@@ -509,11 +509,13 @@ qboolean FS_CreatePath (char *OSPath) {
 	Q_strncpyz( path, OSPath, sizeof( path ) );
 	FS_ReplaceSeparators( path );
 
-	// Skip creation of the root directory as it will always be there
-	ofs = strchr( path, PATH_SEP );
-	ofs++;
+	if (path[0] == PATH_SEP) {
+		ofs = path + 1;
+	} else {
+		ofs = path;
+	}
 
-	for (; ofs != NULL && *ofs ; ofs++) {
+	for ( ; *ofs ; ofs++) {
 		if (*ofs == PATH_SEP) {
 			// create the directory
 			*ofs = 0;
