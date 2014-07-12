@@ -619,10 +619,10 @@ intptr_t CL_CgameSystemCalls( intptr_t *args ) {
 		return Key_IsDown( args[1] );
   case CG_KEY_GETCATCHER:
 		return Key_GetCatcher();
-  case CG_KEY_SETCATCHER:
-		// Don't allow the cgame module to close the console
-		Key_SetCatcher( args[1] | ( Key_GetCatcher( ) & KEYCATCH_CONSOLE ) );
-    return 0;
+	case CG_KEY_SETCATCHER:
+		// don't allow the cgame module to toggle the console
+		Key_SetCatcher( ( args[1] & ~KEYCATCH_CONSOLE ) | ( Key_GetCatcher() & KEYCATCH_CONSOLE ) );
+		return 0;
   case CG_KEY_GETKEY:
 		return Key_GetKey( VMA(1) );
 
@@ -754,9 +754,6 @@ void CL_InitCGame( void ) {
 	vmInterpret_t		interpret;
 
 	t1 = Sys_Milliseconds();
-
-	// put away the console
-	Con_Close();
 
 	// find the current mapname
 	info = cl.gameState.stringData + cl.gameState.stringOffsets[ CS_SERVERINFO ];

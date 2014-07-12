@@ -461,8 +461,6 @@ void CL_ParseGamestate( msg_t *msg ) {
 	char			*s;
 	char oldGame[MAX_QPATH];
 
-	Con_Close();
-
 	clc.connectPacketCount = 0;
 
 	// wipe local client state
