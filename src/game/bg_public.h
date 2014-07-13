@@ -136,7 +136,6 @@ typedef enum
   WEAPON_DROPPING,
   WEAPON_FIRING,
   WEAPON_RELOADING,
-  WEAPON_NEEDS_RESET,
 } weaponstate_t;
 
 // pmove->pm_flags
