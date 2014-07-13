@@ -301,7 +301,7 @@ in site, closest in distance
 */
 void SP_target_location( gentity_t *self )
 {
-  static int n = 1;
+  static int n = 0;
   char *message;
   self->s.eType = ET_LOCATION;
   self->r.svFlags = SVF_BROADCAST;
