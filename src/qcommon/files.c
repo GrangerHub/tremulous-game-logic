@@ -192,7 +192,7 @@ typedef struct fileInPack_s {
 	struct	fileInPack_s*	next;		// next file in the hash
 } fileInPack_t;
 
-typedef struct {
+typedef struct pack_s {
 	char			pakPathname[MAX_OSPATH];	// /tremulous/baseq3
 	char			pakFilename[MAX_OSPATH];	// /tremulous/base/pak0.pk3
 	char			pakBasename[MAX_OSPATH];	// pak0
@@ -205,6 +205,9 @@ typedef struct {
 	int				hashSize;					// hash table size (power of 2)
 	fileInPack_t*	*hashTable;					// hash table
 	fileInPack_t*	buildBuffer;				// buffer with the filenames etc.
+	qboolean		onlyPrimary;
+	qboolean		onlyAlternate;
+	struct pack_s	*primaryVersion;
 } pack_t;
 
 typedef struct {
@@ -1714,7 +1717,11 @@ CONVENIENCE FUNCTIONS FOR ENTIRE FILES
 ======================================================================================
 */
 
-int	FS_FileIsInPAK(const char *filename, int *pChecksum ) {
+int	FS_FileIsInPAK( const char *filename, int *pChecksum ) {
+	return FS_FileIsInPAK_A( qfalse, filename, pChecksum );
+}
+
+int	FS_FileIsInPAK_A( qboolean alternate, const char *filename, int *pChecksum ) {
 	searchpath_t	*search;
 	pack_t			*pak;
 	fileInPack_t	*pakFile;
@@ -1753,6 +1760,9 @@ int	FS_FileIsInPAK(const char *filename, int *pChecksum ) {
 		if ( search->pack && search->pack->hashTable[hash] ) {
 			// disregard if it doesn't match one of the allowed pure pak files
 			if ( !FS_PakIsPure(search->pack) ) {
+				continue;
+			}
+			if ( ( alternate && search->pack->onlyPrimary ) || ( !alternate && search->pack->onlyAlternate ) ) {
 				continue;
 			}
 
@@ -2731,7 +2741,10 @@ void FS_Path_f( void ) {
 	Com_Printf ("Current search path:\n");
 	for (s = fs_searchpaths; s; s = s->next) {
 		if (s->pack) {
-			Com_Printf ("%s (%i files)\n", s->pack->pakFilename, s->pack->numfiles);
+			Com_Printf ("%s (%i files%s)\n", s->pack->pakFilename, s->pack->numfiles,
+				s->pack->onlyPrimary ? ", not for 1.1" : s->pack->onlyAlternate ? ", only for 1.1" : "");
+			if (s->pack->primaryVersion)
+				Com_Printf ("        (the 1.1 version of %s)\n", s->pack->primaryVersion->pakFilename);
 			if ( fs_numServerPaks ) {
 				if ( !FS_PakIsPure(s->pack) ) {
 					Com_Printf( "    not on the pure list\n" );
@@ -2868,6 +2881,14 @@ void FS_AddGameDirectory( const char *path, const char *dir ) {
 	int				pakwhich;
 	int				len;
 
+	char			prefixBuf[MAX_STRING_CHARS];
+	char			*p;
+	const char		*prefixes[10][2];
+	int				lengths[10][2];
+	int				numPairs, i;
+	searchpath_t	*otherSearchpaths;
+	searchpath_t	*srch;
+
 	// Unique
 	for ( sp = fs_searchpaths ; sp ; sp = sp->next ) {
 		if ( sp->dir && !Q_stricmp(sp->dir->path, path) && !Q_stricmp(sp->dir->gamedir, dir)) {
@@ -2895,6 +2916,42 @@ void FS_AddGameDirectory( const char *path, const char *dir ) {
 
 		qsort( pakdirs, numdirs, sizeof(char *), paksort );
 	}
+
+	Q_strncpyz( prefixBuf, Cvar_VariableString( "fs_pk3PrefixPairs" ), sizeof( prefixBuf ) );
+	numPairs = 0;
+	p = prefixBuf;
+	if ( !p[0] )
+		p = NULL;
+	while ( p ) {
+		prefixes[numPairs][0] = p;
+		p = strchr( p, '&' );
+		if ( !p ) {
+			Com_Printf( S_COLOR_YELLOW "WARNING: fs_pk3PrefixPairs ends with an incomplete pair\n" );
+			break;
+		}
+		lengths[numPairs][0] = (int)( p - prefixes[numPairs][0] );
+		*p++ = '\0';
+		prefixes[numPairs][1] = p;
+		p = strchr( p, '|' );
+		if ( p ) {
+			lengths[numPairs][1] = (int)( p - prefixes[numPairs][1] );
+			*p++ = '\0';
+		} else {
+			lengths[numPairs][1] = (int)strlen( prefixes[numPairs][1] );
+		}
+		if ( lengths[numPairs][0] == 0 && lengths[numPairs][1] == 0 ) {
+			Com_Printf( S_COLOR_YELLOW "WARNING: fs_pk3PrefixPairs contains a null-null pair, skipping this pair\n" );
+			continue;
+		}
+		if ( lengths[numPairs][0] != 0 && lengths[numPairs][1] != 0 &&
+			!Q_stricmpn( prefixes[numPairs][0], prefixes[numPairs][1], MIN( lengths[numPairs][0], lengths[numPairs][1] ) ) ) {
+			Com_Printf( S_COLOR_YELLOW "WARNING: in fs_pk3PrefixPairs, one of '%s' and '%s' is a real prefix of the other, skipping this pair\n",
+				prefixes[numPairs][0], prefixes[numPairs][1] );
+			continue;
+		}
+		++numPairs;
+	}
+	otherSearchpaths = fs_searchpaths;
 
 	pakfilesi = 0;
 	pakdirsi = 0;
@@ -2938,6 +2995,20 @@ void FS_AddGameDirectory( const char *path, const char *dir ) {
 			search->next = fs_searchpaths;
 			fs_searchpaths = search;
 
+			pak->onlyPrimary = qfalse;
+			pak->onlyAlternate = qfalse;
+			for ( i = 0 ; i < numPairs ; ++i ) {
+				if ( lengths[i][0] != 0 && !Q_stricmpn( pak->pakBasename, prefixes[i][0], lengths[i][0] ) ) {
+					pak->onlyPrimary = qtrue;
+					break;
+				}
+				else if ( lengths[i][1] != 0 && !Q_stricmpn( pak->pakBasename, prefixes[i][1], lengths[i][1] ) ) {
+					pak->onlyAlternate = qtrue;
+					break;
+				}
+			}
+			pak->primaryVersion = NULL;
+
 			pakfilesi++;
 		}
 		else {
@@ -2970,6 +3041,29 @@ void FS_AddGameDirectory( const char *path, const char *dir ) {
 	// done
 	Sys_FreeFileList( pakfiles );
 	Sys_FreeFileList( pakdirs );
+
+	if ( numPairs > 0 ) {
+		int bnlengths[2];
+		for ( search = fs_searchpaths ; search != otherSearchpaths ; search = search->next ) {
+			if ( !( search->pack && search->pack->onlyPrimary ) ) {
+				continue;
+			}
+			bnlengths[0] = (int)strlen( search->pack->pakBasename );
+			for ( srch = fs_searchpaths ; srch != otherSearchpaths ; srch = srch->next ) {
+				if ( !( srch->pack && srch->pack->onlyAlternate ) ) {
+					continue;
+				}
+				bnlengths[1] = (int)strlen( srch->pack->pakBasename );
+				for ( i = 0 ; i < numPairs ; ++i ) {
+					if ( lengths[i][0] != 0 && lengths[i][1] != 0 && bnlengths[0] >= lengths[i][0] && bnlengths[1] >= lengths[i][1] &&
+						!Q_stricmp( search->pack->pakBasename + lengths[i][0], srch->pack->pakBasename + lengths[i][1] ) ) {
+						srch->pack->primaryVersion = search->pack;
+						break;
+					}
+				}
+			}
+		}
+	}
 
 	//
 	// add the directory to the search path
@@ -3229,6 +3323,7 @@ static void FS_Startup( const char *gameName )
 	}
 	fs_homepath = Cvar_Get ("fs_homepath", homePath, CVAR_INIT|CVAR_PROTECTED );
 	fs_gamedirvar = Cvar_Get ("fs_game", "gpp", CVAR_INIT|CVAR_SYSTEMINFO );
+	Cvar_Get( "fs_pk3PrefixPairs", "", CVAR_ARCHIVE|CVAR_LATCH );
 
 	// add search path elements in reverse priority order
 	if (fs_basepath->string[0]) {
@@ -3303,7 +3398,7 @@ Returns a space separated string containing the checksums of all loaded pk3 file
 Servers with sv_pure set will get this string and pass it to clients.
 =====================
 */
-const char *FS_LoadedPakChecksums( void ) {
+const char *FS_LoadedPakChecksums( qboolean alternate ) {
 	static char	info[BIG_INFO_STRING];
 	searchpath_t	*search;
 
@@ -3312,6 +3407,9 @@ const char *FS_LoadedPakChecksums( void ) {
 	for ( search = fs_searchpaths ; search ; search = search->next ) {
 		// is the element a pak file? 
 		if ( !search->pack ) {
+			continue;
+		}
+		if ( ( alternate && search->pack->onlyPrimary ) || ( !alternate && search->pack->onlyAlternate ) ) {
 			continue;
 		}
 
@@ -3329,7 +3427,7 @@ Returns a space separated string containing the names of all loaded pk3 files.
 Servers with sv_pure set will get this string and pass it to clients.
 =====================
 */
-const char *FS_LoadedPakNames( void ) {
+const char *FS_LoadedPakNames( qboolean alternate ) {
 	static char	info[BIG_INFO_STRING];
 	searchpath_t	*search;
 
@@ -3338,6 +3436,9 @@ const char *FS_LoadedPakNames( void ) {
 	for ( search = fs_searchpaths ; search ; search = search->next ) {
 		// is the element a pak file?
 		if ( !search->pack ) {
+			continue;
+		}
+		if ( ( alternate && search->pack->onlyPrimary ) || ( !alternate && search->pack->onlyAlternate ) ) {
 			continue;
 		}
 
@@ -3359,7 +3460,7 @@ Servers with sv_pure use these checksums to compare with the checksums the clien
 back to the server.
 =====================
 */
-const char *FS_LoadedPakPureChecksums( void ) {
+const char *FS_LoadedPakPureChecksums( qboolean alternate ) {
 	static char	info[BIG_INFO_STRING];
 	searchpath_t	*search;
 
@@ -3368,6 +3469,9 @@ const char *FS_LoadedPakPureChecksums( void ) {
 	for ( search = fs_searchpaths ; search ; search = search->next ) {
 		// is the element a pak file? 
 		if ( !search->pack ) {
+			continue;
+		}
+		if ( ( alternate && search->pack->onlyPrimary ) || ( !alternate && search->pack->onlyAlternate ) ) {
 			continue;
 		}
 
@@ -3385,7 +3489,7 @@ Returns a space separated string containing the checksums of all referenced pk3 
 The server will send this to the clients so they can check which files should be auto-downloaded. 
 =====================
 */
-const char *FS_ReferencedPakChecksums( void ) {
+const char *FS_ReferencedPakChecksums( qboolean alternate ) {
 	static char	info[BIG_INFO_STRING];
 	searchpath_t *search;
 
@@ -3395,7 +3499,11 @@ const char *FS_ReferencedPakChecksums( void ) {
 	for ( search = fs_searchpaths ; search ; search = search->next ) {
 		// is the element a pak file?
 		if ( search->pack ) {
-			if (search->pack->referenced || Q_stricmpn(search->pack->pakGamename, BASEGAME, strlen(BASEGAME))) {
+			if ( ( alternate && search->pack->onlyPrimary ) || ( !alternate && search->pack->onlyAlternate ) ) {
+				continue;
+			}
+			if (search->pack->referenced || (search->pack->primaryVersion && search->pack->primaryVersion->referenced) ||
+				(fs_gamedirvar->string[0] && Q_stricmp(fs_gamedirvar->string, BASEGAME) && !Q_stricmp(search->pack->pakGamename, fs_gamedirvar->string))) {
 				Q_strcat( info, sizeof( info ), va("%i ", search->pack->checksum ) );
 			}
 		}
@@ -3459,7 +3567,7 @@ Returns a space separated string containing the names of all referenced pk3 file
 The server will send this to the clients so they can check which files should be auto-downloaded. 
 =====================
 */
-const char *FS_ReferencedPakNames( void ) {
+const char *FS_ReferencedPakNames( qboolean alternate ) {
 	static char	info[BIG_INFO_STRING];
 	searchpath_t	*search;
 
@@ -3470,7 +3578,11 @@ const char *FS_ReferencedPakNames( void ) {
 	for ( search = fs_searchpaths ; search ; search = search->next ) {
 		// is the element a pak file?
 		if ( search->pack ) {
-			if (search->pack->referenced || Q_stricmpn(search->pack->pakGamename, BASEGAME, strlen(BASEGAME))) {
+			if ( ( alternate && search->pack->onlyPrimary ) || ( !alternate && search->pack->onlyAlternate ) ) {
+				continue;
+			}
+			if (search->pack->referenced || (search->pack->primaryVersion && search->pack->primaryVersion->referenced) ||
+				(fs_gamedirvar->string[0] && Q_stricmp(fs_gamedirvar->string, BASEGAME) && !Q_stricmp(search->pack->pakGamename, fs_gamedirvar->string))) {
 				if (*info) {
 					Q_strcat(info, sizeof( info ), " " );
 				}
@@ -3633,6 +3745,7 @@ void FS_InitFilesystem( void ) {
 	Com_StartupVariable("fs_basepath");
 	Com_StartupVariable("fs_homepath");
 	Com_StartupVariable("fs_game");
+	Com_StartupVariable("fs_pk3PrefixPairs");
 
 	if(!FS_FilenameCompare(Cvar_VariableString("fs_game"), BASEGAME))
 		Cvar_Set("fs_game", "");

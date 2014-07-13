@@ -1928,7 +1928,7 @@ CL_PK3List_f
 ==================
 */
 void CL_OpenedPK3List_f( void ) {
-	Com_Printf("Opened PK3 Names: %s\n", FS_LoadedPakNames());
+	Com_Printf("Opened PK3 Names: %s\n", FS_LoadedPakNames( qfalse ));
 }
 
 /*
@@ -1937,7 +1937,7 @@ CL_PureList_f
 ==================
 */
 void CL_ReferencedPK3List_f( void ) {
-	Com_Printf("Referenced PK3 Names: %s\n", FS_ReferencedPakNames());
+	Com_Printf("Referenced PK3 Names: %s\n", FS_ReferencedPakNames( qfalse ));
 }
 
 /*

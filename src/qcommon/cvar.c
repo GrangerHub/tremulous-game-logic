@@ -403,6 +403,9 @@ cvar_t *Cvar_Get( const char *var_name, const char *var_value, int flags ) {
 		// ZOID--needs to be set so that cvars the game sets as 
 		// SERVERINFO get sent to clients
 		cvar_modifiedFlags |= flags;
+		if ( flags & CVAR_ALTERNATE_SYSTEMINFO ) {
+			cvar_modifiedFlags |= CVAR_SYSTEMINFO;
+		}
 
 		return var;
 	}
@@ -452,6 +455,9 @@ cvar_t *Cvar_Get( const char *var_name, const char *var_value, int flags ) {
 	var->flags = flags;
 	// note what types of cvars have been modified (userinfo, archive, serverinfo, systeminfo)
 	cvar_modifiedFlags |= var->flags;
+	if ( var->flags & CVAR_ALTERNATE_SYSTEMINFO ) {
+		cvar_modifiedFlags |= CVAR_SYSTEMINFO;
+	}
 
 	hash = generateHashValue(var_name);
 	var->hashIndex = hash;
@@ -555,6 +561,9 @@ cvar_t *Cvar_Set2( const char *var_name, const char *value, qboolean force ) {
 
 	// note what types of cvars have been modified (userinfo, archive, serverinfo, systeminfo)
 	cvar_modifiedFlags |= var->flags;
+	if ( var->flags & CVAR_ALTERNATE_SYSTEMINFO ) {
+		cvar_modifiedFlags |= CVAR_SYSTEMINFO;
+	}
 
 	if (!force)
 	{
