@@ -934,6 +934,7 @@ typedef struct
   int       fov;
   float     bob;
   float     bobCycle;
+  float     landBob;
   int       steptime;
 
   float     speed;
