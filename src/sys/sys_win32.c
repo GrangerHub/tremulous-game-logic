@@ -171,27 +171,6 @@ qboolean Sys_RandomBytes( byte *string, int len )
 	return qtrue;
 }
 
-/*
-================
-Sys_GetCurrentUser
-================
-*/
-char *Sys_GetCurrentUser( void )
-{
-	static char s_userName[1024];
-	unsigned long size = sizeof( s_userName );
-
-	if( !GetUserName( s_userName, &size ) )
-		strcpy( s_userName, "player" );
-
-	if( !s_userName[0] )
-	{
-		strcpy( s_userName, "player" );
-	}
-
-	return s_userName;
-}
-
 #define MEM_THRESHOLD 96*1024*1024
 
 /*

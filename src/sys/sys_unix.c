@@ -126,21 +126,6 @@ qboolean Sys_RandomBytes( byte *string, int len )
 	return qtrue;
 }
 
-/*
-==================
-Sys_GetCurrentUser
-==================
-*/
-char *Sys_GetCurrentUser( void )
-{
-	struct passwd *p;
-
-	if ( (p = getpwuid( getuid() )) == NULL ) {
-		return "player";
-	}
-	return p->pw_name;
-}
-
 #define MEM_THRESHOLD 96*1024*1024
 
 /*
