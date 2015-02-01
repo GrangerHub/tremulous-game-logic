@@ -122,7 +122,7 @@ static void CG_Creep( centity_t *cent )
     else
       frac = 1.0f;
   }
-  else if( time < 0 )
+  else
   {
     msec = cg.time + time;
     if( msec >= 0 && msec < CREEP_SCALEDOWN_TIME )

@@ -866,7 +866,7 @@ static void UI_BuildServerStatus( qboolean force )
 UI_BuildServerDisplayList
 ==================
 */
-static void UI_BuildServerDisplayList( qboolean force )
+static void UI_BuildServerDisplayList( int force )
 {
   int i, count, clients, maxClients, ping, len, visible;
   char info[MAX_STRING_CHARS];

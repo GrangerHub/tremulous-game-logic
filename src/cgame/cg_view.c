@@ -925,9 +925,7 @@ static int CG_CalcFov( void )
       {
         f = ( cg.time - cg.zoomTime ) / (float)ZOOM_TIME;
 
-        if ( f > 1.0f )
-          fov_y = fov_y;
-        else
+        if ( f <= 1.0f )
           fov_y = zoomFov + f * ( fov_y - zoomFov );
 
         // BUTTON_ATTACK2 is held so zoom next time
