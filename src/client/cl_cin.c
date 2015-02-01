@@ -1358,8 +1358,8 @@ e_status CIN_RunCinematic (int handle)
 	}
 
 	thisTime = CL_ScaledMilliseconds();
-	if (cinTable[currentHandle].shader && (abs(thisTime - cinTable[currentHandle].lastTime))>100) {
-		cinTable[currentHandle].startTime += thisTime - cinTable[currentHandle].lastTime;
+	if (cinTable[currentHandle].shader && (abs(thisTime - (int)cinTable[currentHandle].lastTime))>100) {
+		cinTable[currentHandle].startTime += thisTime - (int)cinTable[currentHandle].lastTime;
 	}
 	cinTable[currentHandle].tfps = (((CL_ScaledMilliseconds() - cinTable[currentHandle].startTime)*3)/100);
 
