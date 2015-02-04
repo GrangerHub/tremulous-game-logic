@@ -284,12 +284,14 @@ ifneq ($(BUILD_CLIENT),0)
 endif
 
 # Add git version info
-USE_GIT=
-ifeq ($(wildcard .git),.git)
-  GIT_REV=$(shell git show -s --pretty=format:%h-%ad --date=short)
-  ifneq ($(GIT_REV),)
-    VERSION:=$(VERSION)_GIT_$(GIT_REV)
-    USE_GIT=1
+ifneq ($(USE_GIT),0)
+  USE_GIT=
+  ifeq ($(wildcard .git),.git)
+    GIT_REV=$(shell git show -s --pretty=format:%h-%ad --date=short)
+    ifneq ($(GIT_REV),)
+      VERSION:=$(VERSION)_GIT_$(GIT_REV)
+      USE_GIT=1
+    endif
   endif
 endif
 
