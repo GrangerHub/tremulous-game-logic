@@ -675,21 +675,6 @@ void Sys_PlatformExit( void )
 
 /*
 ==============
-Sys_SetEnv
-
-set/unset environment variables (empty value removes it)
-==============
-*/
-void Sys_SetEnv(const char *name, const char *value)
-{
-	if(value)
-		_putenv(va("%s=%s", name, value));
-	else
-		_putenv(va("%s=", name));
-}
-
-/*
-==============
 Sys_PID
 ==============
 */
