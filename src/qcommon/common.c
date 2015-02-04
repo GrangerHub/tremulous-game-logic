@@ -2478,10 +2478,7 @@ Com_Init
 =================
 */
 void Com_Init( char *commandLine ) {
-	char	*s;
 	int	qport;
-
-	Com_Printf( "%s %s %s\n", Q3_VERSION, PLATFORM_STRING, __DATE__ );
 
 	if ( setjmp (abortframe) ) {
 		Sys_Error ("Error during initialization");
@@ -2592,8 +2589,7 @@ void Com_Init( char *commandLine ) {
 	com_busyWait = Cvar_Get("com_busyWait", "0", CVAR_ARCHIVE);
 	Cvar_Get("com_errorMessage", "", CVAR_ROM | CVAR_NORESTART);
 
-	s = va("%s %s %s", Q3_VERSION, PLATFORM_STRING, __DATE__ );
-	com_version = Cvar_Get ("version", s, CVAR_ROM | CVAR_SERVERINFO );
+	com_version = Cvar_Get ("version", PRODUCT_NAME, CVAR_ROM | CVAR_SERVERINFO );
 	Cvar_Get ("protocol", va("%i", PROTOCOL_VERSION), CVAR_SERVERINFO | CVAR_ROM);
 	com_gamename = Cvar_Get("com_gamename", GAMENAME_FOR_MASTER, CVAR_SERVERINFO | CVAR_INIT);
 
