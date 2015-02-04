@@ -672,39 +672,3 @@ void Sys_PlatformExit( void )
 		timeEndPeriod(timerResolution);
 #endif
 }
-
-/*
-==============
-Sys_PID
-==============
-*/
-int Sys_PID( void )
-{
-	return GetCurrentProcessId( );
-}
-
-/*
-==============
-Sys_PIDIsRunning
-==============
-*/
-qboolean Sys_PIDIsRunning( int pid )
-{
-	DWORD processes[ 1024 ];
-	DWORD numBytes, numProcesses;
-	int i;
-
-	if( !EnumProcesses( processes, sizeof( processes ), &numBytes ) )
-		return qfalse; // Assume it's not running
-
-	numProcesses = numBytes / sizeof( DWORD );
-
-	// Search for the pid
-	for( i = 0; i < numProcesses; i++ )
-	{
-		if( processes[ i ] == pid )
-			return qtrue;
-	}
-
-	return qfalse;
-}

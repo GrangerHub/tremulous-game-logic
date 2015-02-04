@@ -149,73 +149,6 @@ char *Sys_GetClipboardData(void)
 #endif
 }
 
-#ifdef DEDICATED
-#	define PID_FILENAME PRODUCT_NAME "_server.pid"
-#else
-#	define PID_FILENAME PRODUCT_NAME ".pid"
-#endif
-
-/*
-=================
-Sys_PIDFileName
-=================
-*/
-static char *Sys_PIDFileName( void )
-{
-	const char *homePath = Cvar_VariableString( "fs_homepath" );
-
-	if( *homePath != '\0' )
-		return va( "%s/%s", homePath, PID_FILENAME );
-
-	return NULL;
-}
-
-/*
-=================
-Sys_WritePIDFile
-
-Return qtrue if there is an existing stale PID file
-=================
-*/
-qboolean Sys_WritePIDFile( void )
-{
-	char      *pidFile = Sys_PIDFileName( );
-	FILE      *f;
-	qboolean  stale = qfalse;
-
-	if( pidFile == NULL )
-		return qfalse;
-
-	// First, check if the pid file is already there
-	if( ( f = fopen( pidFile, "r" ) ) != NULL )
-	{
-		char  pidBuffer[ 64 ] = { 0 };
-		int   pid;
-
-		pid = fread( pidBuffer, sizeof( char ), sizeof( pidBuffer ) - 1, f );
-		fclose( f );
-
-		if(pid > 0)
-		{
-			pid = atoi( pidBuffer );
-			if( !Sys_PIDIsRunning( pid ) )
-				stale = qtrue;
-		}
-		else
-			stale = qtrue;
-	}
-
-	if( ( f = fopen( pidFile, "w" ) ) != NULL )
-	{
-		fprintf( f, "%d", Sys_PID( ) );
-		fclose( f );
-	}
-	else
-		Com_Printf( S_COLOR_YELLOW "Couldn't write %s.\n", pidFile );
-
-	return stale;
-}
-
 /*
 =================
 Sys_Exit
@@ -230,15 +163,6 @@ static __attribute__ ((noreturn)) void Sys_Exit( int exitCode )
 #ifndef DEDICATED
 	SDL_Quit( );
 #endif
-
-	if( exitCode < 2 )
-	{
-		// Normal exit
-		char *pidFile = Sys_PIDFileName( );
-
-		if( pidFile != NULL )
-			remove( pidFile );
-	}
 
 	NET_Shutdown( );
 

@@ -804,23 +804,3 @@ Unix specific deinitialisation
 void Sys_PlatformExit( void )
 {
 }
-
-/*
-==============
-Sys_PID
-==============
-*/
-int Sys_PID( void )
-{
-	return getpid( );
-}
-
-/*
-==============
-Sys_PIDIsRunning
-==============
-*/
-qboolean Sys_PIDIsRunning( int pid )
-{
-	return kill( pid, 0 ) == 0;
-}
