@@ -128,7 +128,7 @@ MOUNT_DIR=src
 endif
 
 ifndef BUILD_DIR
-BUILD_DIR=build
+BUILD_DIR=bld
 endif
 
 ifndef TEMPDIR
@@ -225,8 +225,8 @@ endif
 
 #############################################################################
 
-BD=$(BUILD_DIR)/debug-$(PLATFORM)-$(ARCH)
-BR=$(BUILD_DIR)/release-$(PLATFORM)-$(ARCH)
+BD=$(BUILD_DIR) # /debug-$(PLATFORM)-$(ARCH)
+BR=$(BUILD_DIR) # /release-$(PLATFORM)-$(ARCH)
 CDIR=$(MOUNT_DIR)/client
 SDIR=$(MOUNT_DIR)/server
 RCOMMONDIR=$(MOUNT_DIR)/renderercommon
