@@ -53,7 +53,7 @@ SV_EmitPacketEntities
 Writes a delta update of an entityState_t list to the message.
 =============
 */
-static void SV_EmitPacketEntities( clientSnapshot_t *from, clientSnapshot_t *to, msg_t *msg ) {
+static void SV_EmitPacketEntities( int alternateProtocol, clientSnapshot_t *from, clientSnapshot_t *to, msg_t *msg ) {
 	entityState_t	*oldent, *newent;
 	int		oldindex, newindex;
 	int		oldnum, newnum;
@@ -89,7 +89,7 @@ static void SV_EmitPacketEntities( clientSnapshot_t *from, clientSnapshot_t *to,
 			// delta update from old position
 			// because the force parm is qfalse, this will not result
 			// in any bytes being emited if the entity has not changed at all
-			MSG_WriteDeltaEntity (msg, oldent, newent, qfalse );
+			MSG_WriteDeltaEntity (alternateProtocol, msg, oldent, newent, qfalse );
 			oldindex++;
 			newindex++;
 			continue;
@@ -97,14 +97,14 @@ static void SV_EmitPacketEntities( clientSnapshot_t *from, clientSnapshot_t *to,
 
 		if ( newnum < oldnum ) {
 			// this is a new entity, send it from the baseline
-			MSG_WriteDeltaEntity (msg, &sv.svEntities[newnum].baseline, newent, qtrue );
+			MSG_WriteDeltaEntity (alternateProtocol, msg, &sv.svEntities[newnum].baseline, newent, qtrue );
 			newindex++;
 			continue;
 		}
 
 		if ( newnum > oldnum ) {
 			// the old entity isn't present in the new message
-			MSG_WriteDeltaEntity (msg, oldent, NULL, qtrue );
+			MSG_WriteDeltaEntity (alternateProtocol, msg, oldent, NULL, qtrue );
 			oldindex++;
 			continue;
 		}
@@ -192,13 +192,13 @@ static void SV_WriteSnapshotToClient( client_t *client, msg_t *msg ) {
 
 	// delta encode the playerstate
 	if ( oldframe ) {
-		MSG_WriteDeltaPlayerstate( msg, &oldframe->ps, &frame->ps );
+		MSG_WriteDeltaPlayerstate( client->netchan.alternateProtocol, msg, &oldframe->ps, &frame->ps );
 	} else {
-		MSG_WriteDeltaPlayerstate( msg, NULL, &frame->ps );
+		MSG_WriteDeltaPlayerstate( client->netchan.alternateProtocol, msg, NULL, &frame->ps );
 	}
 
 	// delta encode the entities
-	SV_EmitPacketEntities (oldframe, frame, msg);
+	SV_EmitPacketEntities (client->netchan.alternateProtocol, oldframe, frame, msg);
 
 	// padding for rate debugging
 	if ( sv_padPackets->integer ) {
@@ -551,13 +551,18 @@ static void SV_WriteVoipToClient(client_t *cl, msg_t *msg)
 	        		if (totalbytes > (msg->maxsize - msg->cursize) / 2)
 		        		break;
 
-        			MSG_WriteByte(msg, svc_voip);
+				if(cl->netchan.alternateProtocol != 0)
+					MSG_WriteByte(msg, svc_EOF);
+				MSG_WriteByte(msg, svc_voip);
+				if(cl->netchan.alternateProtocol != 0)
+					MSG_WriteByte(msg, svc_voip + 1);
         			MSG_WriteShort(msg, packet->sender);
 	        		MSG_WriteByte(msg, (byte) packet->generation);
 		        	MSG_WriteLong(msg, packet->sequence);
 		        	MSG_WriteByte(msg, packet->frames);
         			MSG_WriteShort(msg, packet->len);
-        			MSG_WriteBits(msg, packet->flags, VOIP_FLAGCNT);
+				if(cl->netchan.alternateProtocol == 0)
+					MSG_WriteBits(msg, packet->flags, VOIP_FLAGCNT);
 	        		MSG_WriteData(msg, packet->data, packet->len);
                         }
 

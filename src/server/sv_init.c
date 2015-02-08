@@ -626,6 +626,7 @@ Only called at main exe startup, not for each game
 */
 void SV_Init (void)
 {
+	int a;
 	int index;
 
 	SV_AddOperatorCommands ();
@@ -667,9 +668,12 @@ void SV_Init (void)
 	sv_allowDownload = Cvar_Get ("sv_allowDownload", "0", CVAR_SERVERINFO);
 	Cvar_Get ("sv_dlURL", "http://downloads.tremulous.net", CVAR_SERVERINFO | CVAR_ARCHIVE);
 	
-	sv_master[0] = Cvar_Get("sv_master1", MASTER_SERVER_NAME, 0);
-	for(index = 1; index < MAX_MASTER_SERVERS; index++)
-		sv_master[index] = Cvar_Get(va("sv_master%d", index + 1), "", CVAR_ARCHIVE);
+	for (a = 0; a < 3; ++a)
+	{
+		sv_masters[a][0] = Cvar_Get(va("sv_%smaster1", (a == 2 ? "alt2" : a == 1 ? "alt1" : "")), MASTER_SERVER_NAME, 0);
+		for(index = 1; index < MAX_MASTER_SERVERS; index++)
+			sv_masters[a][index] = Cvar_Get(va("sv_%smaster%d", (a == 2 ? "alt2" : a == 1 ? "alt1" : ""), index + 1), "", CVAR_ARCHIVE);
+	}
 
 	sv_reconnectlimit = Cvar_Get ("sv_reconnectlimit", "3", 0);
 	sv_showloss = Cvar_Get ("sv_showloss", "0", 0);
