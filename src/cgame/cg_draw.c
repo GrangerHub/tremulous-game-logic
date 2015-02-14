@@ -683,15 +683,15 @@ static void CG_DrawPlayerAmmoValue( rectDef_t *rect, vec4_t color )
     len = strlen( text );
 
     if( len <= 4 )
-      scale = 0.50;
+      scale = 0.50f;
     else if( len <= 6 )
-      scale = 0.43;
+      scale = 0.43f;
     else if( len == 7 ) 
-      scale = 0.36; 
+      scale = 0.36f;
     else if( len == 8 )
-      scale = 0.33;
+      scale = 0.33f;
     else
-      scale = 0.31;
+      scale = 0.31f;
 
     CG_AlignText( rect, text, scale, 0.0f, 0.0f, ALIGN_RIGHT, VALIGN_CENTER, &tx, &ty );
     UI_Text_Paint( tx + 1, ty, scale, color, text, 0, 0, ITEM_TEXTSTYLE_NORMAL );
