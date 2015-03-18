@@ -484,8 +484,7 @@ Com_AddStartupCommands
 Adds command line parameters as script statements
 Commands are seperated by + signs
 
-Returns qtrue if any late commands were added, which
-will keep the demoloop from immediately starting
+Returns qtrue if any late commands were added
 =================
 */
 qboolean Com_AddStartupCommands( void ) {
@@ -2614,10 +2613,6 @@ void Com_Init( char *commandLine ) {
 
 	// add + commands from command line
 	if ( !Com_AddStartupCommands() ) {
-		// if the user didn't give any commands, run default action
-		if ( !com_dedicated->integer ) {
-			Cbuf_AddText ("cinematic splash.RoQ\n");
-		}
 	}
 
 	// start in full screen ui mode
