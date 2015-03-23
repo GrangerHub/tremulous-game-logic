@@ -22,7 +22,6 @@ else
   MKDIR=mkdir
 endif
 
-CC=gcc
 RELEASE_CFLAGS=-Wall -O2
 DEBUG_CFLAGS=-g
 OBJECTS= \
