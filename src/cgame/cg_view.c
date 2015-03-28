@@ -1093,7 +1093,6 @@ static void CG_smoothWWTransitions( playerState_t *ps, const vec3_t in, vec3_t o
   if( !VectorCompare( surfNormal, cg.lastNormal ) )
   {
     //if we moving from the ceiling to the floor special case
-    //( x product of colinear vectors is undefined)
     if( VectorCompare( ceilingNormal, cg.lastNormal ) &&
         VectorCompare( refNormal,     surfNormal ) )
     {
