@@ -1,5 +1,5 @@
 build
-Makefile.local
+GNUmakefile.local
 *.swp
 
 # OS X
