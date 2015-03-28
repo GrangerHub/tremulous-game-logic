@@ -44,7 +44,9 @@ endif
 # causing problems with keeping up to date with the repository.
 #
 #############################################################################
--include Makefile.local
+-include GNUmakefile.local
+
+include $(SETTINGS_MAKEFILES)
 
 ifeq ($(COMPILE_PLATFORM),cygwin)
   PLATFORM=mingw32
