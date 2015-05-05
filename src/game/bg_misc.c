@@ -620,9 +620,13 @@ BG_BuildableAllowedInStage
 ==============
 */
 qboolean BG_BuildableAllowedInStage( buildable_t buildable,
-                                     stage_t stage )
+                                     stage_t stage,
+                                     int gameIsInWarmup  )
 {
   int stages = BG_Buildable( buildable )->stages;
+
+  if( gameIsInWarmup )
+    return qtrue;
 
   if( stages & ( 1 << stage ) )
     return qtrue;
@@ -1261,9 +1265,13 @@ BG_ClassAllowedInStage
 ==============
 */
 qboolean BG_ClassAllowedInStage( class_t class,
-                                 stage_t stage )
+                                 stage_t stage,
+                                 int gameIsInWarmup )
 {
   int stages = BG_Class( class )->stages;
+
+  if( gameIsInWarmup )
+    return qtrue;
 
   return stages & ( 1 << stage );
 }
@@ -1327,9 +1335,16 @@ BG_ClassCanEvolveFromTo
 int BG_ClassCanEvolveFromTo( class_t fclass,
                              class_t tclass,
                              int credits, int stage,
-                             int cost )
+                             int cost,
+                             int gameIsInWarmup )
 {
   int i, j, best, value;
+
+  if( gameIsInWarmup &&
+      tclass != PCL_HUMAN &&
+      tclass != PCL_HUMAN_BSUIT &&
+      tclass != PCL_ALIEN_BUILDER0 )
+    return 0;
 
   if( credits < cost || fclass == PCL_NONE || tclass == PCL_NONE ||
       fclass == tclass )
@@ -1346,7 +1361,7 @@ int BG_ClassCanEvolveFromTo( class_t fclass,
       int thruClass, evolveCost;
       
       thruClass = bg_classList[ i ].children[ j ];
-      if( thruClass == PCL_NONE || !BG_ClassAllowedInStage( thruClass, stage ) ||
+      if( thruClass == PCL_NONE || !BG_ClassAllowedInStage( thruClass, stage, gameIsInWarmup ) ||
           !BG_ClassIsAllowed( thruClass ) )
         continue;
 
@@ -1355,7 +1370,8 @@ int BG_ClassCanEvolveFromTo( class_t fclass,
         value = cost + evolveCost;
       else
         value = BG_ClassCanEvolveFromTo( thruClass, tclass, credits, stage,
-                                         cost + evolveCost );
+                                         cost + evolveCost,
+                                         gameIsInWarmup );
 
       if( value >= 0 && value < best )
         best = value;
@@ -1373,9 +1389,12 @@ int BG_ClassCanEvolveFromTo( class_t fclass,
 BG_AlienCanEvolve
 ==============
 */
-qboolean BG_AlienCanEvolve( class_t class, int credits, int stage )
+qboolean BG_AlienCanEvolve( class_t class, int credits, int stage, int gameIsInWarmup )
 {
   int i, j, tclass;
+
+  if( gameIsInWarmup )
+    return qtrue;
 
   for( i = 0; i < bg_numClasses; i++ )
   {
@@ -1385,7 +1404,7 @@ qboolean BG_AlienCanEvolve( class_t class, int credits, int stage )
     for( j = 0; j < 3; j++ )
     {
       tclass = bg_classList[ i ].children[ j ];
-      if( tclass != PCL_NONE && BG_ClassAllowedInStage( tclass, stage ) &&
+      if( tclass != PCL_NONE && BG_ClassAllowedInStage( tclass, stage, gameIsInWarmup ) &&
           BG_ClassIsAllowed( tclass ) &&
           credits >= BG_Class( tclass )->cost * ALIEN_CREDITS_PER_KILL )
         return qtrue;
@@ -2417,9 +2436,13 @@ const weaponAttributes_t *BG_Weapon( weapon_t weapon )
 BG_WeaponAllowedInStage
 ==============
 */
-qboolean BG_WeaponAllowedInStage( weapon_t weapon, stage_t stage )
+qboolean BG_WeaponAllowedInStage( weapon_t weapon, stage_t stage,
+                                  int gameIsInWarmup )
 {
   int stages = BG_Weapon( weapon )->stages;
+
+  if( gameIsInWarmup )
+    return qtrue;
 
   return stages & ( 1 << stage );
 }
@@ -2583,9 +2606,13 @@ const upgradeAttributes_t *BG_Upgrade( upgrade_t upgrade )
 BG_UpgradeAllowedInStage
 ==============
 */
-qboolean BG_UpgradeAllowedInStage( upgrade_t upgrade, stage_t stage )
+qboolean BG_UpgradeAllowedInStage( upgrade_t upgrade, stage_t stage,
+                                   int gameIsInWarmup )
 {
   int stages = BG_Upgrade( upgrade )->stages;
+
+  if( gameIsInWarmup )
+    return qtrue;
 
   return stages & ( 1 << stage );
 }
