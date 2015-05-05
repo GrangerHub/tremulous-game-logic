@@ -1585,8 +1585,12 @@ void Cmd_Ready_f( gentity_t *ent )
 
   trap_Argv( 0, cmd, sizeof( cmd ) );
 
+  if( !g_warmup.integer )
+    trap_SendServerCommand( ent-g_entities,
+      va( "print \"%s: game is no longer in warmup\n\"", cmd ) );
+
   // update client readiness
-  ent->client->pers.readyToPlay ^= 1;
+  ent->client->pers.readyToPlay = !ent->client->pers.readyToPlay;
 
   // reset number of players ready to zero
   level.readyToPlay[ TEAM_HUMANS ] = level.readyToPlay[ TEAM_ALIENS ] = 0;
@@ -1635,6 +1639,9 @@ void Cmd_Ready_f( gentity_t *ent )
                                   level.readyToPlay[ TEAM_HUMANS ],
                                   numHumans,
                                   startGame ? "^4TRUE" : "^1FALSE" ) );
+
+  if(startGame)
+    G_StartGame();
 }
 
 /*
