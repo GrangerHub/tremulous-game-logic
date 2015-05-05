@@ -3392,21 +3392,21 @@ static qboolean CG_DrawQueue( void )
 
 /*
 =================
-CG_DrawWarmup
+CG_DrawCountdown
 =================
 */
-static void CG_DrawWarmup( void )
+static void CG_DrawCountdown( void )
 {
   int    sec = 0;
   int    w;
   int    h;
   float  size = 0.5f;
-  char   text[ MAX_STRING_CHARS ] = "Warmup Time:";
+  char   text[ MAX_STRING_CHARS ] = "Countdown to Battle:";
 
-  if( !cg.warmupTime )
+  if( !cg.countdownTime )
     return;
 
-  sec = ( cg.warmupTime - cg.time ) / 1000;
+  sec = ( cg.countdownTime - cg.time ) / 1000;
 
   if( sec < 0 )
     return;
@@ -3415,7 +3415,7 @@ static void CG_DrawWarmup( void )
   h = UI_Text_Height( text, size );
   UI_Text_Paint( 320 - w / 2, 200, size, colorWhite, text, 0, 0, ITEM_TEXTSTYLE_SHADOWED );
 
-  Com_sprintf( text, sizeof( text ), "%s", sec ? va( "%d", sec ) : "FIGHT!" );
+  Com_sprintf( text, sizeof( text ), "%s", sec ? va( "%d", sec ) : "DESTROY THE ENEMY!" );
 
   w = UI_Text_Width( text, size );
   UI_Text_Paint( 320 - w / 2, 200 + 1.5f * h, size, colorWhite, text, 0, 0, ITEM_TEXTSTYLE_SHADOWED );
@@ -3467,7 +3467,7 @@ static void CG_Draw2D( void )
 
   CG_DrawVote( TEAM_NONE );
   CG_DrawVote( cg.predictedPlayerState.stats[ STAT_TEAM ] );
-  CG_DrawWarmup( );
+  CG_DrawCountdown( );
   CG_DrawQueue( );
 
   // don't draw center string if scoreboard is up
