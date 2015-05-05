@@ -2028,6 +2028,42 @@ void CheckExitRules( void )
 
 /*
 ==================
+G_StartGame
+==================
+*/
+void G_StartGame( void )
+{
+  char      map[ MAX_CVAR_VALUE_STRING ];
+  int       i;
+  gclient_t *cl;
+
+  for( i = 0; i < g_maxclients.integer; i++ )
+  {
+    cl = level.clients + i;
+    if( cl->pers.connected != CON_CONNECTED )
+      continue;
+
+    if( cl->pers.teamSelection == TEAM_NONE )
+      continue;
+
+    cl->sess.restartTeam = cl->pers.teamSelection;
+  }
+
+  trap_Cvar_Set( "g_nextLayout", level.layout );
+  trap_Cvar_Set( "g_warmup", "0" );
+  trap_Cvar_Update( &g_cheats );
+  trap_Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
+
+  AP( va( "print \"^3startgame: ^7players are ready to play (layout '%s' on map '%s')\n\"",
+          level.layout, map ) );
+
+  G_MapConfigs( map );
+
+  trap_SendConsoleCommand( EXEC_APPEND, "map_restart\n" );
+}
+
+/*
+==================
 G_Vote
 ==================
 */
