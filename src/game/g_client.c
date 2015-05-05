@@ -91,6 +91,9 @@ void G_AddCreditToClient( gclient_t *client, short credit, qboolean cap )
   if( !client )
     return;
 
+  if( g_warmup.integer )
+    return;
+
   if( cap && credit > 0 )
   {
     capAmount = client->pers.teamSelection == TEAM_ALIENS ?
