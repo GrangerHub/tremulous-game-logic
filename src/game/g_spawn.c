@@ -618,13 +618,13 @@ void SP_worldspawn( void )
   if( g_restarted.integer )
     trap_Cvar_Set( "g_restarted", "0" );
 
-  // see if we want a warmup time
-  trap_SetConfigstring( CS_WARMUP, "-1" );
-  if( g_doWarmup.integer )
+  // see if we want a countdown time
+  trap_SetConfigstring( CS_COUNTDOWN, "-1" );
+  if( !g_warmup.integer && g_doCountdown.integer )
   {
-    level.warmupTime = level.time - level.startTime + ( g_warmup.integer * 1000 );
-    trap_SetConfigstring( CS_WARMUP, va( "%i", level.warmupTime ) );
-    G_LogPrintf( "Warmup: %i\n", g_warmup.integer );
+    level.countdownTime = level.startTime + ( g_countdown.integer * 1000 );
+    trap_SetConfigstring( CS_COUNTDOWN, va( "%i", level.countdownTime ) );
+    G_LogPrintf( "Countdown: %i\n", g_countdown.integer );
   }
 
 }
