@@ -41,6 +41,9 @@ void AddScore( gentity_t *ent, int score )
   if( !ent->client )
     return;
 
+  if( g_warmup.integer )
+    return;
+
   // make alien and human scores equivalent 
   if ( ent->client->pers.teamSelection == TEAM_ALIENS )
   {
@@ -202,10 +205,13 @@ float G_RewardAttackers( gentity_t *self )
         G_AddCreditToClient( player->client, stageValue, qtrue );
 
         // add to stage counters
-        if( player->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
-          alienCredits += stageValue;
-        else if( player->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
-          humanCredits += stageValue;
+        if( !g_warmup.integer )
+        {
+          if( player->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
+            alienCredits += stageValue;
+          else if( player->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
+            humanCredits += stageValue;
+        }
       }
     }
     self->credits[ i ] = 0;
