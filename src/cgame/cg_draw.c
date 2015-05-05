@@ -319,13 +319,13 @@ static void CG_DrawPlayerCreditsValue( rectDef_t *rect, vec4_t color, qboolean p
       cent->currentState.weapon == WP_ABUILD2 ) && ps->stats[ STAT_MISC ] )
     return;
 
-  value = ps->persistant[ PERS_CREDIT ];
+  value = cgs.warmup ? NO_CREDITS_TIME : ps->persistant[ PERS_CREDIT ];
   if( value > -1 )
   {
     if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_ALIENS )
     {
       if( !BG_AlienCanEvolve( cg.predictedPlayerState.stats[ STAT_CLASS ],
-                              value, cgs.alienStage ) &&
+                              value, cgs.alienStage, cgs.warmup ) &&
           cg.time - cg.lastEvolveAttempt <= NO_CREDITS_TIME &&
           ( ( cg.time - cg.lastEvolveAttempt ) / 300 ) & 1 )
       {
@@ -2513,7 +2513,8 @@ void CG_DrawWeaponIcon( rectDef_t *rect, vec4_t color )
 
   if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_ALIENS &&
       !BG_AlienCanEvolve( cg.predictedPlayerState.stats[ STAT_CLASS ],
-                          ps->persistant[ PERS_CREDIT ], cgs.alienStage ) )
+                          ps->persistant[ PERS_CREDIT ], cgs.alienStage,
+                          cgs.warmup ) )
   {
     if( cg.time - cg.lastEvolveAttempt <= NO_CREDITS_TIME )
     {
@@ -2692,6 +2693,28 @@ static void CG_DrawLocation( rectDef_t *rect, float scale, int textalign, vec4_t
 
 /*
 =====================
+CG_DrawWarmup
+=====================
+*/
+static void CG_DrawWarmup( rectDef_t *rect, float textScale, int textAlign, int textStyle, vec4_t color )
+{
+  const char    warmup[ MAX_STRING_CHARS ] = "Warmup";
+  float         tx = rect->x, ty = rect->y;
+
+  if( cg.intermissionStarted )
+    return;
+
+  if( !cgs.warmup )
+    return;
+
+  CG_AlignText( rect, warmup, textScale, 0.0f, 0.0f, textAlign, VALIGN_CENTER, &tx, &ty );
+  UI_Text_Paint( tx, ty, textScale, color, warmup, 0, 0, textStyle );
+
+  trap_R_SetColor( NULL );
+}
+
+/*
+=====================
 CG_DrawCrosshairNames
 =====================
 */
@@ -2841,6 +2864,9 @@ void CG_OwnerDraw( float x, float y, float w, float h, float text_x,
       break;
     case CG_PLAYER_LOCATION:
       CG_DrawLocation( &rect, scale, textalign, foreColor );
+      break;
+    case CG_WARMUP:
+      CG_DrawWarmup( &rect, scale, textalign, textStyle, foreColor );
       break;
     case CG_FOLLOW:
       CG_DrawFollow( &rect, text_x, text_y, foreColor, scale,
