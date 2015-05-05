@@ -219,6 +219,7 @@ vmCvar_t  cg_debugVoices;
 vmCvar_t  ui_currentClass;
 vmCvar_t  ui_carriage;
 vmCvar_t  ui_stages;
+vmCvar_t  ui_warmup;
 vmCvar_t  ui_dialog;
 vmCvar_t  ui_voteActive;
 vmCvar_t  ui_alienTeamVoteActive;
@@ -352,6 +353,7 @@ static cvarTable_t cvarTable[ ] =
   { &ui_currentClass, "ui_currentClass", "0", CVAR_ROM },
   { &ui_carriage, "ui_carriage", "", CVAR_ROM },
   { &ui_stages, "ui_stages", "0 0", CVAR_ROM },
+  { &ui_warmup, "ui_warmup", "0", CVAR_ROM },
   { &ui_dialog, "ui_dialog", "Text not set", CVAR_ROM },
   { &ui_voteActive, "ui_voteActive", "0", CVAR_ROM },
   { &ui_humanTeamVoteActive, "ui_humanTeamVoteActive", "0", CVAR_ROM },
@@ -442,6 +444,8 @@ static void CG_SetUIVars( void )
   trap_Cvar_Set( "ui_carriage", carriageCvar );
 
   trap_Cvar_Set( "ui_stages", va( "%d %d", cgs.alienStage, cgs.humanStage ) );
+
+  trap_Cvar_Set( "ui_warmup", va( "%d", cgs.warmup ) );
 }
 
 /*
