@@ -315,6 +315,10 @@ typedef struct
   // used to save persistant[] values while in SPECTATOR_FOLLOW mode
   int                 credit;
 
+  // ready state
+  int                 readyToPlay;
+
+  // voting state
   int                 voted;
   int                 vote;
 
@@ -405,6 +409,7 @@ struct gclient_s
 
   char                *areabits;
 
+  int                 lastSuffocationTime;
   int                 lastPoisonTime;
   int                 poisonImmunityTime;
   gentity_t           *lastPoisonClient;
@@ -533,7 +538,7 @@ typedef struct
   int               gentitySize;
   int               num_entities;   // MAX_CLIENTS <= num_entities <= ENTITYNUM_MAX_NORMAL
 
-  int               warmupTime;     // restart match at this time
+  int               countdownTime;     // restart match at this time
 
   fileHandle_t      logFile;
 
@@ -562,7 +567,10 @@ typedef struct
 
   int               snd_fry;                      // sound index for standing in lava
 
-  int               warmupModificationCount;      // for detecting if g_warmup is changed
+  int               countdownModificationCount;      // for detecting if g_countdown is changed
+
+  // ready state
+  int               readyToPlay[ NUM_TEAMS ];
 
   // voting state
   int               voteThreshold[ NUM_TEAMS ];   // need at least this percent to pass
@@ -1088,6 +1096,7 @@ extern  vmCvar_t  g_maxNameChanges;
 
 extern  vmCvar_t  g_timelimit;
 extern  vmCvar_t  g_suddenDeathTime;
+extern  vmCvar_t  g_warmup;
 extern  vmCvar_t  g_friendlyFire;
 extern  vmCvar_t  g_friendlyBuildableFire;
 extern  vmCvar_t  g_dretchPunt;
@@ -1101,8 +1110,8 @@ extern  vmCvar_t  g_debugMove;
 extern  vmCvar_t  g_debugDamage;
 extern  vmCvar_t  g_synchronousClients;
 extern  vmCvar_t  g_motd;
-extern  vmCvar_t  g_warmup;
-extern  vmCvar_t  g_doWarmup;
+extern  vmCvar_t  g_countdown;
+extern  vmCvar_t  g_doCountdown;
 extern  vmCvar_t  g_allowVote;
 extern  vmCvar_t  g_voteLimit;
 extern  vmCvar_t  g_suddenDeathVotePercent;
