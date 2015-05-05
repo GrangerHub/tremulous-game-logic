@@ -45,6 +45,7 @@ gclient_t   g_clients[ MAX_CLIENTS ];
 
 vmCvar_t  g_timelimit;
 vmCvar_t  g_suddenDeathTime;
+vmCvar_t  g_warmup;
 vmCvar_t  g_friendlyFire;
 vmCvar_t  g_friendlyBuildableFire;
 vmCvar_t  g_dretchPunt;
@@ -62,8 +63,8 @@ vmCvar_t  g_debugMove;
 vmCvar_t  g_debugDamage;
 vmCvar_t  g_motd;
 vmCvar_t  g_synchronousClients;
-vmCvar_t  g_warmup;
-vmCvar_t  g_doWarmup;
+vmCvar_t  g_countdown;
+vmCvar_t  g_doCountdown;
 vmCvar_t  g_restarted;
 vmCvar_t  g_lockTeamsAtStart;
 vmCvar_t  g_logFile;
@@ -164,6 +165,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_lockTeamsAtStart, "g_lockTeamsAtStart", "0", CVAR_ROM, 0, qfalse  },
   { NULL, "sv_mapname", "", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
   { NULL, "P", "", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
+  { &g_warmup, "g_warmup", "1", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
 
   // latched vars
 
@@ -183,8 +185,8 @@ static cvarTable_t   gameCvarTable[ ] =
 
   { &g_teamForceBalance, "g_teamForceBalance", "0", CVAR_ARCHIVE, 0, qtrue },
 
-  { &g_warmup, "g_warmup", "10", CVAR_ARCHIVE, 0, qtrue  },
-  { &g_doWarmup, "g_doWarmup", "0", CVAR_ARCHIVE, 0, qtrue  },
+  { &g_countdown, "g_countdown", "10", CVAR_ARCHIVE, 0, qtrue  },
+  { &g_doCountdown, "g_doCountdown", "0", CVAR_ARCHIVE, 0, qtrue  },
   { &g_logFile, "g_logFile", "games.log", CVAR_ARCHIVE, 0, qfalse  },
   { &g_logFileSync, "g_logFileSync", "0", CVAR_ARCHIVE, 0, qfalse  },
 
@@ -1150,8 +1152,8 @@ void G_CalculateBuildPoints( void )
                                                g_humanBuildQueueTime.integer );
   }
 
-  // Sudden Death checks
-  if( G_TimeTilSuddenDeath( ) <= 0 && level.suddenDeathWarning < TW_PASSED )
+  // Sudden Death checks (not applicable in warmup)
+  if( !g_warmup.integer && G_TimeTilSuddenDeath( ) <= 0 && level.suddenDeathWarning < TW_PASSED )
   {
     G_LogPrintf( "Beginning Sudden Death\n" );
     trap_SendServerCommand( -1, "cp \"Sudden Death!\"" );
@@ -1166,7 +1168,7 @@ void G_CalculateBuildPoints( void )
         g_entities[ i ].client->ps.stats[ STAT_BUILDABLE ] = BA_NONE;
     }
   }
-  else if( G_TimeTilSuddenDeath( ) <= SUDDENDEATHWARNING &&
+  else if( !g_warmup.integer && G_TimeTilSuddenDeath( ) <= SUDDENDEATHWARNING &&
     level.suddenDeathWarning < TW_IMMINENT )
   {
     trap_SendServerCommand( -1, va( "cp \"Sudden Death in %d seconds!\"",
@@ -1673,6 +1675,8 @@ void ExitLevel( void )
 
   trap_Cvar_Set( "g_nextMap", "" );
 
+  trap_Cvar_Set( "g_warmup", "1" );
+
   level.restarted = qtrue;
   level.changemap = NULL;
   level.intermissiontime = 0;
@@ -1992,6 +1996,10 @@ void CheckExitRules( void )
       level.timelimitWarning = TW_PASSED;
     }
   }
+
+  // We do not want any team to win in warmup
+  if( g_warmup.integer )
+    return;
 
   if( level.uncondHumanWin ||
       ( !level.uncondAlienWin &&
@@ -2431,7 +2439,7 @@ void G_RunFrame( int levelTime )
   G_UnlaggedStore( );
 
   G_CountSpawns( );
-  if( !g_doWarmup.integer || level.warmupTime <= level.time )
+  if( !g_doCountdown.integer || level.countdownTime <= level.time )
   {
     G_CalculateBuildPoints( );
     G_CalculateStages( );
