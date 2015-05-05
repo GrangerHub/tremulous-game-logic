@@ -1070,8 +1070,8 @@ typedef struct
   int           voiceChatBufferIn;
   int           voiceChatBufferOut;
 
-  // warmup countdown
-  int           warmupTime;
+  // battle countdown
+  int           countdownTime;
 
   //==========================
 
@@ -1381,6 +1381,7 @@ typedef struct
   int           maxclients;
   char          mapname[ MAX_QPATH ];
   qboolean      markDeconstruct;        // Whether or not buildables are marked
+  qboolean      warmup;                 // Whether or not in pre-game warmup
 
   int           voteTime[ NUM_TEAMS ];
   int           voteYes[ NUM_TEAMS ];
