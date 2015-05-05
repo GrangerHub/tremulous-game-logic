@@ -60,7 +60,7 @@ enum
   CS_MUSIC            = 2,
   CS_MESSAGE,               // from the map worldspawn's message field
   CS_MOTD,                  // g_motd string for server message of the day
-  CS_WARMUP,                // server time when the match will be restarted
+  CS_COUNTDOWN,                // server time when the match will be restarted
 
   CS_VOTE_TIME,             // Vote stuff each needs NUM_TEAMS slots
   CS_VOTE_STRING      = CS_VOTE_TIME + NUM_TEAMS,
@@ -1130,7 +1130,8 @@ const buildableAttributes_t *BG_BuildableByName( const char *name );
 const buildableAttributes_t *BG_BuildableByEntityName( const char *name );
 const buildableAttributes_t *BG_Buildable( buildable_t buildable );
 qboolean                    BG_BuildableAllowedInStage( buildable_t buildable,
-                                                        stage_t stage );
+                                                        stage_t stage,
+                                                        int gameIsInWarmup );
 
 buildableConfig_t           *BG_BuildableConfig( buildable_t buildable );
 void                        BG_BuildableBoundingBox( buildable_t buildable,
@@ -1140,7 +1141,8 @@ void                        BG_InitBuildableConfigs( void );
 const classAttributes_t     *BG_ClassByName( const char *name );
 const classAttributes_t     *BG_Class( class_t class );
 qboolean                    BG_ClassAllowedInStage( class_t class,
-                                                    stage_t stage );
+                                                    stage_t stage,
+                                                    int gameIsInWarmup );
 
 classConfig_t               *BG_ClassConfig( class_t class );
 
@@ -1150,20 +1152,26 @@ void                        BG_ClassBoundingBox( class_t class, vec3_t mins,
 qboolean                    BG_ClassHasAbility( class_t class, int ability );
 int                         BG_ClassCanEvolveFromTo( class_t fclass,
                                                      class_t tclass,
-                                                     int credits, int alienStage, int num );
-qboolean                    BG_AlienCanEvolve( class_t class, int credits, int alienStage );
+                                                     int credits,
+                                                     int alienStage, int num,
+                                                     int gameIsInWarmup );
+qboolean                    BG_AlienCanEvolve( class_t class, int credits,
+                                               int alienStage,
+                                               int gameIsInWarmup );
 
 void                        BG_InitClassConfigs( void );
 
 const weaponAttributes_t    *BG_WeaponByName( const char *name );
 const weaponAttributes_t    *BG_Weapon( weapon_t weapon );
 qboolean                    BG_WeaponAllowedInStage( weapon_t weapon,
-                                                     stage_t stage );
+                                                     stage_t stage,
+                                                     int gameIsInWarmup );
 
 const upgradeAttributes_t   *BG_UpgradeByName( const char *name );
 const upgradeAttributes_t   *BG_Upgrade( upgrade_t upgrade );
 qboolean                    BG_UpgradeAllowedInStage( upgrade_t upgrade,
-                                                      stage_t stage );
+                                                      stage_t stage,
+                                                      int gameIsInWarmup );
 
 // content masks
 #define MASK_ALL          (-1)
