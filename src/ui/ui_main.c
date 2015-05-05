@@ -1578,6 +1578,20 @@ void UI_Load( void )
 
 /*
 ===============
+UI_GameIsInWarmup
+===============
+*/
+static int UI_GameIsInWarmup( void )
+{
+  char    buffer[ MAX_TOKEN_CHARS ];
+
+  trap_Cvar_VariableStringBuffer( "ui_warmup", buffer, sizeof( buffer ) );
+
+  return atoi( buffer );
+}
+
+/*
+===============
 UI_GetCurrentAlienStage
 ===============
 */
@@ -1635,7 +1649,8 @@ static void UI_DrawInfoPane( menuItem_t *item, rectDef_t *rect, float text_x, fl
 
     case INFOTYPE_CLASS:
       value = ( BG_ClassCanEvolveFromTo( class, item->v.pclass, credits,
-                                         UI_GetCurrentAlienStage(), 0 ) +
+                                         UI_GetCurrentAlienStage(), 0,
+                                         UI_GameIsInWarmup( ) ) +
                 ALIEN_CREDITS_PER_KILL - 1 ) / ALIEN_CREDITS_PER_KILL;
 
       if( value < 1 )
@@ -2278,7 +2293,9 @@ static void UI_LoadAlienClasses( void )
     UI_AddClass( PCL_ALIEN_LEVEL0 );
 
   if( BG_ClassIsAllowed( PCL_ALIEN_BUILDER0_UPG ) &&
-      BG_ClassAllowedInStage( PCL_ALIEN_BUILDER0_UPG, UI_GetCurrentAlienStage( ) ) )
+      BG_ClassAllowedInStage( PCL_ALIEN_BUILDER0_UPG,
+                              UI_GetCurrentAlienStage( ),
+                              UI_GameIsInWarmup( ) ) )
     UI_AddClass( PCL_ALIEN_BUILDER0_UPG );
   else if( BG_ClassIsAllowed( PCL_ALIEN_BUILDER0 ) )
     UI_AddClass( PCL_ALIEN_BUILDER0 );
@@ -2380,9 +2397,9 @@ UI_LoadHumanArmouryBuys
 */
 static void UI_LoadHumanArmouryBuys( void )
 {
-  int i, j = 0;
+  int     i, j = 0;
   stage_t stage = UI_GetCurrentHumanStage( );
-  int slots = 0;
+  int     slots = 0;
 
   UI_ParseCarriageList( );
 
@@ -2404,7 +2421,7 @@ static void UI_LoadHumanArmouryBuys( void )
   {
     if( BG_Weapon( i )->team == TEAM_HUMANS &&
         BG_Weapon( i )->purchasable &&
-        BG_WeaponAllowedInStage( i, stage ) &&
+        BG_WeaponAllowedInStage( i, stage, UI_GameIsInWarmup( ) ) &&
         BG_WeaponIsAllowed( i ) &&
         !( BG_Weapon( i )->slots & slots ) &&
         !( uiInfo.weapons & ( 1 << i ) ) )
@@ -2425,7 +2442,7 @@ static void UI_LoadHumanArmouryBuys( void )
   {
     if( BG_Upgrade( i )->team == TEAM_HUMANS &&
         BG_Upgrade( i )->purchasable &&
-        BG_UpgradeAllowedInStage( i, stage ) &&
+        BG_UpgradeAllowedInStage( i, stage, UI_GameIsInWarmup( ) ) &&
         BG_UpgradeIsAllowed( i ) &&
         !( BG_Upgrade( i )->slots & slots ) &&
         !( uiInfo.upgrades & ( 1 << i ) ) )
@@ -2529,7 +2546,8 @@ static void UI_LoadAlienUpgrades( void )
 
   for( i = PCL_NONE + 1; i < PCL_NUM_CLASSES; i++ )
   {
-    if( BG_ClassCanEvolveFromTo( class, i, credits, stage, 0 ) >= 0 )
+    if( BG_ClassCanEvolveFromTo( class, i, credits, stage, 0,
+                                 UI_GameIsInWarmup( ) ) >= 0 )
     {
       uiInfo.alienUpgradeList[ j ].text = BG_ClassConfig( i )->humanName;
       uiInfo.alienUpgradeList[ j ].cmd =
@@ -2563,7 +2581,7 @@ static void UI_LoadAlienBuilds( void )
   {
     if( BG_Buildable( i )->team == TEAM_ALIENS &&
         BG_Buildable( i )->buildWeapon & uiInfo.weapons &&
-        BG_BuildableAllowedInStage( i, stage ) &&
+        BG_BuildableAllowedInStage( i, stage, UI_GameIsInWarmup( ) ) &&
         BG_BuildableIsAllowed( i ) )
     {
       uiInfo.alienBuildList[ j ].text = BG_Buildable( i )->humanName;
@@ -2598,7 +2616,7 @@ static void UI_LoadHumanBuilds( void )
   {
     if( BG_Buildable( i )->team == TEAM_HUMANS &&
         BG_Buildable( i )->buildWeapon & uiInfo.weapons &&
-        BG_BuildableAllowedInStage( i, stage ) &&
+        BG_BuildableAllowedInStage( i, stage, UI_GameIsInWarmup( ) ) &&
         BG_BuildableIsAllowed( i ) )
     {
       uiInfo.humanBuildList[ j ].text = BG_Buildable( i )->humanName;
