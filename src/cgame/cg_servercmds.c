@@ -126,24 +126,25 @@ void CG_ParseServerinfo( void )
   cgs.timelimit = atoi( Info_ValueForKey( info, "timelimit" ) );
   cgs.maxclients = atoi( Info_ValueForKey( info, "sv_maxclients" ) );
   cgs.markDeconstruct = atoi( Info_ValueForKey( info, "g_markDeconstruct" ) );
+  cgs.warmup = atoi( Info_ValueForKey( info, "g_warmup" ) );
   mapname = Info_ValueForKey( info, "mapname" );
   Com_sprintf( cgs.mapname, sizeof( cgs.mapname ), "maps/%s.bsp", mapname );
 }
 
 /*
 ==================
-CG_ParseWarmup
+CG_ParseCountdown
 ==================
 */
-static void CG_ParseWarmup( void )
+static void CG_ParseCountdown( void )
 {
   const char  *info;
-  int         warmup;
+  int         countdown;
 
-  info = CG_ConfigString( CS_WARMUP );
+  info = CG_ConfigString( CS_COUNTDOWN );
 
-  warmup = atoi( info );
-  cg.warmupTime = warmup;
+  countdown = atoi( info );
+  cg.countdownTime = countdown;
 }
 
 /*
@@ -176,7 +177,7 @@ void CG_SetConfigValues( void )
     cgs.humanStage = cgs.humanCredits = cgs.humanNextStageThreshold = 0;
 
   cgs.levelStartTime = atoi( CG_ConfigString( CS_LEVEL_START_TIME ) );
-  cg.warmupTime = atoi( CG_ConfigString( CS_WARMUP ) );
+  cg.countdownTime = atoi( CG_ConfigString( CS_COUNTDOWN ) );
 }
 
 
@@ -283,8 +284,8 @@ static void CG_ConfigStringModified( void )
     CG_StartMusic( );
   else if( num == CS_SERVERINFO )
     CG_ParseServerinfo( );
-  else if( num == CS_WARMUP )
-    CG_ParseWarmup( );
+  else if( num == CS_COUNTDOWN )
+    CG_ParseCountdown( );
   else if( num == CS_ALIEN_STAGES )
   {
     stage_t oldAlienStage = cgs.alienStage;
