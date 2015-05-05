@@ -584,8 +584,8 @@ void Cmd_Kill_f( gentity_t *ent )
   {
     if( ent->suicideTime == 0 )
     {
-      trap_SendServerCommand( ent-g_entities, "print \"You will suicide in 20 seconds\n\"" );
-      ent->suicideTime = level.time + 20000;
+      trap_SendServerCommand( ent-g_entities, va( "print \"You will suicide in %d seconds\n\"", g_warmup.integer ? 5 : 20 ) );
+      ent->suicideTime = level.time + ( g_warmup.integer ? 5000 : 20000 );
     }
     else if( ent->suicideTime > level.time )
     {
@@ -1364,7 +1364,7 @@ void Cmd_CallVote_f( gentity_t *ent )
       Com_sprintf( level.voteDisplayString[ team ], sizeof( level.voteDisplayString[ team ] ),
         "Restart the current map%s", arg[ 0 ] ? va( " with layout '%s'", arg ) : "" );
       Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
-        "set g_nextMap \"\" ; set g_nextLayout \"%s\" ; %s", arg, vote );
+        "set g_nextMap \"\" ; set g_nextLayout \"%s\" ; set g_warmup \"1\" ;  %s", arg, vote );
       // map_restart comes with a default delay
     }
     else if( !Q_stricmp( vote, "map" ) )
@@ -1386,7 +1386,7 @@ void Cmd_CallVote_f( gentity_t *ent )
       }
 
       Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
-        "set g_nextMap \"\" ; set g_nextLayout \"%s\" ; %s \"%s\"", extra, vote, arg );
+        "set g_nextMap \"\" ; set g_nextLayout \"%s\" ; set g_warmup \"1\"; %s \"%s\"", extra, vote, arg );
       Com_sprintf( level.voteDisplayString[ team ], sizeof( level.voteDisplayString[ team ] ),
         "Change to map '%s'%s", arg, extra[ 0 ] ? va( " with layout '%s'", extra ) : "" );
       level.voteDelay[ team ] = 3000;
@@ -1568,6 +1568,73 @@ void Cmd_CallVote_f( gentity_t *ent )
   ent->client->pers.namelog->voteCount++;
   ent->client->pers.vote |= 1 << team;
   G_Vote( ent, team, qtrue );
+}
+
+/*
+==================
+Cmd_Ready_f
+==================
+*/
+void Cmd_Ready_f( gentity_t *ent )
+{
+  int       i;
+  char      cmd[ MAX_TOKEN_CHARS ];
+  int       numAliens = 0, numHumans = 0;
+  float     percentAliens, percentHumans;
+  qboolean  startGame;
+
+  trap_Argv( 0, cmd, sizeof( cmd ) );
+
+  // update client readiness
+  ent->client->pers.readyToPlay ^= 1;
+
+  // reset number of players ready to zero
+  level.readyToPlay[ TEAM_HUMANS ] = level.readyToPlay[ TEAM_ALIENS ] = 0;
+
+  // update number of clients ready to play
+  for( i = 0; i < level.maxclients; i++ )
+  {
+    if ( level.clients[ i ].pers.connected != CON_DISCONNECTED )
+    {
+      // spectators are not counted
+      if( level.clients[ i ].pers.teamSelection == TEAM_NONE )
+        continue;
+
+      if( level.clients[ i ].pers.teamSelection == TEAM_ALIENS )
+      {
+        numAliens++;
+        if( level.clients[ i ].pers.readyToPlay )
+          level.readyToPlay[ TEAM_ALIENS ]++;
+      }
+      else if( level.clients[ i ].pers.teamSelection == TEAM_HUMANS )
+      {
+        numHumans++;
+        if( level.clients[ i ].pers.readyToPlay )
+          level.readyToPlay[ TEAM_HUMANS ]++;
+      }
+    }
+  }
+
+  percentAliens = ( (float) level.readyToPlay[ TEAM_ALIENS ] /
+      ( numAliens > 0 ? (float) numAliens : 1.0 ) ) * 100.0;
+  percentHumans = ( (float) level.readyToPlay[ TEAM_HUMANS ] /
+      ( numHumans > 0 ? (float) numHumans : 1.0 ) ) * 100.0;
+
+  startGame = ( percentAliens >= 50.0 && percentHumans >= 50.0 );
+
+  trap_SendServerCommand( -1, va( "print \"^7Warmup: %s %sready^7.\n"
+                                  "^7[ ^1Aliens: ^7%.2f%% (%d/%d) |"
+                                  " ^5Humans: ^7%.2f%% (%d/%d) |"
+                                  " ^3StartGame: %s ^7]\n\"",
+                                  ent->client->pers.netname,
+                                  ( ent->client->pers.readyToPlay ? "^2is " : "^1is no longer " ),
+                                  percentAliens,
+                                  level.readyToPlay[ TEAM_ALIENS ],
+                                  numAliens,
+                                  percentHumans,
+                                  level.readyToPlay[ TEAM_HUMANS ],
+                                  numHumans,
+                                  startGame ? "^4TRUE" : "^1FALSE" ) );
 }
 
 /*
@@ -1757,7 +1824,7 @@ void Cmd_Class_f( gentity_t *ent )
         return;
       }
 
-      if( !BG_ClassAllowedInStage( newClass, g_alienStage.integer ) )
+      if( !BG_ClassAllowedInStage( newClass, g_alienStage.integer, g_warmup.integer ) )
       {
         G_TriggerMenuArgs( ent->client->ps.clientNum, MN_A_CLASSNOTATSTAGE, newClass );
         return;
@@ -1857,7 +1924,8 @@ void Cmd_Class_f( gentity_t *ent )
 
       cost = BG_ClassCanEvolveFromTo( currentClass, newClass,
                                       ent->client->pers.credit,
-                                      g_alienStage.integer, 0 );
+                                      g_alienStage.integer, 0,
+                                      g_warmup.integer );
 
       if( G_RoomForClassChange( ent, newClass, infestOrigin ) )
       {
@@ -1950,7 +2018,7 @@ void Cmd_Destroy_f( gentity_t *ent )
     }
 
     // Cancel deconstruction (unmark)
-    if( deconstruct && g_markDeconstruct.integer && traceEnt->deconstruct )
+    if( deconstruct && !g_warmup.integer && g_markDeconstruct.integer && traceEnt->deconstruct )
     {
       traceEnt->deconstruct = qfalse;
       return;
@@ -1971,20 +2039,20 @@ void Cmd_Destroy_f( gentity_t *ent )
     }
 
     if( lastSpawn && !g_cheats.integer &&
-        !g_markDeconstruct.integer )
+        ( g_warmup.integer || !g_markDeconstruct.integer ) )
     {
       G_TriggerMenu( ent->client->ps.clientNum, MN_B_LASTSPAWN );
       return;
     }
 
     // Don't allow destruction of buildables that cannot be rebuilt
-    if( G_TimeTilSuddenDeath( ) <= 0 )
+    if( !g_warmup.integer && G_TimeTilSuddenDeath( ) <= 0 )
     {
       G_TriggerMenu( ent->client->ps.clientNum, MN_B_SUDDENDEATH );
       return;
     }
 
-    if( !g_markDeconstruct.integer ||
+    if( ( g_warmup.integer || !g_markDeconstruct.integer ) ||
         ( ent->client->pers.teamSelection == TEAM_HUMANS &&
           !G_FindPower( traceEnt, qtrue ) ) )
     {
@@ -2002,7 +2070,7 @@ void Cmd_Destroy_f( gentity_t *ent )
         G_Damage( traceEnt, ent, ent, forward, tr.endpos,
                   traceEnt->health, 0, MOD_SUICIDE );
       }
-      else if( g_markDeconstruct.integer &&
+      else if( !g_warmup.integer && g_markDeconstruct.integer &&
                ( ent->client->pers.teamSelection != TEAM_HUMANS ||
                  G_FindPower( traceEnt , qtrue ) || lastSpawn ) )
       {
@@ -2011,7 +2079,7 @@ void Cmd_Destroy_f( gentity_t *ent )
       }
       else
       {
-        if( !g_cheats.integer ) // add a bit to the build timer
+        if( !g_cheats.integer && !g_warmup.integer ) // add a bit to the build timer
         {
             ent->client->ps.stats[ STAT_MISC ] +=
               BG_Buildable( traceEnt->s.modelindex )->buildTime / 4;
@@ -2179,21 +2247,21 @@ void Cmd_Buy_f( gentity_t *ent )
     }
 
     //are we /allowed/ to buy this?
-    if( !BG_Weapon( weapon )->purchasable )
+    if( !g_warmup.integer && !BG_Weapon( weapon )->purchasable )
     {
       trap_SendServerCommand( ent-g_entities, "print \"You can't buy this item\n\"" );
       return;
     }
 
     //are we /allowed/ to buy this?
-    if( !BG_WeaponAllowedInStage( weapon, g_humanStage.integer ) || !BG_WeaponIsAllowed( weapon ) )
+    if( !BG_WeaponAllowedInStage( weapon, g_humanStage.integer, g_warmup.integer ) || !BG_WeaponIsAllowed( weapon ) )
     {
       trap_SendServerCommand( ent-g_entities, "print \"You can't buy this item\n\"" );
       return;
     }
 
     //can afford this?
-    if( BG_Weapon( weapon )->price > (short)ent->client->pers.credit )
+    if( !g_warmup.integer && ( BG_Weapon( weapon )->price > (short)ent->client->pers.credit ) )
     {
       G_TriggerMenu( ent->client->ps.clientNum, MN_H_NOFUNDS );
       return;
@@ -2236,7 +2304,7 @@ void Cmd_Buy_f( gentity_t *ent )
     }
 
     //can afford this?
-    if( BG_Upgrade( upgrade )->price > (short)ent->client->pers.credit )
+    if( !g_warmup.integer && ( BG_Upgrade( upgrade )->price > (short)ent->client->pers.credit ) )
     {
       G_TriggerMenu( ent->client->ps.clientNum, MN_H_NOFUNDS );
       return;
@@ -2257,14 +2325,14 @@ void Cmd_Buy_f( gentity_t *ent )
     }
 
     //are we /allowed/ to buy this?
-    if( !BG_Upgrade( upgrade )->purchasable )
+    if( !g_warmup.integer && !BG_Upgrade( upgrade )->purchasable )
     {
       trap_SendServerCommand( ent-g_entities, "print \"You can't buy this item\n\"" );
       return;
     }
 
     //are we /allowed/ to buy this?
-    if( !BG_UpgradeAllowedInStage( upgrade, g_humanStage.integer ) || !BG_UpgradeIsAllowed( upgrade ) )
+    if( !BG_UpgradeAllowedInStage( upgrade, g_humanStage.integer, g_warmup.integer ) || !BG_UpgradeIsAllowed( upgrade ) ) 
     {
       trap_SendServerCommand( ent-g_entities, "print \"You can't buy this item\n\"" );
       return;
@@ -2492,14 +2560,14 @@ void Cmd_Build_f( gentity_t *ent )
 
   if( buildable == BA_NONE || !BG_BuildableIsAllowed( buildable ) ||
       !( ( 1 << ent->client->ps.weapon ) & BG_Buildable( buildable )->buildWeapon ) ||
-      ( team == TEAM_ALIENS && !BG_BuildableAllowedInStage( buildable, g_alienStage.integer ) ) ||
-      ( team == TEAM_HUMANS && !BG_BuildableAllowedInStage( buildable, g_humanStage.integer ) ) )
+      ( team == TEAM_ALIENS && !BG_BuildableAllowedInStage( buildable, g_alienStage.integer, g_warmup.integer ) ) ||
+      ( team == TEAM_HUMANS && !BG_BuildableAllowedInStage( buildable, g_humanStage.integer, g_warmup.integer ) ) )
   {
     G_TriggerMenu( ent->client->ps.clientNum, MN_B_CANNOT );
     return;
   }
 
-  if( G_TimeTilSuddenDeath( ) <= 0 )
+  if( !g_warmup.integer && G_TimeTilSuddenDeath( ) <= 0 )
   {
     G_TriggerMenu( ent->client->ps.clientNum, MN_B_SUDDENDEATH );
     return;
@@ -3182,6 +3250,7 @@ commands_t cmds[ ] = {
   { "mt", CMD_MESSAGE|CMD_INTERMISSION, Cmd_PrivateMessage_f },
   { "noclip", CMD_CHEAT_TEAM, Cmd_Noclip_f },
   { "notarget", CMD_CHEAT|CMD_TEAM|CMD_ALIVE, Cmd_Notarget_f },
+  { "ready", CMD_MESSAGE|CMD_TEAM, Cmd_Ready_f },
   { "reload", CMD_HUMAN|CMD_ALIVE, Cmd_Reload_f },
   { "say", CMD_MESSAGE|CMD_INTERMISSION, Cmd_Say_f },
   { "say_area", CMD_MESSAGE|CMD_TEAM|CMD_ALIVE, Cmd_SayArea_f },
