@@ -129,9 +129,9 @@ static void SV_MapRestart_f( void ) {
 	else {
 		delay = 0;
 	}
-	if( delay && !Cvar_VariableValue("g_doWarmup") ) {
+	if( delay && !Cvar_VariableValue("g_doCountdown") ) {
 		sv.restartTime = sv.time + delay * 1000;
-		SV_SetConfigstring( CS_WARMUP, va("%i", sv.restartTime) );
+		SV_SetConfigstring( CS_COUNTDOWN, va("%i", sv.restartTime) );
 		return;
 	}
 
