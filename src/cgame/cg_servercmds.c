@@ -126,9 +126,22 @@ void CG_ParseServerinfo( void )
   cgs.timelimit = atoi( Info_ValueForKey( info, "timelimit" ) );
   cgs.maxclients = atoi( Info_ValueForKey( info, "sv_maxclients" ) );
   cgs.markDeconstruct = atoi( Info_ValueForKey( info, "g_markDeconstruct" ) );
-  cgs.warmup = atoi( Info_ValueForKey( info, "g_warmup" ) );
   mapname = Info_ValueForKey( info, "mapname" );
   Com_sprintf( cgs.mapname, sizeof( cgs.mapname ), "maps/%s.bsp", mapname );
+}
+
+/*
+==================
+CG_ParseWarmup
+==================
+*/
+static void CG_ParseWarmup( void )
+{
+  const char  *info;
+
+  info = CG_ConfigString( CS_WARMUP );
+
+  cgs.warmup = atoi( info );
 }
 
 /*
@@ -178,6 +191,7 @@ void CG_SetConfigValues( void )
 
   cgs.levelStartTime = atoi( CG_ConfigString( CS_LEVEL_START_TIME ) );
   cg.countdownTime = atoi( CG_ConfigString( CS_COUNTDOWN ) );
+  cgs.warmup = atoi( CG_ConfigString( CS_WARMUP ) );
 }
 
 
@@ -286,6 +300,8 @@ static void CG_ConfigStringModified( void )
     CG_ParseServerinfo( );
   else if( num == CS_COUNTDOWN )
     CG_ParseCountdown( );
+  else if( num == CS_WARMUP )
+    CG_ParseWarmup( );
   else if( num == CS_ALIEN_STAGES )
   {
     stage_t oldAlienStage = cgs.alienStage;
