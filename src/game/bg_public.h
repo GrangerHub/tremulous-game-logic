@@ -79,6 +79,8 @@ enum
   CS_ALIEN_STAGES,
   CS_HUMAN_STAGES,
 
+  CS_WARMUP,                // g_warmup
+
   CS_MODELS,
   CS_SOUNDS           = CS_MODELS + MAX_MODELS,
   CS_SHADERS          = CS_SOUNDS + MAX_SOUNDS,

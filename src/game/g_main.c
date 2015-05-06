@@ -159,16 +159,17 @@ static cvarTable_t   gameCvarTable[ ] =
   // don't override the cheat state set by the system
   { &g_cheats, "sv_cheats", "", 0, 0, qfalse },
 
+  // warmup
+  { &g_warmup, "g_warmup", "1", 0, 0, qfalse  },
+
   // noset vars
   { NULL, "gamename", GAME_VERSION , CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
   { &g_restarted, "g_restarted", "0", CVAR_ROM, 0, qfalse  },
   { &g_lockTeamsAtStart, "g_lockTeamsAtStart", "0", CVAR_ROM, 0, qfalse  },
   { NULL, "sv_mapname", "", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
   { NULL, "P", "", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
-  { &g_warmup, "g_warmup", "1", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
 
   // latched vars
-
   { &g_maxclients, "sv_maxclients", "8", CVAR_SERVERINFO | CVAR_LATCH | CVAR_ARCHIVE, 0, qfalse  },
 
   // change anytime vars
@@ -644,6 +645,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
   level.emoticonCount = BG_LoadEmoticons( level.emoticons, MAX_EMOTICONS );
 
   trap_SetConfigstring( CS_INTERMISSION, "0" );
+  trap_SetConfigstring( CS_WARMUP, va( "%d", g_warmup.integer ) );
 
   // test to see if a custom buildable layout will be loaded
   G_LayoutSelect( );
@@ -1674,8 +1676,8 @@ void ExitLevel( void )
   }
 
   trap_Cvar_Set( "g_nextMap", "" );
-
   trap_Cvar_Set( "g_warmup", "1" );
+  trap_SetConfigstring( CS_WARMUP, va( "%d", g_warmup.integer ) );
 
   level.restarted = qtrue;
   level.changemap = NULL;
@@ -2051,6 +2053,7 @@ void G_StartGame( void )
 
   trap_Cvar_Set( "g_nextLayout", level.layout );
   trap_Cvar_Set( "g_warmup", "0" );
+  trap_SetConfigstring( CS_WARMUP, va( "%d", g_warmup.integer ) );
   trap_Cvar_Update( &g_cheats );
   trap_Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
 
