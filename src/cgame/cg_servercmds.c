@@ -142,6 +142,7 @@ static void CG_ParseWarmup( void )
   info = CG_ConfigString( CS_WARMUP );
 
   cgs.warmup = atoi( info );
+  trap_Cvar_Set( "ui_warmup", va( "%d", cgs.warmup ) );
 }
 
 /*
@@ -191,7 +192,9 @@ void CG_SetConfigValues( void )
 
   cgs.levelStartTime = atoi( CG_ConfigString( CS_LEVEL_START_TIME ) );
   cg.countdownTime = atoi( CG_ConfigString( CS_COUNTDOWN ) );
+
   cgs.warmup = atoi( CG_ConfigString( CS_WARMUP ) );
+  trap_Cvar_Set( "ui_warmup", va( "%d", cgs.warmup ) );
 }
 
 
