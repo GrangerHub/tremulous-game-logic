@@ -190,7 +190,8 @@
 #define UI_HELPINFOPANE              79
 
 #define CG_WARMUP                    80
-#define CG_WARMUP_ALIENS_READY       81
-#define CG_WARMUP_HUMANS_READY       82
+#define CG_WARMUP_PLAYER_READY       81
+#define CG_WARMUP_ALIENS_READY       82
+#define CG_WARMUP_HUMANS_READY       83
 
 #endif
