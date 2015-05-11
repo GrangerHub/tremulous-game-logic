@@ -4712,6 +4712,45 @@ void G_LayoutLoad( char *lstr )
 
 /*
 ============
+G_LayoutReset
+============
+*/
+void G_LayoutReset( void )
+{
+  gentity_t *ent;
+
+  // only proceed with reset if the last layout reset was more than 10 seconds ago
+  if( level.lastLayoutReset && level.lastLayoutReset > ( level.time - 10000 ) )
+    return;
+
+  level.lastLayoutReset = level.time;
+
+  // clear decon marks from all buildables
+  G_ClearDeconMarks();
+
+  // loop through all entities
+  for( ent = &g_entities[ MAX_CLIENTS ]; ent < &g_entities[ level.num_entities ]; ++ent )
+  {
+    // skip if entity is not a buildables or not a missile (nades / luci balls
+    // etc)
+    if( ent->s.eType != ET_BUILDABLE && ent->s.eType != ET_MISSILE )
+      continue;
+
+    if( ent->s.eType == ET_BUILDABLE )
+      G_RemoveRangeMarkerFrom( ent );
+
+    // remove entity
+    G_FreeEntity( ent );
+  }
+
+  // TODO: de-spawn players (maybe?)
+
+  // reload layout
+  G_LayoutLoad( level.layout );
+}
+
+/*
+============
 G_BaseSelfDestruct
 ============
 */
