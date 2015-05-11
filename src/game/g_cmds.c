@@ -2271,6 +2271,14 @@ void Cmd_Buy_f( gentity_t *ent )
   }
   else if( upgrade != UP_NONE )
   {
+    // If buying grenades, do not allow if player still has unexploded grenades
+    // (basenade protection)
+    if( upgrade == UP_GRENADE && G_PlayerHasUnexplodedGrenades( ent ) )
+    {
+      G_TriggerMenu( ent->client->ps.clientNum, MN_H_UNEXPLODEDGRENADE );
+      return;
+    }
+
     //already got this?
     if( BG_InventoryContainsUpgrade( upgrade, ent->client->ps.stats ) )
     {

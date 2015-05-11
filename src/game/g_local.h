@@ -894,6 +894,7 @@ void      G_InitDamageLocations( void );
 // g_missile.c
 //
 void      G_RunMissile( gentity_t *ent );
+qboolean  G_PlayerHasUnexplodedGrenades( gentity_t *player );
 
 gentity_t *fire_flamer( gentity_t *self, vec3_t start, vec3_t aimdir );
 gentity_t *fire_blaster( gentity_t *self, vec3_t start, vec3_t dir );
@@ -1141,6 +1142,7 @@ extern  vmCvar_t  g_alienStage2Threshold;
 extern  vmCvar_t  g_alienStage3Threshold;
 extern  vmCvar_t  g_teamImbalanceWarnings;
 extern  vmCvar_t  g_freeFundPeriod;
+extern  vmCvar_t  g_nadeSpamProtection;
 
 extern  vmCvar_t  g_unlagged;
 

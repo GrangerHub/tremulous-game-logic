@@ -577,6 +577,38 @@ gentity_t *launch_grenade( gentity_t *self, vec3_t start, vec3_t dir )
 
 /*
 ================
+G_PlayerHasUnexplodedGrenades
+
+Checks to see if a player still has unexploded grenades.
+================
+ */
+qboolean G_PlayerHasUnexplodedGrenades( gentity_t *player )
+{
+  gentity_t *ent;
+
+  if( !g_nadeSpamProtection.integer )
+    return qfalse;
+
+  // just in case this was called for a non-player
+  if( !player->client )
+    return qfalse;
+
+  // loop through all entities
+  for( ent = &g_entities[ MAX_CLIENTS ]; ent < &g_entities[ level.num_entities ]; ++ent )
+  {
+    // return true if an unexploded grenade belonging to this player is found
+    if( ent->s.eType == ET_MISSILE && ent->s.weapon == WP_GRENADE &&
+        ent->parent->client == player->client )
+      return qtrue;
+  }
+
+  return qfalse;
+}
+
+
+
+/*
+================
 AHive_SearchAndDestroy
 
 Adjust the trajectory to point towards the target

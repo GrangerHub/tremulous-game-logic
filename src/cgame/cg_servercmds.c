@@ -753,6 +753,13 @@ void CG_Menu( int menu, int arg )
       type      = DT_ARMOURYEVOLVE;
       break;
 
+    case MN_H_UNEXPLODEDGRENADE:
+      longMsg   = "You already have an unexploded grenade. It is not possible to buy "
+                  "another until your grenade has detonated.";
+      shortMsg  = "You already have an undetonated grenade.";
+      type      = DT_ARMOURYEVOLVE;
+      break;
+
     case MN_H_NOARMOURYHERE:
       longMsg   = "You must be near a powered Armoury in order to purchase "
                   "weapons, upgrades or ammunition.";
