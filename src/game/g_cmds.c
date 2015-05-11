@@ -712,6 +712,10 @@ void Cmd_Team_f( gentity_t *ent )
 
   // Apply the change
   G_ChangeTeam( ent, team );
+
+  // Update player ready states if in warmup
+  if( g_warmup.integer )
+    G_LevelReady();
 }
 
 /*
@@ -1504,6 +1508,13 @@ void Cmd_CallVote_f( gentity_t *ent )
   }
   else if( !Q_stricmp( vote, "admitdefeat" ) )
   {
+    if( g_warmup.integer )
+    {
+      trap_SendServerCommand( ent-g_entities,
+        va( "print \"%s: admitdefeat cannot be called during warmup\n\"", cmd ) );
+      return;
+    }
+
     Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
       "admitdefeat %d", team );
     strcpy( level.voteDisplayString[ team ], "Admit Defeat" );
@@ -1577,71 +1588,28 @@ Cmd_Ready_f
 */
 void Cmd_Ready_f( gentity_t *ent )
 {
-  int       i;
   char      cmd[ MAX_TOKEN_CHARS ];
-  int       numAliens = 0, numHumans = 0;
-  float     percentAliens, percentHumans;
-  qboolean  startGame;
-
   trap_Argv( 0, cmd, sizeof( cmd ) );
 
+  // do not allow /ready command if not in warmup
   if( !g_warmup.integer )
+  {
     trap_SendServerCommand( ent-g_entities,
       va( "print \"%s: game is no longer in warmup\n\"", cmd ) );
+    return;
+  }
 
   // update client readiness
   ent->client->pers.readyToPlay = !ent->client->pers.readyToPlay;
+  ent->client->ps.stats[ STAT_READY ] = ent->client->pers.readyToPlay ? 1 : 0;
 
-  // reset number of players ready to zero
-  level.readyToPlay[ TEAM_HUMANS ] = level.readyToPlay[ TEAM_ALIENS ] = 0;
-
-  // update number of clients ready to play
-  for( i = 0; i < level.maxclients; i++ )
-  {
-    if ( level.clients[ i ].pers.connected != CON_DISCONNECTED )
-    {
-      // spectators are not counted
-      if( level.clients[ i ].pers.teamSelection == TEAM_NONE )
-        continue;
-
-      if( level.clients[ i ].pers.teamSelection == TEAM_ALIENS )
-      {
-        numAliens++;
-        if( level.clients[ i ].pers.readyToPlay )
-          level.readyToPlay[ TEAM_ALIENS ]++;
-      }
-      else if( level.clients[ i ].pers.teamSelection == TEAM_HUMANS )
-      {
-        numHumans++;
-        if( level.clients[ i ].pers.readyToPlay )
-          level.readyToPlay[ TEAM_HUMANS ]++;
-      }
-    }
-  }
-
-  percentAliens = ( (float) level.readyToPlay[ TEAM_ALIENS ] /
-      ( numAliens > 0 ? (float) numAliens : 1.0 ) ) * 100.0;
-  percentHumans = ( (float) level.readyToPlay[ TEAM_HUMANS ] /
-      ( numHumans > 0 ? (float) numHumans : 1.0 ) ) * 100.0;
-
-  startGame = ( percentAliens >= 50.0 && percentHumans >= 50.0 );
-
-  trap_SendServerCommand( -1, va( "print \"^7Warmup: %s %sready^7.\n"
-                                  "^7[ ^1Aliens: ^7%.2f%% (%d/%d) |"
-                                  " ^5Humans: ^7%.2f%% (%d/%d) |"
-                                  " ^3StartGame: %s ^7]\n\"",
+  // let people see when player changes their ready status
+  trap_SendServerCommand( -1, va( "print \"^7Warmup: %s %sready^7.\n",
                                   ent->client->pers.netname,
-                                  ( ent->client->pers.readyToPlay ? "^2is " : "^1is no longer " ),
-                                  percentAliens,
-                                  level.readyToPlay[ TEAM_ALIENS ],
-                                  numAliens,
-                                  percentHumans,
-                                  level.readyToPlay[ TEAM_HUMANS ],
-                                  numHumans,
-                                  startGame ? "^4TRUE" : "^1FALSE" ) );
+                                  ( ent->client->pers.readyToPlay ? "^2is " : "^1is no longer " ) ) );
 
-  if(startGame)
-    G_StartGame();
+  // Check if conditions are met to start the game
+  G_LevelReady();
 }
 
 /*
