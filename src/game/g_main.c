@@ -2012,7 +2012,8 @@ void CheckExitRules( void )
     // We do not want any team to win in warmup
     if( g_warmup.integer )
     {
-      // TODO: Revert layout to original state
+      G_LayoutReset();
+      return;
     }
 
     //humans win
@@ -2029,7 +2030,8 @@ void CheckExitRules( void )
     // We do not want any team to win in warmup
     if( g_warmup.integer )
     {
-      // TODO: Revert layout to original state
+      G_LayoutReset();
+      return;
     }
 
     //aliens win
