@@ -1809,7 +1809,7 @@ void HSpawn_Respawn( gentity_t *self )
     }
   }
 
-  // cancel respawning if respawning buildable is overmind and there already is
+  // cancel respawning if respawning buildable is reactor and there already is
   // one on the map
   if( self->s.modelindex == BA_H_REACTOR && G_FindBuildable( BA_H_REACTOR ) )
   {
@@ -4715,13 +4715,13 @@ void G_LayoutLoad( char *lstr )
 G_LayoutReset
 ============
 */
-void G_LayoutReset( void )
+qboolean G_LayoutReset( void )
 {
   gentity_t *ent;
 
   // only proceed with reset if the last layout reset was more than 10 seconds ago
   if( level.lastLayoutReset && level.lastLayoutReset > ( level.time - 10000 ) )
-    return;
+    return qfalse;
 
   level.lastLayoutReset = level.time;
 
@@ -4736,6 +4736,7 @@ void G_LayoutReset( void )
     if( ent->s.eType != ET_BUILDABLE && ent->s.eType != ET_MISSILE )
       continue;
 
+    // extra operations
     if( ent->s.eType == ET_BUILDABLE )
       G_RemoveRangeMarkerFrom( ent );
 
@@ -4743,10 +4744,10 @@ void G_LayoutReset( void )
     G_FreeEntity( ent );
   }
 
-  // TODO: de-spawn players (maybe?)
-
   // reload layout
   G_LayoutLoad( level.layout );
+
+  return qtrue;
 }
 
 /*

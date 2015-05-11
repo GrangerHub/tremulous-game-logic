@@ -2012,7 +2012,8 @@ void CheckExitRules( void )
     // We do not want any team to win in warmup
     if( g_warmup.integer )
     {
-      G_LayoutReset();
+      if( G_LayoutReset() )
+        trap_SendServerCommand( -1, "print \"A mysterious force restores balance in the universe.\n\"");
       return;
     }
 
@@ -2030,7 +2031,8 @@ void CheckExitRules( void )
     // We do not want any team to win in warmup
     if( g_warmup.integer )
     {
-      G_LayoutReset();
+      if( G_LayoutReset() )
+        trap_SendServerCommand( -1, "print \"A mysterious force restores balance in the universe.\n\"");
       return;
     }
 

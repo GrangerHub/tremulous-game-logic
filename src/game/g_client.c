@@ -1201,6 +1201,10 @@ void ClientBegin( int clientNum )
   // count current clients and rank for scoreboard
   CalculateRanks( );
 
+  // Update player ready states if in warmup
+  if( g_warmup.integer )
+    G_LevelReady();
+
   // send the client a list of commands that can be used
   G_ListCommands( ent );
 }
@@ -1582,4 +1586,8 @@ void ClientDisconnect( int clientNum )
   trap_SetConfigstring( CS_PLAYERS + clientNum, "");
 
   CalculateRanks( );
+
+  // Update player ready states if in warmup
+  if( g_warmup.integer )
+    G_LevelReady();
 }
