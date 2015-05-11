@@ -262,7 +262,7 @@ static gentity_t *G_SelectSpawnBuildable( vec3_t preference, buildable_t buildab
     if( search->s.groundEntityNum == ENTITYNUM_NONE )
       continue;
 
-    if( search->clientSpawnTime > 0 )
+    if( search->clientSpawnTime > 0 && !g_warmup.integer )
       continue;
 
     if( G_CheckSpawnPoint( search->s.number, search->r.currentOrigin,
