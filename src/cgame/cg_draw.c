@@ -332,7 +332,10 @@ static void CG_DrawPlayerCreditsValue( rectDef_t *rect, vec4_t color, qboolean p
         color[ 3 ] = 0.0f;
       }
 
-      value /= ALIEN_CREDITS_PER_KILL;
+      if ( cgs.warmup )
+        value = 9;
+      else
+        value /= ALIEN_CREDITS_PER_KILL;
     }
 
     trap_R_SetColor( color );
@@ -2698,7 +2701,7 @@ CG_DrawWarmup
 */
 static void CG_DrawWarmup( rectDef_t *rect, float textScale, int textAlign, int textStyle, vec4_t color )
 {
-  const char    warmup[ MAX_STRING_CHARS ] = "Warmup";
+  const char    warmup[ MAX_STRING_CHARS ] = "PRE-GAME WARMUP";
   float         tx = rect->x, ty = rect->y;
 
   if( cg.intermissionStarted )
@@ -2709,6 +2712,63 @@ static void CG_DrawWarmup( rectDef_t *rect, float textScale, int textAlign, int 
 
   CG_AlignText( rect, warmup, textScale, 0.0f, 0.0f, textAlign, VALIGN_CENTER, &tx, &ty );
   UI_Text_Paint( tx, ty, textScale, color, warmup, 0, 0, textStyle );
+
+  trap_R_SetColor( NULL );
+}
+
+static void CG_DrawWarmupPlayerReady( rectDef_t *rect, float textScale, int textAlign, int textStyle, vec4_t color )
+{
+  char          playerReady[ MAX_STRING_CHARS ];
+  float         tx = rect->x, ty = rect->y;
+
+  if( cg.intermissionStarted )
+    return;
+
+  if( !cgs.warmup )
+    return;
+
+  if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_NONE )
+    return;
+
+  Com_sprintf( playerReady, sizeof( playerReady ), "%s", cg.predictedPlayerState.stats[ STAT_READY ] ? "Ready" : "Not Ready" );
+  CG_AlignText( rect, playerReady, textScale, 0.0f, 0.0f, textAlign, VALIGN_CENTER, &tx, &ty );
+  UI_Text_Paint( tx, ty, textScale, color, playerReady, 0, 0, textStyle );
+
+  trap_R_SetColor( NULL );
+}
+
+static void CG_DrawWarmupAliensReady( rectDef_t *rect, float textScale, int textAlign, int textStyle, vec4_t color )
+{
+  char          aliensReady[ MAX_STRING_CHARS ];
+  float         tx = rect->x, ty = rect->y;
+
+  if( cg.intermissionStarted )
+    return;
+
+  if( !cgs.warmup )
+    return;
+
+  Com_sprintf( aliensReady, sizeof( aliensReady ), "Aliens: %d/%d Ready", cgs.numAliensReady, cgs.numAliens );
+  CG_AlignText( rect, aliensReady, textScale, 0.0f, 0.0f, textAlign, VALIGN_CENTER, &tx, &ty );
+  UI_Text_Paint( tx, ty, textScale, color, aliensReady, 0, 0, textStyle );
+
+  trap_R_SetColor( NULL );
+}
+
+static void CG_DrawWarmupHumansReady( rectDef_t *rect, float textScale, int textAlign, int textStyle, vec4_t color )
+{
+  char          humansReady[ MAX_STRING_CHARS ];
+  float         tx = rect->x, ty = rect->y;
+
+  if( cg.intermissionStarted )
+    return;
+
+  if( !cgs.warmup )
+    return;
+
+  Com_sprintf( humansReady, sizeof( humansReady ), "Humans: %d/%d Ready", cgs.numHumansReady, cgs.numHumans );
+  CG_AlignText( rect, humansReady, textScale, 0.0f, 0.0f, textAlign, VALIGN_CENTER, &tx, &ty );
+  UI_Text_Paint( tx, ty, textScale, color, humansReady, 0, 0, textStyle );
 
   trap_R_SetColor( NULL );
 }
@@ -2865,9 +2925,6 @@ void CG_OwnerDraw( float x, float y, float w, float h, float text_x,
     case CG_PLAYER_LOCATION:
       CG_DrawLocation( &rect, scale, textalign, foreColor );
       break;
-    case CG_WARMUP:
-      CG_DrawWarmup( &rect, scale, textalign, textStyle, foreColor );
-      break;
     case CG_FOLLOW:
       CG_DrawFollow( &rect, text_x, text_y, foreColor, scale,
                      textalign, textvalign, textStyle );
@@ -2971,6 +3028,20 @@ void CG_OwnerDraw( float x, float y, float w, float h, float text_x,
 
     case CG_TUTORIAL:
       CG_DrawTutorial( &rect, text_x, text_y, foreColor, scale, textalign, textvalign, textStyle );
+      break;
+
+    // Warmup stuff
+    case CG_WARMUP:
+      CG_DrawWarmup( &rect, scale, textalign, textStyle, foreColor );
+      break;
+    case CG_WARMUP_PLAYER_READY:
+      CG_DrawWarmupPlayerReady( &rect, scale, textalign, textStyle, foreColor );
+      break;
+    case CG_WARMUP_ALIENS_READY:
+      CG_DrawWarmupAliensReady( &rect, scale, textalign, textStyle, foreColor );
+      break;
+    case CG_WARMUP_HUMANS_READY:
+      CG_DrawWarmupHumansReady( &rect, scale, textalign, textStyle, foreColor );
       break;
 
     default:
