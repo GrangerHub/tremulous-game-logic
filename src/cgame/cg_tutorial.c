@@ -47,7 +47,8 @@ static bind_t bindings[ ] =
   { "+button7",       "Use Structure/Evolve",   { -1, -1 } },
   { "deconstruct",    "Deconstruct Structure",  { -1, -1 } },
   { "weapprev",       "Previous Upgrade",       { -1, -1 } },
-  { "weapnext",       "Next Upgrade",           { -1, -1 } }
+  { "weapnext",       "Next Upgrade",           { -1, -1 } },
+  { "ready",          "Ready",                  { -1, -1 } }
 };
 
 static const size_t numBindings = ARRAY_LEN( bindings );
@@ -178,6 +179,13 @@ static void CG_AlienBuilderText( char *text, playerState_t *ps )
   buildable_t   buildable = ps->stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT;
   entityState_t *es;
 
+  if( cgs.warmup )
+  {
+    Q_strcat( text, MAX_TUTORIAL_TEXT,
+        va( "Press %s when ready to start the game\n",
+          CG_KeyNameForCommand( "ready" ) ) );
+  }
+
   if( buildable > BA_NONE )
   {
     Q_strcat( text, MAX_TUTORIAL_TEXT,
@@ -248,6 +256,13 @@ CG_AlienLevel0Text
 */
 static void CG_AlienLevel0Text( char *text, playerState_t *ps )
 {
+  if( cgs.warmup )
+  {
+    Q_strcat( text, MAX_TUTORIAL_TEXT,
+        va( "Press %s when ready to start the game\n",
+          CG_KeyNameForCommand( "ready" ) ) );
+  }
+
   Q_strcat( text, MAX_TUTORIAL_TEXT,
       "Touch humans to damage them\n" );
 
@@ -263,6 +278,13 @@ CG_AlienLevel1Text
 */
 static void CG_AlienLevel1Text( char *text, playerState_t *ps )
 {
+  if( cgs.warmup )
+  {
+    Q_strcat( text, MAX_TUTORIAL_TEXT,
+        va( "Press %s when ready to start the game\n",
+          CG_KeyNameForCommand( "ready" ) ) );
+  }
+
   Q_strcat( text, MAX_TUTORIAL_TEXT,
       "Touch humans to grab them\n" );
 
@@ -289,6 +311,13 @@ CG_AlienLevel2Text
 */
 static void CG_AlienLevel2Text( char *text, playerState_t *ps )
 {
+  if( cgs.warmup )
+  {
+    Q_strcat( text, MAX_TUTORIAL_TEXT,
+        va( "Press %s when ready to start the game\n",
+          CG_KeyNameForCommand( "ready" ) ) );
+  }
+
   Q_strcat( text, MAX_TUTORIAL_TEXT,
       va( "Press %s to bite\n",
         CG_KeyNameForCommand( "+attack" ) ) );
@@ -312,6 +341,13 @@ CG_AlienLevel3Text
 */
 static void CG_AlienLevel3Text( char *text, playerState_t *ps )
 {
+  if( cgs.warmup )
+  {
+    Q_strcat( text, MAX_TUTORIAL_TEXT,
+        va( "Press %s when ready to start the game\n",
+          CG_KeyNameForCommand( "ready" ) ) );
+  }
+
   Q_strcat( text, MAX_TUTORIAL_TEXT,
       va( "Press %s to bite\n",
         CG_KeyNameForCommand( "+attack" ) ) );
@@ -335,6 +371,13 @@ CG_AlienLevel4Text
 */
 static void CG_AlienLevel4Text( char *text, playerState_t *ps )
 {
+  if( cgs.warmup )
+  {
+    Q_strcat( text, MAX_TUTORIAL_TEXT,
+        va( "Press %s when ready to start the game\n",
+          CG_KeyNameForCommand( "ready" ) ) );
+  }
+
   Q_strcat( text, MAX_TUTORIAL_TEXT,
       va( "Press %s to swipe\n",
         CG_KeyNameForCommand( "+attack" ) ) );
@@ -408,6 +451,13 @@ static void CG_HumanText( char *text, playerState_t *ps )
 {
   char      *name;
   upgrade_t upgrade = UP_NONE;
+
+  if( cgs.warmup )
+  {
+    Q_strcat( text, MAX_TUTORIAL_TEXT,
+        va( "Press %s when ready to start the game\n",
+          CG_KeyNameForCommand( "ready" ) ) );
+  }
 
   if( cg.weaponSelect < 32 )
     name = cg_weapons[ cg.weaponSelect ].humanName;
@@ -578,6 +628,13 @@ static void CG_SpectatorText( char *text, playerState_t *ps )
 {
   if( cgs.clientinfo[ cg.clientNum ].team != TEAM_NONE )
   {
+    if( cgs.warmup )
+    {
+      Q_strcat( text, MAX_TUTORIAL_TEXT,
+          va( "Press %s when ready to start the game\n",
+            CG_KeyNameForCommand( "ready" ) ) );
+    }
+
     if( ps->pm_flags & PMF_QUEUED )
       Q_strcat( text, MAX_TUTORIAL_TEXT,
                 va( "Press %s to leave spawn queue\n",
