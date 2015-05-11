@@ -166,6 +166,7 @@ void G_LeaveTeam( gentity_t *self )
 
   // reset player's ready flag to false
   self->client->pers.readyToPlay = qfalse;
+  self->client->ps.stats[ STAT_READY ] = self->client->pers.readyToPlay;
 
   for( i = 0; i < level.num_entities; i++ )
   {
