@@ -1340,11 +1340,20 @@ int BG_ClassCanEvolveFromTo( class_t fclass,
 {
   int i, j, best, value;
 
-  if( gameIsInWarmup &&
-      tclass != PCL_HUMAN &&
-      tclass != PCL_HUMAN_BSUIT &&
-      tclass != PCL_ALIEN_BUILDER0 )
+  if( gameIsInWarmup )
+  {
+    if( tclass == PCL_HUMAN ||
+        tclass == PCL_HUMAN_BSUIT ||
+        tclass == PCL_ALIEN_BUILDER0 )
+      return -1;
+
+    if (tclass <= fclass)
+      return -1;
+
     return 0;
+  }
+
+
 
   if( credits < cost || fclass == PCL_NONE || tclass == PCL_NONE ||
       fclass == tclass )
@@ -1393,9 +1402,6 @@ qboolean BG_AlienCanEvolve( class_t class, int credits, int stage, int gameIsInW
 {
   int i, j, tclass;
 
-  if( gameIsInWarmup )
-    return qtrue;
-
   for( i = 0; i < bg_numClasses; i++ )
   {
     if( bg_classList[ i ].number != class )
@@ -1406,7 +1412,7 @@ qboolean BG_AlienCanEvolve( class_t class, int credits, int stage, int gameIsInW
       tclass = bg_classList[ i ].children[ j ];
       if( tclass != PCL_NONE && BG_ClassAllowedInStage( tclass, stage, gameIsInWarmup ) &&
           BG_ClassIsAllowed( tclass ) &&
-          credits >= BG_Class( tclass )->cost * ALIEN_CREDITS_PER_KILL )
+          (gameIsInWarmup || credits >= BG_Class( tclass )->cost * ALIEN_CREDITS_PER_KILL ) )
         return qtrue;
     }
 
