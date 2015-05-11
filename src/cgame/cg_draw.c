@@ -2730,7 +2730,7 @@ static void CG_DrawWarmupPlayerReady( rectDef_t *rect, float textScale, int text
   if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_NONE )
     return;
 
-  Com_sprintf( playerReady, sizeof( playerReady ), "%s", cg.predictedPlayerState.stats[ STAT_READY ] ? "Ready" : "Not Ready" );
+  Com_sprintf( playerReady, sizeof( playerReady ), "( %s )", cg.predictedPlayerState.stats[ STAT_READY ] ? "Ready" : "Not Ready" );
   CG_AlignText( rect, playerReady, textScale, 0.0f, 0.0f, textAlign, VALIGN_CENTER, &tx, &ty );
   UI_Text_Paint( tx, ty, textScale, color, playerReady, 0, 0, textStyle );
 
