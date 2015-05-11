@@ -1388,12 +1388,14 @@ void G_CalculateStages( void )
     humanNextStageThreshold = ceil( (float)humanNextStageThreshold / 100 ) * 100;
 
   trap_SetConfigstring( CS_ALIEN_STAGES, va( "%d %d %d",
-        g_alienStage.integer, g_alienCredits.integer,
-        alienNextStageThreshold ) );
+        ( g_warmup.integer ? S3 : g_alienStage.integer ),
+        ( g_warmup.integer ? 99999 : g_alienCredits.integer ),
+        ( g_warmup.integer ? 0 : alienNextStageThreshold ) ) );
 
   trap_SetConfigstring( CS_HUMAN_STAGES, va( "%d %d %d",
-        g_humanStage.integer, g_humanCredits.integer,
-        humanNextStageThreshold ) );
+        ( g_warmup.integer ? S3 : g_humanStage.integer ),
+        ( g_warmup.integer ? 99999 : g_humanCredits.integer ),
+        ( g_warmup.integer ? 0 : humanNextStageThreshold ) ) );
 }
 
 /*
@@ -1999,16 +2001,18 @@ void CheckExitRules( void )
     }
   }
 
-  // We do not want any team to win in warmup
-  if( g_warmup.integer )
-    return;
-
   if( level.uncondHumanWin ||
       ( !level.uncondAlienWin &&
         ( level.time > level.startTime + 1000 ) &&
         ( level.numAlienSpawns == 0 ) &&
         ( level.numAlienClientsAlive == 0 ) ) )
   {
+    // We do not want any team to win in warmup
+    if( g_warmup.integer )
+    {
+      // TODO: Revert layout to original state
+    }
+
     //humans win
     level.lastWin = TEAM_HUMANS;
     trap_SendServerCommand( -1, "print \"Humans win\n\"");
@@ -2020,6 +2024,12 @@ void CheckExitRules( void )
              ( level.numHumanSpawns == 0 ) &&
              ( level.numHumanClientsAlive == 0 ) ) )
   {
+    // We do not want any team to win in warmup
+    if( g_warmup.integer )
+    {
+      // TODO: Revert layout to original state
+    }
+
     //aliens win
     level.lastWin = TEAM_ALIENS;
     trap_SendServerCommand( -1, "print \"Aliens win\n\"");
@@ -2030,14 +2040,66 @@ void CheckExitRules( void )
 
 /*
 ==================
-G_StartGame
+G_LevelReady
+
+Check for readyness of players and get out of warmup to start the real game if
+required percentages are met.
 ==================
 */
-void G_StartGame( void )
+void G_LevelReady( void )
 {
   char      map[ MAX_CVAR_VALUE_STRING ];
   int       i;
   gclient_t *cl;
+  int       numAliens = 0, numHumans = 0;
+  float     percentAliens, percentHumans;
+  qboolean  startGame;
+
+  // reset number of players ready to zero
+  level.readyToPlay[ TEAM_HUMANS ] = level.readyToPlay[ TEAM_ALIENS ] = 0;
+
+  // update number of clients ready to play
+  for( i = 0; i < level.maxclients; i++ )
+  {
+    if ( level.clients[ i ].pers.connected != CON_DISCONNECTED )
+    {
+      // spectators are not counted
+      if( level.clients[ i ].pers.teamSelection == TEAM_NONE )
+        continue;
+
+      if( level.clients[ i ].pers.teamSelection == TEAM_ALIENS )
+      {
+        numAliens++;
+        if( level.clients[ i ].pers.readyToPlay )
+          level.readyToPlay[ TEAM_ALIENS ]++;
+      }
+      else if( level.clients[ i ].pers.teamSelection == TEAM_HUMANS )
+      {
+        numHumans++;
+        if( level.clients[ i ].pers.readyToPlay )
+          level.readyToPlay[ TEAM_HUMANS ]++;
+      }
+    }
+  }
+
+  percentAliens = ( (float) level.readyToPlay[ TEAM_ALIENS ] /
+      ( numAliens > 0 ? (float) numAliens : 1.0 ) ) * 100.0;
+  percentHumans = ( (float) level.readyToPlay[ TEAM_HUMANS ] /
+      ( numHumans > 0 ? (float) numHumans : 1.0 ) ) * 100.0;
+
+  startGame = ( percentAliens >= 50.0 && percentHumans >= 50.0 );
+
+  trap_SetConfigstring( CS_WARMUP_READY, va( "%.0f %d %d %.2f %d %d",
+        percentAliens,
+        level.readyToPlay[ TEAM_ALIENS ],
+        numAliens,
+        percentHumans,
+        level.readyToPlay[ TEAM_HUMANS ],
+        numHumans ) );
+
+  // only continue to start game when conditions are met
+  if(!startGame)
+    return;
 
   for( i = 0; i < g_maxclients.integer; i++ )
   {

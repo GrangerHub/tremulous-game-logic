@@ -1004,7 +1004,7 @@ void QDECL G_LogPrintf( const char *fmt, ... ) __attribute__ ((format (printf, 1
 void SendScoreboardMessageToAllClients( void );
 void QDECL G_Printf( const char *fmt, ... ) __attribute__ ((format (printf, 1, 2)));
 void QDECL G_Error( const char *fmt, ... ) __attribute__ ((noreturn, format (printf, 1, 2)));
-void G_StartGame( void );
+void G_LevelReady( void );
 void G_Vote( gentity_t *ent, team_t team, qboolean voting );
 void G_ExecuteVote( team_t team );
 void G_CheckVote( team_t team );
