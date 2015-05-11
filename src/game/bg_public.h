@@ -80,6 +80,7 @@ enum
   CS_HUMAN_STAGES,
 
   CS_WARMUP,                // g_warmup
+  CS_WARMUP_READY,
 
   CS_MODELS,
   CS_SOUNDS           = CS_MODELS + MAX_MODELS,
@@ -225,13 +226,14 @@ typedef enum
   STAT_MAX_HEALTH,// health / armor limit, changable by handicap
   STAT_CLASS,     // player class (for aliens AND humans)
   STAT_TEAM,      // player team
+  STAT_READY,     // player ready state
   STAT_STAMINA,   // stamina (human only)
   STAT_STATE,     // client states e.g. wall climbing
   STAT_MISC,      // for uh...misc stuff (pounce, trample, lcannon)
   STAT_BUILDABLE, // which ghost model to display for building
   STAT_FALLDIST,  // the distance the player fell
   STAT_VIEWLOCK   // direction to lock the view in
-  // netcode has space for 3 more
+  // netcode has space for 2 more
 } statIndex_t;
 
 #define SCA_WALLCLIMBER         0x00000001
