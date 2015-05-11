@@ -147,6 +147,29 @@ static void CG_ParseWarmup( void )
 
 /*
 ==================
+CG_ParseWarmupReady
+==================
+*/
+static void CG_ParseWarmupReady( void )
+{
+  const char  *info;
+
+  info = CG_ConfigString( CS_WARMUP_READY );
+
+  if( info[0] )
+  {
+    sscanf( info, "%f %d %d %f %d %d",
+        &cgs.percentAliensReady,
+        &cgs.numAliensReady,
+        &cgs.numAliens,
+        &cgs.percentHumansReady,
+        &cgs.numHumansReady,
+        &cgs.numHumans);
+  }
+}
+
+/*
+==================
 CG_ParseCountdown
 ==================
 */
@@ -172,6 +195,7 @@ void CG_SetConfigValues( void )
 {
   const char *alienStages = CG_ConfigString( CS_ALIEN_STAGES );
   const char *humanStages = CG_ConfigString( CS_HUMAN_STAGES );
+  const char *playersReady = CG_ConfigString( CS_WARMUP_READY );
 
   if( alienStages[0] )
   {
@@ -189,6 +213,22 @@ void CG_SetConfigValues( void )
   }
   else
     cgs.humanStage = cgs.humanCredits = cgs.humanNextStageThreshold = 0;
+
+  if( playersReady[0] )
+  {
+    sscanf( playersReady, "%f %d %d %f %d %d",
+        &cgs.percentAliensReady,
+        &cgs.numAliensReady,
+        &cgs.numAliens,
+        &cgs.percentHumansReady,
+        &cgs.numHumansReady,
+        &cgs.numHumans);
+  }
+  else
+  {
+    cgs.percentAliensReady = cgs.numAliensReady = cgs.numAliens =
+      cgs.percentHumansReady = cgs.numHumansReady = cgs.numHumans = 0;
+  }
 
   cgs.levelStartTime = atoi( CG_ConfigString( CS_LEVEL_START_TIME ) );
   cg.countdownTime = atoi( CG_ConfigString( CS_COUNTDOWN ) );
@@ -305,6 +345,8 @@ static void CG_ConfigStringModified( void )
     CG_ParseCountdown( );
   else if( num == CS_WARMUP )
     CG_ParseWarmup( );
+  else if( num == CS_WARMUP_READY )
+    CG_ParseWarmupReady( );
   else if( num == CS_ALIEN_STAGES )
   {
     stage_t oldAlienStage = cgs.alienStage;

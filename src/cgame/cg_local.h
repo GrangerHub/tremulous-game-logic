@@ -1381,7 +1381,15 @@ typedef struct
   int           maxclients;
   char          mapname[ MAX_QPATH ];
   qboolean      markDeconstruct;        // Whether or not buildables are marked
-  qboolean      warmup;                 // Whether or not in pre-game warmup
+
+  // warmup-related values parsed from config strings
+  qboolean      warmup;                 // Is it currently pre-game warmup?
+  float         percentAliensReady;     // Percentage of alien players ready
+  int           numAliensReady;         // Number of alien players ready
+  int           numAliens;              // Total number of players in aliens team
+  float         percentHumansReady;     // Percentage of human players ready
+  int           numHumansReady;         // Number of human players ready
+  int           numHumans;              // Total number of players in humans team
 
   int           voteTime[ NUM_TEAMS ];
   int           voteYes[ NUM_TEAMS ];
