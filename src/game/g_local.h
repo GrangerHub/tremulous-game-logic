@@ -800,7 +800,6 @@ void              G_LayoutSave( char *name );
 int               G_LayoutList( const char *map, char *list, int len );
 void              G_LayoutSelect( void );
 void              G_LayoutLoad( char *lstr );
-qboolean          G_LayoutReset( void );
 void              G_BaseSelfDestruct( team_t team );
 int               G_NextQueueTime( int queuedBP, int totalBP, int queueBaseRate );
 void              G_QueueBuildPoints( gentity_t *self );
@@ -1007,6 +1006,7 @@ void QDECL G_LogPrintf( const char *fmt, ... ) __attribute__ ((format (printf, 1
 void SendScoreboardMessageToAllClients( void );
 void QDECL G_Printf( const char *fmt, ... ) __attribute__ ((format (printf, 1, 2)));
 void QDECL G_Error( const char *fmt, ... ) __attribute__ ((noreturn, format (printf, 1, 2)));
+void G_LevelRestart( qboolean stopWarmup );
 void G_LevelReady( void );
 void G_Vote( gentity_t *ent, team_t team, qboolean voting );
 void G_ExecuteVote( team_t team );
