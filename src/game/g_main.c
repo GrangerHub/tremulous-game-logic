@@ -2012,8 +2012,10 @@ void CheckExitRules( void )
     // We do not want any team to win in warmup
     if( g_warmup.integer )
     {
-      if( G_LayoutReset() )
-        trap_SendServerCommand( -1, "print \"A mysterious force restores balance in the universe.\n\"");
+      if( level.lastLayoutReset > ( level.time - 5000 ) )
+        return;
+      G_LevelRestart( qfalse );
+      trap_SendServerCommand( -1, "print \"A mysterious force restores balance in the universe.\n\"");
       return;
     }
 
@@ -2031,8 +2033,10 @@ void CheckExitRules( void )
     // We do not want any team to win in warmup
     if( g_warmup.integer )
     {
-      if( G_LayoutReset() )
-        trap_SendServerCommand( -1, "print \"A mysterious force restores balance in the universe.\n\"");
+      if( level.lastLayoutReset > ( level.time - 5000 ) )
+        return;
+      G_LevelRestart( qfalse );
+      trap_SendServerCommand( -1, "print \"A mysterious force restores balance in the universe.\n\"");
       return;
     }
 
@@ -2046,6 +2050,46 @@ void CheckExitRules( void )
 
 /*
 ==================
+G_LevelRestart
+
+Restart level and optionally specify non-warmup
+==================
+*/
+void G_LevelRestart( qboolean stopWarmup )
+{
+  char      map[ MAX_CVAR_VALUE_STRING ];
+  int       i;
+  gclient_t *cl;
+
+  for( i = 0; i < g_maxclients.integer; i++ )
+  {
+    cl = level.clients + i;
+    if( cl->pers.connected != CON_CONNECTED )
+      continue;
+
+    if( cl->pers.teamSelection == TEAM_NONE )
+      continue;
+
+    cl->sess.restartTeam = cl->pers.teamSelection;
+  }
+
+  trap_Cvar_Set( "g_nextLayout", level.layout );
+  if( stopWarmup )
+  {
+    trap_Cvar_Set( "g_warmup", "0" );
+    trap_SetConfigstring( CS_WARMUP, va( "%d", g_warmup.integer ) );
+  }
+  trap_Cvar_Update( &g_cheats );
+  trap_Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
+  G_MapConfigs( map );
+  trap_SendConsoleCommand( EXEC_APPEND, "map_restart\n" );
+
+  if( !stopWarmup )
+    level.lastLayoutReset = level.time;
+}
+
+/*
+==================
 G_LevelReady
 
 Check for readyness of players and get out of warmup to start the real game if
@@ -2054,10 +2098,7 @@ required percentages are met.
 */
 void G_LevelReady( void )
 {
-  char      map[ MAX_CVAR_VALUE_STRING ];
-  int       i;
-  gclient_t *cl;
-  int       numAliens = 0, numHumans = 0;
+  int       i, numAliens = 0, numHumans = 0;
   float     percentAliens, percentHumans;
   qboolean  startGame;
 
@@ -2107,30 +2148,7 @@ void G_LevelReady( void )
   if(!startGame)
     return;
 
-  for( i = 0; i < g_maxclients.integer; i++ )
-  {
-    cl = level.clients + i;
-    if( cl->pers.connected != CON_CONNECTED )
-      continue;
-
-    if( cl->pers.teamSelection == TEAM_NONE )
-      continue;
-
-    cl->sess.restartTeam = cl->pers.teamSelection;
-  }
-
-  trap_Cvar_Set( "g_nextLayout", level.layout );
-  trap_Cvar_Set( "g_warmup", "0" );
-  trap_SetConfigstring( CS_WARMUP, va( "%d", g_warmup.integer ) );
-  trap_Cvar_Update( &g_cheats );
-  trap_Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
-
-  AP( va( "print \"^3startgame: ^7players are ready to play (layout '%s' on map '%s')\n\"",
-          level.layout, map ) );
-
-  G_MapConfigs( map );
-
-  trap_SendConsoleCommand( EXEC_APPEND, "map_restart\n" );
+  G_LevelRestart( qtrue );
 }
 
 /*
