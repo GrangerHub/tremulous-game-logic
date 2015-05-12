@@ -819,6 +819,14 @@ void AGeneric_CreepRespawn( gentity_t *self )
     }
   }
 
+  // cancel respawning if respawning buildable is overmind and there already is
+  // one on the map
+  if( self->s.modelindex == BA_A_OVERMIND && G_FindBuildable( BA_A_OVERMIND ) )
+  {
+    G_FreeEntity( self );
+    return;
+  }
+
   // Copy buildable model index
   buildable = self->s.modelindex;
 
@@ -1799,6 +1807,14 @@ void HSpawn_Respawn( gentity_t *self )
       G_Damage( hit, self, self, NULL, NULL,
         100000, DAMAGE_NO_PROTECTION, MOD_SUICIDE );
     }
+  }
+
+  // cancel respawning if respawning buildable is overmind and there already is
+  // one on the map
+  if( self->s.modelindex == BA_H_REACTOR && G_FindBuildable( BA_H_REACTOR ) )
+  {
+    G_FreeEntity( self );
+    return;
   }
 
   // copy buildable model index
