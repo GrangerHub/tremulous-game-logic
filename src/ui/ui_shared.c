@@ -1783,6 +1783,16 @@ void Script_SetFocus( itemDef_t *item, char **args )
         g_editItem = focusItem;
       }
 
+      // if focusItem is a list box, reset it to the first entry
+      // and then run the onSelect script
+      if( Item_IsListBox( focusItem ) )
+      {
+        focusItem->cursorPos = DC->feederInitialise( focusItem->feederID );
+        Item_ListBox_SetStartPos( focusItem, 0 );
+        DC->feederSelection( focusItem->feederID, focusItem->cursorPos );
+        Item_RunScript( focusItem, focusItem->onSelect );
+      }
+
       if( DC->Assets.itemFocusSound )
         DC->startLocalSound( DC->Assets.itemFocusSound, CHAN_LOCAL_SOUND );
     }
