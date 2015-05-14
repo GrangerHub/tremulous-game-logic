@@ -2928,6 +2928,8 @@ qboolean Item_ListBox_HandleKey( itemDef_t *item, int key, qboolean down, qboole
 
           if( runDoubleClick )
             Item_RunScript( item, listPtr->doubleClick );
+          else
+            Item_RunScript( item, item->onSelect );
         }
 
         break;
@@ -2943,7 +2945,7 @@ qboolean Item_ListBox_HandleKey( itemDef_t *item, int key, qboolean down, qboole
           item->cursorPos--;
           listPtr->cursorPos = item->cursorPos;
           DC->feederSelection( item->feederID, item->cursorPos );
-          Item_RunScript( item, item->onFocus );
+          Item_RunScript( item, item->onSelect );
         }
         break;
 
@@ -2954,7 +2956,7 @@ qboolean Item_ListBox_HandleKey( itemDef_t *item, int key, qboolean down, qboole
           item->cursorPos++;
           listPtr->cursorPos = item->cursorPos;
           DC->feederSelection( item->feederID, item->cursorPos );
-          Item_RunScript( item, item->onFocus );
+          Item_RunScript( item, item->onSelect );
         }
         break;
 
@@ -6931,6 +6933,14 @@ qboolean ItemParse_onFocus( itemDef_t *item, int handle )
   return qtrue;
 }
 
+qboolean ItemParse_onSelect( itemDef_t *item, int handle )
+{
+  if( !PC_Script_Parse( handle, &item->onSelect ) )
+    return qfalse;
+
+  return qtrue;
+}
+
 qboolean ItemParse_leaveFocus( itemDef_t *item, int handle )
 {
   if( !PC_Script_Parse( handle, &item->leaveFocus ) )
@@ -7284,6 +7294,7 @@ keywordHash_t itemParseKeywords[] = {
   {"outlinecolor", ItemParse_outlinecolor, TYPE_ANY},
   {"background", ItemParse_background, TYPE_ANY},
   {"onFocus", ItemParse_onFocus, TYPE_ANY},
+  {"onSelect", ItemParse_onSelect, TYPE_ANY},
   {"leaveFocus", ItemParse_leaveFocus, TYPE_ANY},
   {"mouseEnter", ItemParse_mouseEnter, TYPE_ANY},
   {"mouseExit", ItemParse_mouseExit, TYPE_ANY},

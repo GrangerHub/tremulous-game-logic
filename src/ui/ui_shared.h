@@ -300,6 +300,7 @@ typedef struct itemDef_s
   const char *action;            // select script
   const char *onFocus;           // select script
   const char *leaveFocus;        // select script
+  const char *onSelect;          // select script
   const char *onTextEntry;       // called when text entered
   const char *onCharEntry;       // called when text entered
   const char *cvar;              // associated cvar
