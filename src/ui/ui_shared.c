@@ -2932,12 +2932,30 @@ qboolean Item_ListBox_HandleKey( itemDef_t *item, int key, qboolean down, qboole
 
         break;
 
+      case K_MOUSE3:
+        Item_RunScript( item, listPtr->doubleClick );
+        break;
+
       case K_MWHEELUP:
         Item_ListBox_SetStartPos( item, listPtr->startPos - 1 );
+        if( item->cursorPos > 0 )
+        {
+          item->cursorPos--;
+          listPtr->cursorPos = item->cursorPos;
+          DC->feederSelection( item->feederID, item->cursorPos );
+          Item_RunScript( item, item->onFocus );
+        }
         break;
 
       case K_MWHEELDOWN:
         Item_ListBox_SetStartPos( item, listPtr->startPos + 1 );
+        if( item->cursorPos < ( listPtr->endPos - 1 ) )
+        {
+          item->cursorPos++;
+          listPtr->cursorPos = item->cursorPos;
+          DC->feederSelection( item->feederID, item->cursorPos );
+          Item_RunScript( item, item->onFocus );
+        }
         break;
 
       case K_ENTER:
@@ -4060,6 +4078,9 @@ void Menu_HandleKey( menuDef_t *menu, int key, qboolean down )
 
     case K_KP_UPARROW:
     case K_UPARROW:
+      // ignore mouse wheel for buttons
+      if( item->type == ITEM_TYPE_BUTTON )
+        return;
       Menu_SetPrevCursorItem( menu );
       break;
 
@@ -4076,6 +4097,9 @@ void Menu_HandleKey( menuDef_t *menu, int key, qboolean down )
     case K_TAB:
     case K_KP_DOWNARROW:
     case K_DOWNARROW:
+      // ignore mouse wheel for buttons
+      if( item->type == ITEM_TYPE_BUTTON )
+        return;
       Menu_SetNextCursorItem( menu );
       break;
 
