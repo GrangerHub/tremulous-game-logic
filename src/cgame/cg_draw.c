@@ -2699,9 +2699,9 @@ static void CG_DrawLocation( rectDef_t *rect, float scale, int textalign, vec4_t
 CG_DrawWarmup
 =====================
 */
-static void CG_DrawWarmup( rectDef_t *rect, float textScale, int textAlign, int textStyle, vec4_t color )
+static void CG_DrawWarmup( int ownerDraw, rectDef_t *rect, float textScale, int textAlign, int textStyle, vec4_t color )
 {
-  const char    warmup[ MAX_STRING_CHARS ] = "PRE-GAME WARMUP";
+  char          warmupText[ MAX_STRING_CHARS ];
   float         tx = rect->x, ty = rect->y;
 
   if( cg.intermissionStarted )
@@ -2710,65 +2710,35 @@ static void CG_DrawWarmup( rectDef_t *rect, float textScale, int textAlign, int 
   if( !cgs.warmup )
     return;
 
-  CG_AlignText( rect, warmup, textScale, 0.0f, 0.0f, textAlign, VALIGN_CENTER, &tx, &ty );
-  UI_Text_Paint( tx, ty, textScale, color, warmup, 0, 0, textStyle );
+  switch( ownerDraw )
+  {
+    case CG_WARMUP:
+      Com_sprintf( warmupText, sizeof( warmupText ), "PRE-GAME WARMUP" );
+      break;
+    case CG_WARMUP_PLAYER_READY:
+      if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_NONE )
+        return;
+      Com_sprintf( warmupText, sizeof( warmupText ), "( You Are %sReady )",
+          cg.predictedPlayerState.stats[ STAT_READY ] ? "" : "Not " );
+      break;
+    case CG_WARMUP_ALIENS_READY_HDR:
+      Com_sprintf( warmupText, sizeof( warmupText ), "Aliens" );
+      break;
+    case CG_WARMUP_ALIENS_READY:
+      Com_sprintf( warmupText, sizeof( warmupText ), "%d/%d Ready",
+          cgs.numAliensReady, cgs.numAliens );
+      break;
+    case CG_WARMUP_HUMANS_READY_HDR:
+      Com_sprintf( warmupText, sizeof( warmupText ), "Humans" );
+      break;
+    case CG_WARMUP_HUMANS_READY:
+      Com_sprintf( warmupText, sizeof( warmupText ), "%d/%d Ready",
+          cgs.numHumansReady, cgs.numHumans );
+      break;
+  }
 
-  trap_R_SetColor( NULL );
-}
-
-static void CG_DrawWarmupPlayerReady( rectDef_t *rect, float textScale, int textAlign, int textStyle, vec4_t color )
-{
-  char          playerReady[ MAX_STRING_CHARS ];
-  float         tx = rect->x, ty = rect->y;
-
-  if( cg.intermissionStarted )
-    return;
-
-  if( !cgs.warmup )
-    return;
-
-  if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_NONE )
-    return;
-
-  Com_sprintf( playerReady, sizeof( playerReady ), "( %s )", cg.predictedPlayerState.stats[ STAT_READY ] ? "Ready" : "Not Ready" );
-  CG_AlignText( rect, playerReady, textScale, 0.0f, 0.0f, textAlign, VALIGN_CENTER, &tx, &ty );
-  UI_Text_Paint( tx, ty, textScale, color, playerReady, 0, 0, textStyle );
-
-  trap_R_SetColor( NULL );
-}
-
-static void CG_DrawWarmupAliensReady( rectDef_t *rect, float textScale, int textAlign, int textStyle, vec4_t color )
-{
-  char          aliensReady[ MAX_STRING_CHARS ];
-  float         tx = rect->x, ty = rect->y;
-
-  if( cg.intermissionStarted )
-    return;
-
-  if( !cgs.warmup )
-    return;
-
-  Com_sprintf( aliensReady, sizeof( aliensReady ), "Aliens: %d/%d Ready", cgs.numAliensReady, cgs.numAliens );
-  CG_AlignText( rect, aliensReady, textScale, 0.0f, 0.0f, textAlign, VALIGN_CENTER, &tx, &ty );
-  UI_Text_Paint( tx, ty, textScale, color, aliensReady, 0, 0, textStyle );
-
-  trap_R_SetColor( NULL );
-}
-
-static void CG_DrawWarmupHumansReady( rectDef_t *rect, float textScale, int textAlign, int textStyle, vec4_t color )
-{
-  char          humansReady[ MAX_STRING_CHARS ];
-  float         tx = rect->x, ty = rect->y;
-
-  if( cg.intermissionStarted )
-    return;
-
-  if( !cgs.warmup )
-    return;
-
-  Com_sprintf( humansReady, sizeof( humansReady ), "Humans: %d/%d Ready", cgs.numHumansReady, cgs.numHumans );
-  CG_AlignText( rect, humansReady, textScale, 0.0f, 0.0f, textAlign, VALIGN_CENTER, &tx, &ty );
-  UI_Text_Paint( tx, ty, textScale, color, humansReady, 0, 0, textStyle );
+  CG_AlignText( rect, warmupText, textScale, 0.0f, 0.0f, textAlign, VALIGN_CENTER, &tx, &ty );
+  UI_Text_Paint( tx, ty, textScale, color, warmupText, 0, 0, textStyle );
 
   trap_R_SetColor( NULL );
 }
@@ -3031,17 +3001,10 @@ void CG_OwnerDraw( float x, float y, float w, float h, float text_x,
       break;
 
     // Warmup stuff
-    case CG_WARMUP:
-      CG_DrawWarmup( &rect, scale, textalign, textStyle, foreColor );
-      break;
-    case CG_WARMUP_PLAYER_READY:
-      CG_DrawWarmupPlayerReady( &rect, scale, textalign, textStyle, foreColor );
-      break;
-    case CG_WARMUP_ALIENS_READY:
-      CG_DrawWarmupAliensReady( &rect, scale, textalign, textStyle, foreColor );
-      break;
-    case CG_WARMUP_HUMANS_READY:
-      CG_DrawWarmupHumansReady( &rect, scale, textalign, textStyle, foreColor );
+    case CG_WARMUP: case CG_WARMUP_PLAYER_READY:
+    case CG_WARMUP_ALIENS_READY_HDR: case CG_WARMUP_ALIENS_READY:
+    case CG_WARMUP_HUMANS_READY_HDR: case CG_WARMUP_HUMANS_READY:
+      CG_DrawWarmup( ownerDraw, &rect, scale, textalign, textStyle, foreColor );
       break;
 
     default:
