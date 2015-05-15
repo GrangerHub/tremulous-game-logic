@@ -2949,25 +2949,39 @@ qboolean Item_ListBox_HandleKey( itemDef_t *item, int key, qboolean down, qboole
         break;
 
       case K_MWHEELUP:
-        Item_ListBox_SetStartPos( item, listPtr->startPos - 1 );
+      case K_KP_UPARROW:
+      case K_UPARROW:
         if( item->cursorPos > 0 )
         {
+          Item_ListBox_SetStartPos( item, listPtr->startPos - 1 );
           item->cursorPos--;
-          listPtr->cursorPos = item->cursorPos;
-          DC->feederSelection( item->feederID, item->cursorPos );
-          Item_RunScript( item, item->onSelect );
         }
+        else
+        {
+          Item_ListBox_SetStartPos( item, DC->feederCount( item->feederID ) - viewmax );
+          item->cursorPos = DC->feederCount( item->feederID ) - 1; 
+        }
+        listPtr->cursorPos = item->cursorPos;
+        DC->feederSelection( item->feederID, item->cursorPos );
+        Item_RunScript( item, item->onSelect );
         break;
 
       case K_MWHEELDOWN:
-        Item_ListBox_SetStartPos( item, listPtr->startPos + 1 );
-        if( item->cursorPos < ( listPtr->endPos - 1 ) )
+      case K_KP_DOWNARROW:
+      case K_DOWNARROW:
+        if( item->cursorPos < ( DC->feederCount( item->feederID ) - 1 ) )
         {
+          Item_ListBox_SetStartPos( item, listPtr->startPos + 1 );
           item->cursorPos++;
-          listPtr->cursorPos = item->cursorPos;
-          DC->feederSelection( item->feederID, item->cursorPos );
-          Item_RunScript( item, item->onSelect );
         }
+        else
+        {
+          Item_ListBox_SetStartPos( item, 0 );
+          item->cursorPos = 0;
+        }
+        listPtr->cursorPos = item->cursorPos;
+        DC->feederSelection( item->feederID, item->cursorPos );
+        Item_RunScript( item, item->onSelect );
         break;
 
       case K_ENTER:
@@ -3021,6 +3035,10 @@ qboolean Item_ListBox_HandleKey( itemDef_t *item, int key, qboolean down, qboole
         else
           Item_ListBox_SetStartPos( item, listPtr->startPos + viewmax );
 
+        break;
+
+      case K_TAB:
+        // TODO: Switch to next area of the window
         break;
 
       default:
@@ -4088,11 +4106,9 @@ void Menu_HandleKey( menuDef_t *menu, int key, qboolean down )
 
       break;
 
+    case K_MWHEELUP:
     case K_KP_UPARROW:
     case K_UPARROW:
-      // ignore mouse wheel for buttons
-      if( item->type == ITEM_TYPE_BUTTON )
-        return;
       Menu_SetPrevCursorItem( menu );
       break;
 
@@ -4106,12 +4122,9 @@ void Menu_HandleKey( menuDef_t *menu, int key, qboolean down )
 
       break;
 
-    case K_TAB:
+    case K_MWHEELDOWN:
     case K_KP_DOWNARROW:
     case K_DOWNARROW:
-      // ignore mouse wheel for buttons
-      if( item->type == ITEM_TYPE_BUTTON )
-        return;
       Menu_SetNextCursorItem( menu );
       break;
 
@@ -4151,6 +4164,10 @@ void Menu_HandleKey( menuDef_t *menu, int key, qboolean down )
 
       break;
 
+    case K_TAB:
+      // TODO: Switch to next area of the window
+      break;
+
     case K_JOY1:
     case K_JOY2:
     case K_JOY3:
@@ -4173,6 +4190,7 @@ void Menu_HandleKey( menuDef_t *menu, int key, qboolean down )
     case K_AUX16:
       break;
 
+    case K_MOUSE3:
     case K_KP_ENTER:
     case K_ENTER:
       if( item )
