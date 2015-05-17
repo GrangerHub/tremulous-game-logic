@@ -33,6 +33,41 @@ void trap_FS_FCloseFile( fileHandle_t f );
 void trap_FS_Seek( fileHandle_t f, long offset, fsOrigin_t origin ); // fsOrigin_t
 int  trap_FS_GetFileList(  const char *path, const char *extension, char *listbuf, int bufsize );
 
+static const teamAttributes_t bg_teamList[ ] =
+{
+  {
+    TEAM_NONE,             //int       number;
+    "spectate",            //char     *name;
+    "Spectators",          //char     *humanName;
+    "Spectators watch the game without participating.",
+  },
+  {
+    TEAM_ALIENS,           //int       number;
+    "aliens",              //char     *name;
+    "Aliens",              //char     *humanName;
+    "The strength of Aliens lie in their agility, fierce melee attacks and "
+    "their ability to construct new bases without much restriction. They "
+    "possess disorienting and lethal secondary attack skills such as "
+    "psychotropic gas, electrical discharge, pouncing and trampling. Left "
+    "to thrive, they may develop the capability of inflicting cripling "
+    "poisons.",
+  },
+  {
+    TEAM_HUMANS,           //int       number;
+    "humans",              //char     *name;
+    "Humans",              //char     *humanName;
+    "The humans are the masters of technology. Although their bases are "
+    "restricted by their requirement for power, their automated defenses "
+    "help ensure they stay built. Although lacking in natural ability, a wide "
+    "range of upgrades and weapons are available to the humans, allowing "
+    "them to eradicate the alien threat with lethal efficiency.",
+  },
+};
+
+size_t bg_numTeams = ARRAY_LEN( bg_teamList );
+
+static const teamAttributes_t nullTeam = { 0 };
+
 static const buildableAttributes_t bg_buildableList[ ] =
 {
   {
@@ -3923,6 +3958,17 @@ int BG_LoadEmoticons( emoticon_t *emoticons, int num )
   Com_Printf( "Loaded %d of %d emoticons (MAX_EMOTICONS is %d)\n",
     count, numFiles, MAX_EMOTICONS );
   return count;
+}
+
+/*
+============
+BG_Team
+============
+*/
+const teamAttributes_t *BG_Team( team_t team )
+{
+  return ( team < NUM_TEAMS ) ?
+    &bg_teamList[ team ] : &nullTeam;
 }
 
 /*
