@@ -57,7 +57,7 @@ static const teamAttributes_t bg_teamList[ ] =
     "humans",              //char     *name;
     "Humans",              //char     *humanName;
     "Humans are the masters of technology. Although their bases are "
-    "restricted by power requirements, their automated defenses help ensure "
+    "restricted by power requirements, automated defenses help ensure that "
     "they stay built. To compensate for their lack of natural abilities, a "
     "wide range of upgrades and weapons are available to the humans, allowing "
     "them to eradicate the alien threat with lethal efficiency.",
