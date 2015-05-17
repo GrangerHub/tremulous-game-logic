@@ -167,6 +167,7 @@ modInfo_t;
 typedef enum
 {
   INFOTYPE_TEXT,
+  INFOTYPE_TEAM,
   INFOTYPE_BUILDABLE,
   INFOTYPE_CLASS,
   INFOTYPE_WEAPON,
@@ -181,6 +182,7 @@ typedef struct
   union
   {
     const char  *text;
+    team_t      team;
     buildable_t buildable;
     class_t     pclass;
     weapon_t    weapon;
