@@ -983,6 +983,16 @@ typedef enum
   S3
 } stage_t;
 
+// team attributes
+typedef struct
+{
+  team_t         number;
+
+  char          *name;
+  char          *humanName;
+  char          *info;
+} teamAttributes_t;
+
 #define MAX_BUILDABLE_MODELS 4
 
 // buildable item record
@@ -1322,7 +1332,8 @@ voiceTrack_t *BG_VoiceTrackFind( voiceTrack_t *head, team_t team,
 
 int BG_LoadEmoticons( emoticon_t *emoticons, int num );
 
-char *BG_TeamName( team_t team );
+const teamAttributes_t *BG_Team( team_t team );
+char                   *BG_TeamName( team_t team );
 
 typedef struct
 {
