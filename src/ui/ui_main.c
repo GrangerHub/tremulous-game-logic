@@ -1647,6 +1647,13 @@ static void UI_DrawInfoPane( menuItem_t *item, rectDef_t *rect, float text_x, fl
       s = item->v.text;
       break;
 
+    case INFOTYPE_TEAM:
+      if( item->v.team == NUM_TEAMS )
+        s = "Join the team with the least players.";
+      else
+        s = BG_Team( item->v.team )->info;
+      break;
+
     case INFOTYPE_CLASS:
       value = ( BG_ClassCanEvolveFromTo( class, item->v.pclass, credits,
                                          UI_GetCurrentAlienStage(), 0,
@@ -2227,38 +2234,36 @@ UI_LoadTeams
 */
 static void UI_LoadTeams( void )
 {
-  uiInfo.teamCount = 4;
+  uiClientState_t cs;
+  int             i, idx = 0, team;
+  char            info[MAX_INFO_STRING];
 
-  uiInfo.teamList[ 0 ].text = "Aliens";
-  uiInfo.teamList[ 0 ].cmd = "cmd team aliens\n";
-  uiInfo.teamList[ 0 ].type = INFOTYPE_TEXT;
-  uiInfo.teamList[ 0 ].v.text =
-    "The Alien Team\n\n"
-    "The Aliens' strengths are in movement and the ability to "
-    "quickly construct new bases quickly. They possess a range "
-    "of abilities including basic melee attacks, movement-"
-    "crippling poisons and more.";
+  trap_GetClientState( &cs );
+  trap_GetConfigString( CS_PLAYERS + cs.clientNum, info, MAX_INFO_STRING );
+  team = atoi( Info_ValueForKey( info, "t" ) );
 
-  uiInfo.teamList[ 1 ].text = "Humans";
-  uiInfo.teamList[ 1 ].cmd = "cmd team humans\n";
-  uiInfo.teamList[ 1 ].type = INFOTYPE_TEXT;
-  uiInfo.teamList[ 1 ].v.text =
-    "The Human Team\n\n"
-    "The humans are the masters of technology. Although their "
-    "bases take long to construct, their automated defense "
-    "ensures they stay built. A wide range of upgrades and "
-    "weapons are available to the humans, each contributing "
-    "to eradicate the alien threat.";
+  for( i = 0; i < ( NUM_TEAMS + 1 ); i++ )
+  {
+    if( i < NUM_TEAMS && team != BG_Team( i )->number )
+    {
+      uiInfo.teamList[ idx ].text = BG_Team( i )->humanName;
+      uiInfo.teamList[ idx ].cmd = va( "cmd team %s\n",
+          BG_Team( i )->name );
+      uiInfo.teamList[ idx ].type = INFOTYPE_TEAM;
+      uiInfo.teamList[ idx ].v.team = BG_Team( i )->number;
+      idx++;
+    }
+    else if ( i == NUM_TEAMS && team == TEAM_NONE )
+    {
+      uiInfo.teamList[ idx ].text = "Auto Select";
+      uiInfo.teamList[ idx ].cmd = "cmd team auto\n";
+      uiInfo.teamList[ idx ].type = INFOTYPE_TEAM;
+      uiInfo.teamList[ idx ].v.team = NUM_TEAMS;
+      idx++;
+    }
+  }
 
-  uiInfo.teamList[ 2 ].text = "Spectate";
-  uiInfo.teamList[ 2 ].cmd = "cmd team spectate\n";
-  uiInfo.teamList[ 2 ].type = INFOTYPE_TEXT;
-  uiInfo.teamList[ 2 ].v.text = "Watch the game without playing.";
-
-  uiInfo.teamList[ 3 ].text = "Auto select";
-  uiInfo.teamList[ 3 ].cmd = "cmd team auto\n";
-  uiInfo.teamList[ 3 ].type = INFOTYPE_TEXT;
-  uiInfo.teamList[ 3 ].v.text = "Join the team with the least players.";
+  uiInfo.teamCount = idx;
 }
 
 /*
