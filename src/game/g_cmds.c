@@ -3233,6 +3233,8 @@ commands_t cmds[ ] = {
   { "mt", CMD_MESSAGE|CMD_INTERMISSION, Cmd_PrivateMessage_f },
   { "noclip", CMD_CHEAT_TEAM, Cmd_Noclip_f },
   { "notarget", CMD_CHEAT|CMD_TEAM|CMD_ALIVE, Cmd_Notarget_f },
+  { "playlist", CMD_MESSAGE, Cmd_Playmap_f },
+  { "playmap", CMD_MESSAGE, Cmd_Playmap_f },
   { "ready", CMD_TEAM, Cmd_Ready_f },
   { "reload", CMD_HUMAN|CMD_ALIVE, Cmd_Reload_f },
   { "say", CMD_MESSAGE|CMD_INTERMISSION, Cmd_Say_f },
@@ -3477,6 +3479,28 @@ void Cmd_PrivateMessage_f( gentity_t *ent )
       ( ent ) ? ent->client->pers.netname : "console",
       name, color, msg );
   }
+}
+
+void Cmd_Playmap_f( gentity_t *ent )
+{
+  char   cmd[ MAX_TOKEN_CHARS ],
+         map[ MAX_TOKEN_CHARS ],
+         layout[ MAX_TOKEN_CHARS ],
+         extra[ MAX_TOKEN_CHARS ];
+  char   *flags;
+
+  trap_Argv( 0, cmd, sizeof( cmd ) );
+  trap_Argv( 1, map, sizeof( map ) );
+  trap_Argv( 2, layout, sizeof( layout ) );
+  trap_Argv( 3, extra, sizeof( extra ) );
+  flags = ConcatArgs( 3 );
+
+  trap_SendServerCommand( ent-g_entities,
+      va( "print \"DEBUG: cmd=%s\n"
+                  "       map=%s\n"
+                  "       layout=%s\n"
+                  "       flags=%s\n\"",
+                  cmd, map, layout, flags ) );
 }
 
 /*
