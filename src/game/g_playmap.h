@@ -22,25 +22,88 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-#define MAX_PLAYMAP_POOL 256
 
+/* MAP POOL */
+
+#define MAX_PLAYMAP_POOL_ENTRIES 256
+
+// map pool for the playmap system
 typedef struct playMapPool_s
 {
-  char mapname[ MAX_QPATH ];
+  char *mapname[ MAX_PLAYMAP_POOL_ENTRIES ];
 
-  int       numMaps;
+  int  numMaps;
 } playMapPool_t;
 
+
+/* PLAYMAP FLAGS */
+
+// available flags for playmap
+typedef enum
+{
+  PLAYMAP_FLAG_DPUNT,
+  PLAYMAP_FLAG_FF,
+  PLAYMAP_FLAG_FBF,
+  PLAYMAP_FLAG_SD,
+  PLAYMAP_FLAG_LGRAV,
+  PLAYMAP_FLAG_UBP,
+  PLAYMAP_NUM_FLAGS
+} playMapFlag_t;
+
+
+/* PLAYMAP QUEUE */
+
+// individual playmap entry in the queue
 typedef struct playMap_s
 {
-  char mapname[ MAX_QPATH ];
-  char layout[ MAX_CVAR_VALUE_STRING ];
+  char *mapname;
+  char *layout;
+
+  gclient_t *client;
+
+  playMapFlag_t *plusFlags;
+  playMapFlag_t *minusFlags;
 } playMap_t;
 
-typedef struct playMapList_s
+// playmap queue/playlist
+typedef struct playMapQueue_s
 {
-  playMap_t playMap[ MAX_PLAYMAP_POOL ];
+  playMap_t playMap[ MAX_PLAYMAP_POOL_ENTRIES ];
 
-  int       numMaps;
-  int       nextMap;
-} playMapList_t;
+  int front, back;
+} playMapQueue_t;
+
+
+/* PLAYMAP ERRORS */
+
+// error codes
+typedef enum playMapErrorCode_s
+{
+  // this item must always be the first in the enum list
+  PLAYMAP_ERROR_NONE,
+
+  // list of error codes (order does not matter)
+  PLAYMAP_ERROR_MAP_ALREADY_IN_POOL,
+  PLAYMAP_ERROR_MAP_NOT_FOUND,
+  PLAYMAP_ERROR_LAYOUT_NOT_FOUND,
+  PLAYMAP_ERROR_MAP_NOT_IN_POOL,
+  PLAYMAP_ERROR_MAP_NOT_IN_QUEUE,
+  PLAYMAP_ERROR_MAP_ALREADY_IN_QUEUE,
+  PLAYMAP_ERROR_USER_ALREADY_IN_QUEUE,
+
+  // an unknown error
+  PLAYMAP_ERROR_UNKNOWN,
+
+  // this item must always be the last in the enum list
+  PLAYMAP_NUM_ERRORS,
+} playMapErrorCode_t;
+
+// error messages
+typedef char *playMapErrorMessage_t;
+
+// error messages
+typedef struct playMapError_s
+{
+  int errorCode;
+  playMapErrorMessage_t errorMessage;
+} playMapError_t;
