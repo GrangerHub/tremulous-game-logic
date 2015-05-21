@@ -23,9 +23,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 
-/* MAP POOL */
+/*
+ * PLAYMAP POOL
+ */
 
-#define MAX_PLAYMAP_POOL_ENTRIES 256
+#define MAX_PLAYMAP_POOL_ENTRIES 128
 
 // map pool for the playmap system
 typedef struct playMapPool_s
@@ -36,22 +38,30 @@ typedef struct playMapPool_s
 } playMapPool_t;
 
 
-/* PLAYMAP FLAGS */
+/*
+ * PLAYMAP FLAGS
+ */
 
-// available flags for playmap
+// available flags for playmap (hint: these are just examples for a
+// proof-of-concept demo. they are very likely to change)
 typedef enum
 {
-  PLAYMAP_FLAG_DPUNT,
-  PLAYMAP_FLAG_FF,
-  PLAYMAP_FLAG_FBF,
-  PLAYMAP_FLAG_SD,
-  PLAYMAP_FLAG_LGRAV,
-  PLAYMAP_FLAG_UBP,
+  PLAYMAP_FLAG_DPUNT, // Dretch Punt
+  PLAYMAP_FLAG_FF,    // Friendly Fire
+  PLAYMAP_FLAG_FBF,   // Friendly Buildable Fire
+  PLAYMAP_FLAG_SD,    // Sudden Death
+  PLAYMAP_FLAG_LGRAV, // Low Gravity
+  PLAYMAP_FLAG_UBP,   // Unlimited BP
   PLAYMAP_NUM_FLAGS
 } playMapFlag_t;
 
 
-/* PLAYMAP QUEUE */
+/*
+ * PLAYMAP QUEUE
+ */
+
+#define MAP_QUEUE_PLUS1(x)  (((x)+1)%MAX_PLAYMAP_POOL_ENTRIES)
+#define MAP_QUEUE_MINUS1(x) (((x)+MAX_PLAYMAP_POOL_ENTRIES-1)%MAX_PLAYMAP_POOL_ENTRIES)
 
 // individual playmap entry in the queue
 typedef struct playMap_s
@@ -70,11 +80,13 @@ typedef struct playMapQueue_s
 {
   playMap_t playMap[ MAX_PLAYMAP_POOL_ENTRIES ];
 
-  int front, back;
+  int head, tail, numEntries;
 } playMapQueue_t;
 
 
-/* PLAYMAP ERRORS */
+/*
+ * PLAYMAP ERRORS
+ */
 
 // error codes
 typedef enum playMapErrorCode_s
@@ -90,6 +102,8 @@ typedef enum playMapErrorCode_s
   PLAYMAP_ERROR_MAP_NOT_IN_QUEUE,
   PLAYMAP_ERROR_MAP_ALREADY_IN_QUEUE,
   PLAYMAP_ERROR_USER_ALREADY_IN_QUEUE,
+  PLAYMAP_ERROR_MAP_QUEUE_EMPTY,
+  PLAYMAP_ERROR_MAP_QUEUE_FULL,
 
   // an unknown error
   PLAYMAP_ERROR_UNKNOWN,
@@ -99,11 +113,25 @@ typedef enum playMapErrorCode_s
 } playMapErrorCode_t;
 
 // error messages
-typedef char *playMapErrorMessage_t;
-
-// error messages
 typedef struct playMapError_s
 {
   int errorCode;
-  playMapErrorMessage_t errorMessage;
+  char *errorMessage;
 } playMapError_t;
+
+
+/*
+ * PLAYMAP PROTOTYPES
+ */
+
+playMapError_t G_PlayMapErrorByCode( int errorCode );
+playMapError_t G_AddToPlayMapPool( char *mapname );
+playMapError_t G_RemoveFromPlayMapPool( char *mapname );
+qboolean G_SavePlayMapPool( void );
+qboolean G_ReloadPlayMapPool( void );
+qboolean G_ClearPlayMapPool( void );
+void G_InitPlayMapQueue( void );
+playMapError_t G_AddToPlayMapQueue( char *mapname, char *layout, gclient_t *client, char *flags );
+playMapError_t G_RemoveFromPlayMapQueue( int index );
+int G_GetPlayMapQueueIndexByMapName( char *mapname );
+int G_GetPlayMapQueueIndexByClient( gclient_t *client );
