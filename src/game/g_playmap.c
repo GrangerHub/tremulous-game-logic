@@ -189,12 +189,111 @@ qboolean G_ClearPlayMapPool( void )
   return qfalse;
 }
 
-void G_ParsePlayMapFlag(char *flags, playMapFlag_t **plusFlags, playMapFlag_t **minusFlags)
+/*
+================
+G_InitPlayMapQueue
+
+Initialize the playmap queue. Should only be run once.
+================
+*/
+void G_InitPlayMapQueue( void )
 {
   int i;
+
+  // Reset everything
+  playMapQueue.numEntries =
+    playMapQueue.tail =
+    playMapQueue.head = 0;
+
+  for( i = 0; i < MAX_PLAYMAP_POOL_ENTRIES; i++ )
+  {
+    // set all values/pointers to NULL
+    playMapQueue.playMap[ i ].mapname    = NULL;
+    playMapQueue.playMap[ i ].layout     = NULL;
+    playMapQueue.playMap[ i ].client     = NULL;
+    playMapQueue.playMap[ i ].plusFlags  = NULL;
+    playMapQueue.playMap[ i ].minusFlags = NULL;
+  }
+}
+
+/*
+================
+G_PlayMapQueueIsEmpty
+
+Returns true if the playmap queue is currently empty.
+================
+*/
+
+qboolean G_PlayMapQueueIsEmpty( void )
+{
+  return ( playMapQueue.tail == playMapQueue.head ) &&
+    ( playMapQueue.playMap[ playMapQueue.tail ].mapname == NULL &&
+      playMapQueue.playMap[ playMapQueue.tail ].layout == NULL &&
+      playMapQueue.playMap[ playMapQueue.tail ].client == NULL );
+}
+
+/*
+================
+G_PlayMapQueueIsFull
+
+Returns true if the playmap queue is currently full.
+================
+*/
+
+qboolean G_PlayMapQueueIsFull( void )
+{
+  return ( playMapQueue.tail == playMapQueue.head ) &&
+    ( playMapQueue.playMap[ playMapQueue.tail ].mapname != NULL &&
+      playMapQueue.playMap[ playMapQueue.tail ].layout != NULL &&
+      playMapQueue.playMap[ playMapQueue.tail ].client != NULL );
+}
+
+/*
+================
+G_ParsePlayMapFlag
+
+Parses a playmap flag string and returns the playMapFlag_t equivalent.
+================
+*/
+
+playMapFlag_t G_ParsePlayMapFlag(char *flag)
+{
+  if( Q_stricmpn( flag, "dpunt", 5 ) == 0 )
+    return PLAYMAP_FLAG_DPUNT;
+
+  if( Q_stricmpn( flag, "ff", 2 ) == 0 )
+    return PLAYMAP_FLAG_FF;
+
+  if( Q_stricmpn( flag, "fbf", 3 ) == 0 )
+    return PLAYMAP_FLAG_FBF;
+
+  if( Q_stricmpn( flag, "sd", 2 ) == 0 )
+    return PLAYMAP_FLAG_SD;
+
+  if( Q_stricmpn( flag, "lgrav", 5 ) == 0 )
+    return PLAYMAP_FLAG_LGRAV;
+
+  if( Q_stricmpn( flag, "ubp", 3 ) == 0 )
+    return PLAYMAP_FLAG_UBP;
+
+  return PLAYMAP_FLAG_NONE;
+}
+
+/*
+================
+G_AddToPlayMapQueue
+
+Enqueue a player requested map in the playmap queue.
+================
+*/
+
+playMapError_t G_AddToPlayMapQueue( char *mapname, char *layout, gclient_t
+    *client, char *flags )
+{
+  int i, plusFlagIdx = 0, minusFlagIdx = 0;
   char *token;
 
-  // Loop through
+  // Loop through flags
   for( i = 0; ; i++ )
   {
     token = COM_Parse( &flags );
@@ -224,61 +323,6 @@ void G_ParsePlayMapFlag(char *flags, playMapFlag_t **plusFlags, playMapFlag_t **
         break;
     }
   }
-}
-
-/*
-================
-G_InitPlayMapQueue
-
-Initialize the playmap queue. Should only be run once.
-================
-*/
-void G_InitPlayMapQueue( void )
-{
-  int i;
-
-  // Reset everything
-  playMapQueue.numEntries =
-    playMapQueue.tail =
-    playMapQueue.head = 0;
-
-  for( i = 0; i < MAX_PLAYMAP_POOL_ENTRIES; i++ )
-  {
-    // set all values/pointers to NULL
-    playMapQueue.playMap[ i ].mapname    = NULL;
-    playMapQueue.playMap[ i ].layout     = NULL;
-    playMapQueue.playMap[ i ].client     = NULL;
-    playMapQueue.playMap[ i ].plusFlags  = NULL;
-    playMapQueue.playMap[ i ].minusFlags = NULL;
-  }
-}
-
-qboolean G_PlayMapQueueIsEmpty( void )
-{
-  return ( playMapQueue.tail == playMapQueue.head ) &&
-    ( playMapQueue.playMap[ playMapQueue.tail ].mapname == NULL &&
-      playMapQueue.playMap[ playMapQueue.tail ].layout == NULL &&
-      playMapQueue.playMap[ playMapQueue.tail ].client == NULL );
-}
-
-qboolean G_PlayMapQueueIsFull( void )
-{
-  return ( playMapQueue.tail == playMapQueue.head ) &&
-    ( playMapQueue.playMap[ playMapQueue.tail ].mapname != NULL &&
-      playMapQueue.playMap[ playMapQueue.tail ].layout != NULL &&
-      playMapQueue.playMap[ playMapQueue.tail ].client != NULL );
-}
-
-/*
-================
-G_AddToPlayMapQueue
-
-Enqueue a player requested map in the playmap queue.
-================
-*/
-playMapError_t G_AddToPlayMapQueue( char *mapname, char *layout, gclient_t *client, char *flags )
-{
-
   return G_PlayMapErrorByCode( PLAYMAP_ERROR_NONE );
 }
 

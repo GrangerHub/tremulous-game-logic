@@ -46,12 +46,15 @@ typedef struct playMapPool_s
 // proof-of-concept demo. they are very likely to change)
 typedef enum
 {
+  PLAYMAP_FLAG_NONE,
+
   PLAYMAP_FLAG_DPUNT, // Dretch Punt
   PLAYMAP_FLAG_FF,    // Friendly Fire
   PLAYMAP_FLAG_FBF,   // Friendly Buildable Fire
   PLAYMAP_FLAG_SD,    // Sudden Death
   PLAYMAP_FLAG_LGRAV, // Low Gravity
   PLAYMAP_FLAG_UBP,   // Unlimited BP
+
   PLAYMAP_NUM_FLAGS
 } playMapFlag_t;
 
@@ -71,8 +74,8 @@ typedef struct playMap_s
 
   gclient_t *client;
 
-  playMapFlag_t *plusFlags;
-  playMapFlag_t *minusFlags;
+  playMapFlag_t plusFlags[ PLAYMAP_NUM_FLAGS ];
+  playMapFlag_t minusFlags[ PLAYMAP_NUM_FLAGS ];
 } playMap_t;
 
 // playmap queue/playlist
