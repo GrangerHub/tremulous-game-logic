@@ -426,17 +426,26 @@ Enqueue a player requested map in the playmap queue.
 playMapError_t G_AddToPlayMapQueue( char *mapname, char *layout, gclient_t
     *client, char *flags )
 {
-  int i;
-  //int plusFlagIdx = 0, minusFlagIdx = 0;
-  char *token;
-
-  // TODO: code that wont crash the server
+  int       i;
+  int       plusFlagIdx = 0, minusFlagIdx = 0;
+  char      *token;
+  playMap_t playMap;
+  playMapFlag_t playMapFlag;
 
   if( G_PlayMapQueueIsFull() )
     return G_PlayMapErrorByCode( PLAYMAP_ERROR_MAP_QUEUE_FULL );
 
+  // copy mapname
+  playMap.mapname = G_CopyString( mapname );
+
+  // copy layout
+  playMap.layout = G_CopyString( layout );
+
+  // copy client pointer
+  playMap.client = client;
+
   // Loop through flags
-  for( i = 0; qtrue; i++ )
+  for( i = 0; ; i++ )
   {
     token = COM_Parse( &flags );
 
@@ -446,24 +455,24 @@ playMapError_t G_AddToPlayMapQueue( char *mapname, char *layout, gclient_t
     switch( token[0] )
     {
       case '+':
-        if( strlen( token ) > 1 )
+        if( ( strlen( token ) > 1 ) )
         {
-          G_Printf( "G_AddToPlayMapQueue: PLUS flag '%s'\n", token + 1 );
+          playMapFlag = G_ParsePlayMapFlag( token + 1 );
+
+          if ( playMapFlag != PLAYMAP_FLAG_NONE )
+            playMap.plusFlags[ plusFlagIdx++ ];
         }
-        else
-          G_Printf( "G_AddToPlayMapQueue: PLUS flag truncated (ignored)\n" );
         break;
       case '-':
-        if( strlen( token ) > 1 )
-        {
-          G_Printf( "G_AddToPlayMapQueue: MINUS flag '%s'\n", token + 1 );
-          // TODO: add to minusFlags
-        }
-        else
-          G_Printf( "G_AddToPlayMapQueue: MINUS flag truncated (ignored)\n" );
+        if( ( strlen( token ) > 1 ) )
+          playMapFlag = G_ParsePlayMapFlag( token + 1 );
+
+          if ( playMapFlag != PLAYMAP_FLAG_NONE )
+            playMap.minusFlags[ minusFlagIdx++ ];
         break;
     }
   }
+
   return G_PlayMapErrorByCode( PLAYMAP_ERROR_NONE );
 }
 
