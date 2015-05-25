@@ -144,6 +144,8 @@ vmCvar_t  g_admin;
 vmCvar_t  g_adminTempBan;
 vmCvar_t  g_adminMaxBan;
 
+vmCvar_t  g_playMapConfig;
+
 vmCvar_t  g_privateMessages;
 vmCvar_t  g_specChat;
 vmCvar_t  g_publicAdminMessages;
@@ -294,6 +296,9 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_admin, "g_admin", "admin.dat", CVAR_ARCHIVE, 0, qfalse  },
   { &g_adminTempBan, "g_adminTempBan", "2m", CVAR_ARCHIVE, 0, qfalse  },
   { &g_adminMaxBan, "g_adminMaxBan", "2w", CVAR_ARCHIVE, 0, qfalse  },
+
+  // playmap pool
+  { &g_playMapConfig, "g_playMapConfig", "", CVAR_ARCHIVE, 0, qfalse  },
 
   { &g_privateMessages, "g_privateMessages", "1", CVAR_ARCHIVE, 0, qfalse  },
   { &g_specChat, "g_specChat", "1", CVAR_ARCHIVE, 0, qfalse  },
