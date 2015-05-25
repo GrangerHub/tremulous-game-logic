@@ -86,15 +86,9 @@ static const playMapError_t playMapError[ ] =
   }
 };
 
-// server's map pool cache
-static playMapPool_t playMapPoolCache;
-
-// current map queue
-static playMapQueue_t playMapQueue;
-
 
 /*
- * playmap utility functions
+ * playmap error utility functions
  */
 
 /*
@@ -120,8 +114,11 @@ playMapError_t G_PlayMapErrorByCode( int errorCode )
 
 
 /*
- * map pool utility functions
+ * playmap pool utility functions
  */ 
+
+// server's map pool cache
+static playMapPool_t playMapPoolCache;
 
 /*
 ================
@@ -132,8 +129,17 @@ Add a map to the current pool of maps available.
 */
 playMapError_t G_AddToPlayMapPool( char *mapname )
 {
-  // TODO: code
-  return G_PlayMapErrorByCode( PLAYMAP_ERROR_MAP_NOT_FOUND );
+  if( G_FindInMapPool( mapname ) >= 0 )
+    return G_PlayMapErrorByCode( PLAYMAP_ERROR_MAP_ALREADY_IN_POOL );
+
+  if( playMapPoolCache.numMaps >= MAX_PLAYMAP_POOL_ENTRIES )
+    return G_PlayMapErrorByCode( PLAYMAP_ERROR_MAP_POOL_FULL );
+
+  playMapPoolCache.maps[ playMapPoolCache.numMaps ] = G_CopyString( mapname );
+
+  playMapPoolCache.numMaps++;
+
+  return G_PlayMapErrorByCode( PLAYMAP_ERROR_NONE );
 }
 
 /*
@@ -145,8 +151,31 @@ Remove a map from the current pool of maps available.
 */
 playMapError_t G_RemoveFromPlayMapPool( char *mapname )
 {
-  // TODO: code
-  return G_PlayMapErrorByCode( PLAYMAP_ERROR_MAP_NOT_IN_POOL );
+  int i, mapIndex;
+
+  mapIndex = G_FindInMapPool( mapname );
+
+  if( mapIndex < 0 )
+    return G_PlayMapErrorByCode( PLAYMAP_ERROR_MAP_NOT_IN_POOL );
+
+  // remove the matching map pool entry
+  BG_Free( playMapPoolCache.maps[ mapIndex ] );
+  playMapPoolCache.maps[ mapIndex ] = NULL;
+
+  for( i = mapIndex; i < playMapPoolCache.numMaps; i++ )
+  {
+    // safeguard against going beyond array bounds
+    if( i >= MAX_PLAYMAP_POOL_ENTRIES )
+      continue;
+
+    // shift next entry in the map pool down by one (close the gap)
+    playMapPoolCache.maps[ i ] = playMapPoolCache.maps[ i + 1 ];
+
+    if( i == ( playMapPoolCache.numMaps - 1 ) )
+      playMapPoolCache.maps[ i ] = NULL;
+  }
+
+  return G_PlayMapErrorByCode( PLAYMAP_ERROR_NONE );
 }
 
 /*
@@ -156,10 +185,36 @@ G_SavePlayMapPool
 Save map pool to configuration file
 ================
 */
-qboolean G_SavePlayMapPool( void )
+void G_SavePlayMapPool( void )
 {
-  // TODO: code
-  return qfalse;
+  fileHandle_t f;
+  int i;
+
+  if( !g_playMapConfig.string[ 0 ] )
+  {
+    G_Printf( S_COLOR_YELLOW "WARNING: g_playMapConfig is not set. "
+        " playmap pool configuration cannot be saved.\n" );
+    return;
+  }
+
+  if( trap_FS_FOpenFile( g_playMapConfig.string, &f, FS_WRITE ) < 0 )
+  {
+    G_Printf( "G_SavePlayMapPool: could not open g_playMapConfig file \"%s\"\n",
+        g_playMapConfig.string );
+    return;
+  }
+
+  for( i = 0; i < playMapPoolCache.numMaps; i++ )
+  {
+    // Skip entry if it is somehow a null pointer (should not happen)
+    if( !playMapPoolCache.maps[ i ] )
+      continue;
+
+    trap_FS_Write( playMapPoolCache.maps[ i ], strlen( playMapPoolCache.maps[ i ] ), f );
+    trap_FS_Write( "\n", 1, f );
+  }
+
+  trap_FS_FCloseFile( f );
 }
 
 /*
@@ -169,10 +224,41 @@ G_ReloadPlayMapPool
 Reload map pool from configuration file
 ================
 */
-qboolean G_ReloadPlayMapPool( void )
+void G_ReloadPlayMapPool( void )
 {
-  // TODO: code
-  return qfalse;
+  fileHandle_t f;
+  int len;
+  char *cnf, *cnf2, *mapname;
+
+  G_ClearPlayMapPool();
+
+  // read playmap config file
+  len = trap_FS_FOpenFile( g_playMapConfig.string, &f, FS_READ );
+  if( len < 0 )
+  {
+    G_Printf( "^3G_ReloadPlayMapPool: ^7could not open playmap config file %s\n",
+            g_playMapConfig.string );
+
+    return;
+  }
+  cnf = BG_Alloc( len + 1 );
+  cnf2 = cnf;
+  trap_FS_Read( cnf, len, f );
+  cnf[ len ] = '\0';
+  trap_FS_FCloseFile( f );
+
+  COM_BeginParseSession( g_playMapConfig.string );
+  while( 1 )
+  {
+    mapname = COM_Parse( &cnf );
+    if( !*mapname )
+      break;
+
+    G_AddToPlayMapPool( mapname );
+  }
+  BG_Free( cnf2 );
+  G_Printf( "^3G_ReloadPlayMapPool: ^7loaded %d maps\n",
+        playMapPoolCache.numMaps );
 }
 
 /*
@@ -183,11 +269,58 @@ Clear cached map pool
 ================
 */
 
-qboolean G_ClearPlayMapPool( void )
+void G_ClearPlayMapPool( void )
 {
-  // TODO: code
-  return qfalse;
+  int i;
+
+  for( i = 0; i < MAX_PLAYMAP_POOL_ENTRIES; i++ )
+  {
+    // skip entry if it is already a null pointer
+    if( playMapPoolCache.maps[ i ] == NULL )
+      continue;
+
+    // free the space taken up by the slot
+    BG_Free( playMapPoolCache.maps[ i ] );
+    playMapPoolCache.maps[ i ] = NULL;
+  }
+
+  playMapPoolCache.numMaps = 0;
 }
+
+/*
+================
+G_FindInMapPool
+
+Check if map is in playmap pool
+================
+*/
+
+int G_FindInMapPool( char *mapname )
+{
+  int i;
+
+  for( i = 0; i < playMapPoolCache.numMaps; i++ )
+  {
+    // Skip entry if it is somehow null (should not happen)
+    if( playMapPoolCache.maps[ i ] == NULL )
+      continue;
+
+    // found a match. return the array index
+    if( Q_stricmp(playMapPoolCache.maps[ i ], mapname) == 0 )
+      return i;
+  }
+
+  // not found
+  return -1;
+}
+
+
+/*
+ * playmap queue utility functions
+ */ 
+
+// current map queue
+static playMapQueue_t playMapQueue;
 
 /*
 ================
@@ -198,7 +331,7 @@ Initialize the playmap queue. Should only be run once.
 */
 void G_InitPlayMapQueue( void )
 {
-  int i;
+  int i, j;
 
   // Reset everything
   playMapQueue.numEntries =
@@ -211,8 +344,11 @@ void G_InitPlayMapQueue( void )
     playMapQueue.playMap[ i ].mapname    = NULL;
     playMapQueue.playMap[ i ].layout     = NULL;
     playMapQueue.playMap[ i ].client     = NULL;
-    playMapQueue.playMap[ i ].plusFlags  = NULL;
-    playMapQueue.playMap[ i ].minusFlags = NULL;
+    for( j = 0; j < PLAYMAP_NUM_FLAGS; j++ )
+    {
+      playMapQueue.playMap[ i ].plusFlags[ j ] = PLAYMAP_FLAG_NONE;
+      playMapQueue.playMap[ i ].minusFlags[ j ] = PLAYMAP_FLAG_NONE;
+    }
   }
 }
 
@@ -290,11 +426,17 @@ Enqueue a player requested map in the playmap queue.
 playMapError_t G_AddToPlayMapQueue( char *mapname, char *layout, gclient_t
     *client, char *flags )
 {
-  int i, plusFlagIdx = 0, minusFlagIdx = 0;
+  int i;
+  //int plusFlagIdx = 0, minusFlagIdx = 0;
   char *token;
 
+  // TODO: code that wont crash the server
+
+  if( G_PlayMapQueueIsFull() )
+    return G_PlayMapErrorByCode( PLAYMAP_ERROR_MAP_QUEUE_FULL );
+
   // Loop through flags
-  for( i = 0; ; i++ )
+  for( i = 0; qtrue; i++ )
   {
     token = COM_Parse( &flags );
 
@@ -307,7 +449,6 @@ playMapError_t G_AddToPlayMapQueue( char *mapname, char *layout, gclient_t
         if( strlen( token ) > 1 )
         {
           G_Printf( "G_AddToPlayMapQueue: PLUS flag '%s'\n", token + 1 );
-          // TODO: Add to plusFlags
         }
         else
           G_Printf( "G_AddToPlayMapQueue: PLUS flag truncated (ignored)\n" );
@@ -316,7 +457,7 @@ playMapError_t G_AddToPlayMapQueue( char *mapname, char *layout, gclient_t
         if( strlen( token ) > 1 )
         {
           G_Printf( "G_AddToPlayMapQueue: MINUS flag '%s'\n", token + 1 );
-          // TODO: Add to minusFlags
+          // TODO: add to minusFlags
         }
         else
           G_Printf( "G_AddToPlayMapQueue: MINUS flag truncated (ignored)\n" );

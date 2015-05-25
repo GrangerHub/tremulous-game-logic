@@ -32,7 +32,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // map pool for the playmap system
 typedef struct playMapPool_s
 {
-  char *mapname[ MAX_PLAYMAP_POOL_ENTRIES ];
+  char *maps[ MAX_PLAYMAP_POOL_ENTRIES ];
 
   int  numMaps;
 } playMapPool_t;
@@ -98,6 +98,7 @@ typedef enum playMapErrorCode_s
   PLAYMAP_ERROR_NONE,
 
   // list of error codes (order does not matter)
+  PLAYMAP_ERROR_MAP_POOL_FULL,
   PLAYMAP_ERROR_MAP_ALREADY_IN_POOL,
   PLAYMAP_ERROR_MAP_NOT_FOUND,
   PLAYMAP_ERROR_LAYOUT_NOT_FOUND,
@@ -130,9 +131,10 @@ typedef struct playMapError_s
 playMapError_t G_PlayMapErrorByCode( int errorCode );
 playMapError_t G_AddToPlayMapPool( char *mapname );
 playMapError_t G_RemoveFromPlayMapPool( char *mapname );
-qboolean G_SavePlayMapPool( void );
-qboolean G_ReloadPlayMapPool( void );
-qboolean G_ClearPlayMapPool( void );
+void G_SavePlayMapPool( void );
+void G_ReloadPlayMapPool( void );
+void G_ClearPlayMapPool( void );
+int G_FindInMapPool( char *mapname );
 void G_InitPlayMapQueue( void );
 playMapError_t G_AddToPlayMapQueue( char *mapname, char *layout, gclient_t *client, char *flags );
 playMapError_t G_RemoveFromPlayMapQueue( int index );

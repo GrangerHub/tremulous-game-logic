@@ -1096,7 +1096,7 @@ qboolean G_admin_readconfig( gentity_t *ent )
   cnf = BG_Alloc( len + 1 );
   cnf2 = cnf;
   trap_FS_Read( cnf, len, f );
-  *( cnf + len ) = '\0';
+  cnf[ len ] = '\0';
   trap_FS_FCloseFile( f );
 
   admin_level_maxname = 0;
