@@ -460,18 +460,24 @@ playMapError_t G_AddToPlayMapQueue( char *mapname, char *layout, gclient_t
           playMapFlag = G_ParsePlayMapFlag( token + 1 );
 
           if ( playMapFlag != PLAYMAP_FLAG_NONE )
-            playMap.plusFlags[ plusFlagIdx++ ];
+            playMap.plusFlags[ plusFlagIdx++ ] = playMapFlag;
         }
         break;
       case '-':
         if( ( strlen( token ) > 1 ) )
+        {
           playMapFlag = G_ParsePlayMapFlag( token + 1 );
 
           if ( playMapFlag != PLAYMAP_FLAG_NONE )
-            playMap.minusFlags[ minusFlagIdx++ ];
+            playMap.minusFlags[ minusFlagIdx++ ] = playMapFlag;
+        }
         break;
     }
   }
+
+  playMapQueue.playMap[ playMapQueue.tail ] = playMap;
+  playMapQueue.tail = MAP_QUEUE_PLUS1( playMapQueue.tail );
+  playMapQueue.numEntries++;
 
   return G_PlayMapErrorByCode( PLAYMAP_ERROR_NONE );
 }
@@ -486,6 +492,7 @@ Dequeue a player requested map from the playmap queue.
 playMapError_t G_RemoveFromPlayMapQueue( int index )
 {
   // TODO: code
+
   return G_PlayMapErrorByCode( PLAYMAP_ERROR_MAP_NOT_IN_QUEUE );
 }
 
