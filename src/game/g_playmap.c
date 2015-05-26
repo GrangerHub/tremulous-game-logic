@@ -45,8 +45,12 @@ static const playMapError_t playMapError[ ] =
     ""
   },
   {
+    PLAYMAP_ERROR_MAP_POOL_FULL,         /* errorCode */
+    "the map pool is currently full"
+  },
+  {
     PLAYMAP_ERROR_MAP_ALREADY_IN_POOL,   /* errorCode */
-    "the map you requested was not found on the server"
+    "that map you requested is already in the map pool"
   },
   {
     PLAYMAP_ERROR_MAP_NOT_FOUND,         /* errorCode */
