@@ -45,6 +45,14 @@ static const playMapError_t playMapError[ ] =
     ""
   },
   {
+    PLAYMAP_ERROR_CONFIG_UNREADABLE,    /* errorCode */
+    "playmap config file specified by g_playMapConfig is not readable."
+  },
+  {
+    PLAYMAP_ERROR_NO_CONFIG,            /* errorCode */
+    "g_playMapConfig is not set. playmap pool configuration cannot be saved."
+  },
+  {
     PLAYMAP_ERROR_MAP_POOL_FULL,         /* errorCode */
     "the map pool is currently full"
   },
@@ -179,6 +187,9 @@ playMapError_t G_RemoveFromPlayMapPool( char *mapname )
       playMapPoolCache.maps[ i ] = NULL;
   }
 
+  // decrease numMaps by one count
+  playMapPoolCache.numMaps--;
+
   return G_PlayMapErrorByCode( PLAYMAP_ERROR_NONE );
 }
 
@@ -189,23 +200,17 @@ G_SavePlayMapPool
 Save map pool to configuration file
 ================
 */
-void G_SavePlayMapPool( void )
+playMapError_t G_SavePlayMapPool( void )
 {
   fileHandle_t f;
   int i;
 
   if( !g_playMapConfig.string[ 0 ] )
-  {
-    G_Printf( S_COLOR_YELLOW "WARNING: g_playMapConfig is not set. "
-        " playmap pool configuration cannot be saved.\n" );
-    return;
-  }
+    return G_PlayMapErrorByCode( PLAYMAP_ERROR_NO_CONFIG );
 
   if( trap_FS_FOpenFile( g_playMapConfig.string, &f, FS_WRITE ) < 0 )
   {
-    G_Printf( "G_SavePlayMapPool: could not open g_playMapConfig file \"%s\"\n",
-        g_playMapConfig.string );
-    return;
+    return G_PlayMapErrorByCode( PLAYMAP_ERROR_CONFIG_UNREADABLE );
   }
 
   for( i = 0; i < playMapPoolCache.numMaps; i++ )
@@ -219,6 +224,8 @@ void G_SavePlayMapPool( void )
   }
 
   trap_FS_FCloseFile( f );
+
+  return G_PlayMapErrorByCode( PLAYMAP_ERROR_NONE );
 }
 
 /*
@@ -228,23 +235,27 @@ G_ReloadPlayMapPool
 Reload map pool from configuration file
 ================
 */
-void G_ReloadPlayMapPool( void )
+playMapError_t G_ReloadPlayMapPool( void )
 {
+  playMapError_t playMapError;
   fileHandle_t f;
   int len;
   char *cnf, *cnf2, *mapname;
 
-  G_ClearPlayMapPool();
+  if( !g_playMapConfig.string[ 0 ] )
+    return G_PlayMapErrorByCode( PLAYMAP_ERROR_NO_CONFIG );
+
+  playMapError = G_ClearPlayMapPool();
+  if( playMapError.errorCode != PLAYMAP_ERROR_NONE )
+    return playMapError;
 
   // read playmap config file
   len = trap_FS_FOpenFile( g_playMapConfig.string, &f, FS_READ );
   if( len < 0 )
   {
-    G_Printf( "^3G_ReloadPlayMapPool: ^7could not open playmap config file %s\n",
-            g_playMapConfig.string );
-
-    return;
+    return G_PlayMapErrorByCode( PLAYMAP_ERROR_CONFIG_UNREADABLE );
   }
+
   cnf = BG_Alloc( len + 1 );
   cnf2 = cnf;
   trap_FS_Read( cnf, len, f );
@@ -257,12 +268,11 @@ void G_ReloadPlayMapPool( void )
     mapname = COM_Parse( &cnf );
     if( !*mapname )
       break;
-
     G_AddToPlayMapPool( mapname );
   }
   BG_Free( cnf2 );
-  G_Printf( "^3G_ReloadPlayMapPool: ^7loaded %d maps\n",
-        playMapPoolCache.numMaps );
+
+  return G_PlayMapErrorByCode( PLAYMAP_ERROR_NONE );
 }
 
 /*
@@ -273,7 +283,7 @@ Clear cached map pool
 ================
 */
 
-void G_ClearPlayMapPool( void )
+playMapError_t G_ClearPlayMapPool( void )
 {
   int i;
 
@@ -289,6 +299,8 @@ void G_ClearPlayMapPool( void )
   }
 
   playMapPoolCache.numMaps = 0;
+
+  return G_PlayMapErrorByCode( PLAYMAP_ERROR_NONE );
 }
 
 /*

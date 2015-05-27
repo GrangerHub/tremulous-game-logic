@@ -98,6 +98,8 @@ typedef enum playMapErrorCode_s
   PLAYMAP_ERROR_NONE,
 
   // list of error codes (order does not matter)
+  PLAYMAP_ERROR_CONFIG_UNREADABLE,
+  PLAYMAP_ERROR_NO_CONFIG,
   PLAYMAP_ERROR_MAP_POOL_FULL,
   PLAYMAP_ERROR_MAP_ALREADY_IN_POOL,
   PLAYMAP_ERROR_MAP_NOT_FOUND,
@@ -131,9 +133,9 @@ typedef struct playMapError_s
 playMapError_t G_PlayMapErrorByCode( int errorCode );
 playMapError_t G_AddToPlayMapPool( char *mapname );
 playMapError_t G_RemoveFromPlayMapPool( char *mapname );
-void G_SavePlayMapPool( void );
-void G_ReloadPlayMapPool( void );
-void G_ClearPlayMapPool( void );
+playMapError_t G_SavePlayMapPool( void );
+playMapError_t G_ReloadPlayMapPool( void );
+playMapError_t G_ClearPlayMapPool( void );
 int G_FindInMapPool( char *mapname );
 void G_InitPlayMapQueue( void );
 qboolean G_PlayMapQueueIsEmpty( void );
