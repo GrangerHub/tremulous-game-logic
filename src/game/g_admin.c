@@ -159,6 +159,11 @@ g_admin_cmd_t g_admin_cmds[ ] =
       ""
     },
 
+    {"playpool", G_admin_playpool, qfalse, "playpool",
+      "Manage the playmap pool.",
+      "[^5add (mapname)|remove (mapname)|clear|reload|save^7]"
+    },
+
     {"putteam", G_admin_putteam, qfalse, "putteam",
       "move a player to a specified team",
       "[^3name|slot#^7] [^3h|a|s^7]"
@@ -3271,6 +3276,109 @@ qboolean G_admin_pause( gentity_t *ent )
   }
 
   return qtrue;
+}
+
+qboolean G_admin_playpool( gentity_t *ent )
+{
+  char           cmd[ MAX_TOKEN_CHARS ],
+                 map[ MAX_TOKEN_CHARS ];
+  playMapError_t playMapError;
+
+  if( trap_Argc( ) < 2 )
+  {
+    ADMP( "^3playpool: ^7usage: playmap [^5add (mapname)|remove (mapname)|clear|reload|save^7]\n" );
+    return qfalse;
+  }
+
+  trap_Argv( 1, cmd, sizeof( cmd ) );
+
+  if( !Q_stricmp( cmd, "add" ) )
+  {
+    if( trap_Argc( ) < 3 )
+    {
+      ADMP( "^3playpool: ^7usage: playmap add (^5mapname^7)\n" );
+      return qfalse;
+    }
+
+    trap_Argv( 2, map, sizeof( map ) );
+    if( !G_MapExists( map ) )
+    {
+      ADMP( va( "^3playpool: ^7invalid map name '%s'\n", map ) );
+      return qfalse;
+    }
+
+    playMapError = G_AddToPlayMapPool( map );
+    if( playMapError.errorCode != PLAYMAP_ERROR_NONE )
+    {
+      ADMP( va( "^3playpool: ^7%s.\n", playMapError.errorMessage ) );
+      return qfalse;
+    }
+
+    ADMP( va( "^3playpool: ^7added map '%s' to playmap pool.\n", map ) );
+    return qtrue;
+  }
+
+  if( !Q_stricmp( cmd, "remove" ) )
+  {
+    if( trap_Argc( ) < 3 )
+    {
+      ADMP( "^3playpool: ^7usage: playmap remove (^5mapname^7)\n" );
+      return qfalse;
+    }
+
+    trap_Argv( 2, map, sizeof( map ) );
+    playMapError = G_RemoveFromPlayMapPool( map );
+    if( playMapError.errorCode != PLAYMAP_ERROR_NONE )
+    {
+      ADMP( va( "^3playpool: ^7%s.\n", playMapError.errorMessage ) );
+      return qfalse;
+    }
+
+    ADMP( va( "^3playpool: ^7removed map '%s' from playmap pool.\n", map ) );
+    return qtrue;
+  }
+
+  if( !Q_stricmp( cmd, "clear" ) )
+  {
+    playMapError = G_ClearPlayMapPool();
+    if( playMapError.errorCode != PLAYMAP_ERROR_NONE )
+    {
+      ADMP( va( "^3playpool: ^7%s.\n", playMapError.errorMessage ) );
+      return qfalse;
+    }
+
+    ADMP( va( "^3playpool: ^7cleared playmap pool.\n" ) );
+    return qtrue;
+  }
+
+  if( !Q_stricmp( cmd, "save" ) )
+  {
+    playMapError = G_SavePlayMapPool();
+    if( playMapError.errorCode != PLAYMAP_ERROR_NONE )
+    {
+      ADMP( va( "^3playpool: ^7%s.\n", playMapError.errorMessage ) );
+      return qfalse;
+    }
+
+    ADMP( va( "^3playpool: ^7saved playmap pool to '%s'.\n", g_playMapConfig.string ) );
+    return qtrue;
+  }
+
+  if( !Q_stricmp( cmd, "reload" ) )
+  {
+    playMapError = G_ReloadPlayMapPool();
+    if( playMapError.errorCode != PLAYMAP_ERROR_NONE )
+    {
+      ADMP( va( "^3playpool: ^7%s.\n", playMapError.errorMessage ) );
+      return qfalse;
+    }
+
+    ADMP( va( "^3playpool: ^7reloaded playmap pool from '%s'.\n", g_playMapConfig.string ) );
+    return qtrue;
+  }
+
+  ADMP( "^3playpool: ^7usage: playmap [^5add (mapname)|remove (mapname)|clear|reload|save^7]\n" );
+  return qfalse;
 }
 
 static char *fates[] =
