@@ -142,6 +142,7 @@ qboolean G_PlayMapQueueIsEmpty( void );
 qboolean G_PlayMapQueueIsFull( void );
 playMapFlag_t G_ParsePlayMapFlag(char *flag);
 playMapError_t G_AddToPlayMapQueue( char *mapname, char *layout, gclient_t *client, char *flags );
+playMap_t *G_PopFromPlayMapQueue( void );
 playMapError_t G_RemoveFromPlayMapQueue( int index );
 int G_GetPlayMapQueueIndexByMapName( char *mapname );
 int G_GetPlayMapQueueIndexByClient( gclient_t *client );
