@@ -500,9 +500,31 @@ playMapError_t G_AddToPlayMapQueue( char *mapname, char *layout, gclient_t
 
 /*
 ================
+G_PopFromPlayMapQueue
+
+Pop a map from the head of playmap queue (dequeue) and return to function
+caller.
+================
+*/
+playMap_t *G_PopFromPlayMapQueue( void )
+{
+  if( G_PlayMapQueueIsEmpty() )
+  {
+    return (playMap_t *) NULL;
+  }
+
+  playMapQueue.head = MAP_QUEUE_PLUS1( playMapQueue.head );
+
+  // TODO: figure out what to do with the damn tail
+
+  return &playMapQueue.playMap[ playMapQueue.head ];
+}
+
+/*
+================
 G_RemoveFromPlayMapQueue
 
-Dequeue a player requested map from the playmap queue.
+Remove a map from the playmap queue by its index.
 ================
 */
 playMapError_t G_RemoveFromPlayMapQueue( int index )
