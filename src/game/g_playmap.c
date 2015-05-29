@@ -350,19 +350,20 @@ void G_InitPlayMapQueue( void )
   int i, j;
 
   // Reset everything
-  playMapQueue.numEntries =
-    playMapQueue.tail =
-    playMapQueue.head = 0;
+  playMapQueue.tail = playMapQueue.head = 0;
+  playMapQueue.tail = MAP_QUEUE_MINUS1( playMapQueue.tail );
+  playMapQueue.numEntries = 0;
 
   for( i = 0; i < MAX_PLAYMAP_POOL_ENTRIES; i++ )
   {
     // set all values/pointers to NULL
-    playMapQueue.playMap[ i ].mapname    = NULL;
-    playMapQueue.playMap[ i ].layout     = NULL;
-    playMapQueue.playMap[ i ].client     = NULL;
+    playMapQueue.playMap[ i ].mapname = NULL;
+    playMapQueue.playMap[ i ].layout  = NULL;
+    playMapQueue.playMap[ i ].client  = NULL;
+
     for( j = 0; j < PLAYMAP_NUM_FLAGS; j++ )
     {
-      playMapQueue.playMap[ i ].plusFlags[ j ] = PLAYMAP_FLAG_NONE;
+      playMapQueue.playMap[ i ].plusFlags[ j ]  = PLAYMAP_FLAG_NONE;
       playMapQueue.playMap[ i ].minusFlags[ j ] = PLAYMAP_FLAG_NONE;
     }
   }
@@ -370,18 +371,23 @@ void G_InitPlayMapQueue( void )
 
 /*
 ================
-G_PlayMapQueueIsEmpty
+G_GetPlayMapQueueLength
 
-Returns true if the playmap queue is currently empty.
+Returns the length of the playmap queue.
 ================
 */
 
-qboolean G_PlayMapQueueIsEmpty( void )
+int G_GetPlayMapQueueLength( void )
 {
-  return ( playMapQueue.tail == playMapQueue.head ) &&
-    ( playMapQueue.playMap[ playMapQueue.tail ].mapname == NULL &&
-      playMapQueue.playMap[ playMapQueue.tail ].layout == NULL &&
-      playMapQueue.playMap[ playMapQueue.tail ].client == NULL );
+  int length = playMapQueue.tail - playMapQueue.head + 1;
+
+  while( length < 0 )
+    length += MAX_PLAYMAP_POOL_ENTRIES;
+
+  while( length >= MAX_PLAYMAP_POOL_ENTRIES )
+    length -= MAX_PLAYMAP_POOL_ENTRIES;
+
+  return length;
 }
 
 /*
@@ -508,16 +514,20 @@ caller.
 */
 playMap_t *G_PopFromPlayMapQueue( void )
 {
-  if( G_PlayMapQueueIsEmpty() )
+  playMap_t *playMap = NULL;
+  int i;
+
+  // return null pointer if queue is empty
+  if( MAP_QUEUE_IS_EMPTY )
   {
-    return (playMap_t *) NULL;
+    return playMap;
   }
 
+  playMap = &playMapQueue.playMap[ playMapQueue.head ];
+  &playMapQueue.playMap[ playMapQueue.head ] = NULL;
   playMapQueue.head = MAP_QUEUE_PLUS1( playMapQueue.head );
 
-  // TODO: figure out what to do with the damn tail
-
-  return &playMapQueue.playMap[ playMapQueue.head ];
+  return playMap;
 }
 
 /*
