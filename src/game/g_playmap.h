@@ -63,8 +63,9 @@ typedef enum
  * PLAYMAP QUEUE
  */
 
-#define MAP_QUEUE_PLUS1(x)  (((x)+1)%MAX_PLAYMAP_POOL_ENTRIES)
-#define MAP_QUEUE_MINUS1(x) (((x)+MAX_PLAYMAP_POOL_ENTRIES-1)%MAX_PLAYMAP_POOL_ENTRIES)
+#define MAP_QUEUE_PLUS1(x)  ( ( ( x ) + 1 ) % MAX_PLAYMAP_POOL_ENTRIES )
+#define MAP_QUEUE_MINUS1(x) ( ( ( x ) + MAX_PLAYMAP_POOL_ENTRIES - 1 ) % MAX_PLAYMAP_POOL_ENTRIES )
+#define MAP_QUEUE_IS_EMPTY  ( G_GetPlayMapQueueLength() > 0 )
 
 // individual playmap entry in the queue
 typedef struct playMap_s
@@ -138,7 +139,7 @@ playMapError_t G_ReloadPlayMapPool( void );
 playMapError_t G_ClearPlayMapPool( void );
 int G_FindInMapPool( char *mapname );
 void G_InitPlayMapQueue( void );
-qboolean G_PlayMapQueueIsEmpty( void );
+int G_GetPlayMapQueueLength( void );
 qboolean G_PlayMapQueueIsFull( void );
 playMapFlag_t G_ParsePlayMapFlag(char *flag);
 playMapError_t G_AddToPlayMapQueue( char *mapname, char *layout, gclient_t *client, char *flags );
