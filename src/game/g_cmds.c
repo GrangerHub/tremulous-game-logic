@@ -3502,7 +3502,7 @@ void Cmd_PlayMap_f( gentity_t *ent )
                   "       flags=%s\n\"",
                   cmd, map, layout, flags ) );
 
-  G_AddToPlayMapQueue( map, layout, ent->client, flags );
+  G_PlayMapEnqueue( map, layout, ent->client, flags );
 }
 
 /*
