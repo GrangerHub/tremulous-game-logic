@@ -351,7 +351,7 @@ void G_InitPlayMapQueue( void )
 
   // Reset everything
   playMapQueue.tail = playMapQueue.head = 0;
-  playMapQueue.tail = MAP_QUEUE_MINUS1( playMapQueue.tail );
+  playMapQueue.tail = PLAYMAP_QUEUE_MINUS1( playMapQueue.tail );
   playMapQueue.numEntries = 0;
 
   for( i = 0; i < MAX_PLAYMAP_POOL_ENTRIES; i++ )
@@ -392,22 +392,6 @@ int G_GetPlayMapQueueLength( void )
 
 /*
 ================
-G_PlayMapQueueIsFull
-
-Returns true if the playmap queue is currently full.
-================
-*/
-
-qboolean G_PlayMapQueueIsFull( void )
-{
-  return ( playMapQueue.tail == playMapQueue.head ) &&
-    ( playMapQueue.playMap[ playMapQueue.tail ].mapname != NULL &&
-      playMapQueue.playMap[ playMapQueue.tail ].layout != NULL &&
-      playMapQueue.playMap[ playMapQueue.tail ].client != NULL );
-}
-
-/*
-================
 G_ParsePlayMapFlag
 
 Parses a playmap flag string and returns the playMapFlag_t equivalent.
@@ -439,13 +423,14 @@ playMapFlag_t G_ParsePlayMapFlag(char *flag)
 
 /*
 ================
-G_AddToPlayMapQueue
+G_PlayMapEnqueue
 
-Enqueue a player requested map in the playmap queue.
+Enqueue a player requested map in the playmap queue (add to the back of the
+queue).
 ================
 */
 
-playMapError_t G_AddToPlayMapQueue( char *mapname, char *layout, gclient_t
+playMapError_t G_PlayMapEnqueue( char *mapname, char *layout, gclient_t
     *client, char *flags )
 {
   int       i;
@@ -454,8 +439,16 @@ playMapError_t G_AddToPlayMapQueue( char *mapname, char *layout, gclient_t
   playMap_t playMap;
   playMapFlag_t playMapFlag;
 
-  if( G_PlayMapQueueIsFull() )
+  if( PLAYMAP_QUEUE_IS_FULL )
     return G_PlayMapErrorByCode( PLAYMAP_ERROR_MAP_QUEUE_FULL );
+
+  // check if user already has a map queued
+  if( G_GetPlayMapQueueIndexByClient( client ) >= 0 )
+    return G_PlayMapErrorByCode( PLAYMAP_ERROR_USER_ALREADY_IN_QUEUE );
+
+  // check if map has already been queued by someone else
+  if( G_GetPlayMapQueueIndexByMapName( mapname ) >= 0 )
+    return G_PlayMapErrorByCode( PLAYMAP_ERROR_MAP_ALREADY_IN_QUEUE );
 
   // copy mapname
   playMap.mapname = G_CopyString( mapname );
@@ -498,7 +491,7 @@ playMapError_t G_AddToPlayMapQueue( char *mapname, char *layout, gclient_t
   }
 
   playMapQueue.playMap[ playMapQueue.tail ] = playMap;
-  playMapQueue.tail = MAP_QUEUE_PLUS1( playMapQueue.tail );
+  playMapQueue.tail = PLAYMAP_QUEUE_PLUS1( playMapQueue.tail );
   playMapQueue.numEntries++;
 
   return G_PlayMapErrorByCode( PLAYMAP_ERROR_NONE );
@@ -514,18 +507,43 @@ caller.
 */
 playMap_t *G_PopFromPlayMapQueue( void )
 {
-  playMap_t *playMap = NULL;
+  playMap_t *playMap;
   int i;
 
   // return null pointer if queue is empty
-  if( MAP_QUEUE_IS_EMPTY )
+  if( PLAYMAP_QUEUE_IS_EMPTY )
   {
-    return playMap;
+    return (playMap_t *) NULL;
   }
 
-  playMap = &playMapQueue.playMap[ playMapQueue.head ];
-  &playMapQueue.playMap[ playMapQueue.head ] = NULL;
-  playMapQueue.head = MAP_QUEUE_PLUS1( playMapQueue.head );
+  playMap = BG_Alloc( sizeof( playMap_t ) );
+
+  // copy values from playmap in the head of the queue
+  playMap->mapname = playMapQueue.playMap[ playMapQueue.head ].mapname;
+  playMap->layout = playMapQueue.playMap[ playMapQueue.head ].layout;
+  playMap->client = playMapQueue.playMap[ playMapQueue.head ].client;
+  for( i = 0; i < PLAYMAP_NUM_FLAGS; i++ )
+  {
+    playMap->plusFlags[ i ]
+      = playMapQueue.playMap[ playMapQueue.head ].plusFlags[ i ];
+    playMap->minusFlags[ i ]
+      = playMapQueue.playMap[ playMapQueue.head ].minusFlags[ i ];
+  }
+
+  // reset the playmap in the head of the queue to null values
+  playMapQueue.playMap[ playMapQueue.head ].mapname = NULL;
+  playMapQueue.playMap[ playMapQueue.head ].layout = NULL;
+  playMapQueue.playMap[ playMapQueue.head ].client = NULL;
+  for( i = 0; i < PLAYMAP_NUM_FLAGS; i++ )
+  {
+    playMapQueue.playMap[ playMapQueue.head ].plusFlags[ i ] =
+      PLAYMAP_FLAG_NONE;
+    playMapQueue.playMap[ playMapQueue.head ].minusFlags[ i ] =
+      PLAYMAP_FLAG_NONE;
+  }
+
+  // advance the head of the queue in the array (shorten queue by one)
+  playMapQueue.head = PLAYMAP_QUEUE_PLUS1( playMapQueue.head );
 
   return playMap;
 }

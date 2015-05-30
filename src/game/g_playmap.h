@@ -63,9 +63,10 @@ typedef enum
  * PLAYMAP QUEUE
  */
 
-#define MAP_QUEUE_PLUS1(x)  ( ( ( x ) + 1 ) % MAX_PLAYMAP_POOL_ENTRIES )
-#define MAP_QUEUE_MINUS1(x) ( ( ( x ) + MAX_PLAYMAP_POOL_ENTRIES - 1 ) % MAX_PLAYMAP_POOL_ENTRIES )
-#define MAP_QUEUE_IS_EMPTY  ( G_GetPlayMapQueueLength() > 0 )
+#define PLAYMAP_QUEUE_PLUS1(x)  ( ( ( x ) + 1 ) % MAX_PLAYMAP_POOL_ENTRIES )
+#define PLAYMAP_QUEUE_MINUS1(x) ( ( ( x ) + MAX_PLAYMAP_POOL_ENTRIES - 1 ) % MAX_PLAYMAP_POOL_ENTRIES )
+#define PLAYMAP_QUEUE_IS_EMPTY  ( G_GetPlayMapQueueLength() < 1 )
+#define PLAYMAP_QUEUE_IS_FULL  ( G_GetPlayMapQueueLength() >= ( MAX_PLAYMAP_POOL_ENTRIES - 1 ) )
 
 // individual playmap entry in the queue
 typedef struct playMap_s
@@ -142,7 +143,7 @@ void G_InitPlayMapQueue( void );
 int G_GetPlayMapQueueLength( void );
 qboolean G_PlayMapQueueIsFull( void );
 playMapFlag_t G_ParsePlayMapFlag(char *flag);
-playMapError_t G_AddToPlayMapQueue( char *mapname, char *layout, gclient_t *client, char *flags );
+playMapError_t G_PlayMapEnqueue( char *mapname, char *layout, gclient_t *client, char *flags );
 playMap_t *G_PopFromPlayMapQueue( void );
 playMapError_t G_RemoveFromPlayMapQueue( int index );
 int G_GetPlayMapQueueIndexByMapName( char *mapname );
