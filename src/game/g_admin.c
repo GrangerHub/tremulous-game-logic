@@ -72,7 +72,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
     },
 
     {"allready", G_admin_allready, qfalse, "allready",
-      "makes everyone ready in intermission",
+      "makes everyone ready in intermission or developer mode warmup",
       ""
     },
 
@@ -2647,6 +2647,14 @@ qboolean G_admin_allready( gentity_t *ent )
 {
   int i = 0;
   gclient_t *cl;
+
+  // special case:
+  // if doing warmup in developer mode, /allready will end warmup immediately
+  if ( g_warmup.integer && g_cheats.integer )
+  {
+    trap_Cvar_Set( "g_warmup", "0" );
+    return qtrue;
+  }
 
   if( !level.intermissiontime )
   {
