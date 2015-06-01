@@ -567,6 +567,10 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
   level.alienStage2Time = level.alienStage3Time =
     level.humanStage2Time = level.humanStage3Time = level.startTime;
 
+  // reset the level's 1 minute and 5 minute timeouts
+  level.warmup1Time = -1;
+  level.warmup2Time = -1;
+
   level.snd_fry = G_SoundIndex( "sound/misc/fry.wav" ); // FIXME standing in lava / slime
 
   if( g_logFile.string[ 0 ] )
@@ -2016,6 +2020,7 @@ void CheckExitRules( void )
     {
       if( level.lastLayoutReset > ( level.time - 5000 ) )
         return;
+      // FIXME: this is awfully ugly
       G_LevelRestart( qfalse );
       trap_SendServerCommand( -1, "print \"A mysterious force restores balance in the universe.\n\"");
       return;
@@ -2037,6 +2042,7 @@ void CheckExitRules( void )
     {
       if( level.lastLayoutReset > ( level.time - 5000 ) )
         return;
+      // FIXME: this is awfully ugly
       G_LevelRestart( qfalse );
       trap_SendServerCommand( -1, "print \"A mysterious force restores balance in the universe.\n\"");
       return;
@@ -2104,6 +2110,10 @@ void G_LevelReady( void )
   float     percentAliens, percentHumans;
   qboolean  startGame;
 
+  // do not proceed if not in warmup
+  if( !g_warmup.integer )
+    return;
+
   // reset number of players ready to zero
   level.readyToPlay[ TEAM_HUMANS ] = level.readyToPlay[ TEAM_ALIENS ] = 0;
 
@@ -2136,18 +2146,75 @@ void G_LevelReady( void )
   percentHumans = ( (float) level.readyToPlay[ TEAM_HUMANS ] /
       ( numHumans > 0 ? (float) numHumans : 1.0 ) ) * 100.0;
 
+  // default condition is to end warmup if > 50% of both teams are ready
   startGame = ( percentAliens >= 50.0 && percentHumans >= 50.0 );
 
-  trap_SetConfigstring( CS_WARMUP_READY, va( "%.0f %d %d %.2f %d %d",
-        percentAliens,
-        level.readyToPlay[ TEAM_ALIENS ],
-        numAliens,
-        percentHumans,
-        level.readyToPlay[ TEAM_HUMANS ],
-        numHumans ) );
+  // if previous conditions are not met and there are at least 4 players who
+  // are not spectators, start a 3 minute countdown until warmup timeout
+  if( !startGame && ( numAliens > 0 ) && ( numHumans > 0 ) &&
+      ( numAliens + numHumans ) >= 4 )
+  {
+    if( ( level.warmup1Time > -1 ) &&
+        ( level.time - level.warmup1Time ) >= 180000 )
+    {
+      startGame = qtrue;
+    }
+    else if ( level.warmup1Time == -1 ) // start countdown
+    {
+      trap_SendServerCommand( -1, "print \"There are at least 4 "
+                                  "non-spectating players. Pre-game warmup "
+                                  "will expire in 3 minutes.\n\"");
+      level.warmup1Time = level.time;
+    }
+  }
+  else
+  {
+    // reset the 5 minute timeout
+    level.warmup1Time = -1;
+  }
+
+  // if previous conditions are not met and at least 66% of players in one
+  // team is ready, start a 1 minute countdown until warmup timeout
+  if( !startGame && ( numAliens > 1 ) && ( numHumans > 1 ) &&
+      ( percentAliens >= 66.0 || percentHumans >= 66.0 ) )
+  {
+    if( ( level.warmup2Time > -1 ) &&
+        ( level.time - level.warmup2Time ) >= 60000 )
+    {
+      startGame = qtrue;
+    }
+    else if ( level.warmup2Time == -1 ) // start countdown
+    {
+      trap_SendServerCommand( -1, "print \"At least 66 percent of players in "
+                                  "a team have become ready. Pre-game warmup "
+                                  "will expire in 1 minute.\n\"");
+      level.warmup2Time = level.time;
+    }
+  }
+  else
+  {
+    // reset the 1 minute timeout
+    level.warmup2Time = -1;
+  }
+
+  // limit the broadcast of config string to once per second
+  if( ( level.time % 1000 ) == 0 )
+  {
+    trap_SetConfigstring( CS_WARMUP_READY, va( "%.0f %d %d %.2f %d %d %d %d",
+          percentAliens,
+          level.readyToPlay[ TEAM_ALIENS ],
+          numAliens,
+          percentHumans,
+          level.readyToPlay[ TEAM_HUMANS ],
+          numHumans,
+          ( level.warmup1Time > -1 ?
+            ( level.time - level.warmup1Time ) / 1000 : -1 ),
+          ( level.warmup2Time > -1 ?
+            ( level.time - level.warmup2Time ) / 1000 : -1 ) ) );
+  }
 
   // only continue to start game when conditions are met
-  if(!startGame)
+  if( !startGame )
     return;
 
   G_LevelRestart( qtrue );
@@ -2576,6 +2643,9 @@ void G_RunFrame( int levelTime )
     G_UpdateZaps( msec );
   }
   G_UpdateBuildableRangeMarkers( );
+
+  // check for warmup timeout
+  G_LevelReady( );
 
   // see if it is time to end the level
   CheckExitRules( );

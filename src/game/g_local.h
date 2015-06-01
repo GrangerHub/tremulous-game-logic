@@ -569,8 +569,10 @@ typedef struct
 
   int               countdownModificationCount;      // for detecting if g_countdown is changed
 
-  // ready state
+  // warmup/ready state
   int               readyToPlay[ NUM_TEAMS ];
+  int               warmup1Time;                  // 3 minute warmup timeout
+  int               warmup2Time;                  // 1 minute warmup timeout
 
   // voting state
   int               voteThreshold[ NUM_TEAMS ];   // need at least this percent to pass
