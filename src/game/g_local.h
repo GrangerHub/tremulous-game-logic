@@ -666,6 +666,8 @@ typedef struct
   int unlaggedTimes[ MAX_UNLAGGED_MARKERS ];
 
   char              layout[ MAX_QPATH ];
+  int               builtInLayoutCount;
+  char              *builtInLayoutItem[ MAX_BUILDLOG ];
 
   team_t            surrenderTeam;
   int               lastTeamImbalancedTime;

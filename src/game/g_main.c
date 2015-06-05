@@ -2036,9 +2036,8 @@ void CheckExitRules( void )
     {
       if( level.lastLayoutReset > ( level.time - 5000 ) )
         return;
-      // FIXME: this is awfully ugly
-      G_LevelRestart( qfalse );
-      trap_SendServerCommand( -1, "print \"A mysterious force restores balance in the universe.\n\"");
+      trap_SendServerCommand( -1, "cp \"A mysterious force restores balance in the universe.\n\"");
+      G_LayoutReset( );
       return;
     }
 
@@ -2058,9 +2057,8 @@ void CheckExitRules( void )
     {
       if( level.lastLayoutReset > ( level.time - 5000 ) )
         return;
-      // FIXME: this is awfully ugly
-      G_LevelRestart( qfalse );
-      trap_SendServerCommand( -1, "print \"A mysterious force restores balance in the universe.\n\"");
+      trap_SendServerCommand( -1, "cp \"A mysterious force restores balance in the universe.\n\"");
+      G_LayoutReset( );
       return;
     }
 

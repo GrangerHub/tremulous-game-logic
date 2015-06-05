@@ -4999,3 +4999,147 @@ void G_UpdateBuildableRangeMarkers( void )
   }
 }
 
+/*
+================
+G_CacheBuiltinLayout
+Called at the beginning of a level if current layout is "*BUILTIN*" to store
+the layout in an array.
+================
+ */
+void G_CacheBuiltinLayout( void )
+{
+  int i;
+  gentity_t *ent;
+
+  level.builtInLayoutCount = 0;
+
+  for( i = MAX_CLIENTS; i < level.num_entities; i++ )
+  {
+    const char *name;
+
+    ent = &level.gentities[ i ];
+
+    if( ent->s.eType == ET_BUILDABLE )
+      name = BG_Buildable( ent->s.modelindex )->name;
+    else if( ent->count == 1 && !strcmp( ent->classname, "info_player_intermission" ) )
+      name = "ivo_spectator";
+    else if( ent->count == 1 && !strcmp( ent->classname, "info_alien_intermission" ) )
+      name = "ivo_alien";
+    else if( ent->count == 1 && !strcmp( ent->classname, "info_human_intermission" ) )
+      name = "ivo_human";
+    else
+      continue;
+
+    Com_sprintf( level.builtInLayoutItem[ i - MAX_CLIENTS ],
+                 sizeof( level.builtInLayoutItem[ i - MAX_CLIENTS ] ),
+                 "%s %f %f %f %f %f %f %f %f %f %f %f %f",
+                 name,
+                 ent->r.currentOrigin[ 0 ],
+                 ent->r.currentOrigin[ 1 ],
+                 ent->r.currentOrigin[ 2 ],
+                 ent->r.currentAngles[ 0 ],
+                 ent->r.currentAngles[ 1 ],
+                 ent->r.currentAngles[ 2 ],
+                 ent->s.origin2[ 0 ],
+                 ent->s.origin2[ 1 ],
+                 ent->s.origin2[ 2 ],
+                 ent->s.angles2[ 0 ],
+                 ent->s.angles2[ 1 ],
+                 ent->s.angles2[ 2 ] );
+
+    level.builtInLayoutCount++;
+  }
+}
+
+/*
+============
+G_LayoutReset
+Called whenever a layout reset is required.
+============
+*/
+void G_LayoutReset( void )
+{
+  gentity_t *ent;
+  int buildable;
+  char buildName[ MAX_TOKEN_CHARS ];
+  vec3_t origin = { 0.0f, 0.0f, 0.0f };
+  vec3_t angles = { 0.0f, 0.0f, 0.0f };
+  vec3_t origin2 = { 0.0f, 0.0f, 0.0f };
+  vec3_t angles2 = { 0.0f, 0.0f, 0.0f };
+  char line[ MAX_STRING_CHARS ];
+  int i;
+
+  // only proceed with reset if the last layout reset was more than 10 seconds ago
+  if( level.lastLayoutReset && level.lastLayoutReset > ( level.time - 10000  )  )
+    return;
+
+  level.lastLayoutReset = level.time;
+
+  // clear decon marks from all buildables
+  G_ClearDeconMarks();
+
+  // loop through all entities
+  for( ent = &g_entities[ MAX_CLIENTS  ]; ent < &g_entities[ level.num_entities  ]; ++ent  )
+  {
+    // skip if entity is not a buildables or not a missile (nades / luci balls
+    // etc)
+    if( ent->s.eType != ET_BUILDABLE && ent->s.eType != ET_MISSILE  )
+      continue;
+
+    // extra operations
+    if( ent->s.eType == ET_BUILDABLE  )
+      G_RemoveRangeMarkerFrom( ent  );
+
+    // remove entity
+    G_FreeEntity( ent  );
+  }
+
+  // reload layout
+  if( Q_stricmp( level.layout, "*BUILTIN*" ) )
+  {
+    G_LayoutLoad( level.layout );
+    return qtrue;
+  }
+  else
+  {
+    for( i = 0; i < level.builtInLayoutCount; i++ )
+    {
+      // extract level.builtInLayoutItem[ i ] info (snippet taken from
+      // G_LayoutLoad())
+      sscanf( level.builtInLayoutItem[ i ], "%s %f %f %f %f %f %f %f %f %f %f %f %f\n",
+        buildName,
+        &origin[ 0 ], &origin[ 1 ], &origin[ 2 ],
+        &angles[ 0 ], &angles[ 1 ], &angles[ 2 ],
+        &origin2[ 0 ], &origin2[ 1 ], &origin2[ 2 ],
+        &angles2[ 0 ], &angles2[ 1 ], &angles2[ 2 ] );
+
+      buildable = BG_BuildableByName( buildName )->number;
+
+      if( !Q_stricmp( buildName, "ivo_spectator" ) )
+      {
+        if( bAllowed[ BA_NONE ] || bAllowed[ BA_NUM_BUILDABLES + TEAM_NONE ] )
+          G_SpawnIntermissionViewOverride( "info_player_intermission", origin, angles );
+      }
+      else if( !Q_stricmp( buildName, "ivo_alien" ) )
+      {
+        if( bAllowed[ BA_NONE ] || bAllowed[ BA_NUM_BUILDABLES + TEAM_ALIENS ] )
+          G_SpawnIntermissionViewOverride( "info_alien_intermission", origin, angles );
+      }
+      else if( !Q_stricmp( buildName, "ivo_human" ) )
+      {
+        if( bAllowed[ BA_NONE ] || bAllowed[ BA_NUM_BUILDABLES + TEAM_HUMANS ] )
+          G_SpawnIntermissionViewOverride( "info_human_intermission", origin, angles );
+      }
+      else if( buildable <= BA_NONE || buildable >= BA_NUM_BUILDABLES )
+        G_Printf( S_COLOR_YELLOW "WARNING: bad buildable name (%s) in layout."
+          " skipping\n", buildName );
+      else
+      {
+        if( bAllowed[ BA_NONE ] || bAllowed[ buildable ] )
+          G_LayoutBuildItem( buildable, origin, angles, origin2, angles2 );
+      }
+    }
+  }
+
+  // FIXME: we should also reset the build log as well
+}
