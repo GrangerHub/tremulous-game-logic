@@ -1058,8 +1058,6 @@ void CL_ShutdownUI( void ) {
 CL_InitUI
 ====================
 */
-#define UI_OLD_API_VERSION	4
-
 void CL_InitUI( void ) {
 	int		v;
 	vmInterpret_t		interpret;
@@ -1082,11 +1080,7 @@ void CL_InitUI( void ) {
 
 	// sanity check
 	v = VM_Call( uivm, UI_GETAPIVERSION );
-	if (v == UI_OLD_API_VERSION) {
-		// init for this gamestate
-		VM_Call( uivm, UI_INIT, (clc.state >= CA_AUTHORIZING && clc.state < CA_ACTIVE));
-	}
-	else if (v != UI_API_VERSION) {
+	if ( v != UI_API_VERSION ) {
 		// Free uivm now, so UI_SHUTDOWN doesn't get called later.
 		VM_Free( uivm );
 		uivm = NULL;
@@ -1094,13 +1088,12 @@ void CL_InitUI( void ) {
 		Com_Error( ERR_DROP, "User Interface is version %d, expected %d", v, UI_API_VERSION );
 		cls.uiStarted = qfalse;
 	}
-	else {
-		// init for this gamestate
-		VM_Call( uivm, UI_INIT, (clc.state >= CA_AUTHORIZING && clc.state < CA_ACTIVE) );
 
-		// show where the ui folder was loaded from
-		Cmd_ExecuteString( "which ui/\n" );
-	}
+	// init for this gamestate
+	VM_Call( uivm, UI_INIT, ( clc.state >= CA_AUTHORIZING && clc.state < CA_ACTIVE ) );
+
+	// show where the ui folder was loaded from
+	Cmd_ExecuteString( "which ui/\n" );
 
 	clc.newsString[ 0 ] = '\0';
 }
