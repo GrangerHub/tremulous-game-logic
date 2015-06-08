@@ -127,6 +127,10 @@ ifndef MOUNT_DIR
 MOUNT_DIR=src
 endif
 
+ifndef DEP_DIR
+DEP_DIR=dep
+endif
+
 ifndef BUILD_DIR
 BUILD_DIR=bld
 endif

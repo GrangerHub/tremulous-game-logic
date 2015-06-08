@@ -1,5 +1,6 @@
 bld
 GNUmakefile.local
+dep
 *.swp
 
 # OS X
