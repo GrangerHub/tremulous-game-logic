@@ -1085,8 +1085,8 @@ void CL_InitUI( void ) {
 		VM_Free( uivm );
 		uivm = NULL;
 
-		Com_Error( ERR_DROP, "User Interface is version %d, expected %d", v, UI_API_VERSION );
 		cls.uiStarted = qfalse;
+		Com_Error( ERR_DROP, "User Interface is version %d, expected %d", v, UI_API_VERSION );
 	}
 
 	// init for this gamestate
