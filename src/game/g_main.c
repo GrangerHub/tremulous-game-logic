@@ -710,6 +710,10 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
 
   G_Printf( "-----------------------------------\n" );
 
+  //
+  if( !Q_stricmp( level.layout, "*BUILTIN*" ) )
+    G_CacheBuiltinLayout( );
+
   // So the server counts the spawns without a client attached
   G_CountSpawns( );
 
@@ -2034,10 +2038,11 @@ void CheckExitRules( void )
     // We do not want any team to win in warmup
     if( IS_WARMUP )
     {
-      if( level.lastLayoutReset > ( level.time - 5000 ) )
+      if( !G_LayoutReset( ) )
         return;
+
       trap_SendServerCommand( -1, "cp \"A mysterious force restores balance in the universe.\n\"");
-      G_LayoutReset( );
+
       return;
     }
 
@@ -2055,10 +2060,11 @@ void CheckExitRules( void )
     // We do not want any team to win in warmup
     if( IS_WARMUP )
     {
-      if( level.lastLayoutReset > ( level.time - 5000 ) )
+      if( !G_LayoutReset( ) )
         return;
+
       trap_SendServerCommand( -1, "cp \"A mysterious force restores balance in the universe.\n\"");
-      G_LayoutReset( );
+
       return;
     }
 

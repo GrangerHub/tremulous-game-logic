@@ -821,6 +821,8 @@ void              G_BuildLogAuto( gentity_t *actor, gentity_t *buildable, buildF
 void              G_BuildLogRevert( int id );
 void              G_RemoveRangeMarkerFrom( gentity_t *self );
 void              G_UpdateBuildableRangeMarkers( void );
+void              G_CacheBuiltinLayout( void );
+qboolean          G_LayoutReset( void );
 
 //
 // g_utils.c
