@@ -2309,6 +2309,7 @@ void G_CheckVote( team_t team )
   qboolean pass = qfalse;
   char     *msg;
   int      i;
+  int      abstained;
 
   if( level.voteExecuteTime[ team ] &&
       level.voteExecuteTime[ team ] < level.time )
@@ -2323,7 +2324,7 @@ void G_CheckVote( team_t team )
       ( level.voteYes[ team ] + level.voteNo[ team ] == level.numVotingClients[ team ] ) )
   {
     pass = ( level.voteYes[ team ] &&
-             (float)level.voteYes[ team ] / ( (float)level.voteYes[ team ] + (float)level.voteNo[ team ] ) > votePassThreshold );
+             (float)level.voteYes[ team ] / level.numVotingClients[ team ] > votePassThreshold );
   }
   else
   {
@@ -2347,9 +2348,12 @@ void G_CheckVote( team_t team )
     pass ? "pass" : "fail",
     level.voteYes[ team ], level.voteNo[ team ], level.numVotingClients[ team ] );
 
-  msg = va( "print \"%sote %sed (%d - %d)\n\"",
+  abstained = level.numVotingClients[ team ] - level.voteYes[ team ] -
+    level.voteNo[ team ];
+
+  msg = va( "print \"%sote %sed (%d yea, %d nay and %d abstained)\n\"",
     team == TEAM_NONE ? "V" : "Team v", pass ? "pass" : "fail",
-    level.voteYes[ team ], level.voteNo[ team ] );
+    level.voteYes[ team ], level.voteNo[ team ], abstained );
 
   if( team == TEAM_NONE )
     trap_SendServerCommand( -1, msg );
