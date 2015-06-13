@@ -2197,21 +2197,13 @@ void G_LevelReady( void )
     level.warmup2Time = -1;
   }
 
-  // limit the broadcast of config string to once per second
-  if( ( level.time % 1000 ) == 0 )
-  {
-    trap_SetConfigstring( CS_WARMUP_READY, va( "%.0f %d %d %.2f %d %d %d %d",
-          percentAliens,
-          level.readyToPlay[ TEAM_ALIENS ],
-          numAliens,
-          percentHumans,
-          level.readyToPlay[ TEAM_HUMANS ],
-          numHumans,
-          ( level.warmup1Time > -1 ?
-            ( level.time - level.warmup1Time ) / 1000 : -1 ),
-          ( level.warmup2Time > -1 ?
-            ( level.time - level.warmup2Time ) / 1000 : -1 ) ) );
-  }
+  trap_SetConfigstring( CS_WARMUP_READY, va( "%.0f %d %d %.2f %d %d %d %d",
+        percentAliens, level.readyToPlay[ TEAM_ALIENS ], numAliens,
+        percentHumans, level.readyToPlay[ TEAM_HUMANS ], numHumans,
+        ( level.warmup1Time > -1 ?  ( level.time - level.warmup1Time ) / 1000 :
+          -1 ),
+        ( level.warmup2Time > -1 ?  ( level.time - level.warmup2Time ) / 1000 :
+          -1 ) ) );
 
   // only continue to start game when conditions are met
   if( !startGame )
