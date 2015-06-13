@@ -2648,11 +2648,26 @@ qboolean G_admin_allready( gentity_t *ent )
   int i = 0;
   gclient_t *cl;
 
-  // special case:
-  // if doing warmup in developer mode, /allready will end warmup immediately
+  // if game is in both warmup and developer mode, /allready will set all
+  // players' readyToPlay flag to true
   if ( g_warmup.integer && g_cheats.integer )
   {
-    trap_Cvar_Set( "g_warmup", "0" );
+    // cycle through each client and change their ready flag
+    for( i = 0; i < g_maxclients.integer; i++ )
+    {
+      cl = level.clients + i;
+      if( cl->pers.connected != CON_CONNECTED )
+        continue;
+
+      if( cl->pers.teamSelection == TEAM_NONE )
+        continue;
+
+      cl->pers.readyToPlay = qtrue;
+      cl->ps.stats[ STAT_READY ] = 1;
+    }
+
+    G_LevelReady();
+
     return qtrue;
   }
 
