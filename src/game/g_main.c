@@ -2119,7 +2119,7 @@ required percentages are met.
 void G_LevelReady( void )
 {
   int       i, numAliens = 0, numHumans = 0;
-  float     percentAliens, percentHumans;
+  float     percentAliens, percentHumans, threshold;
   qboolean  startGame;
 
   // do not proceed if not in warmup
@@ -2153,14 +2153,19 @@ void G_LevelReady( void )
     }
   }
 
+  // calculate percentage ready for both teams
   percentAliens = ( (float) level.readyToPlay[ TEAM_ALIENS ] /
       ( numAliens > 0 ? (float) numAliens : 1.0 ) ) * 100.0;
   percentHumans = ( (float) level.readyToPlay[ TEAM_HUMANS ] /
       ( numHumans > 0 ? (float) numHumans : 1.0 ) ) * 100.0;
 
-  // default condition is to end warmup if > (g_warmupReadyThreshold)% of both teams are ready
-  startGame = ( percentAliens >= (float) g_warmupReadyThreshold.integer &&
-      percentHumans >= (float) g_warmupReadyThreshold.integer );
+  // if cvar g_warmupReadyThreshold is > 50 use it as threshold, if not use 50
+  threshold = g_warmupReadyThreshold.integer > 50 ?
+    (float) g_warmupReadyThreshold.integer : 50.0;
+
+  // default condition for ending warmup is when >= (threshold)% of both teams
+  // are ready
+  startGame = ( percentAliens >= threshold && percentHumans >= threshold );
 
   // if previous conditions are not met and there are at least
   // (g_warmupTimeout1Trigger) players who are not spectators, start a
