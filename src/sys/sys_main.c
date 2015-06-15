@@ -555,14 +555,6 @@ void Sys_ParseArgs( int argc, char **argv )
 	}
 }
 
-#ifndef DEFAULT_BASEDIR
-#	ifdef MACOS_X
-#		define DEFAULT_BASEDIR Sys_StripAppBundle(Sys_BinaryPath())
-#	else
-#		define DEFAULT_BASEDIR Sys_BinaryPath()
-#	endif
-#endif
-
 /*
 =================
 Sys_SigHandler
@@ -644,8 +636,19 @@ int main( int argc, char **argv )
 #endif
 
 	Sys_ParseArgs( argc, argv );
-	Sys_SetBinaryPath( Sys_Dirname( argv[ 0 ] ) );
+	if( strchr( argv[ 0 ], '/' )
+#ifdef _WIN32
+	    || strchr( argv[ 0 ], '\\' )
+#endif
+	)
+	{
+		Sys_SetBinaryPath( Sys_Dirname( argv[ 0 ] ) );
+	}
+#if defined DEFAULT_BASEDIR
 	Sys_SetDefaultInstallPath( DEFAULT_BASEDIR );
+#elif defined MACOS_X
+	Sys_SetDefaultInstallPath( Sys_StripAppBundle( Sys_BinaryPath() ) );
+#endif
 
 	// Concatenate the command line for passing to Com_Init
 	for( i = 1; i < argc; i++ )
