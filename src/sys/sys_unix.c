@@ -236,24 +236,6 @@ FILE *Sys_Mkfifo( const char *ospath )
 }
 
 /*
-==================
-Sys_Cwd
-==================
-*/
-char *Sys_Cwd( void )
-{
-	static char cwd[MAX_OSPATH];
-
-	char *result = getcwd( cwd, sizeof( cwd ) - 1 );
-	if( result != cwd )
-		return NULL;
-
-	cwd[MAX_OSPATH-1] = 0;
-
-	return cwd;
-}
-
-/*
 ==============================================================
 
 DIRECTORY SCANNING

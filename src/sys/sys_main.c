@@ -83,10 +83,7 @@ Sys_DefaultInstallPath
 */
 char *Sys_DefaultInstallPath(void)
 {
-	if (*installPath)
-		return installPath;
-	else
-		return Sys_Cwd();
+	return installPath;
 }
 
 /*
