@@ -1108,8 +1108,16 @@ extern  vmCvar_t  g_maxNameChanges;
 
 extern  vmCvar_t  g_timelimit;
 extern  vmCvar_t  g_suddenDeathTime;
-extern  vmCvar_t  g_warmup;
+
 extern  vmCvar_t  g_doWarmup;
+extern  vmCvar_t  g_warmup;
+extern  vmCvar_t  g_warmupReadyThreshold;
+extern  vmCvar_t  g_warmupTimeout1;
+extern  vmCvar_t  g_warmupTimeout1Trigger;
+extern  vmCvar_t  g_warmupTimeout2;
+extern  vmCvar_t  g_warmupTimeout2Trigger;
+extern  vmCvar_t  g_warmupBuildableRespawnTime;
+extern  vmCvar_t  g_warmupDefensiveBuildableRespawnTime;
 
 #define IS_WARMUP  ( g_doWarmup.integer && g_warmup.integer )
 

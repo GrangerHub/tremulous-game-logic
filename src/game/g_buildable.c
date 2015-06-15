@@ -859,6 +859,8 @@ Called when an alien buildable dies
 */
 void AGeneric_CreepRecede( gentity_t *self )
 {
+  int adjustedRespawnTime;
+
   //if the creep just died begin the recession
   if( !( self->s.eFlags & EF_DEAD ) )
   {
@@ -887,7 +889,22 @@ void AGeneric_CreepRecede( gentity_t *self )
     if( IS_WARMUP && self->enemy->client )
     {
       self->think = AGeneric_CreepRespawn;
-      self->nextthink = level.time + 500;
+      if( self->s.modelindex == BA_A_ACIDTUBE || self->s.modelindex == BA_A_HIVE )
+      {
+        if (g_warmupDefensiveBuildableRespawnTime.integer >= 10)
+          adjustedRespawnTime = g_warmupDefensiveBuildableRespawnTime.integer - 10;
+        else
+          adjustedRespawnTime = g_warmupDefensiveBuildableRespawnTime.integer;
+      }
+      else
+      {
+        if (g_warmupBuildableRespawnTime.integer >= 10)
+          adjustedRespawnTime = g_warmupBuildableRespawnTime.integer - 10;
+        else
+          adjustedRespawnTime = g_warmupBuildableRespawnTime.integer;
+      }
+
+      self->nextthink = level.time + adjustedRespawnTime * 1000;
     }
     else
     {
@@ -1891,7 +1908,12 @@ void HSpawn_Blast( gentity_t *self )
   if( IS_WARMUP && self->enemy->client )
   {
     self->think = HSpawn_Respawn;
-    self->nextthink = level.time + 5000;
+    if( self->s.modelindex == BA_H_MGTURRET || self->s.modelindex == BA_H_TESLAGEN )
+      self->nextthink = level.time +
+        g_warmupDefensiveBuildableRespawnTime.integer * 1000;
+    else
+      self->nextthink = level.time +
+        g_warmupBuildableRespawnTime.integer * 1000;
     self->unlinkAfterEvent = qtrue;
   }
   else
