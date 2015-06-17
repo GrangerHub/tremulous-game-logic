@@ -3891,7 +3891,7 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
   char      buildnums[ MAX_STRING_CHARS ];
   buildLog_t *log;
 
-  if( builder->client )
+  if( builder->client && !IS_WARMUP )
     log = G_BuildLogNew( builder, BF_CONSTRUCT );
   else
     log = NULL;
@@ -5170,6 +5170,5 @@ qboolean G_LayoutReset( void )
     }
   }
 
-  // FIXME: we should also reset the build log as well
   return qtrue;
 }
