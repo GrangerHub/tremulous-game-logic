@@ -207,12 +207,12 @@ ifndef USE_INTERNAL_ZLIB
 USE_INTERNAL_ZLIB=$(USE_INTERNAL_LIBS)
 endif
 
-ifndef USE_INTERNAL_JPEG
-USE_INTERNAL_JPEG=$(USE_INTERNAL_LIBS)
+ifndef USE_INTERNAL_MINIZIP
+USE_INTERNAL_MINIZIP=$(USE_INTERNAL_LIBS)
 endif
 
-ifndef USE_LOCAL_HEADERS
-USE_LOCAL_HEADERS=$(USE_INTERNAL_LIBS)
+ifndef USE_INTERNAL_JPEG
+USE_INTERNAL_JPEG=$(USE_INTERNAL_LIBS)
 endif
 
 ifndef BUILD_MASTER_SERVER
@@ -252,6 +252,7 @@ VORBISDIR=$(MOUNT_DIR)/libvorbis-1.3.4
 OPUSDIR=$(MOUNT_DIR)/opus-1.1
 OPUSFILEDIR=$(MOUNT_DIR)/opusfile-0.5
 ZDIR=$(MOUNT_DIR)/zlib
+MINIZIPDIR=$(DEP_DIR)/minizip
 Q3ASMDIR=$(MOUNT_DIR)/tools/asm
 LBURGDIR=$(MOUNT_DIR)/tools/lcc/lburg
 Q3CPPDIR=$(MOUNT_DIR)/tools/lcc/cpp
@@ -375,6 +376,7 @@ ifneq (,$(findstring "$(PLATFORM)", "linux" "gnu_kfreebsd" "kfreebsd-gnu"))
   RENDERER_LIBS = $(SDL_LIBS) -lGL
 
   ifeq ($(USE_OPENAL),1)
+    CLIENT_CFLAGS += $(OPENAL_CFLAGS)
     ifneq ($(USE_OPENAL_DLOPEN),1)
       CLIENT_LIBS += $(THREAD_LIBS) $(OPENAL_LIBS)
     endif
@@ -458,6 +460,7 @@ ifeq ($(PLATFORM),darwin)
   BASE_CFLAGS += -fno-strict-aliasing -DMACOS_X -fno-common -pipe
 
   ifeq ($(USE_OPENAL),1)
+    CLIENT_CFLAGS += $(OPENAL_CFLAGS)
     ifneq ($(USE_OPENAL_DLOPEN),1)
       CLIENT_LIBS += -framework OpenAL
     endif
@@ -471,10 +474,6 @@ ifeq ($(PLATFORM),darwin)
   endif
 
   BASE_CFLAGS += -D_THREAD_SAFE=1
-
-  ifeq ($(USE_LOCAL_HEADERS),1)
-    BASE_CFLAGS += -I$(SDLHDIR)/include
-  endif
 
   # We copy sdlmain before ranlib'ing it so that subversion doesn't think
   #  the file has been modified by each build.
@@ -553,7 +552,7 @@ ifeq ($(PLATFORM),mingw32)
   ifeq ($(USE_OPENAL),1)
     CLIENT_CFLAGS += $(OPENAL_CFLAGS)
     ifneq ($(USE_OPENAL_DLOPEN),1)
-      CLIENT_LDFLAGS += $(OPENAL_LDFLAGS)
+      CLIENT_LDFLAGS += $(OPENAL_LIBS)
     endif
   endif
 
@@ -598,16 +597,7 @@ ifeq ($(PLATFORM),mingw32)
   ifeq ($(USE_CURL),1)
     CLIENT_CFLAGS += $(CURL_CFLAGS)
     ifneq ($(USE_CURL_DLOPEN),1)
-      ifeq ($(USE_LOCAL_HEADERS),1)
-        CLIENT_CFLAGS += -DCURL_STATICLIB
-        ifeq ($(ARCH),x86_64)
-          CLIENT_LIBS += $(LIBSDIR)/win64/libcurl.a
-        else
-          CLIENT_LIBS += $(LIBSDIR)/win32/libcurl.a
-        endif
-      else
-        CLIENT_LIBS += $(CURL_LIBS)
-      endif
+      CLIENT_LIBS += $(CURL_LIBS)
     endif
   endif
 
@@ -622,29 +612,9 @@ ifeq ($(PLATFORM),mingw32)
   CLIENT_LIBS += -lmingw32
   RENDERER_LIBS += -lmingw32
 
-  ifeq ($(USE_LOCAL_HEADERS),1)
-    CLIENT_CFLAGS += -I$(SDLHDIR)/include
-    ifeq ($(ARCH), x86)
-    CLIENT_LIBS += $(LIBSDIR)/win32/libSDL2main.a \
-                      $(LIBSDIR)/win32/libSDL2.dll.a
-    RENDERER_LIBS += $(LIBSDIR)/win32/libSDL2main.a \
-                      $(LIBSDIR)/win32/libSDL2.dll.a
-    SDLDLL=SDL2.dll
-    CLIENT_EXTRA_FILES += $(LIBSDIR)/win32/SDL2.dll
-    else
-    CLIENT_LIBS += $(LIBSDIR)/win64/libSDL264main.a \
-                      $(LIBSDIR)/win64/libSDL264.dll.a
-    RENDERER_LIBS += $(LIBSDIR)/win64/libSDL264main.a \
-                      $(LIBSDIR)/win64/libSDL264.dll.a
-    SDLDLL=SDL264.dll
-    CLIENT_EXTRA_FILES += $(LIBSDIR)/win64/SDL264.dll
-    endif
-  else
-    CLIENT_CFLAGS += $(SDL_CFLAGS)
-    CLIENT_LIBS += $(SDL_LIBS)
-    RENDERER_LIBS += $(SDL_LIBS)
-    SDLDLL=SDL2.dll
-  endif
+  CLIENT_CFLAGS += $(SDL_CFLAGS)
+  CLIENT_LIBS += $(SDL_LIBS)
+  RENDERER_LIBS += $(SDL_LIBS)
 
 else # ifeq mingw32
 
@@ -679,6 +649,7 @@ ifeq ($(PLATFORM),freebsd)
 
   # optional features/libraries
   ifeq ($(USE_OPENAL),1)
+    CLIENT_CFLAGS += $(OPENAL_CFLAGS)
     ifeq ($(USE_OPENAL_DLOPEN),1)
       CLIENT_LIBS += $(THREAD_LIBS) $(OPENAL_LIBS)
     endif
@@ -769,6 +740,7 @@ ifeq ($(PLATFORM),openbsd)
   RENDERER_LIBS = $(SDL_LIBS) -lGL
 
   ifeq ($(USE_OPENAL),1)
+    CLIENT_CFLAGS += $(OPENAL_CFLAGS)
     ifneq ($(USE_OPENAL_DLOPEN),1)
       CLIENT_LIBS += $(THREAD_LIBS) $(OPENAL_LIBS)
     endif
@@ -927,11 +899,22 @@ ifndef SHLIBNAME
   SHLIBNAME=$(ARCH).$(SHLIBEXT)
 endif
 
+ifeq ($(USE_INTERNAL_MINIZIP),1)
+  MINIZIP_CFLAGS ?= -I$(MINIZIPDIR)
+else
+  MINIZIP_CFLAGS ?= $(shell pkg-config --silence-errors --cflags minizip)
+  MINIZIP_LIBS ?= $(shell pkg-config --silence-errors --libs minizip)
+endif
+
 ifneq ($(BUILD_SERVER),0)
+  SERVER_CFLAGS += $(MINIZIP_CFLAGS)
+  SERVER_LIBS += $(MINIZIP_LIBS)
   TARGETS += $(B)/$(OUT)/$(SERVERBIN)$(FULLBINEXT)
 endif
 
 ifneq ($(BUILD_CLIENT),0)
+  CLIENT_CFLAGS += $(MINIZIP_CFLAGS)
+  CLIENT_LIBS += $(MINIZIP_LIBS)
   ifneq ($(USE_RENDERER_DLOPEN),0)
     TARGETS += $(B)/$(OUT)/$(CLIENTBIN)$(FULLBINEXT) $(B)/$(OUT)/renderer_opengl1_$(SHLIBNAME)
     ifneq ($(BUILD_RENDERER_OPENGL2),0)
@@ -1068,10 +1051,6 @@ endif
 
 ifdef DEFAULT_BASEDIR
   BASE_CFLAGS += -DDEFAULT_BASEDIR=\\\"$(DEFAULT_BASEDIR)\\\"
-endif
-
-ifeq ($(USE_LOCAL_HEADERS),1)
-  BASE_CFLAGS += -DUSE_LOCAL_HEADERS
 endif
 
 ifeq ($(BUILD_STANDALONE),1)
@@ -1290,12 +1269,14 @@ makedirs:
 	@if [ ! -d $(BUILD_DIR) ];then $(MKDIR) $(BUILD_DIR);fi
 	@if [ ! -d $(B) ];then $(MKDIR) $(B);fi
 	@if [ ! -d $(B)/client ];then $(MKDIR) $(B)/client;fi
+	@if [ ! -d $(B)/client/minizip ];then $(MKDIR) $(B)/client/minizip;fi
 	@if [ ! -d $(B)/client/opus ];then $(MKDIR) $(B)/client/opus;fi
 	@if [ ! -d $(B)/client/vorbis ];then $(MKDIR) $(B)/client/vorbis;fi
 	@if [ ! -d $(B)/renderergl1 ];then $(MKDIR) $(B)/renderergl1;fi
 	@if [ ! -d $(B)/renderergl2 ];then $(MKDIR) $(B)/renderergl2;fi
 	@if [ ! -d $(B)/renderergl2/glsl ];then $(MKDIR) $(B)/renderergl2/glsl;fi
 	@if [ ! -d $(B)/ded ];then $(MKDIR) $(B)/ded;fi
+	@if [ ! -d $(B)/ded/minizip ];then $(MKDIR) $(B)/ded/minizip;fi
 	@if [ ! -d $(B)/cgame ];then $(MKDIR) $(B)/cgame;fi
 	@if [ ! -d $(B)/game ];then $(MKDIR) $(B)/game;fi
 	@if [ ! -d $(B)/ui ];then $(MKDIR) $(B)/ui;fi
@@ -1531,8 +1512,6 @@ Q3OBJ = \
   $(B)/client/q_math.o \
   $(B)/client/q_shared.o \
   \
-  $(B)/client/unzip.o \
-  $(B)/client/ioapi.o \
   $(B)/client/puff.o \
   $(B)/client/vm.o \
   $(B)/client/vm_interpreted.o \
@@ -1975,6 +1954,12 @@ Q3OBJ += \
   $(B)/client/zutil.o
 endif
 
+ifeq ($(USE_INTERNAL_MINIZIP),1)
+Q3OBJ += \
+  $(B)/client/minizip/ioapi.o \
+  $(B)/client/minizip/unzip.o
+endif
+
 ifeq ($(HAVE_VM_COMPILED),true)
   ifneq ($(findstring $(ARCH),x86 x86_64),)
     Q3OBJ += \
@@ -2080,8 +2065,6 @@ Q3DOBJ = \
   $(B)/ded/q_math.o \
   $(B)/ded/q_shared.o \
   \
-  $(B)/ded/unzip.o \
-  $(B)/ded/ioapi.o \
   $(B)/ded/vm.o \
   $(B)/ded/vm_interpreted.o \
   \
@@ -2112,6 +2095,12 @@ Q3DOBJ += \
   $(B)/ded/inflate.o \
   $(B)/ded/inftrees.o \
   $(B)/ded/zutil.o
+endif
+
+ifeq ($(USE_INTERNAL_MINIZIP),1)
+  Q3DOBJ += \
+    $(B)/ded/minizip/ioapi.o \
+    $(B)/ded/minizip/unzip.o
 endif
 
 ifeq ($(HAVE_VM_COMPILED),true)
@@ -2145,7 +2134,7 @@ endif
 
 $(B)/$(OUT)/$(SERVERBIN)$(FULLBINEXT): $(Q3DOBJ)
 	$(echo_cmd) "LD $@"
-	$(Q)$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(Q3DOBJ) $(LIBS)
+	$(Q)$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(Q3DOBJ) $(SERVER_LIBS) $(LIBS)
 
 
 
@@ -2306,6 +2295,9 @@ $(B)/client/%.o: $(OGGDIR)/src/%.c
 $(B)/client/vorbis/%.o: $(VORBISDIR)/lib/%.c
 	$(DO_CC)
 
+$(B)/client/minizip/%.o: $(MINIZIPDIR)/%.c
+	$(DO_CC)
+
 $(B)/client/opus/%.o: $(OPUSDIR)/src/%.c
 	$(DO_CC)
 
@@ -2391,6 +2383,9 @@ $(B)/ded/%.o: $(SYSDIR)/%.rc
 	$(DO_WINDRES)
 
 $(B)/ded/%.o: $(NDIR)/%.c
+	$(DO_DED_CC)
+
+$(B)/ded/minizip/%.o: $(MINIZIPDIR)/%.c
 	$(DO_DED_CC)
 
 # Extra dependencies to ensure the git version is incorporated

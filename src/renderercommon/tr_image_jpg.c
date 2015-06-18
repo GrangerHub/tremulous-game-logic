@@ -31,10 +31,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  * You may also wish to include "jerror.h".
  */
 
-#ifdef USE_INTERNAL_JPEG
-#  define JPEG_INTERNALS
-#endif
-
 #include <jpeglib.h>
 
 #ifndef USE_INTERNAL_JPEG
