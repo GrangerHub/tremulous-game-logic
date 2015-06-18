@@ -32,6 +32,12 @@ endif
 ifndef BUILD_GAME_QVM
   BUILD_GAME_QVM   =
 endif
+ifndef BUILD_ONLY_GAME
+  BUILD_ONLY_GAME  =
+endif
+ifndef BUILD_ONLY_CGUI
+  BUILD_ONLY_CGUI  =
+endif
 ifndef BUILD_RENDERER_OPENGL2
   BUILD_RENDERER_OPENGL2=
 endif
@@ -922,17 +928,39 @@ ifneq ($(BUILD_CLIENT),0)
 endif
 
 ifneq ($(BUILD_GAME_SO),0)
-  TARGETS += \
-    $(B)/$(OUT)/$(BASEGAME)/cgame$(SHLIBNAME) \
-    $(B)/$(OUT)/$(BASEGAME)/game$(SHLIBNAME) \
-    $(B)/$(OUT)/$(BASEGAME)/ui$(SHLIBNAME)
+  ifeq ($(BUILD_ONLY_GAME),1)
+    TARGETS += \
+      $(B)/$(OUT)/$(BASEGAME)/game$(SHLIBNAME)
+  else
+    ifeq ($(BUILD_ONLY_CGUI),1)
+      TARGETS += \
+        $(B)/$(OUT)/$(BASEGAME)/cgame$(SHLIBNAME) \
+        $(B)/$(OUT)/$(BASEGAME)/ui$(SHLIBNAME)
+    else
+      TARGETS += \
+        $(B)/$(OUT)/$(BASEGAME)/cgame$(SHLIBNAME) \
+        $(B)/$(OUT)/$(BASEGAME)/game$(SHLIBNAME) \
+        $(B)/$(OUT)/$(BASEGAME)/ui$(SHLIBNAME)
+    endif
+  endif
 endif
 
 ifneq ($(BUILD_GAME_QVM),0)
-  TARGETS += \
-    $(B)/$(OUT)/$(BASEGAME)/vm/cgame.qvm \
-    $(B)/$(OUT)/$(BASEGAME)/vm/game.qvm \
-    $(B)/$(OUT)/$(BASEGAME)/vm/ui.qvm
+  ifeq ($(BUILD_ONLY_GAME),1)
+    TARGETS += \
+      $(B)/$(OUT)/$(BASEGAME)/vm/game.qvm
+  else
+    ifeq ($(BUILD_ONLY_CGUI),1)
+      TARGETS += \
+        $(B)/$(OUT)/$(BASEGAME)/vm/cgame.qvm \
+        $(B)/$(OUT)/$(BASEGAME)/vm/ui.qvm
+    else
+      TARGETS += \
+        $(B)/$(OUT)/$(BASEGAME)/vm/cgame.qvm \
+        $(B)/$(OUT)/$(BASEGAME)/vm/game.qvm \
+        $(B)/$(OUT)/$(BASEGAME)/vm/ui.qvm
+    endif
+  endif
 endif
 
 ifeq ($(USE_OPENAL),1)
