@@ -29,6 +29,9 @@ endif
 ifndef BUILD_GAME_QVM
   BUILD_GAME_QVM   =
 endif
+ifndef BUILD_GAME_QVM_11
+  BUILD_GAME_QVM_11=
+endif
 ifndef BUILD_ONLY_GAME
   BUILD_ONLY_GAME  =
 endif
@@ -960,6 +963,14 @@ ifneq ($(BUILD_GAME_QVM),0)
   endif
 endif
 
+ifneq ($(BUILD_GAME_QVM_11),0)
+  ifneq ($(BUILD_ONLY_GAME),1)
+    TARGETS += \
+      $(B)/$(OUT)/$(BASEGAME)_11/vm/cgame.qvm \
+      $(B)/$(OUT)/$(BASEGAME)_11/vm/ui.qvm
+  endif
+endif
+
 ifeq ($(USE_OPENAL),1)
   CLIENT_CFLAGS += -DUSE_OPENAL
   ifeq ($(USE_OPENAL_DLOPEN),1)
@@ -1291,9 +1302,14 @@ makedirs:
 	@if [ ! -d $(B)/game ];then $(MKDIR) $(B)/game;fi
 	@if [ ! -d $(B)/ui ];then $(MKDIR) $(B)/ui;fi
 	@if [ ! -d $(B)/qcommon ];then $(MKDIR) $(B)/qcommon;fi
+	@if [ ! -d $(B)/11 ];then $(MKDIR) $(B)/11;fi
+	@if [ ! -d $(B)/11/cgame ];then $(MKDIR) $(B)/11/cgame;fi
+	@if [ ! -d $(B)/11/ui ];then $(MKDIR) $(B)/11/ui;fi
 	@if [ ! -d $(B)/$(OUT) ];then $(MKDIR) $(B)/$(OUT);fi
 	@if [ ! -d $(B)/$(OUT)/$(BASEGAME) ];then $(MKDIR) $(B)/$(OUT)/$(BASEGAME);fi
 	@if [ ! -d $(B)/$(OUT)/$(BASEGAME)/vm ];then $(MKDIR) $(B)/$(OUT)/$(BASEGAME)/vm;fi
+	@if [ ! -d $(B)/$(OUT)/$(BASEGAME)_11 ];then $(MKDIR) $(B)/$(OUT)/$(BASEGAME)_11;fi
+	@if [ ! -d $(B)/$(OUT)/$(BASEGAME)_11/vm ];then $(MKDIR) $(B)/$(OUT)/$(BASEGAME)_11/vm;fi
 	@if [ ! -d $(B)/tools ];then $(MKDIR) $(B)/tools;fi
 	@if [ ! -d $(B)/tools/asm ];then $(MKDIR) $(B)/tools/asm;fi
 	@if [ ! -d $(B)/tools/etc ];then $(MKDIR) $(B)/tools/etc;fi
@@ -1435,6 +1451,11 @@ $(echo_cmd) "CGAME_Q3LCC $<"
 $(Q)$(Q3LCC) $(BASEGAME_CFLAGS) -DCGAME -o $@ $<
 endef
 
+define DO_CGAME_Q3LCC_11
+$(echo_cmd) "CGAME_Q3LCC_11 $<"
+$(Q)$(Q3LCC) $(BASEGAME_CFLAGS) -DCGAME -DMODULE_INTERFACE_11 -o $@ $<
+endef
+
 define DO_GAME_Q3LCC
 $(echo_cmd) "GAME_Q3LCC $<"
 $(Q)$(Q3LCC) $(BASEGAME_CFLAGS) -DGAME -o $@ $<
@@ -1443,6 +1464,11 @@ endef
 define DO_UI_Q3LCC
 $(echo_cmd) "UI_Q3LCC $<"
 $(Q)$(Q3LCC) $(BASEGAME_CFLAGS) -DUI -o $@ $<
+endef
+
+define DO_UI_Q3LCC_11
+$(echo_cmd) "UI_Q3LCC_11 $<"
+$(Q)$(Q3LCC) $(BASEGAME_CFLAGS) -DUI -DMODULE_INTERFACE_11 -o $@ $<
 endef
 
 
@@ -2186,8 +2212,43 @@ CGOBJ_ = \
   $(B)/qcommon/q_math.o \
   $(B)/qcommon/q_shared.o
 
+CGOBJ11_ = \
+  $(B)/11/cgame/cg_main.o \
+  $(B)/cgame/bg_misc.o \
+  $(B)/cgame/bg_pmove.o \
+  $(B)/cgame/bg_slidemove.o \
+  $(B)/cgame/bg_lib.o \
+  $(B)/cgame/bg_alloc.o \
+  $(B)/cgame/bg_voice.o \
+  $(B)/cgame/cg_consolecmds.o \
+  $(B)/cgame/cg_buildable.o \
+  $(B)/cgame/cg_animation.o \
+  $(B)/cgame/cg_animmapobj.o \
+  $(B)/cgame/cg_draw.o \
+  $(B)/cgame/cg_drawtools.o \
+  $(B)/cgame/cg_ents.o \
+  $(B)/cgame/cg_event.o \
+  $(B)/cgame/cg_marks.o \
+  $(B)/cgame/cg_players.o \
+  $(B)/cgame/cg_playerstate.o \
+  $(B)/cgame/cg_predict.o \
+  $(B)/11/cgame/cg_servercmds.o \
+  $(B)/11/cgame/cg_snapshot.o \
+  $(B)/cgame/cg_view.o \
+  $(B)/cgame/cg_weapons.o \
+  $(B)/cgame/cg_scanner.o \
+  $(B)/cgame/cg_attachment.o \
+  $(B)/cgame/cg_trails.o \
+  $(B)/cgame/cg_particles.o \
+  $(B)/cgame/cg_tutorial.o \
+  $(B)/cgame/ui_shared.o \
+  \
+  $(B)/qcommon/q_math.o \
+  $(B)/qcommon/q_shared.o
+
 CGOBJ = $(CGOBJ_) $(B)/cgame/cg_syscalls.o
 CGVMOBJ = $(CGOBJ_:%.o=%.asm)
+CGVMOBJ11 = $(CGOBJ11_:%.o=%.asm)
 
 $(B)/$(OUT)/$(BASEGAME)/cgame$(SHLIBNAME): $(CGOBJ)
 	$(echo_cmd) "LD $@"
@@ -2196,6 +2257,10 @@ $(B)/$(OUT)/$(BASEGAME)/cgame$(SHLIBNAME): $(CGOBJ)
 $(B)/$(OUT)/$(BASEGAME)/vm/cgame.qvm: $(CGVMOBJ) $(CGDIR)/cg_syscalls.asm $(Q3ASM)
 	$(echo_cmd) "Q3ASM $@"
 	$(Q)$(Q3ASM) -o $@ $(CGVMOBJ) $(CGDIR)/cg_syscalls.asm
+
+$(B)/$(OUT)/$(BASEGAME)_11/vm/cgame.qvm: $(CGVMOBJ11) $(CGDIR)/cg_syscalls_11.asm $(Q3ASM)
+	$(echo_cmd) "Q3ASM $@"
+	$(Q)$(Q3ASM) -o $@ $(CGVMOBJ11) $(CGDIR)/cg_syscalls_11.asm
 
 
 
@@ -2263,8 +2328,20 @@ UIOBJ_ = \
   $(B)/qcommon/q_math.o \
   $(B)/qcommon/q_shared.o
 
+UIOBJ11_ = \
+  $(B)/11/ui/ui_main.o \
+  $(B)/ui/ui_atoms.o \
+  $(B)/ui/ui_shared.o \
+  $(B)/ui/ui_gameinfo.o \
+  \
+  $(B)/ui/bg_misc.o \
+  $(B)/ui/bg_lib.o \
+  $(B)/qcommon/q_math.o \
+  $(B)/qcommon/q_shared.o
+
 UIOBJ = $(UIOBJ_) $(B)/ui/ui_syscalls.o
 UIVMOBJ = $(UIOBJ_:%.o=%.asm)
+UIVMOBJ11 = $(UIOBJ11_:%.o=%.asm)
 
 $(B)/$(OUT)/$(BASEGAME)/ui$(SHLIBNAME): $(UIOBJ)
 	$(echo_cmd) "LD $@"
@@ -2273,6 +2350,10 @@ $(B)/$(OUT)/$(BASEGAME)/ui$(SHLIBNAME): $(UIOBJ)
 $(B)/$(OUT)/$(BASEGAME)/vm/ui.qvm: $(UIVMOBJ) $(UIDIR)/ui_syscalls.asm $(Q3ASM)
 	$(echo_cmd) "Q3ASM $@"
 	$(Q)$(Q3ASM) -o $@ $(UIVMOBJ) $(UIDIR)/ui_syscalls.asm
+
+$(B)/$(OUT)/$(BASEGAME)_11/vm/ui.qvm: $(UIVMOBJ11) $(UIDIR)/ui_syscalls_11.asm $(Q3ASM)
+	$(echo_cmd) "Q3ASM $@"
+	$(Q)$(Q3ASM) -o $@ $(UIVMOBJ11) $(UIDIR)/ui_syscalls_11.asm
 
 
 
@@ -2428,6 +2509,9 @@ $(B)/cgame/ui_%.asm: $(UIDIR)/ui_%.c $(Q3LCC)
 $(B)/cgame/%.asm: $(CGDIR)/%.c $(Q3LCC)
 	$(DO_CGAME_Q3LCC)
 
+$(B)/11/cgame/%.asm: $(CGDIR)/%.c $(Q3LCC)
+	$(DO_CGAME_Q3LCC_11)
+
 
 $(B)/game/%.o: $(GDIR)/%.c
 	$(DO_GAME_CC)
@@ -2448,6 +2532,9 @@ $(B)/ui/bg_%.asm: $(GDIR)/bg_%.c $(Q3LCC)
 $(B)/ui/%.asm: $(UIDIR)/%.c $(Q3LCC)
 	$(DO_UI_Q3LCC)
 
+$(B)/11/ui/%.asm: $(UIDIR)/%.c $(Q3LCC)
+	$(DO_UI_Q3LCC_11)
+
 
 $(B)/qcommon/%.o: $(CMDIR)/%.c
 	$(DO_SHLIB_CC)
@@ -2461,8 +2548,8 @@ $(B)/qcommon/%.asm: $(CMDIR)/%.c $(Q3LCC)
 #############################################################################
 
 OBJ = $(Q3OBJ) $(Q3ROBJ) $(Q3R2OBJ) $(Q3DOBJ) $(JPGOBJ) \
-  $(GOBJ) $(CGOBJ) $(UIOBJ) \
-  $(GVMOBJ) $(CGVMOBJ) $(UIVMOBJ)
+  $(GOBJ) $(CGOBJ) $(UIOBJ) $(CGOBJ11) $(UIOBJ11) \
+  $(GVMOBJ) $(CGVMOBJ) $(UIVMOBJ) $(CGVMOBJ11) $(UIVMOBJ11)
 TOOLSOBJ = $(LBURGOBJ) $(Q3CPPOBJ) $(Q3RCCOBJ) $(Q3LCCOBJ) $(Q3ASMOBJ)
 STRINGOBJ = $(Q3R2STRINGOBJ)
 
