@@ -3499,8 +3499,6 @@ void CL_Init( void ) {
 		cl_oldGameSet = qfalse;
 	}
 
-	cls.realtime = 0;
-
 	CL_InitInput ();
 
 	//
@@ -3696,6 +3694,7 @@ CL_Shutdown
 void CL_Shutdown(char *finalmsg, qboolean disconnect, qboolean quit)
 {
 	static qboolean recursive = qfalse;
+	int realtime;
 	
 	// check whether the client is running at all.
 	if(!(com_cl_running && com_cl_running->integer))
@@ -3748,7 +3747,9 @@ void CL_Shutdown(char *finalmsg, qboolean disconnect, qboolean quit)
 
 	recursive = qfalse;
 
+	realtime = cls.realtime;
 	Com_Memset( &cls, 0, sizeof( cls ) );
+	cls.realtime = realtime;
 	Key_SetCatcher( 0 );
 
 	Com_Printf( "-----------------------\n" );
