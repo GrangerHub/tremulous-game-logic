@@ -883,11 +883,11 @@ endif
 TARGETS =
 
 ifndef FULLBINEXT
-  FULLBINEXT=.$(ARCH)$(BINEXT)
+  FULLBINEXT=$(BINEXT)
 endif
 
 ifndef SHLIBNAME
-  SHLIBNAME=$(ARCH).$(SHLIBEXT)
+  SHLIBNAME=.$(SHLIBEXT)
 endif
 
 ifeq ($(USE_INTERNAL_MINIZIP),1)
@@ -907,9 +907,9 @@ ifneq ($(BUILD_CLIENT),0)
   CLIENT_CFLAGS += $(MINIZIP_CFLAGS)
   CLIENT_LIBS += $(MINIZIP_LIBS)
   ifneq ($(USE_RENDERER_DLOPEN),0)
-    TARGETS += $(B)/$(OUT)/$(CLIENTBIN)$(FULLBINEXT) $(B)/$(OUT)/renderer_opengl1_$(SHLIBNAME)
+    TARGETS += $(B)/$(OUT)/$(CLIENTBIN)$(FULLBINEXT) $(B)/$(OUT)/renderer_opengl1$(SHLIBNAME)
     ifneq ($(BUILD_RENDERER_OPENGL2),0)
-      TARGETS += $(B)/$(OUT)/renderer_opengl2_$(SHLIBNAME)
+      TARGETS += $(B)/$(OUT)/renderer_opengl2$(SHLIBNAME)
     endif
   else
     TARGETS += $(B)/$(OUT)/$(CLIENTBIN)$(FULLBINEXT)
@@ -1986,12 +1986,12 @@ $(B)/$(OUT)/$(CLIENTBIN)$(FULLBINEXT): $(Q3OBJ) $(LIBSDLMAIN)
 		-o $@ $(Q3OBJ) \
 		$(LIBSDLMAIN) $(CLIENT_LIBS) $(LIBS)
 
-$(B)/$(OUT)/renderer_opengl1_$(SHLIBNAME): $(Q3ROBJ) $(JPGOBJ)
+$(B)/$(OUT)/renderer_opengl1$(SHLIBNAME): $(Q3ROBJ) $(JPGOBJ)
 	$(echo_cmd) "LD $@"
 	$(Q)$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(Q3ROBJ) $(JPGOBJ) \
 		$(THREAD_LIBS) $(LIBSDLMAIN) $(RENDERER_LIBS) $(LIBS)
 
-$(B)/$(OUT)/renderer_opengl2_$(SHLIBNAME): $(Q3R2OBJ) $(Q3R2STRINGOBJ) $(JPGOBJ)
+$(B)/$(OUT)/renderer_opengl2$(SHLIBNAME): $(Q3R2OBJ) $(Q3R2STRINGOBJ) $(JPGOBJ)
 	$(echo_cmd) "LD $@"
 	$(Q)$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(Q3R2OBJ) $(Q3R2STRINGOBJ) $(JPGOBJ) \
 		$(THREAD_LIBS) $(LIBSDLMAIN) $(RENDERER_LIBS) $(LIBS)
