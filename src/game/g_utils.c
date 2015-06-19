@@ -746,7 +746,7 @@ void G_KillBox( gentity_t *ent )
 
     // in warmup telefrag buildables as well
     // (prevents buildings respawning within buildings)
-    if( !g_warmup.integer && ent->client && !hit->client )
+    if( !IS_WARMUP && ent->client && !hit->client )
       continue;
 
     // impossible to telefrag self

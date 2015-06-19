@@ -584,8 +584,8 @@ void Cmd_Kill_f( gentity_t *ent )
   {
     if( ent->suicideTime == 0 )
     {
-      trap_SendServerCommand( ent-g_entities, va( "print \"You will suicide in %d seconds\n\"", g_warmup.integer ? 5 : 20 ) );
-      ent->suicideTime = level.time + ( g_warmup.integer ? 5000 : 20000 );
+      trap_SendServerCommand( ent-g_entities, va( "print \"You will suicide in %d seconds\n\"", IS_WARMUP ? 5 : 20 ) );
+      ent->suicideTime = level.time + ( IS_WARMUP ? 5000 : 20000 );
     }
     else if( ent->suicideTime > level.time )
     {
@@ -714,7 +714,7 @@ void Cmd_Team_f( gentity_t *ent )
   G_ChangeTeam( ent, team );
 
   // Update player ready states if in warmup
-  if( g_warmup.integer )
+  if( IS_WARMUP )
     G_LevelReady();
 }
 
@@ -1508,7 +1508,7 @@ void Cmd_CallVote_f( gentity_t *ent )
   }
   else if( !Q_stricmp( vote, "admitdefeat" ) )
   {
-    if( g_warmup.integer )
+    if( IS_WARMUP )
     {
       trap_SendServerCommand( ent-g_entities,
         va( "print \"%s: admitdefeat cannot be called during warmup\n\"", cmd ) );
@@ -1592,7 +1592,7 @@ void Cmd_Ready_f( gentity_t *ent )
   trap_Argv( 0, cmd, sizeof( cmd ) );
 
   // do not allow /ready command if not in warmup
-  if( !g_warmup.integer )
+  if( !IS_WARMUP )
   {
     trap_SendServerCommand( ent-g_entities,
       va( "print \"%s: game is no longer in warmup\n\"", cmd ) );
@@ -1799,7 +1799,7 @@ void Cmd_Class_f( gentity_t *ent )
         return;
       }
 
-      if( !BG_ClassAllowedInStage( newClass, g_alienStage.integer, g_warmup.integer ) )
+      if( !BG_ClassAllowedInStage( newClass, g_alienStage.integer, IS_WARMUP ) )
       {
         G_TriggerMenuArgs( ent->client->ps.clientNum, MN_A_CLASSNOTATSTAGE, newClass );
         return;
@@ -1900,7 +1900,7 @@ void Cmd_Class_f( gentity_t *ent )
       cost = BG_ClassCanEvolveFromTo( currentClass, newClass,
                                       ent->client->pers.credit,
                                       g_alienStage.integer, 0,
-                                      g_warmup.integer );
+                                      IS_WARMUP );
 
       if( G_RoomForClassChange( ent, newClass, infestOrigin ) )
       {
@@ -1993,7 +1993,7 @@ void Cmd_Destroy_f( gentity_t *ent )
     }
 
     // Cancel deconstruction (unmark)
-    if( deconstruct && !g_warmup.integer && g_markDeconstruct.integer && traceEnt->deconstruct )
+    if( deconstruct && !IS_WARMUP && g_markDeconstruct.integer && traceEnt->deconstruct )
     {
       traceEnt->deconstruct = qfalse;
       return;
@@ -2014,20 +2014,20 @@ void Cmd_Destroy_f( gentity_t *ent )
     }
 
     if( lastSpawn && !g_cheats.integer &&
-        ( g_warmup.integer || !g_markDeconstruct.integer ) )
+        ( IS_WARMUP || !g_markDeconstruct.integer ) )
     {
       G_TriggerMenu( ent->client->ps.clientNum, MN_B_LASTSPAWN );
       return;
     }
 
     // Don't allow destruction of buildables that cannot be rebuilt
-    if( !g_warmup.integer && G_TimeTilSuddenDeath( ) <= 0 )
+    if( !IS_WARMUP && G_TimeTilSuddenDeath( ) <= 0 )
     {
       G_TriggerMenu( ent->client->ps.clientNum, MN_B_SUDDENDEATH );
       return;
     }
 
-    if( ( g_warmup.integer || !g_markDeconstruct.integer ) ||
+    if( ( IS_WARMUP || !g_markDeconstruct.integer ) ||
         ( ent->client->pers.teamSelection == TEAM_HUMANS &&
           !G_FindPower( traceEnt, qtrue ) ) )
     {
@@ -2045,7 +2045,7 @@ void Cmd_Destroy_f( gentity_t *ent )
         G_Damage( traceEnt, ent, ent, forward, tr.endpos,
                   traceEnt->health, 0, MOD_SUICIDE );
       }
-      else if( !g_warmup.integer && g_markDeconstruct.integer &&
+      else if( !IS_WARMUP && g_markDeconstruct.integer &&
                ( ent->client->pers.teamSelection != TEAM_HUMANS ||
                  G_FindPower( traceEnt , qtrue ) || lastSpawn ) )
       {
@@ -2054,7 +2054,7 @@ void Cmd_Destroy_f( gentity_t *ent )
       }
       else
       {
-        if( !g_cheats.integer && !g_warmup.integer ) // add a bit to the build timer
+        if( !g_cheats.integer && !IS_WARMUP ) // add a bit to the build timer
         {
             ent->client->ps.stats[ STAT_MISC ] +=
               BG_Buildable( traceEnt->s.modelindex )->buildTime / 4;
@@ -2222,21 +2222,21 @@ void Cmd_Buy_f( gentity_t *ent )
     }
 
     //are we /allowed/ to buy this?
-    if( !g_warmup.integer && !BG_Weapon( weapon )->purchasable )
+    if( !IS_WARMUP && !BG_Weapon( weapon )->purchasable )
     {
       trap_SendServerCommand( ent-g_entities, "print \"You can't buy this item\n\"" );
       return;
     }
 
     //are we /allowed/ to buy this?
-    if( !BG_WeaponAllowedInStage( weapon, g_humanStage.integer, g_warmup.integer ) || !BG_WeaponIsAllowed( weapon ) )
+    if( !BG_WeaponAllowedInStage( weapon, g_humanStage.integer, IS_WARMUP ) || !BG_WeaponIsAllowed( weapon ) )
     {
       trap_SendServerCommand( ent-g_entities, "print \"You can't buy this item\n\"" );
       return;
     }
 
     //can afford this?
-    if( !g_warmup.integer && ( BG_Weapon( weapon )->price > (short)ent->client->pers.credit ) )
+    if( !IS_WARMUP && ( BG_Weapon( weapon )->price > (short)ent->client->pers.credit ) )
     {
       G_TriggerMenu( ent->client->ps.clientNum, MN_H_NOFUNDS );
       return;
@@ -2287,7 +2287,7 @@ void Cmd_Buy_f( gentity_t *ent )
     }
 
     //can afford this?
-    if( !g_warmup.integer && ( BG_Upgrade( upgrade )->price > (short)ent->client->pers.credit ) )
+    if( !IS_WARMUP && ( BG_Upgrade( upgrade )->price > (short)ent->client->pers.credit ) )
     {
       G_TriggerMenu( ent->client->ps.clientNum, MN_H_NOFUNDS );
       return;
@@ -2308,14 +2308,14 @@ void Cmd_Buy_f( gentity_t *ent )
     }
 
     //are we /allowed/ to buy this?
-    if( !g_warmup.integer && !BG_Upgrade( upgrade )->purchasable )
+    if( !IS_WARMUP && !BG_Upgrade( upgrade )->purchasable )
     {
       trap_SendServerCommand( ent-g_entities, "print \"You can't buy this item\n\"" );
       return;
     }
 
     //are we /allowed/ to buy this?
-    if( !BG_UpgradeAllowedInStage( upgrade, g_humanStage.integer, g_warmup.integer ) || !BG_UpgradeIsAllowed( upgrade ) ) 
+    if( !BG_UpgradeAllowedInStage( upgrade, g_humanStage.integer, IS_WARMUP ) || !BG_UpgradeIsAllowed( upgrade ) ) 
     {
       trap_SendServerCommand( ent-g_entities, "print \"You can't buy this item\n\"" );
       return;
@@ -2543,14 +2543,14 @@ void Cmd_Build_f( gentity_t *ent )
 
   if( buildable == BA_NONE || !BG_BuildableIsAllowed( buildable ) ||
       !( ( 1 << ent->client->ps.weapon ) & BG_Buildable( buildable )->buildWeapon ) ||
-      ( team == TEAM_ALIENS && !BG_BuildableAllowedInStage( buildable, g_alienStage.integer, g_warmup.integer ) ) ||
-      ( team == TEAM_HUMANS && !BG_BuildableAllowedInStage( buildable, g_humanStage.integer, g_warmup.integer ) ) )
+      ( team == TEAM_ALIENS && !BG_BuildableAllowedInStage( buildable, g_alienStage.integer, IS_WARMUP ) ) ||
+      ( team == TEAM_HUMANS && !BG_BuildableAllowedInStage( buildable, g_humanStage.integer, IS_WARMUP ) ) )
   {
     G_TriggerMenu( ent->client->ps.clientNum, MN_B_CANNOT );
     return;
   }
 
-  if( !g_warmup.integer && G_TimeTilSuddenDeath( ) <= 0 )
+  if( !IS_WARMUP && G_TimeTilSuddenDeath( ) <= 0 )
   {
     G_TriggerMenu( ent->client->ps.clientNum, MN_B_SUDDENDEATH );
     return;

@@ -620,7 +620,7 @@ void SP_worldspawn( void )
 
   // see if we want a countdown time
   trap_SetConfigstring( CS_COUNTDOWN, "-1" );
-  if( !g_warmup.integer && g_doCountdown.integer )
+  if( !IS_WARMUP && g_doCountdown.integer )
   {
     level.countdownTime = level.startTime + ( g_countdown.integer * 1000 );
     trap_SetConfigstring( CS_COUNTDOWN, va( "%i", level.countdownTime ) );

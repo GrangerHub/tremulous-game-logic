@@ -1101,6 +1101,10 @@ extern  vmCvar_t  g_maxNameChanges;
 extern  vmCvar_t  g_timelimit;
 extern  vmCvar_t  g_suddenDeathTime;
 extern  vmCvar_t  g_warmup;
+extern  vmCvar_t  g_doWarmup;
+
+#define IS_WARMUP  ( g_doWarmup.integer && g_warmup.integer )
+
 extern  vmCvar_t  g_friendlyFire;
 extern  vmCvar_t  g_friendlyBuildableFire;
 extern  vmCvar_t  g_dretchPunt;

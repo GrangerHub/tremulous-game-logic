@@ -91,7 +91,7 @@ void G_AddCreditToClient( gclient_t *client, short credit, qboolean cap )
   if( !client )
     return;
 
-  if( g_warmup.integer )
+  if( IS_WARMUP )
     return;
 
   if( cap && credit > 0 )
@@ -262,7 +262,7 @@ static gentity_t *G_SelectSpawnBuildable( vec3_t preference, buildable_t buildab
     if( search->s.groundEntityNum == ENTITYNUM_NONE )
       continue;
 
-    if( search->clientSpawnTime > 0 && !g_warmup.integer )
+    if( search->clientSpawnTime > 0 && !IS_WARMUP )
       continue;
 
     if( G_CheckSpawnPoint( search->s.number, search->r.currentOrigin,
@@ -1202,7 +1202,7 @@ void ClientBegin( int clientNum )
   CalculateRanks( );
 
   // Update player ready states if in warmup
-  if( g_warmup.integer )
+  if( IS_WARMUP )
     G_LevelReady();
 
   // send the client a list of commands that can be used
@@ -1588,6 +1588,6 @@ void ClientDisconnect( int clientNum )
   CalculateRanks( );
 
   // Update player ready states if in warmup
-  if( g_warmup.integer )
+  if( IS_WARMUP )
     G_LevelReady();
 }

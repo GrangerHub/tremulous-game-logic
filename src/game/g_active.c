@@ -747,7 +747,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
       client->voiceEnthusiasm = 0.0f;
 
     client->pers.secondsAlive++;
-    if( !g_warmup.integer && g_freeFundPeriod.integer > 0 &&
+    if( !IS_WARMUP && g_freeFundPeriod.integer > 0 &&
         client->pers.secondsAlive % g_freeFundPeriod.integer == 0 )
     {
       // Give clients some credit periodically
@@ -1706,7 +1706,7 @@ void ClientThink_real( gentity_t *ent )
       {
         if( BG_AlienCanEvolve( client->ps.stats[ STAT_CLASS ],
                                client->pers.credit, g_alienStage.integer,
-                               g_warmup.integer ) )
+                               IS_WARMUP ) )
         {
           //no nearby objects and alien - show class menu
           G_TriggerMenu( ent->client->ps.clientNum, MN_A_INFEST );

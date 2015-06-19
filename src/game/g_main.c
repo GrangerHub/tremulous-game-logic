@@ -46,6 +46,7 @@ gclient_t   g_clients[ MAX_CLIENTS ];
 vmCvar_t  g_timelimit;
 vmCvar_t  g_suddenDeathTime;
 vmCvar_t  g_warmup;
+vmCvar_t  g_doWarmup;
 vmCvar_t  g_friendlyFire;
 vmCvar_t  g_friendlyBuildableFire;
 vmCvar_t  g_dretchPunt;
@@ -162,6 +163,7 @@ static cvarTable_t   gameCvarTable[ ] =
 
   // warmup
   { &g_warmup, "g_warmup", "1", 0, 0, qfalse  },
+  { &g_doWarmup, "g_doWarmup", "1", CVAR_ARCHIVE, 0, qtrue  },
 
   // noset vars
   { NULL, "gamename", GAME_VERSION , CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
@@ -647,7 +649,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
   level.emoticonCount = BG_LoadEmoticons( level.emoticons, MAX_EMOTICONS );
 
   trap_SetConfigstring( CS_INTERMISSION, "0" );
-  trap_SetConfigstring( CS_WARMUP, va( "%d", g_warmup.integer ) );
+  trap_SetConfigstring( CS_WARMUP, va( "%d", IS_WARMUP ) );
 
   // test to see if a custom buildable layout will be loaded
   G_LayoutSelect( );
@@ -1157,7 +1159,7 @@ void G_CalculateBuildPoints( void )
   }
 
   // Sudden Death checks (not applicable in warmup)
-  if( !g_warmup.integer && G_TimeTilSuddenDeath( ) <= 0 && level.suddenDeathWarning < TW_PASSED )
+  if( !IS_WARMUP && G_TimeTilSuddenDeath( ) <= 0 && level.suddenDeathWarning < TW_PASSED )
   {
     G_LogPrintf( "Beginning Sudden Death\n" );
     trap_SendServerCommand( -1, "cp \"Sudden Death!\"" );
@@ -1172,7 +1174,7 @@ void G_CalculateBuildPoints( void )
         g_entities[ i ].client->ps.stats[ STAT_BUILDABLE ] = BA_NONE;
     }
   }
-  else if( !g_warmup.integer && G_TimeTilSuddenDeath( ) <= SUDDENDEATHWARNING &&
+  else if( !IS_WARMUP && G_TimeTilSuddenDeath( ) <= SUDDENDEATHWARNING &&
     level.suddenDeathWarning < TW_IMMINENT )
   {
     trap_SendServerCommand( -1, va( "cp \"Sudden Death in %d seconds!\"",
@@ -1390,14 +1392,14 @@ void G_CalculateStages( void )
     humanNextStageThreshold = ceil( (float)humanNextStageThreshold / 100 ) * 100;
 
   trap_SetConfigstring( CS_ALIEN_STAGES, va( "%d %d %d",
-        ( g_warmup.integer ? S3 : g_alienStage.integer ),
-        ( g_warmup.integer ? 99999 : g_alienCredits.integer ),
-        ( g_warmup.integer ? 0 : alienNextStageThreshold ) ) );
+        ( IS_WARMUP ? S3 : g_alienStage.integer ),
+        ( IS_WARMUP ? 99999 : g_alienCredits.integer ),
+        ( IS_WARMUP ? 0 : alienNextStageThreshold ) ) );
 
   trap_SetConfigstring( CS_HUMAN_STAGES, va( "%d %d %d",
-        ( g_warmup.integer ? S3 : g_humanStage.integer ),
-        ( g_warmup.integer ? 99999 : g_humanCredits.integer ),
-        ( g_warmup.integer ? 0 : humanNextStageThreshold ) ) );
+        ( IS_WARMUP ? S3 : g_humanStage.integer ),
+        ( IS_WARMUP ? 99999 : g_humanCredits.integer ),
+        ( IS_WARMUP ? 0 : humanNextStageThreshold ) ) );
 }
 
 /*
@@ -1681,7 +1683,7 @@ void ExitLevel( void )
 
   trap_Cvar_Set( "g_nextMap", "" );
   trap_Cvar_Set( "g_warmup", "1" );
-  trap_SetConfigstring( CS_WARMUP, va( "%d", g_warmup.integer ) );
+  trap_SetConfigstring( CS_WARMUP, va( "%d", IS_WARMUP ) );
 
   level.restarted = qtrue;
   level.changemap = NULL;
@@ -2010,7 +2012,7 @@ void CheckExitRules( void )
         ( level.numAlienClientsAlive == 0 ) ) )
   {
     // We do not want any team to win in warmup
-    if( g_warmup.integer )
+    if( IS_WARMUP )
     {
       if( level.lastLayoutReset > ( level.time - 5000 ) )
         return;
@@ -2031,7 +2033,7 @@ void CheckExitRules( void )
              ( level.numHumanClientsAlive == 0 ) ) )
   {
     // We do not want any team to win in warmup
-    if( g_warmup.integer )
+    if( IS_WARMUP )
     {
       if( level.lastLayoutReset > ( level.time - 5000 ) )
         return;
@@ -2077,7 +2079,7 @@ void G_LevelRestart( qboolean stopWarmup )
   if( stopWarmup )
   {
     trap_Cvar_Set( "g_warmup", "0" );
-    trap_SetConfigstring( CS_WARMUP, va( "%d", g_warmup.integer ) );
+    trap_SetConfigstring( CS_WARMUP, va( "%d", IS_WARMUP ) );
   }
   trap_Cvar_Update( &g_cheats );
   trap_Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );

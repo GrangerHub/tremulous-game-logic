@@ -811,7 +811,7 @@ void buildFire( gentity_t *ent, dynMenu_t menu )
 
     if( G_BuildIfValid( ent, buildable ) )
     {
-      if( !g_cheats.integer && !g_warmup.integer )
+      if( !g_cheats.integer && !IS_WARMUP )
       {
         ent->client->ps.stats[ STAT_MISC ] +=
           BG_Buildable( buildable )->buildTime;

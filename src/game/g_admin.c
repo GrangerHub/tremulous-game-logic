@@ -2163,7 +2163,7 @@ qboolean G_admin_changemap( gentity_t *ent )
           ( ent ) ? ent->client->pers.netname : "console",
           ( layout[ 0 ] ) ? va( "(forcing layout '%s')", layout ) : "" ) );
   trap_Cvar_Set( "g_warmup", "1" );
-  trap_SetConfigstring( CS_WARMUP, va( "%d", g_warmup.integer ) );
+  trap_SetConfigstring( CS_WARMUP, va( "%d", IS_WARMUP ) );
 
   return qtrue;
 }
@@ -2884,7 +2884,7 @@ qboolean G_admin_nextmap( gentity_t *ent )
   LogExit( va( "nextmap was run by %s",
     ( ent ) ? ent->client->pers.netname : "console" ) );
   trap_Cvar_Set( "g_warmup", "1" );
-  trap_SetConfigstring( CS_WARMUP, va( "%d", g_warmup.integer ) );
+  trap_SetConfigstring( CS_WARMUP, va( "%d", IS_WARMUP ) );
 
   return qtrue;
 }

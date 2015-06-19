@@ -398,7 +398,7 @@ Get the number of build points from a position
 */
 int G_GetBuildPoints( const vec3_t pos, team_t team )
 {
-  if( !g_warmup.integer && G_TimeTilSuddenDeath( ) <= 0 )
+  if( !IS_WARMUP && G_TimeTilSuddenDeath( ) <= 0 )
   {
     return 0;
   }
@@ -443,7 +443,7 @@ int G_GetMarkedBuildPoints( const vec3_t pos, team_t team )
   if( G_TimeTilSuddenDeath( ) <= 0 )
     return 0;
 
-  if( ( g_warmup.integer || !g_markDeconstruct.integer ) )
+  if( ( IS_WARMUP || !g_markDeconstruct.integer ) )
     return 0;
 
   for( i = MAX_CLIENTS, ent = g_entities + i; i < level.num_entities; i++, ent++ )
@@ -884,7 +884,7 @@ void AGeneric_CreepRecede( gentity_t *self )
   else //creep has died
   {
     // Respawn buildable if in warmup, otherwise free the entity
-    if( g_warmup.integer && self->enemy->client )
+    if( IS_WARMUP && self->enemy->client )
     {
       self->think = AGeneric_CreepRespawn;
       self->nextthink = level.time + 500;
@@ -990,7 +990,7 @@ void AGeneric_Think( gentity_t *self )
   self->powered = G_Overmind( ) != NULL;
   self->nextthink = level.time + BG_Buildable( self->s.modelindex )->nextthink;
 
-  if ( g_warmup.integer )
+  if ( IS_WARMUP )
   {
     G_SuffocateTrappedEntities( self );
   }
@@ -1066,7 +1066,7 @@ void ASpawn_Think( gentity_t *self )
 
   self->nextthink = level.time + BG_Buildable( self->s.modelindex )->nextthink;
 
-  if ( g_warmup.integer )
+  if ( IS_WARMUP )
   {
     G_SuffocateTrappedEntities( self );
   }
@@ -1164,7 +1164,7 @@ void AOvermind_Think( gentity_t *self )
 
   self->nextthink = level.time + BG_Buildable( self->s.modelindex )->nextthink;
 
-  if ( g_warmup.integer )
+  if ( IS_WARMUP )
   {
     G_SuffocateTrappedEntities( self );
   }
@@ -1888,7 +1888,7 @@ void HSpawn_Blast( gentity_t *self )
   self->s.eType = ET_EVENTS + EV_HUMAN_BUILDABLE_EXPLOSION;
   // respawn the buildable in next think in warmup
   // and attacker was a player
-  if( g_warmup.integer && self->enemy->client )
+  if( IS_WARMUP && self->enemy->client )
   {
     self->think = HSpawn_Respawn;
     self->nextthink = level.time + 5000;
@@ -1980,7 +1980,7 @@ void HSpawn_Think( gentity_t *self )
 
   self->nextthink = level.time + BG_Buildable( self->s.modelindex )->nextthink;
 
-  if ( g_warmup.integer )
+  if ( IS_WARMUP )
   {
     G_SuffocateTrappedEntities( self );
   }
@@ -2088,9 +2088,9 @@ void HRepeater_Think( gentity_t *self )
     }
   }
 
-  self->nextthink = level.time + ( POWER_REFRESH_TIME / ( g_warmup.integer ? 2 : 1 ) );
+  self->nextthink = level.time + ( POWER_REFRESH_TIME / ( IS_WARMUP ? 2 : 1 ) );
 
-  if ( g_warmup.integer )
+  if ( IS_WARMUP )
   {
     G_SuffocateTrappedEntities( self );
   }
@@ -2187,7 +2187,7 @@ void HReactor_Think( gentity_t *self )
   else
     self->nextthink = level.time + REACTOR_ATTACK_REPEAT;
 
-  if ( g_warmup.integer )
+  if ( IS_WARMUP )
   {
     G_SuffocateTrappedEntities( self );
   }
@@ -2230,9 +2230,9 @@ Think for armoury
 void HArmoury_Think( gentity_t *self )
 {
   //make sure we have power
-  self->nextthink = level.time + ( POWER_REFRESH_TIME / ( g_warmup.integer ? 2 : 1 ) );
+  self->nextthink = level.time + ( POWER_REFRESH_TIME / ( IS_WARMUP ? 2 : 1 ) );
 
-  if ( g_warmup.integer )
+  if ( IS_WARMUP )
   {
     G_SuffocateTrappedEntities( self );
   }
@@ -2261,9 +2261,9 @@ Think for dcc
 void HDCC_Think( gentity_t *self )
 {
   //make sure we have power
-  self->nextthink = level.time + ( POWER_REFRESH_TIME / ( g_warmup.integer ? 2 : 1 ) );
+  self->nextthink = level.time + ( POWER_REFRESH_TIME / ( IS_WARMUP ? 2 : 1 ) );
 
-  if ( g_warmup.integer )
+  if ( IS_WARMUP )
   {
     G_SuffocateTrappedEntities( self );
   }
@@ -2315,7 +2315,7 @@ void HMedistat_Think( gentity_t *self )
 
   self->nextthink = level.time + BG_Buildable( self->s.modelindex )->nextthink;
 
-  if ( g_warmup.integer )
+  if ( IS_WARMUP )
   {
     G_SuffocateTrappedEntities( self );
   }
@@ -2654,7 +2654,7 @@ void HMGTurret_Think( gentity_t *self )
   self->nextthink = level.time + 
                     BG_Buildable( self->s.modelindex )->nextthink;
 
-  if ( g_warmup.integer )
+  if ( IS_WARMUP )
   {
     G_SuffocateTrappedEntities( self );
   }
@@ -2744,7 +2744,7 @@ void HTeslaGen_Think( gentity_t *self )
 {
   self->nextthink = level.time + BG_Buildable( self->s.modelindex )->nextthink;
 
-  if ( g_warmup.integer )
+  if ( IS_WARMUP )
   {
     G_SuffocateTrappedEntities( self );
   }
@@ -2856,7 +2856,7 @@ void G_QueueBuildPoints( gentity_t *self )
   int       queuePoints;
 
   // dont queue bp in warmup
-  queuePoints = g_warmup.integer ? 0 : G_QueueValue( self );
+  queuePoints = IS_WARMUP ? 0 : G_QueueValue( self );
 
   if( !queuePoints )
     return;
@@ -3317,7 +3317,7 @@ void G_FreeMarkedBuildables( gentity_t *deconner, char *readable, int rsize,
   if( nums && nsize )
     nums[ 0 ] = '\0';
 
-  if( ( g_warmup.integer || !g_markDeconstruct.integer ) )
+  if( ( IS_WARMUP || !g_markDeconstruct.integer ) )
     return; // Not enabled, can't deconstruct anything
 
   for( i = 0; i < level.numBuildablesForRemoval; i++ )
@@ -3420,7 +3420,7 @@ static itemBuildError_t G_SufficientBPAvailable( buildable_t     buildable,
   }
 
   // Simple non-marking case
-  if( ( g_warmup.integer || !g_markDeconstruct.integer ) )
+  if( ( IS_WARMUP || !g_markDeconstruct.integer ) )
   {
     if( remainingBP - buildPoints < 0 )
       return bpError;
@@ -3744,9 +3744,9 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
 
       if( tempent == NULL ) // No reactor
         reason = IBE_RPTNOREAC;   
-      else if( !g_warmup.integer && g_markDeconstruct.integer && G_IsPowered( entity_origin ) == BA_H_REACTOR )
+      else if( !IS_WARMUP && g_markDeconstruct.integer && G_IsPowered( entity_origin ) == BA_H_REACTOR )
         reason = IBE_RPTPOWERHERE;
-      else if( ( g_warmup.integer || !g_markDeconstruct.integer ) && G_IsPowered( entity_origin ) )
+      else if( ( IS_WARMUP || !g_markDeconstruct.integer ) && G_IsPowered( entity_origin ) )
         reason = IBE_RPTPOWERHERE;
     }
 
@@ -3906,7 +3906,7 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
   built->buildTime = built->s.time = level.time;
 
   // build instantly in cheat mode
-  if( builder->client && ( g_cheats.integer || g_warmup.integer ) )
+  if( builder->client && ( g_cheats.integer || IS_WARMUP ) )
   {
     built->health = BG_Buildable( buildable )->health;
     built->buildTime = built->s.time =
