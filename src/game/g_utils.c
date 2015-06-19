@@ -744,12 +744,21 @@ void G_KillBox( gentity_t *ent )
   {
     hit = &g_entities[ touch[ i ] ];
 
-    if( ent->client && !hit->client ) // players can telefrag only other players
+    // in warmup telefrag buildables as well
+    // (prevents buildings respawning within buildings)
+    if( !g_warmup.integer && ent->client && !hit->client )
       continue;
 
     // impossible to telefrag self
     if( ent == hit )
       continue;
+
+    // buildables dont telefrag enemies. trapping them has other consequences
+    if( !ent->client && hit->client &&
+        hit->client->pers.teamSelection != ent->buildableTeam )
+    {
+      continue;
+    }
 
     // nail it
     G_Damage( hit, ent, ent, NULL, NULL,
