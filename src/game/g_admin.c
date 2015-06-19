@@ -2162,6 +2162,7 @@ qboolean G_admin_changemap( gentity_t *ent )
   AP( va( "print \"^3changemap: ^7map '%s' started by %s^7 %s\n\"", map,
           ( ent ) ? ent->client->pers.netname : "console",
           ( layout[ 0 ] ) ? va( "(forcing layout '%s')", layout ) : "" ) );
+  trap_Cvar_Set( "g_warmup", "1" );
   return qtrue;
 }
 
@@ -2880,6 +2881,7 @@ qboolean G_admin_nextmap( gentity_t *ent )
   trap_SetConfigstring( CS_WINNER, "Evacuation" );
   LogExit( va( "nextmap was run by %s",
     ( ent ) ? ent->client->pers.netname : "console" ) );
+  trap_Cvar_Set( "g_warmup", "1" );
   return qtrue;
 }
 
