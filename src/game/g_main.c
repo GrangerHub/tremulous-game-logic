@@ -2325,6 +2325,7 @@ void G_CheckVote( team_t team )
   char     *msg;
   int      i;
   int      abstained;
+  int      numCountedVotingClients = 0;
 
   if( level.voteExecuteTime[ team ] &&
       level.voteExecuteTime[ team ] < level.time )
@@ -2338,8 +2339,28 @@ void G_CheckVote( team_t team )
   if( ( level.time - level.voteTime[ team ] >= VOTE_TIME ) ||
       ( level.voteYes[ team ] + level.voteNo[ team ] == level.numVotingClients[ team ] ) )
   {
+    // Recalculate number of voting clients if there are players in teams
+    // and only count client as a voting client if they are either
+    // (a) a non-spectator, or
+    // (b) a spectator who has voted
+    if( ( level.numAlienClients + level.numHumanClients ) > 0 )
+    {
+      for( i = 0; i < level.maxclients; i++ )
+      {
+        if ( level.clients[ i ].pers.connected != CON_DISCONNECTED )
+        {
+          if( level.clients[ i ].pers.teamSelection != TEAM_NONE ||
+              ( level.clients[ i ].pers.teamSelection == TEAM_NONE &&
+                level.clients[ i ].pers.voted & ( 1 << TEAM_NONE ) ) )
+          {
+            numCountedVotingClients++;
+          }
+        }
+      }
+    }
+
     pass = ( level.voteYes[ team ] &&
-             (float)level.voteYes[ team ] / level.numVotingClients[ team ] > votePassThreshold );
+             (float)level.voteYes[ team ] / numCountedVotingClients > votePassThreshold );
   }
   else
   {
@@ -2363,12 +2384,12 @@ void G_CheckVote( team_t team )
     pass ? "pass" : "fail",
     level.voteYes[ team ], level.voteNo[ team ], level.numVotingClients[ team ] );
 
-  abstained = level.numVotingClients[ team ] - level.voteYes[ team ] -
-    level.voteNo[ team ];
+  abstained = numCountedVotingClients - level.voteYes[ team ] -
+              level.voteNo[ team ];
 
   msg = va( "print \"%sote %sed (%d yea, %d nay and %d abstained)\n\"",
-    team == TEAM_NONE ? "V" : "Team v", pass ? "pass" : "fail",
-    level.voteYes[ team ], level.voteNo[ team ], abstained );
+            team == TEAM_NONE ? "V" : "Team v", pass ? "pass" : "fail",
+            level.voteYes[ team ], level.voteNo[ team ], abstained );
 
   if( team == TEAM_NONE )
     trap_SendServerCommand( -1, msg );

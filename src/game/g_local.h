@@ -583,6 +583,7 @@ typedef struct
   int               voteDelay[ NUM_TEAMS ];       // it doesn't make sense to always delay vote execution
   int               voteYes[ NUM_TEAMS ];
   int               voteNo[ NUM_TEAMS ];
+  gclient_t         *voteCaller[ NUM_TEAMS ];     // client that called the vote
   int               numVotingClients[ NUM_TEAMS ];// set by CalculateRanks
 
   // spawn variables

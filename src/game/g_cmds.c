@@ -1201,9 +1201,35 @@ void Cmd_CallVote_f( gentity_t *ent )
 
   if( level.voteTime[ team ] )
   {
-    trap_SendServerCommand( ent-g_entities,
-      va( "print \"%s: a vote is already in progress\n\"", cmd ) );
-    return;
+    if( !Q_stricmp( vote, "cancel" ) )
+    {
+      if( ent->client != level.voteCaller[ team ] )
+      {
+        // tell the player to go fly a kite if it was someone else's vote they
+        // are trying to cancel
+        trap_SendServerCommand( ent-g_entities,
+            va( "print \"%s: you cannot cancel a vote that you did not "
+                "call\n\"", cmd ) );
+        return;
+      }
+
+      // tell all players that the vote has been called off
+      trap_SendServerCommand( -1, va( "print \"%s" S_COLOR_WHITE " decided to "
+            "call off the " S_COLOR_YELLOW "%s" S_COLOR_WHITE " vote\n\"",
+            ent->client->pers.netname, level.voteDisplayString[ team ] ) );
+
+      // force all voting clients to be counted as No votes
+      level.voteNo[ team ] = level.numVotingClients[ team ];
+      level.voteYes[ team ] = 0;
+      G_CheckVote( team );
+      return;
+    }
+    else
+    {
+      trap_SendServerCommand( ent-g_entities,
+          va( "print \"%s: a vote is already in progress\n\"", cmd ) );
+      return;
+    }
   }
 
   // protect against the dreaded exploit of '\n'-interpretation inside quotes
@@ -1466,8 +1492,9 @@ void Cmd_CallVote_f( gentity_t *ent )
     else
     {
       trap_SendServerCommand( ent-g_entities, "print \"Invalid vote string\n\"" );
-      trap_SendServerCommand( ent-g_entities, "print \"Valid vote commands are: "
-        "map, nextmap, map_restart, draw, sudden_death, kick, mute and unmute\n" );
+      trap_SendServerCommand( ent-g_entities, "print \"Valid vote commands "
+          "are: map, nextmap, map_restart, draw, sudden_death, kick, mute, "
+          "unmute and cancel\n" );
       return;
     }
   }
@@ -1523,9 +1550,8 @@ void Cmd_CallVote_f( gentity_t *ent )
   else
   {
     trap_SendServerCommand( ent-g_entities, "print \"Invalid vote string\n\"" );
-    trap_SendServerCommand( ent-g_entities,
-       "print \"Valid team vote commands are: "
-       "kick, denybuild, allowbuild and admitdefeat\n\"" );
+    trap_SendServerCommand( ent-g_entities, "print \"Valid team vote commands "
+        "are: kick, denybuild, allowbuild, admitdefeat and cancel\n" );
     return;
   }
 
@@ -1575,6 +1601,18 @@ void Cmd_CallVote_f( gentity_t *ent )
     level.voteDisplayString[ team ] );
   trap_SetConfigstring( CS_VOTE_CALLER + team,
     caller );
+
+  // issue a special message about mute and the virtues of /ignore
+  if( !Q_stricmp( vote, "mute" ) )
+    trap_SendServerCommand( ent-g_entities,
+        va( "print \"" S_COLOR_RED "WARNING: " S_COLOR_WHITE
+          "Muting other players will severely affect their ability to "
+          "communicate with other players. If this is a personal dispute, "
+          "consider using /ignore on the person. In order to cancel your "
+          "vote, please use " S_COLOR_YELLOW "/%s cancel\n\"", cmd ) );
+
+  // record the client that called this vote
+  level.voteCaller[ team ] = ent->client;
 
   ent->client->pers.namelog->voteCount++;
   ent->client->pers.vote |= 1 << team;
