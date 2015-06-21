@@ -1013,6 +1013,7 @@ void G_LevelRestart( qboolean stopWarmup );
 void G_LevelReady( void );
 void G_Vote( gentity_t *ent, team_t team, qboolean voting );
 void G_ExecuteVote( team_t team );
+void G_EndVote( team_t team, qboolean cancel );
 void G_CheckVote( team_t team );
 void LogExit( const char *string );
 int  G_TimeTilSuddenDeath( void );

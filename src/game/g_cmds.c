@@ -1219,9 +1219,7 @@ void Cmd_CallVote_f( gentity_t *ent )
             ent->client->pers.netname, level.voteDisplayString[ team ] ) );
 
       // force all voting clients to be counted as No votes
-      level.voteNo[ team ] = level.numVotingClients[ team ];
-      level.voteYes[ team ] = 0;
-      G_CheckVote( team );
+      G_EndVote( team, qtrue );
       return;
     }
     else

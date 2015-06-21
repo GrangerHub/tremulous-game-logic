@@ -2336,31 +2336,37 @@ void G_CheckVote( team_t team )
   if( !level.voteTime[ team ] )
     return;
 
-  if( ( level.time - level.voteTime[ team ] >= VOTE_TIME ) ||
-      ( level.voteYes[ team ] + level.voteNo[ team ] == level.numVotingClients[ team ] ) )
+  // Recalculate number of voting clients if there are players in teams
+  // and only count client as a voting client if they are either
+  // (a) a non-spectator, or
+  // (b) a spectator who has voted
+  for( i = 0; i < level.maxclients; i++ )
   {
-    // Recalculate number of voting clients if there are players in teams
-    // and only count client as a voting client if they are either
-    // (a) a non-spectator, or
-    // (b) a spectator who has voted
-    if( ( level.numAlienClients + level.numHumanClients ) > 0 )
+    if ( level.clients[ i ].pers.connected != CON_DISCONNECTED )
     {
-      for( i = 0; i < level.maxclients; i++ )
+      switch( team )
       {
-        if ( level.clients[ i ].pers.connected != CON_DISCONNECTED )
-        {
+        case TEAM_ALIENS:
+        case TEAM_HUMANS:
+          if( level.clients[ i ].pers.teamSelection == team &&
+              level.clients[ i ].pers.voted & ( 1 << team ) )
+            numCountedVotingClients++;
+          break;
+        default:
           if( level.clients[ i ].pers.teamSelection != TEAM_NONE ||
               ( level.clients[ i ].pers.teamSelection == TEAM_NONE &&
                 level.clients[ i ].pers.voted & ( 1 << TEAM_NONE ) ) )
-          {
             numCountedVotingClients++;
-          }
-        }
+          break;
       }
     }
+  }
 
+  if( ( level.time - level.voteTime[ team ] >= VOTE_TIME ) ||
+      ( level.voteYes[ team ] + level.voteNo[ team ] == level.numVotingClients[ team ] ) )
+  {
     pass = ( level.voteYes[ team ] &&
-             (float)level.voteYes[ team ] / numCountedVotingClients > votePassThreshold );
+        (float)level.voteYes[ team ] / numCountedVotingClients > votePassThreshold );
   }
   else
   {
@@ -2370,7 +2376,7 @@ void G_CheckVote( team_t team )
       pass = qtrue;
     }
     else if( (float)level.voteNo[ team ] <=
-             (float)level.numVotingClients[ team ] * ( 1.0f - votePassThreshold ) )
+        (float)level.numVotingClients[ team ] * ( 1.0f - votePassThreshold ) )
     {
       return;
     }
@@ -2380,16 +2386,16 @@ void G_CheckVote( team_t team )
     level.voteExecuteTime[ team ] = level.time + level.voteDelay[ team ];
 
   G_LogPrintf( "EndVote: %s %s %d %d %d\n",
-    team == TEAM_NONE ? "global" : BG_TeamName( team ),
-    pass ? "pass" : "fail",
-    level.voteYes[ team ], level.voteNo[ team ], level.numVotingClients[ team ] );
+      team == TEAM_NONE ? "global" : BG_TeamName( team ),
+      pass ? "pass" : "fail",
+      level.voteYes[ team ], level.voteNo[ team ], level.numVotingClients[ team ] );
 
   abstained = numCountedVotingClients - level.voteYes[ team ] -
-              level.voteNo[ team ];
+    level.voteNo[ team ];
 
-  msg = va( "print \"%sote %sed (%d yea, %d nay and %d abstained)\n\"",
-            team == TEAM_NONE ? "V" : "Team v", pass ? "pass" : "fail",
-            level.voteYes[ team ], level.voteNo[ team ], abstained );
+  msg = va( "print \"%sote %sed (%d for, %d against and %d abstained)\n\"",
+      team == TEAM_NONE ? "V" : "Team v", pass ? "pass" : "fail",
+      level.voteYes[ team ], level.voteNo[ team ], abstained );
 
   if( team == TEAM_NONE )
     trap_SendServerCommand( -1, msg );
@@ -2409,6 +2415,37 @@ void G_CheckVote( team_t team )
   trap_SetConfigstring( CS_VOTE_NO + team, "0" );
 }
 
+
+/*
+==================
+G_EndVote
+==================
+*/
+void G_EndVote( team_t team, qboolean cancel )
+{
+  int i;
+
+  for( i = 0; i < level.maxclients; i++ )
+  {
+    if ( level.clients[ i ].pers.connected != CON_DISCONNECTED )
+    {
+      if ( team == TEAM_NONE || level.clients[ i ].pers.teamSelection == team )
+      {
+        if( cancel )
+          level.clients[ i ].pers.vote &= ~( 1 << team );
+        else
+          level.clients[ i ].pers.vote |= 1 << team;
+
+        level.clients[ i ].pers.voted |= 1 << team;
+      }
+    }
+  }
+
+  level.voteNo[ team ] = cancel ? level.numVotingClients[ team ] : 0;
+  level.voteYes[ team ] = cancel ? 0 : level.numVotingClients[ team ];
+
+  G_CheckVote( team );
+}
 
 /*
 ==================

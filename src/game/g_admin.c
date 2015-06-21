@@ -2720,9 +2720,7 @@ qboolean G_admin_endvote( gentity_t *ent )
     return qfalse;
   }
   admin_log( BG_TeamName( team ) );
-  level.voteNo[ team ] = cancel ? level.numVotingClients[ team ] : 0;
-  level.voteYes[ team ] = cancel ? 0 : level.numVotingClients[ team ];
-  G_CheckVote( team );
+  G_EndVote( team, cancel );
   if( team == TEAM_NONE )
     AP( msg );
   else
