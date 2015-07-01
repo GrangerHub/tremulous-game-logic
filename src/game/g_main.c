@@ -87,6 +87,8 @@ vmCvar_t  pmove_msec;
 vmCvar_t  g_minNameChangePeriod;
 vmCvar_t  g_maxNameChanges;
 
+vmCvar_t  g_allowShare;
+
 vmCvar_t  g_alienBuildPoints;
 vmCvar_t  g_alienBuildQueueTime;
 vmCvar_t  g_humanBuildPoints;
@@ -226,6 +228,8 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_suddenDeathVoteDelay, "g_suddenDeathVoteDelay", "180", CVAR_ARCHIVE, 0, qfalse },
   { &g_minNameChangePeriod, "g_minNameChangePeriod", "5", 0, 0, qfalse},
   { &g_maxNameChanges, "g_maxNameChanges", "5", 0, 0, qfalse},
+
+  { &g_allowShare, "g_allowShare", "0", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qfalse},
 
   { &g_smoothClients, "g_smoothClients", "1", 0, 0, qfalse},
   { &pmove_fixed, "pmove_fixed", "0", CVAR_SYSTEMINFO, 0, qfalse},
@@ -2583,7 +2587,7 @@ void G_RunFrame( int levelTime )
       trap_SendServerCommand( -1, "cp \"The game has been paused. Please wait.\"" );
 
       if( level.pausedTime >= 110000  && level.pausedTime <= 119000 )
-        trap_SendServerCommand( -1, va( "print \"Server: Game will auto-unpause in %d seconds\n\"", 
+        trap_SendServerCommand( -1, va( "print \"Server: Game will auto-unpause in %d seconds\n\"",
           (int) ( (float) ( 120000 - level.pausedTime ) / 1000.0f ) ) );
     }
 

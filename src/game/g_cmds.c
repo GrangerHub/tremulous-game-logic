@@ -413,7 +413,7 @@ void Cmd_Give_f( gentity_t *ent )
     else
     {
       credits = atof( name + 6 ) *
-        ( ent->client->pers.teamSelection == 
+        ( ent->client->pers.teamSelection ==
           TEAM_ALIENS ? ALIEN_CREDITS_PER_KILL : 1.0f );
 
       // clamp credits manually, as G_AddCreditToClient() expects a short int
@@ -615,7 +615,7 @@ void Cmd_Team_f( gentity_t *ent )
     humans--;
 
   // stop team join spam
-  if( ent->client->pers.teamChangeTime && 
+  if( ent->client->pers.teamChangeTime &&
       level.time - ent->client->pers.teamChangeTime < 1000 )
     return;
 
@@ -1292,8 +1292,8 @@ void Cmd_CallVote_f( gentity_t *ent )
         G_AdminMessage( NULL, va( S_COLOR_WHITE "%s" S_COLOR_YELLOW " attempted %s %s"
                                 " on immune admin " S_COLOR_WHITE "%s" S_COLOR_YELLOW
                                 " for: %s",
-                                ent->client->pers.netname, cmd, vote, 
-                                g_entities[ clientNum ].client->pers.netname, 
+                                ent->client->pers.netname, cmd, vote,
+                                g_entities[ clientNum ].client->pers.netname,
                                 reason[ 0 ] ? reason : "no reason" ) );
         return;
       }
@@ -1581,9 +1581,9 @@ void Cmd_CallVote_f( gentity_t *ent )
         }
         else if( G_admin_permission( &g_entities[ i ], ADMF_ADMINCHAT ) )
         {
-          trap_SendServerCommand( i, va( "chat -1 %d \"" S_COLOR_YELLOW "%s" 
+          trap_SendServerCommand( i, va( "chat -1 %d \"" S_COLOR_YELLOW "%s"
             S_COLOR_YELLOW " called a team vote (%ss): %s\"", SAY_ADMINS,
-            ent->client->pers.netname, BG_TeamName( team ), 
+            ent->client->pers.netname, BG_TeamName( team ),
             level.voteDisplayString[ team ] ) );
         }
       }
@@ -2351,7 +2351,7 @@ void Cmd_Buy_f( gentity_t *ent )
     }
 
     //are we /allowed/ to buy this?
-    if( !BG_UpgradeAllowedInStage( upgrade, g_humanStage.integer, IS_WARMUP ) || !BG_UpgradeIsAllowed( upgrade ) ) 
+    if( !BG_UpgradeAllowedInStage( upgrade, g_humanStage.integer, IS_WARMUP ) || !BG_UpgradeIsAllowed( upgrade ) )
     {
       trap_SendServerCommand( ent-g_entities, "print \"You can't buy this item\n\"" );
       return;
@@ -3209,6 +3209,269 @@ void Cmd_Damage_f( gentity_t *ent )
 }
 
 /*
+=================
+Cmd_Share_f
+=================
+*/
+void Cmd_Share_f( gentity_t *ent )
+{
+  int    clientNum = -1,
+         creds = 0;
+  char   cmd[ MAX_TOKEN_CHARS ],
+         target[ MAX_STRING_TOKENS ],
+         amount[ MAX_STRING_TOKENS ];
+  team_t team;
+  char   err[ MAX_STRING_TOKENS ];
+
+  if( !ent || !ent->client || ( ent->client->pers.teamSelection == TEAM_NONE ) )
+  {
+    return;
+  }
+
+  if( !g_allowShare.integer )
+  {
+    trap_SendServerCommand( ent-g_entities, "print \"Share has been disabled.\n\"" );
+    return;
+  }
+
+  team = ent->client->pers.teamSelection;
+
+  if( trap_Argc( ) < 3 )
+  {
+    ADMP( va( "usage: %s [name|slot#] [amount]\n", cmd ) );
+  }
+
+  trap_Argv( 0, cmd, sizeof( cmd ) );
+  trap_Argv( 1, target, sizeof( target ) );
+  trap_Argv( 2, amount, sizeof( amount ) );
+
+  clientNum = G_ClientNumberFromString( target, err, sizeof( err ) );
+  if( clientNum == -1 )
+  {
+    ADMP( va( "%s: %s", cmd, err ) );
+    return;
+  }
+
+  // verify target player team
+  if( ( clientNum < 0 ) || ( clientNum >= level.maxclients ) ||
+      ( level.clients[ clientNum ].pers.teamSelection != team ) )
+  {
+    ADMP( va( "%s: %s is not on your team\n", cmd,
+          level.clients[ clientNum ].pers.netname ) );
+    return;
+  }
+
+  // default credit count
+  if( team == TEAM_HUMANS )
+  {
+    creds = atoi( amount );
+  }
+  else if( team == TEAM_ALIENS )
+  {
+    creds = ALIEN_CREDITS_PER_KILL * atoi( amount );
+  }
+
+  // player specified "0" to transfer
+  if( creds <= 0 )
+  {
+    ADMP( "Ooh, you are a generous one, indeed!\n" );
+    return;
+  }
+
+  // transfer only credits the player really has
+  if( creds > ent->client->pers.credit )
+  {
+    creds = ent->client->pers.credit;
+  }
+
+  // player has no credits
+  if( ( ( ent->client->pers.teamSelection == TEAM_ALIENS ) &&
+        ( creds < ALIEN_CREDITS_PER_KILL ) ) || ( creds <= 0 ) )
+  {
+    ADMP( "Earn some more first, you lazy bum!\n" );
+    return;
+  }
+
+  // allow transfers only up to the credit/evo limit
+  if( ( team == TEAM_HUMANS ) &&
+      ( creds > HUMAN_MAX_CREDITS - level.clients[ clientNum ].pers.credit ) )
+  {
+    creds = creds - level.clients[ clientNum ].pers.credit;
+  }
+  else if( ( team == TEAM_ALIENS ) &&
+      ( creds > ALIEN_MAX_FRAGS - level.clients[ clientNum ].pers.credit ) )
+  {
+    creds = creds - level.clients[ clientNum ].pers.credit;
+  }
+
+  // target cannot take any more credits
+  if( creds <= 0 )
+  {
+    ADMP( va( "%s: %s cannot receive any more %s\n", cmd,
+          level.clients[ clientNum ].pers.netname,
+          team == TEAM_HUMANS ? "credits" : "evos" ) );
+    return;
+  }
+
+  // transfer credits
+  G_AddCreditToClient( ent->client, -creds, qfalse );
+  ADMP( va( "%s: transferred %d %s to %s^7.\n\"", cmd, creds,
+        ( team == TEAM_HUMANS ) ? "credits" : "evos",
+        level.clients[ clientNum ].pers.netname ) );
+  G_AddCreditToClient( &(level.clients[ clientNum ]), creds, qtrue );
+  trap_SendServerCommand( clientNum,
+      va( "print \"You have received %d %s from %s^7.\n\"", creds,
+        ( team == TEAM_HUMANS ) ? "credits" : "evos",
+        ent->client->pers.netname ) );
+
+  G_LogPrintf( "Share: %i %i %i %d: %s^7 transferred %d%s to %s^7\n",
+      ent->client->ps.clientNum,
+      clientNum,
+      team,
+      atoi( amount ),
+      ent->client->pers.netname,
+      atoi( amount ),
+      ( team == TEAM_HUMANS ) ? "credits" : "evos",
+      level.clients[ clientNum ].pers.netname );
+}
+
+/*
+=================
+Cmd_Donate_f
+
+Alms for the poor
+=================
+*/
+void Cmd_Donate_f( gentity_t *ent )
+{
+   char cmd[ MAX_TOKEN_CHARS ], donateAmount[ MAX_TOKEN_CHARS ], *type;
+   int i, value, divisor, portion, new_credits, total=0, max,
+       amounts[ MAX_CLIENTS ], totals[ MAX_CLIENTS ];
+   qboolean donated = qtrue;
+
+  if( !ent->client )
+    return;
+
+  trap_Argv( 0, cmd, sizeof( cmd ) );
+
+  if( !g_allowShare.integer )
+  {
+    ADMP( "Donate has been disabled.\n" );
+    return;
+  }
+
+  if( ent->client->pers.teamSelection == TEAM_ALIENS )
+  {
+    divisor = level.numAlienClients - 1;
+    max = ALIEN_MAX_FRAGS;
+    type = "evo(s)";
+  }
+  else if( ent->client->pers.teamSelection == TEAM_HUMANS )
+  {
+    divisor = level.numHumanClients - 1;
+    max = HUMAN_MAX_CREDITS;
+    type = "credit(s)";
+  }
+  else
+  {
+    ADMP( va( "%s: spectators cannot be so gracious\n", cmd ) );
+    return;
+  }
+
+  if( divisor < 1 )
+  {
+    ADMP( va( "%s: get yourself some teammates first\n", cmd ) );
+    return;
+  }
+
+  if( trap_Argc( ) < 2 )
+  {
+    ADMP( va( "usage: %s [amount]\n", cmd ) );
+    return;
+  }
+
+  trap_Argv( 1, donateAmount, sizeof( donateAmount ) );
+  value = atoi( donateAmount );
+
+  if( value > ent->client->pers.credit /
+      ( ent->client->pers.teamSelection == TEAM_ALIENS
+        ? ALIEN_CREDITS_PER_KILL : 1 ) )
+    value = ent->client->pers.credit /
+      ( ent->client->pers.teamSelection == TEAM_ALIENS
+        ? ALIEN_CREDITS_PER_KILL : 1 );
+
+  if( value <= 0 )
+  {
+    ADMP( va( "%s: very funny\n", cmd ) );
+    return;
+  }
+
+  for( i = 0; i < level.maxclients; i++ )
+  {
+    amounts[ i ] = 0;
+    totals[ i ] = 0;
+  }
+
+  // determine donation amounts for each client
+  total = value;
+  while( donated && value )
+  {
+    donated = qfalse;
+    portion = value / divisor;
+    if( portion < 1 )
+      portion = 1;
+    for( i = 0; i < level.maxclients; i++ )
+    {
+      if( level.clients[ i ].pers.connected == CON_CONNECTED &&
+          ent->client != level.clients + i &&
+          level.clients[ i ].pers.teamSelection ==
+          ent->client->pers.teamSelection )
+      {
+        new_credits = level.clients[ i ].pers.credit /
+          ( ent->client->pers.teamSelection == TEAM_ALIENS
+            ? ALIEN_CREDITS_PER_KILL : 1 ) + portion;
+        amounts[ i ] = portion;
+        totals[ i ] += portion;
+
+        if( new_credits > max )
+        {
+          amounts[ i ] -= new_credits - max;
+          totals[ i ] -= new_credits - max;
+          new_credits = max;
+        }
+
+        if( amounts[ i ] )
+        {
+          G_AddCreditToClient( &(level.clients[ i ]), amounts[ i ] *
+              ( ent->client->pers.teamSelection == TEAM_ALIENS
+                ? ALIEN_CREDITS_PER_KILL : 1 ), qtrue );
+          donated = qtrue;
+          value -= amounts[ i ];
+          if( value < portion )
+            break;
+        }
+      }
+    }
+  }
+
+  // transfer funds
+  G_AddCreditToClient( ent->client, ( value - total ) *
+      ( ent->client->pers.teamSelection == TEAM_ALIENS
+        ? ALIEN_CREDITS_PER_KILL : 1 ), qtrue );
+  for( i = 0; i < level.maxclients; i++ )
+  {
+    if( totals[ i ] )
+    {
+      trap_SendServerCommand( i,
+          va( "print \"%s^7 donated %d %s to you, don't forget to say 'thank you'!\n\"",
+            ent->client->pers.netname, totals[ i ], type ) );
+    }
+  }
+
+  ADMP( va( "Donated %d %s to the cause.\n", total - value, type ) );
+}
+
+/*
 ==================
 G_FloodLimited
 
@@ -3254,6 +3517,7 @@ commands_t cmds[ ] = {
   { "damage", CMD_CHEAT|CMD_ALIVE, Cmd_Damage_f },
   { "deconstruct", CMD_TEAM|CMD_ALIVE, Cmd_Destroy_f },
   { "destroy", CMD_CHEAT|CMD_TEAM|CMD_ALIVE, Cmd_Destroy_f },
+  { "donate", CMD_TEAM, Cmd_Donate_f },
   { "follow", CMD_SPEC, Cmd_Follow_f },
   { "follownext", CMD_SPEC, Cmd_FollowCycle_f },
   { "followprev", CMD_SPEC, Cmd_FollowCycle_f },
@@ -3277,6 +3541,7 @@ commands_t cmds[ ] = {
   { "score", CMD_INTERMISSION, ScoreboardMessage },
   { "sell", CMD_HUMAN|CMD_ALIVE, Cmd_Sell_f },
   { "setviewpos", CMD_CHEAT_TEAM, Cmd_SetViewpos_f },
+  { "share", CMD_TEAM, Cmd_Share_f },
   { "team", 0, Cmd_Team_f },
   { "teamvote", CMD_TEAM, Cmd_Vote_f },
   { "test", CMD_CHEAT, Cmd_Test_f },
