@@ -127,7 +127,7 @@ playMapError_t G_PlayMapErrorByCode( int errorCode )
 
 /*
  * playmap pool utility functions
- */ 
+ */
 
 // server's map pool cache
 static playMapPool_t playMapPoolCache;
@@ -333,7 +333,7 @@ int G_FindInMapPool( char *mapname )
 
 /*
  * playmap queue utility functions
- */ 
+ */
 
 // current map queue
 static playMapQueue_t playMapQueue;
