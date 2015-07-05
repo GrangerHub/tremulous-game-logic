@@ -2258,7 +2258,7 @@ void Cmd_Buy_f( gentity_t *ent )
     }
 
     //are we /allowed/ to buy this?
-    if( !IS_WARMUP && !BG_Weapon( weapon )->purchasable )
+    if( !BG_Weapon( weapon )->purchasable )
     {
       trap_SendServerCommand( ent-g_entities, "print \"You can't buy this item\n\"" );
       return;
@@ -2344,7 +2344,7 @@ void Cmd_Buy_f( gentity_t *ent )
     }
 
     //are we /allowed/ to buy this?
-    if( !IS_WARMUP && !BG_Upgrade( upgrade )->purchasable )
+    if( !BG_Upgrade( upgrade )->purchasable )
     {
       trap_SendServerCommand( ent-g_entities, "print \"You can't buy this item\n\"" );
       return;
