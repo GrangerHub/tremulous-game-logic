@@ -3216,7 +3216,7 @@ Cmd_Share_f
 void Cmd_Share_f( gentity_t *ent )
 {
   int    clientNum = -1,
-         creds = 0;
+         shareAmount = 0;
   char   cmd[ MAX_TOKEN_CHARS ],
          target[ MAX_STRING_TOKENS ],
          amount[ MAX_STRING_TOKENS ];
@@ -3261,51 +3261,54 @@ void Cmd_Share_f( gentity_t *ent )
     return;
   }
 
-  // default credit count
-  if( team == TEAM_HUMANS )
+  // prevent sharing with one's self
+  if( &level.clients[ clientNum ] == ent->client )
   {
-    creds = atoi( amount );
-  }
-  else if( team == TEAM_ALIENS )
-  {
-    creds = ALIEN_CREDITS_PER_KILL * atoi( amount );
-  }
-
-  // player specified "0" to transfer
-  if( creds <= 0 )
-  {
-    ADMP( "Ooh, you are a generous one, indeed!\n" );
+    ADMP( va( "%s: Seems a bit pointless sharing with yourself, no?\n", cmd ) );
     return;
   }
 
-  // transfer only credits the player really has
-  if( creds > ent->client->pers.credit )
+  // default credit count
+  shareAmount = atoi( amount );
+
+  // player specified "0" to transfer
+  if( shareAmount <= 0 )
   {
-    creds = ent->client->pers.credit;
+    ADMP( va( "%s: Ooh, you are a generous one, indeed!\n", cmd ) );
+    return;
+  }
+
+  // transfer at most only credits/evos the player really has
+  if( shareAmount > ( ent->client->pers.credit /
+        ( team == TEAM_ALIENS ? ALIEN_CREDITS_PER_KILL : 1 ) ) )
+  {
+    shareAmount = ent->client->pers.credit /
+      ( team == TEAM_ALIENS ? ALIEN_CREDITS_PER_KILL : 1 );
   }
 
   // player has no credits
-  if( ( ( ent->client->pers.teamSelection == TEAM_ALIENS ) &&
-        ( creds < ALIEN_CREDITS_PER_KILL ) ) || ( creds <= 0 ) )
+  if( shareAmount < 1 )
   {
-    ADMP( "Earn some more first, you lazy bum!\n" );
+    ADMP( va( "%s: Earn some more first, you lazy bum!\n", cmd ) );
     return;
   }
 
   // allow transfers only up to the credit/evo limit
-  if( ( team == TEAM_HUMANS ) &&
-      ( creds > HUMAN_MAX_CREDITS - level.clients[ clientNum ].pers.credit ) )
+  if( team == TEAM_HUMANS &&
+      shareAmount > ( HUMAN_MAX_CREDITS - level.clients[ clientNum ].pers.credit ) )
   {
-    creds = creds - level.clients[ clientNum ].pers.credit;
+    shareAmount = shareAmount - level.clients[ clientNum ].pers.credit;
   }
-  else if( ( team == TEAM_ALIENS ) &&
-      ( creds > ALIEN_MAX_FRAGS - level.clients[ clientNum ].pers.credit ) )
+  else if( team == TEAM_ALIENS &&
+      shareAmount > ( ALIEN_MAX_FRAGS -
+        level.clients[ clientNum ].pers.credit / ALIEN_CREDITS_PER_KILL ) )
   {
-    creds = creds - level.clients[ clientNum ].pers.credit;
+    shareAmount = shareAmount - level.clients[ clientNum ].pers.credit /
+      ALIEN_CREDITS_PER_KILL;
   }
 
   // target cannot take any more credits
-  if( creds <= 0 )
+  if( shareAmount <= 0 )
   {
     ADMP( va( "%s: %s cannot receive any more %s\n", cmd,
           level.clients[ clientNum ].pers.netname,
@@ -3313,17 +3316,22 @@ void Cmd_Share_f( gentity_t *ent )
     return;
   }
 
-  // transfer credits
-  G_AddCreditToClient( ent->client, -creds, qfalse );
-  ADMP( va( "%s: transferred %d %s to %s^7.\n\"", cmd, creds,
+  // deduct credits from sharing client and show it on their console
+  G_AddCreditToClient( ent->client,
+      -shareAmount * ( team == TEAM_ALIENS ? ALIEN_CREDITS_PER_KILL : 1 ), qfalse );
+  ADMP( va( "%s: transferred %d %s to %s^7.\n\"", cmd, shareAmount,
         ( team == TEAM_HUMANS ) ? "credits" : "evos",
         level.clients[ clientNum ].pers.netname ) );
-  G_AddCreditToClient( &(level.clients[ clientNum ]), creds, qtrue );
+
+  // add credits to recipient and show it on their console
+  G_AddCreditToClient( &(level.clients[ clientNum ]),
+      shareAmount * ( team == TEAM_ALIENS ? ALIEN_CREDITS_PER_KILL : 1 ), qtrue );
   trap_SendServerCommand( clientNum,
-      va( "print \"You have received %d %s from %s^7.\n\"", creds,
+      va( "print \"You have received %d %s from %s^7.\n\"", shareAmount,
         ( team == TEAM_HUMANS ) ? "credits" : "evos",
         ent->client->pers.netname ) );
 
+  // output the share on the server console
   G_LogPrintf( "Share: %i %i %i %d: %s^7 transferred %d%s to %s^7\n",
       ent->client->ps.clientNum,
       clientNum,
