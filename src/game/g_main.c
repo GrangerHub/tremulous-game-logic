@@ -2352,8 +2352,7 @@ void G_CheckVote( team_t team )
       {
         case TEAM_ALIENS:
         case TEAM_HUMANS:
-          if( level.clients[ i ].pers.teamSelection == team &&
-              level.clients[ i ].pers.voted & ( 1 << team ) )
+          if( level.clients[ i ].pers.teamSelection == team )
             numCountedVotingClients++;
           break;
         default:
