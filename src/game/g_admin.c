@@ -3286,7 +3286,7 @@ qboolean G_admin_playpool( gentity_t *ent )
 
   if( trap_Argc( ) < 2 )
   {
-    ADMP( "^3playpool: ^7usage: playmap [^5add (mapname)|remove (mapname)|clear|reload|save^7]\n" );
+    ADMP( "^3playpool: ^7usage: playpool [^5add (mapname)|remove (mapname)|clear|reload|save^7]\n" );
     return qfalse;
   }
 
@@ -3296,7 +3296,7 @@ qboolean G_admin_playpool( gentity_t *ent )
   {
     if( trap_Argc( ) < 3 )
     {
-      ADMP( "^3playpool: ^7usage: playmap add (^5mapname^7)\n" );
+      ADMP( "^3playpool: ^7usage: playpool add (^5mapname^7)\n" );
       return qfalse;
     }
 
@@ -3322,7 +3322,7 @@ qboolean G_admin_playpool( gentity_t *ent )
   {
     if( trap_Argc( ) < 3 )
     {
-      ADMP( "^3playpool: ^7usage: playmap remove (^5mapname^7)\n" );
+      ADMP( "^3playpool: ^7usage: playpool remove (^5mapname^7)\n" );
       return qfalse;
     }
 
@@ -3377,7 +3377,7 @@ qboolean G_admin_playpool( gentity_t *ent )
     return qtrue;
   }
 
-  ADMP( "^3playpool: ^7usage: playmap [^5add (mapname)|remove (mapname)|clear|reload|save^7]\n" );
+  ADMP( "^3playpool: ^7usage: playpool [^5add (mapname)|remove (mapname)|clear|reload|save^7]\n" );
   return qfalse;
 }
 
