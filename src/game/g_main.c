@@ -693,6 +693,8 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
   BG_InitBuildableConfigs( );
   G_InitDamageLocations( );
   G_InitMapRotations( );
+  G_ReloadPlayMapPool();
+  G_InitPlayMapQueue();
   G_InitSpawnQueue( &level.alienSpawnQueue );
   G_InitSpawnQueue( &level.humanSpawnQueue );
 
@@ -1694,7 +1696,7 @@ void ExitLevel( void )
   }
   else if( G_MapRotationActive( ) )
     G_AdvanceMapRotation( 0 );
-  else
+  else // Otherwise just restart current map
   {
     char map[ MAX_CVAR_VALUE_STRING ];
     trap_Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
@@ -1705,7 +1707,8 @@ void ExitLevel( void )
   trap_Cvar_Set( "g_nextMap", "" );
   trap_Cvar_Set( "g_warmup", "1" );
   trap_SetConfigstring( CS_WARMUP, va( "%d", IS_WARMUP ) );
-
+  G_SavePlayMapPool();
+  
   level.restarted = qtrue;
   level.changemap = NULL;
   level.intermissiontime = 0;
