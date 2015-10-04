@@ -63,8 +63,9 @@ typedef enum
  * PLAYMAP QUEUE
  */
 
-#define PLAYMAP_QUEUE_PLUS1(x)  ( ( ( x ) + 1 ) % MAX_PLAYMAP_POOL_ENTRIES )
-#define PLAYMAP_QUEUE_MINUS1(x) ( ( ( x ) + MAX_PLAYMAP_POOL_ENTRIES - 1 ) % MAX_PLAYMAP_POOL_ENTRIES )
+#define PLAYMAP_QUEUE_ADD(x,y)  ( ( ( x ) + ( y ) ) % MAX_PLAYMAP_POOL_ENTRIES )
+#define PLAYMAP_QUEUE_PLUS1(x)  PLAYMAP_QUEUE_ADD(x,1)
+#define PLAYMAP_QUEUE_MINUS1(x) PLAYMAP_QUEUE_ADD(x,-1)
 #define PLAYMAP_QUEUE_IS_EMPTY  ( G_GetPlayMapQueueLength() < 1 )
 #define PLAYMAP_QUEUE_IS_FULL  ( G_GetPlayMapQueueLength() >= ( MAX_PLAYMAP_POOL_ENTRIES - 1 ) )
 
@@ -148,3 +149,4 @@ playMap_t *G_PopFromPlayMapQueue( void );
 playMapError_t G_RemoveFromPlayMapQueue( int index );
 int G_GetPlayMapQueueIndexByMapName( char *mapname );
 int G_GetPlayMapQueueIndexByClient( gclient_t *client );
+void G_PrintPlayMapQueue( gentity_t *ent );

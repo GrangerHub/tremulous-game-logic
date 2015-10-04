@@ -490,8 +490,8 @@ playMapError_t G_PlayMapEnqueue( char *mapname, char *layout, gclient_t
     }
   }
 
-  playMapQueue.playMap[ playMapQueue.tail ] = playMap;
   playMapQueue.tail = PLAYMAP_QUEUE_PLUS1( playMapQueue.tail );
+  playMapQueue.playMap[ playMapQueue.tail ] = playMap;
   playMapQueue.numEntries++;
 
   return G_PlayMapErrorByCode( PLAYMAP_ERROR_NONE );
@@ -573,10 +573,10 @@ int G_GetPlayMapQueueIndexByMapName( char *mapname )
 {
   int i;
 
-  for( i = 0; i < sizeof( playMapQueue.playMap ); i++ )
+  for( i = 0; i < G_GetPlayMapQueueLength(); i++ )
   {
-    if( sizeof( playMapQueue.playMap[ i ].mapname ) &&
-        Q_stricmp( playMapQueue.playMap[ i ].mapname, mapname ) == 0 )
+    if( Q_stricmp( playMapQueue.playMap[ PLAYMAP_QUEUE_ADD(playMapQueue.head, i)
+					 ].mapname, mapname ) == 0 )
       return i;
   }
 
@@ -595,13 +595,43 @@ int G_GetPlayMapQueueIndexByClient( gclient_t *client )
 {
   int i;
 
-  for( i = 0; i < sizeof( playMapQueue.playMap ); i++ )
+  for( i = 0; i < G_GetPlayMapQueueLength(); i++ )
   {
-    if( sizeof( playMapQueue.playMap[ i ] ) > 0 &&
-        playMapQueue.playMap[ i ].client == client )
+    if( playMapQueue.playMap[ PLAYMAP_QUEUE_ADD(playMapQueue.head, i) ].client == client )
       return i;
   }
 
   // client's map was not found in the queue
   return -1;
+}
+
+/*
+================
+G_PrintPlayMapQueue
+
+Print the playmap queue on the console
+================
+*/
+void G_PrintPlayMapQueue( gentity_t *ent )
+{
+  int i, len;
+
+  ADMBP_begin(); // begin buffer
+  
+  if ( ( len = G_GetPlayMapQueueLength() ) ) {
+    ADMBP( "Maps that are currently in the queue:\n" );
+  } else {
+    ADMBP( va( "%s\n",
+	       G_PlayMapErrorByCode(PLAYMAP_ERROR_MAP_QUEUE_EMPTY).errorMessage) );
+    return;
+  }
+
+  for( i = 0; i < len; i++ )
+  {
+    ADMBP( va( "^3%d.^7 ^5%s^7 (added by %s)\n", i + 1,
+	       playMapQueue.playMap[ PLAYMAP_QUEUE_ADD(playMapQueue.head, i) ].mapname,
+	       ent.client->pers.netname ) );
+  }
+
+  ADMBP_end();
 }

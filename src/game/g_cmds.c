@@ -3488,8 +3488,16 @@ void Cmd_PlayMap_f( gentity_t *ent )
          layout[ MAX_TOKEN_CHARS ],
          extra[ MAX_TOKEN_CHARS ];
   char   *flags;
+  playMapError_t playMapError;
 
   trap_Argv( 0, cmd, sizeof( cmd ) );
+
+  if( trap_Argc( ) < 2 )
+  {
+    G_PrintPlayMapQueue( ent );
+    return;
+  }
+  
   trap_Argv( 1, map, sizeof( map ) );
   trap_Argv( 2, layout, sizeof( layout ) );
   trap_Argv( 3, extra, sizeof( extra ) );
@@ -3502,7 +3510,13 @@ void Cmd_PlayMap_f( gentity_t *ent )
                   "       flags=%s\n\"",
                   cmd, map, layout, flags ) );
 
-  G_PlayMapEnqueue( map, layout, ent->client, flags );
+  playMapError = G_PlayMapEnqueue( map, layout, ent->client, flags );
+  if (playMapError.errorCode == PLAYMAP_ERROR_NONE) {
+    ADMP( va( "Map %s was successfully added to playmap queue by %s.\n",
+	      map, ent->client->pers.netname ) );
+  } else 
+    ADMP( va( "%s\n", playMapError.errorMessage ) );
+  
 }
 
 /*
