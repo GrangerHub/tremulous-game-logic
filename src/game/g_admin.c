@@ -3360,7 +3360,7 @@ qboolean G_admin_playpool( gentity_t *ent )
       return qfalse;
     }
 
-    ADMP( va( "^3playpool: ^7saved playmap pool to '%s'.\n", g_playMapConfig.string ) );
+    ADMP( va( "^3playpool: ^7saved playmap pool to '%s'.\n", g_playMapPoolConfig.string ) );
     return qtrue;
   }
 
@@ -3373,7 +3373,7 @@ qboolean G_admin_playpool( gentity_t *ent )
       return qfalse;
     }
 
-    ADMP( va( "^3playpool: ^7reloaded playmap pool from '%s'.\n", g_playMapConfig.string ) );
+    ADMP( va( "^3playpool: ^7reloaded playmap pool from '%s'.\n", g_playMapPoolConfig.string ) );
     return qtrue;
   }
 

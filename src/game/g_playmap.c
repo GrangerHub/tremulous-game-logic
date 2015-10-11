@@ -45,12 +45,12 @@ static const playMapError_t playMapError[ ] =
     ""
   },
   {
-    PLAYMAP_ERROR_CONFIG_UNREADABLE,    /* errorCode */
-    "playmap config file specified by g_playMapConfig is not readable."
+    PLAYMAP_ERROR_POOL_CONFIG_UNREADABLE,    /* errorCode */
+    "playmap pool config file specified by g_playMapPoolConfig is not readable."
   },
   {
-    PLAYMAP_ERROR_NO_CONFIG,            /* errorCode */
-    "g_playMapConfig is not set. playmap pool configuration cannot be saved."
+    PLAYMAP_ERROR_NO_POOL_CONFIG,            /* errorCode */
+    "g_playMapPoolConfig is not set. playmap pool configuration cannot be saved."
   },
   {
     PLAYMAP_ERROR_MAP_POOL_FULL,         /* errorCode */
@@ -71,6 +71,14 @@ static const playMapError_t playMapError[ ] =
   {
     PLAYMAP_ERROR_MAP_NOT_IN_POOL,       /* errorCode */
     "the map you requested is not currently in the map pool"
+  },
+  {
+    PLAYMAP_ERROR_NO_QUEUE_CONFIG,            /* errorCode */
+    "g_playMapQueueConfig is not set. playmap queue configuration cannot be saved."
+  },
+  {
+    PLAYMAP_ERROR_QUEUE_CONFIG_UNREADABLE,    /* errorCode */
+    "playmap queue config file specified by g_playMapQueueConfig is not readable."
   },
   {
     PLAYMAP_ERROR_MAP_NOT_IN_QUEUE,      /* errorCode */
@@ -205,12 +213,12 @@ playMapError_t G_SavePlayMapPool( void )
   fileHandle_t f;
   int i;
 
-  if( !g_playMapConfig.string[ 0 ] )
-    return G_PlayMapErrorByCode( PLAYMAP_ERROR_NO_CONFIG );
+  if( !g_playMapPoolConfig.string[ 0 ] )
+    return G_PlayMapErrorByCode( PLAYMAP_ERROR_NO_POOL_CONFIG );
 
-  if( trap_FS_FOpenFile( g_playMapConfig.string, &f, FS_WRITE ) < 0 )
+  if( trap_FS_FOpenFile( g_playMapPoolConfig.string, &f, FS_WRITE ) < 0 )
   {
-    return G_PlayMapErrorByCode( PLAYMAP_ERROR_CONFIG_UNREADABLE );
+    return G_PlayMapErrorByCode( PLAYMAP_ERROR_POOL_CONFIG_UNREADABLE );
   }
 
   for( i = 0; i < playMapPoolCache.numMaps; i++ )
@@ -242,18 +250,18 @@ playMapError_t G_ReloadPlayMapPool( void )
   int len;
   char *cnf, *cnf2, *mapname;
 
-  if( !g_playMapConfig.string[ 0 ] )
-    return G_PlayMapErrorByCode( PLAYMAP_ERROR_NO_CONFIG );
+  if( !g_playMapPoolConfig.string[ 0 ] )
+    return G_PlayMapErrorByCode( PLAYMAP_ERROR_NO_POOL_CONFIG );
 
   playMapError = G_ClearPlayMapPool();
   if( playMapError.errorCode != PLAYMAP_ERROR_NONE )
     return playMapError;
 
   // read playmap config file
-  len = trap_FS_FOpenFile( g_playMapConfig.string, &f, FS_READ );
+  len = trap_FS_FOpenFile( g_playMapPoolConfig.string, &f, FS_READ );
   if( len < 0 )
   {
-    return G_PlayMapErrorByCode( PLAYMAP_ERROR_CONFIG_UNREADABLE );
+    return G_PlayMapErrorByCode( PLAYMAP_ERROR_POOL_CONFIG_UNREADABLE );
   }
 
   cnf = BG_Alloc( len + 1 );
@@ -262,7 +270,7 @@ playMapError_t G_ReloadPlayMapPool( void )
   cnf[ len ] = '\0';
   trap_FS_FCloseFile( f );
 
-  COM_BeginParseSession( g_playMapConfig.string );
+  COM_BeginParseSession( g_playMapPoolConfig.string );
   while( 1 )
   {
     mapname = COM_Parse( &cnf );
@@ -346,6 +354,77 @@ Initialize the playmap queue. Should only be run once.
 ================
 */
 void G_InitPlayMapQueue( void )
+{
+  int i, j;
+
+  // Reset everything
+  playMapQueue.tail = playMapQueue.head = 0;
+  playMapQueue.tail = PLAYMAP_QUEUE_MINUS1( playMapQueue.tail );
+  playMapQueue.numEntries = 0;
+
+  for( i = 0; i < MAX_PLAYMAP_POOL_ENTRIES; i++ )
+  {
+    // set all values/pointers to NULL
+    playMapQueue.playMap[ i ].mapname = NULL;
+    playMapQueue.playMap[ i ].layout  = NULL;
+    playMapQueue.playMap[ i ].client  = NULL;
+
+    for( j = 0; j < PLAYMAP_NUM_FLAGS; j++ )
+    {
+      playMapQueue.playMap[ i ].plusFlags[ j ]  = PLAYMAP_FLAG_NONE;
+      playMapQueue.playMap[ i ].minusFlags[ j ] = PLAYMAP_FLAG_NONE;
+    }
+  }
+}
+
+/*
+================
+G_SavePlayMapQueue
+
+Initialize the playmap queue. Should only be run once.
+================
+*/
+playMapError_t G_SavePlayMapQueue( void )
+{
+  fileHandle_t f;
+  int i;
+
+  if( !g_playMapQueueConfig.string[ 0 ] )
+    return G_PlayMapErrorByCode( PLAYMAP_ERROR_NO_QUEUE_CONFIG );
+
+  if( trap_FS_FOpenFile( g_playMapQueueConfig.string, &f, FS_WRITE ) < 0 )
+  {
+    return G_PlayMapErrorByCode( PLAYMAP_ERROR_QUEUE_CONFIG_UNREADABLE );
+  }
+
+  for( i = 0; i < G_GetPlayMapQueueLength(); i++ )
+  {
+    playMap_t playMap =
+      playMapQueue.playMap[ PLAYMAP_QUEUE_ADD(playMapQueue.head, i) ];
+
+    trap_FS_Write( playMap.mapname, strlen( playMap.mapname ), f );
+    trap_FS_Write( " ", 1, f );
+    trap_FS_Write( playMap.layout, strlen( playMap.layout ), f );
+    trap_FS_Write( " ", 1, f );
+    trap_FS_Write( playMap.client->pers.netname,
+		   strlen( playMap.client->pers.netname ), f );
+    // TODO: also save flags here
+    trap_FS_Write( "\n", 1, f );
+  }
+
+  trap_FS_FCloseFile( f );
+
+  return G_PlayMapErrorByCode( PLAYMAP_ERROR_NONE );
+}
+
+/*
+================
+G_ReloadPlayMapQueue
+
+Initialize the playmap queue. Should only be run once.
+================
+*/
+void G_ReloadPlayMapQueue( void )
 {
   int i, j;
 
