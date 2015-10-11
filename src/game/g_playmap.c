@@ -628,9 +628,10 @@ void G_PrintPlayMapQueue( gentity_t *ent )
 
   for( i = 0; i < len; i++ )
   {
+    playMap_t playMap =
+      playMapQueue.playMap[ PLAYMAP_QUEUE_ADD(playMapQueue.head, i) ];
     ADMBP( va( "^3%d.^7 ^5%s^7 (added by %s)\n", i + 1,
-	       playMapQueue.playMap[ PLAYMAP_QUEUE_ADD(playMapQueue.head, i) ].mapname,
-	       ent.client->pers.netname ) );
+	       playMap.mapname, playMap.client->pers.netname ) );
   }
 
   ADMBP_end();
