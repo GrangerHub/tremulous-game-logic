@@ -404,10 +404,10 @@ playMapError_t G_SavePlayMapQueue( void )
 
     trap_FS_Write( playMap.mapname, strlen( playMap.mapname ), f );
     trap_FS_Write( " ", 1, f );
-    trap_FS_Write( playMap.layout, strlen( playMap.layout ), f );
-    trap_FS_Write( " ", 1, f );
     trap_FS_Write( playMap.client->pers.netname,
 		   strlen( playMap.client->pers.netname ), f );
+    trap_FS_Write( " ", 1, f );
+    trap_FS_Write( playMap.layout, strlen( playMap.layout ), f );
     // TODO: also save flags here
     trap_FS_Write( "\n", 1, f );
   }
@@ -424,28 +424,116 @@ G_ReloadPlayMapQueue
 Initialize the playmap queue. Should only be run once.
 ================
 */
-void G_ReloadPlayMapQueue( void )
+playMapError_t G_ReloadPlayMapQueue( void )
 {
-  int i, j;
+  fileHandle_t f;
+  int len;
+  char *cnf, *cnf2, *mapname = NULL, *layout = NULL, *client_name = NULL, *flags = NULL;
+  gclient_t *client;
+  
+  if( !g_playMapQueueConfig.string[ 0 ] )
+    return G_PlayMapErrorByCode( PLAYMAP_ERROR_NO_QUEUE_CONFIG );
 
-  // Reset everything
-  playMapQueue.tail = playMapQueue.head = 0;
-  playMapQueue.tail = PLAYMAP_QUEUE_MINUS1( playMapQueue.tail );
-  playMapQueue.numEntries = 0;
-
-  for( i = 0; i < MAX_PLAYMAP_POOL_ENTRIES; i++ )
+  // TODO: potential memory leak of old queue items
+  G_InitPlayMapQueue();
+  
+  // read playmap config file
+  len = trap_FS_FOpenFile( g_playMapQueueConfig.string, &f, FS_READ );
+  if( len <= 0 )
   {
-    // set all values/pointers to NULL
-    playMapQueue.playMap[ i ].mapname = NULL;
-    playMapQueue.playMap[ i ].layout  = NULL;
-    playMapQueue.playMap[ i ].client  = NULL;
-
-    for( j = 0; j < PLAYMAP_NUM_FLAGS; j++ )
-    {
-      playMapQueue.playMap[ i ].plusFlags[ j ]  = PLAYMAP_FLAG_NONE;
-      playMapQueue.playMap[ i ].minusFlags[ j ] = PLAYMAP_FLAG_NONE;
-    }
+    return G_PlayMapErrorByCode( PLAYMAP_ERROR_QUEUE_CONFIG_UNREADABLE );
   }
+
+  cnf = BG_Alloc( len + 1 );
+  cnf2 = cnf;
+  trap_FS_Read( cnf, len, f );
+  cnf[ len ] = '\0';
+  trap_FS_FCloseFile( f );
+
+  trap_Print( va( "DEBUG: before reading maps file of length %d\n", len ) );
+  COM_BeginParseSession( g_playMapQueueConfig.string );
+  while( cnf < (cnf2 + len) ) // rows
+  {
+    while ( cnf < (cnf2 + len) ) // map arguments
+      {
+	trap_Print( va( "DEBUG: reading maps at char index %ld\n", cnf - cnf2 ) );
+	mapname = G_CopyString(COM_ParseExt( &cnf, qfalse ));
+	if ( strlen( mapname ) > 0 )
+	  {
+	    trap_Print( va( "DEBUG: found map %s\n", mapname ) );
+
+	    client_name = G_CopyString(COM_ParseExt( &cnf, qfalse ));
+	    if ( strlen( client_name ) > 0 )
+	      {
+		layout = COM_ParseExt( &cnf, qfalse );
+		if ( strlen( layout ) > 0 )
+		  {
+		    layout = G_CopyString(layout);
+		    flags = COM_ParseExt( &cnf, qfalse );
+		    if ( strlen( flags ) > 0 )
+		      {
+			flags = G_CopyString(flags);
+			// TODO: parse flags here
+			break;
+		      }
+		    else break;
+		  }
+		else break;
+	      }
+	    else break;
+	  }
+	else break;
+      }	   
+    if( !*mapname )
+      break; // end of all maps
+    
+    if ( *client_name ) 
+      client = G_FindClientByName(NULL, client_name);
+    // TODO: here check if client is still logged in
+    else
+      client = NULL;
+
+    trap_Print( va( "DEBUG: map=%s\n"
+		    "       client=%s\n" 
+		    "       layout=%s\n"
+		    "       flags=%s\n",
+		    mapname, client_name, layout, flags ) );
+
+    G_PlayMapEnqueue( mapname, layout, client, flags );
+  }
+  BG_Free( cnf2 );
+
+  return G_PlayMapErrorByCode( PLAYMAP_ERROR_NONE );
+}
+
+/*
+================
+G_FindClientByName
+
+Find client from given netname.
+TODO: May need to be in g_utils.c
+================
+*/
+
+gclient_t *G_FindClientByName(gentity_t *from, const char *netname)
+{
+  // Copied from g_utils.c:G_Find()
+  if( !from )
+    from = g_entities;
+  else
+    from++;
+
+  for( ; from < &g_entities[ level.num_entities ]; from++ )
+  {
+    if( !from->inuse || !from->client
+	|| !from->client->pers.netname )
+      continue;
+
+    if( !Q_stricmp( from->client->pers.netname, netname ) )
+      return from->client;
+  }
+
+  return NULL;
 }
 
 /*
@@ -697,13 +785,16 @@ void G_PrintPlayMapQueue( gentity_t *ent )
 
   ADMBP_begin(); // begin buffer
   
-  if ( ( len = G_GetPlayMapQueueLength() ) ) {
-    ADMBP( "Maps that are currently in the queue:\n" );
-  } else {
+  if ( ( len = G_GetPlayMapQueueLength() ) )
+    {
+      ADMBP( "Maps that are currently in the queue:\n" );
+    }
+  else
+    {
     ADMBP( va( "%s\n",
 	       G_PlayMapErrorByCode(PLAYMAP_ERROR_MAP_QUEUE_EMPTY).errorMessage) );
     return;
-  }
+    }
 
   for( i = 0; i < len; i++ )
   {

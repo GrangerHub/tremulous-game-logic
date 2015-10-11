@@ -696,7 +696,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
   G_InitDamageLocations( );
   G_InitMapRotations( );
   G_ReloadPlayMapPool();
-  G_InitPlayMapQueue();
+  G_ReloadPlayMapQueue();
   G_InitSpawnQueue( &level.alienSpawnQueue );
   G_InitSpawnQueue( &level.humanSpawnQueue );
 
@@ -1710,6 +1710,7 @@ void ExitLevel( void )
   trap_Cvar_Set( "g_warmup", "1" );
   trap_SetConfigstring( CS_WARMUP, va( "%d", IS_WARMUP ) );
   G_SavePlayMapPool();
+  G_SavePlayMapQueue();
   
   level.restarted = qtrue;
   level.changemap = NULL;
