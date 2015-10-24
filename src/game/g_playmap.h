@@ -75,7 +75,7 @@ typedef struct playMap_s
   char *mapname;
   char *layout;
 
-  gclient_t *client;
+  char *clientname;
 
   playMapFlag_t plusFlags[ PLAYMAP_NUM_FLAGS ];
   playMapFlag_t minusFlags[ PLAYMAP_NUM_FLAGS ];
@@ -149,9 +149,9 @@ gclient_t *G_FindClientByName(gentity_t *from, const char *netname);
 int G_GetPlayMapQueueLength( void );
 qboolean G_PlayMapQueueIsFull( void );
 playMapFlag_t G_ParsePlayMapFlag(char *flag);
-playMapError_t G_PlayMapEnqueue( char *mapname, char *layout, gclient_t *client, char *flags );
+playMapError_t G_PlayMapEnqueue( char *mapname, char *layout, char *clientname, char *flags );
 playMap_t *G_PopFromPlayMapQueue( void );
 playMapError_t G_RemoveFromPlayMapQueue( int index );
 int G_GetPlayMapQueueIndexByMapName( char *mapname );
-int G_GetPlayMapQueueIndexByClient( gclient_t *client );
+int G_GetPlayMapQueueIndexByClient( char *clientname );
 void G_PrintPlayMapQueue( gentity_t *ent );

@@ -367,7 +367,7 @@ void G_InitPlayMapQueue( void )
     // set all values/pointers to NULL
     playMapQueue.playMap[ i ].mapname = NULL;
     playMapQueue.playMap[ i ].layout  = NULL;
-    playMapQueue.playMap[ i ].client  = NULL;
+    playMapQueue.playMap[ i ].clientname  = NULL;
 
     for( j = 0; j < PLAYMAP_NUM_FLAGS; j++ )
     {
@@ -381,7 +381,8 @@ void G_InitPlayMapQueue( void )
 ================
 G_SavePlayMapQueue
 
-Initialize the playmap queue. Should only be run once.
+Save the playmap queue into a config file. Should be run before
+switching maps for the queue to be persistent across map changes.
 ================
 */
 playMapError_t G_SavePlayMapQueue( void )
@@ -404,8 +405,8 @@ playMapError_t G_SavePlayMapQueue( void )
 
     trap_FS_Write( playMap.mapname, strlen( playMap.mapname ), f );
     trap_FS_Write( " ", 1, f );
-    trap_FS_Write( playMap.client->pers.netname,
-		   strlen( playMap.client->pers.netname ), f );
+    trap_FS_Write( playMap.clientname,
+		   strlen( playMap.clientname ), f );
     trap_FS_Write( " ", 1, f );
     trap_FS_Write( playMap.layout, strlen( playMap.layout ), f );
     // TODO: also save flags here
@@ -421,15 +422,16 @@ playMapError_t G_SavePlayMapQueue( void )
 ================
 G_ReloadPlayMapQueue
 
-Initialize the playmap queue. Should only be run once.
+Load the playmap queue from config file. Should be run after
+switching maps for the queue to be persistent across map changes.
 ================
 */
 playMapError_t G_ReloadPlayMapQueue( void )
 {
   fileHandle_t f;
   int len;
-  char *cnf, *cnf2, *mapname = NULL, *layout = NULL, *client_name = NULL, *flags = NULL;
-  gclient_t *client;
+  char *cnf, *cnf2, *mapname, empty = 0,
+    *layout = &empty, *clientname = &empty, *flags = &empty;
   
   if( !g_playMapQueueConfig.string[ 0 ] )
     return G_PlayMapErrorByCode( PLAYMAP_ERROR_NO_QUEUE_CONFIG );
@@ -457,20 +459,21 @@ playMapError_t G_ReloadPlayMapQueue( void )
     while ( cnf < (cnf2 + len) ) // map arguments
       {
 	trap_Print( va( "DEBUG: reading maps at char index %ld\n", cnf - cnf2 ) );
+	// Must use G_CopyString to prevent overwrites by parser
 	mapname = G_CopyString(COM_ParseExt( &cnf, qfalse ));
-	if ( strlen( mapname ) > 0 )
+	if( *mapname )
 	  {
 	    trap_Print( va( "DEBUG: found map %s\n", mapname ) );
 
-	    client_name = G_CopyString(COM_ParseExt( &cnf, qfalse ));
-	    if ( strlen( client_name ) > 0 )
+	    clientname = G_CopyString(COM_ParseExt( &cnf, qfalse ));
+	    if( *clientname )
 	      {
 		layout = COM_ParseExt( &cnf, qfalse );
-		if ( strlen( layout ) > 0 )
+		if( *layout )
 		  {
 		    layout = G_CopyString(layout);
 		    flags = COM_ParseExt( &cnf, qfalse );
-		    if ( strlen( flags ) > 0 )
+		    if( *flags )
 		      {
 			flags = G_CopyString(flags);
 			// TODO: parse flags here
@@ -487,19 +490,22 @@ playMapError_t G_ReloadPlayMapQueue( void )
     if( !*mapname )
       break; // end of all maps
     
-    if ( *client_name ) 
-      client = G_FindClientByName(NULL, client_name);
-    // TODO: here check if client is still logged in
-    else
-      client = NULL;
-
     trap_Print( va( "DEBUG: map=%s\n"
 		    "       client=%s\n" 
 		    "       layout=%s\n"
 		    "       flags=%s\n",
-		    mapname, client_name, layout, flags ) );
+		    mapname, clientname, layout, flags ) );
 
-    G_PlayMapEnqueue( mapname, layout, client, flags );
+    G_PlayMapEnqueue( mapname, layout, clientname, flags );
+
+    // G_PlayMapEnqueue also copies the strings, so release the
+    // originals here
+    if( *mapname ) BG_Free(mapname);
+    if( *clientname ) BG_Free(clientname);
+    if( *layout ) BG_Free(layout);
+    if( *flags ) BG_Free(layout);
+
+    trap_Print( "DEBUG: enqueued\n" );
   }
   BG_Free( cnf2 );
 
@@ -511,7 +517,7 @@ playMapError_t G_ReloadPlayMapQueue( void )
 G_FindClientByName
 
 Find client from given netname.
-TODO: May need to be in g_utils.c
+TODO: May need to be in g_utils.c. Also, no longer used here.
 ================
 */
 
@@ -597,8 +603,8 @@ queue).
 ================
 */
 
-playMapError_t G_PlayMapEnqueue( char *mapname, char *layout, gclient_t
-    *client, char *flags )
+playMapError_t G_PlayMapEnqueue( char *mapname, char *layout, char
+    *clientname, char *flags )
 {
   int       i;
   int       plusFlagIdx = 0, minusFlagIdx = 0;
@@ -610,7 +616,7 @@ playMapError_t G_PlayMapEnqueue( char *mapname, char *layout, gclient_t
     return G_PlayMapErrorByCode( PLAYMAP_ERROR_MAP_QUEUE_FULL );
 
   // check if user already has a map queued
-  if( G_GetPlayMapQueueIndexByClient( client ) >= 0 )
+  if( G_GetPlayMapQueueIndexByClient( clientname ) >= 0 )
     return G_PlayMapErrorByCode( PLAYMAP_ERROR_USER_ALREADY_IN_QUEUE );
 
   // check if map has already been queued by someone else
@@ -618,13 +624,19 @@ playMapError_t G_PlayMapEnqueue( char *mapname, char *layout, gclient_t
     return G_PlayMapErrorByCode( PLAYMAP_ERROR_MAP_ALREADY_IN_QUEUE );
 
   // copy mapname
-  playMap.mapname = G_CopyString( mapname );
+  playMap.mapname = G_CopyString(mapname);
 
   // copy layout
-  playMap.layout = G_CopyString( layout );
+  if( *layout )
+    playMap.layout = G_CopyString(layout);
+  else
+    playMap.layout = NULL;
 
-  // copy client pointer
-  playMap.client = client;
+  // copy clientname
+  if( *clientname )
+    playMap.clientname = G_CopyString(clientname);
+  else
+    playMap.clientname = NULL;
 
   // Loop through flags
   for( i = 0; ; i++ )
@@ -688,7 +700,7 @@ playMap_t *G_PopFromPlayMapQueue( void )
   // copy values from playmap in the head of the queue
   playMap->mapname = playMapQueue.playMap[ playMapQueue.head ].mapname;
   playMap->layout = playMapQueue.playMap[ playMapQueue.head ].layout;
-  playMap->client = playMapQueue.playMap[ playMapQueue.head ].client;
+  playMap->clientname = playMapQueue.playMap[ playMapQueue.head ].clientname;
   for( i = 0; i < PLAYMAP_NUM_FLAGS; i++ )
   {
     playMap->plusFlags[ i ]
@@ -700,7 +712,7 @@ playMap_t *G_PopFromPlayMapQueue( void )
   // reset the playmap in the head of the queue to null values
   playMapQueue.playMap[ playMapQueue.head ].mapname = NULL;
   playMapQueue.playMap[ playMapQueue.head ].layout = NULL;
-  playMapQueue.playMap[ playMapQueue.head ].client = NULL;
+  playMapQueue.playMap[ playMapQueue.head ].clientname = NULL;
   for( i = 0; i < PLAYMAP_NUM_FLAGS; i++ )
   {
     playMapQueue.playMap[ playMapQueue.head ].plusFlags[ i ] =
@@ -758,13 +770,14 @@ G_GetPlayMapQueueIndexByClient
 Get the index of the map in the queue from the client that requested it.
 ================
 */
-int G_GetPlayMapQueueIndexByClient( gclient_t *client )
+int G_GetPlayMapQueueIndexByClient( char *clientname )
 {
   int i;
 
   for( i = 0; i < G_GetPlayMapQueueLength(); i++ )
   {
-    if( playMapQueue.playMap[ PLAYMAP_QUEUE_ADD(playMapQueue.head, i) ].client == client )
+    if( Q_stricmp( playMapQueue.playMap[ PLAYMAP_QUEUE_ADD(playMapQueue.head, i)
+					 ].clientname, clientname ) == 0 )
       return i;
   }
 
@@ -801,7 +814,7 @@ void G_PrintPlayMapQueue( gentity_t *ent )
     playMap_t playMap =
       playMapQueue.playMap[ PLAYMAP_QUEUE_ADD(playMapQueue.head, i) ];
     ADMBP( va( "^3%d.^7 ^5%s^7 (added by %s)\n", i + 1,
-	       playMap.mapname, playMap.client->pers.netname ) );
+	       playMap.mapname, playMap.clientname ) );
   }
 
   ADMBP_end();

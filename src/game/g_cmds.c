@@ -3510,7 +3510,7 @@ void Cmd_PlayMap_f( gentity_t *ent )
                   "       flags=%s\n\"",
                   cmd, map, layout, flags ) );
 
-  playMapError = G_PlayMapEnqueue( map, layout, ent->client, flags );
+  playMapError = G_PlayMapEnqueue( map, layout, ent->client->pers.netname, flags );
   if (playMapError.errorCode == PLAYMAP_ERROR_NONE) {
     ADMP( va( "Map %s was successfully added to playmap queue by %s.\n",
 	      map, ent->client->pers.netname ) );
