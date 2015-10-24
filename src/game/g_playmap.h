@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #define MAX_PLAYMAP_POOL_ENTRIES 128
+#define PLAYMAP_INACTIVE 0
 
 // map pool for the playmap system
 typedef struct playMapPool_s
@@ -155,3 +156,5 @@ playMapError_t G_RemoveFromPlayMapQueue( int index );
 int G_GetPlayMapQueueIndexByMapName( char *mapname );
 int G_GetPlayMapQueueIndexByClient( char *clientname );
 void G_PrintPlayMapQueue( gentity_t *ent );
+qboolean G_PlayMapActive( void );
+void G_NextPlayMap( void );

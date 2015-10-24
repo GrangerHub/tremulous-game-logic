@@ -1190,6 +1190,7 @@ extern  vmCvar_t  g_admin;
 extern  vmCvar_t  g_adminTempBan;
 extern  vmCvar_t  g_adminMaxBan;
 
+extern	vmCvar_t  g_playMapEnable;
 extern  vmCvar_t  g_playMapPoolConfig;
 extern  vmCvar_t  g_playMapQueueConfig;
 

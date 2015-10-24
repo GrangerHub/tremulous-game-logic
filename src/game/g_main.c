@@ -144,6 +144,7 @@ vmCvar_t  g_admin;
 vmCvar_t  g_adminTempBan;
 vmCvar_t  g_adminMaxBan;
 
+vmCvar_t  g_playMapEnable;
 vmCvar_t  g_playMapPoolConfig;
 vmCvar_t  g_playMapQueueConfig;
 
@@ -299,6 +300,8 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_adminMaxBan, "g_adminMaxBan", "2w", CVAR_ARCHIVE, 0, qfalse  },
 
   // playmap pool
+  
+  { &g_playMapEnable, "g_playMapEnable", "0", CVAR_ARCHIVE, 0, qfalse  },
   { &g_playMapPoolConfig, "g_playMapPoolConfig", "playmap_pool.cfg", CVAR_ARCHIVE, 0, qfalse  },
   { &g_playMapQueueConfig, "g_playMapQueueConfig", "playmap_queue.cfg", CVAR_ARCHIVE, 0, qfalse  },
 
@@ -1696,6 +1699,8 @@ void ExitLevel( void )
     trap_SendConsoleCommand( EXEC_APPEND, va( "%smap \"%s\"\n",
       ( g_cheats.integer ? "dev" : "" ), g_nextMap.string ) );
   }
+  else if( G_PlayMapActive( ) )
+    G_NextPlayMap();
   else if( G_MapRotationActive( ) )
     G_AdvanceMapRotation( 0 );
   else // Otherwise just restart current map

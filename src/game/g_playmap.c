@@ -819,3 +819,41 @@ void G_PrintPlayMapQueue( gentity_t *ent )
 
   ADMBP_end();
 }
+
+/*
+===============
+G_PlayMapActive
+
+Test if playmap rotation is currently active
+===============
+*/
+qboolean G_PlayMapActive( void )
+{
+  return ( g_playMapEnable.integer != PLAYMAP_INACTIVE &&
+	   G_GetPlayMapQueueLength() > 0 );
+}
+
+/*
+===============
+G_NextPlayMap
+
+Pop one playmap from queue, do checks and send commands to the server
+to actually change the map.
+===============
+*/
+void G_NextPlayMap( void )
+{
+  playMap_t *playMap = G_PopFromPlayMapQueue();
+    
+  // allow a manually defined g_nextLayout setting to override the maprotation
+  if( !g_nextLayout.string[ 0 ] )
+  {
+    trap_Cvar_Set( "g_nextLayout", playMap->layout );
+  }
+
+  G_MapConfigs( playMap->mapname );
+
+  trap_SendConsoleCommand( EXEC_APPEND, va( "map \"%s\"\n", playMap->mapname ) );
+
+  // TODO: do the flags here
+}
