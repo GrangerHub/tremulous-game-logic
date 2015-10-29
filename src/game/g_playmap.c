@@ -45,6 +45,10 @@ static const playMapError_t playMapError[ ] =
     ""
   },
   {
+       PLAYMAP_ERROR_MAP_NONEXISTANT,         /* errorCode */
+      "cannot find map."
+  },
+  {
     PLAYMAP_ERROR_POOL_CONFIG_UNREADABLE,    /* errorCode */
     "playmap pool config file specified by g_playMapPoolConfig is not readable."
   },
@@ -404,12 +408,18 @@ playMapError_t G_SavePlayMapQueue( void )
       playMapQueue.playMap[ PLAYMAP_QUEUE_ADD(playMapQueue.head, i) ];
 
     trap_FS_Write( playMap.mapname, strlen( playMap.mapname ), f );
-    trap_FS_Write( " ", 1, f );
-    trap_FS_Write( playMap.clientname,
-		   strlen( playMap.clientname ), f );
-    trap_FS_Write( " ", 1, f );
-    trap_FS_Write( playMap.layout, strlen( playMap.layout ), f );
-    // TODO: also save flags here
+    if( playMap.clientname )
+    {
+	 trap_FS_Write( " ", 1, f );
+	 trap_FS_Write( playMap.clientname,
+			strlen( playMap.clientname ), f );
+	 if( playMap.layout )
+	 {
+	      trap_FS_Write( " ", 1, f );
+	      trap_FS_Write( playMap.layout, strlen( playMap.layout ), f );
+	 }
+	 // TODO: also save flags here
+    }
     trap_FS_Write( "\n", 1, f );
   }
 
@@ -612,6 +622,9 @@ playMapError_t G_PlayMapEnqueue( char *mapname, char *layout, char
   playMap_t playMap;
   playMapFlag_t playMapFlag;
 
+  if( ! G_MapExists( mapname ) )
+    return G_PlayMapErrorByCode( PLAYMAP_ERROR_MAP_NONEXISTANT );
+  
   if( PLAYMAP_QUEUE_IS_FULL )
     return G_PlayMapErrorByCode( PLAYMAP_ERROR_MAP_QUEUE_FULL );
 

@@ -102,6 +102,7 @@ typedef enum playMapErrorCode_s
   PLAYMAP_ERROR_NONE,
 
   // list of error codes (order does not matter)
+  PLAYMAP_ERROR_MAP_NONEXISTANT,
   PLAYMAP_ERROR_POOL_CONFIG_UNREADABLE,
   PLAYMAP_ERROR_NO_POOL_CONFIG,
   PLAYMAP_ERROR_MAP_POOL_FULL,
