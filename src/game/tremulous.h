@@ -569,8 +569,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MGTURRET_RANGE              400.0f
 #define MGTURRET_SPREAD             200
 #define MGTURRET_DMG                HDM(4)
-#define MGTURRET_SPINUP_TIME        750 // time between target sighted and fire
+#define MGTURRET_SPINUP_TIME        250 // time between target sighted and fire
 #define MGTURRET_VALUE              0
+#define MGTURRET_DCC_ANGULARSPEED       15
+#define MGTURRET_DCC_SPINUP_TIME    225
+#define MGTURRET_GRAB_ANGULARSPEED      5
 
 #define TESLAGEN_BP                 10
 #define TESLAGEN_BT                 15000
@@ -579,8 +582,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define TESLAGEN_SPLASHRADIUS       100
 #define TESLAGEN_REPEAT             250
 #define TESLAGEN_K_SCALE            4.0f
-#define TESLAGEN_RANGE              200
-#define TESLAGEN_DMG                HDM(10)
+#define TESLAGEN_RANGE              250
+#define TESLAGEN_DMG                HDM(9)
 #define TESLAGEN_VALUE              0
 
 #define DC_BP                       8
@@ -590,7 +593,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define DC_SPLASHRADIUS             100
 #define DC_ATTACK_PERIOD            10000 // how often to spam "under attack"
 #define DC_HEALRATE                 4
-#define DC_RANGE                    1000
+#define DC_RANGE                    10000
 #define DC_VALUE                    0
 
 #define ARMOURY_BP                  10
@@ -646,7 +649,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define STAMINA_BLACKOUT_LEVEL      -800
 
 #define HUMAN_SPAWN_REPEAT_TIME     10000
-#define HUMAN_REGEN_DAMAGE_TIME     2000 //msec since damage before dcc repairs
+#define HUMAN_REGEN_DAMAGE_TIME     3000 //msec since damage before dcc repairs
 
 #define HUMAN_MAX_CREDITS           2000
 #define HUMAN_TK_SUICIDE_PENALTY    150

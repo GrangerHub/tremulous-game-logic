@@ -2732,6 +2732,26 @@ qboolean HMGTurret_TrackEnemy( gentity_t *self )
   vec3_t  dirToTarget, dttAdjusted, angleToTarget, angularDiff, xNormal;
   vec3_t  refNormal = { 0.0f, 0.0f, 1.0f };
   float   temp, rotAngle;
+  float   angularSpeed;
+
+  // Move slow if no dcc or grabbed
+  if( G_IsDCCBuilt( ) && self->lev1Grabbed )
+  {
+    angularSpeed = ( MGTURRET_DCC_ANGULARSPEED - MGTURRET_ANGULARSPEED ) + MGTURRET_GRAB_ANGULARSPEED;
+  }
+  else if( self->lev1Grabbed )
+  {
+    angularSpeed = MGTURRET_GRAB_ANGULARSPEED;
+  }
+  else if( G_IsDCCBuilt( ) )
+  {
+    angularSpeed = MGTURRET_DCC_ANGULARSPEED;
+  }
+  else
+  {
+    angularSpeed = MGTURRET_ANGULARSPEED;
+  }
+
 
   VectorSubtract( self->enemy->s.pos.trBase, self->s.pos.trBase, dirToTarget );
   VectorNormalize( dirToTarget );
@@ -2747,10 +2767,10 @@ qboolean HMGTurret_TrackEnemy( gentity_t *self )
   angularDiff[ YAW ] = AngleSubtract( self->s.angles2[ YAW ], angleToTarget[ YAW ] );
 
   //if not pointing at our target then move accordingly
-  if( angularDiff[ PITCH ] < 0 && angularDiff[ PITCH ] < (-MGTURRET_ANGULARSPEED) )
-    self->s.angles2[ PITCH ] += MGTURRET_ANGULARSPEED;
-  else if( angularDiff[ PITCH ] > 0 && angularDiff[ PITCH ] > MGTURRET_ANGULARSPEED )
-    self->s.angles2[ PITCH ] -= MGTURRET_ANGULARSPEED;
+  if( angularDiff[ PITCH ] < 0 && angularDiff[ PITCH ] < ( -angularSpeed ) )
+    self->s.angles2[ PITCH ] += angularSpeed;
+  else if( angularDiff[ PITCH ] > 0 && angularDiff[ PITCH ] > angularSpeed )
+    self->s.angles2[ PITCH ] -= angularSpeed;
   else
     self->s.angles2[ PITCH ] = angleToTarget[ PITCH ];
 
@@ -2942,7 +2962,15 @@ void HMGTurret_Think( gentity_t *self )
   {
     self->active = qtrue;
 
-    self->turretSpinupTime = level.time + MGTURRET_SPINUP_TIME;
+    if( G_IsDCCBuilt( ) ) 
+    {
+     self->turretSpinupTime = level.time + MGTURRET_DCC_SPINUP_TIME;
+    }
+    else
+    {
+      self->turretSpinupTime = level.time + MGTURRET_SPINUP_TIME;
+    }
+    
     G_AddEvent( self, EV_MGTURRET_SPINUP, 0 );
   }
 
@@ -2986,6 +3014,10 @@ void HTeslaGen_Think( gentity_t *self )
   }
 
   self->powered = G_FindPower( self, qfalse );
+
+  if( !G_IsDCCBuilt( ) )
+    self->powered = qfalse;
+
   if( G_SuicideIfNoPower( self ) )
     return;
   G_IdlePowerState( self );
@@ -3275,7 +3307,7 @@ void G_BuildableThink( gentity_t *ent, int msec )
         else if( ent->buildableTeam == TEAM_HUMANS && ent->dcc &&
           ( ent->lastDamageTime + HUMAN_REGEN_DAMAGE_TIME ) < level.time )
         {
-          ent->health += DC_HEALRATE * ent->dcc;
+          ent->health += DC_HEALRATE; // * ent->dcc;  #Swirl: Only allow 1 DCC
         }
       }
 
@@ -3288,6 +3320,9 @@ void G_BuildableThink( gentity_t *ent, int msec )
       }
     }
   }
+
+  if( ent->lev1Grabbed && ent->lev1GrabTime + LEVEL1_GRAB_TIME < level.time )
+    ent->lev1Grabbed = qfalse;
 
   if( ent->clientSpawnTime > 0 )
     ent->clientSpawnTime -= msec;
@@ -4078,6 +4113,10 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
           reason = IBE_ONEREACTOR;
           break;
 
+	case BA_H_DCC:
+          reason = IBE_ONEDCC;
+          break;
+
         default:
           Com_Error( ERR_FATAL, "No reason for denying build of %d", buildable );
           break;
@@ -4476,6 +4515,10 @@ qboolean G_BuildIfValid( gentity_t *ent, buildable_t buildable )
 
     case IBE_NODCC:
       G_TriggerMenu( ent->client->ps.clientNum, MN_H_NODCC );
+      return qfalse;
+
+    case IBE_ONEDCC:
+      G_TriggerMenu( ent->client->ps.clientNum, MN_H_ONEDCC );
       return qfalse;
 
     case IBE_RPTPOWERHERE:
