@@ -451,7 +451,7 @@ playMapError_t G_ReloadPlayMapQueue( void )
   
   // read playmap config file
   len = trap_FS_FOpenFile( g_playMapQueueConfig.string, &f, FS_READ );
-  if( len <= 0 )
+  if( len < 0 )
   {
     return G_PlayMapErrorByCode( PLAYMAP_ERROR_QUEUE_CONFIG_UNREADABLE );
   }
