@@ -3494,6 +3494,9 @@ void Cmd_PlayMap_f( gentity_t *ent )
 
   if( trap_Argc( ) < 2 )
   {
+    ADMP( "Usage: /playmap mapname [layout [flags]]\n"
+	  "  (Use /listmaps for map names)\n\n" );
+      
     G_PrintPlayMapQueue( ent );
     return;
   }
@@ -3503,17 +3506,19 @@ void Cmd_PlayMap_f( gentity_t *ent )
   trap_Argv( 3, extra, sizeof( extra ) );
   flags = ConcatArgs( 3 );
 
-  trap_SendServerCommand( ent-g_entities,
+  /*trap_SendServerCommand( ent-g_entities,
       va( "print \"DEBUG: cmd=%s\n"
                   "       map=%s\n"
                   "       layout=%s\n"
                   "       flags=%s\n\"",
-                  cmd, map, layout, flags ) );
+                  cmd, map, layout, flags ) );*/
 
   playMapError = G_PlayMapEnqueue( map, layout, ent->client->pers.netname, flags );
   if (playMapError.errorCode == PLAYMAP_ERROR_NONE) {
-    ADMP( va( "Map %s was successfully added to playmap queue by %s.\n",
-	      map, ent->client->pers.netname ) );
+    trap_SendServerCommand( -1, 
+			    va( "print \"%s" S_COLOR_WHITE
+				" added map ^5%s^7 to playmap queue\"\n",
+				ent->client->pers.netname, map ) );
   } else 
     ADMP( va( "%s\n", playMapError.errorMessage ) );
   
