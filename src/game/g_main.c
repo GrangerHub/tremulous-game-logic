@@ -774,6 +774,10 @@ void G_ShutdownGame( int restart )
   // write all the client session data so we can get it back
   G_WriteSessionData( );
 
+  // Save the playmap files here
+  G_SavePlayMapPool();
+  G_SavePlayMapQueue();
+
   G_admin_cleanup( );
   G_namelog_cleanup( );
   G_UnregisterCommands( );
@@ -2122,6 +2126,7 @@ void G_LevelRestart( qboolean stopWarmup )
 
   if( !stopWarmup )
     level.lastLayoutReset = level.time;
+
 }
 
 /*
