@@ -401,6 +401,7 @@ struct gclient_s
   int                 respawnTime;      // can respawn when time > this
   int                 inactivityTime;   // kick players when time > this
   qboolean            inactivityWarning;// qtrue if the five seoond warning has been given
+  int                 voterInactivityTime;   // doesn't count a client in vote results when time > this
   int                 rewardTime;       // clear the EF_AWARD_IMPRESSIVE, etc when time > this
   int                 boostedTime;      // last time we touched a booster
 
@@ -549,6 +550,7 @@ typedef struct
   int               num_entities;   // MAX_CLIENTS <= num_entities <= ENTITYNUM_MAX_NORMAL
 
   int               countdownTime;     // restart match at this time
+  qboolean          fight;
 
   fileHandle_t      logFile;
 
@@ -595,6 +597,8 @@ typedef struct
   int               voteNo[ NUM_TEAMS ];
   gclient_t         *voteCaller[ NUM_TEAMS ];     // client that called the vote
   int               numVotingClients[ NUM_TEAMS ];// set by CalculateRanks
+  int               numCountedVotingClients[ NUM_TEAMS ];// The total number of clients considered in vote calculations
+  vote_t            voteType[ NUM_TEAMS ];
 
   // spawn variables
   qboolean          spawning;                     // the G_Spawn*() functions are valid
@@ -1057,6 +1061,7 @@ void ClientCommand( int clientNum );
 //
 // g_active.c
 //
+void VoterInactivityTimer( gentity_t *ent );
 void G_UnlaggedStore( void );
 void G_UnlaggedClear( gentity_t *ent );
 void G_UnlaggedCalc( int time, gentity_t *skipEnt );
@@ -1162,6 +1167,7 @@ extern  vmCvar_t  g_gravity;
 extern  vmCvar_t  g_speed;
 extern  vmCvar_t  g_knockback;
 extern  vmCvar_t  g_inactivity;
+extern  vmCvar_t  g_impliedVoting;
 extern  vmCvar_t  g_debugMove;
 extern  vmCvar_t  g_debugDamage;
 extern  vmCvar_t  g_debugPlayMap;

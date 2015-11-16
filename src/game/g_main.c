@@ -69,6 +69,7 @@ vmCvar_t  g_gravity;
 vmCvar_t  g_cheats;
 vmCvar_t  g_knockback;
 vmCvar_t  g_inactivity;
+vmCvar_t  g_impliedVoting;
 vmCvar_t  g_debugMove;
 vmCvar_t  g_debugDamage;
 vmCvar_t  g_debugPlayMap;
@@ -229,14 +230,15 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_speed, "g_speed", "320", 0, 0, qtrue  },
   { &g_gravity, "g_gravity", "800", 0, 0, qtrue, cv_gravity },
   { &g_knockback, "g_knockback", "1000", 0, 0, qtrue  },
-  { &g_inactivity, "g_inactivity", "0", 0, 0, qtrue },
+  { &g_inactivity, "g_inactivity", "180", 0, 0, qtrue },
+  { &g_impliedVoting, "g_impliedVoting", "1", CVAR_ARCHIVE, 0, qtrue },
   { &g_debugMove, "g_debugMove", "0", 0, 0, qfalse },
   { &g_debugDamage, "g_debugDamage", "0", 0, 0, qfalse },
   { &g_debugPlayMap, "g_debugPlayMap", "0", 0, 0, qfalse },
   { &g_motd, "g_motd", "", 0, 0, qfalse },
 
   { &g_allowVote, "g_allowVote", "1", CVAR_ARCHIVE, 0, qfalse },
-  { &g_voteLimit, "g_voteLimit", "5", CVAR_ARCHIVE, 0, qfalse },
+  { &g_voteLimit, "g_voteLimit", "3", CVAR_ARCHIVE, 0, qfalse },
   { &g_suddenDeathVotePercent, "g_suddenDeathVotePercent", "74", CVAR_ARCHIVE, 0, qfalse },
   { &g_suddenDeathVoteDelay, "g_suddenDeathVoteDelay", "180", CVAR_ARCHIVE, 0, qfalse },
   { &g_minNameChangePeriod, "g_minNameChangePeriod", "5", 0, 0, qfalse},
@@ -754,6 +756,13 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
     level.humanTeamLocked = qtrue;
     trap_Cvar_Set( "g_lockTeamsAtStart", "0" );
   }
+
+  for( i = 0; i < NUM_TEAMS; ++i )
+  {
+    level.voteType[ i ] = VOID_VOTE;
+  }
+
+  level.fight = qtrue;
 }
 
 /*
@@ -767,10 +776,12 @@ static void G_ClearVotes( void )
 {
   int i;
   memset( level.voteTime, 0, sizeof( level.voteTime ) );
+  memset( level.numVotingClients, 0, sizeof( level.numVotingClients ) );
   for( i = 0; i < NUM_TEAMS; i++ )
   {
     trap_SetConfigstring( CS_VOTE_TIME + i, "" );
     trap_SetConfigstring( CS_VOTE_STRING + i, "" );
+    level.voteType[ i ] = VOID_VOTE;
   }
 }
 
@@ -2317,8 +2328,8 @@ void G_Vote( gentity_t *ent, team_t team, qboolean voting )
     else
       level.voteYes[ team ]--;
 
-    trap_SetConfigstring( CS_VOTE_YES + team,
-      va( "%d", level.voteYes[ team ] ) );
+    trap_SetConfigstring( CS_VOTE_CAST + team,
+      va( "%d", (level.voteYes[ team ] + level.voteNo[ team ] ) ) );
   }
   else
   {
@@ -2327,8 +2338,8 @@ void G_Vote( gentity_t *ent, team_t team, qboolean voting )
     else
       level.voteNo[ team ]--;
 
-    trap_SetConfigstring( CS_VOTE_NO + team,
-      va( "%d", level.voteNo[ team ] ) );
+    trap_SetConfigstring( CS_VOTE_CAST + team,
+      va( "%d", (level.voteYes[ team ] + level.voteNo[ team ] ) ) );
   }
 }
 
@@ -2381,8 +2392,8 @@ void G_CheckVote( team_t team )
   qboolean pass = qfalse;
   char     *msg;
   int      i;
-  int      abstained;
-  int      numCountedVotingClients = 0;
+  int      voteYesPercent = 0 , voteNoPercent = 0;
+  int      numActiveClients = 0;
 
   if( level.voteExecuteTime[ team ] &&
       level.voteExecuteTime[ team ] < level.time )
@@ -2394,9 +2405,9 @@ void G_CheckVote( team_t team )
     return;
 
   // Recalculate number of voting clients if there are players in teams
-  // and only count client as a voting client if they are either
-  // (a) a non-spectator, or
-  // (b) a spectator who has voted
+  // and only count a client as a voting client if they are either
+  // (a) a client that has been active in the previous length of VOTE_TIME, and/or
+  // (b) a client that has voted
   for( i = 0; i < level.maxclients; i++ )
   {
     if ( level.clients[ i ].pers.connected != CON_DISCONNECTED )
@@ -2405,29 +2416,45 @@ void G_CheckVote( team_t team )
       {
         case TEAM_ALIENS:
         case TEAM_HUMANS:
-          if( level.clients[ i ].pers.teamSelection == team )
-            numCountedVotingClients++;
+
+          if( ( ( level.clients[ i ].pers.teamSelection == team ) &&
+                ( ( level.clients[ i ].pers.voted & ( 1 << team ) ) ||
+                  ( level.time < level.clients[ i ].voterInactivityTime ) ) ) ||
+              ( i == ( level.voteCaller[ team ]->pers.namelog->slot ) ) )
+            numActiveClients++;
           break;
         default:
-          if( level.clients[ i ].pers.teamSelection != TEAM_NONE ||
-              ( level.clients[ i ].pers.teamSelection == TEAM_NONE &&
-                level.clients[ i ].pers.voted & ( 1 << TEAM_NONE ) ) )
-            numCountedVotingClients++;
+          if( ( level.clients[ i ].pers.voted & ( 1 << team ) ) ||
+              ( level.time < level.clients[ i ].voterInactivityTime ) ||
+              ( i == ( level.voteCaller[ team ]->pers.namelog->slot ) ) )
+            numActiveClients++;
           break;
       }
     }
   }
 
-  if( ( level.time - level.voteTime[ team ] >= VOTE_TIME ) ||
-      ( level.voteYes[ team ] + level.voteNo[ team ] == level.numVotingClients[ team ] ) )
+  if( g_impliedVoting.integer && !( level.voteType[ team ] == POLL_VOTE ) )
   {
-    pass = ( level.voteYes[ team ] &&
-        (float)level.voteYes[ team ] / numCountedVotingClients > votePassThreshold );
+    level.numCountedVotingClients[ team ] = numActiveClients;
+    trap_SetConfigstring( CS_VOTE_ACTIVE + team,
+    va( "%d", level.numCountedVotingClients[ team ] ) );
   }
   else
   {
-    if( (float)level.voteYes[ team ] >
-        (float)level.numVotingClients[ team ] * votePassThreshold )
+    level.numCountedVotingClients[ team ] = level.voteYes[ team ] + level.voteNo[ team ];
+    trap_SetConfigstring( CS_VOTE_ACTIVE + team, va( "%d", -1 ) );
+  }
+
+  if( ( level.time - level.voteTime[ team ] >= VOTE_TIME ) ||
+      ( level.voteYes[ team ] + level.voteNo[ team ] == level.numVotingClients[ team ] ) )
+  {
+    pass = ( level.voteYes[ team ] && ( level.numCountedVotingClients[ team ] > 0 ) &&
+             ( (float)level.voteYes[ team ] / level.numCountedVotingClients[ team ] > votePassThreshold ) );
+  }
+  else
+  {
+    if( ( (float)level.voteYes[ team ] >
+          (float)level.numVotingClients[ team ] * votePassThreshold ) && !( level.voteType[ team ] == POLL_VOTE ) )
     {
       pass = qtrue;
     }
@@ -2441,17 +2468,61 @@ void G_CheckVote( team_t team )
   if( pass )
     level.voteExecuteTime[ team ] = level.time + level.voteDelay[ team ];
 
-  G_LogPrintf( "EndVote: %s %s %d %d %d\n",
-      team == TEAM_NONE ? "global" : BG_TeamName( team ),
-      pass ? "pass" : "fail",
-      level.voteYes[ team ], level.voteNo[ team ], level.numVotingClients[ team ] );
+  G_LogPrintf( "EndVote: %s %s %d(yes) %d(no) %d(num of voting clients) %d(num of counted voting clients) %s\n",
+               team == TEAM_NONE ? "global" : BG_TeamName( team ),
+               pass ? "^2pass^7" : "^1fail^7",
+               level.voteYes[ team ], level.voteNo[ team ], level.numVotingClients[ team ], 
+               level.numCountedVotingClients[ team ],
+               ( g_impliedVoting.integer && !( level.voteType[ team ] == POLL_VOTE ) ) ?
+               "implied" : "expressed"	 );
 
-  abstained = numCountedVotingClients - level.voteYes[ team ] -
-    level.voteNo[ team ];
+  if( level.numCountedVotingClients[ team ] > 0 )
+  {
+    voteYesPercent = ( 100 * level.voteYes[ team ] ) / level.numCountedVotingClients[ team ];
+    voteNoPercent = ( 100 * level.voteNo[ team ] ) / level.numCountedVotingClients[ team ];
+  }
 
-  msg = va( "print \"%sote %sed (%d for, %d against and %d abstained)\n\"",
-      team == TEAM_NONE ? "V" : "Team v", pass ? "pass" : "fail",
-      level.voteYes[ team ], level.voteNo[ team ], abstained );
+  if( level.voteType[ team ] == POLL_VOTE )
+  {
+    if( level.numCountedVotingClients[ team ] == 0 )
+      msg = va( "print \"%sote %sed^7 (No player voted)\n\"",
+                team == TEAM_NONE ? "V" : "Team v", pass ? "^2pass" : "^1fail" );
+    else if( level.numCountedVotingClients[ team ] == 1 )
+      msg = va( "print \"%sote %sed^7 (Out of %d total vote %d%% voted yes and %d%% voted no)\n\"",
+                team == TEAM_NONE ? "V" : "Team v", pass ? "^2pass" : "^1fail",
+                ( level.voteYes[ team ] + level.voteNo[ team ] ), voteYesPercent, voteNoPercent );
+    else
+      msg = va( "print \"%sote %sed^7 (Out of %d total votes %d%% voted yes and %d%% voted no)\n\"",
+                team == TEAM_NONE ? "V" : "Team v", pass ? "^2pass" : "^1fail",
+                ( level.voteYes[ team ] + level.voteNo[ team ] ), voteYesPercent, voteNoPercent );
+  }
+  else
+  {
+    if( g_impliedVoting.integer )
+    {
+      if( level.numCountedVotingClients[ team ] == 1)
+        msg = va( "print \"%sote %sed^7 (%d%% voted yes out of %d %s)\n\"",
+                  team == TEAM_NONE ? "V" : "Team v", pass ? "^2pass" : "^1fail",
+                  voteYesPercent, level.numCountedVotingClients[ team ],
+                  team == TEAM_NONE ? "active player" : "active teammate" );
+      else
+        msg = va( "print \"%sote %sed^7 (%d%% voted yes out of %d %s)\n\"",
+                    team == TEAM_NONE ? "V" : "Team v", pass ? "^2pass" : "^1fail",
+                    voteYesPercent, level.numCountedVotingClients[ team ],
+                    team == TEAM_NONE ? "active players" : "active teammates" );
+    }
+    else
+    {
+      if( level.numCountedVotingClients[ team ] == 1)
+        msg = va( "print \"%sote %sed^7 (%d%% voted yes out of %d total vote)\n\"",
+                  team == TEAM_NONE ? "V" : "Team v", pass ? "^2pass" : "^1fail",
+                  voteYesPercent, level.numCountedVotingClients[ team ] );
+      else
+        msg = va( "print \"%sote %sed^7 (%d%% voted yes out of %d total votes)\n\"",
+                    team == TEAM_NONE ? "V" : "Team v", pass ? "^2pass" : "^1fail",
+                    voteYesPercent, level.numCountedVotingClients[ team ] );
+    }
+  }
 
   if( team == TEAM_NONE )
     trap_SendServerCommand( -1, msg );
@@ -2461,14 +2532,16 @@ void G_CheckVote( team_t team )
   level.voteTime[ team ] = 0;
   level.voteYes[ team ] = 0;
   level.voteNo[ team ] = 0;
+  level.numCountedVotingClients[ team ] = 0;
+  level.voteType[ team ] = VOID_VOTE;
 
   for( i = 0; i < level.maxclients; i++ )
     level.clients[ i ].pers.voted &= ~( 1 << team );
 
   trap_SetConfigstring( CS_VOTE_TIME + team, "" );
   trap_SetConfigstring( CS_VOTE_STRING + team, "" );
-  trap_SetConfigstring( CS_VOTE_YES + team, "0" );
-  trap_SetConfigstring( CS_VOTE_NO + team, "0" );
+  trap_SetConfigstring( CS_VOTE_CAST + team, "0" );
+  trap_SetConfigstring( CS_VOTE_ACTIVE + team, "0" );
 }
 
 
@@ -2769,12 +2842,15 @@ void G_RunFrame( int levelTime )
   if( !g_doCountdown.integer || level.countdownTime <= level.time )
   {
     G_CalculateBuildPoints( );
-    G_CalculateStages( );
     G_SpawnClients( TEAM_ALIENS );
     G_SpawnClients( TEAM_HUMANS );
     G_CalculateAvgPlayers( );
     G_UpdateZaps( msec );
   }
+  if( level.fight && ( ( g_doWarmup.integer && !g_doCountdown.integer ) ||
+      level.countdownTime <= ( level.time + 1000 ) ) )
+    level.fight = qfalse;
+  G_CalculateStages( );
   G_UpdateBuildableRangeMarkers( );
 
   // check for warmup timeout

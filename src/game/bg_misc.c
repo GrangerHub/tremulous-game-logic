@@ -2901,7 +2901,9 @@ char *eventnames[ ] =
   "EV_MGTURRET_SPINUP", // trigger a sound
 
   "EV_RPTUSE_SOUND",    // trigger a sound
-  "EV_LEV2_ZAP"
+  "EV_LEV2_ZAP",
+
+  "EV_FIGHT"
 };
 
 /*

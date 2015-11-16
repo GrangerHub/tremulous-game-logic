@@ -319,7 +319,7 @@ static cvarTable_t cvarTable[ ] =
   { &cg_debugParticles, "cg_debugParticles", "0", CVAR_CHEAT },
   { &cg_debugTrails, "cg_debugTrails", "0", CVAR_CHEAT },
   { &cg_debugPVS, "cg_debugPVS", "0", CVAR_CHEAT },
-  { &cg_disableWarningDialogs, "cg_disableWarningDialogs", "0", CVAR_ARCHIVE },
+  { &cg_disableWarningDialogs, "cg_disableWarningDialogs", "1", CVAR_ARCHIVE },
   { &cg_disableUpgradeDialogs, "cg_disableUpgradeDialogs", "0", CVAR_ARCHIVE },
   { &cg_disableBuildDialogs, "cg_disableBuildDialogs", "0", CVAR_ARCHIVE },
   { &cg_disableCommandDialogs, "cg_disableCommandDialogs", "0", CVAR_ARCHIVE },
@@ -763,6 +763,8 @@ static void CG_RegisterSounds( void )
   cgs.media.turretSpinupSound     = trap_S_RegisterSound( "sound/buildables/mgturret/spinup.wav", qfalse );
   cgs.media.weaponEmptyClick      = trap_S_RegisterSound( "sound/weapons/click.wav", qfalse );
 
+  cgs.media.voteAlarmSound        = trap_S_RegisterSound( "sound/misc/213096__soundsexciting__gong-with-music.wav", qfalse );
+
   cgs.media.talkSound             = trap_S_RegisterSound( "sound/misc/talk.wav", qfalse );
   cgs.media.alienTalkSound        = trap_S_RegisterSound( "sound/misc/alien_talk.wav", qfalse );
   cgs.media.humanTalkSound        = trap_S_RegisterSound( "sound/misc/human_talk.wav", qfalse );
@@ -773,6 +775,8 @@ static void CG_RegisterSounds( void )
   cgs.media.watrUnSound           = trap_S_RegisterSound( "sound/player/watr_un.wav", qfalse );
 
   cgs.media.disconnectSound       = trap_S_RegisterSound( "sound/misc/disconnect.wav", qfalse );
+
+  cgs.media.fightSound            = trap_S_RegisterSound( "sound/misc/276254__dynajinn__fight-voiceover-fight.wav", qfalse );
 
   for( i = 0; i < 4; i++ )
   {
@@ -1889,6 +1893,8 @@ Will perform callbacks to make the loading info screen update.
 void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum )
 {
   const char  *s;
+  int          i;
+  int          team;
 
   // clear everything
   memset( &cgs, 0, sizeof( cgs ) );
@@ -1934,17 +1940,14 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum )
   // get the gamestate from the client system
   trap_GetGameState( &cgs.gameState );
 
-  // copy vote display strings so they don't show up blank if we see
-  // the same one directly after connecting
-  Q_strncpyz( cgs.voteString[ TEAM_NONE ],
-      CG_ConfigString( CS_VOTE_STRING + TEAM_NONE ),
-      sizeof( cgs.voteString ) );
-  Q_strncpyz( cgs.voteString[ TEAM_ALIENS ],
-      CG_ConfigString( CS_VOTE_STRING + TEAM_ALIENS ),
-      sizeof( cgs.voteString[ TEAM_ALIENS ] ) );
-  Q_strncpyz( cgs.voteString[ TEAM_HUMANS ],
-      CG_ConfigString( CS_VOTE_STRING + TEAM_ALIENS ),
-      sizeof( cgs.voteString[ TEAM_HUMANS ] ) );
+    for( team = TEAM_NONE; team < NUM_TEAMS; ++team )
+  {
+    cgs.voteAlarmPlay[ team ] = qfalse;
+
+    // copy vote display strings so they don't show up blank if we see
+    // the same one directly after connecting
+    CG_ParseVoteStrings( team, CG_ConfigString( CS_VOTE_STRING + team ) );
+  }
 
   // check version
   s = CG_ConfigString( CS_GAME_VERSION );

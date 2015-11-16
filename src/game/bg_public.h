@@ -65,9 +65,9 @@ enum
 
   CS_VOTE_TIME,             // Vote stuff each needs NUM_TEAMS slots
   CS_VOTE_STRING      = CS_VOTE_TIME + NUM_TEAMS,
-  CS_VOTE_YES         = CS_VOTE_STRING + NUM_TEAMS,
-  CS_VOTE_NO          = CS_VOTE_YES + NUM_TEAMS,
-  CS_VOTE_CALLER      = CS_VOTE_NO + NUM_TEAMS,
+  CS_VOTE_CAST         = CS_VOTE_STRING + NUM_TEAMS,
+  CS_VOTE_ACTIVE          = CS_VOTE_CAST + NUM_TEAMS,
+  CS_VOTE_CALLER      = CS_VOTE_ACTIVE + NUM_TEAMS,
   
   CS_GAME_VERSION     = CS_VOTE_CALLER + NUM_TEAMS,
   CS_LEVEL_START_TIME,      // so the timer only shows the current level
@@ -560,7 +560,9 @@ typedef enum
   EV_MGTURRET_SPINUP, // turret spinup sound should play
 
   EV_RPTUSE_SOUND,    // trigger a sound
-  EV_LEV2_ZAP
+  EV_LEV2_ZAP,
+
+  EV_FIGHT
 } entity_event_t;
 
 typedef enum
@@ -1354,3 +1356,22 @@ typedef struct
   const char *name;
 } dummyCmd_t;
 int cmdcmp( const void *a, const void *b );
+
+typedef enum
+{
+  KICK_VOTE,
+  POLL_VOTE,
+  MUTE_VOTE,
+  UNMUTE_VOTE,
+  MAP_RESTART_VOTE,
+  MAP_VOTE,
+  NEXTMAP_VOTE,
+  DRAW_VOTE,
+  SUDDEN_DEATH_VOTE,
+  DENYBUILD_VOTE,
+  ALLOWBUILD_VOTE,
+  ADMITDEFEAT_VOTE,
+
+  NUM_VOTE_TYPES,
+  VOID_VOTE
+} vote_t;
