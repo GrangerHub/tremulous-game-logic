@@ -3517,7 +3517,7 @@ void Cmd_PlayMap_f( gentity_t *ent )
   if (playMapError.errorCode == PLAYMAP_ERROR_NONE) {
     trap_SendServerCommand( -1, 
 			    va( "print \"%s" S_COLOR_WHITE
-				" added map ^5%s^7 to playmap queue\"\n",
+				" added map ^5%s^7 to playmap queue\n\"",
 				ent->client->pers.netname, map ) );
   } else 
     ADMP( va( "%s\n", playMapError.errorMessage ) );
