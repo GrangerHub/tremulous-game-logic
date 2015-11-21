@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #define MAX_PLAYMAP_POOL_ENTRIES 128
+#define MAX_PLAYMAP_QUEUE_ENTRIES 128
 #define PLAYMAP_INACTIVE 0
 
 // map pool for the playmap system
@@ -69,6 +70,8 @@ typedef enum
 #define PLAYMAP_QUEUE_MINUS1(x) PLAYMAP_QUEUE_ADD(x,-1)
 #define PLAYMAP_QUEUE_IS_EMPTY  ( G_GetPlayMapQueueLength() < 1 )
 #define PLAYMAP_QUEUE_IS_FULL  ( G_GetPlayMapQueueLength() >= ( MAX_PLAYMAP_POOL_ENTRIES - 1 ) )
+
+#define FREE_IF_NOT_NULL(x)  { if( *( x ) ) { BG_Free( x ); x = NULL; } }
 
 // individual playmap entry in the queue
 typedef struct playMap_s

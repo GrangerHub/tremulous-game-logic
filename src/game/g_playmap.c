@@ -300,7 +300,9 @@ playMapError_t G_ClearPlayMapPool( void )
   int i;
 
   for( i = 0; i < MAX_PLAYMAP_POOL_ENTRIES; i++ )
-  {
+    FREE_IF_NOT_NULL( playMapPoolCache.maps[ i ] );
+  /*
+    {
     // skip entry if it is already a null pointer
     if( playMapPoolCache.maps[ i ] == NULL )
       continue;
@@ -308,7 +310,7 @@ playMapError_t G_ClearPlayMapPool( void )
     // free the space taken up by the slot
     BG_Free( playMapPoolCache.maps[ i ] );
     playMapPoolCache.maps[ i ] = NULL;
-  }
+    }*/
 
   playMapPoolCache.numMaps = 0;
 
@@ -354,7 +356,7 @@ static playMapQueue_t playMapQueue;
 ================
 G_InitPlayMapQueue
 
-Initialize the playmap queue. Should only be run once.
+Initialize the playmap queue. 
 ================
 */
 void G_InitPlayMapQueue( void )
@@ -366,7 +368,7 @@ void G_InitPlayMapQueue( void )
   playMapQueue.tail = PLAYMAP_QUEUE_MINUS1( playMapQueue.tail );
   playMapQueue.numEntries = 0;
 
-  for( i = 0; i < MAX_PLAYMAP_POOL_ENTRIES; i++ )
+  for( i = 0; i < MAX_PLAYMAP_QUEUE_ENTRIES; i++ )
   {
     // set all values/pointers to NULL
     playMapQueue.playMap[ i ].mapname = NULL;
@@ -379,6 +381,33 @@ void G_InitPlayMapQueue( void )
       playMapQueue.playMap[ i ].minusFlags[ j ] = PLAYMAP_FLAG_NONE;
     }
   }
+}
+
+/*
+================
+G_ClearPlayMapQueue
+
+Free the memory allocated for the playmap queue elements.
+================
+*/
+playMapError_t G_ClearPlayMapQueue( void )
+{
+  int i;
+
+  for( i = 0; i < G_GetPlayMapQueueLength(); i++ )
+  {
+    playMap_t playMap =
+      playMapQueue.playMap[ PLAYMAP_QUEUE_ADD(playMapQueue.head, i) ];
+
+    FREE_IF_NOT_NULL( playMap.mapname );
+    FREE_IF_NOT_NULL( playMap.clientname );
+    FREE_IF_NOT_NULL( playMap.layout );
+  }
+
+  // All contents gone, now must initialize it
+  G_InitPlayMapQueue();
+
+  return G_PlayMapErrorByCode( PLAYMAP_ERROR_NONE );
 }
 
 /*
@@ -425,6 +454,9 @@ playMapError_t G_SavePlayMapQueue( void )
 
   trap_FS_FCloseFile( f );
 
+  // Now clear the memory and initialize it
+  G_ClearPlayMapQueue();
+  
   return G_PlayMapErrorByCode( PLAYMAP_ERROR_NONE );
 }
 
@@ -446,7 +478,6 @@ playMapError_t G_ReloadPlayMapQueue( void )
   if( !g_playMapQueueConfig.string[ 0 ] )
     return G_PlayMapErrorByCode( PLAYMAP_ERROR_NO_QUEUE_CONFIG );
 
-  // TODO: potential memory leak of old queue items
   G_InitPlayMapQueue();
   
   // read playmap config file
@@ -562,15 +593,8 @@ Returns the length of the playmap queue.
 
 int G_GetPlayMapQueueLength( void )
 {
-  int length = playMapQueue.tail - playMapQueue.head + 1;
-
-  while( length < 0 )
-    length += MAX_PLAYMAP_POOL_ENTRIES;
-
-  while( length >= MAX_PLAYMAP_POOL_ENTRIES )
-    length -= MAX_PLAYMAP_POOL_ENTRIES;
-
-  return length;
+  return (playMapQueue.tail - playMapQueue.head + 1)
+    % MAX_PLAYMAP_QUEUE_ENTRIES;
 }
 
 /*

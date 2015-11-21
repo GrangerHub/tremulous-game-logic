@@ -1718,8 +1718,6 @@ void ExitLevel( void )
   trap_Cvar_Set( "g_nextMap", "" );
   trap_Cvar_Set( "g_warmup", "1" );
   trap_SetConfigstring( CS_WARMUP, va( "%d", IS_WARMUP ) );
-  G_SavePlayMapPool();
-  G_SavePlayMapQueue();
   
   level.restarted = qtrue;
   level.changemap = NULL;
