@@ -3497,6 +3497,7 @@ void Cmd_PlayMap_f( gentity_t *ent )
     ADMP( "Usage: /playmap mapname [layout [flags]]\n"
 	  "  (Use /listmaps for map names)\n\n" );
       
+    G_PrintPlayMapPool( ent );
     G_PrintPlayMapQueue( ent );
     return;
   }
@@ -3517,7 +3518,8 @@ void Cmd_PlayMap_f( gentity_t *ent )
   if (playMapError.errorCode == PLAYMAP_ERROR_NONE) {
     trap_SendServerCommand( -1, 
 			    va( "print \"%s" S_COLOR_WHITE
-				" added map ^5%s^7 to playmap queue\n\"",
+				" added map " S_COLOR_CYAN "%s" S_COLOR_WHITE
+				" to playlist\n\"",
 				ent->client->pers.netname, map ) );
   } else 
     ADMP( va( "%s\n", playMapError.errorMessage ) );

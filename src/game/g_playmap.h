@@ -105,10 +105,10 @@ typedef enum playMapErrorCode_s
   PLAYMAP_ERROR_NONE,
 
   // list of error codes (order does not matter)
-  PLAYMAP_ERROR_MAP_NONEXISTANT,
   PLAYMAP_ERROR_POOL_CONFIG_UNREADABLE,
   PLAYMAP_ERROR_NO_POOL_CONFIG,
   PLAYMAP_ERROR_MAP_POOL_FULL,
+  PLAYMAP_ERROR_MAP_POOL_EMPTY,
   PLAYMAP_ERROR_MAP_ALREADY_IN_POOL,
   PLAYMAP_ERROR_MAP_NOT_FOUND,
   PLAYMAP_ERROR_LAYOUT_NOT_FOUND,
@@ -147,6 +147,7 @@ playMapError_t G_SavePlayMapPool( void );
 playMapError_t G_ReloadPlayMapPool( void );
 playMapError_t G_ClearPlayMapPool( void );
 int G_FindInMapPool( char *mapname );
+void G_PrintPlayMapPool( gentity_t *ent );
 void G_InitPlayMapQueue( void );
 playMapError_t G_SavePlayMapQueue( void );
 playMapError_t G_ReloadPlayMapQueue( void );

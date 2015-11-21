@@ -45,10 +45,6 @@ static const playMapError_t playMapError[ ] =
     ""
   },
   {
-       PLAYMAP_ERROR_MAP_NONEXISTANT,         /* errorCode */
-      "cannot find map."
-  },
-  {
     PLAYMAP_ERROR_POOL_CONFIG_UNREADABLE,    /* errorCode */
     "playmap pool config file specified by g_playMapPoolConfig is not readable."
   },
@@ -59,6 +55,10 @@ static const playMapError_t playMapError[ ] =
   {
     PLAYMAP_ERROR_MAP_POOL_FULL,         /* errorCode */
     "the map pool is currently full"
+  },
+  {
+    PLAYMAP_ERROR_MAP_POOL_EMPTY,         /* errorCode */
+    "no maps in pool"
   },
   {
     PLAYMAP_ERROR_MAP_ALREADY_IN_POOL,   /* errorCode */
@@ -344,6 +344,39 @@ int G_FindInMapPool( char *mapname )
   return -1;
 }
 
+/*
+================
+G_PrintPlayMapPool
+
+Print the playmap pool on the console
+================
+*/
+void G_PrintPlayMapPool( gentity_t *ent )
+{
+  int i, len;
+  
+  if ( ( len = playMapPoolCache.numMaps ) )
+    {
+      ADMBP_begin(); // begin buffer
+      ADMBP( "List of maps that can be added to the playlist:\n" );
+    }
+  else
+    {
+    ADMP( va( "%s\n",
+	       G_PlayMapErrorByCode(PLAYMAP_ERROR_MAP_POOL_EMPTY).errorMessage) );
+    return;
+    }
+
+  for( i = 0; i < len; i++ )
+  {
+    ADMBP( va( S_COLOR_CYAN " %-20s" S_COLOR_WHITE,
+	       playMapPoolCache.maps[ i ] ) );
+    // Limit per row (TODO: make one per row and write min/max next to it)
+    if (!((i+1)%3)) ADMBP( "\n" );
+  }
+  ADMBP( "\n\n" );
+  ADMBP_end();
+}
 
 /*
  * playmap queue utility functions
@@ -646,8 +679,8 @@ playMapError_t G_PlayMapEnqueue( char *mapname, char *layout, char
   playMap_t playMap;
   playMapFlag_t playMapFlag;
 
-  if( ! G_MapExists( mapname ) )
-    return G_PlayMapErrorByCode( PLAYMAP_ERROR_MAP_NONEXISTANT );
+  if( G_FindInMapPool( mapname ) < 0 )
+    return G_PlayMapErrorByCode( PLAYMAP_ERROR_MAP_NOT_IN_POOL );
   
   if( PLAYMAP_QUEUE_IS_FULL )
     return G_PlayMapErrorByCode( PLAYMAP_ERROR_MAP_QUEUE_FULL );
@@ -843,6 +876,7 @@ void G_PrintPlayMapQueue( gentity_t *ent )
     {
     ADMBP( va( "%s\n",
 	       G_PlayMapErrorByCode(PLAYMAP_ERROR_MAP_QUEUE_EMPTY).errorMessage) );
+    ADMBP_end();
     return;
     }
 
@@ -850,7 +884,9 @@ void G_PrintPlayMapQueue( gentity_t *ent )
   {
     playMap_t playMap =
       playMapQueue.playMap[ PLAYMAP_QUEUE_ADD(playMapQueue.head, i) ];
-    ADMBP( va( "^3%d.^7 ^5%s^7 (added by %s)\n", i + 1,
+    ADMBP( va( S_COLOR_YELLOW "%d." S_COLOR_WHITE " "
+	       S_COLOR_CYAN "%s" S_COLOR_WHITE
+	       " (added by %s" S_COLOR_WHITE ")\n", i + 1,
 	       playMap.mapname, playMap.clientname ) );
   }
 
