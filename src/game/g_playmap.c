@@ -445,6 +445,47 @@ playMapError_t G_ClearPlayMapQueue( void )
 
 /*
 ================
+G_ValidatePlayMapQueue
+
+Check playmap queue contents to validate them. E.g., entries from
+disconnected clients will be deleted.
+================
+*/
+playMapError_t G_ValidatePlayMapQueue( void )
+{
+  int i;
+  playMap_t playMap;
+  
+  for( i = 0; i < G_GetPlayMapQueueLength(); i++ )
+    {
+      if( g_debugPlayMap.integer > 0 )
+	trap_Print( va( "PLAYMAP: checking entry #%d out of %d in queue\n",
+			i + 1, G_GetPlayMapQueueLength() ) );
+      playMap =
+	playMapQueue.playMap[ PLAYMAP_QUEUE_ADD( playMapQueue.head, i ) ];
+      
+      // Check if client is still connected
+      if ( ! G_FindClientByName( NULL, playMap.clientname ) )
+	{
+	  trap_SendServerCommand( -1,
+				  va( "print \"Removing playlist entry #%d for "
+				      S_COLOR_CYAN "%s" S_COLOR_WHITE
+				      " because player %s" S_COLOR_WHITE
+				      " has left\n\"",
+				      i + 1, playMap.mapname, playMap.clientname ) );
+ 
+	  G_RemoveFromPlayMapQueue( i );
+	  i--; // because queue elements are now shifted
+	}      
+    }
+
+  if( g_debugPlayMap.integer > 0 )
+    trap_Print( "PLAYMAP: leaving G_ValidatePlayMapQueue\n" );
+  return G_PlayMapErrorByCode( PLAYMAP_ERROR_NONE );
+}
+
+/*
+================
 G_SavePlayMapQueue
 
 Save the playmap queue into a config file. Should be run before
@@ -456,6 +497,9 @@ playMapError_t G_SavePlayMapQueue( void )
   fileHandle_t f;
   int i;
 
+  // Clean stale entries
+  G_ValidatePlayMapQueue();
+  
   if( !g_playMapQueueConfig.string[ 0 ] )
     return G_PlayMapErrorByCode( PLAYMAP_ERROR_NO_QUEUE_CONFIG );
 
@@ -464,6 +508,8 @@ playMapError_t G_SavePlayMapQueue( void )
     return G_PlayMapErrorByCode( PLAYMAP_ERROR_QUEUE_CONFIG_UNREADABLE );
   }
 
+  if( g_debugPlayMap.integer > 0 )
+    trap_Print( va( "PLAYMAP: saving %d queue entries\n", G_GetPlayMapQueueLength() ) );
   for( i = 0; i < G_GetPlayMapQueueLength(); i++ )
   {
     playMap_t playMap =
@@ -489,7 +535,9 @@ playMapError_t G_SavePlayMapQueue( void )
 
   // Now clear the memory and initialize it
   G_ClearPlayMapQueue();
-  
+
+  if( g_debugPlayMap.integer > 0 )
+    trap_Print( "PLAYMAP: leaving G_SavePlayMapQueue\n" );
   return G_PlayMapErrorByCode( PLAYMAP_ERROR_NONE );
 }
 
@@ -507,6 +555,9 @@ playMapError_t G_ReloadPlayMapQueue( void )
   int len;
   char *cnf, *cnf2, *mapname, empty = 0,
     *layout = &empty, *clientname = &empty, *flags = &empty;
+
+  if( g_debugPlayMap.integer > 0 )
+    trap_Print( "PLAYMAP: entering G_ReloadPlayMapQueue\n" );
   
   if( !g_playMapQueueConfig.string[ 0 ] )
     return G_PlayMapErrorByCode( PLAYMAP_ERROR_NO_QUEUE_CONFIG );
@@ -526,18 +577,21 @@ playMapError_t G_ReloadPlayMapQueue( void )
   cnf[ len ] = '\0';
   trap_FS_FCloseFile( f );
 
-  trap_Print( va( "DEBUG: before reading maps file of length %d\n", len ) );
+  if( g_debugPlayMap.integer > 0 )
+    trap_Print( va( "PLAYMAP: before reading maps file of length %d\n", len ) );
   COM_BeginParseSession( g_playMapQueueConfig.string );
   while( cnf < (cnf2 + len) ) // rows
   {
     while ( cnf < (cnf2 + len) ) // map arguments
       {
-	trap_Print( va( "DEBUG: reading maps at char index %ld\n", cnf - cnf2 ) );
+	if( g_debugPlayMap.integer > 0 )
+	  trap_Print( va( "PLAYMAP: reading maps at char index %ld\n", cnf - cnf2 ) );
 	// Must use G_CopyString to prevent overwrites by parser
 	mapname = G_CopyString(COM_ParseExt( &cnf, qfalse ));
 	if( *mapname )
 	  {
-	    trap_Print( va( "DEBUG: found map %s\n", mapname ) );
+	    if( g_debugPlayMap.integer > 0 )
+	      trap_Print( va( "PLAYMAP: found map %s\n", mapname ) );
 
 	    clientname = G_CopyString(COM_ParseExt( &cnf, qfalse ));
 	    if( *clientname )
@@ -564,11 +618,12 @@ playMapError_t G_ReloadPlayMapQueue( void )
     if( !*mapname )
       break; // end of all maps
     
-    trap_Print( va( "DEBUG: map=%s\n"
-		    "       client=%s\n" 
-		    "       layout=%s\n"
-		    "       flags=%s\n",
-		    mapname, clientname, layout, flags ) );
+    if( g_debugPlayMap.integer > 0 )
+      trap_Print( va( "PLAYMAP: map=%s\n"
+		      "       client=%s\n" 
+		      "       layout=%s\n"
+		      "       flags=%s\n",
+		      mapname, clientname, layout, flags ) );
 
     G_PlayMapEnqueue( mapname, layout, clientname, flags );
 
@@ -579,10 +634,13 @@ playMapError_t G_ReloadPlayMapQueue( void )
     if( *layout ) BG_Free(layout);
     if( *flags ) BG_Free(layout);
 
-    trap_Print( "DEBUG: enqueued\n" );
+    if( g_debugPlayMap.integer > 0 )
+      trap_Print( "PLAYMAP: enqueued\n" );
   }
   BG_Free( cnf2 );
 
+  if( g_debugPlayMap.integer > 0 )
+    trap_Print( "PLAYMAP: leaving G_ReloadPlayMapQueue\n" );
   return G_PlayMapErrorByCode( PLAYMAP_ERROR_NONE );
 }
 
@@ -794,6 +852,9 @@ playMap_t *G_PopFromPlayMapQueue( void )
   // advance the head of the queue in the array (shorten queue by one)
   playMapQueue.head = PLAYMAP_QUEUE_PLUS1( playMapQueue.head );
 
+  // housekeeping, but this is redundant
+  playMapQueue.numEntries--;
+
   return playMap;
 }
 
@@ -806,9 +867,68 @@ Remove a map from the playmap queue by its index.
 */
 playMapError_t G_RemoveFromPlayMapQueue( int index )
 {
-  // TODO: code
+  int i, len;
 
-  return G_PlayMapErrorByCode( PLAYMAP_ERROR_MAP_NOT_IN_QUEUE );
+  playMap_t playMap =
+    playMapQueue.playMap[ PLAYMAP_QUEUE_ADD( playMapQueue.head, index ) ];
+
+  if( g_debugPlayMap.integer > 0 )
+    trap_Print( va( "PLAYMAP: about to remove map %d out of %d in queue. "
+		    "Head: %d, Tail: %d\n", index + 1, G_GetPlayMapQueueLength(),
+		    playMapQueue.head, playMapQueue.tail ) );
+
+  // Clear up memory for deleted information
+  FREE_IF_NOT_NULL( playMap.mapname );
+  FREE_IF_NOT_NULL( playMap.clientname );
+  FREE_IF_NOT_NULL( playMap.layout );
+  
+  len = G_GetPlayMapQueueLength();
+  for( i = index; i < ( len - 1 ); i++ )
+    {
+      if( g_debugPlayMap.integer > 0 )
+	trap_Print( va( "PLAYMAP: copying map '%s' from #%d onto map '%s' in #%d.\n",
+			playMapQueue.playMap[ PLAYMAP_QUEUE_ADD( playMapQueue.head, i + 1) ].mapname,
+			PLAYMAP_QUEUE_ADD( playMapQueue.head, i + 1), 
+			playMapQueue.playMap[ PLAYMAP_QUEUE_ADD( playMapQueue.head, i) ].mapname,
+			PLAYMAP_QUEUE_ADD( playMapQueue.head, i ) ) );
+
+      // Copy next one over
+      playMapQueue.playMap[ PLAYMAP_QUEUE_ADD( playMapQueue.head, i ) ] = 
+	playMapQueue.playMap[ PLAYMAP_QUEUE_ADD( playMapQueue.head, i + 1) ];
+
+      if( g_debugPlayMap.integer > 0 )
+	trap_Print( va( "PLAYMAP: after copying map is '%s'.\n",
+			playMapQueue.playMap[ PLAYMAP_QUEUE_ADD( playMapQueue.head, i)
+					      ].mapname ) );
+    }
+
+  // If this wasn't the last one
+  if ( index < ( len - 1 ) )
+    {
+      if( g_debugPlayMap.integer > 0 )
+	trap_Print( va( "PLAYMAP: erasing map '%s' from #%d.\n",
+			playMapQueue.playMap[ playMapQueue.tail ].mapname,
+			playMapQueue.tail ) );
+
+      // Clear pointers in the last one
+      // (they are copied and in use, so don't free them!)
+      playMapQueue.playMap[ playMapQueue.tail ].mapname = NULL;
+      playMapQueue.playMap[ playMapQueue.tail ].clientname = NULL;
+      playMapQueue.playMap[ playMapQueue.tail ].layout = NULL;
+    }
+  
+  // Regress the tail marker
+  playMapQueue.tail = PLAYMAP_QUEUE_MINUS1( playMapQueue.tail );
+  playMapQueue.numEntries--;
+
+  if( g_debugPlayMap.integer > 0 )
+    trap_Print( va( "PLAYMAP: after removing, index points to map %s."
+		    " Head: %d, Tail: %d\n",
+		    playMapQueue.playMap[ PLAYMAP_QUEUE_ADD( playMapQueue.head, index )
+					  ].mapname, 
+		    playMapQueue.head, playMapQueue.tail ) );
+
+  return G_PlayMapErrorByCode( PLAYMAP_ERROR_NONE );
 }
 
 /*

@@ -3494,8 +3494,8 @@ void Cmd_PlayMap_f( gentity_t *ent )
 
   if( trap_Argc( ) < 2 )
   {
-    ADMP( "Usage: /playmap mapname [layout [flags]]\n"
-	  "  (Use /listmaps for map names)\n\n" );
+    // TODO: [layout [flags]] announce them once they're implemented
+    ADMP( "Usage: /playmap mapname\n\n" ); 
       
     G_PrintPlayMapPool( ent );
     G_PrintPlayMapQueue( ent );
@@ -3507,12 +3507,13 @@ void Cmd_PlayMap_f( gentity_t *ent )
   trap_Argv( 3, extra, sizeof( extra ) );
   flags = ConcatArgs( 3 );
 
-  /*trap_SendServerCommand( ent-g_entities,
-      va( "print \"DEBUG: cmd=%s\n"
-                  "       map=%s\n"
-                  "       layout=%s\n"
-                  "       flags=%s\n\"",
-                  cmd, map, layout, flags ) );*/
+  if( g_debugPlayMap.integer > 0 )
+       trap_SendServerCommand( ent-g_entities,
+			       va( "print \"DEBUG: cmd=%s\n"
+				   "       map=%s\n"
+				   "       layout=%s\n"
+				   "       flags=%s\n\"",
+				   cmd, map, layout, flags ) );
 
   playMapError = G_PlayMapEnqueue( map, layout, ent->client->pers.netname, flags );
   if (playMapError.errorCode == PLAYMAP_ERROR_NONE) {

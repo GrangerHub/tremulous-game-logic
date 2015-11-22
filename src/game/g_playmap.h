@@ -65,13 +65,13 @@ typedef enum
  * PLAYMAP QUEUE
  */
 
-#define PLAYMAP_QUEUE_ADD(x,y)  ( ( ( x ) + ( y ) ) % MAX_PLAYMAP_POOL_ENTRIES )
+#define PLAYMAP_QUEUE_ADD(x,y)  ( ( ( x ) + ( y ) ) % MAX_PLAYMAP_QUEUE_ENTRIES )
 #define PLAYMAP_QUEUE_PLUS1(x)  PLAYMAP_QUEUE_ADD(x,1)
 #define PLAYMAP_QUEUE_MINUS1(x) PLAYMAP_QUEUE_ADD(x,-1)
 #define PLAYMAP_QUEUE_IS_EMPTY  ( G_GetPlayMapQueueLength() < 1 )
-#define PLAYMAP_QUEUE_IS_FULL  ( G_GetPlayMapQueueLength() >= ( MAX_PLAYMAP_POOL_ENTRIES - 1 ) )
+#define PLAYMAP_QUEUE_IS_FULL  ( G_GetPlayMapQueueLength() >= ( MAX_PLAYMAP_QUEUE_ENTRIES - 1 ) )
 
-#define FREE_IF_NOT_NULL(x)  { if( *( x ) ) { BG_Free( x ); x = NULL; } }
+#define FREE_IF_NOT_NULL(x)  { if( ( x ) ) { BG_Free( x ); x = NULL; } }
 
 // individual playmap entry in the queue
 typedef struct playMap_s
@@ -88,7 +88,7 @@ typedef struct playMap_s
 // playmap queue/playlist
 typedef struct playMapQueue_s
 {
-  playMap_t playMap[ MAX_PLAYMAP_POOL_ENTRIES ];
+  playMap_t playMap[ MAX_PLAYMAP_QUEUE_ENTRIES ];
 
   int head, tail, numEntries;
 } playMapQueue_t;

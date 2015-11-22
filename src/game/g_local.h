@@ -1120,6 +1120,7 @@ extern  vmCvar_t  g_knockback;
 extern  vmCvar_t  g_inactivity;
 extern  vmCvar_t  g_debugMove;
 extern  vmCvar_t  g_debugDamage;
+extern  vmCvar_t  g_debugPlayMap;
 extern  vmCvar_t  g_synchronousClients;
 extern  vmCvar_t  g_motd;
 extern  vmCvar_t  g_countdown;
