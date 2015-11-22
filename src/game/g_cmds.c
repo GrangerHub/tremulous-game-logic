@@ -3515,7 +3515,7 @@ void Cmd_PlayMap_f( gentity_t *ent )
 				   "       flags=%s\n\"",
 				   cmd, map, layout, flags ) );
 
-  playMapError = G_PlayMapEnqueue( map, layout, ent->client->pers.netname, flags );
+  playMapError = G_PlayMapEnqueue( map, layout, ent->client->pers.netname, flags, ent );
   if (playMapError.errorCode == PLAYMAP_ERROR_NONE) {
     trap_SendServerCommand( -1, 
 			    va( "print \"%s" S_COLOR_WHITE

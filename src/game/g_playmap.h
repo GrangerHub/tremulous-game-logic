@@ -155,7 +155,7 @@ gclient_t *G_FindClientByName(gentity_t *from, const char *netname);
 int G_GetPlayMapQueueLength( void );
 qboolean G_PlayMapQueueIsFull( void );
 playMapFlag_t G_ParsePlayMapFlag(char *flag);
-playMapError_t G_PlayMapEnqueue( char *mapname, char *layout, char *clientname, char *flags );
+playMapError_t G_PlayMapEnqueue( char *mapname, char *layout, char *clientname, char *flags, gentity_t *ent );
 playMap_t *G_PopFromPlayMapQueue( void );
 playMapError_t G_RemoveFromPlayMapQueue( int index );
 int G_GetPlayMapQueueIndexByMapName( char *mapname );

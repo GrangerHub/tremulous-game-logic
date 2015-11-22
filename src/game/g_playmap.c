@@ -94,7 +94,7 @@ static const playMapError_t playMapError[ ] =
   },
   {
     PLAYMAP_ERROR_USER_ALREADY_IN_QUEUE, /* errorCode */
-    "you already have a map queued on the playlist"
+    "you already have a map queued on the playlist. Your previous entry is being deleted."
   },
   {
     PLAYMAP_ERROR_MAP_QUEUE_EMPTY,       /* errorCode */
@@ -625,7 +625,7 @@ playMapError_t G_ReloadPlayMapQueue( void )
 		      "       flags=%s\n",
 		      mapname, clientname, layout, flags ) );
 
-    G_PlayMapEnqueue( mapname, layout, clientname, flags );
+    G_PlayMapEnqueue( mapname, layout, clientname, flags, NULL );
 
     // G_PlayMapEnqueue also copies the strings, so release the
     // originals here
@@ -729,7 +729,7 @@ queue).
 */
 
 playMapError_t G_PlayMapEnqueue( char *mapname, char *layout, char
-    *clientname, char *flags )
+				 *clientname, char *flags, gentity_t *ent )
 {
   int       i;
   int       plusFlagIdx = 0, minusFlagIdx = 0;
@@ -744,8 +744,12 @@ playMapError_t G_PlayMapEnqueue( char *mapname, char *layout, char
     return G_PlayMapErrorByCode( PLAYMAP_ERROR_MAP_QUEUE_FULL );
 
   // check if user already has a map queued
-  if( G_GetPlayMapQueueIndexByClient( clientname ) >= 0 )
-    return G_PlayMapErrorByCode( PLAYMAP_ERROR_USER_ALREADY_IN_QUEUE );
+  if( ( i = G_GetPlayMapQueueIndexByClient( clientname ) ) >= 0 )
+    {
+      ADMP( va( "%s\n",
+		G_PlayMapErrorByCode( PLAYMAP_ERROR_USER_ALREADY_IN_QUEUE ).errorMessage) );
+      G_RemoveFromPlayMapQueue( i );
+    }
 
   // check if map has already been queued by someone else
   if( G_GetPlayMapQueueIndexByMapName( mapname ) >= 0 )
