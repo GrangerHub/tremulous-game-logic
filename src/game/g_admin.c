@@ -120,6 +120,11 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "[^3dir^7] [^3extension^7] [^3filter^7]"
     },
 
+    {"explode", G_admin_explode, qfalse, "explode",
+      "Blow up a player",
+      "[^3name^6|^3slot#^7] (^5reason^7)"
+    },
+
     {"kick", G_admin_kick, qfalse, "kick",
       "kick a player with an optional reason",
       "[^3name^6|^3slot#^7] (^5reason^7)"
@@ -2477,6 +2482,60 @@ qboolean G_admin_denybuild( gentity_t *ent )
   return qtrue;
 }
 
+qboolean G_admin_explode( gentity_t *ent )
+{
+
+  int pid;
+  char name[ MAX_NAME_LENGTH ], *reason, err[ MAX_STRING_CHARS ];
+  int minargc;
+  gentity_t *vic;
+
+  if( trap_Argc() < 2 )
+  {
+    ADMP( "^3explode: ^7usage: explode [name|slot#]\n" );
+    return qfalse;
+  }
+
+  trap_Argv( 1, name, sizeof( name ) );
+  reason = ConcatArgs( 2 );
+  if( ( pid = G_ClientNumberFromString( name, err, sizeof( err ) ) ) == -1 )
+  {
+    ADMP( va( "^3explode: ^7%s\n", err ) );
+    return qfalse;
+  }
+
+  vic = &g_entities[ pid ];
+  if( !admin_higher( ent, vic ) )
+  {
+    ADMP( "^3explode: ^7sorry, but your intended victim has a higher admin"
+        " level than you\n" );
+    return qfalse;
+  }
+
+  if( vic->client->pers.teamSelection == TEAM_NONE
+   || vic->client->pers.classSelection == PCL_NONE
+   || vic->health <= 0 )
+  {
+    ADMP( "^3explode: ^7they must be living to use this command\n" );
+    return qfalse;
+  }
+
+  if( vic->flags & FL_GODMODE )
+    vic->flags ^= FL_GODMODE;
+
+  Blow_up(vic);
+
+  trap_SendServerCommand( vic-g_entities,
+			  va( "cp \"^1Boom!!!\n^7%s\n\"", reason ) );
+
+  AP( va( "print \"^3explode: ^7%s^7 has been exploded by %s^7 with the reason: ^7%s\n\"",
+          vic->client->pers.netname,
+          ( ent ) ? ent->client->pers.netname : "console",
+          ( *reason ) ? reason : "No reason specified" ) );
+
+  return qtrue;
+}
+
 qboolean G_admin_listadmins( gentity_t *ent )
 {
   int i;
@@ -3676,7 +3735,7 @@ qboolean G_admin_slap( gentity_t *ent )
 
   if( trap_Argc() < minargc )
   {
-    ADMP( "^3slap: ^7usage: slap [^7name|slot^7] <reason>\n" );
+    ADMP( "^3slap: ^7usage: slap [^3name^6|^3slot^7] (^5reason)\n" );
     return qfalse;
   }
 
