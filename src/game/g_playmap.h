@@ -22,7 +22,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
-
 /*
  * PLAYMAP POOL
  */
@@ -31,10 +30,28 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MAX_PLAYMAP_QUEUE_ENTRIES 128
 #define PLAYMAP_INACTIVE 0
 
+#define MAX_PLAYMAP_MAPNAME 32
+#define MAX_MAPLIST_MAPS 256
+#define MAX_MAPLIST_ROWS 9
+
+// Map types
+#define PLAYMAP_MAPTYPE_NONE 	"NONE"
+#define PLAYMAP_MAPTYPE_ATCS 	"ATCS"
+#define PLAYMAP_MAPTYPE_MISSION	"MISSION"
+
+// map pool entry for the playmap system
+typedef struct playMapPoolEntry_s
+{
+  char *mapName;		/* Name of map */
+  char *mapType;		/* Type of map like ATCS, NIVEUS, etc */
+  
+  int  minClients, maxClients; /* Min, max number of clients for map */
+} playMapPoolEntry_t;
+
 // map pool for the playmap system
 typedef struct playMapPool_s
 {
-  char *maps[ MAX_PLAYMAP_POOL_ENTRIES ];
+  playMapPoolEntry_t mapEntries[ MAX_PLAYMAP_POOL_ENTRIES ];
 
   int  numMaps;
 } playMapPool_t;
@@ -76,10 +93,10 @@ typedef enum
 // individual playmap entry in the queue
 typedef struct playMap_s
 {
-  char *mapname;
+  char *mapName;
   char *layout;
 
-  char *clientname;
+  char *clientName;
 
   playMapFlag_t plusFlags[ PLAYMAP_NUM_FLAGS ];
   playMapFlag_t minusFlags[ PLAYMAP_NUM_FLAGS ];
@@ -141,12 +158,15 @@ typedef struct playMapError_s
  */
 
 playMapError_t G_PlayMapErrorByCode( int errorCode );
-playMapError_t G_AddToPlayMapPool( char *mapname );
-playMapError_t G_RemoveFromPlayMapPool( char *mapname );
+playMapError_t G_AddToPlayMapPool( char *mapName, char *mapType, int minClients,
+				   int maxClients, qboolean sortPool );
+playMapError_t G_RemoveFromPlayMapPool( char *mapName );
 playMapError_t G_SavePlayMapPool( void );
 playMapError_t G_ReloadPlayMapPool( void );
 playMapError_t G_ClearPlayMapPool( void );
-int G_FindInMapPool( char *mapname );
+int G_FindInMapPool( char *mapName );
+void G_SortPlayMapPool( void );
+int G_GetPlayMapPoolLength( void );
 void G_PrintPlayMapPool( gentity_t *ent );
 void G_InitPlayMapQueue( void );
 playMapError_t G_SavePlayMapQueue( void );
@@ -155,11 +175,11 @@ gclient_t *G_FindClientByName(gentity_t *from, const char *netname);
 int G_GetPlayMapQueueLength( void );
 qboolean G_PlayMapQueueIsFull( void );
 playMapFlag_t G_ParsePlayMapFlag(char *flag);
-playMapError_t G_PlayMapEnqueue( char *mapname, char *layout, char *clientname, char *flags, gentity_t *ent );
+playMapError_t G_PlayMapEnqueue( char *mapName, char *layout, char *clientName, char *flags, gentity_t *ent );
 playMap_t *G_PopFromPlayMapQueue( void );
 playMapError_t G_RemoveFromPlayMapQueue( int index );
-int G_GetPlayMapQueueIndexByMapName( char *mapname );
-int G_GetPlayMapQueueIndexByClient( char *clientname );
+int G_GetPlayMapQueueIndexByMapName( char *mapName );
+int G_GetPlayMapQueueIndexByClient( char *clientName );
 void G_PrintPlayMapQueue( gentity_t *ent );
 qboolean G_PlayMapActive( void );
 void G_NextPlayMap( void );

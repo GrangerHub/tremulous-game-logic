@@ -151,18 +151,30 @@ G_AddToPlayMapPool
 Add a map to the current pool of maps available.
 ================
 */
-playMapError_t G_AddToPlayMapPool( char *mapname )
+playMapError_t G_AddToPlayMapPool( char *mapName, char *mapType, int minClients,
+				   int maxClients, qboolean sortPool )
 {
-  if( G_FindInMapPool( mapname ) >= 0 )
+  playMapPoolEntry_t playPool;
+    
+  if( G_FindInMapPool( mapName ) >= 0 )
     return G_PlayMapErrorByCode( PLAYMAP_ERROR_MAP_ALREADY_IN_POOL );
 
   if( playMapPoolCache.numMaps >= MAX_PLAYMAP_POOL_ENTRIES )
     return G_PlayMapErrorByCode( PLAYMAP_ERROR_MAP_POOL_FULL );
 
-  playMapPoolCache.maps[ playMapPoolCache.numMaps ] = G_CopyString( mapname );
-
+  // Initialize entry
+  playPool.mapName = G_CopyString( mapName );
+  playPool.mapType = G_CopyString( mapType );
+  playPool.minClients = minClients;
+  playPool.maxClients = maxClients;
+  
+  playMapPoolCache.mapEntries[ playMapPoolCache.numMaps ] = playPool;
   playMapPoolCache.numMaps++;
 
+  // Sort all entries if requested
+  if ( sortPool )
+    G_SortPlayMapPool();
+  
   return G_PlayMapErrorByCode( PLAYMAP_ERROR_NONE );
 }
 
@@ -173,18 +185,18 @@ G_RemoveFromPlayMapPool
 Remove a map from the current pool of maps available.
 ================
 */
-playMapError_t G_RemoveFromPlayMapPool( char *mapname )
+playMapError_t G_RemoveFromPlayMapPool( char *mapName )
 {
   int i, mapIndex;
 
-  mapIndex = G_FindInMapPool( mapname );
+  mapIndex = G_FindInMapPool( mapName );
 
   if( mapIndex < 0 )
     return G_PlayMapErrorByCode( PLAYMAP_ERROR_MAP_NOT_IN_POOL );
 
   // remove the matching map pool entry
-  BG_Free( playMapPoolCache.maps[ mapIndex ] );
-  playMapPoolCache.maps[ mapIndex ] = NULL;
+  BG_Free( playMapPoolCache.mapEntries[ mapIndex ].mapName );
+  playMapPoolCache.mapEntries[ mapIndex ].mapName = NULL;
 
   for( i = mapIndex; i < playMapPoolCache.numMaps; i++ )
   {
@@ -193,10 +205,10 @@ playMapError_t G_RemoveFromPlayMapPool( char *mapname )
       continue;
 
     // shift next entry in the map pool down by one (close the gap)
-    playMapPoolCache.maps[ i ] = playMapPoolCache.maps[ i + 1 ];
+    playMapPoolCache.mapEntries[ i ] = playMapPoolCache.mapEntries[ i + 1 ];
 
     if( i == ( playMapPoolCache.numMaps - 1 ) )
-      playMapPoolCache.maps[ i ] = NULL;
+      playMapPoolCache.mapEntries[ i ].mapName = NULL;
   }
 
   // decrease numMaps by one count
@@ -207,19 +219,42 @@ playMapError_t G_RemoveFromPlayMapPool( char *mapname )
 
 /*
 ================
+G_SortPlayMapPool
+
+Sort map pool alphabetically.
+================
+*/
+static int SortPlaypoolEntries( const void *a, const void *b )
+{
+  return strcmp( (*(playMapPoolEntry_t *)a).mapName,
+		 (*(playMapPoolEntry_t *)b).mapName );
+}
+
+void G_SortPlayMapPool( void )
+{
+  qsort( playMapPoolCache.mapEntries, playMapPoolCache.numMaps,
+	 sizeof( playMapPoolEntry_t ), SortPlaypoolEntries );
+}
+
+/*
+================
 G_SavePlayMapPool
 
-Save map pool to configuration file
+Save map pool to configuration file after sorting.
 ================
 */
 playMapError_t G_SavePlayMapPool( void )
 {
-  fileHandle_t f;
-  int i;
+  fileHandle_t 	f;
+  int 		i;
+  char      	row[ 1024 ];
+  playMapPoolEntry_t* entry;
 
   if( !g_playMapPoolConfig.string[ 0 ] )
     return G_PlayMapErrorByCode( PLAYMAP_ERROR_NO_POOL_CONFIG );
 
+  G_SortPlayMapPool();
+  
   if( trap_FS_FOpenFile( g_playMapPoolConfig.string, &f, FS_WRITE ) < 0 )
   {
     return G_PlayMapErrorByCode( PLAYMAP_ERROR_POOL_CONFIG_UNREADABLE );
@@ -227,12 +262,15 @@ playMapError_t G_SavePlayMapPool( void )
 
   for( i = 0; i < playMapPoolCache.numMaps; i++ )
   {
-    // Skip entry if it is somehow a null pointer (should not happen)
-    if( !playMapPoolCache.maps[ i ] )
-      continue;
+    entry = &playMapPoolCache.mapEntries[ i ];
+    
+    // Croak if it is somehow a null pointer (should not happen)
+    assert( entry->mapName );
 
-    trap_FS_Write( playMapPoolCache.maps[ i ], strlen( playMapPoolCache.maps[ i ] ), f );
-    trap_FS_Write( "\n", 1, f );
+    Com_sprintf( row, 1024, "%s %s %d %d\n", entry->mapName,
+	     entry->mapType ? entry->mapType : PLAYMAP_MAPTYPE_NONE,
+	     entry->minClients, entry->maxClients );
+    trap_FS_Write( row, strlen( row ), f );
   }
 
   trap_FS_FCloseFile( f );
@@ -251,8 +289,8 @@ playMapError_t G_ReloadPlayMapPool( void )
 {
   playMapError_t playMapError;
   fileHandle_t f;
-  int len;
-  char *cnf, *cnf2, *mapname;
+  int len, minClients, maxClients;
+  char *cnf, *cnf2, mapName[ MAX_PLAYMAP_MAPNAME ], mapType[ MAX_PLAYMAP_MAPNAME ];
 
   if( !g_playMapPoolConfig.string[ 0 ] )
     return G_PlayMapErrorByCode( PLAYMAP_ERROR_NO_POOL_CONFIG );
@@ -261,7 +299,7 @@ playMapError_t G_ReloadPlayMapPool( void )
   if( playMapError.errorCode != PLAYMAP_ERROR_NONE )
     return playMapError;
 
-  // read playmap config file
+  // read playmap pool config file
   len = trap_FS_FOpenFile( g_playMapPoolConfig.string, &f, FS_READ );
   if( len < 0 )
   {
@@ -275,14 +313,46 @@ playMapError_t G_ReloadPlayMapPool( void )
   trap_FS_FCloseFile( f );
 
   COM_BeginParseSession( g_playMapPoolConfig.string );
-  while( 1 )
+  while( cnf < ( cnf2 + len )  )
   {
-    mapname = COM_Parse( &cnf );
-    if( !*mapname )
-      break;
-    G_AddToPlayMapPool( mapname );
+    Q_strncpyz( mapName, COM_ParseExt( &cnf, qtrue ), sizeof( mapName ) );
+    if( !*mapName ) break;
+    else if ( !G_MapExists( mapName ) )
+    {
+      COM_ParseWarning( "map '%s' not found skipping rest of line.", mapName );
+      SkipRestOfLine( &cnf );
+      continue;
+    }
+    
+    Q_strncpyz( mapType, COM_ParseExt( &cnf, qfalse ), sizeof( mapType ) );
+    if( !*mapType )
+    {
+      COM_ParseWarning("mapType not found on play pool file");
+
+      if( g_debugPlayMap.integer > 0 )
+	trap_Print( va( "PLAYMAP: adding to playmap pool map only: %s\n",
+			mapName ) );
+      G_AddToPlayMapPool( mapName, PLAYMAP_MAPTYPE_NONE, 0, 0, qfalse );
+    }
+    else
+    {
+      minClients = atoi( COM_ParseExt( &cnf, qfalse ) );
+      maxClients = atoi( COM_ParseExt( &cnf, qfalse ) );
+      
+      if( g_debugPlayMap.integer > 0 )
+	trap_Print( va( "PLAYMAP: adding to playmap pool: %s %s %d %d\n",
+			mapName, mapType, minClients, maxClients ) );
+      
+      G_AddToPlayMapPool( mapName, mapType, minClients, maxClients, qfalse );
+    }
   }
   BG_Free( cnf2 );
+
+  // Sort once after adding all
+  G_SortPlayMapPool();
+
+  trap_Print( va( "Loaded %d maps into the playmap pool from config file %s\n",
+		  G_GetPlayMapPoolLength( ), g_playMapPoolConfig.string ) );
 
   return G_PlayMapErrorByCode( PLAYMAP_ERROR_NONE );
 }
@@ -300,17 +370,10 @@ playMapError_t G_ClearPlayMapPool( void )
   int i;
 
   for( i = 0; i < MAX_PLAYMAP_POOL_ENTRIES; i++ )
-    FREE_IF_NOT_NULL( playMapPoolCache.maps[ i ] );
-  /*
-    {
-    // skip entry if it is already a null pointer
-    if( playMapPoolCache.maps[ i ] == NULL )
-      continue;
-
-    // free the space taken up by the slot
-    BG_Free( playMapPoolCache.maps[ i ] );
-    playMapPoolCache.maps[ i ] = NULL;
-    }*/
+  {
+    FREE_IF_NOT_NULL( playMapPoolCache.mapEntries[ i ].mapName );
+    FREE_IF_NOT_NULL( playMapPoolCache.mapEntries[ i ].mapType );
+  }
 
   playMapPoolCache.numMaps = 0;
 
@@ -325,23 +388,35 @@ Check if map is in playmap pool
 ================
 */
 
-int G_FindInMapPool( char *mapname )
+int G_FindInMapPool( char *mapName )
 {
   int i;
 
   for( i = 0; i < playMapPoolCache.numMaps; i++ )
   {
-    // Skip entry if it is somehow null (should not happen)
-    if( playMapPoolCache.maps[ i ] == NULL )
-      continue;
+    // Croak if entry is somehow null (should not happen)
+    assert( playMapPoolCache.mapEntries[ i ].mapName );
 
     // found a match. return the array index
-    if( Q_stricmp(playMapPoolCache.maps[ i ], mapname) == 0 )
+    if( Q_stricmp(playMapPoolCache.mapEntries[ i ].mapName, mapName) == 0 )
       return i;
   }
 
   // not found
   return -1;
+}
+
+/*
+================
+G_GetPlayMapPoolLength
+
+Returns the length of the play pool.
+================
+*/
+
+int G_GetPlayMapPoolLength( void )
+{
+  return playMapPoolCache.numMaps;
 }
 
 /*
@@ -353,9 +428,9 @@ Print the playmap pool on the console
 */
 void G_PrintPlayMapPool( gentity_t *ent )
 {
-  int i, len;
-  
-  if ( ( len = playMapPoolCache.numMaps ) )
+  int i, j, len, rows, pages, page, row, start;
+
+  if( ( len = playMapPoolCache.numMaps ) )
     {
       ADMBP_begin(); // begin buffer
       ADMBP( "List of maps that can be added to the playlist:\n" );
@@ -367,15 +442,30 @@ void G_PrintPlayMapPool( gentity_t *ent )
     return;
     }
 
-  for( i = 0; i < len; i++ )
+  page = 0;
+  rows = ( len + 2 ) / 3;
+  pages = MAX( 1, ( rows + MAX_MAPLIST_ROWS - 1 ) / MAX_MAPLIST_ROWS );
+  if( page >= pages )
+    page = pages - 1;
+
+  start = page * MAX_MAPLIST_ROWS * 3;
+  if( len < start + ( 3 * MAX_MAPLIST_ROWS ) )
+    rows = ( len - start + 2 ) / 3;
+  else
+    rows = MAX_MAPLIST_ROWS;
+
+  for( row = 0; row < rows; row++ )
   {
-    ADMBP( va( S_COLOR_CYAN " %-20s" S_COLOR_WHITE,
-	       playMapPoolCache.maps[ i ] ) );
-    // Limit per row (TODO: make one per row and write min/max next to it)
-    if (!((i+1)%3)) ADMBP( "\n" );
+    for( i = start + row, j = 0; i < len && j < 3; i += rows, j++ )
+    {
+      ADMBP( va( S_COLOR_CYAN " %-20s" S_COLOR_WHITE,
+		 playMapPoolCache.mapEntries[ i ].mapName ) );
+      // Limit per row (TODO: make one per row and write type and min/max next to it)
+    }
+    ADMBP( "\n" );
   }
-  ADMBP( "\n\n" );
   ADMBP_end();
+    
 }
 
 /*
@@ -404,9 +494,9 @@ void G_InitPlayMapQueue( void )
   for( i = 0; i < MAX_PLAYMAP_QUEUE_ENTRIES; i++ )
   {
     // set all values/pointers to NULL
-    playMapQueue.playMap[ i ].mapname = NULL;
+    playMapQueue.playMap[ i ].mapName = NULL;
     playMapQueue.playMap[ i ].layout  = NULL;
-    playMapQueue.playMap[ i ].clientname  = NULL;
+    playMapQueue.playMap[ i ].clientName  = NULL;
 
     for( j = 0; j < PLAYMAP_NUM_FLAGS; j++ )
     {
@@ -432,8 +522,8 @@ playMapError_t G_ClearPlayMapQueue( void )
     playMap_t playMap =
       playMapQueue.playMap[ PLAYMAP_QUEUE_ADD(playMapQueue.head, i) ];
 
-    FREE_IF_NOT_NULL( playMap.mapname );
-    FREE_IF_NOT_NULL( playMap.clientname );
+    FREE_IF_NOT_NULL( playMap.mapName );
+    FREE_IF_NOT_NULL( playMap.clientName );
     FREE_IF_NOT_NULL( playMap.layout );
   }
 
@@ -465,14 +555,14 @@ playMapError_t G_ValidatePlayMapQueue( void )
 	playMapQueue.playMap[ PLAYMAP_QUEUE_ADD( playMapQueue.head, i ) ];
       
       // Check if client is still connected
-      if ( ! G_FindClientByName( NULL, playMap.clientname ) )
+      if ( ! G_FindClientByName( NULL, playMap.clientName ) )
 	{
 	  trap_SendServerCommand( -1,
 				  va( "print \"Removing playlist entry #%d for "
 				      S_COLOR_CYAN "%s" S_COLOR_WHITE
 				      " because player %s" S_COLOR_WHITE
 				      " has left\n\"",
-				      i + 1, playMap.mapname, playMap.clientname ) );
+				      i + 1, playMap.mapName, playMap.clientName ) );
  
 	  G_RemoveFromPlayMapQueue( i );
 	  i--; // because queue elements are now shifted
@@ -515,12 +605,12 @@ playMapError_t G_SavePlayMapQueue( void )
     playMap_t playMap =
       playMapQueue.playMap[ PLAYMAP_QUEUE_ADD(playMapQueue.head, i) ];
 
-    trap_FS_Write( playMap.mapname, strlen( playMap.mapname ), f );
-    if( playMap.clientname )
+    trap_FS_Write( playMap.mapName, strlen( playMap.mapName ), f );
+    if( playMap.clientName )
     {
 	 trap_FS_Write( " ", 1, f );
-	 trap_FS_Write( playMap.clientname,
-			strlen( playMap.clientname ), f );
+	 trap_FS_Write( playMap.clientName,
+			strlen( playMap.clientName ), f );
 	 if( playMap.layout )
 	 {
 	      trap_FS_Write( " ", 1, f );
@@ -553,8 +643,8 @@ playMapError_t G_ReloadPlayMapQueue( void )
 {
   fileHandle_t f;
   int len;
-  char *cnf, *cnf2, *mapname, empty = 0,
-    *layout = &empty, *clientname = &empty, *flags = &empty;
+  char *cnf, *cnf2, *mapName, empty = 0,
+    *layout = &empty, *clientName = &empty, *flags = &empty;
 
   if( g_debugPlayMap.integer > 0 )
     trap_Print( "PLAYMAP: entering G_ReloadPlayMapQueue\n" );
@@ -587,14 +677,14 @@ playMapError_t G_ReloadPlayMapQueue( void )
 	if( g_debugPlayMap.integer > 0 )
 	  trap_Print( va( "PLAYMAP: reading maps at char index %ld\n", cnf - cnf2 ) );
 	// Must use G_CopyString to prevent overwrites by parser
-	mapname = G_CopyString(COM_ParseExt( &cnf, qfalse ));
-	if( *mapname )
+	mapName = G_CopyString(COM_ParseExt( &cnf, qfalse ));
+	if( *mapName )
 	  {
 	    if( g_debugPlayMap.integer > 0 )
-	      trap_Print( va( "PLAYMAP: found map %s\n", mapname ) );
+	      trap_Print( va( "PLAYMAP: found map %s\n", mapName ) );
 
-	    clientname = G_CopyString(COM_ParseExt( &cnf, qfalse ));
-	    if( *clientname )
+	    clientName = G_CopyString(COM_ParseExt( &cnf, qfalse ));
+	    if( *clientName )
 	      {
 		layout = COM_ParseExt( &cnf, qfalse );
 		if( *layout )
@@ -615,7 +705,7 @@ playMapError_t G_ReloadPlayMapQueue( void )
 	  }
 	else break;
       }	   
-    if( !*mapname )
+    if( !*mapName )
       break; // end of all maps
     
     if( g_debugPlayMap.integer > 0 )
@@ -623,14 +713,14 @@ playMapError_t G_ReloadPlayMapQueue( void )
 		      "       client=%s\n" 
 		      "       layout=%s\n"
 		      "       flags=%s\n",
-		      mapname, clientname, layout, flags ) );
+		      mapName, clientName, layout, flags ) );
 
-    G_PlayMapEnqueue( mapname, layout, clientname, flags, NULL );
+    G_PlayMapEnqueue( mapName, layout, clientName, flags, NULL );
 
     // G_PlayMapEnqueue also copies the strings, so release the
     // originals here
-    if( *mapname ) BG_Free(mapname);
-    if( *clientname ) BG_Free(clientname);
+    if( *mapName ) BG_Free(mapName);
+    if( *clientName ) BG_Free(clientName);
     if( *layout ) BG_Free(layout);
     if( *flags ) BG_Free(layout);
 
@@ -728,8 +818,8 @@ queue).
 ================
 */
 
-playMapError_t G_PlayMapEnqueue( char *mapname, char *layout, char
-				 *clientname, char *flags, gentity_t *ent )
+playMapError_t G_PlayMapEnqueue( char *mapName, char *layout, char
+				 *clientName, char *flags, gentity_t *ent )
 {
   int       i;
   int       plusFlagIdx = 0, minusFlagIdx = 0;
@@ -737,14 +827,14 @@ playMapError_t G_PlayMapEnqueue( char *mapname, char *layout, char
   playMap_t playMap;
   playMapFlag_t playMapFlag;
 
-  if( G_FindInMapPool( mapname ) < 0 )
+  if( G_FindInMapPool( mapName ) < 0 )
     return G_PlayMapErrorByCode( PLAYMAP_ERROR_MAP_NOT_IN_POOL );
   
   if( PLAYMAP_QUEUE_IS_FULL )
     return G_PlayMapErrorByCode( PLAYMAP_ERROR_MAP_QUEUE_FULL );
 
   // check if user already has a map queued
-  if( ( i = G_GetPlayMapQueueIndexByClient( clientname ) ) >= 0 )
+  if( ( i = G_GetPlayMapQueueIndexByClient( clientName ) ) >= 0 )
     {
       ADMP( va( "%s\n",
 		G_PlayMapErrorByCode( PLAYMAP_ERROR_USER_ALREADY_IN_QUEUE ).errorMessage) );
@@ -752,11 +842,11 @@ playMapError_t G_PlayMapEnqueue( char *mapname, char *layout, char
     }
 
   // check if map has already been queued by someone else
-  if( G_GetPlayMapQueueIndexByMapName( mapname ) >= 0 )
+  if( G_GetPlayMapQueueIndexByMapName( mapName ) >= 0 )
     return G_PlayMapErrorByCode( PLAYMAP_ERROR_MAP_ALREADY_IN_QUEUE );
 
-  // copy mapname
-  playMap.mapname = G_CopyString(mapname);
+  // copy mapName
+  playMap.mapName = G_CopyString(mapName);
 
   // copy layout
   if( *layout )
@@ -764,11 +854,11 @@ playMapError_t G_PlayMapEnqueue( char *mapname, char *layout, char
   else
     playMap.layout = NULL;
 
-  // copy clientname
-  if( *clientname )
-    playMap.clientname = G_CopyString(clientname);
+  // copy clientName
+  if( *clientName )
+    playMap.clientName = G_CopyString(clientName);
   else
-    playMap.clientname = NULL;
+    playMap.clientName = NULL;
 
   // Loop through flags
   for( i = 0; ; i++ )
@@ -830,9 +920,9 @@ playMap_t *G_PopFromPlayMapQueue( void )
   playMap = BG_Alloc( sizeof( playMap_t ) );
 
   // copy values from playmap in the head of the queue
-  playMap->mapname = playMapQueue.playMap[ playMapQueue.head ].mapname;
+  playMap->mapName = playMapQueue.playMap[ playMapQueue.head ].mapName;
   playMap->layout = playMapQueue.playMap[ playMapQueue.head ].layout;
-  playMap->clientname = playMapQueue.playMap[ playMapQueue.head ].clientname;
+  playMap->clientName = playMapQueue.playMap[ playMapQueue.head ].clientName;
   for( i = 0; i < PLAYMAP_NUM_FLAGS; i++ )
   {
     playMap->plusFlags[ i ]
@@ -842,9 +932,9 @@ playMap_t *G_PopFromPlayMapQueue( void )
   }
 
   // reset the playmap in the head of the queue to null values
-  playMapQueue.playMap[ playMapQueue.head ].mapname = NULL;
+  playMapQueue.playMap[ playMapQueue.head ].mapName = NULL;
   playMapQueue.playMap[ playMapQueue.head ].layout = NULL;
-  playMapQueue.playMap[ playMapQueue.head ].clientname = NULL;
+  playMapQueue.playMap[ playMapQueue.head ].clientName = NULL;
   for( i = 0; i < PLAYMAP_NUM_FLAGS; i++ )
   {
     playMapQueue.playMap[ playMapQueue.head ].plusFlags[ i ] =
@@ -882,8 +972,8 @@ playMapError_t G_RemoveFromPlayMapQueue( int index )
 		    playMapQueue.head, playMapQueue.tail ) );
 
   // Clear up memory for deleted information
-  FREE_IF_NOT_NULL( playMap.mapname );
-  FREE_IF_NOT_NULL( playMap.clientname );
+  FREE_IF_NOT_NULL( playMap.mapName );
+  FREE_IF_NOT_NULL( playMap.clientName );
   FREE_IF_NOT_NULL( playMap.layout );
   
   len = G_GetPlayMapQueueLength();
@@ -891,9 +981,9 @@ playMapError_t G_RemoveFromPlayMapQueue( int index )
     {
       if( g_debugPlayMap.integer > 0 )
 	trap_Print( va( "PLAYMAP: copying map '%s' from #%d onto map '%s' in #%d.\n",
-			playMapQueue.playMap[ PLAYMAP_QUEUE_ADD( playMapQueue.head, i + 1) ].mapname,
+			playMapQueue.playMap[ PLAYMAP_QUEUE_ADD( playMapQueue.head, i + 1) ].mapName,
 			PLAYMAP_QUEUE_ADD( playMapQueue.head, i + 1), 
-			playMapQueue.playMap[ PLAYMAP_QUEUE_ADD( playMapQueue.head, i) ].mapname,
+			playMapQueue.playMap[ PLAYMAP_QUEUE_ADD( playMapQueue.head, i) ].mapName,
 			PLAYMAP_QUEUE_ADD( playMapQueue.head, i ) ) );
 
       // Copy next one over
@@ -903,7 +993,7 @@ playMapError_t G_RemoveFromPlayMapQueue( int index )
       if( g_debugPlayMap.integer > 0 )
 	trap_Print( va( "PLAYMAP: after copying map is '%s'.\n",
 			playMapQueue.playMap[ PLAYMAP_QUEUE_ADD( playMapQueue.head, i)
-					      ].mapname ) );
+					      ].mapName ) );
     }
 
   // If this wasn't the last one
@@ -911,13 +1001,13 @@ playMapError_t G_RemoveFromPlayMapQueue( int index )
     {
       if( g_debugPlayMap.integer > 0 )
 	trap_Print( va( "PLAYMAP: erasing map '%s' from #%d.\n",
-			playMapQueue.playMap[ playMapQueue.tail ].mapname,
+			playMapQueue.playMap[ playMapQueue.tail ].mapName,
 			playMapQueue.tail ) );
 
       // Clear pointers in the last one
       // (they are copied and in use, so don't free them!)
-      playMapQueue.playMap[ playMapQueue.tail ].mapname = NULL;
-      playMapQueue.playMap[ playMapQueue.tail ].clientname = NULL;
+      playMapQueue.playMap[ playMapQueue.tail ].mapName = NULL;
+      playMapQueue.playMap[ playMapQueue.tail ].clientName = NULL;
       playMapQueue.playMap[ playMapQueue.tail ].layout = NULL;
     }
   
@@ -929,7 +1019,7 @@ playMapError_t G_RemoveFromPlayMapQueue( int index )
     trap_Print( va( "PLAYMAP: after removing, index points to map %s."
 		    " Head: %d, Tail: %d\n",
 		    playMapQueue.playMap[ PLAYMAP_QUEUE_ADD( playMapQueue.head, index )
-					  ].mapname, 
+					  ].mapName, 
 		    playMapQueue.head, playMapQueue.tail ) );
 
   return G_PlayMapErrorByCode( PLAYMAP_ERROR_NONE );
@@ -939,17 +1029,17 @@ playMapError_t G_RemoveFromPlayMapQueue( int index )
 ================
 G_GetPlayMapQueueIndexByMapName
 
-Get the index of the map in the queue from the mapname.
+Get the index of the map in the queue from the mapName.
 ================
 */
-int G_GetPlayMapQueueIndexByMapName( char *mapname )
+int G_GetPlayMapQueueIndexByMapName( char *mapName )
 {
   int i;
 
   for( i = 0; i < G_GetPlayMapQueueLength(); i++ )
   {
     if( Q_stricmp( playMapQueue.playMap[ PLAYMAP_QUEUE_ADD(playMapQueue.head, i)
-					 ].mapname, mapname ) == 0 )
+					 ].mapName, mapName ) == 0 )
       return i;
   }
 
@@ -964,14 +1054,14 @@ G_GetPlayMapQueueIndexByClient
 Get the index of the map in the queue from the client that requested it.
 ================
 */
-int G_GetPlayMapQueueIndexByClient( char *clientname )
+int G_GetPlayMapQueueIndexByClient( char *clientName )
 {
   int i;
 
   for( i = 0; i < G_GetPlayMapQueueLength(); i++ )
   {
     if( Q_stricmp( playMapQueue.playMap[ PLAYMAP_QUEUE_ADD(playMapQueue.head, i)
-					 ].clientname, clientname ) == 0 )
+					 ].clientName, clientName ) == 0 )
       return i;
   }
 
@@ -986,16 +1076,10 @@ G_PrintPlayMapQueue
 Print the playmap queue on the console
 ================
 */
-static int SortPlaymaps( const void *a, const void *b )
-{
-  return strcmp( (*(playMap_t **)a)->mapname, (*(playMap_t **)b)->mapname );
-}
-#define MAX_MAPLIST_MAPS 256
-
 void G_PrintPlayMapQueue( gentity_t *ent )
 {
   int i, len;
-  playMap_t *mapSort[ MAX_MAPLIST_MAPS ];
+  playMap_t *playMap;
 
   ADMBP_begin(); // begin buffer
   
@@ -1010,22 +1094,15 @@ void G_PrintPlayMapQueue( gentity_t *ent )
     ADMBP_end();
     return;
     }
-
-  assert( len < MAX_MAPLIST_MAPS );
-  for( i = 0; i < len; i++ )
-  {
-    mapSort[ i ] =
-      &playMapQueue.playMap[ PLAYMAP_QUEUE_ADD( playMapQueue.head, i ) ];
-  }
-
-  qsort( mapSort, len, sizeof( mapSort[ 0 ] ), SortPlaymaps );
   
   for( i = 0; i < len; i++ )
   {
+    playMap = &playMapQueue.playMap[ PLAYMAP_QUEUE_ADD(playMapQueue.head, i)
+				  ];
     ADMBP( va( S_COLOR_YELLOW "%d." S_COLOR_WHITE " "
 	       S_COLOR_CYAN "%s" S_COLOR_WHITE
 	       " (added by %s" S_COLOR_WHITE ")\n", i + 1,
-	       (*mapSort[i]).mapname, (*mapSort[i]).clientname ) );
+	       playMap->mapName, playMap->clientName ) );
   }
 
   ADMBP_end();
@@ -1062,9 +1139,9 @@ void G_NextPlayMap( void )
     trap_Cvar_Set( "g_nextLayout", playMap->layout );
   }
 
-  G_MapConfigs( playMap->mapname );
+  G_MapConfigs( playMap->mapName );
 
-  trap_SendConsoleCommand( EXEC_APPEND, va( "map \"%s\"\n", playMap->mapname ) );
+  trap_SendConsoleCommand( EXEC_APPEND, va( "map \"%s\"\n", playMap->mapName ) );
 
   // TODO: do the flags here
 }
