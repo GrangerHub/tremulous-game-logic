@@ -3027,13 +3027,11 @@ List all maps on the server
 =================
 */
 
-static int SortMaps( const void *a, const void *b )
+static int SortStrings( const void *a, const void *b )
 {
   return strcmp( *(char **)a, *(char **)b );
 }
 
-#define MAX_MAPLIST_MAPS 256
-#define MAX_MAPLIST_ROWS 9
 void Cmd_ListMaps_f( gentity_t *ent )
 {
   char search[ 16 ] = {""};
@@ -3088,7 +3086,7 @@ void Cmd_ListMaps_f( gentity_t *ent )
     fileSort[ count ] = filePtr;
     count++;
   }
-  qsort( fileSort, count, sizeof( fileSort[ 0 ] ), SortMaps );
+  qsort( fileSort, count, sizeof( fileSort[ 0 ] ), SortStrings );
 
   rows = ( count + 2 ) / 3;
   pages = MAX( 1, ( rows + MAX_MAPLIST_ROWS - 1 ) / MAX_MAPLIST_ROWS );
@@ -3498,7 +3496,15 @@ void Cmd_PlayMap_f( gentity_t *ent )
     ADMP( "Usage: /playmap mapname\n\n" ); 
       
     G_PrintPlayMapPool( ent );
+    ADMP( "\n" );
     G_PrintPlayMapQueue( ent );
+    ADMP( "\n" );
+
+    ADMP( va( S_COLOR_YELLOW "playmap" S_COLOR_WHITE
+	      ": " S_COLOR_CYAN "%d" S_COLOR_WHITE " maps queued out of "
+	      S_COLOR_CYAN "%d" S_COLOR_WHITE " pool maps.\n",
+	      G_GetPlayMapQueueLength( ),
+	      G_GetPlayMapPoolLength( ) ) );
     return;
   }
   
