@@ -304,8 +304,8 @@ static cvarTable_t   gameCvarTable[ ] =
   // playmap pool
   
   { &g_playMapEnable, "g_playMapEnable", "0", CVAR_ARCHIVE, 0, qfalse  },
-  { &g_playMapPoolConfig, "g_playMapPoolConfig", "playmap_pool.cfg", CVAR_ARCHIVE, 0, qfalse  },
-  { &g_playMapQueueConfig, "g_playMapQueueConfig", "playmap_queue.cfg", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_playMapPoolConfig, "g_playMapPoolConfig", "playmap_pool.dat", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_playMapQueueConfig, "g_playMapQueueConfig", "playmap_queue.dat", CVAR_ARCHIVE, 0, qfalse  },
 
   { &g_privateMessages, "g_privateMessages", "1", CVAR_ARCHIVE, 0, qfalse  },
   { &g_specChat, "g_specChat", "1", CVAR_ARCHIVE, 0, qfalse  },
