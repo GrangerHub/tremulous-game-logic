@@ -986,32 +986,46 @@ G_PrintPlayMapQueue
 Print the playmap queue on the console
 ================
 */
+static int SortPlaymaps( const void *a, const void *b )
+{
+  return strcmp( (*(playMap_t **)a)->mapname, (*(playMap_t **)b)->mapname );
+}
+#define MAX_MAPLIST_MAPS 256
+
 void G_PrintPlayMapQueue( gentity_t *ent )
 {
   int i, len;
+  playMap_t *mapSort[ MAX_MAPLIST_MAPS ];
 
   ADMBP_begin(); // begin buffer
   
   if ( ( len = G_GetPlayMapQueueLength() ) )
-    {
-      ADMBP( "Maps that are currently in the queue:\n" );
-    }
+  {
+    ADMBP( "Maps that are currently in the queue:\n" );
+  }
   else
-    {
+  {
     ADMBP( va( "%s\n",
 	       G_PlayMapErrorByCode(PLAYMAP_ERROR_MAP_QUEUE_EMPTY).errorMessage) );
     ADMBP_end();
     return;
     }
 
+  assert( len < MAX_MAPLIST_MAPS );
   for( i = 0; i < len; i++ )
   {
-    playMap_t playMap =
-      playMapQueue.playMap[ PLAYMAP_QUEUE_ADD(playMapQueue.head, i) ];
+    mapSort[ i ] =
+      &playMapQueue.playMap[ PLAYMAP_QUEUE_ADD( playMapQueue.head, i ) ];
+  }
+
+  qsort( mapSort, len, sizeof( mapSort[ 0 ] ), SortPlaymaps );
+  
+  for( i = 0; i < len; i++ )
+  {
     ADMBP( va( S_COLOR_YELLOW "%d." S_COLOR_WHITE " "
 	       S_COLOR_CYAN "%s" S_COLOR_WHITE
 	       " (added by %s" S_COLOR_WHITE ")\n", i + 1,
-	       playMap.mapname, playMap.clientname ) );
+	       (*mapSort[i]).mapname, (*mapSort[i]).clientname ) );
   }
 
   ADMBP_end();
