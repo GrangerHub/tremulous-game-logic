@@ -3281,12 +3281,13 @@ qboolean G_admin_pause( gentity_t *ent )
 qboolean G_admin_playpool( gentity_t *ent )
 {
   char           cmd[ MAX_TOKEN_CHARS ],
-                 map[ MAX_TOKEN_CHARS ];
+    		 map[ MAX_TOKEN_CHARS ],
+    		 mapType[ MAX_TOKEN_CHARS ];
   playMapError_t playMapError;
 
   if( trap_Argc( ) < 2 )
   {
-    ADMP( "^3playpool: ^7usage: playpool [^5add (mapname)|remove (mapname)|clear|reload|save^7]\n" );
+    ADMP( "^3playpool: ^7usage: playpool [^5add (mapname [maptype])|remove (mapname)|clear|reload|save^7]\n" );
     return qfalse;
   }
 
@@ -3296,7 +3297,7 @@ qboolean G_admin_playpool( gentity_t *ent )
   {
     if( trap_Argc( ) < 3 )
     {
-      ADMP( "^3playpool: ^7usage: playpool add (^5mapname^7)\n" );
+      ADMP( "^3playpool: ^7usage: playpool add (^5mapname^7) [^5maptype^7]\n" );
       return qfalse;
     }
 
@@ -3307,7 +3308,12 @@ qboolean G_admin_playpool( gentity_t *ent )
       return qfalse;
     }
 
-    playMapError = G_AddToPlayMapPool( map );
+    if( trap_Argc( ) > 3 ) 
+      trap_Argv( 3, mapType, sizeof( mapType ) );
+
+    playMapError =
+      G_AddToPlayMapPool( map, ( trap_Argc( ) > 3 ) ? mapType : PLAYMAP_MAPTYPE_NONE,
+			  0, 0, qtrue );
     if( playMapError.errorCode != PLAYMAP_ERROR_NONE )
     {
       ADMP( va( "^3playpool: ^7%s.\n", playMapError.errorMessage ) );
