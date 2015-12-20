@@ -3500,11 +3500,15 @@ void Cmd_PlayMap_f( gentity_t *ent )
     G_PrintPlayMapQueue( ent );
     ADMP( "\n" );
 
+    // overwrite with current map
+    trap_Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
+
     ADMP( va( S_COLOR_YELLOW "playmap" S_COLOR_WHITE
 	      ": " S_COLOR_CYAN "%d" S_COLOR_WHITE " maps queued out of "
-	      S_COLOR_CYAN "%d" S_COLOR_WHITE " pool maps.\n",
+	      S_COLOR_CYAN "%d" S_COLOR_WHITE " pool maps. "
+	      "Current map is " S_COLOR_CYAN "%s" S_COLOR_WHITE ".\n",
 	      G_GetPlayMapQueueLength( ),
-	      G_GetPlayMapPoolLength( ) ) );
+	      G_GetPlayMapPoolLength( ), map ) );
     return;
   }
   
