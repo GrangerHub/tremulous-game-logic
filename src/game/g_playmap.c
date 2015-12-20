@@ -24,7 +24,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "g_local.h"
 
-
 /*
  * external utilities
  */
@@ -226,8 +225,11 @@ Sort map pool alphabetically.
 */
 static int SortPlaypoolEntries( const void *a, const void *b )
 {
-  return strcmp( (*(playMapPoolEntry_t *)a).mapName,
-		 (*(playMapPoolEntry_t *)b).mapName );
+  // Can't link strcasecmp for some reason, so doing it manually -CG
+  char mapNameA[ MAX_PLAYMAP_MAPNAME ], mapNameB[ MAX_PLAYMAP_MAPNAME ];
+  Q_strncpyz( mapNameA, (*(playMapPoolEntry_t *)a).mapName, sizeof( mapNameA ) );
+  Q_strncpyz( mapNameB, (*(playMapPoolEntry_t *)b).mapName, sizeof( mapNameB ) );
+  return strcmp( Q_strlwr( mapNameA ), Q_strlwr( mapNameB ) );
 }
 
 void G_SortPlayMapPool( void )
