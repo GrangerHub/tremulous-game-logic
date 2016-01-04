@@ -3518,7 +3518,7 @@ void Cmd_PlayMap_f( gentity_t *ent )
   // read the subcommand
   trap_Argv( 1, subcmd, sizeof( subcmd ) );
 
-  if ( ! strcmp( subcmd, "pool" ))
+  if ( !Q_stricmp( subcmd, "pool" ))
   {
     if( trap_Argc( ) > 2 )
     {
@@ -3531,7 +3531,7 @@ void Cmd_PlayMap_f( gentity_t *ent )
 
     return;
   }
-  else if ( ! strcmp( subcmd, "add" ))
+  else if ( !Q_stricmp( subcmd, "add" ))
   {    
     trap_Argv( 2, map, sizeof( map ) );
     trap_Argv( 3, layout, sizeof( layout ) );

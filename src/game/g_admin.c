@@ -161,7 +161,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
 
     {"playpool", G_admin_playpool, qfalse, "playpool",
       "Manage the playmap pool.",
-      "[^5add (mapname)|remove (mapname)|clear|reload|save^7]"
+      "[^5add (mapname)|remove (mapname)|clear|list [pagenum]|reload|save^7]"
     },
 
     {"putteam", G_admin_putteam, qfalse, "putteam",
@@ -3283,11 +3283,17 @@ qboolean G_admin_playpool( gentity_t *ent )
   char           cmd[ MAX_TOKEN_CHARS ],
     		 map[ MAX_TOKEN_CHARS ],
     		 mapType[ MAX_TOKEN_CHARS ];
+  int 		 page;
   playMapError_t playMapError;
+  g_admin_cmd_t *admincmd;
+  
+  // Get command structure
+  admincmd = G_admin_cmd( "playpool" );
 
   if( trap_Argc( ) < 2 )
   {
-    ADMP( "^3playpool: ^7usage: playpool [^5add (mapname [maptype])|remove (mapname)|clear|reload|save^7]\n" );
+    ADMP( va( S_COLOR_YELLOW "usage: " S_COLOR_WHITE "%s %s\n",
+	      admincmd->keyword, admincmd->syntax ) );
     return qfalse;
   }
 
@@ -3297,7 +3303,8 @@ qboolean G_admin_playpool( gentity_t *ent )
   {
     if( trap_Argc( ) < 3 )
     {
-      ADMP( "^3playpool: ^7usage: playpool add (^5mapname^7) [^5maptype^7]\n" );
+      ADMP( S_COLOR_YELLOW "playpool: " S_COLOR_WHITE
+	    "usage: playpool add (^5mapname^7) [^5maptype^7]\n" );
       return qfalse;
     }
 
@@ -3357,6 +3364,20 @@ qboolean G_admin_playpool( gentity_t *ent )
     return qtrue;
   }
 
+  if( !Q_stricmp( cmd, "list" ) )
+  {
+    if( trap_Argc( ) > 2 )
+    {
+      trap_Argv( 2, map, sizeof( map ) );
+      page = atoi( map ) - 1;
+    } else page = 0;
+
+    G_PrintPlayMapPool( NULL, page );
+    ADMP( "\n" );
+
+    return qtrue;
+  }
+
   if( !Q_stricmp( cmd, "save" ) )
   {
     playMapError = G_SavePlayMapPool();
@@ -3383,7 +3404,8 @@ qboolean G_admin_playpool( gentity_t *ent )
     return qtrue;
   }
 
-  ADMP( "^3playpool: ^7usage: playpool [^5add (mapname)|remove (mapname)|clear|reload|save^7]\n" );
+  ADMP( va( S_COLOR_YELLOW "usage: " S_COLOR_WHITE "%s %s\n",
+	    admincmd->keyword, admincmd->syntax ) );
   return qfalse;
 }
 

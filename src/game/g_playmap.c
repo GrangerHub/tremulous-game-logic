@@ -422,6 +422,16 @@ int G_GetPlayMapPoolLength( void )
 }
 
 /*
+====================
+Max/min functions
+
+Maximum/minimum of two ints
+====================
+*/
+#define max( a,b ) ( ( a ) > ( b ) ? ( a ):( b )) 
+#define min( a,b ) ( ( a ) < ( b ) ? ( a ):( b )) 
+
+/*
 ================
 G_PrintPlayMapPool
 
@@ -446,8 +456,10 @@ void G_PrintPlayMapPool( gentity_t *ent, int page )
 
   rows = ( len + 2 ) / 3;
   pages = MAX( 1, ( rows + MAX_MAPLIST_ROWS - 1 ) / MAX_MAPLIST_ROWS );
-  if( page >= pages )
-    page = pages - 1;
+
+  // Enforce bounds
+  page = min(page, pages - 1);
+  page = max(page, 0);
 
   if( pages > 1 ) 
     ADMBP( va( " (page %d out of %d)", page + 1, pages ) );

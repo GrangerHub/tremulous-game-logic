@@ -152,7 +152,6 @@ typedef struct playMapError_s
   char *errorMessage;
 } playMapError_t;
 
-
 /*
  * PLAYMAP PROTOTYPES
  */
