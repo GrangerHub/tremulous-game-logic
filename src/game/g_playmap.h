@@ -167,7 +167,7 @@ playMapError_t G_ClearPlayMapPool( void );
 int G_FindInMapPool( char *mapName );
 void G_SortPlayMapPool( void );
 int G_GetPlayMapPoolLength( void );
-void G_PrintPlayMapPool( gentity_t *ent );
+void G_PrintPlayMapPool( gentity_t *ent, int page );
 void G_InitPlayMapQueue( void );
 playMapError_t G_SavePlayMapQueue( void );
 playMapError_t G_ReloadPlayMapQueue( void );

@@ -3482,10 +3482,12 @@ void Cmd_PrivateMessage_f( gentity_t *ent )
 void Cmd_PlayMap_f( gentity_t *ent )
 {
   char   cmd[ MAX_TOKEN_CHARS ],
+    	 subcmd[ MAX_TOKEN_CHARS ],
          map[ MAX_TOKEN_CHARS ],
          layout[ MAX_TOKEN_CHARS ],
          extra[ MAX_TOKEN_CHARS ];
   char   *flags;
+  int 	 page;
   playMapError_t playMapError;
 
   trap_Argv( 0, cmd, sizeof( cmd ) );
@@ -3493,10 +3495,11 @@ void Cmd_PlayMap_f( gentity_t *ent )
   if( trap_Argc( ) < 2 )
   {
     // TODO: [layout [flags]] announce them once they're implemented
-    ADMP( "Usage: /playmap mapname\n\n" ); 
+    ADMP( "To add maps to the playlist:\n"
+	  S_COLOR_YELLOW "  /playmap add " S_COLOR_WHITE "mapname [layout]\n"
+	  "To see a list of maps to choose:\n"
+	  S_COLOR_YELLOW "  /playmap pool " S_COLOR_WHITE "[pagenumber]\n\n" ); 
       
-    G_PrintPlayMapPool( ent );
-    ADMP( "\n" );
     G_PrintPlayMapQueue( ent );
     ADMP( "\n" );
 
@@ -3511,29 +3514,50 @@ void Cmd_PlayMap_f( gentity_t *ent )
 	      G_GetPlayMapPoolLength( ), map ) );
     return;
   }
-  
-  trap_Argv( 1, map, sizeof( map ) );
-  trap_Argv( 2, layout, sizeof( layout ) );
-  trap_Argv( 3, extra, sizeof( extra ) );
-  flags = ConcatArgs( 3 );
 
-  if( g_debugPlayMap.integer > 0 )
-       trap_SendServerCommand( ent-g_entities,
-			       va( "print \"DEBUG: cmd=%s\n"
-				   "       map=%s\n"
-				   "       layout=%s\n"
-				   "       flags=%s\n\"",
-				   cmd, map, layout, flags ) );
+  // read the subcommand
+  trap_Argv( 1, subcmd, sizeof( subcmd ) );
 
-  playMapError = G_PlayMapEnqueue( map, layout, ent->client->pers.netname, flags, ent );
-  if (playMapError.errorCode == PLAYMAP_ERROR_NONE) {
-    trap_SendServerCommand( -1, 
-			    va( "print \"%s" S_COLOR_WHITE
-				" added map " S_COLOR_CYAN "%s" S_COLOR_WHITE
-				" to playlist\n\"",
-				ent->client->pers.netname, map ) );
-  } else 
-    ADMP( va( "%s\n", playMapError.errorMessage ) );
+  if ( ! strcmp( subcmd, "pool" ))
+  {
+    if( trap_Argc( ) > 2 )
+    {
+      trap_Argv( 2, extra, sizeof( extra ) );
+      page = atoi( extra ) - 1;
+    } else page = 0;
+
+    G_PrintPlayMapPool( ent, page );
+    ADMP( "\n" );
+
+    return;
+  }
+  else if ( ! strcmp( subcmd, "add" ))
+  {    
+    trap_Argv( 2, map, sizeof( map ) );
+    trap_Argv( 3, layout, sizeof( layout ) );
+    trap_Argv( 4, extra, sizeof( extra ) );
+    flags = ConcatArgs( 3 );
+
+    if( g_debugPlayMap.integer > 0 )
+      trap_SendServerCommand( ent-g_entities,
+			      va( "print \"DEBUG: cmd=%s\n"
+				  "       map=%s\n"
+				  "       layout=%s\n"
+				  "       flags=%s\n\"",
+				  cmd, map, layout, flags ) );
+
+    playMapError = G_PlayMapEnqueue( map, layout, ent->client->pers.netname, flags, ent );
+    if (playMapError.errorCode == PLAYMAP_ERROR_NONE)
+    {
+      trap_SendServerCommand( -1, 
+			      va( "print \"%s" S_COLOR_WHITE
+				  " added map " S_COLOR_CYAN "%s" S_COLOR_WHITE
+				  " to playlist\n\"",
+				  ent->client->pers.netname, map ) );
+    } else 
+      ADMP( va( "%s\n", playMapError.errorMessage ) );
+  } else
+    ADMP( va( "Unknown playmap subcommand: %s\n",  subcmd ) );
   
 }
 

@@ -428,14 +428,14 @@ G_PrintPlayMapPool
 Print the playmap pool on the console
 ================
 */
-void G_PrintPlayMapPool( gentity_t *ent )
+void G_PrintPlayMapPool( gentity_t *ent, int page )
 {
-  int i, j, len, rows, pages, page, row, start;
+  int i, j, len, rows, pages, row, start;
 
   if( ( len = playMapPoolCache.numMaps ) )
     {
       ADMBP_begin(); // begin buffer
-      ADMBP( "List of maps that can be added to the playlist:\n" );
+      ADMBP( "Maps that can be added to the playlist" );
     }
   else
     {
@@ -444,12 +444,15 @@ void G_PrintPlayMapPool( gentity_t *ent )
     return;
     }
 
-  page = 0;
   rows = ( len + 2 ) / 3;
   pages = MAX( 1, ( rows + MAX_MAPLIST_ROWS - 1 ) / MAX_MAPLIST_ROWS );
   if( page >= pages )
     page = pages - 1;
 
+  if( pages > 1 ) 
+    ADMBP( va( " (page %d out of %d)", page + 1, pages ) );
+  ADMBP( ":\n" );
+  
   start = page * MAX_MAPLIST_ROWS * 3;
   if( len < start + ( 3 * MAX_MAPLIST_ROWS ) )
     rows = ( len - start + 2 ) / 3;
