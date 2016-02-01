@@ -2,7 +2,17 @@
 # Tremulous Makefile
 #
 # GNU Make required
+
+#############################################################################
+# *** WARNING ***
+# DO NOT MODIFY THIS FILE. 
 #
+# If you require a different configuration from the defaults below, create a
+# new file named "GNUmakefile.local" in the same directory as this file and define
+# your parameters there. This allows you to change configuration without
+# causing problems with keeping up to date with the repository.
+#
+#############################################################################
 
 COMPILE_PLATFORM=$(shell uname|sed -e s/_.*//|tr '[:upper:]' '[:lower:]'|sed -e 's/\//_/g')
 
@@ -17,39 +27,50 @@ ifeq ($(COMPILE_PLATFORM),darwin)
   COMPILE_ARCH=$(shell uname -p | sed -e s/i.86/x86/)
 endif
 
+#############################################################################
+#
+# Switches that can be defined in your GNUmakefile.local file
+#
+#############################################################################
+
+# Build the client executable
 ifndef BUILD_CLIENT
   BUILD_CLIENT     =
 endif
+
+# Build the server executable
 ifndef BUILD_SERVER
   BUILD_SERVER     =
 endif
+
+# Build shared libraries
 ifndef BUILD_GAME_SO
   BUILD_GAME_SO    =
 endif
+
+# Build game Quake virtual machine files
 ifndef BUILD_GAME_QVM
   BUILD_GAME_QVM   =
 endif
+
+# Build game Quake virtual machine files for GPP
 ifndef BUILD_GAME_QVM_11
   BUILD_GAME_QVM_11=
 endif
+
 ifndef BUILD_ONLY_GAME
   BUILD_ONLY_GAME  =
 endif
+
 ifndef BUILD_ONLY_CGUI
   BUILD_ONLY_CGUI  =
 endif
+
 ifndef BUILD_RENDERER_OPENGL2
   BUILD_RENDERER_OPENGL2=
 endif
 
-#############################################################################
-#
-# If you require a different configuration from the defaults below, create a
-# new file named "Makefile.local" in the same directory as this file and define
-# your parameters there. This allows you to change configuration without
-# causing problems with keeping up to date with the repository.
-#
-#############################################################################
+# Include local customizations
 -include GNUmakefile.local
 
 include $(SETTINGS_MAKEFILES)
@@ -251,21 +272,21 @@ GDIR=$(MOUNT_DIR)/game
 CGDIR=$(MOUNT_DIR)/cgame
 NDIR=$(MOUNT_DIR)/null
 UIDIR=$(MOUNT_DIR)/ui
-JPDIR=$(MOUNT_DIR)/jpeg-8c
-SPEEXDIR=$(MOUNT_DIR)/libspeex
-OGGDIR=$(MOUNT_DIR)/libogg-1.3.1
-VORBISDIR=$(MOUNT_DIR)/libvorbis-1.3.4
-OPUSDIR=$(MOUNT_DIR)/opus-1.1
-OPUSFILEDIR=$(MOUNT_DIR)/opusfile-0.5
-ZDIR=$(MOUNT_DIR)/zlib
+JPDIR=$(DEP_DIR)/jpeg-8c
+SPEEXDIR=$(DEP_DIR)/libspeex
+OGGDIR=$(DEP_DIR)/libogg-1.3.1
+VORBISDIR=$(DEP_DIR)/libvorbis-1.3.4
+OPUSDIR=$(DEP_DIR)/opus-1.1
+OPUSFILEDIR=$(DEP_DIR)/opusfile-0.5
+ZDIR=$(DEP_DIR)/zlib
 MINIZIPDIR=$(DEP_DIR)/minizip
 Q3ASMDIR=$(MOUNT_DIR)/tools/asm
 LBURGDIR=$(MOUNT_DIR)/tools/lcc/lburg
 Q3CPPDIR=$(MOUNT_DIR)/tools/lcc/cpp
 Q3LCCETCDIR=$(MOUNT_DIR)/tools/lcc/etc
 Q3LCCSRCDIR=$(MOUNT_DIR)/tools/lcc/src
-SDLHDIR=$(MOUNT_DIR)/SDL2
-LIBSDIR=$(MOUNT_DIR)/libs
+SDLHDIR=$(DEP_DIR)/SDL2
+LIBSDIR=$(DEP_DIR)/libs
 MASTERDIR=$(MOUNT_DIR)/master
 TEMPDIR=/tmp
 

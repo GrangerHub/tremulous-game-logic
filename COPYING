@@ -18,7 +18,5 @@ The following files contain sections of code that are not licensed under the
 GPL, but are nevertheless GPL compatible. The license text for these licenses
 is contained within the files as listed.
 
-    src/qcommon/unzip.c                                         zlib license
     src/game/bg_lib.c                                            BSD license
     src/client/snd_adpcm.c            Stichting Mathematisch Centrum license
-    src/jpeg-6/*                                                JPEG license
