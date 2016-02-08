@@ -159,6 +159,11 @@ g_admin_cmd_t g_admin_cmds[ ] =
       ""
     },
 
+    {"playpool", G_admin_playpool, qfalse, "playpool",
+      "Manage the playmap pool.",
+      "[^5add (mapname)|remove (mapname)|clear|list [pagenum]|reload|save^7]"
+    },
+
     {"putteam", G_admin_putteam, qfalse, "putteam",
       "move a player to a specified team",
       "[^3name|slot#^7] [^3h|a|s^7]"
@@ -1096,7 +1101,7 @@ qboolean G_admin_readconfig( gentity_t *ent )
   cnf = BG_Alloc( len + 1 );
   cnf2 = cnf;
   trap_FS_Read( cnf, len, f );
-  *( cnf + len ) = '\0';
+  cnf[ len ] = '\0';
   trap_FS_FCloseFile( f );
 
   admin_level_maxname = 0;
@@ -3269,6 +3274,137 @@ qboolean G_admin_pause( gentity_t *ent )
   }
 
   return qtrue;
+}
+
+qboolean G_admin_playpool( gentity_t *ent )
+{
+  char           cmd[ MAX_TOKEN_CHARS ],
+    		 map[ MAX_TOKEN_CHARS ],
+    		 mapType[ MAX_TOKEN_CHARS ];
+  int 		 page;
+  playMapError_t playMapError;
+  g_admin_cmd_t *admincmd;
+  
+  // Get command structure
+  admincmd = G_admin_cmd( "playpool" );
+
+  if( trap_Argc( ) < 2 )
+  {
+    ADMP( va( S_COLOR_YELLOW "usage: " S_COLOR_WHITE "%s %s\n",
+	      admincmd->keyword, admincmd->syntax ) );
+    return qfalse;
+  }
+
+  trap_Argv( 1, cmd, sizeof( cmd ) );
+
+  if( !Q_stricmp( cmd, "add" ) )
+  {
+    if( trap_Argc( ) < 3 )
+    {
+      ADMP( S_COLOR_YELLOW "playpool: " S_COLOR_WHITE
+	    "usage: playpool add (^5mapname^7) [^5maptype^7]\n" );
+      return qfalse;
+    }
+
+    trap_Argv( 2, map, sizeof( map ) );
+    if( !G_MapExists( map ) )
+    {
+      ADMP( va( "^3playpool: ^7invalid map name '%s'\n", map ) );
+      return qfalse;
+    }
+
+    if( trap_Argc( ) > 3 ) 
+      trap_Argv( 3, mapType, sizeof( mapType ) );
+
+    playMapError =
+      G_AddToPlayMapPool( map, ( trap_Argc( ) > 3 ) ? mapType : PLAYMAP_MAPTYPE_NONE,
+			  0, 0, qtrue );
+    if( playMapError.errorCode != PLAYMAP_ERROR_NONE )
+    {
+      ADMP( va( "^3playpool: ^7%s.\n", playMapError.errorMessage ) );
+      return qfalse;
+    }
+
+    ADMP( va( "^3playpool: ^7added map '%s' to playmap pool.\n", map ) );
+    return qtrue;
+  }
+
+  if( !Q_stricmp( cmd, "remove" ) )
+  {
+    if( trap_Argc( ) < 3 )
+    {
+      ADMP( "^3playpool: ^7usage: playpool remove (^5mapname^7)\n" );
+      return qfalse;
+    }
+
+    trap_Argv( 2, map, sizeof( map ) );
+    playMapError = G_RemoveFromPlayMapPool( map );
+    if( playMapError.errorCode != PLAYMAP_ERROR_NONE )
+    {
+      ADMP( va( "^3playpool: ^7%s.\n", playMapError.errorMessage ) );
+      return qfalse;
+    }
+
+    ADMP( va( "^3playpool: ^7removed map '%s' from playmap pool.\n", map ) );
+    return qtrue;
+  }
+
+  if( !Q_stricmp( cmd, "clear" ) )
+  {
+    playMapError = G_ClearPlayMapPool();
+    if( playMapError.errorCode != PLAYMAP_ERROR_NONE )
+    {
+      ADMP( va( "^3playpool: ^7%s.\n", playMapError.errorMessage ) );
+      return qfalse;
+    }
+
+    ADMP( va( "^3playpool: ^7cleared playmap pool.\n" ) );
+    return qtrue;
+  }
+
+  if( !Q_stricmp( cmd, "list" ) )
+  {
+    if( trap_Argc( ) > 2 )
+    {
+      trap_Argv( 2, map, sizeof( map ) );
+      page = atoi( map ) - 1;
+    } else page = 0;
+
+    G_PrintPlayMapPool( NULL, page );
+    ADMP( "\n" );
+
+    return qtrue;
+  }
+
+  if( !Q_stricmp( cmd, "save" ) )
+  {
+    playMapError = G_SavePlayMapPool();
+    if( playMapError.errorCode != PLAYMAP_ERROR_NONE )
+    {
+      ADMP( va( "^3playpool: ^7%s.\n", playMapError.errorMessage ) );
+      return qfalse;
+    }
+
+    ADMP( va( "^3playpool: ^7saved playmap pool to '%s'.\n", g_playMapPoolConfig.string ) );
+    return qtrue;
+  }
+
+  if( !Q_stricmp( cmd, "reload" ) )
+  {
+    playMapError = G_ReloadPlayMapPool();
+    if( playMapError.errorCode != PLAYMAP_ERROR_NONE )
+    {
+      ADMP( va( "^3playpool: ^7%s.\n", playMapError.errorMessage ) );
+      return qfalse;
+    }
+
+    ADMP( va( "^3playpool: ^7reloaded playmap pool from '%s'.\n", g_playMapPoolConfig.string ) );
+    return qtrue;
+  }
+
+  ADMP( va( S_COLOR_YELLOW "usage: " S_COLOR_WHITE "%s %s\n",
+	    admincmd->keyword, admincmd->syntax ) );
+  return qfalse;
 }
 
 static char *fates[] =
