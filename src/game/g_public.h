@@ -227,7 +227,10 @@ typedef enum {
   G_SEND_GAMESTAT,
 
   G_ADDCOMMAND,
-  G_REMOVECOMMAND
+  G_REMOVECOMMAND,
+
+  // New
+  G_FS_GETFILTEREDFILES
 } gameImport_t;
 
 

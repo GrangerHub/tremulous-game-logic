@@ -797,6 +797,52 @@ static qboolean G_NonSegModel( const char *filename )
 }
 
 /*
+======================
+GetSkin
+
+Probably should be called GetSkin[or]Default. Tries to recreate what
+appears to be an undocumented set of conventions that must be allowed
+in other q3 derives.
+
+This algorithm is not really good enough for Tremulous considering
+armour + upgrade/advanced in gameplay
+
+XXX Move this into bg_ 
+======================
+*/
+char *GetSkin( char *modelname, char *wish )
+{
+    char skins[ MAX_PLAYER_MODEL ][ 64 ];
+    int numskins;
+    int i;
+    qboolean foundDefault = qfalse;
+    qboolean foundSelfNamed = qfalse;
+    static char lastpick[ 64 ] = {""};
+    lastpick[0] = '\0'; // reset static buf
+
+    G_GetPlayerModelSkins(modelname, skins, MAX_PLAYER_MODEL, &numskins);
+
+    for (i = 0; i < numskins; i++)
+    {
+        if ( i == 0 )
+            strncpy(lastpick, skins[0], 64 );
+
+        if ( !strcmp(wish, skins[i]) )
+            return wish;
+        else if ( !strcmp("default", skins[i]))
+            foundDefault = qtrue;
+        else if ( !strcmp(modelname, skins[i]))
+            foundSelfNamed = qtrue;
+    }
+
+    if (foundDefault)
+        return "default";
+    else if (foundSelfNamed)
+        return modelname;
+
+    return lastpick;
+}
+/*
 ===========
 ClientUserInfoChanged
 
@@ -810,7 +856,7 @@ if desired.
 char *ClientUserinfoChanged( int clientNum, qboolean forceName )
 {
   gentity_t *ent;
-  char      *s;
+  char      *s, *s2;
   char      model[ MAX_QPATH ];
   char      buffer[ MAX_QPATH ];
   char      filename[ MAX_QPATH ];
@@ -908,6 +954,38 @@ char *ClientUserinfoChanged( int clientNum, qboolean forceName )
     G_namelog_update_name( client );
   }
 
+  s = NULL;
+  if ( g_pimpHuman.integer )
+  if ( client->pers.teamSelection == TEAM_HUMANS )
+  {
+    int i;
+    qboolean found = qfalse;
+
+    s = Info_ValueForKey(userinfo, "model");
+
+    for ( i = 0; i < level.playerModelCount; i++ )
+    {
+      if ( !strcmp(s, level.playerModel[i]) )
+      {
+        found = qtrue;
+        break;
+      }
+    }
+
+    if ( !found )
+      s = NULL;
+    else if ( !g_cheats.integer
+           && !forceName
+           && !G_admin_permission( ent, va("MODEL%s", s) ) )
+      s = NULL;
+
+    if (s)
+    {
+      s2 = Info_ValueForKey(userinfo, "skin");
+      s2 = GetSkin(s, s2);
+    }
+  }
+
   if( client->pers.classSelection == PCL_NONE )
   {
     //This looks hacky and frankly it is. The clientInfo string needs to hold different
@@ -919,8 +997,15 @@ char *ClientUserinfoChanged( int clientNum, qboolean forceName )
   }
   else
   {
-    Com_sprintf( buffer, MAX_QPATH, "%s/%s",  BG_ClassConfig( client->pers.classSelection )->modelName,
-                                              BG_ClassConfig( client->pers.classSelection )->skinName );
+    if ( s )
+    {
+        Com_sprintf( buffer, MAX_QPATH, "%s/%s", s, s2 );
+    }
+    else
+    {
+        Com_sprintf( buffer, MAX_QPATH, "%s/%s",  BG_ClassConfig( client->pers.classSelection )->modelName,
+                                                  BG_ClassConfig( client->pers.classSelection )->skinName );
+    }
 
     //model segmentation
     Com_sprintf( filename, sizeof( filename ), "models/players/%s/animation.cfg",

@@ -187,6 +187,10 @@ qboolean G_admin_builder( gentity_t *ent );
 qboolean G_admin_buildlog( gentity_t *ent );
 qboolean G_admin_revert( gentity_t *ent );
 qboolean G_admin_setdevmode( gentity_t *ent );
+qboolean G_admin_listflags( gentity_t *ent );
+qboolean G_admin_flag( gentity_t *ent );
+qboolean G_admin_gamedir( gentity_t *ent );
+qboolean G_admin_gamevar( gentity_t *ent );
 
 void G_admin_print( gentity_t *ent, char *m );
 void G_admin_buffer_print( gentity_t *ent, char *m );

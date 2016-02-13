@@ -157,6 +157,7 @@ vmCvar_t  g_publicAdminMessages;
 vmCvar_t  g_allowTeamOverlay;
 
 vmCvar_t  g_censorship;
+vmCvar_t  g_pimpHuman;
 
 vmCvar_t  g_tag;
 
@@ -317,6 +318,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_allowTeamOverlay, "g_allowTeamOverlay", "1", CVAR_ARCHIVE, 0, qtrue  },
 
   { &g_censorship, "g_censorship", "", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_pimpHuman, "g_pimpHuman", "1", CVAR_ARCHIVE, 0, qfalse  },
 
   { &g_tag, "g_tag", "gpp", CVAR_INIT, 0, qfalse }
 };
@@ -567,6 +569,118 @@ void G_MapConfigs( const char *mapname )
     va( "exec \"%s/%s.cfg\"\n", g_mapConfigs.string, mapname ) );
 
   trap_Cvar_Set( "g_mapConfigsLoaded", "1" );
+}
+
+// FIXME: Piece of shit compiler no understand ptr-array compat
+void G_GetPlayerModelSkins( const char *modelname, char skins[][ 64 ], int maxskins, int *numskins )
+{
+    // FIXME: trap_FS_* Shit hardly works for these basic tasks. Why the fuck!?
+    char fileList[ 16*1024 ] = {""}; // FIXME: excessively large arrays are necessary for now.
+    int nFiles;
+    char *filePtr;
+    int fileLen = 0;
+    int i;
+
+    *numskins = 0;
+    nFiles = trap_FS_GetFilteredFiles("models/players", ".skin",
+             va("models*players*%s*skin", modelname), fileList, sizeof(fileList));
+    filePtr = fileList;
+    for (i = 0; i < nFiles && i < maxskins; i++ )
+    {
+        char *start, *end;
+
+        fileLen = strlen( filePtr );
+
+        start = filePtr;
+        start += strlen(va("models/players/%s/", modelname));
+
+        end = filePtr + fileLen;
+        end -= 5;
+        *end = '\0';
+        filePtr += fileLen + 1;
+
+        // dumb way to filter out the unique skins of segmented and
+        // nonsegmented models.
+        // TODO: Stop writing code at 4am.
+        if ( start[0] == 'h'
+          && start[1] == 'e'
+          && start[2] == 'a'
+          && start[3] == 'd'
+          && start[4] == '_' )
+        {
+            start += 5;
+        }
+        else if ( start[0] == 'n'
+               && start[1] == 'o'
+               && start[2] == 'n'
+               && start[3] == 's'
+               && start[4] == 'e'
+               && start[5] == 'g'
+               && start[6] == '_' )
+        {
+            start += 7;
+        }
+        else
+        {
+            continue;
+        }
+
+        strncpy(skins[*numskins], start, 64 );
+        (*numskins)++;
+    }
+}
+
+// XXX This needs to move into bg_
+// XXX CGame in future needs to precache all this! For now its a hack.
+void G_InitPlayerModel( )
+{
+  char fileList[ 16*1024 ] = {""};
+  char *filePtr;
+  int  numFiles;
+  int  fileLen = 0;
+  int  i;
+
+  // TODO: Add an FS trap which is does correct file globbing
+  numFiles = trap_FS_GetFilteredFiles( "models/player/", ".skin", NULL,
+                                  fileList, sizeof( fileList ) );
+  filePtr = fileList;
+  for( i = 0;
+       i < numFiles && level.playerModelCount < MAX_PLAYER_MODEL;
+       i++, filePtr += fileLen + 1 )
+  {
+    int j;
+    char *start, *c;
+    qboolean found = qfalse;
+
+    fileLen = strlen( filePtr );
+
+    // skip leading '/'
+    start = filePtr + 1;
+
+    // Only want directory names at the current depth.
+    for ( c = start; c != '\0'; c++ )
+    {
+        if ( *c == '/' || *c == '\\' )
+        {
+            *c = '\0';
+            break;
+        }
+    }
+
+    // Only capture unique model directory names.
+    for ( j = 0; j < level.playerModelCount; j++ )
+    {
+        if ( !strcmp( start, level.playerModel[ j ] ) )
+            found = qtrue;
+    }
+
+    if (found)
+        continue;
+
+    strncpy(level.playerModel[level.playerModelCount], start,
+            sizeof(level.playerModel[0]));
+    level.playerModelCount++;
+  }
 }
 
 /*

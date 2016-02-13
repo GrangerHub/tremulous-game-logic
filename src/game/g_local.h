@@ -530,6 +530,7 @@ typedef struct
 #define MAX_SPAWN_VARS      64
 #define MAX_SPAWN_VARS_CHARS  4096
 #define MAX_BUILDLOG          1024
+#define MAX_PLAYER_MODEL    256
 
 typedef struct
 {
@@ -676,6 +677,9 @@ typedef struct
 
   emoticon_t        emoticons[ MAX_EMOTICONS ];
   int               emoticonCount;
+
+  char              playerModel[ MAX_PLAYER_MODEL ][ 64 ];
+  int               playerModelCount;
 
   namelog_t         *namelogs;
 
@@ -1019,6 +1023,7 @@ void G_EndVote( team_t team, qboolean cancel );
 void G_CheckVote( team_t team );
 void LogExit( const char *string );
 int  G_TimeTilSuddenDeath( void );
+void G_GetPlayerModelSkins( const char *modelname, char skins[MAX_PLAYER_MODEL][ 64 ], int maxskins, int *numskins );
 
 //
 // g_client.c
@@ -1206,6 +1211,8 @@ extern  vmCvar_t  g_allowTeamOverlay;
 
 extern  vmCvar_t  g_censorship;
 
+extern  vmCvar_t  g_pimpHuman;
+
 void      trap_Print( const char *fmt );
 void      trap_Error( const char *fmt ) __attribute__((noreturn));
 int       trap_Milliseconds( void );
@@ -1218,6 +1225,7 @@ void      trap_FS_Read( void *buffer, int len, fileHandle_t f );
 void      trap_FS_Write( const void *buffer, int len, fileHandle_t f );
 void      trap_FS_FCloseFile( fileHandle_t f );
 int       trap_FS_GetFileList( const char *path, const char *extension, char *listbuf, int bufsize );
+int       trap_FS_GetFilteredFiles( const char *path, const char *extension, char *filter, char *listbuf, int bufsize );
 int       trap_FS_Seek( fileHandle_t f, long offset, int origin ); // fsOrigin_t
 void      trap_SendConsoleCommand( int exec_when, const char *text );
 void      trap_Cvar_Register( vmCvar_t *cvar, const char *var_name, const char *value, int flags );
