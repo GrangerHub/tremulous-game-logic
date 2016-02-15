@@ -283,7 +283,7 @@ LBURGDIR=$(MOUNT_DIR)/tools/lcc/lburg
 Q3CPPDIR=$(MOUNT_DIR)/tools/lcc/cpp
 Q3LCCETCDIR=$(MOUNT_DIR)/tools/lcc/etc
 Q3LCCSRCDIR=$(MOUNT_DIR)/tools/lcc/src
-SDLHDIR=$(DEP_DIR)/SDL2
+SDLHDIR=$(DEP_DIR)/sdl2
 LIBSDIR=$(DEP_DIR)/libs
 MASTERDIR=$(MOUNT_DIR)/master
 TEMPDIR=/tmp
@@ -505,6 +505,9 @@ ifeq ($(PLATFORM),darwin)
   endif
 
   BASE_CFLAGS += -D_THREAD_SAFE=1
+
+  BASE_CFLAGS += -I$(SDLHDIR)/include
+  BASE_CFLAGS += -I$(DEP_DIR)
 
   # We copy sdlmain before ranlib'ing it so that subversion doesn't think
   #  the file has been modified by each build.
@@ -2342,6 +2345,8 @@ UIOBJ_ = \
   $(B)/ui/ui_shared.o \
   $(B)/ui/ui_gameinfo.o \
   \
+  $(B)/ui/bg_alloc.o \
+  $(B)/ui/bg_voice.o \
   $(B)/ui/bg_misc.o \
   $(B)/ui/bg_lib.o \
   $(B)/qcommon/q_math.o \
@@ -2353,6 +2358,8 @@ UIOBJ11_ = \
   $(B)/ui/ui_shared.o \
   $(B)/ui/ui_gameinfo.o \
   \
+  $(B)/ui/bg_alloc.o \
+  $(B)/ui/bg_voice.o \
   $(B)/ui/bg_misc.o \
   $(B)/ui/bg_lib.o \
   $(B)/qcommon/q_math.o \
