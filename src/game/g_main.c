@@ -797,6 +797,8 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
   trap_SetConfigstring( CS_INTERMISSION, "0" );
   trap_SetConfigstring( CS_WARMUP, va( "%d", IS_WARMUP ) );
 
+  G_InitPlayerModel( );
+
   // test to see if a custom buildable layout will be loaded
   G_LayoutSelect( );
 
