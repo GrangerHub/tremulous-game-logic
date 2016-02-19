@@ -797,52 +797,6 @@ static qboolean G_NonSegModel( const char *filename )
 }
 
 /*
-======================
-GetSkin
-
-Probably should be called GetSkin[or]Default. Tries to recreate what
-appears to be an undocumented set of conventions that must be allowed
-in other q3 derives.
-
-This algorithm is not really good enough for Tremulous considering
-armour + upgrade/advanced in gameplay
-
-XXX Move this into bg_ 
-======================
-*/
-char *GetSkin( char *modelname, char *wish )
-{
-    char skins[ MAX_PLAYER_MODEL ][ 64 ];
-    int numskins;
-    int i;
-    qboolean foundDefault = qfalse;
-    qboolean foundSelfNamed = qfalse;
-    static char lastpick[ 64 ] = {""};
-    lastpick[0] = '\0'; // reset static buf
-
-    G_GetPlayerModelSkins(modelname, skins, MAX_PLAYER_MODEL, &numskins);
-
-    for (i = 0; i < numskins; i++)
-    {
-        if ( i == 0 )
-            strncpy(lastpick, skins[0], 64 );
-
-        if ( !strcmp(wish, skins[i]) )
-            return wish;
-        else if ( !strcmp("default", skins[i]))
-            foundDefault = qtrue;
-        else if ( !strcmp(modelname, skins[i]))
-            foundSelfNamed = qtrue;
-    }
-
-    if (foundDefault)
-        return "default";
-    else if (foundSelfNamed)
-        return modelname;
-
-    return lastpick;
-}
-/*
 ===========
 ClientUserInfoChanged
 

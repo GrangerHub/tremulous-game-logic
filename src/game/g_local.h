@@ -678,7 +678,7 @@ typedef struct
   emoticon_t        emoticons[ MAX_EMOTICONS ];
   int               emoticonCount;
 
-  char              playerModel[ MAX_PLAYER_MODEL ][ 64 ];
+  char              *playerModel[ MAX_PLAYER_MODEL ];
   int               playerModelCount;
 
   namelog_t         *namelogs;
@@ -1092,6 +1092,14 @@ void G_namelog_restore( gclient_t *client );
 void G_namelog_update_score( gclient_t *client );
 void G_namelog_update_name( gclient_t *client );
 void G_namelog_cleanup( void );
+
+//
+// g_playermodel.c
+//
+void G_InitPlayerModel(void);
+void G_FreePlayerModel(void);
+void G_GetPlayerModelSkins( const char *modelname, char skins[MAX_PLAYER_MODEL][ 64 ], int maxskins, int *numskins );
+char *GetSkin( char *modelname, char *wish );
 
 //some maxs
 #define MAX_FILEPATH      144
