@@ -40,7 +40,8 @@ void G_InitPlayerModel(void)
     int  i;
 
     // TODO: Add an FS trap which is does correct file globbing
-    numFiles = trap_FS_GetFilteredFiles( "models/player/", ".skin", NULL,
+    numFiles = trap_FS_GetFilteredFiles( "/models/players", "",
+            "models*players*head_*.skin",
             fileList, sizeof(fileList) );
     filePtr = fileList;
 
@@ -52,7 +53,7 @@ void G_InitPlayerModel(void)
         fileLen = strlen( filePtr );
 
         // skip leading '/'
-        start = filePtr + 1;
+        start = filePtr + 15;
 
         // Only want directory names at the current depth.
         for ( c = start; c != '\0'; c++ )
