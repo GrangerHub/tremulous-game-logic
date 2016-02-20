@@ -27,6 +27,10 @@ G_AddPlayerModel(const char *model)
     if (!_is_playermodel_uniq(model))
         return;
 
+    // HACK!
+    if (!strcmp(model, "human_bsuit"))
+        return;
+
     level.playerModel[ level.playerModelCount ] = G_CopyString(model); 
     level.playerModelCount++;
 }

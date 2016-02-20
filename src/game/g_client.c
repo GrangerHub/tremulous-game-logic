@@ -952,7 +952,7 @@ char *ClientUserinfoChanged( int clientNum, qboolean forceName )
   }
   else
   {
-    if ( s )
+    if ( !(client->pers.classSelection == PCL_HUMAN_BSUIT) && s )
     {
         Com_sprintf( buffer, MAX_QPATH, "%s/%s", s, s2 );
     }
