@@ -928,10 +928,11 @@ char *ClientUserinfoChanged( int clientNum, qboolean forceName )
 
     if ( !found )
       s = NULL;
-    else if ( !g_cheats.integer
-           && !forceName
-           && !G_admin_permission( ent, va("MODEL%s", s) ) )
-      s = NULL;
+    // XXX Disabled for the short-term
+    //else if ( !g_cheats.integer
+    //       && !forceName
+    //       && !G_admin_permission( ent, va("MODEL%s", s) ) )
+    //  s = NULL;
 
     if (s)
     {

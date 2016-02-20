@@ -2841,6 +2841,7 @@ qboolean G_admin_transform( gentity_t *ent )
   int pid;
   char name[ MAX_NAME_LENGTH ];
   char modelname[ MAX_NAME_LENGTH ];
+  char skin[ MAX_NAME_LENGTH ];
   char err[ MAX_STRING_CHARS ];
   char userinfo[ MAX_INFO_STRING ];
   gentity_t *victim = NULL;
@@ -2849,12 +2850,18 @@ qboolean G_admin_transform( gentity_t *ent )
 
   if (trap_Argc() < 3)
   {
-    ADMP("^3transform: ^7usage: transform [name|slot#] [model]\n");
+    ADMP("^3transform: ^7usage: transform [name|slot#] [model] <skin>\n");
     return qfalse;
   }
 
   trap_Argv(1, name, sizeof(name));
   trap_Argv(2, modelname, sizeof(modelname));
+
+  strcpy(skin, "default");  
+  if (trap_Argc() >= 4)
+  {
+    trap_Argv(1, skin, sizeof(skin));
+  }
 
   pid = G_ClientNumberFromString(name, err, sizeof(err));
   if (pid == -1)
@@ -2891,7 +2898,7 @@ qboolean G_admin_transform( gentity_t *ent )
          (ent ? ent->client->pers.netname : "console")) );
 
   Info_SetValueForKey( userinfo, "model", modelname );
-  Info_SetValueForKey( userinfo, "skin", GetSkin(modelname, "default"));
+  Info_SetValueForKey( userinfo, "skin", GetSkin(modelname, skin));
   Info_SetValueForKey( userinfo, "voice", modelname );
   trap_SetUserinfo( pid, userinfo );
   ClientUserinfoChanged( pid, qtrue );
