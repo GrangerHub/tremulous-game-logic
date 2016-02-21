@@ -1294,6 +1294,8 @@ typedef struct
   qhandle_t larmourLegsSkin;
   qhandle_t larmourTorsoSkin;
 
+  qhandle_t replaceLarmour; // temporary fix
+
   qhandle_t jetpackModel;
   qhandle_t jetpackFlashModel;
   qhandle_t battpackModel;
