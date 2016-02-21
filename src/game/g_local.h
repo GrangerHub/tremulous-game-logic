@@ -31,6 +31,7 @@ typedef struct gentity_s gentity_t;
 typedef struct gclient_s gclient_t;
 
 #include "g_admin.h"
+#include "g_playmap.h"
 
 //==================================================================
 
@@ -735,6 +736,7 @@ void      G_DecolorString( char *in, char *out, int len );
 void      G_UnEscapeString( char *in, char *out, int len );
 void      G_SanitiseString( char *in, char *out, int len );
 void      Cmd_PrivateMessage_f( gentity_t *ent );
+void      Cmd_PlayMap_f( gentity_t *ent );
 void      Cmd_ListMaps_f( gentity_t *ent );
 void      Cmd_Test_f( gentity_t *ent );
 void      Cmd_AdminMessage_f( gentity_t *ent );
@@ -1132,6 +1134,7 @@ extern  vmCvar_t  g_knockback;
 extern  vmCvar_t  g_inactivity;
 extern  vmCvar_t  g_debugMove;
 extern  vmCvar_t  g_debugDamage;
+extern  vmCvar_t  g_debugPlayMap;
 extern  vmCvar_t  g_synchronousClients;
 extern  vmCvar_t  g_motd;
 extern  vmCvar_t  g_countdown;
@@ -1203,6 +1206,10 @@ extern  vmCvar_t  g_emoticonsAllowedInNames;
 extern  vmCvar_t  g_admin;
 extern  vmCvar_t  g_adminTempBan;
 extern  vmCvar_t  g_adminMaxBan;
+
+extern	vmCvar_t  g_playMapEnable;
+extern  vmCvar_t  g_playMapPoolConfig;
+extern  vmCvar_t  g_playMapQueueConfig;
 
 extern  vmCvar_t  g_privateMessages;
 extern  vmCvar_t  g_specChat;

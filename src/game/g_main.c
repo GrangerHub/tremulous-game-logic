@@ -71,6 +71,7 @@ vmCvar_t  g_knockback;
 vmCvar_t  g_inactivity;
 vmCvar_t  g_debugMove;
 vmCvar_t  g_debugDamage;
+vmCvar_t  g_debugPlayMap;
 vmCvar_t  g_motd;
 vmCvar_t  g_synchronousClients;
 vmCvar_t  g_countdown;
@@ -149,6 +150,10 @@ vmCvar_t  g_admin;
 vmCvar_t  g_adminTempBan;
 vmCvar_t  g_adminMaxBan;
 
+vmCvar_t  g_playMapEnable;
+vmCvar_t  g_playMapPoolConfig;
+vmCvar_t  g_playMapQueueConfig;
+
 vmCvar_t  g_privateMessages;
 vmCvar_t  g_specChat;
 vmCvar_t  g_publicAdminMessages;
@@ -224,6 +229,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_inactivity, "g_inactivity", "0", 0, 0, qtrue },
   { &g_debugMove, "g_debugMove", "0", 0, 0, qfalse },
   { &g_debugDamage, "g_debugDamage", "0", 0, 0, qfalse },
+  { &g_debugPlayMap, "g_debugPlayMap", "0", 0, 0, qfalse },
   { &g_motd, "g_motd", "", 0, 0, qfalse },
 
   { &g_allowVote, "g_allowVote", "1", CVAR_ARCHIVE, 0, qfalse },
@@ -302,6 +308,12 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_admin, "g_admin", "admin.dat", CVAR_ARCHIVE, 0, qfalse  },
   { &g_adminTempBan, "g_adminTempBan", "2m", CVAR_ARCHIVE, 0, qfalse  },
   { &g_adminMaxBan, "g_adminMaxBan", "2w", CVAR_ARCHIVE, 0, qfalse  },
+
+  // playmap pool
+  
+  { &g_playMapEnable, "g_playMapEnable", "0", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_playMapPoolConfig, "g_playMapPoolConfig", "playmap_pool.dat", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_playMapQueueConfig, "g_playMapQueueConfig", "playmap_queue.dat", CVAR_ARCHIVE, 0, qfalse  },
 
   { &g_privateMessages, "g_privateMessages", "1", CVAR_ARCHIVE, 0, qfalse  },
   { &g_specChat, "g_specChat", "1", CVAR_ARCHIVE, 0, qfalse  },
@@ -696,6 +708,8 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
   BG_InitBuildableConfigs( );
   G_InitDamageLocations( );
   G_InitMapRotations( );
+  G_ReloadPlayMapPool();
+  G_ReloadPlayMapQueue();
   G_InitSpawnQueue( &level.alienSpawnQueue );
   G_InitSpawnQueue( &level.humanSpawnQueue );
 
@@ -773,6 +787,10 @@ void G_ShutdownGame( int restart )
 
   // write all the client session data so we can get it back
   G_WriteSessionData( );
+
+  // Save the playmap files here
+  G_SavePlayMapPool();
+  G_SavePlayMapQueue();
 
   G_admin_cleanup( );
   G_namelog_cleanup( );
@@ -1699,9 +1717,11 @@ void ExitLevel( void )
     trap_SendConsoleCommand( EXEC_APPEND, va( "%smap \"%s\"\n",
       ( g_cheats.integer ? "dev" : "" ), g_nextMap.string ) );
   }
+  else if( G_PlayMapActive( ) )
+    G_NextPlayMap();
   else if( G_MapRotationActive( ) )
     G_AdvanceMapRotation( 0 );
-  else
+  else // Otherwise just restart current map
   {
     char map[ MAX_CVAR_VALUE_STRING ];
     trap_Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
@@ -1712,7 +1732,7 @@ void ExitLevel( void )
   trap_Cvar_Set( "g_nextMap", "" );
   trap_Cvar_Set( "g_warmup", "1" );
   trap_SetConfigstring( CS_WARMUP, va( "%d", IS_WARMUP ) );
-
+  
   level.restarted = qtrue;
   level.changemap = NULL;
   level.intermissiontime = 0;
@@ -2118,6 +2138,7 @@ void G_LevelRestart( qboolean stopWarmup )
 
   if( !stopWarmup )
     level.lastLayoutReset = level.time;
+
 }
 
 /*
