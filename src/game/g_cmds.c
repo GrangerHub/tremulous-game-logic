@@ -54,6 +54,29 @@ void G_SanitiseString( char *in, char *out, int len )
 
 /*
 ==================
+G_SingleLineString
+
+Remove semicolons and newlines from a string
+==================
+*/
+void G_SingleLineString( char *in, char *out, int len )
+{
+  len--;
+
+  while( *in && len > 0 )
+  {
+    if( isprint( *in ) && *in != ';' )
+    {
+      *out++ = *in;
+      len--;
+    }
+    in++;
+  }
+  *out = '\0';
+}
+
+/*
+==================
 G_ClientNumberFromString
 
 Returns a player number for either a number or name string
@@ -1179,7 +1202,8 @@ void Cmd_CallVote_f( gentity_t *ent )
   int    clientNum = -1;
   int    id = -1;
   team_t team;
-
+  qboolean voteYes = qtrue;
+  
   trap_Argv( 0, cmd, sizeof( cmd ) );
   trap_Argv( 1, vote, sizeof( vote ) );
   trap_Argv( 2, arg, sizeof( arg ) );
@@ -1336,6 +1360,27 @@ void Cmd_CallVote_f( gentity_t *ent )
         sizeof( level.voteDisplayString[ team ] ), va( " for '%s'", reason ) );
     }
   }
+  else if( !Q_stricmp( vote, "poll" ) )
+  {
+    char poll[ MAX_STRING_CHARS ];
+
+    G_SingleLineString( ConcatArgs( 2 ), poll, sizeof( poll ) );
+
+    if( strlen( poll ) == 0 )
+    {
+      trap_SendServerCommand( ent-g_entities,
+        va( "print \"%s: please specify a poll question\n\"", cmd ) );
+      return;
+    }
+
+    // use an exec string that allows log parsers to see the vote
+    Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
+      "echo poll \"%s\"", poll );
+    Com_sprintf( level.voteDisplayString[ team ],
+      sizeof( level.voteDisplayString[ team ] ),
+      "(poll) %s^7", poll );
+    voteYes = qfalse;
+  }
   else if( team == TEAM_NONE )
   {
     if( !Q_stricmp( vote, "mute" ) )
@@ -1491,7 +1536,7 @@ void Cmd_CallVote_f( gentity_t *ent )
     {
       trap_SendServerCommand( ent-g_entities, "print \"Invalid vote string\n\"" );
       trap_SendServerCommand( ent-g_entities, "print \"Valid vote commands "
-          "are: map, nextmap, map_restart, draw, sudden_death, kick, mute, "
+          "are: map, nextmap, map_restart, draw, sudden_death, kick, poll, mute, "
           "unmute and cancel\n" );
       return;
     }
@@ -1549,7 +1594,7 @@ void Cmd_CallVote_f( gentity_t *ent )
   {
     trap_SendServerCommand( ent-g_entities, "print \"Invalid vote string\n\"" );
     trap_SendServerCommand( ent-g_entities, "print \"Valid team vote commands "
-        "are: kick, denybuild, allowbuild, admitdefeat and cancel\n" );
+        "are: kick, poll, denybuild, allowbuild, admitdefeat and cancel\n" );
     return;
   }
 
@@ -1614,7 +1659,9 @@ void Cmd_CallVote_f( gentity_t *ent )
 
   ent->client->pers.namelog->voteCount++;
   ent->client->pers.vote |= 1 << team;
-  G_Vote( ent, team, qtrue );
+
+  if ( voteYes == qtrue )
+    G_Vote( ent, team, qtrue );   //Caller calls vote YES as default but not in all cases.
 }
 
 /*
