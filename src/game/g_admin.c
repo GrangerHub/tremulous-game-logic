@@ -195,6 +195,12 @@ g_admin_cmd_t g_admin_cmds[ ] =
       ""
     },
 
+    {"register", G_admin_register, qfalse, "register",
+      "register your name to protect it from being used by others. "
+      "use 'register 0' to remove name protection.",
+      "(^7level^7)"
+    },
+
     {"rename", G_admin_rename, qfalse, "rename",
       "rename a player",
       "[^3name|slot#^7] [^3new name^7]"
@@ -676,7 +682,7 @@ static void admin_default_levels( void )
   l->level = level++;
   Q_strncpyz( l->name, "^4Unknown Player", sizeof( l->name ) );
   Q_strncpyz( l->flags,
-    "listplayers admintest adminhelp time",
+    "listplayers admintest adminhelp time register",
     sizeof( l->flags ) );
 
   l = l->next = BG_Alloc( sizeof( g_admin_level_t ) );
@@ -704,7 +710,7 @@ static void admin_default_levels( void )
   l->level = level++;
   Q_strncpyz( l->name, "^3Senior Admin", sizeof( l->name ) );
   Q_strncpyz( l->flags,
-    "listplayers admintest adminhelp time putteam spec999 kick mute showbans ban "
+    "listplayers admintest adminhelp time register rename putteam spec999 kick mute showbans ban "
     "namelog ADMINCHAT",
     sizeof( l->flags ) );
 
@@ -1493,6 +1499,66 @@ qboolean G_admin_setlevel( gentity_t *ent )
     G_admin_authlog( vic );
     G_admin_cmdlist( vic );
   }
+  return qtrue;
+}
+
+qboolean G_admin_register( gentity_t *ent )
+{
+  char arg[ 16 ];
+  char playerName [ MAX_NAME_LENGTH ];
+  char unnamedName [ MAX_NAME_LENGTH ] = "UnnamedPlayer";
+  int  oldLevel;
+  int  newLevel = 1;
+
+  if( !ent )
+  {
+    ADMP( "^3admintest: ^7you are on the console.\n" );
+    return qfalse;
+  }
+
+  G_DecolorString( (char *)ent->client->pers.netname, playerName, sizeof( playerName ) );
+  
+  if( ent->client->pers.admin )
+    oldLevel = ent->client->pers.admin->level;
+  else
+    oldLevel = 0;
+
+  if( trap_Argc( ) > 1 )
+  {
+    trap_Argv( 1, arg, sizeof( arg ) );
+    newLevel = atoi( arg );
+
+    if( newLevel < 0 || newLevel > 1 )
+    {
+      ADMP( "^3register: ^7level can only be 0 or 1\n" );
+      return qfalse;
+    }
+
+    if( newLevel == 0 && oldLevel != 1 )
+    {
+      ADMP( "^3register: ^7you may only remove name protection when level 1. "
+            "find an admin with setlevel\n");
+      return qfalse;
+    }
+  }
+
+  if( newLevel != 0 && !Q_stricmpn ( playerName, unnamedName, strlen( unnamedName ) ) )
+  {
+    ADMP( va( "^3register: ^7You cannot register names similar to '%s'\n", unnamedName ) );
+    return qfalse;
+  }
+
+  if( oldLevel < 0 || oldLevel > 1 )
+    newLevel = oldLevel;
+
+  trap_SendConsoleCommand( EXEC_APPEND,
+                           va( "setlevel %d %d;", (int)(ent - g_entities), newLevel ) );
+
+  AP( va( "print \"^3register: ^7%s^3 is now a %s nickname. Commands unlocked. ^2Congratulations!\n\"",
+          ( newLevel == 0 && ent->client->pers.admin ) ?
+            ent->client->pers.admin->name : ent->client->pers.netname,
+          newLevel == 0 ? "free" : "protected" ) );
+
   return qtrue;
 }
 
