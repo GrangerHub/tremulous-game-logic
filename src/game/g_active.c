@@ -358,7 +358,8 @@ void  G_TouchTriggers( gentity_t *ent )
       continue;
 
     // ignore most entities if a spectator
-    if( ent->client->sess.spectatorState != SPECTATOR_NOT )
+    if ( ent->client->sess.spectatorState != SPECTATOR_NOT
+     || (ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING) )
     {
       if( hit->s.eType != ET_TELEPORT_TRIGGER &&
           // this is ugly but adding a new ET_? type will
@@ -1315,6 +1316,8 @@ void ClientThink_real( gentity_t *ent )
     client->ps.pm_type = PM_NOCLIP;
   else if( client->ps.stats[ STAT_HEALTH ] <= 0 )
     client->ps.pm_type = PM_DEAD;
+  else if ( client->ps.stats[ STAT_STATE ] & SS_HOVELING )
+    client->ps.pm_type = PM_FREEZE;
   else if( client->ps.stats[ STAT_STATE ] & SS_BLOBLOCKED ||
            client->ps.stats[ STAT_STATE ] & SS_GRABBED )
     client->ps.pm_type = PM_GRABBED;
@@ -1549,6 +1552,9 @@ void ClientThink_real( gentity_t *ent )
   pm.pmove_fixed = pmove_fixed.integer | client->pers.pmoveFixed;
   pm.pmove_msec = pmove_msec.integer;
 
+  if ( pm.ps->stats[ STAT_STATE ] & SS_HOVELING )
+      pm.tracemask = MASK_PLAYERSOLID & ~CONTENTS_BODY;
+
   VectorCopy( client->ps.origin, client->oldOrigin );
 
   // moved from after Pmove -- potentially the cause of
@@ -1664,57 +1670,84 @@ void ClientThink_real( gentity_t *ent )
        client->ps.stats[ STAT_HEALTH ] > 0 )
   {
     trace_t   trace;
-    vec3_t    view, point;
+    vec3_t  view, point;
     gentity_t *traceEnt;
 
-#define USE_OBJECT_RANGE 64
+    if ( client->ps.stats[ STAT_STATE ] & SS_HOVELING )
+    {
+      gentity_t *hovel = client->hovel;
 
-    int       entityList[ MAX_GENTITIES ];
-    vec3_t    range = { USE_OBJECT_RANGE, USE_OBJECT_RANGE, USE_OBJECT_RANGE };
-    vec3_t    mins, maxs;
-    int       i, num;
+      // only let the player out if there is room
+      if ( !AHovel_Blocked( hovel, ent, qtrue ) )
+      {
+        // prevent lerping
+        client->ps.eFlags ^= EF_TELEPORT_BIT;
+        client->ps.eFlags &= ~EF_NODRAW;
 
-    // look for object infront of player
-    AngleVectors( client->ps.viewangles, view, NULL, NULL );
-    VectorMA( client->ps.origin, USE_OBJECT_RANGE, view, point );
-    trap_Trace( &trace, client->ps.origin, NULL, NULL, point, ent->s.number, MASK_SHOT );
+        // client leaves hovel
+        client->ps.stats[ STAT_STATE ] &= ~SS_HOVELING;
 
-    traceEnt = &g_entities[ trace.entityNum ];
-
-    if( traceEnt && traceEnt->buildableTeam == client->ps.stats[ STAT_TEAM ] && traceEnt->use )
-      traceEnt->use( traceEnt, ent, ent ); //other and activator are the same in this context
+        // hovel is empty
+        G_SetBuildableAnim( hovel, BANIM_ATTACK2, qfalse );
+        hovel->active = qfalse;
+      }
+      else
+      {
+        // exit is blocked
+        // G_TriggerMenu(ent->client->ps.clientNum, MN_A_HOVEL_BLOCKED );
+      }
+    }
     else
     {
-      //no entity in front of player - do a small area search
+#define USE_OBJECT_RANGE 64
 
-      VectorAdd( client->ps.origin, range, maxs );
-      VectorSubtract( client->ps.origin, range, mins );
+      int     entityList[ MAX_GENTITIES ];
+      vec3_t  range = { USE_OBJECT_RANGE, USE_OBJECT_RANGE, USE_OBJECT_RANGE };
+      vec3_t  mins, maxs;
+      int     i, num;
 
-      num = trap_EntitiesInBox( mins, maxs, entityList, MAX_GENTITIES );
-      for( i = 0; i < num; i++ )
+      // look for object infront of player
+      AngleVectors( client->ps.viewangles, view, NULL, NULL );
+      VectorMA( client->ps.origin, USE_OBJECT_RANGE, view, point );
+      trap_Trace( &trace, client->ps.origin, NULL, NULL, point, ent->s.number, MASK_SHOT );
+
+      traceEnt = &g_entities[ trace.entityNum ];
+
+      if( traceEnt && traceEnt->buildableTeam == client->ps.stats[ STAT_TEAM ] && traceEnt->use )
+        traceEnt->use( traceEnt, ent, ent ); //other and activator are the same in this context
+      else
       {
-        traceEnt = &g_entities[ entityList[ i ] ];
+        //no entity in front of player - do a small area search
 
-        if( traceEnt && traceEnt->buildableTeam == client->ps.stats[ STAT_TEAM ] && traceEnt->use )
-        {
-          traceEnt->use( traceEnt, ent, ent ); //other and activator are the same in this context
-          break;
-        }
-      }
+        VectorAdd( client->ps.origin, range, maxs );
+        VectorSubtract( client->ps.origin, range, mins );
 
-      if( i == num && client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
-      {
-        if( BG_AlienCanEvolve( client->ps.stats[ STAT_CLASS ],
-                               client->pers.credit, g_alienStage.integer,
-                               IS_WARMUP ) )
+        num = trap_EntitiesInBox( mins, maxs, entityList, MAX_GENTITIES );
+        for( i = 0; i < num; i++ )
         {
-          //no nearby objects and alien - show class menu
-          G_TriggerMenu( ent->client->ps.clientNum, MN_A_INFEST );
+          traceEnt = &g_entities[ entityList[ i ] ];
+
+          if( traceEnt && traceEnt->buildableTeam == client->ps.stats[ STAT_TEAM ] && traceEnt->use )
+          {
+            traceEnt->use( traceEnt, ent, ent ); //other and activator are the same in this context
+            break;
+          }
         }
-        else
+
+        if( i == num && client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
         {
-          //flash frags
-          G_AddEvent( ent, EV_ALIEN_EVOLVE_FAILED, 0 );
+          if( BG_AlienCanEvolve( client->ps.stats[ STAT_CLASS ],
+                client->pers.credit, g_alienStage.integer,
+                IS_WARMUP ) )
+          {
+            //no nearby objects and alien - show class menu
+            G_TriggerMenu( ent->client->ps.clientNum, MN_A_INFEST );
+          }
+          else
+          {
+            //flash frags
+            G_AddEvent( ent, EV_ALIEN_EVOLVE_FAILED, 0 );
+          }
         }
       }
     }

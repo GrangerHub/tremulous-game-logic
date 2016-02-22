@@ -302,6 +302,15 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define HIVE_DIR_CHANGE_PERIOD      500
 #define HIVE_VALUE                  ABVM(HIVE_BP)
 
+#define HOVEL_BP                     0
+#define HOVEL_BT                     15000
+#define HOVEL_HEALTH                 ABHM(375)
+#define HOVEL_REGEN                  20
+#define HOVEL_SPLASHDAMAGE           20
+#define HOVEL_SPLASHRADIUS           200
+#define HOVEL_CREEPSIZE              120
+#define HOVEL_VALUE                  ABVM(HOVEL_BP)
+
 #define TRAPPER_BP                  8
 #define TRAPPER_BT                  12000
 #define TRAPPER_HEALTH              ABHM(50)

@@ -598,6 +598,12 @@ Cmd_Kill_f
 */
 void Cmd_Kill_f( gentity_t *ent )
 {
+  if ( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING )
+  {
+    trap_SendServerCommand( ent-g_entities, "print \"Leave your hovel first.\n\"" );
+    return;
+  }
+
   if( g_cheats.integer )
   {
     ent->client->ps.stats[ STAT_HEALTH ] = ent->health = 0;
@@ -1968,6 +1974,12 @@ void Cmd_Class_f( gentity_t *ent )
       if( ent->client->ps.eFlags & EF_WALLCLIMB )
       {
         G_TriggerMenu( clientNum, MN_A_EVOLVEWALLWALK );
+        return;
+      }
+
+      if ( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING )
+      {
+        G_TriggerMenu( clientNum, MN_A_NOEROOM );
         return;
       }
 
