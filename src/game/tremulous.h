@@ -307,7 +307,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define HOVEL_SPLASHDAMAGE           20
 #define HOVEL_SPLASHRADIUS           200
 #define HOVEL_CREEPSIZE              120
-#define HOVEL_VALUE                  ABVM(HOVEL_BP)
+#define HOVEL_VALUE                  0
 
 #define TRAPPER_BP                  8
 #define TRAPPER_BT                  12000
