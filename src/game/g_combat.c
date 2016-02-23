@@ -198,20 +198,17 @@ float G_RewardAttackers( gentity_t *self )
         continue;
 
       AddScore( player, stageValue );
+      
+      G_AddCreditToClient( player->client, stageValue, qtrue );
 
-      // killing buildables earns score, but not credits
-      if( self->s.eType != ET_BUILDABLE )
+      // killing buildables earns score and credits, but doesn't count towards stage advancement
+      if( ( !IS_WARMUP ) && ( self->s.eType != ET_BUILDABLE ) )
       {
-        G_AddCreditToClient( player->client, stageValue, qtrue );
-
         // add to stage counters
-        if( !IS_WARMUP )
-        {
-          if( player->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
-            alienCredits += stageValue;
-          else if( player->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
-            humanCredits += stageValue;
-        }
+        if( player->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
+          alienCredits += stageValue;
+        else if( player->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
+          humanCredits += stageValue;
       }
     }
     self->credits[ i ] = 0;

@@ -229,8 +229,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define ALIEN_BHLTH_MODIFIER        1.0f
 #define ABHM(h)                     ((int)((float)h*ALIEN_BHLTH_MODIFIER))
-#define ALIEN_BVALUE_MODIFIER       90.0f
-#define ABVM(h)                     ((int)((float)h*ALIEN_BVALUE_MODIFIER))
 
 #define CREEP_BASESIZE              700
 #define CREEP_TIMEOUT               1000
@@ -248,7 +246,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ASPAWN_SPLASHDAMAGE         50
 #define ASPAWN_SPLASHRADIUS         100
 #define ASPAWN_CREEPSIZE            120
-#define ASPAWN_VALUE                ABVM(ASPAWN_BP)
+#define ASPAWN_VALUE                150
 
 #define BARRICADE_BP                8
 #define BARRICADE_BT                20000
@@ -259,7 +257,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define BARRICADE_CREEPSIZE         120
 #define BARRICADE_SHRINKPROP        0.25f
 #define BARRICADE_SHRINKTIMEOUT     500
-#define BARRICADE_VALUE             ABVM(BARRICADE_BP)
+#define BARRICADE_VALUE             0
 
 #define BOOSTER_BP                  12
 #define BOOSTER_BT                  15000
@@ -269,7 +267,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define BOOSTER_SPLASHRADIUS        100
 #define BOOSTER_CREEPSIZE           120
 #define BOOSTER_REGEN_MOD           3.0f
-#define BOOSTER_VALUE               ABVM(BOOSTER_BP)
+#define BOOSTER_VALUE               0
 #define BOOST_TIME                  20000
 #define BOOST_WARN_TIME             15000
 
@@ -284,7 +282,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ACIDTUBE_RANGE              300.0f
 #define ACIDTUBE_REPEAT             300
 #define ACIDTUBE_REPEAT_ANIM        2000
-#define ACIDTUBE_VALUE              ABVM(ACIDTUBE_BP)
+#define ACIDTUBE_VALUE              0
 
 #define HIVE_BP                     12
 #define HIVE_BT                     20000
@@ -300,7 +298,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define HIVE_DMG                    80
 #define HIVE_SPEED                  320.0f
 #define HIVE_DIR_CHANGE_PERIOD      500
-#define HIVE_VALUE                  ABVM(HIVE_BP)
+#define HIVE_VALUE                  0
 
 #define HOVEL_BP                     0
 #define HOVEL_BT                     15000
@@ -320,7 +318,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define TRAPPER_CREEPSIZE           30
 #define TRAPPER_RANGE               400
 #define TRAPPER_REPEAT              1000
-#define TRAPPER_VALUE               ABVM(TRAPPER_BP)
+#define TRAPPER_VALUE               0
 #define LOCKBLOB_SPEED              650.0f
 #define LOCKBLOB_LOCKTIME           5000
 #define LOCKBLOB_DOT                0.85f // max angle = acos( LOCKBLOB_DOT )
@@ -335,7 +333,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define OVERMIND_CREEPSIZE          120
 #define OVERMIND_ATTACK_RANGE       150.0f
 #define OVERMIND_ATTACK_REPEAT      1000
-#define OVERMIND_VALUE              ABVM(30)
+#define OVERMIND_VALUE              300
 
 /*
  * ALIEN misc
@@ -532,8 +530,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define HUMAN_BHLTH_MODIFIER        1.0f
 #define HBHM(h)                     ((int)((float)h*HUMAN_BHLTH_MODIFIER))
-#define HUMAN_BVALUE_MODIFIER       240.0f
-#define HBVM(h)                     ((int)((float)h*(float)HUMAN_BVALUE_MODIFIER)) // remember these are measured in credits not frags (c.f. ALIEN_CREDITS_PER_KILL)
 
 #define REACTOR_BASESIZE            1000
 #define REPEATER_BASESIZE           500
@@ -544,14 +540,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define HSPAWN_HEALTH               HBHM(310)
 #define HSPAWN_SPLASHDAMAGE         50
 #define HSPAWN_SPLASHRADIUS         100
-#define HSPAWN_VALUE                HBVM(HSPAWN_BP)
+#define HSPAWN_VALUE                ALIEN_CREDITS_PER_KILL
 
 #define MEDISTAT_BP                 8
 #define MEDISTAT_BT                 10000
 #define MEDISTAT_HEALTH             HBHM(190)
 #define MEDISTAT_SPLASHDAMAGE       50
 #define MEDISTAT_SPLASHRADIUS       100
-#define MEDISTAT_VALUE              HBVM(MEDISTAT_BP)
+#define MEDISTAT_VALUE              0
 
 #define MGTURRET_BP                 8
 #define MGTURRET_BT                 10000
@@ -567,7 +563,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MGTURRET_SPREAD             200
 #define MGTURRET_DMG                HDM(8)
 #define MGTURRET_SPINUP_TIME        750 // time between target sighted and fire
-#define MGTURRET_VALUE              HBVM(MGTURRET_BP)
+#define MGTURRET_VALUE              0
 
 #define TESLAGEN_BP                 10
 #define TESLAGEN_BT                 15000
@@ -578,7 +574,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define TESLAGEN_K_SCALE            4.0f
 #define TESLAGEN_RANGE              200
 #define TESLAGEN_DMG                HDM(10)
-#define TESLAGEN_VALUE              HBVM(TESLAGEN_BP)
+#define TESLAGEN_VALUE              0
 
 #define DC_BP                       8
 #define DC_BT                       10000
@@ -588,14 +584,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define DC_ATTACK_PERIOD            10000 // how often to spam "under attack"
 #define DC_HEALRATE                 4
 #define DC_RANGE                    1000
-#define DC_VALUE                    HBVM(DC_BP)
+#define DC_VALUE                    0
 
 #define ARMOURY_BP                  10
 #define ARMOURY_BT                  10000
 #define ARMOURY_HEALTH              HBHM(420)
 #define ARMOURY_SPLASHDAMAGE        50
 #define ARMOURY_SPLASHRADIUS        100
-#define ARMOURY_VALUE               HBVM(ARMOURY_BP)
+#define ARMOURY_VALUE               0
 
 #define REACTOR_BP                  0
 #define REACTOR_BT                  20000
@@ -608,14 +604,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define REACTOR_ATTACK_DCC_REPEAT   1000
 #define REACTOR_ATTACK_DCC_RANGE    150.0f
 #define REACTOR_ATTACK_DCC_DAMAGE   40
-#define REACTOR_VALUE               HBVM(30)
+#define REACTOR_VALUE               ( 2 * ALIEN_CREDITS_PER_KILL )
 
 #define REPEATER_BP                 4
 #define REPEATER_BT                 10000
 #define REPEATER_HEALTH             HBHM(250)
 #define REPEATER_SPLASHDAMAGE       50
 #define REPEATER_SPLASHRADIUS       100
-#define REPEATER_VALUE              HBVM(REPEATER_BP)
+#define REPEATER_VALUE              0
 
 /*
  * HUMAN misc
