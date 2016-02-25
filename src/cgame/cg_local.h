@@ -1265,7 +1265,9 @@ typedef struct
   sfxHandle_t jetpackDescendDeactivateSound;
   sfxHandle_t jetpackIdleDeactivateSound;
   sfxHandle_t jetpackAscendDeactivateSound;
+  sfxHandle_t jetpackJumpSound;
   sfxHandle_t jetpackLowFuelSound;
+  sfxHandle_t jetpackNoJumpFuelSound;
   sfxHandle_t jetpackRefuelSound;
 
   qhandle_t   jetPackDescendPS;

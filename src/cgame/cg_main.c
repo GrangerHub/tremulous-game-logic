@@ -812,7 +812,9 @@ static void CG_RegisterSounds( void )
   cgs.media.jetpackDescendDeactivateSound   = trap_S_RegisterSound( "sound/upgrades/jetpack/low_off.wav", qfalse );
   cgs.media.jetpackIdleDeactivateSound      = trap_S_RegisterSound( "sound/upgrades/jetpack/idle_off.wav", qfalse );
   cgs.media.jetpackAscendDeactivateSound    = trap_S_RegisterSound( "sound/upgrades/jetpack/hi_off.wav", qfalse );
+  cgs.media.jetpackJumpSound                = trap_S_RegisterSound( "sound/upgrades/jetpack/jump.wav", qfalse );
   cgs.media.jetpackLowFuelSound             = trap_S_RegisterSound( "sound/upgrades/jetpack/lowfuel.wav", qfalse );
+  cgs.media.jetpackNoJumpFuelSound          = trap_S_RegisterSound( "sound/upgrades/jetpack/nojumpfuel.wav", qfalse );
   cgs.media.jetpackRefuelSound              = trap_S_RegisterSound( "sound/upgrades/jetpack/refuel.wav", qfalse );
 
 

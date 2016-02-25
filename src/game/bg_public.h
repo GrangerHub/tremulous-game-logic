@@ -279,8 +279,9 @@ typedef enum
   PERS_QUEUEPOS,  // position in the spawn queue
   PERS_NEWWEAPON,  // weapon to switch to
   PERS_BP,
-  PERS_MARKEDBP
+  PERS_MARKEDBP,
   // netcode has space for 3 more
+  PERS_JUMPTIME
 } persEnum_t;
 
 #define PS_WALLCLIMBINGFOLLOW   0x00000001
@@ -484,6 +485,7 @@ typedef enum
   EV_FALLING,
 
   EV_JUMP,
+  EV_JETJUMP,
   EV_WATER_TOUCH, // foot touches
   EV_WATER_LEAVE, // foot leaves
   EV_WATER_UNDER, // head touches

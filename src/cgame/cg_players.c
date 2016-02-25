@@ -1413,6 +1413,7 @@ CG_PlayerUpgrade
 static void CG_PlayerUpgrades( centity_t *cent, refEntity_t *torso )
 {
   int           held, active;
+  qboolean      jetjump;
   refEntity_t   jetpack;
   refEntity_t   battpack;
   refEntity_t   flash;
@@ -1420,6 +1421,8 @@ static void CG_PlayerUpgrades( centity_t *cent, refEntity_t *torso )
 
   held = es->modelindex;
   active = es->modelindex2;
+
+  jetjump = ( cent->jetPackJumpTime + 100 > cg.time && !( active & ( 1 << UP_JETPACK ) ) );
 
   if( held & ( 1 << UP_JETPACK ) )
   {
@@ -1438,7 +1441,7 @@ static void CG_PlayerUpgrades( centity_t *cent, refEntity_t *torso )
 
     trap_R_AddRefEntityToScene( &jetpack );
 
-    if( active & ( 1 << UP_JETPACK ) )
+    if( jetjump || active & ( 1 << UP_JETPACK ) )
     {
       if( es->pos.trDelta[ 2 ] > 10.0f )
       {
@@ -1451,8 +1454,9 @@ static void CG_PlayerUpgrades( centity_t *cent, refEntity_t *torso )
           cent->jetPackState = JPS_ASCENDING;
         }
 
-        trap_S_AddLoopingSound( cent->currentState.number, cent->lerpOrigin,
-                                vec3_origin, cgs.media.jetpackAscendSound );
+        if( !jetjump )
+          trap_S_AddLoopingSound( cent->currentState.number, cent->lerpOrigin,
+                                  vec3_origin, cgs.media.jetpackAscendSound );
       }
       else if( es->pos.trDelta[ 2 ] < -10.0f )
       {
@@ -1465,8 +1469,9 @@ static void CG_PlayerUpgrades( centity_t *cent, refEntity_t *torso )
           cent->jetPackState = JPS_DESCENDING;
         }
 
-        trap_S_AddLoopingSound( cent->currentState.number, cent->lerpOrigin,
-                                vec3_origin, cgs.media.jetpackDescendSound );
+        if( !jetjump )
+          trap_S_AddLoopingSound( cent->currentState.number, cent->lerpOrigin,
+                                  vec3_origin, cgs.media.jetpackDescendSound );
       }
       else
       {
@@ -1479,8 +1484,9 @@ static void CG_PlayerUpgrades( centity_t *cent, refEntity_t *torso )
           cent->jetPackState = JPS_HOVERING;
         }
 
-        trap_S_AddLoopingSound( cent->currentState.number, cent->lerpOrigin,
-                                vec3_origin, cgs.media.jetpackIdleSound );
+        if( !jetjump )
+          trap_S_AddLoopingSound( cent->currentState.number, cent->lerpOrigin,
+                                  vec3_origin, cgs.media.jetpackIdleSound );
       }
 
       memset( &flash, 0, sizeof( flash ) );

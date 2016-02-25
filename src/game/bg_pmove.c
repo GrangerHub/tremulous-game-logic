@@ -45,6 +45,9 @@ float pm_waterfriction = 1.0f;
 float pm_flightfriction = 6.0f;
 float pm_spectatorfriction = 5.0f;
 
+float cpm_pm_jump_z = 0.5;
+float pm_cliptime = 200;
+
 int   c_pmove = 0;
 
 /*
@@ -403,7 +406,8 @@ static float PM_CmdScale( usercmd_t *cmd, qboolean zFlight )
     if( !zFlight )
     {
       //must have have stamina to jump
-      if( pm->ps->stats[ STAT_STAMINA ] < STAMINA_SLOW_LEVEL + STAMINA_JUMP_TAKE )
+      if( pm->ps->stats[ STAT_STAMINA ] < STAMINA_SLOW_LEVEL + STAMINA_JUMP_TAKE &&
+          ( !BG_InventoryContainsUpgrade( UP_JETPACK, pm->ps->stats ) || pm->ps->stats[ STAT_FUEL ] < JETPACK_FUEL_JUMP ) )
         cmd->upmove = 0;
     }
 
@@ -740,6 +744,8 @@ PM_CheckJump
 static qboolean PM_CheckJump( void )
 {
   vec3_t normal;
+  qboolean jetjump;
+  int jumpvel;
 
   if( pm->ps->groundEntityNum == ENTITYNUM_NONE )
     return qfalse;
@@ -759,7 +765,8 @@ static qboolean PM_CheckJump( void )
     return qfalse;
 
   if( ( pm->ps->stats[ STAT_TEAM ] == TEAM_HUMANS ) &&
-      ( pm->ps->stats[ STAT_STAMINA ] < STAMINA_SLOW_LEVEL + STAMINA_JUMP_TAKE ) )
+      ( pm->ps->stats[ STAT_STAMINA ] < STAMINA_SLOW_LEVEL + STAMINA_JUMP_TAKE ) &&
+      ( !BG_InventoryContainsUpgrade( UP_JETPACK, pm->ps->stats ) || pm->ps->stats[ STAT_FUEL ] < JETPACK_FUEL_JUMP ) )
     return qfalse;
 
   //no bunny hopping off a dodge
@@ -793,9 +800,35 @@ static qboolean PM_CheckJump( void )
   pml.walking = qfalse;
   pm->ps->pm_flags |= PMF_JUMP_HELD;
 
-  // take some stamina off
+  // true if using the jetpack to jump (doesn't use stamina, only fuel)
+  jetjump = ( BG_InventoryContainsUpgrade( UP_JETPACK, pm->ps->stats ) &&
+              pm->ps->stats[ STAT_FUEL ] >= JETPACK_FUEL_JUMP );
+
   if( pm->ps->stats[ STAT_TEAM ] == TEAM_HUMANS )
-    pm->ps->stats[ STAT_STAMINA ] -= STAMINA_JUMP_TAKE;
+  {
+    if( !jetjump )
+      pm->ps->stats[ STAT_STAMINA ] -= STAMINA_JUMP_TAKE;
+    else
+     pm->ps->stats[ STAT_FUEL ] -= JETPACK_FUEL_JUMP;
+  }
+
+//Alright, let's start the jumping process.
+  jumpvel = BG_Class( pm->ps->stats[ STAT_CLASS ] )->jumpMagnitude;
+
+	 //ZdrytchX: check for double-jump
+  if(pm->ps->stats[ STAT_STAMINA ] > 0 //derp doesn't have STAMINA_MIN_TO_JUMP :/
+    || ( pm->ps->stats[ STAT_TEAM ] == TEAM_ALIENS
+    && !BG_ClassHasAbility( pm->ps->stats[ STAT_CLASS ], SCA_WALLJUMPER ) ) )
+    //Trust me. You don't want marauders flying out of the map from 3 wall jumps.
+		if (cpm_pm_jump_z) {
+			if (pm->ps->persistant[PERS_JUMPTIME] > 0) {
+				jumpvel += (cpm_pm_jump_z * BG_Class( pm->ps->stats[ STAT_CLASS ] )->jumpMagnitude);
+				//Adding requires me to multiply by class vel again
+			}
+			pm->ps->persistant[PERS_JUMPTIME] = 400;
+			pm->ps->pm_time = pm_cliptime; //clip through walls with the same timer as walljump
+	  }
+
 
   pm->ps->groundEntityNum = ENTITYNUM_NONE;
 
@@ -808,7 +841,10 @@ static qboolean PM_CheckJump( void )
   VectorMA( pm->ps->velocity, BG_Class( pm->ps->stats[ STAT_CLASS ] )->jumpMagnitude,
             normal, pm->ps->velocity );
 
-  PM_AddEvent( EV_JUMP );
+  if( jetjump )
+    PM_AddEvent( EV_JETJUMP );
+  else
+    PM_AddEvent( EV_JUMP );
 
   if( pm->cmd.forwardmove >= 0 )
   {

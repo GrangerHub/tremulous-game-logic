@@ -795,15 +795,22 @@ static void CG_NewText( char *text, playerState_t *ps )
     if( ps->persistant[ PERS_SPECSTATE ] == SPECTATOR_NOT &&
         !( ps->pm_flags & PMF_FOLLOW ) &&
         ps->stats[ STAT_HEALTH ] > 0 )
-    {
       if( BG_InventoryContainsUpgrade( UP_JETPACK, ps->stats ) )
       {
-        if( ps->stats[ STAT_FUEL ] <= JETPACK_FUEL_LOW )
+        if( ps->stats[ STAT_FUEL ] > JETPACK_FUEL_JUMP )
         {
+          Q_strcat( text, MAX_TUTORIAL_TEXT,
+                     va( "Press %s to perform a jetpack-aided jump. It uses fuel instead of stamina\n",
+                         CG_KeyNameForCommand( "+moveup" ) ) );
+        }
+       if( BG_InventoryContainsUpgrade( UP_JETPACK, ps->stats ) )
+       {
+         if( ps->stats[ STAT_FUEL ] <= JETPACK_FUEL_LOW )
+         {
           Q_strcat( text, MAX_TUTORIAL_TEXT,
                     va( "You are running low on jet fuel. Find an Armoury and press %s to refuel\n",
                         CG_KeyNameForCommand( "buy ammo" ) ) );
-        }
+         }
         else if( ps->stats[ STAT_FUEL ] <= 0 )
         {
           Q_strcat( text, MAX_TUTORIAL_TEXT,
