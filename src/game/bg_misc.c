@@ -2215,7 +2215,9 @@ static const weaponAttributes_t bg_weapons[ ] =
     "Lucifer Cannon",     //char      *humanName;
     "Blaster technology scaled up to deliver devastating power. "
       "Primary fire must be charged before firing. It has a quick "
-      "secondary attack that does not require charging.",
+      "secondary attack that does not require charging. "
+      "Primary fire's charge can be reduced before firing if the "
+      "secondary attack is held down simultaneously with the primary attack.",
     LCANNON_AMMO,         //int       maxAmmo;
     0,                    //int       maxClips;
     qfalse,               //int       infiniteAmmo;

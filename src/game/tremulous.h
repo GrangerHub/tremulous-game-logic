@@ -451,23 +451,23 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define PRIFLE_SIZE                 5
 
 #define LCANNON_PRICE               600
-#define LCANNON_AMMO                80
+#define LCANNON_AMMO                90
 #define LCANNON_K_SCALE             1.0f
 #define LCANNON_REPEAT              500
 #define LCANNON_RELOAD              0
 #define LCANNON_DAMAGE              HDM(265)
 #define LCANNON_RADIUS              150      // primary splash damage radius
 #define LCANNON_SIZE                5        // missile bounding box radius
-#define LCANNON_SECONDARY_DAMAGE    HDM(30)
+#define LCANNON_SECONDARY_DAMAGE    HDM(27)
 #define LCANNON_SECONDARY_RADIUS    75       // secondary splash damage radius
-#define LCANNON_SECONDARY_SPEED     1400
+#define LCANNON_SECONDARY_SPEED     700
 #define LCANNON_SECONDARY_RELOAD    2000
-#define LCANNON_SECONDARY_REPEAT    1000
-#define LCANNON_SPEED               700
-#define LCANNON_CHARGE_TIME_MAX     3000
-#define LCANNON_CHARGE_TIME_MIN     100
-#define LCANNON_CHARGE_TIME_WARN    2000
-#define LCANNON_CHARGE_AMMO         10       // ammo cost of a full charge shot
+#define LCANNON_SECONDARY_REPEAT    500
+#define LCANNON_SPEED               350
+#define LCANNON_CHARGE_TIME_MAX     2000
+#define LCANNON_CHARGE_TIME_MIN     400
+#define LCANNON_CHARGE_TIME_WARN    ( LCANNON_CHARGE_TIME_MAX - ( 2000 / 3 ) )
+#define LCANNON_CHARGE_AMMO         12       // ammo cost of a full charge shot
 
 #define HBUILD_PRICE                0
 #define HBUILD_REPEAT               1000

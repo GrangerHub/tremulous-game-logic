@@ -2920,11 +2920,14 @@ static void PM_Weapon( void )
 
   if( pm->ps->weapon == WP_LUCIFER_CANNON )
   {
-    // Charging up
+    // Charging up and charging down
     if( !pm->ps->weaponTime &&
         ( pm->cmd.buttons & BUTTON_ATTACK ) )
     {
-      pm->ps->stats[ STAT_MISC ] += pml.msec;
+      if( pm->cmd.buttons & BUTTON_ATTACK2 )
+        pm->ps->stats[ STAT_MISC ] -= pml.msec;
+      else
+        pm->ps->stats[ STAT_MISC ] += pml.msec;
       if( pm->ps->stats[ STAT_MISC ] >= LCANNON_CHARGE_TIME_MAX )
         pm->ps->stats[ STAT_MISC ] = LCANNON_CHARGE_TIME_MAX;
       if( pm->ps->stats[ STAT_MISC ] > pm->ps->ammo * LCANNON_CHARGE_TIME_MAX /
