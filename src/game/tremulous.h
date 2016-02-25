@@ -118,20 +118,20 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL3_BOUNCEBALL_REGEN     12500    // msec until new barb
 
 #define LEVEL4_CLAW_DMG             ADM(100)
-#define LEVEL4_CLAW_RANGE           100.0f
-#define LEVEL4_CLAW_WIDTH           14.0f
+#define LEVEL4_CLAW_RANGE           128.0f
+#define LEVEL4_CLAW_WIDTH           20.0f
 #define LEVEL4_CLAW_HEIGHT          20.0f
-#define LEVEL4_CLAW_REPEAT          800
+#define LEVEL4_CLAW_REPEAT          750
 #define LEVEL4_CLAW_K_SCALE         1.0f
 
-#define LEVEL4_TRAMPLE_DMG             ADM(111)
+#define LEVEL4_TRAMPLE_DMG             ADM(110)
 #define LEVEL4_TRAMPLE_SPEED           2.0f
-#define LEVEL4_TRAMPLE_CHARGE_MIN      375   // minimum msec to start a charge
-#define LEVEL4_TRAMPLE_CHARGE_MAX      1000  // msec to maximum charge stored
+#define LEVEL4_TRAMPLE_CHARGE_MIN      750   // minimum msec to start a charge
+#define LEVEL4_TRAMPLE_CHARGE_MAX      1500  // msec to maximum charge stored
 #define LEVEL4_TRAMPLE_CHARGE_TRIGGER  3000  // msec charge starts on its own
 #define LEVEL4_TRAMPLE_DURATION        3000  // msec trample lasts on full charge
 #define LEVEL4_TRAMPLE_STOP_PENALTY    1     // charge lost per msec when stopped
-#define LEVEL4_TRAMPLE_REPEAT          100   // msec before a trample will rehit a player
+#define LEVEL4_TRAMPLE_REPEAT          1000   // msec before a trample will rehit a player
 
 #define LEVEL4_CRUSH_DAMAGE_PER_V      0.5f  // damage per falling velocity
 #define LEVEL4_CRUSH_DAMAGE            120   // to players only
@@ -209,7 +209,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define LEVEL4_SPEED                1.2f
 #define LEVEL4_VALUE                AVM(960)
-#define LEVEL4_HEALTH               AHM(350)
+#define LEVEL4_HEALTH               AHM(400)
 #define LEVEL4_REGEN                (0.025f * LEVEL4_HEALTH)
 #define LEVEL4_COST                 2
 
