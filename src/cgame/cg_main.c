@@ -236,6 +236,10 @@ vmCvar_t  cg_emoticons;
 
 vmCvar_t  cg_chatTeamPrefix;
 
+vmCvar_t  cg_fuelInfoX;
+vmCvar_t  cg_fuelInfoY;
+vmCvar_t  cg_fuelInfoScale;
+
 typedef struct
 {
   vmCvar_t  *vmCvar;
@@ -384,7 +388,11 @@ static cvarTable_t cvarTable[ ] =
 
   { &cg_emoticons, "cg_emoticons", "1", CVAR_LATCH|CVAR_ARCHIVE},
 
-  { &cg_chatTeamPrefix, "cg_chatTeamPrefix", "1", CVAR_ARCHIVE}
+  { &cg_chatTeamPrefix, "cg_chatTeamPrefix", "1", CVAR_ARCHIVE},
+
+  { &cg_fuelInfoX, "cg_fuelInfoX" ,"0", CVAR_ARCHIVE },
+  { &cg_fuelInfoY, "cg_fuelInfoY" ,"150", CVAR_ARCHIVE },
+  { &cg_fuelInfoScale, "cg_fuelInfoScale" ,"0.5", CVAR_ARCHIVE }
 };
 
 static size_t cvarTableSize = ARRAY_LEN( cvarTable );
@@ -798,9 +806,15 @@ static void CG_RegisterSounds( void )
     cgs.gameSounds[ i ] = trap_S_RegisterSound( soundName, qfalse );
   }
 
-  cgs.media.jetpackDescendSound     = trap_S_RegisterSound( "sound/upgrades/jetpack/low.wav", qfalse );
-  cgs.media.jetpackIdleSound        = trap_S_RegisterSound( "sound/upgrades/jetpack/idle.wav", qfalse );
-  cgs.media.jetpackAscendSound      = trap_S_RegisterSound( "sound/upgrades/jetpack/hi.wav", qfalse );
+  cgs.media.jetpackDescendSound             = trap_S_RegisterSound( "sound/upgrades/jetpack/low.wav", qfalse );
+  cgs.media.jetpackIdleSound                = trap_S_RegisterSound( "sound/upgrades/jetpack/idle.wav", qfalse );
+  cgs.media.jetpackAscendSound              = trap_S_RegisterSound( "sound/upgrades/jetpack/hi.wav", qfalse );
+  cgs.media.jetpackDescendDeactivateSound   = trap_S_RegisterSound( "sound/upgrades/jetpack/low_off.wav", qfalse );
+  cgs.media.jetpackIdleDeactivateSound      = trap_S_RegisterSound( "sound/upgrades/jetpack/idle_off.wav", qfalse );
+  cgs.media.jetpackAscendDeactivateSound    = trap_S_RegisterSound( "sound/upgrades/jetpack/hi_off.wav", qfalse );
+  cgs.media.jetpackLowFuelSound             = trap_S_RegisterSound( "sound/upgrades/jetpack/lowfuel.wav", qfalse );
+  cgs.media.jetpackRefuelSound              = trap_S_RegisterSound( "sound/upgrades/jetpack/refuel.wav", qfalse );
+
 
   cgs.media.medkitUseSound          = trap_S_RegisterSound( "sound/upgrades/medkit/medkit.wav", qfalse );
 

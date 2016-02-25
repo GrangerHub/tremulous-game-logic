@@ -232,7 +232,8 @@ typedef enum
   STAT_MISC,      // for uh...misc stuff (pounce, trample, lcannon)
   STAT_BUILDABLE, // which ghost model to display for building
   STAT_FALLDIST,  // the distance the player fell
-  STAT_VIEWLOCK   // direction to lock the view in
+  STAT_VIEWLOCK,  // direction to lock the view in
+  STAT_FUEL       // jetpacks
   // netcode has space for 2 more
 } statIndex_t;
 
@@ -554,7 +555,10 @@ typedef enum
   EV_MGTURRET_SPINUP, // turret spinup sound should play
 
   EV_RPTUSE_SOUND,    // trigger a sound
-  EV_LEV2_ZAP
+  EV_LEV2_ZAP,
+
+  EV_JETPACK_DEACTIVATE,
+  EV_JETPACK_REFUEL
 } entity_event_t;
 
 typedef enum

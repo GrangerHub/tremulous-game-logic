@@ -2875,7 +2875,10 @@ char *eventnames[ ] =
   "EV_MGTURRET_SPINUP", // trigger a sound
 
   "EV_RPTUSE_SOUND",    // trigger a sound
-  "EV_LEV2_ZAP"
+  "EV_LEV2_ZAP",
+
+  "EV_JETPACK_DEACTIVATE",
+  "EV_JETPACK_REFUEL"
 };
 
 /*
@@ -3256,7 +3259,8 @@ Activates an upgrade
 */
 void BG_ActivateUpgrade( int item, int stats[ ] )
 {
-  stats[ STAT_ACTIVEITEMS ] |= ( 1 << item );
+  if( item != UP_JETPACK || stats[ STAT_FUEL ] >  0)
+    stats[ STAT_ACTIVEITEMS ] |= ( 1 << item );
 }
 
 /*

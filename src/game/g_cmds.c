@@ -508,6 +508,12 @@ void Cmd_Give_f( gentity_t *ent )
         BG_InventoryContainsUpgrade( UP_BATTPACK, client->ps.stats ) )
       client->ps.ammo = (int)( (float)client->ps.ammo * BATTPACK_MODIFIER );
   }
+
+  if( give_all || Q_stricmp( name, "fuel" ) == 0 )
+  {
+    if( BG_InventoryContainsUpgrade( UP_JETPACK, ent->client->ps.stats ) )
+      ent->client->ps.stats[ STAT_FUEL ] = JETPACK_FUEL_FULL;
+  }
 }
 
 
@@ -2405,7 +2411,15 @@ void Cmd_Buy_f( gentity_t *ent )
     }
 
     if( upgrade == UP_AMMO )
-      G_GiveClientMaxAmmo( ent, energyOnly );
+    {
+       G_GiveClientMaxAmmo( ent, energyOnly );
+      if( !energyOnly && BG_InventoryContainsUpgrade( UP_JETPACK, ent->client->ps.stats ) &&
+          ent->client->ps.stats[ STAT_FUEL ] < JETPACK_FUEL_FULL )
+      {
+        G_AddEvent( ent, EV_JETPACK_REFUEL, 0) ;
+        ent->client->ps.stats[ STAT_FUEL ] = JETPACK_FUEL_FULL;
+      }
+    }
     else
     {
       if( upgrade == UP_BATTLESUIT )
@@ -2422,6 +2436,8 @@ void Cmd_Buy_f( gentity_t *ent )
         ent->client->pers.classSelection = PCL_HUMAN_BSUIT;
         ent->client->ps.eFlags ^= EF_TELEPORT_BIT;
       }
+      else if( upgrade == UP_JETPACK )
+       ent->client->ps.stats[ STAT_FUEL ] = JETPACK_FUEL_FULL;
 
       //add to inventory
       BG_AddUpgradeToInventory( upgrade, ent->client->ps.stats );

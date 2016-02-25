@@ -42,7 +42,7 @@ static bind_t bindings[ ] =
   { "+attack",        "Primary Attack",         { -1, -1 } },
   { "+button5",       "Secondary Attack",       { -1, -1 } },
   { "reload",         "Reload",                 { -1, -1 } },
-  { "buy ammo",       "Buy Ammo",               { -1, -1 } },
+  { "buy ammo",       "Buy Ammo / Refuel", { -1, -1 } },
   { "itemact medkit", "Use Medkit",             { -1, -1 } },
   { "+button7",       "Use Structure/Evolve",   { -1, -1 } },
   { "deconstruct",    "Deconstruct Structure",  { -1, -1 } },
@@ -786,4 +786,31 @@ const char *CG_TutorialText( void )
   }
 
   return text;
+}
+
+static void CG_NewText( char *text, playerState_t *ps )
+{
+  if( !cg.intermissionStarted && !cg.demoPlayback )
+  {
+    if( ps->persistant[ PERS_SPECSTATE ] == SPECTATOR_NOT &&
+        !( ps->pm_flags & PMF_FOLLOW ) &&
+        ps->stats[ STAT_HEALTH ] > 0 )
+    {
+      if( BG_InventoryContainsUpgrade( UP_JETPACK, ps->stats ) )
+      {
+        if( ps->stats[ STAT_FUEL ] <= JETPACK_FUEL_LOW )
+        {
+          Q_strcat( text, MAX_TUTORIAL_TEXT,
+                    va( "You are running low on jet fuel. Find an Armoury and press %s to refuel\n",
+                        CG_KeyNameForCommand( "buy ammo" ) ) );
+        }
+        else if( ps->stats[ STAT_FUEL ] <= 0 )
+        {
+          Q_strcat( text, MAX_TUTORIAL_TEXT,
+                    va( "You are out of jet fuel. You can no longer fly. Find an Armoury and press %s to refuel\n",
+                        CG_KeyNameForCommand( "buy ammo" ) ) );
+        }
+      }
+    }
+  }
 }

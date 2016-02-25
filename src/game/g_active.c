@@ -702,6 +702,21 @@ void ClientTimerActions( gentity_t *ent, int msec )
           ent->client->ps.stats[ STAT_STATE ] &= ~SS_HEALING_2X;
       }
     }
+
+    //use fuel
+    if( BG_InventoryContainsUpgrade( UP_JETPACK, ent->client->ps.stats ) && 
+        BG_UpgradeIsActive( UP_JETPACK, ent->client->ps.stats ) && 
+        ent->client->ps.stats[ STAT_FUEL ] > 0 )
+    {
+      ent->client->ps.stats[ STAT_FUEL ] -= JETPACK_FUEL_USAGE;
+      if( ent->client->ps.stats[ STAT_FUEL ] <= 0 )
+      {
+        ent->client->ps.stats[ STAT_FUEL ] = 0;
+        BG_DeactivateUpgrade( UP_JETPACK, client->ps.stats );
+        BG_AddPredictableEventToPlayerstate( EV_JETPACK_DEACTIVATE, 0, &client->ps );
+      }
+    }
+
   }
 
   while( client->time1000 >= 1000 )
@@ -1518,9 +1533,9 @@ void ClientThink_real( gentity_t *ent )
         client->ps.pm_type = PM_NORMAL;
     }
 
-    //switch jetpack off if no reactor
-    if( !G_Reactor( ) )
-      BG_DeactivateUpgrade( UP_JETPACK, client->ps.stats );
+    //[DISABLED]switch jetpack off if no reactor
+   // if( !G_Reactor( ) )
+     // BG_DeactivateUpgrade( UP_JETPACK, client->ps.stats );
   }
 
   // set up for pmove
