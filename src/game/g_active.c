@@ -727,17 +727,12 @@ void ClientTimerActions( gentity_t *ent, int msec )
     }
 
     // turn off life support when a team admits defeat
-    if( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
-        level.surrenderTeam == TEAM_ALIENS )
+    if( client->ps.stats[ STAT_TEAM ] == level.surrenderTeam )
     {
-      G_Damage( ent, NULL, NULL, NULL, NULL,
-        BG_Class( client->ps.stats[ STAT_CLASS ] )->regenRate,
-        DAMAGE_NO_ARMOR, MOD_SUICIDE );
-    }
-    else if( client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
-      level.surrenderTeam == TEAM_HUMANS )
-    {
-      G_Damage( ent, NULL, NULL, NULL, NULL, 5, DAMAGE_NO_ARMOR, MOD_SUICIDE );
+      int dmg = 5;
+      if ( BG_ClassHasAbility(client->ps.stats[STAT_CLASS], SCA_REGEN) )
+          dmg = BG_Class(client->ps.stats[STAT_CLASS])->regenRate;
+      G_Damage( ent, NULL, NULL, NULL, NULL, dmg, DAMAGE_NO_ARMOR, MOD_SUICIDE );
     }
 
     // lose some voice enthusiasm
