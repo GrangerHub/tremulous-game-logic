@@ -7,7 +7,7 @@
 //-------------------------------------------------------------------------
 // Player models
 //-------------------------------------------------------------------------
-
+//
 static qboolean
 _is_playermodel_uniq(const char *model)
 {
@@ -31,7 +31,7 @@ G_AddPlayerModel(const char *model)
     if (!strcmp(model, "human_bsuit"))
         return;
 
-    level.playerModel[ level.playerModelCount ] = G_CopyString(model); 
+    level.playerModel[ level.playerModelCount ] = G_CopyString(model);
     level.playerModelCount++;
 }
 
@@ -71,6 +71,11 @@ void G_InitPlayerModel(void)
 
         G_AddPlayerModel(start);
     }
+}
+
+qboolean G_IsValidPlayerModel(const char *model)
+{
+    return !_is_playermodel_uniq(model);
 }
 
 void G_FreePlayerModel(void)

@@ -2911,8 +2911,7 @@ qboolean G_admin_transform( gentity_t *ent )
   char err[ MAX_STRING_CHARS ];
   char userinfo[ MAX_INFO_STRING ];
   gentity_t *victim = NULL;
-  int i;
-  qboolean found = qfalse;
+  qboolean found;
 
   if (trap_Argc() < 3)
   {
@@ -2943,14 +2942,7 @@ qboolean G_admin_transform( gentity_t *ent )
     return qfalse;
   }
 
-  for ( i = 0; i < level.playerModelCount; i++ )
-  {
-    if ( !strcmp(modelname, level.playerModel[i]) )
-    {
-      found = qtrue;
-      break;
-    }
-  }
+  found = G_IsValidPlayerModel(modelname);
 
   if (!found)
   {

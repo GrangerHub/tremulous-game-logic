@@ -912,19 +912,10 @@ char *ClientUserinfoChanged( int clientNum, qboolean forceName )
   if ( g_pimpHuman.integer )
   if ( client->pers.teamSelection == TEAM_HUMANS )
   {
-    int i;
-    qboolean found = qfalse;
+    qboolean found;
 
     s = Info_ValueForKey(userinfo, "model");
-
-    for ( i = 0; i < level.playerModelCount; i++ )
-    {
-      if ( !strcmp(s, level.playerModel[i]) )
-      {
-        found = qtrue;
-        break;
-      }
-    }
+    found = G_IsValidPlayerModel(s);
 
     if ( !found )
       s = NULL;

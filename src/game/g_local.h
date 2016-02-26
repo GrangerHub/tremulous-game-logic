@@ -1024,7 +1024,6 @@ void G_EndVote( team_t team, qboolean cancel );
 void G_CheckVote( team_t team );
 void LogExit( const char *string );
 int  G_TimeTilSuddenDeath( void );
-void G_GetPlayerModelSkins( const char *modelname, char skins[MAX_PLAYER_MODEL][ 64 ], int maxskins, int *numskins );
 
 //
 // g_client.c
@@ -1098,6 +1097,7 @@ void G_namelog_cleanup( void );
 //
 void G_InitPlayerModel(void);
 void G_FreePlayerModel(void);
+qboolean G_IsValidPlayerModel(const char *model);
 void G_GetPlayerModelSkins( const char *modelname, char skins[MAX_PLAYER_MODEL][ 64 ], int maxskins, int *numskins );
 char *GetSkin( char *modelname, char *wish );
 
