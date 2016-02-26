@@ -463,7 +463,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LCANNON_SECONDARY_SPEED     700
 #define LCANNON_SECONDARY_RELOAD    2000
 #define LCANNON_SECONDARY_REPEAT    500
-#define LCANNON_SPEED               350
+#define LCANNON_SPEED_MIN           350
 #define LCANNON_CHARGE_TIME_MAX     2000
 #define LCANNON_CHARGE_TIME_MIN     400
 #define LCANNON_CHARGE_TIME_WARN    ( LCANNON_CHARGE_TIME_MAX - ( 2000 / 3 ) )
