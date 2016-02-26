@@ -667,6 +667,8 @@ typedef struct
   int unlaggedTimes[ MAX_UNLAGGED_MARKERS ];
 
   char              layout[ MAX_QPATH ];
+  int               builtInLayoutCount;
+  char              *builtInLayoutItem[ MAX_BUILDLOG ];
 
   team_t            surrenderTeam;
   int               lastTeamImbalancedTime;
@@ -821,6 +823,8 @@ void              G_BuildLogAuto( gentity_t *actor, gentity_t *buildable, buildF
 void              G_BuildLogRevert( int id );
 void              G_RemoveRangeMarkerFrom( gentity_t *self );
 void              G_UpdateBuildableRangeMarkers( void );
+void              G_CacheBuiltinLayout( void );
+qboolean          G_LayoutReset( void );
 
 //
 // g_utils.c
@@ -1106,8 +1110,16 @@ extern  vmCvar_t  g_maxNameChanges;
 
 extern  vmCvar_t  g_timelimit;
 extern  vmCvar_t  g_suddenDeathTime;
-extern  vmCvar_t  g_warmup;
+
 extern  vmCvar_t  g_doWarmup;
+extern  vmCvar_t  g_warmup;
+extern  vmCvar_t  g_warmupReadyThreshold;
+extern  vmCvar_t  g_warmupTimeout1;
+extern  vmCvar_t  g_warmupTimeout1Trigger;
+extern  vmCvar_t  g_warmupTimeout2;
+extern  vmCvar_t  g_warmupTimeout2Trigger;
+extern  vmCvar_t  g_warmupBuildableRespawnTime;
+extern  vmCvar_t  g_warmupDefensiveBuildableRespawnTime;
 
 #define IS_WARMUP  ( g_doWarmup.integer && g_warmup.integer )
 

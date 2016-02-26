@@ -45,14 +45,17 @@ gclient_t   g_clients[ MAX_CLIENTS ];
 
 vmCvar_t  g_timelimit;
 vmCvar_t  g_suddenDeathTime;
-vmCvar_t  g_warmup;
+
 vmCvar_t  g_doWarmup;
+vmCvar_t  g_warmup;
 vmCvar_t  g_warmupReadyThreshold;
 vmCvar_t  g_warmupTimeout1;
 vmCvar_t  g_warmupTimeout1Trigger;
 vmCvar_t  g_warmupTimeout2;
 vmCvar_t  g_warmupTimeout2Trigger;
-vmCvar_t  g_warmupDefensiveRespawnTime;
+vmCvar_t  g_warmupBuildableRespawnTime;
+vmCvar_t  g_warmupDefensiveBuildableRespawnTime;
+
 vmCvar_t  g_friendlyFire;
 vmCvar_t  g_friendlyBuildableFire;
 vmCvar_t  g_dretchPunt;
@@ -182,7 +185,8 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_warmupTimeout1Trigger, "g_warmupTimeout1Trigger", "4", CVAR_ARCHIVE, 0, qtrue },
   { &g_warmupTimeout2, "g_warmupTimeout2", "60", CVAR_ARCHIVE, 0, qtrue },
   { &g_warmupTimeout2Trigger, "g_warmupTimeout2Trigger", "66", CVAR_ARCHIVE, 0, qtrue },
-  { &g_warmupDefensiveRespawnTime, "g_warmupDefensiveRespawnTime", "30", CVAR_ARCHIVE, 0, qtrue },
+  { &g_warmupBuildableRespawnTime, "g_warmupBuildableRespawnTime", "10", CVAR_ARCHIVE, 0, qtrue },
+  { &g_warmupDefensiveBuildableRespawnTime, "g_warmupDefensiveBuildableRespawnTime", "30", CVAR_ARCHIVE, 0, qtrue },
 
   // noset vars
   { NULL, "gamename", GAME_VERSION , CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
@@ -723,6 +727,10 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
   level.suddenDeathBeginTime = g_suddenDeathTime.integer * 60000;
 
   G_Printf( "-----------------------------------\n" );
+
+  //
+  if( !Q_stricmp( level.layout, "*BUILTIN*" ) )
+    G_CacheBuiltinLayout( );
 
   // So the server counts the spawns without a client attached
   G_CountSpawns( );
@@ -2054,11 +2062,11 @@ void CheckExitRules( void )
     // We do not want any team to win in warmup
     if( IS_WARMUP )
     {
-      if( level.lastLayoutReset > ( level.time - 5000 ) )
+      if( !G_LayoutReset( ) )
         return;
-      // FIXME: this is awfully ugly
-      G_LevelRestart( qfalse );
-      trap_SendServerCommand( -1, "print \"A mysterious force restores balance in the universe.\n\"");
+
+      trap_SendServerCommand( -1, "cp \"A mysterious force restores balance in the universe.\n\"");
+
       return;
     }
 
@@ -2076,11 +2084,11 @@ void CheckExitRules( void )
     // We do not want any team to win in warmup
     if( IS_WARMUP )
     {
-      if( level.lastLayoutReset > ( level.time - 5000 ) )
+      if( !G_LayoutReset( ) )
         return;
-      // FIXME: this is awfully ugly
-      G_LevelRestart( qfalse );
-      trap_SendServerCommand( -1, "print \"A mysterious force restores balance in the universe.\n\"");
+
+      trap_SendServerCommand( -1, "cp \"A mysterious force restores balance in the universe.\n\"");
+
       return;
     }
 

@@ -1044,8 +1044,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
         return;
       }
 
-      // check if friendly fire has been disabled
-      if( !g_friendlyFire.integer )
+      // check if friendly fire has been disabled or if Warmup is in progress
+      if( !g_friendlyFire.integer || IS_WARMUP )
       {
         return;
       }
@@ -1056,7 +1056,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
         mod != MOD_REPLACE && mod != MOD_NOCREEP )
     {
       if( targ->buildableTeam == attacker->client->pers.teamSelection &&
-        !g_friendlyBuildableFire.integer )
+        ( !g_friendlyBuildableFire.integer || IS_WARMUP ) )
       {
         return;
       }
