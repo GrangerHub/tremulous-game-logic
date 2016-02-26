@@ -120,11 +120,6 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "[^3dir^7] [^3extension^7] [^3filter^7]"
     },
 
-    {"gamevar", G_admin_gamevar, qtrue, "gamevar",
-      "Change server side cvars",
-      "[^3cvar^7] [^3value^7]"
-    },
-
     {"kick", G_admin_kick, qfalse, "kick",
       "kick a player with an optional reason",
       "[^3name|slot#^7] (^5reason^7)"
@@ -4190,54 +4185,6 @@ qboolean G_admin_flag( gentity_t *ent )
     admin_writeconfig();
 
   return qtrue;
-}
-
-qboolean G_admin_gamevar( gentity_t *ent )
-{
-    char cmd[ MAX_NAME_LENGTH ] = {""};
-    char cvar[ MAX_CVAR_VALUE_STRING ];
-
-    if ( trap_Argc() < 2 )
-    {
-        ADMBP_begin();
-        ADMBP("^3gamevar: ^7usage: gamevar show [cvar]\n");
-        ADMBP("                        set [cvar] [value]\n");
-        ADMBP_end();
-        return qfalse;
-    }
-
-    trap_Argv( 1, cmd, sizeof(cmd) );
-    trap_Argv( 2, cvar, sizeof(cvar) );
-
-    if ( !Q_stricmp("show", cmd) )
-    {
-        char value[ MAX_CVAR_VALUE_STRING ];
-        trap_Cvar_VariableStringBuffer(cvar, value, sizeof(value));
-        ADMP(va("^3gamevar: ^7%s = \"%s^7\"\n", cvar, value));
-
-        return qtrue;
-    }
-    else if ( !Q_stricmp("set", cmd) )
-    {
-        char value[ MAX_CVAR_VALUE_STRING ];
-        if ( trap_Argc() < 3 )
-        {
-            ADMP("^3gamevar: ^7usage: gamevar set [cvar] [value]\n");
-            return qfalse;
-        }
-
-        trap_Argv( 3, value, sizeof(value) );
-        trap_Cvar_Set( cvar, value );
-        trap_Cvar_VariableStringBuffer(cvar, value, sizeof(value));
-        ADMP(va("^3gamevar: ^7%s = \"%s^7\"\n", cvar, value));
-        return qtrue;
-    }
-
-    ADMBP_begin();
-    ADMBP("^3gamevar: ^7usage: gamevar show [cvar]\n");
-    ADMBP("                        set [cvar] [value]\n");
-    ADMBP_end();
-    return qfalse;
 }
 
 qboolean G_admin_gamedir( gentity_t *ent )
