@@ -167,6 +167,7 @@ typedef struct
 {
   int pouncePayload;
   float fallVelocity;
+  float luciAmmoReduction;
 } pmoveExt_t;
 
 #define MAXTOUCH  32

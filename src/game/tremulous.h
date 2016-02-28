@@ -458,7 +458,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LCANNON_DAMAGE              HDM(265)
 #define LCANNON_RADIUS              150      // primary splash damage radius
 #define LCANNON_SIZE                5        // missile bounding box radius
-#define LCANNON_SECONDARY_DAMAGE    HDM(27)
+#define LCANNON_SECONDARY_DAMAGE    HDM( LCANNON_DAMAGE / LCANNON_CHARGE_AMMO )
 #define LCANNON_SECONDARY_RADIUS    75       // secondary splash damage radius
 #define LCANNON_SECONDARY_SPEED     700
 #define LCANNON_SECONDARY_RELOAD    2000
@@ -467,7 +467,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LCANNON_CHARGE_TIME_MAX     2000
 #define LCANNON_CHARGE_TIME_MIN     400
 #define LCANNON_CHARGE_TIME_WARN    ( LCANNON_CHARGE_TIME_MAX - ( 2000 / 3 ) )
-#define LCANNON_CHARGE_AMMO         12       // ammo cost of a full charge shot
+#define LCANNON_CHARGE_AMMO         10       // ammo cost of a full charge shot
+#define LCANNON_CHARGE_AMMO_REDUCE  0.25f     // affects the rate at which luci ammo is reduced when
+                                             // using +attack2 during the primary luci charging process
 
 #define HBUILD_PRICE                0
 #define HBUILD_REPEAT               1000

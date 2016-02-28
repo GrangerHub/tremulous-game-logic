@@ -2731,6 +2731,9 @@ static void PM_BeginWeaponChange( int weapon )
   if( pm->ps->weapon == WP_LUCIFER_CANNON )
     pm->ps->stats[ STAT_MISC ] = 0;
 
+  if( weapon == WP_LUCIFER_CANNON )
+    pm->pmext->luciAmmoReduction = 0;
+
   pm->ps->weaponstate = WEAPON_DROPPING;
   pm->ps->weaponTime += 200;
   pm->ps->persistant[ PERS_NEWWEAPON ] = weapon;
@@ -2925,7 +2928,23 @@ static void PM_Weapon( void )
         ( pm->cmd.buttons & BUTTON_ATTACK ) )
     {
       if( pm->cmd.buttons & BUTTON_ATTACK2 )
+      {
         pm->ps->stats[ STAT_MISC ] -= pml.msec;
+
+        if( pm->ps->stats[ STAT_MISC ] > 0 )
+        {
+          pm->pmext->luciAmmoReduction += LCANNON_CHARGE_AMMO_REDUCE * LCANNON_CHARGE_AMMO *
+                                          ( ( float ) ( pml.msec ) ) / LCANNON_CHARGE_TIME_MAX;
+          pm->ps->ammo -= ( int ) ( pm->pmext->luciAmmoReduction );
+          pm->pmext->luciAmmoReduction -= ( int ) ( pm->pmext->luciAmmoReduction );
+        }
+
+        if( pm->ps->ammo <= 0 )
+        {
+          pm->ps->ammo = 0;
+          pm->pmext->luciAmmoReduction = 0;
+        }
+      }
       else
         pm->ps->stats[ STAT_MISC ] += pml.msec;
       if( pm->ps->stats[ STAT_MISC ] >= LCANNON_CHARGE_TIME_MAX )
@@ -3060,6 +3079,9 @@ static void PM_Weapon( void )
     if( BG_Weapon( pm->ps->weapon )->usesEnergy &&
         BG_InventoryContainsUpgrade( UP_BATTPACK, pm->ps->stats ) )
       pm->ps->ammo *= BATTPACK_MODIFIER;
+
+    if( pm->ps->weapon == WP_LUCIFER_CANNON )
+      pm->pmext->luciAmmoReduction = 0;
 
     //allow some time for the weapon to be raised
     pm->ps->weaponstate = WEAPON_RAISING;
