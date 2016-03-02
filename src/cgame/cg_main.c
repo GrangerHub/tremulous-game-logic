@@ -234,6 +234,8 @@ vmCvar_t  cg_voice;
 
 vmCvar_t  cg_emoticons;
 
+vmCvar_t  cg_cameraShakeMagnitude;
+
 vmCvar_t  cg_chatTeamPrefix;
 
 vmCvar_t  cg_fuelInfoX;
@@ -387,6 +389,8 @@ static cvarTable_t cvarTable[ ] =
   { &cg_voice, "voice", "default", CVAR_USERINFO|CVAR_ARCHIVE},
 
   { &cg_emoticons, "cg_emoticons", "1", CVAR_LATCH|CVAR_ARCHIVE},
+
+  { &cg_cameraShakeMagnitude, "cg_cameraShakeMagnitude", "1", CVAR_ARCHIVE },
 
   { &cg_chatTeamPrefix, "cg_chatTeamPrefix", "1", CVAR_ARCHIVE},
 

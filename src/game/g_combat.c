@@ -1321,7 +1321,7 @@ G_RadiusDamage
 qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage,
                          float radius, gentity_t *ignore, int mod )
 {
-  float     points, dist;
+  float     points, dist, shake;
   gentity_t *ent;
   int       entityList[ MAX_GENTITIES ];
   int       numListedEntities;
@@ -1379,6 +1379,31 @@ qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage,
       G_Damage( ent, NULL, attacker, dir, origin,
           (int)points, DAMAGE_RADIUS|DAMAGE_NO_LOCDAMAGE, mod );
     }
+  }
+
+  for( i = 0; i < 3; i++ )
+  {
+    mins[ i ] = origin[ i ] - radius * 2;
+    maxs[ i ] = origin[ i ] + radius * 2;
+  }
+
+  numListedEntities = trap_EntitiesInBox( mins, maxs, entityList, MAX_GENTITIES );
+
+  for( e = 0; e < numListedEntities; e++ )
+  {
+    ent = g_entities + entityList[ e ];
+
+    if( ent == ignore )
+      continue;
+
+    if( !ent->client )
+      continue;
+
+    if( !ent->takedamage )
+      continue;
+
+    shake = damage * 10 / Distance( origin, ent->r.currentOrigin );
+    ent->client->ps.stats[ STAT_SHAKE ] += (int) shake;
   }
 
   return hitClient;

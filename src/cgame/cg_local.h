@@ -1614,6 +1614,8 @@ extern  vmCvar_t    cg_projectileNudge;
 
 extern  vmCvar_t    cg_voice;
 
+extern  vmCvar_t    cg_cameraShakeMagnitude;
+
 extern  vmCvar_t    cg_emoticons;
 
 extern  vmCvar_t    cg_chatTeamPrefix;

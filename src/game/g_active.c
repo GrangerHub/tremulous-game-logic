@@ -719,6 +719,12 @@ void ClientTimerActions( gentity_t *ent, int msec )
 
   }
 
+  //Camera Shake
+    ent->client->ps.stats[ STAT_SHAKE ] *= 0.77f;
+    if( ent->client->ps.stats[ STAT_SHAKE ] < 0 )
+      ent->client->ps.stats[ STAT_SHAKE ] = 0;
+
+
   while( client->time1000 >= 1000 )
   {
     client->time1000 -= 1000;
