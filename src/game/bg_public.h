@@ -167,6 +167,7 @@ typedef struct
 {
   int pouncePayload;
   float fallVelocity;
+  float luciAmmoReduction;
 } pmoveExt_t;
 
 #define MAXTOUCH  32
@@ -233,8 +234,9 @@ typedef enum
   STAT_BUILDABLE, // which ghost model to display for building
   STAT_FALLDIST,  // the distance the player fell
   STAT_VIEWLOCK,  // direction to lock the view in
-  STAT_FUEL       // jetpacks
-  // netcode has space for 2 more
+  STAT_FUEL,      // jetpacks
+  STAT_SHAKE      // camera shake
+  // netcode has space for 0 more
 } statIndex_t;
 
 #define SCA_WALLCLIMBER         0x00000001

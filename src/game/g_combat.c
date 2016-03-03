@@ -1044,8 +1044,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
         return;
       }
 
-      // check if friendly fire has been disabled
-      if( !g_friendlyFire.integer )
+      // check if friendly fire has been disabled or if Warmup is in progress
+      if( !g_friendlyFire.integer || IS_WARMUP )
       {
         return;
       }
@@ -1056,7 +1056,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
         mod != MOD_REPLACE && mod != MOD_NOCREEP )
     {
       if( targ->buildableTeam == attacker->client->pers.teamSelection &&
-        !g_friendlyBuildableFire.integer )
+        ( !g_friendlyBuildableFire.integer || IS_WARMUP ) )
       {
         return;
       }
@@ -1321,7 +1321,7 @@ G_RadiusDamage
 qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage,
                          float radius, gentity_t *ignore, int mod )
 {
-  float     points, dist;
+  float     points, dist, shake;
   gentity_t *ent;
   int       entityList[ MAX_GENTITIES ];
   int       numListedEntities;
@@ -1379,6 +1379,31 @@ qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage,
       G_Damage( ent, NULL, attacker, dir, origin,
           (int)points, DAMAGE_RADIUS|DAMAGE_NO_LOCDAMAGE, mod );
     }
+  }
+
+  for( i = 0; i < 3; i++ )
+  {
+    mins[ i ] = origin[ i ] - radius * 2;
+    maxs[ i ] = origin[ i ] + radius * 2;
+  }
+
+  numListedEntities = trap_EntitiesInBox( mins, maxs, entityList, MAX_GENTITIES );
+
+  for( e = 0; e < numListedEntities; e++ )
+  {
+    ent = g_entities + entityList[ e ];
+
+    if( ent == ignore )
+      continue;
+
+    if( !ent->client )
+      continue;
+
+    if( !ent->takedamage )
+      continue;
+
+    shake = damage * 10 / Distance( origin, ent->r.currentOrigin );
+    ent->client->ps.stats[ STAT_SHAKE ] += (int) shake;
   }
 
   return hitClient;
