@@ -282,8 +282,9 @@ typedef enum
   PERS_NEWWEAPON,  // weapon to switch to
   PERS_BP,
   PERS_MARKEDBP,
-  // netcode has space for 3 more
+  //zdrytchx: no space in stats, use persistant. This meanas we risk doing a double jump upon spawning but death animations are 1700 msecs long, so technically it's impossible anyway
   PERS_JUMPTIME
+    // netcode has space for 2 more
 } persEnum_t;
 
 #define PS_WALLCLIMBINGFOLLOW   0x00000001

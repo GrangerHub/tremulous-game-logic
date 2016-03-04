@@ -289,6 +289,7 @@ PM_StepSlideMove
 qboolean PM_StepSlideMove( qboolean gravity, qboolean predictive )
 {
   vec3_t    start_o, start_v;
+  vec3_t    down_o, down_v;
   trace_t   trace;
   vec3_t    normal;
   vec3_t    step_v, step_vNormal;
@@ -328,6 +329,9 @@ qboolean PM_StepSlideMove( qboolean gravity, qboolean predictive )
     {
       return stepped;
     }
+
+    VectorCopy( pm->ps->origin, down_o );
+    VectorCopy( pm->ps->velocity, down_v );
 
     VectorCopy( start_o, up );
     VectorMA( up, STEPSIZE, normal, up );

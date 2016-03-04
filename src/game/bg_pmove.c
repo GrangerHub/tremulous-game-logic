@@ -35,8 +35,10 @@ pml_t       pml;
 float pm_stopspeed = 100.0f;
 float pm_duckScale = 0.25f;
 float pm_swimScale = 0.50f;
+float pm_wadeScale = 0.70f;
 
 float pm_accelerate = 10.0f;
+float pm_airaccelerate = 1.0f;
 float pm_wateraccelerate = 4.0f;
 float pm_flyaccelerate = 4.0f;
 
@@ -45,7 +47,23 @@ float pm_waterfriction = 1.0f;
 float pm_flightfriction = 6.0f;
 float pm_spectatorfriction = 5.0f;
 
-float cpm_pm_jump_z = 0.5;
+float pm_airControlAmount = 165.0f; //Equivalence to side strafes value is approx ~165
+
+//Side Air Strafes
+float	cpm_pm_strafeaccelerate = 150; //GoldSRC used 150. vq3: 1
+float	cpm_pm_wishspeed = 150; //vq3: 400. I personally set this to 500 on vanilla mode since dretch travels at 448 ups
+//You missed this. VQ3 just has "1.0"
+float	cpm_pm_airstopaccelerate = 2.5;
+
+//TODO: Marauder doesn't have a double jump since I removed it because it'll stack heavily when wall climbing.
+//It doesn't need it though, but may feel akward
+float cpm_pm_jump_z = 0.5; //CPM: 100/270 (normal jumpvel is 270, doublejump default 100) = 0.37037
+                           //However, that value feels too low and nothing much is acomplished since
+                           //tremulous human jump default is only 240 ups, meaning half height.
+
+//Clip time for maintaining velocity when clipping. For marauder it's actually equal to the jump
+//repeat rate so we can't modify it to cpm's default. CPM Default is 400 I think, but I placed 200
+//becausemarauder has 200, it's a bit tricky to get used to two different values at once.
 float pm_cliptime = 200;
 
 int   c_pmove = 0;
@@ -250,8 +268,13 @@ static void PM_Friction( void )
 
   speed = VectorLength( vec );
 
-  if( speed < 0.1 )
+  if( speed < 1 )
+  {
+    vel[ 0 ] = 0;
+    vel[ 1 ] = 0;   // allow sinking underwater
+    // FIXME: still have z friction underwater?
     return;
+  }
 
   drop = 0;
 
@@ -405,7 +428,7 @@ static float PM_CmdScale( usercmd_t *cmd, qboolean zFlight )
 
     if( !zFlight )
     {
-      //must have have stamina to jump
+      //must have have stamina or a jetpack to jump
       if( pm->ps->stats[ STAT_STAMINA ] < STAMINA_SLOW_LEVEL + STAMINA_JUMP_TAKE &&
           ( !BG_InventoryContainsUpgrade( UP_JETPACK, pm->ps->stats ) || pm->ps->stats[ STAT_FUEL ] < JETPACK_FUEL_JUMP ) )
         cmd->upmove = 0;
@@ -627,6 +650,9 @@ static qboolean PM_CheckWallJump( void )
   float   upFraction = 1.5f;
   trace_t trace;
 
+  if( pm->waterlevel )
+    return qfalse;
+
   if( !( BG_Class( pm->ps->stats[ STAT_CLASS ] )->abilities & SCA_WALLJUMPER ) )
     return qfalse;
 
@@ -653,7 +679,10 @@ static qboolean PM_CheckWallJump( void )
       !( trace.surfaceFlags & ( SURF_SKY | SURF_SLICK ) ) &&
       trace.plane.normal[ 2 ] < MIN_WALK_NORMAL )
   {
-    VectorCopy( trace.plane.normal, pm->ps->grapplePoint );
+    if( !VectorCompare( trace.plane.normal, pm->ps->grapplePoint ) )
+    {
+      VectorCopy( trace.plane.normal, pm->ps->grapplePoint );
+    }
   }
   else
     return qfalse;
@@ -838,7 +867,7 @@ static qboolean PM_CheckJump( void )
   if( pm->ps->velocity[ 2 ] < 0 )
     pm->ps->velocity[ 2 ] = 0;
 
-  VectorMA( pm->ps->velocity, BG_Class( pm->ps->stats[ STAT_CLASS ] )->jumpMagnitude,
+  VectorMA( pm->ps->velocity, jumpvel,
             normal, pm->ps->velocity );
 
   if( jetjump )
@@ -878,27 +907,45 @@ static qboolean PM_CheckWaterJump( void )
   vec3_t  spot;
   int     cont;
   vec3_t  flatforward;
+  vec3_t  mins, maxs;
+  float   a, r;
 
   if( pm->ps->pm_time )
     return qfalse;
 
-  // check for water jump
-  if( pm->waterlevel != 2 )
+  if( pm->cmd.upmove < 10 )
+    // not holding jump
     return qfalse;
+
+  // check for water jump
+  //if( pm->waterlevel != 2 )
+  //  return qfalse;
 
   flatforward[ 0 ] = pml.forward[ 0 ];
   flatforward[ 1 ] = pml.forward[ 1 ];
   flatforward[ 2 ] = 0;
   VectorNormalize( flatforward );
 
-  VectorMA( pm->ps->origin, 30, flatforward, spot );
-  spot[ 2 ] += 4;
+  BG_ClassBoundingBox( pm->ps->stats[ STAT_CLASS ], mins, maxs, NULL, NULL, NULL );
+
+  // bbox bottom
+  spot[ 0 ] = pm->ps->origin[ 0 ];
+  spot[ 1 ] = pm->ps->origin[ 1 ];
+  spot[ 2 ] = pm->ps->origin[ 2 ] + mins[ 2 ];
+
+  // project the flatforward vector onto the bbox (just a bit longer, so we'll actually hit a wall)
+  // then add it to spot
+  #define fmod(a,n) ((a)-(n)*floor((a)/(n)))
+  a = pm->ps->viewangles[ YAW ] / ( 180.0f / M_PI );
+  r = ( maxs[ 0 ] + 1 ) * 1.0f / cos( fmod( a+0.25f*M_PI, 0.5f*M_PI ) - 0.25f*M_PI );
+  VectorMA( spot, r, flatforward, spot );
+
   cont = pm->pointcontents( spot, pm->ps->clientNum );
 
   if( !( cont & CONTENTS_SOLID ) )
     return qfalse;
 
-  spot[ 2 ] += 16;
+  spot[ 2 ] = pm->ps->origin[ 2 ] + maxs[ 2 ];
   cont = pm->pointcontents( spot, pm->ps->clientNum );
 
   if( cont )
@@ -1081,11 +1128,19 @@ static void PM_WaterMove( void )
   //
   // user intentions
   //
+  if( !scale )
+  {
+    wishvel[ 0 ] = 0;
+    wishvel[ 1 ] = 0;
+    wishvel[ 2 ] = -60;   // sink towards bottom
+  }
+  else
+  {
+    for( i = 0; i < 3; i++ )
+      wishvel[ i ] = scale * pml.forward[ i ] * pm->cmd.forwardmove + scale * pml.right[ i ] * pm->cmd.rightmove;
 
-  for( i = 0; i < 3; i++ )
-    wishvel[ i ] = scale * pml.forward[ i ] * pm->cmd.forwardmove + scale * pml.right[ i ] * pm->cmd.rightmove;
-
-  wishvel[ 2 ] += scale * pm->cmd.upmove;
+    wishvel[ 2 ] += scale * pm->cmd.upmove;
+  }
 
   VectorCopy( wishvel, wishdir );
   wishspeed = VectorNormalize( wishdir );
@@ -1200,6 +1255,41 @@ static void PM_FlyMove( void )
   PM_StepSlideMove( qfalse, qfalse );
 }
 
+/*
+===================
+PM_AirControl
+
+===================
+*/
+static void PM_AirControl(vec3_t wishdir, float wishspeed)
+{
+  float   zspeed, speed, dot, k;
+  int     i;
+
+  if((pm->ps->movementDir && pm->ps->movementDir != 4) || wishspeed == 0.0)
+    return; // can't control movement if not moving forward or backward
+
+  zspeed = pm->ps->velocity[2];
+  pm->ps->velocity[2] = 0;
+  speed = VectorNormalize(pm->ps->velocity);
+
+  dot = DotProduct(pm->ps->velocity, wishdir);
+  k = 32;
+  k *= pm_airControlAmount * BG_Class( pm->ps->stats[ STAT_CLASS ] )->airAcceleration * dot * dot * pml.frametime;
+
+  if(dot > 0)
+  {
+    // we can't change direction while slowing down
+    for(i = 0; i < 2; i++)
+      pm->ps->velocity[i] = pm->ps->velocity[i] * speed + wishdir[i] * k;
+    VectorNormalize(pm->ps->velocity);
+  }
+
+  for(i = 0; i < 2; i++)
+    pm->ps->velocity[i] *= speed;
+
+  pm->ps->velocity[2] = zspeed;
+}
 
 /*
 ===================
@@ -1216,6 +1306,11 @@ static void PM_AirMove( void )
   float     wishspeed;
   float     scale;
   usercmd_t cmd;
+
+  float	    accel; // CPM
+  float     velscale;//classes temp.var
+
+  velscale = BG_Class( pm->ps->stats[ STAT_CLASS ] )->airAcceleration;
 
   PM_CheckWallJump( );
   PM_Friction( );
@@ -1244,9 +1339,24 @@ static void PM_AirMove( void )
   wishspeed = VectorNormalize( wishdir );
   wishspeed *= scale;
 
-  // not on ground, so little effect on velocity
-  PM_Accelerate( wishdir, wishspeed,
-    BG_Class( pm->ps->stats[ STAT_CLASS ] )->airAcceleration );
+  if( DotProduct(pm->ps->velocity, wishdir) < 0 &&
+      (pm_airaccelerate * velscale) < cpm_pm_airstopaccelerate ) // Stop marauders from climbing walls easily
+    accel = cpm_pm_airstopaccelerate * velscale;
+
+  //ZdrytchX: Use side strafes for Q1 style turning
+  if( pm->ps->movementDir == 2 || pm->ps->movementDir == 6 ) //Detect for side strafe buttons
+  {
+    wishspeed = cpm_pm_wishspeed * velscale;
+    accel = cpm_pm_strafeaccelerate * velscale;
+    PM_Accelerate (wishdir, wishspeed, accel);
+  }
+  else //accelerte normally
+  {
+    PM_Accelerate( wishdir, wishspeed, velscale );
+  }
+
+  // cpma air control
+  PM_AirControl (wishdir, wishspeed);
 
   // we may have a ground plane that is very steep, even
   // though we don't have a groundentity
@@ -1957,7 +2067,7 @@ static void PM_GroundClimbTrace( void )
         //mask out CONTENTS_BODY to not hit other players and avoid the camera flipping out when
         // wallwalkers touch
         VectorMA( pm->ps->origin, -0.25f, surfNormal, point );
-        pm->trace( &trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum, pm->tracemask & ~CONTENTS_BODY );
+        pm->trace( &trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum, pm->tracemask /*& ~CONTENTS_BODY*/ );
         break;
 
       case 2:
@@ -1992,8 +2102,8 @@ static void PM_GroundClimbTrace( void )
     }
 
     //if we hit something
-    if( trace.fraction < 1.0f && !( trace.surfaceFlags & ( SURF_SKY | SURF_SLICK ) ) && 
-        !( trace.entityNum != ENTITYNUM_WORLD && i != 4 ) )
+    if( trace.fraction < 1.0f && !( trace.surfaceFlags & ( SURF_SKY | SURF_SLICK ) ) /*&& 
+        !( trace.entityNum != ENTITYNUM_WORLD && i != 4 )*/ )
     {
       if( i == 2 || i == 3 )
       {
@@ -2270,7 +2380,7 @@ static void PM_GroundTrace( void )
     qboolean  steppedDown = qfalse;
 
     // try to step down
-    if( pml.groundPlane != qfalse && PM_PredictStepMove( ) )
+    if( pml.groundPlane != qfalse && PM_PredictStepMove( ) && pm->ps->velocity[ 2 ] <= 0.0f )
     {
       //step down
       point[ 0 ] = pm->ps->origin[ 0 ];
@@ -2374,7 +2484,6 @@ static void PM_GroundTrace( void )
   PM_AddTouchEnt( trace.entityNum );
 }
 
-
 /*
 =============
 PM_SetWaterLevel  FIXME: avoid this twice?  certainly if not moving
@@ -2386,6 +2495,7 @@ static void PM_SetWaterLevel( void )
   int     cont;
   int     sample1;
   int     sample2;
+  vec3_t  mins;
 
   //
   // get waterlevel, accounting for ducking
@@ -2393,25 +2503,27 @@ static void PM_SetWaterLevel( void )
   pm->waterlevel = 0;
   pm->watertype = 0;
 
+  BG_ClassBoundingBox( pm->ps->stats[ STAT_CLASS ], mins, NULL, NULL, NULL, NULL );
+
   point[ 0 ] = pm->ps->origin[ 0 ];
   point[ 1 ] = pm->ps->origin[ 1 ];
-  point[ 2 ] = pm->ps->origin[ 2 ] + MINS_Z + 1;
+  point[ 2 ] = pm->ps->origin[ 2 ] + mins[2] + 1;
   cont = pm->pointcontents( point, pm->ps->clientNum );
 
   if( cont & MASK_WATER )
   {
-    sample2 = pm->ps->viewheight - MINS_Z;
+    sample2 = pm->ps->viewheight - mins[2];
     sample1 = sample2 / 2;
 
     pm->watertype = cont;
     pm->waterlevel = 1;
-    point[ 2 ] = pm->ps->origin[ 2 ] + MINS_Z + sample1;
+    point[ 2 ] = pm->ps->origin[ 2 ] + mins[2] + sample1;
     cont = pm->pointcontents( point, pm->ps->clientNum );
 
     if( cont & MASK_WATER )
     {
       pm->waterlevel = 2;
-      point[ 2 ] = pm->ps->origin[ 2 ] + MINS_Z + sample2;
+      point[ 2 ] = pm->ps->origin[ 2 ] + mins[2] + sample2;
       cont = pm->pointcontents( point, pm->ps->clientNum );
 
       if( cont & MASK_WATER )
@@ -2419,7 +2531,6 @@ static void PM_SetWaterLevel( void )
     }
   }
 }
-
 
 
 /*
@@ -3774,6 +3885,10 @@ void PmoveSingle( pmove_t *pmove )
     PM_DeadMove( );
 
   PM_DropTimers( );
+
+  //Incremenet jumptime status
+  if (pm->ps->persistant[PERS_JUMPTIME] > 0) pm->ps->persistant[PERS_JUMPTIME] -= pml.msec;
+
   PM_CheckDodge( );
 
   if( pm->ps->pm_type == PM_JETPACK )

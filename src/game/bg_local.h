@@ -65,6 +65,7 @@ extern  float pm_duckScale;
 extern  float pm_swimScale;
 
 extern  float pm_accelerate;
+extern  float pm_airaccelerate;
 extern  float pm_wateraccelerate;
 extern  float pm_flyaccelerate;
 
