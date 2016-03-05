@@ -950,6 +950,17 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
   knockback = damage;
 
+  // luci splash does less damage to non-naked humans, but still deals the same knockback
+  if( mod == MOD_LCANNON_SPLASH )
+  {
+    if( BG_InventoryContainsUpgrade( UP_LIGHTARMOUR, targ->client->ps.stats ) )
+      damage *= LCANNON_SPLASH_LIGHTARMOUR;
+    if( BG_InventoryContainsUpgrade( UP_HELMET, targ->client->ps.stats ) )
+      damage *= LCANNON_SPLASH_HELMET;
+    if( BG_InventoryContainsUpgrade( UP_BATTLESUIT, targ->client->ps.stats ) )
+      damage *= LCANNON_SPLASH_BATTLESUIT;
+  }
+
   if( inflictor->s.weapon != WP_NONE )
   {
     knockback = (int)( (float)knockback *
