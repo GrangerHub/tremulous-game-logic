@@ -886,6 +886,7 @@ PM_CheckDodge
 Checks the dodge key and starts a human dodge or sprint
 ==================
 */
+/* Disable dodge
 static qboolean PM_CheckDodge( void )
 {
   vec3_t right, forward, velocity = { 0.0f, 0.0f, 0.0f };
@@ -978,7 +979,7 @@ static qboolean PM_CheckDodge( void )
   PM_AddEvent( EV_JUMP );
 
   return qtrue;
-}
+}*/
 
 //============================================================================
 
@@ -3738,7 +3739,8 @@ void PmoveSingle( pmove_t *pmove )
     PM_DeadMove( );
 
   PM_DropTimers( );
-  PM_CheckDodge( );
+  // Disable dodge
+  //PM_CheckDodge( );
 
   if( pm->ps->pm_type == PM_JETPACK )
     PM_JetPackMove( );
