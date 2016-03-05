@@ -2928,9 +2928,11 @@ static void PM_Weapon( void )
     if( !pm->ps->weaponTime &&
         ( pm->cmd.buttons & BUTTON_ATTACK ) )
     {
-      if( pm->cmd.buttons & BUTTON_ATTACK2 )
+      if( ( pm->cmd.buttons & BUTTON_ATTACK2 ) && ( pm->ps->stats[ STAT_MISC ] > 0 ) )
       {
         pm->ps->stats[ STAT_MISC ] -= pml.msec;
+        if( pm->ps->stats[ STAT_MISC ] < 0 )
+          pm->ps->stats[ STAT_MISC ] = 0;
 
         if( pm->ps->stats[ STAT_MISC ] > 0 )
         {
@@ -2938,15 +2940,15 @@ static void PM_Weapon( void )
                                           ( ( float ) ( pml.msec ) ) / LCANNON_CHARGE_TIME_MAX;
           pm->ps->ammo -= ( int ) ( pm->pmext->luciAmmoReduction );
           pm->pmext->luciAmmoReduction -= ( int ) ( pm->pmext->luciAmmoReduction );
-        }
 
-        if( pm->ps->ammo <= 0 )
-        {
-          pm->ps->ammo = 0;
-          pm->pmext->luciAmmoReduction = 0;
+          if( pm->ps->ammo <= 0 )
+          {
+            pm->ps->ammo = 0;
+            pm->pmext->luciAmmoReduction = 0;
+          }
         }
       }
-      else
+      else if( !( pm->cmd.buttons & BUTTON_ATTACK2 ) )
         pm->ps->stats[ STAT_MISC ] += pml.msec;
       if( pm->ps->stats[ STAT_MISC ] >= LCANNON_CHARGE_TIME_MAX )
         pm->ps->stats[ STAT_MISC ] = LCANNON_CHARGE_TIME_MAX;
