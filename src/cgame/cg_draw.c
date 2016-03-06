@@ -2542,8 +2542,6 @@ CROSSHAIR
 ================================================================================
 */
 
-
-
 /*
 =================
 CG_DrawCrosshair
@@ -2553,7 +2551,7 @@ static void CG_DrawCrosshair( rectDef_t *rect, vec4_t color )
 {
   float         w, h;
   qhandle_t     hShader;
-  float         x, y;
+  float         x, y, x2, y2;
   weaponInfo_t  *wi;
   weapon_t      weapon;
 
@@ -2585,6 +2583,11 @@ static void CG_DrawCrosshair( rectDef_t *rect, vec4_t color )
   x = rect->x + ( rect->w / 2 ) - ( w / 2 );
   y = rect->y + ( rect->h / 2 ) - ( h / 2 );
 
+  CG_WorldToScreen( cg.crosshairPredictedImpactPoint, &x2, &y2 );
+
+  x2 -= w / 2;
+  y2 -= h / 2;
+
   hShader = wi->crossHair;
 
   //aiming at a friendly player/buildable, dim the crosshair
@@ -2592,20 +2595,30 @@ static void CG_DrawCrosshair( rectDef_t *rect, vec4_t color )
   {
     int i;
     for( i = 0; i < 3; i++ )
-      color[i] *= .5f;
+      color[ i ] *= .5f;
 
   }
 
   if( hShader != 0 )
   {
+    if( cg_drawCrosshairImpactPredictor.integer && !( ( x == x2 ) &&
+        ( y == y2) ) && BG_Weapon( weapon )->team == TEAM_HUMANS &&
+        BG_Weapon( weapon )->impactPrediction[ 0 ].weaponMode &&
+        ( !( cg.predictedPlayerState.velocity[1] == 0 )||
+        !( cg.predictedPlayerState.velocity[2] == 0 ) ) )
+    {
+      trap_R_SetColor( color );
+      CG_DrawPic( x2, y2, w, h, hShader );
+      trap_R_SetColor( NULL );
+      color[ 3 ] *= .25f;
+    }
 
     trap_R_SetColor( color );
     CG_DrawPic( x, y, w, h, hShader );
     trap_R_SetColor( NULL );
+
   }
 }
-
-
 
 /*
 =================
@@ -2614,16 +2627,70 @@ CG_ScanForCrosshairEntity
 */
 static void CG_ScanForCrosshairEntity( void )
 {
+  vec3_t   end, forward, maxs, mins, normal, start, velocity;
+  weapon_t weapon;
+  qboolean endCalculated = qfalse;
+  int      speed, num = 0;
   trace_t   trace;
-  vec3_t    start, end;
 /*  int       content;*/
   team_t    team;
 
-  VectorCopy( cg.refdef.vieworg, start );
-  VectorMA( start, 131072, cg.refdef.viewaxis[ 0 ], end );
+  weapon = BG_GetPlayerWeapon( &cg.predictedPlayerState );
 
-  CG_Trace( &trace, start, vec3_origin, vec3_origin, end,
-    cg.snap->ps.clientNum, CONTENTS_SOLID|CONTENTS_BODY );
+  AngleVectors( cg.predictedPlayerState.viewangles, forward, NULL, NULL );
+
+  VectorCopy( cg.predictedPlayerState.origin, start );
+  BG_GetClientNormal( &cg.predictedPlayerState, normal );
+  VectorMA( start, cg.predictedPlayerState.viewheight, normal, start );
+  VectorMA( start, 1, forward, start );
+  SnapVector( start );
+
+  if( BG_Weapon( weapon )->impactPrediction[ 0 ].weaponMode &&
+      cg_drawCrosshairImpactPredictor.integer )
+  {
+    if( BG_Weapon( weapon )->impactPrediction[ 1 ].weaponMode )
+    {
+      switch( weapon )
+      {
+        case WP_LUCIFER_CANNON:
+          if( cg.predictedPlayerState.stats[ STAT_MISC ] >= 0 )
+            num = 1;
+          break;
+        default:
+          num = 0;
+      }
+    }
+
+    if( weapon == WP_LUCIFER_CANNON && num == 1 )
+      speed = BG_GetLCannonPrimaryFireSpeed( cg.predictedPlayerState.stats[ STAT_MISC ] );
+    else
+      speed = BG_Weapon( weapon )->impactPrediction[ num ].missileLaunchSpeed;
+
+    mins[0] = mins[1] = mins[2] = -BG_Weapon( weapon )->impactPrediction[ num ].missileSize;
+    maxs[0] = maxs[1] = maxs[2] = BG_Weapon( weapon )->impactPrediction[ num ].missileSize;
+
+    switch( BG_Weapon( weapon )->impactPrediction[ num ].trType )
+    {
+      case TR_LINEAR :
+        VectorScale( forward, speed, velocity );
+        BG_ModifyMissleLaunchVelocity( cg.predictedPlayerState.velocity, velocity,
+                                 BG_Weapon( weapon )->relativeMissileSpeed );
+        SnapVector( velocity );
+        VectorScale( velocity, BG_Weapon( weapon )->impactPrediction[ num ].missileLifeTime, end );
+        endCalculated = qtrue;
+      break;
+      default:
+        endCalculated = qfalse;
+    }
+  }
+
+  if( !endCalculated )
+    VectorMA( start, 131072, forward, end );
+
+  CG_Trace( &trace, start, mins, maxs, end,
+    cg.predictedPlayerState.clientNum, MASK_SHOT );
+
+  VectorCopy( trace.endpos, cg.crosshairPredictedImpactPoint );
 
   // if the player is in fog, don't show it
 /*  content = trap_CM_PointContents( trace.endpos, 0 );*/
@@ -2798,9 +2865,6 @@ static void CG_DrawCrosshairNames( rectDef_t *rect, float scale, int textStyle )
 
   if( cg.renderingThirdPerson )
     return;
-
-  // scan the known entities to see if the crosshair is sighted on one
-  CG_ScanForCrosshairEntity( );
 
   // draw the name of the player being looked at
   color = CG_FadeColor( cg.crosshairClientTime, CROSSHAIR_CLIENT_TIMEOUT );
@@ -3569,6 +3633,8 @@ static void CG_Draw2D( void )
   CG_DrawVote( cg.predictedPlayerState.stats[ STAT_TEAM ] );
   CG_DrawCountdown( );
   CG_DrawQueue( );
+  // scan the known entities to see if the crosshair is sighted on one
+  CG_ScanForCrosshairEntity( );
 
   // don't draw center string if scoreboard is up
   cg.scoreBoardShowing = CG_DrawScoreboard( );

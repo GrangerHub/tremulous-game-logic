@@ -1047,6 +1047,8 @@ typedef struct
   int           crosshairClientNum;
   int           crosshairClientTime;
 
+  vec3_t        crosshairPredictedImpactPoint;
+
   // powerup active flashing
   int           powerupActive;
   int           powerupTime;
@@ -1509,6 +1511,7 @@ extern  vmCvar_t    cg_drawChargeBar;
 extern  vmCvar_t    cg_drawCrosshair;
 extern  vmCvar_t    cg_drawCrosshairNames;
 extern  vmCvar_t    cg_crosshairSize;
+extern  vmCvar_t    cg_drawCrosshairImpactPredictor;
 extern  vmCvar_t    cg_drawTeamOverlay;
 extern  vmCvar_t    cg_teamOverlaySortMode;
 extern  vmCvar_t    cg_teamOverlayMaxPlayers;

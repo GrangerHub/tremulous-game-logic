@@ -123,6 +123,7 @@ vmCvar_t  cg_drawChargeBar;
 vmCvar_t  cg_drawCrosshair;
 vmCvar_t  cg_drawCrosshairNames;
 vmCvar_t  cg_crosshairSize;
+vmCvar_t  cg_drawCrosshairImpactPredictor;
 vmCvar_t  cg_draw2D;
 vmCvar_t  cg_animSpeed;
 vmCvar_t  cg_debugAnim;
@@ -266,6 +267,7 @@ static cvarTable_t cvarTable[ ] =
   { &cg_drawCrosshair, "cg_drawCrosshair", "2", CVAR_ARCHIVE },
   { &cg_drawCrosshairNames, "cg_drawCrosshairNames", "1", CVAR_ARCHIVE },
   { &cg_crosshairSize, "cg_crosshairSize", "1", CVAR_ARCHIVE },
+  { &cg_drawCrosshairImpactPredictor, "cg_drawCrosshairImpactPredictor", "1", CVAR_ARCHIVE },
   { &cg_addMarks, "cg_marks", "1", CVAR_ARCHIVE },
   { &cg_lagometer, "cg_lagometer", "0", CVAR_ARCHIVE },
   { &cg_drawSpeed, "cg_drawSpeed", "0", CVAR_ARCHIVE },

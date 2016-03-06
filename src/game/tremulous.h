@@ -46,6 +46,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ABUILDER_BLOB_SPEED         800.0f
 #define ABUILDER_BLOB_SPEED_MOD     0.5f
 #define ABUILDER_BLOB_TIME          2000
+#define ABUILDER_BLOB_LIFETIME      15000
 
 #define LEVEL0_BITE_DMG             ADM(48)
 #define LEVEL0_BITE_RANGE           64.0f
@@ -116,6 +117,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL3_BOUNCEBALL_SPEED     1000.0f
 #define LEVEL3_BOUNCEBALL_RADIUS    0
 #define LEVEL3_BOUNCEBALL_REGEN     12500    // msec until new barb
+#define LEVEL3_BOUNCEBALL_LIFETIME  3000
 
 #define LEVEL4_CLAW_DMG             ADM(100)
 #define LEVEL4_CLAW_RANGE           128.0f
@@ -314,6 +316,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LOCKBLOB_LOCKTIME           5000
 #define LOCKBLOB_DOT                0.85f // max angle = acos( LOCKBLOB_DOT )
 #define LOCKBLOB_K_SCALE            1.0f
+#define LOCKBLOB_LIFETIME           15000
 
 #define OVERMIND_BP                 0
 #define OVERMIND_BT                 30000
@@ -370,6 +373,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define BLASTER_SPEED               1400
 #define BLASTER_DMG                 HDM(10)
 #define BLASTER_SIZE                5
+#define BLASTER_LIFETIME            10000
 
 #define RIFLE_CLIPSIZE              30
 #define RIFLE_MAXCLIPS              6
@@ -394,6 +398,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define GRENADE_DAMAGE              HDM(310)
 #define GRENADE_RANGE               192.0f
 #define GRENADE_SPEED               400.0f
+#define GRENADE_SIZE                3.0f        // missile bounding box
+#define GRENADE_LIFETIME            5000
 
 #define SHOTGUN_PRICE               150
 #define SHOTGUN_SHELLS              8
@@ -436,7 +442,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define FLAMER_SPLASHDAMAGE         HDM(10)
 #define FLAMER_RADIUS               50       // splash radius
 #define FLAMER_SIZE                 15        // missile bounding box
-#define FLAMER_LIFETIME             700.0f
+#define FLAMER_LIFETIME             700
 #define FLAMER_SPEED                500.0f
 #define FLAMER_LAG                  0.65f    // the amount of player velocity that is added to the fireball
 
@@ -449,6 +455,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define PRIFLE_DMG                  HDM(9)
 #define PRIFLE_SPEED                1200
 #define PRIFLE_SIZE                 5
+#define PRIFLE_LIFETIME             10000
 
 #define LCANNON_PRICE               600
 #define LCANNON_AMMO                90
@@ -472,6 +479,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LCANNON_SPLASH_LIGHTARMOUR  0.50f    // reduction of damage fraction for luci splash on light armour
 #define LCANNON_SPLASH_HELMET       0.75f    // reduction of damage fraction for luci splash on helmets
 #define LCANNON_SPLASH_BATTLESUIT   0.50f    // reduction of damage fraction for luci splash on battlesuits
+#define LCANNON_LIFETIME            10000
 
 #define HBUILD_PRICE                0
 #define HBUILD_REPEAT               1000

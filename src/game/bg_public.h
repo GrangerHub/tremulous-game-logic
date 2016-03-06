@@ -1065,38 +1065,51 @@ typedef struct
 } buildableConfig_t;
 
 // weapon record
+
 typedef struct
 {
-  weapon_t  number;
+  weaponMode_t  weaponMode;
+  trType_t      trType;
+  int           missileLifeTime;
+  int           missileSize;
+  int           missileLaunchSpeed;
+} impactPrediction_t;
 
-  int       price;
-  int       stages;
+typedef struct
+{
+  weapon_t           number;
 
-  int       slots;
+  int                price;
+  int                stages;
 
-  char      *name;
-  char      *humanName;
-  char      *info;
+  int                slots;
 
-  int       maxAmmo;
-  int       maxClips;
-  qboolean  infiniteAmmo;
-  qboolean  usesEnergy;
+  char               *name;
+  char               *humanName;
+  char               *info;
 
-  int       repeatRate1;
-  int       repeatRate2;
-  int       repeatRate3;
-  int       reloadTime;
-  float     knockbackScale;
+  int                 maxAmmo;
+  int                 maxClips;
+  qboolean            infiniteAmmo;
+  qboolean            usesEnergy;
 
-  qboolean  hasAltMode;
-  qboolean  hasThirdMode;
+  int                 repeatRate1;
+  int                 repeatRate2;
+  int                 repeatRate3;
+  int                 reloadTime;
+  float               knockbackScale;
 
-  qboolean  canZoom;
-  float     zoomFov;
+  qboolean            hasAltMode;
+  qboolean            hasThirdMode;
 
-  qboolean  purchasable;
-  qboolean  longRanged;
+  qboolean            canZoom;
+  float               zoomFov;
+
+  qboolean            purchasable;
+  qboolean            longRanged;
+
+  qboolean            relativeMissileSpeed;
+  impactPrediction_t  impactPrediction[2];
 
   team_t    team;
 } weaponAttributes_t;
@@ -1197,6 +1210,8 @@ qboolean                    BG_UpgradeAllowedInStage( upgrade_t upgrade,
                                                       stage_t stage,
                                                       int gameIsInWarmup );
 int                         BG_GetLCannonPrimaryFireSpeed( int charge );
+void                        BG_ModifyMissleLaunchVelocity( vec3_t pVelocity, vec3_t mVelocity,
+                                                           qboolean relativeMissileSpeed );
 
 // content masks
 #define MASK_ALL          (-1)

@@ -392,7 +392,7 @@ gentity_t *fire_blaster( gentity_t *self, vec3_t start, vec3_t dir )
   bolt = G_Spawn();
   bolt->classname = "blaster";
   bolt->pointAgainstWorld = qtrue;
-  bolt->nextthink = level.time + 10000;
+  bolt->nextthink = level.time + BLASTER_LIFETIME;
   bolt->think = G_ExplodeMissile;
   bolt->s.eType = ET_MISSILE;
   bolt->s.weapon = WP_BLASTER;
@@ -413,6 +413,8 @@ gentity_t *fire_blaster( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;   // move a bit on the very first frame
   VectorCopy( start, bolt->s.pos.trBase );
   VectorScale( dir, BLASTER_SPEED, bolt->s.pos.trDelta );
+  BG_ModifyMissleLaunchVelocity( self->s.pos.trDelta, bolt->s.pos.trDelta,
+                                 BG_Weapon( bolt->s.weapon )->relativeMissileSpeed );
   SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
 
   VectorCopy( start, bolt->r.currentOrigin );
@@ -437,7 +439,7 @@ gentity_t *fire_pulseRifle( gentity_t *self, vec3_t start, vec3_t dir )
   bolt = G_Spawn();
   bolt->classname = "pulse";
   bolt->pointAgainstWorld = qtrue;
-  bolt->nextthink = level.time + 10000;
+  bolt->nextthink = level.time + PRIFLE_LIFETIME;
   bolt->think = G_ExplodeMissile;
   bolt->s.eType = ET_MISSILE;
   bolt->s.weapon = WP_PULSE_RIFLE;
@@ -458,6 +460,8 @@ gentity_t *fire_pulseRifle( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;   // move a bit on the very first frame
   VectorCopy( start, bolt->s.pos.trBase );
   VectorScale( dir, PRIFLE_SPEED, bolt->s.pos.trDelta );
+  BG_ModifyMissleLaunchVelocity( self->s.pos.trDelta, bolt->s.pos.trDelta,
+                                 BG_Weapon( bolt->s.weapon )->relativeMissileSpeed );
   SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
 
   VectorCopy( start, bolt->r.currentOrigin );
@@ -488,7 +492,7 @@ gentity_t *fire_luciferCannon( gentity_t *self, vec3_t start, vec3_t dir,
   if( damage == LCANNON_DAMAGE )
     bolt->nextthink = level.time;
   else
-    bolt->nextthink = level.time + 10000;
+    bolt->nextthink = level.time + LCANNON_LIFETIME;
 
   bolt->think = G_ExplodeMissile;
   bolt->s.eType = ET_MISSILE;
@@ -520,6 +524,8 @@ gentity_t *fire_luciferCannon( gentity_t *self, vec3_t start, vec3_t dir,
   bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;   // move a bit on the very first frame
   VectorCopy( start, bolt->s.pos.trBase );
   VectorScale( dir, speed, bolt->s.pos.trDelta );
+  BG_ModifyMissleLaunchVelocity( self->s.pos.trDelta, bolt->s.pos.trDelta,
+                                 BG_Weapon( bolt->s.weapon )->relativeMissileSpeed );
   SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
 
   VectorCopy( start, bolt->r.currentOrigin );
@@ -542,7 +548,7 @@ gentity_t *launch_grenade( gentity_t *self, vec3_t start, vec3_t dir )
   bolt = G_Spawn( );
   bolt->classname = "grenade";
   bolt->pointAgainstWorld = qfalse;
-  bolt->nextthink = level.time + 5000;
+  bolt->nextthink = level.time + GRENADE_LIFETIME;
   bolt->think = G_ExplodeMissile;
   bolt->s.eType = ET_MISSILE;
   bolt->s.weapon = WP_GRENADE;
@@ -557,14 +563,16 @@ gentity_t *launch_grenade( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->splashMethodOfDeath = MOD_GRENADE;
   bolt->clipmask = MASK_SHOT;
   bolt->target_ent = NULL;
-  bolt->r.mins[ 0 ] = bolt->r.mins[ 1 ] = bolt->r.mins[ 2 ] = -3.0f;
-  bolt->r.maxs[ 0 ] = bolt->r.maxs[ 1 ] = bolt->r.maxs[ 2 ] = 3.0f;
+  bolt->r.mins[ 0 ] = bolt->r.mins[ 1 ] = bolt->r.mins[ 2 ] = -GRENADE_SIZE;
+  bolt->r.maxs[ 0 ] = bolt->r.maxs[ 1 ] = bolt->r.maxs[ 2 ] = GRENADE_SIZE;
   bolt->s.time = level.time;
 
   bolt->s.pos.trType = TR_GRAVITY;
   bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;   // move a bit on the very first frame
   VectorCopy( start, bolt->s.pos.trBase );
   VectorScale( dir, GRENADE_SPEED, bolt->s.pos.trDelta );
+  BG_ModifyMissleLaunchVelocity( self->s.pos.trDelta, bolt->s.pos.trDelta,
+                                 BG_Weapon( bolt->s.weapon )->relativeMissileSpeed );
   SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
 
   VectorCopy( start, bolt->r.currentOrigin );
@@ -744,7 +752,7 @@ gentity_t *fire_lockblob( gentity_t *self, vec3_t start, vec3_t dir )
   bolt = G_Spawn( );
   bolt->classname = "lockblob";
   bolt->pointAgainstWorld = qtrue;
-  bolt->nextthink = level.time + 15000;
+  bolt->nextthink = level.time + LOCKBLOB_LIFETIME;
   bolt->think = G_ExplodeMissile;
   bolt->s.eType = ET_MISSILE;
   bolt->s.weapon = WP_LOCKBLOB_LAUNCHER;
@@ -761,7 +769,9 @@ gentity_t *fire_lockblob( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->s.pos.trType = TR_LINEAR;
   bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;   // move a bit on the very first frame
   VectorCopy( start, bolt->s.pos.trBase );
-  VectorScale( dir, 500, bolt->s.pos.trDelta );
+  VectorScale( dir, LOCKBLOB_SPEED, bolt->s.pos.trDelta );
+  BG_ModifyMissleLaunchVelocity( self->s.pos.trDelta, bolt->s.pos.trDelta,
+                                 BG_Weapon( bolt->s.weapon )->relativeMissileSpeed );
   SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
   VectorCopy( start, bolt->r.currentOrigin );
 
@@ -782,7 +792,7 @@ gentity_t *fire_slowBlob( gentity_t *self, vec3_t start, vec3_t dir )
   bolt = G_Spawn( );
   bolt->classname = "slowblob";
   bolt->pointAgainstWorld = qtrue;
-  bolt->nextthink = level.time + 15000;
+  bolt->nextthink = level.time + ABUILDER_BLOB_LIFETIME;
   bolt->think = G_ExplodeMissile;
   bolt->s.eType = ET_MISSILE;
   bolt->s.weapon = WP_ABUILD2;
@@ -801,6 +811,8 @@ gentity_t *fire_slowBlob( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;   // move a bit on the very first frame
   VectorCopy( start, bolt->s.pos.trBase );
   VectorScale( dir, ABUILDER_BLOB_SPEED, bolt->s.pos.trDelta );
+  BG_ModifyMissleLaunchVelocity( self->s.pos.trDelta, bolt->s.pos.trDelta,
+                                 BG_Weapon( bolt->s.weapon )->relativeMissileSpeed );
   SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
   VectorCopy( start, bolt->r.currentOrigin );
 
@@ -821,7 +833,7 @@ gentity_t *fire_paraLockBlob( gentity_t *self, vec3_t start, vec3_t dir )
   bolt = G_Spawn( );
   bolt->classname = "lockblob";
   bolt->pointAgainstWorld = qtrue;
-  bolt->nextthink = level.time + 15000;
+  bolt->nextthink = level.time + LOCKBLOB_LIFETIME;
   bolt->think = G_ExplodeMissile;
   bolt->s.eType = ET_MISSILE;
   bolt->s.weapon = WP_LOCKBLOB_LAUNCHER;
@@ -838,6 +850,8 @@ gentity_t *fire_paraLockBlob( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;   // move a bit on the very first frame
   VectorCopy( start, bolt->s.pos.trBase );
   VectorScale( dir, LOCKBLOB_SPEED, bolt->s.pos.trDelta );
+  BG_ModifyMissleLaunchVelocity( self->s.pos.trDelta, bolt->s.pos.trDelta,
+                                 BG_Weapon( bolt->s.weapon )->relativeMissileSpeed );
   SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
   VectorCopy( start, bolt->r.currentOrigin );
 
@@ -858,7 +872,7 @@ gentity_t *fire_bounceBall( gentity_t *self, vec3_t start, vec3_t dir )
   bolt = G_Spawn( );
   bolt->classname = "bounceball";
   bolt->pointAgainstWorld = qtrue;
-  bolt->nextthink = level.time + 3000;
+  bolt->nextthink = level.time + LEVEL3_BOUNCEBALL_LIFETIME;
   bolt->think = G_ExplodeMissile;
   bolt->s.eType = ET_MISSILE;
   bolt->s.weapon = WP_ALEVEL3_UPG;
@@ -877,6 +891,8 @@ gentity_t *fire_bounceBall( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;   // move a bit on the very first frame
   VectorCopy( start, bolt->s.pos.trBase );
   VectorScale( dir, LEVEL3_BOUNCEBALL_SPEED, bolt->s.pos.trDelta );
+  BG_ModifyMissleLaunchVelocity( self->s.pos.trDelta, bolt->s.pos.trDelta,
+                                 BG_Weapon( bolt->s.weapon )->relativeMissileSpeed );
   SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
   VectorCopy( start, bolt->r.currentOrigin );
 
