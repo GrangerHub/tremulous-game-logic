@@ -2616,7 +2616,7 @@ static void CG_ScanForCrosshairEntity( void )
 {
   trace_t   trace;
   vec3_t    start, end;
-  int       content;
+/*  int       content;*/
   team_t    team;
 
   VectorCopy( cg.refdef.vieworg, start );
@@ -2626,9 +2626,9 @@ static void CG_ScanForCrosshairEntity( void )
     cg.snap->ps.clientNum, CONTENTS_SOLID|CONTENTS_BODY );
 
   // if the player is in fog, don't show it
-  content = trap_CM_PointContents( trace.endpos, 0 );
-  if( content & CONTENTS_FOG )
-    return;
+/*  content = trap_CM_PointContents( trace.endpos, 0 );*/
+/*  if( content & CONTENTS_FOG )*/
+/*    return;*/
 
   if( trace.entityNum >= MAX_CLIENTS )
   {
