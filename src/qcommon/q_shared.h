@@ -203,6 +203,19 @@ typedef int		clipHandle_t;
 #define ARRAY_LEN(x)			(sizeof(x) / sizeof(*(x)))
 #define STRARRAY_LEN(x)			(ARRAY_LEN(x) - 1)
 
+/*
+====================
+Max/min functions
+
+Maximum/minimum of two ints
+====================
+*/
+#define max( a,b ) ( ( a ) > ( b ) ? ( a ):( b ))
+#define min( a,b ) ( ( a ) < ( b ) ? ( a ):( b ))
+
+// safe exact match check assuming 0-terminated strings
+#define Q_stricmp_exact( s1, s2 ) Q_stricmpn( s1, s2, min( strlen( s1 ), strlen( s2 )))
+
 // angle indexes
 #define	PITCH				0		// up / down
 #define	YAW					1		// left / right

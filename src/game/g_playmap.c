@@ -114,6 +114,17 @@ static const playMapError_t playMapError[ ] =
   }
 };
 
+// list of playmap flags and info
+static const playMapFlagDesc_t playMapFlag[ ] =
+{
+  { PLAYMAP_FLAG_DPUNT, "dpunt", qfalse, "Dretch Punt" },
+  { PLAYMAP_FLAG_FF, 	"ff", 	 qtrue,  "Friendly Fire" },
+  { PLAYMAP_FLAG_FBF, 	"fbf", 	 qtrue,  "Friendly Buildable Fire" },
+  { PLAYMAP_FLAG_SD, 	"sd", 	 qtrue,  "Sudden Death" },
+  { PLAYMAP_FLAG_LGRAV, "lgrav", qfalse, "Low Gravity" },
+  { PLAYMAP_FLAG_UBP, 	"ubp",	 qfalse, "Unlimited BP" },
+  { PLAYMAP_FLAG_PORTAL,"portal",qfalse, "Portal Gun" }
+};
 
 /*
  * playmap error utility functions
@@ -425,16 +436,6 @@ int G_GetPlayMapPoolLength( void )
 {
   return playMapPoolCache.numMaps;
 }
-
-/*
-====================
-Max/min functions
-
-Maximum/minimum of two ints
-====================
-*/
-#define max( a,b ) ( ( a ) > ( b ) ? ( a ):( b ))
-#define min( a,b ) ( ( a ) < ( b ) ? ( a ):( b ))
 
 /*
 ================
@@ -810,23 +811,18 @@ Parses a playmap flag string and returns the playMapFlag_t equivalent.
 
 playMapFlag_t G_ParsePlayMapFlag(char *flag)
 {
-  if( Q_stricmpn( flag, "dpunt", 5 ) == 0 )
-    return PLAYMAP_FLAG_DPUNT;
+  int flagNum;
 
-  if( Q_stricmpn( flag, "ff", 2 ) == 0 )
-    return PLAYMAP_FLAG_FF;
-
-  if( Q_stricmpn( flag, "fbf", 3 ) == 0 )
-    return PLAYMAP_FLAG_FBF;
-
-  if( Q_stricmpn( flag, "sd", 2 ) == 0 )
-    return PLAYMAP_FLAG_SD;
-
-  if( Q_stricmpn( flag, "lgrav", 5 ) == 0 )
-    return PLAYMAP_FLAG_LGRAV;
-
-  if( Q_stricmpn( flag, "ubp", 3 ) == 0 )
-    return PLAYMAP_FLAG_UBP;
+  for( flagNum = PLAYMAP_FLAG_NONE + 1;
+       flagNum < PLAYMAP_NUM_FLAGS; flagNum++ )
+  {
+    if( Q_stricmp_exact( flag, playMapFlag[ flagNum ].flagName ) == 0 )
+    {
+      // Confirm flag sequence and number match 
+      assert( flagNum == playMapFlag[ flagNum ].flag);
+      return flagNum;
+    }
+  }
 
   return PLAYMAP_FLAG_NONE;
 }
@@ -844,7 +840,6 @@ playMapError_t G_PlayMapEnqueue( char *mapName, char *layout,
                                  char *clientName, char *flags, gentity_t *ent )
 {
   int       i;
-  int       plusFlagIdx = 0, minusFlagIdx = 0;
   char      *token;
   playMap_t playMap;
   playMapFlag_t playMapFlag;

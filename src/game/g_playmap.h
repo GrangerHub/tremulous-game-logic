@@ -65,7 +65,7 @@ typedef struct playMapPool_s
 // proof-of-concept demo. they are very likely to change)
 typedef enum
 {
-  PLAYMAP_FLAG_NONE,
+  PLAYMAP_FLAG_NONE = 0,
 
   PLAYMAP_FLAG_DPUNT, // Dretch Punt
   PLAYMAP_FLAG_FF,    // Friendly Fire
@@ -73,13 +73,23 @@ typedef enum
   PLAYMAP_FLAG_SD,    // Sudden Death
   PLAYMAP_FLAG_LGRAV, // Low Gravity
   PLAYMAP_FLAG_UBP,   // Unlimited BP
+  PLAYMAP_FLAG_PORTAL,// Portal Gun
 
   PLAYMAP_NUM_FLAGS
 } playMapFlag_t;
 
-#define PlaymapFlag_Set(X, FLAG) ((X) |= (1 << (FLAG)))
-#define PlaymapFlag_IsSet(X, FLAG) ((X) & (1 << (FLAG)))
-#define PlaymapFlag_Clear(X, FLAG) ((X) &= ~(1 << (FLAG)))
+#define PlaymapFlag_Set(X, FLAG) ((X) |= (1 << (FLAG - 1)))
+#define PlaymapFlag_IsSet(X, FLAG) ((X) & (1 << (FLAG - 1)))
+#define PlaymapFlag_Clear(X, FLAG) ((X) &= ~(1 << (FLAG - 1)))
+
+// flag names
+typedef struct playMapFlagDesc_s
+{
+  int 	   flag;		/* Flag bit */
+  char 	   *flagName;		/* String to parse */
+  qboolean defVal;		/* Default */
+  char 	   *flagDesc;		/* Description string */
+} playMapFlagDesc_t;
 
 /*
  * PLAYMAP QUEUE
