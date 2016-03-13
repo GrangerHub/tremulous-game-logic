@@ -351,7 +351,7 @@ string will be returned if the next token is
 a newline.
 ==============
 */
-static char *SkipWhitespace( char *data, qboolean *hasNewLines ) {
+char *SkipWhitespace( char *data, qboolean hasNewLines ) {
 	int c;
 
 	while( (c = *data) <= ' ') {
@@ -360,7 +360,7 @@ static char *SkipWhitespace( char *data, qboolean *hasNewLines ) {
 		}
 		if( c == '\n' ) {
 			com_lines++;
-			*hasNewLines = qtrue;
+			hasNewLines = qtrue;
 		}
 		data++;
 	}
@@ -458,7 +458,7 @@ char *COM_ParseExt( char **data_p, qboolean allowLineBreaks )
 	while ( 1 )
 	{
 		// skip whitespace
-		data = SkipWhitespace( data, &hasNewLines );
+		data = SkipWhitespace( data, hasNewLines );
 		if ( !data )
 		{
 			*data_p = NULL;
