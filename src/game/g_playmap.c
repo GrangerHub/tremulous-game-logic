@@ -22,6 +22,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
+/*
+ * TODO: Move this into server code so pool and queue aren't reset at
+ * map changes.
+ */
+
 #include "g_local.h"
 
 /*
