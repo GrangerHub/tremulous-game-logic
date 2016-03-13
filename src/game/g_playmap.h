@@ -77,6 +77,9 @@ typedef enum
   PLAYMAP_NUM_FLAGS
 } playMapFlag_t;
 
+#define PlaymapFlag_Set(X, FLAG) ((X) |= (1 << (FLAG)))
+#define PlaymapFlag_IsSet(X, FLAG) ((X) & (1 << (FLAG)))
+#define PlaymapFlag_Clear(X, FLAG) ((X) &= ~(1 << (FLAG)))
 
 /*
  * PLAYMAP QUEUE
@@ -98,8 +101,10 @@ typedef struct playMap_s
 
   char *clientName;
 
-  playMapFlag_t plusFlags[ PLAYMAP_NUM_FLAGS ];
-  playMapFlag_t minusFlags[ PLAYMAP_NUM_FLAGS ];
+  int plusFlags;
+  int minusFlags;
+  //playMapFlag_t plusFlags[ PLAYMAP_NUM_FLAGS ];
+  //playMapFlag_t minusFlags[ PLAYMAP_NUM_FLAGS ];
 } playMap_t;
 
 // playmap queue/playlist

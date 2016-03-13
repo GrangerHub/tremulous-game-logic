@@ -683,6 +683,8 @@ typedef struct
   int               buildId;
   int               numBuildLogs;
   int               lastLayoutReset;
+
+  int               playmapFlags;
 } level_locals_t;
 
 #define CMD_CHEAT         0x0001

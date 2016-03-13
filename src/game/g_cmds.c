@@ -3837,10 +3837,8 @@ void Cmd_PrivateMessage_f( gentity_t *ent )
 
 void Cmd_PlayMap_f( gentity_t *ent )
 {
-  char   cmd[ MAX_TOKEN_CHARS ],
-    	 subcmd[ MAX_TOKEN_CHARS ],
-         map[ MAX_TOKEN_CHARS ],
-         layout[ MAX_TOKEN_CHARS ],
+  char   cmd[ MAX_TOKEN_CHARS ], subcmd[ MAX_TOKEN_CHARS ],
+         map[ MAX_TOKEN_CHARS ], layout[ MAX_TOKEN_CHARS ],
          extra[ MAX_TOKEN_CHARS ];
   char   *flags;
   int 	 page;
