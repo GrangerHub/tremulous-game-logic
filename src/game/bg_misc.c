@@ -2660,6 +2660,22 @@ qboolean BG_UpgradeAllowedInStage( upgrade_t upgrade, stage_t stage,
   return stages & ( 1 << stage );
 }
 
+
+/*
+===================================
+BG_GetLCannonPrimaryFireSpeed
+
+===================================
+*/
+int BG_GetLCannonPrimaryFireSpeed( int charge )
+{
+  return ( LCANNON_SPEED_MIN + ( charge -
+           LCANNON_CHARGE_TIME_MAX ) * ( LCANNON_SECONDARY_SPEED - LCANNON_SPEED_MIN ) /
+           ( ( ( LCANNON_CHARGE_TIME_MAX * LCANNON_SECONDARY_DAMAGE ) / LCANNON_DAMAGE ) -
+           LCANNON_CHARGE_TIME_MAX ) );
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////
 
 /*

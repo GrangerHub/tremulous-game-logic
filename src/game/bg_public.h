@@ -1196,6 +1196,7 @@ const upgradeAttributes_t   *BG_Upgrade( upgrade_t upgrade );
 qboolean                    BG_UpgradeAllowedInStage( upgrade_t upgrade,
                                                       stage_t stage,
                                                       int gameIsInWarmup );
+int                         BG_GetLCannonPrimaryFireSpeed( int charge );
 
 // content masks
 #define MASK_ALL          (-1)
