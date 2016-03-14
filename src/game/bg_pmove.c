@@ -51,7 +51,7 @@ float pm_airControlAmount = 165.0f; //Equivalence to side strafes value is appro
 
 //Side Air Strafes
 float	cpm_pm_strafeaccelerate = 150; //GoldSRC used 150. vq3: 1
-float	cpm_pm_wishspeed = 150; //vq3: 400. I personally set this to 500 on vanilla mode since dretch travels at 448 ups
+float	cpm_pm_wishspeed = 30; //vq3: 400. I personally set this to 500 on vanilla mode since dretch travels at 448 ups
 //You missed this. VQ3 just has "1.0"
 float	cpm_pm_airstopaccelerate = 2.5;
 
