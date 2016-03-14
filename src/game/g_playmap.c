@@ -823,32 +823,6 @@ int G_GetPlayMapQueueLength( void )
 
 /*
 ================
-G_ParsePlayMapFlag
-
-Parses a playmap flag string and returns the playMapFlag_t equivalent.
-================
-*/
-
-playMapFlag_t G_ParsePlayMapFlag(char *flag)
-{
-  int flagNum;
-
-  for( flagNum = PLAYMAP_FLAG_NONE + 1;
-       flagNum < PLAYMAP_NUM_FLAGS; flagNum++ )
-  {
-    if( Q_stricmp_exact( flag, playMapFlagList[ flagNum ].flagName ) == 0 )
-    {
-      // Confirm flag sequence and number match 
-      assert( flagNum == playMapFlagList[ flagNum ].flag);
-      return flagNum;
-    }
-  }
-
-  return PLAYMAP_FLAG_NONE;
-}
-
-/*
-================
 G_PlayMapEnqueue
 
 Enqueue a player requested map in the playmap queue (add to the back of the
@@ -895,8 +869,7 @@ playMapError_t G_PlayMapEnqueue( char *mapName, char *layout,
   else
     playMap.clientName = NULL;
 
-  // TODO: One can modify the default flags here. Prolly should come from a cvar
-  playMap.flags = G_ParsePlayMapFlagTokens( flags, PLAYMAP_FLAG_NONE );
+  playMap.flags = G_ParsePlayMapFlagTokens( flags );
 
   playMapQueue.tail = PLAYMAP_QUEUE_PLUS1( playMapQueue.tail );
   playMapQueue.playMap[ playMapQueue.tail ] = playMap;
@@ -907,18 +880,67 @@ playMapError_t G_PlayMapEnqueue( char *mapName, char *layout,
 
 /*
 ================
+G_ParsePlayMapFlag
+
+Parses a playmap flag string and returns the playMapFlag_t equivalent.
+================
+*/
+
+playMapFlag_t G_ParsePlayMapFlag(char *flag)
+{
+  int flagNum;
+
+  for( flagNum = PLAYMAP_FLAG_NONE + 1;
+       flagNum < PLAYMAP_NUM_FLAGS; flagNum++ )
+  {
+    if( Q_stricmp_exact( flag, playMapFlagList[ flagNum ].flagName ) == 0 )
+    {
+      // Confirm flag sequence and number match 
+      assert( flagNum == playMapFlagList[ flagNum ].flag);
+      return flagNum;
+    }
+  }
+
+  return PLAYMAP_FLAG_NONE;
+}
+
+/*
+================
+G_DefaultPlayMapFlags
+
+Returns binary value of default flags.
+================
+*/
+
+int G_DefaultPlayMapFlags(void)
+{
+  int flagNum,
+      flags = PLAYMAP_FLAG_NONE;
+
+  for( flagNum = PLAYMAP_FLAG_NONE + 1;
+       flagNum < PLAYMAP_NUM_FLAGS; flagNum++ )
+    if( playMapFlagList[ flagNum ].defVal )
+      PlaymapFlag_Set( flags, flagNum );
+
+  return flags;
+}
+
+/*
+================
 G_ParsePlayMapFlagTokens
 
 Tokenize string to find flags and set or clear bits on a given default
 flag configuration. TODO: defaults should come from playMapFlagList?
 ================
 */
-int G_ParsePlayMapFlagTokens( char *flags, int defaultFlags )
+int G_ParsePlayMapFlagTokens( char *flags )
 {
-  int 		i,
-    		flagsValue = defaultFlags;
+  int 		i, flagsValue;
   char  	*token;
   playMapFlag_t playMapFlag;
+
+  // Get defaults
+  flagsValue = G_DefaultPlayMapFlags();
   
   // Loop through flags
   for( i = 0; ; i++ )
@@ -971,6 +993,7 @@ G_PlayMapFlags2String
 
 Convert flag bits into string representation. Compares to
 default flags here to show only differences.
+TODO: Write to caller's buffer instead of allocating new one.
 ================
 */
 char *G_PlayMapFlags2String( int flags )
@@ -1167,14 +1190,16 @@ Print the playmap queue on the console
 */
 void G_PrintPlayMapQueue( gentity_t *ent )
 {
-  int i, len;
+  int 	    i, len;
   playMap_t *playMap;
+  char 	    *flagString;
 
   ADMBP_begin(); // begin buffer
 
   if ( ( len = G_GetPlayMapQueueLength() ) )
   {
-    ADMBP( "Maps that are currently in the queue:\n" );
+    ADMBP( "Current playmap queue:\n"
+	   "    Map        Player     Flags\n");
   }
   else
   {
@@ -1186,12 +1211,13 @@ void G_PrintPlayMapQueue( gentity_t *ent )
 
   for( i = 0; i < len; i++ )
   {
-    playMap = &playMapQueue.playMap[ PLAYMAP_QUEUE_ADD(playMapQueue.head, i)
-                                  ];
-    ADMBP( va( S_COLOR_YELLOW "%d." S_COLOR_WHITE " "
-               S_COLOR_CYAN "%s" S_COLOR_WHITE
-               " (added by %s" S_COLOR_WHITE ")\n", i + 1,
-               playMap->mapName, playMap->clientName ) );
+    playMap = &playMapQueue.playMap[ PLAYMAP_QUEUE_ADD(playMapQueue.head, i) ];
+    flagString = G_PlayMapFlags2String( playMap->flags );
+    ADMBP( va( S_COLOR_YELLOW "%2d." S_COLOR_WHITE " "
+               S_COLOR_CYAN "%-10s" S_COLOR_WHITE
+               " %-10s " S_COLOR_RED "%s" S_COLOR_WHITE "\n", i + 1,
+               playMap->mapName, playMap->clientName, flagString ) );
+    BG_Free( flagString );
   }
 
   ADMBP_end();
