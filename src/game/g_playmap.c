@@ -33,9 +33,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  * external utilities
  */
 
-void trap_FS_Read( void *buffer, int len, fileHandle_t f );
+int  trap_FS_Read( void *buffer, int len, fileHandle_t f );
 void trap_FS_Write( const void *buffer, int len, fileHandle_t f );
-
 
 /*
  * globals
@@ -115,8 +114,9 @@ static const playMapError_t playMapError[ ] =
 };
 
 // list of playmap flags and info
-static const playMapFlagDesc_t playMapFlag[ ] =
+static const playMapFlagDesc_t playMapFlagList[ ] =
 {
+  { PLAYMAP_FLAG_NONE,  "", 	 qfalse, "No flags" },
   { PLAYMAP_FLAG_DPUNT, "dpunt", qfalse, "Dretch Punt" },
   { PLAYMAP_FLAG_FF, 	"ff", 	 qtrue,  "Friendly Fire" },
   { PLAYMAP_FLAG_FBF, 	"fbf", 	 qtrue,  "Friendly Buildable Fire" },
@@ -520,8 +520,7 @@ void G_InitPlayMapQueue( void )
     playMapQueue.playMap[ i ].mapName = NULL;
     playMapQueue.playMap[ i ].layout  = NULL;
     playMapQueue.playMap[ i ].clientName = NULL;
-    playMapQueue.playMap[ i ].plusFlags  = 0;
-    playMapQueue.playMap[ i ].minusFlags = 0;
+    playMapQueue.playMap[ i ].flags  = 0;
   }
 }
 
@@ -605,6 +604,7 @@ playMapError_t G_SavePlayMapQueue( void )
 {
   fileHandle_t f;
   int i;
+  char *flagString;
 
   // Clean stale entries
   G_ValidatePlayMapQueue();
@@ -635,7 +635,13 @@ playMapError_t G_SavePlayMapQueue( void )
               trap_FS_Write( " ", 1, f );
               trap_FS_Write( playMap.layout, strlen( playMap.layout ), f );
          }
-         // TODO: also save flags here
+	 flagString = G_PlayMapFlags2String( playMap.flags );
+	 if( *flagString )
+	 {
+	   trap_FS_Write( " ", 1, f );
+	   trap_FS_Write( flagString, strlen( flagString ), f );
+	 }
+	 BG_Free( flagString );
     }
     trap_FS_Write( "\n", 1, f );
   }
@@ -694,34 +700,51 @@ playMapError_t G_ReloadPlayMapQueue( void )
         while ( cnf < (cnf2 + len) ) // map arguments
         {
             if( g_debugPlayMap.integer > 0 )
-                trap_Print( va( "PLAYMAP: reading maps at char index %ld\n", cnf - cnf2 ) );
-            // Must use G_CopyString to prevent overwrites by parser
-            mapName = G_CopyString(COM_ParseExt( &cnf, qfalse ));
+                trap_Print( va( "PLAYMAP: reading maps at char index %ld: '%s'\n",
+				cnf - cnf2, cnf ) );
+            mapName = COM_ParseExt( &cnf, qfalse );
             if( !*mapName )
-                break;
+	    {
+	      mapName = NULL;
+	      break;
+	    }
 
+	    // Must use G_CopyString to prevent overwrites by parser
+    	    mapName = G_CopyString( mapName );
+	    
             if( g_debugPlayMap.integer > 0 )
                 trap_Print( va( "PLAYMAP: found map %s\n", mapName ) );
 
             clientName = G_CopyString(COM_ParseExt( &cnf, qfalse ));
             if( !*clientName )
+	    {
+	      clientName = NULL;
+	      break;
+	    }
+
+	    // Check whether we have layout or flags
+	    cnf = SkipWhitespace( cnf, qfalse );
+
+	    if( ! *cnf || *cnf == '\n')
+	      break;
+	    
+	    if( ! *cnf == '+' && ! *cnf == '-' )
+	    {
+	      layout = COM_ParseExt( &cnf, qfalse );
+	      if( !*layout )
+	      {
+		layout = NULL;
                 break;
+	      }
+	      layout = G_CopyString(layout);
+	    } else
+	      layout = NULL;
 
-            layout = COM_ParseExt( &cnf, qfalse );
-            if( !*layout )
-                break;
-
-            layout = G_CopyString(layout);
-
-            flags = COM_ParseExt( &cnf, qfalse );
-            if( !*flags )
-                break;
-
-            flags = G_CopyString(flags);
-            // TODO: parse flags here
+	    flags = cnf;	/* Leave it at the end of layouts */
+	    SkipRestOfLine( &cnf );
             break;
         }
-        if( !*mapName )
+        if( !mapName || !*mapName )
             break; // end of all maps
 
         if( g_debugPlayMap.integer > 0 )
@@ -735,16 +758,13 @@ playMapError_t G_ReloadPlayMapQueue( void )
 
         // G_PlayMapEnqueue also copies the strings, so release the
         // originals here
-        if( *mapName )
+        if( mapName && *mapName )
             BG_Free(mapName);
 
-        if( *clientName )
+        if( clientName && *clientName )
             BG_Free(clientName);
 
-        if( *layout )
-            BG_Free(layout);
-
-        if( *flags )
+        if( layout && *layout )
             BG_Free(layout);
 
         if( g_debugPlayMap.integer > 0 )
@@ -816,10 +836,10 @@ playMapFlag_t G_ParsePlayMapFlag(char *flag)
   for( flagNum = PLAYMAP_FLAG_NONE + 1;
        flagNum < PLAYMAP_NUM_FLAGS; flagNum++ )
   {
-    if( Q_stricmp_exact( flag, playMapFlag[ flagNum ].flagName ) == 0 )
+    if( Q_stricmp_exact( flag, playMapFlagList[ flagNum ].flagName ) == 0 )
     {
       // Confirm flag sequence and number match 
-      assert( flagNum == playMapFlag[ flagNum ].flag);
+      assert( flagNum == playMapFlagList[ flagNum ].flag);
       return flagNum;
     }
   }
@@ -839,10 +859,8 @@ queue).
 playMapError_t G_PlayMapEnqueue( char *mapName, char *layout,
                                  char *clientName, char *flags, gentity_t *ent )
 {
-  int       i;
-  char      *token;
-  playMap_t playMap;
-  playMapFlag_t playMapFlag;
+  int       	i;
+  playMap_t 	playMap;
 
   if( G_FindInMapPool( mapName ) < 0 )
     return G_PlayMapErrorByCode( PLAYMAP_ERROR_MAP_NOT_IN_POOL );
@@ -877,10 +895,38 @@ playMapError_t G_PlayMapEnqueue( char *mapName, char *layout,
   else
     playMap.clientName = NULL;
 
+  // TODO: One can modify the default flags here. Prolly should come from a cvar
+  playMap.flags = G_ParsePlayMapFlagTokens( flags, PLAYMAP_FLAG_NONE );
+
+  playMapQueue.tail = PLAYMAP_QUEUE_PLUS1( playMapQueue.tail );
+  playMapQueue.playMap[ playMapQueue.tail ] = playMap;
+  playMapQueue.numEntries++;
+
+  return G_PlayMapErrorByCode( PLAYMAP_ERROR_NONE );
+}
+
+/*
+================
+G_ParsePlayMapFlagTokens
+
+Tokenize string to find flags and set or clear bits on a given default
+flag configuration. TODO: defaults should come from playMapFlagList?
+================
+*/
+int G_ParsePlayMapFlagTokens( char *flags, int defaultFlags )
+{
+  int 		i,
+    		flagsValue = defaultFlags;
+  char  	*token;
+  playMapFlag_t playMapFlag;
+  
   // Loop through flags
   for( i = 0; ; i++ )
   {
-    token = COM_Parse( &flags );
+    token = COM_ParseExt( &flags, qfalse );
+    if( g_debugPlayMap.integer > 0 )
+      trap_Print( va( "PLAYMAP: parsing flag #%d: %s.\n",
+		      i + 1, token ));
 
     if( !token[0] )
       break;
@@ -893,7 +939,11 @@ playMapError_t G_PlayMapEnqueue( char *mapName, char *layout,
           playMapFlag = G_ParsePlayMapFlag( token + 1 );
 
           if ( playMapFlag != PLAYMAP_FLAG_NONE )
-            PlaymapFlag_Set(playMap.plusFlags, playMapFlag);
+            PlaymapFlag_Set(flagsValue, playMapFlag);
+
+	  if( g_debugPlayMap.integer > 0 )
+	    trap_Print( va( "PLAYMAP: setting flag %s.\n",
+			    playMapFlagList[ playMapFlag ].flagDesc ) );
         }
         break;
       case '-':
@@ -902,17 +952,55 @@ playMapError_t G_PlayMapEnqueue( char *mapName, char *layout,
           playMapFlag = G_ParsePlayMapFlag( token + 1 );
 
           if ( playMapFlag != PLAYMAP_FLAG_NONE )
-            PlaymapFlag_Set(playMap.minusFlags, playMapFlag);
+            PlaymapFlag_Clear(flagsValue, playMapFlag);
+
+	  if( g_debugPlayMap.integer > 0 )
+	    trap_Print( va( "PLAYMAP: clearing flag %s.\n",
+			    playMapFlagList[ playMapFlag ].flagDesc ) );
         }
         break;
     }
   }
 
-  playMapQueue.tail = PLAYMAP_QUEUE_PLUS1( playMapQueue.tail );
-  playMapQueue.playMap[ playMapQueue.tail ] = playMap;
-  playMapQueue.numEntries++;
+  return flagsValue;
+}
 
-  return G_PlayMapErrorByCode( PLAYMAP_ERROR_NONE );
+/*
+================
+G_PlayMapFlags2String
+
+Convert flag bits into string representation. Compares to
+default flags here to show only differences.
+================
+*/
+char *G_PlayMapFlags2String( int flags )
+{
+  int 	 flagNum;
+  char 	*flagString;
+  char 	 token[ MAX_TOKEN_CHARS ];
+
+  flagString = BG_Alloc( MAX_STRING_CHARS );
+  *flagString = '\0';
+  
+  // Loop through flags
+  for( flagNum = PLAYMAP_FLAG_NONE + 1; flagNum < PLAYMAP_NUM_FLAGS; flagNum++ )
+  {
+    if( ! playMapFlagList[ flagNum ].defVal &&
+	PlaymapFlag_IsSet( flags, flagNum ) )
+    {
+      Com_sprintf( token, MAX_TOKEN_CHARS, "+%s ",
+		   playMapFlagList[ flagNum ].flagName );
+      Q_strcat( flagString, MAX_STRING_CHARS, token );
+    } else if( playMapFlagList[ flagNum ].defVal &&
+	       ! PlaymapFlag_IsSet( flags, flagNum ) )
+    {
+      Com_sprintf( token, MAX_TOKEN_CHARS, "-%s ",
+		   playMapFlagList[ flagNum ].flagName );
+      Q_strcat( flagString, MAX_STRING_CHARS, token );
+    }
+  }
+
+  return flagString;
 }
 
 /*
@@ -936,15 +1024,13 @@ playMap_t *G_PopFromPlayMapQueue( void )
   playMap->mapName = playMapQueue.playMap[ playMapQueue.head ].mapName;
   playMap->layout = playMapQueue.playMap[ playMapQueue.head ].layout;
   playMap->clientName = playMapQueue.playMap[ playMapQueue.head ].clientName;
-  playMap->plusFlags = playMapQueue.playMap[ playMapQueue.head ].plusFlags;
-  playMap->minusFlags = playMapQueue.playMap[ playMapQueue.head ].minusFlags;
+  playMap->flags = playMapQueue.playMap[ playMapQueue.head ].flags;
 
   // reset the playmap in the head of the queue to null values
   playMapQueue.playMap[ playMapQueue.head ].mapName = NULL;
   playMapQueue.playMap[ playMapQueue.head ].layout = NULL;
   playMapQueue.playMap[ playMapQueue.head ].clientName = NULL;
-  playMapQueue.playMap[ playMapQueue.head ].plusFlags = 0;
-  playMapQueue.playMap[ playMapQueue.head ].minusFlags = 0;
+  playMapQueue.playMap[ playMapQueue.head ].flags = 0;
 
   // advance the head of the queue in the array (shorten queue by one)
   playMapQueue.head = PLAYMAP_QUEUE_PLUS1( playMapQueue.head );
@@ -1145,7 +1231,6 @@ void G_NextPlayMap( void )
 
   trap_SendConsoleCommand( EXEC_APPEND, va( "map \"%s\"\n", playMap->mapName ) );
 
-  // TODO: do the flags here
-
-  level.playmapFlags = playMap->plusFlags;
+  // do the flags here
+  level.playmapFlags = playMap->flags;
 }

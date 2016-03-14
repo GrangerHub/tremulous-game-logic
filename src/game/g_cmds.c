@@ -3890,7 +3890,12 @@ void Cmd_PlayMap_f( gentity_t *ent )
     trap_Argv( 2, map, sizeof( map ) );
     trap_Argv( 3, layout, sizeof( layout ) );
     trap_Argv( 4, extra, sizeof( extra ) );
-    flags = ConcatArgs( 3 );
+    if( *layout == '+' || *layout == '-' )
+    {
+      flags = ConcatArgs( 3 );
+      *layout = '\0';
+    } else
+      flags = ConcatArgs( 4 );
 
     if( g_debugPlayMap.integer > 0 )
       trap_SendServerCommand( ent-g_entities,

@@ -111,8 +111,7 @@ typedef struct playMap_s
 
   char *clientName;
 
-  int plusFlags;
-  int minusFlags;
+  int flags;
   //playMapFlag_t plusFlags[ PLAYMAP_NUM_FLAGS ];
   //playMapFlag_t minusFlags[ PLAYMAP_NUM_FLAGS ];
 } playMap_t;
@@ -197,3 +196,5 @@ int G_GetPlayMapQueueIndexByClient( char *clientName );
 void G_PrintPlayMapQueue( gentity_t *ent );
 qboolean G_PlayMapActive( void );
 void G_NextPlayMap( void );
+int G_ParsePlayMapFlagTokens( char *flags, int defaultFlags );
+char *G_PlayMapFlags2String( int flags );
