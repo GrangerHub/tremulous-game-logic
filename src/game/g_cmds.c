@@ -3850,7 +3850,7 @@ void Cmd_PlayMap_f( gentity_t *ent )
   {
     // TODO: [layout [flags]] announce them once they're implemented
     ADMP( "To add maps to the playlist:\n"
-	  S_COLOR_YELLOW "  /playmap add " S_COLOR_WHITE "mapname [layout]\n"
+	  S_COLOR_YELLOW "  /playmap add " S_COLOR_WHITE "mapname [layout] [flags]\n"
 	  "To see a list of maps to choose:\n"
 	  S_COLOR_YELLOW "  /playmap pool " S_COLOR_WHITE "[pagenumber]\n\n" ); 
       
