@@ -1044,6 +1044,7 @@ typedef struct
   int           crosshairBuildable;
   int           crosshairClientNum;
   int           crosshairClientTime;
+  int           crosshairEnemyTime;
 
   // powerup active flashing
   int           powerupActive;
