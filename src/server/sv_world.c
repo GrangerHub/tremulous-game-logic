@@ -512,11 +512,13 @@ static void SV_ClipMoveToEntities( moveclip_t *clip ) {
 	trace_t		trace;
 	clipHandle_t	clipHandle;
 	float		*origin, *angles;
+        int             astralMask = 0;
 
 	num = SV_AreaEntities( clip->boxmins, clip->boxmaxs, touchlist, MAX_GENTITIES);
 
 	if ( clip->passEntityNum != ENTITYNUM_NONE ) {
 		passOwnerNum = ( SV_GentityNum( clip->passEntityNum ) )->r.ownerNum;
+                astralMask = clip->contentmask & EF_ASTRAL_NOCLIP;
 		if ( passOwnerNum == ENTITYNUM_NONE ) {
 			passOwnerNum = -1;
 		}
@@ -541,6 +543,9 @@ static void SV_ClipMoveToEntities( moveclip_t *clip ) {
 			if ( touch->r.ownerNum == passOwnerNum ) {
 				continue;	// don't clip against other missiles from our owner
 			}
+                        if ( astralMask & touch->s.eFlags ) {
+                                continue;      // EF_ASTRAL_NOCLIP flagged entities don't clip with ASTRALSOLID entities
+                        }
 		}
 
 		// if it doesn't have any brushes of a type we

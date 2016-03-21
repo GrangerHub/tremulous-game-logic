@@ -1046,6 +1046,7 @@ typedef struct
   int           crosshairBuildable;
   int           crosshairClientNum;
   int           crosshairClientTime;
+  int           crosshairEnemy;
 
   vec3_t        crosshairPredictedImpactPoint;
 
