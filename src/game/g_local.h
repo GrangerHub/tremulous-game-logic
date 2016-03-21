@@ -530,6 +530,7 @@ typedef struct
 #define MAX_SPAWN_VARS      64
 #define MAX_SPAWN_VARS_CHARS  4096
 #define MAX_BUILDLOG          1024
+#define MAX_PLAYER_MODEL    256
 
 typedef struct
 {
@@ -676,6 +677,9 @@ typedef struct
 
   emoticon_t        emoticons[ MAX_EMOTICONS ];
   int               emoticonCount;
+
+  char              *playerModel[ MAX_PLAYER_MODEL ];
+  int               playerModelCount;
 
   namelog_t         *namelogs;
 
@@ -982,6 +986,7 @@ void      BeginIntermission( void );
 void      ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const vec3_t angles );
 void      player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod );
 qboolean  SpotWouldTelefrag( gentity_t *spot );
+char      *GetSkin( char *modelname, char *wish ); 
 
 //
 // g_svcmds.c
@@ -1086,6 +1091,15 @@ void G_namelog_restore( gclient_t *client );
 void G_namelog_update_score( gclient_t *client );
 void G_namelog_update_name( gclient_t *client );
 void G_namelog_cleanup( void );
+
+//
+// g_playermodel.c
+//
+void G_InitPlayerModel(void);
+void G_FreePlayerModel(void);
+qboolean G_IsValidPlayerModel(const char *model);
+void G_GetPlayerModelSkins( const char *modelname, char skins[MAX_PLAYER_MODEL][ 64 ], int maxskins, int *numskins );
+char *GetSkin( char *modelname, char *wish );
 
 //some maxs
 #define MAX_FILEPATH      144
@@ -1214,6 +1228,8 @@ extern  vmCvar_t  g_allowTeamOverlay;
 
 extern  vmCvar_t  g_censorship;
 
+extern  vmCvar_t  g_pimpHuman;
+
 void      trap_Print( const char *fmt );
 void      trap_Error( const char *fmt ) __attribute__((noreturn));
 int       trap_Milliseconds( void );
@@ -1226,6 +1242,7 @@ void      trap_FS_Read( void *buffer, int len, fileHandle_t f );
 void      trap_FS_Write( const void *buffer, int len, fileHandle_t f );
 void      trap_FS_FCloseFile( fileHandle_t f );
 int       trap_FS_GetFileList( const char *path, const char *extension, char *listbuf, int bufsize );
+int       trap_FS_GetFilteredFiles( const char *path, const char *extension, char *filter, char *listbuf, int bufsize );
 int       trap_FS_Seek( fileHandle_t f, long offset, int origin ); // fsOrigin_t
 void      trap_SendConsoleCommand( int exec_when, const char *text );
 void      trap_Cvar_Register( vmCvar_t *cvar, const char *var_name, const char *value, int flags );

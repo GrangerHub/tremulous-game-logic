@@ -92,6 +92,11 @@ int trap_FS_GetFileList(  const char *path, const char *extension, char *listbuf
   return syscall( G_FS_GETFILELIST, path, extension, listbuf, bufsize );
 }
 
+int trap_FS_GetFilteredFiles( const char *path, const char *extension, char *filter, char *listbuf, int bufsize )
+{
+  return syscall( G_FS_GETFILTEREDFILES, path, extension, filter, listbuf, bufsize );
+}
+
 void  trap_SendConsoleCommand( int exec_when, const char *text )
 {
   syscall( G_SEND_CONSOLE_COMMAND, exec_when, text );

@@ -109,6 +109,17 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "[^3name|slot#^7]"
     },
 
+    {"flag", G_admin_flag, qtrue, "flag",
+      "add an admin flag to a player, prefix flag with '-' to disallow the flag. "
+      "console can use this command on admin levels by prefacing a '*' to the admin level value.",
+      "[^3name^7|^3slot#^7|^3*adminlevel^7] (^3+^7|^3-^7)[^3flag^7]"
+    },
+
+    {"gamedir", G_admin_gamedir, qtrue, "gamedir",
+      "Filter files on the server",
+      "[^3dir^7] [^3extension^7] [^3filter^7]"
+    },
+
     {"kick", G_admin_kick, qfalse, "kick",
       "kick a player with an optional reason",
       "[^3name|slot#^7] (^5reason^7)"
@@ -117,6 +128,11 @@ g_admin_cmd_t g_admin_cmds[ ] =
     {"listadmins", G_admin_listadmins, qtrue, "listadmins",
       "display a list of all server admins and their levels",
       "(^5name^7) (^5start admin#^7)"
+    },
+
+    {"listflags", G_admin_listflags, qtrue, "flag",
+     "list all flags understood by this server",
+     "[^3name|slot#^7]"
     },
 
     {"listlayouts", G_admin_listlayouts, qtrue, "listlayouts",
@@ -227,6 +243,11 @@ g_admin_cmd_t g_admin_cmds[ ] =
     {"time", G_admin_time, qtrue, "time",
       "show the current local server time",
       ""},
+
+    {"transform", G_admin_transform, qfalse, "magic",
+      "change a human player to a different player model",
+      "[^3name|slot#^7] [^3player model^7]"
+    },
 
     {"unban", G_admin_unban, qfalse, "ban",
       "unbans a player specified by the slot as seen in showbans",
@@ -2876,6 +2897,68 @@ qboolean G_admin_rename( gentity_t *ent )
   return qtrue;
 }
 
+qboolean G_admin_transform( gentity_t *ent )
+{
+  int pid;
+  char name[ MAX_NAME_LENGTH ];
+  char modelname[ MAX_NAME_LENGTH ];
+  char skin[ MAX_NAME_LENGTH ];
+  char err[ MAX_STRING_CHARS ];
+  char userinfo[ MAX_INFO_STRING ];
+  gentity_t *victim = NULL;
+  qboolean found;
+
+  if (trap_Argc() < 3)
+  {
+    ADMP("^3transform: ^7usage: transform [name|slot#] [model] <skin>\n");
+    return qfalse;
+  }
+
+  trap_Argv(1, name, sizeof(name));
+  trap_Argv(2, modelname, sizeof(modelname));
+
+  strcpy(skin, "default");  
+  if (trap_Argc() >= 4)
+  {
+    trap_Argv(1, skin, sizeof(skin));
+  }
+
+  pid = G_ClientNumberFromString(name, err, sizeof(err));
+  if (pid == -1)
+  {
+    ADMP(va("^3transform: ^7%s", err));
+    return qfalse;
+  }
+
+  victim = &g_entities[ pid ];
+  if (victim->client->pers.connected != CON_CONNECTED)
+  {
+    ADMP("^3transform: ^7sorry, but your intended victim is still connecting\n");
+    return qfalse;
+  }
+
+  found = G_IsValidPlayerModel(modelname);
+
+  if (!found)
+  {
+    ADMP(va("^3transform: ^7no matching model %s\n", modelname));
+    return qfalse;
+  }
+
+  trap_GetUserinfo(pid, userinfo, sizeof(userinfo));
+  AP( va("print \"^3transform: ^7%s^7 has been changed into %s^7 by %s\n\"",
+         victim->client->pers.netname, modelname,
+         (ent ? ent->client->pers.netname : "console")) );
+
+  Info_SetValueForKey( userinfo, "model", modelname );
+  Info_SetValueForKey( userinfo, "skin", GetSkin(modelname, skin));
+  Info_SetValueForKey( userinfo, "voice", modelname );
+  trap_SetUserinfo( pid, userinfo );
+  ClientUserinfoChanged( pid, qtrue );
+
+  return qtrue;
+}
+
 qboolean G_admin_restart( gentity_t *ent )
 {
   char      layout[ MAX_CVAR_VALUE_STRING ] = { "" };
@@ -3645,6 +3728,523 @@ qboolean G_admin_revert( gentity_t *ent )
   G_BuildLogRevert( id );
   return qtrue;
 }
+
+// TODO: Move this to header
+typedef struct {
+  char *flag;
+  char *description;
+} AdminFlagListEntry_t;
+
+static AdminFlagListEntry_t adminFlagList[] =
+{
+  { ADMF_ACTIVITY,             "inactivity rules do not apply" },
+  { ADMF_ADMINCHAT,            "can see and use admin chat" },
+  { ADMF_CAN_PERM_BAN,         "can permanently ban players" },
+  { ADMF_CAN_IP_BAN,           "can ban players with CIDR notation" },
+  { ADMF_FORCETEAMCHANGE,      "team balance rules do not apply" },
+  { ADMF_INCOGNITO,            "does not show as admin in !listplayers" },
+  { ADMF_IMMUNITY,             "cannot be vote kicked or muted" },
+  { ADMF_IMMUTABLE,            "admin commands cannot be used on them" },
+  { ADMF_NOCENSORFLOOD,        "no flood protection" },
+  { ADMF_NO_VOTE_LIMIT,        "vote limitations do not apply" },
+  { ADMF_ADMINCHAT,            "can see and send /a admin messages" },
+  { ADMF_SPEC_ALLCHAT,         "can see team chat as spectator" },
+  { ADMF_UNACCOUNTABLE,        "does not need to specify reason for kick/ban" },
+};
+
+static int adminNumFlags = sizeof(adminFlagList) / sizeof(adminFlagList[ 0 ]);
+
+qboolean G_admin_listflags( gentity_t * ent )
+{
+  int i, j;
+  int count = 0;
+
+  ADMBP_begin();
+
+  ADMBP( "^3\nAbility flags:^7\n\n" );
+
+  for( i = 0; i < adminNumFlags; i++ )
+  {
+    //ADMBP( va( "  %s%-20s ^7%s\n",
+    ADMBP( va( "  %-20s ^7%s\n",
+      adminFlagList[ i ].flag,
+      adminFlagList[ i ].description ) );
+  }
+
+  ADMBP( "\n^3Command flags:^7\n\n" );
+
+  for( i = 0; i < adminNumCmds; i++ )
+  {
+    ADMBP( va( "  ^5%-20s^7", g_admin_cmds[ i ].flag ) );
+    for( j = 0; j < adminNumCmds; j++ )
+    {
+      if( !strcmp( g_admin_cmds[ j ].flag, g_admin_cmds[ i ].flag ) )
+        ADMBP( va( " %s", g_admin_cmds[ j ].keyword ) );
+    }
+    ADMBP( "\n" );
+    count++;
+  }
+
+  ADMBP( "^3\nPlayer Models:^7\n\n" );
+  for ( i = 0; i < level.playerModelCount; i++ )
+  {
+      ADMBP( va( " ^2MODEL%-20s^7 %s\n", level.playerModel[i], level.playerModel[i] ) ); 
+  }
+  ADMBP( "\n" );
+
+  ADMBP( va( "^3listflags: ^7listed %d abilities and %d command flags and %d\n",
+    adminNumFlags, count, level.playerModelCount ) );
+
+  ADMBP_end();
+
+  return qtrue;
+}
+
+static int SortFlags( const void *pa, const void *pb )
+{
+  char *a = (char *)pa;
+  char *b = (char *)pb;
+
+  if( *a == '-' || *a == '+' )
+    a++;
+  if( *b == '-' || *b == '+' )
+    b++;
+  return strcmp(a, b);
+}
+
+
+#define MAX_USER_FLAGS 200
+const char *G_admin_user_flag( char *oldflags, char *flag, qboolean add, qboolean clear,
+                               char *newflags, int size )
+{
+  char *token, *token_p;
+  char *key;
+  char head_flags[ MAX_USER_FLAGS ][ MAX_ADMIN_FLAG_LEN ];
+  char tail_flags[ MAX_USER_FLAGS ][ MAX_ADMIN_FLAG_LEN ];
+  char allflag[ MAX_ADMIN_FLAG_LEN ];
+  char newflag[ MAX_ADMIN_FLAG_LEN ];
+  int head_count = 0;
+  int tail_count = 0;
+  qboolean flagset = qfalse;
+  int i;
+
+  if( !flag[ 0 ] )
+  {
+    return "invalid admin flag";
+  }
+
+  allflag[ 0 ] = '\0';
+  token_p = oldflags;
+  while( *( token = COM_Parse( &token_p ) ) )
+  {
+    key = token;
+    if( *key == '-' || *key == '+' )
+      key++;
+
+    if( !strcmp( key, flag ) )
+    {
+      if( flagset )
+        continue;
+      flagset = qtrue;
+      if( clear )
+      {
+        // clearing ALLFlAGS will result in clearing any following flags
+        if( !strcmp( key, ADMF_ALLFLAGS ) )
+          break;
+        else
+          continue;
+      }
+      Com_sprintf( newflag, sizeof( newflag ), "%s%s",
+        ( add ? "+" : "-" ), key );
+    }
+    else
+    {
+      Q_strncpyz( newflag, token, sizeof( newflag ) );
+    }
+
+    if( !strcmp( key, ADMF_ALLFLAGS ) )
+    {
+      if( !allflag[ 0 ] )
+        Q_strncpyz( allflag, newflag, sizeof( allflag ) );
+      continue;
+    }
+
+    if( !allflag[ 0 ] )
+    {
+      if( head_count < MAX_USER_FLAGS )
+      {
+        Q_strncpyz( head_flags[ head_count ], newflag,
+                    sizeof( head_flags[ head_count ] ) );
+        head_count++;
+      }
+    }
+    else
+    {
+      if( tail_count < MAX_USER_FLAGS )
+      {
+        Q_strncpyz( tail_flags[ tail_count ], newflag,
+                    sizeof( tail_flags[ tail_count ] ) );
+        tail_count++;
+      }
+    }
+  }
+
+  if( !flagset && !clear )
+  {
+    if( !strcmp( flag, ADMF_ALLFLAGS ) )
+    {
+      Com_sprintf( allflag, sizeof( allflag ), "%s%s",
+        ( add ) ? "" : "-", ADMF_ALLFLAGS );
+    }
+    else if( !allflag[ 0 ] )
+    {
+      if( head_count < MAX_USER_FLAGS )
+      {
+        Com_sprintf( head_flags[ head_count ], sizeof( head_flags[ head_count ] ),
+          "%s%s", ( add ) ? "" : "-", flag );
+        head_count++;
+      }
+    }
+    else
+    {
+      if( tail_count < MAX_USER_FLAGS )
+      {
+        Com_sprintf( tail_flags[ tail_count ], sizeof( tail_flags[ tail_count ] ),
+          "%s%s", ( add ) ? "+" : "-", flag );
+        tail_count++;
+      }
+    }
+  }
+
+  qsort( head_flags, head_count, sizeof( head_flags[ 0 ] ), SortFlags );
+  qsort( tail_flags, tail_count, sizeof( tail_flags[ 0 ] ), SortFlags );
+
+  // rebuild flags
+  newflags[ 0 ] = '\0';
+  for( i = 0; i < head_count; i++ )
+  {
+    Q_strcat( newflags, size,
+              va( "%s%s", ( i ) ? " ": "", head_flags[ i ] ) );
+  }
+  if( allflag[ 0 ] )
+  {
+    Q_strcat( newflags, size,
+      va( "%s%s", ( newflags[ 0 ] ) ? " ": "", allflag ) );
+
+    for( i = 0; i < tail_count; i++ )
+    {
+      Q_strcat( newflags, size,
+                va( " %s", tail_flags[ i ] ) );
+    }
+  }
+
+  return NULL;
+}
+
+qboolean G_admin_flag( gentity_t *ent )
+{
+  char cmd[ MAX_NAME_LENGTH ] = {""};
+  char testname[ MAX_NAME_LENGTH ] = {""};
+  char name[ MAX_NAME_LENGTH ] = {""};
+  char flag[ MAX_ADMIN_FLAG_LEN ] = {""};
+  char *flagptr = NULL;
+  const char *result;
+  qboolean add = qtrue;
+  qboolean clear = qfalse;
+  g_admin_admin_t *a = NULL;
+  g_admin_level_t *l = NULL;
+  g_admin_level_t *d = G_admin_level( 0 );
+
+  gentity_t *vic = NULL; 
+  int i, na;
+
+  trap_Argv( 0, cmd, sizeof(cmd) );
+  if( trap_Argc() < 2 )
+  {
+    ADMP(va("^7usage: %s [name|slot|*level] [flag]\n", cmd));
+    return qfalse;
+  }
+
+  trap_Argv( 1, testname, sizeof(testname) );
+  trap_Argv( 2, flag, sizeof(flag) );
+
+  if( testname[ 0 ] == '*' )
+  {
+    int id;
+    if( ent )
+    {
+      ADMP(va("^3%s: ^7only console can change admin level flags\n", cmd));
+      return qfalse;
+    }
+
+    id = atoi( testname + 1 );
+    if( !(l = G_admin_level(id)) )
+    {
+      ADMP(va("^3%s: ^7level is not defined\n", cmd));
+      return qfalse;
+    }
+  }
+  else
+  {
+    for( na = 0, a = g_admin_admins; a; na++, a = a->next );
+
+    for( i = 0; testname[ i ] && isdigit( testname[ i ] ); i++ );
+    if( !testname[ i ] )
+    {
+      int id = atoi( testname );
+      if( id < MAX_CLIENTS )
+      {
+        vic = &g_entities[ id ];
+        if( !vic || !vic->client || vic->client->pers.connected == CON_DISCONNECTED )
+        {
+          ADMP( va("^3%s: ^7no player connected in slot %d\n", cmd, id) );
+          return qfalse;
+        }
+      }
+      else if( id < na + MAX_CLIENTS )
+      {
+        for( i = 0, a = g_admin_admins; i < id - MAX_CLIENTS; i++, a = a->next );
+      }
+      else
+      {
+        ADMP( va("^3%s: ^7%s not in range 1-%d\n", cmd, testname, na + MAX_CLIENTS - 1) );
+        return qfalse;
+      }
+    }
+    else
+    {
+      G_SanitiseString( testname, name, sizeof( name ) );
+    }
+  
+    if( vic )
+    {
+      a = vic->client->pers.admin;
+    }
+    else if( !a )
+    {
+      g_admin_admin_t *wa;
+      int             matches = 0;
+  
+      for( wa = g_admin_admins; wa && matches < 2; wa = wa->next )
+      {
+        G_SanitiseString( wa->name, testname, sizeof( testname ) );
+        if( strstr( testname, name ) )
+        {
+          a = wa;
+          matches++;
+        }
+      }
+  
+      for( i = 0; i < level.maxclients && matches < 2; i++ )
+      {
+        if( level.clients[ i ].pers.connected == CON_DISCONNECTED )
+          continue;
+  
+        if( matches && level.clients[ i ].pers.admin &&
+            level.clients[ i ].pers.admin == a )
+        {
+          vic = &g_entities[ i ];
+          continue;
+        }
+  
+        G_SanitiseString( level.clients[ i ].pers.netname, testname,
+          sizeof( testname ) );
+        if( strstr( testname, name ) )
+        {
+          vic = &g_entities[ i ];
+          a = vic->client->pers.admin;
+          matches++;
+        }
+      }
+  
+      if( matches == 0 )
+      {
+        ADMP( va("^3%s:^7 no match.  use listplayers or listadmins to "
+          "find an appropriate number to use instead of name.\n", cmd) );
+        return qfalse;
+      }
+      if( matches > 1 )
+      {
+        ADMP( va("^3%s:^7 more than one match.  Use the admin number "
+          "instead:\n", cmd) );
+        admin_listadmins( ent, 0, name );
+        return qfalse;
+      }
+    }
+
+    if( ent && !admin_higher_admin( ent->client->pers.admin, a ) )
+    {
+      ADMP( va("^3%s: ^7sorry, but your intended victim has a higher"
+          " admin level than you\n", cmd) );
+      return qfalse;
+    }
+  }
+
+  if( trap_Argc() < 3 )
+  {
+    if( a )
+    {
+      g_admin_level_t *tmp = G_admin_level(a->level);
+      if( tmp )
+      {
+        ADMP( va("^3%s:^7 flags for %s ^7%s are '^3%s%s^2%s'\n",
+                  cmd,
+                  tmp->name,
+                  testname,
+                  tmp->flags,
+                  (*a->flags ? " " : ""),
+                  a->flags) );
+      }
+      else
+      {
+        // XXX: Probably dead code path.
+        ADMP( va("^3%s:^7 flags for player ^3%s^7 are '^3%s^7'\n",
+                  cmd, testname, a->flags) );
+      }
+    }
+    else if ( !l )
+    {
+       ADMP( va("^3%s:^7 flags for %s^7 %s are '^3%s^7'\n",
+                  cmd, d->name, testname, d->flags) );
+    }
+    else
+    {
+      ADMP( va("^3%s:^7 flags for %s^7 (level %d) are '^3%s^7'\n",
+                  cmd, l->name, l->level, l->flags) );
+    }
+    return qtrue;
+  }
+
+  trap_Argv( 2, flag, sizeof(flag) );
+  if( flag[ 0 ] == '-' || flag[ 0 ] == '+' )
+  {
+    add = ( flag[ 0 ] == '+' );
+    flagptr = flag+1;
+  }
+
+  if( ent && !Q_stricmp( ent->client->pers.guid, a->guid ) )
+  {
+    ADMP(va("^3%s:^7 you may not change your own flags (use rcon)\n", cmd));
+    return qfalse;
+  }
+
+  if( flagptr[ 0 ] != '.' && !G_admin_permission( ent, flagptr ) )
+  {
+    ADMP( va("^3%s:^7 you can only change flags that you also have\n", cmd));
+    return qfalse;
+  }
+
+  if( !Q_stricmp( cmd, "unflag" ) )
+  {
+    clear = qtrue;
+  }
+
+  if( a && a->level )
+  {
+    result = G_admin_user_flag( a->flags, flagptr, add, clear,
+                                a->flags, sizeof(a->flags) );
+  }
+  else if (l)
+  {
+    //FIXME: Does not work on admin levels?
+    result = G_admin_user_flag( l->flags, flagptr, add, clear,
+                                l->flags, sizeof(l->flags) );
+  }
+  else
+  {
+    // cannot for non-registered players
+    ADMP( va( "^3flag:^7 you can not set flags to %s's^7'", d->name) );
+    return qfalse;
+  }
+
+  if( result )
+  {
+    ADMP( va( "^3flag: ^7an error occured setting flag '^3%s^7', %s\n",
+      flagptr, result ) );
+    return qfalse;
+  }
+
+  if( !Q_stricmp( cmd, "flag" ) )
+  {
+    ADMP( va( "^3%s: ^7%s^7 was %s admin flag '%s' by %s\n",
+      cmd, testname,
+      ( add ) ? "given" : "denied",
+      flagptr,
+      ( ent ) ? ent->client->pers.netname : "console" ) );
+  }
+  else
+  {
+    ADMP( va( "^3%s: ^7admin flag '%s' for %s^7 cleared by %s\n",
+      cmd, flagptr, testname,
+      ( ent ) ? ent->client->pers.netname : "console" ) );
+  }
+
+  if( !g_admin.string[ 0 ] )
+    ADMP("^3flag: ^7WARNING g_admin not set, not saving admin record to a file\n");
+  else
+    admin_writeconfig();
+
+  return qtrue;
+}
+
+qboolean G_admin_gamedir( gentity_t *ent )
+{
+    char dir[ MAX_QPATH ];
+    char ext[ 24 ]; // arbitrary number, smaller or larger might be approriate.
+    char filter[ MAX_QPATH ];
+    int page = 0;
+
+    if ( trap_Argc() < 4 )
+    {
+        ADMP("usage: ^3gamedir^7 \"<dir>\" \"<extension>\" \"<filter>\"\n");
+        return qfalse;
+    }
+
+    trap_Argv( 1, dir, sizeof(dir) );
+    trap_Argv( 2, ext, sizeof(ext) );
+    trap_Argv( 3, filter, sizeof(filter) );
+
+    if ( trap_Argc() >= 5 )
+    {
+      char lp[ 8 ];
+      trap_Argv( 4, lp, sizeof( lp ) );
+      page = atoi( lp );
+
+      if( page < 0 )
+        page = 0;
+    }
+
+    {
+      char fileList[ 16*1024 ] = {""};
+      char *filePtr;
+      int  nFiles;
+      int  fileLen = 0;
+      int  i, j = 0;
+
+      ADMBP_begin();
+
+      nFiles = trap_FS_GetFilteredFiles(dir, ext, filter,
+              fileList, sizeof(fileList));
+      filePtr = fileList;
+      for( i = 0; i < nFiles; i++, filePtr += fileLen + 1 )
+      {
+        fileLen = strlen( filePtr );
+
+        if ( i < page ) 
+          continue;
+
+        ADMBP( va( "%d - %s\n", i, filePtr ) );
+        if ( j++ > 32 )
+          break;
+      }
+
+      ADMBP( va( "^3gamedir^7: %d-%d of %d matches listed.\n", page, page+32, nFiles) );
+      ADMBP_end();
+    }
+
+    return qtrue;
+}
+
 
 /*
 ================
