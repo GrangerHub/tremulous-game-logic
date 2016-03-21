@@ -294,7 +294,7 @@ static cvarTable_t cvarTable[ ] =
   { &cg_tracerWidth, "cg_tracerwidth", "1", CVAR_CHEAT },
   { &cg_tracerLength, "cg_tracerlength", "100", CVAR_CHEAT },
   { &cg_thirdPersonRange, "cg_thirdPersonRange", "75", CVAR_ARCHIVE },
-  { &cg_thirdPerson, "cg_thirdPerson", "0", CVAR_CHEAT },
+  { &cg_thirdPerson, "cg_thirdPerson", "0", CVAR_ARCHIVE },
   { &cg_thirdPersonAngle, "cg_thirdPersonAngle", "0", CVAR_CHEAT },
   { &cg_thirdPersonPitchFollow, "cg_thirdPersonPitchFollow", "0", 0 },
   { &cg_thirdPersonShoulderViewMode, "cg_thirdPersonShoulderViewMode", "1", CVAR_ARCHIVE },
@@ -1097,6 +1097,7 @@ static void CG_RegisterClients( void )
   cgs.media.larmourHeadSkin    = trap_R_RegisterSkin( "models/players/human_base/head_light.skin" );
   cgs.media.larmourLegsSkin    = trap_R_RegisterSkin( "models/players/human_base/lower_light.skin" );
   cgs.media.larmourTorsoSkin   = trap_R_RegisterSkin( "models/players/human_base/upper_light.skin" );
+  cgs.media.replaceLarmour     = trap_R_RegisterShader( "replace/larmour" );
 
   cgs.media.jetpackModel       = trap_R_RegisterModel( "models/players/human_base/jetpack.md3" );
   cgs.media.jetpackFlashModel  = trap_R_RegisterModel( "models/players/human_base/jetpack_flash.md3" );
