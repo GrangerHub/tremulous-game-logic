@@ -1374,7 +1374,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   else
     ent->r.contents = CONTENTS_BODY;
   if( client->pers.teamSelection == TEAM_NONE )
-    ent->clipmask = MASK_DEADSOLID;
+    ent->clipmask = MASK_ASTRALSOLID;
   else
     ent->clipmask = MASK_PLAYERSOLID;
   ent->die = player_die;
