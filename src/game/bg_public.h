@@ -612,6 +612,7 @@ typedef enum
   MN_B_SUDDENDEATH,
   MN_B_REVOKED,
   MN_B_SURRENDER,
+  MN_B_BLOCKEDBYENEMY,
 
   //alien build
   MN_A_ONEOVERMIND,

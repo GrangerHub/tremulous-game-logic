@@ -678,6 +678,22 @@ void CG_Menu( int menu, int arg )
       type      = DT_BUILD;
       break;
 
+    case MN_B_BLOCKEDBYENEMY:
+      switch( cg.snap->ps.stats[ STAT_TEAM ] )
+      {
+        case TEAM_ALIENS:
+          longMsg   = "You cannot build within the range of a human reactor "
+                      "nor a repeater during pre-game warmup.";
+          shortMsg  = "^5A nearby human reactor or a repeater is disrupting creep here.";
+          break;
+        case TEAM_HUMANS:
+          longMsg   = "You cannot build on alien creep, within the range of "
+                      "an overmind nor an egg nor during pre-game warmup.";
+          shortMsg  = "^5Alien creep is disrupting power here.";
+          break;
+      }
+      break;
+
     case MN_B_SURRENDER:
       longMsg   = "Your team has decided to admit defeat and concede the game:"
                   "traitors and cowards are not allowed to build.";

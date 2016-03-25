@@ -2724,6 +2724,10 @@ void Cmd_Build_f( gentity_t *ent )
         err = MN_B_LASTSPAWN;
         break;
 
+      case IBE_BLOCKEDBYENEMY:
+        err = MN_B_BLOCKEDBYENEMY;
+        break;
+
       default:
         err = -1; // stop uninitialised warning
         break;
