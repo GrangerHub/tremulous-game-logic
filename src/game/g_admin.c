@@ -125,6 +125,11 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "[^3name|slot#^7] (^5reason^7)"
     },
 
+    {"layoutsave", G_admin_layoutsave, qfalse, "layoutsave",
+      "save a map layout",
+      "[^3layout^7]"
+    },
+
     {"listadmins", G_admin_listadmins, qtrue, "listadmins",
       "display a list of all server admins and their levels",
       "(^5name^7) (^5start admin#^7)"
@@ -2030,6 +2035,50 @@ qboolean G_admin_addlayout( gentity_t *ent )
   G_LayoutLoad( layout );
 
   AP( va( "print \"^3addlayout: ^7some layout elements have been placed by %s\n\"",
+          ent ? ent->client->pers.netname : "console" ) );
+  return qtrue;
+}
+
+qboolean G_admin_layoutsave( gentity_t *ent )
+{
+  char str[ MAX_QPATH ];
+  char str2[ MAX_QPATH - 4 ];
+  char *s;
+  int i = 0;
+  qboolean pipeEncountered = qfalse;
+
+  if( trap_Argc( ) != 2 )
+  {
+    ADMP( "^3layoutsave: ^7usage: layoutsave <name>\n" );
+    return qfalse;
+  }
+
+  trap_Argv( 1, str, sizeof( str ) );
+
+  // sanitize name
+  str2[ 0 ] = '\0';
+  s = &str[ 0 ];
+  while( *s && i < sizeof( str2 ) - 1 )
+  {
+    if( isalnum( *s ) || *s == '-' || *s == '_' ||
+        ( ( *s == '|' || *s == ',' ) && !pipeEncountered ) )
+    {
+      str2[ i++ ] = *s;
+      str2[ i ] = '\0';
+      if( *s == '|' )
+        pipeEncountered = qtrue;
+    }
+    s++;
+  }
+
+  if( !str2[ 0 ] )
+  {
+    ADMP( "^3layoutsave: ^7invalid layout name\n" );
+    return qfalse;
+  }
+
+  trap_SendConsoleCommand( EXEC_APPEND, va( "layoutsave %s", str2 ) );
+  AP( va( "print \"^3layoutsave: ^7layout has been saved as '^2%s^7' by '%s'\n", str2,
           ent ? ent->client->pers.netname : "console" ) );
   return qtrue;
 }
