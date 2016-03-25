@@ -91,7 +91,7 @@ static void CG_ClipMoveToEntities ( const vec3_t start, const vec3_t mins,
     const vec3_t maxs, const vec3_t end, int skipNumber,
     int mask, trace_t *tr, traceType_t collisionType )
 {
-  int           i, j, x, zd, zu;
+  int           i, j, x, zd, zu, astralMask = 0;
   trace_t       trace;
   entityState_t *ent;
   clipHandle_t  cmodel;
@@ -106,6 +106,8 @@ static void CG_ClipMoveToEntities ( const vec3_t start, const vec3_t mins,
   else
     j = cg_numSolidEntities;
 
+  astralMask = mask & EF_ASTRAL_NOCLIP;
+
   for( i = 0; i < j; i++ )
   {
     if( i < cg_numSolidEntities )
@@ -117,6 +119,9 @@ static void CG_ClipMoveToEntities ( const vec3_t start, const vec3_t mins,
 
     if( ent->number == skipNumber )
       continue;
+
+    if ( astralMask & ent->eFlags )
+      continue;      // EF_ASTRAL_NOCLIP flagged entities don't clip with ASTRALSOLID entities
 
     if( ent->solid == SOLID_BMODEL )
     {
@@ -587,7 +592,7 @@ void CG_PredictPlayerState( void )
     cg_pmove.tracemask = MASK_PLAYERSOLID;
 
   if( cg.snap->ps.persistant[ PERS_SPECSTATE ] != SPECTATOR_NOT )
-    cg_pmove.tracemask = MASK_DEADSOLID; // spectators can fly through bodies
+    cg_pmove.tracemask = MASK_ASTRALSOLID; // spectators can fly through bodies
 
   cg_pmove.noFootsteps = 0;
 

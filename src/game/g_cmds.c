@@ -54,6 +54,29 @@ void G_SanitiseString( char *in, char *out, int len )
 
 /*
 ==================
+G_SingleLineString
+
+Remove semicolons and newlines from a string
+==================
+*/
+void G_SingleLineString( char *in, char *out, int len )
+{
+  len--;
+
+  while( *in && len > 0 )
+  {
+    if( isprint( *in ) && *in != ';' )
+    {
+      *out++ = *in;
+      len--;
+    }
+    in++;
+  }
+  *out = '\0';
+}
+
+/*
+==================
 G_ClientNumberFromString
 
 Returns a player number for either a number or name string
@@ -1179,7 +1202,8 @@ void Cmd_CallVote_f( gentity_t *ent )
   int    clientNum = -1;
   int    id = -1;
   team_t team;
-
+  qboolean voteYes = qtrue;
+  
   trap_Argv( 0, cmd, sizeof( cmd ) );
   trap_Argv( 1, vote, sizeof( vote ) );
   trap_Argv( 2, arg, sizeof( arg ) );
@@ -1336,6 +1360,27 @@ void Cmd_CallVote_f( gentity_t *ent )
         sizeof( level.voteDisplayString[ team ] ), va( " for '%s'", reason ) );
     }
   }
+  else if( !Q_stricmp( vote, "poll" ) )
+  {
+    char poll[ MAX_STRING_CHARS ];
+
+    G_SingleLineString( ConcatArgs( 2 ), poll, sizeof( poll ) );
+
+    if( strlen( poll ) == 0 )
+    {
+      trap_SendServerCommand( ent-g_entities,
+        va( "print \"%s: please specify a poll question\n\"", cmd ) );
+      return;
+    }
+
+    // use an exec string that allows log parsers to see the vote
+    Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
+      "echo poll \"%s\"", poll );
+    Com_sprintf( level.voteDisplayString[ team ],
+      sizeof( level.voteDisplayString[ team ] ),
+      "(poll) %s^7", poll );
+    voteYes = qfalse;
+  }
   else if( team == TEAM_NONE )
   {
     if( !Q_stricmp( vote, "mute" ) )
@@ -1491,7 +1536,7 @@ void Cmd_CallVote_f( gentity_t *ent )
     {
       trap_SendServerCommand( ent-g_entities, "print \"Invalid vote string\n\"" );
       trap_SendServerCommand( ent-g_entities, "print \"Valid vote commands "
-          "are: map, nextmap, map_restart, draw, sudden_death, kick, mute, "
+          "are: map, nextmap, map_restart, draw, sudden_death, kick, poll, mute, "
           "unmute and cancel\n" );
       return;
     }
@@ -1549,7 +1594,7 @@ void Cmd_CallVote_f( gentity_t *ent )
   {
     trap_SendServerCommand( ent-g_entities, "print \"Invalid vote string\n\"" );
     trap_SendServerCommand( ent-g_entities, "print \"Valid team vote commands "
-        "are: kick, denybuild, allowbuild, admitdefeat and cancel\n" );
+        "are: kick, poll, denybuild, allowbuild, admitdefeat and cancel\n" );
     return;
   }
 
@@ -1614,7 +1659,9 @@ void Cmd_CallVote_f( gentity_t *ent )
 
   ent->client->pers.namelog->voteCount++;
   ent->client->pers.vote |= 1 << team;
-  G_Vote( ent, team, qtrue );
+
+  if ( voteYes == qtrue )
+    G_Vote( ent, team, qtrue );   //Caller calls vote YES as default but not in all cases.
 }
 
 /*
@@ -2661,6 +2708,10 @@ void Cmd_Build_f( gentity_t *ent )
         err = MN_B_LASTSPAWN;
         break;
 
+      case IBE_BLOCKEDBYENEMY:
+        err = MN_B_BLOCKEDBYENEMY;
+        break;
+
       default:
         err = -1; // stop uninitialised warning
         break;
@@ -3157,6 +3208,59 @@ void Cmd_ListMaps_f( gentity_t *ent )
   ADMBP( ".\n" );
   ADMBP_end( );
 }
+ 
+/*
+=================
+Cmd_ListModels_f
+
+List all the available player models installed on the server.
+=================
+*/
+void Cmd_ListModels_f( gentity_t *ent )
+{
+    int i;
+
+    ADMBP_begin();
+    for (i = 0; i < level.playerModelCount; i++)
+    {
+        ADMBP(va("%d - %s\n", i+1, level.playerModel[i]));
+    }
+    ADMBP(va("^3listmodels: ^7showing %d player models\n", level.playerModelCount));
+    ADMBP_end();
+
+}
+
+/*
+=================
+Cmd_ListSkins_f
+=================
+*/
+void Cmd_ListSkins_f( gentity_t *ent )
+{
+    char modelname[ 64 ];
+    char skins[ MAX_PLAYER_MODEL ][ 64 ];
+    int numskins;
+    int i;
+
+    if ( trap_Argc() < 2 )
+    {
+        ADMP("^3listskins: ^7usage: listskins <model>\n");
+        return;
+    }
+
+    trap_Argv(1, modelname, sizeof(modelname));
+
+    G_GetPlayerModelSkins(modelname, skins, MAX_PLAYER_MODEL, &numskins);
+
+    ADMBP_begin();
+    for (i = 0; i < numskins; i++)
+    {
+        ADMBP(va("%d - %s\n", i+1, skins[i]));
+    }
+    ADMBP(va("^3listskins: ^7default skin ^2%s\n", GetSkin(modelname, "default")));
+    ADMBP(va("^3listskins: ^7showing %d skins for %s\n", numskins, modelname));
+    ADMBP_end();
+}
 
 /*
 =================
@@ -3535,6 +3639,8 @@ commands_t cmds[ ] = {
   { "itemtoggle", CMD_HUMAN|CMD_ALIVE, Cmd_ToggleItem_f },
   { "kill", CMD_TEAM|CMD_ALIVE, Cmd_Kill_f },
   { "listmaps", CMD_MESSAGE|CMD_INTERMISSION, Cmd_ListMaps_f },
+  { "listmodels", CMD_MESSAGE|CMD_INTERMISSION, Cmd_ListModels_f },
+  { "listskins", CMD_MESSAGE|CMD_INTERMISSION, Cmd_ListSkins_f },
   { "m", CMD_MESSAGE|CMD_INTERMISSION, Cmd_PrivateMessage_f },
   { "mt", CMD_MESSAGE|CMD_INTERMISSION, Cmd_PrivateMessage_f },
   { "noclip", CMD_CHEAT_TEAM, Cmd_Noclip_f },

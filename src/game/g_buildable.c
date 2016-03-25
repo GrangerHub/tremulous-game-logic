@@ -859,6 +859,8 @@ Called when an alien buildable dies
 */
 void AGeneric_CreepRecede( gentity_t *self )
 {
+  int adjustedRespawnTime;
+
   //if the creep just died begin the recession
   if( !( self->s.eFlags & EF_DEAD ) )
   {
@@ -887,7 +889,22 @@ void AGeneric_CreepRecede( gentity_t *self )
     if( IS_WARMUP && self->enemy->client )
     {
       self->think = AGeneric_CreepRespawn;
-      self->nextthink = level.time + 500;
+      if( self->s.modelindex == BA_A_ACIDTUBE || self->s.modelindex == BA_A_HIVE )
+      {
+        if (g_warmupDefensiveBuildableRespawnTime.integer >= 10)
+          adjustedRespawnTime = g_warmupDefensiveBuildableRespawnTime.integer - 10;
+        else
+          adjustedRespawnTime = g_warmupDefensiveBuildableRespawnTime.integer;
+      }
+      else
+      {
+        if (g_warmupBuildableRespawnTime.integer >= 10)
+          adjustedRespawnTime = g_warmupBuildableRespawnTime.integer - 10;
+        else
+          adjustedRespawnTime = g_warmupBuildableRespawnTime.integer;
+      }
+
+      self->nextthink = level.time + adjustedRespawnTime * 1000;
     }
     else
     {
@@ -1891,7 +1908,12 @@ void HSpawn_Blast( gentity_t *self )
   if( IS_WARMUP && self->enemy->client )
   {
     self->think = HSpawn_Respawn;
-    self->nextthink = level.time + 5000;
+    if( self->s.modelindex == BA_H_MGTURRET || self->s.modelindex == BA_H_TESLAGEN )
+      self->nextthink = level.time +
+        g_warmupDefensiveBuildableRespawnTime.integer * 1000;
+    else
+      self->nextthink = level.time +
+        g_warmupBuildableRespawnTime.integer * 1000;
     self->unlinkAfterEvent = qtrue;
   }
   else
@@ -3671,6 +3693,7 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   qboolean          invert;
   int               contents;
   playerState_t     *ps = &ent->client->ps;
+  float             d;
 
   // Stop all buildables from interacting with traces
   G_SetBuildableLinkState( qfalse );
@@ -3717,6 +3740,24 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
         reason = IBE_NOCREEP;
     }
 
+    // Check if the enemy isn't blocking your building during pre-game warmup
+    if( ( G_IsPowered( entity_origin ) != BA_NONE ) && IS_WARMUP )
+    {
+      // TODO: This needs to be improved to account for multiple overminds
+      tempent = G_Overmind( );
+      if( tempent != NULL )
+      {
+        d = Distance( tempent->r.currentOrigin, entity_origin );
+        if ( d > CREEP_BASESIZE )
+        {
+          reason = IBE_BLOCKEDBYENEMY;
+        }
+      } else
+        {
+          reason = IBE_BLOCKEDBYENEMY;
+        }
+     }
+
     // Check permission to build here
     if( tr1.surfaceFlags & SURF_NOALIENBUILD || contents & CONTENTS_NOALIENBUILD )
       reason = IBE_PERMISSION;
@@ -3732,6 +3773,25 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
       if( buildable != BA_H_REACTOR && buildable != BA_H_REPEATER )
         reason = IBE_NOPOWERHERE;
     }
+
+    // Check if the enemy isn't blocking your building during pre-game warmup
+    if( G_IsCreepHere( entity_origin ) && IS_WARMUP )
+    {
+      // TODO: This needs to be improved to account for multiple reactors
+      tempent = G_Reactor( );
+      if( tempent != NULL )
+      {
+        d = Distance( tempent->r.currentOrigin, entity_origin );
+        if ( d > REACTOR_BASESIZE )
+        {
+          reason = IBE_BLOCKEDBYENEMY;
+        }
+      } else
+        {
+          reason = IBE_BLOCKEDBYENEMY;
+        }
+     }
+
 
     //this buildable requires a DCC
     if( BG_Buildable( buildable )->dccTest && !G_IsDCCBuilt( ) )
@@ -4166,6 +4226,10 @@ qboolean G_BuildIfValid( gentity_t *ent, buildable_t buildable )
 
     case IBE_LASTSPAWN:
       G_TriggerMenu( ent->client->ps.clientNum, MN_B_LASTSPAWN );
+      return qfalse;
+
+    case IBE_BLOCKEDBYENEMY:
+      G_TriggerMenu( ent->client->ps.clientNum, MN_B_BLOCKEDBYENEMY );
       return qfalse;
 
     default:
@@ -4986,7 +5050,9 @@ void G_UpdateBuildableRangeMarkers( void )
       }
       wantsToSee = !!( client->pers.buildableRangeMarkerMask & ( 1 << bType ) );
 
-      if( ( team == TEAM_NONE || ( team == bTeam && weaponDisplays ) ) && wantsToSee )
+      if( ( team == TEAM_NONE || ( (team == bTeam || ( IS_WARMUP && ( bType == BA_A_SPAWN ||
+          bType == BA_H_REACTOR || bType == BA_H_REPEATER || bType == BA_A_OVERMIND ) ) ) &&
+          weaponDisplays ) ) && wantsToSee )
       {
         if( i >= 32 )
           e->rangeMarker->r.hack.generic1 |= 1 << ( i - 32 );

@@ -810,7 +810,7 @@ if desired.
 char *ClientUserinfoChanged( int clientNum, qboolean forceName )
 {
   gentity_t *ent;
-  char      *s;
+  char      *s, *s2;
   char      model[ MAX_QPATH ];
   char      buffer[ MAX_QPATH ];
   char      filename[ MAX_QPATH ];
@@ -908,6 +908,29 @@ char *ClientUserinfoChanged( int clientNum, qboolean forceName )
     G_namelog_update_name( client );
   }
 
+  s = NULL;
+  if ( g_pimpHuman.integer )
+  if ( client->pers.teamSelection == TEAM_HUMANS )
+  {
+    qboolean found;
+
+    s = Info_ValueForKey(userinfo, "model");
+    found = G_IsValidPlayerModel(s);
+
+    if ( !found )
+      s = NULL;
+    else if ( !g_cheats.integer
+           && !forceName
+           && !G_admin_permission( ent, va("MODEL%s", s) ) )
+      s = NULL;
+
+    if (s)
+    {
+      s2 = Info_ValueForKey(userinfo, "skin");
+      s2 = GetSkin(s, s2);
+    }
+  }
+
   if( client->pers.classSelection == PCL_NONE )
   {
     //This looks hacky and frankly it is. The clientInfo string needs to hold different
@@ -919,8 +942,15 @@ char *ClientUserinfoChanged( int clientNum, qboolean forceName )
   }
   else
   {
-    Com_sprintf( buffer, MAX_QPATH, "%s/%s",  BG_ClassConfig( client->pers.classSelection )->modelName,
-                                              BG_ClassConfig( client->pers.classSelection )->skinName );
+    if ( !(client->pers.classSelection == PCL_HUMAN_BSUIT) && s )
+    {
+        Com_sprintf( buffer, MAX_QPATH, "%s/%s", s, s2 );
+    }
+    else
+    {
+        Com_sprintf( buffer, MAX_QPATH, "%s/%s",  BG_ClassConfig( client->pers.classSelection )->modelName,
+                                                  BG_ClassConfig( client->pers.classSelection )->skinName );
+    }
 
     //model segmentation
     Com_sprintf( filename, sizeof( filename ), "models/players/%s/animation.cfg",
@@ -1344,7 +1374,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   else
     ent->r.contents = CONTENTS_BODY;
   if( client->pers.teamSelection == TEAM_NONE )
-    ent->clipmask = MASK_DEADSOLID;
+    ent->clipmask = MASK_ASTRALSOLID;
   else
     ent->clipmask = MASK_PLAYERSOLID;
   ent->die = player_die;

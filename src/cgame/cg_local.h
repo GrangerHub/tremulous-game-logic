@@ -1044,6 +1044,7 @@ typedef struct
   int           crosshairBuildable;
   int           crosshairClientNum;
   int           crosshairClientTime;
+  int           crosshairEnemyTime;
 
   // powerup active flashing
   int           powerupActive;
@@ -1293,6 +1294,8 @@ typedef struct
   qhandle_t larmourHeadSkin;
   qhandle_t larmourLegsSkin;
   qhandle_t larmourTorsoSkin;
+
+  qhandle_t replaceLarmour; // temporary fix
 
   qhandle_t jetpackModel;
   qhandle_t jetpackFlashModel;
@@ -1606,6 +1609,8 @@ extern  vmCvar_t    cg_optimizePrediction;
 extern  vmCvar_t    cg_projectileNudge;
 
 extern  vmCvar_t    cg_voice;
+
+extern  vmCvar_t    cg_cameraShakeMagnitude;
 
 extern  vmCvar_t    cg_emoticons;
 
