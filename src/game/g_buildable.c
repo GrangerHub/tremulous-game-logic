@@ -3693,6 +3693,7 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   qboolean          invert;
   int               contents;
   playerState_t     *ps = &ent->client->ps;
+  float             d;
 
   // Stop all buildables from interacting with traces
   G_SetBuildableLinkState( qfalse );
@@ -3739,6 +3740,24 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
         reason = IBE_NOCREEP;
     }
 
+    // Check if the enemy isn't blocking your building during pre-game warmup
+    if( ( G_IsPowered( entity_origin ) != BA_NONE ) && IS_WARMUP )
+    {
+      // TODO: This needs to be improved to account for multiple overminds
+      tempent = G_Overmind( );
+      if( tempent != NULL )
+      {
+        d = Distance( tempent->r.currentOrigin, entity_origin );
+        if ( d > CREEP_BASESIZE )
+        {
+          reason = IBE_BLOCKEDBYENEMY;
+        }
+      } else
+        {
+          reason = IBE_BLOCKEDBYENEMY;
+        }
+     }
+
     // Check permission to build here
     if( tr1.surfaceFlags & SURF_NOALIENBUILD || contents & CONTENTS_NOALIENBUILD )
       reason = IBE_PERMISSION;
@@ -3754,6 +3773,25 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
       if( buildable != BA_H_REACTOR && buildable != BA_H_REPEATER )
         reason = IBE_NOPOWERHERE;
     }
+
+    // Check if the enemy isn't blocking your building during pre-game warmup
+    if( G_IsCreepHere( entity_origin ) && IS_WARMUP )
+    {
+      // TODO: This needs to be improved to account for multiple reactors
+      tempent = G_Reactor( );
+      if( tempent != NULL )
+      {
+        d = Distance( tempent->r.currentOrigin, entity_origin );
+        if ( d > REACTOR_BASESIZE )
+        {
+          reason = IBE_BLOCKEDBYENEMY;
+        }
+      } else
+        {
+          reason = IBE_BLOCKEDBYENEMY;
+        }
+     }
+
 
     //this buildable requires a DCC
     if( BG_Buildable( buildable )->dccTest && !G_IsDCCBuilt( ) )
@@ -4188,6 +4226,10 @@ qboolean G_BuildIfValid( gentity_t *ent, buildable_t buildable )
 
     case IBE_LASTSPAWN:
       G_TriggerMenu( ent->client->ps.clientNum, MN_B_LASTSPAWN );
+      return qfalse;
+
+    case IBE_BLOCKEDBYENEMY:
+      G_TriggerMenu( ent->client->ps.clientNum, MN_B_BLOCKEDBYENEMY );
       return qfalse;
 
     default:
@@ -5008,7 +5050,9 @@ void G_UpdateBuildableRangeMarkers( void )
       }
       wantsToSee = !!( client->pers.buildableRangeMarkerMask & ( 1 << bType ) );
 
-      if( ( team == TEAM_NONE || ( team == bTeam && weaponDisplays ) ) && wantsToSee )
+      if( ( team == TEAM_NONE || ( (team == bTeam || ( IS_WARMUP && ( bType == BA_A_SPAWN ||
+          bType == BA_H_REACTOR || bType == BA_H_REPEATER || bType == BA_A_OVERMIND ) ) ) &&
+          weaponDisplays ) ) && wantsToSee )
       {
         if( i >= 32 )
           e->rangeMarker->r.hack.generic1 |= 1 << ( i - 32 );
