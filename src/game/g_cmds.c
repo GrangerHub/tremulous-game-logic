@@ -3896,10 +3896,8 @@ void Cmd_PrivateMessage_f( gentity_t *ent )
 
 void Cmd_PlayMap_f( gentity_t *ent )
 {
-  char   cmd[ MAX_TOKEN_CHARS ],
-    	 subcmd[ MAX_TOKEN_CHARS ],
-         map[ MAX_TOKEN_CHARS ],
-         layout[ MAX_TOKEN_CHARS ],
+  char   cmd[ MAX_TOKEN_CHARS ], subcmd[ MAX_TOKEN_CHARS ],
+         map[ MAX_TOKEN_CHARS ], layout[ MAX_TOKEN_CHARS ],
          extra[ MAX_TOKEN_CHARS ];
   char   *flags;
   int 	 page;
@@ -3911,7 +3909,7 @@ void Cmd_PlayMap_f( gentity_t *ent )
   {
     // TODO: [layout [flags]] announce them once they're implemented
     ADMP( "To add maps to the playlist:\n"
-	  S_COLOR_YELLOW "  /playmap add " S_COLOR_WHITE "mapname [layout]\n"
+	  S_COLOR_YELLOW "  /playmap add " S_COLOR_WHITE "mapname [layout] [flags]\n"
 	  "To see a list of maps to choose:\n"
 	  S_COLOR_YELLOW "  /playmap pool " S_COLOR_WHITE "[pagenumber]\n\n" ); 
       
@@ -3951,7 +3949,12 @@ void Cmd_PlayMap_f( gentity_t *ent )
     trap_Argv( 2, map, sizeof( map ) );
     trap_Argv( 3, layout, sizeof( layout ) );
     trap_Argv( 4, extra, sizeof( extra ) );
-    flags = ConcatArgs( 3 );
+    if( *layout == '+' || *layout == '-' )
+    {
+      flags = ConcatArgs( 3 );
+      *layout = '\0';
+    } else
+      flags = ConcatArgs( 4 );
 
     if( g_debugPlayMap.integer > 0 )
       trap_SendServerCommand( ent-g_entities,
