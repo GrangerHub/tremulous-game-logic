@@ -676,6 +676,8 @@ typedef struct centity_s
 
   particleSystem_t      *jetPackPS;
   jetPackState_t        jetPackState;
+  int                   jetPackJumpTime;
+  int                   jetPackRefuelTime; //to avoid spamming sounds
 
   particleSystem_t      *poisonCloudedPS;
 
@@ -1044,6 +1046,7 @@ typedef struct
   int           crosshairBuildable;
   int           crosshairClientNum;
   int           crosshairClientTime;
+  int           crosshairEnemyTime;
 
   // powerup active flashing
   int           powerupActive;
@@ -1260,6 +1263,11 @@ typedef struct
   sfxHandle_t jetpackDescendSound;
   sfxHandle_t jetpackIdleSound;
   sfxHandle_t jetpackAscendSound;
+  sfxHandle_t jetpackDescendDeactivateSound;
+  sfxHandle_t jetpackIdleDeactivateSound;
+  sfxHandle_t jetpackAscendDeactivateSound;
+  sfxHandle_t jetpackLowFuelSound;
+  sfxHandle_t jetpackRefuelSound;
 
   qhandle_t   jetPackDescendPS;
   qhandle_t   jetPackHoverPS;
@@ -1293,6 +1301,8 @@ typedef struct
   qhandle_t larmourHeadSkin;
   qhandle_t larmourLegsSkin;
   qhandle_t larmourTorsoSkin;
+
+  qhandle_t replaceLarmour; // temporary fix
 
   qhandle_t jetpackModel;
   qhandle_t jetpackFlashModel;
@@ -1607,9 +1617,15 @@ extern  vmCvar_t    cg_projectileNudge;
 
 extern  vmCvar_t    cg_voice;
 
+extern  vmCvar_t    cg_cameraShakeMagnitude;
+
 extern  vmCvar_t    cg_emoticons;
 
 extern  vmCvar_t    cg_chatTeamPrefix;
+
+extern  vmCvar_t    cg_fuelInfoX;
+extern  vmCvar_t    cg_fuelInfoY;
+extern  vmCvar_t    cg_fuelInfoScale;
 
 //
 // cg_main.c

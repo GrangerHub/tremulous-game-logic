@@ -2252,7 +2252,9 @@ static const weaponAttributes_t bg_weapons[ ] =
     "Lucifer Cannon",     //char      *humanName;
     "Blaster technology scaled up to deliver devastating power. "
       "Primary fire must be charged before firing. It has a quick "
-      "secondary attack that does not require charging.",
+      "secondary attack that does not require charging. "
+      "Primary fire's charge can be reduced before firing if the "
+      "secondary attack is held down simultaneously with the primary attack.",
     LCANNON_AMMO,         //int       maxAmmo;
     0,                    //int       maxClips;
     qfalse,               //int       infiniteAmmo;
@@ -2695,6 +2697,22 @@ qboolean BG_UpgradeAllowedInStage( upgrade_t upgrade, stage_t stage,
   return stages & ( 1 << stage );
 }
 
+
+/*
+===================================
+BG_GetLCannonPrimaryFireSpeed
+
+===================================
+*/
+int BG_GetLCannonPrimaryFireSpeed( int charge )
+{
+  return ( LCANNON_SPEED_MIN + ( charge -
+           LCANNON_CHARGE_TIME_MAX ) * ( LCANNON_SECONDARY_SPEED - LCANNON_SPEED_MIN ) /
+           ( ( ( LCANNON_CHARGE_TIME_MAX * LCANNON_SECONDARY_DAMAGE ) / LCANNON_DAMAGE ) -
+           LCANNON_CHARGE_TIME_MAX ) );
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -2910,7 +2928,10 @@ char *eventnames[ ] =
   "EV_MGTURRET_SPINUP", // trigger a sound
 
   "EV_RPTUSE_SOUND",    // trigger a sound
-  "EV_LEV2_ZAP"
+  "EV_LEV2_ZAP",
+
+  "EV_JETPACK_DEACTIVATE",
+  "EV_JETPACK_REFUEL"
 };
 
 /*
@@ -3291,7 +3312,8 @@ Activates an upgrade
 */
 void BG_ActivateUpgrade( int item, int stats[ ] )
 {
-  stats[ STAT_ACTIVEITEMS ] |= ( 1 << item );
+  if( item != UP_JETPACK || stats[ STAT_FUEL ] >  0)
+    stats[ STAT_ACTIVEITEMS ] |= ( 1 << item );
 }
 
 /*

@@ -358,19 +358,9 @@ void  G_TouchTriggers( gentity_t *ent )
       continue;
 
     // ignore most entities if a spectator
-    if ( ent->client->sess.spectatorState != SPECTATOR_NOT
-     || (ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING) )
-    {
-      if( hit->s.eType != ET_TELEPORT_TRIGGER &&
-          // this is ugly but adding a new ET_? type will
-          // most likely cause network incompatibilities
-          hit->touch != Touch_DoorTrigger )
-      {
-        //check for manually triggered doors
-        manualTriggerSpectator( hit, ent );
-        continue;
-      }
-    }
+    if( ( ent->clipmask & CONTENTS_ASTRAL_NOCLIP ) &&
+        hit->s.eType != ET_TELEPORT_TRIGGER )
+      continue;
 
     if( !trap_EntityContact( mins, maxs, hit ) )
       continue;
@@ -703,7 +693,28 @@ void ClientTimerActions( gentity_t *ent, int msec )
           ent->client->ps.stats[ STAT_STATE ] &= ~SS_HEALING_2X;
       }
     }
+
+    //use fuel
+    if( BG_InventoryContainsUpgrade( UP_JETPACK, ent->client->ps.stats ) && 
+        BG_UpgradeIsActive( UP_JETPACK, ent->client->ps.stats ) && 
+        ent->client->ps.stats[ STAT_FUEL ] > 0 )
+    {
+      ent->client->ps.stats[ STAT_FUEL ] -= JETPACK_FUEL_USAGE;
+      if( ent->client->ps.stats[ STAT_FUEL ] <= 0 )
+      {
+        ent->client->ps.stats[ STAT_FUEL ] = 0;
+        BG_DeactivateUpgrade( UP_JETPACK, client->ps.stats );
+        BG_AddPredictableEventToPlayerstate( EV_JETPACK_DEACTIVATE, 0, &client->ps );
+      }
+    }
+
   }
+
+  //Camera Shake
+    ent->client->ps.stats[ STAT_SHAKE ] *= 0.77f;
+    if( ent->client->ps.stats[ STAT_SHAKE ] < 0 )
+      ent->client->ps.stats[ STAT_SHAKE ] = 0;
+
 
   while( client->time1000 >= 1000 )
   {
@@ -1521,9 +1532,9 @@ void ClientThink_real( gentity_t *ent )
         client->ps.pm_type = PM_NORMAL;
     }
 
-    //switch jetpack off if no reactor
-    if( !G_Reactor( ) )
-      BG_DeactivateUpgrade( UP_JETPACK, client->ps.stats );
+    //[DISABLED]switch jetpack off if no reactor
+   // if( !G_Reactor( ) )
+     // BG_DeactivateUpgrade( UP_JETPACK, client->ps.stats );
   }
 
   // set up for pmove
@@ -1553,7 +1564,16 @@ void ClientThink_real( gentity_t *ent )
   pm.pmove_msec = pmove_msec.integer;
 
   if ( pm.ps->stats[ STAT_STATE ] & SS_HOVELING )
-      pm.tracemask = MASK_PLAYERSOLID & ~CONTENTS_BODY;
+  {
+    pm.tracemask = MASK_ASTRALSOLID;
+    ent->clipmask = MASK_ASTRALSOLID;
+  }
+  else if( ( pm.ps->stats[ STAT_CLASS ] == PCL_ALIEN_BUILDER0 ) ||
+           ( pm.ps->stats[ STAT_CLASS ] == PCL_ALIEN_BUILDER0_UPG ) )
+  {
+    pm.tracemask = MASK_PLAYERSOLID;
+    ent->clipmask = MASK_PLAYERSOLID;
+  }
 
   VectorCopy( client->ps.origin, client->oldOrigin );
 
@@ -1766,6 +1786,14 @@ void ClientThink_real( gentity_t *ent )
 
   if( ent->suicideTime > 0 && ent->suicideTime < level.time )
   {
+    // reset any hovels the player might be using
+    if( ent->client && ent->client->hovel )
+    {
+      ent->client->hovel->active = qfalse;
+      ent->client->hovel->builder = NULL;
+      ent->client->hovel = NULL;
+    }
+
     ent->client->ps.stats[ STAT_HEALTH ] = ent->health = 0;
     player_die( ent, ent, ent, 100000, MOD_SUICIDE );
 

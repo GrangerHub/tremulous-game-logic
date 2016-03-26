@@ -45,14 +45,17 @@ gclient_t   g_clients[ MAX_CLIENTS ];
 
 vmCvar_t  g_timelimit;
 vmCvar_t  g_suddenDeathTime;
-vmCvar_t  g_warmup;
+
 vmCvar_t  g_doWarmup;
+vmCvar_t  g_warmup;
 vmCvar_t  g_warmupReadyThreshold;
 vmCvar_t  g_warmupTimeout1;
 vmCvar_t  g_warmupTimeout1Trigger;
 vmCvar_t  g_warmupTimeout2;
 vmCvar_t  g_warmupTimeout2Trigger;
-vmCvar_t  g_warmupDefensiveRespawnTime;
+vmCvar_t  g_warmupBuildableRespawnTime;
+vmCvar_t  g_warmupDefensiveBuildableRespawnTime;
+
 vmCvar_t  g_friendlyFire;
 vmCvar_t  g_friendlyBuildableFire;
 vmCvar_t  g_dretchPunt;
@@ -157,6 +160,7 @@ vmCvar_t  g_publicAdminMessages;
 vmCvar_t  g_allowTeamOverlay;
 
 vmCvar_t  g_censorship;
+vmCvar_t  g_pimpHuman;
 
 vmCvar_t  g_tag;
 
@@ -182,7 +186,8 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_warmupTimeout1Trigger, "g_warmupTimeout1Trigger", "4", CVAR_ARCHIVE, 0, qtrue },
   { &g_warmupTimeout2, "g_warmupTimeout2", "60", CVAR_ARCHIVE, 0, qtrue },
   { &g_warmupTimeout2Trigger, "g_warmupTimeout2Trigger", "66", CVAR_ARCHIVE, 0, qtrue },
-  { &g_warmupDefensiveRespawnTime, "g_warmupDefensiveRespawnTime", "30", CVAR_ARCHIVE, 0, qtrue },
+  { &g_warmupBuildableRespawnTime, "g_warmupBuildableRespawnTime", "10", CVAR_ARCHIVE, 0, qtrue },
+  { &g_warmupDefensiveBuildableRespawnTime, "g_warmupDefensiveBuildableRespawnTime", "30", CVAR_ARCHIVE, 0, qtrue },
 
   // noset vars
   { NULL, "gamename", GAME_VERSION , CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
@@ -317,6 +322,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_allowTeamOverlay, "g_allowTeamOverlay", "1", CVAR_ARCHIVE, 0, qtrue  },
 
   { &g_censorship, "g_censorship", "", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_pimpHuman, "g_pimpHuman", "1", CVAR_ARCHIVE, 0, qfalse  },
 
   { &g_tag, "g_tag", "gpp", CVAR_INIT, 0, qfalse }
 };
@@ -683,6 +689,8 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
   trap_SetConfigstring( CS_INTERMISSION, "0" );
   trap_SetConfigstring( CS_WARMUP, va( "%d", IS_WARMUP ) );
 
+  G_InitPlayerModel( );
+
   // test to see if a custom buildable layout will be loaded
   G_LayoutSelect( );
 
@@ -787,6 +795,8 @@ void G_ShutdownGame( int restart )
   G_admin_cleanup( );
   G_namelog_cleanup( );
   G_UnregisterCommands( );
+
+  G_FreePlayerModel( );
 
   G_ShutdownMapRotations( );
 

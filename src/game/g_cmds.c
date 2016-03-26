@@ -508,6 +508,12 @@ void Cmd_Give_f( gentity_t *ent )
         BG_InventoryContainsUpgrade( UP_BATTPACK, client->ps.stats ) )
       client->ps.ammo = (int)( (float)client->ps.ammo * BATTPACK_MODIFIER );
   }
+
+  if( give_all || Q_stricmp( name, "fuel" ) == 0 )
+  {
+    if( BG_InventoryContainsUpgrade( UP_JETPACK, ent->client->ps.stats ) )
+      ent->client->ps.stats[ STAT_FUEL ] = JETPACK_FUEL_FULL;
+  }
 }
 
 
@@ -598,14 +604,17 @@ Cmd_Kill_f
 */
 void Cmd_Kill_f( gentity_t *ent )
 {
-  if ( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING )
-  {
-    trap_SendServerCommand( ent-g_entities, "print \"Leave your hovel first.\n\"" );
-    return;
-  }
 
   if( g_cheats.integer )
   {
+    // reset any hovels the player might be using
+    if( ent->client && ent->client->hovel )
+    {
+      ent->client->hovel->active = qfalse;
+      ent->client->hovel->builder = NULL;
+      ent->client->hovel = NULL;
+    }
+
     ent->client->ps.stats[ STAT_HEALTH ] = ent->health = 0;
     player_die( ent, ent, ent, 100000, MOD_SUICIDE );
   }
@@ -2417,7 +2426,15 @@ void Cmd_Buy_f( gentity_t *ent )
     }
 
     if( upgrade == UP_AMMO )
-      G_GiveClientMaxAmmo( ent, energyOnly );
+    {
+       G_GiveClientMaxAmmo( ent, energyOnly );
+      if( !energyOnly && BG_InventoryContainsUpgrade( UP_JETPACK, ent->client->ps.stats ) &&
+          ent->client->ps.stats[ STAT_FUEL ] < JETPACK_FUEL_FULL )
+      {
+        G_AddEvent( ent, EV_JETPACK_REFUEL, 0) ;
+        ent->client->ps.stats[ STAT_FUEL ] = JETPACK_FUEL_FULL;
+      }
+    }
     else
     {
       if( upgrade == UP_BATTLESUIT )
@@ -2434,6 +2451,8 @@ void Cmd_Buy_f( gentity_t *ent )
         ent->client->pers.classSelection = PCL_HUMAN_BSUIT;
         ent->client->ps.eFlags ^= EF_TELEPORT_BIT;
       }
+      else if( upgrade == UP_JETPACK )
+       ent->client->ps.stats[ STAT_FUEL ] = JETPACK_FUEL_FULL;
 
       //add to inventory
       BG_AddUpgradeToInventory( upgrade, ent->client->ps.stats );
@@ -2718,6 +2737,10 @@ void Cmd_Build_f( gentity_t *ent )
 
       case IBE_LASTSPAWN:
         err = MN_B_LASTSPAWN;
+        break;
+
+      case IBE_BLOCKEDBYENEMY:
+        err = MN_B_BLOCKEDBYENEMY;
         break;
 
       default:
@@ -3216,6 +3239,59 @@ void Cmd_ListMaps_f( gentity_t *ent )
   ADMBP( ".\n" );
   ADMBP_end( );
 }
+ 
+/*
+=================
+Cmd_ListModels_f
+
+List all the available player models installed on the server.
+=================
+*/
+void Cmd_ListModels_f( gentity_t *ent )
+{
+    int i;
+
+    ADMBP_begin();
+    for (i = 0; i < level.playerModelCount; i++)
+    {
+        ADMBP(va("%d - %s\n", i+1, level.playerModel[i]));
+    }
+    ADMBP(va("^3listmodels: ^7showing %d player models\n", level.playerModelCount));
+    ADMBP_end();
+
+}
+
+/*
+=================
+Cmd_ListSkins_f
+=================
+*/
+void Cmd_ListSkins_f( gentity_t *ent )
+{
+    char modelname[ 64 ];
+    char skins[ MAX_PLAYER_MODEL ][ 64 ];
+    int numskins;
+    int i;
+
+    if ( trap_Argc() < 2 )
+    {
+        ADMP("^3listskins: ^7usage: listskins <model>\n");
+        return;
+    }
+
+    trap_Argv(1, modelname, sizeof(modelname));
+
+    G_GetPlayerModelSkins(modelname, skins, MAX_PLAYER_MODEL, &numskins);
+
+    ADMBP_begin();
+    for (i = 0; i < numskins; i++)
+    {
+        ADMBP(va("%d - %s\n", i+1, skins[i]));
+    }
+    ADMBP(va("^3listskins: ^7default skin ^2%s\n", GetSkin(modelname, "default")));
+    ADMBP(va("^3listskins: ^7showing %d skins for %s\n", numskins, modelname));
+    ADMBP_end();
+}
 
 /*
 =================
@@ -3594,6 +3670,8 @@ commands_t cmds[ ] = {
   { "itemtoggle", CMD_HUMAN|CMD_ALIVE, Cmd_ToggleItem_f },
   { "kill", CMD_TEAM|CMD_ALIVE, Cmd_Kill_f },
   { "listmaps", CMD_MESSAGE|CMD_INTERMISSION, Cmd_ListMaps_f },
+  { "listmodels", CMD_MESSAGE|CMD_INTERMISSION, Cmd_ListModels_f },
+  { "listskins", CMD_MESSAGE|CMD_INTERMISSION, Cmd_ListSkins_f },
   { "m", CMD_MESSAGE|CMD_INTERMISSION, Cmd_PrivateMessage_f },
   { "mt", CMD_MESSAGE|CMD_INTERMISSION, Cmd_PrivateMessage_f },
   { "noclip", CMD_CHEAT_TEAM, Cmd_Noclip_f },

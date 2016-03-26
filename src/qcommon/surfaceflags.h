@@ -38,6 +38,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define CONTENTS_NOTTEAM2		0x0100
 #define CONTENTS_NOBOTCLIP		0x0200
 
+#define CONTENTS_ASTRAL_NOCLIP          0x0400          // Content that doesn't clip with ASTRALSOLID entities. Must
+                                                        // be equal to EF_ASTRAL_NOCLIP
+
 #define	CONTENTS_AREAPORTAL		0x8000
 
 #define	CONTENTS_PLAYERCLIP		0x10000

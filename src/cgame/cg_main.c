@@ -234,7 +234,13 @@ vmCvar_t  cg_voice;
 
 vmCvar_t  cg_emoticons;
 
+vmCvar_t  cg_cameraShakeMagnitude;
+
 vmCvar_t  cg_chatTeamPrefix;
+
+vmCvar_t  cg_fuelInfoX;
+vmCvar_t  cg_fuelInfoY;
+vmCvar_t  cg_fuelInfoScale;
 
 typedef struct
 {
@@ -286,7 +292,7 @@ static cvarTable_t cvarTable[ ] =
   { &cg_tracerWidth, "cg_tracerwidth", "1", CVAR_CHEAT },
   { &cg_tracerLength, "cg_tracerlength", "100", CVAR_CHEAT },
   { &cg_thirdPersonRange, "cg_thirdPersonRange", "75", CVAR_ARCHIVE },
-  { &cg_thirdPerson, "cg_thirdPerson", "0", CVAR_CHEAT },
+  { &cg_thirdPerson, "cg_thirdPerson", "0", CVAR_ARCHIVE },
   { &cg_thirdPersonAngle, "cg_thirdPersonAngle", "0", CVAR_CHEAT },
   { &cg_thirdPersonPitchFollow, "cg_thirdPersonPitchFollow", "0", 0 },
   { &cg_thirdPersonShoulderViewMode, "cg_thirdPersonShoulderViewMode", "1", CVAR_ARCHIVE },
@@ -384,7 +390,13 @@ static cvarTable_t cvarTable[ ] =
 
   { &cg_emoticons, "cg_emoticons", "1", CVAR_LATCH|CVAR_ARCHIVE},
 
-  { &cg_chatTeamPrefix, "cg_chatTeamPrefix", "1", CVAR_ARCHIVE}
+  { &cg_cameraShakeMagnitude, "cg_cameraShakeMagnitude", "1", CVAR_ARCHIVE },
+
+  { &cg_chatTeamPrefix, "cg_chatTeamPrefix", "1", CVAR_ARCHIVE},
+
+  { &cg_fuelInfoX, "cg_fuelInfoX" ,"0", CVAR_ARCHIVE },
+  { &cg_fuelInfoY, "cg_fuelInfoY" ,"150", CVAR_ARCHIVE },
+  { &cg_fuelInfoScale, "cg_fuelInfoScale" ,"0.5", CVAR_ARCHIVE }
 };
 
 static size_t cvarTableSize = ARRAY_LEN( cvarTable );
@@ -798,9 +810,15 @@ static void CG_RegisterSounds( void )
     cgs.gameSounds[ i ] = trap_S_RegisterSound( soundName, qfalse );
   }
 
-  cgs.media.jetpackDescendSound     = trap_S_RegisterSound( "sound/upgrades/jetpack/low.wav", qfalse );
-  cgs.media.jetpackIdleSound        = trap_S_RegisterSound( "sound/upgrades/jetpack/idle.wav", qfalse );
-  cgs.media.jetpackAscendSound      = trap_S_RegisterSound( "sound/upgrades/jetpack/hi.wav", qfalse );
+  cgs.media.jetpackDescendSound             = trap_S_RegisterSound( "sound/upgrades/jetpack/low.wav", qfalse );
+  cgs.media.jetpackIdleSound                = trap_S_RegisterSound( "sound/upgrades/jetpack/idle.wav", qfalse );
+  cgs.media.jetpackAscendSound              = trap_S_RegisterSound( "sound/upgrades/jetpack/hi.wav", qfalse );
+  cgs.media.jetpackDescendDeactivateSound   = trap_S_RegisterSound( "sound/upgrades/jetpack/low_off.wav", qfalse );
+  cgs.media.jetpackIdleDeactivateSound      = trap_S_RegisterSound( "sound/upgrades/jetpack/idle_off.wav", qfalse );
+  cgs.media.jetpackAscendDeactivateSound    = trap_S_RegisterSound( "sound/upgrades/jetpack/hi_off.wav", qfalse );
+  cgs.media.jetpackLowFuelSound             = trap_S_RegisterSound( "sound/upgrades/jetpack/lowfuel.wav", qfalse );
+  cgs.media.jetpackRefuelSound              = trap_S_RegisterSound( "sound/upgrades/jetpack/refuel.wav", qfalse );
+
 
   cgs.media.medkitUseSound          = trap_S_RegisterSound( "sound/upgrades/medkit/medkit.wav", qfalse );
 
@@ -1075,6 +1093,7 @@ static void CG_RegisterClients( void )
   cgs.media.larmourHeadSkin    = trap_R_RegisterSkin( "models/players/human_base/head_light.skin" );
   cgs.media.larmourLegsSkin    = trap_R_RegisterSkin( "models/players/human_base/lower_light.skin" );
   cgs.media.larmourTorsoSkin   = trap_R_RegisterSkin( "models/players/human_base/upper_light.skin" );
+  cgs.media.replaceLarmour     = trap_R_RegisterShader( "replace/larmour" );
 
   cgs.media.jetpackModel       = trap_R_RegisterModel( "models/players/human_base/jetpack.md3" );
   cgs.media.jetpackFlashModel  = trap_R_RegisterModel( "models/players/human_base/jetpack_flash.md3" );

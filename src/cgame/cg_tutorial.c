@@ -42,7 +42,7 @@ static bind_t bindings[ ] =
   { "+attack",        "Primary Attack",         { -1, -1 } },
   { "+button5",       "Secondary Attack",       { -1, -1 } },
   { "reload",         "Reload",                 { -1, -1 } },
-  { "buy ammo",       "Buy Ammo",               { -1, -1 } },
+  { "buy ammo",       "Buy Ammo / Refuel", { -1, -1 } },
   { "itemact medkit", "Use Medkit",             { -1, -1 } },
   { "+button7",       "Use Structure/Evolve",   { -1, -1 } },
   { "deconstruct",    "Deconstruct Structure",  { -1, -1 } },
@@ -531,8 +531,8 @@ static void CG_HumanText( char *text, playerState_t *ps )
 
       case WP_LUCIFER_CANNON:
         Q_strcat( text, MAX_TUTORIAL_TEXT,
-            va( "Hold and release %s to fire a charged shot\n",
-              CG_KeyNameForCommand( "+attack" ) ) );
+            va( "Hold and release %s to fire a charged shot\nHold %s while charging to reduce the charge\n",
+              CG_KeyNameForCommand( "+attack" ), CG_KeyNameForCommand( "+button5" ) ) );
 
         Q_strcat( text, MAX_TUTORIAL_TEXT,
             va( "Press %s to fire the %s\n",
@@ -617,6 +617,22 @@ static void CG_HumanText( char *text, playerState_t *ps )
   Q_strcat( text, MAX_TUTORIAL_TEXT,
       va( "Press %s and back or strafe to dodge\n",
         CG_KeyNameForCommand( "+button6" ) ) );
+
+  if( BG_InventoryContainsUpgrade( UP_JETPACK, ps->stats ) )
+    {
+      if( ( ps->stats[ STAT_FUEL ] <= JETPACK_FUEL_LOW ) && ( ps->stats[ STAT_FUEL ] > 0 )  )
+      {
+        Q_strcat( text, MAX_TUTORIAL_TEXT,
+                  va( "You are running low on jet fuel. Find an Armoury and press %s to refuel\n",
+                      CG_KeyNameForCommand( "buy ammo" ) ) );
+      }
+      else if( ps->stats[ STAT_FUEL ] <= 0 )
+      {
+        Q_strcat( text, MAX_TUTORIAL_TEXT,
+                  va( "You are out of jet fuel. You can no longer fly. Find an Armoury and press %s to refuel\n",
+                      CG_KeyNameForCommand( "buy ammo" ) ) );
+      }
+    }
 }
 
 /*
@@ -690,6 +706,7 @@ CG_TutorialText
 Returns context help for the current class/weapon
 ===============
 */
+
 const char *CG_TutorialText( void )
 {
   playerState_t *ps;

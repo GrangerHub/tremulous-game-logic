@@ -886,6 +886,7 @@ PM_CheckDodge
 Checks the dodge key and starts a human dodge or sprint
 ==================
 */
+/* Disable dodge
 static qboolean PM_CheckDodge( void )
 {
   vec3_t right, forward, velocity = { 0.0f, 0.0f, 0.0f };
@@ -978,7 +979,7 @@ static qboolean PM_CheckDodge( void )
   PM_AddEvent( EV_JUMP );
 
   return qtrue;
-}
+}*/
 
 //============================================================================
 
@@ -2731,6 +2732,9 @@ static void PM_BeginWeaponChange( int weapon )
   if( pm->ps->weapon == WP_LUCIFER_CANNON )
     pm->ps->stats[ STAT_MISC ] = 0;
 
+  if( weapon == WP_LUCIFER_CANNON )
+    pm->pmext->luciAmmoReduction = 0;
+
   pm->ps->weaponstate = WEAPON_DROPPING;
   pm->ps->weaponTime += 200;
   pm->ps->persistant[ PERS_NEWWEAPON ] = weapon;
@@ -2920,11 +2924,32 @@ static void PM_Weapon( void )
 
   if( pm->ps->weapon == WP_LUCIFER_CANNON )
   {
-    // Charging up
+    // Charging up and charging down
     if( !pm->ps->weaponTime &&
         ( pm->cmd.buttons & BUTTON_ATTACK ) )
     {
-      pm->ps->stats[ STAT_MISC ] += pml.msec;
+      if( ( pm->cmd.buttons & BUTTON_ATTACK2 ) && ( pm->ps->stats[ STAT_MISC ] > 0 ) )
+      {
+        pm->ps->stats[ STAT_MISC ] -= pml.msec;
+        if( pm->ps->stats[ STAT_MISC ] < 0 )
+          pm->ps->stats[ STAT_MISC ] = 0;
+
+        if( pm->ps->stats[ STAT_MISC ] > 0 )
+        {
+          pm->pmext->luciAmmoReduction += LCANNON_CHARGE_AMMO_REDUCE * LCANNON_CHARGE_AMMO *
+                                          ( ( float ) ( pml.msec ) ) / LCANNON_CHARGE_TIME_MAX;
+          pm->ps->ammo -= ( int ) ( pm->pmext->luciAmmoReduction );
+          pm->pmext->luciAmmoReduction -= ( int ) ( pm->pmext->luciAmmoReduction );
+
+          if( pm->ps->ammo <= 0 )
+          {
+            pm->ps->ammo = 0;
+            pm->pmext->luciAmmoReduction = 0;
+          }
+        }
+      }
+      else if( !( pm->cmd.buttons & BUTTON_ATTACK2 ) )
+        pm->ps->stats[ STAT_MISC ] += pml.msec;
       if( pm->ps->stats[ STAT_MISC ] >= LCANNON_CHARGE_TIME_MAX )
         pm->ps->stats[ STAT_MISC ] = LCANNON_CHARGE_TIME_MAX;
       if( pm->ps->stats[ STAT_MISC ] > pm->ps->ammo * LCANNON_CHARGE_TIME_MAX /
@@ -3057,6 +3082,9 @@ static void PM_Weapon( void )
     if( BG_Weapon( pm->ps->weapon )->usesEnergy &&
         BG_InventoryContainsUpgrade( UP_BATTPACK, pm->ps->stats ) )
       pm->ps->ammo *= BATTPACK_MODIFIER;
+
+    if( pm->ps->weapon == WP_LUCIFER_CANNON )
+      pm->pmext->luciAmmoReduction = 0;
 
     //allow some time for the weapon to be raised
     pm->ps->weaponstate = WEAPON_RAISING;
@@ -3713,7 +3741,8 @@ void PmoveSingle( pmove_t *pmove )
     PM_DeadMove( );
 
   PM_DropTimers( );
-  PM_CheckDodge( );
+  // Disable dodge
+  //PM_CheckDodge( );
 
   if( pm->ps->pm_type == PM_JETPACK )
     PM_JetPackMove( );

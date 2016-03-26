@@ -47,7 +47,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ABUILDER_BLOB_SPEED_MOD     0.5f
 #define ABUILDER_BLOB_TIME          2000
 
-#define LEVEL0_BITE_DMG             ADM(36)
+#define LEVEL0_BITE_DMG             ADM(48)
 #define LEVEL0_BITE_RANGE           64.0f
 #define LEVEL0_BITE_WIDTH           6.0f
 #define LEVEL0_BITE_REPEAT          500
@@ -93,45 +93,45 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL2_WALLJUMP_MAXSPEED    1000.0f
 
 #define LEVEL3_CLAW_DMG             ADM(80)
-#define LEVEL3_CLAW_RANGE           80.0f
-#define LEVEL3_CLAW_UPG_RANGE       LEVEL3_CLAW_RANGE + 3.0f          
+#define LEVEL3_CLAW_RANGE           96.0f
+#define LEVEL3_CLAW_UPG_RANGE       LEVEL3_CLAW_RANGE // + 3.0f          
 #define LEVEL3_CLAW_WIDTH           12.0f
-#define LEVEL3_CLAW_REPEAT          900
+#define LEVEL3_CLAW_REPEAT          700
 #define LEVEL3_CLAW_K_SCALE         1.0f
-#define LEVEL3_CLAW_U_REPEAT        800
+#define LEVEL3_CLAW_U_REPEAT        600
 #define LEVEL3_CLAW_U_K_SCALE       1.0f
 #define LEVEL3_POUNCE_DMG           ADM(100)
-#define LEVEL3_POUNCE_RANGE         48.0f
+#define LEVEL3_POUNCE_RANGE         72.0f
 #define LEVEL3_POUNCE_UPG_RANGE     LEVEL3_POUNCE_RANGE + 3.0f
-#define LEVEL3_POUNCE_WIDTH         14.0f
-#define LEVEL3_POUNCE_TIME          800      // msec for full Dragoon pounce
-#define LEVEL3_POUNCE_TIME_UPG      800      // msec for full Adv. Dragoon pounce
+#define LEVEL3_POUNCE_WIDTH         16.0f
+#define LEVEL3_POUNCE_TIME          700      // msec for full Dragoon pounce
+#define LEVEL3_POUNCE_TIME_UPG      700      // msec for full Adv. Dragoon pounce
 #define LEVEL3_POUNCE_TIME_MIN      200      // msec before which pounce cancels  
 #define LEVEL3_POUNCE_REPEAT        400      // msec before a new pounce starts
 #define LEVEL3_POUNCE_SPEED_MOD     0.75f    // walking speed modifier for pounce charging
 #define LEVEL3_POUNCE_JUMP_MAG      700      // Dragoon pounce jump power
 #define LEVEL3_POUNCE_JUMP_MAG_UPG  800      // Adv. Dragoon pounce jump power
 #define LEVEL3_BOUNCEBALL_DMG       ADM(110)
-#define LEVEL3_BOUNCEBALL_REPEAT    1200
+#define LEVEL3_BOUNCEBALL_REPEAT    1000
 #define LEVEL3_BOUNCEBALL_SPEED     1000.0f
-#define LEVEL3_BOUNCEBALL_RADIUS    75
-#define LEVEL3_BOUNCEBALL_REGEN     15000    // msec until new barb
+#define LEVEL3_BOUNCEBALL_RADIUS    0
+#define LEVEL3_BOUNCEBALL_REGEN     12500    // msec until new barb
 
 #define LEVEL4_CLAW_DMG             ADM(100)
-#define LEVEL4_CLAW_RANGE           100.0f
-#define LEVEL4_CLAW_WIDTH           14.0f
+#define LEVEL4_CLAW_RANGE           128.0f
+#define LEVEL4_CLAW_WIDTH           20.0f
 #define LEVEL4_CLAW_HEIGHT          20.0f
-#define LEVEL4_CLAW_REPEAT          800
+#define LEVEL4_CLAW_REPEAT          750
 #define LEVEL4_CLAW_K_SCALE         1.0f
 
-#define LEVEL4_TRAMPLE_DMG             ADM(111)
+#define LEVEL4_TRAMPLE_DMG             ADM(110)
 #define LEVEL4_TRAMPLE_SPEED           2.0f
-#define LEVEL4_TRAMPLE_CHARGE_MIN      375   // minimum msec to start a charge
-#define LEVEL4_TRAMPLE_CHARGE_MAX      1000  // msec to maximum charge stored
+#define LEVEL4_TRAMPLE_CHARGE_MIN      750   // minimum msec to start a charge
+#define LEVEL4_TRAMPLE_CHARGE_MAX      1500  // msec to maximum charge stored
 #define LEVEL4_TRAMPLE_CHARGE_TRIGGER  3000  // msec charge starts on its own
 #define LEVEL4_TRAMPLE_DURATION        3000  // msec trample lasts on full charge
 #define LEVEL4_TRAMPLE_STOP_PENALTY    1     // charge lost per msec when stopped
-#define LEVEL4_TRAMPLE_REPEAT          100   // msec before a trample will rehit a player
+#define LEVEL4_TRAMPLE_REPEAT          1000   // msec before a trample will rehit a player
 
 #define LEVEL4_CRUSH_DAMAGE_PER_V      0.5f  // damage per falling velocity
 #define LEVEL4_CRUSH_DAMAGE            120   // to players only
@@ -209,7 +209,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define LEVEL4_SPEED                1.2f
 #define LEVEL4_VALUE                AVM(960)
-#define LEVEL4_HEALTH               AHM(350)
+#define LEVEL4_HEALTH               AHM(400)
 #define LEVEL4_REGEN                (0.025f * LEVEL4_HEALTH)
 #define LEVEL4_COST                 2
 
@@ -276,11 +276,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ACIDTUBE_HEALTH             ABHM(125)
 #define ACIDTUBE_REGEN              10
 #define ACIDTUBE_SPLASHDAMAGE       50
-#define ACIDTUBE_SPLASHRADIUS       100
+#define ACIDTUBE_SPLASHRADIUS       300
 #define ACIDTUBE_CREEPSIZE          120
-#define ACIDTUBE_DAMAGE             8
+#define ACIDTUBE_DAMAGE             6
 #define ACIDTUBE_RANGE              300.0f
-#define ACIDTUBE_REPEAT             300
+#define ACIDTUBE_REPEAT             200
 #define ACIDTUBE_REPEAT_ANIM        2000
 #define ACIDTUBE_VALUE              0
 
@@ -460,23 +460,27 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define PRIFLE_SIZE                 5
 
 #define LCANNON_PRICE               600
-#define LCANNON_AMMO                80
+#define LCANNON_AMMO                90
 #define LCANNON_K_SCALE             1.0f
 #define LCANNON_REPEAT              500
 #define LCANNON_RELOAD              0
 #define LCANNON_DAMAGE              HDM(265)
 #define LCANNON_RADIUS              150      // primary splash damage radius
 #define LCANNON_SIZE                5        // missile bounding box radius
-#define LCANNON_SECONDARY_DAMAGE    HDM(30)
+#define LCANNON_SECONDARY_DAMAGE    HDM( LCANNON_DAMAGE / LCANNON_CHARGE_AMMO )
 #define LCANNON_SECONDARY_RADIUS    75       // secondary splash damage radius
-#define LCANNON_SECONDARY_SPEED     1400
+#define LCANNON_SECONDARY_SPEED     700
 #define LCANNON_SECONDARY_RELOAD    2000
-#define LCANNON_SECONDARY_REPEAT    1000
-#define LCANNON_SPEED               700
-#define LCANNON_CHARGE_TIME_MAX     3000
-#define LCANNON_CHARGE_TIME_MIN     100
-#define LCANNON_CHARGE_TIME_WARN    2000
+#define LCANNON_SECONDARY_REPEAT    500
+#define LCANNON_SPEED_MIN           350
+#define LCANNON_CHARGE_TIME_MAX     2000
+#define LCANNON_CHARGE_TIME_MIN     400
+#define LCANNON_CHARGE_TIME_WARN    ( LCANNON_CHARGE_TIME_MAX - ( 2000 / 3 ) )
 #define LCANNON_CHARGE_AMMO         10       // ammo cost of a full charge shot
+#define LCANNON_CHARGE_AMMO_REDUCE  0.25f    // rate at which luci ammo is reduced when using +attack2
+#define LCANNON_SPLASH_LIGHTARMOUR  0.50f    // reduction of damage fraction for luci splash on light armour
+#define LCANNON_SPLASH_HELMET       0.75f    // reduction of damage fraction for luci splash on helmets
+#define LCANNON_SPLASH_BATTLESUIT   0.50f    // reduction of damage fraction for luci splash on battlesuits
 
 #define HBUILD_PRICE                0
 #define HBUILD_REPEAT               1000
@@ -505,6 +509,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define JETPACK_SINK_SPEED          192.0f //down movement speed
 #define JETPACK_DISABLE_TIME        1000 //time to disable the jetpack when player damaged
 #define JETPACK_DISABLE_CHANCE      0.3f
+#define JETPACK_FUEL_FULL           7500 //can't exceed 32767
+#define JETPACK_FUEL_LOW            1500
+#define JETPACK_FUEL_USAGE          10 //every 100ms
 
 #define BSUIT_PRICE                 400
 #define BSUIT_POISON_PROTECTION     3
@@ -557,11 +564,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MGTURRET_ANGULARSPEED       12
 #define MGTURRET_ACCURACY_TO_FIRE   0
 #define MGTURRET_VERTICALCAP        30  // +/- maximum pitch
-#define MGTURRET_REPEAT             150
+#define MGTURRET_REPEAT             100
 #define MGTURRET_K_SCALE            1.0f
 #define MGTURRET_RANGE              400.0f
 #define MGTURRET_SPREAD             200
-#define MGTURRET_DMG                HDM(8)
+#define MGTURRET_DMG                HDM(4)
 #define MGTURRET_SPINUP_TIME        750 // time between target sighted and fire
 #define MGTURRET_VALUE              0
 

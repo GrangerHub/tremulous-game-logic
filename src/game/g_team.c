@@ -168,6 +168,14 @@ void G_LeaveTeam( gentity_t *self )
   self->client->pers.readyToPlay = qfalse;
   self->client->ps.stats[ STAT_READY ] = self->client->pers.readyToPlay;
 
+  // reset any hovels the player might be using
+  if( self->client->hovel )
+  {
+    self->client->hovel->active = qfalse;
+    self->client->hovel->builder = NULL;
+    self->client->hovel = NULL;
+  }
+
   for( i = 0; i < level.num_entities; i++ )
   {
     ent = &g_entities[ i ];

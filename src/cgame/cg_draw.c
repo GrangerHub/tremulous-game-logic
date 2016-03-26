@@ -2595,6 +2595,12 @@ static void CG_DrawCrosshair( rectDef_t *rect, vec4_t color )
       color[i] *= .5f;
 
   }
+  else if( cg.time == cg.crosshairEnemyTime )
+  {
+    color[0] = 1.0;
+    color[1] = 0.0;
+    color[2] = 0.0;
+  }
 
   if( hShader != 0 )
   {
@@ -2616,7 +2622,7 @@ static void CG_ScanForCrosshairEntity( void )
 {
   trace_t   trace;
   vec3_t    start, end;
-  int       content;
+/*  int       content;*/
   team_t    team;
 
   VectorCopy( cg.refdef.vieworg, start );
@@ -2626,16 +2632,25 @@ static void CG_ScanForCrosshairEntity( void )
     cg.snap->ps.clientNum, CONTENTS_SOLID|CONTENTS_BODY );
 
   // if the player is in fog, don't show it
-  content = trap_CM_PointContents( trace.endpos, 0 );
-  if( content & CONTENTS_FOG )
-    return;
+/*  content = trap_CM_PointContents( trace.endpos, 0 );*/
+/*  if( content & CONTENTS_FOG )*/
+/*    return;*/
 
   if( trace.entityNum >= MAX_CLIENTS )
   {
     entityState_t *s = &cg_entities[ trace.entityNum ].currentState;
-    if( s->eType == ET_BUILDABLE && BG_Buildable( s->modelindex )->team ==
-        cg.snap->ps.stats[ STAT_TEAM ] )
-      cg.crosshairBuildable = trace.entityNum;
+    if( s->eType == ET_BUILDABLE )
+    {
+      if( BG_Buildable( s->modelindex )->team == cg.snap->ps.stats[ STAT_TEAM ] )
+      {
+        cg.crosshairBuildable = trace.entityNum;
+      }
+      else
+      {
+        cg.crosshairEnemyTime = cg.time;
+        cg.crosshairBuildable = -1;
+      }
+    }
     else
       cg.crosshairBuildable = -1;
 
@@ -2644,16 +2659,24 @@ static void CG_ScanForCrosshairEntity( void )
 
   team = cgs.clientinfo[ trace.entityNum ].team;
 
+
   if( cg.snap->ps.stats[ STAT_TEAM ] != TEAM_NONE )
   {
-    //only display team names of those on the same team as this player
-    if( team != cg.snap->ps.stats[ STAT_TEAM ] )
-      return;
+    if( team == cg.snap->ps.stats[ STAT_TEAM ] )
+    {
+      // update the fade timer
+      cg.crosshairClientNum = trace.entityNum;
+      cg.crosshairClientTime = cg.time;
+    }
+    // only display team names of those on the same team as this player,
+    // and change the crosshair color to red for enemies of this player
+    else
+    {
+      cg.crosshairEnemyTime = cg.time;
+    }
   }
 
-  // update the fade timer
-  cg.crosshairClientNum = trace.entityNum;
-  cg.crosshairClientTime = cg.time;
+
 }
 
 
@@ -2742,6 +2765,45 @@ static void CG_DrawWarmup( int ownerDraw, rectDef_t *rect, float textScale, int 
 
   trap_R_SetColor( NULL );
 }
+/*
+======================
+CG_DrawFuel
+======================
+*/
+void CG_DrawFuel( void )
+{
+  int i;
+  float x, y, w, h, scale, fuel;
+  vec4_t color;
+  char text[20];
+  qboolean active;
+
+
+  if( !BG_InventoryContainsUpgrade( UP_JETPACK, cg.predictedPlayerState.stats ) )
+    return;
+
+  active = BG_UpgradeIsActive( UP_JETPACK, cg.predictedPlayerState.stats ) ||
+           cg.predictedPlayerEntity.jetPackJumpTime + 100 > cg.time;
+
+  fuel = (float)cg.predictedPlayerState.stats[ STAT_FUEL ] / JETPACK_FUEL_FULL;
+  fuel = ceil( fuel * 100 );
+
+  Com_sprintf( text, sizeof(text), "%.0f%%", fuel );
+
+  scale = cg_fuelInfoScale.value;
+
+  w = UI_Text_Width( text, scale );
+  h = UI_Text_Height( text, scale );
+  x = 320.0f - w / 2.0f + cg_fuelInfoX.value;
+  y = 240.0f - h / 2.0f + cg_fuelInfoY.value;
+
+  for( i = 0; i < 3; i++ )
+    color[ i ] = ( active ? 1 : 0.5 );
+  color[ 3 ] = 1.0f;
+
+  UI_Text_Paint( x, y, scale, color, text, 0, 0, ITEM_TEXTSTYLE_SHADOWEDMORE );
+}
+
 
 /*
 =====================
@@ -3512,6 +3574,7 @@ static void CG_Draw2D( void )
       cg.predictedPlayerState.stats[ STAT_CLASS ] )->hudName );
 
     CG_DrawBuildableStatus( );
+    CG_DrawFuel( );
   }
 
   if( !menu )
