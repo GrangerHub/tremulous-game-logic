@@ -4426,6 +4426,14 @@ qboolean G_BuildIfValid( gentity_t *ent, buildable_t buildable )
       G_TriggerMenu( ent->client->ps.clientNum, MN_A_ONEOVERMIND );
       return qfalse;
 
+    case IBE_ONEHOVEL:
+      G_TriggerMenu( ent->client->ps.clientNum, MN_A_ONEHOVEL );
+      return qfalse;
+
+    case IBE_HOVELEXIT:
+      G_TriggerMenu( ent->client->ps.clientNum, MN_A_HOVEL_EXIT );
+      return qfalse;
+
     case IBE_NORMAL:
       G_TriggerMenu( ent->client->ps.clientNum, MN_B_NORMAL );
       return qfalse;
