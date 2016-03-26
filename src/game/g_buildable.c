@@ -1540,8 +1540,222 @@ void ABooster_Touch( gentity_t *self, gentity_t *other, trace_t *trace )
   client->boostedTime = level.time;
 }
 
+//==================================================================================
 
+#define HOVEL_TRACE_DEPTH 128.0f
 
+/*
+================
+AHovel_Blocked
+
+Is this hovel entrance blocked?
+================
+*/
+qboolean AHovel_Blocked( gentity_t *hovel, gentity_t *player, qboolean provideExit )
+{
+  vec3_t    forward, normal, origin, start, end, angles, hovelMaxs;
+  vec3_t    mins, maxs;
+  float     displacement;
+  trace_t   tr;
+
+  BG_BuildableBoundingBox( BA_A_HOVEL, NULL, maxs );
+  BG_ClassBoundingBox( player->client->ps.stats[ STAT_CLASS ],
+                       mins, maxs, NULL, NULL, NULL );
+
+  VectorCopy( hovel->s.origin2, normal );
+  AngleVectors( hovel->s.angles, forward, NULL, NULL );
+  VectorInverse( forward );
+
+  displacement = VectorMaxComponent( maxs ) * M_ROOT3 +
+                 VectorMaxComponent( hovelMaxs ) * M_ROOT3 + 1.0f;
+
+  VectorMA( hovel->r.currentOrigin, displacement, forward, origin );
+  vectoangles( forward, angles );
+
+  VectorMA( origin, HOVEL_TRACE_DEPTH, normal, start );
+
+  //compute a place up in the air to start the real trace
+  trap_Trace( &tr, origin, mins, maxs, start, player->s.number, MASK_PLAYERSOLID );
+  VectorMA( origin, ( HOVEL_TRACE_DEPTH * tr.fraction ) - 1.0f, normal, start );
+  VectorMA( origin, -HOVEL_TRACE_DEPTH, normal, end );
+
+  trap_Trace( &tr, start, mins, maxs, end, player->s.number, MASK_PLAYERSOLID );
+
+  if( tr.startsolid )
+    return qtrue;
+
+  VectorCopy( tr.endpos, origin );
+
+  trap_Trace( &tr, origin, mins, maxs, origin, player->s.number, MASK_PLAYERSOLID );
+
+  if( provideExit )
+  {
+    G_SetOrigin( player, origin );
+    VectorCopy( origin, player->client->ps.origin );
+    VectorCopy( vec3_origin, player->client->ps.velocity );
+    G_SetClientViewAngle( player, angles );
+  }
+
+  if( tr.fraction < 1.0f )
+    return qtrue;
+  else
+    return qfalse;
+}
+
+/*
+================
+APropHovel_Blocked
+
+Wrapper to test a hovel placement for validity
+================
+*/
+static qboolean APropHovel_Blocked( vec3_t origin, vec3_t angles, vec3_t normal,
+                                    gentity_t *player )
+{
+  gentity_t hovel;
+
+  VectorCopy( origin, hovel.r.currentOrigin );
+  VectorCopy( angles, hovel.s.angles );
+  VectorCopy( normal, hovel.s.origin2 );
+
+  return AHovel_Blocked( &hovel, player, qfalse );
+}
+
+/*
+================
+AHovel_Use
+
+Called when an alien uses a hovel
+================
+*/
+void AHovel_Use( gentity_t *self, gentity_t *other, gentity_t *activator )
+{
+  vec3_t  hovelOrigin, hovelAngles, inverseNormal;
+
+  //AGeneric_Think( self );
+
+  if( self->spawned && self->powered )
+  {
+    if( self->active )
+    {
+      //this hovel is in use
+      G_TriggerMenu( activator->client->ps.clientNum, MN_A_HOVEL_OCCUPIED );
+    }
+    else if( ( ( activator->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_BUILDER0 ) ||
+               ( activator->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_BUILDER0_UPG ) ) &&
+             activator->health > 0 && self->health > 0 )
+    {
+      if( AHovel_Blocked( self, activator, qfalse ) )
+      {
+        //you can get in, but you can't get out
+        G_TriggerMenu( activator->client->ps.clientNum, MN_A_HOVEL_BLOCKED );
+        return;
+      }
+
+      self->active = qtrue;
+      G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
+
+      //prevent lerping
+      activator->client->ps.eFlags ^= EF_TELEPORT_BIT;
+      activator->client->ps.eFlags |= EF_NODRAW;
+
+      activator->client->ps.stats[ STAT_STATE ] |= SS_HOVELING;
+      activator->client->hovel = self;
+      self->builder = activator;
+
+      VectorCopy( self->s.pos.trBase, hovelOrigin );
+      VectorMA( hovelOrigin, 128.0f, self->s.origin2, hovelOrigin );
+
+      VectorCopy( self->s.origin2, inverseNormal );
+      VectorInverse( inverseNormal );
+      vectoangles( inverseNormal, hovelAngles );
+
+      VectorCopy( activator->s.pos.trBase, activator->client->hovelOrigin );
+
+      G_SetOrigin( activator, hovelOrigin );
+      VectorCopy( hovelOrigin, activator->client->ps.origin );
+      G_SetClientViewAngle( activator, hovelAngles );
+    }
+  }
+}
+
+/*
+================
+AHovel_Think
+
+Think for alien hovel
+================
+*/
+void AHovel_Think( gentity_t *self )
+{
+  if( self->spawned )
+  {
+    if( self->active )
+      G_SetIdleBuildableAnim( self, BANIM_IDLE2 );
+    else
+      G_SetIdleBuildableAnim( self, BANIM_IDLE1 );
+  }
+
+  G_CreepSlow( self );
+
+  self->nextthink = level.time + 200;
+}
+
+/*
+================
+AHovel_Die
+
+Die for alien hovel
+================
+*/
+void AHovel_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod )
+{
+  vec3_t  dir;
+
+  VectorCopy( self->s.origin2, dir );
+
+  G_LogDestruction( self, attacker, mod );
+
+  //do a bit of radius damage
+  G_SelectiveRadiusDamage( self->s.pos.trBase, self, self->splashDamage,
+    self->splashRadius, self, self->splashMethodOfDeath, TEAM_ALIENS );
+
+  //pretty events and item cleanup
+  self->s.eFlags |= EF_NODRAW; //don't draw the model once its destroyed
+  G_AddEvent( self, EV_ALIEN_BUILDABLE_EXPLOSION, DirToByte( dir ) );
+  self->s.eFlags &= ~EF_FIRING; //prevent any firing effects
+  self->timestamp = level.time;
+  self->think = AGeneric_CreepRecede;
+  self->nextthink = level.time + 500; //wait .5 seconds before damaging others
+
+  //if the hovel is occupied free the occupant
+  if( self->active )
+  {
+    gentity_t *builder = self->builder;
+    vec3_t    newOrigin;
+    vec3_t    newAngles;
+
+    VectorCopy( self->s.angles, newAngles );
+    newAngles[ ROLL ] = 0;
+
+    VectorCopy( self->r.currentOrigin, newOrigin );
+    VectorMA( newOrigin, 1.0f, self->s.origin2, newOrigin );
+
+    //prevent lerping
+    builder->client->ps.eFlags ^= EF_TELEPORT_BIT;
+    builder->client->ps.eFlags &= ~EF_NODRAW;
+
+    G_SetOrigin( builder, newOrigin );
+    VectorCopy( newOrigin, builder->client->ps.origin );
+    G_SetClientViewAngle( builder, newAngles );
+
+    //client leaves hovel
+    builder->client->ps.stats[ STAT_STATE ] &= ~SS_HOVELING;
+  }
+
+  self->r.contents = 0;    //stop collisions...
+  trap_LinkEntity( self ); //...requires a relink
+}
 
 //==================================================================================
 
@@ -3740,6 +3954,15 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
         reason = IBE_NOCREEP;
     }
 
+    // XXX This check is being awfully flaky. Maybe I will learn to appreciate why it was removed...
+#if 0
+    if ( buildable == BA_A_HOVEL )
+    {
+      if ( APropHovel_Blocked( angles, origin, normal, ent ) )
+          reason = IBE_HOVELEXIT;
+    }
+#endif
+
     // Check if the enemy isn't blocking your building during pre-game warmup
     if( ( G_IsPowered( entity_origin ) != BA_NONE ) && IS_WARMUP )
     {
@@ -3829,6 +4052,10 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
       {
         case BA_A_OVERMIND:
           reason = IBE_ONEOVERMIND;
+          break;
+        
+        case BA_A_HOVEL:
+          reason = IBE_ONEHOVEL;
           break;
 
         case BA_H_REACTOR:
@@ -4008,6 +4235,13 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
       built->die = AGeneric_Die;
       built->think = AHive_Think;
       built->pain = AHive_Pain;
+      break;
+
+    case BA_A_HOVEL:
+      built->die = AHovel_Die;
+      built->use = AHovel_Use;
+      built->think = AHovel_Think;
+      built->pain = AGeneric_Pain;
       break;
 
     case BA_A_TRAPPER:

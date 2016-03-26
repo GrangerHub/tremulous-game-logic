@@ -215,6 +215,7 @@ struct gentity_s
   int               turretSpinupTime;   // spinup delay for norfenturrets
 
   vec4_t            animation;          // animated map objects
+  gentity_t         *builder;           // occupant of this hovel
 
   qboolean          nonSegModel;        // this entity uses a nonsegmented player model
 
@@ -409,6 +410,8 @@ struct gclient_s
   int                 time10000;        // timer for ten second interval events
 
   char                *areabits;
+  gentity_t           *hovel;           // body that is being infested. must be persistant
+  vec3_t              hovelOrigin;          // player origin before entering hovel
 
   int                 lastSuffocationTime;
   int                 lastPoisonTime;
@@ -764,9 +767,11 @@ typedef enum
 
   IBE_NOOVERMIND,
   IBE_ONEOVERMIND,
+  IBE_ONEHOVEL,
   IBE_NOALIENBP,
   IBE_SPWNWARN, // not currently used
   IBE_NOCREEP,
+  IBE_HOVELEXIT,
 
   IBE_ONEREACTOR,
   IBE_NOPOWERHERE,
@@ -826,6 +831,7 @@ void              G_BuildLogAuto( gentity_t *actor, gentity_t *buildable, buildF
 void              G_BuildLogRevert( int id );
 void              G_RemoveRangeMarkerFrom( gentity_t *self );
 void              G_UpdateBuildableRangeMarkers( void );
+qboolean          AHovel_Blocked( gentity_t *hovel, gentity_t *player, qboolean provideExit );
 
 //
 // g_utils.c

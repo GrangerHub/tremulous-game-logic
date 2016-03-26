@@ -604,8 +604,17 @@ Cmd_Kill_f
 */
 void Cmd_Kill_f( gentity_t *ent )
 {
+
   if( g_cheats.integer )
   {
+    // reset any hovels the player might be using
+    if( ent->client && ent->client->hovel )
+    {
+      ent->client->hovel->active = qfalse;
+      ent->client->hovel->builder = NULL;
+      ent->client->hovel = NULL;
+    }
+
     ent->client->ps.stats[ STAT_HEALTH ] = ent->health = 0;
     player_die( ent, ent, ent, 100000, MOD_SUICIDE );
   }
@@ -1974,6 +1983,12 @@ void Cmd_Class_f( gentity_t *ent )
       if( ent->client->ps.eFlags & EF_WALLCLIMB )
       {
         G_TriggerMenu( clientNum, MN_A_EVOLVEWALLWALK );
+        return;
+      }
+
+      if ( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING )
+      {
+        G_TriggerMenu( clientNum, MN_A_NOEROOM );
         return;
       }
 

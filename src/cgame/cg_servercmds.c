@@ -845,6 +845,33 @@ void CG_Menu( int menu, int arg )
       type      = DT_BUILD;
       break;
 
+    case MN_A_ONEHOVEL:
+      longMsg   = "There can only be one Hovel. Deconstruct the existing one if you "
+                  "wish to move it.";
+      shortMsg  = "There can only be one Hovel";
+      type      = DT_BUILD;
+      break;
+
+    case MN_A_HOVEL_OCCUPIED:
+      longMsg   = "This Hovel is occupied by another builder. The Hovel can only have "
+                  "a single occupant.";
+      shortMsg  = "This Hovel is occupied by another builder";
+      type      = DT_COMMAND;
+      break;
+
+    case MN_A_HOVEL_BLOCKED:
+      longMsg   = "The exit to the Hovel is blocked. Wait until it becomes clear and "
+                  "try again.";
+      shortMsg  = "The exit to the Hovel is blocked";
+      type      = DT_COMMAND;
+      break;
+
+    case MN_A_HOVEL_EXIT:
+      longMsg   = "The entrance to the Hovel is blocked. Find a more suitable location.";
+      shortMsg  = "The entrance to the Hovel is blocked";
+      type      = DT_BUILD;
+      break;
+
     case MN_A_NOBP:
       longMsg   = "The Overmind cannot control any more structures. Deconstruct existing "
                   "structures to build more.";
