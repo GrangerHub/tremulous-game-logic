@@ -1552,7 +1552,7 @@ qboolean AHovel_Blocked( gentity_t *hovel, gentity_t *player, qboolean provideEx
   displacement = VectorMaxComponent( maxs ) * M_ROOT3 +
                  VectorMaxComponent( hovelMaxs ) * M_ROOT3 + 1.0f;
 
-  VectorMA( hovel->s.origin, displacement, forward, origin );
+  VectorMA( hovel->r.currentOrigin, displacement, forward, origin );
   vectoangles( forward, angles );
 
   VectorMA( origin, HOVEL_TRACE_DEPTH, normal, start );
@@ -1597,7 +1597,7 @@ static qboolean APropHovel_Blocked( vec3_t origin, vec3_t angles, vec3_t normal,
 {
   gentity_t hovel;
 
-  VectorCopy( origin, hovel.s.origin );
+  VectorCopy( origin, hovel.r.currentOrigin );
   VectorCopy( angles, hovel.s.angles );
   VectorCopy( normal, hovel.s.origin2 );
 
@@ -1697,6 +1697,8 @@ void AHovel_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
   VectorCopy( self->s.origin2, dir );
 
+  G_LogDestruction( self, attacker, mod );
+
   //do a bit of radius damage
   G_SelectiveRadiusDamage( self->s.pos.trBase, self, self->splashDamage,
     self->splashRadius, self, self->splashMethodOfDeath, TEAM_ALIENS );
@@ -1719,7 +1721,7 @@ void AHovel_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
     VectorCopy( self->s.angles, newAngles );
     newAngles[ ROLL ] = 0;
 
-    VectorCopy( self->s.origin, newOrigin );
+    VectorCopy( self->r.currentOrigin, newOrigin );
     VectorMA( newOrigin, 1.0f, self->s.origin2, newOrigin );
 
     //prevent lerping
@@ -4176,10 +4178,11 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
       break;
 
     case BA_A_HOVEL:
-      built->die = AGeneric_Die;
+      built->die = AHovel_Die;
       built->use = AHovel_Use;
       built->think = AHovel_Think;
       built->pain = AGeneric_Pain;
+      break;
 
     case BA_A_TRAPPER:
       built->die = AGeneric_Die;
