@@ -3674,6 +3674,33 @@ static void G_SetBuildableMarkedLinkState( qboolean link )
 }
 
 /*
+=================================================
+G_IsOvermindCreepHere
+
+Checks to see if a point is within Overmind creep
+=================================================
+*/
+static qboolean G_IsOvermindCreepHere( vec3_t point )
+{
+  gentity_t  *tempent;
+  float      d;
+
+  // TODO: This needs to be improved to account for multiple overminds
+  tempent = G_Overmind( );
+
+  if( tempent != NULL )
+  {
+    d = Distance( tempent->r.currentOrigin, point );
+    if ( d <= CREEP_BASESIZE )
+    {
+      return qtrue;
+    }
+  }
+
+  return qfalse;
+}
+
+/*
 ================
 G_CanBuild
 
@@ -3693,7 +3720,6 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   qboolean          invert;
   int               contents;
   playerState_t     *ps = &ent->client->ps;
-  float             d;
 
   // Stop all buildables from interacting with traces
   G_SetBuildableLinkState( qfalse );
@@ -3743,20 +3769,15 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
     // Check if the enemy isn't blocking your building during pre-game warmup
     if( ( G_IsPowered( entity_origin ) != BA_NONE ) && IS_WARMUP )
     {
-      // TODO: This needs to be improved to account for multiple overminds
-      tempent = G_Overmind( );
-      if( tempent != NULL )
+      if( G_IsPowered( entity_origin ) == BA_H_REACTOR )
       {
-        d = Distance( tempent->r.currentOrigin, entity_origin );
-        if ( d > CREEP_BASESIZE )
-        {
-          reason = IBE_BLOCKEDBYENEMY;
-        }
-      } else
-        {
-          reason = IBE_BLOCKEDBYENEMY;
-        }
-     }
+        reason = IBE_BLOCKEDBYENEMY;
+      } else if( !G_IsOvermindCreepHere( entity_origin ) &&
+                 buildable != BA_A_OVERMIND  )
+      {
+        reason = IBE_BLOCKEDBYENEMY;
+      }
+    }
 
     // Check permission to build here
     if( tr1.surfaceFlags & SURF_NOALIENBUILD || contents & CONTENTS_NOALIENBUILD )
@@ -3777,20 +3798,15 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
     // Check if the enemy isn't blocking your building during pre-game warmup
     if( G_IsCreepHere( entity_origin ) && IS_WARMUP )
     {
-      // TODO: This needs to be improved to account for multiple reactors
-      tempent = G_Reactor( );
-      if( tempent != NULL )
+      if( G_IsOvermindCreepHere( entity_origin ) )
       {
-        d = Distance( tempent->r.currentOrigin, entity_origin );
-        if ( d > REACTOR_BASESIZE )
-        {
-          reason = IBE_BLOCKEDBYENEMY;
-        }
-      } else
-        {
-          reason = IBE_BLOCKEDBYENEMY;
-        }
-     }
+        reason = IBE_BLOCKEDBYENEMY;
+      } else if( G_IsPowered( entity_origin ) != BA_H_REACTOR &&
+                 buildable != BA_H_REACTOR  )
+      {
+        reason = IBE_BLOCKEDBYENEMY;
+      }
+    }
 
 
     //this buildable requires a DCC
