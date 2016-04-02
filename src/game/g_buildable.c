@@ -408,19 +408,6 @@ int G_GetBuildPoints( const vec3_t pos, team_t team )
   }
   else if( team == TEAM_HUMANS )
   {
-    gentity_t *powerPoint = G_PowerEntityForPoint( pos );
-
-    if( powerPoint && powerPoint->s.modelindex == BA_H_REACTOR )
-      return level.humanBuildPoints;
-
-    if( powerPoint && powerPoint->s.modelindex == BA_H_REPEATER &&
-        powerPoint->usesBuildPointZone && level.buildPointZones[ powerPoint->buildPointZone ].active )
-    {
-      return level.buildPointZones[ powerPoint->buildPointZone ].totalBuildPoints -
-             level.buildPointZones[ powerPoint->buildPointZone ].queuedBuildPoints;
-    }
-
-    // Return the BP of the main zone by default
     return level.humanBuildPoints;
   }
 
@@ -1927,42 +1914,6 @@ void ATrapper_Think( gentity_t *self )
 
 //==================================================================================
 
-
-
-
-/*
-================
-G_SuicideIfNoPower
-
-Destroy human structures that have been unpowered too long
-================
-*/
-static qboolean G_SuicideIfNoPower( gentity_t *self )
-{
-  if( self->buildableTeam != TEAM_HUMANS )
-    return qfalse;
-
-  if( !self->powered )
-  {
-    // if the power hasn't reached this buildable for some time, then destroy the buildable
-    if( self->count == 0 )
-      self->count = level.time;
-    else if( ( level.time - self->count ) >= HUMAN_BUILDABLE_INACTIVE_TIME )
-    {
-      if( self->parentNode )
-        G_Damage( self, NULL, g_entities + self->parentNode->killedBy,
-                  NULL, NULL, self->health, 0, MOD_NOCREEP );
-      else
-        G_Damage( self, NULL, NULL, NULL, NULL, self->health, 0, MOD_NOCREEP );
-      return qtrue;
-    }
-  }
-  else
-    self->count = 0;
-
-  return qfalse;
-}
-
 /*
 ================
 G_IdlePowerState
@@ -2183,9 +2134,6 @@ void HSpawn_Think( gentity_t *self )
 
   // set parentNode
   self->powered = G_FindPower( self, qfalse );
-
-  if( G_SuicideIfNoPower( self ) )
-    return;
 
   if( self->spawned )
   {
@@ -2474,8 +2422,6 @@ void HArmoury_Think( gentity_t *self )
   }
 
   self->powered = G_FindPower( self, qfalse );
-
-  G_SuicideIfNoPower( self );
 }
 
 
@@ -2505,8 +2451,6 @@ void HDCC_Think( gentity_t *self )
   }
 
   self->powered = G_FindPower( self, qfalse );
-
-  G_SuicideIfNoPower( self );
 }
 
 
@@ -2557,8 +2501,6 @@ void HMedistat_Think( gentity_t *self )
   }
 
   self->powered = G_FindPower( self, qfalse );
-  if( G_SuicideIfNoPower( self ) )
-    return;
   G_IdlePowerState( self );
 
   //clear target's healing flag
@@ -2919,8 +2861,6 @@ void HMGTurret_Think( gentity_t *self )
   self->s.eFlags &= ~EF_FIRING;
 
   self->powered = G_FindPower( self, qfalse );
-  if( G_SuicideIfNoPower( self ) )
-    return;
   G_IdlePowerState( self );
 
   // If not powered or spawned don't do anything
@@ -3018,8 +2958,6 @@ void HTeslaGen_Think( gentity_t *self )
   if( !G_IsDCCBuilt( ) )
     self->powered = qfalse;
 
-  if( G_SuicideIfNoPower( self ) )
-    return;
   G_IdlePowerState( self );
 
   //if not powered don't do anything and check again for power next think
@@ -3159,24 +3097,6 @@ void G_QueueBuildPoints( gentity_t *self )
               level.humanNextQueueTime = level.time + nqt;
 
             level.humanBuildPointQueue += queuePoints;
-            break;
-
-          case BA_H_REPEATER:
-            if( powerEntity->usesBuildPointZone &&
-                level.buildPointZones[ powerEntity->buildPointZone ].active )
-            {
-              buildPointZone_t *zone = &level.buildPointZones[ powerEntity->buildPointZone ];
-
-              nqt = G_NextQueueTime( zone->queuedBuildPoints,
-                                     zone->totalBuildPoints,
-                                     g_humanRepeaterBuildQueueTime.integer );
-
-              if( !zone->queuedBuildPoints ||
-                  level.time + nqt < zone->nextQueueTime )
-                zone->nextQueueTime = level.time + nqt;
-
-              zone->queuedBuildPoints += queuePoints;
-            }
             break;
 
           default:
