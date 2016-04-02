@@ -206,6 +206,8 @@ struct gentity_s
   int               nextPhysicsTime;    // buildables don't need to check what they're sitting on
                                         // every single frame.. so only do it periodically
   int               clientSpawnTime;    // the time until this spawn can spawn a client
+  qboolean          lev1Grabbed;        //TA: for turrets interacting with lev1s
+  int               lev1GrabTime;       //TA: for turrets interacting with lev1s
 
   int               credits[ MAX_CLIENTS ];     // human credits for each client
   int               killedBy;                   // clientNum of killer
@@ -780,6 +782,7 @@ typedef enum
   IBE_RPTPOWERHERE,
   IBE_NOHUMANBP,
   IBE_NODCC,
+  IBE_ONEDCC,
 
   IBE_NORMAL, // too steep
   IBE_NOROOM,

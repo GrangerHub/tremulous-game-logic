@@ -2731,6 +2731,10 @@ void Cmd_Build_f( gentity_t *ent )
         err = MN_H_NODCC;
         break;
 
+      case IBE_ONEDCC:
+        err = MN_H_ONEDCC;
+        break;
+
       case IBE_PERMISSION:
         err = MN_B_NORMAL;
         break;

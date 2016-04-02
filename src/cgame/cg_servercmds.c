@@ -742,6 +742,13 @@ void CG_Menu( int menu, int arg )
       type      = DT_BUILD;
       break;
 
+    case MN_H_ONEDCC:
+      longMsg   = "There can only be one Defense Computer. Deconstruct the existing"
+                  "one if you wish to move it.";
+      shortMsg  = "There can be only one Defense Computer";
+      type      = DT_BUILD;
+      break;
+
     case MN_H_RPTPOWERHERE:
       longMsg   = "This area already has power. A Repeater is not required here.";
       shortMsg  = "This area already has power";

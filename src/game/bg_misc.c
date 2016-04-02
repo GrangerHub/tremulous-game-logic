@@ -452,7 +452,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  invertNormal;
     qfalse,                //qboolean  creepTest;
     0,                     //int       creepSize;
-    qfalse,                //qboolean  dccTest;
+    qtrue,                 //qboolean  dccTest;
     qtrue,                 //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     TESLAGEN_VALUE,        //int       value;
@@ -518,13 +518,13 @@ static const buildableAttributes_t bg_buildableList[ ] =
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
-    0.95f,                 //float     minNormal;
+    0.5f,                  //float     minNormal;
     qfalse,                //qboolean  invertNormal;
     qfalse,                //qboolean  creepTest;
     0,                     //int       creepSize;
     qfalse,                //qboolean  dccTest;
     qfalse,                //qboolean  transparentTest;
-    qfalse,                //qboolean  uniqueTest;
+    qtrue,                 //qboolean  uniqueTest;
     DC_VALUE,              //int       value;
   },
   {

@@ -648,6 +648,7 @@ typedef enum
   MN_H_NOBP,
   MN_H_NOTPOWERED,
   MN_H_NODCC,
+  MN_H_ONEDCC,
   MN_H_ONEREACTOR,
   MN_H_RPTPOWERHERE,
 } dynMenu_t;
