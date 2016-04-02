@@ -68,7 +68,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
 
     {"allowbuild", G_admin_denybuild, qfalse, "denybuild",
       "restore a player's ability to build",
-      "[^3name|slot#^7]"
+      "[^3name^6|^3slot#^7]"
     },
 
     {"allready", G_admin_allready, qfalse, "allready",
@@ -81,7 +81,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
       " duration is specified as numbers followed by units 'w' (weeks), 'd' "
       "(days), 'h' (hours) or 'm' (minutes), or seconds if no units are "
       "specified",
-      "[^3name|slot#|IP(/mask)^7] (^5duration^7) (^5reason^7)"
+      "[^3name^6|^3slot#^6|^3IP(/mask)^7] (^5duration^7) (^5reason^7)"
     },
 
     {"builder", G_admin_builder, qtrue, "builder",
@@ -91,12 +91,12 @@ g_admin_cmd_t g_admin_cmds[ ] =
 
     {"buildlog", G_admin_buildlog, qfalse, "buildlog",
       "show buildable log",
-      "(^5name|slot#^7) (^5id^7)"
+      "(^5name^6|^5slot#^7) (^5id^7)"
     },
 
     {"cancelvote", G_admin_endvote, qfalse, "cancelvote",
       "cancel a vote taking place",
-      "(^5a|h^7)"
+      "(^5a^6|^5h^7)"
     },
 
     {"changemap", G_admin_changemap, qfalse, "changemap",
@@ -106,13 +106,13 @@ g_admin_cmd_t g_admin_cmds[ ] =
 
     {"denybuild", G_admin_denybuild, qfalse, "denybuild",
       "take away a player's ability to build",
-      "[^3name|slot#^7]"
+      "[^3name^6|^3slot#^7]"
     },
 
     {"flag", G_admin_flag, qtrue, "flag",
       "add an admin flag to a player, prefix flag with '-' to disallow the flag. "
       "console can use this command on admin levels by prefacing a '*' to the admin level value.",
-      "[^3name^7|^3slot#^7|^3*adminlevel^7] (^3+^7|^3-^7)[^3flag^7]"
+      "[^3name^6|^3slot#^6|^3*adminlevel^7] (^5+^6|^5-^7)[^3flag^7]"
     },
 
     {"gamedir", G_admin_gamedir, qtrue, "gamedir",
@@ -120,9 +120,14 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "[^3dir^7] [^3extension^7] [^3filter^7]"
     },
 
+    {"explode", G_admin_explode, qfalse, "explode",
+      "Blow up a player",
+      "[^3name^6|^3slot#^7] (^5reason^7)"
+    },
+
     {"kick", G_admin_kick, qfalse, "kick",
       "kick a player with an optional reason",
-      "[^3name|slot#^7] (^5reason^7)"
+      "[^3name^6|^3slot#^7] (^5reason^7)"
     },
 
     {"layoutsave", G_admin_layoutsave, qfalse, "layoutsave",
@@ -137,7 +142,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
 
     {"listflags", G_admin_listflags, qtrue, "flag",
      "list all flags understood by this server",
-     "[^3name|slot#^7]"
+     "[^3name^6|^3slot#^7]"
     },
 
     {"listlayouts", G_admin_listlayouts, qtrue, "listlayouts",
@@ -152,17 +157,17 @@ g_admin_cmd_t g_admin_cmds[ ] =
 
     {"lock", G_admin_lock, qfalse, "lock",
       "lock a team to prevent anyone from joining it",
-      "[^3a|h^7]"
+      "[^3a^6|^3h^7]"
     },
 
     {"mute", G_admin_mute, qfalse, "mute",
       "mute a player",
-      "[^3name|slot#^7]"
+      "[^3name^6|^3slot#^7]"
     },
 
     {"namelog", G_admin_namelog, qtrue, "namelog",
       "display a list of names used by recently connected players",
-      "(^5name|IP(/mask)^7) (start namelog#)"
+      "(^5name^6|^5IP(/mask)^7) (^5start namelog#^7)"
     },
 
     {"nextmap", G_admin_nextmap, qfalse, "nextmap",
@@ -172,7 +177,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
 
     {"passvote", G_admin_endvote, qfalse, "passvote",
       "pass a vote currently taking place",
-      "(^5a|h^7)"
+      "(^5a^6|^5h^7)"
     },
 
     {"pause", G_admin_pause, qfalse, "pause",
@@ -182,12 +187,12 @@ g_admin_cmd_t g_admin_cmds[ ] =
 
     {"playpool", G_admin_playpool, qfalse, "playpool",
       "Manage the playmap pool.",
-      "[^5add (mapname)|remove (mapname)|clear|list [pagenum]|reload|save^7]"
+      "[^3add (mapname)^6|^3remove (mapname)^6|^3clear^6|^3list (pagenum)^6|^3reload^6|^3save^7]"
     },
 
     {"putteam", G_admin_putteam, qfalse, "putteam",
       "move a player to a specified team",
-      "[^3name|slot#^7] [^3h|a|s^7]"
+      "[^3name^6|^3slot#^7] [^3h^6|^3a^6|^3s^7]"
     },
 
     {"readconfig", G_admin_readconfig, qfalse, "readconfig",
@@ -198,17 +203,17 @@ g_admin_cmd_t g_admin_cmds[ ] =
     {"register", G_admin_register, qfalse, "register",
       "register your name to protect it from being used by others. "
       "use 'register 0' to remove name protection.",
-      "(^7level^7)"
+      "(^5level^7)"
     },
 
     {"rename", G_admin_rename, qfalse, "rename",
       "rename a player",
-      "[^3name|slot#^7] [^3new name^7]"
+      "[^3name^6|^3slot#^7] [^3new name^7]"
     },
 
     {"restart", G_admin_restart, qfalse, "restart",
       "restart the current map (optionally using named layout or keeping/switching teams)",
-      "(^5layout^7) (^5keepteams|switchteams|keepteamslock|switchteamslock^7)"
+      "(^5layout^7) (^5keepteams^6|^5switchteams^6|^5keepteamslock^6|^5switchteamslock^7)"
     },
 
     {"revert", G_admin_revert, qfalse, "revert",
@@ -218,17 +223,17 @@ g_admin_cmd_t g_admin_cmds[ ] =
 
     {"setdevmode", G_admin_setdevmode, qfalse, "setdevmode",
       "switch developer mode on or off",
-      "[^3on|off^7]"
+      "[^3on^6|^3off^7]"
     },
 
     {"setivo", G_admin_setivo, qfalse, "setivo",
       "set an intermission view override",
-      "[^3s|a|h^7]"
+      "[^3s^6|^3a^6|^3h^7]"
     },
 
     {"setlevel", G_admin_setlevel, qfalse, "setlevel",
       "sets the admin level of a player",
-      "[^3name|slot#|admin#^7] [^3level^7]"
+      "[^3name^6|^3slot#^6|^3admin#^6] [^3level^7]"
     },
 
     {"setnextmap", G_admin_setnextmap, qfalse, "setnextmap",
@@ -238,7 +243,12 @@ g_admin_cmd_t g_admin_cmds[ ] =
 
     {"showbans", G_admin_showbans, qtrue, "showbans",
       "display a (partial) list of active bans",
-      "(^5name|IP(/mask)^7) (^5start at ban#^7)"
+      "(^5name^6|^5IP(/mask)^7) (^5start at ban#^7)"
+    },
+	
+    {"slap", G_admin_slap, qtrue, "slap",
+      "Do damage to a player, and send them flying",
+      "[^3name^6|^3slot^7]"
     },
 
     {"spec999", G_admin_spec999, qfalse, "spec999",
@@ -251,7 +261,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
 
     {"transform", G_admin_transform, qfalse, "magic",
       "change a human player to a different player model",
-      "[^3name|slot#^7] [^3player model^7]"
+      "[^3name^6|^3slot#^7] [^3player model^7]"
     },
 
     {"unban", G_admin_unban, qfalse, "ban",
@@ -261,12 +271,18 @@ g_admin_cmd_t g_admin_cmds[ ] =
 
     {"unlock", G_admin_lock, qfalse, "lock",
       "unlock a locked team",
-      "[^3a|h^7]"
+      "[^3a^6|^3h^7]"
     },
 
     {"unmute", G_admin_mute, qfalse, "mute",
       "unmute a muted player",
-      "[^3name|slot#^7]"
+      "[^3name^6|^3slot#^7]"
+    },
+	
+    {
+     "warn", G_admin_warn, qfalse, "warn",
+      "warn a player to correct their current activity",
+      "[^3name^6|^3slot#^7] [^3reason^7]"
     }
   };
 
@@ -2309,6 +2325,42 @@ qboolean G_admin_changemap( gentity_t *ent )
   return qtrue;
 }
 
+qboolean G_admin_warn( gentity_t *ent )
+{
+  char      reason[ 64 ];
+  int       pid;
+  char      name[ MAX_NAME_LENGTH ], err[ MAX_STRING_CHARS ];
+  gentity_t *vic;
+
+  if( trap_Argc() < 3 )
+  {
+    ADMP( va( "^3warn: ^7usage: warn [name|slot#] [reason]\n" ) );
+    return qfalse;
+  }
+  trap_Argv( 1, name, sizeof( name ) );
+  if( ( pid = G_ClientNumberFromString( name, err, sizeof( err ) ) ) == -1 )
+  {
+    ADMP( va( "^3warn: ^7%s\n", err ) );
+    return qfalse;
+  }
+  if( !admin_higher( ent, &g_entities[ pid ] ) )
+  {
+    ADMP( "^3warn: ^7sorry, but your intended victim has a higher admin level than you\n" );
+    return qfalse;
+  }
+  vic = &g_entities[ pid ];
+
+  G_DecolorString( ConcatArgs( 2 ), reason, sizeof( reason ) );
+  CPx( pid, va( "cp \"^1You have been warned by an administrator:\n^7%s\"",
+                      reason ) );
+  AP( va( "print \"^3warn: ^7%s^7 has been warned: '%s' by %s\n\"",
+          vic->client->pers.netname,
+          reason,
+          ( ent ) ? ent->client->pers.netname : "console" ) );
+
+  return qtrue;
+}
+
 qboolean G_admin_mute( gentity_t *ent )
 {
   char name[ MAX_NAME_LENGTH ];
@@ -2427,6 +2479,60 @@ qboolean G_admin_denybuild( gentity_t *ent )
   }
   admin_log( va( "%d (%s) \"%s" S_COLOR_WHITE "\"", vic->slot, vic->guid,
     vic->name[ vic->nameOffset ] ) );
+  return qtrue;
+}
+
+qboolean G_admin_explode( gentity_t *ent )
+{
+
+  int pid;
+  char name[ MAX_NAME_LENGTH ], *reason, err[ MAX_STRING_CHARS ];
+  int minargc;
+  gentity_t *vic;
+
+  if( trap_Argc() < 2 )
+  {
+    ADMP( "^3explode: ^7usage: explode [name|slot#]\n" );
+    return qfalse;
+  }
+
+  trap_Argv( 1, name, sizeof( name ) );
+  reason = ConcatArgs( 2 );
+  if( ( pid = G_ClientNumberFromString( name, err, sizeof( err ) ) ) == -1 )
+  {
+    ADMP( va( "^3explode: ^7%s\n", err ) );
+    return qfalse;
+  }
+
+  vic = &g_entities[ pid ];
+  if( !admin_higher( ent, vic ) )
+  {
+    ADMP( "^3explode: ^7sorry, but your intended victim has a higher admin"
+        " level than you\n" );
+    return qfalse;
+  }
+
+  if( vic->client->pers.teamSelection == TEAM_NONE
+   || vic->client->pers.classSelection == PCL_NONE
+   || vic->health <= 0 )
+  {
+    ADMP( "^3explode: ^7they must be living to use this command\n" );
+    return qfalse;
+  }
+
+  if( vic->flags & FL_GODMODE )
+    vic->flags ^= FL_GODMODE;
+
+  Blow_up(vic);
+
+  trap_SendServerCommand( vic-g_entities,
+			  va( "cp \"^1Boom!!!\n^7%s\n\"", reason ) );
+
+  AP( va( "print \"^3explode: ^7%s^7 has been exploded by %s^7 with the reason: ^7%s\n\"",
+          vic->client->pers.netname,
+          ( ent ) ? ent->client->pers.netname : "console",
+          ( *reason ) ? reason : "No reason specified" ) );
+
   return qtrue;
 }
 
@@ -3615,6 +3721,78 @@ static char *fates[] =
   "^7unpowered^7",
   "removed"
 };
+
+qboolean G_admin_slap( gentity_t *ent )
+{
+  int pid;
+  char name[ MAX_NAME_LENGTH ], *reason, err[ MAX_STRING_CHARS ];
+  int minargc;
+  gentity_t *vic;
+  vec3_t dir;
+  minargc = 3;
+  if( G_admin_permission( ent, ADMF_UNACCOUNTABLE ) )
+    minargc = 2;
+
+  if( trap_Argc() < minargc )
+  {
+    ADMP( "^3slap: ^7usage: slap [^3name^6|^3slot^7] (^5reason)\n" );
+    return qfalse;
+  }
+
+  trap_Argv( 1, name, sizeof( name ) );
+  reason = ConcatArgs( 2 );
+  if( ( pid = G_ClientNumberFromString( name, err, sizeof( err ) ) ) == -1 )
+  {
+    ADMP( va( "^3slap: ^7%s", err ) );
+    return qfalse;
+  }
+  vic = &g_entities[ pid ];
+  if( !admin_higher( ent, vic ) )
+  {
+    ADMP( "^3slap: ^7sorry, but your intended victim has a higher admin"
+        " level than you\n" );
+    return qfalse;
+  }
+
+  if( vic->client->pers.teamSelection == TEAM_NONE ||
+      vic->client->pers.classSelection == PCL_NONE )
+  {
+    ADMP( "^3slap: ^7can't slap spectators\n" );
+    return qfalse;
+  }
+
+  // knockback in a random direction
+  dir[0] = crandom();
+  dir[1] = crandom();
+  dir[2] = random();
+  G_Knockback( vic, dir, 100 );
+
+  trap_SendServerCommand( vic-g_entities,
+			  va( "cp \"%s^1 is not amused!\n^7%s\n\"", 
+			      ent ? ent->client->pers.netname : "console",
+			      reason ) );
+  AP( va( "print \"^3slap: ^7%s^7 has been slapped by %s^7 with the reason: ^7%s\n\"",
+          vic->client->pers.netname,
+          ( ent ) ? ent->client->pers.netname : "console",
+          ( *reason ) ? reason : "No reason specified" ) );
+
+  vic->health -= 25;
+  vic->client->ps.stats[ STAT_HEALTH ] = vic->health;
+  vic->lastDamageTime = level.time;
+  if( vic->health <= 1 )
+  {
+    vic->flags |= FL_NO_KNOCKBACK;
+    vic->enemy = ent;
+    vic->die( vic, ent, ent, 25, MOD_SLAP );
+  }
+  else if( vic->pain )
+  {
+    vic->pain( vic, ent, 2 );
+  }
+
+  return qtrue;
+}
+
 qboolean G_admin_buildlog( gentity_t *ent )
 {
   char       search[ MAX_NAME_LENGTH ] = {""};

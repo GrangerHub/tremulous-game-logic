@@ -128,7 +128,8 @@ char *modNames[ ] =
   "MOD_OVERMIND",
   "MOD_DECONSTRUCT",
   "MOD_REPLACE",
-  "MOD_NOCREEP"
+  "MOD_NOCREEP",
+  "MOD_SLAP"
 };
 
 /*
@@ -1324,6 +1325,48 @@ qboolean G_SelectiveRadiusDamage( vec3_t origin, gentity_t *attacker, float dama
   return hitClient;
 }
 
+/*
+============
+G_Knockback
+============
+*/
+void G_Knockback( gentity_t *targ, vec3_t dir, int knockback )
+{
+  if( knockback && targ->client )
+  {
+    vec3_t  kvel;
+    float   mass;
+
+    mass = 200;
+
+    // Halve knockback for bsuits
+    if( targ->client &&
+        targ->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
+        BG_InventoryContainsUpgrade( UP_BATTLESUIT, targ->client->ps.stats ) )
+      mass += 400;
+
+    // Halve knockback for crouching players
+    if(targ->client->ps.pm_flags&PMF_DUCKED) knockback /= 2;
+
+    VectorScale( dir, g_knockback.value * (float)knockback / mass, kvel );
+    VectorAdd( targ->client->ps.velocity, kvel, targ->client->ps.velocity );
+
+    // set the timer so that the other client can't cancel
+    // out the movement immediately
+    if( !targ->client->ps.pm_time )
+    {
+      int   t;
+      t = knockback * 2;
+      if( t < 50 )
+        t = 50;
+
+      if( t > 200 )
+        t = 200;
+      targ->client->ps.pm_time = t;
+      targ->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
+    }
+  }
+}
 
 /*
 ============
