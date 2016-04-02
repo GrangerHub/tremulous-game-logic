@@ -637,6 +637,7 @@ static void CG_DrawPlayerAmmoValue( rectDef_t *rect, vec4_t color )
 {
   int value;
   int valueMarked = -1;
+  int valueReserve = -1;
   qboolean bp = qfalse;
 
   switch( cg.snap->ps.stats[ STAT_WEAPON ] )
@@ -647,6 +648,7 @@ static void CG_DrawPlayerAmmoValue( rectDef_t *rect, vec4_t color )
 
     case WP_ABUILD:
     case WP_ABUILD2:
+      valueReserve = cg.snap->ps.persistant[ PERS_BP_RESERVE ];
     case WP_HBUILD:
       value = cg.snap->ps.persistant[ PERS_BP ];
       valueMarked = cg.snap->ps.persistant[ PERS_MARKEDBP ];
@@ -662,6 +664,8 @@ static void CG_DrawPlayerAmmoValue( rectDef_t *rect, vec4_t color )
     value = 999;
   if( valueMarked > 999 )
     valueMarked = 999;
+  if( valueReserve > 999 )
+    valueReserve = 999;
 
   if( value > -1 )
   {
@@ -679,7 +683,14 @@ static void CG_DrawPlayerAmmoValue( rectDef_t *rect, vec4_t color )
     }
 
     if( valueMarked > 0 )
-      text = va( "%d+(%d)", value, valueMarked );
+    {
+      if( valueReserve > 0 )
+        text = va( "%d+(%d)+{%d}", value, valueMarked, valueReserve );
+      else
+        text = va( "%d+(%d)", value, valueMarked );
+    }
+    else if( valueReserve > 0 )
+        text = va( "%d+{%d}", value, valueReserve );
     else
       text = va( "%d", value );
 
@@ -693,8 +704,14 @@ static void CG_DrawPlayerAmmoValue( rectDef_t *rect, vec4_t color )
       scale = 0.36f;
     else if( len == 8 )
       scale = 0.33f;
-    else
+    else if( len == 9 )
       scale = 0.31f;
+    else if( len == 10 )
+      scale = 0.29;
+    else if( len == 11 )
+      scale = 0.27;
+    else
+      scale = 0.25;
 
     CG_AlignText( rect, text, scale, 0.0f, 0.0f, ALIGN_RIGHT, VALIGN_CENTER, &tx, &ty );
     UI_Text_Paint( tx + 1, ty, scale, color, text, 0, 0, ITEM_TEXTSTYLE_NORMAL );
@@ -821,19 +838,47 @@ static void CG_DrawPlayerClipsValue( rectDef_t *rect, vec4_t color )
     case WP_BLASTER:
     case WP_ABUILD:
     case WP_ABUILD2:
+      return;
+
     case WP_HBUILD:
+      value = ps->persistant[ PERS_BP_RESERVE ];
+
+      if( value > 999 )
+        value = 999;
+
+      if( value > -1 )
+      {
+        float tx, ty;
+        char *text;
+        float scale;
+        int len;
+
+        trap_R_SetColor( color );
+
+        text = va( "%d", value );
+
+        len = strlen( text );
+
+        if( len <= 2 )
+          scale = 0.45f;
+        else
+          scale = 0.35f;
+
+        CG_AlignText( rect, text, scale, 0.0f, 0.0f, ALIGN_RIGHT, VALIGN_CENTER, &tx, &ty );
+        UI_Text_Paint( tx + 6, ty, scale, color, text, 0, 0, ITEM_TEXTSTYLE_NORMAL );
+        trap_R_SetColor( NULL );
+      }
       return;
 
     default:
       value = ps->clips;
-
-      if( value > -1 )
-      {
-        trap_R_SetColor( color );
-        CG_DrawField( rect->x, rect->y, 4, rect->w / 4, rect->h, value );
-        trap_R_SetColor( NULL );
-      }
       break;
+  }
+  if( value > -1 )
+  {
+    trap_R_SetColor( color );
+    CG_DrawField( rect->x, rect->y, 4, rect->w / 4, rect->h, value );
+    trap_R_SetColor( NULL );
   }
 }
 

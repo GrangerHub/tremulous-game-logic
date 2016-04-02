@@ -282,6 +282,7 @@ typedef enum
   PERS_QUEUEPOS,  // position in the spawn queue
   PERS_NEWWEAPON,  // weapon to switch to
   PERS_BP,
+  PERS_BP_RESERVE,
   PERS_MARKEDBP,
   //zdrytchx: no space in stats, use persistant. This meanas we risk doing a double jump upon spawning but death animations are 1700 msecs long, so technically it's impossible anyway
   PERS_JUMPTIME

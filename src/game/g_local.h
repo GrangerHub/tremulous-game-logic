@@ -631,9 +631,13 @@ typedef struct
   int               numHumanClientsAlive;
 
   int               alienBuildPoints;
+  int               alienBuildPointsReserve;
+  int               alienBuildPointsReserveLost;
   int               alienBuildPointQueue;
   int               alienNextQueueTime;
   int               humanBuildPoints;
+  int               humanBuildPointsReserve;
+  int               humanBuildPointsReserveLost;
   int               humanBuildPointQueue;
   int               humanNextQueueTime;
 
@@ -1174,8 +1178,10 @@ extern  vmCvar_t  pmove_msec;
 extern  vmCvar_t  g_allowShare;
 
 extern  vmCvar_t  g_alienBuildPoints;
+extern  vmCvar_t  g_alienBuildPointsReserve;
 extern  vmCvar_t  g_alienBuildQueueTime;
 extern  vmCvar_t  g_humanBuildPoints;
+extern  vmCvar_t  g_humanBuildPointsReserve;
 extern  vmCvar_t  g_humanBuildQueueTime;
 extern  vmCvar_t  g_humanRepeaterBuildPoints;
 extern  vmCvar_t  g_humanRepeaterBuildQueueTime;

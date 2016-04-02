@@ -416,6 +416,31 @@ int G_GetBuildPoints( const vec3_t pos, team_t team )
 
 /*
 ==================
+G_GetBuildPointsReserve
+
+Get the number of build points from a position
+==================
+*/
+int G_GetBuildPointsReserve( team_t team )
+{
+  if( !IS_WARMUP && G_TimeTilSuddenDeath( ) <= 0 )
+  {
+    return 0;
+  }
+  else if( team == TEAM_ALIENS )
+  {
+    return level.alienBuildPointsReserve;
+  }
+  else if( team == TEAM_HUMANS )
+  {
+    return level.humanBuildPointsReserve;
+  }
+
+  return 0;
+}
+
+/*
+==================
 G_GetMarkedBuildPoints
 
 Get the number of marked build points from a position

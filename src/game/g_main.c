@@ -94,8 +94,10 @@ vmCvar_t  g_maxNameChanges;
 vmCvar_t  g_allowShare;
 
 vmCvar_t  g_alienBuildPoints;
+vmCvar_t  g_alienBuildPointsReserve;
 vmCvar_t  g_alienBuildQueueTime;
 vmCvar_t  g_humanBuildPoints;
+vmCvar_t  g_humanBuildPointsReserve;
 vmCvar_t  g_humanBuildQueueTime;
 vmCvar_t  g_humanRepeaterBuildPoints;
 vmCvar_t  g_humanRepeaterBuildQueueTime;
@@ -172,6 +174,8 @@ static char cv_alienMaxStage[ MAX_CVAR_VALUE_STRING ];
 static char cv_humanRepeaterBuildPoints[ MAX_CVAR_VALUE_STRING ];
 static char cv_humanBuildPoints[ MAX_CVAR_VALUE_STRING ];
 static char cv_alienBuildPoints[ MAX_CVAR_VALUE_STRING ];
+static char cv_humanBuildPointsReserve[ MAX_CVAR_VALUE_STRING ];
+static char cv_alienBuildPointsReserve[ MAX_CVAR_VALUE_STRING ];
 
 static cvarTable_t   gameCvarTable[ ] =
 {
@@ -247,8 +251,10 @@ static cvarTable_t   gameCvarTable[ ] =
   { &pmove_msec, "pmove_msec", "8", CVAR_SYSTEMINFO, 0, qfalse},
 
   { &g_alienBuildPoints, "g_alienBuildPoints", DEFAULT_ALIEN_BUILDPOINTS, 0, 0, qfalse, cv_alienBuildPoints },
+  { &g_alienBuildPointsReserve, "g_alienBuildPointsReserve", DEFAULT_ALIEN_BUILDPOINTS_RESERVE, 0, 0, qfalse, cv_alienBuildPointsReserve },
   { &g_alienBuildQueueTime, "g_alienBuildQueueTime", DEFAULT_ALIEN_QUEUE_TIME, CVAR_ARCHIVE, 0, qfalse  },
   { &g_humanBuildPoints, "g_humanBuildPoints", DEFAULT_HUMAN_BUILDPOINTS, 0, 0, qfalse, cv_humanBuildPoints },
+  { &g_humanBuildPointsReserve, "g_humanBuildPointsReserve", DEFAULT_HUMAN_BUILDPOINTS_RESERVE, 0, 0, qfalse, cv_humanBuildPointsReserve },
   { &g_humanBuildQueueTime, "g_humanBuildQueueTime", DEFAULT_HUMAN_QUEUE_TIME, CVAR_ARCHIVE, 0, qfalse  },
   { &g_humanRepeaterBuildPoints, "g_humanRepeaterBuildPoints", DEFAULT_HUMAN_REPEATER_BUILDPOINTS, CVAR_ARCHIVE, 0, qfalse, cv_humanRepeaterBuildPoints },
   { &g_humanRepeaterMaxZones, "g_humanRepeaterMaxZones", DEFAULT_HUMAN_REPEATER_MAX_ZONES, CVAR_ARCHIVE, 0, qfalse  },
@@ -658,6 +664,12 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
   G_RegisterCommands( );
   G_admin_readconfig( NULL );
   G_LoadCensors( );
+
+  // initialize the build points reserves
+  level.alienBuildPointsReserve = g_alienBuildPointsReserve.integer;
+  level.alienBuildPointsReserveLost = 0;
+  level.humanBuildPointsReserve = g_humanBuildPointsReserve.integer;
+  level.humanBuildPointsReserveLost = 0;
 
   // initialize all entities for this game
   memset( g_entities, 0, MAX_GENTITIES * sizeof( g_entities[ 0 ] ) );
@@ -1187,22 +1199,37 @@ void G_CalculateBuildPoints( void )
 
   // BP queue updates
   while( level.alienBuildPointQueue > 0 &&
+         level.alienBuildPointsReserve > 0 &&
          level.alienNextQueueTime < level.time )
   {
     level.alienBuildPointQueue--;
+    if( !IS_WARMUP && G_TimeTilSuddenDeath( ) > 0 )
+      level.alienBuildPointsReserveLost++;
     level.alienNextQueueTime += G_NextQueueTime( level.alienBuildPointQueue,
                                                g_alienBuildPoints.integer,
                                                g_alienBuildQueueTime.integer );
+
+    level.alienBuildPointsReserve = g_alienBuildPointsReserve.integer -
+                                    level.alienBuildPointsReserveLost;
   }
 
+
   while( level.humanBuildPointQueue > 0 &&
+         level.humanBuildPointsReserve > 0 &&
          level.humanNextQueueTime < level.time )
   {
     level.humanBuildPointQueue--;
+    if( !IS_WARMUP && G_TimeTilSuddenDeath( ) > 0 )
+      level.humanBuildPointsReserveLost++;
     level.humanNextQueueTime += G_NextQueueTime( level.humanBuildPointQueue,
                                                g_humanBuildPoints.integer,
                                                g_humanBuildQueueTime.integer );
+
+    level.humanBuildPointsReserve = g_humanBuildPointsReserve.integer -
+                                    level.humanBuildPointsReserveLost;
   }
+
+  
 
   // Sudden Death checks (not applicable in warmup)
   if( !IS_WARMUP && G_TimeTilSuddenDeath( ) <= 0 && level.suddenDeathWarning < TW_PASSED )
@@ -1212,6 +1239,10 @@ void G_CalculateBuildPoints( void )
     trap_SendServerCommand( -1, "print \"Beginning Sudden Death.\n\"" );
     level.suddenDeathWarning = TW_PASSED;
     G_ClearDeconMarks( );
+
+    // empty the build points reserves
+    level.alienBuildPointsReserveLost = g_alienBuildPointsReserve.integer;
+    level.humanBuildPointsReserveLost = g_humanBuildPointsReserve.integer;
 
     // Clear blueprints, or else structs that cost 0 BP can still be built after SD
     for( i = 0; i < level.maxclients; i++ )
