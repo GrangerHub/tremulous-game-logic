@@ -408,19 +408,6 @@ int G_GetBuildPoints( const vec3_t pos, team_t team )
   }
   else if( team == TEAM_HUMANS )
   {
-    gentity_t *powerPoint = G_PowerEntityForPoint( pos );
-
-    if( powerPoint && powerPoint->s.modelindex == BA_H_REACTOR )
-      return level.humanBuildPoints;
-
-    if( powerPoint && powerPoint->s.modelindex == BA_H_REPEATER &&
-        powerPoint->usesBuildPointZone && level.buildPointZones[ powerPoint->buildPointZone ].active )
-    {
-      return level.buildPointZones[ powerPoint->buildPointZone ].totalBuildPoints -
-             level.buildPointZones[ powerPoint->buildPointZone ].queuedBuildPoints;
-    }
-
-    // Return the BP of the main zone by default
     return level.humanBuildPoints;
   }
 
@@ -3110,24 +3097,6 @@ void G_QueueBuildPoints( gentity_t *self )
               level.humanNextQueueTime = level.time + nqt;
 
             level.humanBuildPointQueue += queuePoints;
-            break;
-
-          case BA_H_REPEATER:
-            if( powerEntity->usesBuildPointZone &&
-                level.buildPointZones[ powerEntity->buildPointZone ].active )
-            {
-              buildPointZone_t *zone = &level.buildPointZones[ powerEntity->buildPointZone ];
-
-              nqt = G_NextQueueTime( zone->queuedBuildPoints,
-                                     zone->totalBuildPoints,
-                                     g_humanRepeaterBuildQueueTime.integer );
-
-              if( !zone->queuedBuildPoints ||
-                  level.time + nqt < zone->nextQueueTime )
-                zone->nextQueueTime = level.time + nqt;
-
-              zone->queuedBuildPoints += queuePoints;
-            }
             break;
 
           default:
