@@ -894,6 +894,7 @@ qboolean  G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage, floa
                           gentity_t *ignore, int mod );
 qboolean  G_SelectiveRadiusDamage( vec3_t origin, gentity_t *attacker, float damage, float radius,
                                    gentity_t *ignore, int mod, int team );
+void G_Knockback( gentity_t *targ, vec3_t dir, int knockback );
 float     G_RewardAttackers( gentity_t *self );
 void      AddScore( gentity_t *ent, int score );
 void      G_LogDestruction( gentity_t *self, gentity_t *actor, int mod );
@@ -923,6 +924,7 @@ gentity_t *fire_slowBlob( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *fire_bounceBall( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *fire_hive( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *launch_grenade( gentity_t *self, vec3_t start, vec3_t dir );
+gentity_t *launch_grenade2( gentity_t *self, vec3_t start, vec3_t dir );
 
 
 //
@@ -965,6 +967,7 @@ typedef struct zap_s
 #define MAX_ZAPS MAX_CLIENTS
 extern zap_t zaps[ MAX_ZAPS ];
 
+void      Blow_up( gentity_t *ent );
 void      G_ForceWeaponChange( gentity_t *ent, weapon_t weapon );
 void      G_GiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo );
 void      CalcMuzzlePoint( gentity_t *ent, vec3_t forward, vec3_t right, vec3_t up, vec3_t muzzlePoint );

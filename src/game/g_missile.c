@@ -581,7 +581,52 @@ gentity_t *launch_grenade( gentity_t *self, vec3_t start, vec3_t dir )
 }
 //=============================================================================
 
+/*
+=================
+launch_grenade2
 
+=================
+*/
+gentity_t *launch_grenade2( gentity_t *self, vec3_t start, vec3_t dir )
+{
+  gentity_t *bolt;
+
+  VectorNormalize( dir );
+
+  bolt = G_Spawn( );
+  bolt->classname = "grenade";
+  bolt->pointAgainstWorld = qfalse;
+  bolt->nextthink = level.time;
+  bolt->think = G_ExplodeMissile;
+  bolt->s.eType = ET_MISSILE;
+  bolt->s.weapon = WP_GRENADE;
+  bolt->s.eFlags = EF_BOUNCE_HALF;
+  bolt->s.generic1 = WPM_PRIMARY; //weaponMode
+  bolt->r.ownerNum = self->s.number;
+  bolt->parent = self;
+  bolt->damage = GRENADE_DAMAGE;
+  bolt->splashDamage = GRENADE_DAMAGE;
+  bolt->splashRadius = 1.0f;
+  bolt->methodOfDeath = MOD_GRENADE;
+  bolt->splashMethodOfDeath = MOD_GRENADE;
+  bolt->clipmask = MASK_SHOT;
+  bolt->target_ent = NULL;
+  bolt->r.mins[ 0 ] = bolt->r.mins[ 1 ] = bolt->r.mins[ 2 ] = -3.0f;
+  bolt->r.maxs[ 0 ] = bolt->r.maxs[ 1 ] = bolt->r.maxs[ 2 ] = 3.0f;
+  bolt->s.time = level.time;
+
+  bolt->s.pos.trType = TR_STATIONARY;
+  bolt->s.pos.trTime = level.time;
+  //bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;
+  VectorCopy( start, bolt->s.pos.trBase );
+  VectorScale( dir, 0, bolt->s.pos.trDelta );
+  SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
+
+  VectorCopy( start, bolt->r.currentOrigin );
+
+  return bolt;
+}
+//=============================================================================
 
 /*
 ================
