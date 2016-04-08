@@ -193,8 +193,8 @@ attempt to find power for self, return qtrue if successful
 */
 qboolean G_FindPower( gentity_t *self, qboolean searchUnspawned )
 {
-  int       i, j;
-  gentity_t *ent, *ent2;
+  int       i;
+  gentity_t *ent;
   gentity_t *closestPower = NULL;
   int       distance = 0;
   int       minDistance = REPEATER_BASESIZE + 1;
@@ -235,95 +235,13 @@ qboolean G_FindPower( gentity_t *self, qboolean searchUnspawned )
       // Always prefer a reactor if there is one in range
       if( ent->s.modelindex == BA_H_REACTOR && distance <= REACTOR_BASESIZE )
       {
-        // Only power as much BP as the reactor can hold
-        if( self->s.modelindex != BA_NONE )
-        {
-          int buildPoints = g_humanBuildPoints.integer;
-
-          // Scan the buildables in the reactor zone
-          for( j = MAX_CLIENTS, ent2 = g_entities + j; j < level.num_entities; j++, ent2++ )
-          {
-            if( ent2->s.eType != ET_BUILDABLE )
-              continue;
-
-            if( ent2 == self )
-              continue;
-
-            if( ent2->parentNode == ent )
-            {
-              buildPoints -= BG_Buildable( ent2->s.modelindex )->buildPoints;
-            }
-          }
-
-          buildPoints -= level.humanBuildPointQueue;
-
-          buildPoints -= BG_Buildable( self->s.modelindex )->buildPoints;
-
-          if( buildPoints >= 0 )
-          {
-            self->parentNode = ent;
-            return qtrue;
-          }
-          else
-          {
-            // a buildable can still be built if it shares BP from two zones
-
-            // TODO: handle combined power zones here
-          }
-        }
-
-        // Dummy buildables don't need to look for zones
-        else
-        {
-          self->parentNode = ent;
-          return qtrue;
-        }
+        self->parentNode = ent;
+       return qtrue;
       }
       else if( distance < minDistance )
       {
-        // It's a repeater, so check that enough BP will be available to power
-        // the buildable but only if self is a real buildable
-
-        if( self->s.modelindex != BA_NONE )
-        {
-          int buildPoints = g_humanRepeaterBuildPoints.integer;
-
-          // Scan the buildables in the repeater zone
-          for( j = MAX_CLIENTS, ent2 = g_entities + j; j < level.num_entities; j++, ent2++ )
-          {
-            if( ent2->s.eType != ET_BUILDABLE )
-              continue;
-
-            if( ent2 == self )
-              continue;
-
-            if( ent2->parentNode == ent )
-              buildPoints -= BG_Buildable( ent2->s.modelindex )->buildPoints;
-          }
-
-          if( ent->usesBuildPointZone && level.buildPointZones[ ent->buildPointZone ].active )
-            buildPoints -= level.buildPointZones[ ent->buildPointZone ].queuedBuildPoints;
-
-          buildPoints -= BG_Buildable( self->s.modelindex )->buildPoints;
-
-          if( buildPoints >= 0 )
-          {
-            closestPower = ent;
-            minDistance = distance;
-          }
-          else
-          {
-            // a buildable can still be built if it shares BP from two zones
-
-            // TODO: handle combined power zones here
-          }
-        }      
-        else
-        {
-          // Dummy buildables don't need to look for zones
-          closestPower = ent;
-          minDistance = distance;
-        }
+        closestPower = ent;
+        minDistance = distance;
       }
     }
   }
@@ -436,12 +354,6 @@ int G_GetMarkedBuildPoints( const vec3_t pos, team_t team )
   for( i = MAX_CLIENTS, ent = g_entities + i; i < level.num_entities; i++, ent++ )
   {
     if( ent->s.eType != ET_BUILDABLE )
-      continue;
-
-    if( team == TEAM_HUMANS &&
-        ent->s.modelindex != BA_H_REACTOR &&
-        ent->s.modelindex != BA_H_REPEATER &&
-        ent->parentNode != G_PowerEntityForPoint( pos ) )
       continue;
 
     if( !ent->inuse )
@@ -2259,9 +2171,6 @@ void HRepeater_Think( gentity_t *self )
       if( !zone->active )
       {
         // Initialise the BP queue with no BP queued
-        zone->queuedBuildPoints = 0;
-        zone->totalBuildPoints = g_humanRepeaterBuildPoints.integer;
-        zone->nextQueueTime = level.time;
         zone->active = qtrue;
 
         self->buildPointZone = zone - level.buildPointZones;
@@ -3058,7 +2967,6 @@ G_QueueBuildPoints
 */
 void G_QueueBuildPoints( gentity_t *self )
 {
-  gentity_t *powerEntity;
   int       queuePoints;
 
   // dont queue bp in warmup
@@ -3081,28 +2989,12 @@ void G_QueueBuildPoints( gentity_t *self )
       break;
 
     case TEAM_HUMANS:
-      powerEntity = G_PowerEntityForEntity( self );
+      if( !level.humanBuildPointQueue )
+          level.humanNextQueueTime = level.time + g_humanBuildQueueTime.integer;
 
-      if( powerEntity )
-      {
-        int nqt;
-        switch( powerEntity->s.modelindex )
-        {
-          case BA_H_REACTOR:
-            nqt = G_NextQueueTime( level.humanBuildPointQueue,
-                                   g_humanBuildPoints.integer,
-                                   g_humanBuildQueueTime.integer );
-            if( !level.humanBuildPointQueue ||
-                level.time + nqt < level.humanNextQueueTime )
-              level.humanNextQueueTime = level.time + nqt;
-
-            level.humanBuildPointQueue += queuePoints;
-            break;
-
-          default:
-            break;
-        }
-      }
+      level.humanBuildPointQueue += queuePoints;
+      break;
+    
   }
 }
 
@@ -3666,14 +3558,6 @@ static itemBuildError_t G_SufficientBPAvailable( buildable_t     buildable,
     else
       repeaterInRange = qfalse;
 
-    // Don't allow marked buildables to be replaced in another zone,
-    // unless the marked buildable isn't in a zone (and thus unpowered)
-    if( team == TEAM_HUMANS &&
-        buildable != BA_H_REACTOR &&
-        buildable != BA_H_REPEATER &&
-        ent->parentNode != G_PowerEntityForPoint( origin ) )
-      continue;
-
     if( !ent->inuse )
       continue;
 
@@ -3695,10 +3579,6 @@ static itemBuildError_t G_SufficientBPAvailable( buildable_t     buildable,
         buildable != core )
       continue;
 
-    // Don't include unpowered buildables
-    if( !collision && !ent->powered )
-      continue;
-
     if( ent->deconstruct )
     {
       level.markedBuildables[ numBuildables++ ] = ent;
@@ -3717,16 +3597,14 @@ static itemBuildError_t G_SufficientBPAvailable( buildable_t     buildable,
         if( repeaterInRange )
           repeaterInRangeCount--;
 
-        if( ent->powered )
-          pointsYielded += BG_Buildable( ent->s.modelindex )->buildPoints;
+        pointsYielded += BG_Buildable( ent->s.modelindex )->buildPoints;
         level.numBuildablesForRemoval++;
       }
       else if( BG_Buildable( ent->s.modelindex )->uniqueTest &&
                ent->s.modelindex == buildable )
       {
         // If it's a unique buildable, it must be replaced by the same type
-        if( ent->powered )
-          pointsYielded += BG_Buildable( ent->s.modelindex )->buildPoints;
+        pointsYielded += BG_Buildable( ent->s.modelindex )->buildPoints;
         level.numBuildablesForRemoval++;
       }
     }
@@ -3757,8 +3635,7 @@ static itemBuildError_t G_SufficientBPAvailable( buildable_t     buildable,
        level.numBuildablesForRemoval++ )
   {
     ent = level.markedBuildables[ level.numBuildablesForRemoval ];
-    if( ent->powered )
-      pointsYielded += BG_Buildable( ent->s.modelindex )->buildPoints;
+    pointsYielded += BG_Buildable( ent->s.modelindex )->buildPoints;
   }
 
   // Do another pass to see if we can meet quota with fewer buildables
@@ -3771,8 +3648,7 @@ static itemBuildError_t G_SufficientBPAvailable( buildable_t     buildable,
     int pointsUnYielded = 0;
     changed = qfalse;
     ent = level.markedBuildables[ numRequired ];
-    if( ent->powered )
-      pointsUnYielded = BG_Buildable( ent->s.modelindex )->buildPoints;
+    pointsUnYielded = BG_Buildable( ent->s.modelindex )->buildPoints;
 
     if( pointsYielded - pointsUnYielded >= buildPoints )
     {
@@ -5173,24 +5049,8 @@ void G_BuildLogRevert( int id )
         }
         else
         {
-          if( log->powerSource == BA_H_REACTOR )
-          {
-            level.humanBuildPointQueue =
-              MAX( 0, level.humanBuildPointQueue - value );
-          }
-          else if( log->powerSource == BA_H_REPEATER )
-          {
-            gentity_t        *source;
-            buildPointZone_t *zone;
-
-            source = G_PowerEntityForPoint( log->origin );
-            if( source && source->usesBuildPointZone )
-            {
-              zone = &level.buildPointZones[ source->buildPointZone ];
-              zone->queuedBuildPoints =
-                MAX( 0, zone->queuedBuildPoints - value );
-            }
-          }
+          level.humanBuildPointQueue =
+            MAX( 0, level.humanBuildPointQueue - value );
         }
       }
     }

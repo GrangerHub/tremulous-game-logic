@@ -476,10 +476,6 @@ void      G_PrintSpawnQueue( spawnQueue_t *sq );
 typedef struct
 {
   int active;
-
-  int totalBuildPoints;
-  int queuedBuildPoints;
-  int nextQueueTime;
 } buildPointZone_t;
 
 // store locational damage regions
