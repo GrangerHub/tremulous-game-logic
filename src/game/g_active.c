@@ -358,18 +358,9 @@ void  G_TouchTriggers( gentity_t *ent )
       continue;
 
     // ignore most entities if a spectator
-    if( ent->client->sess.spectatorState != SPECTATOR_NOT )
-    {
-      if( hit->s.eType != ET_TELEPORT_TRIGGER &&
-          // this is ugly but adding a new ET_? type will
-          // most likely cause network incompatibilities
-          hit->touch != Touch_DoorTrigger )
-      {
-        //check for manually triggered doors
-        manualTriggerSpectator( hit, ent );
-        continue;
-      }
-    }
+    if( ( ent->clipmask & CONTENTS_ASTRAL_NOCLIP ) &&
+        hit->s.eType != ET_TELEPORT_TRIGGER )
+      continue;
 
     if( !trap_EntityContact( mins, maxs, hit ) )
       continue;
@@ -703,6 +694,12 @@ void ClientTimerActions( gentity_t *ent, int msec )
       }
     }
   }
+
+  //Camera Shake
+    ent->client->ps.stats[ STAT_SHAKE ] *= 0.77f;
+    if( ent->client->ps.stats[ STAT_SHAKE ] < 0 )
+      ent->client->ps.stats[ STAT_SHAKE ] = 0;
+
 
   while( client->time1000 >= 1000 )
   {
