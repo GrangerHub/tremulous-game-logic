@@ -3114,7 +3114,10 @@ void G_BuildableThink( gentity_t *ent, int msec )
   //toggle spawned flag for buildables
   if( !ent->spawned && ent->health > 0 && !level.pausedTime )
   {
-    if( ent->buildTime + buildTime < level.time )
+    if( ( ent->buildableTeam != TEAM_HUMANS &&
+          ent->buildTime + buildTime < level.time ) ||
+        ( ent->buildableTeam == TEAM_HUMANS &&
+          ent->buildProgress <= 0) )
     {
       ent->spawned = qtrue;
       if( ent->s.modelindex == BA_A_OVERMIND )
@@ -3132,7 +3135,7 @@ void G_BuildableThink( gentity_t *ent, int msec )
 
     if( ent->health > 0 && ent->health < maxHealth )
     {
-      if( !ent->spawned )
+      if( !ent->spawned && ent->buildableTeam != TEAM_HUMANS )
         ent->health += (int)( ceil( (float)maxHealth / (float)( buildTime * 0.001f ) ) );
       else
       {
@@ -4067,6 +4070,7 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
   built->takedamage = qtrue;
   built->spawned = qfalse;
   built->buildTime = built->s.time = level.time;
+  built->buildProgress = BG_Buildable( buildable )->buildTime;
 
   // build instantly in cheat mode
   if( builder->client && ( g_cheats.integer || IS_WARMUP ) )
@@ -4074,6 +4078,7 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
     built->health = BG_Buildable( buildable )->health;
     built->buildTime = built->s.time =
       level.time - BG_Buildable( buildable )->buildTime;
+    built->buildProgress = 0;
   }
 
   //things that vary for each buildable that aren't in the dbase
@@ -4998,6 +5003,7 @@ void G_BuildLogRevertThink( gentity_t *ent )
 
   built = G_FinishSpawningBuildable( ent, qtrue );
   built->buildTime = built->s.time = 0;
+  built->buildProgress = 0;
   G_KillBox( built );
 
   G_LogPrintf( "revert: restore %d %s\n",

@@ -441,11 +441,19 @@ static void CG_HumanCkitText( char *text, playerState_t *ps )
             CG_KeyNameForCommand( "deconstruct" ) ) );
     }
 
-    if( health < 1.0f )
+    if( es->eFlags & EF_B_SPAWNED )
+    {
+      if( health < 1.0f )
+      {
+        Q_strcat( text, MAX_TUTORIAL_TEXT,
+                  va( "Hold %s to repair this structure\n",
+                  CG_KeyNameForCommand( "+button5" ) ) );
+      }
+    } else
     {
       Q_strcat( text, MAX_TUTORIAL_TEXT,
-                va( "Hold %s to repair this structure\n",
-                CG_KeyNameForCommand( "+button5" ) ) );
+                  va( "Hold %s to finish constructing this structure\n",
+                  CG_KeyNameForCommand( "+button5" ) ) );
     }
   }
 }

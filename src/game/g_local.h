@@ -196,6 +196,7 @@ struct gentity_s
   qboolean          spawned;            // whether or not this buildable has finished spawning
   int               shrunkTime;         // time when a barricade shrunk or zero
   int               buildTime;          // when this buildable was built
+  int               buildProgress;      // amount of building progress remaining for a buildable in msec
   int               animTime;           // last animation change
   int               time1000;           // timer evaluated every second
   qboolean          deconstruct;        // deconstruct if no BP left
@@ -822,6 +823,7 @@ void              G_BaseSelfDestruct( team_t team );
 int               G_NextQueueTime( int queuedBP, int totalBP, int queueBaseRate );
 void              G_QueueBuildPoints( gentity_t *self );
 int               G_GetBuildPoints( const vec3_t pos, team_t team );
+int               G_GetBuildPointsReserve( team_t team );
 int               G_GetMarkedBuildPoints( const vec3_t pos, team_t team );
 qboolean          G_FindPower( gentity_t *self, qboolean searchUnspawned );
 gentity_t         *G_PowerEntityForPoint( const vec3_t origin );

@@ -768,22 +768,41 @@ void CheckCkitRepair( gentity_t *ent )
   trap_Trace( &tr, viewOrigin, NULL, NULL, end, ent->s.number, MASK_PLAYERSOLID );
   traceEnt = &g_entities[ tr.entityNum ];
 
-  if( tr.fraction < 1.0f && traceEnt->spawned && traceEnt->health > 0 &&
+  if( tr.fraction < 1.0f && traceEnt->health > 0 &&
       traceEnt->s.eType == ET_BUILDABLE && traceEnt->buildableTeam == TEAM_HUMANS )
   {
-    bHealth = BG_Buildable( traceEnt->s.modelindex )->health;
-    if( traceEnt->health < bHealth )
+    if( traceEnt->spawned )
     {
-      traceEnt->health += HBUILD_HEALRATE;
+      bHealth = BG_Buildable( traceEnt->s.modelindex )->health;
+      if( traceEnt->health < bHealth )
+      {
+        traceEnt->health += HBUILD_HEALRATE;
+        if( traceEnt->health >= bHealth )
+        {
+          traceEnt->health = bHealth;
+          G_AddEvent( ent, EV_BUILD_REPAIRED, 0 );
+        } else
+          G_AddEvent( ent, EV_BUILD_REPAIR, 0 );
+
+        ent->client->ps.weaponTime += BG_Weapon( ent->client->ps.weapon )->repeatRate1;
+      }
+    } else
+    {
+      // progress the contruction of an unspawned buildable
+      int buildTime = BG_Buildable( traceEnt->s.modelindex )->buildTime;
+      int repeatRate = BG_Weapon( ent->client->ps.weapon )->repeatRate1;
+
+      bHealth = BG_Buildable( traceEnt->s.modelindex )->health;
+      traceEnt->buildProgress -= repeatRate;
+      traceEnt->health += (int)( ceil( (float)bHealth / (float)( buildTime / repeatRate ) ) );
       if( traceEnt->health >= bHealth )
       {
-        traceEnt->health = bHealth;
-        G_AddEvent( ent, EV_BUILD_REPAIRED, 0 );
-      }
-      else
-        G_AddEvent( ent, EV_BUILD_REPAIR, 0 );
+          traceEnt->health = bHealth;
+          G_AddEvent( ent, EV_BUILD_REPAIRED, 0 );
+      } else
+          G_AddEvent( ent, EV_BUILD_REPAIR, 0 );
 
-      ent->client->ps.weaponTime += BG_Weapon( ent->client->ps.weapon )->repeatRate1;
+      ent->client->ps.weaponTime += repeatRate;
     }
   }
 }
@@ -820,20 +839,8 @@ void buildFire( gentity_t *ent, dynMenu_t menu )
 
   if( buildable > BA_NONE )
   {
-    if( ent->client->ps.stats[ STAT_MISC ] > 0 )
-    {
-      G_AddEvent( ent, EV_BUILD_DELAY, ent->client->ps.clientNum );
-      return;
-    }
-
     if( G_BuildIfValid( ent, buildable ) )
     {
-      if( !g_cheats.integer && !IS_WARMUP )
-      {
-        ent->client->ps.stats[ STAT_MISC ] +=
-          BG_Buildable( buildable )->buildTime;
-      }
-
       ent->client->ps.stats[ STAT_BUILDABLE ] = BA_NONE;
     }
 
