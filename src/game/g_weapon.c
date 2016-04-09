@@ -839,8 +839,24 @@ void buildFire( gentity_t *ent, dynMenu_t menu )
 
   if( buildable > BA_NONE )
   {
+    if( ent->client->ps.stats[ STAT_MISC ] > 0 &&
+        ( ent->client->ps.weapon == WP_ABUILD ||
+          ent->client->ps.weapon == WP_ABUILD2 ) )
+    {
+      G_AddEvent( ent, EV_BUILD_DELAY, ent->client->ps.clientNum );
+      return;
+    }
+
     if( G_BuildIfValid( ent, buildable ) )
     {
+      if( !g_cheats.integer && !IS_WARMUP &&
+        ( ent->client->ps.weapon == WP_ABUILD ||
+          ent->client->ps.weapon == WP_ABUILD2 ) )
+      {
+        ent->client->ps.stats[ STAT_MISC ] +=
+          BG_Buildable( buildable )->buildTime;
+      }
+
       ent->client->ps.stats[ STAT_BUILDABLE ] = BA_NONE;
     }
 
