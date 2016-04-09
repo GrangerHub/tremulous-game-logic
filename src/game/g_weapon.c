@@ -1531,6 +1531,7 @@ void FireWeapon2( gentity_t *ent )
     case WP_ABUILD2:
     case WP_HBUILD:
       cancelBuildFire( ent );
+      CheckCkitRepair( ent );
       break;
     default:
       break;

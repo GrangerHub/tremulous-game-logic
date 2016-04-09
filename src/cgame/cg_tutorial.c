@@ -396,6 +396,7 @@ static void CG_HumanCkitText( char *text, playerState_t *ps )
 {
   buildable_t   buildable = ps->stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT;
   entityState_t *es;
+  float      health;
 
   if( buildable > BA_NONE )
   {
@@ -416,7 +417,7 @@ static void CG_HumanCkitText( char *text, playerState_t *ps )
           CG_KeyNameForCommand( "+attack" ) ) );
   }
 
-  if( ( es = CG_BuildableInRange( ps, NULL ) ) )
+  if( ( es = CG_BuildableInRange( ps, &health ) ) )
   {
     if( cgs.markDeconstruct )
     {
@@ -438,6 +439,13 @@ static void CG_HumanCkitText( char *text, playerState_t *ps )
       Q_strcat( text, MAX_TUTORIAL_TEXT,
           va( "Press %s to destroy this structure\n",
             CG_KeyNameForCommand( "deconstruct" ) ) );
+    }
+
+    if( health < 1.0f )
+    {
+      Q_strcat( text, MAX_TUTORIAL_TEXT,
+                va( "Hold %s to repair this structure\n",
+                CG_KeyNameForCommand( "+button5" ) ) );
     }
   }
 }
