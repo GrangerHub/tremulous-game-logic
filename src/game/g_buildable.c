@@ -3133,11 +3133,21 @@ void G_BuildableThink( gentity_t *ent, int msec )
   {
     ent->time1000 -= 1000;
 
+    if( !ent->spawned && ent->buildProgress >= 0 && ent->dcc )
+        ent->buildProgress -= 500;
+
     if( ent->health > 0 && ent->health < maxHealth )
     {
-      if( !ent->spawned && ent->buildableTeam != TEAM_HUMANS )
-        ent->health += (int)( ceil( (float)maxHealth / (float)( buildTime * 0.001f ) ) );
-      else
+      if( !ent->spawned )
+      {
+        if( ent->buildableTeam != TEAM_HUMANS )
+          ent->health += (int)( ceil( (float)( maxHealth * 0.9f ) / (float)( buildTime * 0.001f ) ) );
+        if( ent->dcc )
+          {
+            ent->health += (int)( ceil( (float)( maxHealth * 0.9f ) / (float)( buildTime * 0.002f ) ) );
+
+          }
+      } else
       {
         if( ent->buildableTeam == TEAM_ALIENS && regenRate &&
           ( ent->lastDamageTime + ALIEN_REGEN_DAMAGE_TIME ) < level.time )
@@ -4059,7 +4069,7 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
   built->buildableTeam = built->s.modelindex2 = BG_Buildable( buildable )->team;
   BG_BuildableBoundingBox( buildable, built->r.mins, built->r.maxs );
 
-  built->health = 1;
+  built->health = BG_Buildable( buildable )->health / 10;
 
   built->splashDamage = BG_Buildable( buildable )->splashDamage;
   built->splashRadius = BG_Buildable( buildable )->splashRadius;

@@ -794,11 +794,16 @@ void CheckCkitRepair( gentity_t *ent )
 
       bHealth = BG_Buildable( traceEnt->s.modelindex )->health;
       traceEnt->buildProgress -= repeatRate;
-      traceEnt->health += (int)( ceil( (float)bHealth / (float)( buildTime / repeatRate ) ) );
-      if( traceEnt->health >= bHealth )
+      traceEnt->health += (int)( ceil( (float)( bHealth * 0.9f ) / (float)( buildTime / repeatRate ) ) );
+      if( traceEnt->buildProgress <= 0 )
       {
+        traceEnt->buildProgress = 0;
+        if( traceEnt->health >= bHealth )
+        {
           traceEnt->health = bHealth;
           G_AddEvent( ent, EV_BUILD_REPAIRED, 0 );
+        } else
+            G_AddEvent( ent, EV_BUILD_REPAIR, 0 );
       } else
           G_AddEvent( ent, EV_BUILD_REPAIR, 0 );
 
