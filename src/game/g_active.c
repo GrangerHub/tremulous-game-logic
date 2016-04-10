@@ -1636,6 +1636,10 @@ void ClientThink_real( gentity_t *ent )
       }
       break;
 
+    case WP_HBUILD:
+      CheckCkitRepair( ent );
+      break;
+
     default:
       break;
   }
