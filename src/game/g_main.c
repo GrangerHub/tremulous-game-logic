@@ -747,6 +747,9 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
   // So the server counts the spawns without a client attached
   G_CountSpawns( );
 
+  for( i = 0; i < NUM_TEAMS; i++ )
+    level.numUnspawnedBuildables[ i ] = 0;
+
   G_UpdateTeamConfigStrings( );
 
   if( g_lockTeamsAtStart.integer )

@@ -640,6 +640,8 @@ typedef struct
 
   buildPointZone_t  *buildPointZones;
 
+  int               numUnspawnedBuildables[ NUM_TEAMS ]; // number of unspawned buildables for a given team
+
   gentity_t         *markedBuildables[ MAX_GENTITIES ];
   int               numBuildablesForRemoval;
 

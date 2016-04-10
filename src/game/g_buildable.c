@@ -3117,9 +3117,11 @@ void G_BuildableThink( gentity_t *ent, int msec )
     if( ( ent->buildableTeam != TEAM_HUMANS &&
           ent->buildTime + buildTime < level.time ) ||
         ( ent->buildableTeam == TEAM_HUMANS &&
-          ent->buildProgress <= 0) )
+          ( ent->buildProgress <= 0 ||
+            ent->health >= maxHealth ) ) )
     {
       ent->spawned = qtrue;
+      level.numUnspawnedBuildables[ ent->buildableTeam ]--;
       if( ent->s.modelindex == BA_A_OVERMIND )
       {
         G_TeamCommand( TEAM_ALIENS, "cp \"The Overmind has awakened!\"" );
@@ -3134,18 +3136,18 @@ void G_BuildableThink( gentity_t *ent, int msec )
     ent->time1000 -= 1000;
 
     if( !ent->spawned && ent->buildProgress >= 0 && ent->dcc )
-        ent->buildProgress -= 500;
+        ent->buildProgress -= 500 / level.numUnspawnedBuildables[ TEAM_HUMANS ];
 
     if( ent->health > 0 && ent->health < maxHealth )
     {
       if( !ent->spawned )
       {
         if( ent->buildableTeam != TEAM_HUMANS )
-          ent->health += (int)( ceil( (float)( maxHealth * 0.9f ) / (float)( buildTime * 0.001f ) ) );
+          ent->health += (int)( ceil( (float)( maxHealth ) / (float)( buildTime * 0.001f ) ) );
         if( ent->dcc )
           {
-            ent->health += (int)( ceil( (float)( maxHealth * 0.9f ) / (float)( buildTime * 0.002f ) ) );
-
+            ent->health += (int)( ceil( (float)( maxHealth * 0.9f ) / (float)( buildTime * 0.002f *
+                                                  level.numUnspawnedBuildables[ TEAM_HUMANS ]) ) );
           }
       } else
       {
@@ -4069,7 +4071,10 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
   built->buildableTeam = built->s.modelindex2 = BG_Buildable( buildable )->team;
   BG_BuildableBoundingBox( buildable, built->r.mins, built->r.maxs );
 
-  built->health = BG_Buildable( buildable )->health / 10;
+  if( built->buildableTeam == TEAM_HUMANS )
+    built->health = BG_Buildable( buildable )->health / 10;
+  else
+    built->health = 1;
 
   built->splashDamage = BG_Buildable( buildable )->splashDamage;
   built->splashRadius = BG_Buildable( buildable )->splashRadius;
@@ -4079,6 +4084,7 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
 
   built->takedamage = qtrue;
   built->spawned = qfalse;
+  level.numUnspawnedBuildables[ built->buildableTeam ]++;
   built->buildTime = built->s.time = level.time;
   built->buildProgress = BG_Buildable( buildable )->buildTime;
 
@@ -4403,6 +4409,7 @@ static gentity_t *G_FinishSpawningBuildable( gentity_t *ent, qboolean force )
 
   built->takedamage = qtrue;
   built->spawned = qtrue; //map entities are already spawned
+  level.numUnspawnedBuildables[ built->buildableTeam ]--;
   built->health = BG_Buildable( buildable )->health;
   built->s.eFlags |= EF_B_SPAWNED;
 
@@ -5052,6 +5059,8 @@ void G_BuildLogRevert( int id )
             if( ent->s.eType == ET_BUILDABLE )
               G_LogPrintf( "revert: remove %d %s\n",
                 (int)( ent - g_entities ), BG_Buildable( ent->s.modelindex )->name );
+            if( ent->buildableTeam == TEAM_HUMANS && !ent->spawned )
+                level.numUnspawnedBuildables[ ent->buildableTeam ]--;
             G_RemoveRangeMarkerFrom( ent );
             G_FreeEntity( ent );
             break;
