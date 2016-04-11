@@ -2965,6 +2965,7 @@ static int G_QueueValue( gentity_t *self )
   int       damageTotal = 0;
   int       queuePoints;
   double    queueFraction = 0;
+  double    spawnProgress;
 
   for( i = 0; i < level.maxclients; i++ )
   {
@@ -2981,7 +2982,20 @@ static int G_QueueValue( gentity_t *self )
   else // all damage was done by nonclients, so queue everything
     queueFraction = 1.0;
 
-  queuePoints = (int) ( queueFraction * (double) BG_Buildable( self->s.modelindex )->buildPoints );
+  if( !self->spawned )
+  {
+    double  totalBuildTime = ( double ) BG_Buildable( self->s.modelindex )->buildTime;
+    if( self->buildableTeam == TEAM_HUMANS )
+      spawnProgress = ( double ) ( totalBuildTime - self->buildProgress );
+    else
+      spawnProgress = ( double ) ( level.time - self->buildTime );
+
+    spawnProgress = spawnProgress / totalBuildTime;
+  } else
+    spawnProgress = 1;
+
+  queuePoints = (int) ( queueFraction * spawnProgress * 
+                        (double) BG_Buildable( self->s.modelindex )->buildPoints );
   return queuePoints;
 }
 

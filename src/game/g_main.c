@@ -1166,7 +1166,12 @@ void G_CountSpawns( void )
       level.numAlienSpawns++;
 
     if( ent->s.modelindex == BA_H_SPAWN )
+    {
+      if( !ent->spawned && !ent->dcc )
+        continue;
+
       level.numHumanSpawns++;
+    }
   }
 }
 
