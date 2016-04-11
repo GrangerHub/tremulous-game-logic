@@ -165,7 +165,8 @@ typedef enum
 
 typedef struct
 {
-  int pouncePayload;
+  int   pouncePayload;
+  int   repairRepeatDelay;      // Used for for the construction kit
   float fallVelocity;
   float luciAmmoReduction;
 } pmoveExt_t;
