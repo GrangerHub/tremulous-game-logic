@@ -757,7 +757,7 @@ void CheckCkitRepair( gentity_t *ent )
   gentity_t   *traceEnt;
   int         bHealth;
 
-  if( ent->client->ps.weaponTime > 0 ||
+  if( ent->client->pmext.repairRepeatDelay > 0 ||
       ent->client->ps.stats[ STAT_MISC ] > 0 )
     return;
 
@@ -784,7 +784,7 @@ void CheckCkitRepair( gentity_t *ent )
         } else
           G_AddEvent( ent, EV_BUILD_REPAIR, 0 );
 
-        ent->client->ps.weaponTime += BG_Weapon( ent->client->ps.weapon )->repeatRate1;
+        ent->client->pmext.repairRepeatDelay += BG_Weapon( ent->client->ps.weapon )->repeatRate1;
       }
     } else
     {
@@ -807,7 +807,7 @@ void CheckCkitRepair( gentity_t *ent )
       } else
           G_AddEvent( ent, EV_BUILD_REPAIR, 0 );
 
-      ent->client->ps.weaponTime += repeatRate;
+      ent->client->pmext.repairRepeatDelay += repeatRate;
     }
   }
 }
@@ -1559,7 +1559,6 @@ void FireWeapon2( gentity_t *ent )
     case WP_ABUILD2:
     case WP_HBUILD:
       cancelBuildFire( ent );
-      CheckCkitRepair( ent );
       break;
     default:
       break;

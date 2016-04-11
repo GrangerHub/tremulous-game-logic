@@ -3121,6 +3121,10 @@ static void PM_Weapon( void )
     pm->ps->weaponTime -= pml.msec;
   if( pm->ps->weaponTime < 0 )
     pm->ps->weaponTime = 0;
+  if( pm->pmext->repairRepeatDelay > 0 )
+    pm->pmext->repairRepeatDelay -= pml.msec;
+  if( pm->pmext->repairRepeatDelay < 0 )
+    pm->pmext->repairRepeatDelay = 0;
 
   // no slash during charge
   if( pm->ps->stats[ STAT_STATE ] & SS_CHARGING )
