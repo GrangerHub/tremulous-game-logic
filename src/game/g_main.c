@@ -598,6 +598,13 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
 
   // set some level globals
   memset( &level, 0, sizeof( level ) );
+
+
+  trap_Query( DB_OPEN, "game.db", NULL );
+  trap_Query( DB_TIME_GET, level.database_data, NULL );
+  unpack_start( level.database_data, DATABASE_DATA_MAX );
+  unpack_int( &level.epochStartTime );
+
   level.time = levelTime;
   level.startTime = levelTime;
   level.alienStage2Time = level.alienStage3Time =
@@ -805,6 +812,8 @@ void G_ShutdownGame( int restart )
   level.restarted = qfalse;
   level.surrenderTeam = TEAM_NONE;
   trap_SetConfigstring( CS_WINNER, "" );
+
+  trap_Query( DB_CLOSE, NULL, NULL );
 }
 
 
@@ -1845,6 +1854,15 @@ void LogExit( const char *string )
   int         i, numSorted;
   gclient_t   *cl;
   gentity_t   *ent;
+  char        map[ MAX_QPATH ];
+
+  trap_Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
+  pack_start( level.database_data, DATABASE_DATA_MAX );
+  pack_text2( map );
+  pack_text2( (char *)string );
+  pack_int( level.numConnectedClients );
+  pack_int( level.epochStartTime );
+  trap_Query( DB_MAPSTAT_ADD, level.database_data, NULL );
 
   level.exited = qtrue;
 

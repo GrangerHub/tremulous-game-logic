@@ -688,6 +688,8 @@ typedef struct
   int               buildId;
   int               numBuildLogs;
   int               lastLayoutReset;
+  int               epochStartTime;
+  char              database_data[ DATABASE_DATA_MAX ];
 } level_locals_t;
 
 #define CMD_CHEAT         0x0001
@@ -1285,3 +1287,5 @@ void      trap_SnapVector( float *v );
 
 void      trap_AddCommand( const char *cmdName );
 void      trap_RemoveCommand( const char *cmdName );
+
+int       trap_Query( dbArray_t type, char *data, int *steps );

@@ -1512,3 +1512,17 @@ typedef struct
 #define LUMA( red, green, blue ) ( 0.2126f * ( red ) + 0.7152f * ( green ) + 0.0722f * ( blue ) )
 
 #endif	// __Q_SHARED_H
+
+extern int pack_max;
+void pack_start( char *data, int max );
+int pack_int( int in );
+int pack_float( float in );
+int pack_text( char *in, int size );
+int pack_text2( char *in );
+extern int unpack_max;
+void unpack_start( char *data, int max );
+int unpack_int( int *out );
+int unpack_float( float *out );
+int unpack_text( int size, char *out, int max);
+int unpack_text2( char *out, int max );
+char *unpack_text3( void );
