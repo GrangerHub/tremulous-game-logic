@@ -230,7 +230,8 @@ typedef enum {
   G_REMOVECOMMAND,
 
   // New
-  G_FS_GETFILTEREDFILES
+  G_FS_GETFILTEREDFILES,
+  G_SL_QUERY,
 } gameImport_t;
 
 
@@ -268,3 +269,17 @@ typedef enum {
   // and parameters.  Return qfalse if the game doesn't recognize it as a command.
 } gameExport_t;
 
+// Database
+typedef enum {
+  DB_OPEN,
+  DB_CLOSE,
+  DB_EXEC,
+  DB_MAPSTAT_ADD,
+  DB_SEEN_ADD,
+  DB_TIME_GET,
+  DB_LAST_MAPS,
+  DB_SEEN,
+  DB_COUNT //Must be last enum
+} dbArray_t;
+
+#define DATABASE_DATA_MAX 4096

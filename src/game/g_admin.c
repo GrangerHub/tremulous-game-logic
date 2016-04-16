@@ -160,6 +160,11 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "[^3a^6|^3h^7]"
     },
 
+    {"maplog", G_admin_maplog, qfalse, "maplog",
+      "retrieve the map log",
+      "[^3offset(optional)^7]"
+    },
+
     {"mute", G_admin_mute, qfalse, "mute",
       "mute a player",
       "[^3name^6|^3slot#^7]"
@@ -219,6 +224,11 @@ g_admin_cmd_t g_admin_cmds[ ] =
     {"revert", G_admin_revert, qfalse, "revert",
       "revert buildables to a given time",
       "[^3id^7]"
+    },
+
+    {"seen", G_admin_seen, qfalse, "seen",
+      "search for when the last time a player was on",
+      "[^3name^7] [^3offset(optional)^7]"
     },
 
     {"setdevmode", G_admin_setdevmode, qfalse, "setdevmode",
@@ -4553,4 +4563,60 @@ void G_admin_cleanup( void )
   }
   g_admin_commands = NULL;
   BG_DefragmentMemory( );
+}
+
+qboolean G_admin_seen( gentity_t *ent )
+{
+  int        offset = 0;
+  char       offsetstr[ 10 ];
+  char       name[ MAX_NAME_LENGTH ];
+
+  if( trap_Argc() < 2 )
+  {
+    ADMP( "^3seen: ^7usage: seen [name] [offset(optional]\n" );
+    return qfalse;
+  }
+  trap_Argv( 1, name, sizeof( name ) );
+  if( trap_Argc() == 3 )
+  {
+    trap_Argv( 2, offsetstr, sizeof( offsetstr ) );
+    offset = atoi( offsetstr );
+  }
+  pack_start( level.database_data, DATABASE_DATA_MAX );
+  pack_int( ent - g_entities );
+  pack_text2( va( "%%%s%%", name ) );
+  pack_int( 10 );
+  pack_int( offset );
+  if( trap_Query( DB_SEEN, level.database_data, NULL ) != 0 )
+  {
+    ADMP( "^3seen: ^7Query failed\n" );
+    return qfalse;
+  }
+  ADMP( "^3seen: ^7Done\n" );
+  return qtrue;
+}
+
+qboolean G_admin_maplog( gentity_t *ent )
+{
+  int        offset = 0;
+  char       offsetstr[ 10 ];
+
+  if( trap_Argc() == 2 )
+  {
+    trap_Argv( 1, offsetstr, sizeof( offsetstr ) );
+    offset = atoi( offsetstr );
+  }
+
+  pack_start( level.database_data, DATABASE_DATA_MAX );
+  pack_int( ent - g_entities );
+  pack_int( -1 );
+  pack_int( 10 );
+  pack_int( offset );
+  if( trap_Query( DB_LAST_MAPS, level.database_data, NULL ) != 0 )
+  {
+    ADMP( "^3maplog: ^7Query failed\n" );
+    return qfalse;
+  }
+  ADMP( "^3maplog: ^7Done\n" );
+  return qtrue;
 }

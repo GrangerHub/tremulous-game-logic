@@ -1606,6 +1606,16 @@ void ClientDisconnect( int clientNum )
   G_LogPrintf( "ClientDisconnect: %i [%s] (%s) \"%s^7\"\n", clientNum,
    ent->client->pers.ip.str, ent->client->pers.guid, ent->client->pers.netname );
 
+  {
+    char cleanname[ MAX_NAME_LENGTH ];
+    G_SanitiseString( ent->client->pers.netname, cleanname, sizeof( cleanname ) );
+    trap_Query( DB_SEEN_ADD, cleanname, NULL );
+    if( ent->client->pers.admin ) {
+      G_SanitiseString( ent->client->pers.admin->name, cleanname, sizeof( cleanname ) );
+      trap_Query( DB_SEEN_ADD, cleanname, NULL );
+    }
+  }
+
   trap_UnlinkEntity( ent );
   ent->inuse = qfalse;
   ent->classname = "disconnected";

@@ -443,6 +443,9 @@ intptr_t SV_GameSystemCalls( intptr_t *args ) {
 		Cmd_RemoveCommand( VMA(1) );
 		return 0;
 
+	case G_SL_QUERY:
+		return sl_query( args[1], VMA(2), VMA(3) );
+
 	case TRAP_MEMSET:
 		Com_Memset( VMA(1), args[2], args[3] );
 		return 0;
