@@ -292,18 +292,28 @@ static void WideBloodSpurt( gentity_t *attacker, gentity_t *victim, trace_t *tr 
 meleeAttack
 ===============
 */
+
 void meleeAttack( gentity_t *ent, float range, float width, float height,
                   int damage, meansOfDeath_t mod )
 {
   trace_t   tr;
   gentity_t *traceEnt;
+  int n;
+  float widthAdjusted, heightAdjusted;
 
-  G_WideTrace( &tr, ent, range, width, height, &traceEnt );
-  if( traceEnt == NULL || !traceEnt->takedamage )
-    return;
+  for( n=0; n <= 5; ++n )
+  {
+    widthAdjusted = ( width * n ) / 5;
+    heightAdjusted = ( height * n ) / 5;
 
-  WideBloodSpurt( ent, traceEnt, &tr );
-  G_Damage( traceEnt, ent, ent, forward, tr.endpos, damage, DAMAGE_NO_KNOCKBACK, mod );
+    G_WideTrace( &tr, ent, range, widthAdjusted, heightAdjusted, &traceEnt );
+    if( traceEnt != NULL && traceEnt->takedamage )
+    {
+      WideBloodSpurt( ent, traceEnt, &tr );
+      G_Damage( traceEnt, ent, ent, forward, tr.endpos, damage, DAMAGE_NO_KNOCKBACK, mod );
+      return;
+    }
+  }
 }
 
 /*
