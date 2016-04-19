@@ -237,6 +237,8 @@ struct gentity_s
 
   qboolean          pointAgainstWorld;              // don't use the bbox for map collisions
 
+  qboolean          damageDroppedBuildable;          // for buildables stacking
+
   int               buildPointZone;                 // index for zone
   int               usesBuildPointZone;             // does it use a zone?
 };
@@ -1173,6 +1175,7 @@ extern  vmCvar_t  pmove_msec;
 
 extern  vmCvar_t  g_allowShare;
 
+extern  vmCvar_t  g_allowBuildableStacking;
 extern  vmCvar_t  g_alienBuildPoints;
 extern  vmCvar_t  g_alienBuildQueueTime;
 extern  vmCvar_t  g_humanBuildPoints;
