@@ -358,6 +358,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  transparentTest;
     qtrue,                 //qboolean  uniqueTest;
     HOVEL_VALUE,           //int       value;
+    qfalse,                //qboolean  stackable;
   },
   {
     BA_H_SPAWN,            //int       number;
