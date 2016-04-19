@@ -575,7 +575,7 @@ static void CG_BuildableAnimation( centity_t *cent, int *old, int *now, float *b
   }
 }
 
-#define TRACE_DEPTH 15.0f
+#define TRACE_DEPTH 8.0f
 
 /*
 ===============

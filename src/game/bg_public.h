@@ -976,6 +976,8 @@ typedef struct
   int       children[ 3 ];
   int       cost;
   int       value;
+
+  qboolean  stackable;
 } classAttributes_t;
 
 typedef struct
@@ -1065,7 +1067,9 @@ typedef struct
   qboolean      transparentTest;
   qboolean      uniqueTest;
   
-  int       value;
+  int           value;
+
+  qboolean      stackable;
 } buildableAttributes_t;
 
 typedef struct
