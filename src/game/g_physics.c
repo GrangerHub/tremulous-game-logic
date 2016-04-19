@@ -142,6 +142,8 @@ void G_Physics( gentity_t *ent, int msec )
 
       if( tr.fraction == 1.0f )
         ent->s.groundEntityNum = ENTITYNUM_NONE;
+      else if( ent->s.groundEntityNum != tr.entityNum )
+        ent->s.groundEntityNum == tr.entityNum;
 
       ent->nextPhysicsTime = level.time + PHYSICS_TIME;
     }
