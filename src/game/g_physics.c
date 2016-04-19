@@ -36,12 +36,15 @@ static void G_Bounce( gentity_t *ent, trace_t *trace )
   int       hitTime;
   float     minNormal;
   qboolean  invert = qfalse;
+  vec3_t    normal;
+
+  VectorCopy( trace->plane.normal, normal );
 
   // reflect the velocity on the trace plane
   hitTime = level.previousTime + ( level.time - level.previousTime ) * trace->fraction;
   BG_EvaluateTrajectoryDelta( &ent->s.pos, hitTime, velocity );
-  dot = DotProduct( velocity, trace->plane.normal );
-  VectorMA( velocity, -2*dot, trace->plane.normal, ent->s.pos.trDelta );
+  dot = DotProduct( velocity, normal );
+  VectorMA( velocity, -2*dot, normal, ent->s.pos.trDelta );
 
   if( ent->s.eType == ET_BUILDABLE )
   {
@@ -52,8 +55,8 @@ static void G_Bounce( gentity_t *ent, trace_t *trace )
     minNormal = 0.707f;
 
   // cut the velocity to keep from bouncing forever
-  if( ( trace->plane.normal[ 2 ] >= minNormal ||
-      ( invert && trace->plane.normal[ 2 ] <= -minNormal ) ) &&
+  if( ( normal[ 2 ] >= minNormal ||
+      ( invert && normal[ 2 ] <= -minNormal ) ) &&
       trace->entityNum == ENTITYNUM_WORLD )
     VectorScale( ent->s.pos.trDelta, ent->physicsBounce, ent->s.pos.trDelta );
   else
@@ -63,12 +66,30 @@ static void G_Bounce( gentity_t *ent, trace_t *trace )
   {
     G_SetOrigin( ent, trace->endpos );
     ent->s.groundEntityNum = trace->entityNum;
-    VectorCopy( trace->plane.normal, ent->s.origin2 );
+
+    // check if a buildable should be damaged at its new location
+    if( !IS_WARMUP && g_allowBuildableStacking.integer && ent->s.eType == ET_BUILDABLE )
+    {
+      int contents = trap_PointContents( ent->r.currentOrigin, -1 );
+      int surfaceFlags = trace->surfaceFlags;
+
+      if( !( normal[ 2 ] >= minNormal || ( invert && normal[ 2 ] <= -minNormal ) ) ||
+          ( surfaceFlags & SURF_NOBUILD || contents & CONTENTS_NOBUILD ) ||
+          ( ent->buildableTeam == TEAM_ALIENS &&
+            ( trace->surfaceFlags & SURF_NOALIENBUILD || contents & CONTENTS_NOALIENBUILD ) ) ||
+          ( ent->buildableTeam == TEAM_HUMANS &&
+            ( trace->surfaceFlags & SURF_NOHUMANBUILD || contents & CONTENTS_NOHUMANBUILD ) ) )
+        ent->damageDroppedBuildable = qtrue;
+      else
+        ent->damageDroppedBuildable = qfalse;
+    }
+
+    VectorCopy( normal, ent->s.origin2 );
     VectorSet( ent->s.pos.trDelta, 0.0f, 0.0f, 0.0f );
     return;
   }
 
-  VectorMA( ent->r.currentOrigin, 0.15, trace->plane.normal, ent->r.currentOrigin );
+  VectorMA( ent->r.currentOrigin, 0.15, normal, ent->r.currentOrigin );
   VectorCopy( ent->r.currentOrigin, ent->s.pos.trBase );
   ent->s.pos.trTime = level.time;
 }

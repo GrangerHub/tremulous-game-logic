@@ -3101,6 +3101,10 @@ void G_BuildableThink( gentity_t *ent, int msec )
   ent->time1000 += msec;
   if( ent->time1000 >= 1000 )
   {
+    gentity_t *groundEnt;
+
+    groundEnt = &g_entities[ ent->s.groundEntityNum ];
+
     ent->time1000 -= 1000;
 
     if( ent->health > 0 && ent->health < maxHealth )
@@ -3128,6 +3132,24 @@ void G_BuildableThink( gentity_t *ent, int msec )
         for( i = 0; i < MAX_CLIENTS; i++ )
           ent->credits[ i ] = 0;
       }
+    }
+
+    if(  !IS_WARMUP && g_allowBuildableStacking.integer )
+    {
+      if( groundEnt->s.eType == ET_BUILDABLE &&
+          !BG_Buildable( groundEnt->s.modelindex )->stackable )
+        G_Damage( groundEnt, ent, ent, NULL, NULL,
+            BG_Buildable( groundEnt->s.modelindex )->health / 5, DAMAGE_NO_PROTECTION,
+            MOD_CRUSH );
+      else if( groundEnt->client &&
+               !BG_Class( groundEnt->client->ps.stats[STAT_CLASS] )->stackable )
+        G_Damage( groundEnt, ent, ent, NULL, NULL,
+            20 , DAMAGE_NO_PROTECTION, MOD_CRUSH );
+
+      if( ent->damageDroppedBuildable )
+        G_Damage( ent, ent, ent, NULL, NULL,
+            BG_Buildable( ent->s.modelindex )->health / 5, DAMAGE_NO_PROTECTION,
+            MOD_SUICIDE );
     }
   }
 
@@ -3777,8 +3799,11 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   int               contents;
   playerState_t     *ps = &ent->client->ps;
 
-  // Stop all buildables from interacting with traces
-  G_SetBuildableLinkState( qfalse );
+  if( IS_WARMUP || !g_allowBuildableStacking.integer )
+  {
+    // Stop all buildables from interacting with traces
+    G_SetBuildableLinkState( qfalse );
+  }
 
   BG_BuildableBoundingBox( buildable, mins, maxs );
 
@@ -3796,7 +3821,12 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   if( !( normal[ 2 ] >= minNormal || ( invert && normal[ 2 ] <= -minNormal ) ) )
     reason = IBE_NORMAL;
 
-  if( tr1.entityNum != ENTITYNUM_WORLD )
+  if( tr1.entityNum != ENTITYNUM_WORLD &&
+      ( IS_WARMUP || !g_allowBuildableStacking.integer ||
+        ( g_entities[ *groundEntNum ].s.eType == ET_BUILDABLE &&
+          !BG_Buildable( g_entities[ *groundEntNum ].s.modelindex )->stackable ) ||
+        ( g_entities[ *groundEntNum ].client &&
+          !BG_Class( g_entities[ *groundEntNum ].client->ps.stats[STAT_CLASS] )->stackable ) ) )
     reason = IBE_NORMAL;
 
   contents = trap_PointContents( entity_origin, -1 );
@@ -4036,6 +4066,8 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
   built->takedamage = qtrue;
   built->spawned = qfalse;
   built->buildTime = built->s.time = level.time;
+
+  built->damageDroppedBuildable = qfalse;
 
   // build instantly in cheat mode
   if( builder->client && ( g_cheats.integer || IS_WARMUP ) )
