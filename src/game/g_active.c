@@ -1326,7 +1326,16 @@ void ClientThink_real( gentity_t *ent )
   if( client->noclip )
     client->ps.pm_type = PM_NOCLIP;
   else if( client->ps.stats[ STAT_HEALTH ] <= 0 )
+  {
     client->ps.pm_type = PM_DEAD;
+    // reset any hovels the player might be using
+    if( ent->client && ent->client->hovel )
+    {
+      ent->client->hovel->active = qfalse;
+      ent->client->hovel->builder = NULL;
+      ent->client->hovel = NULL;
+    }
+  }
   else if ( client->ps.stats[ STAT_STATE ] & SS_HOVELING )
     client->ps.pm_type = PM_FREEZE;
   else if( client->ps.stats[ STAT_STATE ] & SS_BLOBLOCKED ||
@@ -1567,6 +1576,10 @@ void ClientThink_real( gentity_t *ent )
   {
     pm.tracemask = MASK_ASTRALSOLID;
     ent->clipmask = MASK_ASTRALSOLID;
+    if( client->noclip )
+        client->cliprcontents = CONTENTS_ASTRAL_NOCLIP;
+    else
+        ent->r.contents = CONTENTS_ASTRAL_NOCLIP;
   }
   else if( ( pm.ps->stats[ STAT_CLASS ] == PCL_ALIEN_BUILDER0 ) ||
            ( pm.ps->stats[ STAT_CLASS ] == PCL_ALIEN_BUILDER0_UPG ) )
@@ -1706,6 +1719,12 @@ void ClientThink_real( gentity_t *ent )
 
         // client leaves hovel
         client->ps.stats[ STAT_STATE ] &= ~SS_HOVELING;
+
+        // client is no longer astral
+        if( client->noclip )
+          client->cliprcontents = CONTENTS_BODY;
+        else
+          ent->r.contents = CONTENTS_BODY;
 
         // hovel is empty
         G_SetBuildableAnim( hovel, BANIM_ATTACK2, qfalse );
