@@ -72,13 +72,34 @@ void CG_BuildSolidList( void )
       continue;
     }
 
-    if( cent->nextState.solid && ent->eType != ET_MISSILE )
+    if( cent->nextState.solid && ent->eType != ET_MISSILE &&
+        !( cgs.sublimeMarkedBuildables && ( ent->eType == ET_BUILDABLE ) &&
+           ( ent->eFlags & EF_B_MARKED ) ) )
     {
       cg_solidEntities[ cg_numSolidEntities ] = cent;
       cg_numSolidEntities++;
       continue;
     }
   }
+}
+
+/*
+==========================
+CG_SublimeMarkedBuildables
+
+This adds or removes marked buildables from cg_solidEntities
+==========================
+*/
+void CG_SublimeMarkedBuildables( qboolean sublime )
+{
+  if( sublime )
+    cgs.sublimeMarkedBuildables = qtrue;
+  else
+    cgs.sublimeMarkedBuildables = qfalse;
+
+  CG_BuildSolidList( );
+
+  return;
 }
 
 /*

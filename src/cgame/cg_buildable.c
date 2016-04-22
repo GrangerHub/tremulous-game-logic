@@ -320,6 +320,8 @@ void CG_InitBuildables( void )
   int           j;
   fileHandle_t  f;
 
+  cgs.sublimeMarkedBuildables = qfalse;
+
   memset( cg_buildables, 0, sizeof( cg_buildables ) );
 
   //default sounds
@@ -575,7 +577,7 @@ static void CG_BuildableAnimation( centity_t *cent, int *old, int *now, float *b
   }
 }
 
-#define TRACE_DEPTH 8.0f
+#define TRACE_DEPTH 15.0f
 
 /*
 ===============
@@ -610,7 +612,7 @@ static void CG_PositionAndOrientateBuildable( const vec3_t angles, const vec3_t 
   VectorMA( inOrigin, -TRACE_DEPTH, normal, end );
 
   CG_CapTrace( &tr, inOrigin, mins, maxs, end, skipNumber,
-               CONTENTS_SOLID | CONTENTS_PLAYERCLIP );
+               MASK_PLAYERSOLID );
 
   fraction = tr.fraction;
   if( tr.startsolid )
@@ -676,6 +678,8 @@ void CG_GhostBuildable( buildable_t buildable )
 
   BG_BuildableBoundingBox( buildable, mins, maxs );
 
+  CG_SublimeMarkedBuildables( qtrue );
+
   BG_PositionBuildableRelativeToPlayer( ps, mins, maxs, CG_Trace, entity_origin, angles, &tr );
 
   if( cg_rangeMarkerForBlueprint.integer && tr.entityNum != ENTITYNUM_NONE )
@@ -683,6 +687,8 @@ void CG_GhostBuildable( buildable_t buildable )
 
   CG_PositionAndOrientateBuildable( ps->viewangles, entity_origin, tr.plane.normal, ps->clientNum,
                                     mins, maxs, ent.axis, ent.origin );
+
+  CG_SublimeMarkedBuildables( qfalse );
 
   //offset on the Z axis if required
   VectorMA( ent.origin, BG_BuildableConfig( buildable )->zOffset, tr.plane.normal, ent.origin );
