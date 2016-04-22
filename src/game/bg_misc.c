@@ -537,7 +537,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     MEDISTAT_VALUE,        //int       value;
-    qtrue,                 //qboolean  stackable;
+    qfalse,                 //qboolean  stackable;
   },
   {
     BA_H_REACTOR,          //int       number;
@@ -3430,7 +3430,6 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
   //so buildings drop to floor
   VectorMA( targetOrigin, -128, playerNormal, targetOrigin );
 
-  // The mask is MASK_DEADSOLID on purpose to avoid collisions with other entities
   (*trace)( tr, entityOrigin, mins, maxs, targetOrigin, ps->clientNum, MASK_PLAYERSOLID );
   VectorCopy( tr->endpos, outOrigin );
   vectoangles( forward, outAngles );

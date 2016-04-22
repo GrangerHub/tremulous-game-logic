@@ -2075,13 +2075,6 @@ void Cmd_Destroy_f( gentity_t *ent )
       return;
     }
 
-    // Cancel deconstruction (unmark)
-    if( deconstruct && !IS_WARMUP && g_markDeconstruct.integer && traceEnt->deconstruct )
-    {
-      traceEnt->deconstruct = qfalse;
-      return;
-    }
-
     // Prevent destruction of the last spawn
     if( ent->client->pers.teamSelection == TEAM_ALIENS &&
         traceEnt->s.modelindex == BA_A_SPAWN )
@@ -2096,8 +2089,7 @@ void Cmd_Destroy_f( gentity_t *ent )
         lastSpawn = qtrue;
     }
 
-    if( lastSpawn && !g_cheats.integer &&
-        ( IS_WARMUP || !g_markDeconstruct.integer ) )
+    if( lastSpawn && !g_cheats.integer )
     {
       G_TriggerMenu( ent->client->ps.clientNum, MN_B_LASTSPAWN );
       return;
@@ -2110,8 +2102,7 @@ void Cmd_Destroy_f( gentity_t *ent )
       return;
     }
 
-    if( ( IS_WARMUP || !g_markDeconstruct.integer ) ||
-        ( ent->client->pers.teamSelection == TEAM_HUMANS &&
+    if( IS_WARMUP || ( ent->client->pers.teamSelection == TEAM_HUMANS &&
           !G_FindPower( traceEnt, qtrue ) ) )
     {
       if( ent->client->ps.stats[ STAT_MISC ] > 0 )
@@ -2128,15 +2119,14 @@ void Cmd_Destroy_f( gentity_t *ent )
         G_Damage( traceEnt, ent, ent, forward, tr.endpos,
                   traceEnt->health, 0, MOD_SUICIDE );
       }
-      else if( !IS_WARMUP && g_markDeconstruct.integer &&
-               ( ent->client->pers.teamSelection != TEAM_HUMANS ||
-                 G_FindPower( traceEnt , qtrue ) || lastSpawn ) )
-      {
-        traceEnt->deconstruct     = qtrue; // Mark buildable for deconstruction
-        traceEnt->deconstructTime = level.time;
-      }
       else
       {
+        if( ent->client->ps.stats[ STAT_MISC ] > 0 )
+        {
+          G_AddEvent( ent, EV_BUILD_DELAY, ent->client->ps.clientNum );
+          return;
+        }
+
         if( !g_cheats.integer && !IS_WARMUP ) // add a bit to the build timer
         {
             ent->client->ps.stats[ STAT_MISC ] +=
@@ -2732,28 +2722,104 @@ Cmd_Reload_f
 void Cmd_Reload_f( gentity_t *ent )
 {
   playerState_t *ps = &ent->client->ps;
-  int ammo;
 
-  // weapon doesn't ever need reloading
-  if( BG_Weapon( ps->weapon )->infiniteAmmo )
-    return;
+  if( ps->stats[ STAT_TEAM ] == TEAM_HUMANS &&
+      ps->weapon != WP_HBUILD )
+  {
+    // reload is being attempted
+    int ammo;
 
-  if( ps->clips <= 0 )
-    return;
+    // weapon doesn't ever need reloading
+    if( BG_Weapon( ps->weapon )->infiniteAmmo )
+      return;
 
-  if( BG_Weapon( ps->weapon )->usesEnergy &&
-      BG_InventoryContainsUpgrade( UP_BATTPACK, ps->stats ) )
-    ammo = BG_Weapon( ps->weapon )->maxAmmo * BATTPACK_MODIFIER;
-  else
-    ammo = BG_Weapon( ps->weapon )->maxAmmo;
+    if( ps->clips <= 0 )
+      return;
 
-  // don't reload when full
-  if( ps->ammo >= ammo )
-    return;
+    if( BG_Weapon( ps->weapon )->usesEnergy &&
+        BG_InventoryContainsUpgrade( UP_BATTPACK, ps->stats ) )
+      ammo = BG_Weapon( ps->weapon )->maxAmmo * BATTPACK_MODIFIER;
+    else
+      ammo = BG_Weapon( ps->weapon )->maxAmmo;
 
-  // the animation, ammo refilling etc. is handled by PM_Weapon
-  if( ent->client->ps.weaponstate != WEAPON_RELOADING )
-    ent->client->ps.pm_flags |= PMF_WEAPON_RELOAD;
+    // don't reload when full
+    if( ps->ammo >= ammo )
+      return;
+
+    // the animation, ammo refilling etc. is handled by PM_Weapon
+    if( ent->client->ps.weaponstate != WEAPON_RELOADING )
+      ent->client->ps.pm_flags |= PMF_WEAPON_RELOAD;
+  } else if( g_markDeconstruct.integer )
+  {
+    // mark buildables for deconstruction is being attempted
+    vec3_t      viewOrigin, forward, end;
+    trace_t     tr;
+    gentity_t   *traceEnt;
+    qboolean    lastSpawn = qfalse;
+
+    if( ent->client->pers.namelog->denyBuild &&
+        ( ps->weapon == WP_HBUILD ||
+          ps->weapon == WP_ABUILD ||
+          ps->weapon == WP_ABUILD2 ) )
+    {
+      G_TriggerMenu( ent->client->ps.clientNum, MN_B_REVOKED );
+      return;
+    }
+
+    BG_GetClientViewOrigin( &ent->client->ps, viewOrigin );
+    AngleVectors( ent->client->ps.viewangles, forward, NULL, NULL );
+    VectorMA( viewOrigin, 100, forward, end );
+
+    trap_Trace( &tr, viewOrigin, NULL, NULL, end, ent->s.number, MASK_PLAYERSOLID );
+    traceEnt = &g_entities[ tr.entityNum ];
+
+    if( tr.fraction < 1.0f &&
+        ( traceEnt->s.eType == ET_BUILDABLE ) &&
+        ( traceEnt->buildableTeam == ent->client->pers.teamSelection ) &&
+        ( ( ent->client->ps.weapon >= WP_ABUILD ) &&
+          ( ent->client->ps.weapon <= WP_HBUILD ) ) )
+    {
+      // Cancel deconstruction (unmark)
+      if( !IS_WARMUP && traceEnt->deconstruct )
+      {
+        traceEnt->deconstruct = qfalse;
+        return;
+      }
+
+      // determine if the team has one or less spawns left
+      if( ent->client->pers.teamSelection == TEAM_ALIENS &&
+          traceEnt->s.modelindex == BA_A_SPAWN )
+      {
+        if( level.numAlienSpawns <= 1 )
+          lastSpawn = qtrue;
+      }
+      else if( ent->client->pers.teamSelection == TEAM_HUMANS &&
+               traceEnt->s.modelindex == BA_H_SPAWN )
+      {
+        if( level.numHumanSpawns <= 1 )
+          lastSpawn = qtrue;
+      }
+
+
+      // Don't allow destruction of buildables that cannot be rebuilt
+      if( !IS_WARMUP && G_TimeTilSuddenDeath( ) <= 0 )
+      {
+        G_TriggerMenu( ent->client->ps.clientNum, MN_B_SUDDENDEATH );
+        return;
+      }
+
+      if( traceEnt->health > 0 )
+      {
+        if( !IS_WARMUP &&
+                 ( ent->client->pers.teamSelection != TEAM_HUMANS ||
+                   G_FindPower( traceEnt , qtrue ) || lastSpawn ) )
+        {
+          traceEnt->deconstruct     = qtrue; // Mark buildable for deconstruction
+          traceEnt->deconstructTime = level.time;
+        }
+      }
+    }
+  }
 }
 
 /*
@@ -3648,7 +3714,7 @@ commands_t cmds[ ] = {
   { "playlist", CMD_MESSAGE, Cmd_PlayMap_f },
   { "playmap", CMD_MESSAGE, Cmd_PlayMap_f },
   { "ready", CMD_TEAM, Cmd_Ready_f },
-  { "reload", CMD_HUMAN|CMD_ALIVE, Cmd_Reload_f },
+  { "reload", CMD_TEAM|CMD_ALIVE, Cmd_Reload_f },
   { "say", CMD_MESSAGE|CMD_INTERMISSION, Cmd_Say_f },
   { "say_area", CMD_MESSAGE|CMD_TEAM|CMD_ALIVE, Cmd_SayArea_f },
   { "say_team", CMD_MESSAGE|CMD_INTERMISSION, Cmd_Say_f },
