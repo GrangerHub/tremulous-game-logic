@@ -286,8 +286,10 @@ typedef enum
   PERS_BP_RESERVE,
   PERS_MARKEDBP,
   //zdrytchx: no space in stats, use persistant. This meanas we risk doing a double jump upon spawning but death animations are 1700 msecs long, so technically it's impossible anyway
-  PERS_JUMPTIME
-    // netcode has space for 2 more
+  PERS_JUMPTIME,
+
+  PERS_HEALTH_RESERVE
+    // netcode has space for 1 more
 } persEnum_t;
 
 #define PS_WALLCLIMBINGFOLLOW   0x00000001

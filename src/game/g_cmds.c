@@ -2012,12 +2012,22 @@ void Cmd_Class_f( gentity_t *ent )
         {
 
           ent->client->pers.evolveHealthFraction = (float)ent->client->ps.stats[ STAT_HEALTH ] /
-            (float)BG_Class( currentClass )->health;
+                                                   (float)BG_Class( currentClass )->health;
 
           if( ent->client->pers.evolveHealthFraction < 0.0f )
             ent->client->pers.evolveHealthFraction = 0.0f;
           else if( ent->client->pers.evolveHealthFraction > 1.0f )
             ent->client->pers.evolveHealthFraction = 1.0f;
+
+          ent->client->pers.evolveHealthReserveFraction =
+                          (float)ent->client->ps.persistant[ PERS_HEALTH_RESERVE ] /
+                          ( (float)BG_Class( currentClass )->health *
+                          ALIEN_HP_RESERVE_MAX );
+
+          if( ent->client->pers.evolveHealthReserveFraction < 0.0f )
+            ent->client->pers.evolveHealthReserveFraction = 0.0f;
+          else if( ent->client->pers.evolveHealthReserveFraction > 1.0f )
+            ent->client->pers.evolveHealthReserveFraction = 1.0f;
 
           //remove credit
           G_AddCreditToClient( ent->client, -cost, qtrue );

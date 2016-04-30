@@ -1419,7 +1419,7 @@ void ClientThink_real( gentity_t *ent )
 
     if( ent->health <= 0 || ent->nextRegenTime < 0 || regenRate == 0 )
       ent->nextRegenTime = -1; // no regen
-    else
+    else if( ent->healthReserve > 0 )
     {
       int       entityList[ MAX_GENTITIES ];
       int       i, num;
@@ -1490,8 +1490,18 @@ void ClientThink_real( gentity_t *ent )
       count = 1 + ( level.time - ent->nextRegenTime ) / interval;
       ent->nextRegenTime += count * interval;
 
-      if( ent->health < client->ps.stats[ STAT_MAX_HEALTH ] )
+      if( ( ent->healthReserve - count ) < 0 )
+        count = ent->healthReserve;
+
+      if( ent->health < client->ps.stats[ STAT_MAX_HEALTH ]  )
       {
+        ent->healthReserve -= count;
+
+        if( ent->healthReserve < 0 )
+          ent->healthReserve = 0;
+
+        client->ps.persistant[ PERS_HEALTH_RESERVE ] = ent->healthReserve;
+
         ent->health += count;
         client->ps.stats[ STAT_HEALTH ] = ent->health;
 
@@ -1502,6 +1512,42 @@ void ClientThink_real( gentity_t *ent )
           for( i = 0; i < MAX_CLIENTS; i++ )
             ent->credits[ i ] = 0;
         }
+      }
+    }
+  }
+
+  // Replenish alien health reserve
+  if( level.surrenderTeam != client->pers.teamSelection &&
+      ent->nextHPReserveRegenTime >= 0 && ent->nextHPReserveRegenTime < level.time )
+  {
+    float regenRate =
+        BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->regenRate;
+
+    if( ent->health <= 0 || ent->nextHPReserveRegenTime < 0 || regenRate == 0 )
+      ent->nextHPReserveRegenTime = -1; // no regen
+    else
+    {
+      int       count, interval;
+
+      interval = 1000 / ( regenRate * ALIEN_HP_RESERVE_REGEN_MOD );
+      // if recovery interval is less than frametime, compensate
+      count = 1 + ( level.time - ent->nextHPReserveRegenTime ) / interval;
+      ent->nextHPReserveRegenTime += count * interval;
+
+      if( ( ( ent->health >= client->ps.stats[ STAT_MAX_HEALTH ] ) ||
+            ( ent->healthReserve <= 0 ) ) &&
+          ( ent->healthReserve < (int)( ALIEN_HP_RESERVE_MAX *
+                                        client->ps.stats[ STAT_MAX_HEALTH ] ) ) )
+      {
+        ent->healthReserve += count;
+        if( ent->healthReserve > (int)( ALIEN_HP_RESERVE_MAX *
+                                         client->ps.stats[ STAT_MAX_HEALTH ] ) )
+        {
+          ent->healthReserve = (int)( ALIEN_HP_RESERVE_MAX *
+                                      client->ps.stats[ STAT_MAX_HEALTH ] );
+        }
+
+        client->ps.persistant[ PERS_HEALTH_RESERVE ] = ent->healthReserve;
       }
     }
   }

@@ -70,8 +70,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL1_PCLOUD_RANGE         120.0f
 #define LEVEL1_PCLOUD_REPEAT        2000
 #define LEVEL1_PCLOUD_TIME          10000
-#define LEVEL1_REGEN_MOD            (2.0f/ALIEN_REGEN_MOD)
-#define LEVEL1_UPG_REGEN_MOD        (3.0f/ALIEN_REGEN_MOD)
+#define LEVEL1_REGEN_MOD            (2.0f)
+#define LEVEL1_UPG_REGEN_MOD        (3.0f)
 #define LEVEL1_REGEN_SCOREINC       AVM(100) // score added for healing per 10s
 #define LEVEL1_UPG_REGEN_SCOREINC   AVM(200)
 
@@ -155,66 +155,67 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ALIEN_VALUE_MODIFIER        1.0f
 #define AVM(h)                      ((int)((float)h*ALIEN_VALUE_MODIFIER))
 
-#define ALIEN_REGEN_MOD             (1.0f/3.0f)
+#define ALIEN_HP_RESERVE_REGEN_MOD  (1.0f/9.0f)
+#define ALIEN_HP_RESERVE_MAX        2.0f
 
 #define ABUILDER_SPEED              0.9f
 #define ABUILDER_VALUE              AVM(240)
 #define ABUILDER_HEALTH             AHM(50)
-#define ABUILDER_REGEN              (0.04f * ALIEN_REGEN_MOD * ABUILDER_HEALTH)
+#define ABUILDER_REGEN              (0.04f * ABUILDER_HEALTH)
 #define ABUILDER_COST               0
 
 #define ABUILDER_UPG_SPEED          0.9f
 #define ABUILDER_UPG_VALUE          AVM(300)
 #define ABUILDER_UPG_HEALTH         AHM(75)
-#define ABUILDER_UPG_REGEN          (0.04f * ALIEN_REGEN_MOD * ABUILDER_UPG_HEALTH)
+#define ABUILDER_UPG_REGEN          (0.04f * ABUILDER_UPG_HEALTH)
 #define ABUILDER_UPG_COST           0
 
 #define LEVEL0_SPEED                1.4f
 #define LEVEL0_VALUE                AVM(180)
 #define LEVEL0_HEALTH               AHM(25)
-#define LEVEL0_REGEN                (0.05f * ALIEN_REGEN_MOD * LEVEL0_HEALTH)
+#define LEVEL0_REGEN                (0.05f * LEVEL0_HEALTH)
 #define LEVEL0_COST                 0
 
 #define LEVEL1_SPEED                1.25f
 #define LEVEL1_VALUE                AVM(270)
 #define LEVEL1_HEALTH               AHM(60)
-#define LEVEL1_REGEN                (0.03f * ALIEN_REGEN_MOD * LEVEL1_HEALTH)
+#define LEVEL1_REGEN                (0.03f * LEVEL1_HEALTH)
 #define LEVEL1_COST                 1
 
 #define LEVEL1_UPG_SPEED            1.25f
 #define LEVEL1_UPG_VALUE            AVM(330)
 #define LEVEL1_UPG_HEALTH           AHM(80)
-#define LEVEL1_UPG_REGEN            (0.03f * ALIEN_REGEN_MOD * LEVEL1_UPG_HEALTH)
+#define LEVEL1_UPG_REGEN            (0.03f * LEVEL1_UPG_HEALTH)
 #define LEVEL1_UPG_COST             1
 
 #define LEVEL2_SPEED                1.2f
 #define LEVEL2_VALUE                AVM(420)
 #define LEVEL2_HEALTH               AHM(150)
-#define LEVEL2_REGEN                (0.03f * ALIEN_REGEN_MOD * LEVEL2_HEALTH)
+#define LEVEL2_REGEN                (0.03f * LEVEL2_HEALTH)
 #define LEVEL2_COST                 1
 
 #define LEVEL2_UPG_SPEED            1.2f
 #define LEVEL2_UPG_VALUE            AVM(540)
 #define LEVEL2_UPG_HEALTH           AHM(175)
-#define LEVEL2_UPG_REGEN            (0.03f * ALIEN_REGEN_MOD * LEVEL2_UPG_HEALTH)
+#define LEVEL2_UPG_REGEN            (0.03f * LEVEL2_UPG_HEALTH)
 #define LEVEL2_UPG_COST             1
 
 #define LEVEL3_SPEED                1.1f
 #define LEVEL3_VALUE                AVM(600)
 #define LEVEL3_HEALTH               AHM(200)
-#define LEVEL3_REGEN                (0.03f * ALIEN_REGEN_MOD * LEVEL3_HEALTH)
+#define LEVEL3_REGEN                (0.03f * LEVEL3_HEALTH)
 #define LEVEL3_COST                 1
 
 #define LEVEL3_UPG_SPEED            1.1f
 #define LEVEL3_UPG_VALUE            AVM(720)
 #define LEVEL3_UPG_HEALTH           AHM(250)
-#define LEVEL3_UPG_REGEN            (0.03f * ALIEN_REGEN_MOD * LEVEL3_UPG_HEALTH)
+#define LEVEL3_UPG_REGEN            (0.03f * LEVEL3_UPG_HEALTH)
 #define LEVEL3_UPG_COST             1
 
 #define LEVEL4_SPEED                1.2f
 #define LEVEL4_VALUE                AVM(960)
 #define LEVEL4_HEALTH               AHM(400)
-#define LEVEL4_REGEN                (0.025f * ALIEN_REGEN_MOD * LEVEL4_HEALTH)
+#define LEVEL4_REGEN                (0.025f * LEVEL4_HEALTH)
 #define LEVEL4_COST                 2
 
 /*
@@ -270,7 +271,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define BOOSTER_SPLASHDAMAGE        50
 #define BOOSTER_SPLASHRADIUS        100
 #define BOOSTER_CREEPSIZE           120
-#define BOOSTER_REGEN_MOD           (3.0f / ALIEN_REGEN_MOD)
+#define BOOSTER_REGEN_MOD           (3.0f)
 #define BOOSTER_VALUE               0
 #define BOOST_TIME                  20000
 #define BOOST_WARN_TIME             15000
@@ -357,7 +358,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ALIEN_SPAWN_REPEAT_TIME     10000
 
 #define ALIEN_REGEN_DAMAGE_TIME     2000 //msec since damage that regen starts again
-#define ALIEN_REGEN_NOCREEP_MOD     (1.0f/3.0f) //regen off creep
+#define ALIEN_REGEN_NOCREEP_MOD     (1.0f/2.0f) //regen off creep
 
 #define ALIEN_MAX_FRAGS             9
 #define ALIEN_MAX_CREDITS           (ALIEN_MAX_FRAGS*ALIEN_CREDITS_PER_KILL)

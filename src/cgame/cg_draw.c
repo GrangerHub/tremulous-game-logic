@@ -884,10 +884,49 @@ static void CG_DrawPlayerClipsValue( rectDef_t *rect, vec4_t color )
 
 static void CG_DrawPlayerHealthValue( rectDef_t *rect, vec4_t color )
 {
+  float tx, ty;
+  char  *text;
+  float scale;
+  int   len;
+  int   health = cg.snap->ps.stats[ STAT_HEALTH ];
+  int   healthReserve = cg.snap->ps.persistant[ PERS_HEALTH_RESERVE ];
+
+    
+    
+
   trap_R_SetColor( color );
-  CG_DrawField( rect->x, rect->y, 4, rect->w / 4, rect->h,
-                cg.snap->ps.stats[ STAT_HEALTH ] );
-  trap_R_SetColor( NULL );
+  if( healthReserve <= 0 )
+  {
+    CG_DrawField( rect->x, rect->y, 4, rect->w / 4, rect->h,
+                  health );
+    trap_R_SetColor( NULL );
+    return;
+  }
+
+  text = va( "%d+{%d}", health, healthReserve );
+
+  len = strlen( text );
+
+  if( len <= 4 )
+    scale = 0.50f;
+  else if( len <= 6 )
+    scale = 0.40f;
+  else if( len == 7 ) 
+    scale = 0.32f;
+  else if( len == 8 )
+    scale = 0.29f;
+  else if( len == 9 )
+    scale = 0.27f;
+  else if( len == 10 )
+    scale = 0.25;
+  else if( len == 11 )
+    scale = 0.23;
+  else
+    scale = 0.21;
+
+  CG_AlignText( rect, text, scale, 0.0f, 0.0f, ALIGN_RIGHT, VALIGN_CENTER, &tx, &ty );
+  UI_Text_Paint( tx + 1, ty, scale, color, text, 0, 0, ITEM_TEXTSTYLE_NORMAL );
+  trap_R_SetColor( NULL );  
 }
 
 /*
