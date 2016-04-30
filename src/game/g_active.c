@@ -1848,7 +1848,7 @@ void G_RunClient( gentity_t *ent )
   {
     if( level.time - ent->client->lastCmdTime > 250 )
     {
-      trap_GetUsercmd( clientNum, &ent->client->pers.cmd );
+      trap_GetUsercmd( ent->client->ps.clientNum, &ent->client->pers.cmd );
       ClientThink_real( ent );
     }
      return;
