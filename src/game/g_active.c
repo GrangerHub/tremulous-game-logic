@@ -1844,7 +1844,7 @@ void ClientThink( int clientNum )
 
 void G_RunClient( gentity_t *ent )
 {
-  if( !g_synchronousClients.integer )
+  if( !g_synchronousClients.integer && level.time - ent->client->lastCmdTime < 100 )
     return;
 
   ent->client->pers.cmd.serverTime = level.time;
