@@ -416,7 +416,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     TEAM_HUMANS,           //int       team;
     ( 1 << WP_HBUILD ),    //weapon_t  buildWeapon;
     BANIM_IDLE1,           //int       idleAnim;
-    50,                    //int       nextthink;
+    MGTURRET_NEXTTHINK,    //int       nextthink;
     MGTURRET_BT,           //int       buildTime;
     qfalse,                //qboolean  usable;
     MGTURRET_RANGE,        //int       turretRange;

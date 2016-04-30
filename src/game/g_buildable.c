@@ -2862,7 +2862,21 @@ void HMGTurret_Think( gentity_t *self )
   self->powered = G_FindPower( self, qfalse );
   G_IdlePowerState( self );
 
-  // If not powered or spawned don't do anything
+  // If not spawned don't do anything
+  if( !self->spawned )
+    return;
+
+  // spin down
+  if( !self->active && ( self->timestamp < level.time ) &&
+                       ( self->turretFireSpeedMod > MGTURRET_REPEAT_MOD_MIN ) )
+  {
+    self->turretFireSpeedMod -= ( MGTURRET_REPEAT_MOD_DIFF * MGTURRET_NEXTTHINK ) /
+                                  MGTURRET_SPINUP_TIME;
+    if( self->turretFireSpeedMod < MGTURRET_REPEAT_MOD_MIN )
+      self->turretFireSpeedMod = MGTURRET_REPEAT_MOD_MIN;
+  }
+  
+  // If not powered don't do anything
   if( !self->powered )
   {
     // if power loss drop turret
@@ -2873,14 +2887,11 @@ void HMGTurret_Think( gentity_t *self )
     self->nextthink = level.time + POWER_REFRESH_TIME;
     return;
   }
-  if( !self->spawned )
-    return;
     
   // If the current target is not valid find a new enemy
   if( !HMGTurret_CheckTarget( self, self->enemy, qtrue ) )
   {
     self->active = qfalse;
-    self->turretSpinupTime = -1;
     HMGTurret_FindEnemy( self );
   }
   // if newly powered raise turret
@@ -2892,7 +2903,6 @@ void HMGTurret_Think( gentity_t *self )
   if( !HMGTurret_TrackEnemy( self ) )
   {
     self->active = qfalse;
-    self->turretSpinupTime = -1;
     return;
   }
 
@@ -2900,21 +2910,12 @@ void HMGTurret_Think( gentity_t *self )
   if( !self->active && self->timestamp < level.time )
   {
     self->active = qtrue;
-
-    if( G_IsDCCBuilt( ) ) 
-    {
-     self->turretSpinupTime = level.time + MGTURRET_DCC_SPINUP_TIME;
-    }
-    else
-    {
-      self->turretSpinupTime = level.time + MGTURRET_SPINUP_TIME;
-    }
     
     G_AddEvent( self, EV_MGTURRET_SPINUP, 0 );
   }
 
   // Not firing or haven't spun up yet
-  if( !self->active || self->turretSpinupTime > level.time )
+  if( !self->active )
     return;
     
   // Fire repeat delay
@@ -2923,9 +2924,31 @@ void HMGTurret_Think( gentity_t *self )
 
   FireWeapon( self );
   self->s.eFlags |= EF_FIRING;
-  self->timestamp = level.time + BG_Buildable( self->s.modelindex )->turretFireSpeed;
+  self->timestamp = level.time + ( ( BG_Buildable( self->s.modelindex )->turretFireSpeed *
+                                     100 ) / self->turretFireSpeedMod );
   G_AddEvent( self, EV_FIRE_WEAPON, 0 );
   G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
+
+  // spin up
+  if( self->turretFireSpeedMod < 100 )
+  {
+    if( G_IsDCCBuilt( ) ) 
+    {
+      self->turretFireSpeedMod += ( MGTURRET_REPEAT_MOD_DIFF *
+                                    ( self->timestamp - level.time ) ) /
+                                  MGTURRET_DCC_SPINUP_TIME;
+    }
+    else
+    {
+      self->turretFireSpeedMod += ( MGTURRET_REPEAT_MOD_DIFF *
+                                    ( self->timestamp - level.time ) ) /
+                                  MGTURRET_SPINUP_TIME;
+    }
+  } else if( self->turretFireSpeedMod > 100 )
+  {
+    self->turretFireSpeedMod = 100;
+  }
+  
 }
 
 
@@ -4189,7 +4212,11 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
   BG_BuildableBoundingBox( buildable, built->r.mins, built->r.maxs );
 
   if( built->buildableTeam == TEAM_HUMANS )
+  {
     built->health = BG_Buildable( buildable )->health / 10;
+    if( buildable == BA_H_MGTURRET )
+      built->turretFireSpeedMod = MGTURRET_REPEAT_MOD_MIN;
+  }
   else
     built->health = 1;
 

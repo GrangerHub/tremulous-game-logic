@@ -217,7 +217,7 @@ struct gentity_s
 
   vec3_t            turretAim;          // aim vector for turrets
   vec3_t            turretAimRate;      // track turn speed for norfenturrets
-  int               turretSpinupTime;   // spinup delay for norfenturrets
+  int               turretFireSpeedMod; // modification of the turret fire speed
 
   vec4_t            animation;          // animated map objects
   gentity_t         *builder;           // occupant of this hovel
