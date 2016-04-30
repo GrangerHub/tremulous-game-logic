@@ -101,7 +101,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL3_CLAW_K_SCALE         1.0f
 #define LEVEL3_CLAW_U_REPEAT        600
 #define LEVEL3_CLAW_U_K_SCALE       1.0f
-#define LEVEL3_POUNCE_DMG           ADM(100)
+#define LEVEL3_POUNCE_DMG           ADM(80)
 #define LEVEL3_POUNCE_RANGE         72.0f
 #define LEVEL3_POUNCE_UPG_RANGE     LEVEL3_POUNCE_RANGE + 3.0f
 #define LEVEL3_POUNCE_WIDTH         16.0f
@@ -583,7 +583,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MGTURRET_K_SCALE            1.0f
 #define MGTURRET_RANGE              400.0f
 #define MGTURRET_SPREAD             200
-#define MGTURRET_DMG                HDM(4)
+#define MGTURRET_DMG                HDM(3)
 #define MGTURRET_SPINUP_TIME        950 // time between target sighted and fire
 #define MGTURRET_VALUE              0
 #define MGTURRET_DCC_ANGULARSPEED       15
