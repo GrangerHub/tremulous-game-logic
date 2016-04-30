@@ -2866,14 +2866,36 @@ void HMGTurret_Think( gentity_t *self )
   if( !self->spawned )
     return;
 
-  // spin down
-  if( !self->active && ( self->timestamp < level.time ) &&
-                       ( self->turretFireSpeedMod > MGTURRET_REPEAT_MOD_MIN ) )
+  if( !self->active )
   {
-    self->turretFireSpeedMod -= ( MGTURRET_REPEAT_MOD_DIFF * MGTURRET_NEXTTHINK ) /
-                                  MGTURRET_SPINUP_TIME;
-    if( self->turretFireSpeedMod < MGTURRET_REPEAT_MOD_MIN )
-      self->turretFireSpeedMod = MGTURRET_REPEAT_MOD_MIN;
+    // spin down
+    if( ( self->timestamp < level.time ) &&
+        ( self->turretFireSpeedMod > MGTURRET_REPEAT_MOD_MIN ) )
+    {
+      self->turretFireSpeedMod -= ( MGTURRET_REPEAT_MOD_DIFF * MGTURRET_NEXTTHINK ) /
+                                    MGTURRET_SPINUP_TIME;
+      if( self->turretFireSpeedMod < MGTURRET_REPEAT_MOD_MIN )
+        self->turretFireSpeedMod = MGTURRET_REPEAT_MOD_MIN;
+    }
+  } else
+  {
+    // spin up
+    if( self->turretFireSpeedMod < 100 )
+    {
+      if( G_IsDCCBuilt( ) ) 
+      {
+        self->turretFireSpeedMod += ( MGTURRET_REPEAT_MOD_DIFF * MGTURRET_NEXTTHINK ) /
+                                    MGTURRET_DCC_SPINUP_TIME;
+      }
+      else
+      {
+        self->turretFireSpeedMod += ( MGTURRET_REPEAT_MOD_DIFF * MGTURRET_NEXTTHINK ) /
+                                      MGTURRET_SPINUP_TIME;
+      }
+    } else if( self->turretFireSpeedMod > 100 )
+    {
+      self->turretFireSpeedMod = 100;
+    }
   }
   
   // If not powered don't do anything
@@ -2928,27 +2950,6 @@ void HMGTurret_Think( gentity_t *self )
                                      100 ) / self->turretFireSpeedMod );
   G_AddEvent( self, EV_FIRE_WEAPON, 0 );
   G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
-
-  // spin up
-  if( self->turretFireSpeedMod < 100 )
-  {
-    if( G_IsDCCBuilt( ) ) 
-    {
-      self->turretFireSpeedMod += ( MGTURRET_REPEAT_MOD_DIFF *
-                                    ( self->timestamp - level.time ) ) /
-                                  MGTURRET_DCC_SPINUP_TIME;
-    }
-    else
-    {
-      self->turretFireSpeedMod += ( MGTURRET_REPEAT_MOD_DIFF *
-                                    ( self->timestamp - level.time ) ) /
-                                  MGTURRET_SPINUP_TIME;
-    }
-  } else if( self->turretFireSpeedMod > 100 )
-  {
-    self->turretFireSpeedMod = 100;
-  }
-  
 }
 
 
