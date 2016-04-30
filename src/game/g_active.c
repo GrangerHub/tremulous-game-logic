@@ -1848,8 +1848,16 @@ void ClientThink( int clientNum )
 
 void G_RunClient( gentity_t *ent )
 {
-  if( !g_synchronousClients.integer && level.time - ent->client->lastCmdTime < 100 )
-    return;
+  if( !g_synchronousClients.integer )
+  {
+    if( level.time - ent->client->lastCmdTime > 250 )
+    {
+      trap_GetUsercmd( clientNum, &ent->client->pers.cmd );
+      ClientThink_real( ent );
+    }
+     return;
+  }
+
 
   ent->client->pers.cmd.serverTime = level.time;
   ClientThink_real( ent );
