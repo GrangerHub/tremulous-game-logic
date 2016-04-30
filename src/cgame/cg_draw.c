@@ -2657,8 +2657,9 @@ static void CG_DrawCrosshair( rectDef_t *rect, vec4_t color )
     if( cg_drawCrosshairImpactPredictor.integer && !( ( x == x2 ) &&
         ( y == y2) ) && BG_Weapon( weapon )->team == TEAM_HUMANS &&
         BG_Weapon( weapon )->impactPrediction[ 0 ].weaponMode &&
-        ( !( cg.predictedPlayerState.velocity[1] == 0 )||
-        !( cg.predictedPlayerState.velocity[2] == 0 ) ) )
+        ( !( cg.predictedPlayerState.velocity[1] == 0 ) ||
+        !( cg.predictedPlayerState.velocity[2] == 0 ) ) ||
+        !cg.predictedPlayerEntity.currentState.apos.trDelta )
     {
       trap_R_SetColor( color );
       CG_DrawPic( x2, y2, w, h, hShader );
@@ -2730,8 +2731,9 @@ static void CG_ScanForCrosshairEntity( void )
     {
       case TR_LINEAR :
         VectorScale( forward, speed, velocity );
-        BG_ModifyMissleLaunchVelocity( cg.predictedPlayerState.velocity, velocity,
-                                 BG_Weapon( weapon )->relativeMissileSpeed );
+        BG_ModifyMissleLaunchVelocity( cg.predictedPlayerEntity.currentState.pos.trDelta, 
+                                       cg.predictedPlayerEntity.currentState.apos.trDelta, velocity,
+                                       BG_Weapon( weapon )->relativeMissileSpeed );
         SnapVector( velocity );
         VectorScale( velocity, BG_Weapon( weapon )->impactPrediction[ num ].missileLifeTime, end );
         endCalculated = qtrue;
