@@ -377,10 +377,18 @@ typedef enum
   WP_ABUILD,
   WP_ABUILD2,
   WP_HBUILD,
+  WP_PORTAL_GUN,
   //ok?
 
   WP_NUM_WEAPONS
 } weapon_t;
+
+typedef enum
+{
+  PORTAL_BLUE,
+  PORTAL_RED,
+  PORTAL_NUM
+} portal_t;
 
 typedef enum
 {

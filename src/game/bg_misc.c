@@ -2462,6 +2462,33 @@ static const weaponAttributes_t bg_weapons[ ] =
     qtrue,                //qboolean  purchasable;
     qfalse,               //qboolean  longRanged;
     TEAM_HUMANS           //team_t    team;
+  },
+  {
+    WP_PORTAL_GUN,        //int       weaponNum;
+    PORTALGUN_PRICE,      //int       price;
+    ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),          //int  stages
+    SLOT_WEAPON,          //int       slots;
+    "portalgun",          //char      *weaponName;
+    "Portal Gun",         //char      *humanName;
+    "Teleporting technology scaled into a portable gun. Prmary fire creates "
+     "the blue portal, secondsary fire creates the orange portal. Third fire "
+     "clears both portals.",
+    0,                    //int       maxAmmo;
+    0,                    //int       maxClips;
+    qtrue,                //int       infiniteAmmo;
+    qfalse,               //int       usesEnergy;
+    PORTALGUN_REPEAT,     //int       repeatRate1;
+    PORTALGUN_REPEAT,     //int       repeatRate2;
+    PORTALGUN_REPEAT,     //int       repeatRate3;
+    0,                    //int       reloadTime;
+    0.0f,                 //float     knockbackScale;
+    qtrue,                //qboolean  hasAltMode;
+    qtrue,                //qboolean  hasThirdMode;
+    qfalse,               //qboolean  canZoom;
+    90.0f,                //float     zoomFov;
+    qtrue,                //qboolean  purchasable;
+    qtrue,                //qboolean  longRanged;
+    TEAM_HUMANS           //team_t    team;
   }
 };
 
