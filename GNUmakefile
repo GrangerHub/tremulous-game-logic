@@ -22,10 +22,6 @@ ifeq ($(COMPILE_PLATFORM),sunos)
   # Solaris uname and GNU uname differ
   COMPILE_ARCH=$(shell uname -p | sed -e s/i.86/x86/)
 endif
-ifeq ($(COMPILE_PLATFORM),darwin)
-  # Apple does some things a little differently...
-  COMPILE_ARCH=$(shell uname -p | sed -e s/i.86/x86/)
-endif
 
 #############################################################################
 #
@@ -480,6 +476,17 @@ ifeq ($(PLATFORM),darwin)
   endif
 
   BASE_CFLAGS += -fno-strict-aliasing -DMACOS_X -fno-common -pipe
+
+  # 
+  # FIXME: This is a workaround for broken OSX build. BASE_CFLAGS is either
+  # not setup correctly, or is being reset durring the build.
+  #
+  BASE_CFLAGS += -I$(SDLHDIR)/include \
+				 -I$(OPUSFILEDIR)/include \
+    			 -DOPUS_BUILD -DHAVE_LRINTF -DFLOATING_POINT -DUSE_ALLOCA \
+          		 -I$(OPUSDIR)/include -I$(OPUSDIR)/celt -I$(OPUSDIR)/silk \
+          		 -I$(OPUSDIR)/silk/float -I$(OPUSFILEDIR)/include
+
 
   ifeq ($(USE_OPENAL),1)
     CLIENT_CFLAGS += $(OPENAL_CFLAGS)
