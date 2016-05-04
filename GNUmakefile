@@ -2336,6 +2336,7 @@ GOBJ_ = \
   $(B)/game/g_namelog.o \
   $(B)/game/g_playmap.o \
   $(B)/game/g_playermodel.o \
+  $(B)/game/g_portal.o \
   \
   $(B)/qcommon/q_math.o \
   $(B)/qcommon/q_shared.o \

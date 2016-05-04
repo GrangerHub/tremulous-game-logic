@@ -311,6 +311,49 @@ static void CG_General( centity_t *cent )
 
 /*
 ==================
+CG_Teleportal
+==================
+*/
+static void CG_Teleportal( centity_t *cent )
+{
+  refEntity_t     ent;
+  entityState_t   *s1;
+
+  s1 = &cent->currentState;
+
+  // if set to invisible, skip
+  if( !s1->modelindex )
+    return;
+
+  memset( &ent, 0, sizeof( ent ) );
+
+  // set frame
+
+  ent.frame = s1->frame;
+  ent.oldframe = ent.frame;
+  ent.backlerp = 0;
+
+  VectorCopy( cent->lerpOrigin, ent.origin);
+  VectorCopy( cent->lerpOrigin, ent.oldorigin);
+
+  ent.hModel = cg_buildables[ s1->modelindex ].models[ 0 ];
+  ent.customShader = cgs.media.humanSpawningShader;
+  // XXX: Ok so these are actually backwards.
+  if ( s1->modelindex2 == PORTAL_BLUE )
+    ent.customShader = cgs.media.humanSpawningShader2;
+
+  // get axis
+  VectorCopy( s1->origin2, ent.axis[ 2 ] );
+  PerpendicularVector( ent.axis[ 1 ], ent.axis[ 2 ] );
+  VectorSubtract( vec3_origin, ent.axis[ 1 ], ent.axis[ 1 ] );
+  CrossProduct( ent.axis[ 2 ], ent.axis[ 1 ], ent.axis[ 0 ] );
+
+  // add to refresh list
+  trap_R_AddRefEntityToScene( &ent );
+}
+
+/*
+==================
 CG_Speaker
 
 Speaker entities can automatically play sounds
@@ -1153,6 +1196,10 @@ static void CG_AddCEntity( centity_t *cent )
 
     case ET_LEV2_ZAP_CHAIN:
       CG_Lev2ZapChain( cent );
+      break;
+
+    case ET_TELEPORTAL:
+      CG_Teleportal( cent );
       break;
   }
 }

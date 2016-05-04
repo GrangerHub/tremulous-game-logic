@@ -91,12 +91,12 @@ static void G_Portal_Touch(gentity_t *self, gentity_t *other, trace_t *trace)
 	G_UnlaggedClear(other);
 	if (dir[0] || dir[1])
     {
-		if (other->client->portaltime < level.time)
+		if (other->client->portalTime < level.time)
         {
 			vectoangles(dir, angles);
 			G_SetClientViewAngle(other, angles);
 		}
-		other->client->portaltime = level.time + 250;
+		other->client->portalTime = level.time + 250;
 	}
 	BG_PlayerStateToEntityState(&other->client->ps, &other->s, qtrue);
 	VectorCopy(other->client->ps.origin, other->r.currentOrigin);

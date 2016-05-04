@@ -1222,6 +1222,7 @@ typedef struct
   qhandle_t   greenBuildShader;
   qhandle_t   redBuildShader;
   qhandle_t   humanSpawningShader;
+  qhandle_t   humanSpawningShader2;
 
   qhandle_t   sphereModel;
   qhandle_t   sphericalCone64Model;

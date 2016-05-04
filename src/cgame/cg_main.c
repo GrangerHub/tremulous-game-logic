@@ -903,6 +903,7 @@ static void CG_RegisterGraphics( void )
   cgs.media.greenBuildShader          = trap_R_RegisterShader("gfx/misc/greenbuild" );
   cgs.media.redBuildShader            = trap_R_RegisterShader("gfx/misc/redbuild" );
   cgs.media.humanSpawningShader       = trap_R_RegisterShader("models/buildables/telenode/rep_cyl" );
+  cgs.media.humanSpawningShader2      = trap_R_RegisterShader("models/buildables/telenode/rep_cyl2" );
 
   for( i = 0; i < 8; i++ )
     cgs.media.buildWeaponTimerPie[ i ] = trap_R_RegisterShader( buildWeaponTimerPieShaders[ i ] );
