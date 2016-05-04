@@ -1321,7 +1321,8 @@ typedef enum {
 	TR_LINEAR_STOP,
 	TR_SINE,					// value = base + sin( time / duration ) * delta
 	TR_GRAVITY,
-	TR_BUOYANCY
+	TR_BUOYANCY,
+    TR_ACCEL
 } trType_t;
 
 typedef struct {
