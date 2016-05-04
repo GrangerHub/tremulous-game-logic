@@ -1200,6 +1200,7 @@ typedef struct
   qhandle_t   outlineShader;
 
   qhandle_t   level2ZapTS;
+  qhandle_t   massDriverTS;
 
   qhandle_t   balloonShader;
   qhandle_t   connectionShader;
@@ -1835,6 +1836,7 @@ void        CG_MissileHitWall( weapon_t weapon, weaponMode_t weaponMode, int cli
                                vec3_t origin, vec3_t dir, impactSound_t soundType, int charge );
 void        CG_MissileHitEntity( weapon_t weaponNum, weaponMode_t weaponMode,
                                  vec3_t origin, vec3_t dir, int entityNum, int charge );
+void        CG_MassDriverFire( entityState_t *es );
 void        CG_Bullet( vec3_t origin, int sourceEntityNum, vec3_t normal, qboolean flesh, int fleshEntityNum );
 void        CG_ShotgunFire( entityState_t *es );
 

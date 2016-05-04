@@ -875,6 +875,12 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       CG_ShotgunFire( es );
       break;
 
+    case EV_MASS_DRIVER:
+      ByteToDir( es->eventParm, dir );
+      CG_MissileHitWall( es->weapon, es->generic1, 0, position, dir, IMPACTSOUND_DEFAULT, 0 );
+      CG_MassDriverFire( es );
+      break;
+
     case EV_GENERAL_SOUND:
       if( cgs.gameSounds[ es->eventParm ] )
         trap_S_StartSound( NULL, es->number, CHAN_VOICE, cgs.gameSounds[ es->eventParm ] );
