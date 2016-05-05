@@ -370,7 +370,7 @@ static cvarTable_t cvarTable[ ] =
   // but we also reference them here
 
   { &cg_paused, "cl_paused", "0", CVAR_ROM },
-  { &cg_blood, "com_blood", "1", CVAR_ARCHIVE },
+  { &cg_blood, "cg_blood", "0", CVAR_ARCHIVE },
   { &cg_synchronousClients, "g_synchronousClients", "0", 0 }, // communicated by systeminfo
   { &cg_timescaleFadeEnd, "cg_timescaleFadeEnd", "1", CVAR_CHEAT },
   { &cg_timescaleFadeSpeed, "cg_timescaleFadeSpeed", "0", CVAR_CHEAT },
@@ -947,6 +947,8 @@ static void CG_RegisterGraphics( void )
 
   cgs.media.alienBleedPS              = CG_RegisterParticleSystem( "alienBleedPS" );
   cgs.media.humanBleedPS              = CG_RegisterParticleSystem( "humanBleedPS" );
+
+  cgs.media.humanGibPS              = CG_RegisterParticleSystem( "humanPlayerGibsPS" );
 
   cgs.media.sphereModel               = trap_R_RegisterModel( "models/generic/sphere" );
   cgs.media.sphericalCone64Model      = trap_R_RegisterModel( "models/generic/sphericalCone64" );

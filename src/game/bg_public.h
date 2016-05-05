@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define GAME_VERSION            "base"
 
 #define DEFAULT_GRAVITY         800
+#define GIB_HEALTH              -40
 
 #define VOTE_TIME               30000 // 30 seconds before vote times out
 
@@ -1207,7 +1208,7 @@ qboolean                    BG_UpgradeAllowedInStage( upgrade_t upgrade,
 #define MASK_ASTRALSOLID  (CONTENTS_SOLID|CONTENTS_PLAYERCLIP|CONTENTS_ASTRAL_NOCLIP)
 #define MASK_WATER        (CONTENTS_WATER|CONTENTS_LAVA|CONTENTS_SLIME)
 #define MASK_OPAQUE       (CONTENTS_SOLID|CONTENTS_SLIME|CONTENTS_LAVA)
-#define MASK_SHOT         (CONTENTS_SOLID|CONTENTS_BODY)
+#define MASK_SHOT         (CONTENTS_SOLID|CONTENTS_BODY|CONTENTS_CORPSE)
 
 
 //

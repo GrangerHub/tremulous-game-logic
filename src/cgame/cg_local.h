@@ -1318,11 +1318,13 @@ typedef struct
   qhandle_t   alienBuildableDamagedPS;
   qhandle_t   alienBuildableDestroyedPS;
 
-  qhandle_t   alienBleedPS;
-  qhandle_t   humanBleedPS;
   qhandle_t   alienBuildableBleedPS;
   qhandle_t   humanBuildableBleedPS;
 
+  qhandle_t   alienBleedPS;
+  qhandle_t   humanBleedPS;
+
+  qhandle_t   humanGibPS;
 
   qhandle_t   teslaZapTS;
 
@@ -1735,6 +1737,7 @@ void        CG_PrecacheClientInfo( class_t class, char *model, char *skin );
 sfxHandle_t CG_CustomSound( int clientNum, const char *soundName );
 void        CG_PlayerDisconnect( vec3_t org );
 void        CG_Bleed( vec3_t origin, vec3_t normal, int entityNum );
+void        CG_GibPlayer( vec3_t origin, vec3_t dir );
 centity_t   *CG_GetPlayerLocation( void );
 
 //

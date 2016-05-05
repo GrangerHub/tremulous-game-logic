@@ -872,7 +872,8 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       break;
 
     case EV_GIB_PLAYER:
-      // no gibbing
+      ByteToDir( es->eventParm, dir );
+      CG_GibPlayer( position, dir );
       break;
 
     case EV_STOPLOOPINGSOUND:
