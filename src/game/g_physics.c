@@ -62,7 +62,7 @@ static void G_Bounce( gentity_t *ent, trace_t *trace )
   else
     VectorScale( ent->s.pos.trDelta, 0.3f, ent->s.pos.trDelta );
 
-  if( VectorLength( ent->s.pos.trDelta ) < 10 )
+  if( VectorLength( ent->s.pos.trDelta ) < 10 || ent->s.eType == ET_BUILDABLE )
   {
     G_SetOrigin( ent, trace->endpos );
     ent->s.groundEntityNum = trace->entityNum;
