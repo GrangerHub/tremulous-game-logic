@@ -94,6 +94,7 @@ char *modNames[ ] =
   "MOD_SLIME",
   "MOD_LAVA",
   "MOD_CRUSH",
+  "MOD_DROP",
   "MOD_TELEFRAG",
   "MOD_FALLING",
   "MOD_SUICIDE",
