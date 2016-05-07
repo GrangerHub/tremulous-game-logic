@@ -201,6 +201,7 @@ struct gentity_s
   int               time1000;           // timer evaluated every second
   qboolean          deconstruct;        // deconstruct if no BP left
   int               deconstructTime;    // time at which structure marked
+  int               markDeconstructor;  // number of the builder that marked the deconstructed buildable
   int               overmindAttackTimer;
   int               overmindDyingTimer;
   int               overmindSpawnsTimer;
@@ -238,7 +239,11 @@ struct gentity_s
 
   qboolean          pointAgainstWorld;              // don't use the bbox for map collisions
 
-  qboolean          damageDroppedBuildable;          // for buildables stacking
+  // variables for buildable stacking
+  qboolean          damageDroppedBuildable;
+  int               dropperNum;
+  int               buildableStack[ MAX_GENTITIES ];
+  int               numOfStackedBuildables;
 
   int               buildPointZone;                 // index for zone
   int               usesBuildPointZone;             // does it use a zone?
@@ -812,6 +817,11 @@ int               G_FindDCC( gentity_t *self );
 gentity_t         *G_Reactor( void );
 gentity_t         *G_Overmind( void );
 qboolean          G_FindCreep( gentity_t *self );
+
+qboolean G_FindBuildableInStack( int groundBuildableNum, int stackedBuildableNum, int *index );
+void G_AddBuildableToStack( int groundBuildableNum, int stackedBuildableNum );
+void G_RemoveBuildableFromStack( int groundBuildableNum, int stackedBuildableNum );
+void G_SetBuildableDropper( int removedBuildableNum, int dropperNum );
 
 void              G_BuildableThink( gentity_t *ent, int msec );
 qboolean          G_BuildableRange( vec3_t origin, float r, buildable_t buildable );
