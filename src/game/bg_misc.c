@@ -104,7 +104,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     ASPAWN_VALUE,          //int       value;
-    qtrue,                //qboolean  stackable;
+    qfalse,                //qboolean  stackable;
   },
   {
     BA_A_OVERMIND,         //int       number;
@@ -356,7 +356,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     HSPAWN_VALUE,          //int       value;
-    qtrue,                 //qboolean  stackable;
+    qfalse,                //qboolean  stackable;
   },
   {
     BA_H_MGTURRET,         //int       number;
