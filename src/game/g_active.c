@@ -749,7 +749,8 @@ void ClientTimerActions( gentity_t *ent, int msec )
     else if( client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
       level.surrenderTeam == TEAM_HUMANS )
     {
-      G_Damage( ent, NULL, NULL, NULL, NULL, 5, DAMAGE_NO_ARMOR, MOD_SUICIDE );
+      G_Damage( ent, NULL, NULL, NULL, NULL, 5,
+              DAMAGE_NO_ARMOR, MOD_SUICIDE );
     }
 
     // lose some voice enthusiasm
