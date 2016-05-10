@@ -4204,7 +4204,7 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
       if( tempent == NULL ) // No reactor
         reason = IBE_RPTNOREAC;   
       else if( !IS_WARMUP && g_markDeconstruct.integer && g_markDeconstruct.integer != 3 &&
-               powerBuildable->s.modelindex == BA_H_REACTOR )
+               powerBuildable && powerBuildable->s.modelindex == BA_H_REACTOR )
         reason = IBE_RPTPOWERHERE;
       else if( powerBuildable &&
                ( IS_WARMUP || !g_markDeconstruct.integer || ( g_markDeconstruct.integer == 3 &&
