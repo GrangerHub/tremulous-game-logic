@@ -1040,6 +1040,10 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       CG_Level2Zap( es );
       break;
 
+    case EV_FIGHT:
+      trap_S_StartLocalSound( cgs.media.fightSound, CHAN_LOCAL_SOUND );
+      break;
+
     default:
       CG_Error( "Unknown event: %i", event );
       break;

@@ -898,6 +898,23 @@ void Q_strcat( char *dest, int size, const char *src ) {
 	Q_strncpyz( dest + l1, src, size - l1 );
 }
 
+void Q_cleanDelimitedString( char *dest, const char *src )
+{
+  for( ; *src; ++src )
+  {
+    if( *src != STRING_DELIMITER )
+      *dest = *src;
+    else
+      *dest = ' ';
+
+    ++dest;
+  }
+
+  *dest = 0;
+
+  return;
+}
+
 /*
 * Find the first occurrence of find in s.
 */
