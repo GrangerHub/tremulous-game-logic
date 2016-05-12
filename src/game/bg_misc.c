@@ -2960,7 +2960,9 @@ char *eventnames[ ] =
   "EV_LEV2_ZAP",
 
   "EV_JETPACK_DEACTIVATE",
-  "EV_JETPACK_REFUEL"
+  "EV_JETPACK_REFUEL",
+
+  "EV_FIGHT"
 };
 
 /*

@@ -3059,7 +3059,8 @@ void CG_OwnerDraw( float x, float y, float w, float h, float text_x,
       break;
 
     case CG_TUTORIAL:
-      CG_DrawTutorial( &rect, text_x, text_y, foreColor, scale, textalign, textvalign, textStyle );
+      if( !( cgs.voteTime[ TEAM_NONE ] || cgs.voteTime[ cg.predictedPlayerState.stats[ STAT_TEAM ] ] ) )
+        CG_DrawTutorial( &rect, text_x, text_y, foreColor, scale, textalign, textvalign, textStyle );
       break;
 
     // Warmup stuff
@@ -3347,6 +3348,13 @@ static void CG_DrawVote( team_t team )
   if( !cgs.voteTime[ team ] )
     return;
 
+    if( cgs.voteAlarmPlay[ team ] )
+  {
+    cgs.voteAlarmPlay[ team ] = qfalse;
+    cgs.voteModified[ team ] = qfalse;
+    trap_S_StartLocalSound( cgs.media.voteAlarmSound, CHAN_LOCAL_SOUND );
+  }
+
   // play a talk beep whenever it is modified
   if( cgs.voteModified[ team ] )
   {
@@ -3359,33 +3367,48 @@ static void CG_DrawVote( team_t team )
   if( sec < 0 )
     sec = 0;
 
-  if( cg_tutorial.integer )
-  {
-    Com_sprintf( yeskey, sizeof( yeskey ), "[%s]", 
-      CG_KeyBinding( va( "%svote yes", team == TEAM_NONE ? "" : "team" ) ) );
-    Com_sprintf( nokey, sizeof( nokey ), "[%s]", 
-      CG_KeyBinding( va( "%svote no", team == TEAM_NONE ? "" : "team" ) ) );
-  }
+
+  Com_sprintf( yeskey, sizeof( yeskey ), "[%s]", 
+    CG_KeyBinding( va( "%svote yes", team == TEAM_NONE ? "" : "team" ) ) );
+  Com_sprintf( nokey, sizeof( nokey ), "[%s]", 
+    CG_KeyBinding( va( "%svote no", team == TEAM_NONE ? "" : "team" ) ) );
 
   if( team != TEAM_NONE )
-    offset = 80;
+    offset = ( ( cgs.voteTime[ TEAM_NONE ] ? -65 : 0 ) - 
+               ( Q_PrintStrlen( cgs.voteString[ VOTE_EXTRA_STRING ][ TEAM_NONE ] ) ? 20 : 0  ) );
 
-  s = va( "%sVOTE(%i): %s", 
-    team == TEAM_NONE ? "" : "TEAM", sec, cgs.voteString[ team ] );
+  s = va( "^5[granger]%sVOTE: %s ^4|^5%s%s%i^5", team == TEAM_NONE ? "" : "^6TEAM^5",
+          cgs.voteString[ VOTE_DESCRIPTION_STRING ][ team ],
+          ( ( sec > 10 ) ? " " : "  " ), ( ( sec > 7 ) ? "^3" : "^1" ) , sec );
 
-  UI_Text_Paint( 8, 300 + offset, 0.3f, white, s, 0, 0,
-    ITEM_TEXTSTYLE_NORMAL );
+  UI_Text_Paint( 8, ( ( 335 + offset ) - ( Q_PrintStrlen( cgs.voteString[ VOTE_EXTRA_STRING ][ team ] ) ? 20 : 0  ) ),
+                    0.42f, white, s, 0, 0, ITEM_TEXTSTYLE_SHADOWED );
 
-  s = va( "  Called by: \"%s\"", cgs.voteCaller[ team ] );
+  if( Q_PrintStrlen( cgs.voteString[ VOTE_EXTRA_STRING ][ team ] ) )
+  {
+    s = va( "^5  \"%s\"", cgs.voteString[ VOTE_EXTRA_STRING ][ team ] );
 
-  UI_Text_Paint( 8, 320 + offset, 0.3f, white, s, 0, 0,
-    ITEM_TEXTSTYLE_NORMAL );
+    UI_Text_Paint( 8, 335 + offset, 0.3f, white, s, 0, 0, ITEM_TEXTSTYLE_SHADOWED );
 
-  s = va( "  %sYes:%i %sNo:%i",
-    yeskey, cgs.voteYes[ team ], nokey, cgs.voteNo[ team ] );
+  }
 
-  UI_Text_Paint( 8, 340 + offset, 0.3f, white, s, 0, 0,
-    ITEM_TEXTSTYLE_NORMAL );
+  s = va( "^5  Called by: \"%s\"", cgs.voteCaller[ team ] );
+
+  UI_Text_Paint( 8, 355 + offset, 0.3f, white, s, 0, 0, ITEM_TEXTSTYLE_SHADOWED );
+
+  if( cgs.voteActive[ team ] < 0 )
+  {
+    s = va( "^5  %i total vote%s(press ^2%s^5 to vote ^2yes^5, or press ^1%s^5 to vote ^1no^5)",
+            cgs.voteCast[ team ], ( ( cgs.voteCast[ team ] == 1 ) ? " " : "s " ), yeskey, nokey );
+  }
+  else
+  {
+    s = va( "^5  %i total vote%sout of %i active player%s(press ^2%s^5 to vote ^2yes^5, or press ^1%s^5 to vote ^1no^5)",
+            cgs.voteCast[ team ], ( ( cgs.voteCast[ team ] == 1 ) ? " " : "s " ),
+            cgs.voteActive[ team ], ( ( cgs.voteActive[ team ] == 1 ) ? " " : "s " ), yeskey, nokey );
+  }
+
+  UI_Text_Paint( 8, 375 + offset, 0.3f, white, s, 0, 0, ITEM_TEXTSTYLE_SHADOWED );
 }
 
 
@@ -3526,7 +3549,9 @@ static void CG_DrawCountdown( void )
   char   text[ MAX_STRING_CHARS ] = "Countdown to Battle:";
 
   if( !cg.countdownTime )
+  {
     return;
+  }
 
   sec = ( cg.countdownTime - cg.time ) / 1000;
 
@@ -3537,7 +3562,7 @@ static void CG_DrawCountdown( void )
   h = UI_Text_Height( text, size );
   UI_Text_Paint( 320 - w / 2, 200, size, colorWhite, text, 0, 0, ITEM_TEXTSTYLE_SHADOWED );
 
-  Com_sprintf( text, sizeof( text ), "%s", sec ? va( "%d", sec ) : "DESTROY THE ENEMY!" );
+  Com_sprintf( text, sizeof( text ), "%s", sec ? va( "%d", sec ) : "DESTROY THE ENEMY!" );    
 
   w = UI_Text_Width( text, size );
   UI_Text_Paint( 320 - w / 2, 200 + 1.5f * h, size, colorWhite, text, 0, 0, ITEM_TEXTSTYLE_SHADOWED );

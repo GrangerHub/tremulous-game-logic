@@ -530,23 +530,62 @@ qboolean ClientInactivityTimer( gentity_t *ent )
   }
   else if( !client->pers.localClient )
   {
-    if( level.time > client->inactivityTime &&
-        !G_admin_permission( ent, ADMF_ACTIVITY ) )
+    if( level.time > client->inactivityTime - 10000 )
     {
-      trap_DropClient( client - level.clients, "Dropped due to inactivity" );
-      return qfalse;
-    }
-
-    if( level.time > client->inactivityTime - 10000 &&
-        !client->inactivityWarning &&
-        !G_admin_permission( ent, ADMF_ACTIVITY ) )
-    {
-      client->inactivityWarning = qtrue;
-      trap_SendServerCommand( client - level.clients, "cp \"Ten seconds until inactivity drop!\n\"" );
+      if( level.time > client->inactivityTime )
+      {
+        if( G_admin_permission( ent, ADMF_ACTIVITY ) )
+        {
+          client->inactivityTime = level.time + g_inactivity.integer * 1000;
+          return qtrue;
+        }
+        {
+          trap_SendServerCommand( -1,
+                                  va( "print \"%s^7 moved from %s to spectators due to inactivity\n\"",
+                                      client->pers.netname,
+                                      BG_TeamName( client->pers.teamSelection ) ) );
+          G_LogPrintf( "Inactivity: %d", (int)(client - level.clients) );
+          G_ChangeTeam( ent, TEAM_NONE );
+        }
+      
+        return qfalse;
+      }
+      else if( !client->inactivityWarning )
+      {
+        client->inactivityWarning = qtrue;
+        if( !G_admin_permission( ent, ADMF_ACTIVITY ) )
+          trap_SendServerCommand( client - level.clients,
+                                  va( "cp \"Ten seconds until inactivity %s!\n\"",
+                                      "spectate" ) );
+      }
     }
   }
 
   return qtrue;
+}
+
+/*
+=================
+VoterInactivityTimer
+
+This is used for implied voting
+=================
+*/
+void VoterInactivityTimer( gentity_t *ent )
+{
+  gclient_t *client = ent->client;
+
+  if( client->pers.connected != CON_CONNECTED )
+    client->voterInactivityTime = level.time - 2000;
+  else if( client->pers.cmd.forwardmove ||
+      client->pers.cmd.rightmove ||
+      client->pers.cmd.upmove ||
+      ( client->pers.cmd.buttons & BUTTON_ATTACK ) )
+  {
+    client->voterInactivityTime = level.time + ( VOTE_TIME );
+  }
+
+  return;
 }
 
 /*
@@ -1259,6 +1298,8 @@ void ClientThink_real( gentity_t *ent )
 
   client = ent->client;
 
+  VoterInactivityTimer( ent );
+
   // don't think if the client is not yet connected (and thus not yet spawned in)
   if( client->pers.connected != CON_CONNECTED )
     return;
@@ -1845,6 +1886,12 @@ void ClientThink( int clientNum )
 
 void G_RunClient( gentity_t *ent )
 {
+  if( level.fight && ( ( g_doWarmup.integer && !g_doCountdown.integer ) ||
+      level.countdownTime <= ( level.time + 1000 ) ) )
+  {
+    G_AddPredictableEvent( ent, EV_FIGHT, 0 );
+  }
+
   if( !g_synchronousClients.integer )
   {
     if( level.time - ent->client->lastCmdTime > 250 )
@@ -1904,7 +1951,7 @@ void SpectatorClientEndFrame( gentity_t *ent )
 ClientEndFrame
 
 Called at the end of each server frame for each connected client
-A fast client will have multiple ClientThink for each ClientEdFrame,
+A fast client will have multiple ClientThink for each ClientEndFrame,
 while a slow client may have multiple ClientEndFrame between ClientThink.
 ==============
 */
