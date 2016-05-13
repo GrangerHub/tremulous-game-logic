@@ -166,9 +166,10 @@ typedef enum
 
 typedef struct
 {
-  int   pouncePayload;
-  int   repairRepeatDelay;      // Used for for the construction kit
-  float fallVelocity;
+  int    pouncePayload;
+  int    repairRepeatDelay;      // Used for for the construction kit
+  float  fallVelocity;
+  vec3_t angularVelocity;
 } pmoveExt_t;
 
 #define MAXTOUCH  32

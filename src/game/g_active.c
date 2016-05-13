@@ -523,7 +523,12 @@ qboolean ClientInactivityTimer( gentity_t *ent )
   else if( client->pers.cmd.forwardmove ||
            client->pers.cmd.rightmove ||
            client->pers.cmd.upmove ||
-           ( client->pers.cmd.buttons & BUTTON_ATTACK ) )
+           ( client->pers.cmd.buttons & BUTTON_ATTACK ) ||
+           client->pmext.angularVelocity[0] ||
+           client->pmext.angularVelocity[1] ||
+           client->pmext.angularVelocity[2] ||
+           G_SearchSpawnQueue( &level.alienSpawnQueue, ent-g_entities ) ||
+           G_SearchSpawnQueue( &level.humanSpawnQueue, ent-g_entities ) )
   {
     client->inactivityTime = level.time + g_inactivity.integer * 1000;
     client->inactivityWarning = qfalse;
@@ -580,7 +585,12 @@ void VoterInactivityTimer( gentity_t *ent )
   else if( client->pers.cmd.forwardmove ||
       client->pers.cmd.rightmove ||
       client->pers.cmd.upmove ||
-      ( client->pers.cmd.buttons & BUTTON_ATTACK ) )
+      ( client->pers.cmd.buttons & BUTTON_ATTACK ) ||
+      client->pmext.angularVelocity[0] ||
+      client->pmext.angularVelocity[1] ||
+      client->pmext.angularVelocity[2] ||
+      G_SearchSpawnQueue( &level.alienSpawnQueue, ent-g_entities ) ||
+      G_SearchSpawnQueue( &level.humanSpawnQueue, ent-g_entities ) )
   {
     client->voterInactivityTime = level.time + ( VOTE_TIME );
   }
@@ -1330,6 +1340,11 @@ void ClientThink_real( gentity_t *ent )
     ClientIntermissionThink( client );
     return;
   }
+
+  // check for inactivity timer, but never drop the local client of a non-dedicated server
+  if( ( client->pers.teamSelection != TEAM_NONE ) &&
+      !ClientInactivityTimer( ent ) )
+    return;
 
   // spectators don't do much
   if( client->sess.spectatorState != SPECTATOR_NOT )
