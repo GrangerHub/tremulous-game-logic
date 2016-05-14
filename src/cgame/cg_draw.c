@@ -2599,6 +2599,7 @@ static void CG_DrawCrosshair( rectDef_t *rect, vec4_t color )
   float         x, y, x2, y2;
   weaponInfo_t  *wi;
   weapon_t      weapon;
+  vec3_t        right, up;
   vec4_t        color2;
 
   weapon = BG_GetPlayerWeapon( &cg.snap->ps );
@@ -2654,13 +2655,15 @@ static void CG_DrawCrosshair( rectDef_t *rect, vec4_t color )
 
   if( hShader != 0 )
   {
+    AngleVectors( cg.predictedPlayerState.viewangles, NULL, right, up );
+
     if( cg_drawCrosshairImpactPredictor.integer && !( ( x == x2 ) &&
         ( y == y2) ) && BG_Weapon( weapon )->team == TEAM_HUMANS &&
         BG_Weapon( weapon )->impactPrediction[ 0 ].weaponMode &&
-        (( cg.predictedPlayerState.velocity[1] != 0 ) ||
-         ( cg.predictedPlayerState.velocity[2] != 0 ) ) ||
-         ( cg.pmext.angularVelocity[1] != 0 ) ||
-         ( cg.pmext.angularVelocity[2] != 0 ) )
+        ( DotProduct( cg.predictedPlayerState.velocity, right ) ||
+          DotProduct( cg.predictedPlayerState.velocity, up ) ||
+          DotProduct( cg.pmext.angularVelocity, right ) ||
+          DotProduct( cg.pmext.angularVelocity, up ) ) )
     {
       trap_R_SetColor( color );
       CG_DrawPic( x2, y2, w, h, hShader );
