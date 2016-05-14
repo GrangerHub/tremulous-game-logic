@@ -413,8 +413,10 @@ gentity_t *fire_blaster( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;   // move a bit on the very first frame
   VectorCopy( start, bolt->s.pos.trBase );
   VectorScale( dir, BLASTER_SPEED, bolt->s.pos.trDelta );
-  BG_ModifyMissleLaunchVelocity( self->s.pos.trDelta, self->client->pmext.angularVelocity, bolt->s.pos.trDelta,
-                                 BG_Weapon( bolt->s.weapon )->relativeMissileSpeed );
+
+  if( self->client )
+    BG_ModifyMissleLaunchVelocity( self->s.pos.trDelta, self->client->pmext.angularVelocity, bolt->s.pos.trDelta,
+                                   BG_Weapon( bolt->s.weapon )->relativeMissileSpeed );
   SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
 
   VectorCopy( start, bolt->r.currentOrigin );
@@ -460,8 +462,10 @@ gentity_t *fire_pulseRifle( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;   // move a bit on the very first frame
   VectorCopy( start, bolt->s.pos.trBase );
   VectorScale( dir, PRIFLE_SPEED, bolt->s.pos.trDelta );
-  BG_ModifyMissleLaunchVelocity( self->s.pos.trDelta, self->client->pmext.angularVelocity, bolt->s.pos.trDelta,
-                                 BG_Weapon( bolt->s.weapon )->relativeMissileSpeed );
+
+  if( self->client )
+    BG_ModifyMissleLaunchVelocity( self->s.pos.trDelta, self->client->pmext.angularVelocity, bolt->s.pos.trDelta,
+                                   BG_Weapon( bolt->s.weapon )->relativeMissileSpeed );
   SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
 
   VectorCopy( start, bolt->r.currentOrigin );
@@ -524,8 +528,10 @@ gentity_t *fire_luciferCannon( gentity_t *self, vec3_t start, vec3_t dir,
   bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;   // move a bit on the very first frame
   VectorCopy( start, bolt->s.pos.trBase );
   VectorScale( dir, speed, bolt->s.pos.trDelta );
-  BG_ModifyMissleLaunchVelocity( self->s.pos.trDelta, self->client->pmext.angularVelocity, bolt->s.pos.trDelta,
-                                 BG_Weapon( bolt->s.weapon )->relativeMissileSpeed );
+
+  if( self->client )
+    BG_ModifyMissleLaunchVelocity( self->s.pos.trDelta, self->client->pmext.angularVelocity, bolt->s.pos.trDelta,
+                                   BG_Weapon( bolt->s.weapon )->relativeMissileSpeed );
   SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
 
   VectorCopy( start, bolt->r.currentOrigin );
@@ -571,8 +577,10 @@ gentity_t *launch_grenade( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;   // move a bit on the very first frame
   VectorCopy( start, bolt->s.pos.trBase );
   VectorScale( dir, GRENADE_SPEED, bolt->s.pos.trDelta );
-  BG_ModifyMissleLaunchVelocity( self->s.pos.trDelta, self->client->pmext.angularVelocity, bolt->s.pos.trDelta,
-                                 BG_Weapon( bolt->s.weapon )->relativeMissileSpeed );
+
+  if( self->client )
+    BG_ModifyMissleLaunchVelocity( self->s.pos.trDelta, self->client->pmext.angularVelocity, bolt->s.pos.trDelta,
+                                   BG_Weapon( bolt->s.weapon )->relativeMissileSpeed );
   SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
 
   VectorCopy( start, bolt->r.currentOrigin );
@@ -815,8 +823,10 @@ gentity_t *fire_lockblob( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;   // move a bit on the very first frame
   VectorCopy( start, bolt->s.pos.trBase );
   VectorScale( dir, LOCKBLOB_SPEED, bolt->s.pos.trDelta );
-  BG_ModifyMissleLaunchVelocity( self->s.pos.trDelta, self->client->pmext.angularVelocity, bolt->s.pos.trDelta,
-                                 BG_Weapon( bolt->s.weapon )->relativeMissileSpeed );
+
+  if( self->client )
+    BG_ModifyMissleLaunchVelocity( self->s.pos.trDelta, self->client->pmext.angularVelocity, bolt->s.pos.trDelta,
+                                   BG_Weapon( bolt->s.weapon )->relativeMissileSpeed );
   SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
   VectorCopy( start, bolt->r.currentOrigin );
 
@@ -856,8 +866,10 @@ gentity_t *fire_slowBlob( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;   // move a bit on the very first frame
   VectorCopy( start, bolt->s.pos.trBase );
   VectorScale( dir, ABUILDER_BLOB_SPEED, bolt->s.pos.trDelta );
-  BG_ModifyMissleLaunchVelocity( self->s.pos.trDelta, self->client->pmext.angularVelocity, bolt->s.pos.trDelta,
-                                 BG_Weapon( bolt->s.weapon )->relativeMissileSpeed );
+
+  if( self->client )
+    BG_ModifyMissleLaunchVelocity( self->s.pos.trDelta, self->client->pmext.angularVelocity, bolt->s.pos.trDelta,
+                                   BG_Weapon( bolt->s.weapon )->relativeMissileSpeed );
   SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
   VectorCopy( start, bolt->r.currentOrigin );
 
@@ -895,8 +907,10 @@ gentity_t *fire_paraLockBlob( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;   // move a bit on the very first frame
   VectorCopy( start, bolt->s.pos.trBase );
   VectorScale( dir, LOCKBLOB_SPEED, bolt->s.pos.trDelta );
-  BG_ModifyMissleLaunchVelocity( self->s.pos.trDelta, self->client->pmext.angularVelocity, bolt->s.pos.trDelta,
-                                 BG_Weapon( bolt->s.weapon )->relativeMissileSpeed );
+
+  if( self->client )
+    BG_ModifyMissleLaunchVelocity( self->s.pos.trDelta, self->client->pmext.angularVelocity, bolt->s.pos.trDelta,
+                                   BG_Weapon( bolt->s.weapon )->relativeMissileSpeed );
   SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
   VectorCopy( start, bolt->r.currentOrigin );
 
@@ -936,8 +950,10 @@ gentity_t *fire_bounceBall( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;   // move a bit on the very first frame
   VectorCopy( start, bolt->s.pos.trBase );
   VectorScale( dir, LEVEL3_BOUNCEBALL_SPEED, bolt->s.pos.trDelta );
-  BG_ModifyMissleLaunchVelocity( self->s.pos.trDelta, self->client->pmext.angularVelocity, bolt->s.pos.trDelta,
-                                 BG_Weapon( bolt->s.weapon )->relativeMissileSpeed );
+
+  if( self->client )
+    BG_ModifyMissleLaunchVelocity( self->s.pos.trDelta, self->client->pmext.angularVelocity, bolt->s.pos.trDelta,
+                                   BG_Weapon( bolt->s.weapon )->relativeMissileSpeed );
   SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
   VectorCopy( start, bolt->r.currentOrigin );
 
