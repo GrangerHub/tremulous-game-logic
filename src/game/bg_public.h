@@ -169,6 +169,10 @@ typedef struct
   int    pouncePayload;
   int    repairRepeatDelay;      // Used for for the construction kit
   float  fallVelocity;
+  int    updateAnglesTime;
+  float  diffAnglesPeriod;
+  vec3_t previousFrameAngles;
+  vec3_t previousUpdateAngles;
   vec3_t angularVelocity;
 } pmoveExt_t;
 
@@ -214,6 +218,7 @@ typedef struct pmove_s
 
 // if a full pmove isn't done on the client, you can just update the angles
 void PM_UpdateViewAngles( playerState_t *ps, const usercmd_t *cmd );
+void PM_CalculateAngularVelocity( playerState_t *ps, const usercmd_t *cmd );
 void Pmove( pmove_t *pmove );
 
 //===================================================================================
