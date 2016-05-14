@@ -3509,12 +3509,6 @@ void BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s, qboolean 
   VectorCopy( ps->velocity, s->pos.trDelta );
 
   s->apos.trType = TR_INTERPOLATE;
-  for( i = 0; i < 3; i++ )
-  {
-    s->apos.trDelta[ i ] = ( M_PI / 180.0 ) *
-                           ( AngleDelta ( ps->viewangles[ i ], s->apos.trBase[ i ] ) / 
-                             20.0 );
-  }
   VectorCopy( ps->viewangles, s->apos.trBase );
 
   if( snap )
@@ -3625,12 +3619,6 @@ void BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s
   s->pos.trDuration = 50; // 1000 / sv_fps (default = 20)
 
   s->apos.trType = TR_INTERPOLATE;
-  for( i = 0; i < 3; i++ )
-  {
-    s->apos.trDelta[ i ] = ( M_PI / 180.0 ) *
-                           ( AngleDelta ( ps->viewangles[ i ], s->apos.trBase[ i ] ) / 
-                             20.0 );
-  }
   VectorCopy( ps->viewangles, s->apos.trBase );
   if( snap )
     SnapVector( s->apos.trBase );
