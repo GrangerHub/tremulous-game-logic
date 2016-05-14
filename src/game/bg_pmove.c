@@ -3551,6 +3551,12 @@ void PM_UpdateViewAngles( playerState_t *ps, const usercmd_t *cmd )
       tempang[ i ] += 360.0f;
   }
 
+  // calculate the angular velocity
+  for( i = 0; i < 3; i++ )
+    pm->pmext->angularVelocity[i] = ( M_PI / 180.0 ) *
+                                   ( AngleDelta ( tempang[ i ], ps->viewangles[ i ] ) / 
+                                     pml.msec );
+
   //actually set the viewangles
   for( i = 0; i < 3; i++ )
     ps->viewangles[ i ] = tempang[ i ];

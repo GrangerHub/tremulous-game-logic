@@ -169,6 +169,7 @@ typedef struct
   int   pouncePayload;
   int   repairRepeatDelay;      // Used for for the construction kit
   float fallVelocity;
+  vec3_t angularVelocity;
   float luciAmmoReduction;
 } pmoveExt_t;
 
