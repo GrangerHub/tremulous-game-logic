@@ -1773,17 +1773,22 @@ ATrapper_FireOnEnemy
 Used by ATrapper_Think to fire at enemy
 ================
 */
-void ATrapper_FireOnEnemy( gentity_t *self, int firespeed, float range )
+static void ATrapper_FireOnEnemy( gentity_t *self, int firespeed )
 {
   gentity_t *enemy = self->enemy;
-  vec3_t    dirToTarget;
+  vec3_t    dirToTarget, bestDirToTarget;
   vec3_t    halfAcceleration, thirdJerk;
   float     distanceToTarget = BG_Buildable( self->s.modelindex )->turretRange;
+  float     bestDistanceToTarget;
+  int       i = 0;
   int       lowMsec = 0;
   int       highMsec = (int)( (
     ( ( distanceToTarget * LOCKBLOB_SPEED ) +
       ( distanceToTarget * BG_Class( enemy->client->ps.stats[ STAT_CLASS ] )->speed ) ) /
     ( LOCKBLOB_SPEED * LOCKBLOB_SPEED ) ) * 1000.0f );
+
+  VectorSubtract( enemy->s.pos.trBase, self->s.pos.trBase, bestDirToTarget );
+  bestDistanceToTarget = VectorLength( bestDirToTarget );
 
   VectorScale( enemy->acceleration, 1.0f / 2.0f, halfAcceleration );
   VectorScale( enemy->jerk, 1.0f / 3.0f, thirdJerk );
@@ -1808,6 +1813,18 @@ void ATrapper_FireOnEnemy( gentity_t *self, int firespeed, float range )
       highMsec = partitionMsec;
     else if( projectileDistance == distanceToTarget )
       break; // unlikely to happen
+
+    if( Q_fabs( projectileDistance - distanceToTarget ) < Q_fabs( projectileDistance - bestDistanceToTarget ) )
+    {
+      VectorCopy( dirToTarget, bestDirToTarget );
+      bestDistanceToTarget = VectorLength( bestDirToTarget );
+    }
+
+    if( i > 50 )
+    {
+      VectorCopy( bestDirToTarget, dirToTarget );
+      break;
+    }
   }
 
   VectorNormalize( dirToTarget );
@@ -1826,7 +1843,7 @@ ATrapper_CheckTarget
 Used by ATrapper_Think to check enemies for validity
 ================
 */
-qboolean ATrapper_CheckTarget( gentity_t *self, gentity_t *target, int range )
+static qboolean ATrapper_CheckTarget( gentity_t *self, gentity_t *target, int range )
 {
   vec3_t    distance;
   trace_t   trace;
@@ -1873,7 +1890,7 @@ ATrapper_FindEnemy
 Used by ATrapper_Think to locate enemy gentities
 ================
 */
-void ATrapper_FindEnemy( gentity_t *ent, int range )
+static void ATrapper_FindEnemy( gentity_t *ent, int range )
 {
   gentity_t *target;
   int       i;
@@ -1923,7 +1940,7 @@ void ATrapper_Think( gentity_t *self )
 
     //if we are pointing at our target and we can fire shoot it
     if( self->count < level.time )
-      ATrapper_FireOnEnemy( self, firespeed, range );
+      ATrapper_FireOnEnemy( self, firespeed );
   }
 }
 
@@ -2647,8 +2664,8 @@ HMGTurret_CheckTarget
 Used by HMGTurret_Think to check enemies for validity
 ================
 */
-qboolean HMGTurret_CheckTarget( gentity_t *self, gentity_t *target,
-                                qboolean los_check )
+static qboolean HMGTurret_CheckTarget( gentity_t *self, gentity_t *target,
+                                       qboolean los_check )
 {
   trace_t   tr;
   vec3_t    dir, end;
@@ -2680,7 +2697,7 @@ HMGTurret_TrackEnemy
 Used by HMGTurret_Think to track enemy location
 ================
 */
-qboolean HMGTurret_TrackEnemy( gentity_t *self )
+static qboolean HMGTurret_TrackEnemy( gentity_t *self )
 {
   vec3_t  dirToTarget, dttAdjusted, angleToTarget, angularDiff, xNormal;
   vec3_t  refNormal = { 0.0f, 0.0f, 1.0f };
@@ -2762,7 +2779,7 @@ HMGTurret_FindEnemy
 Used by HMGTurret_Think to locate enemy gentities
 ================
 */
-void HMGTurret_FindEnemy( gentity_t *self )
+static void HMGTurret_FindEnemy( gentity_t *self )
 {
   int       entityList[ MAX_GENTITIES ];
   vec3_t    range;

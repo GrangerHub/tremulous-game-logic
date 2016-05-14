@@ -3837,6 +3837,11 @@ void ClientCommand( int clientNum )
 
   command = bsearch( cmd, cmds, numCmds, sizeof( cmds[ 0 ] ), cmdcmp );
 
+  // reset the inactivty timers
+  ent->client->inactivityTime = level.time + g_inactivity.integer * 1000;
+  ent->client->inactivityWarning = qfalse;
+  ent->client->voterInactivityTime = level.time + ( VOTE_TIME );
+
   if( !command )
   {
     if( !G_admin_cmd_check( ent ) )
