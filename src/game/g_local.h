@@ -815,6 +815,22 @@ void G_AddBuildableToStack( int groundBuildableNum, int stackedBuildableNum );
 void G_RemoveBuildableFromStack( int groundBuildableNum, int stackedBuildableNum );
 void G_SetBuildableDropper( int removedBuildableNum, int dropperNum );
 
+void              AGeneric_Think( gentity_t *self );
+void              ASpawn_Think( gentity_t *self );
+void              AOvermind_Think( gentity_t *self );
+void              ABarricade_Think( gentity_t *self );
+void              AAcidTube_Think( gentity_t *self );
+void              AHive_Think( gentity_t *self );
+void              ATrapper_Think( gentity_t *self );
+void              HSpawn_Think( gentity_t *self );
+void              HRepeater_Think( gentity_t *self );
+void              HReactor_Think( gentity_t *self );
+void              HArmoury_Think( gentity_t *self );
+void              HDCC_Think( gentity_t *self );
+void              HMedistat_Think( gentity_t *self );
+void              HMGTurret_Think( gentity_t *self );
+void              HTeslaGen_Think( gentity_t *self );
+
 void              G_BuildableThink( gentity_t *ent, int msec );
 qboolean          G_BuildableRange( vec3_t origin, float r, buildable_t buildable );
 void              G_ClearDeconMarks( void );
