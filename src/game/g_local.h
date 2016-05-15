@@ -200,12 +200,14 @@ struct gentity_s
   int               time1000;           // timer evaluated every second
   qboolean          deconstruct;        // deconstruct if no BP left
   int               deconstructTime;    // time at which structure marked
+  int               markDeconstructor;  // number of the builder that marked the deconstructed buildable
   int               overmindAttackTimer;
   int               overmindDyingTimer;
   int               overmindSpawnsTimer;
   int               nextPhysicsTime;    // buildables don't need to check what they're sitting on
                                         // every single frame.. so only do it periodically
   int               clientSpawnTime;    // the time until this spawn can spawn a client
+  int               spawnBlockTime;     // timer for anti spawn block
 
   int               credits[ MAX_CLIENTS ];     // human credits for each client
   int               killedBy;                   // clientNum of killer
@@ -231,6 +233,12 @@ struct gentity_s
   int               nextRegenTime;
 
   qboolean          pointAgainstWorld;              // don't use the bbox for map collisions
+
+  // variables for buildable stacking
+  qboolean          damageDroppedBuildable;
+  int               dropperNum;
+  int               buildableStack[ MAX_GENTITIES ];
+  int               numOfStackedBuildables;
 
   int               buildPointZone;                 // index for zone
   int               usesBuildPointZone;             // does it use a zone?
@@ -322,6 +330,14 @@ typedef struct
   // voting state
   int                 voted;
   int                 vote;
+
+  // timers
+  int                 voterInactivityTime;   // doesn't count a client in vote results when time > this
+
+  // used for checking if a client's command angles changed
+  int                 previousCmdAngles[3];
+  int                 previousCmdAnglesTime;
+  qboolean            cmdAnglesChanged;
 
   // flood protection
   int                 floodDemerits;
@@ -541,6 +557,7 @@ typedef struct
   int               num_entities;   // MAX_CLIENTS <= num_entities <= ENTITYNUM_MAX_NORMAL
 
   int               countdownTime;     // restart match at this time
+  qboolean          fight;
 
   fileHandle_t      logFile;
 
@@ -587,6 +604,8 @@ typedef struct
   int               voteNo[ NUM_TEAMS ];
   gclient_t         *voteCaller[ NUM_TEAMS ];     // client that called the vote
   int               numVotingClients[ NUM_TEAMS ];// set by CalculateRanks
+  int               numCountedVotingClients[ NUM_TEAMS ];// The total number of clients considered in vote calculations
+  vote_t            voteType[ NUM_TEAMS ];
 
   // spawn variables
   qboolean          spawning;                     // the G_Spawn*() functions are valid
@@ -658,6 +677,9 @@ typedef struct
   int               humanStage2Time;
   int               humanStage3Time;
 
+  int               alienNextStageThreshold;
+  int               humanNextStageThreshold;
+
   qboolean          uncondAlienWin;
   qboolean          uncondHumanWin;
   qboolean          alienTeamLocked;
@@ -689,6 +711,8 @@ typedef struct
   int               lastLayoutReset;
 
   int               playmapFlags;
+  int               epochStartTime;
+  char              database_data[ DATABASE_DATA_MAX ];
 } level_locals_t;
 
 #define CMD_CHEAT         0x0001
@@ -798,6 +822,27 @@ gentity_t         *G_Reactor( void );
 gentity_t         *G_Overmind( void );
 qboolean          G_FindCreep( gentity_t *self );
 
+qboolean G_FindBuildableInStack( int groundBuildableNum, int stackedBuildableNum, int *index );
+void G_AddBuildableToStack( int groundBuildableNum, int stackedBuildableNum );
+void G_RemoveBuildableFromStack( int groundBuildableNum, int stackedBuildableNum );
+void G_SetBuildableDropper( int removedBuildableNum, int dropperNum );
+
+void              AGeneric_Think( gentity_t *self );
+void              ASpawn_Think( gentity_t *self );
+void              AOvermind_Think( gentity_t *self );
+void              ABarricade_Think( gentity_t *self );
+void              AAcidTube_Think( gentity_t *self );
+void              AHive_Think( gentity_t *self );
+void              ATrapper_Think( gentity_t *self );
+void              HSpawn_Think( gentity_t *self );
+void              HRepeater_Think( gentity_t *self );
+void              HReactor_Think( gentity_t *self );
+void              HArmoury_Think( gentity_t *self );
+void              HDCC_Think( gentity_t *self );
+void              HMedistat_Think( gentity_t *self );
+void              HMGTurret_Think( gentity_t *self );
+void              HTeslaGen_Think( gentity_t *self );
+
 void              G_BuildableThink( gentity_t *ent, int msec );
 qboolean          G_BuildableRange( vec3_t origin, float r, buildable_t buildable );
 void              G_ClearDeconMarks( void );
@@ -816,7 +861,7 @@ void              G_BaseSelfDestruct( team_t team );
 int               G_NextQueueTime( int queuedBP, int totalBP, int queueBaseRate );
 void              G_QueueBuildPoints( gentity_t *self );
 int               G_GetBuildPoints( const vec3_t pos, team_t team );
-int               G_GetMarkedBuildPoints( const vec3_t pos, team_t team );
+int               G_GetMarkedBuildPoints( playerState_t *ps );
 qboolean          G_FindPower( gentity_t *self, qboolean searchUnspawned );
 gentity_t         *G_PowerEntityForPoint( const vec3_t origin );
 gentity_t         *G_PowerEntityForEntity( gentity_t *ent );
@@ -990,6 +1035,7 @@ gentity_t *G_SelectHumanLockSpawnPoint( vec3_t origin, vec3_t angles );
 void      respawn( gentity_t *ent );
 void      BeginIntermission( void );
 void      ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const vec3_t angles );
+void      body_die( gentity_t *self, gentity_t*, gentity_t*, int, int );
 void      player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod );
 qboolean  SpotWouldTelefrag( gentity_t *spot );
 char      *GetSkin( char *modelname, char *wish ); 
@@ -1043,6 +1089,7 @@ void ClientCommand( int clientNum );
 //
 // g_active.c
 //
+void VoterInactivityTimer( gentity_t *ent );
 void G_UnlaggedStore( void );
 void G_UnlaggedClear( gentity_t *ent );
 void G_UnlaggedCalc( int time, gentity_t *skipEnt );
@@ -1148,6 +1195,7 @@ extern  vmCvar_t  g_gravity;
 extern  vmCvar_t  g_speed;
 extern  vmCvar_t  g_knockback;
 extern  vmCvar_t  g_inactivity;
+extern  vmCvar_t  g_impliedVoting;
 extern  vmCvar_t  g_debugMove;
 extern  vmCvar_t  g_debugDamage;
 extern  vmCvar_t  g_debugPlayMap;
@@ -1166,6 +1214,7 @@ extern  vmCvar_t  pmove_msec;
 
 extern  vmCvar_t  g_allowShare;
 
+extern  vmCvar_t  g_allowBuildableStacking;
 extern  vmCvar_t  g_alienBuildPoints;
 extern  vmCvar_t  g_alienBuildQueueTime;
 extern  vmCvar_t  g_humanBuildPoints;
@@ -1210,6 +1259,7 @@ extern  vmCvar_t  g_floodMaxDemerits;
 extern  vmCvar_t  g_floodMinTime;
 
 extern  vmCvar_t  g_shove;
+extern  vmCvar_t  g_antiSpawnBlock;
 
 extern  vmCvar_t  g_mapConfigs;
 
@@ -1285,3 +1335,5 @@ void      trap_SnapVector( float *v );
 
 void      trap_AddCommand( const char *cmdName );
 void      trap_RemoveCommand( const char *cmdName );
+
+int       trap_Query( dbArray_t type, char *data, int *steps );

@@ -104,6 +104,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     ASPAWN_VALUE,          //int       value;
+    qfalse,                //qboolean  stackable;
   },
   {
     BA_A_OVERMIND,         //int       number;
@@ -131,14 +132,15 @@ static const buildableAttributes_t bg_buildableList[ ] =
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
-    0.95f,                 //float     minNormal;
-    qfalse,                //qboolean  invertNormal;
+    0.0f,                 //float     minNormal;
+    qtrue,                 //qboolean  invertNormal;
     qfalse,                //qboolean  creepTest;
     OVERMIND_CREEPSIZE,    //int       creepSize;
     qfalse,                //qboolean  dccTest;
     qfalse,                //qboolean  transparentTest;
     qtrue,                 //qboolean  uniqueTest;
     OVERMIND_VALUE,        //int       value;
+    qtrue,                 //qboolean  stackable;
   },
   {
     BA_A_BARRICADE,        //int       number;
@@ -174,6 +176,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     BARRICADE_VALUE,       //int       value;
+    qfalse,                //qboolean  stackable;
   },
   {
     BA_A_ACIDTUBE,         //int       number;
@@ -209,6 +212,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     ACIDTUBE_VALUE,        //int       value;
+    qfalse,                //qboolean  stackable;
   },
   {
     BA_A_TRAPPER,          //int       number;
@@ -244,6 +248,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     TRAPPER_VALUE,         //int       value;
+    qfalse,                //qboolean  stackable;
   },
   {
     BA_A_BOOSTER,          //int       number;
@@ -280,6 +285,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     BOOSTER_VALUE,         //int       value;
+    qfalse,                //qboolean  stackable;
   },
   {
     BA_A_HIVE,             //int       number;
@@ -314,6 +320,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     HIVE_VALUE,            //int       value;
+    qfalse,                //qboolean  stackable;
   },
   {
     BA_H_SPAWN,            //int       number;
@@ -349,6 +356,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     HSPAWN_VALUE,          //int       value;
+    qfalse,                //qboolean  stackable;
   },
   {
     BA_H_MGTURRET,         //int       number;
@@ -384,6 +392,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     MGTURRET_VALUE,        //int       value;
+    qfalse,                //qboolean  stackable;
   },
   {
     BA_H_TESLAGEN,         //int       number;
@@ -419,6 +428,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     TESLAGEN_VALUE,        //int       value;
+    qfalse,                //qboolean  stackable;
   },
   {
     BA_H_ARMOURY,          //int       number;
@@ -454,6 +464,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     ARMOURY_VALUE,         //int       value;
+    qtrue,                 //qboolean  stackable;
   },
   {
     BA_H_DCC,              //int       number;
@@ -489,6 +500,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     DC_VALUE,              //int       value;
+    qtrue,                 //qboolean  stackable;
   },
   {
     BA_H_MEDISTAT,         //int       number;
@@ -525,6 +537,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     MEDISTAT_VALUE,        //int       value;
+    qfalse,                 //qboolean  stackable;
   },
   {
     BA_H_REACTOR,          //int       number;
@@ -560,6 +573,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  transparentTest;
     qtrue,                 //qboolean  uniqueTest;
     REACTOR_VALUE,         //int       value;
+    qtrue,                //qboolean  stackable;
   },
   {
     BA_H_REPEATER,         //int       number;
@@ -595,6 +609,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     REPEATER_VALUE,        //int       value;
+    qfalse,                //qboolean  stackable;
   }
 };
 
@@ -914,7 +929,8 @@ static const classAttributes_t bg_classList[ ] =
     1.0f,                                           //float   knockbackScale;
     { PCL_NONE, PCL_NONE, PCL_NONE },               //int     children[ 3 ];
     0,                                              //int     cost;
-    0                                               //int     value;
+    0,                                              //int     value;
+    qfalse                                          //int     stackable;
   },
   {
     PCL_ALIEN_BUILDER0,                             //int     number;
@@ -942,7 +958,8 @@ static const classAttributes_t bg_classList[ ] =
     1.0f,                                           //float   knockbackScale;
     { PCL_ALIEN_BUILDER0_UPG, PCL_ALIEN_LEVEL0, PCL_NONE }, //int  children[ 3 ];
     ABUILDER_COST,                                  //int     cost;
-    ABUILDER_VALUE                                  //int     value;
+    ABUILDER_VALUE,                                 //int     value;
+    qfalse                                          //int     stackable;
   },
   {
     PCL_ALIEN_BUILDER0_UPG,                         //int     number;
@@ -971,7 +988,8 @@ static const classAttributes_t bg_classList[ ] =
     1.0f,                                           //float   knockbackScale;
     { PCL_ALIEN_LEVEL0, PCL_NONE, PCL_NONE },       //int     children[ 3 ];
     ABUILDER_UPG_COST,                              //int     cost;
-    ABUILDER_UPG_VALUE                              //int     value;
+    ABUILDER_UPG_VALUE,                             //int     value;
+    qfalse                                          //int     stackable;
   },
   {
     PCL_ALIEN_LEVEL0,                               //int     number;
@@ -999,7 +1017,8 @@ static const classAttributes_t bg_classList[ ] =
     2.0f,                                           //float   knockbackScale;
     { PCL_ALIEN_LEVEL1, PCL_NONE, PCL_NONE },       //int     children[ 3 ];
     LEVEL0_COST,                                    //int     cost;
-    LEVEL0_VALUE                                    //int     value;
+    LEVEL0_VALUE,                                   //int     value;
+    qfalse                                          //int     stackable;
   },
   {
     PCL_ALIEN_LEVEL1,                               //int     number;
@@ -1029,7 +1048,8 @@ static const classAttributes_t bg_classList[ ] =
     1.2f,                                           //float   knockbackScale;
     { PCL_ALIEN_LEVEL2, PCL_ALIEN_LEVEL1_UPG, PCL_NONE }, //int  children[ 3 ];
     LEVEL1_COST,                                    //int     cost;
-    LEVEL1_VALUE                                    //int     value;
+    LEVEL1_VALUE,                                   //int     value;
+    qfalse                                          //int     stackable;
   },
   {
     PCL_ALIEN_LEVEL1_UPG,                           //int     number;
@@ -1059,7 +1079,8 @@ static const classAttributes_t bg_classList[ ] =
     1.1f,                                           //float   knockbackScale;
     { PCL_ALIEN_LEVEL2, PCL_NONE, PCL_NONE },       //int     children[ 3 ];
     LEVEL1_UPG_COST,                                //int     cost;
-    LEVEL1_UPG_VALUE                                //int     value;
+    LEVEL1_UPG_VALUE,                               //int     value;
+    qfalse                                          //int     stackable;
   },
   {
     PCL_ALIEN_LEVEL2,                               //int     number;
@@ -1087,7 +1108,8 @@ static const classAttributes_t bg_classList[ ] =
     0.8f,                                           //float   knockbackScale;
     { PCL_ALIEN_LEVEL3, PCL_ALIEN_LEVEL2_UPG, PCL_NONE }, //int  children[ 3 ];
     LEVEL2_COST,                                    //int     cost;
-    LEVEL2_VALUE                                    //int     value;
+    LEVEL2_VALUE,                                   //int     value;
+    qfalse                                          //int     stackable;
   },
   {
     PCL_ALIEN_LEVEL2_UPG,                           //int     number;
@@ -1115,7 +1137,8 @@ static const classAttributes_t bg_classList[ ] =
     0.7f,                                           //float   knockbackScale;
     { PCL_ALIEN_LEVEL3, PCL_NONE, PCL_NONE },       //int     children[ 3 ];
     LEVEL2_UPG_COST,                                //int     cost;
-    LEVEL2_UPG_VALUE                                //int     value;
+    LEVEL2_UPG_VALUE,                               //int     value;
+    qfalse                                          //int     stackable;
   },
   {
     PCL_ALIEN_LEVEL3,                               //int     number;
@@ -1144,7 +1167,8 @@ static const classAttributes_t bg_classList[ ] =
     0.5f,                                           //float   knockbackScale;
     { PCL_ALIEN_LEVEL4, PCL_ALIEN_LEVEL3_UPG, PCL_NONE }, //int  children[ 3 ];
     LEVEL3_COST,                                    //int     cost;
-    LEVEL3_VALUE                                    //int     value;
+    LEVEL3_VALUE,                                   //int     value;
+    qfalse                                          //int     stackable;
   },
   {
     PCL_ALIEN_LEVEL3_UPG,                           //int     number;
@@ -1173,7 +1197,8 @@ static const classAttributes_t bg_classList[ ] =
     0.4f,                                           //float   knockbackScale;
     { PCL_ALIEN_LEVEL4, PCL_NONE, PCL_NONE },       //int     children[ 3 ];
     LEVEL3_UPG_COST,                                //int     cost;
-    LEVEL3_UPG_VALUE                                //int     value;
+    LEVEL3_UPG_VALUE,                               //int     value;
+    qtrue                                           //int     stackable;
   },
   {
     PCL_ALIEN_LEVEL4,                               //int     number;
@@ -1203,7 +1228,8 @@ static const classAttributes_t bg_classList[ ] =
     0.1f,                                           //float   knockbackScale;
     { PCL_NONE, PCL_NONE, PCL_NONE },               //int     children[ 3 ];
     LEVEL4_COST,                                    //int     cost;
-    LEVEL4_VALUE                                    //int     value;
+    LEVEL4_VALUE,                                   //int     value;
+    qtrue                                           //int     stackable;
   },
   {
     PCL_HUMAN,                                      //int     number;
@@ -1230,7 +1256,8 @@ static const classAttributes_t bg_classList[ ] =
     1.0f,                                           //float   knockbackScale;
     { PCL_NONE, PCL_NONE, PCL_NONE },               //int     children[ 3 ];
     0,                                              //int     cost;
-    ALIEN_CREDITS_PER_KILL                          //int     value;
+    ALIEN_CREDITS_PER_KILL,                         //int     value;
+    qfalse                                          //int     stackable;
   },
   {
     PCL_HUMAN_BSUIT,                                //int     number;
@@ -1257,7 +1284,8 @@ static const classAttributes_t bg_classList[ ] =
     1.0f,                                           //float   knockbackScale;
     { PCL_NONE, PCL_NONE, PCL_NONE },               //int     children[ 3 ];
     0,                                              //int     cost;
-    ALIEN_CREDITS_PER_KILL                          //int     value;
+    ALIEN_CREDITS_PER_KILL,                         //int     value;
+    qtrue                                           //int     stackable;
   }
 };
 
@@ -2873,7 +2901,9 @@ char *eventnames[ ] =
   "EV_MGTURRET_SPINUP", // trigger a sound
 
   "EV_RPTUSE_SOUND",    // trigger a sound
-  "EV_LEV2_ZAP"
+  "EV_LEV2_ZAP",
+
+  "EV_FIGHT"
 };
 
 /*
@@ -2941,6 +2971,8 @@ void BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s, qboolean 
   if( ps->pm_type == PM_INTERMISSION || ps->pm_type == PM_SPECTATOR || ps->pm_type == PM_FREEZE )
     s->eType = ET_INVISIBLE;
   else if( ps->persistant[ PERS_SPECSTATE ] != SPECTATOR_NOT )
+    s->eType = ET_INVISIBLE;
+  else if( ps->stats[ STAT_HEALTH ] <= GIB_HEALTH )
     s->eType = ET_INVISIBLE;
   else
     s->eType = ET_PLAYER;
@@ -3045,6 +3077,8 @@ void BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s
   if( ps->pm_type == PM_INTERMISSION || ps->pm_type == PM_SPECTATOR || ps->pm_type == PM_FREEZE )
     s->eType = ET_INVISIBLE;
   else if( ps->persistant[ PERS_SPECSTATE ] != SPECTATOR_NOT )
+    s->eType = ET_INVISIBLE;
+  else if( ps->stats[ STAT_HEALTH ] <= GIB_HEALTH )
     s->eType = ET_INVISIBLE;
   else
     s->eType = ET_PLAYER;
@@ -3402,8 +3436,7 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
   //so buildings drop to floor
   VectorMA( targetOrigin, -128, playerNormal, targetOrigin );
 
-  // The mask is MASK_DEADSOLID on purpose to avoid collisions with other entities
-  (*trace)( tr, entityOrigin, mins, maxs, targetOrigin, ps->clientNum, MASK_DEADSOLID );
+  (*trace)( tr, entityOrigin, mins, maxs, targetOrigin, ps->clientNum, MASK_PLAYERSOLID );
   VectorCopy( tr->endpos, outOrigin );
   vectoangles( forward, outAngles );
 }

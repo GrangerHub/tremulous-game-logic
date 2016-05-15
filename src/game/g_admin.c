@@ -109,6 +109,11 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "[^3name^6|^3slot#^7]"
     },
 
+    {"explode", G_admin_explode, qfalse, "explode",
+      "Blow up a player",
+      "[^3name^6|^3slot#^7] (^5reason^7)"
+    },
+
     {"flag", G_admin_flag, qtrue, "flag",
       "add an admin flag to a player, prefix flag with '-' to disallow the flag. "
       "console can use this command on admin levels by prefacing a '*' to the admin level value.",
@@ -118,11 +123,6 @@ g_admin_cmd_t g_admin_cmds[ ] =
     {"gamedir", G_admin_gamedir, qtrue, "gamedir",
       "Filter files on the server",
       "[^3dir^7] [^3extension^7] [^3filter^7]"
-    },
-
-    {"explode", G_admin_explode, qfalse, "explode",
-      "Blow up a player",
-      "[^3name^6|^3slot#^7] (^5reason^7)"
     },
 
     {"kick", G_admin_kick, qfalse, "kick",
@@ -158,6 +158,11 @@ g_admin_cmd_t g_admin_cmds[ ] =
     {"lock", G_admin_lock, qfalse, "lock",
       "lock a team to prevent anyone from joining it",
       "[^3a^6|^3h^7]"
+    },
+
+    {"maplog", G_admin_maplog, qfalse, "maplog",
+      "retrieve the map log",
+      "[^3offset(optional)^7]"
     },
 
     {"mute", G_admin_mute, qfalse, "mute",
@@ -219,6 +224,11 @@ g_admin_cmd_t g_admin_cmds[ ] =
     {"revert", G_admin_revert, qfalse, "revert",
       "revert buildables to a given time",
       "[^3id^7]"
+    },
+
+    {"seen", G_admin_seen, qfalse, "seen",
+      "search for when the last time a player was on",
+      "[^3name^7] [^3offset(optional)^7]"
     },
 
     {"setdevmode", G_admin_setdevmode, qfalse, "setdevmode",
@@ -4553,4 +4563,60 @@ void G_admin_cleanup( void )
   }
   g_admin_commands = NULL;
   BG_DefragmentMemory( );
+}
+
+qboolean G_admin_seen( gentity_t *ent )
+{
+  int        offset = 0;
+  char       offsetstr[ 10 ];
+  char       name[ MAX_NAME_LENGTH ];
+
+  if( trap_Argc() < 2 )
+  {
+    ADMP( "^3seen: ^7usage: seen [name] [offset(optional]\n" );
+    return qfalse;
+  }
+  trap_Argv( 1, name, sizeof( name ) );
+  if( trap_Argc() == 3 )
+  {
+    trap_Argv( 2, offsetstr, sizeof( offsetstr ) );
+    offset = atoi( offsetstr );
+  }
+  pack_start( level.database_data, DATABASE_DATA_MAX );
+  pack_int( ent - g_entities );
+  pack_text2( va( "%%%s%%", name ) );
+  pack_int( 10 );
+  pack_int( offset );
+  if( trap_Query( DB_SEEN, level.database_data, NULL ) != 0 )
+  {
+    ADMP( "^3seen: ^7Query failed\n" );
+    return qfalse;
+  }
+  ADMP( "^3seen: ^7Done\n" );
+  return qtrue;
+}
+
+qboolean G_admin_maplog( gentity_t *ent )
+{
+  int        offset = 0;
+  char       offsetstr[ 10 ];
+
+  if( trap_Argc() == 2 )
+  {
+    trap_Argv( 1, offsetstr, sizeof( offsetstr ) );
+    offset = atoi( offsetstr );
+  }
+
+  pack_start( level.database_data, DATABASE_DATA_MAX );
+  pack_int( ent - g_entities );
+  pack_int( -1 );
+  pack_int( 10 );
+  pack_int( offset );
+  if( trap_Query( DB_LAST_MAPS, level.database_data, NULL ) != 0 )
+  {
+    ADMP( "^3maplog: ^7Query failed\n" );
+    return qfalse;
+  }
+  ADMP( "^3maplog: ^7Done\n" );
+  return qtrue;
 }

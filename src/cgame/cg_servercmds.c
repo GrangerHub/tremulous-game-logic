@@ -185,6 +185,49 @@ static void CG_ParseCountdown( void )
 }
 
 /*
+=====================
+CG_ParseVoteStrings
+=====================
+*/
+void CG_ParseVoteStrings( int team, const char *conStr )
+{
+  int subStringIndex, rawStringChar, subStringChar;
+
+  Q_strncpyz( cgs.voteString[ RAW_VOTE_STRING ][ team ], conStr,
+              sizeof( cgs.voteString[ RAW_VOTE_STRING ][ team ] ) );
+
+  cgs.voteString[ 0 ][ team ][ 0 ]= 0;
+
+  for( subStringIndex = 0, rawStringChar = 0, subStringChar = 0;
+       ( cgs.voteString[ RAW_VOTE_STRING ][ team ][rawStringChar] && ( subStringIndex < RAW_VOTE_STRING ) );
+       ++rawStringChar )
+  {
+    if( cgs.voteString[ RAW_VOTE_STRING ][ team ][rawStringChar] == STRING_DELIMITER )
+    {
+      cgs.voteString[ subStringIndex ][ team ][subStringChar] = 0;
+      ++subStringIndex;
+      subStringChar = 0;
+    }
+    else
+    {
+      cgs.voteString[ subStringIndex ][ team ][subStringChar] = cgs.voteString[ RAW_VOTE_STRING ][ team ][rawStringChar];
+      ++subStringChar;
+    }
+   }
+
+  cgs.voteString[ subStringIndex ][ team ][subStringChar] = 0;
+  ++subStringIndex;
+
+  while( subStringIndex < RAW_VOTE_STRING )
+  {
+    cgs.voteString[ subStringIndex ][ team ][ 0 ] = 0;
+    ++subStringIndex;
+  }
+
+  return;
+}
+
+/*
 ================
 CG_SetConfigValues
 
@@ -356,7 +399,7 @@ static void CG_ConfigStringModified( void )
       sscanf( str, "%d %d %d", &cgs.alienStage, &cgs.alienCredits,
           &cgs.alienNextStageThreshold );
 
-      if( cgs.alienStage != oldAlienStage )
+      if( ( cgs.alienStage > oldAlienStage ) && !( cgs.warmup ) )
         CG_AnnounceAlienStageTransistion( oldAlienStage, cgs.alienStage );
     }
     else
@@ -373,7 +416,7 @@ static void CG_ConfigStringModified( void )
       sscanf( str, "%d %d %d", &cgs.humanStage, &cgs.humanCredits,
           &cgs.humanNextStageThreshold );
 
-      if( cgs.humanStage != oldHumanStage )
+      if( ( cgs.humanStage > oldHumanStage ) && !( cgs.warmup ) )
         CG_AnnounceHumanStageTransistion( oldHumanStage, cgs.humanStage );
     }
     else
@@ -386,7 +429,7 @@ static void CG_ConfigStringModified( void )
   else if( num >= CS_VOTE_TIME && num < CS_VOTE_TIME + NUM_TEAMS )
   {
     cgs.voteTime[ num - CS_VOTE_TIME ] = atoi( str );
-    cgs.voteModified[ num - CS_VOTE_TIME ] = qtrue;
+    cgs.voteAlarmPlay[ num - CS_VOTE_TIME ] = qtrue;
 
     if( num - CS_VOTE_TIME == TEAM_NONE )
       trap_Cvar_Set( "ui_voteActive", cgs.voteTime[ TEAM_NONE ] ? "1" : "0" );
@@ -397,19 +440,19 @@ static void CG_ConfigStringModified( void )
       trap_Cvar_Set( "ui_humanTeamVoteActive",
         cgs.voteTime[ TEAM_HUMANS ] ? "1" : "0" );
   }
-  else if( num >= CS_VOTE_YES && num < CS_VOTE_YES + NUM_TEAMS )
+  else if( num >= CS_VOTE_CAST && num < CS_VOTE_CAST + NUM_TEAMS )
   {
-    cgs.voteYes[ num - CS_VOTE_YES ] = atoi( str );
-    cgs.voteModified[ num - CS_VOTE_YES ] = qtrue;
+    cgs.voteCast[ num - CS_VOTE_CAST ] = atoi( str );
+    cgs.voteModified[ num - CS_VOTE_CAST ] = qtrue;
   }
-  else if( num >= CS_VOTE_NO && num < CS_VOTE_NO + NUM_TEAMS )
+  else if( num >= CS_VOTE_ACTIVE && num < CS_VOTE_ACTIVE + NUM_TEAMS )
   {
-    cgs.voteNo[ num - CS_VOTE_NO ] = atoi( str );
-    cgs.voteModified[ num - CS_VOTE_NO ] = qtrue;
+    cgs.voteActive[ num - CS_VOTE_ACTIVE ] = atoi( str );
   }
   else if( num >= CS_VOTE_STRING && num < CS_VOTE_STRING + NUM_TEAMS )
-    Q_strncpyz( cgs.voteString[ num - CS_VOTE_STRING ], str,
-      sizeof( cgs.voteString[ num - CS_VOTE_STRING ] ) );
+  {
+    CG_ParseVoteStrings( ( num - CS_VOTE_STRING ), str );
+  }
   else if( num >= CS_VOTE_CALLER && num < CS_VOTE_CALLER + NUM_TEAMS )
     Q_strncpyz( cgs.voteCaller[ num - CS_VOTE_CALLER ], str,
       sizeof( cgs.voteCaller[ num - CS_VOTE_CALLER ] ) );
@@ -964,6 +1007,7 @@ static void CG_Say( int clientNum, saymode_t mode, const char *text )
   char *location = "";
   char *color;
   char *maybeColon;
+  char *tmsgcolor = S_COLOR_YELLOW;
 
   if( clientNum >= 0 && clientNum < MAX_CLIENTS )
   {
@@ -971,6 +1015,9 @@ static void CG_Say( int clientNum, saymode_t mode, const char *text )
     char         *tcolor = S_COLOR_WHITE;
 
     name = ci->name;
+
+    if( !( ci->team == TEAM_NONE ) )
+      tmsgcolor = S_COLOR_CYAN;
 
     if( ci->team == TEAM_ALIENS )
       tcolor = S_COLOR_RED;
@@ -1038,11 +1085,11 @@ static void CG_Say( int clientNum, saymode_t mode, const char *text )
       break;
     case SAY_TEAM:
 #ifdef MODULE_INTERFACE_11
-      CG_Printf( "%s%s(%s" S_COLOR_WHITE ")%s%s " S_COLOR_CYAN "%s\n",
-                 ignore, prefix, name, location, maybeColon, text );
+      CG_Printf( "%s%s(%s" S_COLOR_WHITE ")%s%s %s%s\n",
+                 ignore, prefix, name, location, maybeColon, tmsgcolor, text );
 #else
-      CG_Printf( "%s%s(%s" S_COLOR_WHITE ")%s%s %c" S_COLOR_CYAN "%s\n",
-                 ignore, prefix, name, location, maybeColon, INDENT_MARKER, text );
+      CG_Printf( "%s%s(%s" S_COLOR_WHITE ")%s%s %c%s%s\n",
+                 ignore, prefix, name, location, maybeColon, INDENT_MARKER, tmsgcolor, text );
 #endif
       break;
     case SAY_ADMINS:

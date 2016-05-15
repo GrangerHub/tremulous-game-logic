@@ -297,3 +297,7 @@ void trap_RemoveCommand( const char *cmdName )
   syscall( G_REMOVECOMMAND, cmdName );
 }
 
+int trap_Query( dbArray_t type, char *data, int *steps )
+{
+  return syscall( G_SL_QUERY, type, data, steps );
+}

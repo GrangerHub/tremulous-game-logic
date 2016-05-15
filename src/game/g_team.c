@@ -124,13 +124,13 @@ void G_UpdateTeamConfigStrings( void )
 
   trap_SetConfigstringRestrictions( CS_VOTE_TIME + TEAM_ALIENS,   &humanTeam );
   trap_SetConfigstringRestrictions( CS_VOTE_STRING + TEAM_ALIENS, &humanTeam );
-  trap_SetConfigstringRestrictions( CS_VOTE_YES + TEAM_ALIENS,    &humanTeam );
-  trap_SetConfigstringRestrictions( CS_VOTE_NO + TEAM_ALIENS,     &humanTeam );
+  trap_SetConfigstringRestrictions( CS_VOTE_CAST + TEAM_ALIENS,    &humanTeam );
+  trap_SetConfigstringRestrictions( CS_VOTE_ACTIVE + TEAM_ALIENS,     &humanTeam );
 
   trap_SetConfigstringRestrictions( CS_VOTE_TIME + TEAM_HUMANS,   &alienTeam );
   trap_SetConfigstringRestrictions( CS_VOTE_STRING + TEAM_HUMANS, &alienTeam );
-  trap_SetConfigstringRestrictions( CS_VOTE_YES + TEAM_HUMANS,    &alienTeam );
-  trap_SetConfigstringRestrictions( CS_VOTE_NO + TEAM_HUMANS,     &alienTeam );
+  trap_SetConfigstringRestrictions( CS_VOTE_CAST + TEAM_HUMANS,    &alienTeam );
+  trap_SetConfigstringRestrictions( CS_VOTE_ACTIVE + TEAM_HUMANS,     &alienTeam );
 
   trap_SetConfigstringRestrictions( CS_ALIEN_STAGES, &humanTeam );
   trap_SetConfigstringRestrictions( CS_HUMAN_STAGES, &alienTeam );
