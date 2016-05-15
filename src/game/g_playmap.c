@@ -668,6 +668,7 @@ playMapError_t G_ReloadPlayMapQueue( void )
 {
     fileHandle_t f;
     int len;
+    qboolean hasNewLines = qfalse;
     char *cnf, *cnf2, *mapName, empty = 0,
          *layout = &empty, *clientName = &empty, *flags = &empty;
 
@@ -723,7 +724,7 @@ playMapError_t G_ReloadPlayMapQueue( void )
 	    }
 
 	    // Check whether we have layout or flags
-	    cnf = SkipWhitespace( cnf, qfalse );
+	    cnf = SkipWhitespace( cnf, &hasNewLines );
 
 	    if( ! *cnf || *cnf == '\n')
 	      break;
