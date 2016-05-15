@@ -500,7 +500,34 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
   }
 }
 
+/*
+=================
+ComparePreviousCmdAngles
 
+Checks if a client's command angles changed
+=================
+*/
+static void ComparePreviousCmdAngles( gclient_t *client )
+{
+  int i;
+
+  if( client->pers.previousCmdAnglesTime < level.time )
+  {
+    if( ( client->pers.previousCmdAngles[0] != client->pers.cmd.angles[0] ) ||
+        ( client->pers.previousCmdAngles[1] != client->pers.cmd.angles[1] ) ||
+        ( client->pers.previousCmdAngles[2] != client->pers.cmd.angles[2] ) )
+    {
+      for( i = 0; i < 3; i++ )
+        client->pers.previousCmdAngles[i] = client->pers.cmd.angles[i];
+
+      client->pers.previousCmdAnglesTime = level.time;
+      client->pers.cmdAnglesChanged = qtrue;
+    } else
+      client->pers.cmdAnglesChanged = qfalse;
+  }
+
+  return;
+}
 
 /*
 =================
@@ -524,9 +551,7 @@ qboolean ClientInactivityTimer( gentity_t *ent )
            client->pers.cmd.rightmove ||
            client->pers.cmd.upmove ||
            ( client->pers.cmd.buttons & BUTTON_ATTACK ) ||
-           client->pmext.angularVelocity[0] ||
-           client->pmext.angularVelocity[1] ||
-           client->pmext.angularVelocity[2] ||
+           client->pers.cmdAnglesChanged ||
            G_SearchSpawnQueue( &level.alienSpawnQueue, ent-g_entities ) ||
            G_SearchSpawnQueue( &level.humanSpawnQueue, ent-g_entities ) )
   {
@@ -581,18 +606,16 @@ void VoterInactivityTimer( gentity_t *ent )
   gclient_t *client = ent->client;
 
   if( client->pers.connected != CON_CONNECTED )
-    client->voterInactivityTime = level.time - 2000;
+    client->pers.voterInactivityTime = level.time - 2000;
   else if( client->pers.cmd.forwardmove ||
       client->pers.cmd.rightmove ||
       client->pers.cmd.upmove ||
       ( client->pers.cmd.buttons & BUTTON_ATTACK ) ||
-      client->pmext.angularVelocity[0] ||
-      client->pmext.angularVelocity[1] ||
-      client->pmext.angularVelocity[2] ||
+      client->pers.cmdAnglesChanged ||
       G_SearchSpawnQueue( &level.alienSpawnQueue, ent-g_entities ) ||
       G_SearchSpawnQueue( &level.humanSpawnQueue, ent-g_entities ) )
   {
-    client->voterInactivityTime = level.time + ( VOTE_TIME );
+    client->pers.voterInactivityTime = level.time + ( VOTE_TIME );
   }
 
   return;
@@ -1292,6 +1315,8 @@ void ClientThink_real( gentity_t *ent )
   usercmd_t *ucmd;
 
   client = ent->client;
+
+  ComparePreviousCmdAngles( client );
 
   VoterInactivityTimer( ent );
 

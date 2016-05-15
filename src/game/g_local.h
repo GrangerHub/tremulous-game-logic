@@ -331,6 +331,14 @@ typedef struct
   int                 voted;
   int                 vote;
 
+  // timers
+  int                 voterInactivityTime;   // doesn't count a client in vote results when time > this
+
+  // used for checking if a client's command angles changed
+  int                 previousCmdAngles[3];
+  int                 previousCmdAnglesTime;
+  qboolean            cmdAnglesChanged;
+
   // flood protection
   int                 floodDemerits;
   int                 floodTime;
@@ -401,7 +409,6 @@ struct gclient_s
   int                 respawnTime;      // can respawn when time > this
   int                 inactivityTime;   // kick players when time > this
   qboolean            inactivityWarning;// qtrue if the five seoond warning has been given
-  int                 voterInactivityTime;   // doesn't count a client in vote results when time > this
   int                 rewardTime;       // clear the EF_AWARD_IMPRESSIVE, etc when time > this
   int                 boostedTime;      // last time we touched a booster
 

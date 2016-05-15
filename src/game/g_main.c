@@ -2432,13 +2432,13 @@ void G_CheckVote( team_t team )
 
           if( ( ( level.clients[ i ].pers.teamSelection == team ) &&
                 ( ( level.clients[ i ].pers.voted & ( 1 << team ) ) ||
-                  ( level.time < level.clients[ i ].voterInactivityTime ) ) ) ||
+                  ( level.time < level.clients[ i ].pers.voterInactivityTime ) ) ) ||
               ( i == ( level.voteCaller[ team ]->pers.namelog->slot ) ) )
             numActiveClients++;
           break;
         default:
           if( ( level.clients[ i ].pers.voted & ( 1 << team ) ) ||
-              ( level.time < level.clients[ i ].voterInactivityTime ) ||
+              ( level.time < level.clients[ i ].pers.voterInactivityTime ) ||
               ( i == ( level.voteCaller[ team ]->pers.namelog->slot ) ) )
             numActiveClients++;
           break;

@@ -1533,7 +1533,6 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   ent->nextRegenTime = level.time;
 
   client->inactivityTime = level.time + g_inactivity.integer * 1000;
-  client->voterInactivityTime = level.time + VOTE_TIME;
   client->latched_buttons = 0;
 
   // set default animations

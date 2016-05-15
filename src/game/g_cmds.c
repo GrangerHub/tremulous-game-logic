@@ -3807,7 +3807,7 @@ void ClientCommand( int clientNum )
   // reset the inactivty timers
   ent->client->inactivityTime = level.time + g_inactivity.integer * 1000;
   ent->client->inactivityWarning = qfalse;
-  ent->client->voterInactivityTime = level.time + ( VOTE_TIME );
+  ent->client->pers.voterInactivityTime = level.time + ( VOTE_TIME );
 
   if( !command )
   {
