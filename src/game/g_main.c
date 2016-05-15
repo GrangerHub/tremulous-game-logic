@@ -1293,7 +1293,6 @@ void G_CalculateStages( void )
 {
   float         alienPlayerCountMod     = level.averageNumAlienClients / PLAYER_COUNT_MOD;
   float         humanPlayerCountMod     = level.averageNumHumanClients / PLAYER_COUNT_MOD;
-  int           alienNextStageThreshold, humanNextStageThreshold;
   static int    lastAlienStageModCount  = 1;
   static int    lastHumanStageModCount  = 1;
   static int    alienTriggerStage       = 0;
@@ -1372,35 +1371,40 @@ void G_CalculateStages( void )
   }
 
   if( g_alienStage.integer == S1 && g_alienMaxStage.integer > S1 )
-    alienNextStageThreshold = (int)( ceil( (float)g_alienStage2Threshold.integer * alienPlayerCountMod ) );
+    level.alienNextStageThreshold = (int)( ceil( (float)g_alienStage2Threshold.integer *
+                                                  alienPlayerCountMod ) );
   else if( g_alienStage.integer == S2 && g_alienMaxStage.integer > S2 )
-    alienNextStageThreshold = (int)( ceil( (float)g_alienStage3Threshold.integer * alienPlayerCountMod ) );
+    level.alienNextStageThreshold = (int)( ceil( (float)g_alienStage3Threshold.integer *
+                                                 alienPlayerCountMod ) );
   else
-    alienNextStageThreshold = -1;
+    level.alienNextStageThreshold = -1;
 
   if( g_humanStage.integer == S1 && g_humanMaxStage.integer > S1 )
-    humanNextStageThreshold = (int)( ceil( (float)g_humanStage2Threshold.integer * humanPlayerCountMod ) );
+    level.humanNextStageThreshold = (int)( ceil( (float)g_humanStage2Threshold.integer *
+                                                 humanPlayerCountMod ) );
   else if( g_humanStage.integer == S2 && g_humanMaxStage.integer > S2 )
-    humanNextStageThreshold = (int)( ceil( (float)g_humanStage3Threshold.integer * humanPlayerCountMod ) );
+    level.humanNextStageThreshold = (int)( ceil( (float)g_humanStage3Threshold.integer *
+                                                 humanPlayerCountMod ) );
   else
-    humanNextStageThreshold = -1;
+    level.humanNextStageThreshold = -1;
 
   // save a lot of bandwidth by rounding thresholds up to the nearest 100
-  if( alienNextStageThreshold > 0 )
-    alienNextStageThreshold = ceil( (float)alienNextStageThreshold / 100 ) * 100;
+  if( level.alienNextStageThreshold > 0 )
+    level.alienNextStageThreshold = ceil( (float)level.alienNextStageThreshold / 100 ) * 100;
 
-  if( humanNextStageThreshold > 0 )
-    humanNextStageThreshold = ceil( (float)humanNextStageThreshold / 100 ) * 100;
+  if( level.humanNextStageThreshold > 0 )
+    level.humanNextStageThreshold = ceil( (float)level.humanNextStageThreshold / 100 ) * 100;
+
 
   trap_SetConfigstring( CS_ALIEN_STAGES, va( "%d %d %d",
         ( IS_WARMUP ? S3 : g_alienStage.integer ),
         ( IS_WARMUP ? 99999 : g_alienCredits.integer ),
-        ( IS_WARMUP ? 0 : alienNextStageThreshold ) ) );
+        ( IS_WARMUP ? 0 : level.alienNextStageThreshold ) ) );
 
   trap_SetConfigstring( CS_HUMAN_STAGES, va( "%d %d %d",
         ( IS_WARMUP ? S3 : g_humanStage.integer ),
         ( IS_WARMUP ? 99999 : g_humanCredits.integer ),
-        ( IS_WARMUP ? 0 : humanNextStageThreshold ) ) );
+        ( IS_WARMUP ? 0 : level.humanNextStageThreshold ) ) );
 }
 
 /*
@@ -2094,6 +2098,15 @@ void G_LevelRestart( qboolean stopWarmup )
   {
     trap_Cvar_Set( "g_warmup", "0" );
     trap_SetConfigstring( CS_WARMUP, va( "%d", IS_WARMUP ) );
+    trap_SetConfigstring( CS_ALIEN_STAGES, va( "%d %d %d",
+        ( g_alienStage.integer ),
+        ( g_alienCredits.integer ),
+        ( level.alienNextStageThreshold ) ) );
+
+  trap_SetConfigstring( CS_HUMAN_STAGES, va( "%d %d %d",
+        ( g_humanStage.integer ),
+        ( g_humanCredits.integer ),
+        ( level.humanNextStageThreshold ) ) );
   }
   trap_Cvar_Update( &g_cheats );
   trap_Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
@@ -2348,13 +2361,13 @@ void G_CheckVote( team_t team )
 
           if( ( ( level.clients[ i ].pers.teamSelection == team ) &&
                 ( ( level.clients[ i ].pers.voted & ( 1 << team ) ) ||
-                  ( level.time < level.clients[ i ].voterInactivityTime ) ) ) ||
+                  ( level.time < level.clients[ i ].pers.voterInactivityTime ) ) ) ||
               ( i == ( level.voteCaller[ team ]->pers.namelog->slot ) ) )
             numActiveClients++;
           break;
         default:
           if( ( level.clients[ i ].pers.voted & ( 1 << team ) ) ||
-              ( level.time < level.clients[ i ].voterInactivityTime ) ||
+              ( level.time < level.clients[ i ].pers.voterInactivityTime ) ||
               ( i == ( level.voteCaller[ team ]->pers.namelog->slot ) ) )
             numActiveClients++;
           break;
@@ -2771,6 +2784,7 @@ void G_RunFrame( int levelTime )
   if( !g_doCountdown.integer || level.countdownTime <= level.time )
   {
     G_CalculateBuildPoints( );
+    G_CalculateStages( );
     G_SpawnClients( TEAM_ALIENS );
     G_SpawnClients( TEAM_HUMANS );
     G_CalculateAvgPlayers( );
@@ -2779,7 +2793,6 @@ void G_RunFrame( int levelTime )
   if( level.fight && ( ( g_doWarmup.integer && !g_doCountdown.integer ) ||
       level.countdownTime <= ( level.time + 1000 ) ) )
     level.fight = qfalse;
-  G_CalculateStages( );
   G_UpdateBuildableRangeMarkers( );
 
   // check for warmup timeout
