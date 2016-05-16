@@ -925,10 +925,9 @@ gentity_t *fire_paraLockBlob( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *fire_slowBlob( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *fire_bounceBall( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *fire_hive( gentity_t *self, vec3_t start, vec3_t dir );
+gentity_t *fire_portalGun( gentity_t *self, vec3_t start, vec3_t dir, portal_t portal );
 gentity_t *launch_grenade( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *launch_grenade2( gentity_t *self, vec3_t start, vec3_t dir );
-gentity_t *launch_portalGun( gentity_t *self, vec3_t start, vec3_t dir, portal_t portal );
-
 
 //
 // g_mover.c
@@ -1250,6 +1249,7 @@ extern  vmCvar_t  g_allowTeamOverlay;
 extern  vmCvar_t  g_censorship;
 
 extern  vmCvar_t  g_pimpHuman;
+extern  vmCvar_t  g_portalGun;
 
 void      trap_Print( const char *fmt );
 void      trap_Error( const char *fmt ) __attribute__((noreturn));
