@@ -109,6 +109,11 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "[^3name^6|^3slot#^7]"
     },
 
+    {"explode", G_admin_explode, qfalse, "explode",
+      "Blow up a player",
+      "[^3name^6|^3slot#^7] (^5reason^7)"
+    },
+
     {"flag", G_admin_flag, qtrue, "flag",
       "add an admin flag to a player, prefix flag with '-' to disallow the flag. "
       "console can use this command on admin levels by prefacing a '*' to the admin level value.",
@@ -118,11 +123,6 @@ g_admin_cmd_t g_admin_cmds[ ] =
     {"gamedir", G_admin_gamedir, qtrue, "gamedir",
       "Filter files on the server",
       "[^3dir^7] [^3extension^7] [^3filter^7]"
-    },
-
-    {"explode", G_admin_explode, qfalse, "explode",
-      "Blow up a player",
-      "[^3name^6|^3slot#^7] (^5reason^7)"
     },
 
     {"kick", G_admin_kick, qfalse, "kick",

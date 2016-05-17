@@ -475,15 +475,30 @@ static void SpawnCorpse( gentity_t *ent )
   body->s.clientNum = ent->client->ps.stats[ STAT_CLASS ];
   body->nonSegModel = ent->client->ps.persistant[ PERS_STATE ] & PS_NONSEGMODEL;
 
+  // FIXIT-P: Looks like dead code
   if( ent->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
     body->classname = "humanCorpse";
   else
     body->classname = "alienCorpse";
 
-  body->s.misc = MAX_CLIENTS;
+  body->s.misc     = MAX_CLIENTS; // FIXIT-P: This doesn't seemto have any use. 
 
-  body->think = BodySink;
-  body->nextthink = level.time + 20000;
+  body->think      = BodySink;    // Ok, so body sinks
+  body->nextthink  = level.time + 20000; // after 20seconds
+
+  body->health     = ent->health;
+
+  if ( ent->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
+  {
+    body->takedamage = qtrue;     // Should allow body_die to call
+    body->die      = body_die;  // But it doesnt? 
+  }
+  else
+  {
+    body->takedamage = qfalse;
+    body->die      = NULL;
+  }
+
 
   body->s.legsAnim = ent->s.legsAnim;
 
@@ -495,10 +510,12 @@ static void SpawnCorpse( gentity_t *ent )
       case BOTH_DEAD1:
         body->s.torsoAnim = body->s.legsAnim = BOTH_DEAD1;
         break;
+
       case BOTH_DEATH2:
       case BOTH_DEAD2:
         body->s.torsoAnim = body->s.legsAnim = BOTH_DEAD2;
         break;
+
       case BOTH_DEATH3:
       case BOTH_DEAD3:
       default:
@@ -514,10 +531,12 @@ static void SpawnCorpse( gentity_t *ent )
       case NSPA_DEAD1:
         body->s.legsAnim = NSPA_DEAD1;
         break;
+
       case NSPA_DEATH2:
       case NSPA_DEAD2:
         body->s.legsAnim = NSPA_DEAD2;
         break;
+
       case NSPA_DEATH3:
       case NSPA_DEAD3:
       default:
@@ -526,17 +545,15 @@ static void SpawnCorpse( gentity_t *ent )
     }
   }
 
-  body->takedamage = qfalse;
-
-  body->health = ent->health;
-
   //change body dimensions
-  BG_ClassBoundingBox( ent->client->ps.stats[ STAT_CLASS ], mins, NULL, NULL, body->r.mins, body->r.maxs );
+  BG_ClassBoundingBox( ent->client->ps.stats[ STAT_CLASS ], mins, NULL, NULL,
+          body->r.mins, body->r.maxs );
 
   //drop down to match the *model* origins of ent and body
   origin[2] += mins[ 2 ] - body->r.mins[ 2 ];
 
   G_SetOrigin( body, origin );
+
   body->s.pos.trType = TR_GRAVITY;
   body->s.pos.trTime = level.time;
   VectorCopy( ent->client->ps.velocity, body->s.pos.trDelta );

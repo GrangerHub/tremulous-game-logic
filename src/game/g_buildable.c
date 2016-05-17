@@ -971,6 +971,9 @@ void AGeneric_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, i
   else
     self->nextthink = level.time; //blast immediately
 
+  G_RemoveBuildableFromStack( self->s.groundEntityNum, self->s.number );
+  G_SetBuildableDropper( self->s.number, attacker->s.number );
+
   G_RemoveRangeMarkerFrom( self );
   G_LogDestruction( self, attacker, mod );
 }
@@ -1770,17 +1773,22 @@ ATrapper_FireOnEnemy
 Used by ATrapper_Think to fire at enemy
 ================
 */
-void ATrapper_FireOnEnemy( gentity_t *self, int firespeed, float range )
+static void ATrapper_FireOnEnemy( gentity_t *self, int firespeed )
 {
   gentity_t *enemy = self->enemy;
-  vec3_t    dirToTarget;
+  vec3_t    dirToTarget, bestDirToTarget;
   vec3_t    halfAcceleration, thirdJerk;
   float     distanceToTarget = BG_Buildable( self->s.modelindex )->turretRange;
+  float     bestDistanceToTarget;
+  int       i = 0;
   int       lowMsec = 0;
   int       highMsec = (int)( (
     ( ( distanceToTarget * LOCKBLOB_SPEED ) +
       ( distanceToTarget * BG_Class( enemy->client->ps.stats[ STAT_CLASS ] )->speed ) ) /
     ( LOCKBLOB_SPEED * LOCKBLOB_SPEED ) ) * 1000.0f );
+
+  VectorSubtract( enemy->s.pos.trBase, self->s.pos.trBase, bestDirToTarget );
+  bestDistanceToTarget = VectorLength( bestDirToTarget );
 
   VectorScale( enemy->acceleration, 1.0f / 2.0f, halfAcceleration );
   VectorScale( enemy->jerk, 1.0f / 3.0f, thirdJerk );
@@ -1805,6 +1813,18 @@ void ATrapper_FireOnEnemy( gentity_t *self, int firespeed, float range )
       highMsec = partitionMsec;
     else if( projectileDistance == distanceToTarget )
       break; // unlikely to happen
+
+    if( Q_fabs( projectileDistance - distanceToTarget ) < Q_fabs( projectileDistance - bestDistanceToTarget ) )
+    {
+      VectorCopy( dirToTarget, bestDirToTarget );
+      bestDistanceToTarget = VectorLength( bestDirToTarget );
+    }
+
+    if( i > 50 )
+    {
+      VectorCopy( bestDirToTarget, dirToTarget );
+      break;
+    }
   }
 
   VectorNormalize( dirToTarget );
@@ -1823,7 +1843,7 @@ ATrapper_CheckTarget
 Used by ATrapper_Think to check enemies for validity
 ================
 */
-qboolean ATrapper_CheckTarget( gentity_t *self, gentity_t *target, int range )
+static qboolean ATrapper_CheckTarget( gentity_t *self, gentity_t *target, int range )
 {
   vec3_t    distance;
   trace_t   trace;
@@ -1870,7 +1890,7 @@ ATrapper_FindEnemy
 Used by ATrapper_Think to locate enemy gentities
 ================
 */
-void ATrapper_FindEnemy( gentity_t *ent, int range )
+static void ATrapper_FindEnemy( gentity_t *ent, int range )
 {
   gentity_t *target;
   int       i;
@@ -1920,7 +1940,7 @@ void ATrapper_Think( gentity_t *self )
 
     //if we are pointing at our target and we can fire shoot it
     if( self->count < level.time )
-      ATrapper_FireOnEnemy( self, firespeed, range );
+      ATrapper_FireOnEnemy( self, firespeed );
   }
 }
 
@@ -2132,6 +2152,9 @@ void HSpawn_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
     self->nextthink = level.time; //blast immediately
   }
 
+  G_RemoveBuildableFromStack( self->s.groundEntityNum, self->s.number );
+  G_SetBuildableDropper( self->s.number, attacker->s.number );
+
   G_RemoveRangeMarkerFrom( self );
   G_LogDestruction( self, attacker, mod );
 }
@@ -2225,6 +2248,9 @@ static void HRepeater_Die( gentity_t *self, gentity_t *inflictor, gentity_t *att
     self->think = HSpawn_Disappear;
     self->nextthink = level.time; //blast immediately
   }
+
+  G_RemoveBuildableFromStack( self->s.groundEntityNum, self->s.number );
+  G_SetBuildableDropper( self->s.number, attacker->s.number );
 
   G_RemoveRangeMarkerFrom( self );
   G_LogDestruction( self, attacker, mod );
@@ -2638,8 +2664,8 @@ HMGTurret_CheckTarget
 Used by HMGTurret_Think to check enemies for validity
 ================
 */
-qboolean HMGTurret_CheckTarget( gentity_t *self, gentity_t *target,
-                                qboolean los_check )
+static qboolean HMGTurret_CheckTarget( gentity_t *self, gentity_t *target,
+                                       qboolean los_check )
 {
   trace_t   tr;
   vec3_t    dir, end;
@@ -2671,7 +2697,7 @@ HMGTurret_TrackEnemy
 Used by HMGTurret_Think to track enemy location
 ================
 */
-qboolean HMGTurret_TrackEnemy( gentity_t *self )
+static qboolean HMGTurret_TrackEnemy( gentity_t *self )
 {
   vec3_t  dirToTarget, dttAdjusted, angleToTarget, angularDiff, xNormal;
   vec3_t  refNormal = { 0.0f, 0.0f, 1.0f };
@@ -2753,7 +2779,7 @@ HMGTurret_FindEnemy
 Used by HMGTurret_Think to locate enemy gentities
 ================
 */
-void HMGTurret_FindEnemy( gentity_t *self )
+static void HMGTurret_FindEnemy( gentity_t *self )
 {
   int       entityList[ MAX_GENTITIES ];
   vec3_t    range;
@@ -3197,6 +3223,137 @@ void G_BuildableTouchTriggers( gentity_t *ent )
   }
 }
 
+/*
+===============
+G_FindBuildableInStack
+===============
+*/
+qboolean G_FindBuildableInStack( int groundBuildableNum, int stackedBuildableNum, int *index )
+{
+  if( g_entities[ groundBuildableNum ].s.eType != ET_BUILDABLE ||
+      g_entities[ stackedBuildableNum ].s.eType != ET_BUILDABLE )
+    return qfalse;
+
+  for( *index = 0; *index < g_entities[ groundBuildableNum ].numOfStackedBuildables; *index += 1 )
+  {
+    if( g_entities[ groundBuildableNum ].buildableStack[ *index ] == stackedBuildableNum )
+      return qtrue;
+  }
+
+  return qfalse;
+}
+
+/*
+===============
+G_AddBuildableToStack
+===============
+*/
+void G_AddBuildableToStack( int groundBuildableNum, int stackedBuildableNum )
+{
+  int i;
+  int *numOfStackedBuildables;
+  gentity_t *groundBuildable;
+
+  groundBuildable = &g_entities[ groundBuildableNum ];
+
+  if( groundBuildable->s.eType != ET_BUILDABLE ||
+      g_entities[ stackedBuildableNum ].s.eType != ET_BUILDABLE )
+    return;
+
+  numOfStackedBuildables = &groundBuildable->numOfStackedBuildables;
+
+  if( *numOfStackedBuildables >= MAX_GENTITIES )
+  {
+    *numOfStackedBuildables = MAX_GENTITIES;
+    return;
+  }
+
+  if( *numOfStackedBuildables < 0 )
+    *numOfStackedBuildables = 0;
+
+  if( !G_FindBuildableInStack( groundBuildableNum, stackedBuildableNum, &i )  )
+  {
+    groundBuildable->buildableStack[ *numOfStackedBuildables ] = stackedBuildableNum;
+    *numOfStackedBuildables += 1;
+  }
+}
+
+/*
+===============
+G_RemoveBuildableFromStack
+===============
+*/
+void G_RemoveBuildableFromStack( int groundBuildableNum, int stackedBuildableNum )
+{
+  int i;
+  int *numOfStackedBuildables;
+  gentity_t *groundBuildable;
+
+  groundBuildable = &g_entities[ groundBuildableNum ];
+  
+  if( groundBuildable->s.eType != ET_BUILDABLE ||
+      g_entities[ stackedBuildableNum ].s.eType != ET_BUILDABLE )
+    return;
+
+  numOfStackedBuildables = &groundBuildable->numOfStackedBuildables;
+
+  if( *numOfStackedBuildables <= 0 )
+  {
+    *numOfStackedBuildables = 0;
+    return;
+  }
+
+  if( *numOfStackedBuildables == 1 )
+  {
+    if( groundBuildable->buildableStack[ 0 ] == stackedBuildableNum )
+      groundBuildable->buildableStack[ 0 ] = ENTITYNUM_NONE;
+
+    return;
+  }
+
+  if( *numOfStackedBuildables > MAX_GENTITIES )
+    *numOfStackedBuildables = MAX_GENTITIES;
+
+  if( G_FindBuildableInStack( groundBuildableNum, stackedBuildableNum, &i ) )
+  {
+    groundBuildable->buildableStack[ i ] = groundBuildable->buildableStack[ *numOfStackedBuildables - 1 ];
+    *numOfStackedBuildables -= 1;
+  }
+}
+
+/*
+===============
+G_SetBuildableDropper
+===============
+*/
+void G_SetBuildableDropper( int removedBuildableNum, int dropperNum )
+{
+  int i;
+  int *numOfStackedBuildables;
+  gentity_t *removedBuildable;
+
+  removedBuildable = &g_entities[ removedBuildableNum ];
+
+  if( removedBuildable->s.eType != ET_BUILDABLE )
+    return;
+
+  numOfStackedBuildables = &removedBuildable->numOfStackedBuildables;
+
+  if( *numOfStackedBuildables <= 0 )
+  {
+    *numOfStackedBuildables = 0;
+    return;
+  }
+
+  if( *numOfStackedBuildables > MAX_GENTITIES )
+    *numOfStackedBuildables = MAX_GENTITIES;
+
+  for( i = 0; i < *numOfStackedBuildables; i++ )
+  {
+    g_entities[ removedBuildable->buildableStack[ i ] ].dropperNum = dropperNum;
+    G_SetBuildableDropper( removedBuildable->buildableStack[ i ], dropperNum );
+  }
+}
 
 /*
 ===============
@@ -3278,20 +3435,33 @@ void G_BuildableThink( gentity_t *ent, int msec )
 
     if(  !IS_WARMUP && g_allowBuildableStacking.integer )
     {
+      meansOfDeath_t meansOD;
+
+      if( ent->dropperNum == ENTITYNUM_WORLD )
+        meansOD = MOD_CRUSH;
+      else
+        meansOD = MOD_DROP;
+
       if( groundEnt->s.eType == ET_BUILDABLE &&
           !BG_Buildable( groundEnt->s.modelindex )->stackable )
-        G_Damage( groundEnt, ent, ent, NULL, NULL,
-            BG_Buildable( groundEnt->s.modelindex )->health / 5, DAMAGE_NO_PROTECTION,
-            MOD_CRUSH );
+      {
+        if( groundEnt->s.modelindex != BA_H_SPAWN &&
+            groundEnt->s.modelindex != BA_A_SPAWN )
+          G_Damage( groundEnt, ent, &g_entities[ ent->dropperNum ], NULL, NULL,
+              BG_Buildable( groundEnt->s.modelindex )->health / 5, DAMAGE_NO_PROTECTION,
+              meansOD );
+        else
+          ent->damageDroppedBuildable = qtrue;
+      }
       else if( groundEnt->client &&
                !BG_Class( groundEnt->client->ps.stats[STAT_CLASS] )->stackable )
-        G_Damage( groundEnt, ent, ent, NULL, NULL,
-            20 , DAMAGE_NO_PROTECTION, MOD_CRUSH );
+        G_Damage( groundEnt, ent, &g_entities[ ent->dropperNum ], NULL, NULL,
+            20 , DAMAGE_NO_PROTECTION, meansOD );
 
       if( ent->damageDroppedBuildable )
-        G_Damage( ent, ent, ent, NULL, NULL,
+        G_Damage( ent, ent, &g_entities[ ent->dropperNum ], NULL, NULL,
             BG_Buildable( ent->s.modelindex )->health / 5, DAMAGE_NO_PROTECTION,
-            MOD_SUICIDE );
+            meansOD );
     }
   }
 
@@ -3592,7 +3762,8 @@ and list the buildables that must be destroyed if this is the case
 ===============
 */
 static itemBuildError_t G_SufficientBPAvailable( buildable_t     buildable,
-                                                 vec3_t          origin )
+                                                 vec3_t          origin,
+                                                 vec3_t          normal )
 {
   int               i;
   int               numBuildables = 0;
@@ -3669,6 +3840,18 @@ static itemBuildError_t G_SufficientBPAvailable( buildable_t     buildable,
       continue;
 
     collision = G_BuildablesIntersect( buildable, origin, ent->s.modelindex, ent->r.currentOrigin );
+
+    if( !collision && ( buildable == BA_A_SPAWN ||
+                        buildable == BA_H_SPAWN ) )
+    {
+      if( ent->deconstruct )
+        trap_LinkEntity( ent );
+
+      collision = ( G_CheckSpawnPoint( ENTITYNUM_NONE, origin, normal, buildable, NULL ) == ent );
+
+      if( ent->deconstruct )
+        trap_UnlinkEntity( ent );
+    }
 
     if( collision )
     {
@@ -3943,7 +4126,7 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
 
   contents = trap_PointContents( entity_origin, -1 );
 
-  if( ( tempReason = G_SufficientBPAvailable( buildable, origin ) ) != IBE_NONE )
+  if( ( tempReason = G_SufficientBPAvailable( buildable, origin, normal ) ) != IBE_NONE )
     reason = tempReason;
 
   if( ent->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
@@ -4038,7 +4221,7 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
       if( tempent == NULL ) // No reactor
         reason = IBE_RPTNOREAC;   
       else if( !IS_WARMUP && g_markDeconstruct.integer && g_markDeconstruct.integer != 3 &&
-               powerBuildable->s.modelindex == BA_H_REACTOR )
+               powerBuildable && powerBuildable->s.modelindex == BA_H_REACTOR )
         reason = IBE_RPTPOWERHERE;
       else if( powerBuildable &&
                ( IS_WARMUP || !g_markDeconstruct.integer || ( g_markDeconstruct.integer == 3 &&
@@ -4233,7 +4416,12 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
   built->buildTime = built->s.time = level.time;
   built->buildProgress = BG_Buildable( buildable )->buildTime;
 
+  // initialize buildable stacking variables
   built->damageDroppedBuildable = qfalse;
+  built->dropperNum = builder->s.number;
+  memset( built->buildableStack, ENTITYNUM_NONE, sizeof( built->buildableStack ) );
+  built->numOfStackedBuildables = 0;
+  G_AddBuildableToStack( groundEntNum, built->s.number );
 
   // build instantly in cheat mode
   if( builder->client && ( g_cheats.integer || IS_WARMUP ) )

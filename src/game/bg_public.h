@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define GAME_VERSION            "base"
 
 #define DEFAULT_GRAVITY         800
+#define GIB_HEALTH              -40
 
 #define VOTE_TIME               30000 // 30 seconds before vote times out
 
@@ -64,9 +65,9 @@ enum
 
   CS_VOTE_TIME,             // Vote stuff each needs NUM_TEAMS slots
   CS_VOTE_STRING      = CS_VOTE_TIME + NUM_TEAMS,
-  CS_VOTE_YES         = CS_VOTE_STRING + NUM_TEAMS,
-  CS_VOTE_NO          = CS_VOTE_YES + NUM_TEAMS,
-  CS_VOTE_CALLER      = CS_VOTE_NO + NUM_TEAMS,
+  CS_VOTE_CAST         = CS_VOTE_STRING + NUM_TEAMS,
+  CS_VOTE_ACTIVE          = CS_VOTE_CAST + NUM_TEAMS,
+  CS_VOTE_CALLER      = CS_VOTE_ACTIVE + NUM_TEAMS,
   
   CS_GAME_VERSION     = CS_VOTE_CALLER + NUM_TEAMS,
   CS_LEVEL_START_TIME,      // so the timer only shows the current level
@@ -165,10 +166,15 @@ typedef enum
 
 typedef struct
 {
-  int   pouncePayload;
-  int   repairRepeatDelay;      // Used for for the construction kit
-  float fallVelocity;
-  float luciAmmoReduction;
+  int    pouncePayload;
+  int    repairRepeatDelay;      // Used for for the construction kit
+  float  fallVelocity;
+  int    updateAnglesTime;
+  float  diffAnglesPeriod;
+  vec3_t previousFrameAngles;
+  vec3_t previousUpdateAngles;
+  vec3_t angularVelocity;
+  float  luciAmmoReduction;
 } pmoveExt_t;
 
 #define MAXTOUCH  32
@@ -213,6 +219,7 @@ typedef struct pmove_s
 
 // if a full pmove isn't done on the client, you can just update the angles
 void PM_UpdateViewAngles( playerState_t *ps, const usercmd_t *cmd );
+void PM_CalculateAngularVelocity( playerState_t *ps, const usercmd_t *cmd );
 void Pmove( pmove_t *pmove );
 
 //===================================================================================
@@ -572,7 +579,9 @@ typedef enum
   EV_LEV2_ZAP,
 
   EV_JETPACK_DEACTIVATE,
-  EV_JETPACK_REFUEL
+  EV_JETPACK_REFUEL,
+
+  EV_FIGHT
 } entity_event_t;
 
 typedef enum
@@ -900,6 +909,7 @@ typedef enum
   MOD_SLIME,
   MOD_LAVA,
   MOD_CRUSH,
+  MOD_DROP,
   MOD_TELEFRAG,
   MOD_FALLING,
   MOD_SUICIDE,
@@ -1240,7 +1250,7 @@ void                        BG_ModifyMissleLaunchVelocity( vec3_t pVelocity, vec
 #define MASK_ASTRALSOLID  (CONTENTS_SOLID|CONTENTS_PLAYERCLIP|CONTENTS_ASTRAL_NOCLIP)
 #define MASK_WATER        (CONTENTS_WATER|CONTENTS_LAVA|CONTENTS_SLIME)
 #define MASK_OPAQUE       (CONTENTS_SOLID|CONTENTS_SLIME|CONTENTS_LAVA)
-#define MASK_SHOT         (CONTENTS_SOLID|CONTENTS_BODY)
+#define MASK_SHOT         (CONTENTS_SOLID|CONTENTS_BODY|CONTENTS_CORPSE)
 
 
 //
@@ -1385,3 +1395,22 @@ typedef struct
   const char *name;
 } dummyCmd_t;
 int cmdcmp( const void *a, const void *b );
+
+typedef enum
+{
+  KICK_VOTE,
+  POLL_VOTE,
+  MUTE_VOTE,
+  UNMUTE_VOTE,
+  MAP_RESTART_VOTE,
+  MAP_VOTE,
+  NEXTMAP_VOTE,
+  DRAW_VOTE,
+  SUDDEN_DEATH_VOTE,
+  DENYBUILD_VOTE,
+  ALLOWBUILD_VOTE,
+  ADMITDEFEAT_VOTE,
+
+  NUM_VOTE_TYPES,
+  VOID_VOTE
+} vote_t;

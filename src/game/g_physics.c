@@ -62,10 +62,12 @@ static void G_Bounce( gentity_t *ent, trace_t *trace )
   else
     VectorScale( ent->s.pos.trDelta, 0.3f, ent->s.pos.trDelta );
 
-  if( VectorLength( ent->s.pos.trDelta ) < 10 )
+  if( VectorLength( ent->s.pos.trDelta ) < 10 || ent->s.eType == ET_BUILDABLE )
   {
     G_SetOrigin( ent, trace->endpos );
     ent->s.groundEntityNum = trace->entityNum;
+    if( ent->s.eType == ET_BUILDABLE )
+      G_AddBuildableToStack( ent->s.groundEntityNum, ent->s.number );
 
     // check if a buildable should be damaged at its new location
     if( !IS_WARMUP && g_allowBuildableStacking.integer && ent->s.eType == ET_BUILDABLE )
@@ -107,6 +109,9 @@ void G_Physics( gentity_t *ent, int msec )
   vec3_t    origin;
   trace_t   tr;
   int     contents;
+  int     unlinkedClientNums[ MAX_CLIENTS ];
+  int     numUnlinkedClientNums = 0;
+  int     i;
 
   // if groundentity has been set to ENTITYNUM_NONE, ent may have been pushed off an edge
   if( ent->s.groundEntityNum == ENTITYNUM_NONE )
@@ -140,10 +145,29 @@ void G_Physics( gentity_t *ent, int msec )
 
       trap_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin, ent->s.number, ent->clipmask );
 
+      while( g_entities[ tr.entityNum ].client && ( tr.fraction != 1.0f ) )
+      {
+        unlinkedClientNums[ numUnlinkedClientNums ] = tr.entityNum;
+        numUnlinkedClientNums++;
+        trap_UnlinkEntity( &g_entities[ tr.entityNum ] );
+        trap_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin, ent->s.number, ent->clipmask );
+      }
+
+      for( i = 0; i < numUnlinkedClientNums; i++ )
+        trap_LinkEntity( &g_entities[ unlinkedClientNums[ i ] ] );
+
       if( tr.fraction == 1.0f )
+      {
+        if( ent->s.groundEntityNum != ENTITYNUM_NONE )
+          G_RemoveBuildableFromStack( ent->s.groundEntityNum, ent->s.number );
         ent->s.groundEntityNum = ENTITYNUM_NONE;
+      }
       else if( ent->s.groundEntityNum != tr.entityNum )
+      {
+        G_RemoveBuildableFromStack( ent->s.groundEntityNum, ent->s.number );
         ent->s.groundEntityNum = tr.entityNum;
+        G_AddBuildableToStack( ent->s.groundEntityNum, ent->s.number );
+      }
 
       ent->nextPhysicsTime = level.time + PHYSICS_TIME;
     }

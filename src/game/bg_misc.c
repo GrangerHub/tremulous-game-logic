@@ -99,7 +99,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
-    0.5f,                  //float     minNormal;
+    0.0f,                  //float     minNormal;
     qtrue,                 //qboolean  invertNormal;
     qfalse,                //qboolean  creepTest;
     ASPAWN_CREEPSIZE,      //int       creepSize;
@@ -107,7 +107,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     ASPAWN_VALUE,          //int       value;
-    qtrue,                //qboolean  stackable;
+    qfalse,                //qboolean  stackable;
   },
   {
     BA_A_OVERMIND,         //int       number;
@@ -135,8 +135,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
-    0.0f,                 //float     minNormal;
-    qtrue,                 //qboolean  invertNormal;
+    0.95f,                 //float     minNormal;
+    qfalse,                //qboolean  invertNormal;
     qfalse,                //qboolean  creepTest;
     OVERMIND_CREEPSIZE,    //int       creepSize;
     qfalse,                //qboolean  dccTest;
@@ -281,7 +281,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
     0.707f,                //float     minNormal;
-    qfalse,                //qboolean  invertNormal;
+    qtrue,                //qboolean  invertNormal;
     qtrue,                 //qboolean  creepTest;
     BOOSTER_CREEPSIZE,     //int       creepSize;
     qfalse,                //qboolean  dccTest;
@@ -394,7 +394,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     HSPAWN_VALUE,          //int       value;
-    qtrue,                 //qboolean  stackable;
+    qfalse,                //qboolean  stackable;
   },
   {
     BA_H_MGTURRET,         //int       number;
@@ -422,7 +422,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     MGTURRET_RANGE,        //int       turretRange;
     MGTURRET_REPEAT,       //int       turretFireSpeed;
     WP_MGTURRET,           //weapon_t  turretProjType;
-    0.95f,                 //float     minNormal;
+    0.5f,                 //float     minNormal;
     qfalse,                //qboolean  invertNormal;
     qfalse,                //qboolean  creepTest;
     0,                     //int       creepSize;
@@ -494,7 +494,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
-    0.95f,                 //float     minNormal;
+    0.9f,                  //float     minNormal;
     qfalse,                //qboolean  invertNormal;
     qfalse,                //qboolean  creepTest;
     0,                     //int       creepSize;
@@ -530,7 +530,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
-    0.5f,                  //float     minNormal;
+    0.9f,                  //float     minNormal;
     qfalse,                //qboolean  invertNormal;
     qfalse,                //qboolean  creepTest;
     0,                     //int       creepSize;
@@ -639,7 +639,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
-    0.95f,                 //float     minNormal;
+    0.5f,                  //float     minNormal;
     qfalse,                //qboolean  invertNormal;
     qfalse,                //qboolean  creepTest;
     0,                     //int       creepSize;
@@ -3421,7 +3421,9 @@ char *eventnames[ ] =
   "EV_LEV2_ZAP",
 
   "EV_JETPACK_DEACTIVATE",
-  "EV_JETPACK_REFUEL"
+  "EV_JETPACK_REFUEL",
+
+  "EV_FIGHT"
 };
 
 /*
@@ -3490,6 +3492,8 @@ void BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s, qboolean 
     s->eType = ET_INVISIBLE;
   else if( ps->persistant[ PERS_SPECSTATE ] != SPECTATOR_NOT )
     s->eType = ET_INVISIBLE;
+  else if( ps->stats[ STAT_HEALTH ] <= GIB_HEALTH )
+    s->eType = ET_INVISIBLE;
   else
     s->eType = ET_PLAYER;
 
@@ -3505,12 +3509,6 @@ void BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s, qboolean 
   VectorCopy( ps->velocity, s->pos.trDelta );
 
   s->apos.trType = TR_INTERPOLATE;
-  for( i = 0; i < 3; i++ )
-  {
-    s->apos.trDelta[ i ] = ( M_PI / 180.0 ) *
-                           ( AngleDelta ( ps->viewangles[ i ], s->apos.trBase[ i ] ) / 
-                             20.0 );
-  }
   VectorCopy( ps->viewangles, s->apos.trBase );
 
   if( snap )
@@ -3600,6 +3598,8 @@ void BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s
     s->eType = ET_INVISIBLE;
   else if( ps->persistant[ PERS_SPECSTATE ] != SPECTATOR_NOT )
     s->eType = ET_INVISIBLE;
+  else if( ps->stats[ STAT_HEALTH ] <= GIB_HEALTH )
+    s->eType = ET_INVISIBLE;
   else
     s->eType = ET_PLAYER;
 
@@ -3619,12 +3619,6 @@ void BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s
   s->pos.trDuration = 50; // 1000 / sv_fps (default = 20)
 
   s->apos.trType = TR_INTERPOLATE;
-  for( i = 0; i < 3; i++ )
-  {
-    s->apos.trDelta[ i ] = ( M_PI / 180.0 ) *
-                           ( AngleDelta ( ps->viewangles[ i ], s->apos.trBase[ i ] ) / 
-                             20.0 );
-  }
   VectorCopy( ps->viewangles, s->apos.trBase );
   if( snap )
     SnapVector( s->apos.trBase );

@@ -792,6 +792,7 @@ void CG_InitWeapons( void )
     CG_RegisterWeapon( i );
 
   cgs.media.level2ZapTS = CG_RegisterTrailSystem( "models/weapons/lev2zap/lightning" );
+  cgs.media.massDriverTS = CG_RegisterTrailSystem( "models/weapons/mdriver/fireTS" );
 }
 
 
@@ -1880,6 +1881,42 @@ void CG_MissileHitEntity( weapon_t weaponNum, weaponMode_t weaponMode,
   }
 }
 
+/*
+==============
+CG_MassDriverFire
+
+Draws the mass driver trail
+==============
+*/
+
+#define MDRIVER_MUZZLE_OFFSET 48.f
+
+void CG_MassDriverFire( entityState_t *es )
+{
+  vec3_t front, frontToBack;
+  trailSystem_t *ts;
+  float length;
+
+  ts = CG_SpawnNewTrailSystem( cgs.media.massDriverTS );
+  if( !CG_IsTrailSystemValid( &ts ) )
+    return;
+
+  // trail front attaches to the player, needs to be pushed forward a bit
+  // so that it doesn't look like it shot out of the wrong location
+  VectorCopy( es->origin2, front );
+  VectorSubtract( es->pos.trBase, front, frontToBack );
+  length = VectorLength( frontToBack );
+  if( length - MDRIVER_MUZZLE_OFFSET < 0.f )
+    return;
+  VectorScale( frontToBack, 1 / length, frontToBack );
+  VectorMA( front, MDRIVER_MUZZLE_OFFSET, frontToBack, front );
+  CG_SetAttachmentPoint( &ts->frontAttachment, front );
+  CG_AttachToPoint( &ts->frontAttachment );
+
+  // trail back attaches to the impact point
+  CG_SetAttachmentPoint( &ts->backAttachment, es->pos.trBase );
+  CG_AttachToPoint( &ts->backAttachment );
+}
 
 /*
 ============================================================================
