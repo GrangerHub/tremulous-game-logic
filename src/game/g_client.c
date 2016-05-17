@@ -87,32 +87,9 @@ G_AddCreditToClient
 void G_AddCreditToClient( gclient_t *client, short credit, qboolean cap )
 {
   int capAmount;
-  gentity_t *ent;
-  int       maxHealthReserve;
 
   if( !client )
     return;
-
-  ent = &g_entities[ client - level.clients ];
-
-  maxHealthReserve = (int)( ALIEN_HP_RESERVE_MAX *
-                            client->ps.stats[ STAT_MAX_HEALTH ] );
-
-  // increase the health reserve for aliens
-  if( BG_Class( client->ps.stats[ STAT_CLASS ] )->regenRate &&
-      ( ent->health >= 0 ) &&
-      ( ent->healthReserve < maxHealthReserve ) )
-  {
-    ent->healthReserve += (int)( ALIEN_EVO_HP_RESERVE_GAIN * (float)( maxHealthReserve ) *
-                                (float)( credit / ALIEN_CREDITS_PER_KILL ) );
-
-    if( ent->healthReserve > maxHealthReserve )
-    {
-      ent->healthReserve = maxHealthReserve;
-    }
-
-    client->ps.persistant[ PERS_HEALTH_RESERVE ] = ent->healthReserve;
-  }
 
   if( IS_WARMUP )
     return;

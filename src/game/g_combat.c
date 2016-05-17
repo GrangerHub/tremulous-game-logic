@@ -146,6 +146,7 @@ float G_RewardAttackers( gentity_t *self )
   float     value, totalDamage = 0;
   int       team, i, maxHealth = 0;
   int       alienCredits = 0, humanCredits = 0;
+  int       maxHealthReserve;
   gentity_t *player;
 
   // Total up all the damage done by non-teammates
@@ -200,7 +201,26 @@ float G_RewardAttackers( gentity_t *self )
         continue;
 
       AddScore( player, stageValue );
-      
+
+      maxHealthReserve = (int)( ALIEN_HP_RESERVE_MAX *
+                                player->client->ps.stats[ STAT_MAX_HEALTH ] );
+
+      // increase the health reserve for aliens
+      if( BG_Class( player->client->ps.stats[ STAT_CLASS ] )->regenRate &&
+          ( player->health >= 0 ) &&
+          ( player->healthReserve < maxHealthReserve ) )
+      {
+        player->healthReserve += (int)( ALIEN_EVO_HP_RESERVE_GAIN * (float)( maxHealthReserve ) *
+                                    (float)( stageValue / ALIEN_CREDITS_PER_KILL ) );
+
+        if( player->healthReserve > maxHealthReserve )
+        {
+          player->healthReserve = maxHealthReserve;
+        }
+
+        player->client->ps.persistant[ PERS_HEALTH_RESERVE ] = player->healthReserve;
+      }
+
       G_AddCreditToClient( player->client, stageValue, qtrue );
 
       // killing buildables earns score and credits, but doesn't count towards stage advancement
