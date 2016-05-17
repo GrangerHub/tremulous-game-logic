@@ -2194,10 +2194,10 @@ static const weaponAttributes_t bg_weapons[ ] =
     90.0f,                //float     zoomFov;
     qfalse,               //qboolean  purchasable;
     qtrue,                //qboolean  longRanged;
-    qtrue,                //qboolean  relativeMissileSpeed;
+    qfalse,               //qboolean  relativeMissileSpeed;
     {
       {                     //impactPrediction_t impactPrediction[0];
-        WPM_PRIMARY,        //weaponMode_t  weaponMode;
+        WPM_NONE,           //weaponMode_t  weaponMode;
         TR_LINEAR,          //trType_t      trType;
         BLASTER_LIFETIME,   //int       missileLifeTime;
         BLASTER_SIZE,       //int       missileSize;
@@ -2542,10 +2542,10 @@ static const weaponAttributes_t bg_weapons[ ] =
     90.0f,                //float     zoomFov;
     qtrue,                //qboolean  purchasable;
     qtrue,                //qboolean  longRanged;
-    qtrue,                //qboolean  relativeMissileSpeed;
+    qfalse,               //qboolean  relativeMissileSpeed;
     {
       {                     //impactPrediction_t impactPrediction[0];
-        WPM_PRIMARY,        //weaponMode_t  weaponMode;
+        WPM_NONE,           //weaponMode_t  weaponMode;
         TR_LINEAR,          //trType_t      trType;
         PRIFLE_LIFETIME,    //int       missileLifeTime;
         PRIFLE_SIZE,        //int       missileSize;
@@ -2588,17 +2588,17 @@ static const weaponAttributes_t bg_weapons[ ] =
     90.0f,                //float     zoomFov;
     qtrue,                //qboolean  purchasable;
     qtrue,                //qboolean  longRanged;
-    qtrue,                //qboolean  relativeMissileSpeed;
+    qfalse,               //qboolean  relativeMissileSpeed;
     {
       {                     //impactPrediction_t impactPrediction[0];
-        WPM_SECONDARY,      //weaponMode_t  weaponMode;
+        WPM_NONE,           //weaponMode_t  weaponMode;
         TR_LINEAR,          //trType_t      trType;
         LCANNON_LIFETIME,   //int       missileLifeTime;
         LCANNON_SIZE,       //int       missileSize;
         LCANNON_SECONDARY_SPEED  //int       missileLaunchSpeed;
       },
       {                     //impactPrediction_t impactPrediction[1];
-        WPM_PRIMARY,        //weaponMode_t  weaponMode;
+        WPM_NONE,           //weaponMode_t  weaponMode;
         TR_LINEAR,          //trType_t      trType;
         LCANNON_LIFETIME,   //int       missileLifeTime;
         LCANNON_SIZE,       //int       missileSize;
@@ -2630,7 +2630,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     90.0f,                //float     zoomFov;
     qfalse,               //qboolean  purchasable;
     qfalse,               //qboolean  longRanged;
-    qtrue,                //qboolean  relativeMissileSpeed;
+    qfalse,               //qboolean  relativeMissileSpeed;
     {
       {                     //impactPrediction_t impactPrediction[0];
         WPM_NONE,           //weaponMode_t  weaponMode;
@@ -2672,7 +2672,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     90.0f,                //float     zoomFov;
     qfalse,               //qboolean  purchasable;
     qfalse,               //qboolean  longRanged;
-    qtrue,                //qboolean  relativeMissileSpeed;
+    qfalse,               //qboolean  relativeMissileSpeed;
     {
       {                     //impactPrediction_t impactPrediction[0];
         WPM_NONE,           //weaponMode_t  weaponMode;
