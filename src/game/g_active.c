@@ -1603,7 +1603,7 @@ void ClientThink_real( gentity_t *ent )
       ent->nextHPReserveRegenTime >= 0 && ent->nextHPReserveRegenTime < level.time )
   {
     float regenRate =
-        BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->regenRate;
+        BG_Class( client->ps.stats[ STAT_CLASS ] )->regenRate;
 
     if( ent->health <= 0 || ent->nextHPReserveRegenTime < 0 || regenRate == 0 )
       ent->nextHPReserveRegenTime = -1; // no regen
