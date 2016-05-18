@@ -221,8 +221,6 @@ float G_RewardAttackers( gentity_t *self )
         player->client->ps.persistant[ PERS_HEALTH_RESERVE ] = player->healthReserve;
       }
 
-      G_AddCreditToClient( player->client, stageValue, qtrue );
-
       // killing buildables earns score and credits, but doesn't count towards stage advancement
       if( ( !IS_WARMUP ) && ( self->s.eType != ET_BUILDABLE ) )
       {
@@ -232,6 +230,16 @@ float G_RewardAttackers( gentity_t *self )
         else if( player->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
           humanCredits += stageValue;
       }
+
+      // account for previous partial rewards from the time of damage infliction
+      if( self->client && 
+          player->client->ps.stats[ STAT_CLASS ] != PCL_ALIEN_LEVEL1 &&
+          player->client->ps.stats[ STAT_CLASS ] != PCL_ALIEN_LEVEL1_UPG )
+      {
+        stageValue = (int)( ( 1 - PARTIAL_DAMAGE_CREDITS ) * (float)( stageValue ) );
+      }
+
+      G_AddCreditToClient( player->client, stageValue, qtrue );
     }
     self->credits[ i ] = 0;
   }
@@ -976,6 +984,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 {
   gclient_t *client;
   int     take;
+  int     value = 0;
   int     asave = 0;
   int     knockback;
 
@@ -1229,7 +1238,21 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
     // add to the attackers "account" on the target
     if( attacker->client && attacker != targ )
-      targ->credits[ attacker->client->ps.clientNum ] += take;
+    {
+        targ->credits[ attacker->client->ps.clientNum ] += take;
+
+      // reward some of the credits upon damage infliction before a kill
+      if( targ->client &&
+          attacker->client->pers.teamSelection != targ->client->pers.teamSelection &&
+          attacker->client->ps.stats[ STAT_CLASS ] != PCL_ALIEN_LEVEL1 &&
+          attacker->client->ps.stats[ STAT_CLASS ] != PCL_ALIEN_LEVEL1_UPG )
+      {
+          value = BG_GetValueOfPlayer( &targ->client->ps );
+          value = (int)( PARTIAL_DAMAGE_CREDITS * (float)( value ) * (float)( take ) /
+                  (float)( targ->client->ps.stats[ STAT_MAX_HEALTH ] ) );
+          G_AddCreditToClient( attacker->client, value, qtrue );
+      }
+    }
 
     if( targ->health <= 0 )
     {
