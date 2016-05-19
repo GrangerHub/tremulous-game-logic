@@ -1039,6 +1039,9 @@ void CheckGrabAttack( gentity_t *ent )
   vec3_t    end, dir;
   gentity_t *traceEnt;
 
+  // reset autoswipping
+  ent->client->ps.stats[ STAT_STATE ] &= ~SS_GRABBING;
+
   // set aiming directions
   AngleVectors( ent->client->ps.viewangles, forward, right, up );
 
@@ -1085,6 +1088,9 @@ void CheckGrabAttack( gentity_t *ent )
     }
 
     traceEnt->client->ps.stats[ STAT_STATE ] |= SS_GRABBED;
+
+    // for autoswipping grabbed clients
+    ent->client->ps.stats[ STAT_STATE ] |= SS_GRABBING;
 
     if( ent->client->ps.weapon == WP_ALEVEL1 )
       traceEnt->client->grabExpiryTime = level.time + LEVEL1_GRAB_TIME;

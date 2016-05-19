@@ -269,6 +269,7 @@ typedef enum
 #define SS_HEALING_2X           0x00000800 // medkit or double healing rate
 #define SS_HEALING_3X           0x00001000 // triple healing rate
 #define SS_HOVELING             0x00002000
+#define SS_GRABBING             0x00004000
 
 #define SB_VALID_TOGGLEBIT      0x00004000
 
