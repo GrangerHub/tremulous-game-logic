@@ -1095,6 +1095,9 @@ void CheckGrabAttack( gentity_t *ent )
 
       traceEnt->lev1Grabbed = qtrue;
       traceEnt->lev1GrabTime = level.time;
+
+      // for autoswipping grabbed rets
+      ent->client->ps.stats[ STAT_STATE ] |= SS_GRABBING;
   }
 }
 
