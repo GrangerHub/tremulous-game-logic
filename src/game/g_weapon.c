@@ -298,13 +298,13 @@ void meleeAttack( gentity_t *ent, float range, float width, float height,
 {
   trace_t   tr;
   gentity_t *traceEnt;
-  float n;
+  int n;
   float widthAdjusted, heightAdjusted;
 
-  for( n=0; n <= 5; ++n )
+  for( n = 0; n <= 5; ++n )
   {
-    widthAdjusted = ( width * n ) / 5.00f;
-    heightAdjusted = ( height * n ) / 5.00f;
+    widthAdjusted = ( width * (float)( n ) ) / 5.00f;
+    heightAdjusted = ( height * (float)( n ) ) / 5.00f;
 
     G_WideTrace( &tr, ent, range, widthAdjusted, heightAdjusted, &traceEnt );
     if( traceEnt != NULL && traceEnt->takedamage )
