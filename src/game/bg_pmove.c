@@ -3125,6 +3125,10 @@ static void PM_Weapon( void )
     pm->pmext->repairRepeatDelay -= pml.msec;
   if( pm->pmext->repairRepeatDelay < 0 )
     pm->pmext->repairRepeatDelay = 0;
+  if( pm->pmext->gasTime > 0 )
+    pm->pmext->gasTime -= pml.msec;
+  if( pm->pmext->gasTime < 0 )
+    pm->pmext->gasTime = 0;
 
   // no slash during charge
   if( pm->ps->stats[ STAT_STATE ] & SS_CHARGING )
@@ -3179,6 +3183,17 @@ static void PM_Weapon( void )
       }
     }
   }
+
+  // release advanced basilisk gas ( better out than in )
+  if( BG_Weapon( pm->ps->weapon )->hasAltMode &&
+      ( pm->ps->weapon == WP_ALEVEL1_UPG ) &&
+      ( pm->pmext->gasTime <= 0 ) && attack2 )
+  {
+    pm->ps->generic1 = WPM_SECONDARY;
+    PM_AddEvent( EV_FIRE_WEAPON2 );
+    pm->pmext->gasTime += BG_Weapon( pm->ps->weapon )->repeatRate2;  // basi gas has an independent timer
+  }
+      
 
   if( pm->ps->weaponTime > 0 )
     return;
@@ -3376,7 +3391,7 @@ static void PM_Weapon( void )
       return;
     }
   }
-  else if( attack2 )
+  else if( attack2 && ( pm->ps->weapon != WP_ALEVEL1_UPG ) )
   {
     if( BG_Weapon( pm->ps->weapon )->hasAltMode )
     {

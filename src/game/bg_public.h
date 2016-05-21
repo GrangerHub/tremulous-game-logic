@@ -175,6 +175,7 @@ typedef struct
   vec3_t previousUpdateAngles;
   vec3_t angularVelocity;
   float  luciAmmoReduction;
+  int    gasTime;
 } pmoveExt_t;
 
 #define MAXTOUCH  32
