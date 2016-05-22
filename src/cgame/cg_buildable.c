@@ -622,6 +622,11 @@ static void CG_PositionAndOrientateBuildable( const vec3_t angles, const vec3_t 
     // this is either too far off of the bbox to be useful for gameplay purposes
     //  or the model is positioned in thin air anyways.
     fraction = 0;
+  } else if( normal[ 0 ] == 0  && normal[ 1 ] == 0 )
+  {
+    // don't allow buildable models to drop at all if the surface normal is alligned
+    // vertically
+    fraction = 0;
   }
 
   VectorMA( inOrigin, fraction * -TRACE_DEPTH, normal, outOrigin );
