@@ -1065,7 +1065,7 @@ void CheckGrabAttack( gentity_t *ent )
 
   traceEnt = &g_entities[ tr.entityNum ];
 
-  if( !traceEnt->takedamage )
+  if( !traceEnt->takedamage || traceEnt->health <= 0 )
     return;
 
   if( traceEnt->client )
