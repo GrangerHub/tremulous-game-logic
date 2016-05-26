@@ -233,8 +233,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
 
-#define ALIEN_BHLTH_MODIFIER        1.0f
+#define ALIEN_BHLTH_MODIFIER        4.0f
 #define ABHM(h)                     ((int)((float)h*ALIEN_BHLTH_MODIFIER))
+
+#define ALIEN_BDMG_MODIFIER         (1.0f/4.0f)
+#define ABDM(d)                     ((int)((float)d*ALIEN_BDMG_MODIFIER))
 
 #define CREEP_BASESIZE              700
 #define CREEP_TIMEOUT               1000
@@ -284,7 +287,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ACIDTUBE_SPLASHDAMAGE       50
 #define ACIDTUBE_SPLASHRADIUS       300
 #define ACIDTUBE_CREEPSIZE          120
-#define ACIDTUBE_DAMAGE             6
+#define ACIDTUBE_DAMAGE             ABDM(6)
 #define ACIDTUBE_RANGE              300.0f
 #define ACIDTUBE_REPEAT             200
 #define ACIDTUBE_REPEAT_ANIM        2000
@@ -301,7 +304,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define HIVE_LIFETIME               3000
 #define HIVE_REPEAT                 3000
 #define HIVE_K_SCALE                1.0f
-#define HIVE_DMG                    80
+#define HIVE_DMG                    ABDM(80)
 #define HIVE_SPEED                  320.0f
 #define HIVE_DIR_CHANGE_PERIOD      500
 #define HIVE_VALUE                  0
@@ -549,8 +552,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
 
-#define HUMAN_BHLTH_MODIFIER        1.0f
+#define HUMAN_BHLTH_MODIFIER        4.0f
 #define HBHM(h)                     ((int)((float)h*HUMAN_BHLTH_MODIFIER))
+
+#define HUMAN_BDMG_MODIFIER         (1.0f/4.0f)
+#define HBDM(d)                     ((int)((float)d*HUMAN_BDMG_MODIFIER))
 
 #define REACTOR_BASESIZE            1000
 #define REPEATER_BASESIZE           500
@@ -586,7 +592,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MGTURRET_K_SCALE            1.0f
 #define MGTURRET_RANGE              400.0f
 #define MGTURRET_SPREAD             200
-#define MGTURRET_DMG                HDM(3)
+#define MGTURRET_DMG                HBDM(3)
 #define MGTURRET_SPINUP_TIME        950 // time between target sighted and fire
 #define MGTURRET_VALUE              0
 #define MGTURRET_DCC_ANGULARSPEED       15
@@ -601,7 +607,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define TESLAGEN_REPEAT             250
 #define TESLAGEN_K_SCALE            4.0f
 #define TESLAGEN_RANGE              250
-#define TESLAGEN_DMG                HDM(9)
+#define TESLAGEN_DMG                HBDM(9)
 #define TESLAGEN_VALUE              0
 
 #define DC_BP                       8
