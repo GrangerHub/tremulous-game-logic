@@ -239,6 +239,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ALIEN_BDMG_MODIFIER         (1.0f/4.0f)
 #define ABDM(d)                     ((int)((float)d*ALIEN_BDMG_MODIFIER))
 
+#define ALIEN_BREGEN_MODIFIER       (1.0f/4.0f)
+#define ABRM(r)                     ((int)((float)r*ALIEN_BREGEN_MODIFIER))
+
 #define CREEP_BASESIZE              700
 #define CREEP_TIMEOUT               1000
 #define CREEP_MODIFIER              0.5f
@@ -251,7 +254,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ASPAWN_BP                   10
 #define ASPAWN_BT                   15000
 #define ASPAWN_HEALTH               ABHM(250)
-#define ASPAWN_REGEN                8
+#define ASPAWN_REGEN                ABRM(8)
 #define ASPAWN_SPLASHDAMAGE         50
 #define ASPAWN_SPLASHRADIUS         100
 #define ASPAWN_CREEPSIZE            120
@@ -260,7 +263,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define BARRICADE_BP                8
 #define BARRICADE_BT                20000
 #define BARRICADE_HEALTH            ABHM(300)
-#define BARRICADE_REGEN             14
+#define BARRICADE_REGEN             ABRM(14)
 #define BARRICADE_SPLASHDAMAGE      50
 #define BARRICADE_SPLASHRADIUS      100
 #define BARRICADE_CREEPSIZE         120
@@ -271,7 +274,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define BOOSTER_BP                  12
 #define BOOSTER_BT                  15000
 #define BOOSTER_HEALTH              ABHM(150)
-#define BOOSTER_REGEN               8
+#define BOOSTER_REGEN               ABRM(8)
 #define BOOSTER_SPLASHDAMAGE        50
 #define BOOSTER_SPLASHRADIUS        100
 #define BOOSTER_CREEPSIZE           120
@@ -283,7 +286,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ACIDTUBE_BP                 8
 #define ACIDTUBE_BT                 15000
 #define ACIDTUBE_HEALTH             ABHM(125)
-#define ACIDTUBE_REGEN              10
+#define ACIDTUBE_REGEN              ABRM(10)
 #define ACIDTUBE_SPLASHDAMAGE       50
 #define ACIDTUBE_SPLASHRADIUS       300
 #define ACIDTUBE_CREEPSIZE          120
@@ -296,7 +299,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define HIVE_BP                     12
 #define HIVE_BT                     20000
 #define HIVE_HEALTH                 ABHM(125)
-#define HIVE_REGEN                  10
+#define HIVE_REGEN                  ABRM(10)
 #define HIVE_SPLASHDAMAGE           30
 #define HIVE_SPLASHRADIUS           200
 #define HIVE_CREEPSIZE              120
@@ -312,7 +315,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define HOVEL_BP                     0
 #define HOVEL_BT                     15000
 #define HOVEL_HEALTH                 ABHM(375)
-#define HOVEL_REGEN                  20
+#define HOVEL_REGEN                  ABRM(20)
 #define HOVEL_SPLASHDAMAGE           20
 #define HOVEL_SPLASHRADIUS           200
 #define HOVEL_CREEPSIZE              120
@@ -321,7 +324,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define TRAPPER_BP                  8
 #define TRAPPER_BT                  12000
 #define TRAPPER_HEALTH              ABHM(50)
-#define TRAPPER_REGEN               6
+#define TRAPPER_REGEN               ABRM(6)
 #define TRAPPER_SPLASHDAMAGE        15
 #define TRAPPER_SPLASHRADIUS        100
 #define TRAPPER_CREEPSIZE           30
@@ -337,7 +340,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define OVERMIND_BP                 0
 #define OVERMIND_BT                 30000
 #define OVERMIND_HEALTH             ABHM(750)
-#define OVERMIND_REGEN              6
+#define OVERMIND_REGEN              ABRM(6)
 #define OVERMIND_SPLASHDAMAGE       15
 #define OVERMIND_SPLASHRADIUS       300
 #define OVERMIND_CREEPSIZE          120
@@ -500,7 +503,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define HBUILD_PRICE                0
 #define HBUILD_REPEAT               1000
-#define HBUILD_HEALRATE             18
+#define HBUILD_HEALRATE             HBRM(18)
 
 /*
  * HUMAN upgrades
@@ -557,6 +560,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define HUMAN_BDMG_MODIFIER         (1.0f/4.0f)
 #define HBDM(d)                     ((int)((float)d*HUMAN_BDMG_MODIFIER))
+
+#define HUMAN_BREGEN_MODIFIER       (1.0f/4.0f)
+#define HBRM(r)                     ((int)((float)r*HUMAN_BREGEN_MODIFIER))
+
 
 #define REACTOR_BASESIZE            1000
 #define REPEATER_BASESIZE           500
@@ -616,7 +623,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define DC_SPLASHDAMAGE             50
 #define DC_SPLASHRADIUS             100
 #define DC_ATTACK_PERIOD            10000 // how often to spam "under attack"
-#define DC_HEALRATE                 4
+#define DC_HEALRATE                 HBRM(4)
 #define DC_RANGE                    10000
 #define DC_VALUE                    0
 
