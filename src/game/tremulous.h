@@ -233,13 +233,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
 
-#define ALIEN_BHLTH_MODIFIER        4.0f
+#define ALIEN_BHLTH_MODIFIER        2.0f
 #define ABHM(h)                     ((int)((float)h*ALIEN_BHLTH_MODIFIER))
 
-#define ALIEN_BDMG_MODIFIER         (1.0f/4.0f)
+#define ALIEN_BDMG_MODIFIER         (1.0f/2.0f)
 #define ABDM(d)                     ((int)((float)d*ALIEN_BDMG_MODIFIER))
 
-#define ALIEN_BREGEN_MODIFIER       (1.0f/4.0f)
+#define ALIEN_BREGEN_MODIFIER       (1.0f/2.0f)
 #define ABRM(r)                     ((int)((float)r*ALIEN_BREGEN_MODIFIER))
 
 #define CREEP_BASESIZE              700
@@ -555,13 +555,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
 
-#define HUMAN_BHLTH_MODIFIER        4.0f
+#define HUMAN_BHLTH_MODIFIER        2.0f
 #define HBHM(h)                     ((int)((float)h*HUMAN_BHLTH_MODIFIER))
 
-#define HUMAN_BDMG_MODIFIER         (1.0f/4.0f)
+#define HUMAN_BDMG_MODIFIER         (1.0f/2.0f)
 #define HBDM(d)                     ((int)((float)d*HUMAN_BDMG_MODIFIER))
 
-#define HUMAN_BREGEN_MODIFIER       (1.0f/4.0f)
+#define HUMAN_BREGEN_MODIFIER       (1.0f/2.0f)
 #define HBRM(r)                     ((int)((float)r*HUMAN_BREGEN_MODIFIER))
 
 
