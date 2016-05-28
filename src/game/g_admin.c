@@ -3684,7 +3684,7 @@ qboolean G_admin_playpool( gentity_t *ent )
       page = atoi( map ) - 1;
     } else page = 0;
 
-    G_PrintPlayMapPool( NULL, page );
+    G_PrintPlayMapPool( ent, page );
     ADMP( "\n" );
 
     return qtrue;
