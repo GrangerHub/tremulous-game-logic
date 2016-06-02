@@ -190,8 +190,11 @@ struct gentity_s
   team_t            buildableTeam;      // buildable item team
   gentity_t         *parentNode;        // for creep and defence/spawn dependencies
   gentity_t         *rangeMarker;
+  gentity_t         *nextTeleporter;    // for linking human teleporter buildables
   qboolean          active;             // for power repeater, but could be useful elsewhere
   qboolean          powered;            // for human buildables
+  int               batteryPower;       // amount of time a human buildable can remain powered
+                                        // without an external power source
   struct namelog_s  *builtBy;           // person who built this
   int               dcc;                // number of controlling dccs
   qboolean          spawned;            // whether or not this buildable has finished spawning
@@ -210,6 +213,11 @@ struct gentity_s
                                         // every single frame.. so only do it periodically
   int               clientSpawnTime;    // the time until this spawn can spawn a client
   int               spawnBlockTime;     // timer for anti spawn block
+  int               attemptSpawnTime;   // timer for attempting to spawn
+  int               teleporterActivated;// timer for indicating if a teleporter is in use
+  int               teleporterActivator;// the number of the entity that is currently using this teleporter
+  int               teleporterCoolDown; // cool down time before this teleporter can be used again
+  qboolean          noTelefrag;         // don't telefrag at the next time you teleport
 
   qboolean          lev1Grabbed;        //TA: for turrets interacting with lev1s
   int               lev1GrabTime;       //TA: for turrets interacting with lev1s
@@ -684,6 +692,8 @@ typedef struct
   spawnQueue_t      alienSpawnQueue;
   spawnQueue_t      humanSpawnQueue;
 
+  gentity_t         *teleporters;                    //  pointer for the linking of human teleporter buildables
+
   int               alienStage2Time;
   int               alienStage3Time;
   int               humanStage2Time;
@@ -827,6 +837,9 @@ typedef enum
 gentity_t         *G_CheckSpawnPoint( int spawnNum, const vec3_t origin,
                                       const vec3_t normal, buildable_t spawn,
                                       vec3_t spawnOrigin );
+
+void              G_RemoveTeleporter( gentity_t *self );
+void              G_UseTeleporter( gentity_t *entry, gentity_t *activator );
 
 buildable_t       G_IsPowered( vec3_t origin );
 qboolean          G_IsDCCBuilt( void );

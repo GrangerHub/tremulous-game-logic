@@ -156,7 +156,7 @@ gentity_t *G_CheckSpawnPoint( int spawnNum, const vec3_t origin,
     displacement = ( maxs[ 2 ] + MAX_ALIEN_BBOX ) * M_ROOT3 + 1.0f;
     VectorMA( origin, displacement, normal, localOrigin );
   }
-  else if( spawn == BA_H_SPAWN )
+  else if( spawn == BA_H_SPAWN || spawn == BA_H_TELEPORTER)
   {
     BG_ClassBoundingBox( PCL_HUMAN, cmins, cmaxs, NULL, NULL, NULL );
 
@@ -191,7 +191,38 @@ Move spawn blockers
 */
 static void G_PuntBlocker( gentity_t *self, gentity_t *blocker )
 {
-  vec3_t nudge;
+  vec3_t     nudge;
+  gentity_t  *tempEnt, *blockers[ MAX_GENTITIES ];
+  int        i, numBlockers = 0;
+
+  if( !g_antiSpawnBlock.integer )
+    return;
+
+  if( self->attemptSpawnTime < level.time )
+  {
+    self->spawnBlockTime = 0;
+    return;
+  }
+
+  for( tempEnt = blocker; tempEnt; tempEnt = G_CheckSpawnPoint( self->s.number,
+                                                    self->r.currentOrigin, self->s.origin2,
+                                                    self->s.modelindex, NULL ) )
+  {
+    if( tempEnt->client )
+    {
+      blockers[ numBlockers ] = tempEnt;
+      numBlockers++;
+      trap_UnlinkEntity( tempEnt );
+    }
+  }
+
+  for( i = 0; i < numBlockers; i++ )
+  {
+    trap_LinkEntity( blockers[ i ] );
+  }
+
+  if( numBlockers <= 0 )
+    return;
 
   if( self )
   {
@@ -201,26 +232,202 @@ static void G_PuntBlocker( gentity_t *self, gentity_t *blocker )
       self->spawnBlockTime = level.time;
       return;
     }
-    else if( level.time - self->spawnBlockTime > 10000 )
+    else if( level.time - self->spawnBlockTime > 5000 )
     {
       // still blocked, get rid of them
-      G_Damage( blocker, NULL, NULL, NULL, NULL, 10000, 0, MOD_TRIGGER_HURT );
+      for( i = 0; i < numBlockers; i++ )
+        G_Damage( blockers[ i ], NULL, NULL, NULL, NULL, 10000, 0, MOD_TRIGGER_HURT );
+
       self->spawnBlockTime = 0;
-      return;
-    }
-    else if( level.time - self->spawnBlockTime < 5000 )
-    {
-      // within grace period
       return;
     }
   }
 
-  nudge[ 0 ] = crandom() * 250.0f;
-  nudge[ 1 ] = crandom() * 250.0f;
-  nudge[ 2 ] = 175.0f;
+  for( i = 0; i < numBlockers; i++ )
+  {
+    nudge[ 0 ] = crandom() * 250.0f;
+    nudge[ 1 ] = crandom() * 250.0f;
+    nudge[ 2 ] = 100.0f;
 
-  VectorAdd( blocker->client->ps.velocity, nudge, blocker->client->ps.velocity );
-  trap_SendServerCommand( blocker - g_entities, "cp \"Don't spawn block!\"" );
+    VectorAdd( blockers[ i ]->client->ps.velocity, nudge, blockers[ i ]->client->ps.velocity );
+    if( self->s.modelindex == BA_H_TELEPORTER )
+      trap_SendServerCommand( blockers[ i ] - g_entities, "cp \"Don't block teleporters!\"" );
+    else
+      trap_SendServerCommand( blockers[ i ] - g_entities, "cp \"Don't spawn block!\"" );
+  }
+}
+
+/*
+================
+G_AddTeleporter
+
+adds a teleporter to the teleporter linked list
+================
+*/
+static void G_AddTeleporter( gentity_t *self )
+{
+  self->nextTeleporter = level.teleporters;
+  level.teleporters = self;
+  self->teleporterActivated = -1;
+  self->teleporterActivator = ENTITYNUM_NONE;
+  self->teleporterCoolDown = -1;
+
+  return;
+}
+
+/*
+================
+G_RemoveTeleporter
+
+remove a teleporter to the teleporter linked list
+================
+*/
+void G_RemoveTeleporter( gentity_t *self )
+{
+  gentity_t *search;
+
+  search = level.teleporters;
+
+  // check if the teleporter linked list is empty
+  if( !search )
+    return;
+
+  // check if the teleporter is first in the teleporter linked list
+  if( search == self )
+  {
+    level.teleporters = self->nextTeleporter;
+    return;
+  }
+
+  while( search->nextTeleporter != self )
+  {
+    if( !search->nextTeleporter )
+      // this teleporter isn't in the teleporter linked list
+      return;
+
+    search = search->nextTeleporter;
+  }
+
+  // remove the teleporter
+  search->nextTeleporter = self->nextTeleporter;
+
+  return;
+}
+
+/*
+================
+G_UseTeleporter
+
+teleport to a functional destination teleporter
+================
+*/
+void G_UseTeleporter( gentity_t *entry, gentity_t *activator )
+{
+  gentity_t *destination, *blocker, *search;
+  vec3_t    origin, angles;
+
+  if( !entry->spawned )
+    return;
+
+  if( entry->health <= 0 )
+    return;
+
+  if( !entry->powered )
+    return;
+
+  if( entry->s.groundEntityNum == ENTITYNUM_NONE )
+    return;
+
+  if( !activator->client || activator->client->pers.teamSelection != TEAM_HUMANS )
+    return;
+
+  if( activator->client->pers.classSelection == PCL_HUMAN_BSUIT )
+  {
+    trap_SendServerCommand( activator - g_entities,
+                            "cp \"^1Battle suits can't use this teleporter!\"" );
+    return;
+  }
+
+  destination = blocker = NULL;
+
+  // find an operational destination teleporter
+  for( search = ( entry->nextTeleporter  ) ? entry->nextTeleporter : level.teleporters;
+       !destination && ( search != entry );
+       search = ( search->nextTeleporter ) ? search->nextTeleporter : level.teleporters )
+  {
+    if( !search->spawned )
+      continue;
+
+    if( search->health <= 0 )
+      continue;
+
+    if( !search->powered )
+      continue;
+
+    if( search->s.groundEntityNum == ENTITYNUM_NONE )
+      continue;
+
+    if( search->teleporterActivator != activator->s.number && 
+        search->teleporterActivated >= level.time )
+      continue;
+
+    if( ( blocker = G_CheckSpawnPoint( search->s.number, search->r.currentOrigin,
+          search->s.origin2, BA_H_TELEPORTER, origin ) ) != NULL && !blocker->client )
+      continue;
+
+    destination = search;
+  }
+
+  if( !destination )
+  {
+    trap_SendServerCommand( activator - g_entities,
+                            "cp \"^1There are no operational destination teleporters available!\"" );
+    return;
+  }
+
+  if( entry->teleporterCoolDown >= level.time ||
+      destination->teleporterCoolDown >= level.time )
+  {
+    entry->teleporterActivated = level.time + 1000;
+    entry->teleporterActivator = activator->s.number;
+    destination->teleporterActivated = level.time + 1000;
+    destination->teleporterActivator = activator->s.number;
+    trap_SendServerCommand( activator - g_entities,
+                            "cp \"^3Teleporters cooling down! Please stand by for teleportation!\"");
+  } else if( blocker && blocker->client )
+  {
+    entry->teleporterActivated = level.time + 1000;
+    entry->teleporterActivator = activator->s.number;
+    destination->attemptSpawnTime = level.time + 1000;
+    destination->teleporterActivated = level.time + 1000;
+    destination->teleporterActivator = activator->s.number;
+    trap_SendServerCommand( activator - g_entities,
+                            "cp \"^3Removing a blocker! Please stand by for teleportation!\"");
+  } else
+  {
+    entry->teleporterActivated = -1;
+    entry->teleporterActivator = ENTITYNUM_NONE;
+    destination->attemptSpawnTime = -1;
+    destination->teleporterActivated = -1;
+    destination->teleporterActivator = ENTITYNUM_NONE;
+
+    VectorCopy( destination->r.currentAngles, angles );
+    angles[ ROLL ] = 0;
+    angles[ YAW ] += 180.0f;
+    AngleNormalize360( angles[ YAW ] );
+
+    // teleport the player
+    G_SetBuildableAnim( entry, BANIM_SPAWN1, qtrue );
+    G_SetBuildableAnim( destination, BANIM_SPAWN1, qtrue );
+    activator->noTelefrag = qtrue;
+    G_ForceWeaponChange( activator, activator->client->ps.weapon );
+    TeleportPlayer( activator, origin, angles, 0.0f );
+
+    entry->teleporterCoolDown = level.time + HTELEPORTER_COOLDOWN_TIME;
+    destination->teleporterCoolDown = level.time + HTELEPORTER_COOLDOWN_TIME;
+  }
+
+  return;
 }
 
 #define POWER_REFRESH_TIME  2000
@@ -288,7 +495,12 @@ qboolean G_FindPower( gentity_t *self, qboolean searchUnspawned )
   }
 
   self->parentNode = closestPower;
-  return self->parentNode != NULL;
+
+  // extend the batery power supply
+  if(  self->parentNode )
+    self->batteryPower = level.time + BG_Buildable( self->s.modelindex )->batteryPower;
+
+  return self->batteryPower >= level.time;
 }
 
 /*
@@ -1068,19 +1280,17 @@ void ASpawn_Think( gentity_t *self )
             G_Damage( ent, NULL, g_entities + ent->builtBy->slot, NULL, NULL, 10000, 0, MOD_SUICIDE );
           else
             G_Damage( ent, NULL, NULL, NULL, NULL, 10000, 0, MOD_SUICIDE );
-
-          G_SetBuildableAnim( self, BANIM_SPAWN1, qtrue );
+          
+          if( ent->health > 0 )
+            G_SetBuildableAnim( self, BANIM_SPAWN1, qtrue );
         }
         else if( ent->s.number == ENTITYNUM_WORLD || ent->s.eType == ET_MOVER )
         {
           G_Damage( self, NULL, NULL, NULL, NULL, 10000, 0, MOD_SUICIDE );
           return;
         }
-        else if( g_antiSpawnBlock.integer &&
-                 ent->client && ent->client->pers.teamSelection == TEAM_ALIENS )
-        {
-          G_PuntBlocker( self, ent );
-        }
+
+        G_PuntBlocker( self, ent );
 
         if( ent->s.eType == ET_CORPSE )
           G_FreeEntity( ent ); //quietly remove
@@ -2155,6 +2365,9 @@ void HSpawn_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   G_RemoveBuildableFromStack( self->s.groundEntityNum, self->s.number );
   G_SetBuildableDropper( self->s.number, attacker->s.number );
 
+  if( self->s.modelindex == BA_H_TELEPORTER )
+    G_RemoveTeleporter( self );
+
   G_RemoveRangeMarkerFrom( self );
   G_LogDestruction( self, attacker, mod );
 }
@@ -2173,33 +2386,31 @@ void HSpawn_Think( gentity_t *self )
   // set parentNode
   self->powered = G_FindPower( self, qfalse );
 
-  if( self->spawned )
+  if( self->spawned && !( self->s.modelindex == BA_H_TELEPORTER && !self->powered ) )
   {
     //only suicide if at rest
     if( self->s.groundEntityNum != ENTITYNUM_NONE )
     {
       if( ( ent = G_CheckSpawnPoint( self->s.number, self->r.currentOrigin,
-              self->s.origin2, BA_H_SPAWN, NULL ) ) != NULL )
+              self->s.origin2, self->s.modelindex, NULL ) ) != NULL )
       {
         // If the thing blocking the spawn is a buildable, kill it. 
         // If it's part of the map, kill self. 
         if( ent->s.eType == ET_BUILDABLE )
         {
-          G_Damage( ent, NULL, NULL, NULL, NULL, self->health, 0, MOD_SUICIDE );
-          G_SetBuildableAnim( self, BANIM_SPAWN1, qtrue );
+          if( ent->health > 0 )
+            G_SetBuildableAnim( self, BANIM_SPAWN1, qtrue );
+
+          G_Damage( ent, NULL, NULL, NULL, NULL, ent->health, 0, MOD_SUICIDE );
         }
         else if( ent->s.number == ENTITYNUM_WORLD || ent->s.eType == ET_MOVER )
         {
           G_Damage( self, NULL, NULL, NULL, NULL, self->health, 0, MOD_SUICIDE );
           return;
         }
-        else if( g_antiSpawnBlock.integer &&
-                 ent->client && ent->client->pers.teamSelection == TEAM_HUMANS )
-        {
-          G_PuntBlocker( self, ent );
-        }
+        
+        G_PuntBlocker( self, ent );
  
-
         if( ent->s.eType == ET_CORPSE )
           G_FreeEntity( ent ); //quietly remove
       }
@@ -3446,11 +3657,12 @@ void G_BuildableThink( gentity_t *ent, int msec )
           !BG_Buildable( groundEnt->s.modelindex )->stackable )
       {
         if( groundEnt->s.modelindex != BA_H_SPAWN &&
+            groundEnt->s.modelindex != BA_H_TELEPORTER &&
             groundEnt->s.modelindex != BA_A_SPAWN )
           G_Damage( groundEnt, ent, &g_entities[ ent->dropperNum ], NULL, NULL,
               BG_Buildable( groundEnt->s.modelindex )->health / 5, DAMAGE_NO_PROTECTION,
               meansOD );
-        else
+        else if( ( groundEnt->s.modelindex != BA_H_TELEPORTER ) || groundEnt->powered )
           ent->damageDroppedBuildable = qtrue;
       }
       else if( groundEnt->client &&
@@ -4415,6 +4627,11 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
   level.numUnspawnedBuildables[ built->buildableTeam ]++;
   built->buildTime = built->s.time = level.time;
   built->buildProgress = BG_Buildable( buildable )->buildTime;
+  built->attemptSpawnTime = -1;
+  built->batteryPower = -1;
+
+  if( buildable == BA_H_TELEPORTER )
+    G_AddTeleporter( built );
 
   // initialize buildable stacking variables
   built->damageDroppedBuildable = qfalse;
@@ -4489,6 +4706,11 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
       break;
 
     case BA_H_SPAWN:
+      built->die = HSpawn_Die;
+      built->think = HSpawn_Think;
+      break;
+
+    case BA_H_TELEPORTER:
       built->die = HSpawn_Die;
       built->think = HSpawn_Think;
       break;
@@ -5396,6 +5618,8 @@ void G_BuildLogRevert( int id )
                 (int)( ent - g_entities ), BG_Buildable( ent->s.modelindex )->name );
             if( ent->buildableTeam == TEAM_HUMANS && !ent->spawned )
                 level.numUnspawnedBuildables[ ent->buildableTeam ]--;
+            if( ent->s.modelindex == BA_H_TELEPORTER )
+              G_RemoveTeleporter( ent );
             G_RemoveRangeMarkerFrom( ent );
             G_FreeEntity( ent );
             break;

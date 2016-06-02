@@ -1325,11 +1325,17 @@ void ClientThink_real( gentity_t *ent )
 {
   gclient_t *client;
   pmove_t   pm;
+  gentity_t *groundEnt;
+  int       groundEntityNum;
   int       oldEventSequence;
   int       msec;
   usercmd_t *ucmd;
 
   client = ent->client;
+
+  groundEntityNum = client->ps.groundEntityNum;
+
+  groundEnt = &g_entities[ client->ps.groundEntityNum ];
 
   ComparePreviousCmdAngles( client );
 
@@ -1827,8 +1833,18 @@ void ClientThink_real( gentity_t *ent )
   client->buttons = ucmd->buttons;
   client->latched_buttons |= client->buttons & ~client->oldbuttons;
 
-  if( ( client->buttons & BUTTON_USE_EVOLVE ) && !( client->oldbuttons & BUTTON_USE_EVOLVE ) &&
-       client->ps.stats[ STAT_HEALTH ] > 0 )
+  if( client->pers.teamSelection == TEAM_HUMANS &&
+      groundEnt->s.modelindex == BA_H_TELEPORTER &&
+      groundEnt->powered &&
+      client->ps.stats[ STAT_HEALTH ] > 0 &&
+      ( ( groundEnt->teleporterActivator == ent->s.number && 
+          groundEnt->teleporterActivated >= level.time  ) ||
+        ( ( client->buttons & BUTTON_USE_EVOLVE ) && !( client->oldbuttons & BUTTON_USE_EVOLVE )
+           ) ) )
+  {
+    G_UseTeleporter( groundEnt, ent );
+  } else if( ( client->buttons & BUTTON_USE_EVOLVE ) && !( client->oldbuttons & BUTTON_USE_EVOLVE ) &&
+             client->ps.stats[ STAT_HEALTH ] > 0 )
   {
     trace_t   trace;
     vec3_t  view, point;
@@ -1880,40 +1896,43 @@ void ClientThink_real( gentity_t *ent )
 
       traceEnt = &g_entities[ trace.entityNum ];
 
-      if( traceEnt && traceEnt->buildableTeam == client->ps.stats[ STAT_TEAM ] && traceEnt->use )
-        traceEnt->use( traceEnt, ent, ent ); //other and activator are the same in this context
-      else
+      if( traceEnt->s.modelindex != BA_H_TELEPORTER )
       {
-        //no entity in front of player - do a small area search
-
-        VectorAdd( client->ps.origin, range, maxs );
-        VectorSubtract( client->ps.origin, range, mins );
-
-        num = trap_EntitiesInBox( mins, maxs, entityList, MAX_GENTITIES );
-        for( i = 0; i < num; i++ )
+        if( traceEnt && traceEnt->buildableTeam == client->ps.stats[ STAT_TEAM ] && traceEnt->use )
+          traceEnt->use( traceEnt, ent, ent ); //other and activator are the same in this context
+        else
         {
-          traceEnt = &g_entities[ entityList[ i ] ];
+          //no entity in front of player - do a small area search
 
-          if( traceEnt && traceEnt->buildableTeam == client->ps.stats[ STAT_TEAM ] && traceEnt->use )
-          {
-            traceEnt->use( traceEnt, ent, ent ); //other and activator are the same in this context
-            break;
-          }
-        }
+          VectorAdd( client->ps.origin, range, maxs );
+          VectorSubtract( client->ps.origin, range, mins );
 
-        if( i == num && client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
-        {
-          if( BG_AlienCanEvolve( client->ps.stats[ STAT_CLASS ],
-                client->pers.credit, g_alienStage.integer,
-                IS_WARMUP ) )
+          num = trap_EntitiesInBox( mins, maxs, entityList, MAX_GENTITIES );
+          for( i = 0; i < num; i++ )
           {
-            //no nearby objects and alien - show class menu
-            G_TriggerMenu( ent->client->ps.clientNum, MN_A_INFEST );
+            traceEnt = &g_entities[ entityList[ i ] ];
+
+            if( traceEnt && traceEnt->buildableTeam == client->ps.stats[ STAT_TEAM ] && traceEnt->use )
+            {
+              traceEnt->use( traceEnt, ent, ent ); //other and activator are the same in this context
+              break;
+            }
           }
-          else
+
+          if( i == num && client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
           {
-            //flash frags
-            G_AddEvent( ent, EV_ALIEN_EVOLVE_FAILED, 0 );
+            if( BG_AlienCanEvolve( client->ps.stats[ STAT_CLASS ],
+                  client->pers.credit, g_alienStage.integer,
+                  IS_WARMUP ) )
+            {
+              //no nearby objects and alien - show class menu
+              G_TriggerMenu( ent->client->ps.clientNum, MN_A_INFEST );
+            }
+            else
+            {
+              //flash frags
+              G_AddEvent( ent, EV_ALIEN_EVOLVE_FAILED, 0 );
+            }
           }
         }
       }

@@ -441,6 +441,7 @@ typedef enum
   BA_A_HOVEL,
 
   BA_H_SPAWN,
+  BA_H_TELEPORTER,
 
   BA_H_MGTURRET,
   BA_H_TESLAGEN,
@@ -1084,6 +1085,7 @@ typedef struct
   int           value;
 
   qboolean      stackable;
+  int           batteryPower;
 } buildableAttributes_t;
 
 typedef struct

@@ -304,7 +304,7 @@ qboolean G_CallSpawn( gentity_t *ent )
     if( level.layout[ 0 ] && Q_stricmp( level.layout, "*BUILTIN*" ) )
       return qfalse;
 
-    if( buildable == BA_A_SPAWN || buildable == BA_H_SPAWN )
+    if( buildable == BA_A_SPAWN || buildable == BA_H_SPAWN || buildable == BA_H_TELEPORTER )
     {
       ent->r.currentAngles[ YAW ] += 180.0f;
       AngleNormalize360( ent->r.currentAngles[ YAW ] );

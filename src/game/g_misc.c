@@ -106,8 +106,12 @@ void TeleportPlayer( gentity_t *player, vec3_t origin, vec3_t angles, float spee
 
   if( player->client->sess.spectatorState == SPECTATOR_NOT )
   {
-    // kill anything at the destination
-    G_KillBox( player );
+    if( !player->noTelefrag )
+    {
+      // kill anything at the destination
+      G_KillBox( player );
+    } else
+      player->noTelefrag = qfalse;
 
     trap_LinkEntity (player);
   }

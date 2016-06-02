@@ -108,6 +108,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     ASPAWN_VALUE,          //int       value;
     qfalse,                //qboolean  stackable;
+    0                      //int       batteryPower;
   },
   {
     BA_A_OVERMIND,         //int       number;
@@ -144,6 +145,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  uniqueTest;
     OVERMIND_VALUE,        //int       value;
     qtrue,                 //qboolean  stackable;
+    0                      //int       batteryPower;
   },
   {
     BA_A_BARRICADE,        //int       number;
@@ -180,6 +182,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     BARRICADE_VALUE,       //int       value;
     qfalse,                //qboolean  stackable;
+    0                      //int       batteryPower;
   },
   {
     BA_A_ACIDTUBE,         //int       number;
@@ -216,6 +219,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     ACIDTUBE_VALUE,        //int       value;
     qfalse,                //qboolean  stackable;
+    0                      //int       batteryPower;
   },
   {
     BA_A_TRAPPER,          //int       number;
@@ -252,6 +256,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     TRAPPER_VALUE,         //int       value;
     qfalse,                //qboolean  stackable;
+    0                      //int       batteryPower;
   },
   {
     BA_A_BOOSTER,          //int       number;
@@ -289,6 +294,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     BOOSTER_VALUE,         //int       value;
     qfalse,                //qboolean  stackable;
+    0                      //int       batteryPower;
   },
   {
     BA_A_HIVE,             //int       number;
@@ -324,6 +330,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     HIVE_VALUE,            //int       value;
     qfalse,                //qboolean  stackable;
+    0                      //int       batteryPower;
   },
   {
     BA_A_HOVEL,            //int       buildNum;
@@ -359,6 +366,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  uniqueTest;
     HOVEL_VALUE,           //int       value;
     qfalse,                //qboolean  stackable;
+    0                      //int       batteryPower;
   },
   {
     BA_H_SPAWN,            //int       number;
@@ -395,6 +403,43 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     HSPAWN_VALUE,          //int       value;
     qfalse,                //qboolean  stackable;
+    0                      //int       batteryPower;
+  },
+  {
+    BA_H_TELEPORTER,       //int       number;
+    "teleporter",          //char      *name;
+    "Teleporter",          //char      *humanName;
+    "Allows for instanous transportation to remote locations.  At "
+      "least two teleporters must be built for them to be useful.",
+    "team_human_teleporter", //char      *entityName;
+    TR_GRAVITY,            //trType_t  traj;
+    0.0,                   //float     bounce;
+    HTELEPORTER_BP,        //int       buildPoints;
+    ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
+    HTELEPORTER_HEALTH,    //int       health;
+    0,                     //int       regenRate;
+    HTELEPORTER_SPLASHDAMAGE, //int       splashDamage;
+    HTELEPORTER_SPLASHRADIUS, //int       splashRadius;
+    MOD_HSPAWN,            //int       meansOfDeath;
+    TEAM_HUMANS,           //int       team;
+    ( 1 << WP_HBUILD ),    //weapon_t  buildWeapon;
+    BANIM_IDLE1,           //int       idleAnim;
+    100,                   //int       nextthink;
+    HTELEPORTER_BT,        //int       buildTime;
+    qtrue,                 //qboolean  usable;
+    0,                     //int       turretRange;
+    0,                     //int       turretFireSpeed;
+    WP_NONE,               //weapon_t  turretProjType;
+    0.95f,                 //float     minNormal;
+    qfalse,                //qboolean  invertNormal;
+    qfalse,                //qboolean  creepTest;
+    0,                     //int       creepSize;
+    qfalse,                //qboolean  dccTest;
+    qtrue,                 //qboolean  transparentTest;
+    qfalse,                //qboolean  uniqueTest;
+    HTELEPORTER_VALUE,     //int       value;
+    qfalse,                //qboolean  stackable;
+    HTELEPORTER_BAT_PWR    //int       batteryPower;
   },
   {
     BA_H_MGTURRET,         //int       number;
@@ -431,6 +476,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     MGTURRET_VALUE,        //int       value;
     qfalse,                //qboolean  stackable;
+    0                      //int       batteryPower;
   },
   {
     BA_H_TESLAGEN,         //int       number;
@@ -467,6 +513,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     TESLAGEN_VALUE,        //int       value;
     qfalse,                //qboolean  stackable;
+    0                      //int       batteryPower;
   },
   {
     BA_H_ARMOURY,          //int       number;
@@ -503,6 +550,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     ARMOURY_VALUE,         //int       value;
     qtrue,                 //qboolean  stackable;
+    0                      //int       batteryPower;
   },
   {
     BA_H_DCC,              //int       number;
@@ -539,6 +587,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  uniqueTest;
     DC_VALUE,              //int       value;
     qtrue,                 //qboolean  stackable;
+    0                      //int       batteryPower;
   },
   {
     BA_H_MEDISTAT,         //int       number;
@@ -575,7 +624,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     MEDISTAT_VALUE,        //int       value;
-    qfalse,                 //qboolean  stackable;
+    qfalse,                //qboolean  stackable;
+    0                      //int       batteryPower;
   },
   {
     BA_H_REACTOR,          //int       number;
@@ -611,7 +661,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  transparentTest;
     qtrue,                 //qboolean  uniqueTest;
     REACTOR_VALUE,         //int       value;
-    qtrue,                //qboolean  stackable;
+    qtrue,                 //qboolean  stackable;
+    0                      //int       batteryPower;
   },
   {
     BA_H_REPEATER,         //int       number;
@@ -648,6 +699,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     REPEATER_VALUE,        //int       value;
     qfalse,                //qboolean  stackable;
+    0                      //int       batteryPower;
   }
 };
 

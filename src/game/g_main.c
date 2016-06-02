@@ -742,6 +742,8 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
   G_InitSpawnQueue( &level.alienSpawnQueue );
   G_InitSpawnQueue( &level.humanSpawnQueue );
 
+  level.teleporters = NULL;
+
   if( g_debugMapRotation.integer )
     G_PrintRotations( );
 

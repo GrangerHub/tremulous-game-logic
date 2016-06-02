@@ -576,6 +576,16 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define HSPAWN_SPLASHRADIUS         100
 #define HSPAWN_VALUE                ALIEN_CREDITS_PER_KILL
 
+#define HTELEPORTER_BP              10
+#define HTELEPORTER_BT              10000
+#define HTELEPORTER_HEALTH          HBHM(310)
+#define HTELEPORTER_SPLASHDAMAGE    50
+#define HTELEPORTER_SPLASHRADIUS    100
+#define HTELEPORTER_VALUE           ALIEN_CREDITS_PER_KILL
+#define HTELEPORTER_COOLDOWN_TIME   2000
+#define HTELEPORTER_BAT_PWR         30000  // amount of time teleporter's can remained powered without
+                                           // an external power source
+
 #define MEDISTAT_BP                 8
 #define MEDISTAT_BT                 10000
 #define MEDISTAT_HEALTH             HBHM(190)

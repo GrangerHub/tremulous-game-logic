@@ -598,6 +598,11 @@ static void CG_HumanText( char *text, playerState_t *ps )
             CG_KeyNameForCommand( "+button7" ),
             BG_Buildable( cg.nearUsableBuildable )->humanName ) );
       break;
+    case BA_H_TELEPORTER:
+      Q_strcat( text, MAX_TUTORIAL_TEXT,
+          va( "Press %s to teleport",
+            CG_KeyNameForCommand( "+button7" ) ) );
+      break;
     case BA_NONE:
       break;
     default:

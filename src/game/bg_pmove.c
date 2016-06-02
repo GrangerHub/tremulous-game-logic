@@ -2068,7 +2068,7 @@ static void PM_GroundClimbTrace( void )
         //mask out CONTENTS_BODY to not hit other players and avoid the camera flipping out when
         // wallwalkers touch
         VectorMA( pm->ps->origin, -0.25f, surfNormal, point );
-        pm->trace( &trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum, pm->tracemask /*& ~CONTENTS_BODY*/ );
+        pm->trace( &trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum, pm->tracemask & ~CONTENTS_BODY );
         break;
 
       case 2:
