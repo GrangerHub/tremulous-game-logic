@@ -318,7 +318,7 @@ void G_RemoveTeleporter( gentity_t *self )
 ================
 G_UseTeleporter
 
-teleport to a functional destination teleporter
+teleport to an operational destination teleporter
 ================
 */
 void G_UseTeleporter( gentity_t *entry, gentity_t *activator )
@@ -348,6 +348,14 @@ void G_UseTeleporter( gentity_t *entry, gentity_t *activator )
     return;
   }
 
+  if( entry->teleporterActivator != activator->s.number && 
+      entry->teleporterActivated >= level.time )
+  {
+    trap_SendServerCommand( activator - g_entities,
+                            "cp \"^1This teleporter is currently in use! Try again later!\"");
+    return;
+  }
+
   destination = blocker = NULL;
 
   // find an operational destination teleporter
@@ -367,10 +375,6 @@ void G_UseTeleporter( gentity_t *entry, gentity_t *activator )
     if( search->s.groundEntityNum == ENTITYNUM_NONE )
       continue;
 
-    if( search->teleporterActivator != activator->s.number && 
-        search->teleporterActivated >= level.time )
-      continue;
-
     if( ( blocker = G_CheckSpawnPoint( search->s.number, search->r.currentOrigin,
           search->s.origin2, BA_H_TELEPORTER, origin ) ) != NULL && !blocker->client )
       continue;
@@ -385,7 +389,14 @@ void G_UseTeleporter( gentity_t *entry, gentity_t *activator )
     return;
   }
 
-  if( entry->teleporterCoolDown >= level.time ||
+  if( destination->teleporterActivator != activator->s.number && 
+      destination->teleporterActivated >= level.time )
+  {
+    entry->teleporterActivated = level.time + 1000;
+    entry->teleporterActivator = activator->s.number;
+    trap_SendServerCommand( activator - g_entities,
+                            "cp \"^3Destination teleporter currently in use! Please stand by for teleportation!\"");
+  } else if( entry->teleporterCoolDown >= level.time ||
       destination->teleporterCoolDown >= level.time )
   {
     entry->teleporterActivated = level.time + 1000;

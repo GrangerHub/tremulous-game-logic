@@ -409,8 +409,9 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BA_H_TELEPORTER,       //int       number;
     "teleporter",          //char      *name;
     "Teleporter",          //char      *humanName;
-    "Allows for instanous transportation to remote locations.  At "
-      "least two teleporters must be built for them to be useful.",
+    "Allows for instanous human transportation to remote "
+      "locations.  At least two teleporters must be built "
+      "for them to be useful.",
     "team_human_teleporter", //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
     0.0,                   //float     bounce;
