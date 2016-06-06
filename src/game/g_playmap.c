@@ -117,12 +117,12 @@ static const playMapError_t playMapError[ ] =
 static const playMapFlagDesc_t playMapFlagList[ ] =
 {
   { PLAYMAP_FLAG_NONE,  "", 	 qfalse, "No flags" },
-  { PLAYMAP_FLAG_DPUNT, "dpunt", qfalse, "Dretch Punt" },
+  /*  { PLAYMAP_FLAG_DPUNT, "dpunt", qfalse, "Dretch Punt" },
   { PLAYMAP_FLAG_FF, 	"ff", 	 qtrue,  "Friendly Fire" },
   { PLAYMAP_FLAG_FBF, 	"fbf", 	 qtrue,  "Friendly Buildable Fire" },
   { PLAYMAP_FLAG_SD, 	"sd", 	 qtrue,  "Sudden Death" },
   { PLAYMAP_FLAG_LGRAV, "lgrav", qfalse, "Low Gravity" },
-  { PLAYMAP_FLAG_UBP, 	"ubp",	 qfalse, "Unlimited BP" },
+  { PLAYMAP_FLAG_UBP, 	"ubp",	 qfalse, "Unlimited BP" },*/
   { PLAYMAP_FLAG_PORTAL,"portal",qfalse, "Portal Gun" }
 };
 
