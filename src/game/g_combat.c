@@ -94,6 +94,7 @@ char *modNames[ ] =
   "MOD_SLIME",
   "MOD_LAVA",
   "MOD_CRUSH",
+  "MOD_DROP",
   "MOD_TELEFRAG",
   "MOD_FALLING",
   "MOD_SUICIDE",
@@ -236,6 +237,38 @@ float G_RewardAttackers( gentity_t *self )
 
 /*
 ==================
+GibEntity
+==================
+*/
+void GibEntity( gentity_t *self )
+{
+  vec3_t dir;
+ 
+  VectorCopy( self->s.origin2, dir );
+ 
+  G_AddEvent( self, EV_GIB_PLAYER, DirToByte( dir ) );
+  self->takedamage = qfalse;
+  self->s.eType    = ET_INVISIBLE;
+  self->r.contents = 0;
+  self->nextthink  = 0;
+}
+
+/*
+==================
+body_die
+==================
+*/
+void body_die( gentity_t *self, gentity_t *unused, gentity_t *unused2, int damage, int meansOfDeath )
+{
+  if ( self->health > GIB_HEALTH )
+    return;
+
+  GibEntity( self );
+}
+
+
+/*
+==================
 player_die
 ==================
 */
@@ -352,7 +385,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
   VectorCopy( self->r.currentOrigin, self->client->pers.lastDeathLocation );
 
-  self->takedamage = qfalse; // can still be gibbed
+  self->takedamage = qtrue; // can still be gibbed
 
   self->s.weapon = WP_NONE;
   if( self->client->noclip )
@@ -376,6 +409,12 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   // clear misc
   memset( self->client->ps.misc, 0, sizeof( self->client->ps.misc ) );
 
+  if ( self->health <= GIB_HEALTH
+    && self->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
+  {
+    GibEntity( self );
+  }
+  else
   {
     // normal death
     static int i;
@@ -927,7 +966,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   int     knockback;
 
   // Can't deal damage sometimes
-  if( !targ->takedamage || targ->health <= 0 || level.intermissionQueued )
+  if( !targ->takedamage || level.intermissionQueued )
     return;
 
   if( !inflictor )

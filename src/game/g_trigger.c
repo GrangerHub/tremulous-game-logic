@@ -377,7 +377,8 @@ void hurt_use( gentity_t *self, gentity_t *other, gentity_t *activator )
 
 void hurt_touch( gentity_t *self, gentity_t *other, trace_t *trace )
 {
-  int   dflags;
+  int       dflags;
+  gentity_t *attacker;
 
   if( !other->takedamage )
     return;
@@ -399,7 +400,12 @@ void hurt_touch( gentity_t *self, gentity_t *other, trace_t *trace )
   else
     dflags = 0;
 
-  G_Damage( other, self, self, NULL, NULL, self->damage, dflags, MOD_TRIGGER_HURT );
+  if( other->s.eType == ET_BUILDABLE )
+    attacker = &g_entities[ other->dropperNum ];
+  else
+    attacker = self;
+
+  G_Damage( other, self, attacker, NULL, NULL, self->damage, dflags, MOD_TRIGGER_HURT );
 }
 
 void SP_trigger_hurt( gentity_t *self )

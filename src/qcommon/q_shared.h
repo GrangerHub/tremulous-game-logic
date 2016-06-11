@@ -865,6 +865,19 @@ const char	*Q_stristr( const char *s, const char *find);
 void	Q_strncpyz( char *dest, const char *src, int destsize );
 void	Q_strcat( char *dest, int size, const char *src );
 
+typedef enum
+{
+  VOTE_DESCRIPTION_STRING = 0,
+  VOTE_EXTRA_STRING,
+
+  RAW_VOTE_STRING,
+  NUM_VOTE_STRINGS
+} voteString_t;
+
+#define STRING_DELIMITER        '\r'
+
+void    Q_cleanDelimitedString( char *dest, const char *src );
+
 // strlen that discounts Quake color sequences
 int Q_PrintStrlen( const char *string );
 // removes color sequences from string

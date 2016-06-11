@@ -23,6 +23,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "g_local.h"
 
+static qboolean G_RoomForClassChange( gentity_t*, class_t, vec3_t );
+
 /*
 ==================
 G_SanitiseString
@@ -402,6 +404,71 @@ char *ConcatArgsPrintable( int start )
   return line;
 }
 
+static void Give_Class( gentity_t *ent, char *s )
+{
+  class_t currentClass = ent->client->pers.classSelection;
+  int clientNum = ent->client - level.clients;
+  vec3_t infestOrigin;
+  vec3_t oldVel;
+  int oldBoostTime = -1;
+  int newClass = BG_ClassByName( s )->number;
+
+  if( newClass == PCL_NONE )
+    return;
+
+  if( !G_RoomForClassChange( ent, newClass, infestOrigin ) )
+  {
+    ADMP("give: not enough room to evolve\n");
+    return;
+  }
+
+  ent->client->pers.evolveHealthFraction 
+      = (float)ent->client->ps.stats[ STAT_HEALTH ] 
+      / (float)BG_Class( currentClass )->health;
+
+  if( ent->client->pers.evolveHealthFraction < 0.0f )
+    ent->client->pers.evolveHealthFraction = 0.0f;
+  else if( ent->client->pers.evolveHealthFraction > 1.0f )
+    ent->client->pers.evolveHealthFraction = 1.0f;
+
+  //remove credit
+  //G_AddCreditToClient( ent->client, -cost, qtrue );
+  ent->client->pers.classSelection = newClass;
+  ClientUserinfoChanged( clientNum, qfalse );
+  VectorCopy( infestOrigin, ent->s.pos.trBase );
+  VectorCopy( ent->client->ps.velocity, oldVel );
+
+  if( ent->client->ps.stats[ STAT_STATE ] & SS_BOOSTED )
+    oldBoostTime = ent->client->boostedTime;
+
+  ClientSpawn( ent, ent, ent->s.pos.trBase, ent->s.apos.trBase );
+
+  VectorCopy( oldVel, ent->client->ps.velocity );
+  if( oldBoostTime > 0 )
+  {
+    ent->client->boostedTime = oldBoostTime;
+    ent->client->ps.stats[ STAT_STATE ] |= SS_BOOSTED;
+  }
+}
+
+static void Give_Gun( gentity_t *ent, char *s )
+{
+  int w = BG_WeaponByName( s )->number;
+
+  if ( w == WP_NONE )
+    return;
+
+  ent->client->ps.stats[ STAT_WEAPON ] = w;
+  ent->client->ps.ammo = BG_Weapon( w )->maxAmmo;
+  ent->client->ps.clips = BG_Weapon( w )->maxClips;
+  G_ForceWeaponChange( ent, w );
+}
+
+static void Give_Upgrade( gentity_t *ent, char *s )
+{
+    int u = BG_UpgradeByName( s )->number;
+    BG_AddUpgradeToInventory( u, ent->client->ps.stats );
+}
 
 /*
 ==================
@@ -417,15 +484,29 @@ void Cmd_Give_f( gentity_t *ent )
 
   if( trap_Argc( ) < 2 )
   {
-    ADMP( "usage: give [what]\n" );
-    ADMP( "usage: valid choices are: all, health, funds [amount], stamina, "
-          "poison, gas, ammo\n" );
+    // FIXME I am hideous :#(
+    ADMP( "^3give: ^7usage: give [what]\n\nNormal\n\n"
+          "  health\n  funds <amount>\n  stamina\n  poison\n  gas\n  ammo\n" 
+          "\n^3Classes\n\n"
+          "  level0\n  level1\n  level1upg\n  level2\n  level2upg\n  level3\n  level3upg\n  level4\n  builder\n  builderupg\n"
+          "  human_base\n  human_bsuit\n  "
+          "\n^5Weapons\n\n"
+          "  blaster\n  rifle\n  psaw\n  shotgun\n  lgun\n  mdriver\n  chaingun\n  flamer\n  prifle\n  grenade\n  lockblob\n"
+          "  hive\n  teslagen\n  mgturret\n  abuild\n  abuildupg\n  portalgun\n  proximity\n  smokecan\n  "
+          "\n^2Upgrades\n\n"
+          "  larmour\n  helmet\n  medkit\n  battpak\n  jetpack\n  bsuit\n  gren\n  prox\n  smoke\n" );
     return;
   }
 
   name = ConcatArgs( 1 );
   if( Q_stricmp( name, "all" ) == 0 )
     give_all = qtrue;
+
+  if( give_all || Q_stricmp( name, "health" ) == 0 )
+  {
+    ent->health = ent->client->ps.stats[ STAT_MAX_HEALTH ];
+    BG_AddUpgradeToInventory( UP_MEDKIT, ent->client->ps.stats );
+  }
 
   if( give_all || Q_stricmpn( name, "funds", 5 ) == 0 )
   {
@@ -436,39 +517,31 @@ void Cmd_Give_f( gentity_t *ent )
     else
     {
       credits = atof( name + 6 ) *
-        ( ent->client->pers.teamSelection ==
+        ( ent->client->pers.teamSelection == 
           TEAM_ALIENS ? ALIEN_CREDITS_PER_KILL : 1.0f );
 
       // clamp credits manually, as G_AddCreditToClient() expects a short int
-      if( credits > 30000.0f )
+      if( credits > SHRT_MAX )
         credits = 30000.0f;
-      else if( credits < -30000.0f )
+      else if( credits < SHRT_MIN )
         credits = -30000.0f;
     }
 
     G_AddCreditToClient( ent->client, (short)credits, qtrue );
   }
 
-  if( ent->client->ps.stats[ STAT_HEALTH ] <= 0 ||
-      ent->client->sess.spectatorState != SPECTATOR_NOT )
-  {
-    if( !( give_all || Q_stricmpn( name, "funds", 5 ) == 0 ) )
-      G_TriggerMenu( ent-g_entities, MN_CMD_ALIVE );
-    return;
-  }
-
-  if( give_all || Q_stricmp( name, "health" ) == 0 )
-  {
-    if( ent->health < ent->client->ps.stats[ STAT_MAX_HEALTH ] )
-    {
-      ent->health = ent->client->ps.stats[ STAT_MAX_HEALTH ];
-      ent->client->ps.stats[ STAT_HEALTH ] = ent->health;
-    }
-    BG_AddUpgradeToInventory( UP_MEDKIT, ent->client->ps.stats );
-  }
-
   if( give_all || Q_stricmp( name, "stamina" ) == 0 )
     ent->client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
+
+  // Adding guns
+  Give_Gun(ent, name);
+
+  // Adding upgrades
+  Give_Upgrade(ent, name);
+
+  // Change class- this allows you to be any alien class on TEAM_HUMAN and the
+  // otherway round.
+  Give_Class(ent, name);
 
   if( Q_stricmp( name, "poison" ) == 0 )
   {
@@ -489,8 +562,7 @@ void Cmd_Give_f( gentity_t *ent )
   {
     ent->client->ps.eFlags |= EF_POISONCLOUDED;
     ent->client->lastPoisonCloudedTime = level.time;
-    trap_SendServerCommand( ent->client->ps.clientNum,
-                              "poisoncloud" );
+    trap_SendServerCommand( ent->client->ps.clientNum, "poisoncloud" );
   }
 
   if( give_all || Q_stricmp( name, "ammo" ) == 0 )
@@ -509,7 +581,6 @@ void Cmd_Give_f( gentity_t *ent )
       client->ps.ammo = (int)( (float)client->ps.ammo * BATTPACK_MODIFIER );
   }
 }
-
 
 /*
 ==================
@@ -935,6 +1006,7 @@ void G_Say( gentity_t *ent, saymode_t mode, const char *chatText )
   gentity_t   *other;
   // don't let text be too long for malicious reasons
   char        text[ MAX_SAY_TEXT ];
+  char         *tmsgcolor = S_COLOR_YELLOW;
 
   // check if blocked by g_specChat 0
   if( ( !g_specChat.integer ) && ( mode != SAY_TEAM ) &&
@@ -955,10 +1027,12 @@ void G_Say( gentity_t *ent, saymode_t mode, const char *chatText )
       break;
     case SAY_TEAM:
       // console say_team is handled in g_svscmds, not here
+      if( !( ent->client->pers.teamSelection == TEAM_NONE ) )
+        tmsgcolor = S_COLOR_CYAN;
       if( !ent || !ent->client )
         Com_Error( ERR_FATAL, "SAY_TEAM by non-client entity" );
-      G_LogPrintf( "SayTeam: %d \"%s" S_COLOR_WHITE "\": " S_COLOR_CYAN "%s\n",
-        (int)( ent - g_entities ), ent->client->pers.netname, chatText );
+      G_LogPrintf( "SayTeam: %d \"%s" S_COLOR_WHITE "\": %s%s\n",
+        (int)( ent - g_entities ), ent->client->pers.netname, tmsgcolor, chatText );
       break;
     case SAY_RAW:
       if( ent )
@@ -1199,6 +1273,9 @@ void Cmd_CallVote_f( gentity_t *ent )
   char   caller[ MAX_NAME_LENGTH ] = "";
   char   reason[ MAX_TOKEN_CHARS ];
   char   *creason;
+  char   poll[ MAX_TOKEN_CHARS ];
+  char   *cpoll;
+  char   cVoteDisplayString[ MAX_STRING_CHARS ];
   int    clientNum = -1;
   int    id = -1;
   team_t team;
@@ -1210,6 +1287,8 @@ void Cmd_CallVote_f( gentity_t *ent )
   trap_Argv( 3, extra, sizeof( extra ) );
   creason = ConcatArgs( 3 );
   G_DecolorString( creason, reason, sizeof( reason ) );
+  cpoll = ConcatArgs( 2 );
+  G_DecolorString( cpoll, poll, sizeof( poll ) );
 
   if( !Q_stricmp( cmd, "callteamvote" ) )
     team = ent->client->pers.teamSelection;
@@ -1240,7 +1319,7 @@ void Cmd_CallVote_f( gentity_t *ent )
       // tell all players that the vote has been called off
       trap_SendServerCommand( -1, va( "print \"%s" S_COLOR_WHITE " decided to "
             "call off the " S_COLOR_YELLOW "%s" S_COLOR_WHITE " vote\n\"",
-            ent->client->pers.netname, level.voteDisplayString[ team ] ) );
+            ent->client->pers.netname, cVoteDisplayString ) );
 
       // force all voting clients to be counted as No votes
       G_EndVote( team, qtrue );
@@ -1257,7 +1336,8 @@ void Cmd_CallVote_f( gentity_t *ent )
   // protect against the dreaded exploit of '\n'-interpretation inside quotes
   if( strchr( arg, '\n' ) || strchr( arg, '\r' ) ||
       strchr( extra, '\n' ) || strchr( extra, '\r' ) ||
-      strchr( creason, '\n' ) || strchr( creason, '\r' ) )
+      strchr( creason, '\n' ) || strchr( creason, '\r' ) ||
+      strchr( cpoll, '\n' ) || strchr( cpoll, '\r' ) )
   {
     trap_SendServerCommand( ent-g_entities, "print \"Invalid vote string\n\"" );
     return;
@@ -1352,20 +1432,22 @@ void Cmd_CallVote_f( gentity_t *ent )
     Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
       "ban %s \"1s%s\" vote kick (%s)", level.clients[ clientNum ].pers.ip.str,
       g_adminTempBan.string, reason );
-    Com_sprintf( level.voteDisplayString[ team ],
-      sizeof( level.voteDisplayString[ team ] ), "Kick player '%s'", name );
+    Com_sprintf( level.voteDisplayString[ team ], sizeof( level.voteDisplayString[ team ] ),
+                 "^4[^3Kick^4] ^5player '%s' (Needs > %d%% of %s)", name, level.voteThreshold[ team ],
+                 g_impliedVoting.integer ? "active players" : "total votes" );
+
+    level.voteType[ team ] = KICK_VOTE;
+
     if( reason[ 0 ] )
     {
       Q_strcat( level.voteDisplayString[ team ],
-        sizeof( level.voteDisplayString[ team ] ), va( " for '%s'", reason ) );
+        sizeof( level.voteDisplayString[ team ] ), va( "%cfor '%s'", STRING_DELIMITER, reason ) );
     }
+
+    level.voteType[ team ] = KICK_VOTE;
   }
   else if( !Q_stricmp( vote, "poll" ) )
   {
-    char poll[ MAX_STRING_CHARS ];
-
-    G_SingleLineString( ConcatArgs( 2 ), poll, sizeof( poll ) );
-
     if( strlen( poll ) == 0 )
     {
       trap_SendServerCommand( ent-g_entities,
@@ -1375,11 +1457,11 @@ void Cmd_CallVote_f( gentity_t *ent )
 
     // use an exec string that allows log parsers to see the vote
     Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
-      "echo poll \"%s\"", poll );
-    Com_sprintf( level.voteDisplayString[ team ],
-      sizeof( level.voteDisplayString[ team ] ),
-      "(poll) %s^7", poll );
+                 "echo poll \"%s\"", poll );
+    Com_sprintf( level.voteDisplayString[ team ], sizeof( level.voteDisplayString[ team ] ),
+                 "^4[^7Poll^4]^5%c%s", STRING_DELIMITER, poll );
     voteYes = qfalse;
+    level.voteType[ team ] = POLL_VOTE;
   }
   else if( team == TEAM_NONE )
   {
@@ -1394,14 +1476,17 @@ void Cmd_CallVote_f( gentity_t *ent )
 
       Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
         "mute %d", id );
-      Com_sprintf( level.voteDisplayString[ team ],
-        sizeof( level.voteDisplayString[ team ] ),
-        "Mute player '%s'", name );
+      Com_sprintf( level.voteDisplayString[ team ], sizeof( level.voteDisplayString[ team ] ), 
+                   "^4[^3Mute^4]^5 player '%s' (Needs > %d%% of %s)", name, level.voteThreshold[ team ],
+                   g_impliedVoting.integer ? "active players" : "total votes" );
+
       if( reason[ 0 ] )
       {
         Q_strcat( level.voteDisplayString[ team ],
-          sizeof( level.voteDisplayString[ team ] ), va( " for '%s'", reason ) );
+          sizeof( level.voteDisplayString[ team ] ), va( "%cfor '%s'", STRING_DELIMITER, reason ) );
       }
+
+      level.voteType[ team ] = MUTE_VOTE;
     }
     else if( !Q_stricmp( vote, "unmute" ) )
     {
@@ -1414,9 +1499,11 @@ void Cmd_CallVote_f( gentity_t *ent )
 
       Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
         "unmute %d", id );
-      Com_sprintf( level.voteDisplayString[ team ],
-        sizeof( level.voteDisplayString[ team ] ),
-        "Unmute player '%s'", name );
+      Com_sprintf( level.voteDisplayString[ team ], sizeof( level.voteDisplayString[ team ] ), 
+                   "^4[^3Unmute^4] ^5player '%s' (Needs > %d%% of %s)", name, level.voteThreshold[ team ],
+                   g_impliedVoting.integer ? "active players" : "total votes" );
+
+      level.voteType[ team ] = UNMUTE_VOTE;
     }
     else if( !Q_stricmp( vote, "map_restart" ) )
     {
@@ -1432,13 +1519,21 @@ void Cmd_CallVote_f( gentity_t *ent )
               cmd, arg, map ) );
           return;
         }
+
+        
       }
 
       Com_sprintf( level.voteDisplayString[ team ], sizeof( level.voteDisplayString[ team ] ),
-        "Restart the current map%s", arg[ 0 ] ? va( " with layout '%s'", arg ) : "" );
+        "^4[^1Restart the current map^4]^5%s", arg[ 0 ] ? va( " with layout '%s'", arg ) : "" );
+      Q_strcat( level.voteDisplayString[ team ], sizeof( level.voteDisplayString ),
+                va( "^5 (Needs > %d%% of %s)", level.voteThreshold[ team ],
+                g_impliedVoting.integer ? "active players" : "total votes" ) );
+
       Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
         "set g_nextMap \"\" ; set g_nextLayout \"%s\" ; set g_warmup \"1\" ;  %s", arg, vote );
       // map_restart comes with a default delay
+
+      level.voteType[ team ] = MAP_RESTART_VOTE;
     }
     else if( !Q_stricmp( vote, "map" ) )
     {
@@ -1461,8 +1556,14 @@ void Cmd_CallVote_f( gentity_t *ent )
       Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
         "set g_nextMap \"\" ; set g_nextLayout \"%s\" ; set g_warmup \"1\"; %s \"%s\"", extra, vote, arg );
       Com_sprintf( level.voteDisplayString[ team ], sizeof( level.voteDisplayString[ team ] ),
-        "Change to map '%s'%s", arg, extra[ 0 ] ? va( " with layout '%s'", extra ) : "" );
+        "^4[^1Change to map^4] ^5 '%s'%s", arg, extra[ 0 ] ? va( " with layout '%s'", extra ) : "" );
+      Q_strcat( level.voteDisplayString[ team ], sizeof( level.voteDisplayString ),
+                va( "^5 (Needs > %d%% of %s)", level.voteThreshold[ team ],
+                g_impliedVoting.integer ? "active players" : "total votes" ) );
+
       level.voteDelay[ team ] = 3000;
+
+      level.voteType[ team ] = MAP_VOTE;
     }
     else if( !Q_stricmp( vote, "nextmap" ) )
     {
@@ -1495,13 +1596,23 @@ void Cmd_CallVote_f( gentity_t *ent )
       Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
         "set g_nextMap \"%s\" ; set g_nextLayout \"%s\"", arg, extra );
       Com_sprintf( level.voteDisplayString[ team ], sizeof( level.voteDisplayString[ team ] ),
-        "Set the next map to '%s'%s", arg, extra[ 0 ] ? va( " with layout '%s'", extra ) : "" );
+        "^4[^2Set the next map^4] ^5to '%s'%s", arg, extra[ 0 ] ? va( " with layout '%s'", extra ) : "" );
+      Q_strcat( level.voteDisplayString[ team ], sizeof( level.voteDisplayString ),
+                va( "^5 (Needs > %d%% of %s)", level.voteThreshold[ team ],
+                g_impliedVoting.integer ? "active players" : "total votes" ) );
+
+      level.voteType[ team ] = NEXTMAP_VOTE;
     }
     else if( !Q_stricmp( vote, "draw" ) )
     {
       strcpy( level.voteString[ team ], "evacuation" );
-      strcpy( level.voteDisplayString[ team ], "End match in a draw" );
+      strcpy( level.voteDisplayString[ team ], va( "^4[^1End match in a draw^4]^5" ) );
+      Q_strcat( level.voteDisplayString[ team ], sizeof( level.voteDisplayString ),
+                va( "^5 (Needs > %d%% of %s)", level.voteThreshold[ team ],
+                g_impliedVoting.integer ? "active players" : "total votes" ) );
       level.voteDelay[ team ] = 3000;
+
+      level.voteType[ team ] = DRAW_VOTE;
     }
     else if( !Q_stricmp( vote, "sudden_death" ) )
     {
@@ -1527,10 +1638,12 @@ void Cmd_CallVote_f( gentity_t *ent )
       level.voteThreshold[ team ] = g_suddenDeathVotePercent.integer;
       Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
         "suddendeath %d", g_suddenDeathVoteDelay.integer );
-      Com_sprintf( level.voteDisplayString[ team ],
-                   sizeof( level.voteDisplayString[ team ] ),
-                   "Begin sudden death in %d seconds",
-                   g_suddenDeathVoteDelay.integer );
+      Com_sprintf( level.voteDisplayString[ team ], sizeof( level.voteDisplayString[ team ] ),
+                   "^4[^1Begin sudden death^4] ^5in %d seconds (Needs > %d%% of %s)",
+                   g_suddenDeathVoteDelay.integer, g_suddenDeathVotePercent.integer,
+                   g_impliedVoting.integer ? "active players" : "total votes" );
+
+      level.voteType[ team ] = SUDDEN_DEATH_VOTE;
     }
     else
     {
@@ -1552,14 +1665,15 @@ void Cmd_CallVote_f( gentity_t *ent )
 
     Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
       "denybuild %d", id );
-    Com_sprintf( level.voteDisplayString[ team ],
-      sizeof( level.voteDisplayString[ team ] ),
-      "Take away building rights from '%s'", name );
+    Com_sprintf( level.voteDisplayString[ team ], sizeof( level.voteDisplayString[ team ] ),
+              "^4[^3Take away building rights^4] ^5from '%s' (Needs > %d%% of %s)", name, level.voteThreshold[ team ],
+              g_impliedVoting.integer ? "active teammates" : "total votes" );
     if( reason[ 0 ] )
     {
       Q_strcat( level.voteDisplayString[ team ],
-        sizeof( level.voteDisplayString[ team ] ), va( " for '%s'", reason ) );
+        sizeof( level.voteDisplayString[ team ] ), va( "%cfor '%s'", STRING_DELIMITER, reason ) );
     }
+    level.voteType[ team ] = DENYBUILD_VOTE;
   }
   else if( !Q_stricmp( vote, "allowbuild" ) )
   {
@@ -1572,9 +1686,11 @@ void Cmd_CallVote_f( gentity_t *ent )
 
     Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
       "allowbuild %d", id );
-    Com_sprintf( level.voteDisplayString[ team ],
-      sizeof( level.voteDisplayString[ team ] ),
-      "Allow '%s' to build", name );
+    Com_sprintf( level.voteDisplayString[ team ], sizeof( level.voteDisplayString[ team ] ),
+              "^4[^3Give building rights^4] ^5to '%s' (Needs > %d%% of %s)", name, level.voteThreshold[ team ],
+              g_impliedVoting.integer ? "active teammates" : "total votes" );
+
+    level.voteType[ team ] = ALLOWBUILD_VOTE;
   }
   else if( !Q_stricmp( vote, "admitdefeat" ) )
   {
@@ -1587,8 +1703,12 @@ void Cmd_CallVote_f( gentity_t *ent )
 
     Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
       "admitdefeat %d", team );
-    strcpy( level.voteDisplayString[ team ], "Admit Defeat" );
+    Com_sprintf( level.voteDisplayString[ team ], sizeof( level.voteDisplayString[ team ] ),
+                 "^4[^1Admit Defeat^4] ^5 (Needs > %d%% of %s)", level.voteThreshold[ team ],
+                 g_impliedVoting.integer ? "active teammates" : "total votes" );
     level.voteDelay[ team ] = 3000;
+
+    level.voteType[ team ] = ADMITDEFEAT_VOTE;
   }
   else
   {
@@ -1602,11 +1722,13 @@ void Cmd_CallVote_f( gentity_t *ent )
     team == TEAM_NONE ? "CallVote" : "CallTeamVote",
     (int)( ent - g_entities ), ent->client->pers.netname, level.voteString[ team ] );
 
+  Q_cleanDelimitedString( cVoteDisplayString, level.voteDisplayString[ team ] );
+
   if( team == TEAM_NONE )
   {
-    trap_SendServerCommand( -1, va( "print \"%s" S_COLOR_WHITE
+    trap_SendServerCommand( -1, va( "print \"%s" S_COLOR_CYAN
       " called a vote: %s\n\"", ent->client->pers.netname,
-      level.voteDisplayString[ team ] ) );
+      cVoteDisplayString ) );
   }
   else
   {
@@ -1620,16 +1742,16 @@ void Cmd_CallVote_f( gentity_t *ent )
             ( level.clients[ i ].pers.teamSelection == TEAM_NONE &&
             G_admin_permission( &g_entities[ i ], ADMF_SPEC_ALLCHAT ) ) )
         {
-          trap_SendServerCommand( i, va( "print \"%s" S_COLOR_WHITE
+          trap_SendServerCommand( i, va( "print \"%s" S_COLOR_CYAN
             " called a team vote: %s\n\"", ent->client->pers.netname,
-            level.voteDisplayString[ team ] ) );
+            cVoteDisplayString ) );
         }
         else if( G_admin_permission( &g_entities[ i ], ADMF_ADMINCHAT ) )
         {
           trap_SendServerCommand( i, va( "chat -1 %d \"" S_COLOR_YELLOW "%s"
             S_COLOR_YELLOW " called a team vote (%ss): %s\"", SAY_ADMINS,
             ent->client->pers.netname, BG_TeamName( team ),
-            level.voteDisplayString[ team ] ) );
+            cVoteDisplayString ) );
         }
       }
     }
@@ -3752,6 +3874,11 @@ void ClientCommand( int clientNum )
   trap_Argv( 0, cmd, sizeof( cmd ) );
 
   command = bsearch( cmd, cmds, numCmds, sizeof( cmds[ 0 ] ), cmdcmp );
+
+  // reset the inactivty timers
+  ent->client->inactivityTime = level.time + g_inactivity.integer * 1000;
+  ent->client->inactivityWarning = qfalse;
+  ent->client->pers.voterInactivityTime = level.time + ( VOTE_TIME );
 
   if( !command )
   {
