@@ -122,6 +122,13 @@ void BG_Free( void *ptr )
   char *freeend;
   int *freeptr;
 
+  // Lets just do this here.
+
+  if ( !ptr )
+  {
+      return;
+  }
+
   freeptr = ptr;
   freeptr--;
 

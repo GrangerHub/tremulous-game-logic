@@ -65,7 +65,7 @@ typedef struct playMapPool_s
 // proof-of-concept demo. they are very likely to change)
 typedef enum
 {
-  PLAYMAP_FLAG_NONE,
+  PLAYMAP_FLAG_NONE = 0,
 
   PLAYMAP_FLAG_DPUNT, // Dretch Punt
   PLAYMAP_FLAG_FF,    // Friendly Fire
@@ -73,10 +73,24 @@ typedef enum
   PLAYMAP_FLAG_SD,    // Sudden Death
   PLAYMAP_FLAG_LGRAV, // Low Gravity
   PLAYMAP_FLAG_UBP,   // Unlimited BP
+  PLAYMAP_FLAG_PORTAL,// Portal Gun
 
   PLAYMAP_NUM_FLAGS
 } playMapFlag_t;
 
+#define PlaymapFlag_Set(X, FLAG) ((X) |= (1 << (FLAG - 1)))
+#define PlaymapFlag_IsSet(X, FLAG) ((X) & (1 << (FLAG - 1)))
+#define PlaymapFlag_Clear(X, FLAG) ((X) &= ~(1 << (FLAG - 1)))
+
+// flag names
+typedef struct playMapFlagDesc_s
+{
+  int 	   flag;		/* Flag bit */
+  char 	   *flagName;		/* String to parse */
+  qboolean defVal;		/* Whether flag is on by default */
+  qboolean avail;		/* Whether flag is available for users */
+  char 	   *flagDesc;		/* Description string */
+} playMapFlagDesc_t;
 
 /*
  * PLAYMAP QUEUE
@@ -98,8 +112,9 @@ typedef struct playMap_s
 
   char *clientName;
 
-  playMapFlag_t plusFlags[ PLAYMAP_NUM_FLAGS ];
-  playMapFlag_t minusFlags[ PLAYMAP_NUM_FLAGS ];
+  int flags;
+  //playMapFlag_t plusFlags[ PLAYMAP_NUM_FLAGS ];
+  //playMapFlag_t minusFlags[ PLAYMAP_NUM_FLAGS ];
 } playMap_t;
 
 // playmap queue/playlist
@@ -173,7 +188,7 @@ playMapError_t G_ReloadPlayMapQueue( void );
 gclient_t *G_FindClientByName(gentity_t *from, const char *netname);
 int G_GetPlayMapQueueLength( void );
 qboolean G_PlayMapQueueIsFull( void );
-playMapFlag_t G_ParsePlayMapFlag(char *flag);
+playMapFlag_t G_ParsePlayMapFlag( gentity_t *ent, char *flag );
 playMapError_t G_PlayMapEnqueue( char *mapName, char *layout, char *clientName, char *flags, gentity_t *ent );
 playMap_t *G_PopFromPlayMapQueue( void );
 playMapError_t G_RemoveFromPlayMapQueue( int index );
@@ -182,3 +197,6 @@ int G_GetPlayMapQueueIndexByClient( char *clientName );
 void G_PrintPlayMapQueue( gentity_t *ent );
 qboolean G_PlayMapActive( void );
 void G_NextPlayMap( void );
+int G_ParsePlayMapFlagTokens( gentity_t *ent, char *flags );
+char *G_PlayMapFlags2String( int flags );
+int G_DefaultPlayMapFlags(void);
