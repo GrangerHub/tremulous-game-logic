@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "bg_public.h"
 
 int  trap_FS_FOpenFile( const char *qpath, fileHandle_t *f, fsMode_t mode );
-void trap_FS_Read( void *buffer, int len, fileHandle_t f );
+int  trap_FS_Read( void *buffer, int len, fileHandle_t f );
 void trap_FS_Write( const void *buffer, int len, fileHandle_t f );
 void trap_FS_FCloseFile( fileHandle_t f );
 void trap_FS_Seek( fileHandle_t f, long offset, fsOrigin_t origin ); // fsOrigin_t
@@ -1032,7 +1032,7 @@ static const classAttributes_t bg_classList[ ] =
     ABUILDER_HEALTH,                                //int     health;
     0.2f,                                           //float   fallDamage;
     ABUILDER_REGEN,                                 //float   regenRate;
-    SCA_TAKESFALLDAMAGE|SCA_FOVWARPS|SCA_ALIENSENSE, //int    abilities;
+    SCA_TAKESFALLDAMAGE|SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN, //int    abilities;
     WP_ABUILD,                                      //weapon_t startWeapon;
     95.0f,                                          //float   buildDist;
     110,                                            //int     fov;
@@ -1062,7 +1062,7 @@ static const classAttributes_t bg_classList[ ] =
     ABUILDER_UPG_HEALTH,                            //int     health;
     0.2f,                                           //float   fallDamage;
     ABUILDER_UPG_REGEN,                             //float   regenRate;
-    SCA_TAKESFALLDAMAGE|SCA_FOVWARPS|SCA_WALLCLIMBER|SCA_ALIENSENSE, //int  abilities;
+    SCA_TAKESFALLDAMAGE|SCA_FOVWARPS|SCA_WALLCLIMBER|SCA_ALIENSENSE|SCA_REGEN, //int  abilities;
     WP_ABUILD2,                                     //weapon_t startWeapon;
     105.0f,                                         //float   buildDist;
     110,                                            //int     fov;
@@ -1091,7 +1091,7 @@ static const classAttributes_t bg_classList[ ] =
     LEVEL0_HEALTH,                                  //int     health;
     0.0f,                                           //float   fallDamage;
     LEVEL0_REGEN,                                   //float   regenRate;
-    SCA_WALLCLIMBER|SCA_FOVWARPS|SCA_ALIENSENSE,    //int     abilities;
+    SCA_WALLCLIMBER|SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,    //int     abilities;
     WP_ALEVEL0,                                     //weapon_t startWeapon;
     0.0f,                                           //float   buildDist;
     140,                                            //int     fov;
@@ -1122,7 +1122,7 @@ static const classAttributes_t bg_classList[ ] =
     LEVEL1_HEALTH,                                  //int     health;
     0.0f,                                           //float   fallDamage;
     LEVEL1_REGEN,                                   //float   regenRate;
-    SCA_FOVWARPS|SCA_WALLCLIMBER|SCA_ALIENSENSE,    //int     abilities;
+    SCA_FOVWARPS|SCA_WALLCLIMBER|SCA_ALIENSENSE|SCA_REGEN,    //int     abilities;
     WP_ALEVEL1,                                     //weapon_t startWeapon;
     0.0f,                                           //float   buildDist;
     120,                                            //int     fov;
@@ -1153,7 +1153,7 @@ static const classAttributes_t bg_classList[ ] =
     LEVEL1_UPG_HEALTH,                              //int     health;
     0.0f,                                           //float   fallDamage;
     LEVEL1_UPG_REGEN,                               //float   regenRate;
-    SCA_FOVWARPS|SCA_WALLCLIMBER|SCA_ALIENSENSE,    //int     abilities;
+    SCA_FOVWARPS|SCA_WALLCLIMBER|SCA_ALIENSENSE|SCA_REGEN,    //int     abilities;
     WP_ALEVEL1_UPG,                                 //weapon_t startWeapon;
     0.0f,                                           //float   buildDist;
     120,                                            //int     fov;
@@ -1182,7 +1182,7 @@ static const classAttributes_t bg_classList[ ] =
     LEVEL2_HEALTH,                                  //int     health;
     0.0f,                                           //float   fallDamage;
     LEVEL2_REGEN,                                   //float   regenRate;
-    SCA_WALLJUMPER|SCA_FOVWARPS|SCA_ALIENSENSE,     //int     abilities;
+    SCA_WALLJUMPER|SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,     //int     abilities;
     WP_ALEVEL2,                                     //weapon_t startWeapon;
     0.0f,                                           //float   buildDist;
     90,                                             //int     fov;
@@ -1211,7 +1211,7 @@ static const classAttributes_t bg_classList[ ] =
     LEVEL2_UPG_HEALTH,                              //int     health;
     0.0f,                                           //float   fallDamage;
     LEVEL2_UPG_REGEN,                               //float   regenRate;
-    SCA_WALLJUMPER|SCA_FOVWARPS|SCA_ALIENSENSE,     //int     abilities;
+    SCA_WALLJUMPER|SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,     //int     abilities;
     WP_ALEVEL2_UPG,                                 //weapon_t startWeapon;
     0.0f,                                           //float   buildDist;
     90,                                             //int     fov;
@@ -1241,7 +1241,7 @@ static const classAttributes_t bg_classList[ ] =
     LEVEL3_HEALTH,                                  //int     health;
     0.0f,                                           //float   fallDamage;
     LEVEL3_REGEN,                                   //float   regenRate;
-    SCA_FOVWARPS|SCA_ALIENSENSE,                    //int     abilities;
+    SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,                    //int     abilities;
     WP_ALEVEL3,                                     //weapon_t startWeapon;
     0.0f,                                           //float   buildDist;
     110,                                            //int     fov;
@@ -1271,7 +1271,7 @@ static const classAttributes_t bg_classList[ ] =
     LEVEL3_UPG_HEALTH,                              //int     health;
     0.0f,                                           //float   fallDamage;
     LEVEL3_UPG_REGEN,                               //float   regenRate;
-    SCA_FOVWARPS|SCA_ALIENSENSE,                    //int     abilities;
+    SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,                    //int     abilities;
     WP_ALEVEL3_UPG,                                 //weapon_t startWeapon;
     0.0f,                                           //float   buildDist;
     110,                                            //int     fov;
@@ -1302,7 +1302,7 @@ static const classAttributes_t bg_classList[ ] =
     LEVEL4_HEALTH,                                  //int     health;
     0.0f,                                           //float   fallDamage;
     LEVEL4_REGEN,                                   //float   regenRate;
-    SCA_FOVWARPS|SCA_ALIENSENSE,                    //int     abilities;
+    SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,                    //int     abilities;
     WP_ALEVEL4,                                     //weapon_t startWeapon;
     0.0f,                                           //float   buildDist;
     90,                                             //int     fov;
@@ -1330,7 +1330,7 @@ static const classAttributes_t bg_classList[ ] =
     100,                                            //int     health;
     1.0f,                                           //float   fallDamage;
     0.0f,                                           //float   regenRate;
-    SCA_TAKESFALLDAMAGE|SCA_CANUSELADDERS,          //int     abilities;
+    SCA_TAKESFALLDAMAGE|SCA_CANUSELADDERS|SCA_STAMINA,          //int     abilities;
     WP_NONE, //special-cased in g_client.c          //weapon_t startWeapon;
     110.0f,                                         //float   buildDist;
     90,                                             //int     fov;
@@ -1358,7 +1358,7 @@ static const classAttributes_t bg_classList[ ] =
     100,                                            //int     health;
     1.0f,                                           //float   fallDamage;
     0.0f,                                           //float   regenRate;
-    SCA_TAKESFALLDAMAGE|SCA_CANUSELADDERS,          //int     abilities;
+    SCA_TAKESFALLDAMAGE|SCA_CANUSELADDERS|SCA_STAMINA,          //int     abilities;
     WP_NONE, //special-cased in g_client.c          //weapon_t startWeapon;
     110.0f,                                         //float   buildDist;
     90,                                             //int     fov;

@@ -23,6 +23,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "g_local.h"
 
+static qboolean G_RoomForClassChange( gentity_t*, class_t, vec3_t );
+
 /*
 ==================
 G_SanitiseString
@@ -402,6 +404,71 @@ char *ConcatArgsPrintable( int start )
   return line;
 }
 
+static void Give_Class( gentity_t *ent, char *s )
+{
+  class_t currentClass = ent->client->pers.classSelection;
+  int clientNum = ent->client - level.clients;
+  vec3_t infestOrigin;
+  vec3_t oldVel;
+  int oldBoostTime = -1;
+  int newClass = BG_ClassByName( s )->number;
+
+  if( newClass == PCL_NONE )
+    return;
+
+  if( !G_RoomForClassChange( ent, newClass, infestOrigin ) )
+  {
+    ADMP("give: not enough room to evolve\n");
+    return;
+  }
+
+  ent->client->pers.evolveHealthFraction 
+      = (float)ent->client->ps.stats[ STAT_HEALTH ] 
+      / (float)BG_Class( currentClass )->health;
+
+  if( ent->client->pers.evolveHealthFraction < 0.0f )
+    ent->client->pers.evolveHealthFraction = 0.0f;
+  else if( ent->client->pers.evolveHealthFraction > 1.0f )
+    ent->client->pers.evolveHealthFraction = 1.0f;
+
+  //remove credit
+  //G_AddCreditToClient( ent->client, -cost, qtrue );
+  ent->client->pers.classSelection = newClass;
+  ClientUserinfoChanged( clientNum, qfalse );
+  VectorCopy( infestOrigin, ent->s.pos.trBase );
+  VectorCopy( ent->client->ps.velocity, oldVel );
+
+  if( ent->client->ps.stats[ STAT_STATE ] & SS_BOOSTED )
+    oldBoostTime = ent->client->boostedTime;
+
+  ClientSpawn( ent, ent, ent->s.pos.trBase, ent->s.apos.trBase );
+
+  VectorCopy( oldVel, ent->client->ps.velocity );
+  if( oldBoostTime > 0 )
+  {
+    ent->client->boostedTime = oldBoostTime;
+    ent->client->ps.stats[ STAT_STATE ] |= SS_BOOSTED;
+  }
+}
+
+static void Give_Gun( gentity_t *ent, char *s )
+{
+  int w = BG_WeaponByName( s )->number;
+
+  if ( w == WP_NONE )
+    return;
+
+  ent->client->ps.stats[ STAT_WEAPON ] = w;
+  ent->client->ps.ammo = BG_Weapon( w )->maxAmmo;
+  ent->client->ps.clips = BG_Weapon( w )->maxClips;
+  G_ForceWeaponChange( ent, w );
+}
+
+static void Give_Upgrade( gentity_t *ent, char *s )
+{
+    int u = BG_UpgradeByName( s )->number;
+    BG_AddUpgradeToInventory( u, ent->client->ps.stats );
+}
 
 /*
 ==================
@@ -417,15 +484,29 @@ void Cmd_Give_f( gentity_t *ent )
 
   if( trap_Argc( ) < 2 )
   {
-    ADMP( "usage: give [what]\n" );
-    ADMP( "usage: valid choices are: all, health, funds [amount], stamina, "
-          "poison, gas, ammo\n" );
+    // FIXME I am hideous :#(
+    ADMP( "^3give: ^7usage: give [what]\n\nNormal\n\n"
+          "  health\n  funds <amount>\n  stamina\n  poison\n  gas\n  ammo\n" 
+          "\n^3Classes\n\n"
+          "  level0\n  level1\n  level1upg\n  level2\n  level2upg\n  level3\n  level3upg\n  level4\n  builder\n  builderupg\n"
+          "  human_base\n  human_bsuit\n  "
+          "\n^5Weapons\n\n"
+          "  blaster\n  rifle\n  psaw\n  shotgun\n  lgun\n  mdriver\n  chaingun\n  flamer\n  prifle\n  grenade\n  lockblob\n"
+          "  hive\n  teslagen\n  mgturret\n  abuild\n  abuildupg\n  portalgun\n  proximity\n  smokecan\n  "
+          "\n^2Upgrades\n\n"
+          "  larmour\n  helmet\n  medkit\n  battpak\n  jetpack\n  bsuit\n  gren\n  prox\n  smoke\n" );
     return;
   }
 
   name = ConcatArgs( 1 );
   if( Q_stricmp( name, "all" ) == 0 )
     give_all = qtrue;
+
+  if( give_all || Q_stricmp( name, "health" ) == 0 )
+  {
+    ent->health = ent->client->ps.stats[ STAT_MAX_HEALTH ];
+    BG_AddUpgradeToInventory( UP_MEDKIT, ent->client->ps.stats );
+  }
 
   if( give_all || Q_stricmpn( name, "funds", 5 ) == 0 )
   {
@@ -436,39 +517,31 @@ void Cmd_Give_f( gentity_t *ent )
     else
     {
       credits = atof( name + 6 ) *
-        ( ent->client->pers.teamSelection ==
+        ( ent->client->pers.teamSelection == 
           TEAM_ALIENS ? ALIEN_CREDITS_PER_KILL : 1.0f );
 
       // clamp credits manually, as G_AddCreditToClient() expects a short int
-      if( credits > 30000.0f )
+      if( credits > SHRT_MAX )
         credits = 30000.0f;
-      else if( credits < -30000.0f )
+      else if( credits < SHRT_MIN )
         credits = -30000.0f;
     }
 
     G_AddCreditToClient( ent->client, (short)credits, qtrue );
   }
 
-  if( ent->client->ps.stats[ STAT_HEALTH ] <= 0 ||
-      ent->client->sess.spectatorState != SPECTATOR_NOT )
-  {
-    if( !( give_all || Q_stricmpn( name, "funds", 5 ) == 0 ) )
-      G_TriggerMenu( ent-g_entities, MN_CMD_ALIVE );
-    return;
-  }
-
-  if( give_all || Q_stricmp( name, "health" ) == 0 )
-  {
-    if( ent->health < ent->client->ps.stats[ STAT_MAX_HEALTH ] )
-    {
-      ent->health = ent->client->ps.stats[ STAT_MAX_HEALTH ];
-      ent->client->ps.stats[ STAT_HEALTH ] = ent->health;
-    }
-    BG_AddUpgradeToInventory( UP_MEDKIT, ent->client->ps.stats );
-  }
-
   if( give_all || Q_stricmp( name, "stamina" ) == 0 )
     ent->client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
+
+  // Adding guns
+  Give_Gun(ent, name);
+
+  // Adding upgrades
+  Give_Upgrade(ent, name);
+
+  // Change class- this allows you to be any alien class on TEAM_HUMAN and the
+  // otherway round.
+  Give_Class(ent, name);
 
   if( Q_stricmp( name, "poison" ) == 0 )
   {
@@ -489,8 +562,7 @@ void Cmd_Give_f( gentity_t *ent )
   {
     ent->client->ps.eFlags |= EF_POISONCLOUDED;
     ent->client->lastPoisonCloudedTime = level.time;
-    trap_SendServerCommand( ent->client->ps.clientNum,
-                              "poisoncloud" );
+    trap_SendServerCommand( ent->client->ps.clientNum, "poisoncloud" );
   }
 
   if( give_all || Q_stricmp( name, "ammo" ) == 0 )
@@ -515,7 +587,6 @@ void Cmd_Give_f( gentity_t *ent )
       ent->client->ps.stats[ STAT_FUEL ] = JETPACK_FUEL_FULL;
   }
 }
-
 
 /*
 ==================
@@ -4061,10 +4132,8 @@ void Cmd_PrivateMessage_f( gentity_t *ent )
 
 void Cmd_PlayMap_f( gentity_t *ent )
 {
-  char   cmd[ MAX_TOKEN_CHARS ],
-    	 subcmd[ MAX_TOKEN_CHARS ],
-         map[ MAX_TOKEN_CHARS ],
-         layout[ MAX_TOKEN_CHARS ],
+  char   cmd[ MAX_TOKEN_CHARS ], subcmd[ MAX_TOKEN_CHARS ],
+         map[ MAX_TOKEN_CHARS ], layout[ MAX_TOKEN_CHARS ],
          extra[ MAX_TOKEN_CHARS ];
   char   *flags;
   int 	 page;
@@ -4076,7 +4145,7 @@ void Cmd_PlayMap_f( gentity_t *ent )
   {
     // TODO: [layout [flags]] announce them once they're implemented
     ADMP( "To add maps to the playlist:\n"
-	  S_COLOR_YELLOW "  /playmap add " S_COLOR_WHITE "mapname [layout]\n"
+	  S_COLOR_YELLOW "  /playmap add " S_COLOR_WHITE "mapname [layout] [flags]\n"
 	  "To see a list of maps to choose:\n"
 	  S_COLOR_YELLOW "  /playmap pool " S_COLOR_WHITE "[pagenumber]\n\n" ); 
       
@@ -4116,7 +4185,12 @@ void Cmd_PlayMap_f( gentity_t *ent )
     trap_Argv( 2, map, sizeof( map ) );
     trap_Argv( 3, layout, sizeof( layout ) );
     trap_Argv( 4, extra, sizeof( extra ) );
-    flags = ConcatArgs( 3 );
+    if( *layout == '+' || *layout == '-' )
+    {
+      flags = ConcatArgs( 3 );
+      *layout = '\0';
+    } else
+      flags = ConcatArgs( 4 );
 
     if( g_debugPlayMap.integer > 0 )
       trap_SendServerCommand( ent-g_entities,

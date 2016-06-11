@@ -381,7 +381,8 @@ static float PM_CmdScale( usercmd_t *cmd, qboolean zFlight )
   float       scale;
   float       modifier = 1.0f;
   
-  if( pm->ps->stats[ STAT_TEAM ] == TEAM_HUMANS && pm->ps->pm_type == PM_NORMAL )
+  if ( BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_STAMINA)
+    && pm->ps->pm_type == PM_NORMAL )
   {
     qboolean wasSprinting;
     qboolean sprint;
@@ -793,13 +794,14 @@ static qboolean PM_CheckJump( void )
       pm->ps->stats[ STAT_MISC ] > 0 )
     return qfalse;
 
-  if( ( pm->ps->stats[ STAT_TEAM ] == TEAM_HUMANS ) &&
+  if( BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_STAMINA) &&
       ( pm->ps->stats[ STAT_STAMINA ] < STAMINA_SLOW_LEVEL + STAMINA_JUMP_TAKE ) &&
       ( !BG_InventoryContainsUpgrade( UP_JETPACK, pm->ps->stats ) || pm->ps->stats[ STAT_FUEL ] < JETPACK_FUEL_JUMP ) )
     return qfalse;
 
   //no bunny hopping off a dodge
-  if( pm->ps->stats[ STAT_TEAM ] == TEAM_HUMANS && 
+  //SCA_DODGE? -vjr
+  if( BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_STAMINA) &&
       pm->ps->pm_time )
     return qfalse;
 
@@ -829,11 +831,10 @@ static qboolean PM_CheckJump( void )
   pml.walking = qfalse;
   pm->ps->pm_flags |= PMF_JUMP_HELD;
 
-  // true if using the jetpack to jump (doesn't use stamina, only fuel)
   jetjump = ( BG_InventoryContainsUpgrade( UP_JETPACK, pm->ps->stats ) &&
               pm->ps->stats[ STAT_FUEL ] >= JETPACK_FUEL_JUMP );
 
-  if( pm->ps->stats[ STAT_TEAM ] == TEAM_HUMANS )
+  if( BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_STAMINA) )
   {
     if( !jetjump )
       pm->ps->stats[ STAT_STAMINA ] -= STAMINA_JUMP_TAKE;
@@ -857,7 +858,6 @@ static qboolean PM_CheckJump( void )
 			pm->ps->persistant[PERS_JUMPTIME] = 400;
 			pm->ps->pm_time = pm_cliptime; //clip through walls with the same timer as walljump
 	  }
-
 
   pm->ps->groundEntityNum = ENTITYNUM_NONE;
 
@@ -976,7 +976,7 @@ static qboolean PM_CheckDodge( void )
   float jump, sideModifier;
   int i;
   
-  if( pm->ps->stats[ STAT_TEAM ] != TEAM_HUMANS )
+  if( !BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_STAMINA) )
     return qfalse;
 
   // Landed a dodge
