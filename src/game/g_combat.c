@@ -94,6 +94,7 @@ char *modNames[ ] =
   "MOD_SLIME",
   "MOD_LAVA",
   "MOD_CRUSH",
+  "MOD_DROP",
   "MOD_TELEFRAG",
   "MOD_FALLING",
   "MOD_SUICIDE",
@@ -128,7 +129,8 @@ char *modNames[ ] =
   "MOD_OVERMIND",
   "MOD_DECONSTRUCT",
   "MOD_REPLACE",
-  "MOD_NOCREEP"
+  "MOD_NOCREEP",
+  "MOD_SLAP"
 };
 
 /*
@@ -232,6 +234,38 @@ float G_RewardAttackers( gentity_t *self )
   
   return totalDamage;
 }
+
+/*
+==================
+GibEntity
+==================
+*/
+void GibEntity( gentity_t *self )
+{
+  vec3_t dir;
+ 
+  VectorCopy( self->s.origin2, dir );
+ 
+  G_AddEvent( self, EV_GIB_PLAYER, DirToByte( dir ) );
+  self->takedamage = qfalse;
+  self->s.eType    = ET_INVISIBLE;
+  self->r.contents = 0;
+  self->nextthink  = 0;
+}
+
+/*
+==================
+body_die
+==================
+*/
+void body_die( gentity_t *self, gentity_t *unused, gentity_t *unused2, int damage, int meansOfDeath )
+{
+  if ( self->health > GIB_HEALTH )
+    return;
+
+  GibEntity( self );
+}
+
 
 /*
 ==================
@@ -348,7 +382,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
   VectorCopy( self->r.currentOrigin, self->client->pers.lastDeathLocation );
 
-  self->takedamage = qfalse; // can still be gibbed
+  self->takedamage = qtrue; // can still be gibbed
 
   self->s.weapon = WP_NONE;
   if( self->client->noclip )
@@ -372,6 +406,12 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   // clear misc
   memset( self->client->ps.misc, 0, sizeof( self->client->ps.misc ) );
 
+  if ( self->health <= GIB_HEALTH
+    && self->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
+  {
+    GibEntity( self );
+  }
+  else
   {
     // normal death
     static int i;
@@ -923,7 +963,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   int     knockback;
 
   // Can't deal damage sometimes
-  if( !targ->takedamage || targ->health <= 0 || level.intermissionQueued )
+  if( !targ->takedamage || level.intermissionQueued )
     return;
 
   if( !inflictor )
@@ -1047,8 +1087,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
         return;
       }
 
-      // check if friendly fire has been disabled
-      if( !g_friendlyFire.integer )
+      // check if friendly fire has been disabled or if Warmup is in progress
+      if( !g_friendlyFire.integer || IS_WARMUP )
       {
         return;
       }
@@ -1059,7 +1099,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
         mod != MOD_REPLACE && mod != MOD_NOCREEP )
     {
       if( targ->buildableTeam == attacker->client->pers.teamSelection &&
-        !g_friendlyBuildableFire.integer )
+        ( !g_friendlyBuildableFire.integer || IS_WARMUP ) )
       {
         return;
       }
@@ -1315,6 +1355,48 @@ qboolean G_SelectiveRadiusDamage( vec3_t origin, gentity_t *attacker, float dama
   return hitClient;
 }
 
+/*
+============
+G_Knockback
+============
+*/
+void G_Knockback( gentity_t *targ, vec3_t dir, int knockback )
+{
+  if( knockback && targ->client )
+  {
+    vec3_t  kvel;
+    float   mass;
+
+    mass = 200;
+
+    // Halve knockback for bsuits
+    if( targ->client &&
+        targ->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
+        BG_InventoryContainsUpgrade( UP_BATTLESUIT, targ->client->ps.stats ) )
+      mass += 400;
+
+    // Halve knockback for crouching players
+    if(targ->client->ps.pm_flags&PMF_DUCKED) knockback /= 2;
+
+    VectorScale( dir, g_knockback.value * (float)knockback / mass, kvel );
+    VectorAdd( targ->client->ps.velocity, kvel, targ->client->ps.velocity );
+
+    // set the timer so that the other client can't cancel
+    // out the movement immediately
+    if( !targ->client->ps.pm_time )
+    {
+      int   t;
+      t = knockback * 2;
+      if( t < 50 )
+        t = 50;
+
+      if( t > 200 )
+        t = 200;
+      targ->client->ps.pm_time = t;
+      targ->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
+    }
+  }
+}
 
 /*
 ============
@@ -1324,7 +1406,7 @@ G_RadiusDamage
 qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage,
                          float radius, gentity_t *ignore, int mod )
 {
-  float     points, dist;
+  float     points, dist, shake;
   gentity_t *ent;
   int       entityList[ MAX_GENTITIES ];
   int       numListedEntities;
@@ -1382,6 +1464,31 @@ qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage,
       G_Damage( ent, NULL, attacker, dir, origin,
           (int)points, DAMAGE_RADIUS|DAMAGE_NO_LOCDAMAGE, mod );
     }
+  }
+
+  for( i = 0; i < 3; i++ )
+  {
+    mins[ i ] = origin[ i ] - radius * 2;
+    maxs[ i ] = origin[ i ] + radius * 2;
+  }
+
+  numListedEntities = trap_EntitiesInBox( mins, maxs, entityList, MAX_GENTITIES );
+
+  for( e = 0; e < numListedEntities; e++ )
+  {
+    ent = g_entities + entityList[ e ];
+
+    if( ent == ignore )
+      continue;
+
+    if( !ent->client )
+      continue;
+
+    if( !ent->takedamage )
+      continue;
+
+    shake = damage * 10 / Distance( origin, ent->r.currentOrigin );
+    ent->client->ps.stats[ STAT_SHAKE ] += (int) shake;
   }
 
   return hitClient;

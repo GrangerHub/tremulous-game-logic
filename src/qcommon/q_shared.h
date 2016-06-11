@@ -865,6 +865,19 @@ const char	*Q_stristr( const char *s, const char *find);
 void	Q_strncpyz( char *dest, const char *src, int destsize );
 void	Q_strcat( char *dest, int size, const char *src );
 
+typedef enum
+{
+  VOTE_DESCRIPTION_STRING = 0,
+  VOTE_EXTRA_STRING,
+
+  RAW_VOTE_STRING,
+  NUM_VOTE_STRINGS
+} voteString_t;
+
+#define STRING_DELIMITER        '\r'
+
+void    Q_cleanDelimitedString( char *dest, const char *src );
+
 // strlen that discounts Quake color sequences
 int Q_PrintStrlen( const char *string );
 // removes color sequences from string
@@ -1076,7 +1089,7 @@ typedef struct {
 	cplane_t	plane;		// surface normal at impact, transformed to world space
 	int			surfaceFlags;	// surface hit
 	int			contents;	// contents on other side of surface hit
-	int			entityNum;	// entity the contacted sirface is a part of
+	int			entityNum;	// entity the contacted surface is a part of
 	float		lateralFraction; // fraction of collision tangetially to the trace direction
 } trace_t;
 
@@ -1512,3 +1525,17 @@ typedef struct
 #define LUMA( red, green, blue ) ( 0.2126f * ( red ) + 0.7152f * ( green ) + 0.0722f * ( blue ) )
 
 #endif	// __Q_SHARED_H
+
+extern int pack_max;
+void pack_start( char *data, int max );
+int pack_int( int in );
+int pack_float( float in );
+int pack_text( char *in, int size );
+int pack_text2( char *in );
+extern int unpack_max;
+void unpack_start( char *data, int max );
+int unpack_int( int *out );
+int unpack_float( float *out );
+int unpack_text( int size, char *out, int max);
+int unpack_text2( char *out, int max );
+char *unpack_text3( void );

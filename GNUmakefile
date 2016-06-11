@@ -22,10 +22,6 @@ ifeq ($(COMPILE_PLATFORM),sunos)
   # Solaris uname and GNU uname differ
   COMPILE_ARCH=$(shell uname -p | sed -e s/i.86/x86/)
 endif
-ifeq ($(COMPILE_PLATFORM),darwin)
-  # Apple does some things a little differently...
-  COMPILE_ARCH=$(shell uname -p | sed -e s/i.86/x86/)
-endif
 
 #############################################################################
 #
@@ -354,16 +350,16 @@ ifneq (,$(findstring "$(PLATFORM)", "linux" "gnu_kfreebsd" "kfreebsd-gnu"))
   CLIENT_CFLAGS += $(SDL_CFLAGS)
 
   OPTIMIZEVM = -O3
-  OPTIMIZE = $(OPTIMIZEVM) -ffast-math
+  OPTIMIZE = $(OPTIMIZEVM)
 
   ifeq ($(ARCH),x86_64)
     OPTIMIZEVM = -O3
-    OPTIMIZE = $(OPTIMIZEVM) -ffast-math
+    OPTIMIZE = $(OPTIMIZEVM)
     HAVE_VM_COMPILED = true
   else
   ifeq ($(ARCH),x86)
     OPTIMIZEVM = -O3 -march=i586
-    OPTIMIZE = $(OPTIMIZEVM) -ffast-math
+    OPTIMIZE = $(OPTIMIZEVM)
     HAVE_VM_COMPILED=true
   else
   ifeq ($(ARCH),ppc)
@@ -481,6 +477,17 @@ ifeq ($(PLATFORM),darwin)
 
   BASE_CFLAGS += -fno-strict-aliasing -DMACOS_X -fno-common -pipe
 
+  # 
+  # FIXME: This is a workaround for broken OSX build. BASE_CFLAGS is either
+  # not setup correctly, or is being reset durring the build.
+  #
+  BASE_CFLAGS += -I$(SDLHDIR)/include \
+				 -I$(OPUSFILEDIR)/include \
+    			 -DOPUS_BUILD -DHAVE_LRINTF -DFLOATING_POINT -DUSE_ALLOCA \
+          		 -I$(OPUSDIR)/include -I$(OPUSDIR)/celt -I$(OPUSDIR)/silk \
+          		 -I$(OPUSDIR)/silk/float -I$(OPUSFILEDIR)/include
+
+
   ifeq ($(USE_OPENAL),1)
     CLIENT_CFLAGS += $(OPENAL_CFLAGS)
     ifneq ($(USE_OPENAL_DLOPEN),1)
@@ -506,7 +513,7 @@ ifeq ($(PLATFORM),darwin)
   RENDERER_LIBS += -framework OpenGL $(LIBSDIR)/macosx/libSDL2-2.0.0.dylib
   CLIENT_EXTRA_FILES += $(LIBSDIR)/macosx/libSDL2-2.0.0.dylib
 
-  OPTIMIZE = $(OPTIMIZEVM) -ffast-math
+  OPTIMIZE = $(OPTIMIZEVM)
 
   SHLIBEXT=dylib
   SHLIBCFLAGS=-fPIC -fno-common
@@ -580,12 +587,12 @@ ifeq ($(PLATFORM),mingw32)
 
   ifeq ($(ARCH),x86_64)
     OPTIMIZEVM = -O3
-    OPTIMIZE = $(OPTIMIZEVM) -ffast-math
+    OPTIMIZE = $(OPTIMIZEVM)
     HAVE_VM_COMPILED = true
   endif
   ifeq ($(ARCH),x86)
     OPTIMIZEVM = -O3 -march=i586
-    OPTIMIZE = $(OPTIMIZEVM) -ffast-math
+    OPTIMIZE = $(OPTIMIZEVM)
     HAVE_VM_COMPILED = true
   endif
 
@@ -652,7 +659,7 @@ ifeq ($(PLATFORM),freebsd)
   HAVE_VM_COMPILED = true
 
   OPTIMIZEVM = -O3
-  OPTIMIZE = $(OPTIMIZEVM) -ffast-math
+  OPTIMIZE = $(OPTIMIZEVM)
 
   SHLIBEXT=so
   SHLIBCFLAGS=-fPIC
@@ -706,16 +713,16 @@ ifeq ($(PLATFORM),openbsd)
   CLIENT_CFLAGS += $(SDL_CFLAGS)
 
   OPTIMIZEVM = -O3
-  OPTIMIZE = $(OPTIMIZEVM) -ffast-math
+  OPTIMIZE = $(OPTIMIZEVM)
 
   ifeq ($(ARCH),x86_64)
     OPTIMIZEVM = -O3
-    OPTIMIZE = $(OPTIMIZEVM) -ffast-math
+    OPTIMIZE = $(OPTIMIZEVM)
     HAVE_VM_COMPILED = true
   else
   ifeq ($(ARCH),x86)
     OPTIMIZEVM = -O3 -march=i586
-    OPTIMIZE = $(OPTIMIZEVM) -ffast-math
+    OPTIMIZE = $(OPTIMIZEVM)
     HAVE_VM_COMPILED=true
   else
   ifeq ($(ARCH),ppc)
@@ -861,7 +868,7 @@ ifeq ($(PLATFORM),sunos)
   endif
   endif
 
-  OPTIMIZE = $(OPTIMIZEVM) -ffast-math
+  OPTIMIZE = $(OPTIMIZEVM)
 
   SHLIBEXT=so
   SHLIBCFLAGS=-fPIC
@@ -1539,6 +1546,7 @@ Q3OBJ = \
   $(B)/client/net_ip.o \
   $(B)/client/huffman.o \
   $(B)/client/parse.o \
+  $(B)/client/packing.o \
   \
   $(B)/client/snd_adpcm.o \
   $(B)/client/snd_dma.o \
@@ -1565,6 +1573,9 @@ Q3OBJ = \
   $(B)/client/sv_net_chan.o \
   $(B)/client/sv_snapshot.o \
   $(B)/client/sv_world.o \
+  $(B)/client/sv_database.o \
+  $(B)/client/sv_sqlite.o \
+  $(B)/client/sqlite3.o \
   \
   $(B)/client/q_math.o \
   $(B)/client/q_shared.o \
@@ -2049,6 +2060,8 @@ ifeq ($(USE_MUMBLE),1)
     $(B)/client/libmumblelink.o
 endif
 
+LIBS += $(shell pkg-config --libs sqlite3)
+
 ifneq ($(USE_RENDERER_DLOPEN),0)
 $(B)/$(OUT)/$(CLIENTBIN)$(FULLBINEXT): $(Q3OBJ) $(LIBSDLMAIN)
 	$(echo_cmd) "LD $@"
@@ -2102,6 +2115,9 @@ Q3DOBJ = \
   $(B)/ded/sv_net_chan.o \
   $(B)/ded/sv_snapshot.o \
   $(B)/ded/sv_world.o \
+  $(B)/ded/sv_database.o \
+  $(B)/ded/sv_sqlite.o \
+  $(B)/ded/sqlite3.o \
   \
   $(B)/ded/cm_load.o \
   $(B)/ded/cm_patch.o \
@@ -2118,6 +2134,7 @@ Q3DOBJ = \
   $(B)/ded/net_ip.o \
   $(B)/ded/huffman.o \
   $(B)/ded/parse.o \
+  $(B)/ded/packing.o \
   \
   $(B)/ded/q_math.o \
   $(B)/ded/q_shared.o \
@@ -2191,7 +2208,7 @@ endif
 
 $(B)/$(OUT)/$(SERVERBIN)$(FULLBINEXT): $(Q3DOBJ)
 	$(echo_cmd) "LD $@"
-	$(Q)$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(Q3DOBJ) $(SERVER_LIBS) $(LIBS)
+	$(Q)$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(Q3DOBJ) $(SERVER_LIBS) $(LIBS) -lpthread
 
 
 
@@ -2318,9 +2335,11 @@ GOBJ_ = \
   $(B)/game/g_admin.o \
   $(B)/game/g_namelog.o \
   $(B)/game/g_playmap.o \
+  $(B)/game/g_playermodel.o \
   \
   $(B)/qcommon/q_math.o \
-  $(B)/qcommon/q_shared.o
+  $(B)/qcommon/q_shared.o \
+  $(B)/qcommon/packing.o
 
 GOBJ = $(GOBJ_) $(B)/game/g_syscalls.o
 GVMOBJ = $(GOBJ_:%.o=%.asm)

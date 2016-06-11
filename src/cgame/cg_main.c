@@ -234,6 +234,8 @@ vmCvar_t  cg_voice;
 
 vmCvar_t  cg_emoticons;
 
+vmCvar_t  cg_cameraShakeMagnitude;
+
 vmCvar_t  cg_chatTeamPrefix;
 
 typedef struct
@@ -286,7 +288,7 @@ static cvarTable_t cvarTable[ ] =
   { &cg_tracerWidth, "cg_tracerwidth", "1", CVAR_CHEAT },
   { &cg_tracerLength, "cg_tracerlength", "100", CVAR_CHEAT },
   { &cg_thirdPersonRange, "cg_thirdPersonRange", "75", CVAR_ARCHIVE },
-  { &cg_thirdPerson, "cg_thirdPerson", "0", CVAR_CHEAT },
+  { &cg_thirdPerson, "cg_thirdPerson", "0", CVAR_ARCHIVE },
   { &cg_thirdPersonAngle, "cg_thirdPersonAngle", "0", CVAR_CHEAT },
   { &cg_thirdPersonPitchFollow, "cg_thirdPersonPitchFollow", "0", 0 },
   { &cg_thirdPersonShoulderViewMode, "cg_thirdPersonShoulderViewMode", "1", CVAR_ARCHIVE },
@@ -317,7 +319,7 @@ static cvarTable_t cvarTable[ ] =
   { &cg_debugParticles, "cg_debugParticles", "0", CVAR_CHEAT },
   { &cg_debugTrails, "cg_debugTrails", "0", CVAR_CHEAT },
   { &cg_debugPVS, "cg_debugPVS", "0", CVAR_CHEAT },
-  { &cg_disableWarningDialogs, "cg_disableWarningDialogs", "0", CVAR_ARCHIVE },
+  { &cg_disableWarningDialogs, "cg_disableWarningDialogs", "1", CVAR_ARCHIVE },
   { &cg_disableUpgradeDialogs, "cg_disableUpgradeDialogs", "0", CVAR_ARCHIVE },
   { &cg_disableBuildDialogs, "cg_disableBuildDialogs", "0", CVAR_ARCHIVE },
   { &cg_disableCommandDialogs, "cg_disableCommandDialogs", "0", CVAR_ARCHIVE },
@@ -368,7 +370,7 @@ static cvarTable_t cvarTable[ ] =
   // but we also reference them here
 
   { &cg_paused, "cl_paused", "0", CVAR_ROM },
-  { &cg_blood, "com_blood", "1", CVAR_ARCHIVE },
+  { &cg_blood, "cg_blood", "0", CVAR_ARCHIVE },
   { &cg_synchronousClients, "g_synchronousClients", "0", 0 }, // communicated by systeminfo
   { &cg_timescaleFadeEnd, "cg_timescaleFadeEnd", "1", CVAR_CHEAT },
   { &cg_timescaleFadeSpeed, "cg_timescaleFadeSpeed", "0", CVAR_CHEAT },
@@ -384,6 +386,8 @@ static cvarTable_t cvarTable[ ] =
 
   { &cg_emoticons, "cg_emoticons", "1", CVAR_LATCH|CVAR_ARCHIVE},
 
+  { &cg_cameraShakeMagnitude, "cg_cameraShakeMagnitude", "1", CVAR_ARCHIVE },
+	
   { &cg_chatTeamPrefix, "cg_chatTeamPrefix", "1", CVAR_ARCHIVE}
 };
 
@@ -759,6 +763,8 @@ static void CG_RegisterSounds( void )
   cgs.media.turretSpinupSound     = trap_S_RegisterSound( "sound/buildables/mgturret/spinup.wav", qfalse );
   cgs.media.weaponEmptyClick      = trap_S_RegisterSound( "sound/weapons/click.wav", qfalse );
 
+  cgs.media.voteAlarmSound        = trap_S_RegisterSound( "sound/misc/213096__soundsexciting__gong-with-music.wav", qfalse );
+
   cgs.media.talkSound             = trap_S_RegisterSound( "sound/misc/talk.wav", qfalse );
   cgs.media.alienTalkSound        = trap_S_RegisterSound( "sound/misc/alien_talk.wav", qfalse );
   cgs.media.humanTalkSound        = trap_S_RegisterSound( "sound/misc/human_talk.wav", qfalse );
@@ -769,6 +775,8 @@ static void CG_RegisterSounds( void )
   cgs.media.watrUnSound           = trap_S_RegisterSound( "sound/player/watr_un.wav", qfalse );
 
   cgs.media.disconnectSound       = trap_S_RegisterSound( "sound/misc/disconnect.wav", qfalse );
+
+  cgs.media.fightSound            = trap_S_RegisterSound( "sound/misc/276254__dynajinn__fight-voiceover-fight.wav", qfalse );
 
   for( i = 0; i < 4; i++ )
   {
@@ -944,6 +952,8 @@ static void CG_RegisterGraphics( void )
   cgs.media.alienBleedPS              = CG_RegisterParticleSystem( "alienBleedPS" );
   cgs.media.humanBleedPS              = CG_RegisterParticleSystem( "humanBleedPS" );
 
+  cgs.media.humanGibPS              = CG_RegisterParticleSystem( "humanPlayerGibsPS" );
+
   cgs.media.sphereModel               = trap_R_RegisterModel( "models/generic/sphere" );
   cgs.media.sphericalCone64Model      = trap_R_RegisterModel( "models/generic/sphericalCone64" );
   cgs.media.sphericalCone240Model     = trap_R_RegisterModel( "models/generic/sphericalCone240" );
@@ -1075,6 +1085,7 @@ static void CG_RegisterClients( void )
   cgs.media.larmourHeadSkin    = trap_R_RegisterSkin( "models/players/human_base/head_light.skin" );
   cgs.media.larmourLegsSkin    = trap_R_RegisterSkin( "models/players/human_base/lower_light.skin" );
   cgs.media.larmourTorsoSkin   = trap_R_RegisterSkin( "models/players/human_base/upper_light.skin" );
+  cgs.media.replaceLarmour     = trap_R_RegisterShader( "replace/larmour" );
 
   cgs.media.jetpackModel       = trap_R_RegisterModel( "models/players/human_base/jetpack.md3" );
   cgs.media.jetpackFlashModel  = trap_R_RegisterModel( "models/players/human_base/jetpack_flash.md3" );
@@ -1882,6 +1893,8 @@ Will perform callbacks to make the loading info screen update.
 void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum )
 {
   const char  *s;
+  int          i;
+  int          team;
 
   // clear everything
   memset( &cgs, 0, sizeof( cgs ) );
@@ -1927,17 +1940,14 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum )
   // get the gamestate from the client system
   trap_GetGameState( &cgs.gameState );
 
-  // copy vote display strings so they don't show up blank if we see
-  // the same one directly after connecting
-  Q_strncpyz( cgs.voteString[ TEAM_NONE ],
-      CG_ConfigString( CS_VOTE_STRING + TEAM_NONE ),
-      sizeof( cgs.voteString ) );
-  Q_strncpyz( cgs.voteString[ TEAM_ALIENS ],
-      CG_ConfigString( CS_VOTE_STRING + TEAM_ALIENS ),
-      sizeof( cgs.voteString[ TEAM_ALIENS ] ) );
-  Q_strncpyz( cgs.voteString[ TEAM_HUMANS ],
-      CG_ConfigString( CS_VOTE_STRING + TEAM_ALIENS ),
-      sizeof( cgs.voteString[ TEAM_HUMANS ] ) );
+    for( team = TEAM_NONE; team < NUM_TEAMS; ++team )
+  {
+    cgs.voteAlarmPlay[ team ] = qfalse;
+
+    // copy vote display strings so they don't show up blank if we see
+    // the same one directly after connecting
+    CG_ParseVoteStrings( team, CG_ConfigString( CS_VOTE_STRING + team ) );
+  }
 
   // check version
   s = CG_ConfigString( CS_GAME_VERSION );

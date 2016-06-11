@@ -2951,6 +2951,10 @@ static void PM_Weapon( void )
     pm->ps->weaponTime -= pml.msec;
   if( pm->ps->weaponTime < 0 )
     pm->ps->weaponTime = 0;
+  if( pm->pmext->repairRepeatDelay > 0 )
+    pm->pmext->repairRepeatDelay -= pml.msec;
+  if( pm->pmext->repairRepeatDelay < 0 )
+    pm->pmext->repairRepeatDelay = 0;
 
   // no slash during charge
   if( pm->ps->stats[ STAT_STATE ] & SS_CHARGING )
@@ -3521,6 +3525,8 @@ void PM_UpdateViewAngles( playerState_t *ps, const usercmd_t *cmd )
       tempang[ i ] += 360.0f;
   }
 
+  PM_CalculateAngularVelocity( ps, cmd );
+
   //actually set the viewangles
   for( i = 0; i < 3; i++ )
     ps->viewangles[ i ] = tempang[ i ];
@@ -3555,6 +3561,111 @@ void PM_UpdateViewAngles( playerState_t *ps, const usercmd_t *cmd )
   }
 }
 
+void PM_CalculateAngularVelocity( playerState_t *ps, const usercmd_t *cmd )
+{
+  short   temp[ 3 ];
+  int     i;
+  vec3_t  axis[ 3 ], rotaxis[ 3 ];
+  vec3_t  tempang, cartNew, cartOld;
+
+  if( ps->pm_type == PM_INTERMISSION )
+    return;   // no view changes at all
+
+  if( ps->pm_type != PM_SPECTATOR && ps->stats[ STAT_HEALTH ] <= 0 )
+    return;   // no view changes at all
+
+  // circularly clamp the angles with deltas
+  for( i = 0; i < 3; i++ )
+  {
+    if( i == ROLL ) 
+    {
+      // Guard against speed hack
+      temp[ i ] = ps->delta_angles[ i ];
+
+#ifdef CGAME
+      // Assert here so that if cmd->angles[ i ] becomes non-zero
+      // for a legitimate reason we can tell where and why it's
+      // being ignored
+      assert( cmd->angles[ i ] == 0 );
+#endif
+
+    }
+    else
+      temp[ i ] = cmd->angles[ i ] + ps->delta_angles[ i ];
+
+    if( i == PITCH )
+    {
+      // don't let the player look up or down more than 90 degrees
+      if( temp[ i ] > 16000 )
+      {
+        temp[ i ] = 16000;
+      }
+      else if( temp[ i ] < -16000 )
+      {
+        temp[ i ] = -16000;
+      }
+    }
+    tempang[ i ] = SHORT2ANGLE( temp[ i ] );
+  }
+
+  //convert viewangles -> axis
+  AnglesToAxis( tempang, axis );
+
+  if( !( ps->stats[ STAT_STATE ] & SS_WALLCLIMBING ) ||
+      !BG_RotateAxis( ps->grapplePoint, axis, rotaxis, qfalse,
+                      ps->eFlags & EF_WALLCLIMBCEILING ) )
+    AxisCopy( axis, rotaxis );
+
+  //convert the new axis back to angles
+  AxisToAngles( rotaxis, tempang );
+
+  //force angles to -180 <= x <= 180
+  for( i = 0; i < 3; i++ )
+  {
+    while( tempang[ i ] > 180.0f )
+      tempang[ i ] -= 360.0f;
+
+    while( tempang[ i ] < -180.0f )
+      tempang[ i ] += 360.0f;
+  }
+
+  // actually calculate the angular velocity
+
+  if( pm->pmext->updateAnglesTime != pm->ps->commandTime )
+  {
+    VectorCopy( pm->pmext->previousUpdateAngles, pm->pmext->previousFrameAngles );
+    pm->pmext->diffAnglesPeriod = (float)( pm->ps->commandTime - pm->pmext->updateAnglesTime );
+  }
+
+  if( !( VectorCompare( tempang, pm->pmext->previousUpdateAngles ) && 
+         pm->pmext->updateAnglesTime == pm->ps->commandTime ) )
+  {
+    VectorCopy( tempang, pm->pmext->previousUpdateAngles );
+
+    cartOld[0] = (float)sin( (double)( pm->pmext->previousFrameAngles[ PITCH  ] + 90 ) ) *
+                 (float)cos( (double)( pm->pmext->previousFrameAngles[ YAW ] ) );
+
+    cartOld[1] = (float)sin( (double)( pm->pmext->previousFrameAngles[ PITCH  ] + 90 ) ) *
+                 (float)sin( (double)( pm->pmext->previousFrameAngles[ YAW ] ) );
+
+    cartOld[2] = (float)cos( (double)( pm->pmext->previousFrameAngles[ PITCH  ] + 90 ) );
+
+    cartNew[0] = (float)sin( (double)( tempang[ PITCH ] + 90 ) ) *
+                 (float)cos( (double)( tempang[ YAW ] ) );
+
+    cartNew[1] = (float)sin( (double)( tempang[ PITCH ] + 90 ) ) *
+                 (float)sin( (double)( tempang[ YAW ] ) );
+
+    cartNew[2] = (float)cos( (double)( tempang[ PITCH ] + 90 ) );
+
+    VectorSubtract( cartNew,  cartOld, pm->pmext->angularVelocity );
+
+    VectorScale( pm->pmext->angularVelocity, 1.000f/pm->pmext->diffAnglesPeriod,
+                 pm->pmext->angularVelocity );
+  }
+
+  pm->pmext->updateAnglesTime = pm->ps->commandTime;
+}
 
 /*
 ================

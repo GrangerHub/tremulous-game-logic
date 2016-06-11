@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define GAME_VERSION            "base"
 
 #define DEFAULT_GRAVITY         800
+#define GIB_HEALTH              -40
 
 #define VOTE_TIME               30000 // 30 seconds before vote times out
 
@@ -64,9 +65,9 @@ enum
 
   CS_VOTE_TIME,             // Vote stuff each needs NUM_TEAMS slots
   CS_VOTE_STRING      = CS_VOTE_TIME + NUM_TEAMS,
-  CS_VOTE_YES         = CS_VOTE_STRING + NUM_TEAMS,
-  CS_VOTE_NO          = CS_VOTE_YES + NUM_TEAMS,
-  CS_VOTE_CALLER      = CS_VOTE_NO + NUM_TEAMS,
+  CS_VOTE_CAST         = CS_VOTE_STRING + NUM_TEAMS,
+  CS_VOTE_ACTIVE          = CS_VOTE_CAST + NUM_TEAMS,
+  CS_VOTE_CALLER      = CS_VOTE_ACTIVE + NUM_TEAMS,
   
   CS_GAME_VERSION     = CS_VOTE_CALLER + NUM_TEAMS,
   CS_LEVEL_START_TIME,      // so the timer only shows the current level
@@ -165,8 +166,14 @@ typedef enum
 
 typedef struct
 {
-  int pouncePayload;
-  float fallVelocity;
+  int    pouncePayload;
+  int    repairRepeatDelay;      // Used for for the construction kit
+  float  fallVelocity;
+  int    updateAnglesTime;
+  float  diffAnglesPeriod;
+  vec3_t previousFrameAngles;
+  vec3_t previousUpdateAngles;
+  vec3_t angularVelocity;
 } pmoveExt_t;
 
 #define MAXTOUCH  32
@@ -211,6 +218,7 @@ typedef struct pmove_s
 
 // if a full pmove isn't done on the client, you can just update the angles
 void PM_UpdateViewAngles( playerState_t *ps, const usercmd_t *cmd );
+void PM_CalculateAngularVelocity( playerState_t *ps, const usercmd_t *cmd );
 void Pmove( pmove_t *pmove );
 
 //===================================================================================
@@ -232,7 +240,8 @@ typedef enum
   STAT_MISC,      // for uh...misc stuff (pounce, trample, lcannon)
   STAT_BUILDABLE, // which ghost model to display for building
   STAT_FALLDIST,  // the distance the player fell
-  STAT_VIEWLOCK   // direction to lock the view in
+  STAT_VIEWLOCK,   // direction to lock the view in
+  STAT_SHAKE      // camera shake
   // netcode has space for 2 more
 } statIndex_t;
 
@@ -305,17 +314,20 @@ typedef enum
 #define EF_B_POWERED        0x0010
 #define EF_B_MARKED         0x0020
 
-#define EF_WARN_CHARGE      0x0020    // Lucifer Cannon is about to overcharge
-#define EF_WALLCLIMB        0x0040    // wall walking
-#define EF_WALLCLIMBCEILING 0x0080    // wall walking ceiling hack
-#define EF_NODRAW           0x0100    // may have an event, but no model (unspawned items)
-#define EF_FIRING           0x0200    // for lightning gun
-#define EF_FIRING2          0x0400    // alt fire
-#define EF_FIRING3          0x0800    // third fire
-#define EF_MOVER_STOP       0x1000    // will push otherwise
-#define EF_POISONCLOUDED    0x2000    // player hit with basilisk gas
-#define EF_CONNECTION       0x4000    // draw a connection trouble sprite
-#define EF_BLOBLOCKED       0x8000    // caught by a trapper
+#define EF_WARN_CHARGE      0x0020                   // Lucifer Cannon is about to overcharge
+#define EF_WALLCLIMB        0x0040                   // wall walking
+#define EF_WALLCLIMBCEILING 0x0080                   // wall walking ceiling hack
+#define EF_NODRAW           0x0100                   // may have an event, but no model (unspawned items)
+#define EF_MOVER_STOP       0x0200                   // will push otherwise
+#define EF_ASTRAL_NOCLIP    0x0400                   // EF_ASTRAL flagged entities don't clip with Astral entities,
+                                                     // must be equal to CONTENTS_ASTRAL_NOCLIP
+#define EF_FIRING           0x0800                   // for lightning gun
+#define EF_FIRING2          0x1000                   // alt fire
+#define EF_FIRING3          0x2000                   // third fire
+#define EF_POISONCLOUDED    0x4000                   // player hit with basilisk gas
+#define EF_CONNECTION       0x8000                   // draw a connection trouble sprite
+#define EF_BLOBLOCKED       0x10000                  // caught by a trapper
+
 
 typedef enum
 {
@@ -556,7 +568,9 @@ typedef enum
   EV_MGTURRET_SPINUP, // turret spinup sound should play
 
   EV_RPTUSE_SOUND,    // trigger a sound
-  EV_LEV2_ZAP
+  EV_LEV2_ZAP,
+
+  EV_FIGHT
 } entity_event_t;
 
 typedef enum
@@ -602,6 +616,7 @@ typedef enum
   MN_B_SUDDENDEATH,
   MN_B_REVOKED,
   MN_B_SURRENDER,
+  MN_B_BLOCKEDBYENEMY,
 
   //alien build
   MN_A_ONEOVERMIND,
@@ -878,6 +893,7 @@ typedef enum
   MOD_SLIME,
   MOD_LAVA,
   MOD_CRUSH,
+  MOD_DROP,
   MOD_TELEFRAG,
   MOD_FALLING,
   MOD_SUICIDE,
@@ -910,6 +926,7 @@ typedef enum
   MOD_ASPAWN,
   MOD_ATUBE,
   MOD_OVERMIND,
+  MOD_SLAP,
   MOD_DECONSTRUCT,
   MOD_REPLACE,
   MOD_NOCREEP
@@ -955,6 +972,8 @@ typedef struct
   int       children[ 3 ];
   int       cost;
   int       value;
+
+  qboolean  stackable;
 } classAttributes_t;
 
 typedef struct
@@ -1044,7 +1063,9 @@ typedef struct
   qboolean      transparentTest;
   qboolean      uniqueTest;
   
-  int       value;
+  int           value;
+
+  qboolean      stackable;
 } buildableAttributes_t;
 
 typedef struct
@@ -1195,9 +1216,10 @@ qboolean                    BG_UpgradeAllowedInStage( upgrade_t upgrade,
 #define MASK_SOLID        (CONTENTS_SOLID)
 #define MASK_PLAYERSOLID  (CONTENTS_SOLID|CONTENTS_PLAYERCLIP|CONTENTS_BODY)
 #define MASK_DEADSOLID    (CONTENTS_SOLID|CONTENTS_PLAYERCLIP)
+#define MASK_ASTRALSOLID  (CONTENTS_SOLID|CONTENTS_PLAYERCLIP|CONTENTS_ASTRAL_NOCLIP)
 #define MASK_WATER        (CONTENTS_WATER|CONTENTS_LAVA|CONTENTS_SLIME)
 #define MASK_OPAQUE       (CONTENTS_SOLID|CONTENTS_SLIME|CONTENTS_LAVA)
-#define MASK_SHOT         (CONTENTS_SOLID|CONTENTS_BODY)
+#define MASK_SHOT         (CONTENTS_SOLID|CONTENTS_BODY|CONTENTS_CORPSE)
 
 
 //
@@ -1342,3 +1364,22 @@ typedef struct
   const char *name;
 } dummyCmd_t;
 int cmdcmp( const void *a, const void *b );
+
+typedef enum
+{
+  KICK_VOTE,
+  POLL_VOTE,
+  MUTE_VOTE,
+  UNMUTE_VOTE,
+  MAP_RESTART_VOTE,
+  MAP_VOTE,
+  NEXTMAP_VOTE,
+  DRAW_VOTE,
+  SUDDEN_DEATH_VOTE,
+  DENYBUILD_VOTE,
+  ALLOWBUILD_VOTE,
+  ADMITDEFEAT_VOTE,
+
+  NUM_VOTE_TYPES,
+  VOID_VOTE
+} vote_t;

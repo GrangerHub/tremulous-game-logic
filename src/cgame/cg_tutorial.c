@@ -424,21 +424,19 @@ static void CG_HumanCkitText( char *text, playerState_t *ps )
       {
         Q_strcat( text, MAX_TUTORIAL_TEXT,
             va( "Press %s to unmark this structure\n",
-              CG_KeyNameForCommand( "deconstruct" ) ) );
+              CG_KeyNameForCommand( "reload" ) ) );
       }
       else
       {
         Q_strcat( text, MAX_TUTORIAL_TEXT,
             va( "Press %s to mark this structure\n",
-              CG_KeyNameForCommand( "deconstruct" ) ) );
+              CG_KeyNameForCommand( "reload" ) ) );
       }
     }
-    else
-    {
-      Q_strcat( text, MAX_TUTORIAL_TEXT,
-          va( "Press %s to destroy this structure\n",
-            CG_KeyNameForCommand( "deconstruct" ) ) );
-    }
+
+    Q_strcat( text, MAX_TUTORIAL_TEXT,
+              va( "Press %s to destroy this structure\n",
+                   CG_KeyNameForCommand( "deconstruct" ) ) );
   }
 }
 

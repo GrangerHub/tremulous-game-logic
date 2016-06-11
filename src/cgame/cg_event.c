@@ -168,6 +168,15 @@ static void CG_Obituary( entityState_t *ent )
           message = "blew himself up";
         break;
 
+      case MOD_DROP:
+        if( gender == GENDER_FEMALE )
+          message = "squished herself";
+        else if( gender == GENDER_NEUTER )
+          message = "squished itself";
+        else
+          message = "squished himself";
+        break;
+
       case MOD_LEVEL3_BOUNCEBALL:
         if( gender == GENDER_FEMALE )
           message = "sniped herself";
@@ -264,6 +273,11 @@ static void CG_Obituary( entityState_t *ent )
       case MOD_GRENADE:
         message = "couldn't escape";
         message2 = "'s grenade";
+        break;
+
+      case MOD_DROP:
+        message = "was squished by";
+        message2 = "'s dropped structure";
         break;
 
       case MOD_ABUILDER_CLAW:
@@ -872,7 +886,8 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       break;
 
     case EV_GIB_PLAYER:
-      // no gibbing
+      ByteToDir( es->eventParm, dir );
+      CG_GibPlayer( position, dir );
       break;
 
     case EV_STOPLOOPINGSOUND:
@@ -989,6 +1004,10 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
 
     case EV_LEV2_ZAP:
       CG_Level2Zap( es );
+      break;
+
+    case EV_FIGHT:
+      trap_S_StartLocalSound( cgs.media.fightSound, CHAN_LOCAL_SOUND );
       break;
 
     default:

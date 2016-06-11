@@ -480,8 +480,13 @@ static qboolean CG_RegisterClientModelname( clientInfo_t *ci, const char *modelN
   // if any skins failed to load, return failure
   if( !CG_RegisterClientSkin( ci, modelName, skinName ) )
   {
-    Com_Printf( "Failed to load skin file: %s : %s\n", modelName, skinName );
-    return qfalse;
+    Com_Printf( "Failed to load skin file: %s : %s. Loading default\n",
+            modelName, skinName );
+    if( !CG_RegisterClientSkin( ci, modelName, "default" ) )
+    {
+        Com_Printf( "^1Failed to load default skin file!\n" );
+        return qfalse;
+    }
   }
 
   return qtrue;
@@ -1983,7 +1988,11 @@ void CG_Player( centity_t *cent )
     legs.hModel = ci->legsModel;
 
     if( held & ( 1 << UP_LIGHTARMOUR ) )
+    {
       legs.customSkin = cgs.media.larmourLegsSkin;
+      if (!!strcmp(ci->modelName, "human_base"))
+        legs.customShader = cgs.media.replaceLarmour;
+    }
     else
       legs.customSkin = ci->legsSkin;
   }
@@ -2057,7 +2066,11 @@ void CG_Player( centity_t *cent )
     torso.hModel = ci->torsoModel;
 
     if( held & ( 1 << UP_LIGHTARMOUR ) )
+    {
       torso.customSkin = cgs.media.larmourTorsoSkin;
+      if (!!strcmp(ci->modelName, "human_base"))
+        torso.customShader = cgs.media.replaceLarmour;
+    }
     else
       torso.customSkin = ci->torsoSkin;
 
@@ -2079,7 +2092,11 @@ void CG_Player( centity_t *cent )
     head.hModel = ci->headModel;
 
     if( held & ( 1 << UP_HELMET ) )
+    {
       head.customSkin = cgs.media.larmourHeadSkin;
+      if (!!strcmp(ci->modelName, "human_base"))
+        head.customShader = cgs.media.replaceLarmour;
+    }
     else
       head.customSkin = ci->headSkin;
 
@@ -2299,6 +2316,32 @@ void CG_Corpse( centity_t *cent )
   }
 }
 
+/*
+===================
+CG_GibPlayer
+
+Generated a bunch of gibs launching out from a location
+===================
+*/
+void CG_GibPlayer( vec3_t origin, vec3_t dir )
+{
+  particleSystem_t  *ps;
+
+  if ( cg_blood.integer == 0 )
+      return;
+
+  trap_S_StartSound( origin, ENTITYNUM_WORLD, CHAN_AUTO, cgs.media.alienBuildableExplosion );
+
+  //particle system
+  ps = CG_SpawnNewParticleSystem( cgs.media.humanGibPS );
+
+  if( CG_IsParticleSystemValid( &ps ) )
+  {
+    CG_SetAttachmentPoint( &ps->attachment, origin );
+    CG_SetParticleSystemNormal( ps, dir );
+    CG_AttachToPoint( &ps->attachment );
+  }
+}
 
 //=====================================================================
 

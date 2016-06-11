@@ -332,6 +332,8 @@ intptr_t SV_GameSystemCalls( intptr_t *args ) {
 		return 0;
 	case G_FS_GETFILELIST:
 		return FS_GetFileList( VMA(1), VMA(2), VMA(3), args[4] );
+    case G_FS_GETFILTEREDFILES:
+		return FS_GetFilteredFiles( VMA(1), VMA(2), VMA(3), VMA(4), args[5] );
 	case G_FS_SEEK:
 		return FS_Seek( args[1], args[2], args[3] );
 
@@ -440,6 +442,9 @@ intptr_t SV_GameSystemCalls( intptr_t *args ) {
 	case G_REMOVECOMMAND:
 		Cmd_RemoveCommand( VMA(1) );
 		return 0;
+
+	case G_SL_QUERY:
+		return sl_query( args[1], VMA(2), VMA(3) );
 
 	case TRAP_MEMSET:
 		Com_Memset( VMA(1), args[2], args[3] );

@@ -54,6 +54,9 @@ equ trap_SendGameStat                 -49
 
 equ trap_AddCommand                   -50
 equ trap_RemoveCommand                -51
+equ trap_FS_GetFilteredFiles          -52
+
+equ trap_Query                        -53
 
 equ memset                            -101
 equ memcpy                            -102

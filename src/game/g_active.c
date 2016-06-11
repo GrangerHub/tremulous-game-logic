@@ -358,18 +358,9 @@ void  G_TouchTriggers( gentity_t *ent )
       continue;
 
     // ignore most entities if a spectator
-    if( ent->client->sess.spectatorState != SPECTATOR_NOT )
-    {
-      if( hit->s.eType != ET_TELEPORT_TRIGGER &&
-          // this is ugly but adding a new ET_? type will
-          // most likely cause network incompatibilities
-          hit->touch != Touch_DoorTrigger )
-      {
-        //check for manually triggered doors
-        manualTriggerSpectator( hit, ent );
-        continue;
-      }
-    }
+    if( ( ent->clipmask & CONTENTS_ASTRAL_NOCLIP ) &&
+        hit->s.eType != ET_TELEPORT_TRIGGER )
+      continue;
 
     if( !trap_EntityContact( mins, maxs, hit ) )
       continue;
@@ -509,7 +500,34 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
   }
 }
 
+/*
+=================
+ComparePreviousCmdAngles
 
+Checks if a client's command angles changed
+=================
+*/
+static void ComparePreviousCmdAngles( gclient_t *client )
+{
+  int i;
+
+  if( client->pers.previousCmdAnglesTime < level.time )
+  {
+    if( ( client->pers.previousCmdAngles[0] != client->pers.cmd.angles[0] ) ||
+        ( client->pers.previousCmdAngles[1] != client->pers.cmd.angles[1] ) ||
+        ( client->pers.previousCmdAngles[2] != client->pers.cmd.angles[2] ) )
+    {
+      for( i = 0; i < 3; i++ )
+        client->pers.previousCmdAngles[i] = client->pers.cmd.angles[i];
+
+      client->pers.previousCmdAnglesTime = level.time;
+      client->pers.cmdAnglesChanged = qtrue;
+    } else
+      client->pers.cmdAnglesChanged = qfalse;
+  }
+
+  return;
+}
 
 /*
 =================
@@ -532,30 +550,75 @@ qboolean ClientInactivityTimer( gentity_t *ent )
   else if( client->pers.cmd.forwardmove ||
            client->pers.cmd.rightmove ||
            client->pers.cmd.upmove ||
-           ( client->pers.cmd.buttons & BUTTON_ATTACK ) )
+           ( client->pers.cmd.buttons & BUTTON_ATTACK ) ||
+           client->pers.cmdAnglesChanged ||
+           G_SearchSpawnQueue( &level.alienSpawnQueue, ent-g_entities ) ||
+           G_SearchSpawnQueue( &level.humanSpawnQueue, ent-g_entities ) )
   {
     client->inactivityTime = level.time + g_inactivity.integer * 1000;
     client->inactivityWarning = qfalse;
   }
   else if( !client->pers.localClient )
   {
-    if( level.time > client->inactivityTime &&
-        !G_admin_permission( ent, ADMF_ACTIVITY ) )
+    if( level.time > client->inactivityTime - 10000 )
     {
-      trap_DropClient( client - level.clients, "Dropped due to inactivity" );
-      return qfalse;
-    }
-
-    if( level.time > client->inactivityTime - 10000 &&
-        !client->inactivityWarning &&
-        !G_admin_permission( ent, ADMF_ACTIVITY ) )
-    {
-      client->inactivityWarning = qtrue;
-      trap_SendServerCommand( client - level.clients, "cp \"Ten seconds until inactivity drop!\n\"" );
+      if( level.time > client->inactivityTime )
+      {
+        if( G_admin_permission( ent, ADMF_ACTIVITY ) )
+        {
+          client->inactivityTime = level.time + g_inactivity.integer * 1000;
+          return qtrue;
+        }
+        {
+          trap_SendServerCommand( -1,
+                                  va( "print \"%s^7 moved from %s to spectators due to inactivity\n\"",
+                                      client->pers.netname,
+                                      BG_TeamName( client->pers.teamSelection ) ) );
+          G_LogPrintf( "Inactivity: %d", (int)(client - level.clients) );
+          G_ChangeTeam( ent, TEAM_NONE );
+        }
+      
+        return qfalse;
+      }
+      else if( !client->inactivityWarning )
+      {
+        client->inactivityWarning = qtrue;
+        if( !G_admin_permission( ent, ADMF_ACTIVITY ) )
+          trap_SendServerCommand( client - level.clients,
+                                  va( "cp \"Ten seconds until inactivity %s!\n\"",
+                                      "spectate" ) );
+      }
     }
   }
 
   return qtrue;
+}
+
+/*
+=================
+VoterInactivityTimer
+
+This is used for implied voting
+=================
+*/
+void VoterInactivityTimer( gentity_t *ent )
+{
+  gclient_t *client = ent->client;
+
+  if( client->pers.connected != CON_CONNECTED )
+    client->pers.voterInactivityTime = level.time - 2000;
+  else if( client->pers.cmd.forwardmove ||
+      client->pers.cmd.rightmove ||
+      client->pers.cmd.upmove ||
+      ( client->pers.cmd.buttons & BUTTON_ATTACK ) ||
+      client->pers.cmdAnglesChanged ||
+      G_SearchSpawnQueue( &level.alienSpawnQueue, ent-g_entities ) ||
+      G_SearchSpawnQueue( &level.humanSpawnQueue, ent-g_entities ) )
+  {
+    client->pers.voterInactivityTime = level.time + ( VOTE_TIME );
+  }
+
+  return;
 }
 
 /*
@@ -703,6 +766,12 @@ void ClientTimerActions( gentity_t *ent, int msec )
       }
     }
   }
+
+  //Camera Shake
+    ent->client->ps.stats[ STAT_SHAKE ] *= 0.77f;
+    if( ent->client->ps.stats[ STAT_SHAKE ] < 0 )
+      ent->client->ps.stats[ STAT_SHAKE ] = 0;
+
 
   while( client->time1000 >= 1000 )
   {
@@ -1241,6 +1310,10 @@ void ClientThink_real( gentity_t *ent )
 
   client = ent->client;
 
+  ComparePreviousCmdAngles( client );
+
+  VoterInactivityTimer( ent );
+
   // don't think if the client is not yet connected (and thus not yet spawned in)
   if( client->pers.connected != CON_CONNECTED )
     return;
@@ -1286,6 +1359,11 @@ void ClientThink_real( gentity_t *ent )
     ClientIntermissionThink( client );
     return;
   }
+
+  // check for inactivity timer, but never drop the local client of a non-dedicated server
+  if( ( client->pers.teamSelection != TEAM_NONE ) &&
+      !ClientInactivityTimer( ent ) )
+    return;
 
   // spectators don't do much
   if( client->sess.spectatorState != SPECTATOR_NOT )
@@ -1717,8 +1795,7 @@ void ClientThink_real( gentity_t *ent )
 
   client->ps.persistant[ PERS_BP ] = G_GetBuildPoints( client->ps.origin,
     client->ps.stats[ STAT_TEAM ] );
-  client->ps.persistant[ PERS_MARKEDBP ] = G_GetMarkedBuildPoints( client->ps.origin,
-    client->ps.stats[ STAT_TEAM ] );
+  client->ps.persistant[ PERS_MARKEDBP ] = G_GetMarkedBuildPoints( &client->ps );
 
   if( client->ps.persistant[ PERS_BP ] < 0 )
     client->ps.persistant[ PERS_BP ] = 0;
@@ -1760,8 +1837,22 @@ void ClientThink( int clientNum )
 
 void G_RunClient( gentity_t *ent )
 {
+  if( level.fight && ( ( g_doWarmup.integer && !g_doCountdown.integer ) ||
+      level.countdownTime <= ( level.time + 1000 ) ) )
+  {
+    G_AddPredictableEvent( ent, EV_FIGHT, 0 );
+  }
+
   if( !g_synchronousClients.integer )
-    return;
+  {
+    if( level.time - ent->client->lastCmdTime > 250 )
+    {
+      trap_GetUsercmd( ent->client->ps.clientNum, &ent->client->pers.cmd );
+      ClientThink_real( ent );
+    }
+     return;
+  }
+
 
   ent->client->pers.cmd.serverTime = level.time;
   ClientThink_real( ent );
@@ -1811,7 +1902,7 @@ void SpectatorClientEndFrame( gentity_t *ent )
 ClientEndFrame
 
 Called at the end of each server frame for each connected client
-A fast client will have multiple ClientThink for each ClientEdFrame,
+A fast client will have multiple ClientThink for each ClientEndFrame,
 while a slow client may have multiple ClientEndFrame between ClientThink.
 ==============
 */

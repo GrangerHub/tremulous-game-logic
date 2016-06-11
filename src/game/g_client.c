@@ -475,15 +475,30 @@ static void SpawnCorpse( gentity_t *ent )
   body->s.clientNum = ent->client->ps.stats[ STAT_CLASS ];
   body->nonSegModel = ent->client->ps.persistant[ PERS_STATE ] & PS_NONSEGMODEL;
 
+  // FIXIT-P: Looks like dead code
   if( ent->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
     body->classname = "humanCorpse";
   else
     body->classname = "alienCorpse";
 
-  body->s.misc = MAX_CLIENTS;
+  body->s.misc     = MAX_CLIENTS; // FIXIT-P: This doesn't seemto have any use. 
 
-  body->think = BodySink;
-  body->nextthink = level.time + 20000;
+  body->think      = BodySink;    // Ok, so body sinks
+  body->nextthink  = level.time + 20000; // after 20seconds
+
+  body->health     = ent->health;
+
+  if ( ent->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
+  {
+    body->takedamage = qtrue;     // Should allow body_die to call
+    body->die      = body_die;  // But it doesnt? 
+  }
+  else
+  {
+    body->takedamage = qfalse;
+    body->die      = NULL;
+  }
+
 
   body->s.legsAnim = ent->s.legsAnim;
 
@@ -495,10 +510,12 @@ static void SpawnCorpse( gentity_t *ent )
       case BOTH_DEAD1:
         body->s.torsoAnim = body->s.legsAnim = BOTH_DEAD1;
         break;
+
       case BOTH_DEATH2:
       case BOTH_DEAD2:
         body->s.torsoAnim = body->s.legsAnim = BOTH_DEAD2;
         break;
+
       case BOTH_DEATH3:
       case BOTH_DEAD3:
       default:
@@ -514,10 +531,12 @@ static void SpawnCorpse( gentity_t *ent )
       case NSPA_DEAD1:
         body->s.legsAnim = NSPA_DEAD1;
         break;
+
       case NSPA_DEATH2:
       case NSPA_DEAD2:
         body->s.legsAnim = NSPA_DEAD2;
         break;
+
       case NSPA_DEATH3:
       case NSPA_DEAD3:
       default:
@@ -526,17 +545,15 @@ static void SpawnCorpse( gentity_t *ent )
     }
   }
 
-  body->takedamage = qfalse;
-
-  body->health = ent->health;
-
   //change body dimensions
-  BG_ClassBoundingBox( ent->client->ps.stats[ STAT_CLASS ], mins, NULL, NULL, body->r.mins, body->r.maxs );
+  BG_ClassBoundingBox( ent->client->ps.stats[ STAT_CLASS ], mins, NULL, NULL,
+          body->r.mins, body->r.maxs );
 
   //drop down to match the *model* origins of ent and body
   origin[2] += mins[ 2 ] - body->r.mins[ 2 ];
 
   G_SetOrigin( body, origin );
+
   body->s.pos.trType = TR_GRAVITY;
   body->s.pos.trTime = level.time;
   VectorCopy( ent->client->ps.velocity, body->s.pos.trDelta );
@@ -810,7 +827,7 @@ if desired.
 char *ClientUserinfoChanged( int clientNum, qboolean forceName )
 {
   gentity_t *ent;
-  char      *s;
+  char      *s, *s2;
   char      model[ MAX_QPATH ];
   char      buffer[ MAX_QPATH ];
   char      filename[ MAX_QPATH ];
@@ -908,6 +925,29 @@ char *ClientUserinfoChanged( int clientNum, qboolean forceName )
     G_namelog_update_name( client );
   }
 
+  s = NULL;
+  if ( g_pimpHuman.integer )
+  if ( client->pers.teamSelection == TEAM_HUMANS )
+  {
+    qboolean found;
+
+    s = Info_ValueForKey(userinfo, "model");
+    found = G_IsValidPlayerModel(s);
+
+    if ( !found )
+      s = NULL;
+    else if ( !g_cheats.integer
+           && !forceName
+           && !G_admin_permission( ent, va("MODEL%s", s) ) )
+      s = NULL;
+
+    if (s)
+    {
+      s2 = Info_ValueForKey(userinfo, "skin");
+      s2 = GetSkin(s, s2);
+    }
+  }
+
   if( client->pers.classSelection == PCL_NONE )
   {
     //This looks hacky and frankly it is. The clientInfo string needs to hold different
@@ -919,8 +959,15 @@ char *ClientUserinfoChanged( int clientNum, qboolean forceName )
   }
   else
   {
-    Com_sprintf( buffer, MAX_QPATH, "%s/%s",  BG_ClassConfig( client->pers.classSelection )->modelName,
-                                              BG_ClassConfig( client->pers.classSelection )->skinName );
+    if ( !(client->pers.classSelection == PCL_HUMAN_BSUIT) && s )
+    {
+        Com_sprintf( buffer, MAX_QPATH, "%s/%s", s, s2 );
+    }
+    else
+    {
+        Com_sprintf( buffer, MAX_QPATH, "%s/%s",  BG_ClassConfig( client->pers.classSelection )->modelName,
+                                                  BG_ClassConfig( client->pers.classSelection )->skinName );
+    }
 
     //model segmentation
     Com_sprintf( filename, sizeof( filename ), "models/players/%s/animation.cfg",
@@ -1344,7 +1391,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   else
     ent->r.contents = CONTENTS_BODY;
   if( client->pers.teamSelection == TEAM_NONE )
-    ent->clipmask = MASK_DEADSOLID;
+    ent->clipmask = MASK_ASTRALSOLID;
   else
     ent->clipmask = MASK_PLAYERSOLID;
   ent->die = player_die;
@@ -1575,6 +1622,16 @@ void ClientDisconnect( int clientNum )
 
   G_LogPrintf( "ClientDisconnect: %i [%s] (%s) \"%s^7\"\n", clientNum,
    ent->client->pers.ip.str, ent->client->pers.guid, ent->client->pers.netname );
+
+  {
+    char cleanname[ MAX_NAME_LENGTH ];
+    G_SanitiseString( ent->client->pers.netname, cleanname, sizeof( cleanname ) );
+    trap_Query( DB_SEEN_ADD, cleanname, NULL );
+    if( ent->client->pers.admin ) {
+      G_SanitiseString( ent->client->pers.admin->name, cleanname, sizeof( cleanname ) );
+      trap_Query( DB_SEEN_ADD, cleanname, NULL );
+    }
+  }
 
   trap_UnlinkEntity( ent );
   ent->inuse = qfalse;
