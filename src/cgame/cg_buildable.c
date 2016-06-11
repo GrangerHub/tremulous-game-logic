@@ -622,6 +622,11 @@ static void CG_PositionAndOrientateBuildable( const vec3_t angles, const vec3_t 
     // this is either too far off of the bbox to be useful for gameplay purposes
     //  or the model is positioned in thin air anyways.
     fraction = 0;
+  } else if( normal[ 0 ] == 0  && normal[ 1 ] == 0 )
+  {
+    // don't allow buildable models to drop at all if the surface normal is alligned
+    // vertically
+    fraction = 0;
   }
 
   VectorMA( inOrigin, fraction * -TRACE_DEPTH, normal, outOrigin );
@@ -970,58 +975,65 @@ static void CG_BuildableStatusDisplay( centity_t *cent )
 
   entNum = cg.predictedPlayerState.clientNum;
 
-  // if first try fails, step left, step right
-  for( j = 0; j < 3; j++ )
+  // don't display health bars and icons when the buildable has
+  // full health, is powered, & is unmarked
+  if( ( es->misc < BG_Buildable( es->modelindex )->health ) ||
+      !( es->eFlags & EF_B_POWERED ) ||
+       ( es->eFlags & EF_B_MARKED ) )
   {
-    VectorCopy( cg.refdef.vieworg, trOrigin );
-    switch( j )
+    // if first try fails, step left, step right
+    for( j = 0; j < 3; j++ )
     {
-      case 1:
-        // step right
-        AngleVectors( cg.refdefViewAngles, NULL, right, NULL );
-        VectorMA( trOrigin, STATUS_PEEK_DIST, right, trOrigin );
-        break;
-      case 2:
-        // step left
-        AngleVectors( cg.refdefViewAngles, NULL, right, NULL );
-        VectorMA( trOrigin, -STATUS_PEEK_DIST, right, trOrigin );
-        break;
-      default:
-        break;
+      VectorCopy( cg.refdef.vieworg, trOrigin );
+      switch( j )
+      {
+        case 1:
+          // step right
+          AngleVectors( cg.refdefViewAngles, NULL, right, NULL );
+          VectorMA( trOrigin, STATUS_PEEK_DIST, right, trOrigin );
+          break;
+        case 2:
+          // step left
+          AngleVectors( cg.refdefViewAngles, NULL, right, NULL );
+          VectorMA( trOrigin, -STATUS_PEEK_DIST, right, trOrigin );
+          break;
+        default:
+          break;
+      }
+      // look through up to 3 players and/or transparent buildables
+      for( i = 0; i < 3; i++ )
+      {
+        CG_Trace( &tr, trOrigin, NULL, NULL, origin, entNum, MASK_SHOT );
+        if( tr.entityNum == cent->currentState.number )
+        {
+          visible = qtrue;
+          break;
+        }
+
+        if( tr.entityNum == ENTITYNUM_WORLD )
+          break;
+
+        hit  = &cg_entities[ tr.entityNum ].currentState;
+
+        if( tr.entityNum < MAX_CLIENTS || ( hit->eType == ET_BUILDABLE &&
+            ( !( es->eFlags & EF_B_SPAWNED ) ||
+              BG_Buildable( hit->modelindex )->transparentTest ) ) )
+        {
+          entNum = tr.entityNum;
+          VectorCopy( tr.endpos, trOrigin );
+        }
+        else
+          break;
+      }
     }
-    // look through up to 3 players and/or transparent buildables
-    for( i = 0; i < 3; i++ )
+    // hack to make the kit obscure view
+    if( cg_drawGun.integer && visible &&
+        cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_HUMANS &&
+        CG_WorldToScreen( origin, &x, &y ) )
     {
-      CG_Trace( &tr, trOrigin, NULL, NULL, origin, entNum, MASK_SHOT );
-      if( tr.entityNum == cent->currentState.number )
-      {
-        visible = qtrue;
-        break;
-      }
-
-      if( tr.entityNum == ENTITYNUM_WORLD )
-        break;
-
-      hit  = &cg_entities[ tr.entityNum ].currentState;
-
-      if( tr.entityNum < MAX_CLIENTS || ( hit->eType == ET_BUILDABLE &&
-          ( !( es->eFlags & EF_B_SPAWNED ) ||
-            BG_Buildable( hit->modelindex )->transparentTest ) ) )
-      {
-        entNum = tr.entityNum;
-        VectorCopy( tr.endpos, trOrigin );
-      }
-      else
-        break;
+      if( x > 450 && y > 290 )
+        visible = qfalse;
     }
-  }
-  // hack to make the kit obscure view
-  if( cg_drawGun.integer && visible &&
-      cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_HUMANS &&
-      CG_WorldToScreen( origin, &x, &y ) )
-  {
-    if( x > 450 && y > 290 )
-      visible = qfalse;
   }
 
   if( !visible && cent->buildableStatus.visible )

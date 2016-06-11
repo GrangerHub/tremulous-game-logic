@@ -355,7 +355,8 @@ static float PM_CmdScale( usercmd_t *cmd, qboolean zFlight )
   float       scale;
   float       modifier = 1.0f;
   
-  if( pm->ps->stats[ STAT_TEAM ] == TEAM_HUMANS && pm->ps->pm_type == PM_NORMAL )
+  if ( BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_STAMINA)
+    && pm->ps->pm_type == PM_NORMAL )
   {
     qboolean wasSprinting;
     qboolean sprint;
@@ -758,12 +759,13 @@ static qboolean PM_CheckJump( void )
       pm->ps->stats[ STAT_MISC ] > 0 )
     return qfalse;
 
-  if( ( pm->ps->stats[ STAT_TEAM ] == TEAM_HUMANS ) &&
-      ( pm->ps->stats[ STAT_STAMINA ] < STAMINA_SLOW_LEVEL + STAMINA_JUMP_TAKE ) )
+  if( BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_STAMINA) &&
+     (pm->ps->stats[STAT_STAMINA] < STAMINA_SLOW_LEVEL + STAMINA_JUMP_TAKE) )
     return qfalse;
 
   //no bunny hopping off a dodge
-  if( pm->ps->stats[ STAT_TEAM ] == TEAM_HUMANS && 
+  //SCA_DODGE? -vjr
+  if( BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_STAMINA) &&
       pm->ps->pm_time )
     return qfalse;
 
@@ -794,7 +796,7 @@ static qboolean PM_CheckJump( void )
   pm->ps->pm_flags |= PMF_JUMP_HELD;
 
   // take some stamina off
-  if( pm->ps->stats[ STAT_TEAM ] == TEAM_HUMANS )
+  if( BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_STAMINA) )
     pm->ps->stats[ STAT_STAMINA ] -= STAMINA_JUMP_TAKE;
 
   pm->ps->groundEntityNum = ENTITYNUM_NONE;
@@ -892,7 +894,7 @@ static qboolean PM_CheckDodge( void )
   float jump, sideModifier;
   int i;
   
-  if( pm->ps->stats[ STAT_TEAM ] != TEAM_HUMANS )
+  if( !BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_STAMINA) )
     return qfalse;
 
   // Landed a dodge

@@ -301,10 +301,10 @@ void meleeAttack( gentity_t *ent, float range, float width, float height,
   int n;
   float widthAdjusted, heightAdjusted;
 
-  for( n=0; n <= 5; ++n )
+  for( n = 0; n < 5; ++n )
   {
-    widthAdjusted = ( width * n ) / 5;
-    heightAdjusted = ( height * n ) / 5;
+    widthAdjusted = ( width * (float)( n ) ) / 5.00f;
+    heightAdjusted = ( height * (float)( n ) ) / 5.00f;
 
     G_WideTrace( &tr, ent, range, widthAdjusted, heightAdjusted, &traceEnt );
     if( traceEnt != NULL && traceEnt->takedamage )
@@ -314,6 +314,13 @@ void meleeAttack( gentity_t *ent, float range, float width, float height,
       return;
     }
   }
+
+  G_WideTrace( &tr, ent, range, width, height, &traceEnt );
+  if( traceEnt == NULL || !traceEnt->takedamage )
+    return;
+
+  WideBloodSpurt( ent, traceEnt, &tr );
+  G_Damage( traceEnt, ent, ent, forward, tr.endpos, damage, DAMAGE_NO_KNOCKBACK, mod );
 }
 
 /*
