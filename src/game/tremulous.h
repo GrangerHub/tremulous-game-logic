@@ -157,7 +157,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define ALIEN_HP_RESERVE_REGEN_MOD  (1.0f/9.0f)
 #define ALIEN_HP_RESERVE_MAX        2.0f
-#define ALIEN_EVO_HP_RESERVE_GAIN   (1.0f/16.0f)
+#define ALIEN_EVO_HP_RESERVE_GAIN   (1.0f/8.0f)
 
 #define ABUILDER_SPEED              0.9f
 #define ABUILDER_VALUE              AVM(240)
