@@ -1250,6 +1250,7 @@ typedef struct
   sfxHandle_t hardBounceSound1;
   sfxHandle_t hardBounceSound2;
 
+  sfxHandle_t voteAlarmSound;
   sfxHandle_t voteNow;
   sfxHandle_t votePassed;
   sfxHandle_t voteFailed;
@@ -1286,6 +1287,8 @@ typedef struct
   sfxHandle_t alienL4ChargePrepare;
   sfxHandle_t alienL4ChargeStart;
 
+  sfxHandle_t fightSound;
+
   qhandle_t   cursor;
   qhandle_t   selectCursor;
   qhandle_t   sizeCursor;
@@ -1318,11 +1321,13 @@ typedef struct
   qhandle_t   alienBuildableDamagedPS;
   qhandle_t   alienBuildableDestroyedPS;
 
-  qhandle_t   alienBleedPS;
-  qhandle_t   humanBleedPS;
   qhandle_t   alienBuildableBleedPS;
   qhandle_t   humanBuildableBleedPS;
 
+  qhandle_t   alienBleedPS;
+  qhandle_t   humanBleedPS;
+
+  qhandle_t   humanGibPS;
 
   qhandle_t   teslaZapTS;
 
@@ -1395,11 +1400,12 @@ typedef struct
   int           numHumans;              // Total number of players in humans team
 
   int           voteTime[ NUM_TEAMS ];
-  int           voteYes[ NUM_TEAMS ];
-  int           voteNo[ NUM_TEAMS ];
+  int           voteCast[ NUM_TEAMS ];   // Total number of yes and no votes combined
+  int           voteActive[ NUM_TEAMS ]; // Total number of active clients during a vote
   char          voteCaller[ NUM_TEAMS ][ MAX_NAME_LENGTH ];
-  qboolean      voteModified[ NUM_TEAMS ];// beep whenever changed
-  char          voteString[ NUM_TEAMS ][ MAX_STRING_TOKENS ];
+  qboolean      voteModified[ NUM_TEAMS ]; // beep whenever changed
+  char          voteString[ NUM_VOTE_STRINGS ][ NUM_TEAMS ][ MAX_STRING_TOKENS ];
+  qboolean      voteAlarmPlay[ NUM_TEAMS ];
 
   int           levelStartTime;
 
@@ -1413,6 +1419,8 @@ typedef struct
   int           humanCredits;
   int           alienNextStageThreshold;
   int           humanNextStageThreshold;
+
+  qboolean      sublimeMarkedBuildables;  // make marked buildables non-solid
 
   //
   // locally derived information from gamestate
@@ -1733,6 +1741,7 @@ void        CG_PrecacheClientInfo( class_t class, char *model, char *skin );
 sfxHandle_t CG_CustomSound( int clientNum, const char *soundName );
 void        CG_PlayerDisconnect( vec3_t org );
 void        CG_Bleed( vec3_t origin, vec3_t normal, int entityNum );
+void        CG_GibPlayer( vec3_t origin, vec3_t dir );
 centity_t   *CG_GetPlayerLocation( void );
 
 //
@@ -1765,6 +1774,7 @@ void        CG_ModelDoor( centity_t *cent );
 #define MAGIC_TRACE_HACK -2
 
 void        CG_BuildSolidList( void );
+void        CG_SublimeMarkedBuildables( qboolean sublime );
 int         CG_PointContents( const vec3_t point, int passEntityNum );
 void        CG_Trace( trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs,
                 const vec3_t end, int skipNumber, int mask );
@@ -1861,6 +1871,7 @@ qboolean      CG_RequestScores( void );
 //
 void          CG_ExecuteNewServerCommands( int latestSequence );
 void          CG_ParseServerinfo( void );
+void          CG_ParseVoteStrings( int team, const char *conStr );
 void          CG_SetConfigValues( void );
 void          CG_ShaderStateChanged(void);
 void          CG_UnregisterCommands( void );

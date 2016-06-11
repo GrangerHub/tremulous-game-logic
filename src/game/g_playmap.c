@@ -116,14 +116,14 @@ static const playMapError_t playMapError[ ] =
 // list of playmap flags and info
 static const playMapFlagDesc_t playMapFlagList[ ] =
 {
-  { PLAYMAP_FLAG_NONE,  "", 	 qfalse, "No flags" },
-  { PLAYMAP_FLAG_DPUNT, "dpunt", qfalse, "Dretch Punt" },
-  { PLAYMAP_FLAG_FF, 	"ff", 	 qtrue,  "Friendly Fire" },
-  { PLAYMAP_FLAG_FBF, 	"fbf", 	 qtrue,  "Friendly Buildable Fire" },
-  { PLAYMAP_FLAG_SD, 	"sd", 	 qtrue,  "Sudden Death" },
-  { PLAYMAP_FLAG_LGRAV, "lgrav", qfalse, "Low Gravity" },
-  { PLAYMAP_FLAG_UBP, 	"ubp",	 qfalse, "Unlimited BP" },
-  { PLAYMAP_FLAG_PORTAL,"portal",qfalse, "Portal Gun" }
+  { PLAYMAP_FLAG_NONE,  "", 	 qfalse, qfalse, "No flags" },
+  { PLAYMAP_FLAG_DPUNT, "dpunt", qfalse, qfalse, "Dretch Punt" },
+  { PLAYMAP_FLAG_FF, 	"ff", 	 qtrue,  qfalse, "Friendly Fire" },
+  { PLAYMAP_FLAG_FBF, 	"fbf", 	 qtrue,  qfalse, "Friendly Buildable Fire" },
+  { PLAYMAP_FLAG_SD, 	"sd", 	 qtrue,  qfalse, "Sudden Death" },
+  { PLAYMAP_FLAG_LGRAV, "lgrav", qfalse, qfalse, "Low Gravity" },
+  { PLAYMAP_FLAG_UBP, 	"ubp",	 qfalse, qfalse, "Unlimited BP" },
+  { PLAYMAP_FLAG_PORTAL,"portal",qfalse, qfalse, "Portal Gun" }
 };
 
 /*
@@ -668,6 +668,7 @@ playMapError_t G_ReloadPlayMapQueue( void )
 {
     fileHandle_t f;
     int len;
+    qboolean hasNewLines = qfalse;
     char *cnf, *cnf2, *mapName, empty = 0,
          *layout = &empty, *clientName = &empty, *flags = &empty;
 
@@ -723,12 +724,12 @@ playMapError_t G_ReloadPlayMapQueue( void )
 	    }
 
 	    // Check whether we have layout or flags
-	    cnf = SkipWhitespace( cnf, qfalse );
+	    cnf = SkipWhitespace( cnf, &hasNewLines );
 
 	    if( ! *cnf || *cnf == '\n')
 	      break;
 	    
-	    if( ! *cnf == '+' && ! *cnf == '-' )
+	    if( !( *cnf == '+' )&&!( *cnf == '-' ) )
 	    {
 	      layout = COM_ParseExt( &cnf, qfalse );
 	      if( !*layout )
@@ -869,7 +870,7 @@ playMapError_t G_PlayMapEnqueue( char *mapName, char *layout,
   else
     playMap.clientName = NULL;
 
-  playMap.flags = G_ParsePlayMapFlagTokens( flags );
+  playMap.flags = G_ParsePlayMapFlagTokens( ent, flags );
 
   playMapQueue.tail = PLAYMAP_QUEUE_PLUS1( playMapQueue.tail );
   playMapQueue.playMap[ playMapQueue.tail ] = playMap;
@@ -886,7 +887,7 @@ Parses a playmap flag string and returns the playMapFlag_t equivalent.
 ================
 */
 
-playMapFlag_t G_ParsePlayMapFlag(char *flag)
+playMapFlag_t G_ParsePlayMapFlag(gentity_t *ent, char *flag)
 {
   int flagNum;
 
@@ -895,6 +896,13 @@ playMapFlag_t G_ParsePlayMapFlag(char *flag)
   {
     if( Q_stricmp_exact( flag, playMapFlagList[ flagNum ].flagName ) == 0 )
     {
+      // Check if flag is available
+      if( ! playMapFlagList[ flagNum ].avail )
+      {
+	ADMP( va( "Playmap flag " S_COLOR_CYAN "%s" S_COLOR_WHITE
+		  " is disabled.\n", flag) );
+	break;			// Out of for
+      }
       // Confirm flag sequence and number match 
       assert( flagNum == playMapFlagList[ flagNum ].flag);
       return flagNum;
@@ -933,7 +941,7 @@ Tokenize string to find flags and set or clear bits on a given default
 flag configuration. TODO: defaults should come from playMapFlagList?
 ================
 */
-int G_ParsePlayMapFlagTokens( char *flags )
+int G_ParsePlayMapFlagTokens( gentity_t *ent, char *flags )
 {
   int 		i, flagsValue;
   char  	*token;
@@ -958,7 +966,7 @@ int G_ParsePlayMapFlagTokens( char *flags )
       case '+':
         if( ( strlen( token ) > 1 ) )
         {
-          playMapFlag = G_ParsePlayMapFlag( token + 1 );
+          playMapFlag = G_ParsePlayMapFlag( ent, token + 1 );
 
           if ( playMapFlag != PLAYMAP_FLAG_NONE )
             PlaymapFlag_Set(flagsValue, playMapFlag);
@@ -971,7 +979,7 @@ int G_ParsePlayMapFlagTokens( char *flags )
       case '-':
         if( ( strlen( token ) > 1 ) )
         {
-          playMapFlag = G_ParsePlayMapFlag( token + 1 );
+          playMapFlag = G_ParsePlayMapFlag( ent, token + 1 );
 
           if ( playMapFlag != PLAYMAP_FLAG_NONE )
             PlaymapFlag_Clear(flagsValue, playMapFlag);

@@ -87,7 +87,8 @@ typedef struct playMapFlagDesc_s
 {
   int 	   flag;		/* Flag bit */
   char 	   *flagName;		/* String to parse */
-  qboolean defVal;		/* Default */
+  qboolean defVal;		/* Whether flag is on by default */
+  qboolean avail;		/* Whether flag is available for users */
   char 	   *flagDesc;		/* Description string */
 } playMapFlagDesc_t;
 
@@ -187,7 +188,7 @@ playMapError_t G_ReloadPlayMapQueue( void );
 gclient_t *G_FindClientByName(gentity_t *from, const char *netname);
 int G_GetPlayMapQueueLength( void );
 qboolean G_PlayMapQueueIsFull( void );
-playMapFlag_t G_ParsePlayMapFlag(char *flag);
+playMapFlag_t G_ParsePlayMapFlag( gentity_t *ent, char *flag );
 playMapError_t G_PlayMapEnqueue( char *mapName, char *layout, char *clientName, char *flags, gentity_t *ent );
 playMap_t *G_PopFromPlayMapQueue( void );
 playMapError_t G_RemoveFromPlayMapQueue( int index );
@@ -196,6 +197,6 @@ int G_GetPlayMapQueueIndexByClient( char *clientName );
 void G_PrintPlayMapQueue( gentity_t *ent );
 qboolean G_PlayMapActive( void );
 void G_NextPlayMap( void );
-int G_ParsePlayMapFlagTokens( char *flags );
+int G_ParsePlayMapFlagTokens( gentity_t *ent, char *flags );
 char *G_PlayMapFlags2String( int flags );
 int G_DefaultPlayMapFlags(void);

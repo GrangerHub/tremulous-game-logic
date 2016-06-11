@@ -36,12 +36,15 @@ static void G_Bounce( gentity_t *ent, trace_t *trace )
   int       hitTime;
   float     minNormal;
   qboolean  invert = qfalse;
+  vec3_t    normal;
+
+  VectorCopy( trace->plane.normal, normal );
 
   // reflect the velocity on the trace plane
   hitTime = level.previousTime + ( level.time - level.previousTime ) * trace->fraction;
   BG_EvaluateTrajectoryDelta( &ent->s.pos, hitTime, velocity );
-  dot = DotProduct( velocity, trace->plane.normal );
-  VectorMA( velocity, -2*dot, trace->plane.normal, ent->s.pos.trDelta );
+  dot = DotProduct( velocity, normal );
+  VectorMA( velocity, -2*dot, normal, ent->s.pos.trDelta );
 
   if( ent->s.eType == ET_BUILDABLE )
   {
@@ -52,23 +55,43 @@ static void G_Bounce( gentity_t *ent, trace_t *trace )
     minNormal = 0.707f;
 
   // cut the velocity to keep from bouncing forever
-  if( ( trace->plane.normal[ 2 ] >= minNormal ||
-      ( invert && trace->plane.normal[ 2 ] <= -minNormal ) ) &&
+  if( ( normal[ 2 ] >= minNormal ||
+      ( invert && normal[ 2 ] <= -minNormal ) ) &&
       trace->entityNum == ENTITYNUM_WORLD )
     VectorScale( ent->s.pos.trDelta, ent->physicsBounce, ent->s.pos.trDelta );
   else
     VectorScale( ent->s.pos.trDelta, 0.3f, ent->s.pos.trDelta );
 
-  if( VectorLength( ent->s.pos.trDelta ) < 10 )
+  if( VectorLength( ent->s.pos.trDelta ) < 10 || ent->s.eType == ET_BUILDABLE )
   {
     G_SetOrigin( ent, trace->endpos );
     ent->s.groundEntityNum = trace->entityNum;
-    VectorCopy( trace->plane.normal, ent->s.origin2 );
+    if( ent->s.eType == ET_BUILDABLE )
+      G_AddBuildableToStack( ent->s.groundEntityNum, ent->s.number );
+
+    // check if a buildable should be damaged at its new location
+    if( !IS_WARMUP && g_allowBuildableStacking.integer && ent->s.eType == ET_BUILDABLE )
+    {
+      int contents = trap_PointContents( ent->r.currentOrigin, -1 );
+      int surfaceFlags = trace->surfaceFlags;
+
+      if( !( normal[ 2 ] >= minNormal || ( invert && normal[ 2 ] <= -minNormal ) ) ||
+          ( surfaceFlags & SURF_NOBUILD || contents & CONTENTS_NOBUILD ) ||
+          ( ent->buildableTeam == TEAM_ALIENS &&
+            ( trace->surfaceFlags & SURF_NOALIENBUILD || contents & CONTENTS_NOALIENBUILD ) ) ||
+          ( ent->buildableTeam == TEAM_HUMANS &&
+            ( trace->surfaceFlags & SURF_NOHUMANBUILD || contents & CONTENTS_NOHUMANBUILD ) ) )
+        ent->damageDroppedBuildable = qtrue;
+      else
+        ent->damageDroppedBuildable = qfalse;
+    }
+
+    VectorCopy( normal, ent->s.origin2 );
     VectorSet( ent->s.pos.trDelta, 0.0f, 0.0f, 0.0f );
     return;
   }
 
-  VectorMA( ent->r.currentOrigin, 0.15, trace->plane.normal, ent->r.currentOrigin );
+  VectorMA( ent->r.currentOrigin, 0.15, normal, ent->r.currentOrigin );
   VectorCopy( ent->r.currentOrigin, ent->s.pos.trBase );
   ent->s.pos.trTime = level.time;
 }
@@ -86,6 +109,9 @@ void G_Physics( gentity_t *ent, int msec )
   vec3_t    origin;
   trace_t   tr;
   int     contents;
+  int     unlinkedClientNums[ MAX_CLIENTS ];
+  int     numUnlinkedClientNums = 0;
+  int     i;
 
   // if groundentity has been set to ENTITYNUM_NONE, ent may have been pushed off an edge
   if( ent->s.groundEntityNum == ENTITYNUM_NONE )
@@ -119,8 +145,29 @@ void G_Physics( gentity_t *ent, int msec )
 
       trap_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin, ent->s.number, ent->clipmask );
 
+      while( g_entities[ tr.entityNum ].client && ( tr.fraction != 1.0f ) )
+      {
+        unlinkedClientNums[ numUnlinkedClientNums ] = tr.entityNum;
+        numUnlinkedClientNums++;
+        trap_UnlinkEntity( &g_entities[ tr.entityNum ] );
+        trap_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin, ent->s.number, ent->clipmask );
+      }
+
+      for( i = 0; i < numUnlinkedClientNums; i++ )
+        trap_LinkEntity( &g_entities[ unlinkedClientNums[ i ] ] );
+
       if( tr.fraction == 1.0f )
+      {
+        if( ent->s.groundEntityNum != ENTITYNUM_NONE )
+          G_RemoveBuildableFromStack( ent->s.groundEntityNum, ent->s.number );
         ent->s.groundEntityNum = ENTITYNUM_NONE;
+      }
+      else if( ent->s.groundEntityNum != tr.entityNum )
+      {
+        G_RemoveBuildableFromStack( ent->s.groundEntityNum, ent->s.number );
+        ent->s.groundEntityNum = tr.entityNum;
+        G_AddBuildableToStack( ent->s.groundEntityNum, ent->s.number );
+      }
 
       ent->nextPhysicsTime = level.time + PHYSICS_TIME;
     }

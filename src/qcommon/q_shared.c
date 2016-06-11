@@ -351,7 +351,9 @@ string will be returned if the next token is
 a newline.
 ==============
 */
-char *SkipWhitespace( char *data, qboolean hasNewLines ) {
+
+// Sets hasNewLines to qtrue if a new line is skipped.
+char *SkipWhitespace( char *data, qboolean *hasNewLines ) {
 	int c;
 
 	while( (c = *data) <= ' ') {
@@ -360,7 +362,7 @@ char *SkipWhitespace( char *data, qboolean hasNewLines ) {
 		}
 		if( c == '\n' ) {
 			com_lines++;
-			hasNewLines = qtrue;
+			*hasNewLines = qtrue;
 		}
 		data++;
 	}
@@ -458,7 +460,7 @@ char *COM_ParseExt( char **data_p, qboolean allowLineBreaks )
 	while ( 1 )
 	{
 		// skip whitespace
-		data = SkipWhitespace( data, hasNewLines );
+		data = SkipWhitespace( data, &hasNewLines );
 		if ( !data )
 		{
 			*data_p = NULL;
@@ -896,6 +898,23 @@ void Q_strcat( char *dest, int size, const char *src ) {
 		Com_Error( ERR_FATAL, "Q_strcat: already overflowed" );
 	}
 	Q_strncpyz( dest + l1, src, size - l1 );
+}
+
+void Q_cleanDelimitedString( char *dest, const char *src )
+{
+  for( ; *src; ++src )
+  {
+    if( *src != STRING_DELIMITER )
+      *dest = *src;
+    else
+      *dest = ' ';
+
+    ++dest;
+  }
+
+  *dest = 0;
+
+  return;
 }
 
 /*
