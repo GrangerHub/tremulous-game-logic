@@ -3618,8 +3618,12 @@ void G_BuildableThink( gentity_t *ent, int msec )
 
     ent->time1000 -= 1000;
 
-    if( !ent->spawned && ent->buildProgress >= 0 && ent->dcc )
-        ent->buildProgress -= 500 / level.numUnspawnedBuildables[ TEAM_HUMANS ];
+    if( !ent->spawned && ent->buildProgress >= 0 )
+    {
+        ent->buildProgress -= 1000.0f /
+                              (float)( ( ent->dcc ? 2 : 10 ) *
+                                       level.numUnspawnedBuildables[ TEAM_HUMANS ] );
+    }
 
     if( ent->health > 0 && ent->health < maxHealth )
     {
@@ -3627,11 +3631,17 @@ void G_BuildableThink( gentity_t *ent, int msec )
       {
         if( ent->buildableTeam != TEAM_HUMANS )
           ent->health += (int)( ceil( (float)( maxHealth ) / (float)( buildTime * 0.001f ) ) );
-        if( ent->dcc )
-          {
-            ent->health += (int)( ceil( (float)( maxHealth * 0.9f ) / (float)( buildTime * 0.002f *
-                                                  level.numUnspawnedBuildables[ TEAM_HUMANS ]) ) );
-          }
+        else
+        {
+          int healRate = (int)( ceil( (float)( maxHealth * 0.9f ) / (float)( buildTime * 0.001f ) ) );
+
+          if( healRate > DC_HEALRATE )
+            healRate = DC_HEALRATE;
+
+          ent->health += (int)( ceil( (float)( healRate ) /
+                                      ( ( ent->dcc ? 1.0f : 10.0f ) *
+                                        (float)( level.numUnspawnedBuildables[ TEAM_HUMANS ] ) ) ) );
+        }
       } else
       {
         if( ent->buildableTeam == TEAM_ALIENS && regenRate &&
@@ -3639,10 +3649,13 @@ void G_BuildableThink( gentity_t *ent, int msec )
         {
           ent->health += regenRate;
         }
-        else if( ent->buildableTeam == TEAM_HUMANS && ent->dcc &&
+        else if( ent->buildableTeam == TEAM_HUMANS &&
           ( ent->lastDamageTime + HUMAN_REGEN_DAMAGE_TIME ) < level.time )
         {
-          ent->health += DC_HEALRATE; // * ent->dcc;  #Swirl: Only allow 1 DCC
+          if( ent->dcc )
+            ent->health += DC_HEALRATE;
+          else if( ent->powered )
+            ent->health += (int)( ceil( (float)( DC_HEALRATE ) / 10.0f ) );
         }
       }
 

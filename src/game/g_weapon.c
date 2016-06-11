@@ -852,9 +852,9 @@ void CheckCkitRepair( gentity_t *ent )
   if( tr.fraction < 1.0f && traceEnt->health > 0 &&
       traceEnt->s.eType == ET_BUILDABLE && traceEnt->buildableTeam == TEAM_HUMANS )
   {
+    bHealth = BG_Buildable( traceEnt->s.modelindex )->health;
     if( traceEnt->spawned )
     {
-      bHealth = BG_Buildable( traceEnt->s.modelindex )->health;
       if( traceEnt->health < bHealth )
       {
         traceEnt->health += HBUILD_HEALRATE;
@@ -877,7 +877,6 @@ void CheckCkitRepair( gentity_t *ent )
       if( healRate > HBUILD_HEALRATE )
         healRate = HBUILD_HEALRATE;
 
-      bHealth = BG_Buildable( traceEnt->s.modelindex )->health;
       traceEnt->buildProgress -= repeatRate;
       traceEnt->health += healRate;
       if( traceEnt->buildProgress <= 0 )

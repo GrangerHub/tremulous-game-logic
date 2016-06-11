@@ -633,7 +633,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define DC_SPLASHDAMAGE             50
 #define DC_SPLASHRADIUS             100
 #define DC_ATTACK_PERIOD            10000 // how often to spam "under attack"
-#define DC_HEALRATE                 HBRM(4)
+#define DC_HEALRATE                 4
 #define DC_RANGE                    10000
 #define DC_VALUE                    0
 
