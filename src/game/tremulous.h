@@ -602,7 +602,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MGTURRET_ACCURACY_TO_FIRE   0
 #define MGTURRET_VERTICALCAP        30  // +/- maximum pitch
 #define MGTURRET_REPEAT             100
-#define MGTURRET_REPEAT_MOD_MIN     33  //  minimum percent of the repeat fire rate
+#define MGTURRET_REPEAT_MOD_MIN     25  //  minimum percent of the repeat fire rate
                                         //  change of the percent of the repeat fire rate
 #define MGTURRET_REPEAT_MOD_DIFF    ( ( 100 - MGTURRET_REPEAT_MOD_MIN ) )
 #define MGTURRET_NEXTTHINK          50
@@ -610,10 +610,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MGTURRET_RANGE              400.0f
 #define MGTURRET_SPREAD             200
 #define MGTURRET_DMG                HBDM(3)
-#define MGTURRET_SPINUP_TIME        950 // time between target sighted and fire
+#define MGTURRET_SPINUP_TIME        2000 // time between target sighted and fire
 #define MGTURRET_VALUE              ALIEN_CREDITS_PER_KILL
 #define MGTURRET_DCC_ANGULARSPEED       15
-#define MGTURRET_DCC_SPINUP_TIME    700
+#define MGTURRET_DCC_SPINUP_TIME    1250
 #define MGTURRET_GRAB_ANGULARSPEED      5
 
 #define TESLAGEN_BP                 10
