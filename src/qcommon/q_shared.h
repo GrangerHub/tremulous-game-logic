@@ -397,6 +397,13 @@ extern	vec4_t		colorWhite;
 extern	vec4_t		colorLtGrey;
 extern	vec4_t		colorMdGrey;
 extern	vec4_t		colorDkGrey;
+extern	vec4_t		colorOrange;
+extern	vec4_t		colorPurple;
+extern	vec4_t		colorTeal;
+extern	vec4_t		colorPink;
+extern	vec4_t		colorChocolate;
+extern	vec4_t		colorGold;
+extern	vec4_t		colorIndigo;
 
 #define Q_COLOR_ESCAPE	'^'
 #define Q_IsColorString(p)	((p) && *(p) == Q_COLOR_ESCAPE && *((p)+1) && isalnum(*((p)+1))) // ^[0-9a-zA-Z]
@@ -409,22 +416,38 @@ extern	vec4_t		colorDkGrey;
 #define COLOR_CYAN	'5'
 #define COLOR_MAGENTA	'6'
 #define COLOR_WHITE	'7'
-#define ColorIndexForNumber(c) ((c) & 0x07)
+#define COLOR_ORANGE	'8'
+#define COLOR_PURPLE	'9'
+#define COLOR_TEAL	'j'
+#define COLOR_PINK	'k'
+#define COLOR_CHOCOLATE	'l'
+#define COLOR_GOLD	'm'
+#define COLOR_SILVER	'n'
+#define COLOR_INDIGO	'o'
+#define ColorIndexForNumber(c) ((c) & 0x0F)
 #define ColorIndex(c) (ColorIndexForNumber((c) - '0'))
 
-#define S_COLOR_BLACK	"^0"
-#define S_COLOR_RED	"^1"
-#define S_COLOR_GREEN	"^2"
-#define S_COLOR_YELLOW	"^3"
-#define S_COLOR_BLUE	"^4"
-#define S_COLOR_CYAN	"^5"
-#define S_COLOR_MAGENTA	"^6"
-#define S_COLOR_WHITE	"^7"
+#define S_COLOR_BLACK		"^0"
+#define S_COLOR_RED		"^1"
+#define S_COLOR_GREEN		"^2"
+#define S_COLOR_YELLOW		"^3"
+#define S_COLOR_BLUE		"^4"
+#define S_COLOR_CYAN		"^5"
+#define S_COLOR_MAGENTA		"^6"
+#define S_COLOR_WHITE		"^7"
+#define S_COLOR_ORANGE		"^8"
+#define S_COLOR_PURPLE		"^9"
+#define S_COLOR_TEAL		"^j"
+#define S_COLOR_PINK		"^k"
+#define S_COLOR_CHOCOLATE	"^l"
+#define S_COLOR_GOLD		"^m"
+#define S_COLOR_SILVER		"^n"
+#define S_COLOR_INDIGO		"^o"
 
 #define INDENT_MARKER '\v'
 void Q_StripIndentMarker(char *string);
 
-extern vec4_t	g_color_table[8];
+extern vec4_t	g_color_table[16];
 
 #define	MAKERGB( v, r, g, b ) v[0]=r;v[1]=g;v[2]=b
 #define	MAKERGBA( v, r, g, b, a ) v[0]=r;v[1]=g;v[2]=b;v[3]=a

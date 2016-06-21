@@ -41,23 +41,38 @@ vec4_t		colorRed	= {1, 0, 0, 1};
 vec4_t		colorGreen	= {0, 1, 0, 1};
 vec4_t		colorBlue	= {0, 0, 1, 1};
 vec4_t		colorYellow	= {1, 1, 0, 1};
-vec4_t		colorMagenta= {1, 0, 1, 1};
+vec4_t		colorMagenta	= {1, 0, 1, 1};
 vec4_t		colorCyan	= {0, 1, 1, 1};
 vec4_t		colorWhite	= {1, 1, 1, 1};
 vec4_t		colorLtGrey	= {0.75, 0.75, 0.75, 1};
 vec4_t		colorMdGrey	= {0.5, 0.5, 0.5, 1};
 vec4_t		colorDkGrey	= {0.25, 0.25, 0.25, 1};
+vec4_t		colorOrange	= {1, 0.65, 0, 1};
+vec4_t		colorPurple	= {0.5, 0, 0.5, 1};
+vec4_t		colorTeal	= {0, 0.31, 0.31, 1};
+vec4_t		colorPink	= {1, 0.75, 0.80, 1};
+vec4_t		colorChocolate	= {0.82, 0.41, 0.12, 1};
+vec4_t		colorGold	= {1, 0.84, 0, 1};
+vec4_t		colorIndigo	= {0.29, 0, 0.51, 1};
 
-vec4_t	g_color_table[8] =
+vec4_t	g_color_table[16] =
 	{
-	{0.2f, 0.2f, 0.2f, 1.0f},
-	{1.0f, 0.0f, 0.0f, 1.0f},
-	{0.0f, 1.0f, 0.0f, 1.0f},
-	{1.0f, 1.0f, 0.0f, 1.0f},
-	{0.0f, 0.0f, 1.0f, 1.0f},
-	{0.0f, 1.0f, 1.0f, 1.0f},
-	{1.0f, 0.0f, 1.0f, 1.0f},
-	{1.0f, 1.0f, 1.0f, 1.0f},
+	{0.25f, 0.25f, 0.25f, 1.00f},
+	{1.00f, 0.00f, 0.00f, 1.00f},
+	{0.00f, 1.00f, 0.00f, 1.00f},
+	{1.00f, 1.00f, 0.00f, 1.00f},
+	{0.00f, 0.00f, 1.00f, 1.00f},
+	{0.00f, 1.00f, 1.00f, 1.00f},
+	{1.00f, 0.00f, 1.00f, 1.00f},
+	{1.00f, 1.00f, 1.00f, 1.00f},
+	{1.00f, 0.65f, 0.00f, 1.00f},
+	{0.50f, 0.00f, 0.50f, 1.00f},
+	{0.00f, 0.31f, 0.31f, 1.00f},
+	{1.00f, 0.75f, 0.80f, 1.00f},
+	{0.82f, 0.41f, 0.12f, 1.00f},
+	{1.00f, 0.84f, 0.00f, 1.00f},
+	{0.75f, 0.75f, 0.75f, 1.00f},
+	{0.29f, 0.00f, 0.51f, 1.00f},
 	};
 
 
