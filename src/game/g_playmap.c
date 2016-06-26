@@ -696,10 +696,16 @@ playMapError_t G_ReloadPlayMapQueue( void )
     if( g_debugPlayMap.integer > 0 )
         trap_Print( va( "PLAYMAP: before reading maps file of length %d\n", len ) );
     COM_BeginParseSession( g_playMapQueueConfig.string );
-    while( cnf < (cnf2 + len) ) // rows
+    while( cnf && cnf < (cnf2 + len) ) // rows
     {
-        while ( cnf < (cnf2 + len) ) // map arguments
+        while ( cnf && cnf < (cnf2 + len) ) // map arguments
         {
+	    // Initialize
+	    mapName = NULL;
+	    layout = NULL;
+	    clientName = NULL;
+	    flags = NULL;
+
             if( g_debugPlayMap.integer > 0 )
                 trap_Print( va( "PLAYMAP: reading maps at char index %ld: '%s'\n",
 				cnf - cnf2, cnf ) );
@@ -726,7 +732,7 @@ playMapError_t G_ReloadPlayMapQueue( void )
 	    // Check whether we have layout or flags
 	    cnf = SkipWhitespace( cnf, &hasNewLines );
 
-	    if( ! *cnf || *cnf == '\n')
+	    if( ! cnf || ! *cnf || *cnf == '\n')
 	      break;
 	    
 	    if( !( *cnf == '+' )&&!( *cnf == '-' ) )
@@ -741,8 +747,13 @@ playMapError_t G_ReloadPlayMapQueue( void )
 	    } else
 	      layout = NULL;
 
-	    flags = cnf;	/* Leave it at the end of layouts */
-	    SkipRestOfLine( &cnf );
+	    cnf = SkipWhitespace( cnf, &hasNewLines );
+
+	    if( !hasNewLines )
+            {
+	      flags = cnf;	/* Leave it at the end of layouts */
+	      SkipRestOfLine( &cnf );
+	    }
             break;
         }
         if( !mapName || !*mapName )
@@ -859,13 +870,13 @@ playMapError_t G_PlayMapEnqueue( char *mapName, char *layout,
   playMap.mapName = G_CopyString(mapName);
 
   // copy layout
-  if( *layout )
+  if( layout && *layout )
     playMap.layout = G_CopyString(layout);
   else
     playMap.layout = NULL;
 
   // copy clientName
-  if( *clientName )
+  if( clientName && *clientName )
     playMap.clientName = G_CopyString(clientName);
   else
     playMap.clientName = NULL;
@@ -949,6 +960,9 @@ int G_ParsePlayMapFlagTokens( gentity_t *ent, char *flags )
 
   // Get defaults
   flagsValue = G_DefaultPlayMapFlags();
+
+  if( !flags || !*flags )
+    return flagsValue;
   
   // Loop through flags
   for( i = 0; ; i++ )
