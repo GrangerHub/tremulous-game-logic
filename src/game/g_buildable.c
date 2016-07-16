@@ -1612,8 +1612,6 @@ void AHovel_Use( gentity_t *self, gentity_t *other, gentity_t *activator )
 {
   vec3_t  hovelOrigin, hovelAngles, inverseNormal;
 
-  //AGeneric_Think( self );
-
   if( self->spawned && self->powered )
   {
     if( self->active )
@@ -1683,9 +1681,9 @@ void AHovel_Think( gentity_t *self )
       G_SetIdleBuildableAnim( self, BANIM_IDLE1 );
   }
 
-  G_CreepSlow( self );
+  AGeneric_Think( self );
 
-  self->nextthink = level.time + 200;
+  G_CreepSlow( self );
 }
 
 /*
