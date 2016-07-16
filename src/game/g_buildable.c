@@ -1738,6 +1738,12 @@ void AHovel_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
     //client leaves hovel
     builder->client->ps.stats[ STAT_STATE ] &= ~SS_HOVELING;
+
+    // client is no longer astral
+    if( builder->client->noclip )
+      builder->client->cliprcontents = CONTENTS_BODY;
+    else
+      builder->r.contents = CONTENTS_BODY;
   }
 
   self->r.contents = 0;    //stop collisions...
