@@ -1625,6 +1625,13 @@ void AHovel_Use( gentity_t *self, gentity_t *other, gentity_t *activator )
                ( activator->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_BUILDER0_UPG ) ) &&
              activator->health > 0 && self->health > 0 )
     {
+      if( activator->client->noclip )
+      {
+        //activator has noclip on
+        G_TriggerMenu( activator->client->ps.clientNum, MN_A_HOVEL_NOCLIP );
+        return;
+      }
+
       if( AHovel_Blocked( self, activator, qfalse ) )
       {
         //you can get in, but you can't get out

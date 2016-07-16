@@ -909,6 +909,13 @@ void CG_Menu( int menu, int arg )
       type      = DT_COMMAND;
       break;
 
+    case MN_A_HOVEL_NOCLIP:
+      longMsg   = "You can't enter a hovel while you have noclip activated.  Disable "
+                  "noclip then try again.";
+      shortMsg  = "You can't enter a hovel while noclip is activated.";
+      type      = DT_COMMAND;
+      break;
+
     case MN_A_HOVEL_BLOCKED:
       longMsg   = "The exit to the Hovel is blocked. Wait until it becomes clear and "
                   "try again.";
