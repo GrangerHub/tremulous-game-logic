@@ -1871,6 +1871,13 @@ void AHovel_Use( gentity_t *self, gentity_t *other, gentity_t *activator )
                ( activator->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_BUILDER0_UPG ) ) &&
              activator->health > 0 && self->health > 0 )
     {
+      if( activator->client->noclip )
+      {
+        //activator has noclip on
+        G_TriggerMenu( activator->client->ps.clientNum, MN_A_HOVEL_NOCLIP );
+        return;
+      }
+
       if( AHovel_Blocked( self, activator, qfalse ) )
       {
         //you can get in, but you can't get out
@@ -1977,6 +1984,12 @@ void AHovel_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
     //client leaves hovel
     builder->client->ps.stats[ STAT_STATE ] &= ~SS_HOVELING;
+
+    // client is no longer astral
+    if( builder->client->noclip )
+      builder->client->cliprcontents = CONTENTS_BODY;
+    else
+      builder->r.contents = CONTENTS_BODY;
   }
 
   self->r.contents = 0;    //stop collisions...

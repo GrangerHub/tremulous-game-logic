@@ -647,22 +647,28 @@ void Cmd_Noclip_f( gentity_t *ent )
 {
   char  *msg;
 
-  if( ent->client->noclip )
+  if( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING)
   {
-    msg = "noclip OFF\n";
-    ent->r.contents = ent->client->cliprcontents;
-  }
-  else
+    msg = "noclip disabled while hoveling";
+  } else
   {
-    msg = "noclip ON\n";
-    ent->client->cliprcontents = ent->r.contents;
-    ent->r.contents = 0;
-  }
+    if( ent->client->noclip )
+    {
+      msg = "noclip OFF\n";
+      ent->r.contents = ent->client->cliprcontents;
+    }
+    else
+    {
+      msg = "noclip ON\n";
+      ent->client->cliprcontents = ent->r.contents;
+      ent->r.contents = 0;
+    }
 
-  ent->client->noclip = !ent->client->noclip;
+    ent->client->noclip = !ent->client->noclip;
 
-  if( ent->r.linked )
-    trap_LinkEntity( ent );
+    if( ent->r.linked )
+      trap_LinkEntity( ent );
+    }
 
   trap_SendServerCommand( ent - g_entities, va( "print \"%s\"", msg ) );
 }
