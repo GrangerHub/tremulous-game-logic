@@ -1410,6 +1410,11 @@ void CG_Buildable( centity_t *cent )
     ent.customShader = cgs.media.redBuildShader;
 
   //add to refresh list
+  if( cg_spectatorWallhack.integer == 2 &&
+      cgs.clientinfo[ cg.clientNum ].team == TEAM_NONE )
+  {
+    ent.renderfx |= RF_DEPTHHACK;
+  }
   trap_R_AddRefEntityToScene( &ent );
 
   CrossProduct( surfNormal, refNormal, xNormal );
@@ -1454,6 +1459,11 @@ void CG_Buildable( centity_t *cent )
     if( CG_PlayerIsBuilder( es->modelindex ) && CG_BuildableRemovalPending( es->number ) )
       turretBarrel.customShader = cgs.media.redBuildShader;
 
+    if( cg_spectatorWallhack.integer == 2 &&
+        cgs.clientinfo[ cg.clientNum ].team == TEAM_NONE )
+    {
+      turretBarrel.renderfx |= RF_DEPTHHACK;
+    }
     trap_R_AddRefEntityToScene( &turretBarrel );
   }
 
@@ -1499,6 +1509,11 @@ void CG_Buildable( centity_t *cent )
     if( CG_PlayerIsBuilder( es->modelindex ) && CG_BuildableRemovalPending( es->number ) )
       turretTop.customShader = cgs.media.redBuildShader;
 
+    if( cg_spectatorWallhack.integer == 2 &&
+        cgs.clientinfo[ cg.clientNum ].team == TEAM_NONE )
+    {
+      turretTop.renderfx |= RF_DEPTHHACK;
+    }
     trap_R_AddRefEntityToScene( &turretTop );
   }
 
