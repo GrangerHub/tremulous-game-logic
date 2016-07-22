@@ -205,6 +205,8 @@ vmCvar_t  cg_rangeMarkerForBlueprint;
 vmCvar_t  cg_rangeMarkerBuildableTypes;
 vmCvar_t  cg_binaryShaderScreenScale;
 
+vmCvar_t  cg_spectatorWallhack;
+
 vmCvar_t  cg_painBlendUpRate;
 vmCvar_t  cg_painBlendDownRate;
 vmCvar_t  cg_painBlendMax;
@@ -342,6 +344,8 @@ static cvarTable_t cvarTable[ ] =
   { &cg_rangeMarkerBuildableTypes, "cg_rangeMarkerBuildableTypes", "support", CVAR_ARCHIVE },
   { NULL, "cg_buildableRangeMarkerMask", "", CVAR_USERINFO },
   { &cg_binaryShaderScreenScale, "cg_binaryShaderScreenScale", "1.0", CVAR_ARCHIVE },
+
+  { &cg_spectatorWallhack, "cg_spectatorWallhack", "0", CVAR_ARCHIVE },
 
   { &cg_hudFiles, "cg_hudFiles", "ui/hud.txt", CVAR_ARCHIVE},
   { &cg_hudFilesEnable, "cg_hudFilesEnable", "0", CVAR_ARCHIVE},

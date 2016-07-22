@@ -1444,6 +1444,11 @@ static void CG_PlayerUpgrades( centity_t *cent, refEntity_t *torso )
     //FIXME: change to tag_back when it exists
     CG_PositionRotatedEntityOnTag( &jetpack, torso, torso->hModel, "tag_head" );
 
+    if( cg_spectatorWallhack.integer &&
+        cgs.clientinfo[ cg.clientNum ].team == TEAM_NONE )
+    {
+      jetpack.renderfx |= RF_DEPTHHACK;
+    }
     trap_R_AddRefEntityToScene( &jetpack );
 
     if( jetjump || active & ( 1 << UP_JETPACK ) )
@@ -1543,6 +1548,11 @@ static void CG_PlayerUpgrades( centity_t *cent, refEntity_t *torso )
     //FIXME: change to tag_back when it exists
     CG_PositionRotatedEntityOnTag( &battpack, torso, torso->hModel, "tag_head" );
 
+    if( cg_spectatorWallhack.integer &&
+        cgs.clientinfo[ cg.clientNum ].team == TEAM_NONE )
+    {
+      battpack.renderfx |= RF_DEPTHHACK;
+    }
     trap_R_AddRefEntityToScene( &battpack );
   }
 
@@ -2058,6 +2068,11 @@ void CG_Player( centity_t *cent )
   VectorCopy( legs.origin, legs.lightingOrigin );
   VectorCopy( legs.origin, legs.oldorigin ); // don't positionally lerp at all
 
+  if( cg_spectatorWallhack.integer &&
+      cgs.clientinfo[ cg.clientNum ].team == TEAM_NONE )
+  {
+    legs.renderfx |= RF_DEPTHHACK;
+  }
   trap_R_AddRefEntityToScene( &legs );
 
   // if the model failed, allow the default nullmodel to be displayed
@@ -2090,6 +2105,11 @@ void CG_Player( centity_t *cent )
     torso.shadowPlane = shadowPlane;
     torso.renderfx = renderfx;
 
+    if( cg_spectatorWallhack.integer &&
+        cgs.clientinfo[ cg.clientNum ].team == TEAM_NONE )
+    {
+      torso.renderfx |= RF_DEPTHHACK;
+    }
     trap_R_AddRefEntityToScene( &torso );
 
     //
@@ -2116,6 +2136,11 @@ void CG_Player( centity_t *cent )
     head.shadowPlane = shadowPlane;
     head.renderfx = renderfx;
 
+    if( cg_spectatorWallhack.integer &&
+        cgs.clientinfo[ cg.clientNum ].team == TEAM_NONE )
+    {
+      head.renderfx |= RF_DEPTHHACK;
+    }
     trap_R_AddRefEntityToScene( &head );
 
     // if this player has been hit with poison cloud, add an effect PS
@@ -2276,6 +2301,11 @@ void CG_Corpse( centity_t *cent )
     legs.nonNormalizedAxes = qtrue;
   }
 
+  if( cg_spectatorWallhack.integer &&
+      cgs.clientinfo[ cg.clientNum ].team == TEAM_NONE )
+  {
+    legs.renderfx |= RF_DEPTHHACK;
+  }
   trap_R_AddRefEntityToScene( &legs );
 
   // if the model failed, allow the default nullmodel to be displayed
@@ -2300,6 +2330,11 @@ void CG_Corpse( centity_t *cent )
     torso.shadowPlane = shadowPlane;
     torso.renderfx = renderfx;
 
+    if( cg_spectatorWallhack.integer &&
+        cgs.clientinfo[ cg.clientNum ].team == TEAM_NONE )
+    {
+      torso.renderfx |= RF_DEPTHHACK;
+    }
     trap_R_AddRefEntityToScene( &torso );
 
     //
@@ -2318,6 +2353,11 @@ void CG_Corpse( centity_t *cent )
     head.shadowPlane = shadowPlane;
     head.renderfx = renderfx;
 
+    if( cg_spectatorWallhack.integer &&
+        cgs.clientinfo[ cg.clientNum ].team == TEAM_NONE )
+    {
+      head.renderfx |= RF_DEPTHHACK;
+    }
     trap_R_AddRefEntityToScene( &head );
   }
 }
