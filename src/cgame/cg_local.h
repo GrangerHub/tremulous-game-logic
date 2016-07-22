@@ -1598,6 +1598,8 @@ extern  vmCvar_t    cg_rangeMarkerForBlueprint;
 extern  vmCvar_t    cg_rangeMarkerBuildableTypes;
 extern  vmCvar_t    cg_binaryShaderScreenScale;
 
+extern  vmCvar_t    cg_spectatorWallhack;
+
 extern  vmCvar_t    cg_painBlendUpRate;
 extern  vmCvar_t    cg_painBlendDownRate;
 extern  vmCvar_t    cg_painBlendMax;
