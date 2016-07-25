@@ -306,10 +306,6 @@ static void SV_CreateBaseline( void ) {
 		}
 		svent->s.number = entnum;
 
-		//
-		// take current state as baseline
-		//
-		sv.svEntities[entnum].baseline = svent->s;
 	}
 }
 

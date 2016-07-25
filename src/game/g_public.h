@@ -86,8 +86,9 @@ typedef struct {
 
 // the server looks at a sharedEntity, which is the start of the game's gentity_t structure
 typedef struct {
-  entityState_t s;        // communicated by server to clients
-  entityShared_t  r;        // shared by both the server system and game
+  entityState_t   s;           // communicated by server to clients
+  entityShared_t  r;           // shared by both the server system and game
+  int             snap_eFlags; //Stored state for snapshot
 } sharedEntity_t;
 
 

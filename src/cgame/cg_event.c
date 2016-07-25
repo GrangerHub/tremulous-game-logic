@@ -409,7 +409,7 @@ void CG_PainEvent( centity_t *cent, int health )
   else
     snd = "*pain100_1.wav";
 
-  trap_S_StartSound( NULL, cent->currentState.number, CHAN_VOICE,
+  trap_S_StartSound2( NULL, &cent->currentState, CHAN_VOICE,
     CG_CustomSound( cent->currentState.number, snd ) );
 
   // save pain time for programitic twitch animation
@@ -470,6 +470,20 @@ static void CG_Level2Zap( entityState_t *es )
   }
   source->level2ZapTime = cg.time;
 }
+ 
+ /*
+ ==============
+trap_S_StartSound2
+
+Wrapper for trap_S_StartSound to halt sounds when emitter is not visible.
+==============
+*/
+void trap_S_StartSound2( vec3_t origin, entityState_t *es, int entchannel, sfxHandle_t sfx ) {
+  if( es && es->eFlags & EF_NODRAW ) {
+    return;
+  }
+  trap_S_StartSound( origin, es->number, entchannel, sfx );
+}
 
 /*
 ==============
@@ -498,8 +512,8 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
   event = es->event & ~EV_EVENT_BITS;
 
   if( cg_debugEvents.integer )
-    CG_Printf( "ent:%3i  event:%3i %s\n", es->number, event,
-               BG_EventName( event ) );
+    CG_Printf( "ent:%3i  event:%3i %s eFlags:%d clientNum:%d\n", es->number,
+               event, BG_EventName( event ),es->eFlags,es->clientNum );
 
   if( !event )
     return;
@@ -519,10 +533,10 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       if( cg_footsteps.integer && ci->footsteps != FOOTSTEP_NONE )
       {
         if( ci->footsteps == FOOTSTEP_CUSTOM )
-          trap_S_StartSound( NULL, es->number, CHAN_BODY,
+          trap_S_StartSound2( NULL, es, CHAN_BODY,
             ci->customFootsteps[ rand( ) & 3 ] );
         else
-          trap_S_StartSound( NULL, es->number, CHAN_BODY,
+          trap_S_StartSound2( NULL, es, CHAN_BODY,
             cgs.media.footsteps[ ci->footsteps ][ rand( ) & 3 ] );
       }
       break;
@@ -531,10 +545,10 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       if( cg_footsteps.integer && ci->footsteps != FOOTSTEP_NONE )
       {
         if( ci->footsteps == FOOTSTEP_CUSTOM )
-          trap_S_StartSound( NULL, es->number, CHAN_BODY,
+          trap_S_StartSound2( NULL, es, CHAN_BODY,
             ci->customMetalFootsteps[ rand( ) & 3 ] );
         else
-          trap_S_StartSound( NULL, es->number, CHAN_BODY,
+          trap_S_StartSound2( NULL, es, CHAN_BODY,
             cgs.media.footsteps[ FOOTSTEP_METAL ][ rand( ) & 3 ] );
       }
       break;
@@ -542,7 +556,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
     case EV_FOOTSTEP_SQUELCH:
       if( cg_footsteps.integer && ci->footsteps != FOOTSTEP_NONE )
       {
-        trap_S_StartSound( NULL, es->number, CHAN_BODY,
+        trap_S_StartSound2( NULL, es, CHAN_BODY,
           cgs.media.footsteps[ FOOTSTEP_FLESH ][ rand( ) & 3 ] );
       }
       break;
@@ -550,7 +564,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
     case EV_FOOTSPLASH:
       if( cg_footsteps.integer && ci->footsteps != FOOTSTEP_NONE )
       {
-        trap_S_StartSound( NULL, es->number, CHAN_BODY,
+        trap_S_StartSound2( NULL, es, CHAN_BODY,
           cgs.media.footsteps[ FOOTSTEP_SPLASH ][ rand( ) & 3 ] );
       }
       break;
@@ -558,7 +572,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
     case EV_FOOTWADE:
       if( cg_footsteps.integer && ci->footsteps != FOOTSTEP_NONE )
       {
-        trap_S_StartSound( NULL, es->number, CHAN_BODY,
+        trap_S_StartSound2( NULL, es, CHAN_BODY,
           cgs.media.footsteps[ FOOTSTEP_SPLASH ][ rand( ) & 3 ] );
       }
       break;
@@ -566,14 +580,14 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
     case EV_SWIM:
       if( cg_footsteps.integer && ci->footsteps != FOOTSTEP_NONE )
       {
-        trap_S_StartSound( NULL, es->number, CHAN_BODY,
+        trap_S_StartSound2( NULL, es, CHAN_BODY,
           cgs.media.footsteps[ FOOTSTEP_SPLASH ][ rand( ) & 3 ] );
       }
       break;
 
 
     case EV_FALL_SHORT:
-      trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.landSound );
+      trap_S_StartSound2( NULL, es, CHAN_AUTO, cgs.media.landSound );
 
       if( clientNum == cg.predictedPlayerState.clientNum )
       {
@@ -585,7 +599,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
 
     case EV_FALL_MEDIUM:
       // use normal pain sound
-      trap_S_StartSound( NULL, es->number, CHAN_VOICE, CG_CustomSound( es->number, "*pain100_1.wav" ) );
+      trap_S_StartSound2( NULL, es, CHAN_VOICE, CG_CustomSound( es->number, "*pain100_1.wav" ) );
 
       if( clientNum == cg.predictedPlayerState.clientNum )
       {
@@ -596,7 +610,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       break;
 
     case EV_FALL_FAR:
-      trap_S_StartSound( NULL, es->number, CHAN_AUTO, CG_CustomSound( es->number, "*fall1.wav" ) );
+      trap_S_StartSound2( NULL, es, CHAN_AUTO, CG_CustomSound( es->number, "*fall1.wav" ) );
       cent->pe.painTime = cg.time;  // don't play a pain sound right after this
 
       if( clientNum == cg.predictedPlayerState.clientNum )
@@ -608,7 +622,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       break;
 
     case EV_FALLING:
-      trap_S_StartSound( NULL, es->number, CHAN_AUTO, CG_CustomSound( es->number, "*falling1.wav" ) );
+      trap_S_StartSound2( NULL, es, CHAN_AUTO, CG_CustomSound( es->number, "*falling1.wav" ) );
       break;
 
     case EV_STEP_4:
@@ -662,7 +676,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       }
 
     case EV_JUMP:
-      trap_S_StartSound( NULL, es->number, CHAN_VOICE, CG_CustomSound( es->number, "*jump1.wav" ) );
+      trap_S_StartSound2( NULL, es, CHAN_VOICE, CG_CustomSound( es->number, "*jump1.wav" ) );
 
       if( BG_ClassHasAbility( cg.predictedPlayerState.stats[ STAT_CLASS ], SCA_WALLJUMPER ) )
       {
@@ -692,49 +706,49 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       break;
 
     case EV_LEV1_GRAB:
-      trap_S_StartSound( NULL, es->number, CHAN_VOICE, cgs.media.alienL1Grab );
+      trap_S_StartSound2( NULL, es, CHAN_VOICE, cgs.media.alienL1Grab );
       break;
 
     case EV_LEV4_TRAMPLE_PREPARE:
-      trap_S_StartSound( NULL, es->number, CHAN_VOICE, cgs.media.alienL4ChargePrepare );
+      trap_S_StartSound2( NULL, es, CHAN_VOICE, cgs.media.alienL4ChargePrepare );
       break;
 
     case EV_LEV4_TRAMPLE_START:
       //FIXME: stop cgs.media.alienL4ChargePrepare playing here
-      trap_S_StartSound( NULL, es->number, CHAN_VOICE, cgs.media.alienL4ChargeStart );
+      trap_S_StartSound2( NULL, es, CHAN_VOICE, cgs.media.alienL4ChargeStart );
       break;
 
     case EV_TAUNT:
       if( !cg_noTaunt.integer )
-        trap_S_StartSound( NULL, es->number, CHAN_VOICE, CG_CustomSound( es->number, "*taunt.wav" ) );
+        trap_S_StartSound2( NULL, es, CHAN_VOICE, CG_CustomSound( es->number, "*taunt.wav" ) );
       break;
 
     case EV_WATER_TOUCH:
-      trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.watrInSound );
+      trap_S_StartSound2( NULL, es, CHAN_AUTO, cgs.media.watrInSound );
       break;
 
     case EV_WATER_LEAVE:
-      trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.watrOutSound );
+      trap_S_StartSound2( NULL, es, CHAN_AUTO, cgs.media.watrOutSound );
       break;
 
     case EV_WATER_UNDER:
-      trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.watrUnSound );
+      trap_S_StartSound2( NULL, es, CHAN_AUTO, cgs.media.watrUnSound );
       break;
 
     case EV_WATER_CLEAR:
-      trap_S_StartSound( NULL, es->number, CHAN_AUTO, CG_CustomSound( es->number, "*gasp.wav" ) );
+      trap_S_StartSound2( NULL, es, CHAN_AUTO, CG_CustomSound( es->number, "*gasp.wav" ) );
       break;
 
     //
     // weapon events
     //
     case EV_NOAMMO:
-      trap_S_StartSound( NULL, es->number, CHAN_WEAPON,
-                         cgs.media.weaponEmptyClick );
+      trap_S_StartSound2( NULL, es, CHAN_WEAPON,
+                          cgs.media.weaponEmptyClick );
       break;
 
     case EV_CHANGE_WEAPON:
-      trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.selectSound );
+      trap_S_StartSound2( NULL, es, CHAN_AUTO, cgs.media.selectSound );
       break;
 
     case EV_FIRE_WEAPON:
@@ -759,6 +773,10 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       break;
 
     case EV_PLAYER_TELEPORT_OUT:
+      if( es->eFlags & EF_NODRAW )
+      {
+        break;
+      }
       CG_PlayerDisconnect( position );
       break;
 
@@ -771,14 +789,14 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       break;
 
     case EV_RPTUSE_SOUND:
-      trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.repeaterUseSound );
+      trap_S_StartSound2( NULL, es, CHAN_AUTO, cgs.media.repeaterUseSound );
       break;
 
     case EV_GRENADE_BOUNCE:
       if( rand( ) & 1 )
-        trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.hardBounceSound1 );
+        trap_S_StartSound2( NULL, es, CHAN_AUTO, cgs.media.hardBounceSound1 );
       else
-        trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.hardBounceSound2 );
+        trap_S_StartSound2( NULL, es, CHAN_AUTO, cgs.media.hardBounceSound2 );
       break;
 
     //
@@ -800,11 +818,19 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       break;
 
     case EV_HUMAN_BUILDABLE_EXPLOSION:
+      if( es->eFlags & EF_NODRAW )
+      {
+        break;
+      }
       ByteToDir( es->eventParm, dir );
       CG_HumanBuildableExplosion( position, dir );
       break;
 
     case EV_ALIEN_BUILDABLE_EXPLOSION:
+      if( es->eFlags & EF_NODRAW )
+      {
+        break;
+      }
       ByteToDir( es->eventParm, dir );
       CG_AlienBuildableExplosion( position, dir );
       break;
@@ -849,11 +875,11 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
 
     case EV_GENERAL_SOUND:
       if( cgs.gameSounds[ es->eventParm ] )
-        trap_S_StartSound( NULL, es->number, CHAN_VOICE, cgs.gameSounds[ es->eventParm ] );
+        trap_S_StartSound2( NULL, es, CHAN_VOICE, cgs.gameSounds[ es->eventParm ] );
       else
       {
         s = CG_ConfigString( CS_SOUNDS + es->eventParm );
-        trap_S_StartSound( NULL, es->number, CHAN_VOICE, CG_CustomSound( es->number, s ) );
+        trap_S_StartSound2( NULL, es, CHAN_VOICE, CG_CustomSound( es->number, s ) );
       }
       break;
 
@@ -877,7 +903,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
     case EV_DEATH1:
     case EV_DEATH2:
     case EV_DEATH3:
-      trap_S_StartSound( NULL, es->number, CHAN_VOICE,
+      trap_S_StartSound2( NULL, es, CHAN_VOICE,
           CG_CustomSound( es->number, va( "*death%i.wav", event - EV_DEATH1 + 1 ) ) );
       break;
 
@@ -908,11 +934,11 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       break;
 
     case EV_BUILD_REPAIR:
-      trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.buildableRepairSound );
+      trap_S_StartSound2( NULL, es, CHAN_AUTO, cgs.media.buildableRepairSound );
       break;
 
     case EV_BUILD_REPAIRED:
-      trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.buildableRepairedSound );
+      trap_S_StartSound2( NULL, es, CHAN_AUTO, cgs.media.buildableRepairedSound );
       break;
 
     case EV_OVERMIND_ATTACK:
@@ -940,7 +966,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       break;
 
     case EV_MGTURRET_SPINUP:
-      trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.turretSpinupSound );
+      trap_S_StartSound2( NULL, es, CHAN_AUTO, cgs.media.turretSpinupSound );
       break;
 
     case EV_OVERMIND_SPAWNS:
@@ -952,7 +978,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       break;
 
     case EV_ALIEN_EVOLVE:
-      trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.alienEvolveSound );
+      trap_S_StartSound2( NULL, es, CHAN_BODY, cgs.media.alienEvolveSound );
       {
         particleSystem_t *ps = CG_SpawnNewParticleSystem( cgs.media.alienEvolvePS );
 
@@ -994,7 +1020,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       break;
 
     case EV_MEDKIT_USED:
-      trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.medkitUseSound );
+      trap_S_StartSound2( NULL, es, CHAN_AUTO, cgs.media.medkitUseSound );
       break;
 
     case EV_PLAYER_RESPAWN:

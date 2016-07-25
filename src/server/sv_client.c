@@ -521,16 +521,7 @@ static void SV_SendClientGameState( client_t *client ) {
 		}
 	}
 
-	// write the baselines
-	Com_Memset( &nullstate, 0, sizeof( nullstate ) );
-	for ( start = 0 ; start < MAX_GENTITIES; start++ ) {
-		base = &sv.svEntities[start].baseline;
-		if ( !base->number ) {
-			continue;
-		}
-		MSG_WriteByte( &msg, svc_baseline );
-		MSG_WriteDeltaEntity( client->netchan.alternateProtocol, &msg, &nullstate, base, qtrue );
-	}
+	client->deltaClear = qtrue;//Send baselines later on.
 
 	MSG_WriteByte( &msg, svc_EOF );
 
