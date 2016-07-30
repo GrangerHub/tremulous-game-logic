@@ -488,7 +488,7 @@ static void CG_RunBuildableLerpFrame( centity_t *cent )
         CG_Printf( "Sound for animation %d for a %s\n",
             newAnimation, BG_Buildable( buildable )->humanName );
 
-      trap_S_StartSound2( cent->lerpOrigin, &cent->currentState, CHAN_AUTO,
+      trap_S_StartSound( cent->lerpOrigin, cent->currentState.number, CHAN_AUTO,
         cg_buildables[ buildable ].sounds[ newAnimation ].sound );
     }
   }
@@ -1314,15 +1314,11 @@ void CG_Buildable( centity_t *cent )
   int             health;
 
   //must be before EF_NODRAW check
-  if( team == TEAM_ALIENS && !( es->eFlags & EF_NODRAW ) )
+  if( team == TEAM_ALIENS )
     CG_Creep( cent );
 
   // if set to invisible, skip
-  if( ( !( !(es->eFlags & EF_NODRAW) ||
-           ( es->eFlags & EF_NODRAW &&
-             cg_spectatorWallhack.integer > 1 &&
-             cgs.clientinfo[ cg.clientNum ].team == TEAM_NONE ) ) ) ||
-      ( team == TEAM_ALIENS && es->eFlags & EF_DEAD ) )
+  if( es->eFlags & EF_NODRAW )
   {
     if( CG_IsParticleSystemValid( &cent->buildablePS ) )
       CG_DestroyParticleSystem( &cent->buildablePS );
@@ -1552,7 +1548,7 @@ void CG_Buildable( centity_t *cent )
   health = es->misc;
 
   if( health < cent->lastBuildableHealth &&
-      ( es->eFlags & EF_B_SPAWNED ) && !( es->eFlags & EF_NODRAW ) )
+      ( es->eFlags & EF_B_SPAWNED ) )
   {
     if( cent->lastBuildableDamageSoundTime + BUILDABLE_SOUND_PERIOD < cg.time )
     {

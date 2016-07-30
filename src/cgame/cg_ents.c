@@ -220,7 +220,7 @@ static void CG_EntityEffects( centity_t *cent )
   CG_SetEntitySoundPosition( cent );
 
   // add loop sound
-  if( cent->currentState.loopSound && !( cent->currentState.eFlags & EF_NODRAW ) )
+  if( cent->currentState.loopSound )
   {
     if( cent->currentState.eType != ET_SPEAKER )
     {
@@ -326,7 +326,7 @@ static void CG_Speaker( centity_t *cent )
   if( cg.time < cent->miscTime )
     return;
 
-  trap_S_StartSound2( NULL, &cent->currentState, CHAN_ITEM, cgs.gameSounds[ cent->currentState.eventParm ] );
+  trap_S_StartSound( NULL, cent->currentState.number, CHAN_ITEM, cgs.gameSounds[ cent->currentState.eventParm ] );
 
   //  ent->s.frame = ent->wait * 10;
   //  ent->s.clientNum = ent->random * 10;

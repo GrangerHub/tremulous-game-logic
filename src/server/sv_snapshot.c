@@ -130,11 +130,10 @@ static void SV_WriteSnapshotToClient( client_t *client, msg_t *msg ) {
 	frame = &client->frames[ client->netchan.outgoingSequence & PACKET_MASK ];
 
 	// try to use a previous frame as the source for delta compressing the snapshot
-	if ( client->deltaMessage <= 0 || client->state != CS_ACTIVE || client->deltaClear ) {
+	if ( client->deltaMessage <= 0 || client->state != CS_ACTIVE ) {
 		// client is asking for a retransmit
 		oldframe = NULL;
 		lastframe = 0;
-                client->deltaClear = qfalse;
 	} else if ( client->netchan.outgoingSequence - client->deltaMessage 
 		>= (PACKET_BACKUP - 3) ) {
 		// client hasn't gotten a good message through in a long time
@@ -284,8 +283,6 @@ static void SV_AddEntToSnapshot( svEntity_t *svEnt, sharedEntity_t *gEnt, snapsh
 
 	eNums->snapshotEntities[ eNums->numSnapshotEntities ] = gEnt->s.number;
 	eNums->numSnapshotEntities++;
-
-        gEnt->snap_eFlags = gEnt->s.eFlags;
 }
 
 /*
@@ -374,10 +371,6 @@ static void SV_AddEntitiesVisibleFromPoint( vec3_t origin, clientSnapshot_t *fra
 			continue;
 		}
 
-                //Everything is always sent
-                SV_AddEntToSnapshot( svEnt, ent, eNums );
-                ent->s.eFlags |= EF_NODRAW;
-
 		// ignore if not touching a PV leaf
 		// check area
 		if ( !CM_AreasConnected( clientarea, svEnt->areanum ) ) {
@@ -419,7 +412,8 @@ static void SV_AddEntitiesVisibleFromPoint( vec3_t origin, clientSnapshot_t *fra
 			}
 		}
 
-		ent->s.eFlags = ent->snap_eFlags; //Reset state because it is visible.
+		// add it
+		SV_AddEntToSnapshot( svEnt, ent, eNums );
 
 		// if it's a portal entity, add everything visible from its camera position
 		if ( ent->r.svFlags & SVF_PORTAL ) {
@@ -521,9 +515,6 @@ static void SV_BuildClientSnapshot( client_t *client ) {
 		ent = SV_GentityNum(entityNumbers.snapshotEntities[i]);
 		state = &svs.snapshotEntities[svs.nextSnapshotEntities % svs.numSnapshotEntities];
 		*state = ent->s;
-
-                ent->s.eFlags = ent->snap_eFlags; //Restore
-
 		svs.nextSnapshotEntities++;
 		// this should never hit, map should always be restarted first in SV_Frame
 		if ( svs.nextSnapshotEntities >= 0x7FFFFFFE ) {

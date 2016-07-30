@@ -1766,7 +1766,7 @@ void CG_FireWeapon( centity_t *cent, weaponMode_t weaponMode )
   {
     c = rand( ) % c;
     if( wi->wim[ weaponMode ].flashSound[ c ] )
-      trap_S_StartSound2( NULL, es, CHAN_WEAPON, wi->wim[ weaponMode ].flashSound[ c ] );
+      trap_S_StartSound( NULL, es->number, CHAN_WEAPON, wi->wim[ weaponMode ].flashSound[ c ] );
   }
 }
 
@@ -1885,7 +1885,7 @@ void CG_MissileHitEntity( weapon_t weaponNum, weaponMode_t weaponMode,
     }
     else
       sound = IMPACTSOUND_DEFAULT;
-
+          
     CG_MissileHitWall( weaponNum, weaponMode, 0, origin, dir, sound, charge );
   }
 }

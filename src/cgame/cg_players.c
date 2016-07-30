@@ -1910,10 +1910,7 @@ void CG_Player( centity_t *cent )
     return;
 
   //don't draw
-  if( !( !(es->eFlags & EF_NODRAW) ||
-       ( es->eFlags & EF_NODRAW &&
-         cg_spectatorWallhack.integer &&
-         cgs.clientinfo[ cg.clientNum ].team == TEAM_NONE ) ) )
+  if( es->eFlags & EF_NODRAW )
     return;
 
   // get the player model information

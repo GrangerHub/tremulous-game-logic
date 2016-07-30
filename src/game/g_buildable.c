@@ -1013,6 +1013,7 @@ void AGeneric_Blast( gentity_t *self )
                            TEAM_ALIENS );
 
   //pretty events and item cleanup
+  self->s.eFlags |= EF_NODRAW; //don't draw the model once it's destroyed
   G_AddEvent( self, EV_ALIEN_BUILDABLE_EXPLOSION, DirToByte( dir ) );
   self->timestamp = level.time;
   self->think = AGeneric_CreepRecede;
