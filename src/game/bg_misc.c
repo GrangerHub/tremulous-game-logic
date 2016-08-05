@@ -2417,8 +2417,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     LASGUN_K_SCALE,       //float     knockbackScale;
     qfalse,               //qboolean  hasAltMode;
     qfalse,               //qboolean  hasThirdMode;
-    qfalse,               //qboolean  canZoom;
-    90.0f,                //float     zoomFov;
+    qtrue,                //qboolean  canZoom;
+    20.0f,                //float     zoomFov;
     qtrue,                //qboolean  purchasable;
     qtrue,                //qboolean  longRanged;
     qfalse,               //qboolean  relativeMissileSpeed;
