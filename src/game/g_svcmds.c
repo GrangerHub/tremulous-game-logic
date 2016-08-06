@@ -549,6 +549,19 @@ static void Svcmd_SuddenDeath_f( void )
       offset, offset == 1 ? "" : "s" ) );
 }
 
+static void Svcmd_Extend_f( void )
+{
+  char mins[ 16 ] = {""};
+  int  offset;
+  trap_Argv( 1, mins, sizeof( mins ) );
+  offset = atoi( mins );
+
+  level.extendTimeLimit += offset;
+  trap_SendServerCommand( -1,
+    va( "cp \"The time limit has been ^2extended^7 by %d minute%s\"",
+      offset, offset == 1 ? "" : "s" ) );
+}
+
 static void Svcmd_G_AdvanceMapRotation_f( void )
 {
   G_AdvanceMapRotation( 0 );
@@ -570,6 +583,7 @@ struct svcmd
   { "eject", qfalse, Svcmd_EjectClient_f },
   { "entityList", qfalse, Svcmd_EntityList_f },
   { "evacuation", qfalse, Svcmd_Evacuation_f },
+  { "extend", qfalse, Svcmd_Extend_f },
   { "forceTeam", qfalse, Svcmd_ForceTeam_f },
   { "game_memory", qfalse, BG_MemoryInfo },
   { "humanWin", qfalse, Svcmd_TeamWin_f },

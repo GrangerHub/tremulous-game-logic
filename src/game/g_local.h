@@ -573,6 +573,9 @@ typedef struct
 
   int               startTime;                    // level.time the map was started
 
+  int               extendTimeLimit;              // set the time limit to g_basetimelimit + this value
+  int               extendVoteCount;
+
   int               teamScores[ NUM_TEAMS ];
   int               lastTeamLocationTime;         // last time of client team location update
 
@@ -1178,6 +1181,10 @@ extern  vmCvar_t  g_minNameChangePeriod;
 extern  vmCvar_t  g_maxNameChanges;
 
 extern  vmCvar_t  g_timelimit;
+extern  vmCvar_t  g_basetimelimit;  // this is for resetting the time limit after an extended match
+extern  vmCvar_t  g_extendVotesPercent;
+extern  vmCvar_t  g_extendVotesTime;
+extern  vmCvar_t  g_extendVotesCount;
 extern  vmCvar_t  g_suddenDeathTime;
 
 extern  vmCvar_t  g_doWarmup;

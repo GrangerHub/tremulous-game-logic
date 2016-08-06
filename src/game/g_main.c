@@ -44,6 +44,10 @@ gentity_t   g_entities[ MAX_GENTITIES ];
 gclient_t   g_clients[ MAX_CLIENTS ];
 
 vmCvar_t  g_timelimit;
+vmCvar_t  g_basetimelimit;
+vmCvar_t  g_extendVotesPercent;
+vmCvar_t  g_extendVotesTime;
+vmCvar_t  g_extendVotesCount;
 vmCvar_t  g_suddenDeathTime;
 
 vmCvar_t  g_doWarmup;
@@ -205,7 +209,11 @@ static cvarTable_t   gameCvarTable[ ] =
   // change anytime vars
   { &g_maxGameClients, "g_maxGameClients", "0", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse  },
 
-  { &g_timelimit, "timelimit", "0", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_NORESTART, 0, qtrue },
+  { &g_timelimit, "timelimit", "0", CVAR_SERVERINFO | CVAR_NORESTART, 0, qtrue },
+  { &g_basetimelimit, "g_basetimelimit", "0", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_NORESTART, 0, qtrue },
+  { &g_extendVotesPercent, "g_extendVotesPercent", "50", CVAR_ARCHIVE, 0, qfalse },
+  { &g_extendVotesTime, "g_extendVotesTime", "10", CVAR_ARCHIVE, 0, qfalse },
+  { &g_extendVotesCount, "g_extendVotesCount", "3", CVAR_ARCHIVE, 0, qfalse },
   { &g_suddenDeathTime, "g_suddenDeathTime", "0", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_NORESTART, 0, qtrue },
 
   { &g_synchronousClients, "g_synchronousClients", "0", CVAR_SYSTEMINFO, 0, qfalse  },
@@ -613,6 +621,9 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
   level.startTime = levelTime;
   level.alienStage2Time = level.alienStage3Time =
     level.humanStage2Time = level.humanStage3Time = level.startTime;
+
+  // set the timelimit equal to the basetimelimit
+  level.extendTimeLimit = 0;
 
   // reset the level's 1 minute and 5 minute timeouts
   level.warmup1Time = -1;
@@ -2523,10 +2534,12 @@ CheckCvars
 */
 void CheckCvars( void )
 {
-  static int lastPasswordModCount   = -1;
-  static int lastMarkDeconModCount  = -1;
-  static int lastSDTimeModCount = -1;
-  static int lastNumZones = 0;
+  static int lastPasswordModCount      = -1;
+  static int lastMarkDeconModCount     = -1;
+  static int lastSDTimeModCount        = -1;
+  static int lastNumZones              = 0;
+  static int lastBaseTimeLimitModCount = -1;
+  static int lastExtendTimeLimit = -1;
 
   if( g_password.modificationCount != lastPasswordModCount )
   {
@@ -2570,6 +2583,17 @@ void CheckCvars( void )
 
     level.buildPointZones = newZones;
     lastNumZones = g_humanRepeaterMaxZones.integer;
+  }
+
+  // adjust the time limit if either the base time limit changes or
+  // if an extend vote passes
+  if( ( g_basetimelimit.modificationCount != lastBaseTimeLimitModCount ) ||
+      ( level.extendTimeLimit != lastExtendTimeLimit )  )
+  {
+    trap_Cvar_Set( "timelimit", va( "%d", ( g_basetimelimit.integer +
+                                            level.extendTimeLimit ) ) );
+    lastBaseTimeLimitModCount = g_basetimelimit.modificationCount;
+    lastExtendTimeLimit = level.extendTimeLimit;
   }
 
   level.frameMsec = trap_Milliseconds( );
