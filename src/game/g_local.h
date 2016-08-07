@@ -571,8 +571,10 @@ typedef struct
 
   int               startTime;                    // level.time the map was started
 
-  int               extendTimeLimit;              // set the time limit to g_basetimelimit + this value
+  int               extendTimeLimit;              // set the time limit to level.matchBaseTimeLimit + this value
   int               extendVoteCount;
+  int               matchBaseTimeLimit;
+  qboolean          timeLimitInitialized;
 
   int               teamScores[ NUM_TEAMS ];
   int               lastTeamLocationTime;         // last time of client team location update

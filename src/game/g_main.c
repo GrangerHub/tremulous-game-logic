@@ -622,8 +622,12 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
   level.alienStage2Time = level.alienStage3Time =
     level.humanStage2Time = level.humanStage3Time = level.startTime;
 
-  // set the timelimit equal to the basetimelimit
+  // initialize time limit values
+  level.matchBaseTimeLimit = g_basetimelimit.integer;
+  trap_Cvar_Set( "timelimit", va( "%d", level.matchBaseTimeLimit ) );
   level.extendTimeLimit = 0;
+  level.extendVoteCount = 0;
+  level.timeLimitInitialized = qtrue;
 
   // reset the level's 1 minute and 5 minute timeouts
   level.warmup1Time = -1;
@@ -2609,8 +2613,8 @@ void CheckCvars( void )
   static int lastMarkDeconModCount     = -1;
   static int lastSDTimeModCount        = -1;
   static int lastNumZones              = 0;
-  static int lastBaseTimeLimitModCount = -1;
-  static int lastExtendTimeLimit = -1;
+  static int lastTimeLimitModCount = -1;
+  static int lastExtendTimeLimit = 0;
 
   if( g_password.modificationCount != lastPasswordModCount )
   {
@@ -2656,15 +2660,29 @@ void CheckCvars( void )
     lastNumZones = g_humanRepeaterMaxZones.integer;
   }
 
-  // adjust the time limit if either the base time limit changes or
-  // if an extend vote passes
-  if( ( g_basetimelimit.modificationCount != lastBaseTimeLimitModCount ) ||
-      ( level.extendTimeLimit != lastExtendTimeLimit )  )
+  // adjust settings related to time limit extensions
+  if( level.timeLimitInitialized )
   {
-    trap_Cvar_Set( "timelimit", va( "%d", ( g_basetimelimit.integer +
+    lastTimeLimitModCount = g_timelimit.modificationCount;
+    level.timeLimitInitialized = qfalse;
+  }
+
+  if( g_timelimit.modificationCount != lastTimeLimitModCount )
+  {
+    if( g_timelimit.integer < 0 )
+      trap_Cvar_Set( "timelimit" , "0" );
+
+    level.extendTimeLimit = 0;
+    lastExtendTimeLimit = 0;
+    level.extendVoteCount = 0;
+    level.matchBaseTimeLimit = g_timelimit.integer;
+    lastTimeLimitModCount = g_timelimit.modificationCount;
+  } else if( level.extendTimeLimit != lastExtendTimeLimit )
+  {
+    trap_Cvar_Set( "timelimit", va( "%d", ( level.matchBaseTimeLimit +
                                             level.extendTimeLimit ) ) );
-    lastBaseTimeLimitModCount = g_basetimelimit.modificationCount;
     lastExtendTimeLimit = level.extendTimeLimit;
+    lastTimeLimitModCount = g_timelimit.modificationCount;
   }
 
   level.frameMsec = trap_Milliseconds( );
