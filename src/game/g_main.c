@@ -44,6 +44,10 @@ gentity_t   g_entities[ MAX_GENTITIES ];
 gclient_t   g_clients[ MAX_CLIENTS ];
 
 vmCvar_t  g_timelimit;
+vmCvar_t  g_basetimelimit;
+vmCvar_t  g_extendVotesPercent;
+vmCvar_t  g_extendVotesTime;
+vmCvar_t  g_extendVotesCount;
 vmCvar_t  g_suddenDeathTime;
 
 vmCvar_t  g_doWarmup;
@@ -209,7 +213,11 @@ static cvarTable_t   gameCvarTable[ ] =
   // change anytime vars
   { &g_maxGameClients, "g_maxGameClients", "0", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse  },
 
-  { &g_timelimit, "timelimit", "0", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_NORESTART, 0, qtrue },
+  { &g_timelimit, "timelimit", "0", CVAR_SERVERINFO | CVAR_NORESTART, 0, qtrue },
+  { &g_basetimelimit, "g_basetimelimit", "0", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_NORESTART, 0, qtrue },
+  { &g_extendVotesPercent, "g_extendVotesPercent", "50", CVAR_ARCHIVE, 0, qfalse },
+  { &g_extendVotesTime, "g_extendVotesTime", "10", CVAR_ARCHIVE, 0, qfalse },
+  { &g_extendVotesCount, "g_extendVotesCount", "3", CVAR_ARCHIVE, 0, qfalse },
   { &g_suddenDeathTime, "g_suddenDeathTime", "0", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_NORESTART, 0, qtrue },
 
   { &g_synchronousClients, "g_synchronousClients", "0", CVAR_SYSTEMINFO, 0, qfalse  },
@@ -619,6 +627,13 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
   level.startTime = levelTime;
   level.alienStage2Time = level.alienStage3Time =
     level.humanStage2Time = level.humanStage3Time = level.startTime;
+
+  // initialize time limit values
+  level.matchBaseTimeLimit = g_basetimelimit.integer;
+  trap_Cvar_Set( "timelimit", va( "%d", level.matchBaseTimeLimit ) );
+  level.extendTimeLimit = 0;
+  level.extendVoteCount = 0;
+  level.timeLimitInitialized = qtrue;
 
   // reset the level's 1 minute and 5 minute timeouts
   level.warmup1Time = -1;
@@ -2559,10 +2574,12 @@ CheckCvars
 */
 void CheckCvars( void )
 {
-  static int lastPasswordModCount   = -1;
-  static int lastMarkDeconModCount  = -1;
-  static int lastSDTimeModCount = -1;
-  static int lastNumZones = 0;
+  static int lastPasswordModCount      = -1;
+  static int lastMarkDeconModCount     = -1;
+  static int lastSDTimeModCount        = -1;
+  static int lastNumZones              = 0;
+  static int lastTimeLimitModCount = -1;
+  static int lastExtendTimeLimit = 0;
 
   if( g_password.modificationCount != lastPasswordModCount )
   {
@@ -2606,6 +2623,31 @@ void CheckCvars( void )
 
     level.buildPointZones = newZones;
     lastNumZones = g_humanRepeaterMaxZones.integer;
+  }
+
+  // adjust settings related to time limit extensions
+  if( level.timeLimitInitialized )
+  {
+    lastTimeLimitModCount = g_timelimit.modificationCount;
+    level.timeLimitInitialized = qfalse;
+  }
+
+  if( g_timelimit.modificationCount != lastTimeLimitModCount )
+  {
+    if( g_timelimit.integer < 0 )
+      trap_Cvar_Set( "timelimit" , "0" );
+
+    level.extendTimeLimit = 0;
+    lastExtendTimeLimit = 0;
+    level.extendVoteCount = 0;
+    level.matchBaseTimeLimit = g_timelimit.integer;
+    lastTimeLimitModCount = g_timelimit.modificationCount;
+  } else if( level.extendTimeLimit != lastExtendTimeLimit )
+  {
+    trap_Cvar_Set( "timelimit", va( "%d", ( level.matchBaseTimeLimit +
+                                            level.extendTimeLimit ) ) );
+    lastExtendTimeLimit = level.extendTimeLimit;
+    lastTimeLimitModCount = g_timelimit.modificationCount;
   }
 
   level.frameMsec = trap_Milliseconds( );
