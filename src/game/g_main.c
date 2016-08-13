@@ -639,6 +639,9 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
   level.warmup1Time = -1;
   level.warmup2Time = -1;
 
+  level.lifeSupportTimer[ TEAM_HUMANS ] = level.time + HUMAN_LIFE_SUPPORT_TIME;
+  level.lifeSupportTimer[ TEAM_ALIENS ] = level.time + ALIEN_HIVEMIND_LINK_TIME;
+
   level.snd_fry = G_SoundIndex( "sound/misc/fry.wav" ); // FIXME standing in lava / slime
 
   if( g_logFile.string[ 0 ] )
@@ -1456,6 +1459,37 @@ void G_CalculateStages( void )
         ( IS_WARMUP ? S3 : g_humanStage.integer ),
         ( IS_WARMUP ? 99999 : g_humanCredits.integer ),
         ( IS_WARMUP ? 0 : level.humanNextStageThreshold ) ) );
+}
+
+/*
+============
+G_CheckLifeSupport
+
+Players have a limited amount of time they can survive without their overmind/reactor and spawns
+============
+*/
+static void G_CheckLifeSupport( void )
+{
+  if( IS_WARMUP )
+    return;
+
+  if( G_Overmind( ) || ( level.numAlienSpawns > 0 ) || ( level.surrenderTeam == TEAM_ALIENS ) )
+    level.lifeSupportTimer[ TEAM_ALIENS ] = level.time + ALIEN_HIVEMIND_LINK_TIME;
+  else if( level.lifeSupportTimer[ TEAM_ALIENS ] > level.time )
+    G_TeamCommand( TEAM_ALIENS, va( "cp \"Hivemind Link will Break in %d Seconds!\nBuild an Overmind!\"",
+                   ( level.lifeSupportTimer[ TEAM_ALIENS ] - level.time ) / 1000 ) );
+  else
+    G_TeamCommand( TEAM_ALIENS, "cp \"Hivemind Link Broken\"");
+
+  if( G_Reactor( ) || ( level.numHumanSpawns > 0 )  || ( level.surrenderTeam == TEAM_HUMANS ) )
+    level.lifeSupportTimer[ TEAM_HUMANS ] = level.time + HUMAN_LIFE_SUPPORT_TIME;
+  else if( level.lifeSupportTimer[ TEAM_HUMANS ] > level.time )
+    G_TeamCommand( TEAM_HUMANS, va( "cp \"Life Support will Terminate in %d Seconds!\nBuild a Reactor!\"",
+                   ( level.lifeSupportTimer[ TEAM_HUMANS ] - level.time ) / 1000 ) );
+  else
+    G_TeamCommand( TEAM_HUMANS, "cp \"Life Support Terminated\"");
+
+  return;
 }
 
 /*
@@ -2865,6 +2899,7 @@ void G_RunFrame( int levelTime )
     G_SpawnClients( TEAM_HUMANS );
     G_CalculateAvgPlayers( );
     G_UpdateZaps( msec );
+    G_CheckLifeSupport( );
   }
   if( level.fight && ( ( g_doWarmup.integer && !g_doCountdown.integer ) ||
       level.countdownTime <= ( level.time + 1000 ) ) )

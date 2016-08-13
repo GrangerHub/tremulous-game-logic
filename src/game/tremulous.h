@@ -364,6 +364,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define ALIEN_SPAWN_REPEAT_TIME     10000
 
+#define ALIEN_HIVEMIND_LINK_TIME    150000 //amount of time aliens can survive without any eggs/overmind
+
 #define ALIEN_REGEN_DAMAGE_TIME     2000 //msec since damage that regen starts again
 #define ALIEN_REGEN_NOCREEP_MOD     (1.0f/2.0f) //regen off creep
 
@@ -691,6 +693,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define HUMAN_SPAWN_REPEAT_TIME     10000
 #define HUMAN_REGEN_DAMAGE_TIME     3000 //msec since damage before dcc repairs
+
+#define HUMAN_LIFE_SUPPORT_TIME     150000 //amount of time humans can survive without any telenodes/reactor
 
 #define HUMAN_MAX_CREDITS           2000
 #define HUMAN_TK_SUICIDE_PENALTY    150

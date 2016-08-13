@@ -3076,9 +3076,7 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     SLOT_HEAD,              //int   slots;
     "helmet",               //char  *name;
     "Helmet",               //char  *humanName;
-    "In addition to protecting your head, the helmet provides a "
-      "scanner indicating the presence of any friendly or hostile "
-      "lifeforms and structures in your immediate vicinity.",
+    "The helmet provides protection to your head.",
     "icons/iconu_helmet",
     qtrue,                  //qboolean  purchasable;
     qfalse,                 //qboolean  usable;

@@ -811,7 +811,8 @@ void ClientTimerActions( gentity_t *ent, int msec )
     }
 
     // turn off life support when a team admits defeat
-    if( client->ps.stats[ STAT_TEAM ] == level.surrenderTeam )
+    if( ( client->ps.stats[ STAT_TEAM ] == level.surrenderTeam ) ||
+        ( level.lifeSupportTimer[ client->ps.stats[ STAT_TEAM ] ] < level.time ) )
     {
       int dmg = 5;
       if ( BG_ClassHasAbility(client->ps.stats[STAT_CLASS], SCA_REGEN) )
@@ -1494,7 +1495,8 @@ void ClientThink_real( gentity_t *ent )
 
   // Replenish alien health
   if( level.surrenderTeam != client->pers.teamSelection &&
-      ent->nextRegenTime >= 0 && ent->nextRegenTime < level.time )
+      ent->nextRegenTime >= 0 && ent->nextRegenTime < level.time &&
+      level.lifeSupportTimer[ client->pers.teamSelection ] >= level.time )
   {
     float regenRate =
         BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->regenRate;
@@ -1600,7 +1602,8 @@ void ClientThink_real( gentity_t *ent )
 
   // Replenish alien health reserve
   if( level.surrenderTeam != client->pers.teamSelection &&
-      ent->nextHPReserveRegenTime >= 0 && ent->nextHPReserveRegenTime < level.time )
+      ent->nextHPReserveRegenTime >= 0 && ent->nextHPReserveRegenTime < level.time &&
+      level.lifeSupportTimer[ client->pers.teamSelection ] >= level.time )
   {
     float regenRate =
         BG_Class( client->ps.stats[ STAT_CLASS ] )->regenRate;
