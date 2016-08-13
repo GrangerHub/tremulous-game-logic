@@ -1470,10 +1470,7 @@ Players have a limited amount of time they can survive without their overmind/re
 */
 static void G_CheckLifeSupport( void )
 {
-  if( IS_WARMUP )
-    return;
-
-  if( G_Overmind( ) || ( level.numAlienSpawns > 0 ) || ( level.surrenderTeam == TEAM_ALIENS ) )
+  if( IS_WARMUP || G_Overmind( ) || ( level.numAlienSpawns > 0 ) || ( level.surrenderTeam == TEAM_ALIENS ) )
     level.lifeSupportTimer[ TEAM_ALIENS ] = level.time + ALIEN_HIVEMIND_LINK_TIME;
   else if( level.lifeSupportTimer[ TEAM_ALIENS ] > level.time )
     G_TeamCommand( TEAM_ALIENS, va( "cp \"Hivemind Link will Break in %d Seconds!\nBuild an Overmind!\"",
@@ -1481,7 +1478,7 @@ static void G_CheckLifeSupport( void )
   else
     G_TeamCommand( TEAM_ALIENS, "cp \"Hivemind Link Broken\"");
 
-  if( G_Reactor( ) || ( level.numHumanSpawns > 0 )  || ( level.surrenderTeam == TEAM_HUMANS ) )
+  if( IS_WARMUP || G_Reactor( ) || ( level.numHumanSpawns > 0 )  || ( level.surrenderTeam == TEAM_HUMANS ) )
     level.lifeSupportTimer[ TEAM_HUMANS ] = level.time + HUMAN_LIFE_SUPPORT_TIME;
   else if( level.lifeSupportTimer[ TEAM_HUMANS ] > level.time )
     G_TeamCommand( TEAM_HUMANS, va( "cp \"Life Support will Terminate in %d Seconds!\nBuild a Reactor!\"",
