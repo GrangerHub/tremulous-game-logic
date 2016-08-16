@@ -996,7 +996,7 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
   if( weaponNum <= WP_NONE || weaponNum >= WP_NUM_WEAPONS )
   {
     Com_Printf( S_COLOR_YELLOW "WARNING: CG_AddPlayerWeapon: weapon "
-                "number %i is out of bounds", weaponNum );
+                "number %i is out of bounds\n", weaponNum );
     return;
   }
 
@@ -1093,6 +1093,11 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
     CG_PositionEntityOnTag( &gun, parent, parent->hModel, "tag_weapon" );
     CG_WeaponAnimation( cent, &gun.oldframe, &gun.frame, &gun.backlerp );
 
+    if( cg_spectatorWallhack.integer &&
+        cgs.clientinfo[ cg.clientNum ].team == TEAM_NONE )
+    {
+      gun.renderfx |= RF_DEPTHHACK;
+    }
     trap_R_AddRefEntityToScene( &gun );
 
     if( !ps )
@@ -1119,6 +1124,11 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 
       CG_PositionRotatedEntityOnTag( &barrel, &gun, gun.hModel, "tag_barrel" );
 
+      if( cg_spectatorWallhack.integer &&
+          cgs.clientinfo[ cg.clientNum ].team == TEAM_NONE )
+      {
+        barrel.renderfx |= RF_DEPTHHACK;
+      }
       trap_R_AddRefEntityToScene( &barrel );
     }
   }

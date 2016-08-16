@@ -1645,12 +1645,49 @@ void Cmd_CallVote_f( gentity_t *ent )
 
       level.voteType[ team ] = SUDDEN_DEATH_VOTE;
     }
+    else if( !Q_stricmp( vote, "extend" ) )
+    {
+      if( !g_extendVotesPercent.integer )
+      {
+        trap_SendServerCommand( ent-g_entities, "print \"Extend votes have been disabled\n\"" );
+        return;
+      }
+      if( g_extendVotesCount.integer
+          && level.extendVoteCount >= g_extendVotesCount.integer )
+      {
+        trap_SendServerCommand( ent-g_entities,
+                                va( "print \"callvote: Maximum number of %d extend votes has been reached\n\"",
+                                    g_extendVotesCount.integer ) );
+        return;
+      }
+      if( !g_timelimit.integer ) {
+        trap_SendServerCommand( ent-g_entities,
+                                "print \"This match has no timelimit so extend votes wont work\n\"" );
+        return;
+      }
+      if( level.time - level.startTime <
+          ( g_timelimit.integer - g_extendVotesTime.integer / 2 ) * 60000 )
+      {
+        trap_SendServerCommand( ent-g_entities,
+                                va( "print \"callvote: Extend votes only allowed with less than %d minutes remaining\n\"",
+                                    g_extendVotesTime.integer / 2 ) );
+        return;
+      }
+      level.extendVoteCount++;
+      level.voteThreshold[ team ] = g_extendVotesPercent.integer; 
+      Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
+                   "extend %d", g_extendVotesTime.integer );
+      Com_sprintf( level.voteDisplayString[ team ], sizeof( level.voteDisplayString[ team ] ),
+                   "^4[^1Extend^4] ^5the timelimit by %d minutes (Needs > %d%% of %s)",
+                   g_extendVotesTime.integer, g_extendVotesPercent.integer,
+                   g_impliedVoting.integer ? "active players" : "total votes" );
+    }
     else
     {
       trap_SendServerCommand( ent-g_entities, "print \"Invalid vote string\n\"" );
       trap_SendServerCommand( ent-g_entities, "print \"Valid vote commands "
-          "are: map, nextmap, map_restart, draw, sudden_death, kick, poll, mute, "
-          "unmute and cancel\n" );
+          "are: map, nextmap, map_restart, draw, sudden_death, extend, kick, poll, mute, "
+          "unmute, and cancel\n" );
       return;
     }
   }

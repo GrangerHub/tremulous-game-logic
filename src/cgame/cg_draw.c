@@ -2657,20 +2657,18 @@ static void CG_ScanForCrosshairEntity( void )
   team = cgs.clientinfo[ trace.entityNum ].team;
 
 
-  if( cg.snap->ps.stats[ STAT_TEAM ] != TEAM_NONE )
+  if( ( team == cg.snap->ps.stats[ STAT_TEAM ] ) ||
+      ( cg.snap->ps.stats[ STAT_TEAM ] == TEAM_NONE ) )
   {
-    if( team == cg.snap->ps.stats[ STAT_TEAM ] )
-    {
-      // update the fade timer
-      cg.crosshairClientNum = trace.entityNum;
-      cg.crosshairClientTime = cg.time;
-    }
-    // only display team names of those on the same team as this player,
-    // and change the crosshair color to red for enemies of this player
-    else
-    {
-      cg.crosshairEnemyTime = cg.time;
-    }
+    // update the fade timer
+    cg.crosshairClientNum = trace.entityNum;
+    cg.crosshairClientTime = cg.time;
+  }
+  // only display team names of those on the same team as this player,
+  // and change the crosshair color to red for enemies of this player
+  else
+  {
+    cg.crosshairEnemyTime = cg.time;
   }
 
 
@@ -2801,6 +2799,11 @@ static void CG_DrawCrosshairNames( rectDef_t *rect, float scale, int textStyle )
     name = va( "%s ^7[^%c%d^7]", name,
                CG_GetColorCharForHealth( cg.crosshairClientNum ),
                cgs.clientinfo[ cg.crosshairClientNum ].health );
+  }
+
+  if( cg.snap->ps.stats[ STAT_TEAM ] == TEAM_NONE )
+  {
+    name = va( "^7Looking at %s^7", name );
   }
 
   w = UI_Text_Width( name, scale );

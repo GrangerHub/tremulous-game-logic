@@ -899,9 +899,9 @@ void AGeneric_CreepRespawn( gentity_t *self )
     }
   }
 
-  // cancel respawning if respawning buildable is overmind and there already is
+  // cancel respawning if respawning buildable needs to be unique and there already is
   // one on the map
-  if( self->s.modelindex == BA_A_OVERMIND && G_FindBuildable( BA_A_OVERMIND ) )
+  if( BG_Buildable( self->s.modelindex )->uniqueTest && G_FindBuildable( self->s.modelindex ) )
   {
     G_FreeEntity( self );
     return;
@@ -1924,9 +1924,9 @@ void HSpawn_Respawn( gentity_t *self )
     }
   }
 
-  // cancel respawning if respawning buildable is reactor and there already is
+  // cancel respawning if respawning buildable needs to be unique and there already is
   // one on the map
-  if( self->s.modelindex == BA_H_REACTOR && G_FindBuildable( BA_H_REACTOR ) )
+  if( BG_Buildable( self->s.modelindex )->uniqueTest && G_FindBuildable( self->s.modelindex ) )
   {
     G_FreeEntity( self );
     return;
