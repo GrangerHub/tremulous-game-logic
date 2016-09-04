@@ -348,7 +348,7 @@ void G_UseTeleporter( gentity_t *entry, gentity_t *activator )
     return;
   }
 
-  if( entry->teleporterActivator != activator->s.number && 
+  if( entry->teleporterActivator != activator->s.number &&
       entry->teleporterActivated >= level.time )
   {
     trap_SendServerCommand( activator - g_entities,
@@ -389,7 +389,7 @@ void G_UseTeleporter( gentity_t *entry, gentity_t *activator )
     return;
   }
 
-  if( destination->teleporterActivator != activator->s.number && 
+  if( destination->teleporterActivator != activator->s.number &&
       destination->teleporterActivated >= level.time )
   {
     entry->teleporterActivated = level.time + 1000;
@@ -780,7 +780,7 @@ int G_FindDCC( gentity_t *self )
       distance = VectorLength( temp_v );
       if( distance < DC_RANGE && ent->powered )
       {
-        foundDCC++; 
+        foundDCC++;
       }
     }
   }
@@ -832,7 +832,7 @@ The code here will break if more than one reactor or overmind is allowed, even
 if one of them is dead/unspawned
 ================
 */
-static gentity_t *G_FindBuildable( buildable_t buildable ); 
+static gentity_t *G_FindBuildable( buildable_t buildable );
 
 gentity_t *G_Reactor( void )
 {
@@ -893,7 +893,7 @@ qboolean G_FindCreep( gentity_t *self )
       if( ent->s.eType != ET_BUILDABLE )
         continue;
 
-      if( ( ent->s.modelindex == BA_A_SPAWN || 
+      if( ( ent->s.modelindex == BA_A_SPAWN ||
             ent->s.modelindex == BA_A_OVERMIND ) &&
           ent->spawned && ent->health > 0 )
       {
@@ -1036,12 +1036,12 @@ void AGeneric_CreepRespawn( gentity_t *self )
       velocity[0] = 40 * (hit->r.currentOrigin[0] - self->r.currentOrigin[0]);
       velocity[1] = 40 * (hit->r.currentOrigin[1] - self->r.currentOrigin[1]);
       velocity[2] = 50; //(hit->r.currentOrigin[2] - self->r.currentOrigin[2]);
-                
+
       VectorAdd( hit->client->ps.velocity, velocity, hit->client->ps.velocity );
     }
     else if( hit != self )
     {
-      // buildables taking the same space kill themselves 
+      // buildables taking the same space kill themselves
       G_Damage( hit, NULL, NULL, NULL, NULL, 10000, 0, MOD_SUICIDE );
     }
   }
@@ -1253,7 +1253,7 @@ void AGeneric_Pain( gentity_t *self, gentity_t *attacker, int damage )
 {
   if( self->health <= 0 )
     return;
-    
+
   // Alien buildables only have the first pain animation defined
   G_SetBuildableAnim( self, BANIM_PAIN1, qfalse );
 }
@@ -1282,8 +1282,8 @@ void ASpawn_Think( gentity_t *self )
       if( ( ent = G_CheckSpawnPoint( self->s.number, self->r.currentOrigin,
               self->s.origin2, BA_A_SPAWN, NULL ) ) != NULL )
       {
-        // If the thing blocking the spawn is a buildable, kill it. 
-        // If it's part of the map, kill self. 
+        // If the thing blocking the spawn is a buildable, kill it.
+        // If it's part of the map, kill self.
         if( ent->s.eType == ET_BUILDABLE )
         {
           // don't queue the bp from this
@@ -1291,7 +1291,7 @@ void ASpawn_Think( gentity_t *self )
             G_Damage( ent, NULL, g_entities + ent->builtBy->slot, NULL, NULL, 10000, 0, MOD_SUICIDE );
           else
             G_Damage( ent, NULL, NULL, NULL, NULL, 10000, 0, MOD_SUICIDE );
-          
+
           if( ent->health > 0 )
             G_SetBuildableAnim( self, BANIM_SPAWN1, qtrue );
         }
@@ -1619,9 +1619,9 @@ void AAcidTube_Think( gentity_t *self )
           G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
           G_AddEvent( self, EV_ALIEN_ACIDTUBE, DirToByte( self->s.origin2 ) );
         }
-        
+
         G_SelectiveRadiusDamage( self->s.pos.trBase, self, ACIDTUBE_DAMAGE,
-                                 ACIDTUBE_RANGE, self, MOD_ATUBE, TEAM_ALIENS );                           
+                                 ACIDTUBE_RANGE, self, MOD_ATUBE, TEAM_ALIENS );
         self->nextthink = level.time + ACIDTUBE_REPEAT;
         return;
       }
@@ -1779,53 +1779,28 @@ Is this hovel entrance blocked?
 */
 qboolean AHovel_Blocked( gentity_t *hovel, gentity_t *player, qboolean provideExit )
 {
-  vec3_t    forward, normal, origin, start, end, angles, hovelMaxs;
-  vec3_t    mins, maxs;
-  float     displacement;
+  vec3_t    mins, maxs, bmins, bmaxs, target, position;
   trace_t   tr;
 
-  BG_BuildableBoundingBox( BA_A_HOVEL, NULL, maxs );
   BG_ClassBoundingBox( player->client->ps.stats[ STAT_CLASS ],
                        mins, maxs, NULL, NULL, NULL );
-
-  VectorCopy( hovel->s.origin2, normal );
-  AngleVectors( hovel->s.angles, forward, NULL, NULL );
-  VectorInverse( forward );
-
-  displacement = VectorMaxComponent( maxs ) * M_ROOT3 +
-                 VectorMaxComponent( hovelMaxs ) * M_ROOT3 + 1.0f;
-
-  VectorMA( hovel->r.currentOrigin, displacement, forward, origin );
-  vectoangles( forward, angles );
-
-  VectorMA( origin, HOVEL_TRACE_DEPTH, normal, start );
-
-  //compute a place up in the air to start the real trace
-  trap_Trace( &tr, origin, mins, maxs, start, player->s.number, MASK_PLAYERSOLID );
-  VectorMA( origin, ( HOVEL_TRACE_DEPTH * tr.fraction ) - 1.0f, normal, start );
-  VectorMA( origin, -HOVEL_TRACE_DEPTH, normal, end );
-
-  trap_Trace( &tr, start, mins, maxs, end, player->s.number, MASK_PLAYERSOLID );
-
-  if( tr.startsolid )
+  BG_BuildableBoundingBox( BA_A_HOVEL, bmins, bmaxs );
+  VectorCopy( hovel->r.currentOrigin, position );
+  position[2] += fabs( mins[2] ) + bmaxs[2] + 1.0f;
+  VectorCopy( hovel->r.currentOrigin, target );
+  target[2] += fabs( mins[2] ) + 1.0f;
+  trap_UnlinkEntity( player );
+  trap_Trace( &tr, position, mins, maxs, target, hovel->s.number, MASK_SHOT );
+  trap_LinkEntity( player );
+  if( tr.startsolid || tr.fraction < 1.0f )
     return qtrue;
-
-  VectorCopy( tr.endpos, origin );
-
-  trap_Trace( &tr, origin, mins, maxs, origin, player->s.number, MASK_PLAYERSOLID );
-
-  if( provideExit )
-  {
-    G_SetOrigin( player, origin );
-    VectorCopy( origin, player->client->ps.origin );
+  if( provideExit == qtrue ){
+    G_SetOrigin( player, position );
+    VectorCopy( position, player->client->ps.origin );
     VectorCopy( vec3_origin, player->client->ps.velocity );
-    G_SetClientViewAngle( player, angles );
+    G_SetClientViewAngle( player, hovel->r.currentAngles );
   }
-
-  if( tr.fraction < 1.0f )
-    return qtrue;
-  else
-    return qfalse;
+  return qfalse;
 }
 
 /*
@@ -1841,8 +1816,7 @@ static qboolean APropHovel_Blocked( vec3_t origin, vec3_t angles, vec3_t normal,
   gentity_t hovel;
 
   VectorCopy( origin, hovel.r.currentOrigin );
-  VectorCopy( angles, hovel.s.angles );
-  VectorCopy( normal, hovel.s.origin2 );
+  VectorCopy( angles, hovel.r.currentAngles );
 
   return AHovel_Blocked( &hovel, player, qfalse );
 }
@@ -1857,6 +1831,7 @@ Called when an alien uses a hovel
 void AHovel_Use( gentity_t *self, gentity_t *other, gentity_t *activator )
 {
   vec3_t  hovelOrigin, hovelAngles, inverseNormal;
+  trace_t tr;
 
   if( self->spawned && self->powered )
   {
@@ -1895,11 +1870,19 @@ void AHovel_Use( gentity_t *self, gentity_t *other, gentity_t *activator )
       self->builder = activator;
 
       VectorCopy( self->s.pos.trBase, hovelOrigin );
-      VectorMA( hovelOrigin, 128.0f, self->s.origin2, hovelOrigin );
+      hovelOrigin[2] += 128.0f;
+
+      trap_UnlinkEntity( activator );
+      trap_Trace( &tr, self->s.pos.trBase, NULL, NULL, hovelOrigin, self->s.number, MASK_DEADSOLID );
+      trap_LinkEntity( activator );
+
+      if( tr.fraction < 1.0f )
+        hovelOrigin[2] = tr.endpos[2];
 
       VectorCopy( self->s.origin2, inverseNormal );
       VectorInverse( inverseNormal );
       vectoangles( inverseNormal, hovelAngles );
+      hovelAngles[YAW] = self->r.currentAngles[YAW];
 
       VectorCopy( activator->s.pos.trBase, activator->client->hovelOrigin );
 
@@ -1966,7 +1949,7 @@ void AHovel_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
     vec3_t    newOrigin;
     vec3_t    newAngles;
 
-    VectorCopy( self->s.angles, newAngles );
+    VectorCopy( self->r.currentAngles, newAngles );
     newAngles[ ROLL ] = 0;
 
     VectorCopy( self->r.currentOrigin, newOrigin );
@@ -2252,7 +2235,7 @@ void HSpawn_Respawn( gentity_t *self )
     }
     else if( hit != self )
     {
-      // buildables taking the same space kill themselves 
+      // buildables taking the same space kill themselves
       G_Damage( hit, self, self, NULL, NULL,
         100000, DAMAGE_NO_PROTECTION, MOD_SUICIDE );
     }
@@ -2416,8 +2399,8 @@ void HSpawn_Think( gentity_t *self )
       if( ( ent = G_CheckSpawnPoint( self->s.number, self->r.currentOrigin,
               self->s.origin2, self->s.modelindex, NULL ) ) != NULL )
       {
-        // If the thing blocking the spawn is a buildable, kill it. 
-        // If it's part of the map, kill self. 
+        // If the thing blocking the spawn is a buildable, kill it.
+        // If it's part of the map, kill self.
         if( ent->s.eType == ET_BUILDABLE )
         {
           if( ent->health > 0 )
@@ -2430,9 +2413,9 @@ void HSpawn_Think( gentity_t *self )
           G_Damage( self, NULL, NULL, NULL, NULL, self->health, 0, MOD_SUICIDE );
           return;
         }
-        
+
         G_PuntBlocker( self, ent );
- 
+
         if( ent->s.eType == ET_CORPSE )
           G_FreeEntity( ent ); //quietly remove
       }
@@ -2792,7 +2775,7 @@ void HMedistat_Think( gentity_t *self )
     //if active use the healing idle
     if( self->active )
       G_SetIdleBuildableAnim( self, BANIM_IDLE2 );
-      
+
     //check if a previous occupier is still here
     num = trap_EntitiesInBox( mins, maxs, entityList, MAX_GENTITIES );
     for( i = 0; i < num; i++ )
@@ -2801,7 +2784,7 @@ void HMedistat_Think( gentity_t *self )
 
       if( player->flags & FL_NOTARGET )
         continue; // notarget cancels even beneficial effects?
-      
+
       //remove poison from everyone, not just the healed player
       if( player->client && player->client->ps.stats[ STAT_STATE ] & SS_POISONED )
         player->client->ps.stats[ STAT_STATE ] &= ~SS_POISONED;
@@ -2909,7 +2892,7 @@ static qboolean HMGTurret_CheckTarget( gentity_t *self, gentity_t *target,
 
   if( target->flags & FL_NOTARGET )
     return qfalse;
-    
+
   if( !los_check )
     return qtrue;
 
@@ -3022,7 +3005,7 @@ static void HMGTurret_FindEnemy( gentity_t *self )
   int       start;
 
   self->enemy = NULL;
-    
+
   // Look for targets in a box around the turret
   VectorSet( range, MGTURRET_RANGE, MGTURRET_RANGE, MGTURRET_RANGE );
   VectorAdd( self->r.currentOrigin, range, maxs );
@@ -3079,7 +3062,7 @@ static qboolean HMGTurret_State( gentity_t *self, int state )
       else
         self->speed *= 1.25f;
 
-      self->s.angles2[ PITCH ] = 
+      self->s.angles2[ PITCH ] =
         MIN( MGTURRET_VERTICALCAP, angle + self->speed );
       return qtrue;
     }
@@ -3110,7 +3093,7 @@ Think function for MG turret
 */
 void HMGTurret_Think( gentity_t *self )
 {
-  self->nextthink = level.time + 
+  self->nextthink = level.time +
                     BG_Buildable( self->s.modelindex )->nextthink;
 
   G_SuffocateTrappedEntities( self );
@@ -3141,7 +3124,7 @@ void HMGTurret_Think( gentity_t *self )
     // spin up
     if( self->turretFireSpeedMod < 100 )
     {
-      if( G_IsDCCBuilt( ) ) 
+      if( G_IsDCCBuilt( ) )
       {
         self->turretFireSpeedMod += ( MGTURRET_REPEAT_MOD_DIFF * MGTURRET_NEXTTHINK ) /
                                     MGTURRET_DCC_SPINUP_TIME;
@@ -3156,7 +3139,7 @@ void HMGTurret_Think( gentity_t *self )
       self->turretFireSpeedMod = 100;
     }
   }
-  
+
   // If not powered don't do anything
   if( !self->powered )
   {
@@ -3168,7 +3151,7 @@ void HMGTurret_Think( gentity_t *self )
     self->nextthink = level.time + POWER_REFRESH_TIME;
     return;
   }
-    
+
   // If the current target is not valid find a new enemy
   if( !HMGTurret_CheckTarget( self, self->enemy, qtrue ) )
   {
@@ -3191,14 +3174,14 @@ void HMGTurret_Think( gentity_t *self )
   if( !self->active && self->timestamp < level.time )
   {
     self->active = qtrue;
-    
+
     G_AddEvent( self, EV_MGTURRET_SPINUP, 0 );
   }
 
   // Not firing or haven't spun up yet
   if( !self->active )
     return;
-    
+
   // Fire repeat delay
   if( self->timestamp > level.time )
     return;
@@ -3339,7 +3322,7 @@ static int G_QueueValue( gentity_t *self )
   } else
     spawnProgress = 1;
 
-  queuePoints = (int) ( queueFraction * spawnProgress * 
+  queuePoints = (int) ( queueFraction * spawnProgress *
                         (double) BG_Buildable( self->s.modelindex )->buildPoints );
   return queuePoints;
 }
@@ -3358,7 +3341,7 @@ void G_QueueBuildPoints( gentity_t *self )
 
   if( !queuePoints )
     return;
-      
+
   switch( self->buildableTeam )
   {
     default:
@@ -3378,7 +3361,7 @@ void G_QueueBuildPoints( gentity_t *self )
 
       level.humanBuildPointQueue += queuePoints;
       break;
-    
+
   }
 }
 
@@ -3523,7 +3506,7 @@ void G_RemoveBuildableFromStack( int groundBuildableNum, int stackedBuildableNum
   gentity_t *groundBuildable;
 
   groundBuildable = &g_entities[ groundBuildableNum ];
-  
+
   if( groundBuildable->s.eType != ET_BUILDABLE ||
       g_entities[ stackedBuildableNum ].s.eType != ET_BUILDABLE )
     return;
@@ -4211,7 +4194,7 @@ static itemBuildError_t G_SufficientBPAvailable( buildable_t     buildable,
   //  than we have now due to mismatches between priority and BP amounts
   //  by repeatedly testing if we can chop off the first thing that isn't
   //  required by rules of collision/uniqueness, which are always at the head
-  while( changed && level.numBuildablesForRemoval > 1 && 
+  while( changed && level.numBuildablesForRemoval > 1 &&
          level.numBuildablesForRemoval > numRequired )
   {
     int pointsUnYielded = 0;
@@ -4224,7 +4207,7 @@ static itemBuildError_t G_SufficientBPAvailable( buildable_t     buildable,
       pointsYielded -= pointsUnYielded;
       memmove( &level.markedBuildables[ numRequired ],
                &level.markedBuildables[ numRequired + 1 ],
-               ( level.numBuildablesForRemoval - numRequired ) 
+               ( level.numBuildablesForRemoval - numRequired )
                  * sizeof( gentity_t * ) );
       level.numBuildablesForRemoval--;
       changed = qtrue;
@@ -4394,14 +4377,12 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
         reason = IBE_NOCREEP;
     }
 
-    // XXX This check is being awfully flaky. Maybe I will learn to appreciate why it was removed...
-#if 0
+
     if ( buildable == BA_A_HOVEL )
     {
-      if ( APropHovel_Blocked( angles, origin, normal, ent ) )
+      if ( APropHovel_Blocked( origin, angles, normal, ent ) )
           reason = IBE_HOVELEXIT;
     }
-#endif
 
     // Check if the enemy isn't blocking your building during pre-game warmup
     if( ( G_IsPowered( entity_origin ) != BA_NONE ) && IS_WARMUP )
@@ -4466,7 +4447,7 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
       G_SetBuildableMarkedLinkState( qfalse );
 
       if( tempent == NULL ) // No reactor
-        reason = IBE_RPTNOREAC;   
+        reason = IBE_RPTNOREAC;
       else if( !IS_WARMUP && g_markDeconstruct.integer && g_markDeconstruct.integer != 3 &&
                powerBuildable && powerBuildable->s.modelindex == BA_H_REACTOR )
         reason = IBE_RPTPOWERHERE;
@@ -4499,7 +4480,7 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
 
       G_SetBuildableMarkedLinkState( qfalse );
 
-    if( tempent && ( !tempent->deconstruct || ( g_markDeconstruct.integer == 3 && 
+    if( tempent && ( !tempent->deconstruct || ( g_markDeconstruct.integer == 3 &&
                                                 !intersectsBuildable ) ) )
     {
       switch( buildable )
@@ -4507,7 +4488,7 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
         case BA_A_OVERMIND:
           reason = IBE_ONEOVERMIND;
           break;
-        
+
         case BA_A_HOVEL:
           reason = IBE_ONEHOVEL;
           break;
@@ -5680,7 +5661,7 @@ void G_BuildLogRevert( int id )
       builder->nextthink = level.time + FRAMETIME;
 
       // Number of thinks before giving up and killing players in the way
-      builder->suicideTime = 30; 
+      builder->suicideTime = 30;
 
       if( log->fate == BF_DESTROY || log->fate == BF_TEAMKILL )
       {
@@ -5789,4 +5770,3 @@ void G_UpdateBuildableRangeMarkers( void )
     trap_LinkEntity( e->rangeMarker );
   }
 }
-
