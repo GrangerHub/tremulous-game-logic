@@ -30,7 +30,6 @@ ABUILDER_UPG_REGEN	src/game/tremulous.h	165;"	d
 ABUILDER_UPG_SPEED	src/game/tremulous.h	162;"	d
 ABUILDER_UPG_VALUE	src/game/tremulous.h	163;"	d
 ABUILDER_VALUE	src/game/tremulous.h	157;"	d
-ABVM	src/game/tremulous.h	233;"	d
 ABarricade_Die	src/game/g_buildable.c	/^void ABarricade_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod )$/;"	f
 ABarricade_Pain	src/game/g_buildable.c	/^void ABarricade_Pain( gentity_t *self, gentity_t *attacker, int damage )$/;"	f
 ABarricade_Shrink	src/game/g_buildable.c	/^void ABarricade_Shrink( gentity_t *self, qboolean shrink )$/;"	f
@@ -45,18 +44,18 @@ ACFF_MODULATE_RGBA	src/renderergl1/tr_local.h	/^	ACFF_MODULATE_RGBA,$/;"	e	enum:
 ACFF_MODULATE_RGBA	src/renderergl2/tr_local.h	/^	ACFF_MODULATE_RGBA,$/;"	e	enum:__anon18
 ACFF_NONE	src/renderergl1/tr_local.h	/^	ACFF_NONE,$/;"	e	enum:__anon136
 ACFF_NONE	src/renderergl2/tr_local.h	/^	ACFF_NONE,$/;"	e	enum:__anon18
-ACIDTUBE_BP	src/game/tremulous.h	276;"	d
-ACIDTUBE_BT	src/game/tremulous.h	277;"	d
-ACIDTUBE_CREEPSIZE	src/game/tremulous.h	282;"	d
-ACIDTUBE_DAMAGE	src/game/tremulous.h	283;"	d
-ACIDTUBE_HEALTH	src/game/tremulous.h	278;"	d
-ACIDTUBE_RANGE	src/game/tremulous.h	284;"	d
-ACIDTUBE_REGEN	src/game/tremulous.h	279;"	d
-ACIDTUBE_REPEAT	src/game/tremulous.h	285;"	d
-ACIDTUBE_REPEAT_ANIM	src/game/tremulous.h	286;"	d
-ACIDTUBE_SPLASHDAMAGE	src/game/tremulous.h	280;"	d
-ACIDTUBE_SPLASHRADIUS	src/game/tremulous.h	281;"	d
-ACIDTUBE_VALUE	src/game/tremulous.h	287;"	d
+ACIDTUBE_BP	src/game/tremulous.h	274;"	d
+ACIDTUBE_BT	src/game/tremulous.h	275;"	d
+ACIDTUBE_CREEPSIZE	src/game/tremulous.h	280;"	d
+ACIDTUBE_DAMAGE	src/game/tremulous.h	281;"	d
+ACIDTUBE_HEALTH	src/game/tremulous.h	276;"	d
+ACIDTUBE_RANGE	src/game/tremulous.h	282;"	d
+ACIDTUBE_REGEN	src/game/tremulous.h	277;"	d
+ACIDTUBE_REPEAT	src/game/tremulous.h	283;"	d
+ACIDTUBE_REPEAT_ANIM	src/game/tremulous.h	284;"	d
+ACIDTUBE_SPLASHDAMAGE	src/game/tremulous.h	278;"	d
+ACIDTUBE_SPLASHRADIUS	src/game/tremulous.h	279;"	d
+ACIDTUBE_VALUE	src/game/tremulous.h	285;"	d
 ACT	src/tools/lcc/cpp/lex.c	26;"	d	file:
 ADD	src/qcommon/vm_sparc.c	/^	ADDI, ADD,$/;"	e	enum:sparc_iname	file:
 ADDI	src/qcommon/vm_sparc.c	/^	ADDI, ADD,$/;"	e	enum:sparc_iname	file:
@@ -121,6 +120,10 @@ AHive_CheckTarget	src/game/g_buildable.c	/^static qboolean AHive_CheckTarget( ge
 AHive_Pain	src/game/g_buildable.c	/^void AHive_Pain( gentity_t *self, gentity_t *attacker, int damage )$/;"	f
 AHive_SearchAndDestroy	src/game/g_missile.c	/^void AHive_SearchAndDestroy( gentity_t *self )$/;"	f
 AHive_Think	src/game/g_buildable.c	/^void AHive_Think( gentity_t *self )$/;"	f
+AHovel_Blocked	src/game/g_buildable.c	/^qboolean AHovel_Blocked( gentity_t *hovel, gentity_t *player, qboolean provideExit )$/;"	f
+AHovel_Die	src/game/g_buildable.c	/^void AHovel_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod )$/;"	f
+AHovel_Think	src/game/g_buildable.c	/^void AHovel_Think( gentity_t *self )$/;"	f
+AHovel_Use	src/game/g_buildable.c	/^void AHovel_Use( gentity_t *self, gentity_t *other, gentity_t *activator )$/;"	f
 ALC_ALL_DEVICES_SPECIFIER	src/client/qal.h	44;"	d
 ALC_DEFAULT_ALL_DEVICES_SPECIFIER	src/client/qal.h	43;"	d
 ALC_ENUMERATE_ALL_EXT	src/client/qal.h	42;"	d
@@ -129,21 +132,20 @@ ALDRIVER_DEFAULT	src/client/snd_openal.c	2229;"	d	file:
 ALDRIVER_DEFAULT	src/client/snd_openal.c	2231;"	d	file:
 ALDRIVER_DEFAULT	src/client/snd_openal.c	2233;"	d	file:
 ALDRIVER_DEFAULT	src/client/snd_openal.c	2235;"	d	file:
-ALIENSENSE_RANGE	src/game/tremulous.h	338;"	d
+ALIENSENSE_RANGE	src/game/tremulous.h	345;"	d
 ALIEN_BHLTH_MODIFIER	src/game/tremulous.h	230;"	d
-ALIEN_BUILDER_SCOREINC	src/game/tremulous.h	643;"	d
-ALIEN_BVALUE_MODIFIER	src/game/tremulous.h	232;"	d
-ALIEN_CREDITS_PER_KILL	src/game/tremulous.h	352;"	d
+ALIEN_BUILDER_SCOREINC	src/game/tremulous.h	658;"	d
+ALIEN_CREDITS_PER_KILL	src/game/tremulous.h	359;"	d
 ALIEN_HLTH_MODIFIER	src/game/tremulous.h	150;"	d
-ALIEN_MAX_CREDITS	src/game/tremulous.h	351;"	d
-ALIEN_MAX_FRAGS	src/game/tremulous.h	350;"	d
-ALIEN_POISON_DIVIDER	src/game/tremulous.h	343;"	d
-ALIEN_POISON_DMG	src/game/tremulous.h	342;"	d
-ALIEN_POISON_TIME	src/game/tremulous.h	341;"	d
-ALIEN_REGEN_DAMAGE_TIME	src/game/tremulous.h	347;"	d
-ALIEN_REGEN_NOCREEP_MOD	src/game/tremulous.h	348;"	d
-ALIEN_SPAWN_REPEAT_TIME	src/game/tremulous.h	345;"	d
-ALIEN_TK_SUICIDE_PENALTY	src/game/tremulous.h	353;"	d
+ALIEN_MAX_CREDITS	src/game/tremulous.h	358;"	d
+ALIEN_MAX_FRAGS	src/game/tremulous.h	357;"	d
+ALIEN_POISON_DIVIDER	src/game/tremulous.h	350;"	d
+ALIEN_POISON_DMG	src/game/tremulous.h	349;"	d
+ALIEN_POISON_TIME	src/game/tremulous.h	348;"	d
+ALIEN_REGEN_DAMAGE_TIME	src/game/tremulous.h	354;"	d
+ALIEN_REGEN_NOCREEP_MOD	src/game/tremulous.h	355;"	d
+ALIEN_SPAWN_REPEAT_TIME	src/game/tremulous.h	352;"	d
+ALIEN_TK_SUICIDE_PENALTY	src/game/tremulous.h	360;"	d
 ALIEN_VALUE_MODIFIER	src/game/tremulous.h	153;"	d
 ALIEN_WDMG_MODIFIER	src/game/tremulous.h	35;"	d
 ALIGN_CENTER	src/ui/menudef.h	24;"	d
@@ -177,11 +179,12 @@ ANDNI	src/qcommon/vm_sparc.c	/^	ANDNI, ANDN,$/;"	e	enum:sparc_iname	file:
 ANGLE2SHORT	src/qcommon/q_shared.h	1183;"	d
 ANGLE_DOWN	src/qcommon/qfiles.h	352;"	d
 ANGLE_UP	src/qcommon/qfiles.h	351;"	d
-ANIM_FORCEBIT	src/game/bg_public.h	821;"	d
-ANIM_TOGGLEBIT	src/game/bg_public.h	820;"	d
+ANIM_FORCEBIT	src/game/bg_public.h	834;"	d
+ANIM_TOGGLEBIT	src/game/bg_public.h	833;"	d
 AOvermind_Think	src/game/g_buildable.c	/^void AOvermind_Think( gentity_t *self )$/;"	f
 AP	src/game/g_admin.h	26;"	d
 APSF	src/qcommon/msg.c	1194;"	d	file:
+APropHovel_Blocked	src/game/g_buildable.c	/^static qboolean APropHovel_Blocked( vec3_t origin, vec3_t angles, vec3_t normal,$/;"	f	file:
 ARCH	GNUmakefile	/^  ARCH=mips$/;"	m
 ARCH	GNUmakefile	/^ARCH=$(COMPILE_ARCH)$/;"	m
 ARCH	src/master/Makefile	/^	ARCH=$(shell uname -m | sed -e s\/i.86\/x86\/)$/;"	m
@@ -215,7 +218,7 @@ ARCH_STRING	src/qcommon/q_platform.h	306;"	d
 ARCH_STRING	src/qcommon/q_platform.h	322;"	d
 AREA_DEPTH	src/server/sv_world.c	72;"	d	file:
 AREA_NODES	src/server/sv_world.c	73;"	d	file:
-ARENAS_PER_TIER	src/game/bg_public.h	1277;"	d
+ARENAS_PER_TIER	src/game/bg_public.h	1291;"	d
 ARG2_FLOAT	src/qcommon/vm_powerpc.c	764;"	d	file:
 ARG2_INT	src/qcommon/vm_powerpc.c	763;"	d	file:
 ARG_DISP22	src/qcommon/vm_sparc.c	69;"	d	file:
@@ -234,12 +237,12 @@ ARG_RS2_RD	src/qcommon/vm_sparc.c	76;"	d	file:
 ARG_SIMM13	src/qcommon/vm_sparc.c	66;"	d	file:
 ARG_SWTRAP	src/qcommon/vm_sparc.c	70;"	d	file:
 ARITH	src/tools/lcc/cpp/eval.c	19;"	d	file:
-ARMOURY_BP	src/game/tremulous.h	584;"	d
-ARMOURY_BT	src/game/tremulous.h	585;"	d
-ARMOURY_HEALTH	src/game/tremulous.h	586;"	d
-ARMOURY_SPLASHDAMAGE	src/game/tremulous.h	587;"	d
-ARMOURY_SPLASHRADIUS	src/game/tremulous.h	588;"	d
-ARMOURY_VALUE	src/game/tremulous.h	589;"	d
+ARMOURY_BP	src/game/tremulous.h	599;"	d
+ARMOURY_BT	src/game/tremulous.h	600;"	d
+ARMOURY_HEALTH	src/game/tremulous.h	601;"	d
+ARMOURY_SPLASHDAMAGE	src/game/tremulous.h	602;"	d
+ARMOURY_SPLASHRADIUS	src/game/tremulous.h	603;"	d
+ARMOURY_VALUE	src/game/tremulous.h	604;"	d
 ARRAY_LEN	src/qcommon/q_shared.h	203;"	d
 ARROW	src/tools/lcc/cpp/cpp.h	/^		ARROW, SBRA, SKET, LP, RP, DOT, AND, STAR, PLUS, MINUS,$/;"	e	enum:toktype
 ART_FX_BASE	src/ui/ui_shared.h	85;"	d
@@ -285,14 +288,14 @@ ASMDIR	GNUmakefile	/^ASMDIR=$(MOUNT_DIR)\/asm$/;"	m
 ASMINUS	src/tools/lcc/cpp/cpp.h	/^		ASPLUS, ASMINUS, ASSTAR, ASSLASH, ASPCT, ASCIRC, ASLSH,$/;"	e	enum:toktype
 ASM_ERROR_OPC	src/qcommon/vm_powerpc_asm.c	51;"	d	file:
 ASOR	src/tools/lcc/cpp/cpp.h	/^		ASRSH, ASOR, ASAND, ELLIPS,$/;"	e	enum:toktype
-ASPAWN_BP	src/game/tremulous.h	244;"	d
-ASPAWN_BT	src/game/tremulous.h	245;"	d
-ASPAWN_CREEPSIZE	src/game/tremulous.h	250;"	d
-ASPAWN_HEALTH	src/game/tremulous.h	246;"	d
-ASPAWN_REGEN	src/game/tremulous.h	247;"	d
-ASPAWN_SPLASHDAMAGE	src/game/tremulous.h	248;"	d
-ASPAWN_SPLASHRADIUS	src/game/tremulous.h	249;"	d
-ASPAWN_VALUE	src/game/tremulous.h	251;"	d
+ASPAWN_BP	src/game/tremulous.h	242;"	d
+ASPAWN_BT	src/game/tremulous.h	243;"	d
+ASPAWN_CREEPSIZE	src/game/tremulous.h	248;"	d
+ASPAWN_HEALTH	src/game/tremulous.h	244;"	d
+ASPAWN_REGEN	src/game/tremulous.h	245;"	d
+ASPAWN_SPLASHDAMAGE	src/game/tremulous.h	246;"	d
+ASPAWN_SPLASHRADIUS	src/game/tremulous.h	247;"	d
+ASPAWN_VALUE	src/game/tremulous.h	249;"	d
 ASPCT	src/tools/lcc/cpp/cpp.h	/^		ASPLUS, ASMINUS, ASSTAR, ASSLASH, ASPCT, ASCIRC, ASLSH,$/;"	e	enum:toktype
 ASPECT_NONE	src/ui/menudef.h	26;"	d
 ASPLUS	src/tools/lcc/cpp/cpp.h	/^		ASPLUS, ASMINUS, ASSTAR, ASSLASH, ASPCT, ASCIRC, ASLSH,$/;"	e	enum:toktype
@@ -317,7 +320,7 @@ AS_LOCAL	src/qcommon/q_shared.h	1502;"	d
 AS_LOCAL	src/ui/ui_main.c	38;"	d	file:
 AS_LOCAL	src/ui/ui_main.c	40;"	d	file:
 AS_MPLAYER	src/qcommon/q_shared.h	1501;"	d
-AS_OVER_RT3	src/game/g_cmds.c	1936;"	d	file:
+AS_OVER_RT3	src/game/g_cmds.c	1957;"	d	file:
 ASpawn_Think	src/game/g_buildable.c	/^void ASpawn_Think( gentity_t *self )$/;"	f
 AT1_MASK	src/qcommon/vm_powerpc_asm.c	584;"	d	file:
 AT2_MASK	src/qcommon/vm_powerpc_asm.c	585;"	d	file:
@@ -361,7 +364,7 @@ ATrapper_FindEnemy	src/game/g_buildable.c	/^static void ATrapper_FindEnemy( gent
 ATrapper_FireOnEnemy	src/game/g_buildable.c	/^static void ATrapper_FireOnEnemy( gentity_t *self, int firespeed )$/;"	f	file:
 ATrapper_Think	src/game/g_buildable.c	/^void ATrapper_Think( gentity_t *self )$/;"	f
 AUTHORIZE_TIMEOUT	src/server/server.h	217;"	d
-AVG_FALL_DISTANCE	src/game/tremulous.h	653;"	d
+AVG_FALL_DISTANCE	src/game/tremulous.h	666;"	d
 AVI_LINE_PADDING	src/qcommon/qcommon.h	1016;"	d
 AVM	src/game/tremulous.h	154;"	d
 A_MASK	src/qcommon/vm_powerpc_asm.c	558;"	d	file:
@@ -446,16 +449,16 @@ BANIM_PAIN1	src/game/bg_public.h	/^  BANIM_PAIN1,$/;"	e	enum:__anon343
 BANIM_PAIN2	src/game/bg_public.h	/^  BANIM_PAIN2,$/;"	e	enum:__anon343
 BANIM_SPAWN1	src/game/bg_public.h	/^  BANIM_SPAWN1,$/;"	e	enum:__anon343
 BANIM_SPAWN2	src/game/bg_public.h	/^  BANIM_SPAWN2,$/;"	e	enum:__anon343
-BARRICADE_BP	src/game/tremulous.h	253;"	d
-BARRICADE_BT	src/game/tremulous.h	254;"	d
-BARRICADE_CREEPSIZE	src/game/tremulous.h	259;"	d
-BARRICADE_HEALTH	src/game/tremulous.h	255;"	d
-BARRICADE_REGEN	src/game/tremulous.h	256;"	d
-BARRICADE_SHRINKPROP	src/game/tremulous.h	260;"	d
-BARRICADE_SHRINKTIMEOUT	src/game/tremulous.h	261;"	d
-BARRICADE_SPLASHDAMAGE	src/game/tremulous.h	257;"	d
-BARRICADE_SPLASHRADIUS	src/game/tremulous.h	258;"	d
-BARRICADE_VALUE	src/game/tremulous.h	262;"	d
+BARRICADE_BP	src/game/tremulous.h	251;"	d
+BARRICADE_BT	src/game/tremulous.h	252;"	d
+BARRICADE_CREEPSIZE	src/game/tremulous.h	257;"	d
+BARRICADE_HEALTH	src/game/tremulous.h	253;"	d
+BARRICADE_REGEN	src/game/tremulous.h	254;"	d
+BARRICADE_SHRINKPROP	src/game/tremulous.h	258;"	d
+BARRICADE_SHRINKTIMEOUT	src/game/tremulous.h	259;"	d
+BARRICADE_SPLASHDAMAGE	src/game/tremulous.h	255;"	d
+BARRICADE_SPLASHRADIUS	src/game/tremulous.h	256;"	d
+BARRICADE_VALUE	src/game/tremulous.h	260;"	d
 BASEDIRNAME	src/tools/asm/cmdlib.c	38;"	d	file:
 BASEGAME	GNUmakefile	/^BASEGAME=gpp$/;"	m
 BASEGAME	src/qcommon/qcommon.h	592;"	d
@@ -467,12 +470,13 @@ BASE_CFLAGS	GNUmakefile	/^  BASE_CFLAGS = -Wall -fno-strict-aliasing -Wimplicit 
 BASE_CFLAGS	GNUmakefile	/^  BASE_CFLAGS=$/;"	m
 BASE_CFLAGS	GNUmakefile	/^  BASE_CFLAGS=-Dstricmp=strcasecmp -Xcpluscomm -woff 1185 \\$/;"	m
 BASE_FOV_Y	src/cgame/cg_view.c	843;"	d	file:
-BATTPACK_MODIFIER	src/game/tremulous.h	494;"	d
-BATTPACK_PRICE	src/game/tremulous.h	493;"	d
+BATTPACK_MODIFIER	src/game/tremulous.h	505;"	d
+BATTPACK_PRICE	src/game/tremulous.h	504;"	d
 BA_A_ACIDTUBE	src/game/bg_public.h	/^  BA_A_ACIDTUBE,$/;"	e	enum:__anon337
 BA_A_BARRICADE	src/game/bg_public.h	/^  BA_A_BARRICADE,$/;"	e	enum:__anon337
 BA_A_BOOSTER	src/game/bg_public.h	/^  BA_A_BOOSTER,$/;"	e	enum:__anon337
 BA_A_HIVE	src/game/bg_public.h	/^  BA_A_HIVE,$/;"	e	enum:__anon337
+BA_A_HOVEL	src/game/bg_public.h	/^  BA_A_HOVEL,$/;"	e	enum:__anon337
 BA_A_OVERMIND	src/game/bg_public.h	/^  BA_A_OVERMIND,$/;"	e	enum:__anon337
 BA_A_SPAWN	src/game/bg_public.h	/^  BA_A_SPAWN,$/;"	e	enum:__anon337
 BA_A_TRAPPER	src/game/bg_public.h	/^  BA_A_TRAPPER,$/;"	e	enum:__anon337
@@ -547,6 +551,7 @@ BG_EventName	src/game/bg_misc.c	/^const char *BG_EventName( int num )$/;"	f
 BG_Free	src/game/bg_alloc.c	/^void BG_Free( void *ptr )$/;"	f
 BG_GetClientNormal	src/game/bg_misc.c	/^void BG_GetClientNormal( const playerState_t *ps, vec3_t normal )$/;"	f
 BG_GetClientViewOrigin	src/game/bg_misc.c	/^void BG_GetClientViewOrigin( const playerState_t *ps, vec3_t viewOrigin )$/;"	f
+BG_GetLCannonPrimaryFireSpeed	src/game/bg_misc.c	/^int BG_GetLCannonPrimaryFireSpeed( int charge )$/;"	f
 BG_GetPlayerWeapon	src/game/bg_misc.c	/^weapon_t BG_GetPlayerWeapon( playerState_t *ps )$/;"	f
 BG_GetValueOfPlayer	src/game/bg_misc.c	/^int BG_GetValueOfPlayer( playerState_t *ps )$/;"	f
 BG_InitAllowedGameElements	src/game/bg_misc.c	/^void BG_InitAllowedGameElements( void )$/;"	f
@@ -604,7 +609,7 @@ BIGCHAR_WIDTH	src/qcommon/q_shared.h	383;"	d
 BIG_INFO_KEY	src/qcommon/q_shared.h	235;"	d
 BIG_INFO_STRING	src/qcommon/q_shared.h	234;"	d
 BIG_INFO_VALUE	src/qcommon/q_shared.h	236;"	d
-BINDING_REFRESH_INTERVAL	src/cgame/cg_tutorial.c	682;"	d	file:
+BINDING_REFRESH_INTERVAL	src/cgame/cg_tutorial.c	698;"	d	file:
 BINEXT	GNUmakefile	/^  BINEXT=.exe$/;"	m
 BINEXT	src/master/Makefile	/^  BINEXT=$/;"	m
 BINEXT	src/master/Makefile	/^  BINEXT=.exe$/;"	m
@@ -623,12 +628,12 @@ BITVEC_USIZE	src/server/sqlite3.c	41031;"	d	file:
 BI_MASK	src/qcommon/vm_powerpc_asm.c	253;"	d	file:
 BL	src/qcommon/vm_sparc.c	/^	BA, BN, BNE, BE, BG, BLE, BGE, BL, BGU, BLEU, BCC, BCS,$/;"	e	enum:sparc_iname	file:
 BLANK	src/tools/lcc/src/lex.c	/^enum { BLANK=01,  NEWLINE=02, LETTER=04,$/;"	e	enum:__anon281	file:
-BLASTER_DMG	src/game/tremulous.h	373;"	d
-BLASTER_K_SCALE	src/game/tremulous.h	370;"	d
-BLASTER_REPEAT	src/game/tremulous.h	369;"	d
-BLASTER_SIZE	src/game/tremulous.h	374;"	d
-BLASTER_SPEED	src/game/tremulous.h	372;"	d
-BLASTER_SPREAD	src/game/tremulous.h	371;"	d
+BLASTER_DMG	src/game/tremulous.h	380;"	d
+BLASTER_K_SCALE	src/game/tremulous.h	377;"	d
+BLASTER_REPEAT	src/game/tremulous.h	376;"	d
+BLASTER_SIZE	src/game/tremulous.h	381;"	d
+BLASTER_SPEED	src/game/tremulous.h	379;"	d
+BLASTER_SPREAD	src/game/tremulous.h	378;"	d
 BLE	src/qcommon/vm_sparc.c	/^	BA, BN, BNE, BE, BG, BLE, BGE, BL, BGU, BLEU, BCC, BCS,$/;"	e	enum:sparc_iname	file:
 BLEU	src/qcommon/vm_sparc.c	/^	BA, BN, BNE, BE, BG, BLE, BGE, BL, BGU, BLEU, BCC, BCS,$/;"	e	enum:sparc_iname	file:
 BLINK_DIVISOR	src/qcommon/q_shared.h	297;"	d
@@ -662,17 +667,17 @@ BOF	src/qcommon/vm_powerpc_asm.c	855;"	d	file:
 BOFM4	src/qcommon/vm_powerpc_asm.c	857;"	d	file:
 BOFP	src/qcommon/vm_powerpc_asm.c	856;"	d	file:
 BOFP4	src/qcommon/vm_powerpc_asm.c	858;"	d	file:
-BOOSTER_BP	src/game/tremulous.h	264;"	d
-BOOSTER_BT	src/game/tremulous.h	265;"	d
-BOOSTER_CREEPSIZE	src/game/tremulous.h	270;"	d
-BOOSTER_HEALTH	src/game/tremulous.h	266;"	d
-BOOSTER_REGEN	src/game/tremulous.h	267;"	d
-BOOSTER_REGEN_MOD	src/game/tremulous.h	271;"	d
-BOOSTER_SPLASHDAMAGE	src/game/tremulous.h	268;"	d
-BOOSTER_SPLASHRADIUS	src/game/tremulous.h	269;"	d
-BOOSTER_VALUE	src/game/tremulous.h	272;"	d
-BOOST_TIME	src/game/tremulous.h	273;"	d
-BOOST_WARN_TIME	src/game/tremulous.h	274;"	d
+BOOSTER_BP	src/game/tremulous.h	262;"	d
+BOOSTER_BT	src/game/tremulous.h	263;"	d
+BOOSTER_CREEPSIZE	src/game/tremulous.h	268;"	d
+BOOSTER_HEALTH	src/game/tremulous.h	264;"	d
+BOOSTER_REGEN	src/game/tremulous.h	265;"	d
+BOOSTER_REGEN_MOD	src/game/tremulous.h	269;"	d
+BOOSTER_SPLASHDAMAGE	src/game/tremulous.h	266;"	d
+BOOSTER_SPLASHRADIUS	src/game/tremulous.h	267;"	d
+BOOSTER_VALUE	src/game/tremulous.h	270;"	d
+BOOST_TIME	src/game/tremulous.h	271;"	d
+BOOST_WARN_TIME	src/game/tremulous.h	272;"	d
 BOT	src/qcommon/vm_powerpc_asm.c	859;"	d	file:
 BOTCFLAGS	GNUmakefile	/^  BOTCFLAGS=-O0$/;"	m
 BOTH_DEAD1	src/game/bg_public.h	/^  BOTH_DEAD1,$/;"	e	enum:__anon341
@@ -698,9 +703,9 @@ BSP_IDENT	src/qcommon/qfiles.h	314;"	d
 BSP_VERSION	src/qcommon/qfiles.h	317;"	d
 BSS	src/tools/lcc/src/c.h	/^enum { CODE=1, BSS, DATA, LIT };$/;"	e	enum:__anon288
 BSSSEG	src/tools/asm/q3asm.c	/^	BSSSEG,		\/\/ 0 filled$/;"	e	enum:__anon266	file:
-BSUIT_PCLOUD_PROTECTION	src/game/tremulous.h	504;"	d
-BSUIT_POISON_PROTECTION	src/game/tremulous.h	503;"	d
-BSUIT_PRICE	src/game/tremulous.h	502;"	d
+BSUIT_PCLOUD_PROTECTION	src/game/tremulous.h	518;"	d
+BSUIT_POISON_PROTECTION	src/game/tremulous.h	517;"	d
+BSUIT_PRICE	src/game/tremulous.h	516;"	d
 BTALLOC_ANY	src/server/sqlite3.c	55850;"	d	file:
 BTALLOC_EXACT	src/server/sqlite3.c	55851;"	d	file:
 BTALLOC_LE	src/server/sqlite3.c	55852;"	d	file:
@@ -1134,6 +1139,7 @@ CG_DrawFadePic	src/cgame/cg_drawtools.c	/^void CG_DrawFadePic( float x, float y,
 CG_DrawField	src/cgame/cg_draw.c	/^void CG_DrawField( float x, float y, int width, float cw, float ch, int value )$/;"	f
 CG_DrawFieldPadded	src/cgame/cg_draw.c	/^static void CG_DrawFieldPadded( int x, int y, int width, int cw, int ch, int value )$/;"	f	file:
 CG_DrawFollow	src/cgame/cg_draw.c	/^static void CG_DrawFollow( rectDef_t *rect, float text_x, float text_y,$/;"	f	file:
+CG_DrawFuel	src/cgame/cg_draw.c	/^void CG_DrawFuel( void )$/;"	f
 CG_DrawHostname	src/cgame/cg_draw.c	/^static void CG_DrawHostname( rectDef_t *rect, float text_x, float text_y,$/;"	f	file:
 CG_DrawHumanScanner	src/cgame/cg_draw.c	/^static void CG_DrawHumanScanner( rectDef_t *rect, qhandle_t shader, vec4_t color )$/;"	f	file:
 CG_DrawIntermission	src/cgame/cg_draw.c	/^static void CG_DrawIntermission( void )$/;"	f	file:
@@ -1619,12 +1625,12 @@ CG_scrollScoresDown_f	src/cgame/cg_consolecmds.c	/^static void CG_scrollScoresDo
 CG_scrollScoresUp_f	src/cgame/cg_consolecmds.c	/^static void CG_scrollScoresUp_f( void )$/;"	f	file:
 CG_smoothWJTransitions	src/cgame/cg_view.c	/^static void CG_smoothWJTransitions( playerState_t *ps, const vec3_t in, vec3_t out )$/;"	f	file:
 CG_smoothWWTransitions	src/cgame/cg_view.c	/^static void CG_smoothWWTransitions( playerState_t *ps, const vec3_t in, vec3_t out )$/;"	f	file:
-CHAINGUN_BULLETS	src/game/tremulous.h	427;"	d
-CHAINGUN_DMG	src/game/tremulous.h	431;"	d
-CHAINGUN_K_SCALE	src/game/tremulous.h	429;"	d
-CHAINGUN_PRICE	src/game/tremulous.h	426;"	d
-CHAINGUN_REPEAT	src/game/tremulous.h	428;"	d
-CHAINGUN_SPREAD	src/game/tremulous.h	430;"	d
+CHAINGUN_BULLETS	src/game/tremulous.h	434;"	d
+CHAINGUN_DMG	src/game/tremulous.h	438;"	d
+CHAINGUN_K_SCALE	src/game/tremulous.h	436;"	d
+CHAINGUN_PRICE	src/game/tremulous.h	433;"	d
+CHAINGUN_REPEAT	src/game/tremulous.h	435;"	d
+CHAINGUN_SPREAD	src/game/tremulous.h	437;"	d
 CHALLENGE_KEY	src/master/messages.c	403;"	d	file:
 CHALLENGE_MAX_LENGTH	src/master/servers.h	39;"	d
 CHALLENGE_MIN_LENGTH	src/master/servers.h	38;"	d
@@ -1888,17 +1894,17 @@ CL_cURL_PerformDownload	src/client/cl_curl.c	/^void CL_cURL_PerformDownload(void
 CL_cURL_Shutdown	src/client/cl_curl.c	/^void CL_cURL_Shutdown( void )$/;"	f
 CL_handle	src/client/cl_cin.c	/^static int				CL_handle = -1;$/;"	v	file:
 CMDIR	GNUmakefile	/^CMDIR=$(MOUNT_DIR)\/qcommon$/;"	m
-CMD_ALIEN	src/game/g_local.h	728;"	d
-CMD_ALIVE	src/game/g_local.h	730;"	d
+CMD_ALIEN	src/game/g_local.h	730;"	d
+CMD_ALIVE	src/game/g_local.h	732;"	d
 CMD_BACKUP	src/cgame/cg_public.h	25;"	d
-CMD_CHEAT	src/game/g_local.h	723;"	d
-CMD_CHEAT_TEAM	src/game/g_local.h	724;"	d
-CMD_HUMAN	src/game/g_local.h	729;"	d
-CMD_INTERMISSION	src/game/g_local.h	731;"	d
+CMD_CHEAT	src/game/g_local.h	725;"	d
+CMD_CHEAT_TEAM	src/game/g_local.h	726;"	d
+CMD_HUMAN	src/game/g_local.h	731;"	d
+CMD_INTERMISSION	src/game/g_local.h	733;"	d
 CMD_MASK	src/cgame/cg_public.h	26;"	d
-CMD_MESSAGE	src/game/g_local.h	725;"	d
-CMD_SPEC	src/game/g_local.h	727;"	d
-CMD_TEAM	src/game/g_local.h	726;"	d
+CMD_MESSAGE	src/game/g_local.h	727;"	d
+CMD_SPEC	src/game/g_local.h	729;"	d
+CMD_TEAM	src/game/g_local.h	728;"	d
 CM_AddFacetBevels	src/qcommon/cm_patch.c	/^void CM_AddFacetBevels( facet_t *facet ) {$/;"	f
 CM_AdjustAreaPortalState	src/qcommon/cm_test.c	/^void	CM_AdjustAreaPortalState( int area1, int area2, qboolean open ) {$/;"	f
 CM_AreasConnected	src/qcommon/cm_test.c	/^qboolean	CM_AreasConnected( int area1, int area2 ) {$/;"	f
@@ -2156,18 +2162,18 @@ CRC_Init	src/tools/asm/cmdlib.c	/^void CRC_Init(unsigned short *crcvalue)$/;"	f
 CRC_ProcessByte	src/tools/asm/cmdlib.c	/^void CRC_ProcessByte(unsigned short *crcvalue, byte data)$/;"	f
 CRC_Value	src/tools/asm/cmdlib.c	/^unsigned short CRC_Value(unsigned short crcvalue)$/;"	f
 CRC_XOR_VALUE	src/tools/asm/cmdlib.c	1027;"	d	file:
-CREEP_ARMOUR_MODIFIER	src/game/tremulous.h	238;"	d
-CREEP_BASESIZE	src/game/tremulous.h	235;"	d
+CREEP_ARMOUR_MODIFIER	src/game/tremulous.h	236;"	d
+CREEP_BASESIZE	src/game/tremulous.h	233;"	d
 CREEP_DISTANCE	src/cgame/cg_buildable.c	98;"	d	file:
-CREEP_MODIFIER	src/game/tremulous.h	237;"	d
-CREEP_SCALEDOWN_TIME	src/game/tremulous.h	239;"	d
+CREEP_MODIFIER	src/game/tremulous.h	235;"	d
+CREEP_SCALEDOWN_TIME	src/game/tremulous.h	237;"	d
 CREEP_SIZE	src/cgame/cg_buildable.c	97;"	d	file:
-CREEP_TIMEOUT	src/game/tremulous.h	236;"	d
+CREEP_TIMEOUT	src/game/tremulous.h	234;"	d
 CRFD	src/qcommon/vm_powerpc_asm.c	270;"	d	file:
-CROSSHAIR_ALWAYSOFF	src/cgame/cg_local.h	2311;"	d
-CROSSHAIR_ALWAYSON	src/cgame/cg_local.h	2313;"	d
-CROSSHAIR_CLIENT_TIMEOUT	src/cgame/cg_local.h	923;"	d
-CROSSHAIR_RANGEDONLY	src/cgame/cg_local.h	2312;"	d
+CROSSHAIR_ALWAYSOFF	src/cgame/cg_local.h	2322;"	d
+CROSSHAIR_ALWAYSON	src/cgame/cg_local.h	2324;"	d
+CROSSHAIR_CLIENT_TIMEOUT	src/cgame/cg_local.h	925;"	d
+CROSSHAIR_RANGEDONLY	src/cgame/cg_local.h	2323;"	d
 CROSS_COMPILING	GNUmakefile	/^    CROSS_COMPILING=0$/;"	m
 CROSS_COMPILING	GNUmakefile	/^    CROSS_COMPILING=1$/;"	m
 CROSS_COMPILING	GNUmakefile	/^  CROSS_COMPILING=0$/;"	m
@@ -2626,12 +2632,12 @@ D	src/qcommon/vm_powerpc_asm.c	294;"	d	file:
 D	src/server/sqlite3.c	/^  int Y, M, D;       \/* Year, month, and day *\/$/;"	m	struct:DateTime	file:
 DAGCHECK_C	GNUmakefile	/^DAGCHECK_C  = $(B)\/tools\/rcc\/dagcheck.c$/;"	m
 DAMAGE_DEFLECT_TIME	src/cgame/cg_local.h	43;"	d
-DAMAGE_FRACTION_FOR_KILL	src/game/tremulous.h	673;"	d
-DAMAGE_NO_ARMOR	src/game/g_local.h	952;"	d
-DAMAGE_NO_KNOCKBACK	src/game/g_local.h	953;"	d
-DAMAGE_NO_LOCDAMAGE	src/game/g_local.h	955;"	d
-DAMAGE_NO_PROTECTION	src/game/g_local.h	954;"	d
-DAMAGE_RADIUS	src/game/g_local.h	951;"	d
+DAMAGE_FRACTION_FOR_KILL	src/game/tremulous.h	686;"	d
+DAMAGE_NO_ARMOR	src/game/g_local.h	958;"	d
+DAMAGE_NO_KNOCKBACK	src/game/g_local.h	959;"	d
+DAMAGE_NO_LOCDAMAGE	src/game/g_local.h	961;"	d
+DAMAGE_NO_PROTECTION	src/game/g_local.h	960;"	d
+DAMAGE_RADIUS	src/game/g_local.h	957;"	d
 DAMAGE_RETURN_TIME	src/cgame/cg_local.h	44;"	d
 DAMAGE_TIME	src/cgame/cg_local.h	45;"	d
 DATA	src/tools/lcc/src/c.h	/^enum { CODE=1, BSS, DATA, LIT };$/;"	e	enum:__anon288
@@ -2652,46 +2658,46 @@ DB_UnresetViews	src/server/sqlite3.c	12058;"	d	file:
 DC	src/ui/ui_shared.c	/^displayContextDef_t *DC = NULL;$/;"	v
 DCOORD	src/server/sqlite3.c	156898;"	d	file:
 DCOORD	src/server/sqlite3.c	156900;"	d	file:
-DC_ATTACK_PERIOD	src/game/tremulous.h	579;"	d
-DC_BP	src/game/tremulous.h	574;"	d
-DC_BT	src/game/tremulous.h	575;"	d
-DC_HEALRATE	src/game/tremulous.h	580;"	d
-DC_HEALTH	src/game/tremulous.h	576;"	d
-DC_RANGE	src/game/tremulous.h	581;"	d
-DC_SPLASHDAMAGE	src/game/tremulous.h	577;"	d
-DC_SPLASHRADIUS	src/game/tremulous.h	578;"	d
-DC_VALUE	src/game/tremulous.h	582;"	d
+DC_ATTACK_PERIOD	src/game/tremulous.h	594;"	d
+DC_BP	src/game/tremulous.h	589;"	d
+DC_BT	src/game/tremulous.h	590;"	d
+DC_HEALRATE	src/game/tremulous.h	595;"	d
+DC_HEALTH	src/game/tremulous.h	591;"	d
+DC_RANGE	src/game/tremulous.h	596;"	d
+DC_SPLASHDAMAGE	src/game/tremulous.h	592;"	d
+DC_SPLASHRADIUS	src/game/tremulous.h	593;"	d
+DC_VALUE	src/game/tremulous.h	597;"	d
 DEAD_VIEWHEIGHT	src/game/bg_public.h	41;"	d
 DEBUGSTR	src/qcommon/vm_interpreted.c	317;"	d	file:
 DEBUG_CFLAGS	GNUmakefile	/^DEBUG_CFLAGS=-g -O0$/;"	m
 DEBUG_CFLAGS	src/master/Makefile	/^DEBUG_CFLAGS=-g$/;"	m
 DEBUG_LDFLAGS	src/master/Makefile	/^  DEBUG_LDFLAGS=-ltdb$/;"	m
 DEBUG_LDFLAGS	src/master/Makefile	/^  DEBUG_LDFLAGS=-lwsock32$/;"	m
-DECOLOR_OFF	src/game/g_local.h	755;"	d
-DECOLOR_ON	src/game/g_local.h	756;"	d
-DEFAULT_ALIEN_BUILDPOINTS	src/game/tremulous.h	659;"	d
-DEFAULT_ALIEN_MAX_STAGE	src/game/tremulous.h	663;"	d
-DEFAULT_ALIEN_QUEUE_TIME	src/game/tremulous.h	660;"	d
-DEFAULT_ALIEN_STAGE2_THRESH	src/game/tremulous.h	661;"	d
-DEFAULT_ALIEN_STAGE3_THRESH	src/game/tremulous.h	662;"	d
+DECOLOR_OFF	src/game/g_local.h	757;"	d
+DECOLOR_ON	src/game/g_local.h	758;"	d
+DEFAULT_ALIEN_BUILDPOINTS	src/game/tremulous.h	672;"	d
+DEFAULT_ALIEN_MAX_STAGE	src/game/tremulous.h	676;"	d
+DEFAULT_ALIEN_QUEUE_TIME	src/game/tremulous.h	673;"	d
+DEFAULT_ALIEN_STAGE2_THRESH	src/game/tremulous.h	674;"	d
+DEFAULT_ALIEN_STAGE3_THRESH	src/game/tremulous.h	675;"	d
 DEFAULT_CIN_HEIGHT	src/client/cl_cin.c	42;"	d	file:
 DEFAULT_CIN_WIDTH	src/client/cl_cin.c	41;"	d	file:
 DEFAULT_CONSOLE_WIDTH	src/client/cl_console.c	59;"	d	file:
 DEFAULT_CURL_LIB	src/client/cl_curl.h	35;"	d
 DEFAULT_CURL_LIB	src/client/cl_curl.h	38;"	d
 DEFAULT_CURL_LIB	src/client/cl_curl.h	40;"	d
-DEFAULT_FREEKILL_PERIOD	src/game/tremulous.h	655;"	d
+DEFAULT_FREEKILL_PERIOD	src/game/tremulous.h	668;"	d
 DEFAULT_GRAVITY	src/game/bg_public.h	33;"	d
 DEFAULT_HASHTABLE_SIZE	src/tools/asm/q3asm.c	30;"	d	file:
 DEFAULT_HASH_SIZE	src/master/servers.h	34;"	d
-DEFAULT_HUMAN_BUILDPOINTS	src/game/tremulous.h	664;"	d
-DEFAULT_HUMAN_MAX_STAGE	src/game/tremulous.h	671;"	d
-DEFAULT_HUMAN_QUEUE_TIME	src/game/tremulous.h	665;"	d
-DEFAULT_HUMAN_REPEATER_BUILDPOINTS	src/game/tremulous.h	666;"	d
-DEFAULT_HUMAN_REPEATER_MAX_ZONES	src/game/tremulous.h	668;"	d
-DEFAULT_HUMAN_REPEATER_QUEUE_TIME	src/game/tremulous.h	667;"	d
-DEFAULT_HUMAN_STAGE2_THRESH	src/game/tremulous.h	669;"	d
-DEFAULT_HUMAN_STAGE3_THRESH	src/game/tremulous.h	670;"	d
+DEFAULT_HUMAN_BUILDPOINTS	src/game/tremulous.h	677;"	d
+DEFAULT_HUMAN_MAX_STAGE	src/game/tremulous.h	684;"	d
+DEFAULT_HUMAN_QUEUE_TIME	src/game/tremulous.h	678;"	d
+DEFAULT_HUMAN_REPEATER_BUILDPOINTS	src/game/tremulous.h	679;"	d
+DEFAULT_HUMAN_REPEATER_MAX_ZONES	src/game/tremulous.h	681;"	d
+DEFAULT_HUMAN_REPEATER_QUEUE_TIME	src/game/tremulous.h	680;"	d
+DEFAULT_HUMAN_STAGE2_THRESH	src/game/tremulous.h	682;"	d
+DEFAULT_HUMAN_STAGE3_THRESH	src/game/tremulous.h	683;"	d
 DEFAULT_JAIL_PATH	src/master/master.c	52;"	d	file:
 DEFAULT_LIGHTMAP_SIZE	src/renderergl2/tr_bsp.c	200;"	d	file:
 DEFAULT_LOW_PRIV_USER	src/master/master.c	55;"	d	file:
@@ -2949,27 +2955,27 @@ ECONNRESET	src/qcommon/net_ip.c	53;"	d	file:
 EDI	src/asm/qasm-inline.h	32;"	d
 EDI	src/asm/qasm-inline.h	37;"	d
 EDIT_CURSOR_WIDTH	src/ui/ui_shared.c	3259;"	d	file:
-EF_ASTRAL_NOCLIP	src/game/bg_public.h	322;"	d
-EF_BLOBLOCKED	src/game/bg_public.h	329;"	d
-EF_BOUNCE	src/game/bg_public.h	308;"	d
-EF_BOUNCE_HALF	src/game/bg_public.h	309;"	d
-EF_B_MARKED	src/game/bg_public.h	315;"	d
-EF_B_POWERED	src/game/bg_public.h	314;"	d
-EF_B_SPAWNED	src/game/bg_public.h	313;"	d
-EF_CONNECTION	src/game/bg_public.h	328;"	d
-EF_DEAD	src/game/bg_public.h	303;"	d
-EF_FIRING	src/game/bg_public.h	324;"	d
-EF_FIRING2	src/game/bg_public.h	325;"	d
-EF_FIRING3	src/game/bg_public.h	326;"	d
-EF_MOVER_STOP	src/game/bg_public.h	321;"	d
-EF_NODRAW	src/game/bg_public.h	320;"	d
-EF_NO_BOUNCE_SOUND	src/game/bg_public.h	310;"	d
-EF_PLAYER_EVENT	src/game/bg_public.h	305;"	d
-EF_POISONCLOUDED	src/game/bg_public.h	327;"	d
-EF_TELEPORT_BIT	src/game/bg_public.h	304;"	d
-EF_WALLCLIMB	src/game/bg_public.h	318;"	d
-EF_WALLCLIMBCEILING	src/game/bg_public.h	319;"	d
-EF_WARN_CHARGE	src/game/bg_public.h	317;"	d
+EF_ASTRAL_NOCLIP	src/game/bg_public.h	325;"	d
+EF_BLOBLOCKED	src/game/bg_public.h	332;"	d
+EF_BOUNCE	src/game/bg_public.h	311;"	d
+EF_BOUNCE_HALF	src/game/bg_public.h	312;"	d
+EF_B_MARKED	src/game/bg_public.h	318;"	d
+EF_B_POWERED	src/game/bg_public.h	317;"	d
+EF_B_SPAWNED	src/game/bg_public.h	316;"	d
+EF_CONNECTION	src/game/bg_public.h	331;"	d
+EF_DEAD	src/game/bg_public.h	306;"	d
+EF_FIRING	src/game/bg_public.h	327;"	d
+EF_FIRING2	src/game/bg_public.h	328;"	d
+EF_FIRING3	src/game/bg_public.h	329;"	d
+EF_MOVER_STOP	src/game/bg_public.h	324;"	d
+EF_NODRAW	src/game/bg_public.h	323;"	d
+EF_NO_BOUNCE_SOUND	src/game/bg_public.h	313;"	d
+EF_PLAYER_EVENT	src/game/bg_public.h	308;"	d
+EF_POISONCLOUDED	src/game/bg_public.h	330;"	d
+EF_TELEPORT_BIT	src/game/bg_public.h	307;"	d
+EF_WALLCLIMB	src/game/bg_public.h	321;"	d
+EF_WALLCLIMBCEILING	src/game/bg_public.h	322;"	d
+EF_WARN_CHARGE	src/game/bg_public.h	320;"	d
 EIGHT_BYTE_ALIGNMENT	src/server/sqlite3.c	10117;"	d	file:
 EIGHT_BYTE_ALIGNMENT	src/server/sqlite3.c	10119;"	d	file:
 ELF32	src/qcommon/vm_powerpc.c	132;"	d	file:
@@ -3061,7 +3067,7 @@ ET_PUSH_TRIGGER	src/game/bg_public.h	/^  ET_PUSH_TRIGGER,$/;"	e	enum:__anon357
 ET_RANGE_MARKER	src/game/bg_public.h	/^  ET_RANGE_MARKER,$/;"	e	enum:__anon357
 ET_SPEAKER	src/game/bg_public.h	/^  ET_SPEAKER,$/;"	e	enum:__anon357
 ET_TELEPORT_TRIGGER	src/game/bg_public.h	/^  ET_TELEPORT_TRIGGER,$/;"	e	enum:__anon357
-EVENT_VALID_MSEC	src/game/bg_public.h	469;"	d
+EVENT_VALID_MSEC	src/game/bg_public.h	473;"	d
 EVSEL	src/qcommon/vm_powerpc_asm.c	624;"	d	file:
 EVSEL_MASK	src/qcommon/vm_powerpc_asm.c	625;"	d	file:
 EVUIMM	src/qcommon/vm_powerpc_asm.c	379;"	d	file:
@@ -3083,9 +3089,9 @@ EV_DEATH1	src/game/bg_public.h	/^  EV_DEATH1,$/;"	e	enum:__anon339
 EV_DEATH2	src/game/bg_public.h	/^  EV_DEATH2,$/;"	e	enum:__anon339
 EV_DEATH3	src/game/bg_public.h	/^  EV_DEATH3,$/;"	e	enum:__anon339
 EV_DEBUG_LINE	src/game/bg_public.h	/^  EV_DEBUG_LINE,$/;"	e	enum:__anon339
-EV_EVENT_BIT1	src/game/bg_public.h	465;"	d
-EV_EVENT_BIT2	src/game/bg_public.h	466;"	d
-EV_EVENT_BITS	src/game/bg_public.h	467;"	d
+EV_EVENT_BIT1	src/game/bg_public.h	469;"	d
+EV_EVENT_BIT2	src/game/bg_public.h	470;"	d
+EV_EVENT_BITS	src/game/bg_public.h	471;"	d
 EV_FALLING	src/game/bg_public.h	/^  EV_FALLING,$/;"	e	enum:__anon339
 EV_FALL_FAR	src/game/bg_public.h	/^  EV_FALL_FAR,$/;"	e	enum:__anon339
 EV_FALL_MEDIUM	src/game/bg_public.h	/^  EV_FALL_MEDIUM,$/;"	e	enum:__anon339
@@ -3104,6 +3110,8 @@ EV_GIB_PLAYER	src/game/bg_public.h	/^  EV_GIB_PLAYER,$/;"	e	enum:__anon339
 EV_GLOBAL_SOUND	src/game/bg_public.h	/^  EV_GLOBAL_SOUND,    \/\/ no attenuation$/;"	e	enum:__anon339
 EV_GRENADE_BOUNCE	src/game/bg_public.h	/^  EV_GRENADE_BOUNCE,    \/\/ eventParm will be the soundindex$/;"	e	enum:__anon339
 EV_HUMAN_BUILDABLE_EXPLOSION	src/game/bg_public.h	/^  EV_HUMAN_BUILDABLE_EXPLOSION,$/;"	e	enum:__anon339
+EV_JETPACK_DEACTIVATE	src/game/bg_public.h	/^  EV_JETPACK_DEACTIVATE,$/;"	e	enum:__anon339
+EV_JETPACK_REFUEL	src/game/bg_public.h	/^  EV_JETPACK_REFUEL,$/;"	e	enum:__anon339
 EV_JUMP	src/game/bg_public.h	/^  EV_JUMP,$/;"	e	enum:__anon339
 EV_LEV1_GRAB	src/game/bg_public.h	/^  EV_LEV1_GRAB,$/;"	e	enum:__anon339
 EV_LEV2_ZAP	src/game/bg_public.h	/^  EV_LEV2_ZAP,$/;"	e	enum:__anon339
@@ -3315,9 +3323,9 @@ FEEDER_TREMHUMANARMOURYSELL	src/ui/menudef.h	84;"	d
 FEEDER_TREMHUMANBUILD	src/ui/menudef.h	87;"	d
 FEEDER_TREMHUMANITEMS	src/ui/menudef.h	82;"	d
 FEEDER_TREMTEAMS	src/ui/menudef.h	80;"	d
-FFF_ALIENS	src/game/bg_public.h	1299;"	d
-FFF_BUILDABLES	src/game/bg_public.h	1300;"	d
-FFF_HUMANS	src/game/bg_public.h	1298;"	d
+FFF_ALIENS	src/game/bg_public.h	1313;"	d
+FFF_BUILDABLES	src/game/bg_public.h	1314;"	d
+FFF_HUMANS	src/game/bg_public.h	1312;"	d
 FGetLittleLong	src/client/snd_codec_wav.c	/^static int FGetLittleLong( fileHandle_t f ) {$/;"	f	file:
 FGetLittleShort	src/client/snd_codec_wav.c	/^static short FGetLittleShort( fileHandle_t f ) {$/;"	f	file:
 FIELD	src/tools/lcc/src/c.h	/^	FIELD=43<<4$/;"	e	enum:__anon305
@@ -3344,17 +3352,17 @@ FLAG_STRING	src/server/sqlite3.c	22916;"	d	file:
 FLAG_TAKEN	src/qcommon/q_shared.h	/^	FLAG_TAKEN,			\/\/ CTF$/;"	e	enum:_flag_status
 FLAG_TAKEN_BLUE	src/qcommon/q_shared.h	/^	FLAG_TAKEN_BLUE,	\/\/ One Flag CTF$/;"	e	enum:_flag_status
 FLAG_TAKEN_RED	src/qcommon/q_shared.h	/^	FLAG_TAKEN_RED,		\/\/ One Flag CTF$/;"	e	enum:_flag_status
-FLAMER_DMG	src/game/tremulous.h	437;"	d
-FLAMER_GAS	src/game/tremulous.h	434;"	d
-FLAMER_K_SCALE	src/game/tremulous.h	436;"	d
-FLAMER_LAG	src/game/tremulous.h	443;"	d
-FLAMER_LIFETIME	src/game/tremulous.h	441;"	d
-FLAMER_PRICE	src/game/tremulous.h	433;"	d
-FLAMER_RADIUS	src/game/tremulous.h	439;"	d
-FLAMER_REPEAT	src/game/tremulous.h	435;"	d
-FLAMER_SIZE	src/game/tremulous.h	440;"	d
-FLAMER_SPEED	src/game/tremulous.h	442;"	d
-FLAMER_SPLASHDAMAGE	src/game/tremulous.h	438;"	d
+FLAMER_DMG	src/game/tremulous.h	444;"	d
+FLAMER_GAS	src/game/tremulous.h	441;"	d
+FLAMER_K_SCALE	src/game/tremulous.h	443;"	d
+FLAMER_LAG	src/game/tremulous.h	450;"	d
+FLAMER_LIFETIME	src/game/tremulous.h	448;"	d
+FLAMER_PRICE	src/game/tremulous.h	440;"	d
+FLAMER_RADIUS	src/game/tremulous.h	446;"	d
+FLAMER_REPEAT	src/game/tremulous.h	442;"	d
+FLAMER_SIZE	src/game/tremulous.h	447;"	d
+FLAMER_SPEED	src/game/tremulous.h	449;"	d
+FLAMER_SPLASHDAMAGE	src/game/tremulous.h	445;"	d
 FLARE_NOFADE	src/cgame/cg_ents.c	601;"	d	file:
 FLARE_OFF	src/cgame/cg_ents.c	600;"	d	file:
 FLARE_REALFADE	src/cgame/cg_ents.c	603;"	d	file:
@@ -3385,7 +3393,7 @@ FMV_ID_WAIT	src/qcommon/q_shared.h	/^	FMV_ID_WAIT$/;"	e	enum:__anon480
 FMV_LOOPED	src/qcommon/q_shared.h	/^	FMV_LOOPED,$/;"	e	enum:__anon480
 FMV_PLAY	src/qcommon/q_shared.h	/^	FMV_PLAY,		\/\/ play$/;"	e	enum:__anon480
 FNEG	src/qcommon/vm_sparc.c	/^	FADD, FSUB, FCMP, FSTOI, FITOS, FNEG, FDIV, FMUL,$/;"	e	enum:sparc_iname	file:
-FOFS	src/game/g_local.h	1168;"	d
+FOFS	src/game/g_local.h	1174;"	d
 FOGDEF_ALL	src/renderergl2/tr_local.h	/^	FOGDEF_ALL                  = 0x0003,$/;"	e	enum:__anon34
 FOGDEF_COUNT	src/renderergl2/tr_local.h	/^	FOGDEF_COUNT                = 0x0004,$/;"	e	enum:__anon34
 FOGDEF_USE_DEFORM_VERTEXES	src/renderergl2/tr_local.h	/^	FOGDEF_USE_DEFORM_VERTEXES  = 0x0001,$/;"	e	enum:__anon34
@@ -3432,8 +3440,8 @@ FRB	src/qcommon/vm_powerpc_asm.c	309;"	d	file:
 FRB_MASK	src/qcommon/vm_powerpc_asm.c	310;"	d	file:
 FRC	src/qcommon/vm_powerpc_asm.c	314;"	d	file:
 FRC_MASK	src/qcommon/vm_powerpc_asm.c	315;"	d	file:
-FREEKILL_ALIEN	src/game/tremulous.h	656;"	d
-FREEKILL_HUMAN	src/game/tremulous.h	657;"	d
+FREEKILL_ALIEN	src/game/tremulous.h	669;"	d
+FREEKILL_HUMAN	src/game/tremulous.h	670;"	d
 FREEMEMCOOKIE	src/game/bg_alloc.c	33;"	d	file:
 FREETYPE_CFLAGS	GNUmakefile	/^    FREETYPE_CFLAGS = -Ifreetype2$/;"	m
 FREETYPE_CFLAGS	GNUmakefile	/^  FREETYPE_CFLAGS ?= $(shell pkg-config --silence-errors --cflags freetype2 || true)$/;"	m
@@ -4448,12 +4456,12 @@ GPA	src/client/cl_curl.c	/^static void *GPA(char *str)$/;"	f	file:
 GPA	src/client/qal.c	/^static void *GPA(char *str)$/;"	f	file:
 GPRLEN	src/qcommon/vm_powerpc.c	144;"	d	file:
 GPRLEN_SHIFT	src/qcommon/vm_powerpc.c	147;"	d	file:
-GRENADE_DAMAGE	src/game/tremulous.h	396;"	d
-GRENADE_K_SCALE	src/game/tremulous.h	395;"	d
-GRENADE_PRICE	src/game/tremulous.h	393;"	d
-GRENADE_RANGE	src/game/tremulous.h	397;"	d
-GRENADE_REPEAT	src/game/tremulous.h	394;"	d
-GRENADE_SPEED	src/game/tremulous.h	398;"	d
+GRENADE_DAMAGE	src/game/tremulous.h	403;"	d
+GRENADE_K_SCALE	src/game/tremulous.h	402;"	d
+GRENADE_PRICE	src/game/tremulous.h	400;"	d
+GRENADE_RANGE	src/game/tremulous.h	404;"	d
+GRENADE_REPEAT	src/game/tremulous.h	401;"	d
+GRENADE_SPEED	src/game/tremulous.h	405;"	d
 GS_FILENAME	src/master/stats.c	93;"	d	file:
 GT	src/tools/lcc/cpp/cpp.h	/^		TILDE, NOT, SLASH, PCT, LT, GT, CIRC, OR, QUEST,$/;"	e	enum:toktype
 GT1	src/tools/lcc/cpp/lex.c	/^	CIRC1, GT1, GT2, LT1, LT2, OR1, AND1, ASG1, NOT1, DOTS1,$/;"	e	enum:state	file:
@@ -4772,7 +4780,6 @@ G_StopFromFollowing	src/game/g_cmds.c	/^void G_StopFromFollowing( gentity_t *ent
 G_StopMapRotation	src/game/g_maprotation.c	/^void G_StopMapRotation( void )$/;"	f
 G_SufficientBPAvailable	src/game/g_buildable.c	/^static itemBuildError_t G_SufficientBPAvailable( buildable_t     buildable,$/;"	f	file:
 G_SuffocateTrappedEntities	src/game/g_buildable.c	/^void G_SuffocateTrappedEntities( gentity_t *self )$/;"	f
-G_SuicideIfNoPower	src/game/g_buildable.c	/^static qboolean G_SuicideIfNoPower( gentity_t *self )$/;"	f	file:
 G_TRACE	src/game/g_public.h	/^  G_TRACE,  \/\/ ( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int passEntityNum, int contentmask );$/;"	e	enum:__anon363
 G_TRACECAPSULE	src/game/g_public.h	/^  G_TRACECAPSULE, \/\/ ( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int passEntityNum, int contentmask );$/;"	e	enum:__anon363
 G_TeamCommand	src/game/g_team.c	/^void G_TeamCommand( team_t team, char *cmd )$/;"	f
@@ -4942,36 +4949,35 @@ HAVE_VM_COMPILED	GNUmakefile	/^  HAVE_VM_COMPILED = true$/;"	m
 HAVE_VM_COMPILED	GNUmakefile	/^  HAVE_VM_COMPILED=true$/;"	m
 HArmoury_Activate	src/game/g_buildable.c	/^void HArmoury_Activate( gentity_t *self, gentity_t *other, gentity_t *activator )$/;"	f
 HArmoury_Think	src/game/g_buildable.c	/^void HArmoury_Think( gentity_t *self )$/;"	f
-HBHM	src/game/tremulous.h	525;"	d
-HBUILD_HEALRATE	src/game/tremulous.h	476;"	d
-HBUILD_PRICE	src/game/tremulous.h	474;"	d
-HBUILD_REPEAT	src/game/tremulous.h	475;"	d
-HBVM	src/game/tremulous.h	527;"	d
+HBHM	src/game/tremulous.h	539;"	d
+HBUILD_HEALRATE	src/game/tremulous.h	487;"	d
+HBUILD_PRICE	src/game/tremulous.h	485;"	d
+HBUILD_REPEAT	src/game/tremulous.h	486;"	d
 HDCC_Think	src/game/g_buildable.c	/^void HDCC_Think( gentity_t *self )$/;"	f
-HDM	src/game/tremulous.h	367;"	d
+HDM	src/game/tremulous.h	374;"	d
 HEADER_LUMPS	src/qcommon/qfiles.h	385;"	d
 HEARTBEAT_FOR_MASTER	src/qcommon/q_shared.h	46;"	d
 HEARTBEAT_MSEC	src/server/sv_main.c	224;"	d	file:
-HELMET_PCLOUD_PROTECTION	src/game/tremulous.h	489;"	d
-HELMET_POISON_PROTECTION	src/game/tremulous.h	488;"	d
-HELMET_PRICE	src/game/tremulous.h	486;"	d
-HELMET_RANGE	src/game/tremulous.h	487;"	d
+HELMET_PCLOUD_PROTECTION	src/game/tremulous.h	500;"	d
+HELMET_POISON_PROTECTION	src/game/tremulous.h	499;"	d
+HELMET_PRICE	src/game/tremulous.h	497;"	d
+HELMET_RANGE	src/game/tremulous.h	498;"	d
 HEX	src/tools/lcc/src/lex.c	/^       DIGIT=010, HEX=020,    OTHER=040 };$/;"	e	enum:__anon281	file:
-HIVE_BP	src/game/tremulous.h	289;"	d
-HIVE_BT	src/game/tremulous.h	290;"	d
-HIVE_CREEPSIZE	src/game/tremulous.h	295;"	d
-HIVE_DIR_CHANGE_PERIOD	src/game/tremulous.h	302;"	d
-HIVE_DMG	src/game/tremulous.h	300;"	d
-HIVE_HEALTH	src/game/tremulous.h	291;"	d
-HIVE_K_SCALE	src/game/tremulous.h	299;"	d
-HIVE_LIFETIME	src/game/tremulous.h	297;"	d
-HIVE_REGEN	src/game/tremulous.h	292;"	d
-HIVE_REPEAT	src/game/tremulous.h	298;"	d
-HIVE_SENSE_RANGE	src/game/tremulous.h	296;"	d
-HIVE_SPEED	src/game/tremulous.h	301;"	d
-HIVE_SPLASHDAMAGE	src/game/tremulous.h	293;"	d
-HIVE_SPLASHRADIUS	src/game/tremulous.h	294;"	d
-HIVE_VALUE	src/game/tremulous.h	303;"	d
+HIVE_BP	src/game/tremulous.h	287;"	d
+HIVE_BT	src/game/tremulous.h	288;"	d
+HIVE_CREEPSIZE	src/game/tremulous.h	293;"	d
+HIVE_DIR_CHANGE_PERIOD	src/game/tremulous.h	300;"	d
+HIVE_DMG	src/game/tremulous.h	298;"	d
+HIVE_HEALTH	src/game/tremulous.h	289;"	d
+HIVE_K_SCALE	src/game/tremulous.h	297;"	d
+HIVE_LIFETIME	src/game/tremulous.h	295;"	d
+HIVE_REGEN	src/game/tremulous.h	290;"	d
+HIVE_REPEAT	src/game/tremulous.h	296;"	d
+HIVE_SENSE_RANGE	src/game/tremulous.h	294;"	d
+HIVE_SPEED	src/game/tremulous.h	299;"	d
+HIVE_SPLASHDAMAGE	src/game/tremulous.h	291;"	d
+HIVE_SPLASHRADIUS	src/game/tremulous.h	292;"	d
+HIVE_VALUE	src/game/tremulous.h	301;"	d
 HI_MEDKIT	src/game/bg_public.h	/^  HI_MEDKIT,$/;"	e	enum:__anon333
 HI_NONE	src/game/bg_public.h	/^  HI_NONE,$/;"	e	enum:__anon333
 HI_NUM_HOLDABLE	src/game/bg_public.h	/^  HI_NUM_HOLDABLE$/;"	e	enum:__anon333
@@ -4987,16 +4993,25 @@ HMedistat_Think	src/game/g_buildable.c	/^void HMedistat_Think( gentity_t *self )
 HOMEPATH_NAME_MACOSX	src/qcommon/q_shared.h	43;"	d
 HOMEPATH_NAME_UNIX	src/qcommon/q_shared.h	41;"	d
 HOMEPATH_NAME_WIN	src/qcommon/q_shared.h	42;"	d
+HOVEL_BP	src/game/tremulous.h	303;"	d
+HOVEL_BT	src/game/tremulous.h	304;"	d
+HOVEL_CREEPSIZE	src/game/tremulous.h	309;"	d
+HOVEL_HEALTH	src/game/tremulous.h	305;"	d
+HOVEL_REGEN	src/game/tremulous.h	306;"	d
+HOVEL_SPLASHDAMAGE	src/game/tremulous.h	307;"	d
+HOVEL_SPLASHRADIUS	src/game/tremulous.h	308;"	d
+HOVEL_TRACE_DEPTH	src/game/g_buildable.c	1525;"	d	file:
+HOVEL_VALUE	src/game/tremulous.h	310;"	d
 HReactor_Think	src/game/g_buildable.c	/^void HReactor_Think( gentity_t *self )$/;"	f
 HRepeater_Die	src/game/g_buildable.c	/^static void HRepeater_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod )$/;"	f	file:
 HRepeater_Think	src/game/g_buildable.c	/^void HRepeater_Think( gentity_t *self )$/;"	f
 HRepeater_Use	src/game/g_buildable.c	/^void HRepeater_Use( gentity_t *self, gentity_t *other, gentity_t *activator )$/;"	f
-HSPAWN_BP	src/game/tremulous.h	533;"	d
-HSPAWN_BT	src/game/tremulous.h	534;"	d
-HSPAWN_HEALTH	src/game/tremulous.h	535;"	d
-HSPAWN_SPLASHDAMAGE	src/game/tremulous.h	536;"	d
-HSPAWN_SPLASHRADIUS	src/game/tremulous.h	537;"	d
-HSPAWN_VALUE	src/game/tremulous.h	538;"	d
+HSPAWN_BP	src/game/tremulous.h	545;"	d
+HSPAWN_BT	src/game/tremulous.h	546;"	d
+HSPAWN_HEALTH	src/game/tremulous.h	547;"	d
+HSPAWN_SPLASHDAMAGE	src/game/tremulous.h	548;"	d
+HSPAWN_SPLASHRADIUS	src/game/tremulous.h	549;"	d
+HSPAWN_VALUE	src/game/tremulous.h	550;"	d
 HSSIZ	src/tools/lcc/cpp/hideset.c	12;"	d	file:
 HSVtoRGB	src/renderergl1/tr_bsp.c	/^static void HSVtoRGB( float h, float s, float v, float rgb[3] )$/;"	f	file:
 HSVtoRGB	src/renderergl2/tr_bsp.c	/^static void HSVtoRGB( float h, float s, float v, float rgb[3] )$/;"	f	file:
@@ -5008,26 +5023,24 @@ HSpawn_Think	src/game/g_buildable.c	/^void HSpawn_Think( gentity_t *self )$/;"	f
 HTeslaGen_Think	src/game/g_buildable.c	/^void HTeslaGen_Think( gentity_t *self )$/;"	f
 HUD_HORIZONTAL	src/ui/menudef.h	60;"	d
 HUD_VERTICAL	src/ui/menudef.h	59;"	d
-HUMAN_BACK_MODIFIER	src/game/tremulous.h	617;"	d
-HUMAN_BHLTH_MODIFIER	src/game/tremulous.h	524;"	d
-HUMAN_BUILDABLE_INACTIVE_TIME	src/game/tremulous.h	645;"	d
-HUMAN_BUILDER_SCOREINC	src/game/tremulous.h	642;"	d
-HUMAN_BVALUE_MODIFIER	src/game/tremulous.h	526;"	d
-HUMAN_DETONATION_DELAY	src/game/tremulous.h	531;"	d
-HUMAN_DODGE_SIDE_MODIFIER	src/game/tremulous.h	619;"	d
-HUMAN_DODGE_SLOWED_MODIFIER	src/game/tremulous.h	620;"	d
-HUMAN_DODGE_TIMEOUT	src/game/tremulous.h	622;"	d
-HUMAN_DODGE_UP_MODIFIER	src/game/tremulous.h	621;"	d
-HUMAN_JOG_MODIFIER	src/game/tremulous.h	616;"	d
-HUMAN_LAND_FRICTION	src/game/tremulous.h	623;"	d
-HUMAN_MAX_CREDITS	src/game/tremulous.h	639;"	d
-HUMAN_REGEN_DAMAGE_TIME	src/game/tremulous.h	637;"	d
+HUMAN_BACK_MODIFIER	src/game/tremulous.h	632;"	d
+HUMAN_BHLTH_MODIFIER	src/game/tremulous.h	538;"	d
+HUMAN_BUILDER_SCOREINC	src/game/tremulous.h	657;"	d
+HUMAN_DETONATION_DELAY	src/game/tremulous.h	543;"	d
+HUMAN_DODGE_SIDE_MODIFIER	src/game/tremulous.h	634;"	d
+HUMAN_DODGE_SLOWED_MODIFIER	src/game/tremulous.h	635;"	d
+HUMAN_DODGE_TIMEOUT	src/game/tremulous.h	637;"	d
+HUMAN_DODGE_UP_MODIFIER	src/game/tremulous.h	636;"	d
+HUMAN_JOG_MODIFIER	src/game/tremulous.h	631;"	d
+HUMAN_LAND_FRICTION	src/game/tremulous.h	638;"	d
+HUMAN_MAX_CREDITS	src/game/tremulous.h	654;"	d
+HUMAN_REGEN_DAMAGE_TIME	src/game/tremulous.h	652;"	d
 HUMAN_SCANNER_UPDATE_PERIOD	src/cgame/cg_scanner.c	28;"	d	file:
-HUMAN_SIDE_MODIFIER	src/game/tremulous.h	618;"	d
-HUMAN_SPAWN_REPEAT_TIME	src/game/tremulous.h	636;"	d
-HUMAN_SPRINT_MODIFIER	src/game/tremulous.h	615;"	d
-HUMAN_TK_SUICIDE_PENALTY	src/game/tremulous.h	640;"	d
-HUMAN_WDMG_MODIFIER	src/game/tremulous.h	366;"	d
+HUMAN_SIDE_MODIFIER	src/game/tremulous.h	633;"	d
+HUMAN_SPAWN_REPEAT_TIME	src/game/tremulous.h	651;"	d
+HUMAN_SPRINT_MODIFIER	src/game/tremulous.h	630;"	d
+HUMAN_TK_SUICIDE_PENALTY	src/game/tremulous.h	655;"	d
+HUMAN_WDMG_MODIFIER	src/game/tremulous.h	373;"	d
 HUNK_DEBUG	src/qcommon/q_shared.h	313;"	d
 HUNK_FREE_MAGIC	src/qcommon/common.c	1221;"	d	file:
 HUNK_MAGIC	src/qcommon/common.c	1220;"	d	file:
@@ -5094,6 +5107,7 @@ I5	src/qcommon/vm_sparc.h	34;"	d
 I6	src/qcommon/vm_sparc.h	35;"	d
 I7	src/qcommon/vm_sparc.h	36;"	d
 IBE_BLOCKEDBYENEMY	src/game/g_local.h	/^  IBE_BLOCKEDBYENEMY,$/;"	e	enum:__anon318
+IBE_HOVELEXIT	src/game/g_local.h	/^  IBE_HOVELEXIT,$/;"	e	enum:__anon318
 IBE_LASTSPAWN	src/game/g_local.h	/^  IBE_LASTSPAWN,$/;"	e	enum:__anon318
 IBE_MAXERRORS	src/game/g_local.h	/^  IBE_MAXERRORS$/;"	e	enum:__anon318
 IBE_NOALIENBP	src/game/g_local.h	/^  IBE_NOALIENBP,$/;"	e	enum:__anon318
@@ -5105,6 +5119,8 @@ IBE_NOOVERMIND	src/game/g_local.h	/^  IBE_NOOVERMIND,$/;"	e	enum:__anon318
 IBE_NOPOWERHERE	src/game/g_local.h	/^  IBE_NOPOWERHERE,$/;"	e	enum:__anon318
 IBE_NORMAL	src/game/g_local.h	/^  IBE_NORMAL, \/\/ too steep$/;"	e	enum:__anon318
 IBE_NOROOM	src/game/g_local.h	/^  IBE_NOROOM,$/;"	e	enum:__anon318
+IBE_ONEDCC	src/game/g_local.h	/^  IBE_ONEDCC,$/;"	e	enum:__anon318
+IBE_ONEHOVEL	src/game/g_local.h	/^  IBE_ONEHOVEL,$/;"	e	enum:__anon318
 IBE_ONEOVERMIND	src/game/g_local.h	/^  IBE_ONEOVERMIND,$/;"	e	enum:__anon318
 IBE_ONEREACTOR	src/game/g_local.h	/^  IBE_ONEREACTOR,$/;"	e	enum:__anon318
 IBE_PERMISSION	src/game/g_local.h	/^  IBE_PERMISSION,$/;"	e	enum:__anon318
@@ -5332,7 +5348,7 @@ ISUNCHANGE	src/tools/lcc/cpp/cpp.h	32;"	d
 IS_BIG_INT	src/server/sqlite3.c	9504;"	d	file:
 IS_LOCK_ERROR	src/server/sqlite3.c	27489;"	d	file:
 IS_NAN	src/qcommon/q_shared.h	465;"	d
-IS_WARMUP	src/game/g_local.h	1196;"	d
+IS_WARMUP	src/game/g_local.h	1202;"	d
 ITEM	src/tools/lcc/src/symbolic.c	25;"	d	file:
 ITEM_BLOB_TIME	src/cgame/cg_local.h	53;"	d
 ITEM_SCALEUP_TIME	src/cgame/cg_local.h	51;"	d
@@ -5587,11 +5603,14 @@ JEACH_PATH	src/server/sqlite3.c	168141;"	d	file:
 JEACH_ROOT	src/server/sqlite3.c	168143;"	d	file:
 JEACH_TYPE	src/server/sqlite3.c	168136;"	d	file:
 JEACH_VALUE	src/server/sqlite3.c	168135;"	d	file:
-JETPACK_DISABLE_CHANCE	src/game/tremulous.h	500;"	d
-JETPACK_DISABLE_TIME	src/game/tremulous.h	499;"	d
-JETPACK_FLOAT_SPEED	src/game/tremulous.h	497;"	d
-JETPACK_PRICE	src/game/tremulous.h	496;"	d
-JETPACK_SINK_SPEED	src/game/tremulous.h	498;"	d
+JETPACK_DISABLE_CHANCE	src/game/tremulous.h	511;"	d
+JETPACK_DISABLE_TIME	src/game/tremulous.h	510;"	d
+JETPACK_FLOAT_SPEED	src/game/tremulous.h	508;"	d
+JETPACK_FUEL_FULL	src/game/tremulous.h	512;"	d
+JETPACK_FUEL_LOW	src/game/tremulous.h	513;"	d
+JETPACK_FUEL_USAGE	src/game/tremulous.h	514;"	d
+JETPACK_PRICE	src/game/tremulous.h	507;"	d
+JETPACK_SINK_SPEED	src/game/tremulous.h	509;"	d
 JMPL	src/qcommon/vm_sparc.c	/^	JMPLI, JMPL,$/;"	e	enum:sparc_iname	file:
 JMPLI	src/qcommon/vm_sparc.c	/^	JMPLI, JMPL,$/;"	e	enum:sparc_iname	file:
 JNODE_APPEND	src/server/sqlite3.c	166602;"	d	file:
@@ -5959,12 +5978,12 @@ LARGEST_INT64	src/server/sqlite3.c	10093;"	d	file:
 LARGEST_INT64	src/server/sqlite3.c	141557;"	d	file:
 LARGEST_INT64	src/server/sqlite3.c	166503;"	d	file:
 LARGEST_INT64	src/server/sqlite3.c	169292;"	d	file:
-LASGUN_AMMO	src/game/tremulous.h	412;"	d
-LASGUN_DAMAGE	src/game/tremulous.h	416;"	d
-LASGUN_K_SCALE	src/game/tremulous.h	414;"	d
-LASGUN_PRICE	src/game/tremulous.h	411;"	d
-LASGUN_RELOAD	src/game/tremulous.h	415;"	d
-LASGUN_REPEAT	src/game/tremulous.h	413;"	d
+LASGUN_AMMO	src/game/tremulous.h	419;"	d
+LASGUN_DAMAGE	src/game/tremulous.h	423;"	d
+LASGUN_K_SCALE	src/game/tremulous.h	421;"	d
+LASGUN_PRICE	src/game/tremulous.h	418;"	d
+LASGUN_RELOAD	src/game/tremulous.h	422;"	d
+LASGUN_REPEAT	src/game/tremulous.h	420;"	d
 LAST	src/tools/lcc/src/c.h	/^	LAST$/;"	e	enum:__anon285
 LASTOP	src/tools/lcc/src/c.h	/^       	op(LOAD,U,csilhp) LASTOP };$/;"	e	enum:__anon287
 LAST_COMMAND_MOV_STACK_EAX	src/qcommon/vm_x86.c	/^	LAST_COMMAND_MOV_STACK_EAX,$/;"	e	enum:__anon444	file:
@@ -5975,24 +5994,28 @@ LBURG	GNUmakefile	/^LBURG       = $(B)\/tools\/lburg\/lburg$(TOOLS_BINEXT)$/;"	m
 LBURGDIR	GNUmakefile	/^LBURGDIR=$(MOUNT_DIR)\/tools\/lcc\/lburg$/;"	m
 LBURGOBJ	GNUmakefile	/^LBURGOBJ= \\$/;"	m
 LBURG_MAX	src/tools/lcc/src/config.h	86;"	d
-LCANNON_AMMO	src/game/tremulous.h	456;"	d
-LCANNON_CHARGE_AMMO	src/game/tremulous.h	472;"	d
-LCANNON_CHARGE_TIME_MAX	src/game/tremulous.h	469;"	d
-LCANNON_CHARGE_TIME_MIN	src/game/tremulous.h	470;"	d
-LCANNON_CHARGE_TIME_WARN	src/game/tremulous.h	471;"	d
-LCANNON_DAMAGE	src/game/tremulous.h	460;"	d
-LCANNON_K_SCALE	src/game/tremulous.h	457;"	d
-LCANNON_PRICE	src/game/tremulous.h	455;"	d
-LCANNON_RADIUS	src/game/tremulous.h	461;"	d
-LCANNON_RELOAD	src/game/tremulous.h	459;"	d
-LCANNON_REPEAT	src/game/tremulous.h	458;"	d
-LCANNON_SECONDARY_DAMAGE	src/game/tremulous.h	463;"	d
-LCANNON_SECONDARY_RADIUS	src/game/tremulous.h	464;"	d
-LCANNON_SECONDARY_RELOAD	src/game/tremulous.h	466;"	d
-LCANNON_SECONDARY_REPEAT	src/game/tremulous.h	467;"	d
-LCANNON_SECONDARY_SPEED	src/game/tremulous.h	465;"	d
-LCANNON_SIZE	src/game/tremulous.h	462;"	d
-LCANNON_SPEED	src/game/tremulous.h	468;"	d
+LCANNON_AMMO	src/game/tremulous.h	463;"	d
+LCANNON_CHARGE_AMMO	src/game/tremulous.h	479;"	d
+LCANNON_CHARGE_AMMO_REDUCE	src/game/tremulous.h	480;"	d
+LCANNON_CHARGE_TIME_MAX	src/game/tremulous.h	476;"	d
+LCANNON_CHARGE_TIME_MIN	src/game/tremulous.h	477;"	d
+LCANNON_CHARGE_TIME_WARN	src/game/tremulous.h	478;"	d
+LCANNON_DAMAGE	src/game/tremulous.h	467;"	d
+LCANNON_K_SCALE	src/game/tremulous.h	464;"	d
+LCANNON_PRICE	src/game/tremulous.h	462;"	d
+LCANNON_RADIUS	src/game/tremulous.h	468;"	d
+LCANNON_RELOAD	src/game/tremulous.h	466;"	d
+LCANNON_REPEAT	src/game/tremulous.h	465;"	d
+LCANNON_SECONDARY_DAMAGE	src/game/tremulous.h	470;"	d
+LCANNON_SECONDARY_RADIUS	src/game/tremulous.h	471;"	d
+LCANNON_SECONDARY_RELOAD	src/game/tremulous.h	473;"	d
+LCANNON_SECONDARY_REPEAT	src/game/tremulous.h	474;"	d
+LCANNON_SECONDARY_SPEED	src/game/tremulous.h	472;"	d
+LCANNON_SIZE	src/game/tremulous.h	469;"	d
+LCANNON_SPEED_MIN	src/game/tremulous.h	475;"	d
+LCANNON_SPLASH_BATTLESUIT	src/game/tremulous.h	483;"	d
+LCANNON_SPLASH_HELMET	src/game/tremulous.h	482;"	d
+LCANNON_SPLASH_LIGHTARMOUR	src/game/tremulous.h	481;"	d
 LCChargeFire	src/game/g_weapon.c	/^void LCChargeFire( gentity_t *ent, qboolean secondary )$/;"	f
 LCS_ITERATOR_FINISHED	src/server/sqlite3.c	155237;"	d	file:
 LClampDone	src/asm/snd_mixa.s	/^LClampDone:$/;"	l
@@ -6168,9 +6191,9 @@ LIBS	GNUmakefile	/^  LIBS=-lsocket -lnsl -ldl -lm$/;"	m
 LIBSDIR	GNUmakefile	/^LIBSDIR=$(DEP_DIR)\/libs$/;"	m
 LIBSDLMAIN	GNUmakefile	/^  LIBSDLMAIN=$(B)\/libSDL2main.a$/;"	m
 LIBSDLMAINSRC	GNUmakefile	/^  LIBSDLMAINSRC=$(LIBSDIR)\/macosx\/libSDL2main.a$/;"	m
-LIGHTARMOUR_PCLOUD_PROTECTION	src/game/tremulous.h	484;"	d
-LIGHTARMOUR_POISON_PROTECTION	src/game/tremulous.h	483;"	d
-LIGHTARMOUR_PRICE	src/game/tremulous.h	482;"	d
+LIGHTARMOUR_PCLOUD_PROTECTION	src/game/tremulous.h	495;"	d
+LIGHTARMOUR_POISON_PROTECTION	src/game/tremulous.h	494;"	d
+LIGHTARMOUR_PRICE	src/game/tremulous.h	493;"	d
 LIGHTDEF_ALL	src/renderergl2/tr_local.h	/^	LIGHTDEF_ALL                 = 0x003F,$/;"	e	enum:__anon36
 LIGHTDEF_COUNT	src/renderergl2/tr_local.h	/^	LIGHTDEF_COUNT               = 0x0040$/;"	e	enum:__anon36
 LIGHTDEF_ENTITY	src/renderergl2/tr_local.h	/^	LIGHTDEF_ENTITY              = 0x0004,$/;"	e	enum:__anon36
@@ -6205,10 +6228,10 @@ LLeftSet	src/asm/snd_mixa.s	/^LLeftSet:$/;"	l
 LMix8Loop	src/asm/snd_mixa.s	/^LMix8Loop:$/;"	l
 LOCAL	src/tools/lcc/src/c.h	/^enum { CONSTANTS=1, LABELS, GLOBAL, PARAM, LOCAL };$/;"	e	enum:__anon303
 LOCAL_DATA_CHUNK	src/qcommon/vm_powerpc.c	555;"	d	file:
-LOCKBLOB_DOT	src/game/tremulous.h	317;"	d
-LOCKBLOB_K_SCALE	src/game/tremulous.h	318;"	d
-LOCKBLOB_LOCKTIME	src/game/tremulous.h	316;"	d
-LOCKBLOB_SPEED	src/game/tremulous.h	315;"	d
+LOCKBLOB_DOT	src/game/tremulous.h	324;"	d
+LOCKBLOB_K_SCALE	src/game/tremulous.h	325;"	d
+LOCKBLOB_LOCKTIME	src/game/tremulous.h	323;"	d
+LOCKBLOB_SPEED	src/game/tremulous.h	322;"	d
 LOCKFILE_EXCLUSIVE_LOCK	src/server/sqlite3.c	38207;"	d	file:
 LOCKFILE_FAIL_IMMEDIATELY	src/server/sqlite3.c	38203;"	d	file:
 LOG	src/qcommon/msg.c	511;"	d	file:
@@ -6310,7 +6333,7 @@ M2S_GETINFO	src/master/messages.c	51;"	d	file:
 MACOS_X	src/qcommon/q_platform.h	147;"	d
 MAC_EVENT_PUMP_MSEC	src/renderergl1/tr_backend.c	495;"	d	file:
 MAC_EVENT_PUMP_MSEC	src/renderergl2/tr_backend.c	553;"	d	file:
-MAGIC_TRACE_HACK	src/cgame/cg_local.h	1776;"	d
+MAGIC_TRACE_HACK	src/cgame/cg_local.h	1787;"	d
 MAKERGB	src/qcommon/q_shared.h	452;"	d
 MAKERGBA	src/qcommon/q_shared.h	453;"	d
 MAKE_CHUNKTYPE	src/renderercommon/tr_image_png.c	79;"	d	file:
@@ -6324,16 +6347,16 @@ MARK_FADE_TIME	src/cgame/cg_marks.c	239;"	d	file:
 MARK_TOTAL_TIME	src/cgame/cg_marks.c	238;"	d	file:
 MASKBIT	src/server/sqlite3.c	13339;"	d	file:
 MASKBIT32	src/server/sqlite3.c	13340;"	d	file:
-MASK_ALL	src/game/bg_public.h	1215;"	d
-MASK_ASTRALSOLID	src/game/bg_public.h	1219;"	d
-MASK_DEADSOLID	src/game/bg_public.h	1218;"	d
-MASK_OPAQUE	src/game/bg_public.h	1221;"	d
-MASK_PLAYERSOLID	src/game/bg_public.h	1217;"	d
+MASK_ALL	src/game/bg_public.h	1229;"	d
+MASK_ASTRALSOLID	src/game/bg_public.h	1233;"	d
+MASK_DEADSOLID	src/game/bg_public.h	1232;"	d
+MASK_OPAQUE	src/game/bg_public.h	1235;"	d
+MASK_PLAYERSOLID	src/game/bg_public.h	1231;"	d
 MASK_QUEUED_EVENTS	src/qcommon/common.c	1924;"	d	file:
 MASK_REG	src/qcommon/vm_x86.c	206;"	d	file:
-MASK_SHOT	src/game/bg_public.h	1222;"	d
-MASK_SOLID	src/game/bg_public.h	1216;"	d
-MASK_WATER	src/game/bg_public.h	1220;"	d
+MASK_SHOT	src/game/bg_public.h	1236;"	d
+MASK_SOLID	src/game/bg_public.h	1230;"	d
+MASK_WATER	src/game/bg_public.h	1234;"	d
 MASTERDIR	GNUmakefile	/^MASTERDIR=$(MOUNT_DIR)\/master$/;"	m
 MASTER_NAME	src/server/sqlite3.c	10209;"	d	file:
 MASTER_ROOT	src/server/sqlite3.c	10215;"	d	file:
@@ -6348,7 +6371,7 @@ MAXBITS	src/qcommon/puff.c	81;"	d	file:
 MAXCHOICES	src/game/g_utils.c	192;"	d	file:
 MAXCODES	src/qcommon/puff.c	84;"	d	file:
 MAXDCODES	src/qcommon/puff.c	83;"	d	file:
-MAXIMUM_BUILD_TIME	src/game/tremulous.h	676;"	d
+MAXIMUM_BUILD_TIME	src/game/tremulous.h	689;"	d
 MAXLCODES	src/qcommon/puff.c	82;"	d	file:
 MAXLINE	src/tools/lcc/src/c.h	13;"	d
 MAXPRINTMSG	src/qcommon/qcommon.h	781;"	d
@@ -6357,7 +6380,7 @@ MAXSMOOTHS	src/cgame/cg_local.h	565;"	d
 MAXSTATE	src/tools/lcc/cpp/lex.c	25;"	d	file:
 MAXTOKEN	src/tools/lcc/src/lex.c	6;"	d	file:
 MAXTOKEN	src/tools/lcc/src/profio.c	22;"	d	file:
-MAXTOUCH	src/game/bg_public.h	179;"	d
+MAXTOUCH	src/game/bg_public.h	180;"	d
 MAX_6BYTE	src/server/sqlite3.c	71143;"	d	file:
 MAX_ACC_RADIUS	src/cgame/cg_particles.c	1991;"	d	file:
 MAX_ADDRESSLENGTH	src/ui/ui_local.h	53;"	d
@@ -6367,9 +6390,9 @@ MAX_ADMIN_FLAGS	src/game/g_admin.h	35;"	d
 MAX_ADMIN_FLAG_LEN	src/game/g_admin.h	34;"	d
 MAX_ADMIN_LISTITEMS	src/game/g_admin.h	70;"	d
 MAX_ADMIN_SHOWBANS	src/game/g_admin.h	71;"	d
-MAX_ALIEN_BBOX	src/game/g_local.h	790;"	d
-MAX_ARENAS	src/game/bg_public.h	1278;"	d
-MAX_ARENAS_TEXT	src/game/bg_public.h	1279;"	d
+MAX_ALIEN_BBOX	src/game/g_local.h	792;"	d
+MAX_ARENAS	src/game/bg_public.h	1292;"	d
+MAX_ARENAS_TEXT	src/game/bg_public.h	1293;"	d
 MAX_ASM_FILES	src/tools/asm/q3asm.c	189;"	d	file:
 MAX_AVI_BUFFER	src/client/cl_avi.c	72;"	d	file:
 MAX_BASEPARTICLES	src/cgame/cg_local.h	190;"	d
@@ -6378,12 +6401,12 @@ MAX_BASEPARTICLE_SYSTEMS	src/cgame/cg_local.h	188;"	d
 MAX_BASETRAIL_BEAMS	src/cgame/cg_local.h	438;"	d
 MAX_BASETRAIL_SYSTEMS	src/cgame/cg_local.h	437;"	d
 MAX_BEAMS_PER_SYSTEM	src/cgame/cg_local.h	435;"	d
-MAX_BOTS	src/game/bg_public.h	1281;"	d
-MAX_BOTS_TEXT	src/game/bg_public.h	1282;"	d
+MAX_BOTS	src/game/bg_public.h	1295;"	d
+MAX_BOTS_TEXT	src/game/bg_public.h	1296;"	d
 MAX_BUCKETS	src/server/sv_main.c	359;"	d	file:
 MAX_BUILDABLE_ANIMATIONS	src/game/bg_public.h	/^  MAX_BUILDABLE_ANIMATIONS$/;"	e	enum:__anon343
-MAX_BUILDABLE_MODELS	src/game/bg_public.h	1017;"	d
-MAX_BUILDLOG	src/game/g_local.h	548;"	d
+MAX_BUILDABLE_MODELS	src/game/bg_public.h	1030;"	d
+MAX_BUILDLOG	src/game/g_local.h	550;"	d
 MAX_CALC_PSHADOWS	src/renderergl2/tr_local.h	55;"	d
 MAX_CHALLENGES	src/server/server.h	211;"	d
 MAX_CHALLENGES_MULTI	src/server/server.h	215;"	d
@@ -6397,15 +6420,15 @@ MAX_CMD_LINE	src/qcommon/cmd.c	29;"	d	file:
 MAX_COLOR_RANGES	src/ui/ui_shared.h	41;"	d
 MAX_CONFIGSTRINGS	src/qcommon/q_shared.h	1214;"	d
 MAX_CONSOLE_KEYS	src/sdl/sdl_input.c	86;"	d	file:
-MAX_CONSOLE_LINES	src/cgame/cg_local.h	913;"	d
+MAX_CONSOLE_LINES	src/cgame/cg_local.h	915;"	d
 MAX_CONSOLE_LINES	src/qcommon/common.c	388;"	d	file:
 MAX_CONSOLE_SAVE_BUFFER	src/client/cl_keys.c	1387;"	d	file:
-MAX_CONSOLE_TEXT	src/cgame/cg_local.h	912;"	d
-MAX_CUSTOM_SOUNDS	src/cgame/cg_local.h	729;"	d
+MAX_CONSOLE_TEXT	src/cgame/cg_local.h	914;"	d
+MAX_CUSTOM_SOUNDS	src/cgame/cg_local.h	731;"	d
 MAX_CVARS	src/qcommon/cvar.c	32;"	d	file:
 MAX_CVAR_VALUE_STRING	src/qcommon/q_shared.h	1043;"	d
-MAX_DAMAGE_REGIONS	src/game/g_local.h	484;"	d
-MAX_DAMAGE_REGION_TEXT	src/game/g_local.h	483;"	d
+MAX_DAMAGE_REGIONS	src/game/g_local.h	490;"	d
+MAX_DAMAGE_REGION_TEXT	src/game/g_local.h	489;"	d
 MAX_DATA_SIZE	src/master/stats.c	36;"	d	file:
 MAX_DEFINEPARMS	src/qcommon/parse.c	225;"	d	file:
 MAX_DEMOS	src/ui/ui_local.h	61;"	d
@@ -6435,11 +6458,11 @@ MAX_EX_ARGC	src/tools/asm/cmdlib.c	59;"	d	file:
 MAX_FACETS	src/qcommon/cm_patch.h	64;"	d
 MAX_FACE_POINTS	src/renderergl1/tr_local.h	491;"	d
 MAX_FACE_POINTS	src/renderergl2/tr_local.h	865;"	d
-MAX_FALL_DISTANCE	src/game/tremulous.h	652;"	d
+MAX_FALL_DISTANCE	src/game/tremulous.h	665;"	d
 MAX_FBOS	src/renderergl2/tr_local.h	51;"	d
 MAX_FEATLABEL_CHARS	src/client/client.h	429;"	d
 MAX_FILEHASH_SIZE	src/qcommon/files.c	186;"	d	file:
-MAX_FILEPATH	src/game/g_local.h	1163;"	d
+MAX_FILEPATH	src/game/g_local.h	1169;"	d
 MAX_FILE_HANDLES	src/qcommon/qcommon.h	590;"	d
 MAX_FLARES	src/renderergl1/tr_flares.c	83;"	d	file:
 MAX_FLARES	src/renderergl2/tr_flares.c	83;"	d	file:
@@ -6529,8 +6552,8 @@ MAX_MOVIES	src/ui/ui_local.h	62;"	d
 MAX_MSGLEN	src/qcommon/qcommon.h	197;"	d
 MAX_MULTIDRAW_PRIMITIVES	src/renderergl2/tr_local.h	2004;"	d
 MAX_MULTI_CVARS	src/ui/ui_shared.h	243;"	d
-MAX_NAMELOG_ADDRS	src/game/g_local.h	269;"	d
-MAX_NAMELOG_NAMES	src/game/g_local.h	268;"	d
+MAX_NAMELOG_ADDRS	src/game/g_local.h	273;"	d
+MAX_NAMELOG_NAMES	src/game/g_local.h	272;"	d
 MAX_NAME_LENGTH	src/qcommon/q_shared.h	247;"	d
 MAX_NEWS_LINES	src/ui/ui_local.h	57;"	d
 MAX_NEWS_LINEWIDTH	src/ui/ui_local.h	58;"	d
@@ -6538,7 +6561,7 @@ MAX_NEWS_STRING	src/qcommon/q_shared.h	238;"	d
 MAX_NONSEG_PLAYER_ANIMATIONS	src/game/bg_public.h	/^  MAX_NONSEG_PLAYER_ANIMATIONS,$/;"	e	enum:__anon342
 MAX_NONSEG_PLAYER_TOTALANIMATIONS	src/game/bg_public.h	/^  MAX_NONSEG_PLAYER_TOTALANIMATIONS$/;"	e	enum:__anon342
 MAX_NUM_ARGVS	src/qcommon/common.c	38;"	d	file:
-MAX_NUM_PACKED_ENTITY_NUMS	src/game/bg_misc.c	3562;"	d	file:
+MAX_NUM_PACKED_ENTITY_NUMS	src/game/bg_misc.c	3622;"	d	file:
 MAX_OPEN_MENUS	src/ui/ui_shared.h	42;"	d
 MAX_OPERATORS	src/qcommon/parse.c	1880;"	d	file:
 MAX_OSPATH	src/qcommon/q_shared.h	242;"	d
@@ -6568,7 +6591,7 @@ MAX_PERSISTANT	src/qcommon/q_shared.h	1234;"	d
 MAX_PINGREQUESTS	src/qcommon/q_shared.h	1537;"	d
 MAX_PINGREQUESTS	src/ui/ui_local.h	52;"	d
 MAX_PLAYER_ANIMATIONS	src/game/bg_public.h	/^  MAX_PLAYER_ANIMATIONS,$/;"	e	enum:__anon341
-MAX_PLAYER_MODEL	src/game/g_local.h	549;"	d
+MAX_PLAYER_MODEL	src/game/g_local.h	551;"	d
 MAX_PLAYER_TOTALANIMATIONS	src/game/bg_public.h	/^  MAX_PLAYER_TOTALANIMATIONS$/;"	e	enum:__anon341
 MAX_PLAYMAP_MAPNAME	src/game/g_playmap.h	33;"	d
 MAX_PLAYMAP_POOL_ENTRIES	src/game/g_playmap.h	29;"	d
@@ -6579,7 +6602,7 @@ MAX_POLYS	src/renderergl2/tr_local.h	2449;"	d
 MAX_POLYVERTS	src/renderergl1/tr_local.h	1569;"	d
 MAX_POLYVERTS	src/renderergl2/tr_local.h	2450;"	d
 MAX_POSITION_LEAFS	src/qcommon/cm_trace.c	410;"	d	file:
-MAX_PREDICTED_EVENTS	src/cgame/cg_local.h	918;"	d
+MAX_PREDICTED_EVENTS	src/cgame/cg_local.h	920;"	d
 MAX_PS_EVENTS	src/qcommon/q_shared.h	1238;"	d
 MAX_PS_MODELS	src/cgame/cg_local.h	184;"	d
 MAX_PS_SHADER_FRAMES	src/cgame/cg_local.h	183;"	d
@@ -6598,7 +6621,7 @@ MAX_RENDER_COMMANDS	src/renderergl2/tr_local.h	2336;"	d
 MAX_RENDER_STRINGS	src/renderercommon/tr_types.h	124;"	d
 MAX_RENDER_STRING_LENGTH	src/renderercommon/tr_types.h	125;"	d
 MAX_RESOLUTIONS	src/ui/ui_local.h	64;"	d
-MAX_REWARDSTACK	src/cgame/cg_local.h	881;"	d
+MAX_REWARDSTACK	src/cgame/cg_local.h	883;"	d
 MAX_RIFF_CHUNKS	src/client/cl_avi.c	28;"	d	file:
 MAX_ROWID	src/server/sqlite3.c	78611;"	d	file:
 MAX_SAY_TEXT	src/qcommon/q_shared.h	250;"	d
@@ -6625,12 +6648,12 @@ MAX_SHADER_STAGES	src/renderergl2/tr_local.h	165;"	d
 MAX_SKINS	src/renderergl1/tr_local.h	760;"	d
 MAX_SKINS	src/renderergl2/tr_local.h	1286;"	d
 MAX_SNAPSHOT_ENTITIES	src/qcommon/qcommon.h	141;"	d
-MAX_SOUNDBUFFER	src/cgame/cg_local.h	882;"	d
+MAX_SOUNDBUFFER	src/cgame/cg_local.h	884;"	d
 MAX_SOUNDS	src/qcommon/q_shared.h	1209;"	d
 MAX_SOURCEFILES	src/qcommon/parse.c	3636;"	d	file:
-MAX_SPAWN_VARS	src/game/g_local.h	546;"	d
+MAX_SPAWN_VARS	src/game/g_local.h	548;"	d
 MAX_SPAWN_VARS	src/renderergl2/tr_bsp.c	2891;"	d	file:
-MAX_SPAWN_VARS_CHARS	src/game/g_local.h	547;"	d
+MAX_SPAWN_VARS_CHARS	src/game/g_local.h	549;"	d
 MAX_SRC	src/client/snd_openal.c	605;"	d	file:
 MAX_SRC	src/client/snd_openal.c	607;"	d	file:
 MAX_STATS	src/qcommon/q_shared.h	1233;"	d
@@ -6650,9 +6673,9 @@ MAX_TRAIL_BEAM_JITTERS	src/cgame/cg_local.h	444;"	d
 MAX_TRAIL_BEAM_NODES	src/cgame/cg_local.h	442;"	d
 MAX_TRAIL_FILES	src/cgame/cg_local.h	433;"	d
 MAX_TRAIL_SYSTEMS	src/cgame/cg_local.h	440;"	d
-MAX_TRAMPLE_BUILDABLES_TRACKED	src/game/g_local.h	366;"	d
+MAX_TRAMPLE_BUILDABLES_TRACKED	src/game/g_local.h	370;"	d
 MAX_TUTORIAL_TEXT	src/cgame/cg_tutorial.c	138;"	d	file:
-MAX_UNLAGGED_MARKERS	src/game/g_local.h	358;"	d
+MAX_UNLAGGED_MARKERS	src/game/g_local.h	362;"	d
 MAX_USER_FLAGS	src/game/g_admin.c	4053;"	d	file:
 MAX_VALUE	src/qcommon/qfiles.h	348;"	d
 MAX_VALUES	src/qcommon/parse.c	1879;"	d	file:
@@ -6665,16 +6688,16 @@ MAX_VISCOUNTS	src/renderergl2/tr_local.h	52;"	d
 MAX_VM	src/qcommon/vm.c	47;"	d	file:
 MAX_VMMAIN_ARGS	src/qcommon/vm_local.h	28;"	d
 MAX_VMSYSCALL_ARGS	src/qcommon/vm_local.h	32;"	d
-MAX_VOICES	src/game/bg_public.h	1303;"	d
-MAX_VOICE_CMD_LEN	src/game/bg_public.h	1305;"	d
-MAX_VOICE_NAME_LEN	src/game/bg_public.h	1304;"	d
+MAX_VOICES	src/game/bg_public.h	1317;"	d
+MAX_VOICE_CMD_LEN	src/game/bg_public.h	1319;"	d
+MAX_VOICE_NAME_LEN	src/game/bg_public.h	1318;"	d
 MAX_WEAPONS	src/qcommon/q_shared.h	1236;"	d
 MAX_WEAPON_ANIMATIONS	src/game/bg_public.h	/^  MAX_WEAPON_ANIMATIONS$/;"	e	enum:__anon344
 MAX_WORLD_COORD	src/qcommon/qfiles.h	357;"	d
 MAX_WRAP_CACHE	src/ui/ui_shared.c	4466;"	d	file:
 MAX_WRAP_LINES	src/ui/ui_shared.c	4467;"	d	file:
 MAX_WRAP_TEXT	src/ui/ui_shared.c	4468;"	d	file:
-MAX_ZAPS	src/game/g_local.h	1013;"	d
+MAX_ZAPS	src/game/g_local.h	1019;"	d
 MAX_ZPATH	src/qcommon/files.c	184;"	d	file:
 MAYBE_EMIT_CONST	src/qcommon/vm_powerpc.c	800;"	d	file:
 MAYBE_EMIT_CONST	src/qcommon/vm_sparc.c	859;"	d	file:
@@ -6772,13 +6795,13 @@ MD5Transform	src/qcommon/md5.c	/^static void MD5Transform(uint32_t buf[4],$/;"	f
 MD5Update	src/qcommon/md5.c	/^static void MD5Update(struct MD5Context *ctx, unsigned char const *buf,$/;"	f	file:
 MD5_CTX	src/qcommon/md5.c	/^} MD5_CTX;$/;"	t	typeref:struct:MD5Context	file:
 MDMB_MASK	src/qcommon/vm_powerpc_asm.c	645;"	d	file:
-MDRIVER_CLIPSIZE	src/game/tremulous.h	419;"	d
-MDRIVER_DMG	src/game/tremulous.h	421;"	d
-MDRIVER_K_SCALE	src/game/tremulous.h	423;"	d
-MDRIVER_MAXCLIPS	src/game/tremulous.h	420;"	d
-MDRIVER_PRICE	src/game/tremulous.h	418;"	d
-MDRIVER_RELOAD	src/game/tremulous.h	424;"	d
-MDRIVER_REPEAT	src/game/tremulous.h	422;"	d
+MDRIVER_CLIPSIZE	src/game/tremulous.h	426;"	d
+MDRIVER_DMG	src/game/tremulous.h	428;"	d
+MDRIVER_K_SCALE	src/game/tremulous.h	430;"	d
+MDRIVER_MAXCLIPS	src/game/tremulous.h	427;"	d
+MDRIVER_PRICE	src/game/tremulous.h	425;"	d
+MDRIVER_RELOAD	src/game/tremulous.h	431;"	d
+MDRIVER_REPEAT	src/game/tremulous.h	429;"	d
 MDR_IDENT	src/qcommon/qfiles.h	202;"	d
 MDR_MAX_BONES	src/qcommon/qfiles.h	204;"	d
 MDR_VERSION	src/qcommon/qfiles.h	203;"	d
@@ -6788,16 +6811,16 @@ MDSMB_MASK	src/qcommon/vm_powerpc_asm.c	655;"	d	file:
 MDS_MASK	src/qcommon/vm_powerpc_asm.c	652;"	d	file:
 MD_MASK	src/qcommon/vm_powerpc_asm.c	642;"	d	file:
 ME	src/qcommon/vm_powerpc_asm.c	330;"	d	file:
-MEDISTAT_BP	src/game/tremulous.h	540;"	d
-MEDISTAT_BT	src/game/tremulous.h	541;"	d
-MEDISTAT_HEALTH	src/game/tremulous.h	542;"	d
-MEDISTAT_SPLASHDAMAGE	src/game/tremulous.h	543;"	d
-MEDISTAT_SPLASHRADIUS	src/game/tremulous.h	544;"	d
-MEDISTAT_VALUE	src/game/tremulous.h	545;"	d
-MEDKIT_POISON_IMMUNITY_TIME	src/game/tremulous.h	506;"	d
-MEDKIT_PRICE	src/game/tremulous.h	491;"	d
-MEDKIT_STARTUP_SPEED	src/game/tremulous.h	508;"	d
-MEDKIT_STARTUP_TIME	src/game/tremulous.h	507;"	d
+MEDISTAT_BP	src/game/tremulous.h	552;"	d
+MEDISTAT_BT	src/game/tremulous.h	553;"	d
+MEDISTAT_HEALTH	src/game/tremulous.h	554;"	d
+MEDISTAT_SPLASHDAMAGE	src/game/tremulous.h	555;"	d
+MEDISTAT_SPLASHRADIUS	src/game/tremulous.h	556;"	d
+MEDISTAT_VALUE	src/game/tremulous.h	557;"	d
+MEDKIT_POISON_IMMUNITY_TIME	src/game/tremulous.h	520;"	d
+MEDKIT_PRICE	src/game/tremulous.h	502;"	d
+MEDKIT_STARTUP_SPEED	src/game/tremulous.h	522;"	d
+MEDKIT_STARTUP_TIME	src/game/tremulous.h	521;"	d
 MEM5LINK	src/server/sqlite3.c	20117;"	d	file:
 MEMCELLSIZE	src/server/sqlite3.c	16063;"	d	file:
 MEMDB	src/server/sqlite3.c	44777;"	d	file:
@@ -6836,21 +6859,24 @@ MENUDEF_H	src/ui/menudef.h	2;"	d
 MENU_FALSE	src/ui/menudef.h	57;"	d
 MENU_TRUE	src/ui/menudef.h	56;"	d
 ME_MASK	src/qcommon/vm_powerpc_asm.c	331;"	d	file:
-MGTURRET_ACCURACY_TO_FIRE	src/game/tremulous.h	553;"	d
-MGTURRET_ANGULARSPEED	src/game/tremulous.h	552;"	d
-MGTURRET_BP	src/game/tremulous.h	547;"	d
-MGTURRET_BT	src/game/tremulous.h	548;"	d
-MGTURRET_DMG	src/game/tremulous.h	559;"	d
-MGTURRET_HEALTH	src/game/tremulous.h	549;"	d
-MGTURRET_K_SCALE	src/game/tremulous.h	556;"	d
-MGTURRET_RANGE	src/game/tremulous.h	557;"	d
-MGTURRET_REPEAT	src/game/tremulous.h	555;"	d
-MGTURRET_SPINUP_TIME	src/game/tremulous.h	560;"	d
-MGTURRET_SPLASHDAMAGE	src/game/tremulous.h	550;"	d
-MGTURRET_SPLASHRADIUS	src/game/tremulous.h	551;"	d
-MGTURRET_SPREAD	src/game/tremulous.h	558;"	d
-MGTURRET_VALUE	src/game/tremulous.h	561;"	d
-MGTURRET_VERTICALCAP	src/game/tremulous.h	554;"	d
+MGTURRET_ACCURACY_TO_FIRE	src/game/tremulous.h	565;"	d
+MGTURRET_ANGULARSPEED	src/game/tremulous.h	564;"	d
+MGTURRET_BP	src/game/tremulous.h	559;"	d
+MGTURRET_BT	src/game/tremulous.h	560;"	d
+MGTURRET_DCC_ANGULARSPEED	src/game/tremulous.h	574;"	d
+MGTURRET_DCC_SPINUP_TIME	src/game/tremulous.h	575;"	d
+MGTURRET_DMG	src/game/tremulous.h	571;"	d
+MGTURRET_GRAB_ANGULARSPEED	src/game/tremulous.h	576;"	d
+MGTURRET_HEALTH	src/game/tremulous.h	561;"	d
+MGTURRET_K_SCALE	src/game/tremulous.h	568;"	d
+MGTURRET_RANGE	src/game/tremulous.h	569;"	d
+MGTURRET_REPEAT	src/game/tremulous.h	567;"	d
+MGTURRET_SPINUP_TIME	src/game/tremulous.h	572;"	d
+MGTURRET_SPLASHDAMAGE	src/game/tremulous.h	562;"	d
+MGTURRET_SPLASHRADIUS	src/game/tremulous.h	563;"	d
+MGTURRET_SPREAD	src/game/tremulous.h	570;"	d
+MGTURRET_VALUE	src/game/tremulous.h	573;"	d
+MGTURRET_VERTICALCAP	src/game/tremulous.h	566;"	d
 MGT_STATE_ACTIVE	src/game/g_buildable.c	/^  MGT_STATE_ACTIVE$/;"	e	enum:__anon370	file:
 MGT_STATE_DROP	src/game/g_buildable.c	/^  MGT_STATE_DROP,$/;"	e	enum:__anon370	file:
 MGT_STATE_INACTIVE	src/game/g_buildable.c	/^  MGT_STATE_INACTIVE,$/;"	e	enum:__anon370	file:
@@ -6879,7 +6905,7 @@ MINUS	src/tools/lcc/cpp/cpp.h	/^		ARROW, SBRA, SKET, LP, RP, DOT, AND, STAR, PLU
 MINUS1	src/tools/lcc/cpp/lex.c	/^	CC1, CC2, WS1, PLUS1, MINUS1, STAR1, SLASH1, PCT1, SHARP1,$/;"	e	enum:state	file:
 MIN_COMHUNKMEGS	src/qcommon/common.c	41;"	d	file:
 MIN_DEDICATED_COMHUNKMEGS	src/qcommon/common.c	40;"	d	file:
-MIN_FALL_DISTANCE	src/game/tremulous.h	651;"	d
+MIN_FALL_DISTANCE	src/game/tremulous.h	664;"	d
 MIN_FIELD_WIDTH	src/ui/ui_shared.c	3258;"	d	file:
 MIN_GAMESTAT_DELAY	src/master/servers.h	42;"	d
 MIN_PACKET_SIZE	src/master/master.c	48;"	d	file:
@@ -6905,12 +6931,17 @@ MN_A_CLASSNOTATSTAGE	src/game/bg_public.h	/^  MN_A_CLASSNOTATSTAGE,$/;"	e	enum:_
 MN_A_CLASSNOTSPAWN	src/game/bg_public.h	/^  MN_A_CLASSNOTSPAWN,$/;"	e	enum:__anon340
 MN_A_EVOLVEBUILDTIMER	src/game/bg_public.h	/^  MN_A_EVOLVEBUILDTIMER,$/;"	e	enum:__anon340
 MN_A_EVOLVEWALLWALK	src/game/bg_public.h	/^  MN_A_EVOLVEWALLWALK,$/;"	e	enum:__anon340
+MN_A_HOVEL_BLOCKED	src/game/bg_public.h	/^  MN_A_HOVEL_BLOCKED,$/;"	e	enum:__anon340
+MN_A_HOVEL_EXIT	src/game/bg_public.h	/^  MN_A_HOVEL_EXIT,$/;"	e	enum:__anon340
+MN_A_HOVEL_NOCLIP	src/game/bg_public.h	/^  MN_A_HOVEL_NOCLIP,$/;"	e	enum:__anon340
+MN_A_HOVEL_OCCUPIED	src/game/bg_public.h	/^  MN_A_HOVEL_OCCUPIED,$/;"	e	enum:__anon340
 MN_A_INFEST	src/game/bg_public.h	/^  MN_A_INFEST,$/;"	e	enum:__anon340
 MN_A_NOBP	src/game/bg_public.h	/^  MN_A_NOBP,$/;"	e	enum:__anon340
 MN_A_NOCREEP	src/game/bg_public.h	/^  MN_A_NOCREEP,$/;"	e	enum:__anon340
 MN_A_NOEROOM	src/game/bg_public.h	/^  MN_A_NOEROOM,$/;"	e	enum:__anon340
 MN_A_NOOVMND	src/game/bg_public.h	/^  MN_A_NOOVMND,$/;"	e	enum:__anon340
 MN_A_NOOVMND_EVOLVE	src/game/bg_public.h	/^  MN_A_NOOVMND_EVOLVE,$/;"	e	enum:__anon340
+MN_A_ONEHOVEL	src/game/bg_public.h	/^  MN_A_ONEHOVEL,$/;"	e	enum:__anon340
 MN_A_ONEOVERMIND	src/game/bg_public.h	/^  MN_A_ONEOVERMIND,$/;"	e	enum:__anon340
 MN_A_TEAMFULL	src/game/bg_public.h	/^  MN_A_TEAMFULL,$/;"	e	enum:__anon340
 MN_A_TEAMLOCKED	src/game/bg_public.h	/^  MN_A_TEAMLOCKED,$/;"	e	enum:__anon340
@@ -6946,6 +6977,7 @@ MN_H_NOROOMBSUITOFF	src/game/bg_public.h	/^  MN_H_NOROOMBSUITOFF,$/;"	e	enum:__a
 MN_H_NOROOMBSUITON	src/game/bg_public.h	/^  MN_H_NOROOMBSUITON,$/;"	e	enum:__anon340
 MN_H_NOSLOTS	src/game/bg_public.h	/^  MN_H_NOSLOTS,$/;"	e	enum:__anon340
 MN_H_NOTPOWERED	src/game/bg_public.h	/^  MN_H_NOTPOWERED,$/;"	e	enum:__anon340
+MN_H_ONEDCC	src/game/bg_public.h	/^  MN_H_ONEDCC,$/;"	e	enum:__anon340
 MN_H_ONEREACTOR	src/game/bg_public.h	/^  MN_H_ONEREACTOR,$/;"	e	enum:__anon340
 MN_H_RPTPOWERHERE	src/game/bg_public.h	/^  MN_H_RPTPOWERHERE,$/;"	e	enum:__anon340
 MN_H_SPAWN	src/game/bg_public.h	/^  MN_H_SPAWN,$/;"	e	enum:__anon340
@@ -7415,12 +7447,12 @@ NUMBER	src/tools/lcc/cpp/cpp.h	/^enum toktype { END, UNCLASS, NAME, NUMBER, STRI
 NUMVERTEXNORMALS	src/qcommon/q_shared.h	369;"	d
 NUM_BEAM_SEGS	src/renderergl1/tr_surface.c	290;"	d	file:
 NUM_BEAM_SEGS	src/renderergl2/tr_surface.c	542;"	d	file:
-NUM_BINARY_SHADERS	src/cgame/cg_local.h	932;"	d
+NUM_BINARY_SHADERS	src/cgame/cg_local.h	934;"	d
 NUM_CON_TIMES	src/client/cl_console.c	31;"	d	file:
 NUM_CROSSHAIRS	src/cgame/cg_local.h	77;"	d
 NUM_CROSSHAIRS	src/ui/ui_shared.h	120;"	d
 NUM_MUSIC_BUFFERS	src/client/snd_openal.c	1930;"	d	file:
-NUM_SAVED_STATES	src/cgame/cg_local.h	920;"	d
+NUM_SAVED_STATES	src/cgame/cg_local.h	922;"	d
 NUM_SEGMENTS	src/tools/asm/q3asm.c	/^	NUM_SEGMENTS$/;"	e	enum:__anon266	file:
 NUM_SERVER_PORTS	src/qcommon/qcommon.h	274;"	d
 NUM_SOURCE_OPS	src/tools/asm/q3asm.c	224;"	d	file:
@@ -7875,19 +7907,19 @@ OS_VXWORKS	src/server/sqlite3.c	131;"	d	file:
 OTHER	src/tools/lcc/src/lex.c	/^       DIGIT=010, HEX=020,    OTHER=040 };$/;"	e	enum:__anon281	file:
 OUT	GNUmakefile	/^OUT=out$/;"	m
 OUTS	src/tools/lcc/cpp/cpp.c	10;"	d	file:
-OVERMIND_ATTACK_PERIOD	src/game/g_buildable.c	1186;"	d	file:
-OVERMIND_ATTACK_RANGE	src/game/tremulous.h	327;"	d
-OVERMIND_ATTACK_REPEAT	src/game/tremulous.h	328;"	d
-OVERMIND_BP	src/game/tremulous.h	320;"	d
-OVERMIND_BT	src/game/tremulous.h	321;"	d
-OVERMIND_CREEPSIZE	src/game/tremulous.h	326;"	d
-OVERMIND_DYING_PERIOD	src/game/g_buildable.c	1187;"	d	file:
-OVERMIND_HEALTH	src/game/tremulous.h	322;"	d
-OVERMIND_REGEN	src/game/tremulous.h	323;"	d
-OVERMIND_SPAWNS_PERIOD	src/game/g_buildable.c	1188;"	d	file:
-OVERMIND_SPLASHDAMAGE	src/game/tremulous.h	324;"	d
-OVERMIND_SPLASHRADIUS	src/game/tremulous.h	325;"	d
-OVERMIND_VALUE	src/game/tremulous.h	329;"	d
+OVERMIND_ATTACK_PERIOD	src/game/g_buildable.c	1085;"	d	file:
+OVERMIND_ATTACK_RANGE	src/game/tremulous.h	334;"	d
+OVERMIND_ATTACK_REPEAT	src/game/tremulous.h	335;"	d
+OVERMIND_BP	src/game/tremulous.h	327;"	d
+OVERMIND_BT	src/game/tremulous.h	328;"	d
+OVERMIND_CREEPSIZE	src/game/tremulous.h	333;"	d
+OVERMIND_DYING_PERIOD	src/game/g_buildable.c	1086;"	d	file:
+OVERMIND_HEALTH	src/game/tremulous.h	329;"	d
+OVERMIND_REGEN	src/game/tremulous.h	330;"	d
+OVERMIND_SPAWNS_PERIOD	src/game/g_buildable.c	1087;"	d	file:
+OVERMIND_SPLASHDAMAGE	src/game/tremulous.h	331;"	d
+OVERMIND_SPLASHRADIUS	src/game/tremulous.h	332;"	d
+OVERMIND_VALUE	src/game/tremulous.h	336;"	d
 OV_EXCLUDE_STATIC_CALLBACKS	src/client/snd_codec_ogg.c	35;"	d	file:
 O_BINARY	src/server/sqlite3.c	27808;"	d	file:
 O_LARGEFILE	src/server/sqlite3.c	27798;"	d	file:
@@ -7984,14 +8016,14 @@ PAGER_WRITER_CACHEMOD	src/server/sqlite3.c	44350;"	d	file:
 PAGER_WRITER_DBMOD	src/server/sqlite3.c	44351;"	d	file:
 PAGER_WRITER_FINISHED	src/server/sqlite3.c	44352;"	d	file:
 PAGER_WRITER_LOCKED	src/server/sqlite3.c	44349;"	d	file:
-PAINBLEND_BORDER	src/cgame/cg_draw.c	3611;"	d	file:
-PAINSAW_DAMAGE	src/game/tremulous.h	388;"	d
-PAINSAW_HEIGHT	src/game/tremulous.h	391;"	d
-PAINSAW_K_SCALE	src/game/tremulous.h	387;"	d
-PAINSAW_PRICE	src/game/tremulous.h	385;"	d
-PAINSAW_RANGE	src/game/tremulous.h	389;"	d
-PAINSAW_REPEAT	src/game/tremulous.h	386;"	d
-PAINSAW_WIDTH	src/game/tremulous.h	390;"	d
+PAINBLEND_BORDER	src/cgame/cg_draw.c	3651;"	d	file:
+PAINSAW_DAMAGE	src/game/tremulous.h	395;"	d
+PAINSAW_HEIGHT	src/game/tremulous.h	398;"	d
+PAINSAW_K_SCALE	src/game/tremulous.h	394;"	d
+PAINSAW_PRICE	src/game/tremulous.h	392;"	d
+PAINSAW_RANGE	src/game/tremulous.h	396;"	d
+PAINSAW_REPEAT	src/game/tremulous.h	393;"	d
+PAINSAW_WIDTH	src/game/tremulous.h	397;"	d
 PAINTBUFFER_SIZE	src/client/snd_local.h	30;"	d
 PAIN_TWITCH_TIME	src/cgame/cg_local.h	49;"	d
 PARAM	src/tools/lcc/src/c.h	/^enum { CONSTANTS=1, LABELS, GLOBAL, PARAM, LOCAL };$/;"	e	enum:__anon303
@@ -8019,9 +8051,9 @@ PCACHE1_MIGHT_USE_GROUP_MUTEX	src/server/sqlite3.c	42323;"	d	file:
 PCACHE_DIRTYLIST_ADD	src/server/sqlite3.c	41439;"	d	file:
 PCACHE_DIRTYLIST_FRONT	src/server/sqlite3.c	41440;"	d	file:
 PCACHE_DIRTYLIST_REMOVE	src/server/sqlite3.c	41438;"	d	file:
-PCLOUD_ARMOUR_MODIFIER	src/game/tremulous.h	242;"	d
+PCLOUD_ARMOUR_MODIFIER	src/game/tremulous.h	240;"	d
 PCLOUD_DISORIENT_DURATION	src/cgame/cg_view.c	538;"	d	file:
-PCLOUD_MODIFIER	src/game/tremulous.h	241;"	d
+PCLOUD_MODIFIER	src/game/tremulous.h	239;"	d
 PCLOUD_ROLL_AMPLITUDE	src/cgame/cg_view.c	534;"	d	file:
 PCLOUD_ROLL_FREQUENCY	src/cgame/cg_view.c	535;"	d	file:
 PCLOUD_ZOOM_AMPLITUDE	src/cgame/cg_view.c	536;"	d	file:
@@ -8183,7 +8215,6 @@ PM_Animate	src/game/bg_pmove.c	/^static void PM_Animate( void )$/;"	f	file:
 PM_BeginWeaponChange	src/game/bg_pmove.c	/^static void PM_BeginWeaponChange( int weapon )$/;"	f	file:
 PM_CalculateAngularVelocity	src/game/bg_pmove.c	/^void PM_CalculateAngularVelocity( playerState_t *ps, const usercmd_t *cmd )$/;"	f
 PM_CheckCharge	src/game/bg_pmove.c	/^static void PM_CheckCharge( void )$/;"	f	file:
-PM_CheckDodge	src/game/bg_pmove.c	/^static qboolean PM_CheckDodge( void )$/;"	f	file:
 PM_CheckDuck	src/game/bg_pmove.c	/^static void PM_CheckDuck (void)$/;"	f	file:
 PM_CheckJump	src/game/bg_pmove.c	/^static qboolean PM_CheckJump( void )$/;"	f	file:
 PM_CheckLadder	src/game/bg_pmove.c	/^static void PM_CheckLadder( void )$/;"	f	file:
@@ -8374,15 +8405,15 @@ PPC_ShrinkJumps	src/qcommon/vm_powerpc.c	/^PPC_ShrinkJumps( void )$/;"	f	file:
 PPERCENT	src/tools/lcc/lburg/gram.c	/^    PPERCENT = 260,$/;"	e	enum:yytokentype	file:
 PPERCENT	src/tools/lcc/lburg/gram.c	117;"	d	file:
 PPLUS	src/tools/lcc/cpp/cpp.h	/^		EQ, NEQ, LEQ, GEQ, LSH, RSH, LAND, LOR, PPLUS, MMINUS,$/;"	e	enum:toktype
-PRIFLE_CLIPS	src/game/tremulous.h	446;"	d
-PRIFLE_DMG	src/game/tremulous.h	451;"	d
-PRIFLE_K_SCALE	src/game/tremulous.h	449;"	d
-PRIFLE_MAXCLIPS	src/game/tremulous.h	447;"	d
-PRIFLE_PRICE	src/game/tremulous.h	445;"	d
-PRIFLE_RELOAD	src/game/tremulous.h	450;"	d
-PRIFLE_REPEAT	src/game/tremulous.h	448;"	d
-PRIFLE_SIZE	src/game/tremulous.h	453;"	d
-PRIFLE_SPEED	src/game/tremulous.h	452;"	d
+PRIFLE_CLIPS	src/game/tremulous.h	453;"	d
+PRIFLE_DMG	src/game/tremulous.h	458;"	d
+PRIFLE_K_SCALE	src/game/tremulous.h	456;"	d
+PRIFLE_MAXCLIPS	src/game/tremulous.h	454;"	d
+PRIFLE_PRICE	src/game/tremulous.h	452;"	d
+PRIFLE_RELOAD	src/game/tremulous.h	457;"	d
+PRIFLE_REPEAT	src/game/tremulous.h	455;"	d
+PRIFLE_SIZE	src/game/tremulous.h	460;"	d
+PRIFLE_SPEED	src/game/tremulous.h	459;"	d
 PRINT_ALL	src/qcommon/q_shared.h	/^	PRINT_ALL,$/;"	e	enum:__anon459
 PRINT_DEVELOPER	src/qcommon/q_shared.h	/^	PRINT_DEVELOPER,		\/\/ only print when "developer 1"$/;"	e	enum:__anon459
 PRINT_ERROR	src/qcommon/q_shared.h	/^	PRINT_ERROR$/;"	e	enum:__anon459
@@ -8404,11 +8435,11 @@ PROXY_PATHINDEX	src/server/sqlite3.c	34180;"	d	file:
 PSF	src/qcommon/msg.c	1067;"	d	file:
 PSFO	src/cgame/cg_snapshot.c	265;"	d	file:
 PSHADOW_MAP_SIZE	src/renderergl2/tr_local.h	57;"	d
-PS_NONSEGMODEL	src/game/bg_public.h	298;"	d
+PS_NONSEGMODEL	src/game/bg_public.h	301;"	d
 PS_PMOVEFRAMECOUNTBITS	src/qcommon/q_shared.h	1240;"	d
-PS_SPRINTTOGGLE	src/game/bg_public.h	299;"	d
-PS_WALLCLIMBINGFOLLOW	src/game/bg_public.h	296;"	d
-PS_WALLCLIMBINGTOGGLE	src/game/bg_public.h	297;"	d
+PS_SPRINTTOGGLE	src/game/bg_public.h	302;"	d
+PS_WALLCLIMBINGFOLLOW	src/game/bg_public.h	299;"	d
+PS_WALLCLIMBINGTOGGLE	src/game/bg_public.h	300;"	d
 PTF_INTKEY	src/server/sqlite3.c	55063;"	d	file:
 PTF_LEAF	src/server/sqlite3.c	55066;"	d	file:
 PTF_LEAFDATA	src/server/sqlite3.c	55065;"	d	file:
@@ -8775,8 +8806,8 @@ QSORT_REFENTITYNUM_SHIFT	src/renderergl2/tr_local.h	1319;"	d
 QSORT_SHADERNUM_SHIFT	src/renderergl1/tr_local.h	787;"	d
 QSORT_SHADERNUM_SHIFT	src/renderergl2/tr_local.h	1320;"	d
 QUEST	src/tools/lcc/cpp/cpp.h	/^		TILDE, NOT, SLASH, PCT, LT, GT, CIRC, OR, QUEST,$/;"	e	enum:toktype
-QUEUE_MINUS1	src/game/g_local.h	470;"	d
-QUEUE_PLUS1	src/game/g_local.h	469;"	d
+QUEUE_MINUS1	src/game/g_local.h	476;"	d
+QUEUE_PLUS1	src/game/g_local.h	475;"	d
 Q_COLOR_ESCAPE	src/qcommon/q_shared.h	408;"	d
 Q_CleanStr	src/qcommon/q_shared.c	/^char *Q_CleanStr( char *string ) {$/;"	f
 Q_CountChar	src/qcommon/q_shared.c	/^int Q_CountChar(const char *string, char tocount)$/;"	f
@@ -9081,19 +9112,19 @@ RDF_HYPERSPACE	src/renderercommon/tr_types.h	61;"	d
 RDF_NOFOG	src/renderergl2/tr_extratypes.h	29;"	d
 RDF_NOWORLDMODEL	src/renderercommon/tr_types.h	60;"	d
 RDF_SUNLIGHT	src/renderergl2/tr_extratypes.h	31;"	d
-REACTOR_ATTACK_DAMAGE	src/game/tremulous.h	598;"	d
-REACTOR_ATTACK_DCC_DAMAGE	src/game/tremulous.h	601;"	d
-REACTOR_ATTACK_DCC_RANGE	src/game/tremulous.h	600;"	d
-REACTOR_ATTACK_DCC_REPEAT	src/game/tremulous.h	599;"	d
-REACTOR_ATTACK_RANGE	src/game/tremulous.h	596;"	d
-REACTOR_ATTACK_REPEAT	src/game/tremulous.h	597;"	d
-REACTOR_BASESIZE	src/game/tremulous.h	529;"	d
-REACTOR_BP	src/game/tremulous.h	591;"	d
-REACTOR_BT	src/game/tremulous.h	592;"	d
-REACTOR_HEALTH	src/game/tremulous.h	593;"	d
-REACTOR_SPLASHDAMAGE	src/game/tremulous.h	594;"	d
-REACTOR_SPLASHRADIUS	src/game/tremulous.h	595;"	d
-REACTOR_VALUE	src/game/tremulous.h	602;"	d
+REACTOR_ATTACK_DAMAGE	src/game/tremulous.h	613;"	d
+REACTOR_ATTACK_DCC_DAMAGE	src/game/tremulous.h	616;"	d
+REACTOR_ATTACK_DCC_RANGE	src/game/tremulous.h	615;"	d
+REACTOR_ATTACK_DCC_REPEAT	src/game/tremulous.h	614;"	d
+REACTOR_ATTACK_RANGE	src/game/tremulous.h	611;"	d
+REACTOR_ATTACK_REPEAT	src/game/tremulous.h	612;"	d
+REACTOR_BASESIZE	src/game/tremulous.h	541;"	d
+REACTOR_BP	src/game/tremulous.h	606;"	d
+REACTOR_BT	src/game/tremulous.h	607;"	d
+REACTOR_HEALTH	src/game/tremulous.h	608;"	d
+REACTOR_SPLASHDAMAGE	src/game/tremulous.h	609;"	d
+REACTOR_SPLASHRADIUS	src/game/tremulous.h	610;"	d
+REACTOR_VALUE	src/game/tremulous.h	617;"	d
 READMARK_NOT_USED	src/server/sqlite3.c	51748;"	d	file:
 READ_LOCK	src/server/sqlite3.c	55133;"	d	file:
 READ_UTF16BE	src/server/sqlite3.c	24976;"	d	file:
@@ -9106,7 +9137,7 @@ REFENTITYNUM_BITS	src/renderercommon/tr_types.h	30;"	d
 REFENTITYNUM_MASK	src/renderercommon/tr_types.h	31;"	d
 REFENTITYNUM_WORLD	src/renderercommon/tr_types.h	35;"	d
 REF_API_VERSION	src/renderercommon/tr_public.h	28;"	d
-REGEN_BOOST_RANGE	src/game/tremulous.h	339;"	d
+REGEN_BOOST_RANGE	src/game/tremulous.h	346;"	d
 REGISTER_TRACE	src/server/sqlite3.c	74869;"	d	file:
 REGISTER_TRACE	src/server/sqlite3.c	74871;"	d	file:
 REG_FLAGS_FLOAT	src/qcommon/vm_sparc.c	542;"	d	file:
@@ -9117,13 +9148,13 @@ RELEASE_LDFLAGS	src/master/Makefile	/^  RELEASE_LDFLAGS=-lwsock32$/;"	m
 RENDERER_LIBS	GNUmakefile	/^  RENDERER_LIBS = $(SDL_LIBS) -lGL$/;"	m
 RENDERER_LIBS	GNUmakefile	/^  RENDERER_LIBS = -lgdi32 -lole32 -lopengl32$/;"	m
 RENDERER_LIBS	GNUmakefile	/^  RENDERER_LIBS=$/;"	m
-REPEATER_BASESIZE	src/game/tremulous.h	530;"	d
-REPEATER_BP	src/game/tremulous.h	604;"	d
-REPEATER_BT	src/game/tremulous.h	605;"	d
-REPEATER_HEALTH	src/game/tremulous.h	606;"	d
-REPEATER_SPLASHDAMAGE	src/game/tremulous.h	607;"	d
-REPEATER_SPLASHRADIUS	src/game/tremulous.h	608;"	d
-REPEATER_VALUE	src/game/tremulous.h	609;"	d
+REPEATER_BASESIZE	src/game/tremulous.h	542;"	d
+REPEATER_BP	src/game/tremulous.h	619;"	d
+REPEATER_BT	src/game/tremulous.h	620;"	d
+REPEATER_HEALTH	src/game/tremulous.h	621;"	d
+REPEATER_SPLASHDAMAGE	src/game/tremulous.h	622;"	d
+REPEATER_SPLASHRADIUS	src/game/tremulous.h	623;"	d
+REPEATER_VALUE	src/game/tremulous.h	624;"	d
 RESERVED_BYTE	src/server/sqlite3.c	11822;"	d	file:
 RESERVED_CONFIGSTRINGS	src/qcommon/q_shared.h	1221;"	d
 RESERVED_LOCK	src/server/sqlite3.c	11758;"	d	file:
@@ -9205,14 +9236,14 @@ RGBAtoNormal	src/renderergl2/tr_image.c	/^static void RGBAtoNormal(const byte *i
 RGBAtoYCoCgA	src/renderergl2/tr_image.c	/^static void RGBAtoYCoCgA(const byte *in, byte *out, int width, int height)$/;"	f	file:
 RGL1DIR	GNUmakefile	/^RGL1DIR=$(MOUNT_DIR)\/renderergl1$/;"	m
 RGL2DIR	GNUmakefile	/^RGL2DIR=$(MOUNT_DIR)\/renderergl2$/;"	m
-RIFLE_CLIPSIZE	src/game/tremulous.h	376;"	d
-RIFLE_DMG	src/game/tremulous.h	383;"	d
-RIFLE_K_SCALE	src/game/tremulous.h	379;"	d
-RIFLE_MAXCLIPS	src/game/tremulous.h	377;"	d
-RIFLE_PRICE	src/game/tremulous.h	381;"	d
-RIFLE_RELOAD	src/game/tremulous.h	380;"	d
-RIFLE_REPEAT	src/game/tremulous.h	378;"	d
-RIFLE_SPREAD	src/game/tremulous.h	382;"	d
+RIFLE_CLIPSIZE	src/game/tremulous.h	383;"	d
+RIFLE_DMG	src/game/tremulous.h	390;"	d
+RIFLE_K_SCALE	src/game/tremulous.h	386;"	d
+RIFLE_MAXCLIPS	src/game/tremulous.h	384;"	d
+RIFLE_PRICE	src/game/tremulous.h	388;"	d
+RIFLE_RELOAD	src/game/tremulous.h	387;"	d
+RIFLE_REPEAT	src/game/tremulous.h	385;"	d
+RIFLE_SPREAD	src/game/tremulous.h	389;"	d
 RIGHT	src/tools/lcc/src/c.h	/^	RIGHT=42<<4,$/;"	e	enum:__anon305
 RM	src/master/Makefile	/^  RM=rm -f$/;"	m
 RMT_SPHERE	src/game/bg_public.h	/^  RMT_SPHERE,$/;"	e	enum:__anon338
@@ -9790,17 +9821,17 @@ SAY_RAW	src/game/bg_public.h	/^  SAY_RAW$/;"	e	enum:__anon347
 SAY_TEAM	src/game/bg_public.h	/^  SAY_TEAM,$/;"	e	enum:__anon347
 SAY_TPRIVMSG	src/game/bg_public.h	/^  SAY_TPRIVMSG,$/;"	e	enum:__anon347
 SBRA	src/tools/lcc/cpp/cpp.h	/^		ARROW, SBRA, SKET, LP, RP, DOT, AND, STAR, PLUS, MINUS,$/;"	e	enum:toktype
-SB_VALID_TOGGLEBIT	src/game/bg_public.h	272;"	d
+SB_VALID_TOGGLEBIT	src/game/bg_public.h	275;"	d
 SC	src/qcommon/vm_powerpc_asm.c	658;"	d	file:
-SCA_ALIENSENSE	src/game/bg_public.h	252;"	d
-SCA_CANUSELADDERS	src/game/bg_public.h	253;"	d
-SCA_CANZOOM	src/game/bg_public.h	250;"	d
-SCA_FOVWARPS	src/game/bg_public.h	251;"	d
-SCA_REGEN	src/game/bg_public.h	256;"	d
-SCA_STAMINA	src/game/bg_public.h	255;"	d
-SCA_TAKESFALLDAMAGE	src/game/bg_public.h	249;"	d
-SCA_WALLCLIMBER	src/game/bg_public.h	248;"	d
-SCA_WALLJUMPER	src/game/bg_public.h	254;"	d
+SCA_ALIENSENSE	src/game/bg_public.h	254;"	d
+SCA_CANUSELADDERS	src/game/bg_public.h	255;"	d
+SCA_CANZOOM	src/game/bg_public.h	252;"	d
+SCA_FOVWARPS	src/game/bg_public.h	253;"	d
+SCA_REGEN	src/game/bg_public.h	258;"	d
+SCA_STAMINA	src/game/bg_public.h	257;"	d
+SCA_TAKESFALLDAMAGE	src/game/bg_public.h	251;"	d
+SCA_WALLCLIMBER	src/game/bg_public.h	250;"	d
+SCA_WALLJUMPER	src/game/bg_public.h	256;"	d
 SCFL_NOBINARYNUMBERS	src/qcommon/parse.c	33;"	d	file:
 SCFL_NOERRORS	src/qcommon/parse.c	28;"	d	file:
 SCFL_NONUMBERVALUES	src/qcommon/parse.c	34;"	d	file:
@@ -9963,16 +9994,16 @@ SHLIBLDFLAGS	GNUmakefile	/^  SHLIBLDFLAGS=-shared $(LDFLAGS)$/;"	m
 SHLIBLDFLAGS	GNUmakefile	/^  SHLIBLDFLAGS=-shared$/;"	m
 SHLIBNAME	GNUmakefile	/^  SHLIBNAME=.$(SHLIBEXT)$/;"	m
 SHORT2ANGLE	src/qcommon/q_shared.h	1184;"	d
-SHOTGUN_DMG	src/game/tremulous.h	408;"	d
-SHOTGUN_K_SCALE	src/game/tremulous.h	405;"	d
-SHOTGUN_MAXCLIPS	src/game/tremulous.h	403;"	d
-SHOTGUN_PELLETS	src/game/tremulous.h	402;"	d
-SHOTGUN_PRICE	src/game/tremulous.h	400;"	d
-SHOTGUN_RANGE	src/game/tremulous.h	409;"	d
-SHOTGUN_RELOAD	src/game/tremulous.h	406;"	d
-SHOTGUN_REPEAT	src/game/tremulous.h	404;"	d
-SHOTGUN_SHELLS	src/game/tremulous.h	401;"	d
-SHOTGUN_SPREAD	src/game/tremulous.h	407;"	d
+SHOTGUN_DMG	src/game/tremulous.h	415;"	d
+SHOTGUN_K_SCALE	src/game/tremulous.h	412;"	d
+SHOTGUN_MAXCLIPS	src/game/tremulous.h	410;"	d
+SHOTGUN_PELLETS	src/game/tremulous.h	409;"	d
+SHOTGUN_PRICE	src/game/tremulous.h	407;"	d
+SHOTGUN_RANGE	src/game/tremulous.h	416;"	d
+SHOTGUN_RELOAD	src/game/tremulous.h	413;"	d
+SHOTGUN_REPEAT	src/game/tremulous.h	411;"	d
+SHOTGUN_SHELLS	src/game/tremulous.h	408;"	d
+SHOTGUN_SPREAD	src/game/tremulous.h	414;"	d
 SHOWNET	src/client/cl_parse.c	/^void SHOWNET( msg_t *msg, char *s) {$/;"	f
 SHRT_MAX	src/game/bg_lib.h	48;"	d
 SHRT_MIN	src/game/bg_lib.h	49;"	d
@@ -10020,14 +10051,14 @@ SLOT_2_0	src/server/sqlite3.c	188406;"	d	file:
 SLOT_2_0	src/server/sqlite3.c	26212;"	d	file:
 SLOT_4_2_0	src/server/sqlite3.c	188407;"	d	file:
 SLOT_4_2_0	src/server/sqlite3.c	26213;"	d	file:
-SLOT_ARMS	src/game/bg_public.h	415;"	d
-SLOT_BACKPACK	src/game/bg_public.h	417;"	d
-SLOT_HEAD	src/game/bg_public.h	413;"	d
-SLOT_LEGS	src/game/bg_public.h	416;"	d
-SLOT_NONE	src/game/bg_public.h	412;"	d
-SLOT_SIDEARM	src/game/bg_public.h	419;"	d
-SLOT_TORSO	src/game/bg_public.h	414;"	d
-SLOT_WEAPON	src/game/bg_public.h	418;"	d
+SLOT_ARMS	src/game/bg_public.h	418;"	d
+SLOT_BACKPACK	src/game/bg_public.h	420;"	d
+SLOT_HEAD	src/game/bg_public.h	416;"	d
+SLOT_LEGS	src/game/bg_public.h	419;"	d
+SLOT_NONE	src/game/bg_public.h	415;"	d
+SLOT_SIDEARM	src/game/bg_public.h	422;"	d
+SLOT_TORSO	src/game/bg_public.h	417;"	d
+SLOT_WEAPON	src/game/bg_public.h	421;"	d
 SL_ARRAY_SIZE	src/server/sv_sqlite.h	11;"	d
 SMALLCHAR_HEIGHT	src/qcommon/q_shared.h	381;"	d
 SMALLCHAR_WIDTH	src/qcommon/q_shared.h	380;"	d
@@ -11287,11 +11318,11 @@ SS_BLEND3	src/renderergl1/tr_local.h	/^	SS_BLEND3,$/;"	e	enum:__anon130
 SS_BLEND3	src/renderergl2/tr_local.h	/^	SS_BLEND3,$/;"	e	enum:__anon11
 SS_BLEND6	src/renderergl1/tr_local.h	/^	SS_BLEND6,$/;"	e	enum:__anon130
 SS_BLEND6	src/renderergl2/tr_local.h	/^	SS_BLEND6,$/;"	e	enum:__anon11
-SS_BLOBLOCKED	src/game/bg_public.h	262;"	d
-SS_BOOSTED	src/game/bg_public.h	264;"	d
-SS_BOOSTEDWARNING	src/game/bg_public.h	265;"	d
-SS_CHARGING	src/game/bg_public.h	267;"	d
-SS_CREEPSLOWED	src/game/bg_public.h	259;"	d
+SS_BLOBLOCKED	src/game/bg_public.h	264;"	d
+SS_BOOSTED	src/game/bg_public.h	266;"	d
+SS_BOOSTEDWARNING	src/game/bg_public.h	267;"	d
+SS_CHARGING	src/game/bg_public.h	269;"	d
+SS_CREEPSLOWED	src/game/bg_public.h	261;"	d
 SS_DEAD	src/server/server.h	/^	SS_DEAD,			\/\/ no map loaded$/;"	e	enum:__anon183
 SS_DECAL	src/renderergl1/tr_local.h	/^	SS_DECAL,			\/\/ scorch marks, etc.$/;"	e	enum:__anon130
 SS_DECAL	src/renderergl2/tr_local.h	/^	SS_DECAL,			\/\/ scorch marks, etc.$/;"	e	enum:__anon11
@@ -11300,27 +11331,28 @@ SS_ENVIRONMENT	src/renderergl2/tr_local.h	/^	SS_ENVIRONMENT,		\/\/ sky box$/;"	e
 SS_FOG	src/renderergl1/tr_local.h	/^	SS_FOG,$/;"	e	enum:__anon130
 SS_FOG	src/renderergl2/tr_local.h	/^	SS_FOG,$/;"	e	enum:__anon11
 SS_GAME	src/server/server.h	/^	SS_GAME				\/\/ actively running$/;"	e	enum:__anon183
-SS_GRABBED	src/game/bg_public.h	261;"	d
-SS_HEALING_2X	src/game/bg_public.h	269;"	d
-SS_HEALING_3X	src/game/bg_public.h	270;"	d
-SS_HEALING_ACTIVE	src/game/bg_public.h	268;"	d
+SS_GRABBED	src/game/bg_public.h	263;"	d
+SS_HEALING_2X	src/game/bg_public.h	271;"	d
+SS_HEALING_3X	src/game/bg_public.h	272;"	d
+SS_HEALING_ACTIVE	src/game/bg_public.h	270;"	d
+SS_HOVELING	src/game/bg_public.h	273;"	d
 SS_LOADING	src/server/server.h	/^	SS_LOADING,			\/\/ spawning level entities$/;"	e	enum:__anon183
 SS_NEAREST	src/renderergl1/tr_local.h	/^	SS_NEAREST			\/\/ blood blobs$/;"	e	enum:__anon130
 SS_NEAREST	src/renderergl2/tr_local.h	/^	SS_NEAREST			\/\/ blood blobs$/;"	e	enum:__anon11
 SS_OPAQUE	src/renderergl1/tr_local.h	/^	SS_OPAQUE,			\/\/ opaque$/;"	e	enum:__anon130
 SS_OPAQUE	src/renderergl2/tr_local.h	/^	SS_OPAQUE,			\/\/ opaque$/;"	e	enum:__anon11
-SS_POISONED	src/game/bg_public.h	263;"	d
+SS_POISONED	src/game/bg_public.h	265;"	d
 SS_PORTAL	src/renderergl1/tr_local.h	/^	SS_PORTAL,			\/\/ mirrors, portals, viewscreens$/;"	e	enum:__anon130
 SS_PORTAL	src/renderergl2/tr_local.h	/^	SS_PORTAL,			\/\/ mirrors, portals, viewscreens$/;"	e	enum:__anon11
 SS_SEE_THROUGH	src/renderergl1/tr_local.h	/^	SS_SEE_THROUGH,		\/\/ ladders, grates, grills that may have small blended edges$/;"	e	enum:__anon130
 SS_SEE_THROUGH	src/renderergl2/tr_local.h	/^	SS_SEE_THROUGH,		\/\/ ladders, grates, grills that may have small blended edges$/;"	e	enum:__anon11
-SS_SLOWLOCKED	src/game/bg_public.h	266;"	d
-SS_SPEEDBOOST	src/game/bg_public.h	260;"	d
+SS_SLOWLOCKED	src/game/bg_public.h	268;"	d
+SS_SPEEDBOOST	src/game/bg_public.h	262;"	d
 SS_STENCIL_SHADOW	src/renderergl1/tr_local.h	/^	SS_STENCIL_SHADOW,$/;"	e	enum:__anon130
 SS_STENCIL_SHADOW	src/renderergl2/tr_local.h	/^	SS_STENCIL_SHADOW,$/;"	e	enum:__anon11
 SS_UNDERWATER	src/renderergl1/tr_local.h	/^	SS_UNDERWATER,		\/\/ for items that should be drawn in front of the water plane$/;"	e	enum:__anon130
 SS_UNDERWATER	src/renderergl2/tr_local.h	/^	SS_UNDERWATER,		\/\/ for items that should be drawn in front of the water plane$/;"	e	enum:__anon11
-SS_WALLCLIMBING	src/game/bg_public.h	258;"	d
+SS_WALLCLIMBING	src/game/bg_public.h	260;"	d
 ST1	src/tools/lcc/cpp/lex.c	/^	START=0, NUM1, NUM2, NUM3, ID1, ST1, ST2, ST3, COM1, COM2, COM3, COM4,$/;"	e	enum:state	file:
 ST2	src/tools/lcc/cpp/lex.c	/^	START=0, NUM1, NUM2, NUM3, ID1, ST1, ST2, ST3, COM1, COM2, COM3, COM4,$/;"	e	enum:state	file:
 ST3	src/tools/lcc/cpp/lex.c	/^	START=0, NUM1, NUM2, NUM3, ID1, ST1, ST2, ST3, COM1, COM2, COM3, COM4,$/;"	e	enum:state	file:
@@ -11331,16 +11363,16 @@ STACK_RTEMP	src/qcommon/vm_powerpc.c	157;"	d	file:
 STACK_SAVE	src/qcommon/vm_powerpc.c	152;"	d	file:
 STACK_TEMP	src/qcommon/vm_powerpc.c	154;"	d	file:
 STALKWIDTH	src/cgame/cg_scanner.c	108;"	d	file:
-STAMINA_BLACKOUT_LEVEL	src/game/tremulous.h	634;"	d
-STAMINA_BREATHING_LEVEL	src/game/tremulous.h	632;"	d
-STAMINA_DODGE_TAKE	src/game/tremulous.h	630;"	d
-STAMINA_JUMP_TAKE	src/game/tremulous.h	629;"	d
-STAMINA_MAX	src/game/tremulous.h	631;"	d
-STAMINA_MEDISTAT_RESTORE	src/game/tremulous.h	627;"	d
-STAMINA_SLOW_LEVEL	src/game/tremulous.h	633;"	d
-STAMINA_SPRINT_TAKE	src/game/tremulous.h	628;"	d
-STAMINA_STOP_RESTORE	src/game/tremulous.h	625;"	d
-STAMINA_WALK_RESTORE	src/game/tremulous.h	626;"	d
+STAMINA_BLACKOUT_LEVEL	src/game/tremulous.h	649;"	d
+STAMINA_BREATHING_LEVEL	src/game/tremulous.h	647;"	d
+STAMINA_DODGE_TAKE	src/game/tremulous.h	645;"	d
+STAMINA_JUMP_TAKE	src/game/tremulous.h	644;"	d
+STAMINA_MAX	src/game/tremulous.h	646;"	d
+STAMINA_MEDISTAT_RESTORE	src/game/tremulous.h	642;"	d
+STAMINA_SLOW_LEVEL	src/game/tremulous.h	648;"	d
+STAMINA_SPRINT_TAKE	src/game/tremulous.h	643;"	d
+STAMINA_STOP_RESTORE	src/game/tremulous.h	640;"	d
+STAMINA_WALK_RESTORE	src/game/tremulous.h	641;"	d
 STAR	src/tools/lcc/cpp/cpp.h	/^		ARROW, SBRA, SKET, LP, RP, DOT, AND, STAR, PLUS, MINUS,$/;"	e	enum:toktype
 STAR1	src/tools/lcc/cpp/lex.c	/^	CC1, CC2, WS1, PLUS1, MINUS1, STAR1, SLASH1, PCT1, SHARP1,$/;"	e	enum:state	file:
 START	src/tools/lcc/cpp/lex.c	/^	START=0, NUM1, NUM2, NUM3, ID1, ST1, ST2, ST3, COM1, COM2, COM3, COM4,$/;"	e	enum:state	file:
@@ -11357,6 +11389,7 @@ STAT_ACTIVEITEMS	src/game/bg_public.h	/^  STAT_ACTIVEITEMS,$/;"	e	enum:__anon331
 STAT_BUILDABLE	src/game/bg_public.h	/^  STAT_BUILDABLE, \/\/ which ghost model to display for building$/;"	e	enum:__anon331
 STAT_CLASS	src/game/bg_public.h	/^  STAT_CLASS,     \/\/ player class (for aliens AND humans)$/;"	e	enum:__anon331
 STAT_FALLDIST	src/game/bg_public.h	/^  STAT_FALLDIST,  \/\/ the distance the player fell$/;"	e	enum:__anon331
+STAT_FUEL	src/game/bg_public.h	/^  STAT_FUEL,      \/\/ jetpacks$/;"	e	enum:__anon331
 STAT_GET_NDLT	src/server/sqlite3.c	92533;"	d	file:
 STAT_GET_NEQ	src/server/sqlite3.c	92531;"	d	file:
 STAT_GET_NLT	src/server/sqlite3.c	92532;"	d	file:
@@ -11372,7 +11405,7 @@ STAT_SHAKE	src/game/bg_public.h	/^  STAT_SHAKE      \/\/ camera shake$/;"	e	enum
 STAT_STAMINA	src/game/bg_public.h	/^  STAT_STAMINA,   \/\/ stamina (human only)$/;"	e	enum:__anon331
 STAT_STATE	src/game/bg_public.h	/^  STAT_STATE,     \/\/ client states e.g. wall climbing$/;"	e	enum:__anon331
 STAT_TEAM	src/game/bg_public.h	/^  STAT_TEAM,      \/\/ player team$/;"	e	enum:__anon331
-STAT_VIEWLOCK	src/game/bg_public.h	/^  STAT_VIEWLOCK,   \/\/ direction to lock the view in$/;"	e	enum:__anon331
+STAT_VIEWLOCK	src/game/bg_public.h	/^  STAT_VIEWLOCK,  \/\/ direction to lock the view in$/;"	e	enum:__anon331
 STAT_WEAPON	src/game/bg_public.h	/^  STAT_WEAPON,    \/\/ current primary weapon$/;"	e	enum:__anon331
 STB	src/qcommon/vm_sparc.c	/^	STBI, STB,$/;"	e	enum:sparc_iname	file:
 STBI	src/qcommon/vm_sparc.c	/^	STBI, STB,$/;"	e	enum:sparc_iname	file:
@@ -12199,7 +12232,7 @@ TEAMOVERLAY_SORT_WEAPONCLASS	src/cgame/cg_draw.c	/^  TEAMOVERLAY_SORT_WEAPONCLAS
 TEAMOVERLAY_SUPPORT	src/cgame/cg_draw.c	/^  TEAMOVERLAY_SUPPORT,$/;"	e	enum:__anon224	file:
 TEAM_ALIENS	src/game/bg_public.h	/^  TEAM_ALIENS,$/;"	e	enum:__anon325
 TEAM_HUMANS	src/game/bg_public.h	/^  TEAM_HUMANS,$/;"	e	enum:__anon325
-TEAM_LOCATION_UPDATE_TIME	src/game/bg_public.h	824;"	d
+TEAM_LOCATION_UPDATE_TIME	src/game/bg_public.h	837;"	d
 TEAM_NONE	src/game/bg_public.h	/^  TEAM_NONE,$/;"	e	enum:__anon325
 TEAM_OVERLAY_MAXLOCATION_WIDTH	src/cgame/cg_local.h	80;"	d
 TEAM_OVERLAY_MAXNAME_WIDTH	src/cgame/cg_local.h	79;"	d
@@ -12226,16 +12259,16 @@ TERM_OR_OK	src/server/sqlite3.c	120174;"	d	file:
 TERM_VIRTUAL	src/server/sqlite3.c	120169;"	d	file:
 TERM_VNULL	src/server/sqlite3.c	120176;"	d	file:
 TERM_VNULL	src/server/sqlite3.c	120178;"	d	file:
-TESLAGEN_BP	src/game/tremulous.h	563;"	d
-TESLAGEN_BT	src/game/tremulous.h	564;"	d
-TESLAGEN_DMG	src/game/tremulous.h	571;"	d
-TESLAGEN_HEALTH	src/game/tremulous.h	565;"	d
-TESLAGEN_K_SCALE	src/game/tremulous.h	569;"	d
-TESLAGEN_RANGE	src/game/tremulous.h	570;"	d
-TESLAGEN_REPEAT	src/game/tremulous.h	568;"	d
-TESLAGEN_SPLASHDAMAGE	src/game/tremulous.h	566;"	d
-TESLAGEN_SPLASHRADIUS	src/game/tremulous.h	567;"	d
-TESLAGEN_VALUE	src/game/tremulous.h	572;"	d
+TESLAGEN_BP	src/game/tremulous.h	578;"	d
+TESLAGEN_BT	src/game/tremulous.h	579;"	d
+TESLAGEN_DMG	src/game/tremulous.h	586;"	d
+TESLAGEN_HEALTH	src/game/tremulous.h	580;"	d
+TESLAGEN_K_SCALE	src/game/tremulous.h	584;"	d
+TESLAGEN_RANGE	src/game/tremulous.h	585;"	d
+TESLAGEN_REPEAT	src/game/tremulous.h	583;"	d
+TESLAGEN_SPLASHDAMAGE	src/game/tremulous.h	581;"	d
+TESLAGEN_SPLASHRADIUS	src/game/tremulous.h	582;"	d
+TESLAGEN_VALUE	src/game/tremulous.h	587;"	d
 TESTBIT	src/server/sqlite3.c	41292;"	d	file:
 TESTONLY	src/server/sqlite3.c	138285;"	d	file:
 TESTONLY	src/server/sqlite3.c	138287;"	d	file:
@@ -12512,17 +12545,17 @@ TRAIN_START_OFF	src/game/g_mover.c	1912;"	d	file:
 TRANS_NONE	src/server/sqlite3.c	55181;"	d	file:
 TRANS_READ	src/server/sqlite3.c	55182;"	d	file:
 TRANS_WRITE	src/server/sqlite3.c	55183;"	d	file:
-TRAPPER_ACCURACY	src/game/g_buildable.c	1629;"	d	file:
-TRAPPER_BP	src/game/tremulous.h	305;"	d
-TRAPPER_BT	src/game/tremulous.h	306;"	d
-TRAPPER_CREEPSIZE	src/game/tremulous.h	311;"	d
-TRAPPER_HEALTH	src/game/tremulous.h	307;"	d
-TRAPPER_RANGE	src/game/tremulous.h	312;"	d
-TRAPPER_REGEN	src/game/tremulous.h	308;"	d
-TRAPPER_REPEAT	src/game/tremulous.h	313;"	d
-TRAPPER_SPLASHDAMAGE	src/game/tremulous.h	309;"	d
-TRAPPER_SPLASHRADIUS	src/game/tremulous.h	310;"	d
-TRAPPER_VALUE	src/game/tremulous.h	314;"	d
+TRAPPER_ACCURACY	src/game/g_buildable.c	1736;"	d	file:
+TRAPPER_BP	src/game/tremulous.h	312;"	d
+TRAPPER_BT	src/game/tremulous.h	313;"	d
+TRAPPER_CREEPSIZE	src/game/tremulous.h	318;"	d
+TRAPPER_HEALTH	src/game/tremulous.h	314;"	d
+TRAPPER_RANGE	src/game/tremulous.h	319;"	d
+TRAPPER_REGEN	src/game/tremulous.h	315;"	d
+TRAPPER_REPEAT	src/game/tremulous.h	320;"	d
+TRAPPER_SPLASHDAMAGE	src/game/tremulous.h	316;"	d
+TRAPPER_SPLASHRADIUS	src/game/tremulous.h	317;"	d
+TRAPPER_VALUE	src/game/tremulous.h	321;"	d
 TRAP_ANGLEVECTORS	src/qcommon/qcommon.h	/^	TRAP_ANGLEVECTORS,$/;"	e	enum:__anon424
 TRAP_ATAN2	src/qcommon/qcommon.h	/^	TRAP_ATAN2,$/;"	e	enum:__anon424
 TRAP_CEIL	src/qcommon/qcommon.h	/^	TRAP_CEIL,$/;"	e	enum:__anon424
@@ -13114,7 +13147,7 @@ USE_INTERNAL_VORBIS	GNUmakefile	/^USE_INTERNAL_VORBIS=$(USE_INTERNAL_LIBS)$/;"	m
 USE_INTERNAL_ZLIB	GNUmakefile	/^USE_INTERNAL_ZLIB=$(USE_INTERNAL_LIBS)$/;"	m
 USE_MUMBLE	GNUmakefile	/^  USE_MUMBLE=0$/;"	m
 USE_MUMBLE	GNUmakefile	/^USE_MUMBLE=1$/;"	m
-USE_OBJECT_RANGE	src/game/g_active.c	1743;"	d	file:
+USE_OBJECT_RANGE	src/game/g_active.c	1817;"	d	file:
 USE_OPENAL	GNUmakefile	/^USE_OPENAL=1$/;"	m
 USE_OPENAL_DLOPEN	GNUmakefile	/^USE_OPENAL_DLOPEN=1$/;"	m
 USE_PREAD	src/server/sqlite3.c	27391;"	d	file:
@@ -13241,7 +13274,7 @@ VOICE_CHAN_ALL	src/game/bg_public.h	/^  VOICE_CHAN_ALL,$/;"	e	enum:__anon358
 VOICE_CHAN_LOCAL	src/game/bg_public.h	/^  VOICE_CHAN_LOCAL,$/;"	e	enum:__anon358
 VOICE_CHAN_NUM_CHANS	src/game/bg_public.h	/^  VOICE_CHAN_NUM_CHANS$/;"	e	enum:__anon358
 VOICE_CHAN_TEAM	src/game/bg_public.h	/^  VOICE_CHAN_TEAM ,$/;"	e	enum:__anon358
-VOICE_ENTHUSIASM_DECAY	src/game/bg_public.h	1306;"	d
+VOICE_ENTHUSIASM_DECAY	src/game/bg_public.h	1320;"	d
 VOID_VOTE	src/game/bg_public.h	/^  VOID_VOTE$/;"	e	enum:__anon360
 VOIP_DIRECT	src/qcommon/q_shared.h	1068;"	d
 VOIP_FLAGCNT	src/qcommon/q_shared.h	1072;"	d
@@ -15271,6 +15304,7 @@ buildableTeam	src/game/g_local.h	/^  team_t            buildableTeam;      \/\/ 
 buildable_t	src/game/bg_public.h	/^} buildable_t;$/;"	t	typeref:enum:__anon337
 buildables	src/game/bg_misc.c	/^  buildable_t       buildables[ BA_NUM_BUILDABLES ];$/;"	m	struct:gameElements_s	file:
 buildablesFraction	src/cgame/cg_local.h	/^  float         buildablesFraction;$/;"	m	struct:__anon249
+builder	src/game/g_local.h	/^  gentity_t         *builder;           \/\/ occupant of this hovel$/;"	m	struct:gentity_s
 builtBy	src/game/g_local.h	/^  namelog_t    *builtBy;$/;"	m	struct:__anon315
 builtBy	src/game/g_local.h	/^  struct namelog_s  *builtBy;           \/\/ person who built this$/;"	m	struct:gentity_s	typeref:struct:gentity_s::namelog_s
 builtin	src/qcommon/parse.c	/^  int builtin;                \/\/ > 0 if builtin define$/;"	m	struct:define_s	file:
@@ -15537,6 +15571,9 @@ cg_entities	src/cgame/cg_main.c	/^centity_t   cg_entities[ MAX_GENTITIES ];$/;"	
 cg_errorDecay	src/cgame/cg_main.c	/^vmCvar_t  cg_errorDecay;$/;"	v
 cg_footsteps	src/cgame/cg_main.c	/^vmCvar_t  cg_footsteps;$/;"	v
 cg_freeMarkPolys	src/cgame/cg_marks.c	/^markPoly_t  *cg_freeMarkPolys;      \/\/ single linked list$/;"	v
+cg_fuelInfoScale	src/cgame/cg_main.c	/^vmCvar_t  cg_fuelInfoScale;$/;"	v
+cg_fuelInfoX	src/cgame/cg_main.c	/^vmCvar_t  cg_fuelInfoX;$/;"	v
+cg_fuelInfoY	src/cgame/cg_main.c	/^vmCvar_t  cg_fuelInfoY;$/;"	v
 cg_gun_frame	src/cgame/cg_main.c	/^vmCvar_t  cg_gun_frame;$/;"	v
 cg_gun_x	src/cgame/cg_main.c	/^vmCvar_t  cg_gun_x;$/;"	v
 cg_gun_y	src/cgame/cg_main.c	/^vmCvar_t  cg_gun_y;$/;"	v
@@ -19441,6 +19478,8 @@ hook	src/game/g_local.h	/^  gentity_t           *hook;            \/\/ grapple h
 horizontalMargin	src/cgame/cg_local.h	/^  float         horizontalMargin;$/;"	m	struct:__anon252
 hostName	src/client/client.h	/^	char	  	hostName[MAX_HOSTNAME_LENGTH];$/;"	m	struct:__anon89
 hour_min	src/server/sv_database.c	/^void hour_min( int64_t elapsed, int *hours,int *mins ) {$/;"	f
+hovel	src/game/g_local.h	/^  gentity_t           *hovel;           \/\/ body that is being infested. must be persistant$/;"	m	struct:gclient_s
+hovelOrigin	src/game/g_local.h	/^  vec3_t              hovelOrigin;          \/\/ player origin before entering hovel$/;"	m	struct:gclient_s
 hres	src/renderercommon/tr_image_pcx.c	/^	unsigned short	hres,vres;$/;"	m	struct:__anon124	file:
 hscreensize	src/renderercommon/tr_image_pcx.c	/^	unsigned short	hscreensize, vscreensize;$/;"	m	struct:__anon124	file:
 ht	src/server/sqlite3.c	/^  } *ht;$/;"	m	struct:Fts3Hash	typeref:struct:Fts3Hash::_fts3ht	file:
@@ -20471,14 +20510,21 @@ jerk	src/game/g_local.h	/^  vec3_t            jerk;$/;"	m	struct:gentity_s
 jetPackAscendPS	src/cgame/cg_local.h	/^  qhandle_t   jetPackAscendPS;$/;"	m	struct:__anon251
 jetPackDescendPS	src/cgame/cg_local.h	/^  qhandle_t   jetPackDescendPS;$/;"	m	struct:__anon251
 jetPackHoverPS	src/cgame/cg_local.h	/^  qhandle_t   jetPackHoverPS;$/;"	m	struct:__anon251
+jetPackJumpTime	src/cgame/cg_local.h	/^  int                   jetPackJumpTime;$/;"	m	struct:centity_s
 jetPackPS	src/cgame/cg_local.h	/^  particleSystem_t      *jetPackPS;$/;"	m	struct:centity_s
+jetPackRefuelTime	src/cgame/cg_local.h	/^  int                   jetPackRefuelTime; \/\/to avoid spamming sounds$/;"	m	struct:centity_s
 jetPackState	src/cgame/cg_local.h	/^  jetPackState_t        jetPackState;$/;"	m	struct:centity_s
 jetPackState_t	src/cgame/cg_local.h	/^} jetPackState_t;$/;"	t	typeref:enum:__anon234
+jetpackAscendDeactivateSound	src/cgame/cg_local.h	/^  sfxHandle_t jetpackAscendDeactivateSound;$/;"	m	struct:__anon251
 jetpackAscendSound	src/cgame/cg_local.h	/^  sfxHandle_t jetpackAscendSound;$/;"	m	struct:__anon251
+jetpackDescendDeactivateSound	src/cgame/cg_local.h	/^  sfxHandle_t jetpackDescendDeactivateSound;$/;"	m	struct:__anon251
 jetpackDescendSound	src/cgame/cg_local.h	/^  sfxHandle_t jetpackDescendSound;$/;"	m	struct:__anon251
 jetpackFlashModel	src/cgame/cg_local.h	/^  qhandle_t jetpackFlashModel;$/;"	m	struct:__anon251
+jetpackIdleDeactivateSound	src/cgame/cg_local.h	/^  sfxHandle_t jetpackIdleDeactivateSound;$/;"	m	struct:__anon251
 jetpackIdleSound	src/cgame/cg_local.h	/^  sfxHandle_t jetpackIdleSound;$/;"	m	struct:__anon251
+jetpackLowFuelSound	src/cgame/cg_local.h	/^  sfxHandle_t jetpackLowFuelSound;$/;"	m	struct:__anon251
 jetpackModel	src/cgame/cg_local.h	/^  qhandle_t jetpackModel;$/;"	m	struct:__anon251
+jetpackRefuelSound	src/cgame/cg_local.h	/^  sfxHandle_t jetpackRefuelSound;$/;"	m	struct:__anon251
 jfd	src/server/sqlite3.c	/^  sqlite3_file *jfd;          \/* File descriptor for main journal *\/$/;"	m	struct:Pager	file:
 jitterAttachments	src/cgame/cg_local.h	/^  qboolean                jitterAttachments;$/;"	m	struct:baseTrailBeam_s
 jitters	src/cgame/cg_local.h	/^  baseTrailJitter_t       jitters[ MAX_TRAIL_BEAM_JITTERS ];$/;"	m	struct:baseTrailBeam_s
@@ -20823,6 +20869,8 @@ lerpAngles	src/cgame/cg_local.h	/^  vec3_t                lerpAngles;$/;"	m	stru
 lerpFrame	src/cgame/cg_local.h	/^  lerpFrame_t           lerpFrame;$/;"	m	struct:centity_s
 lerpFrame_t	src/cgame/cg_local.h	/^} lerpFrame_t;$/;"	t	typeref:struct:__anon235
 lerpOrigin	src/cgame/cg_local.h	/^  vec3_t                lerpOrigin;$/;"	m	struct:centity_s
+lev1GrabTime	src/game/g_local.h	/^  int               lev1GrabTime;       \/\/TA: for turrets interacting with lev1s$/;"	m	struct:gentity_s
+lev1Grabbed	src/game/g_local.h	/^  qboolean          lev1Grabbed;        \/\/TA: for turrets interacting with lev1s$/;"	m	struct:gentity_s
 level	src/game/g_admin.h	/^  int level;$/;"	m	struct:g_admin_admin
 level	src/game/g_admin.h	/^  int level;$/;"	m	struct:g_admin_level
 level	src/game/g_main.c	/^level_locals_t  level;$/;"	v
@@ -21075,6 +21123,7 @@ lshift	src/qcommon/md4.c	49;"	d	file:
 lt	src/qcommon/vm_powerpc_asm.h	107;"	d
 ltail	src/qcommon/qcommon.h	/^	node_t*		ltail;$/;"	m	struct:__anon432
 ltov	src/tools/lcc/src/list.c	/^void *ltov(List *list, unsigned arena) {$/;"	f
+luciAmmoReduction	src/game/bg_public.h	/^  float  luciAmmoReduction;$/;"	m	struct:__anon330
 lump_t	src/qcommon/qfiles.h	/^} lump_t;$/;"	t	typeref:struct:__anon405
 lumps	src/qcommon/qfiles.h	/^	lump_t		lumps[HEADER_LUMPS];$/;"	m	struct:__anon406
 lvalue	src/tools/lcc/src/expr.c	/^Tree lvalue(Tree p) {$/;"	f
@@ -22425,7 +22474,6 @@ nextMark	src/cgame/cg_local.h	/^  struct markPoly_s *prevMark, *nextMark;$/;"	m	
 nextOrbitTime	src/cgame/cg_local.h	/^  int           nextOrbitTime;$/;"	m	struct:__anon249
 nextPagesize	src/server/sqlite3.c	/^  int nextPagesize;             \/* Pagesize after VACUUM if >0 *\/$/;"	m	struct:sqlite3	file:
 nextPhysicsTime	src/game/g_local.h	/^  int               nextPhysicsTime;    \/\/ buildables don't need to check what they're sitting on$/;"	m	struct:gentity_s
-nextQueueTime	src/game/g_local.h	/^  int nextQueueTime;$/;"	m	struct:__anon312
 nextRegenTime	src/game/g_local.h	/^  int               nextRegenTime;$/;"	m	struct:gentity_s
 nextReliableTime	src/server/server.h	/^	int				nextReliableTime;	\/\/ svs.time when another reliable command will be allowed$/;"	m	struct:client_s
 nextScrollTime	src/ui/ui_shared.c	/^  int nextScrollTime;$/;"	m	struct:scrollInfo_s	file:
@@ -25402,7 +25450,6 @@ querySharedCacheTableLock	src/server/sqlite3.c	/^static int querySharedCacheTabl
 querySharedCacheTableLock	src/server/sqlite3.c	55908;"	d	file:
 queryTestTokenizer	src/server/sqlite3.c	/^static int queryTestTokenizer($/;"	f	file:
 queryTokenizer	src/server/sqlite3.c	/^int queryTokenizer($/;"	f	file:
-queuedBuildPoints	src/game/g_local.h	/^  int queuedBuildPoints;$/;"	m	struct:__anon312
 queuedVoipIndex	src/server/server.h	/^	int queuedVoipIndex;$/;"	m	struct:client_s
 queuedVoipPackets	src/server/server.h	/^	int queuedVoipPackets;$/;"	m	struct:client_s
 quicklook	src/tools/lcc/cpp/cpp.h	84;"	d
@@ -29919,7 +29966,6 @@ torsoTimer	src/client/client.h	/^	int			torsoTimer;		\/\/ don't change low prior
 torsoTimer	src/qcommon/msg.c	/^	int			torsoTimer;		\/\/ don't change low priority animations until this runs out$/;"	m	struct:alternatePlayerState_s	file:
 torsoTimer	src/qcommon/q_shared.h	/^	int			torsoTimer;		\/\/ don't change low priority animations until this runs out$/;"	m	struct:playerState_s
 totalAlloc	src/server/sqlite3.c	/^  u64 totalAlloc;     \/* Total of all malloc calls - includes internal frag *\/$/;"	m	struct:Mem5Global	file:
-totalBuildPoints	src/game/g_local.h	/^  int totalBuildPoints;$/;"	m	struct:__anon312
 totalBytes	src/client/cl_avi.c	/^  int totalBytes;$/;"	m	struct:audioFormat_s	file:
 totalExcess	src/server/sqlite3.c	/^  u64 totalExcess;    \/* Total internal fragmentation *\/$/;"	m	struct:Mem5Global	file:
 totalFinalize	src/server/sqlite3.c	/^static void totalFinalize(sqlite3_context *context){$/;"	f	file:
