@@ -12597,7 +12597,7 @@ TRAIN_START_OFF	src/game/g_mover.c	1912;"	d	file:
 TRANS_NONE	src/server/sqlite3.c	55181;"	d	file:
 TRANS_READ	src/server/sqlite3.c	55182;"	d	file:
 TRANS_WRITE	src/server/sqlite3.c	55183;"	d	file:
-TRAPPER_ACCURACY	src/game/g_buildable.c	1982;"	d	file:
+TRAPPER_ACCURACY	src/game/g_buildable.c	1983;"	d	file:
 TRAPPER_BP	src/game/tremulous.h	324;"	d
 TRAPPER_BT	src/game/tremulous.h	325;"	d
 TRAPPER_CREEPSIZE	src/game/tremulous.h	330;"	d
