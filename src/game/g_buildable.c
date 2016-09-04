@@ -1543,9 +1543,9 @@ qboolean AHovel_Blocked( gentity_t *hovel, gentity_t *player, qboolean provideEx
   position[2] += fabs( mins[2] ) + bmaxs[2] + 1.0f;
   VectorCopy( hovel->r.currentOrigin, target );
   target[2] += fabs( mins[2] ) + 1.0f;
-  trap_UnlinkEntity( hovel );
-  trap_Trace( &tr, position, mins, maxs, target, player->s.number, MASK_PLAYERSOLID );
-  trap_LinkEntity( hovel );
+  trap_UnlinkEntity( player );
+  trap_Trace( &tr, position, mins, maxs, target, hovel->s.number, MASK_PLAYERSOLID );
+  trap_LinkEntity( player );
   if( tr.startsolid || tr.fraction < 1.0f )
     return qtrue;
   if( provideExit == qtrue ){
@@ -1571,6 +1571,7 @@ static qboolean APropHovel_Blocked( vec3_t origin, vec3_t angles, vec3_t normal,
 
   VectorCopy( origin, hovel.r.currentOrigin );
   VectorCopy( angles, hovel.r.currentAngles );
+  hovel.s.number = ENTITYNUM_NONE;
 
   return AHovel_Blocked( &hovel, player, qfalse );
 }
