@@ -422,8 +422,8 @@ static void Give_Class( gentity_t *ent, char *s )
     return;
   }
 
-  ent->client->pers.evolveHealthFraction 
-      = (float)ent->client->ps.stats[ STAT_HEALTH ] 
+  ent->client->pers.evolveHealthFraction
+      = (float)ent->client->ps.stats[ STAT_HEALTH ]
       / (float)BG_Class( currentClass )->health;
 
   if( ent->client->pers.evolveHealthFraction < 0.0f )
@@ -486,7 +486,7 @@ void Cmd_Give_f( gentity_t *ent )
   {
     // FIXME I am hideous :#(
     ADMP( "^3give: ^7usage: give [what]\n\nNormal\n\n"
-          "  health\n  funds <amount>\n  stamina\n  poison\n  gas\n  ammo\n" 
+          "  health\n  funds <amount>\n  stamina\n  poison\n  gas\n  ammo\n"
           "\n^3Classes\n\n"
           "  level0\n  level1\n  level1upg\n  level2\n  level2upg\n  level3\n  level3upg\n  level4\n  builder\n  builderupg\n"
           "  human_base\n  human_bsuit\n  "
@@ -517,7 +517,7 @@ void Cmd_Give_f( gentity_t *ent )
     else
     {
       credits = atof( name + 6 ) *
-        ( ent->client->pers.teamSelection == 
+        ( ent->client->pers.teamSelection ==
           TEAM_ALIENS ? ALIEN_CREDITS_PER_KILL : 1.0f );
 
       // clamp credits manually, as G_AddCreditToClient() expects a short int
@@ -1301,7 +1301,7 @@ void Cmd_CallVote_f( gentity_t *ent )
   int    id = -1;
   team_t team;
   qboolean voteYes = qtrue;
-  
+
   trap_Argv( 0, cmd, sizeof( cmd ) );
   trap_Argv( 1, vote, sizeof( vote ) );
   trap_Argv( 2, arg, sizeof( arg ) );
@@ -1497,7 +1497,7 @@ void Cmd_CallVote_f( gentity_t *ent )
 
       Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
         "mute %d", id );
-      Com_sprintf( level.voteDisplayString[ team ], sizeof( level.voteDisplayString[ team ] ), 
+      Com_sprintf( level.voteDisplayString[ team ], sizeof( level.voteDisplayString[ team ] ),
                    "^4[^3Mute^4]^5 player '%s' (Needs > %d%% of %s)", name, level.voteThreshold[ team ],
                    g_impliedVoting.integer ? "active players" : "total votes" );
 
@@ -1520,7 +1520,7 @@ void Cmd_CallVote_f( gentity_t *ent )
 
       Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
         "unmute %d", id );
-      Com_sprintf( level.voteDisplayString[ team ], sizeof( level.voteDisplayString[ team ] ), 
+      Com_sprintf( level.voteDisplayString[ team ], sizeof( level.voteDisplayString[ team ] ),
                    "^4[^3Unmute^4] ^5player '%s' (Needs > %d%% of %s)", name, level.voteThreshold[ team ],
                    g_impliedVoting.integer ? "active players" : "total votes" );
 
@@ -1541,7 +1541,7 @@ void Cmd_CallVote_f( gentity_t *ent )
           return;
         }
 
-        
+
       }
 
       Com_sprintf( level.voteDisplayString[ team ], sizeof( level.voteDisplayString[ team ] ),
@@ -1695,7 +1695,7 @@ void Cmd_CallVote_f( gentity_t *ent )
         return;
       }
       level.extendVoteCount++;
-      level.voteThreshold[ team ] = g_extendVotesPercent.integer; 
+      level.voteThreshold[ team ] = g_extendVotesPercent.integer;
       Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
                    "extend %d", g_extendVotesTime.integer );
       Com_sprintf( level.voteDisplayString[ team ], sizeof( level.voteDisplayString[ team ] ),
@@ -2244,9 +2244,13 @@ void Cmd_Destroy_f( gentity_t *ent )
   VectorMA( viewOrigin, 100, forward, end );
 
   trap_Trace( &tr, viewOrigin, NULL, NULL, end, ent->s.number, MASK_PLAYERSOLID );
-  traceEnt = &g_entities[ tr.entityNum ];
+  if ( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING )
+    traceEnt = ent->client->hovel;
+  else
+    traceEnt = &g_entities[ tr.entityNum ];
 
-  if( tr.fraction < 1.0f &&
+  if( ( tr.fraction < 1.0f ||
+        ( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING ) ) &&
       ( traceEnt->s.eType == ET_BUILDABLE ) &&
       ( traceEnt->buildableTeam == ent->client->pers.teamSelection ) &&
       ( ( ent->client->ps.weapon >= WP_ABUILD ) &&
@@ -3472,7 +3476,7 @@ void Cmd_ListMaps_f( gentity_t *ent )
   ADMBP( ".\n" );
   ADMBP_end( );
 }
- 
+
 /*
 =================
 Cmd_ListModels_f
@@ -4180,8 +4184,8 @@ void Cmd_PlayMap_f( gentity_t *ent )
     ADMP( "To add maps to the playlist:\n"
 	  S_COLOR_YELLOW "  /playmap add " S_COLOR_WHITE "mapname [layout] [flags]\n"
 	  "To see a list of maps to choose:\n"
-	  S_COLOR_YELLOW "  /playmap pool " S_COLOR_WHITE "[pagenumber]\n\n" ); 
-      
+	  S_COLOR_YELLOW "  /playmap pool " S_COLOR_WHITE "[pagenumber]\n\n" );
+
     G_PrintPlayMapQueue( ent );
     ADMP( "\n" );
 
@@ -4214,7 +4218,7 @@ void Cmd_PlayMap_f( gentity_t *ent )
     return;
   }
   else if ( !Q_stricmp( subcmd, "add" ))
-  {    
+  {
     trap_Argv( 2, map, sizeof( map ) );
     trap_Argv( 3, layout, sizeof( layout ) );
     trap_Argv( 4, extra, sizeof( extra ) );
@@ -4236,16 +4240,16 @@ void Cmd_PlayMap_f( gentity_t *ent )
     playMapError = G_PlayMapEnqueue( map, layout, ent->client->pers.netname, flags, ent );
     if (playMapError.errorCode == PLAYMAP_ERROR_NONE)
     {
-      trap_SendServerCommand( -1, 
+      trap_SendServerCommand( -1,
 			      va( "print \"%s" S_COLOR_WHITE
 				  " added map " S_COLOR_CYAN "%s" S_COLOR_WHITE
 				  " to playlist\n\"",
 				  ent->client->pers.netname, map ) );
-    } else 
+    } else
       ADMP( va( "%s\n", playMapError.errorMessage ) );
   } else
     ADMP( va( "Unknown playmap subcommand: %s\n",  subcmd ) );
-  
+
 }
 
 /*
@@ -4280,4 +4284,3 @@ void Cmd_AdminMessage_f( gentity_t *ent )
 
   G_AdminMessage( ent, ConcatArgs( 1 ) );
 }
-
