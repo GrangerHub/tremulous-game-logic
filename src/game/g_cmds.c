@@ -834,6 +834,39 @@ void Cmd_Team_f( gentity_t *ent )
 }
 
 /*
+=================
+Cmd_SpecMe_f
+=================
+*/
+void Cmd_SpecMe_f( gentity_t *ent )
+{
+  qboolean  force = G_admin_permission( ent, ADMF_FORCETEAMCHANGE );
+
+  // stop team join spam
+  if( ent->client->pers.teamChangeTime &&
+      level.time - ent->client->pers.teamChangeTime < 1000 )
+    return;
+
+  // stop switching teams for gameplay exploit reasons by enforcing a long
+  // wait before they can come back
+  if( !force && !g_cheats.integer && ent->client->pers.secondsAlive &&
+      level.time - ent->client->pers.teamChangeTime < 30000 )
+  {
+    trap_SendServerCommand( ent-g_entities,
+      va( "print \"You must wait another %d seconds before changing teams again\n\"",
+        (int) ( ( 30000 - ( level.time - ent->client->pers.teamChangeTime ) ) / 1000.f ) ) );
+    return;
+  }
+
+  // Apply the change
+  G_ChangeTeam( ent, TEAM_NONE );
+
+  // Update player ready states if in warmup
+  if( IS_WARMUP )
+    G_LevelReady();
+}
+
+/*
 ==================
 G_CensorString
 ==================
@@ -3934,6 +3967,7 @@ commands_t cmds[ ] = {
   { "sell", CMD_HUMAN|CMD_ALIVE, Cmd_Sell_f },
   { "setviewpos", CMD_CHEAT_TEAM, Cmd_SetViewpos_f },
   { "share", CMD_TEAM, Cmd_Share_f },
+  { "specme", CMD_TEAM, Cmd_SpecMe_f },
   { "team", 0, Cmd_Team_f },
   { "teamvote", CMD_TEAM, Cmd_Vote_f },
   { "test", CMD_CHEAT, Cmd_Test_f },
