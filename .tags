@@ -320,7 +320,7 @@ AS_LOCAL	src/qcommon/q_shared.h	1502;"	d
 AS_LOCAL	src/ui/ui_main.c	38;"	d	file:
 AS_LOCAL	src/ui/ui_main.c	40;"	d	file:
 AS_MPLAYER	src/qcommon/q_shared.h	1501;"	d
-AS_OVER_RT3	src/game/g_cmds.c	1957;"	d	file:
+AS_OVER_RT3	src/game/g_cmds.c	1990;"	d	file:
 ASpawn_Think	src/game/g_buildable.c	/^void ASpawn_Think( gentity_t *self )$/;"	f
 AT1_MASK	src/qcommon/vm_powerpc_asm.c	584;"	d	file:
 AT2_MASK	src/qcommon/vm_powerpc_asm.c	585;"	d	file:
@@ -2401,6 +2401,7 @@ Cmd_Sell_f	src/game/g_cmds.c	/^void Cmd_Sell_f( gentity_t *ent )$/;"	f
 Cmd_SetCommandCompletionFunc	src/qcommon/cmd.c	/^void Cmd_SetCommandCompletionFunc( const char *command, completionFunc_t complete ) {$/;"	f
 Cmd_SetViewpos_f	src/game/g_cmds.c	/^void Cmd_SetViewpos_f( gentity_t *ent )$/;"	f
 Cmd_Share_f	src/game/g_cmds.c	/^void Cmd_Share_f( gentity_t *ent )$/;"	f
+Cmd_SpecMe_f	src/game/g_cmds.c	/^void Cmd_SpecMe_f( gentity_t *ent )$/;"	f
 Cmd_Team_f	src/game/g_cmds.c	/^void Cmd_Team_f( gentity_t *ent )$/;"	f
 Cmd_Test_f	src/game/g_cmds.c	/^void Cmd_Test_f( gentity_t *humanPlayer )$/;"	f
 Cmd_ToggleItem_f	src/game/g_cmds.c	/^void Cmd_ToggleItem_f( gentity_t *ent )$/;"	f
