@@ -207,4 +207,3 @@ void G_Physics( gentity_t *ent, int msec )
 
   G_Bounce( ent, &tr );
 }
-

@@ -2634,11 +2634,11 @@ D	src/server/sqlite3.c	/^  int Y, M, D;       \/* Year, month, and day *\/$/;"	m
 DAGCHECK_C	GNUmakefile	/^DAGCHECK_C  = $(B)\/tools\/rcc\/dagcheck.c$/;"	m
 DAMAGE_DEFLECT_TIME	src/cgame/cg_local.h	43;"	d
 DAMAGE_FRACTION_FOR_KILL	src/game/tremulous.h	686;"	d
-DAMAGE_NO_ARMOR	src/game/g_local.h	958;"	d
-DAMAGE_NO_KNOCKBACK	src/game/g_local.h	959;"	d
-DAMAGE_NO_LOCDAMAGE	src/game/g_local.h	961;"	d
-DAMAGE_NO_PROTECTION	src/game/g_local.h	960;"	d
-DAMAGE_RADIUS	src/game/g_local.h	957;"	d
+DAMAGE_NO_ARMOR	src/game/g_local.h	959;"	d
+DAMAGE_NO_KNOCKBACK	src/game/g_local.h	960;"	d
+DAMAGE_NO_LOCDAMAGE	src/game/g_local.h	962;"	d
+DAMAGE_NO_PROTECTION	src/game/g_local.h	961;"	d
+DAMAGE_RADIUS	src/game/g_local.h	958;"	d
 DAMAGE_RETURN_TIME	src/cgame/cg_local.h	44;"	d
 DAMAGE_TIME	src/cgame/cg_local.h	45;"	d
 DATA	src/tools/lcc/src/c.h	/^enum { CODE=1, BSS, DATA, LIT };$/;"	e	enum:__anon288
@@ -3394,7 +3394,7 @@ FMV_ID_WAIT	src/qcommon/q_shared.h	/^	FMV_ID_WAIT$/;"	e	enum:__anon480
 FMV_LOOPED	src/qcommon/q_shared.h	/^	FMV_LOOPED,$/;"	e	enum:__anon480
 FMV_PLAY	src/qcommon/q_shared.h	/^	FMV_PLAY,		\/\/ play$/;"	e	enum:__anon480
 FNEG	src/qcommon/vm_sparc.c	/^	FADD, FSUB, FCMP, FSTOI, FITOS, FNEG, FDIV, FMUL,$/;"	e	enum:sparc_iname	file:
-FOFS	src/game/g_local.h	1174;"	d
+FOFS	src/game/g_local.h	1175;"	d
 FOGDEF_ALL	src/renderergl2/tr_local.h	/^	FOGDEF_ALL                  = 0x0003,$/;"	e	enum:__anon34
 FOGDEF_COUNT	src/renderergl2/tr_local.h	/^	FOGDEF_COUNT                = 0x0004,$/;"	e	enum:__anon34
 FOGDEF_USE_DEFORM_VERTEXES	src/renderergl2/tr_local.h	/^	FOGDEF_USE_DEFORM_VERTEXES  = 0x0001,$/;"	e	enum:__anon34
@@ -4682,6 +4682,7 @@ G_PlayerHasUnexplodedGrenades	src/game/g_missile.c	/^qboolean G_PlayerHasUnexplo
 G_PopFromPlayMapQueue	src/game/g_playmap.c	/^playMap_t *G_PopFromPlayMapQueue( void )$/;"	f
 G_PopRotationStack	src/game/g_maprotation.c	/^static int G_PopRotationStack( void )$/;"	f	file:
 G_PopSpawnQueue	src/game/g_main.c	/^int G_PopSpawnQueue( spawnQueue_t *sq )$/;"	f
+G_PositionHovelsBuilder	src/game/g_buildable.c	/^void G_PositionHovelsBuilder( gentity_t *self )$/;"	f
 G_PowerEntityForEntity	src/game/g_buildable.c	/^gentity_t *G_PowerEntityForEntity( gentity_t *ent )$/;"	f
 G_PowerEntityForPoint	src/game/g_buildable.c	/^gentity_t *G_PowerEntityForPoint( const vec3_t origin )$/;"	f
 G_PrintPlayMapPool	src/game/g_playmap.c	/^void G_PrintPlayMapPool( gentity_t *ent, int page )$/;"	f
@@ -5349,7 +5350,7 @@ ISUNCHANGE	src/tools/lcc/cpp/cpp.h	32;"	d
 IS_BIG_INT	src/server/sqlite3.c	9504;"	d	file:
 IS_LOCK_ERROR	src/server/sqlite3.c	27489;"	d	file:
 IS_NAN	src/qcommon/q_shared.h	465;"	d
-IS_WARMUP	src/game/g_local.h	1202;"	d
+IS_WARMUP	src/game/g_local.h	1203;"	d
 ITEM	src/tools/lcc/src/symbolic.c	25;"	d	file:
 ITEM_BLOB_TIME	src/cgame/cg_local.h	53;"	d
 ITEM_SCALEUP_TIME	src/cgame/cg_local.h	51;"	d
@@ -6463,7 +6464,7 @@ MAX_FALL_DISTANCE	src/game/tremulous.h	665;"	d
 MAX_FBOS	src/renderergl2/tr_local.h	51;"	d
 MAX_FEATLABEL_CHARS	src/client/client.h	429;"	d
 MAX_FILEHASH_SIZE	src/qcommon/files.c	186;"	d	file:
-MAX_FILEPATH	src/game/g_local.h	1169;"	d
+MAX_FILEPATH	src/game/g_local.h	1170;"	d
 MAX_FILE_HANDLES	src/qcommon/qcommon.h	590;"	d
 MAX_FLARES	src/renderergl1/tr_flares.c	83;"	d	file:
 MAX_FLARES	src/renderergl2/tr_flares.c	83;"	d	file:
@@ -6698,7 +6699,7 @@ MAX_WORLD_COORD	src/qcommon/qfiles.h	357;"	d
 MAX_WRAP_CACHE	src/ui/ui_shared.c	4466;"	d	file:
 MAX_WRAP_LINES	src/ui/ui_shared.c	4467;"	d	file:
 MAX_WRAP_TEXT	src/ui/ui_shared.c	4468;"	d	file:
-MAX_ZAPS	src/game/g_local.h	1019;"	d
+MAX_ZAPS	src/game/g_local.h	1020;"	d
 MAX_ZPATH	src/qcommon/files.c	184;"	d	file:
 MAYBE_EMIT_CONST	src/qcommon/vm_powerpc.c	800;"	d	file:
 MAYBE_EMIT_CONST	src/qcommon/vm_sparc.c	859;"	d	file:
@@ -12546,7 +12547,7 @@ TRAIN_START_OFF	src/game/g_mover.c	1912;"	d	file:
 TRANS_NONE	src/server/sqlite3.c	55181;"	d	file:
 TRANS_READ	src/server/sqlite3.c	55182;"	d	file:
 TRANS_WRITE	src/server/sqlite3.c	55183;"	d	file:
-TRAPPER_ACCURACY	src/game/g_buildable.c	1737;"	d	file:
+TRAPPER_ACCURACY	src/game/g_buildable.c	1757;"	d	file:
 TRAPPER_BP	src/game/tremulous.h	312;"	d
 TRAPPER_BT	src/game/tremulous.h	313;"	d
 TRAPPER_CREEPSIZE	src/game/tremulous.h	318;"	d
@@ -13148,7 +13149,7 @@ USE_INTERNAL_VORBIS	GNUmakefile	/^USE_INTERNAL_VORBIS=$(USE_INTERNAL_LIBS)$/;"	m
 USE_INTERNAL_ZLIB	GNUmakefile	/^USE_INTERNAL_ZLIB=$(USE_INTERNAL_LIBS)$/;"	m
 USE_MUMBLE	GNUmakefile	/^  USE_MUMBLE=0$/;"	m
 USE_MUMBLE	GNUmakefile	/^USE_MUMBLE=1$/;"	m
-USE_OBJECT_RANGE	src/game/g_active.c	1817;"	d	file:
+USE_OBJECT_RANGE	src/game/g_active.c	1818;"	d	file:
 USE_OPENAL	GNUmakefile	/^USE_OPENAL=1$/;"	m
 USE_OPENAL_DLOPEN	GNUmakefile	/^USE_OPENAL_DLOPEN=1$/;"	m
 USE_PREAD	src/server/sqlite3.c	27391;"	d	file:

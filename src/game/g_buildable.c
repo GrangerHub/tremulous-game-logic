@@ -1535,10 +1535,16 @@ qboolean AHovel_Blocked( gentity_t *hovel, gentity_t *player, qboolean provideEx
 {
   vec3_t    mins, maxs, bmins, bmaxs, target, position;
   trace_t   tr;
+  int       i;
 
   BG_ClassBoundingBox( player->client->ps.stats[ STAT_CLASS ],
                        mins, maxs, NULL, NULL, NULL );
   BG_BuildableBoundingBox( BA_A_HOVEL, bmins, bmaxs );
+  for( i = 0; i < 3; i++ )
+  {
+    maxs[i]++;
+    mins[i]--;
+  }
   VectorCopy( hovel->r.currentOrigin, position );
   position[2] += fabs( mins[2] ) + bmaxs[2] + 1.0f;
   VectorCopy( hovel->r.currentOrigin, target );
@@ -1575,6 +1581,42 @@ static qboolean APropHovel_Blocked( vec3_t origin, vec3_t angles, vec3_t normal,
 
   return AHovel_Blocked( &hovel, player, qfalse );
 }
+/*
+=================
+G_PositionHovelsBuilder
+
+Postitions a hovel's ocupying granger
+=================
+*/
+void G_PositionHovelsBuilder( gentity_t *self )
+{
+  vec3_t  hovelOrigin, hovelAngles, inverseNormal;
+  trace_t tr;
+
+  if( !self->builder )
+    return;
+
+  VectorCopy( self->r.currentOrigin, hovelOrigin );
+  hovelOrigin[2] += 128.0f;
+
+  trap_UnlinkEntity( self->builder );
+  trap_Trace( &tr, self->r.currentOrigin, NULL, NULL, hovelOrigin, self->s.number, MASK_DEADSOLID );
+  trap_LinkEntity( self->builder );
+
+  if( tr.fraction < 1.0f )
+    hovelOrigin[2] = tr.endpos[2];
+
+  VectorCopy( self->s.origin2, inverseNormal );
+  VectorInverse( inverseNormal );
+  vectoangles( inverseNormal, hovelAngles );
+  hovelAngles[YAW] = self->r.currentAngles[YAW];
+
+  VectorCopy( self->builder->r.currentOrigin, self->builder->client->hovelOrigin );
+
+  G_SetOrigin( self->builder, hovelOrigin );
+  VectorCopy( hovelOrigin, self->builder->client->ps.origin );
+  G_SetClientViewAngle( self->builder, hovelAngles );
+}
 
 /*
 ================
@@ -1585,9 +1627,6 @@ Called when an alien uses a hovel
 */
 void AHovel_Use( gentity_t *self, gentity_t *other, gentity_t *activator )
 {
-  vec3_t  hovelOrigin, hovelAngles, inverseNormal;
-  trace_t tr;
-
   if( self->spawned && self->powered )
   {
     if( self->active )
@@ -1624,26 +1663,7 @@ void AHovel_Use( gentity_t *self, gentity_t *other, gentity_t *activator )
       activator->client->hovel = self;
       self->builder = activator;
 
-      VectorCopy( self->s.pos.trBase, hovelOrigin );
-      hovelOrigin[2] += 128.0f;
-
-      trap_UnlinkEntity( activator );
-      trap_Trace( &tr, self->s.pos.trBase, NULL, NULL, hovelOrigin, self->s.number, MASK_DEADSOLID );
-      trap_LinkEntity( activator );
-
-      if( tr.fraction < 1.0f )
-        hovelOrigin[2] = tr.endpos[2];
-
-      VectorCopy( self->s.origin2, inverseNormal );
-      VectorInverse( inverseNormal );
-      vectoangles( inverseNormal, hovelAngles );
-      hovelAngles[YAW] = self->r.currentAngles[YAW];
-
-      VectorCopy( activator->s.pos.trBase, activator->client->hovelOrigin );
-
-      G_SetOrigin( activator, hovelOrigin );
-      VectorCopy( hovelOrigin, activator->client->ps.origin );
-      G_SetClientViewAngle( activator, hovelAngles );
+      G_PositionHovelsBuilder( self );
     }
   }
 }
@@ -3412,7 +3432,13 @@ void G_BuildableThink( gentity_t *ent, int msec )
 
   // Fall back on normal physics routines
   if( msec != 0 )
+  {
     G_Physics( ent, msec );
+
+    //Move a hovel's occupant with it
+    if( ent->s.modelindex == BA_A_HOVEL )
+      G_PositionHovelsBuilder( ent );
+  }
 }
 
 
