@@ -6678,7 +6678,7 @@ MAX_TRAIL_SYSTEMS	src/cgame/cg_local.h	440;"	d
 MAX_TRAMPLE_BUILDABLES_TRACKED	src/game/g_local.h	370;"	d
 MAX_TUTORIAL_TEXT	src/cgame/cg_tutorial.c	138;"	d	file:
 MAX_UNLAGGED_MARKERS	src/game/g_local.h	362;"	d
-MAX_USER_FLAGS	src/game/g_admin.c	4053;"	d	file:
+MAX_USER_FLAGS	src/game/g_admin.c	4055;"	d	file:
 MAX_VALUE	src/qcommon/qfiles.h	348;"	d
 MAX_VALUES	src/qcommon/parse.c	1879;"	d	file:
 MAX_VAOS	src/renderergl2/tr_local.h	53;"	d
