@@ -74,6 +74,7 @@ typedef enum
   PLAYMAP_FLAG_LGRAV, // Low Gravity
   PLAYMAP_FLAG_UBP,   // Unlimited BP
   PLAYMAP_FLAG_PORTAL,// Portal Gun
+  PLAYMAP_FLAG_STACK,// Buildable stacking
 
   PLAYMAP_NUM_FLAGS
 } playMapFlag_t;

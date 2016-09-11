@@ -124,6 +124,7 @@ static const playMapFlagDesc_t playMapFlagList[ ] =
   { PLAYMAP_FLAG_LGRAV, "lgrav", qfalse, qfalse, "Low Gravity" },
   { PLAYMAP_FLAG_UBP, 	"ubp",	 qfalse, qfalse, "Unlimited BP" },
   { PLAYMAP_FLAG_PORTAL,"portal",qfalse, qfalse, "Portal Gun" }
+  { PLAYMAP_FLAG_STACK, "stack", qtrue,  qfalse, "Buildable stacking" }
 };
 
 /*
@@ -949,7 +950,7 @@ int G_DefaultPlayMapFlags(void)
 G_ParsePlayMapFlagTokens
 
 Tokenize string to find flags and set or clear bits on a given default
-flag configuration. TODO: defaults should come from playMapFlagList?
+flag configuration. Defaults come from playMapFlagList.
 ================
 */
 int G_ParsePlayMapFlagTokens( gentity_t *ent, char *flags )
@@ -1046,6 +1047,33 @@ char *G_PlayMapFlags2String( int flags )
   }
 
   return flagString;
+}
+
+/*
+================
+G_ExecutePlaymapFlags
+
+Set cvars, etc. to execute actions associated with the selected or
+cleared flags.
+================
+*/
+void G_ExecutePlaymapFlags( int flagsValue )
+{
+  int flagNum,
+      flags = PLAYMAP_FLAG_NONE;
+
+  for( flagNum = PLAYMAP_FLAG_NONE + 1;
+       flagNum < PLAYMAP_NUM_FLAGS; flagNum++ )
+  {
+    // Add special handling of each flag here
+    switch( flagNum )
+    {
+      case PLAYMAP_FLAG_STACK:
+	g_allowBuildableStacking.integer =
+	  ( flagsValue & PLAYMAP_FLAG_STACK ) != 0;
+	break;	
+    }
+  }
 }
 
 /*
@@ -1281,4 +1309,6 @@ void G_NextPlayMap( void )
 
   // do the flags here
   level.playmapFlags = playMap->flags;
+  G_ExecutePlaymapFlags( playMap->flags );
 }
+
