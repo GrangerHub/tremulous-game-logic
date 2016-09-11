@@ -124,6 +124,7 @@ void CG_ParseServerinfo( void )
 
   info = CG_ConfigString( CS_SERVERINFO );
   cgs.timelimit = atoi( Info_ValueForKey( info, "timelimit" ) );
+  cgs.humanBlackout = atoi (Info_ValueForKey ( info, "g_humanBlackout") );
   cgs.maxclients = atoi( Info_ValueForKey( info, "sv_maxclients" ) );
   cgs.markDeconstruct = atoi( Info_ValueForKey( info, "g_markDeconstruct" ) );
   mapname = Info_ValueForKey( info, "mapname" );
