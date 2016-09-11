@@ -186,66 +186,78 @@ static void CG_AlienBuilderText( char *text, playerState_t *ps )
           CG_KeyNameForCommand( "ready" ) ) );
   }
 
-  if( buildable > BA_NONE )
+  if( !( ps->stats[ STAT_STATE ] & SS_HOVELING ) )
   {
-    Q_strcat( text, MAX_TUTORIAL_TEXT,
-        va( "Press %s to place the %s\n",
-          CG_KeyNameForCommand( "+attack" ),
-          BG_Buildable( buildable )->humanName ) );
+    if( buildable > BA_NONE )
+    {
+      Q_strcat( text, MAX_TUTORIAL_TEXT,
+          va( "Press %s to place the %s\n",
+            CG_KeyNameForCommand( "+attack" ),
+            BG_Buildable( buildable )->humanName ) );
 
-    Q_strcat( text, MAX_TUTORIAL_TEXT,
-        va( "Press %s to cancel placing the %s\n",
-          CG_KeyNameForCommand( "+button5" ),
-          BG_Buildable( buildable )->humanName ) );
+      Q_strcat( text, MAX_TUTORIAL_TEXT,
+          va( "Press %s to cancel placing the %s\n",
+            CG_KeyNameForCommand( "+button5" ),
+            BG_Buildable( buildable )->humanName ) );
+    }
+    else
+    {
+      Q_strcat( text, MAX_TUTORIAL_TEXT,
+          va( "Press %s to build a structure\n",
+            CG_KeyNameForCommand( "+attack" ) ) );
+    }
   }
+
+  if( ps->stats[ STAT_STATE ] & SS_HOVELING )
+    es = &cg_entities[ ps->persistant[ PERS_HOVEL ] ].currentState;
   else
-  {
-    Q_strcat( text, MAX_TUTORIAL_TEXT,
-        va( "Press %s to build a structure\n",
-          CG_KeyNameForCommand( "+attack" ) ) );
-  }
+    es = CG_BuildableInRange( ps, NULL );
 
-  if( ( es = CG_BuildableInRange( ps, NULL ) ) )
+  if( es )
   {
     if( cgs.markDeconstruct )
     {
       if( es->eFlags & EF_B_MARKED )
       {
         Q_strcat( text, MAX_TUTORIAL_TEXT,
-            va( "Press %s to unmark this structure for replacement\n",
-              CG_KeyNameForCommand( "deconstruct" ) ) );
+            va( "Press %s to unmark this %s for replacement\n",
+              CG_KeyNameForCommand( "reload" ),
+              ( ps->stats[ STAT_STATE ] & SS_HOVELING ) ? "hovel" : "structure" ) );
       }
       else
       {
         Q_strcat( text, MAX_TUTORIAL_TEXT,
-            va( "Press %s to mark this structure for replacement\n",
-              CG_KeyNameForCommand( "deconstruct" ) ) );
+            va( "Press %s to mark this %s for replacement\n",
+              CG_KeyNameForCommand( "reload" ),
+              ( ps->stats[ STAT_STATE ] & SS_HOVELING ) ? "hovel" : "structure" ) );
       }
     }
-    else
+
+    Q_strcat( text, MAX_TUTORIAL_TEXT,
+              va( "Press %s to destroy this %s\n",
+                  CG_KeyNameForCommand( "deconstruct" ),
+                  ( ps->stats[ STAT_STATE ] & SS_HOVELING ) ? "hovel" : "structure" ) );
+  }
+
+  if( !( ps->stats[ STAT_STATE ] & SS_HOVELING ) )
+  {
+    if( ( ps->stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT ) == BA_NONE )
     {
       Q_strcat( text, MAX_TUTORIAL_TEXT,
-          va( "Press %s to destroy this structure\n",
-            CG_KeyNameForCommand( "deconstruct" ) ) );
+          va( "Press %s to swipe\n",
+            CG_KeyNameForCommand( "+button5" ) ) );
     }
-  }
 
-  if( ( ps->stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT ) == BA_NONE )
-  {
-    Q_strcat( text, MAX_TUTORIAL_TEXT,
-        va( "Press %s to swipe\n",
-          CG_KeyNameForCommand( "+button5" ) ) );
-  }
-
-  if( ps->stats[ STAT_CLASS ] == PCL_ALIEN_BUILDER0_UPG )
-  {
-    Q_strcat( text, MAX_TUTORIAL_TEXT,
-        va( "Press %s to launch a projectile\n",
-        CG_KeyNameForCommand( "+button2" ) ) );
-
-    Q_strcat( text, MAX_TUTORIAL_TEXT,
-        va( "Press %s to walk on walls\n",
-        CG_KeyNameForCommand( "+movedown" ) ) );
+    if( ps->stats[ STAT_CLASS ] == PCL_ALIEN_BUILDER0_UPG )
+    {
+      Q_strcat( text, MAX_TUTORIAL_TEXT,
+          va( "Press %s to launch a projectile\n",
+          CG_KeyNameForCommand( "+button2" ) ) );
+          
+      Q_strcat( text, MAX_TUTORIAL_TEXT,
+          va( "Press %s to walk on walls\n",
+          CG_KeyNameForCommand( "+movedown" ) ) );
+    }
   }
 }
 
@@ -780,10 +792,22 @@ const char *CG_TutorialText( void )
 
       if( ps->stats[ STAT_TEAM ] == TEAM_ALIENS )
       {
-        if( BG_AlienCanEvolve( ps->stats[ STAT_CLASS ],
-                               ps->persistant[ PERS_CREDIT ],
-                               cgs.alienStage,
-                               cgs.warmup ) )
+        if( ps->stats[ STAT_STATE ] & SS_HOVELING )
+        {
+          Q_strcat( text, MAX_TUTORIAL_TEXT,
+              va( "Press %s to exit the hovel\n",
+                CG_KeyNameForCommand( "+button7" ) ) );
+        } else if( cg.nearUsableBuildable == BA_A_HOVEL &&
+                   ( ps->stats[ STAT_CLASS ] == PCL_ALIEN_BUILDER0 ||
+                     ps->stats[ STAT_CLASS ] == PCL_ALIEN_BUILDER0_UPG ) )
+        {
+          Q_strcat( text, MAX_TUTORIAL_TEXT,
+              va( "Press %s to enter the hovel\n",
+                CG_KeyNameForCommand( "+button7" ) ) );
+        } else if( BG_AlienCanEvolve( ps->stats[ STAT_CLASS ],
+                                      ps->persistant[ PERS_CREDIT ],
+                                      cgs.alienStage,
+                                      cgs.warmup ) )
         {
           Q_strcat( text, MAX_TUTORIAL_TEXT,
               va( "Press %s to evolve\n",

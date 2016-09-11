@@ -3018,9 +3018,13 @@ void Cmd_Reload_f( gentity_t *ent )
     VectorMA( viewOrigin, 100, forward, end );
 
     trap_Trace( &tr, viewOrigin, NULL, NULL, end, ent->s.number, MASK_PLAYERSOLID );
-    traceEnt = &g_entities[ tr.entityNum ];
+    if ( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING )
+      traceEnt = ent->client->hovel;
+    else
+      traceEnt = &g_entities[ tr.entityNum ];
 
-    if( tr.fraction < 1.0f &&
+    if( ( tr.fraction < 1.0f ||
+          ( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING ) ) &&
         ( traceEnt->s.eType == ET_BUILDABLE ) &&
         ( traceEnt->buildableTeam == ent->client->pers.teamSelection ) &&
         ( ( ent->client->ps.weapon >= WP_ABUILD ) &&

@@ -296,11 +296,14 @@ typedef enum
   PERS_BP,
   PERS_BP_RESERVE,
   PERS_MARKEDBP,
+  
+  PERS_HOVEL,      // the entity number of the hovel a granger is occupying
+  
   //zdrytchx: no space in stats, use persistant. This meanas we risk doing a double jump upon spawning but death animations are 1700 msecs long, so technically it's impossible anyway
   PERS_JUMPTIME,
 
   PERS_HEALTH_RESERVE
-    // netcode has space for 1 more
+    // netcode has space for 0 more
 } persEnum_t;
 
 #define PS_WALLCLIMBINGFOLLOW   0x00000001

@@ -1907,6 +1907,7 @@ void AHovel_Use( gentity_t *self, gentity_t *other, gentity_t *activator )
 
       activator->client->ps.stats[ STAT_STATE ] |= SS_HOVELING;
       activator->client->hovel = self;
+      activator->client->ps.persistant[ PERS_HOVEL ] = self->s.number;
       self->builder = activator;
 
       G_PositionHovelsBuilder( self );
@@ -1986,6 +1987,9 @@ void AHovel_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
     //client leaves hovel
     builder->client->ps.stats[ STAT_STATE ] &= ~SS_HOVELING;
+    self->active = qfalse;
+    builder->client->hovel = NULL;
+    self->builder = NULL;
 
     // client is no longer astral
     if( builder->client->noclip )

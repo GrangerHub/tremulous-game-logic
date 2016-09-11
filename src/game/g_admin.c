@@ -72,7 +72,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
     },
 
     {"allready", G_admin_allready, qfalse, "allready",
-      "makes everyone ready in intermission or developer mode warmup",
+      "makes everyone ready in intermission or developer mode pre-game warmup",
       ""
     },
 
@@ -2497,7 +2497,6 @@ qboolean G_admin_explode( gentity_t *ent )
 
   int pid;
   char name[ MAX_NAME_LENGTH ], *reason, err[ MAX_STRING_CHARS ];
-  int minargc;
   gentity_t *vic;
 
   if( trap_Argc() < 2 )
@@ -2923,14 +2922,17 @@ qboolean G_admin_allready( gentity_t *ent )
       cl->ps.stats[ STAT_READY ] = 1;
     }
 
-    G_LevelReady();
+    AP( va( "print \"^3allready: ^7%s ^7decided to end pre-game warmup early\n\"",
+            ent ? ent->client->pers.netname : "console" ) );
+    
+    G_LevelRestart( qtrue );
 
     return qtrue;
   }
 
   if( !level.intermissiontime )
   {
-    ADMP( "^3allready: ^7this command is only valid during intermission\n" );
+    ADMP( "^3allready: ^7this command is only valid during intermission or developer mode pre-game warmup\n" );
     return qfalse;
   }
 
