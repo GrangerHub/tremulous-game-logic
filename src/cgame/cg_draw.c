@@ -3394,8 +3394,8 @@ CG_DrawLighting
 static void CG_DrawLighting( void )
 {
   //fade to black if stamina is low
-  if( ( cg.snap->ps.stats[ STAT_STAMINA ] < STAMINA_BLACKOUT_LEVEL ) &&
-      ( cg.snap->ps.stats[ STAT_TEAM ] == TEAM_HUMANS ) )
+   if( cgs.humanBlackout && ( ( cg.snap->ps.stats[ STAT_STAMINA ] < STAMINA_BLACKOUT_LEVEL ) &&
+      ( cg.snap->ps.stats[ STAT_TEAM ] == TEAM_HUMANS ) ) )
   {
     vec4_t black = { 0, 0, 0, 0 };
     black[ 3 ] = 1.0 - ( (float)( cg.snap->ps.stats[ STAT_STAMINA ] + 1000 ) / 200.0f );

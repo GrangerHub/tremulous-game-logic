@@ -102,6 +102,7 @@ vmCvar_t  g_allowBuildableStacking;
 vmCvar_t  g_alienBuildPoints;
 vmCvar_t  g_alienBuildPointsReserve;
 vmCvar_t  g_alienBuildQueueTime;
+vmCvar_t  g_humanBlackout;
 vmCvar_t  g_humanBuildPoints;
 vmCvar_t  g_humanBuildPointsReserve;
 vmCvar_t  g_humanBuildQueueTime;
@@ -266,6 +267,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_alienBuildPoints, "g_alienBuildPoints", DEFAULT_ALIEN_BUILDPOINTS, 0, 0, qfalse, cv_alienBuildPoints },
   { &g_alienBuildPointsReserve, "g_alienBuildPointsReserve", DEFAULT_ALIEN_BUILDPOINTS_RESERVE, 0, 0, qfalse, cv_alienBuildPointsReserve },
   { &g_alienBuildQueueTime, "g_alienBuildQueueTime", DEFAULT_ALIEN_QUEUE_TIME, CVAR_ARCHIVE, 0, qfalse  },
+  { &g_humanBlackout, "g_humanBlackout", "1", CVAR_SERVERINFO, 0, qfalse  },
   { &g_humanBuildPoints, "g_humanBuildPoints", DEFAULT_HUMAN_BUILDPOINTS, 0, 0, qfalse, cv_humanBuildPoints },
   { &g_humanBuildPointsReserve, "g_humanBuildPointsReserve", DEFAULT_HUMAN_BUILDPOINTS_RESERVE, 0, 0, qfalse, cv_humanBuildPointsReserve },
   { &g_humanBuildQueueTime, "g_humanBuildQueueTime", DEFAULT_HUMAN_QUEUE_TIME, CVAR_ARCHIVE, 0, qfalse  },
