@@ -745,6 +745,14 @@ static void CG_DrawUsableBuildable( rectDef_t *rect, qhandle_t shader, vec4_t co
 
   es = &cg_entities[ trace.entityNum ].currentState;
 
+  if( cg.predictedPlayerState.stats[ STAT_STATE ] & SS_HOVELING )
+  {
+    trap_R_SetColor( color );
+    CG_DrawPic( rect->x, rect->y, rect->w, rect->h, shader );
+    trap_R_SetColor( NULL );
+    cg.nearUsableBuildable = BA_A_HOVEL;
+  }
+
   if( es->eType == ET_BUILDABLE && BG_Buildable( es->modelindex )->usable &&
       cg.predictedPlayerState.stats[ STAT_TEAM ] == BG_Buildable( es->modelindex )->team )
   {
@@ -3880,4 +3888,3 @@ void CG_DrawActive( stereoFrame_t stereoView )
   // draw status bar and other floating elements
   CG_Draw2D( );
 }
-
