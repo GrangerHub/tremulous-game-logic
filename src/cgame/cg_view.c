@@ -843,6 +843,8 @@ Fixed fov at intermissions, otherwise account for fov variable and zooms.
 #define BASE_FOV_Y      73.739792f // atan2( 3, 4 / tan( 90 ) )
 #define MAX_FOV_Y       120.0f
 #define MAX_FOV_WARP_Y  127.5f
+#define MAX_FOV_OFFSET  20.0f
+#define MIN_FOV_OFFSET  -20.0f
 
 static int CG_CalcFov( void )
 {
@@ -851,6 +853,7 @@ static int CG_CalcFov( void )
   float     v;
   int       contents;
   float     fov_x, fov_y;
+  float     fov_Offset;
   float     zoomFov;
   float     f;
   int       inwater;
@@ -955,7 +958,7 @@ static int CG_CalcFov( void )
   y = cg.refdef.height / tan( 0.5f * DEG2RAD( fov_y ) );
   fov_x = atan2( cg.refdef.width, y );
   fov_x = 2.0f * RAD2DEG( fov_x );
-
+  
   // warp if underwater
   contents = CG_PointContents( cg.refdef.vieworg, -1 );
 
@@ -983,11 +986,17 @@ static int CG_CalcFov( void )
     fov_x += v;
     fov_y += v;
   }
-
+  
+  // Use client's FOV offset (if it's within a REASON(TM)able range)
+  fov_Offset = cg_fovOffset.value;
+  if ( fov_Offset < MIN_FOV_OFFSET )
+    fov_Offset = MIN_FOV_OFFSET;
+  else if ( fov_Offset > MAX_FOV_OFFSET )
+    fov_Offset = MAX_FOV_OFFSET;
 
   // set it
-  cg.refdef.fov_x = fov_x;
-  cg.refdef.fov_y = fov_y;
+  cg.refdef.fov_x = fov_x + fov_Offset;
+  cg.refdef.fov_y = fov_y + fov_Offset;
 
   if( !cg.zoomed )
     cg.zoomSensitivity = 1.0f;
@@ -1499,4 +1508,3 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
   if( cg_stats.integer )
     CG_Printf( "cg.clientFrame:%i\n", cg.clientFrame );
 }
-
