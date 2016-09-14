@@ -1661,7 +1661,6 @@ void AHovel_Use( gentity_t *self, gentity_t *other, gentity_t *activator )
 
       activator->client->ps.stats[ STAT_STATE ] |= SS_HOVELING;
       activator->client->hovel = self;
-      activator->client->ps.persistant[ PERS_HOVEL ] = self->s.number;
       self->builder = activator;
 
       G_PositionHovelsBuilder( self );
@@ -3422,6 +3421,9 @@ void G_BuildableThink( gentity_t *ent, int msec )
 
   // Set flags
   ent->s.eFlags &= ~( EF_B_POWERED | EF_B_SPAWNED | EF_B_MARKED );
+  if( ent->builder && ent->builder->client)
+    ent->builder->client->ps.eFlags &= ~( EF_HOVEL_MARKED );
+  
   if( ent->powered )
     ent->s.eFlags |= EF_B_POWERED;
 
@@ -3429,7 +3431,12 @@ void G_BuildableThink( gentity_t *ent, int msec )
     ent->s.eFlags |= EF_B_SPAWNED;
 
   if( ent->deconstruct )
+  {
+    if( ent->builder && ent->builder->client)
+      ent->builder->client->ps.eFlags |= EF_HOVEL_MARKED;
+      
     ent->s.eFlags |= EF_B_MARKED;
+  }
 
   // Check if this buildable is touching any triggers
   G_BuildableTouchTriggers( ent );

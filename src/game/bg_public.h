@@ -293,7 +293,7 @@ typedef enum
   PERS_NEWWEAPON,  // weapon to switch to
   PERS_BP,
   PERS_MARKEDBP,
-  PERS_HOVEL      // the entity number of the hovel a granger is occupying
+  PERS_USABLE_OBJECT
   // netcode has space for 2 more
 } persEnum_t;
 
@@ -307,6 +307,9 @@ typedef enum
 #define EF_DEAD             0x0001    // don't draw a foe marker over players with EF_DEAD
 #define EF_TELEPORT_BIT     0x0002    // toggled every time the origin abruptly changes
 #define EF_PLAYER_EVENT     0x0004    // only used for eType > ET_EVENTS
+
+// for cleints occupying hovels
+#define EF_HOVEL_MARKED     0x0008   // tells if the hovel occupied is marked
 
 // for missiles:
 #define EF_BOUNCE           0x0008    // for missiles
