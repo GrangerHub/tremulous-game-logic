@@ -289,7 +289,8 @@ typedef enum
   PERS_QUEUEPOS,  // position in the spawn queue
   PERS_NEWWEAPON,  // weapon to switch to
   PERS_BP,
-  PERS_MARKEDBP
+  PERS_MARKEDBP,
+  PERS_USABLE_OBJECT
   // netcode has space for 3 more
 } persEnum_t;
 

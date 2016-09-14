@@ -734,36 +734,23 @@ CG_DrawUsableBuildable
 */
 static void CG_DrawUsableBuildable( rectDef_t *rect, qhandle_t shader, vec4_t color )
 {
-  vec3_t        view, point;
-  trace_t       trace;
   entityState_t *es;
 
-  AngleVectors( cg.refdefViewAngles, view, NULL, NULL );
-  VectorMA( cg.refdef.vieworg, 64, view, point );
-  CG_Trace( &trace, cg.refdef.vieworg, NULL, NULL,
-            point, cg.predictedPlayerState.clientNum, MASK_SHOT );
+  es = &cg_entities[ cg.predictedPlayerState.persistant[ PERS_USABLE_OBJECT ] ].currentState;
 
-  es = &cg_entities[ trace.entityNum ].currentState;
-
-  if( es->eType == ET_BUILDABLE && BG_Buildable( es->modelindex )->usable &&
-      cg.predictedPlayerState.stats[ STAT_TEAM ] == BG_Buildable( es->modelindex )->team )
+  if( cg.predictedPlayerState.persistant[ PERS_USABLE_OBJECT ] != ENTITYNUM_NONE )
   {
-    //hack to prevent showing the usable buildable when you aren't carrying an energy weapon
-    if( ( es->modelindex == BA_H_REACTOR || es->modelindex == BA_H_REPEATER ) &&
-        ( !BG_Weapon( cg.snap->ps.weapon )->usesEnergy ||
-          BG_Weapon( cg.snap->ps.weapon )->infiniteAmmo ) )
-    {
-      cg.nearUsableBuildable = BA_NONE;
-      return;
-    }
-
     trap_R_SetColor( color );
     CG_DrawPic( rect->x, rect->y, rect->w, rect->h, shader );
     trap_R_SetColor( NULL );
-    cg.nearUsableBuildable = es->modelindex;
+    
+    if( es->eType == ET_BUILDABLE )
+    {
+      cg.nearUsableBuildable = es->modelindex;
+    }
+    else
+      cg.nearUsableBuildable = BA_NONE;
   }
-  else
-    cg.nearUsableBuildable = BA_NONE;
 }
 
 
@@ -3840,4 +3827,3 @@ void CG_DrawActive( stereoFrame_t stereoView )
   // draw status bar and other floating elements
   CG_Draw2D( );
 }
-
