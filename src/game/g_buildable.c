@@ -1634,8 +1634,8 @@ void AHovel_Use( gentity_t *self, gentity_t *other, gentity_t *activator )
       //this hovel is in use
       G_TriggerMenu( activator->client->ps.clientNum, MN_A_HOVEL_OCCUPIED );
     }
-    else if( ( ( activator->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_BUILDER0 ) ||
-               ( activator->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_BUILDER0_UPG ) ) &&
+    else if( BG_ClassHasAbility( activator->client->ps.stats[STAT_CLASS],
+                                 SCA_CANHOVEL ) &&
              activator->health > 0 && self->health > 0 )
     {
       if( activator->client->noclip )

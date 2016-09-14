@@ -1348,7 +1348,9 @@ if( !( client = ent->client ) )
       !( ( traceEnt->s.modelindex == BA_H_REACTOR ||
            traceEnt->s.modelindex == BA_H_REPEATER ) &&
          ( !BG_Weapon( client->ps.weapon )->usesEnergy ||
-           BG_Weapon( client->ps.weapon )->infiniteAmmo ) ) )
+           BG_Weapon( client->ps.weapon )->infiniteAmmo ) ) &&
+      !( traceEnt->s.modelindex == BA_A_HOVEL &&
+         !BG_ClassHasAbility( client->ps.stats[STAT_CLASS], SCA_CANHOVEL ) ) )
   {
     client->ps.persistant[ PERS_USABLE_OBJECT ] = traceEnt->s.number;
   }
@@ -1370,7 +1372,9 @@ if( !( client = ent->client ) )
           !( ( traceEnt->s.modelindex == BA_H_REACTOR ||
                traceEnt->s.modelindex == BA_H_REPEATER ) &&
              ( !BG_Weapon( client->ps.weapon )->usesEnergy ||
-               BG_Weapon( client->ps.weapon )->infiniteAmmo ) ) )
+               BG_Weapon( client->ps.weapon )->infiniteAmmo ) ) &&
+          !( traceEnt->s.modelindex == BA_A_HOVEL &&
+             !BG_ClassHasAbility( client->ps.stats[STAT_CLASS], SCA_CANHOVEL ) ) )
       {
         client->ps.persistant[ PERS_USABLE_OBJECT ] = traceEnt->s.number;
         return;

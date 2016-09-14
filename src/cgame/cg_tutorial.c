@@ -229,27 +229,30 @@ static void CG_AlienBuilderText( char *text, playerState_t *ps )
     Q_strcat( text, MAX_TUTORIAL_TEXT,
               va( "Press %s to destroy this hovel\n",
                   CG_KeyNameForCommand( "deconstruct" ) ) );
-  } else if( ( es = CG_BuildableInRange( ps, NULL ) ) )
+  } else 
   {
-    if( cgs.markDeconstruct )
+    if( ( es = CG_BuildableInRange( ps, NULL ) ) )
     {
-      if( es->eFlags & EF_B_MARKED )
+      if( cgs.markDeconstruct )
       {
-        Q_strcat( text, MAX_TUTORIAL_TEXT,
-            va( "Press %s to unmark this structure for replacement\n",
-              CG_KeyNameForCommand( "reload" ) ) );
+        if( es->eFlags & EF_B_MARKED )
+        {
+          Q_strcat( text, MAX_TUTORIAL_TEXT,
+              va( "Press %s to unmark this structure for replacement\n",
+                CG_KeyNameForCommand( "reload" ) ) );
+        }
+        else
+        {
+          Q_strcat( text, MAX_TUTORIAL_TEXT,
+              va( "Press %s to mark this structure for replacement\n",
+                CG_KeyNameForCommand( "reload" ) ) );
+        }
       }
-      else
-      {
-        Q_strcat( text, MAX_TUTORIAL_TEXT,
-            va( "Press %s to mark this structure for replacement\n",
-              CG_KeyNameForCommand( "reload" ) ) );
-      }
-    }
 
-    Q_strcat( text, MAX_TUTORIAL_TEXT,
-            va( "Press %s to destroy this structure\n",
-              CG_KeyNameForCommand( "deconstruct" ) ) );
+      Q_strcat( text, MAX_TUTORIAL_TEXT,
+              va( "Press %s to destroy this structure\n",
+                CG_KeyNameForCommand( "deconstruct" ) ) );
+    }
 
     if( ( ps->stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT ) == BA_NONE )
     {
