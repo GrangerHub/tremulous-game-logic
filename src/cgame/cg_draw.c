@@ -750,6 +750,9 @@ static void CG_DrawUsableBuildable( rectDef_t *rect, qhandle_t shader, vec4_t co
     }
     else
       cg.nearUsableBuildable = BA_NONE;
+  } else
+  {
+    cg.nearUsableBuildable = BA_NONE;
   }
 }
 
