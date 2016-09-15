@@ -1591,16 +1591,20 @@ Postitions a hovel's ocupying granger
 void G_PositionHovelsBuilder( gentity_t *self )
 {
   vec3_t  hovelOrigin, hovelAngles, inverseNormal;
+  vec3_t  mins, maxs;
   trace_t tr;
 
   if( !self->builder )
     return;
 
+  BG_ClassBoundingBox( self->builder->client->ps.stats[ STAT_CLASS ],
+                       mins, maxs, NULL, NULL, NULL );
+
   VectorCopy( self->r.currentOrigin, hovelOrigin );
   hovelOrigin[2] += 128.0f;
 
   trap_UnlinkEntity( self->builder );
-  trap_Trace( &tr, self->r.currentOrigin, NULL, NULL, hovelOrigin, self->s.number, MASK_DEADSOLID );
+  trap_TraceCapsule( &tr, self->r.currentOrigin, mins, maxs, hovelOrigin, self->s.number, MASK_DEADSOLID );
   trap_LinkEntity( self->builder );
 
   if( tr.fraction < 1.0f )
