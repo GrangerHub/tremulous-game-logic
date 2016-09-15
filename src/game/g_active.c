@@ -1316,12 +1316,11 @@ static qboolean G_CanUseEntity( gclient_t *client, gentity_t *ent )
               default:
                 break;
           }
+          return qtrue;
 
       default:
-        break;
+        return qfalse;
   }
-
-  return qtrue;
 }
 
 /*
