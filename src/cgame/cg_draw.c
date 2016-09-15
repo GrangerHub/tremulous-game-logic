@@ -736,9 +736,9 @@ static void CG_DrawUsableBuildable( rectDef_t *rect, qhandle_t shader, vec4_t co
 {
   entityState_t *es;
 
-  es = &cg_entities[ cg.predictedPlayerState.persistant[ PERS_USABLE_OBJECT ] ].currentState;
+  es = &cg_entities[ cg.predictedPlayerState.persistant[ PERS_USABLE_ENT ] ].currentState;
 
-  if( cg.predictedPlayerState.persistant[ PERS_USABLE_OBJECT ] != ENTITYNUM_NONE )
+  if( cg.predictedPlayerState.persistant[ PERS_USABLE_ENT ] != ENTITYNUM_NONE )
   {
     trap_R_SetColor( color );
     CG_DrawPic( rect->x, rect->y, rect->w, rect->h, shader );

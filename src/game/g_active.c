@@ -1291,12 +1291,47 @@ static void G_UnlaggedDetectCollisions( gentity_t *ent )
 
 /*
 =====================
- G_FindUsableObjects
- 
- Determines if there is a nearby object the client can use
- ====================
+G_CanUseEntity
+
+Determines if a given client can use a given entity
+=====================
 */
-static void G_FindUsableObjects( gentity_t *ent )
+static qboolean G_CanUseEntity( gclient_t *client, gentity_t *ent )
+{
+  if( !ent || !ent->use || !client )
+    return qfalse;
+
+  switch ( ent->s.eType ) {
+      case ET_BUILDABLE:
+          if( ent->buildableTeam != client->ps.stats[ STAT_TEAM ] )
+            return qfalse;
+          switch ( ent->s.modelindex ) {
+              case BA_H_REACTOR: // fall through
+              case BA_H_REPEATER:
+                if( !BG_Weapon( client->ps.weapon )->usesEnergy ||
+                    BG_Weapon( client->ps.weapon )->infiniteAmmo )
+                  return qfalse;
+                break;
+
+              default:
+                break;
+          }
+
+      default:
+        break;
+  }
+
+  return qtrue;
+}
+
+/*
+=====================
+G_FindUsableEntity
+
+Determines if there is a nearby entity the client can use
+=====================
+*/
+static void G_FindUsableEntity( gentity_t *ent )
 {
   gclient_t *client;
   trace_t   trace;
@@ -1310,8 +1345,8 @@ static void G_FindUsableObjects( gentity_t *ent )
   vec3_t    mins, maxs;
   int       i, num;
 
-if( !( client = ent->client ) )
-  return;
+  if( !( client = ent->client ) )
+    return;
 
   // look for object infront of player
   AngleVectors( client->ps.viewangles, view, NULL, NULL );
@@ -1320,15 +1355,9 @@ if( !( client = ent->client ) )
 
   traceEnt = &g_entities[ trace.entityNum ];
 
-  if( traceEnt &&
-      traceEnt->buildableTeam == client->ps.stats[ STAT_TEAM ] &&
-      traceEnt->use &&
-      !( ( traceEnt->s.modelindex == BA_H_REACTOR ||
-           traceEnt->s.modelindex == BA_H_REPEATER ) &&
-         ( !BG_Weapon( client->ps.weapon )->usesEnergy ||
-           BG_Weapon( client->ps.weapon )->infiniteAmmo ) ) )
+  if( G_CanUseEntity( client, traceEnt ) )
   {
-    client->ps.persistant[ PERS_USABLE_OBJECT ] = traceEnt->s.number;
+    client->ps.persistant[ PERS_USABLE_ENT ] = traceEnt->s.number;
   }
   else
   {    
@@ -1342,20 +1371,14 @@ if( !( client = ent->client ) )
     {
       traceEnt = &g_entities[ entityList[ i ] ];
 
-      if( traceEnt &&
-          traceEnt->buildableTeam == client->ps.stats[ STAT_TEAM ] &&
-          traceEnt->use &&
-          !( ( traceEnt->s.modelindex == BA_H_REACTOR ||
-               traceEnt->s.modelindex == BA_H_REPEATER ) &&
-             ( !BG_Weapon( client->ps.weapon )->usesEnergy ||
-               BG_Weapon( client->ps.weapon )->infiniteAmmo ) ) )
+      if( G_CanUseEntity( client, traceEnt ) )
       {
-        client->ps.persistant[ PERS_USABLE_OBJECT ] = traceEnt->s.number;
+        client->ps.persistant[ PERS_USABLE_ENT ] = traceEnt->s.number;
         return;
       }
     }
 
-    client->ps.persistant[ PERS_USABLE_OBJECT ] = ENTITYNUM_NONE;
+    client->ps.persistant[ PERS_USABLE_ENT ] = ENTITYNUM_NONE;
   }
 }
 
@@ -1803,15 +1826,15 @@ void ClientThink_real( gentity_t *ent )
   client->buttons = ucmd->buttons;
   client->latched_buttons |= client->buttons & ~client->oldbuttons;
 
-  G_FindUsableObjects( ent );
+  G_FindUsableEntity( ent );
   if( ( client->buttons & BUTTON_USE_EVOLVE ) && !( client->oldbuttons & BUTTON_USE_EVOLVE ) &&
        client->ps.stats[ STAT_HEALTH ] > 0 )
   {
-    if( client->ps.persistant[ PERS_USABLE_OBJECT ] != ENTITYNUM_NONE )
+    if( client->ps.persistant[ PERS_USABLE_ENT ] != ENTITYNUM_NONE )
     {
       gentity_t *traceEnt;
       
-      traceEnt = &g_entities[ client->ps.persistant[ PERS_USABLE_OBJECT ] ];
+      traceEnt = &g_entities[ client->ps.persistant[ PERS_USABLE_ENT ] ];
       traceEnt->use( traceEnt, ent, ent ); //other and activator are the same in this context
     } else if( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
     {
