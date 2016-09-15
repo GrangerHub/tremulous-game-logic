@@ -294,7 +294,7 @@ typedef enum
   PERS_NEWWEAPON,  // weapon to switch to
   PERS_BP,
   PERS_MARKEDBP,
-  PERS_USABLE_OBJECT
+  PERS_USABLE_ENT  // indicates the entity number of an entity a client can use
   // netcode has space for 2 more
 } persEnum_t;
 
