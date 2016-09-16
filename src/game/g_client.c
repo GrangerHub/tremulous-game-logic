@@ -1425,16 +1425,16 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
     client->ps.stats[ STAT_MAX_HEALTH ] =
       BG_Class( ent->client->pers.classSelection )->health;
     if( BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->regenRate )
-      ent->healthReserve = client->ps.persistant[ PERS_HEALTH_RESERVE ] =
+      ent->healthReserve = client->ps.misc[ MISC_HEALTH_RESERVE ] =
                            (int)( ALIEN_HP_RESERVE_MAX *
                            client->ps.stats[ STAT_MAX_HEALTH ] );
     else
-      ent->healthReserve = client->ps.persistant[ PERS_HEALTH_RESERVE ] = 0;
+      ent->healthReserve = client->ps.misc[ MISC_HEALTH_RESERVE ] = 0;
   }
   else
   {
     client->ps.stats[ STAT_MAX_HEALTH ] = 100;
-    ent->healthReserve = client->ps.persistant[ PERS_HEALTH_RESERVE ] = 0;
+    ent->healthReserve = client->ps.misc[ MISC_HEALTH_RESERVE ] = 0;
   }
 
   // clear entity values
@@ -1469,11 +1469,11 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   ent->health = client->ps.stats[ STAT_HEALTH ] = client->ps.stats[ STAT_MAX_HEALTH ]; //* 1.25;
 
   if( BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->regenRate )
-    ent->healthReserve = client->ps.persistant[ PERS_HEALTH_RESERVE ] =
+    ent->healthReserve = client->ps.misc[ MISC_HEALTH_RESERVE ] =
                          (int)( ALIEN_HP_RESERVE_MAX *
                          client->ps.stats[ STAT_MAX_HEALTH ] );
   else
-    ent->healthReserve = client->ps.persistant[ PERS_HEALTH_RESERVE ] = 0;
+    ent->healthReserve = client->ps.misc[ MISC_HEALTH_RESERVE ] = 0;
 
   //if evolving scale health
   if( ent == spawn )
@@ -1482,7 +1482,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
     client->ps.stats[ STAT_HEALTH ] = ent->health;
 
     ent->healthReserve *= ent->client->pers.evolveHealthReserveFraction;
-    client->ps.persistant[ PERS_HEALTH_RESERVE ] = ent->healthReserve;
+    client->ps.misc[ MISC_HEALTH_RESERVE ] = ent->healthReserve;
   }
 
   //clear the credits array

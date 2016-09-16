@@ -919,7 +919,7 @@ void CG_Menu( int menu, int arg )
 
     case MN_A_HOVEL_BLOCKED:
       longMsg   = "The exit to the Hovel is blocked. Wait until it becomes clear and "
-                  "try again.";
+                  "try again.  Or try deconstructing the hovel.";
       shortMsg  = "The exit to the Hovel is blocked";
       type      = DT_COMMAND;
       break;

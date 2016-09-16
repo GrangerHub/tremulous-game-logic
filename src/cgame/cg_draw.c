@@ -750,58 +750,26 @@ CG_DrawUsableBuildable
 */
 static void CG_DrawUsableBuildable( rectDef_t *rect, qhandle_t shader, vec4_t color )
 {
-  centity_t *groundEnt;
-  vec3_t        view, point;
-  trace_t       trace;
   entityState_t *es;
 
-  groundEnt = &cg_entities[ cg.predictedPlayerState.groundEntityNum ];
+  es = &cg_entities[ cg.predictedPlayerState.persistant[ PERS_USABLE_ENT ] ].currentState;
 
-  if( groundEnt->currentState.modelindex == BA_H_TELEPORTER )
-    es = &groundEnt->currentState;
-  else
-  {
-    AngleVectors( cg.refdefViewAngles, view, NULL, NULL );
-    VectorMA( cg.refdef.vieworg, 64, view, point );
-    CG_Trace( &trace, cg.refdef.vieworg, NULL, NULL,
-              point, cg.predictedPlayerState.clientNum, MASK_SHOT );
-
-    es = &cg_entities[ trace.entityNum ].currentState;
-
-    if( es->modelindex == BA_H_TELEPORTER )
-    {
-      cg.nearUsableBuildable = BA_NONE;
-      return;
-    }
-  }
-
-  if( cg.predictedPlayerState.stats[ STAT_STATE ] & SS_HOVELING )
+  if( cg.predictedPlayerState.persistant[ PERS_USABLE_ENT ] != ENTITYNUM_NONE )
   {
     trap_R_SetColor( color );
     CG_DrawPic( rect->x, rect->y, rect->w, rect->h, shader );
     trap_R_SetColor( NULL );
-    cg.nearUsableBuildable = BA_A_HOVEL;
-  }
-
-  if( es->eType == ET_BUILDABLE && BG_Buildable( es->modelindex )->usable &&
-      cg.predictedPlayerState.stats[ STAT_TEAM ] == BG_Buildable( es->modelindex )->team )
-  {
-    //hack to prevent showing the usable buildable when you aren't carrying an energy weapon
-    if( ( es->modelindex == BA_H_REACTOR || es->modelindex == BA_H_REPEATER ) &&
-        ( !BG_Weapon( cg.snap->ps.weapon )->usesEnergy ||
-          BG_Weapon( cg.snap->ps.weapon )->infiniteAmmo ) )
+    
+    if( es->eType == ET_BUILDABLE )
     {
-      cg.nearUsableBuildable = BA_NONE;
-      return;
+      cg.nearUsableBuildable = es->modelindex;
     }
-
-    trap_R_SetColor( color );
-    CG_DrawPic( rect->x, rect->y, rect->w, rect->h, shader );
-    trap_R_SetColor( NULL );
-    cg.nearUsableBuildable = es->modelindex;
-  }
-  else
+    else
+      cg.nearUsableBuildable = BA_NONE;
+  } else
+  {
     cg.nearUsableBuildable = BA_NONE;
+  }
 }
 
 
@@ -910,7 +878,7 @@ static void CG_DrawPlayerHealthValue( rectDef_t *rect, vec4_t color )
   float scale;
   int   len;
   int   health = cg.snap->ps.stats[ STAT_HEALTH ];
-  int   healthReserve = cg.snap->ps.persistant[ PERS_HEALTH_RESERVE ];
+  int   healthReserve = cg.snap->ps.misc[ MISC_HEALTH_RESERVE ];
 
     
     

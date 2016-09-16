@@ -218,7 +218,7 @@ float G_RewardAttackers( gentity_t *self )
           player->healthReserve = maxHealthReserve;
         }
 
-        player->client->ps.persistant[ PERS_HEALTH_RESERVE ] = player->healthReserve;
+        player->client->ps.misc[ MISC_HEALTH_RESERVE ] = player->healthReserve;
       }
 
       // killing buildables earns score and credits, but doesn't count towards stage advancement

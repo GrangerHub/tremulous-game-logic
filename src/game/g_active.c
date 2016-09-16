@@ -707,7 +707,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
             client->ps.stats[ STAT_BUILDABLE ] &= ~SB_VALID_TOGGLEBIT;
 
           // Let the client know which buildables will be removed by building
-          for( i = 0; i < MAX_MISC; i++ )
+          for( i = 0; i < ( MAX_MISC - 1 ); i++ )
           {
             if( i < level.numBuildablesForRemoval )
               client->ps.misc[ i ] = level.markedBuildables[ i ]->s.number;
@@ -717,7 +717,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
         }
         else
         {
-          for( i = 0; i < MAX_MISC; i++ )
+          for( i = 0; i < ( MAX_MISC - 1 ); i++ )
             client->ps.misc[ i ] = 0;
         }
         break;
@@ -1306,6 +1306,132 @@ static void G_UnlaggedDetectCollisions( gentity_t *ent )
 }
 
 /*
+=====================
+G_CanUseEntity
+
+Determines if a given client can use a given entity
+=====================
+*/
+static qboolean G_CanUseEntity( gclient_t *client, gentity_t *ent )
+{
+  if( !ent || !ent->use || !client )
+    return qfalse;
+
+  switch ( ent->s.eType ) {
+      case ET_BUILDABLE:
+          if( ent->buildableTeam != client->ps.stats[ STAT_TEAM ] )
+            return qfalse;
+          switch ( ent->s.modelindex ) {
+              case BA_A_HOVEL:
+                if( !BG_ClassHasAbility( client->ps.stats[STAT_CLASS], SCA_CANHOVEL ) )
+                  return qfalse;
+                break;
+                
+              case BA_H_TELEPORTER:
+                if( client->ps.groundEntityNum != ent->s.number ||
+                    !ent->powered  )
+                  return qfalse;
+                break;
+
+              case BA_H_REACTOR: // fall through
+              case BA_H_REPEATER:
+                if( !BG_Weapon( client->ps.weapon )->usesEnergy ||
+                    BG_Weapon( client->ps.weapon )->infiniteAmmo )
+                  return qfalse;
+                break;
+
+              default:
+                break;
+          }
+          return qtrue;
+
+      default:
+        return qfalse;
+  }
+}
+
+/*
+=====================
+G_FindUsableEntity
+
+Determines if there is a nearby entity the client can use
+=====================
+*/
+static void G_FindUsableEntity( gentity_t *ent )
+{
+  gclient_t *client;
+  trace_t   trace;
+  vec3_t    view, point;
+  gentity_t *traceEnt, *groundEnt;
+
+#define USE_OBJECT_RANGE 64
+
+  int       entityList[ MAX_GENTITIES ];
+  vec3_t    range = { USE_OBJECT_RANGE, USE_OBJECT_RANGE, USE_OBJECT_RANGE };
+  vec3_t    mins, maxs;
+  int       i, num;
+
+  if( !( client = ent->client ) )
+    return;
+
+  // check if the client is hoveling
+  if ( client->ps.stats[ STAT_STATE ] & SS_HOVELING )
+  {
+    client->ps.persistant[ PERS_USABLE_ENT ] = client->hovel->s.number;
+    return;
+  }
+
+  groundEnt = &g_entities[ client->ps.groundEntityNum ];
+
+  if ( groundEnt->s.modelindex == BA_H_TELEPORTER &&
+            G_CanUseEntity( client, groundEnt ) &&
+        groundEnt->teleporterActivated >= level.time &&
+        groundEnt->teleporterActivator == client->ps.clientNum )
+  {
+    client->ps.persistant[ PERS_USABLE_ENT ] = ENTITYNUM_NONE;
+    return;
+  }
+
+  // look for object infront of player
+  AngleVectors( client->ps.viewangles, view, NULL, NULL );
+  VectorMA( client->ps.origin, USE_OBJECT_RANGE, view, point );
+  trap_Trace( &trace, client->ps.origin, NULL, NULL, point, ent->s.number, MASK_SHOT );
+
+  traceEnt = &g_entities[ trace.entityNum ];
+
+  if( G_CanUseEntity( client, traceEnt ) )
+  {
+    client->ps.persistant[ PERS_USABLE_ENT ] = traceEnt->s.number;
+  }
+  else if ( groundEnt->s.modelindex == BA_H_TELEPORTER &&
+            G_CanUseEntity( client, groundEnt ) )
+  {
+    client->ps.persistant[ PERS_USABLE_ENT ] = groundEnt->s.number;
+  }
+  else
+  {    
+    //no entity in front of player - do a small area search
+
+    VectorAdd( client->ps.origin, range, maxs );
+    VectorSubtract( client->ps.origin, range, mins );
+
+    num = trap_EntitiesInBox( mins, maxs, entityList, MAX_GENTITIES );
+    for( i = 0; i < num; i++ )
+    {
+      traceEnt = &g_entities[ entityList[ i ] ];
+
+      if( G_CanUseEntity( client, traceEnt ) )
+      {
+        client->ps.persistant[ PERS_USABLE_ENT ] = traceEnt->s.number;
+        return;
+      }
+    }
+
+    client->ps.persistant[ PERS_USABLE_ENT ] = ENTITYNUM_NONE;
+  }
+}
+
+/*
 ==============
 ClientThink
 
@@ -1584,7 +1710,7 @@ void ClientThink_real( gentity_t *ent )
         if( ent->healthReserve < 0 )
           ent->healthReserve = 0;
 
-        client->ps.persistant[ PERS_HEALTH_RESERVE ] = ent->healthReserve;
+        client->ps.misc[ MISC_HEALTH_RESERVE ] = ent->healthReserve;
 
         ent->health += count;
         client->ps.stats[ STAT_HEALTH ] = ent->health;
@@ -1632,7 +1758,7 @@ void ClientThink_real( gentity_t *ent )
                                       client->ps.stats[ STAT_MAX_HEALTH ] );
         }
 
-        client->ps.persistant[ PERS_HEALTH_RESERVE ] = ent->healthReserve;
+        client->ps.misc[ MISC_HEALTH_RESERVE ] = ent->healthReserve;
       }
     }
   }
@@ -1830,23 +1956,10 @@ void ClientThink_real( gentity_t *ent )
   client->buttons = ucmd->buttons;
   client->latched_buttons |= client->buttons & ~client->oldbuttons;
 
-  if( client->pers.teamSelection == TEAM_HUMANS &&
-      groundEnt->s.modelindex == BA_H_TELEPORTER &&
-      groundEnt->powered &&
-      client->ps.stats[ STAT_HEALTH ] > 0 &&
-      ( ( groundEnt->teleporterActivator == ent->s.number && 
-          groundEnt->teleporterActivated >= level.time  ) ||
-        ( ( client->buttons & BUTTON_USE_EVOLVE ) && !( client->oldbuttons & BUTTON_USE_EVOLVE )
-           ) ) )
+  G_FindUsableEntity( ent );
+  if( ( client->buttons & BUTTON_USE_EVOLVE ) && !( client->oldbuttons & BUTTON_USE_EVOLVE ) &&
+       client->ps.stats[ STAT_HEALTH ] > 0 )
   {
-    G_UseTeleporter( groundEnt, ent );
-  } else if( ( client->buttons & BUTTON_USE_EVOLVE ) && !( client->oldbuttons & BUTTON_USE_EVOLVE ) &&
-             client->ps.stats[ STAT_HEALTH ] > 0 )
-  {
-    trace_t   trace;
-    vec3_t  view, point;
-    gentity_t *traceEnt;
-
     if ( client->ps.stats[ STAT_STATE ] & SS_HOVELING )
     {
       gentity_t *hovel = client->hovel;
@@ -1875,64 +1988,28 @@ void ClientThink_real( gentity_t *ent )
       else
       {
         // exit is blocked
-        // G_TriggerMenu(ent->client->ps.clientNum, MN_A_HOVEL_BLOCKED );
+        G_TriggerMenu(ent->client->ps.clientNum, MN_A_HOVEL_BLOCKED );
       }
     }
-    else
+    else if( client->ps.persistant[ PERS_USABLE_ENT ] != ENTITYNUM_NONE )
     {
-#define USE_OBJECT_RANGE 64
-
-      int     entityList[ MAX_GENTITIES ];
-      vec3_t  range = { USE_OBJECT_RANGE, USE_OBJECT_RANGE, USE_OBJECT_RANGE };
-      vec3_t  mins, maxs;
-      int     i, num;
-
-      // look for object infront of player
-      AngleVectors( client->ps.viewangles, view, NULL, NULL );
-      VectorMA( client->ps.origin, USE_OBJECT_RANGE, view, point );
-      trap_Trace( &trace, client->ps.origin, NULL, NULL, point, ent->s.number, MASK_SHOT );
-
-      traceEnt = &g_entities[ trace.entityNum ];
-
-      if( traceEnt->s.modelindex != BA_H_TELEPORTER )
+      gentity_t *traceEnt;
+      
+      traceEnt = &g_entities[ client->ps.persistant[ PERS_USABLE_ENT ] ];
+      traceEnt->use( traceEnt, ent, ent ); //other and activator are the same in this context
+    } else if( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
+    {
+      if( BG_AlienCanEvolve( client->ps.stats[ STAT_CLASS ],
+                             client->pers.credit, g_alienStage.integer,
+                             IS_WARMUP ) )
       {
-        if( traceEnt && traceEnt->buildableTeam == client->ps.stats[ STAT_TEAM ] && traceEnt->use )
-          traceEnt->use( traceEnt, ent, ent ); //other and activator are the same in this context
-        else
-        {
-          //no entity in front of player - do a small area search
-
-          VectorAdd( client->ps.origin, range, maxs );
-          VectorSubtract( client->ps.origin, range, mins );
-
-          num = trap_EntitiesInBox( mins, maxs, entityList, MAX_GENTITIES );
-          for( i = 0; i < num; i++ )
-          {
-            traceEnt = &g_entities[ entityList[ i ] ];
-
-            if( traceEnt && traceEnt->buildableTeam == client->ps.stats[ STAT_TEAM ] && traceEnt->use )
-            {
-              traceEnt->use( traceEnt, ent, ent ); //other and activator are the same in this context
-              break;
-            }
-          }
-
-          if( i == num && client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
-          {
-            if( BG_AlienCanEvolve( client->ps.stats[ STAT_CLASS ],
-                  client->pers.credit, g_alienStage.integer,
-                  IS_WARMUP ) )
-            {
-              //no nearby objects and alien - show class menu
-              G_TriggerMenu( ent->client->ps.clientNum, MN_A_INFEST );
-            }
-            else
-            {
-              //flash frags
-              G_AddEvent( ent, EV_ALIEN_EVOLVE_FAILED, 0 );
-            }
-          }
-        }
+        //no nearby objects and alien - show class menu
+        G_TriggerMenu( ent->client->ps.clientNum, MN_A_INFEST );
+      }
+      else
+      {
+        //flash frags
+        G_AddEvent( ent, EV_ALIEN_EVOLVE_FAILED, 0 );
       }
     }
   }

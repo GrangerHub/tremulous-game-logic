@@ -216,6 +216,8 @@ struct gentity_s
   int               attemptSpawnTime;   // timer for attempting to spawn
   int               teleporterActivated;// timer for indicating if a teleporter is in use
   int               teleporterActivator;// the number of the entity that is currently using this teleporter
+  gentity_t         *destinationTeleporter;
+  gentity_t         *originTeleporter;
   int               teleporterCoolDown; // cool down time before this teleporter can be used again
   qboolean          noTelefrag;         // don't telefrag at the next time you teleport
 
@@ -847,7 +849,8 @@ gentity_t         *G_CheckSpawnPoint( int spawnNum, const vec3_t origin,
                                       vec3_t spawnOrigin );
 
 void              G_RemoveTeleporter( gentity_t *self );
-void              G_UseTeleporter( gentity_t *entry, gentity_t *activator );
+void              HTeleporter_Use( gentity_t *self, gentity_t *other, gentity_t *activator );
+void              HTeleporter_Think( gentity_t *self );
 
 buildable_t       G_IsPowered( vec3_t origin );
 qboolean          G_IsDCCBuilt( void );
@@ -1363,6 +1366,8 @@ void      trap_GetServerinfo( char *buffer, int bufferSize );
 void      trap_SetBrushModel( gentity_t *ent, const char *name );
 void      trap_Trace( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs,
                       const vec3_t end, int passEntityNum, int contentmask );
+void      trap_TraceCapsule( trace_t *results, const vec3_t start, const vec3_t mins,
+                             const vec3_t maxs, const vec3_t end, int passEntityNum, int contentmask );
 int       trap_PointContents( const vec3_t point, int passEntityNum );
 qboolean  trap_InPVS( const vec3_t p1, const vec3_t p2 );
 qboolean  trap_InPVSIgnorePortals( const vec3_t p1, const vec3_t p2 );

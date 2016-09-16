@@ -257,6 +257,7 @@ typedef enum
 #define SCA_WALLJUMPER          0x00000040
 #define SCA_STAMINA             0x00000080
 #define SCA_REGEN               0x00000100 // XXX kinda wasted- keeps alien class on human team from never dieing when team admits defeat.
+#define SCA_CANHOVEL            0x00000200
 
 #define SS_WALLCLIMBING         0x00000001
 #define SS_CREEPSLOWED          0x00000002
@@ -296,15 +297,12 @@ typedef enum
   PERS_BP,
   PERS_BP_RESERVE,
   PERS_MARKEDBP,
-  
-  PERS_HOVEL,      // the entity number of the hovel a granger is occupying
-  
-  //zdrytchx: no space in stats, use persistant. This meanas we risk doing a double jump upon spawning but death animations are 1700 msecs long, so technically it's impossible anyway
-  PERS_JUMPTIME,
-
-  PERS_HEALTH_RESERVE
+  PERS_USABLE_ENT, // indicates the entity number of an entity a client can use
+  PERS_JUMPTIME
     // netcode has space for 0 more
 } persEnum_t;
+
+#define MISC_HEALTH_RESERVE    ( MAX_MISC - 1 ) // hack to fit extra data in the misc[] array
 
 #define PS_WALLCLIMBINGFOLLOW   0x00000001
 #define PS_WALLCLIMBINGTOGGLE   0x00000002
@@ -316,6 +314,9 @@ typedef enum
 #define EF_DEAD             0x0001    // don't draw a foe marker over players with EF_DEAD
 #define EF_TELEPORT_BIT     0x0002    // toggled every time the origin abruptly changes
 #define EF_PLAYER_EVENT     0x0004    // only used for eType > ET_EVENTS
+
+// for cleints occupying hovels
+#define EF_HOVEL_MARKED     0x0008   // tells if the hovel occupied is marked
 
 // for missiles:
 #define EF_BOUNCE           0x0008    // for missiles

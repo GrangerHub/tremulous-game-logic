@@ -2218,7 +2218,7 @@ void Cmd_Class_f( gentity_t *ent )
             ent->client->pers.evolveHealthFraction = 1.0f;
 
           ent->client->pers.evolveHealthReserveFraction =
-                          (float)ent->client->ps.persistant[ PERS_HEALTH_RESERVE ] /
+                          (float)ent->client->ps.misc[ MISC_HEALTH_RESERVE ] /
                           ( (float)BG_Class( currentClass )->health *
                           ALIEN_HP_RESERVE_MAX );
 
