@@ -137,6 +137,7 @@ vmCvar_t  cg_footsteps;
 vmCvar_t  cg_addMarks;
 vmCvar_t  cg_viewsize;
 vmCvar_t  cg_drawGun;
+vmCvar_t  cg_fovOffset;
 vmCvar_t  cg_gun_frame;
 vmCvar_t  cg_gun_x;
 vmCvar_t  cg_gun_y;
@@ -293,11 +294,12 @@ static cvarTable_t cvarTable[ ] =
   { &cg_tracerChance, "cg_tracerchance", "0.4", CVAR_CHEAT },
   { &cg_tracerWidth, "cg_tracerwidth", "1", CVAR_CHEAT },
   { &cg_tracerLength, "cg_tracerlength", "100", CVAR_CHEAT },
-  { &cg_thirdPersonRange, "cg_thirdPersonRange", "75", CVAR_ARCHIVE },
+  { &cg_fovOffset, "cg_fovOffset", "0", CVAR_USERINFO },
   { &cg_thirdPerson, "cg_thirdPerson", "0", CVAR_ARCHIVE },
   { &cg_thirdPersonAngle, "cg_thirdPersonAngle", "0", CVAR_CHEAT },
   { &cg_thirdPersonPitchFollow, "cg_thirdPersonPitchFollow", "0", 0 },
   { &cg_thirdPersonShoulderViewMode, "cg_thirdPersonShoulderViewMode", "1", CVAR_ARCHIVE },
+  { &cg_thirdPersonRange, "cg_thirdPersonRange", "75", CVAR_ARCHIVE },
   { &cg_staticDeathCam, "cg_staticDeathCam", "0", CVAR_ARCHIVE },
   { &cg_stats, "cg_stats", "0", 0 },
   { &cg_drawTeamOverlay, "cg_drawTeamOverlay", "1", CVAR_ARCHIVE },
