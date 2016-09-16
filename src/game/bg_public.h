@@ -289,8 +289,9 @@ typedef enum
   PERS_QUEUEPOS,  // position in the spawn queue
   PERS_NEWWEAPON,  // weapon to switch to
   PERS_BP,
-  PERS_MARKEDBP
-  // netcode has space for 3 more
+  PERS_MARKEDBP,
+  PERS_USABLE_ENT  // indicates the entity number of an entity a client can use
+  // netcode has space for 2 more
 } persEnum_t;
 
 #define PS_WALLCLIMBINGFOLLOW   0x00000001
