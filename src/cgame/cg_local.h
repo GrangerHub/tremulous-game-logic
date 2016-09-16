@@ -1389,6 +1389,7 @@ typedef struct
   int           maxclients;
   char          mapname[ MAX_QPATH ];
   qboolean      markDeconstruct;        // Whether or not buildables are marked
+  int           humanBlackout;
 
   // warmup-related values parsed from config strings
   qboolean      warmup;                 // Is it currently pre-game warmup?

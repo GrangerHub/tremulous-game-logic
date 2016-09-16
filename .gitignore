@@ -2,6 +2,7 @@ bld
 GNUmakefile.local
 dep
 *.swp
+.tags
 
 # OS X
 ####################
