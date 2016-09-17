@@ -1883,38 +1883,8 @@ void ClientThink_real( gentity_t *ent )
   if( ( client->buttons & BUTTON_USE_EVOLVE ) && !( client->oldbuttons & BUTTON_USE_EVOLVE ) &&
        client->ps.stats[ STAT_HEALTH ] > 0 )
   {
-    if ( client->ps.stats[ STAT_STATE ] & SS_HOVELING )
-    {
-      gentity_t *hovel = client->hovel;
-
-      // only let the player out if there is room
-      if ( !AHovel_Blocked( hovel, ent, qtrue ) )
-      {
-        // prevent lerping
-        client->ps.eFlags ^= EF_TELEPORT_BIT;
-        client->ps.eFlags &= ~EF_NODRAW;
-
-        // client leaves hovel
-        client->ps.stats[ STAT_STATE ] &= ~SS_HOVELING;
-        client->hovel->builder = NULL;
-
-        // client is no longer astral
-        if( client->noclip )
-          client->cliprcontents = CONTENTS_BODY;
-        else
-          ent->r.contents = CONTENTS_BODY;
-
-        // hovel is empty
-        G_SetBuildableAnim( hovel, BANIM_ATTACK2, qfalse );
-        hovel->active = qfalse;
-      }
-      else
-      {
-        // exit is blocked
-        G_TriggerMenu(ent->client->ps.clientNum, MN_A_HOVEL_BLOCKED );
-      }
-    }
-    else if( client->ps.persistant[ PERS_USABLE_ENT ] != ENTITYNUM_NONE )
+    
+    if( client->ps.persistant[ PERS_USABLE_ENT ] != ENTITYNUM_NONE )
     {
       gentity_t *traceEnt;
       

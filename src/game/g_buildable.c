@@ -1631,14 +1631,48 @@ Called when an alien uses a hovel
 */
 void AHovel_Use( gentity_t *self, gentity_t *other, gentity_t *activator )
 {
-  if( self->spawned && self->powered )
+  if( self->spawned )
   {
     if( self->active )
     {
-      //this hovel is in use
-      G_TriggerMenu( activator->client->ps.clientNum, MN_A_HOVEL_OCCUPIED );
+      if ( self->builder == activator )
+      {
+        // attempt to exit the hovel
+
+        // only let the player out if there is room
+        if ( !AHovel_Blocked( self, activator, qtrue ) )
+        {
+          // prevent lerping
+          activator->client->ps.eFlags ^= EF_TELEPORT_BIT;
+          activator->client->ps.eFlags &= ~EF_NODRAW;
+
+          // client leaves hovel
+          activator->client->ps.stats[ STAT_STATE ] &= ~SS_HOVELING;
+          self->builder = NULL;
+
+          // client is no longer astral
+          if( activator->client->noclip )
+            activator->client->cliprcontents = CONTENTS_BODY;
+          else
+            activator->r.contents = CONTENTS_BODY;
+
+          // hovel is empty
+          G_SetBuildableAnim( self, BANIM_ATTACK2, qfalse );
+          self->active = qfalse;
+        }
+        else
+        {
+          // exit is blocked
+          G_TriggerMenu(activator->client->ps.clientNum, MN_A_HOVEL_BLOCKED );
+        }
+      } else
+      {
+        //this hovel is in use
+        G_TriggerMenu( activator->client->ps.clientNum, MN_A_HOVEL_OCCUPIED );
+      }
     }
-    else if( BG_ClassHasAbility( activator->client->ps.stats[STAT_CLASS],
+    else if( self->powered &&
+             BG_ClassHasAbility( activator->client->ps.stats[STAT_CLASS],
                                  SCA_CANHOVEL ) &&
              activator->health > 0 && self->health > 0 )
     {
@@ -1690,6 +1724,9 @@ void AHovel_Think( gentity_t *self )
   }
 
   AGeneric_Think( self );
+  
+  // hovels are always powered
+  self->powered = qtrue;
 
   G_CreepSlow( self );
 }
