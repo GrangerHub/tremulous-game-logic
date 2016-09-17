@@ -1388,7 +1388,7 @@ static void G_FindUsableEntity( gentity_t *ent )
         groundEnt->teleporterActivated >= level.time &&
         groundEnt->teleporterActivator == client->ps.clientNum )
   {
-    client->ps.persistant[ PERS_USABLE_ENT ] = ENTITYNUM_NONE;
+    client->ps.persistant[ PERS_USABLE_ENT ] = groundEnt->s.number;
     return;
   }
 
@@ -1537,6 +1537,7 @@ void ClientThink_real( gentity_t *ent )
   else if( client->ps.stats[ STAT_HEALTH ] <= 0 )
   {
     client->ps.pm_type = PM_DEAD;
+
     // reset any hovels the player might be using
     if( ent->client && ent->client->hovel )
     {

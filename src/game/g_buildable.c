@@ -257,249 +257,6 @@ static void G_PuntBlocker( gentity_t *self, gentity_t *blocker )
   }
 }
 
-/*
-================
-G_AddTeleporter
-
-adds a teleporter to the teleporter linked list
-================
-*/
-static void G_AddTeleporter( gentity_t *self )
-{
-  self->nextTeleporter = level.teleporters;
-  level.teleporters = self;
-  self->teleporterActivated = -1;
-  self->teleporterActivator = ENTITYNUM_NONE;
-  self->teleporterCoolDown = -1;
-  self->destinationTeleporter = NULL;
-  self->originTeleporter = NULL;
-
-  return;
-}
-
-/*
-================
-G_RemoveTeleporter
-
-remove a teleporter to the teleporter linked list
-================
-*/
-void G_RemoveTeleporter( gentity_t *self )
-{
-  gentity_t *search;
-
-  search = level.teleporters;
-
-  // check if the teleporter linked list is empty
-  if( !search )
-    return;
-
-  // check if the teleporter is first in the teleporter linked list
-  if( search == self )
-  {
-    level.teleporters = self->nextTeleporter;
-    return;
-  }
-
-  while( search->nextTeleporter != self )
-  {
-    if( !search->nextTeleporter )
-      // this teleporter isn't in the teleporter linked list
-      return;
-
-    search = search->nextTeleporter;
-  }
-
-  // the teleporter is active, deactivate the origin/destination teleporter
-  if( self->teleporterActivated >= level.time )
-  {
-    if( self->originTeleporter &&
-        self->originTeleporter->destinationTeleporter == self )
-    {
-      self->originTeleporter->teleporterActivated = -1;
-      self->originTeleporter->teleporterActivator = ENTITYNUM_NONE;
-      self->originTeleporter->destinationTeleporter = NULL;
-    }
-    
-    if( self->destinationTeleporter &&
-        self->destinationTeleporter->originTeleporter == self )
-    {
-      self->destinationTeleporter->teleporterActivated = -1;
-      self->destinationTeleporter->teleporterActivator = ENTITYNUM_NONE;
-      self->destinationTeleporter->originTeleporter = NULL;
-    }
-  }
-  
-  // remove the teleporter
-  search->nextTeleporter = self->nextTeleporter;
-
-  return;
-}
-
-/*
-================
-HTeleporter_Use
-
-teleport to an operational destination teleporter
-================
-*/
-void HTeleporter_Use( gentity_t *self, gentity_t *other, gentity_t *activator )
-{
-  gentity_t *blocker, *search;
-  vec3_t    origin, angles;
-
-  if( !self->spawned )
-    return;
-
-  if( self->health <= 0 )
-    return;
-
-  if( !self->powered )
-    return;
-
-  if( self->s.groundEntityNum == ENTITYNUM_NONE )
-    return;
-
-  if( !activator->client || activator->client->pers.teamSelection != TEAM_HUMANS )
-    return;
-
-  if( activator->client->pers.classSelection == PCL_HUMAN_BSUIT )
-  {
-    trap_SendServerCommand( activator - g_entities,
-                            "cp \"^1Battle suits can't use this teleporter!\"" );
-    return;
-  }
-
-  if( self->teleporterActivator != activator->s.number &&
-      self->teleporterActivated >= level.time )
-  {
-    trap_SendServerCommand( activator - g_entities,
-                            "cp \"^1This teleporter is currently in use! Try again later!\"");
-    return;
-  }
-
-  self->destinationTeleporter = blocker = NULL;
-
-  // find an operational destination teleporter
-  for( search = ( self->nextTeleporter  ) ? self->nextTeleporter : level.teleporters;
-       !self->destinationTeleporter && ( search != self );
-       search = ( search->nextTeleporter ) ? search->nextTeleporter : level.teleporters )
-  {
-    if( !search->spawned )
-      continue;
-
-    if( search->health <= 0 )
-      continue;
-
-    if( !search->powered )
-      continue;
-
-    if( search->s.groundEntityNum == ENTITYNUM_NONE )
-      continue;
-
-    if( ( blocker = G_CheckSpawnPoint( search->s.number, search->r.currentOrigin,
-          search->s.origin2, BA_H_TELEPORTER, origin ) ) != NULL && !blocker->client )
-      continue;
-
-    self->destinationTeleporter = search;
-  }
-
-  if( !self->destinationTeleporter )
-  {
-    trap_SendServerCommand( activator - g_entities,
-                            "cp \"^1There are no operational destination teleporters available!\"" );
-    return;
-  }
-
-  if( self->destinationTeleporter->teleporterActivator != activator->s.number &&
-      self->destinationTeleporter->teleporterActivated >= level.time )
-  {
-    self->teleporterActivated = level.time + 1000;
-    self->teleporterActivator = activator->s.number;
-    trap_SendServerCommand( activator - g_entities,
-                            "cp \"^3Destination teleporter currently in use! Please stand by for teleportation!\"");
-  } else if( self->teleporterCoolDown >= level.time ||
-      self->destinationTeleporter->teleporterCoolDown >= level.time )
-  {
-    self->teleporterActivated = level.time + 1000;
-    self->teleporterActivator = activator->s.number;
-    self->destinationTeleporter->teleporterActivated = level.time + 1000;
-    self->destinationTeleporter->teleporterActivator = activator->s.number;
-    self->destinationTeleporter->originTeleporter = self;
-    trap_SendServerCommand( activator - g_entities,
-                            "cp \"^3Teleporters cooling down! Please stand by for teleportation!\"");
-  } else if( blocker && blocker->client )
-  {
-    self->teleporterActivated = level.time + 1000;
-    self->teleporterActivator = activator->s.number;
-    self->destinationTeleporter->attemptSpawnTime = level.time + 1000;
-    self->destinationTeleporter->teleporterActivated = level.time + 1000;
-    self->destinationTeleporter->teleporterActivator = activator->s.number;
-    self->destinationTeleporter->originTeleporter = self;
-    trap_SendServerCommand( activator - g_entities,
-                            "cp \"^3Removing a blocker! Please stand by for teleportation!\"");
-  } else
-  {
-    self->teleporterActivated = -1;
-    self->teleporterActivator = ENTITYNUM_NONE;
-    self->destinationTeleporter->attemptSpawnTime = -1;
-    self->destinationTeleporter->teleporterActivated = -1;
-    self->destinationTeleporter->teleporterActivator = ENTITYNUM_NONE;
-    self->destinationTeleporter->originTeleporter = NULL;
-
-    VectorCopy( self->destinationTeleporter->r.currentAngles, angles );
-    angles[ ROLL ] = 0;
-    angles[ YAW ] += 180.0f;
-    AngleNormalize360( angles[ YAW ] );
-
-    // teleport the player
-    G_SetBuildableAnim( self, BANIM_SPAWN1, qtrue );
-    G_SetBuildableAnim( self->destinationTeleporter, BANIM_SPAWN1, qtrue );
-    other->noTelefrag = qtrue;
-    G_ForceWeaponChange( other, other->client->ps.weapon );
-    TeleportPlayer( other, origin, angles, 0.0f );
-
-    self->teleporterCoolDown = level.time + HTELEPORTER_COOLDOWN_TIME;
-    self->destinationTeleporter->teleporterCoolDown = level.time + HTELEPORTER_COOLDOWN_TIME;
-    self->destinationTeleporter = NULL;
-  }
-
-  return;
-}
-
-/*
-================
-HTeleporter_Think
-
-Think for human teleporters
-================
-*/
-void HTeleporter_Think( gentity_t *self )
-{
-  HSpawn_Think( self );
-  
-  if( ( self->teleporterActivated >= level.time ) &&
-      self->powered &&
-      self->teleporterActivator !=  ENTITYNUM_NONE &&
-      ( g_entities[ self->teleporterActivator ].client->ps.groundEntityNum ==
-        self->s.number ) )
-  {
-    gentity_t *activator = &g_entities[ self->teleporterActivator ];
-    //other and activator are the same in this context( self, gentity_t *other, gentity_t *activator )
-    self->use( self, activator, activator );
-  } else if( self->destinationTeleporter &&
-             ( self->destinationTeleporter->originTeleporter ==
-               self ) )
-  {
-    self->teleporterActivated = -1;
-    self->teleporterActivator = ENTITYNUM_NONE;
-    self->destinationTeleporter->attemptSpawnTime = -1;
-    self->destinationTeleporter->teleporterActivated = -1;
-    self->destinationTeleporter->teleporterActivator = ENTITYNUM_NONE;
-    self->destinationTeleporter = NULL;
-  }
-}
-
 #define POWER_REFRESH_TIME  2000
 
 /*
@@ -2551,6 +2308,303 @@ void HSpawn_Think( gentity_t *self )
   self->nextthink = level.time + BG_Buildable( self->s.modelindex )->nextthink;
 
   G_SuffocateTrappedEntities( self );
+}
+
+
+
+
+//==================================================================================
+
+
+
+
+/*
+================
+G_AddTeleporter
+
+adds a teleporter to the teleporter linked list
+================
+*/
+static void G_AddTeleporter( gentity_t *self )
+{
+  self->nextTeleporter = level.teleporters;
+  level.teleporters = self;
+  self->teleporterActivated = -1;
+  self->teleporterActivator = ENTITYNUM_NONE;
+  self->teleporterCoolDown = -1;
+  self->destinationTeleporter = NULL;
+  self->originTeleporter = NULL;
+
+  return;
+}
+
+/*
+================
+G_RemoveTeleporter
+
+remove a teleporter to the teleporter linked list
+================
+*/
+void G_RemoveTeleporter( gentity_t *self )
+{
+  gentity_t *search;
+
+  search = level.teleporters;
+
+  // check if the teleporter linked list is empty
+  if( !search )
+    return;
+
+  // check if the teleporter is first in the teleporter linked list
+  if( search == self )
+  {
+    level.teleporters = self->nextTeleporter;
+    return;
+  }
+
+  while( search->nextTeleporter != self )
+  {
+    if( !search->nextTeleporter )
+      // this teleporter isn't in the teleporter linked list
+      return;
+
+    search = search->nextTeleporter;
+  }
+
+  // the teleporter is active, deactivate the origin/destination teleporter
+  if( self->teleporterActivated >= level.time )
+  {
+    if( self->originTeleporter &&
+        self->originTeleporter->destinationTeleporter == self )
+    {
+      self->originTeleporter->teleporterActivated = -1;
+      self->originTeleporter->teleporterActivator = ENTITYNUM_NONE;
+      self->originTeleporter->destinationTeleporter = NULL;
+    }
+    
+    if( self->destinationTeleporter &&
+        self->destinationTeleporter->originTeleporter == self )
+    {
+      self->destinationTeleporter->teleporterActivated = -1;
+      self->destinationTeleporter->teleporterActivator = ENTITYNUM_NONE;
+      self->destinationTeleporter->originTeleporter = NULL;
+    }
+  }
+  
+  // remove the teleporter
+  search->nextTeleporter = self->nextTeleporter;
+
+  return;
+}
+
+/*
+================
+G_DeactivateTeleporter
+
+Deactivates a given teleporter and its destination teleporter is one exists
+================
+*/
+void G_DeactivateTeleporter( gentity_t *self )
+{
+  self->teleporterActivated = -1;
+  self->teleporterActivator = ENTITYNUM_NONE;
+
+  if( self->destinationTeleporter &&
+      self->destinationTeleporter->originTeleporter == self )
+  {
+    self->destinationTeleporter->attemptSpawnTime = -1;
+    self->destinationTeleporter->teleporterActivated = -1;
+    self->destinationTeleporter->teleporterActivator = ENTITYNUM_NONE;
+    self->destinationTeleporter->originTeleporter = NULL;
+    self->destinationTeleporter = NULL;
+  }
+
+  return;
+}
+
+/*
+================
+G_ActivateTeleporter
+
+Activates a given teleporter and its destination teleporter is one exists
+================
+*/
+static void G_ActivateTeleporter( gentity_t *self, gentity_t *activator )
+{
+  self->teleporterActivated = level.time + 1000;
+  self->teleporterActivator = activator->s.number;
+
+  if( self->destinationTeleporter )
+  {
+    self->destinationTeleporter->teleporterActivated = level.time + 1000;
+    self->destinationTeleporter->teleporterActivator = activator->s.number;
+    self->destinationTeleporter->originTeleporter = self;
+  }
+
+}
+
+/*
+================
+G_TryTeleporter
+
+Attempt to teleport to an operational destination teleporter
+================
+*/
+void G_TryTeleporter( gentity_t *self, gentity_t *other, gentity_t *activator )
+{
+  gentity_t *blocker, *search;
+  vec3_t    origin, angles;
+
+  if( !self->spawned )
+    return;
+
+  if( self->health <= 0 )
+    return;
+
+  if( !self->powered )
+    return;
+
+  if( self->s.groundEntityNum == ENTITYNUM_NONE )
+    return;
+
+  if( !activator->client || activator->client->pers.teamSelection != TEAM_HUMANS ||
+      !other->client || other->client->pers.teamSelection != TEAM_HUMANS )
+    return;
+
+  if( activator->client->pers.classSelection == PCL_HUMAN_BSUIT )
+  {
+    trap_SendServerCommand( activator - g_entities,
+                            "cp \"^1Battle suits can't use this teleporter!\"" );
+    return;
+  }
+
+  if( self->teleporterActivator != activator->s.number &&
+      self->teleporterActivated >= level.time )
+  {
+    trap_SendServerCommand( activator - g_entities,
+                            "cp \"^1This teleporter is currently in use! Try again later!\"");
+    return;
+  }
+
+  self->destinationTeleporter = blocker = NULL;
+
+  // find an operational destination teleporter
+  for( search = ( self->nextTeleporter  ) ? self->nextTeleporter : level.teleporters;
+       !self->destinationTeleporter && ( search != self );
+       search = ( search->nextTeleporter ) ? search->nextTeleporter : level.teleporters )
+  {
+    if( !search->spawned )
+      continue;
+
+    if( search->health <= 0 )
+      continue;
+
+    if( !search->powered )
+      continue;
+
+    if( search->s.groundEntityNum == ENTITYNUM_NONE )
+      continue;
+
+    if( ( blocker = G_CheckSpawnPoint( search->s.number, search->r.currentOrigin,
+          search->s.origin2, BA_H_TELEPORTER, origin ) ) != NULL && !blocker->client )
+      continue;
+
+    self->destinationTeleporter = search;
+  }
+
+  if( !self->destinationTeleporter )
+  {
+    trap_SendServerCommand( activator - g_entities,
+                            "cp \"^1There are no operational destination teleporters available!\"" );
+    return;
+  }
+
+  if( self->destinationTeleporter->teleporterActivator != activator->s.number &&
+      self->destinationTeleporter->teleporterActivated >= level.time )
+  {
+    G_ActivateTeleporter( self, activator );
+    trap_SendServerCommand( activator - g_entities,
+                            "cp \"^3Destination teleporter currently in use! Please stand by for teleportation!\"");
+  } else if( self->teleporterCoolDown >= level.time ||
+      self->destinationTeleporter->teleporterCoolDown >= level.time )
+  {
+    G_ActivateTeleporter( self, activator );
+    trap_SendServerCommand( activator - g_entities,
+                            "cp \"^3Teleporters cooling down! Please stand by for teleportation!\"");
+  } else if( blocker && blocker->client )
+  {
+    G_ActivateTeleporter( self, activator );
+    self->destinationTeleporter->attemptSpawnTime = level.time + 1000;
+    trap_SendServerCommand( activator - g_entities,
+                            "cp \"^3Removing a blocker! Please stand by for teleportation!\"");
+  } else
+  {
+
+    VectorCopy( self->destinationTeleporter->r.currentAngles, angles );
+    angles[ ROLL ] = 0;
+    angles[ YAW ] += 180.0f;
+    AngleNormalize360( angles[ YAW ] );
+
+    // teleport the player
+    G_SetBuildableAnim( self, BANIM_SPAWN1, qtrue );
+    G_SetBuildableAnim( self->destinationTeleporter, BANIM_SPAWN1, qtrue );
+    other->noTelefrag = qtrue;
+    other->client->ps.weaponTime += 200;
+    TeleportPlayer( other, origin, angles, 0.0f );
+
+    self->teleporterCoolDown = level.time + HTELEPORTER_COOLDOWN_TIME;
+    self->destinationTeleporter->teleporterCoolDown = level.time + HTELEPORTER_COOLDOWN_TIME;
+    
+    G_DeactivateTeleporter( self );
+  }
+
+  return;
+}
+
+/*
+================
+HTeleporter_Use
+
+Called when a human uses a teleporter
+================
+*/
+void HTeleporter_Use (gentity_t *self, gentity_t *other, gentity_t *activator)
+{
+  if( self->teleporterActivated >= level.time &&
+      self->teleporterActivator == activator->s.number )
+    G_DeactivateTeleporter( self );
+  else
+    G_TryTeleporter( self, other, activator );
+    
+  return;
+}
+
+/*
+================
+HTeleporter_Think
+
+Think for human teleporters
+================
+*/
+void HTeleporter_Think( gentity_t *self )
+{
+  HSpawn_Think( self );
+  
+  if( ( self->teleporterActivated >= level.time ) &&
+      self->powered &&
+      self->teleporterActivator !=  ENTITYNUM_NONE &&
+      ( g_entities[ self->teleporterActivator ].client->ps.groundEntityNum ==
+        self->s.number ) )
+  {
+    gentity_t *activator = &g_entities[ self->teleporterActivator ];
+    //other and activator are the same in this context( self, gentity_t *other, gentity_t *activator )
+    G_TryTeleporter( self, activator, activator );
+  } else if( self->destinationTeleporter &&
+             ( self->destinationTeleporter->originTeleporter ==
+               self ) )
+  {
+    G_DeactivateTeleporter( self );
+  }
 }
 
 

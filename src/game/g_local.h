@@ -849,7 +849,11 @@ gentity_t         *G_CheckSpawnPoint( int spawnNum, const vec3_t origin,
                                       vec3_t spawnOrigin );
 
 void              G_RemoveTeleporter( gentity_t *self );
-void              HTeleporter_Use( gentity_t *self, gentity_t *other, gentity_t *activator );
+void              G_DeactivateTeleporter( gentity_t *self );
+void              G_TryTeleporter( gentity_t *self, gentity_t *other,
+                                   gentity_t *activator );
+void              HTeleporter_Use (gentity_t *self, gentity_t *other,
+                                   gentity_t *activator);
 void              HTeleporter_Think( gentity_t *self );
 
 buildable_t       G_IsPowered( vec3_t origin );
