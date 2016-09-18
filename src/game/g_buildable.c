@@ -1746,17 +1746,21 @@ void AHovel_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
   G_LogDestruction( self, attacker, mod );
 
-  //do a bit of radius damage
-  G_SelectiveRadiusDamage( self->s.pos.trBase, self, self->splashDamage,
-    self->splashRadius, self, self->splashMethodOfDeath, TEAM_ALIENS );
+  if( mod != MOD_DECONSTRUCT )
+  {
+    //do a bit of radius damage
+    G_SelectiveRadiusDamage( self->s.pos.trBase, self, self->splashDamage,
+      self->splashRadius, self, self->splashMethodOfDeath, TEAM_ALIENS );
 
-  //pretty events and item cleanup
-  self->s.eFlags |= EF_NODRAW; //don't draw the model once its destroyed
-  G_AddEvent( self, EV_ALIEN_BUILDABLE_EXPLOSION, DirToByte( dir ) );
-  self->s.eFlags &= ~EF_FIRING; //prevent any firing effects
-  self->timestamp = level.time;
-  self->think = AGeneric_CreepRecede;
-  self->nextthink = level.time + 500; //wait .5 seconds before damaging others
+    //pretty events and item cleanup
+    self->s.eFlags |= EF_NODRAW; //don't draw the model once its destroyed
+    G_AddEvent( self, EV_ALIEN_BUILDABLE_EXPLOSION, DirToByte( dir ) );
+    self->s.eFlags &= ~EF_FIRING; //prevent any firing effects
+    self->timestamp = level.time;
+    self->think = AGeneric_CreepRecede;
+    self->nextthink = level.time + 500; //wait .5 seconds before damaging others
+  }
+  
 
   //if the hovel is occupied free the occupant
   if( self->active )
