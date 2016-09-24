@@ -233,13 +233,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
 
-#define ALIEN_BHLTH_MODIFIER        1.5f
+#define ALIEN_BHLTH_MODIFIER        1.0f
 #define ABHM(h)                     ((int)((float)h*ALIEN_BHLTH_MODIFIER))
 
 #define ALIEN_BDMG_MODIFIER         (1.0f)
 #define ABDM(d)                     ((int)((float)d*ALIEN_BDMG_MODIFIER))
 
-#define ALIEN_BREGEN_MODIFIER       (1.0f/2.0f)
+#define ALIEN_BREGEN_MODIFIER       (1.0f)
 #define ABRM(r)                     ((int)((float)r*ALIEN_BREGEN_MODIFIER))
 
 #define CREEP_BASESIZE              700
@@ -735,4 +735,3 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
                                          //do to increment the stage kill counters
                                          
 #define MAXIMUM_BUILD_TIME          20000 // used for pie timer
-
