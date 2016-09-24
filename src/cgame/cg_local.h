@@ -1389,6 +1389,7 @@ typedef struct
   int           maxclients;
   char          mapname[ MAX_QPATH ];
   qboolean      markDeconstruct;        // Whether or not buildables are marked
+  int           humanBlackout;
 
   // warmup-related values parsed from config strings
   qboolean      warmup;                 // Is it currently pre-game warmup?
@@ -1536,6 +1537,7 @@ extern  vmCvar_t    cg_gun_z;
 extern  vmCvar_t    cg_tracerChance;
 extern  vmCvar_t    cg_tracerWidth;
 extern  vmCvar_t    cg_tracerLength;
+extern  vmCvar_t    cg_fovOffset;
 extern  vmCvar_t    cg_thirdPerson;
 extern  vmCvar_t    cg_thirdPersonAngle;
 extern  vmCvar_t    cg_thirdPersonShoulderViewMode;
