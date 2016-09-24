@@ -416,7 +416,7 @@ static void CG_HumanCkitText( char *text, playerState_t *ps )
 
   if( ( es = CG_BuildableInRange( ps, NULL ) ) )
   {
-    if( cgs.markDeconstruct )
+    if( cgs.markDeconstruct && !cgs.warmup )
     {
       if( es->eFlags & EF_B_MARKED )
       {
@@ -581,31 +581,6 @@ static void CG_HumanText( char *text, playerState_t *ps )
         "Your stamina is low. Stop sprinting to recover\n" );
   }
 
-  switch( cg.nearUsableBuildable )
-  {
-    case BA_H_ARMOURY:
-      Q_strcat( text, MAX_TUTORIAL_TEXT,
-          va( "Press %s to buy equipment upgrades at the %s. Sell your old weapon first!\n",
-            CG_KeyNameForCommand( "+button7" ),
-            BG_Buildable( cg.nearUsableBuildable )->humanName ) );
-      break;
-    case BA_H_REPEATER:
-    case BA_H_REACTOR:
-      Q_strcat( text, MAX_TUTORIAL_TEXT,
-          va( "Press %s to refill your energy weapon's ammo at the %s\n",
-            CG_KeyNameForCommand( "+button7" ),
-            BG_Buildable( cg.nearUsableBuildable )->humanName ) );
-      break;
-    case BA_NONE:
-      break;
-    default:
-      Q_strcat( text, MAX_TUTORIAL_TEXT,
-          va( "Press %s to use the %s\n",
-            CG_KeyNameForCommand( "+button7" ),
-            BG_Buildable( cg.nearUsableBuildable )->humanName ) );
-      break;
-  }
-
   Q_strcat( text, MAX_TUTORIAL_TEXT,
       va( "Press %s and any direction to sprint\n",
         CG_KeyNameForCommand( "+button8" ) ) );
@@ -748,7 +723,52 @@ const char *CG_TutorialText( void )
           break;
       }
 
-      if( ps->stats[ STAT_TEAM ] == TEAM_ALIENS )
+      if( ps->stats[ STAT_STATE ] & SS_ACTIVATING )
+      {
+        switch( cg.nearUsableBuildable )
+        {
+          case BA_NONE:
+            Q_strcat( text, MAX_TUTORIAL_TEXT,
+              va( "Press %s to leave the structure\n",
+                CG_KeyNameForCommand( "+button7" ) ) );
+            break;
+          default:
+          Q_strcat( text, MAX_TUTORIAL_TEXT,
+              va( "Press %s to exit the %s\n",
+                CG_KeyNameForCommand( "+button7" ),
+                BG_Buildable( cg.nearUsableBuildable )->humanName ) );
+          break;
+        }
+      } else if( ps->persistant[ PERS_ACT_ENT ] != ENTITYNUM_NONE )
+      {
+        switch( cg.nearUsableBuildable )
+        {
+          case BA_H_ARMOURY:
+            Q_strcat( text, MAX_TUTORIAL_TEXT,
+                va( "Press %s to buy equipment upgrades at the %s. Sell your old weapon first!\n",
+                  CG_KeyNameForCommand( "+button7" ),
+                  BG_Buildable( cg.nearUsableBuildable )->humanName ) );
+            break;
+          case BA_H_REPEATER:
+          case BA_H_REACTOR:
+            Q_strcat( text, MAX_TUTORIAL_TEXT,
+                va( "Press %s to refill your energy weapon's ammo at the %s\n",
+                  CG_KeyNameForCommand( "+button7" ),
+                  BG_Buildable( cg.nearUsableBuildable )->humanName ) );
+            break;
+          case BA_NONE:
+            Q_strcat( text, MAX_TUTORIAL_TEXT,
+              va( "Press %s to activate the structure\n",
+                CG_KeyNameForCommand( "+button7" ) ) );
+            break;
+          default:
+            Q_strcat( text, MAX_TUTORIAL_TEXT,
+                va( "Press %s to activate the %s\n",
+                  CG_KeyNameForCommand( "+button7" ),
+                  BG_Buildable( cg.nearUsableBuildable )->humanName ) );
+            break;
+        }
+      } else if( ps->stats[ STAT_TEAM ] == TEAM_ALIENS )
       {
         if( BG_AlienCanEvolve( ps->stats[ STAT_CLASS ],
                                ps->persistant[ PERS_CREDIT ],

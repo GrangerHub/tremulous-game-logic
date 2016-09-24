@@ -268,6 +268,7 @@ typedef enum
 #define SS_HEALING_ACTIVE       0x00000400 // medistat for humans, creep for aliens
 #define SS_HEALING_2X           0x00000800 // medkit or double healing rate
 #define SS_HEALING_3X           0x00001000 // triple healing rate
+#define SS_ACTIVATING                0x00002000 // indicates a client is currently using a usable entity
 
 #define SB_VALID_TOGGLEBIT      0x00002000
 
@@ -290,7 +291,7 @@ typedef enum
   PERS_NEWWEAPON,  // weapon to switch to
   PERS_BP,
   PERS_MARKEDBP,
-  PERS_USABLE_ENT  // indicates the entity number of an entity a client can use
+  PERS_ACT_ENT  // indicates the entity number of an entity a client can activate
   // netcode has space for 2 more
 } persEnum_t;
 
@@ -314,6 +315,7 @@ typedef enum
 #define EF_B_SPAWNED        0x0008
 #define EF_B_POWERED        0x0010
 #define EF_B_MARKED         0x0020
+#define EF_B_OCCUPIED       0x0040
 
 #define EF_WARN_CHARGE      0x0020                   // Lucifer Cannon is about to overcharge
 #define EF_WALLCLIMB        0x0040                   // wall walking
@@ -328,6 +330,23 @@ typedef enum
 #define EF_POISONCLOUDED    0x4000                   // player hit with basilisk gas
 #define EF_CONNECTION       0x8000                   // draw a connection trouble sprite
 #define EF_BLOBLOCKED       0x10000                  // caught by a trapper
+
+
+/*
+activation.flags
+*/
+#define  ACTF_TEAM            0x0001 // a client must be on the same team as this entity to activate it
+#define  ACTF_ENT_ALIVE       0x0002 // this entity's health must be greater than 0 to be activated by a client
+#define  ACTF_PL_ALIVE        0x0004 // a player's must be alive to activate this entity
+#define  ACTF_SPAWNED         0x0008 // this entity must be spawned to be activated by a client
+#define  ACTF_POWERED         0x0010 // this entity must be powered to be activated by a client
+#define  ACTF_GROUND          0x0020 // a client must stand on this entity to activate it
+                                     // standing on this entity gives that entity higher preference over other nearby activation entities
+#define  ACTF_LINE_OF_SIGHT   0x0040 // clients must be able to have a MASK_DEADSOLID trace to this activation entity to activate it
+#define  ACTF_OCCUPY          0x0080 // when clients activate this activation entity, they occupy the entity and can't activate any other entity
+                                     // while occupying.  Nor can another player not occupying a given occupiable activation entity activate that
+                                     // entity while it is occupied
+#define  ACTF_OCCUPY_ACTIVATE 0x0100 // keep activating an activation entity while the client occupies it
 
 
 typedef enum
@@ -618,12 +637,15 @@ typedef enum
   MN_B_REVOKED,
   MN_B_SURRENDER,
   MN_B_BLOCKEDBYENEMY,
+  MN_B_NOTPOWERED,
+  MN_B_OCCUPIED,
 
   //alien build
   MN_A_ONEOVERMIND,
   MN_A_NOBP,
   MN_A_NOCREEP,
   MN_A_NOOVMND,
+  MN_A_NOTCONTROLLED,
 
   //human stuff
   MN_H_SPAWN,
@@ -1048,7 +1070,8 @@ typedef struct
 
   int           nextthink;
   int           buildTime;
-  qboolean      usable;
+  qboolean      activationEnt;
+  int           activationFlags; // contains bit flags representing various abilities of a given usable entity
 
   int           turretRange;
   int           turretFireSpeed;

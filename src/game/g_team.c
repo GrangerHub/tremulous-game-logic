@@ -168,6 +168,14 @@ void G_LeaveTeam( gentity_t *self )
   self->client->pers.readyToPlay = qfalse;
   self->client->ps.stats[ STAT_READY ] = self->client->pers.readyToPlay;
 
+  // reset any uable entities the player might be using
+  if( self->client &&
+      ( self->client->ps.stats[ STAT_STATE ] & SS_ACTIVATING ) )
+  {
+    G_ResetActivation( &g_entities[ self->client->ps.persistant[ PERS_ACT_ENT ] ],
+                   self->client );
+  }
+
   for( i = 0; i < level.num_entities; i++ )
   {
     ent = &g_entities[ i ];

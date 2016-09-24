@@ -671,6 +671,14 @@ void Cmd_Kill_f( gentity_t *ent )
 {
   if( g_cheats.integer )
   {
+    // reset any uable entities the player might be using
+    if( ent->client &&
+        ( ent->client->ps.stats[ STAT_STATE ] & SS_ACTIVATING ) )
+    {
+      G_ResetActivation( &g_entities[ ent->client->ps.persistant[ PERS_ACT_ENT ] ],
+                     ent->client );
+    }
+
     ent->client->ps.stats[ STAT_HEALTH ] = ent->health = 0;
     player_die( ent, ent, ent, 100000, MOD_SUICIDE );
   }

@@ -92,7 +92,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     ASPAWN_BT,             //int       buildTime;
-    qfalse,                //qboolean  usable;
+    qfalse,                //qboolean  activationEnt;
+    0,                     //int       activationFlags;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
@@ -128,7 +129,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BANIM_IDLE1,           //int       idleAnim;
     OVERMIND_ATTACK_REPEAT, //int      nextthink;
     OVERMIND_BT,           //int       buildTime;
-    qfalse,                //qboolean  usable;
+    qfalse,                //qboolean  activationEnt;
+    0,                     //int       activationFlags;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
@@ -164,7 +166,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     BARRICADE_BT,          //int       buildTime;
-    qfalse,                //qboolean  usable;
+    qfalse,                //qboolean  activationEnt;
+    0,                     //int       activationFlags;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
@@ -200,7 +203,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BANIM_IDLE1,           //int       idleAnim;
     200,                   //int       nextthink;
     ACIDTUBE_BT,           //int       buildTime;
-    qfalse,                //qboolean  usable;
+    qfalse,                //qboolean  activationEnt;
+    0,                     //int       activationFlags;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
@@ -236,7 +240,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     TRAPPER_BT,            //int       buildTime;
-    qfalse,                //qboolean  usable;
+    qfalse,                //qboolean  activationEnt;
+    0,                     //int       activationFlags;
     TRAPPER_RANGE,         //int       turretRange;
     TRAPPER_REPEAT,        //int       turretFireSpeed;
     WP_LOCKBLOB_LAUNCHER,  //weapon_t  turretProjType;
@@ -273,7 +278,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     BOOSTER_BT,            //int       buildTime;
-    qfalse,                //qboolean  usable;
+    qfalse,                //qboolean  activationEnt;
+    0,                     //int       activationFlags;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
@@ -308,7 +314,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BANIM_IDLE1,           //int       idleAnim;
     500,                   //int       nextthink;
     HIVE_BT,               //int       buildTime;
-    qfalse,                //qboolean  usable;
+    qfalse,                //qboolean  activationEnt;
+    0,                     //int       activationFlags;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_HIVE,               //weapon_t  turretProjType;
@@ -344,7 +351,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     HSPAWN_BT,             //int       buildTime;
-    qfalse,                //qboolean  usable;
+    qfalse,                //qboolean  activationEnt;
+    0,                     //int       activationFlags;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
@@ -380,7 +388,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BANIM_IDLE1,           //int       idleAnim;
     50,                    //int       nextthink;
     MGTURRET_BT,           //int       buildTime;
-    qfalse,                //qboolean  usable;
+    qfalse,                //qboolean  activationEnt;
+    0,                     //int       activationFlags;
     MGTURRET_RANGE,        //int       turretRange;
     MGTURRET_REPEAT,       //int       turretFireSpeed;
     WP_MGTURRET,           //weapon_t  turretProjType;
@@ -416,7 +425,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BANIM_IDLE1,           //int       idleAnim;
     150,                   //int       nextthink;
     TESLAGEN_BT,           //int       buildTime;
-    qfalse,                //qboolean  usable;
+    qfalse,                //qboolean  activationEnt;
+    0,                     //int       activationFlags;
     TESLAGEN_RANGE,        //int       turretRange;
     TESLAGEN_REPEAT,       //int       turretFireSpeed;
     WP_TESLAGEN,           //weapon_t  turretProjType;
@@ -452,7 +462,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     ARMOURY_BT,            //int       buildTime;
-    qtrue,                 //qboolean  usable;
+    qtrue,                 //qboolean  activationEnt;
+    (ACTF_TEAM|ACTF_ENT_ALIVE|ACTF_PL_ALIVE|ACTF_SPAWNED|ACTF_POWERED), //int activationFlags;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
@@ -488,7 +499,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     DC_BT,                 //int       buildTime;
-    qfalse,                //qboolean  usable;
+    qfalse,                //qboolean  activationEnt;
+    0,                     //int       activationFlags;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
@@ -525,7 +537,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     MEDISTAT_BT,           //int       buildTime;
-    qfalse,                //qboolean  usable;
+    qfalse,                //qboolean  activationEnt;
+    0,                     //int       activationFlags;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
@@ -561,7 +574,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BANIM_IDLE1,           //int       idleAnim;
     REACTOR_ATTACK_DCC_REPEAT, //int   nextthink;
     REACTOR_BT,            //int       buildTime;
-    qtrue,                 //qboolean  usable;
+    qtrue,                 //qboolean  activationEnt;
+    (ACTF_TEAM|ACTF_ENT_ALIVE|ACTF_PL_ALIVE|ACTF_SPAWNED|ACTF_POWERED), //int activationFlags;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
@@ -597,7 +611,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     REPEATER_BT,           //int       buildTime;
-    qtrue,                 //qboolean  usable;
+    qtrue,                 //qboolean  activationEnt;
+    (ACTF_TEAM|ACTF_ENT_ALIVE|ACTF_PL_ALIVE|ACTF_SPAWNED|ACTF_POWERED), //int activationFlags;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
