@@ -201,3 +201,4 @@ void G_NextPlayMap( void );
 int G_ParsePlayMapFlagTokens( gentity_t *ent, char *flags );
 char *G_PlayMapFlags2String( int flags );
 int G_DefaultPlayMapFlags(void);
+void G_ExecutePlaymapFlags( int flagsValue );

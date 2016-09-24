@@ -115,7 +115,7 @@ static const playMapError_t playMapError[ ] =
 
 // list of playmap flags and info
 static const playMapFlagDesc_t playMapFlagList[ ] =
-{
+{ // flag, flagName, defVal, avail, flagDesc
   { PLAYMAP_FLAG_NONE,  "", 	 qfalse, qfalse, "No flags" },
   { PLAYMAP_FLAG_DPUNT, "dpunt", qfalse, qfalse, "Dretch Punt" },
   { PLAYMAP_FLAG_FF, 	"ff", 	 qtrue,  qfalse, "Friendly Fire" },
@@ -123,8 +123,8 @@ static const playMapFlagDesc_t playMapFlagList[ ] =
   { PLAYMAP_FLAG_SD, 	"sd", 	 qtrue,  qfalse, "Sudden Death" },
   { PLAYMAP_FLAG_LGRAV, "lgrav", qfalse, qfalse, "Low Gravity" },
   { PLAYMAP_FLAG_UBP, 	"ubp",	 qfalse, qfalse, "Unlimited BP" },
-  { PLAYMAP_FLAG_PORTAL,"portal",qfalse, qfalse, "Portal Gun" }
-  { PLAYMAP_FLAG_STACK, "stack", qtrue,  qfalse, "Buildable stacking" }
+  { PLAYMAP_FLAG_PORTAL,"portal",qfalse, qfalse, "Portal Gun" },
+  { PLAYMAP_FLAG_STACK, "stack", qfalse,  qtrue, "Buildable stacking" }
 };
 
 /*
@@ -1059,8 +1059,7 @@ cleared flags.
 */
 void G_ExecutePlaymapFlags( int flagsValue )
 {
-  int flagNum,
-      flags = PLAYMAP_FLAG_NONE;
+  int flagNum;
 
   for( flagNum = PLAYMAP_FLAG_NONE + 1;
        flagNum < PLAYMAP_NUM_FLAGS; flagNum++ )
@@ -1070,9 +1069,15 @@ void G_ExecutePlaymapFlags( int flagsValue )
     {
       case PLAYMAP_FLAG_STACK:
 	g_allowBuildableStacking.integer =
-	  ( flagsValue & PLAYMAP_FLAG_STACK ) != 0;
+	  PlaymapFlag_IsSet( flagsValue, PLAYMAP_FLAG_STACK ) != 0;
+	if( g_debugPlayMap.integer > 0 )
+	  trap_Print( va( "PLAYMAP: setting stackable flag to %d.\n",
+			  PlaymapFlag_IsSet( flagsValue, PLAYMAP_FLAG_STACK ) != 0 ) );
 	break;	
     }
+    if( g_debugPlayMap.integer > 0 )
+      trap_Print( va( "PLAYMAP: executing flag #%d with value %d.\n",
+		      flagNum, PlaymapFlag_IsSet( flagsValue, flagNum ) != 0 ) );
   }
 }
 
@@ -1307,8 +1312,8 @@ void G_NextPlayMap( void )
 
   trap_SendConsoleCommand( EXEC_APPEND, va( "map \"%s\"\n", playMap->mapName ) );
 
-  // do the flags here
+  // too early to execute the flags 
   level.playmapFlags = playMap->flags;
-  G_ExecutePlaymapFlags( playMap->flags );
+  //G_ExecutePlaymapFlags( playMap->flags );
 }
 
