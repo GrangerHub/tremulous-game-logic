@@ -258,7 +258,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ASPAWN_SPLASHDAMAGE         50
 #define ASPAWN_SPLASHRADIUS         100
 #define ASPAWN_CREEPSIZE            120
-#define ASPAWN_VALUE                ( 2 * LEVEL0_VALUE )
+#define ASPAWN_VALUE                ( LEVEL0_VALUE )
 
 #define BARRICADE_BP                8
 #define BARRICADE_BT                20000
@@ -294,7 +294,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ACIDTUBE_RANGE              300.0f
 #define ACIDTUBE_REPEAT             200
 #define ACIDTUBE_REPEAT_ANIM        2000
-#define ACIDTUBE_VALUE              LEVEL0_VALUE
+#define ACIDTUBE_VALUE              ( LEVEL0_VALUE / 2 )
 
 #define HIVE_BP                     12
 #define HIVE_BT                     20000
@@ -576,14 +576,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define HSPAWN_HEALTH               HBHM(310)
 #define HSPAWN_SPLASHDAMAGE         50
 #define HSPAWN_SPLASHRADIUS         100
-#define HSPAWN_VALUE                ( 2 * ALIEN_CREDITS_PER_KILL )
+#define HSPAWN_VALUE                ( ALIEN_CREDITS_PER_KILL )
 
 #define HTELEPORTER_BP              10
 #define HTELEPORTER_BT              10000
 #define HTELEPORTER_HEALTH          HBHM(310)
 #define HTELEPORTER_SPLASHDAMAGE    50
 #define HTELEPORTER_SPLASHRADIUS    100
-#define HTELEPORTER_VALUE           ( 2 * ALIEN_CREDITS_PER_KILL )
+#define HTELEPORTER_VALUE           ( ALIEN_CREDITS_PER_KILL )
 #define HTELEPORTER_COOLDOWN_TIME   2000
 #define HTELEPORTER_BAT_PWR         30000  // amount of time teleporter's can remained powered without
                                            // an external power source
@@ -593,7 +593,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MEDISTAT_HEALTH             HBHM(190)
 #define MEDISTAT_SPLASHDAMAGE       50
 #define MEDISTAT_SPLASHRADIUS       100
-#define MEDISTAT_VALUE              ( 2 * ALIEN_CREDITS_PER_KILL )
+#define MEDISTAT_VALUE              ( ALIEN_CREDITS_PER_KILL )
 
 #define MGTURRET_BP                 8
 #define MGTURRET_BT                 10000
@@ -613,7 +613,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MGTURRET_SPREAD             200
 #define MGTURRET_DMG                HBDM(3)
 #define MGTURRET_SPINUP_TIME        2000 // time between target sighted and fire
-#define MGTURRET_VALUE              ALIEN_CREDITS_PER_KILL
+#define MGTURRET_VALUE              ( ALIEN_CREDITS_PER_KILL / 2 )
 #define MGTURRET_DCC_ANGULARSPEED       15
 #define MGTURRET_DCC_SPINUP_TIME    1250
 #define MGTURRET_GRAB_ANGULARSPEED      5
@@ -627,7 +627,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define TESLAGEN_K_SCALE            4.0f
 #define TESLAGEN_RANGE              250
 #define TESLAGEN_DMG                HBDM(9)
-#define TESLAGEN_VALUE              ALIEN_CREDITS_PER_KILL
+#define TESLAGEN_VALUE              ( ALIEN_CREDITS_PER_KILL / 2 )
 
 #define DC_BP                       8
 #define DC_BT                       10000
@@ -637,14 +637,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define DC_ATTACK_PERIOD            10000 // how often to spam "under attack"
 #define DC_HEALRATE                 4
 #define DC_RANGE                    10000
-#define DC_VALUE                    ( 3 * ALIEN_CREDITS_PER_KILL )
+#define DC_VALUE                    ( 3 * ALIEN_CREDITS_PER_KILL / 2 )
 
 #define ARMOURY_BP                  10
 #define ARMOURY_BT                  10000
 #define ARMOURY_HEALTH              HBHM(420)
 #define ARMOURY_SPLASHDAMAGE        50
 #define ARMOURY_SPLASHRADIUS        100
-#define ARMOURY_VALUE               ( 3 * ALIEN_CREDITS_PER_KILL )
+#define ARMOURY_VALUE               ( 3 * ALIEN_CREDITS_PER_KILL / 2 )
 
 #define REACTOR_BP                  0
 #define REACTOR_BT                  20000
@@ -657,14 +657,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define REACTOR_ATTACK_DCC_REPEAT   1000
 #define REACTOR_ATTACK_DCC_RANGE    150.0f
 #define REACTOR_ATTACK_DCC_DAMAGE   40
-#define REACTOR_VALUE               ( 4 * ALIEN_CREDITS_PER_KILL )
+#define REACTOR_VALUE               ( 2 * ALIEN_CREDITS_PER_KILL )
 
 #define REPEATER_BP                 4
 #define REPEATER_BT                 10000
 #define REPEATER_HEALTH             HBHM(250)
 #define REPEATER_SPLASHDAMAGE       50
 #define REPEATER_SPLASHRADIUS       100
-#define REPEATER_VALUE              ( 2 * ALIEN_CREDITS_PER_KILL )
+#define REPEATER_VALUE              ( ALIEN_CREDITS_PER_KILL )
 
 /*
  * HUMAN misc
