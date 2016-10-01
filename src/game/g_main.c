@@ -2724,7 +2724,6 @@ void G_RunThink( gentity_t *ent )
         ent->activation.occupyUntil( ent, occupant ) )
       G_UnoccupyActivationEnt( ent, occupant, qtrue );
     else if( ( ent->activation.flags & ACTF_OCCUPY_ACTIVATE ) &&
-             ent->activation.activate &&
              G_CanActivateEntity( occupant->client, ent ) )
       G_ActivateEntity( ent, occupant );
   }
