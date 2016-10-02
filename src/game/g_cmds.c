@@ -647,7 +647,7 @@ void Cmd_Noclip_f( gentity_t *ent )
 {
   char  *msg;
 
-  if( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING)
+  if( ent->client->ps.eFlags & EF_HOVELING )
   {
     msg = "noclip disabled while hoveling";
   } else
@@ -684,12 +684,12 @@ void Cmd_Kill_f( gentity_t *ent )
 
   if( g_cheats.integer )
   {
-    // reset any hovels the player might be using
-    if( ent->client && ent->client->hovel )
+    // reset any uable entities the player might be using
+    if( ent->client &&
+        ( ent->client->ps.stats[ STAT_STATE ] & SS_ACTIVATING ) )
     {
-      ent->client->hovel->active = qfalse;
-      ent->client->hovel->builder = NULL;
-      ent->client->hovel = NULL;
+      G_ResetActivation( &g_entities[ ent->client->ps.persistant[ PERS_ACT_ENT ] ],
+                     ent->client );
     }
 
     ent->client->ps.stats[ STAT_HEALTH ] = ent->health = 0;
@@ -2184,7 +2184,7 @@ void Cmd_Class_f( gentity_t *ent )
         return;
       }
 
-      if ( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING )
+      if ( ent->client->ps.eFlags & EF_HOVELING )
       {
         G_TriggerMenu( clientNum, MN_A_NOEROOM );
         return;
@@ -2277,13 +2277,13 @@ void Cmd_Destroy_f( gentity_t *ent )
   VectorMA( viewOrigin, 100, forward, end );
 
   trap_Trace( &tr, viewOrigin, NULL, NULL, end, ent->s.number, MASK_PLAYERSOLID );
-  if ( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING )
-    traceEnt = ent->client->hovel;
+  if ( ent->client->ps.eFlags & EF_HOVELING )
+    traceEnt = &g_entities[ ent->client->ps.persistant[ PERS_ACT_ENT ] ];
   else
     traceEnt = &g_entities[ tr.entityNum ];
 
   if( ( tr.fraction < 1.0f ||
-        ( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING ) ) &&
+        ( ent->client->ps.eFlags & EF_HOVELING ) ) &&
       ( traceEnt->s.eType == ET_BUILDABLE ) &&
       ( traceEnt->buildableTeam == ent->client->pers.teamSelection ) &&
       ( ( ent->client->ps.weapon >= WP_ABUILD ) &&
@@ -3008,13 +3008,13 @@ void Cmd_Reload_f( gentity_t *ent )
     VectorMA( viewOrigin, 100, forward, end );
 
     trap_Trace( &tr, viewOrigin, NULL, NULL, end, ent->s.number, MASK_PLAYERSOLID );
-    if ( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING )
-      traceEnt = ent->client->hovel;
+    if ( ent->client->ps.eFlags & EF_HOVELING )
+      traceEnt = &g_entities[ ent->client->ps.persistant[ PERS_ACT_ENT ] ];
     else
       traceEnt = &g_entities[ tr.entityNum ];
 
     if( ( tr.fraction < 1.0f ||
-          ( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING ) ) &&
+          ( ent->client->ps.eFlags & EF_HOVELING ) ) &&
         ( traceEnt->s.eType == ET_BUILDABLE ) &&
         ( traceEnt->buildableTeam == ent->client->pers.teamSelection ) &&
         ( ( ent->client->ps.weapon >= WP_ABUILD ) &&

@@ -1160,7 +1160,9 @@ static void CG_BuildableStatusDisplay( centity_t *cent )
     }
 
     trap_R_SetColor( color );
-    if( !powered )
+    if( !powered &&
+        !( BG_Buildable( es->modelindex )->activationEnt &&
+           !( BG_Buildable( es->modelindex )->activationFlags & ACTF_POWERED ) ) )
     {
       float pX;
 

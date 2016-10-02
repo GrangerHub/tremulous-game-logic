@@ -738,6 +738,19 @@ void CG_Menu( int menu, int arg )
       }
       break;
 
+    case MN_B_NOTPOWERED:
+      longMsg   = "This object requires power to be used. Find a way "
+                  "to power it.";
+      shortMsg  = "This object is not powered";
+      break;
+
+    case MN_B_OCCUPIED:
+      longMsg   = "This structure is currently being used by another player and "
+                  "can only by used by a single player at a time.";
+      shortMsg  = "This structure is being used by another player";
+      type      = DT_COMMAND;
+      break;
+
     case MN_B_SURRENDER:
       longMsg   = "Your team has decided to admit defeat and concede the game:"
                   "traitors and cowards are not allowed to build.";
@@ -885,6 +898,13 @@ void CG_Menu( int menu, int arg )
     case MN_A_NOOVMND:
       longMsg   = "There is no Overmind. An Overmind must be built to control "
                   "the structure you tried to place.";
+      shortMsg  = "There is no Overmind";
+      type      = DT_BUILD;
+      break;
+
+    case MN_A_NOTCONTROLLED:
+      longMsg   = "There is no Overmind. An Overmind must be built to control "
+                  "the structure you tried to use.";
       shortMsg  = "There is no Overmind";
       type      = DT_BUILD;
       break;

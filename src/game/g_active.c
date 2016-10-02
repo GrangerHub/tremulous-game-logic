@@ -1306,88 +1306,113 @@ static void G_UnlaggedDetectCollisions( gentity_t *ent )
 
 /*
 =====================
-G_CanUseEntity
+G_CanActivateEntity
 
-Determines if a given client can use a given entity
+Determines if a given client can activate a given entity
 =====================
 */
-static qboolean G_CanUseEntity( gclient_t *client, gentity_t *ent )
+qboolean G_CanActivateEntity( gclient_t *client, gentity_t *ent )
 {
-  if( !ent || !ent->use || !client )
+  if( !ent || ent->s.number == ENTITYNUM_NONE ||
+      !ent->activation.activate || !client )
     return qfalse;
 
-  switch ( ent->s.eType ) {
-      case ET_BUILDABLE:
-          if( ent->buildableTeam != client->ps.stats[ STAT_TEAM ] )
-            return qfalse;
-          switch ( ent->s.modelindex ) {
-              case BA_A_HOVEL:
-                if( !BG_ClassHasAbility( client->ps.stats[STAT_CLASS], SCA_CANHOVEL ) )
-                  return qfalse;
-                break;
-                
-              case BA_H_REACTOR: // fall through
-              case BA_H_REPEATER:
-                if( !BG_Weapon( client->ps.weapon )->usesEnergy ||
-                    BG_Weapon( client->ps.weapon )->infiniteAmmo )
-                  return qfalse;
-                break;
+  // team check
+  if( ( ent->activation.flags & ACTF_TEAM ) &&
+      ent->buildableTeam != client->ps.stats[ STAT_TEAM ] )
+    return qfalse;
 
-              default:
-                break;
-          }
-          return qtrue;
+  // entity spawned check
+  if( ( ent->activation.flags & ACTF_SPAWNED ) && 
+      !ent->spawned )
+    return qfalse;
 
-      default:
-        return qfalse;
+  // entity alive check
+  if( ( ent->activation.flags & ACTF_ENT_ALIVE ) && 
+      ent->health <= 0 )
+    return qfalse;
+
+  // player alive check
+  if( ( ent->activation.flags & ACTF_PL_ALIVE ) && 
+      !PM_Alive( client->ps.pm_type ) )
+    return qfalse;
+
+  if( ( ent->activation.flags & ACTF_GROUND ) &&
+      client->ps.groundEntityNum != ent->s.number )
+    return qfalse;
+
+    // custom canActivate() check
+    if( ent->activation.canActivate && !ent->activation.canActivate( ent, client ) )
+      return qfalse;
+
+  // entity line of sight check
+  if( ent->activation.flags & ACTF_LINE_OF_SIGHT )
+  {
+    trace_t   trace;
+    
+    trap_Trace( &trace, client->ps.origin, NULL, NULL, ent->r.currentOrigin,
+                client->ps.clientNum, MASK_DEADSOLID );
+
+    if( trace.fraction < 1.0f &&
+        trace.entityNum != ent->s.number )
+      return qfalse;
   }
+
+  return qtrue;
 }
 
 /*
 =====================
-G_FindUsableEntity
+G_FindActivationEnt
 
-Determines if there is a nearby entity the client can use
+Determines if there is a nearby entity the client can activate
 =====================
 */
-static void G_FindUsableEntity( gentity_t *ent )
+static void G_FindActivationEnt( gentity_t *ent )
 {
   gclient_t *client;
   trace_t   trace;
   vec3_t    view, point;
-  gentity_t *traceEnt;
-
-#define USE_OBJECT_RANGE 64
-
+  gentity_t *traceEnt, *groundEnt;
   int       entityList[ MAX_GENTITIES ];
-  vec3_t    range = { USE_OBJECT_RANGE, USE_OBJECT_RANGE, USE_OBJECT_RANGE };
   vec3_t    mins, maxs;
   int       i, num;
 
   if( !( client = ent->client ) )
     return;
 
-  // check if the client is hoveling
-  if ( client->ps.stats[ STAT_STATE ] & SS_HOVELING )
-  {
-    client->ps.persistant[ PERS_USABLE_ENT ] = client->hovel->s.number;
+  // check if the client is occupying an activation entity
+  if ( client->ps.stats[ STAT_STATE ] & SS_ACTIVATING )
     return;
-  }
 
-  // look for object infront of player
+  // reset PERS_ACT_ENT
+  client->ps.persistant[ PERS_ACT_ENT ] = ENTITYNUM_NONE;
+
+  groundEnt = &g_entities[ client->ps.groundEntityNum ];
+
+  // look for an activation entity infront of player
   AngleVectors( client->ps.viewangles, view, NULL, NULL );
-  VectorMA( client->ps.origin, USE_OBJECT_RANGE, view, point );
+  VectorMA( client->ps.origin, ACTIVATION_ENT_RANGE, view, point );
   trap_Trace( &trace, client->ps.origin, NULL, NULL, point, ent->s.number, MASK_SHOT );
 
   traceEnt = &g_entities[ trace.entityNum ];
 
-  if( G_CanUseEntity( client, traceEnt ) )
+  if( G_CanActivateEntity( client, traceEnt ) )
   {
-    client->ps.persistant[ PERS_USABLE_ENT ] = traceEnt->s.number;
+    client->ps.persistant[ PERS_ACT_ENT ] = traceEnt->s.number;
+  }
+  else if( ( groundEnt->activation.flags & ACTF_GROUND ) &&
+           G_CanActivateEntity( client, groundEnt ) )
+  {
+    // ACTF_GROUND activation entities get preference after activation entities in front of the client
+    client->ps.persistant[ PERS_ACT_ENT ] = client->ps.groundEntityNum;
   }
   else
-  {    
-    //no entity in front of player - do a small area search
+  {
+    vec3_t    range = { ACTIVATION_ENT_RANGE, ACTIVATION_ENT_RANGE, ACTIVATION_ENT_RANGE };
+    float activationEntDistance, bestDistance = ( 2 * Distance( vec3_origin, range) );
+
+    // do a small area search
 
     VectorAdd( client->ps.origin, range, maxs );
     VectorSubtract( client->ps.origin, range, mins );
@@ -1397,15 +1422,154 @@ static void G_FindUsableEntity( gentity_t *ent )
     {
       traceEnt = &g_entities[ entityList[ i ] ];
 
-      if( G_CanUseEntity( client, traceEnt ) )
+      if( G_CanActivateEntity( client, traceEnt ) )
       {
-        client->ps.persistant[ PERS_USABLE_ENT ] = traceEnt->s.number;
-        return;
+        trap_Trace( &trace, client->ps.origin, NULL, NULL, traceEnt->r.currentOrigin, client->ps.clientNum, MASK_PLAYERSOLID );
+
+        if( trace.fraction < 1.0f && trace.entityNum == traceEnt->s.number )
+          activationEntDistance = Distance( client->ps.origin, trace.endpos );
+        else
+          activationEntDistance = Distance( client->ps.origin, traceEnt->r.currentOrigin );
+
+        if( activationEntDistance < bestDistance )
+        {
+          client->ps.persistant[ PERS_ACT_ENT ] = traceEnt->s.number;
+          bestDistance = activationEntDistance;
+        }
       }
     }
-
-    client->ps.persistant[ PERS_USABLE_ENT ] = ENTITYNUM_NONE;
   }
+}
+
+/*
+=====================
+G_WillActivateEntity
+
+Determines if a given client will activate a nearby activation entity
+=====================
+*/
+qboolean G_WillActivateEntity( gclient_t *client, gentity_t *ent )
+{
+  if ( ( ent->activation.flags & ACTF_POWERED ) &&
+       !ent->powered )
+  {
+    // this entitity must be powered to use
+    switch ( ent->buildableTeam )
+    {
+      case TEAM_HUMANS:
+        G_TriggerMenu( client->ps.clientNum, MN_H_NOTPOWERED );
+        break;
+      case TEAM_ALIENS:
+        G_TriggerMenu( client->ps.clientNum, MN_A_NOTCONTROLLED );
+        break;
+      default:
+        G_TriggerMenu( client->ps.clientNum, MN_B_NOTPOWERED );
+        break;
+    }
+
+    return qfalse;
+  }
+
+  if( ( ent->activation.flags & ACTF_OCCUPY ) &&
+            ( ent->s.eFlags & EF_B_OCCUPIED ) )
+  {
+    // this entitity can not be acitved by another play if
+    // is already occupied
+    G_TriggerMenu( client->ps.clientNum, MN_B_OCCUPIED );
+    return qfalse;
+  }
+    
+
+  if( ent->activation.willActivate )
+    return ent->activation.willActivate( ent, client );
+
+  return qtrue;
+}
+
+/*
+=====================
+G_ActivateEntity
+
+This is a general wrapper for activation.(*activate)()
+=====================
+*/
+void G_ActivateEntity( gentity_t *actEnt, gentity_t *activator )
+{
+  gclient_t *client;
+  
+  if( !activator->client )
+    return;
+
+  client = activator->client;
+  
+  if( G_WillActivateEntity( client, actEnt ) )
+  {
+    gentity_t *other;
+
+    if( actEnt->activation.getOther )
+      other = actEnt->activation.getOther( actEnt, activator );
+    else
+      other = activator;
+
+    if( actEnt->activation.activate( actEnt, other, activator ) &&
+        ( actEnt->activation.flags & ACTF_OCCUPY ) )
+    {
+      //occupy the activation entity
+      actEnt->s.eFlags |= EF_B_OCCUPIED;
+      actEnt->activation.occupant = other;
+      if( other->client )
+      {
+        other->client->ps.stats[ STAT_STATE ] |= SS_ACTIVATING;
+        other->client->ps.persistant[ PERS_ACT_ENT ] = client->ps.persistant[ PERS_ACT_ENT ];
+      }
+    }
+  }
+}
+
+/*
+=====================
+G_ResetActivation
+
+This is a general wrapper for activation.(*reset)(). This is called to reset an occupiable activation 
+enitity and the client that occupied it
+=====================
+*/
+void G_ResetActivation( gentity_t *self, gclient_t *client )
+{
+  if( self->activation.reset )
+    self->activation.reset( self, client );
+
+  client->ps.stats[ STAT_STATE ] &= ~SS_ACTIVATING;
+  self->s.eFlags &= ~EF_B_OCCUPIED;
+  self->activation.occupant = NULL;
+  
+  return;
+}
+
+/*
+=====================
+G_UnoccupyActivationEnt
+
+This is a general wrapper for (*unoccupy)().
+This is called to allow a player to leave an
+occupiable activation entity.  When force is set to
+qtrue, the player will definitely unoccupy the entity.
+=====================
+*/
+void G_UnoccupyActivationEnt( gentity_t *occupied, gentity_t *occupier, qboolean force )
+{
+  if( force )
+  {
+    if( occupied->activation.unoccupy )
+      occupied->activation.unoccupy( occupied, occupier, qtrue );
+
+    G_ResetActivation( occupied, occupier->client );
+  } else if( occupied->activation.unoccupy )
+  {
+    if( occupied->activation.unoccupy( occupied, occupier, qfalse ) )
+      G_ResetActivation( occupied, occupier->client );
+  } else
+    G_ResetActivation( occupied, occupier->client );
 }
 
 /*
@@ -1508,15 +1672,14 @@ void ClientThink_real( gentity_t *ent )
   else if( client->ps.stats[ STAT_HEALTH ] <= 0 )
   {
     client->ps.pm_type = PM_DEAD;
-    // reset any hovels the player might be using
-    if( ent->client && ent->client->hovel )
+    // reset any uable entities the player might be using
+    if( client->ps.stats[ STAT_STATE ] & SS_ACTIVATING )
     {
-      ent->client->hovel->active = qfalse;
-      ent->client->hovel->builder = NULL;
-      ent->client->hovel = NULL;
+      G_ResetActivation( &g_entities[ client->ps.persistant[ PERS_ACT_ENT ] ],
+                         client );
     }
   }
-  else if ( client->ps.stats[ STAT_STATE ] & SS_HOVELING )
+  else if ( client->ps.eFlags & EF_HOVELING )
     client->ps.pm_type = PM_FREEZE;
   else if( client->ps.stats[ STAT_STATE ] & SS_BLOBLOCKED ||
            client->ps.stats[ STAT_STATE ] & SS_GRABBED )
@@ -1752,7 +1915,7 @@ void ClientThink_real( gentity_t *ent )
   pm.pmove_fixed = pmove_fixed.integer | client->pers.pmoveFixed;
   pm.pmove_msec = pmove_msec.integer;
 
-  if ( pm.ps->stats[ STAT_STATE ] & SS_HOVELING )
+  if ( client->ps.eFlags & EF_HOVELING )
   {
     pm.tracemask = MASK_ASTRALSOLID;
     ent->clipmask = MASK_ASTRALSOLID;
@@ -1879,18 +2042,20 @@ void ClientThink_real( gentity_t *ent )
   client->buttons = ucmd->buttons;
   client->latched_buttons |= client->buttons & ~client->oldbuttons;
 
-  G_FindUsableEntity( ent );
+  // interactions with activation entities
+  G_FindActivationEnt( ent );
   if( ( client->buttons & BUTTON_USE_EVOLVE ) && !( client->oldbuttons & BUTTON_USE_EVOLVE ) &&
        client->ps.stats[ STAT_HEALTH ] > 0 )
   {
-    
-    if( client->ps.persistant[ PERS_USABLE_ENT ] != ENTITYNUM_NONE )
-    {
-      gentity_t *traceEnt;
-      
-      traceEnt = &g_entities[ client->ps.persistant[ PERS_USABLE_ENT ] ];
-      traceEnt->use( traceEnt, ent, ent ); //other and activator are the same in this context
-    } else if( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
+    gentity_t *actEnt;
+
+    actEnt = &g_entities[ client->ps.persistant[ PERS_ACT_ENT ] ];
+
+    if( client->ps.stats[ STAT_STATE ] & SS_ACTIVATING )
+      G_UnoccupyActivationEnt( actEnt, ent, qfalse );
+    else if( client->ps.persistant[ PERS_ACT_ENT ] != ENTITYNUM_NONE )
+      G_ActivateEntity( actEnt, ent );
+    else if( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
     {
       if( BG_AlienCanEvolve( client->ps.stats[ STAT_CLASS ],
                              client->pers.credit, g_alienStage.integer,
@@ -1919,13 +2084,20 @@ void ClientThink_real( gentity_t *ent )
 
   if( ent->suicideTime > 0 && ent->suicideTime < level.time )
   {
-    // reset any hovels the player might be using
-    if( ent->client && ent->client->hovel )
+    // reset any uable entities the player might be using
+    if( client->ps.stats[ STAT_STATE ] & SS_ACTIVATING )
     {
-      ent->client->hovel->active = qfalse;
-      ent->client->hovel->builder = NULL;
-      ent->client->hovel = NULL;
+      G_ResetActivation( &g_entities[ client->ps.persistant[ PERS_ACT_ENT ] ],
+                     client );
     }
+
+    // determine the EF_HOVELING state
+    if( !( client->ps.stats[ STAT_STATE ] & SS_ACTIVATING ) ||
+        ( g_entities[ client->ps.persistant[ PERS_ACT_ENT ] ].s.modelindex !=
+          BA_A_HOVEL ) )
+      ent->s.eFlags &= ~EF_HOVELING;
+    else
+      ent->s.eFlags |= EF_HOVELING;
 
     ent->client->ps.stats[ STAT_HEALTH ] = ent->health = 0;
     player_die( ent, ent, ent, 100000, MOD_SUICIDE );

@@ -1229,6 +1229,10 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
       targ->enemy = attacker;
       targ->die( targ, inflictor, attacker, take, mod );
+      if( ( targ->activation.flags & ACTF_OCCUPY ) &&
+          ( targ->s.eFlags & EF_B_OCCUPIED ) &&
+          targ->activation.occupant && targ->activation.occupant->client )
+        G_UnoccupyActivationEnt( targ, targ->activation.occupant, qtrue );
       return;
     }
     else if( targ->pain )
@@ -1451,7 +1455,8 @@ qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage,
     if( !ent->takedamage )
       continue;
 
-    if( ent-> client && ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING )
+    if( ( ent-> client && ent->client->ps.eFlags & EF_HOVELING ) ||
+        ( ent->s.eFlags & EF_HOVELING ) )
       continue;
 
     // find the distance from the edge of the bounding box

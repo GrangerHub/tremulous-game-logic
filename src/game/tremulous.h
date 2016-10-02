@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
+#define ACTIVATION_ENT_RANGE            64 // default maximum range a client can activate an activation entity
 
 /*
  * ALIEN weapons
@@ -687,4 +688,3 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
                                          //do to increment the stage kill counters
                                          
 #define MAXIMUM_BUILD_TIME          20000 // used for pie timer
-

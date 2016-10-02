@@ -152,6 +152,26 @@ struct gentity_s
   void              (*pain)( gentity_t *self, gentity_t *attacker, int damage );
   void              (*die)( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod );
 
+  // for activation entities
+  struct activation_s
+  {
+    gentity_t         *occupant; // the player that this is occupying this entity
+    int               flags; // contains bit flags representing various abilities of a given activation entity
+    qboolean          (*activate)( gentity_t *self, gentity_t *other, gentity_t *activator );
+    qboolean          (*canActivate)( gentity_t *self, gclient_t *client );  // optional custom restrictions on the search for
+                                                                        // a nearby activation entity that the general activation.flags don't address
+    qboolean          (*willActivate)( gentity_t *self, gclient_t *client ); // optional custom restrictions on the actual
+                                                                        // activation of a nearby found activation entity
+    qboolean          (*unoccupy)( gentity_t *occupied, gentity_t *occupier, qboolean force ); // optional function called for
+                                                                           // leaving an occupiable activation entity. Unless force is  
+                                                                           // set to true, if qfalse is returned, the entity remains
+                                                                           // occupied.
+    void              (*reset)( gentity_t *self, gclient_t *client );   // optional custom reset for occupiable activation entities
+    qboolean          (*occupyUntil)( gentity_t *self, gentity_t *occupant );  // optional custom conditions that would force a
+                                                                        // client to unoccupy if qtrue is returned
+    gentity_t         *(*getOther)( gentity_t *self, gentity_t *activator );  // optional function that returns another entity involved in the activation
+  } activation;
+
   int               pain_debounce_time;
   int               last_move_time;
 
@@ -846,6 +866,7 @@ void              AHive_Think( gentity_t *self );
 void              ATrapper_Think( gentity_t *self );
 void              HSpawn_Think( gentity_t *self );
 void              HRepeater_Think( gentity_t *self );
+qboolean          HRepeater_CanActivate( gentity_t *self, gclient_t *client );
 void              HReactor_Think( gentity_t *self );
 void              HArmoury_Think( gentity_t *self );
 void              HDCC_Think( gentity_t *self );
@@ -885,6 +906,16 @@ void              G_RemoveRangeMarkerFrom( gentity_t *self );
 void              G_UpdateBuildableRangeMarkers( void );
 qboolean          AHovel_Blocked( gentity_t *hovel, gentity_t *player, qboolean provideExit );
 void              G_PositionHovelsBuilder( gentity_t *self );
+
+// activation entities functions
+qboolean          G_CanActivateEntity( gclient_t *client, gentity_t *ent );
+qboolean          G_WillActivateEntity( gclient_t *client, gentity_t *ent );
+void              G_ActivateEntity( gentity_t *actEnt, gentity_t *activator );
+void              G_ResetActivation( gentity_t *self, gclient_t *client ); // is called to reset an occupiable activation 
+                                                          // entity and the client that occupied it
+                                                          // A general wrapper for (*activation.reset)()
+void              G_UnoccupyActivationEnt( gentity_t *occupied, gentity_t *occupier, qboolean force ); // wrapper called for players leaving an occupiable
+                                                                            // activation entity.
 
 //
 // g_utils.c
