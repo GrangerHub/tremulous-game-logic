@@ -2231,12 +2231,12 @@ HRepeater_Activate
 Use for human power repeater
 ================
 */
-qboolean HRepeater_Activate( gentity_t *self, gentity_t *other, gentity_t *activator )
+qboolean HRepeater_Activate( gentity_t *self, gentity_t *activator )
 {
-  if( other && other->client )
-    G_GiveClientMaxAmmo( other, qtrue );
+  if( self->activation.other && self->activation.other->client )
+    G_GiveClientMaxAmmo( self->activation.other, qtrue );
 
-  return qtrue;
+  return qfalse;
 }
 
 /*
@@ -2344,11 +2344,11 @@ HArmoury_Activate
 Called when a human activates an Armoury
 ================
 */
-qboolean HArmoury_Activate( gentity_t *self, gentity_t *other, gentity_t *activator )
+qboolean HArmoury_Activate( gentity_t *self, gentity_t *activator )
 {
   G_TriggerMenu( activator->client->ps.clientNum, MN_H_ARMOURY );
 
-  return qtrue;
+  return qfalse;
 }
 
 /*
@@ -4270,6 +4270,9 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
   built->nextthink = BG_Buildable( buildable )->nextthink;
   
   built->activation.flags = BG_Buildable( buildable )->activationFlags;
+  built->activation.pm_type = BG_Buildable( buildable )->activationPm_type;
+  built->activation.contents = BG_Buildable( buildable )->activationContents;
+  built->activation.clipMask = BG_Buildable( buildable )->activationClipMask;
 
   built->takedamage = qtrue;
   built->spawned = qfalse;
@@ -5235,9 +5238,9 @@ void G_BuildLogRevert( int id )
                 (int)( ent - g_entities ), BG_Buildable( ent->s.modelindex )->name );
             G_RemoveRangeMarkerFrom( ent );
             if( ( ent->activation.flags & ACTF_OCCUPY ) &&
-                ( ent->s.eFlags & EF_B_OCCUPIED ) &&
+                ( ent->s.eFlags & EF_OCCUPIED ) &&
                 ent->activation.occupant && ent->activation.occupant->client )
-              G_UnoccupyActivationEnt( ent, ent->activation.occupant, qtrue );
+              G_UnoccupyEnt( ent, ent->activation.occupant, ent->activation.occupant, qtrue );
             G_FreeEntity( ent );
             break;
           }

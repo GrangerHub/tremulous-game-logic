@@ -723,7 +723,7 @@ const char *CG_TutorialText( void )
           break;
       }
 
-      if( ps->stats[ STAT_STATE ] & SS_ACTIVATING )
+      if( ps->eFlags & EF_OCCUPYING )
       {
         switch( cg.nearUsableBuildable )
         {

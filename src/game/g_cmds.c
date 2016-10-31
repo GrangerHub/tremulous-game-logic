@@ -640,23 +640,29 @@ argv(0) noclip
 void Cmd_Noclip_f( gentity_t *ent )
 {
   char  *msg;
-
-  if( ent->client->noclip )
+  if ( ent->client->ps.eFlags & EF_OCCUPYING )
   {
-    msg = "noclip OFF\n";
-    ent->r.contents = ent->client->cliprcontents;
-  }
-  else
+    msg = "noclip is disabled while occupying an activation entity";
+  } else
   {
-    msg = "noclip ON\n";
-    ent->client->cliprcontents = ent->r.contents;
-    ent->r.contents = 0;
+    if( ent->client->noclip )
+    {
+      msg = "noclip OFF\n";
+      ent->r.contents = ent->client->cliprcontents;
+    }
+    else
+    {
+      msg = "noclip ON\n";
+      ent->client->cliprcontents = ent->r.contents;
+      ent->r.contents = 0;
+    }
+
+    ent->client->noclip = !ent->client->noclip;
+
+    if( ent->r.linked )
+      trap_LinkEntity( ent );
   }
 
-  ent->client->noclip = !ent->client->noclip;
-
-  if( ent->r.linked )
-    trap_LinkEntity( ent );
 
   trap_SendServerCommand( ent - g_entities, va( "print \"%s\"", msg ) );
 }
@@ -671,13 +677,9 @@ void Cmd_Kill_f( gentity_t *ent )
 {
   if( g_cheats.integer )
   {
-    // reset any uable entities the player might be using
-    if( ent->client &&
-        ( ent->client->ps.stats[ STAT_STATE ] & SS_ACTIVATING ) )
-    {
-      G_ResetActivation( &g_entities[ ent->client->ps.persistant[ PERS_ACT_ENT ] ],
-                     ent->client );
-    }
+    // reset any activation entities the player might be occupying
+    if( ent->client->ps.eFlags & EF_OCCUPYING )
+      G_ResetActivation( ent->activation.occupied, ent );
 
     ent->client->ps.stats[ STAT_HEALTH ] = ent->health = 0;
     player_die( ent, ent, ent, 100000, MOD_SUICIDE );
@@ -2171,6 +2173,12 @@ void Cmd_Class_f( gentity_t *ent )
         return;
       }
 
+      if ( ent->client->ps.eFlags & EF_OCCUPYING )
+      {
+        G_TriggerMenu( clientNum, MN_A_NOEROOM );
+        return;
+      }
+
       if( ent->client->sess.spectatorState == SPECTATOR_NOT &&
           ( currentClass == PCL_ALIEN_BUILDER0 ||
             currentClass == PCL_ALIEN_BUILDER0_UPG ) &&
@@ -2455,6 +2463,12 @@ void Cmd_Buy_f( gentity_t *ent )
   upgrade_t upgrade;
   qboolean  energyOnly;
 
+  if( ent->client->ps.eFlags & EF_OCCUPYING )
+  {
+    trap_SendServerCommand( ent-g_entities, "print \"You can't buy while occupying another structure\n\"" );
+    return;
+  }
+
   trap_Argv( 1, s, sizeof( s ) );
 
   weapon = BG_WeaponByName( s )->number;
@@ -2646,6 +2660,12 @@ void Cmd_Sell_f( gentity_t *ent )
   int       i;
   weapon_t  weapon;
   upgrade_t upgrade;
+
+  if( ent->client->ps.eFlags & EF_OCCUPYING )
+  {
+    trap_SendServerCommand( ent-g_entities, "print \"You can't sell while occupying another structure\n\"" );
+    return;
+  }
 
   trap_Argv( 1, s, sizeof( s ) );
 
