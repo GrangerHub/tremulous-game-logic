@@ -1686,44 +1686,75 @@ void G_OccupantClip( gentity_t *occupant )
         ( !occupant->client && ( occupant->s.eFlags & EF_OCCUPYING ) ) ) &&
       occupant->activation.occupied )
   {
-    if( ( occupant->activation.occupied->activation.flags &
-        ACTF_OCCUPY_CLIPMASK ) &&
-        occupant->clipmask !=
-                            occupant->activation.occupied->activation.clipMask )
+    if( occupant->activation.occupied->activation.flags & ACTF_OCCUPY_CLIPMASK )
     {
-      occupant->activation.clipMaskBackup = occupant->clipmask;
-      occupant->clipmask = occupant->activation.occupied->activation.clipMask;
+      if( ( occupant->client &&
+            !( occupant->client->ps.eFlags & EF_OCCUPY_CLIPMASK ) ) || 
+          ( !occupant->client && !( occupant->s.eFlags & EF_OCCUPY_CLIPMASK ) ) )
+      {
+        occupant->activation.clipMaskBackup = occupant->clipmask;
+        occupant->clipmask = occupant->activation.occupied->activation.clipMask;
+
+        if( occupant->client )
+        {
+          occupant->client->ps.eFlags |= EF_OCCUPY_CLIPMASK;
+        } else
+        {
+          occupant->s.eFlags |= EF_OCCUPY_CLIPMASK;
+        }
+      }
     }
 
-    if( occupant->activation.occupied->activation.flags &
-        ACTF_OCCUPY_CONTENTS )
+    if( occupant->activation.occupied->activation.flags & ACTF_OCCUPY_CONTENTS )
     {
-      if( occupant->client && occupant->client->noclip &&
-          occupant->client->cliprcontents !=
-                            occupant->activation.occupied->activation.contents )
+      
+      if( ( occupant->client &&
+            !( occupant->client->ps.eFlags & EF_OCCUPY_CONTENTS ) ) || 
+          ( !occupant->client && !( occupant->s.eFlags & EF_OCCUPY_CONTENTS ) ) )
       {
-        occupant->activation.contentsBackup = occupant->client->cliprcontents;
-        occupant->client->cliprcontents =
-                             occupant->activation.occupied->activation.contents;
-      }
-      else if( occupant->r.contents !=
-                            occupant->activation.occupied->activation.contents )
-      {
-        occupant->activation.contentsBackup = occupant->r.contents;
-        occupant->r.contents =
-                             occupant->activation.occupied->activation.contents;
+        if( occupant->client && occupant->client->noclip )
+        {
+          occupant->activation.contentsBackup = occupant->client->cliprcontents;
+          occupant->client->cliprcontents =
+                               occupant->activation.occupied->activation.contents;
+        }
+        else
+        {
+          occupant->activation.contentsBackup = occupant->r.contents;
+          occupant->r.contents =
+                               occupant->activation.occupied->activation.contents;
+        }
+
+        if( occupant->client )
+        {
+          occupant->client->ps.eFlags |= EF_OCCUPY_CLIPMASK;
+        } else
+        {
+          occupant->s.eFlags |= EF_OCCUPY_CLIPMASK;
+        }
       }
     }
   } else
   {
-    if( occupant->activation.clipMaskBackup )
+    if( ( occupant->client &&
+          ( occupant->client->ps.eFlags & EF_OCCUPY_CLIPMASK ) ) || 
+        ( !occupant->client && ( occupant->s.eFlags & EF_OCCUPY_CLIPMASK ) ) )
     {
       occupant->clipmask =
                        occupant->activation.occupied->activation.clipMaskBackup;
-      occupant->activation.clipMaskBackup = 0;
+
+     if( occupant->client )
+     {
+       occupant->client->ps.eFlags &= ~EF_OCCUPY_CLIPMASK;
+     } else
+     {
+       occupant->s.eFlags &= ~EF_OCCUPY_CLIPMASK;
+     }
     }
 
-    if( occupant->activation.contentsBackup )
+    if( ( occupant->client &&
+          ( occupant->client->ps.eFlags & EF_OCCUPY_CONTENTS ) ) || 
+        ( !occupant->client && ( occupant->s.eFlags & EF_OCCUPY_CONTENTS ) ) )
     {
       if( occupant->client && occupant->client->noclip )
       {
@@ -1736,6 +1767,14 @@ void G_OccupantClip( gentity_t *occupant )
         occupant->r.contents =
                        occupant->activation.occupied->activation.contentsBackup;
         occupant->activation.contentsBackup = 0;
+      }
+
+      if( occupant->client )
+      {
+        occupant->client->ps.eFlags &= ~EF_OCCUPY_CONTENTS;
+      } else
+      {
+        occupant->s.eFlags &= ~EF_OCCUPY_CONTENTS;
       }
     }
   }
