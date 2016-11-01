@@ -234,6 +234,7 @@ void G_ChangeTeam( gentity_t *ent, team_t newTeam )
     {
       ent->client->noclip = qfalse;
       ent->r.contents = ent->client->cliprcontents;
+      G_BackupUnoccupyContents( ent );
     }
     ent->flags &= ~( FL_GODMODE | FL_NOTARGET );
   }

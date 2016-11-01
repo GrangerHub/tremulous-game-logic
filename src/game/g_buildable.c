@@ -1020,6 +1020,7 @@ void AGeneric_Blast( gentity_t *self )
   self->nextthink = level.time + 500;
 
   self->r.contents = 0;    //stop collisions...
+  G_BackupUnoccupyContents( self );
   trap_LinkEntity( self ); //...requires a relink
 }
 
@@ -4394,8 +4395,8 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
       break;
   }
 
-  built->r.contents = CONTENTS_BODY;
-  built->clipmask = MASK_PLAYERSOLID;
+  G_SetContents( built, CONTENTS_BODY );
+  G_SetClipmask( built, MASK_PLAYERSOLID );
   built->enemy = NULL;
   built->s.weapon = BG_Buildable( buildable )->turretProjType;
 

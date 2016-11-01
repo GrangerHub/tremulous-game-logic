@@ -302,33 +302,33 @@ typedef enum
 
 // entityState_t->eFlags
 // notice that some flags are overlapped, so their meaning depends on context
-#define EF_DEAD             0x0001    // don't draw a foe marker over players with EF_DEAD
-#define EF_TELEPORT_BIT     0x0002    // toggled every time the origin abruptly changes
-#define EF_PLAYER_EVENT     0x0004    // only used for eType > ET_EVENTS
+#define EF_DEAD             0x00001    // don't draw a foe marker over players with EF_DEAD
+#define EF_TELEPORT_BIT     0x00002    // toggled every time the origin abruptly changes
+#define EF_PLAYER_EVENT     0x00004    // only used for eType > ET_EVENTS
 
 // for missiles:
-#define EF_BOUNCE           0x0008    // for missiles
-#define EF_BOUNCE_HALF      0x0010    // for missiles
-#define EF_NO_BOUNCE_SOUND  0x0020    // for missiles
+#define EF_BOUNCE           0x00008    // for missiles
+#define EF_BOUNCE_HALF      0x00010    // for missiles
+#define EF_NO_BOUNCE_SOUND  0x00020    // for missiles
 
 // buildable flags:
-#define EF_B_SPAWNED        0x0008
-#define EF_B_POWERED        0x0010
-#define EF_B_MARKED         0x0020
+#define EF_B_SPAWNED        0x00008
+#define EF_B_POWERED        0x00010
+#define EF_B_MARKED         0x00020
 
-#define EF_WARN_CHARGE      0x0020                   // Lucifer Cannon is about to overcharge
-#define EF_WALLCLIMB        0x0040                   // wall walking
-#define EF_WALLCLIMBCEILING 0x0080                   // wall walking ceiling hack
-#define EF_NODRAW           0x0100                   // may have an event, but no model (unspawned items)
-#define EF_MOVER_STOP       0x0200                   // will push otherwise
-#define EF_ASTRAL_NOCLIP    0x0400                   // EF_ASTRAL flagged entities don't clip with Astral entities,
-                                                     // must be equal to CONTENTS_ASTRAL_NOCLIP
-#define EF_FIRING           0x0800                   // for lightning gun
-#define EF_FIRING2          0x1000                   // alt fire
-#define EF_FIRING3          0x2000                   // third fire
-#define EF_POISONCLOUDED    0x4000                   // player hit with basilisk gas
-#define EF_CONNECTION       0x8000                   // draw a connection trouble sprite
-#define EF_BLOBLOCKED       0x10000                  // caught by a trapper
+#define EF_WARN_CHARGE      0x00020    // Lucifer Cannon is about to overcharge
+#define EF_WALLCLIMB        0x00040    // wall walking
+#define EF_WALLCLIMBCEILING 0x00080    // wall walking ceiling hack
+#define EF_NODRAW           0x00100    // may have an event, but no model (unspawned items)
+#define EF_MOVER_STOP       0x00200    // will push otherwise
+#define EF_ASTRAL_NOCLIP    0x00400    // EF_ASTRAL flagged entities don't clip with Astral entities,
+                                      // must be equal to CONTENTS_ASTRAL_NOCLIP
+#define EF_FIRING           0x00800    // for lightning gun
+#define EF_FIRING2          0x01000    // alt fire
+#define EF_FIRING3          0x02000    // third fire
+#define EF_POISONCLOUDED    0x04000    // player hit with basilisk gas
+#define EF_CONNECTION       0x08000    // draw a connection trouble sprite
+#define EF_BLOBLOCKED       0x10000    // caught by a trapper
 
 // for occupation of activation entities
 #define EF_OCCUPIED         0x20000

@@ -30,7 +30,7 @@ void InitTrigger( gentity_t *self )
     G_SetMovedir( self->r.currentAngles, self->movedir );
 
   trap_SetBrushModel( self, self->model );
-  self->r.contents = CONTENTS_TRIGGER;    // replaces the -1 from trap_SetBrushModel
+  G_SetContents( self, CONTENTS_TRIGGER ); // replaces the -1 from trap_SetBrushModel
   self->r.svFlags = SVF_NOCLIENT;
 }
 
@@ -418,7 +418,7 @@ void SP_trigger_hurt( gentity_t *self )
   if( self->damage <= 0 )
     self->damage = 5;
 
-  self->r.contents = CONTENTS_TRIGGER;
+  G_SetContents( self, CONTENTS_TRIGGER );
 
   self->use = hurt_use;
 
