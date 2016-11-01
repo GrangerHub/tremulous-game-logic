@@ -1597,7 +1597,7 @@ void G_PositionHovelsBuilder( gentity_t *self )
   if( !self->activation.occupant )
     return;
 
-  BG_ClassBoundingBox( self->builder->client->ps.stats[ STAT_CLASS ],
+  BG_ClassBoundingBox( self->activation.occupant->client->ps.stats[ STAT_CLASS ],
                        mins, maxs, NULL, NULL, NULL );
 
   VectorCopy( self->r.currentOrigin, hovelOrigin );
@@ -1629,15 +1629,16 @@ AHovel_Activate
 Called when an alien activates a hovel
 ================
 */
-qboolean AHovel_Activate( gentity_t *self, gentity_t *other, gentity_t *activator )
+qboolean AHovel_Activate( gentity_t *self, gentity_t *activator )
 {
   G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
 
-  //prevent lerping
-  other->client->ps.eFlags ^= EF_TELEPORT_BIT;
-  other->client->ps.eFlags |= EF_NODRAW;
-
-  other->client->ps.eFlags |= EF_HOVELING;
+  if( self->activation.occupant->client )
+  {
+    //prevent lerping
+    self->activation.occupant->client->ps.eFlags ^= EF_TELEPORT_BIT;
+    self->activation.occupant->client->ps.eFlags |= EF_NODRAW;
+  }
 
   G_PositionHovelsBuilder( self );
 
@@ -1663,19 +1664,20 @@ AHovel_WillActivate
 custom restrictions called to determine if a hovel will be activated
 ================
 */
-qboolean AHovel_WillActivate( gentity_t *self, gclient_t *client )
+qboolean AHovel_WillActivate( gentity_t *actEnt, gentity_t *activator )
 {
-  if( client->noclip )
+  if( actEnt->activation.occupantFound->client &&
+      actEnt->activation.occupantFound->client->noclip )
   {
     //activator has noclip on
-    G_TriggerMenu( client->ps.clientNum, MN_A_HOVEL_NOCLIP );
+    activator->activation.menuMsg = MN_A_HOVEL_NOCLIP;
     return qfalse;
   }
 
-  if( AHovel_Blocked( self, &g_entities[ client->ps.clientNum ], qfalse ) )
+  if( AHovel_Blocked( actEnt, actEnt->activation.occupantFound, qfalse ) )
   {
     //you can get in, but you can't get out
-    G_TriggerMenu( client->ps.clientNum, MN_A_HOVEL_BLOCKED );
+    activator->activation.menuMsg = MN_A_HOVEL_BLOCKED;
     return qfalse;
   }
 
@@ -1689,7 +1691,8 @@ AHovel_Unoccupy
 called to exit a hovel
 ================
 */
-qboolean  AHovel_Unoccupy( gentity_t *occupied, gentity_t *occupier, qboolean force )
+qboolean  AHovel_Unoccupy( gentity_t *occupied, gentity_t *occupant,
+                           gentity_t *activator, qboolean force )
 {
   if( force )
   {
@@ -1703,28 +1706,24 @@ qboolean  AHovel_Unoccupy( gentity_t *occupied, gentity_t *occupier, qboolean fo
     VectorMA( newOrigin, 1.0f, occupied->s.origin2, newOrigin );
 
     //prevent lerping
-    occupier->client->ps.eFlags ^= EF_TELEPORT_BIT;
-    occupier->client->ps.eFlags &= ~EF_NODRAW;
+    occupant->client->ps.eFlags ^= EF_TELEPORT_BIT;
+    occupant->client->ps.eFlags &= ~EF_NODRAW;
 
-    G_SetOrigin( occupier, newOrigin );
-    VectorCopy( newOrigin, occupier->client->ps.origin );
-    G_SetClientViewAngle( occupier, newAngles );
+    G_SetOrigin( occupant, newOrigin );
+    VectorCopy( newOrigin, occupant->client->ps.origin );
+    G_SetClientViewAngle( occupant, newAngles );
 
     return qtrue;
   }
 
   // only let the player out if there is room
-  if ( !AHovel_Blocked( occupied, occupier, qtrue ) )
+  if ( !AHovel_Blocked( occupied, occupant, qtrue ) )
   {
     // prevent lerping
-    occupier->client->ps.eFlags ^= EF_TELEPORT_BIT;
-    occupier->client->ps.eFlags &= ~EF_NODRAW;
+    occupant->client->ps.eFlags ^= EF_TELEPORT_BIT;
+    occupant->client->ps.eFlags &= ~EF_NODRAW;
     return qtrue;
   }
-
-  // exit is blocked
-  if( occupier->client )
-    G_TriggerMenu(occupier->client->ps.clientNum, MN_A_HOVEL_BLOCKED );
 
   return qfalse;
 }
@@ -1736,24 +1735,15 @@ AHovel_Reset
 called to exit a hovel
 ================
 */
-void AHovel_Reset( gentity_t *self, gclient_t *client )
+void AHovel_Reset( gentity_t *occupied, gentity_t *occupant )
 {
-  gentity_t *occupant;
-  
-  if( client )
+  if( occupant && occupant->client )
   {
-    occupant = &g_entities[ client->ps.clientNum ];
-    client->ps.eFlags &= ~EF_HOVELING;
-
-    // client is no longer astral
-    if( occupant->client->noclip )
-      occupant->client->cliprcontents = CONTENTS_BODY;
-    else
-      occupant->r.contents = CONTENTS_BODY;
+    occupant->client->ps.eFlags &= ~EF_HOVELING;
   }
 
-  if( self )
-    G_SetBuildableAnim( self, BANIM_ATTACK2, qfalse );
+  if( occupied )
+    G_SetBuildableAnim( occupied, BANIM_ATTACK2, qfalse );
 }
 
 /*
@@ -2380,12 +2370,12 @@ HRepeater_Activate
 Use for human power repeater
 ================
 */
-qboolean HRepeater_Activate( gentity_t *self, gentity_t *other, gentity_t *activator )
+qboolean HRepeater_Activate( gentity_t *self, gentity_t *activator )
 {
-  if( other && other->client )
-    G_GiveClientMaxAmmo( other, qtrue );
+  if( self->activation.other && self->activation.other->client )
+    G_GiveClientMaxAmmo( self->activation.other, qtrue );
 
-  return qtrue;
+  return qfalse;
 }
 
 /*
@@ -2493,11 +2483,11 @@ HArmoury_Activate
 Called when a human activates an Armoury
 ================
 */
-qboolean HArmoury_Activate( gentity_t *self, gentity_t *other, gentity_t *activator )
+qboolean HArmoury_Activate( gentity_t *self, gentity_t *activator )
 {
   G_TriggerMenu( activator->client->ps.clientNum, MN_H_ARMOURY );
 
-  return qtrue;
+  return qfalse;
 }
 
 /*
@@ -3487,8 +3477,8 @@ void G_BuildableThink( gentity_t *ent, int msec )
 
   // Set flags
   ent->s.eFlags &= ~( EF_B_POWERED | EF_B_SPAWNED | EF_B_MARKED );
-  if( ent->builder && ent->builder->client)
-    ent->builder->client->ps.eFlags &= ~( EF_HOVEL_MARKED );
+  if( ent->activation.occupant && ent->activation.occupant->client)
+    ent->activation.occupant->client->ps.eFlags &= ~( EF_HOVEL_MARKED );
   
   if( ent->powered )
     ent->s.eFlags |= EF_B_POWERED;
@@ -3498,8 +3488,8 @@ void G_BuildableThink( gentity_t *ent, int msec )
 
   if( ent->deconstruct )
   {
-    if( ent->builder && ent->builder->client)
-      ent->builder->client->ps.eFlags |= EF_HOVEL_MARKED;
+    if( ent->activation.occupant && ent->activation.occupant->client)
+      ent->activation.occupant->client->ps.eFlags |= EF_HOVEL_MARKED;
       
     ent->s.eFlags |= EF_B_MARKED;
   }
@@ -4422,6 +4412,9 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
   built->nextthink = BG_Buildable( buildable )->nextthink;
   
   built->activation.flags = BG_Buildable( buildable )->activationFlags;
+  built->activation.pm_type = BG_Buildable( buildable )->activationPm_type;
+  built->activation.contents = BG_Buildable( buildable )->activationContents;
+  built->activation.clipMask = BG_Buildable( buildable )->activationClipMask;
 
   built->takedamage = qtrue;
   built->spawned = qfalse;
@@ -4486,6 +4479,8 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
       built->activation.willActivate = AHovel_WillActivate;
       built->activation.unoccupy = AHovel_Unoccupy;
       built->activation.reset = AHovel_Reset;
+      built->activation.menuMsgOvrd[ ACTMN_ACT_OCCUPIED ] = MN_A_HOVEL_OCCUPIED;
+      built->activation.menuMsgOvrd[ ACTMN_ACT_NOEXIT ] = MN_A_HOVEL_BLOCKED;
       built->think = AHovel_Think;
       built->pain = AGeneric_Pain;
       break;
@@ -5410,9 +5405,9 @@ void G_BuildLogRevert( int id )
                 (int)( ent - g_entities ), BG_Buildable( ent->s.modelindex )->name );
             G_RemoveRangeMarkerFrom( ent );
             if( ( ent->activation.flags & ACTF_OCCUPY ) &&
-                ( ent->s.eFlags & EF_B_OCCUPIED ) &&
+                ( ent->s.eFlags & EF_OCCUPIED ) &&
                 ent->activation.occupant && ent->activation.occupant->client )
-              G_UnoccupyActivationEnt( ent, ent->activation.occupant, qtrue );
+              G_UnoccupyEnt( ent, ent->activation.occupant, ent->activation.occupant, qtrue );
             G_FreeEntity( ent );
             break;
           }

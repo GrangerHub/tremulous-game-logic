@@ -1230,9 +1230,9 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       targ->enemy = attacker;
       targ->die( targ, inflictor, attacker, take, mod );
       if( ( targ->activation.flags & ACTF_OCCUPY ) &&
-          ( targ->s.eFlags & EF_B_OCCUPIED ) &&
+          ( targ->s.eFlags & EF_OCCUPIED ) &&
           targ->activation.occupant && targ->activation.occupant->client )
-        G_UnoccupyActivationEnt( targ, targ->activation.occupant, qtrue );
+        G_UnoccupyEnt( targ, targ->activation.occupant, targ->activation.occupant, qtrue );
       return;
     }
     else if( targ->pain )

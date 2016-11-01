@@ -97,6 +97,9 @@ static const buildableAttributes_t bg_buildableList[ ] =
     ASPAWN_BT,             //int       buildTime;
     qfalse,                //qboolean  activationEnt;
     0,                     //int       activationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    MASK_PLAYERSOLID,      //int       activationContents;
+    CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
@@ -134,6 +137,9 @@ static const buildableAttributes_t bg_buildableList[ ] =
     OVERMIND_BT,           //int       buildTime;
     qfalse,                //qboolean  activationEnt;
     0,                     //int       activationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    MASK_PLAYERSOLID,      //int       activationContents;
+    CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
@@ -171,6 +177,9 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BARRICADE_BT,          //int       buildTime;
     qfalse,                //qboolean  activationEnt;
     0,                     //int       activationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    MASK_PLAYERSOLID,      //int       activationContents;
+    CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
@@ -208,6 +217,9 @@ static const buildableAttributes_t bg_buildableList[ ] =
     ACIDTUBE_BT,           //int       buildTime;
     qfalse,                //qboolean  activationEnt;
     0,                     //int       activationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    MASK_PLAYERSOLID,      //int       activationContents;
+    CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
@@ -245,6 +257,9 @@ static const buildableAttributes_t bg_buildableList[ ] =
     TRAPPER_BT,            //int       buildTime;
     qfalse,                //qboolean  activationEnt;
     0,                     //int       activationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    MASK_PLAYERSOLID,      //int       activationContents;
+    CONTENTS_BODY,         //int       activationClipMask;
     TRAPPER_RANGE,         //int       turretRange;
     TRAPPER_REPEAT,        //int       turretFireSpeed;
     WP_LOCKBLOB_LAUNCHER,  //weapon_t  turretProjType;
@@ -283,6 +298,9 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BOOSTER_BT,            //int       buildTime;
     qfalse,                //qboolean  activationEnt;
     0,                     //int       activationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    MASK_PLAYERSOLID,      //int       activationContents;
+    CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
@@ -319,6 +337,9 @@ static const buildableAttributes_t bg_buildableList[ ] =
     HIVE_BT,               //int       buildTime;
     qfalse,                //qboolean  activationEnt;
     0,                     //int       activationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    MASK_PLAYERSOLID,      //int       activationContents;
+    CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_HIVE,               //weapon_t  turretProjType;
@@ -348,13 +369,23 @@ static const buildableAttributes_t bg_buildableList[ ] =
     HOVEL_SPLASHRADIUS,    //int       splashRadius;
     MOD_ASPAWN,            //int       meansOfDeath;
     TEAM_ALIENS,           //int       team;
-    //( 1 << WP_ABUILD )|( 1 << WP_ABUILD2 ),    //weapon_t  buildWeapon; XXX Due to a bug in AProp_HovelBlocked() WP_ABUILD always has entrance block.
-    ( 1 << WP_ABUILD2 ),    //weapon_t  buildWeapon;
+    ( 1 << WP_ABUILD2 ),   //weapon_t  buildWeapon;
     BANIM_IDLE1,           //int       idleAnim;
     150,                   //int       nextthink;
     HOVEL_BT,              //int       buildTime;
     qtrue,                 //qboolean  activationEnt;
-    (ACTF_TEAM|ACTF_ENT_ALIVE|ACTF_PL_ALIVE|ACTF_SPAWNED|ACTF_LINE_OF_SIGHT|ACTF_OCCUPY),//int       activationFlags;
+    (ACTF_TEAM|
+     ACTF_ENT_ALIVE|
+     ACTF_PL_ALIVE|
+     ACTF_SPAWNED|
+     ACTF_LINE_OF_SIGHT|
+     ACTF_OCCUPY|
+     ACTF_OCCUPY_PM_TYPE|
+     ACTF_OCCUPY_CONTENTS|
+     ACTF_OCCUPY_CLIPMASK),//int       activationFlags;
+    PM_FREEZE,             //pmtype_t  activationPm_type;
+    MASK_ASTRALSOLID,      //int       activationContents;
+    CONTENTS_ASTRAL_NOCLIP,//int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
@@ -392,6 +423,9 @@ static const buildableAttributes_t bg_buildableList[ ] =
     HSPAWN_BT,             //int       buildTime;
     qfalse,                //qboolean  activationEnt;
     0,                     //int       activationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    MASK_PLAYERSOLID,      //int       activationContents;
+    CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
@@ -429,6 +463,9 @@ static const buildableAttributes_t bg_buildableList[ ] =
     MGTURRET_BT,           //int       buildTime;
     qfalse,                //qboolean  activationEnt;
     0,                     //int       activationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    MASK_PLAYERSOLID,      //int       activationContents;
+    CONTENTS_BODY,         //int       activationClipMask;
     MGTURRET_RANGE,        //int       turretRange;
     MGTURRET_REPEAT,       //int       turretFireSpeed;
     WP_MGTURRET,           //weapon_t  turretProjType;
@@ -466,6 +503,9 @@ static const buildableAttributes_t bg_buildableList[ ] =
     TESLAGEN_BT,           //int       buildTime;
     qfalse,                //qboolean  activationEnt;
     0,                     //int       activationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    MASK_PLAYERSOLID,      //int       activationContents;
+    CONTENTS_BODY,         //int       activationClipMask;
     TESLAGEN_RANGE,        //int       turretRange;
     TESLAGEN_REPEAT,       //int       turretFireSpeed;
     WP_TESLAGEN,           //weapon_t  turretProjType;
@@ -502,7 +542,14 @@ static const buildableAttributes_t bg_buildableList[ ] =
     100,                   //int       nextthink;
     ARMOURY_BT,            //int       buildTime;
     qtrue,                 //qboolean  activationEnt;
-    (ACTF_TEAM|ACTF_ENT_ALIVE|ACTF_PL_ALIVE|ACTF_SPAWNED|ACTF_POWERED), //int activationFlags;
+    (ACTF_TEAM|
+     ACTF_ENT_ALIVE|
+     ACTF_PL_ALIVE|
+     ACTF_SPAWNED|
+     ACTF_POWERED),        //int activationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    MASK_PLAYERSOLID,      //int       activationContents;
+    CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
@@ -540,6 +587,9 @@ static const buildableAttributes_t bg_buildableList[ ] =
     DC_BT,                 //int       buildTime;
     qfalse,                //qboolean  activationEnt;
     0,                     //int       activationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    MASK_PLAYERSOLID,      //int       activationContents;
+    CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
@@ -578,6 +628,9 @@ static const buildableAttributes_t bg_buildableList[ ] =
     MEDISTAT_BT,           //int       buildTime;
     qfalse,                //qboolean  activationEnt;
     0,                     //int       activationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    MASK_PLAYERSOLID,      //int       activationContents;
+    CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
@@ -614,7 +667,14 @@ static const buildableAttributes_t bg_buildableList[ ] =
     REACTOR_ATTACK_DCC_REPEAT, //int   nextthink;
     REACTOR_BT,            //int       buildTime;
     qtrue,                 //qboolean  activationEnt;
-    (ACTF_TEAM|ACTF_ENT_ALIVE|ACTF_PL_ALIVE|ACTF_SPAWNED|ACTF_POWERED), //int activationFlags;
+    (ACTF_TEAM|
+     ACTF_ENT_ALIVE|
+     ACTF_PL_ALIVE|
+     ACTF_SPAWNED|
+     ACTF_POWERED),        //int activationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    MASK_PLAYERSOLID,      //int       activationContents;
+    CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
@@ -651,7 +711,14 @@ static const buildableAttributes_t bg_buildableList[ ] =
     100,                   //int       nextthink;
     REPEATER_BT,           //int       buildTime;
     qtrue,                 //qboolean  activationEnt;
-    (ACTF_TEAM|ACTF_ENT_ALIVE|ACTF_PL_ALIVE|ACTF_SPAWNED|ACTF_POWERED), //int activationFlags;
+    (ACTF_TEAM|
+     ACTF_ENT_ALIVE|
+     ACTF_PL_ALIVE|
+     ACTF_SPAWNED|
+     ACTF_POWERED),        //int activationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    MASK_PLAYERSOLID,      //int       activationContents;
+    CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;

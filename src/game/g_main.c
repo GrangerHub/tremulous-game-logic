@@ -2642,20 +2642,6 @@ void G_RunThink( gentity_t *ent )
     G_Error( "NULL ent->think" );
 
   ent->think( ent );
-
-  // for occupied activation entities
-  if( ( ent->s.eFlags & EF_B_OCCUPIED ) &&
-      ent->activation.occupant )
-  {
-    gentity_t *occupant = ent->activation.occupant;
-    
-    if( ent->activation.occupyUntil &&
-        ent->activation.occupyUntil( ent, occupant ) )
-      G_UnoccupyActivationEnt( ent, occupant, qtrue );
-    else if( ( ent->activation.flags & ACTF_OCCUPY_ACTIVATE ) &&
-             G_CanActivateEntity( occupant->client, ent ) )
-      G_ActivateEntity( ent, occupant );
-  }
 }
 
 /*
@@ -2790,6 +2776,8 @@ void G_RunFrame( int levelTime )
 
     if( !ent->r.linked && ent->neverFree )
       continue;
+
+    G_OccupiedThink( ent );
 
     if( ent->s.eType == ET_MISSILE )
     {
