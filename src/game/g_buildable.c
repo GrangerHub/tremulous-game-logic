@@ -1698,9 +1698,7 @@ void AHovel_Occupy( gentity_t *occupied )
     return;
 
   if( occupied->activation.occupant->client )
-    occupied->activation.occupant->client->ps.eFlags |= EF_HOVELING;
-  else
-    occupied->activation.occupant->s.eFlags |= EF_HOVELING;
+    occupied->activation.occupant->client->ps.stats[ STAT_STATE ] |= SS_HOVELING;
 }
 
 /*
@@ -1759,9 +1757,7 @@ void AHovel_Reset( gentity_t *occupied, gentity_t *occupant )
   if( occupant && occupant->client )
   {
     if( occupant->client )
-      occupant->client->ps.eFlags &= ~EF_HOVELING;
-    else
-      occupant->s.eFlags &= ~EF_HOVELING;
+      occupant->client->ps.stats[ STAT_STATE ] &= ~SS_HOVELING;
   }
 
   if( occupied )

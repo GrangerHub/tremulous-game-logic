@@ -2274,13 +2274,13 @@ void Cmd_Destroy_f( gentity_t *ent )
   VectorMA( viewOrigin, 100, forward, end );
 
   trap_Trace( &tr, viewOrigin, NULL, NULL, end, ent->s.number, MASK_PLAYERSOLID );
-  if ( ent->client->ps.eFlags & EF_HOVELING )
+  if ( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING )
     traceEnt = &g_entities[ ent->client->ps.persistant[ PERS_ACT_ENT ] ];
   else
     traceEnt = &g_entities[ tr.entityNum ];
 
   if( ( tr.fraction < 1.0f ||
-        ( ent->client->ps.eFlags & EF_HOVELING ) ) &&
+        ( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING ) ) &&
       ( traceEnt->s.eType == ET_BUILDABLE ) &&
       ( traceEnt->buildableTeam == ent->client->pers.teamSelection ) &&
       ( ( ent->client->ps.weapon >= WP_ABUILD ) &&
@@ -3017,13 +3017,13 @@ void Cmd_Reload_f( gentity_t *ent )
     VectorMA( viewOrigin, 100, forward, end );
 
     trap_Trace( &tr, viewOrigin, NULL, NULL, end, ent->s.number, MASK_PLAYERSOLID );
-    if ( ent->client->ps.eFlags & EF_HOVELING )
+    if ( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING )
       traceEnt = &g_entities[ ent->client->ps.persistant[ PERS_ACT_ENT ] ];
     else
       traceEnt = &g_entities[ tr.entityNum ];
 
     if( ( tr.fraction < 1.0f ||
-          ( ent->client->ps.eFlags & EF_HOVELING ) ) &&
+          ( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING ) ) &&
         ( traceEnt->s.eType == ET_BUILDABLE ) &&
         ( traceEnt->buildableTeam == ent->client->pers.teamSelection ) &&
         ( ( ent->client->ps.weapon >= WP_ABUILD ) &&

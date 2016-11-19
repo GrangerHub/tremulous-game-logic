@@ -1458,8 +1458,7 @@ qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage,
     if( !ent->takedamage )
       continue;
 
-    if( ( ent->client && ( ent->client->ps.eFlags & EF_HOVELING ) ) ||
-        (!ent->client && ( ent->s.eFlags & EF_HOVELING ) ) )
+    if( ent->client && ( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING ) )
       continue;
 
     // find the distance from the edge of the bounding box

@@ -186,7 +186,7 @@ static void CG_AlienBuilderText( char *text, playerState_t *ps )
           CG_KeyNameForCommand( "ready" ) ) );
   }
 
-  if( !( ps->eFlags & EF_HOVELING ) )
+  if( !( ps->stats[ STAT_STATE ] & SS_HOVELING ) )
   {
     if( buildable > BA_NONE )
     {
@@ -208,7 +208,7 @@ static void CG_AlienBuilderText( char *text, playerState_t *ps )
     }
   }
 
-  if( ps->eFlags & EF_HOVELING )
+  if( ps->stats[ STAT_STATE ] & SS_HOVELING )
   {
     if( cgs.markDeconstruct && !cgs.warmup )
     {

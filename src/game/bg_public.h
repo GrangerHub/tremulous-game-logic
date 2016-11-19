@@ -271,6 +271,7 @@ typedef enum
 #define SS_HEALING_ACTIVE       0x00000400 // medistat for humans, creep for aliens
 #define SS_HEALING_2X           0x00000800 // medkit or double healing rate
 #define SS_HEALING_3X           0x00001000 // triple healing rate
+#define SS_HOVELING             0x00002000 // indicates if the entity is occupying a hovel
 
 #define SB_VALID_TOGGLEBIT      0x00004000
 
@@ -309,7 +310,11 @@ typedef enum
 #define EF_PLAYER_EVENT     0x00004    // only used for eType > ET_EVENTS
 
 // for cleints occupying hovels
-#define EF_HOVEL_MARKED     0x0008   // tells if the hovel occupied is marked
+#define EF_HOVEL_MARKED     0x00008   // tells if the hovel occupied is marked
+
+// for occupation of activation entities
+#define EF_OCCUPYING        0x00010    // can result in bugs if applied to buildables or missles
+#define EF_OCCUPIED         0x00040    // can result in bugs if applied to players
 
 // for missiles:
 #define EF_BOUNCE           0x00008    // for missiles
@@ -334,11 +339,6 @@ typedef enum
 #define EF_POISONCLOUDED    0x04000    // player hit with basilisk gas
 #define EF_CONNECTION       0x08000    // draw a connection trouble sprite
 #define EF_BLOBLOCKED       0x10000    // caught by a trapper
-
-// for occupation of activation entities
-#define EF_OCCUPIED         0x20000
-#define EF_OCCUPYING        0x40000
-#define EF_HOVELING         0x80000     // indicates if the entity is occupying a hovel
 
 
 /*
