@@ -1700,7 +1700,7 @@ the temporary OccupantClip condition.
 */
 void G_SetClipmask( gentity_t *ent, int clipmask )
 {
-  if( ent->activation.flags & ACTF_OCCUPY_CLIPMASK )
+  if( ent->activation.occupantFlags & ACTF_OCCUPY_CLIPMASK )
     ent->activation.unoccupiedClipMask = clipmask;
   else
   {
@@ -1718,7 +1718,7 @@ the temporary OccupantClip and noclip conditions.
 */
 void G_SetContents( gentity_t *ent, int contents )
 {
-  if( ent->activation.flags & ACTF_OCCUPY_CONTENTS )
+  if( ent->activation.occupantFlags & ACTF_OCCUPY_CONTENTS )
   {
     ent->activation.unoccupiedContents = contents;
   } else
@@ -1779,15 +1779,15 @@ void G_OccupantClip( gentity_t *occupant )
         ( !occupant->client && ( occupant->s.eFlags & EF_OCCUPYING ) ) ) )
   {
     if( ( occupant->activation.occupied->activation.flags & ACTF_OCCUPY_CLIPMASK ) &&
-        !( occupant->activation.flags & ACTF_OCCUPY_CLIPMASK ) )
+        !( occupant->activation.occupantFlags & ACTF_OCCUPY_CLIPMASK ) )
     {
       G_BackupUnoccupyClipmask( occupant );
       occupant->clipmask = occupant->activation.occupied->activation.clipMask;
-      occupant->activation.flags |= ACTF_OCCUPY_CLIPMASK;
+      occupant->activation.occupantFlags |= ACTF_OCCUPY_CLIPMASK;
     }
 
     if( ( occupant->activation.occupied->activation.flags & ACTF_OCCUPY_CONTENTS ) &&
-          !( occupant->activation.flags & ACTF_OCCUPY_CONTENTS )  )
+          !( occupant->activation.occupantFlags & ACTF_OCCUPY_CONTENTS )  )
     {
       G_BackupUnoccupyContents( occupant );
       if( occupant->client && occupant->client->noclip )
@@ -1797,24 +1797,24 @@ void G_OccupantClip( gentity_t *occupant )
         occupant->r.contents =
                              occupant->activation.occupied->activation.contents;
 
-      occupant->activation.flags |= ACTF_OCCUPY_CONTENTS;
+      occupant->activation.occupantFlags |= ACTF_OCCUPY_CONTENTS;
     }
   } else
   {
-    if( occupant->activation.flags & ACTF_OCCUPY_CLIPMASK )
+    if( occupant->activation.occupantFlags & ACTF_OCCUPY_CLIPMASK )
     {
       occupant->clipmask = occupant->activation.unoccupiedClipMask;
-      occupant->activation.flags &= ~ACTF_OCCUPY_CLIPMASK;
+      occupant->activation.occupantFlags &= ~ACTF_OCCUPY_CLIPMASK;
     }
 
-    if( occupant->activation.flags & ACTF_OCCUPY_CONTENTS )
+    if( occupant->activation.occupantFlags & ACTF_OCCUPY_CONTENTS )
     {
       if( occupant->client && occupant->client->noclip )
         occupant->client->cliprcontents = occupant->activation.unoccupiedContents;
       else
         occupant->r.contents = occupant->activation.unoccupiedContents;
 
-      occupant->activation.flags &= ~ACTF_OCCUPY_CONTENTS;
+      occupant->activation.occupantFlags &= ~ACTF_OCCUPY_CONTENTS;
     }
   }
 }

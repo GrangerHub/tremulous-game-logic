@@ -168,6 +168,8 @@ struct gentity_s
     int       flags; // Contains bit flags representing various abilities of a
                      // given activation entity.
 
+    int       occupantFlags; // Contains bit flags used by occupants
+
     pmtype_t	pm_type; // Changes client's pm_type of an occupant.
 
     int       contents; // Changes the contents of an occupant.
