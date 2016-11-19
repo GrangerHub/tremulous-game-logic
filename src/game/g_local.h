@@ -155,8 +155,7 @@ struct gentity_s
   // for activation entities
   struct activation_s
   {
-    gentity_t *occupant; // The entity that this is occupying this activation
-                         // entity.
+    gentity_t *occupant; // The entity that is occupying this activation entity
 
     gentity_t *occupantFound; // A temporary variable used in the occupying
                                // process. This can be set by (*findOccupant)().
@@ -173,12 +172,12 @@ struct gentity_s
 
     int       contents; // Changes the contents of an occupant.
 
-    int       contentsBackup; // Used to restore the contents of an occupant
+    int       unoccupiedContents; // Used to restore the contents of an occupant
                               // that leaves its occupied activation entity.
 
     int       clipMask; // Changes the clip mask of an occupant.
 
-    int       clipMaskBackup; // Used to restore the clip mask of an occupant
+    int       unoccupiedClipMask; // Used to restore the clip mask of an occupant
                               // that leaves its occupied activation entity.
 
     dynMenu_t menuMsg; // Message sent to the activator when an activation
@@ -199,7 +198,11 @@ struct gentity_s
     // activation entity.
     qboolean  (*willActivate)( gentity_t *actEnt, gentity_t *activator );
 
-    // Optional function called for leaving an occupiable activation entity.
+    // Optional custom function called to perform additional operations for
+    // occupation.
+    void (*occupy)( gentity_t *occupied );
+
+    // Optional custom function for leaving an occupiable activation entity.
     // Unless force is set to qtrue, if qfalse is returned, the entity remains
     // occupied.
     qboolean  (*unoccupy)( gentity_t *occupied, gentity_t *occupant,
@@ -973,6 +976,10 @@ void              G_UnoccupyEnt( gentity_t *occupied,
                                              // for players leaving an
                                              // occupiable activation entity.
 void              G_OccupyEnt( gentity_t *occupied );
+void              G_SetClipmask( gentity_t *ent, int clipmask );
+void              G_SetContents( gentity_t *ent, int contents );
+void              G_BackupUnoccupyClipmask( gentity_t *ent );
+void              G_BackupUnoccupyContents( gentity_t *ent );
 void              G_OccupantClip( gentity_t *occupant );
 void              G_OccupiedThink( gentity_t *occupied );
 

@@ -304,42 +304,40 @@ typedef enum
 
 // entityState_t->eFlags
 // notice that some flags are overlapped, so their meaning depends on context
-#define EF_DEAD             0x000001    // don't draw a foe marker over players with EF_DEAD
-#define EF_TELEPORT_BIT     0x000002    // toggled every time the origin abruptly changes
-#define EF_PLAYER_EVENT     0x000004    // only used for eType > ET_EVENTS
+#define EF_DEAD             0x00001    // don't draw a foe marker over players with EF_DEAD
+#define EF_TELEPORT_BIT     0x00002    // toggled every time the origin abruptly changes
+#define EF_PLAYER_EVENT     0x00004    // only used for eType > ET_EVENTS
 
 // for cleints occupying hovels
 #define EF_HOVEL_MARKED     0x0008   // tells if the hovel occupied is marked
 
 // for missiles:
-#define EF_BOUNCE           0x000008    // for missiles
-#define EF_BOUNCE_HALF      0x000010    // for missiles
-#define EF_NO_BOUNCE_SOUND  0x000020    // for missiles
+#define EF_BOUNCE           0x00008    // for missiles
+#define EF_BOUNCE_HALF      0x00010    // for missiles
+#define EF_NO_BOUNCE_SOUND  0x00020    // for missiles
 
 // buildable flags:
-#define EF_B_SPAWNED        0x000008
-#define EF_B_POWERED        0x000010
-#define EF_B_MARKED         0x000020
+#define EF_B_SPAWNED        0x00008
+#define EF_B_POWERED        0x00010
+#define EF_B_MARKED         0x00020
 
-#define EF_WARN_CHARGE      0x000020    // Lucifer Cannon is about to overcharge
-#define EF_WALLCLIMB        0x000040    // wall walking
-#define EF_WALLCLIMBCEILING 0x000080    // wall walking ceiling hack
-#define EF_NODRAW           0x000100    // may have an event, but no model (unspawned items)
-#define EF_MOVER_STOP       0x000200    // will push otherwise
-#define EF_ASTRAL_NOCLIP    0x000400    // EF_ASTRAL flagged entities don't clip with Astral entities,
-                                        // must be equal to CONTENTS_ASTRAL_NOCLIP
-#define EF_FIRING           0x000800    // for lightning gun
-#define EF_FIRING2          0x001000    // alt fire
-#define EF_FIRING3          0x002000    // third fire
-#define EF_POISONCLOUDED    0x004000    // player hit with basilisk gas
-#define EF_CONNECTION       0x008000    // draw a connection trouble sprite
-#define EF_BLOBLOCKED       0x010000    // caught by a trapper
+#define EF_WARN_CHARGE      0x00020    // Lucifer Cannon is about to overcharge
+#define EF_WALLCLIMB        0x00040    // wall walking
+#define EF_WALLCLIMBCEILING 0x00080    // wall walking ceiling hack
+#define EF_NODRAW           0x00100    // may have an event, but no model (unspawned items)
+#define EF_MOVER_STOP       0x00200    // will push otherwise
+#define EF_ASTRAL_NOCLIP    0x00400    // EF_ASTRAL flagged entities don't clip with Astral entities,
+                                      // must be equal to CONTENTS_ASTRAL_NOCLIP
+#define EF_FIRING           0x00800    // for lightning gun
+#define EF_FIRING2          0x01000    // alt fire
+#define EF_FIRING3          0x02000    // third fire
+#define EF_POISONCLOUDED    0x04000    // player hit with basilisk gas
+#define EF_CONNECTION       0x08000    // draw a connection trouble sprite
+#define EF_BLOBLOCKED       0x10000    // caught by a trapper
 
 // for occupation of activation entities
-#define EF_OCCUPIED         0x020000
-#define EF_OCCUPYING        0x040000
-#define EF_OCCUPY_CLIPMASK  0x080000    // an occupant's clipmask has been set
-#define EF_OCCUPY_CONTENTS  0x100000    // an occupant's contents has been set
+#define EF_OCCUPIED         0x20000
+#define EF_OCCUPYING        0x40000
 
 #define EF_HOVELING         0x200000     // indicates if the entity is occupying a hovel
 

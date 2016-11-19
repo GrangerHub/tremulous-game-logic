@@ -247,6 +247,7 @@ void GibEntity( gentity_t *self )
   self->takedamage = qfalse;
   self->s.eType    = ET_INVISIBLE;
   self->r.contents = 0;
+  G_BackupUnoccupyContents( self );
   self->nextthink  = 0;
 }
 
@@ -386,6 +387,8 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
     self->client->cliprcontents = CONTENTS_CORPSE;
   else
     self->r.contents = CONTENTS_CORPSE;
+
+  G_BackupUnoccupyContents( self );
 
   self->client->ps.viewangles[ PITCH ] = 0; // zomg
   self->client->ps.viewangles[ YAW ] = self->s.apos.trBase[ YAW ];
