@@ -1687,6 +1687,24 @@ qboolean AHovel_WillActivate( gentity_t *actEnt, gentity_t *activator )
 
 /*
 ================
+AHovel_Occupy
+
+called when a hovel is being entered
+================
+*/
+void AHovel_Occupy( gentity_t *occupied )
+{
+  if( !occupied->activation.occupant )
+    return;
+
+  if( occupied->activation.occupant->client )
+    occupied->activation.occupant->client->ps.eFlags |= EF_HOVELING;
+  else
+    occupied->activation.occupant->s.eFlags |= EF_HOVELING;
+}
+
+/*
+================
 AHovel_Unoccupy
 
 called to exit a hovel
@@ -4478,6 +4496,7 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
       built->activation.activate = AHovel_Activate;
       built->activation.canActivate = AHovel_CanActivate;
       built->activation.willActivate = AHovel_WillActivate;
+      built->activation.occupy = AHovel_Occupy;
       built->activation.unoccupy = AHovel_Unoccupy;
       built->activation.reset = AHovel_Reset;
       built->activation.menuMsgOvrd[ ACTMN_ACT_OCCUPIED ] = MN_A_HOVEL_OCCUPIED;

@@ -2391,13 +2391,6 @@ void ClientThink_real( gentity_t *ent )
 
     ent->suicideTime = 0;
   }
-
-  // determine the EF_HOVELING state
-  if( ( client->ps.eFlags & EF_OCCUPYING ) && ent->activation.occupied &&
-      ( ent->activation.occupied->s.modelindex == BA_A_HOVEL ) )
-    ent->s.eFlags |= EF_HOVELING;
-  else
-    ent->s.eFlags &= ~EF_HOVELING;
 }
 
 /*

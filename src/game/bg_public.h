@@ -338,8 +338,7 @@ typedef enum
 // for occupation of activation entities
 #define EF_OCCUPIED         0x20000
 #define EF_OCCUPYING        0x40000
-
-#define EF_HOVELING         0x200000     // indicates if the entity is occupying a hovel
+#define EF_HOVELING         0x80000     // indicates if the entity is occupying a hovel
 
 
 /*
