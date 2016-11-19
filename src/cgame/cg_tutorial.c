@@ -210,7 +210,7 @@ static void CG_AlienBuilderText( char *text, playerState_t *ps )
 
   if( ps->eFlags & EF_HOVELING )
   {
-    if( cgs.markDeconstruct && cgs.warmup )
+    if( cgs.markDeconstruct && !cgs.warmup )
     {
       if( ps->eFlags & EF_HOVEL_MARKED )
       {
@@ -791,6 +791,7 @@ const char *CG_TutorialText( void )
             Q_strcat( text, MAX_TUTORIAL_TEXT,
                 va( "Press %s to enter the hovel\n",
                   CG_KeyNameForCommand( "+button7" ) ) );
+            break;
           case BA_H_ARMOURY:
             Q_strcat( text, MAX_TUTORIAL_TEXT,
                 va( "Press %s to buy equipment upgrades at the %s. Sell your old weapon first!\n",

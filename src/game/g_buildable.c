@@ -1758,7 +1758,10 @@ void AHovel_Reset( gentity_t *occupied, gentity_t *occupant )
 {
   if( occupant && occupant->client )
   {
-    occupant->client->ps.eFlags &= ~EF_HOVELING;
+    if( occupant->client )
+      occupant->client->ps.eFlags &= ~EF_HOVELING;
+    else
+      occupant->s.eFlags &= ~EF_HOVELING;
   }
 
   if( occupied )
