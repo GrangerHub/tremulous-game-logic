@@ -1696,16 +1696,14 @@ qboolean AHovel_Activate( gentity_t *self, gentity_t *activator )
 {
   G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
 
-  if( self->activation.occupant->client )
+  if( self->activation.occupantFound->client )
   {
     //prevent lerping
-    self->activation.occupant->client->ps.eFlags ^= EF_TELEPORT_BIT;
-    self->activation.occupant->client->ps.eFlags |= EF_NODRAW;
-  }
-
-  G_PositionHovelsBuilder( self );
-
-  return qtrue;
+    self->activation.occupantFound->client->ps.eFlags ^= EF_TELEPORT_BIT;
+    self->activation.occupantFound->client->ps.eFlags |= EF_NODRAW;
+      return qtrue;
+  } else
+    return qfalse;
 }
 
 /*
@@ -1758,6 +1756,8 @@ void AHovel_Occupy( gentity_t *occupied )
 {
   if( !occupied->activation.occupant )
     return;
+
+  G_PositionHovelsBuilder( occupied->activation.occupant );
 
   if( occupied->activation.occupant->client )
     occupied->activation.occupant->client->ps.stats[ STAT_STATE ] |= SS_HOVELING;
