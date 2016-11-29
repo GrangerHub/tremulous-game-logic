@@ -1826,7 +1826,7 @@ void G_OccupiedThink( gentity_t *occupied )
       else if( ( occupied->activation.flags & ACTF_OCCUPY_ACTIVATE ) &&
                occupied->activation.occupant->client )
       {
-        if( occupied->s.eFlags & ACTF_OCCUPY_UNTIL_INACTIVE )
+        if( occupied->activation.flags & ACTF_OCCUPY_UNTIL_INACTIVE )
         {
           if( !G_CanActivateEntity( occupied->activation.occupant->client,
                                     occupied ) )
