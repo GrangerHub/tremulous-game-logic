@@ -272,7 +272,7 @@ typedef enum
 #define SS_HEALING_ACTIVE       0x00000400 // medistat for humans, creep for aliens
 #define SS_HEALING_2X           0x00000800 // medkit or double healing rate
 #define SS_HEALING_3X           0x00001000 // triple healing rate
-#define SS_HOVELING             0x00002000
+#define SS_HOVELING             0x00002000 // indicates if the entity is occupying a hovel
 #define SS_GRABBING             0x00004000
 
 #define SB_VALID_TOGGLEBIT      0x00004000
@@ -297,7 +297,7 @@ typedef enum
   PERS_BP,
   PERS_BP_RESERVE,
   PERS_MARKEDBP,
-  PERS_USABLE_ENT, // indicates the entity number of an entity a client can use
+  PERS_ACT_ENT, // indicates the entity number of an entity a client can activate
   PERS_JUMPTIME
     // netcode has space for 0 more
 } persEnum_t;
@@ -311,36 +311,104 @@ typedef enum
 
 // entityState_t->eFlags
 // notice that some flags are overlapped, so their meaning depends on context
-#define EF_DEAD             0x0001    // don't draw a foe marker over players with EF_DEAD
-#define EF_TELEPORT_BIT     0x0002    // toggled every time the origin abruptly changes
-#define EF_PLAYER_EVENT     0x0004    // only used for eType > ET_EVENTS
+#define EF_DEAD             0x00001    // don't draw a foe marker over players with EF_DEAD
+#define EF_TELEPORT_BIT     0x00002    // toggled every time the origin abruptly changes
+#define EF_PLAYER_EVENT     0x00004    // only used for eType > ET_EVENTS
 
 // for cleints occupying hovels
-#define EF_HOVEL_MARKED     0x0008   // tells if the hovel occupied is marked
+#define EF_HOVEL_MARKED     0x00008   // tells if the hovel occupied is marked
+
+// for occupation of activation entities
+#define EF_OCCUPYING        0x00010    // can result in bugs if applied to buildables or missles
+#define EF_OCCUPIED         0x00040    // can result in bugs if applied to players
 
 // for missiles:
-#define EF_BOUNCE           0x0008    // for missiles
-#define EF_BOUNCE_HALF      0x0010    // for missiles
-#define EF_NO_BOUNCE_SOUND  0x0020    // for missiles
+#define EF_BOUNCE           0x00008    // for missiles
+#define EF_BOUNCE_HALF      0x00010    // for missiles
+#define EF_NO_BOUNCE_SOUND  0x00020    // for missiles
 
 // buildable flags:
-#define EF_B_SPAWNED        0x0008
-#define EF_B_POWERED        0x0010
-#define EF_B_MARKED         0x0020
+#define EF_B_SPAWNED        0x00008
+#define EF_B_POWERED        0x00010
+#define EF_B_MARKED         0x00020
 
-#define EF_WARN_CHARGE      0x0020                   // Lucifer Cannon is about to overcharge
-#define EF_WALLCLIMB        0x0040                   // wall walking
-#define EF_WALLCLIMBCEILING 0x0080                   // wall walking ceiling hack
-#define EF_NODRAW           0x0100                   // may have an event, but no model (unspawned items)
-#define EF_MOVER_STOP       0x0200                   // will push otherwise
-#define EF_ASTRAL_NOCLIP    0x0400                   // EF_ASTRAL flagged entities don't clip with Astral entities,
-                                                     // must be equal to CONTENTS_ASTRAL_NOCLIP
-#define EF_FIRING           0x0800                   // for lightning gun
-#define EF_FIRING2          0x1000                   // alt fire
-#define EF_FIRING3          0x2000                   // third fire
-#define EF_POISONCLOUDED    0x4000                   // player hit with basilisk gas
-#define EF_CONNECTION       0x8000                   // draw a connection trouble sprite
-#define EF_BLOBLOCKED       0x10000                  // caught by a trapper
+#define EF_WARN_CHARGE      0x00020    // Lucifer Cannon is about to overcharge
+#define EF_WALLCLIMB        0x00040    // wall walking
+#define EF_WALLCLIMBCEILING 0x00080    // wall walking ceiling hack
+#define EF_NODRAW           0x00100    // may have an event, but no model (unspawned items)
+#define EF_MOVER_STOP       0x00200    // will push otherwise
+#define EF_ASTRAL_NOCLIP    0x00400    // EF_ASTRAL flagged entities don't clip with Astral entities,
+                                      // must be equal to CONTENTS_ASTRAL_NOCLIP
+#define EF_FIRING           0x00800    // for lightning gun
+#define EF_FIRING2          0x01000    // alt fire
+#define EF_FIRING3          0x02000    // third fire
+#define EF_POISONCLOUDED    0x04000    // player hit with basilisk gas
+#define EF_CONNECTION       0x08000    // draw a connection trouble sprite
+#define EF_BLOBLOCKED       0x10000    // caught by a trapper
+
+
+/*
+--------------------------------------------------------------------------------
+activation.flags
+*/
+#define  ACTF_TEAM                 0x0001 // A client must be on the same team
+                                          // as this entity to activate it.
+
+#define  ACTF_ENT_ALIVE            0x0002 // This entity's health must be
+                                          // greater than 0 to be activated by a
+                                          // client.
+
+#define  ACTF_PL_ALIVE             0x0004 // A player must be alive to activate
+                                          // this entity.
+
+#define  ACTF_SPAWNED              0x0008 // This entity must be spawned to be
+                                          // activated by a client.
+
+#define  ACTF_POWERED              0x0010 // This entity must be powered to be
+                                          // activated by a client.
+
+#define  ACTF_GROUND               0x0020 // A client must stand on this entity
+                                          // to activate it standing on this
+                                          // entity gives that entity higher
+                                          // preference over other nearby
+                                          // activation entities.
+
+#define  ACTF_LINE_OF_SIGHT        0x0040 // Clients must be able to have a
+                                          // MASK_DEADSOLID trace to this
+                                          // activation entity to activate it.
+
+#define  ACTF_OCCUPY               0x0080 // When clients activate this
+                                          // activation entity, they occupy the
+                                          // entity and can't activate any other
+                                          // entity while occupying.  Nor can 
+                                          //another player not occupying a given
+                                          // occupiable activation entity
+                                          // activate that entity while it is
+                                          // occupied.
+
+#define  ACTF_OCCUPY_ACTIVATE      0x0100 // Keep activating an activation
+                                          // entity while the client occupies
+                                          // it.
+
+#define ACTF_OCCUPY_UNTIL_INACTIVE 0x0200 // Unoccupy an occupant that is no
+                                          // longer activating this entity.
+                                          // Requires ACTF_OCCUPY_ACTIVATE.
+
+#define  ACTF_OCCUPY_PM_TYPE       0x0400 // change the pm_type of an occupant
+                                          // to activation.pm_type.
+
+#define  ACTF_OCCUPY_CONTENTS      0x0800 // Change the contents of an occupant
+                                          // to activation.contents.
+
+#define  ACTF_OCCUPY_CLIPMASK      0x1000 // Change the clip mask of an occupant
+                                          // to activation.clipMask.
+
+#define  ACTF_OCCUPY_RESET_OTHER   0x2000 // When an occupied activation entity
+                                          // is reset, also reset
+                                          // activation.other.
+/*
+--------------------------------------------------------------------------------
+*/
 
 
 typedef enum
@@ -674,7 +742,40 @@ typedef enum
   MN_H_ONEDCC,
   MN_H_ONEREACTOR,
   MN_H_RPTPOWERHERE,
+  MN_H_TELEPORTER_NOBSUIT,
+  MN_H_TELEPORTNODESTINATION,
+
+  // activation entity stuff
+  MN_ACT_FAILED,
+  MN_ACT_OCCUPIED,
+  MN_ACT_OCCUPYING,
+  MN_ACT_NOOCCUPANTS,
+  MN_ACT_NOEXIT,
+  MN_ACT_NOTPOWERED,
+  MN_ACT_NOTCONTROLLED,
+  MN_ACT_TELEPORTER_OCCUPIED
 } dynMenu_t;
+
+// indicies for overriding activation entity menu messages
+typedef enum
+{
+  ACTMN_ACT_FAILED,          // for general activation failure if a more
+                             // specific message isn't set.
+
+  // occupying activation entity stuff
+  ACTMN_ACT_OCCUPIED,        // this entity is fully occupied
+  ACTMN_ACT_OCCUPYING,       // the target potential occupant is occupying
+                             // another entity
+  ACTMN_ACT_NOOCCUPANTS,     // there are no target potential occupants
+  ACTMN_ACT_NOEXIT,          // the activation entity can't be exited
+
+  // this entitity must be powered to use
+  ACTMN_H_NOTPOWERED,        // humans specific
+  ACTMN_ACT_NOTCONTROLLED,   // alien specific
+  ACTMN_ACT_NOTPOWERED,      // generic
+
+  MAX_ACTMN
+} actMNOvrdIndex_t;
 
 // animations
 typedef enum
@@ -1073,7 +1174,12 @@ typedef struct
 
   int           nextthink;
   int           buildTime;
-  qboolean      usable;
+  qboolean      activationEnt;
+  int           activationFlags; // contains bit flags representing various 
+                                //abilities of a given usable entity
+  pmtype_t			activationPm_type; // changes client's pm_type of an occupant
+  int           activationContents; // changes the contents of an occupant
+  int           activationClipMask; // changes the clip mask of an occupant
 
   int           turretRange;
   int           turretFireSpeed;

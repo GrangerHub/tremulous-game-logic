@@ -647,9 +647,9 @@ void Cmd_Noclip_f( gentity_t *ent )
 {
   char  *msg;
 
-  if( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING)
+  if ( ent->client->ps.eFlags & EF_OCCUPYING )
   {
-    msg = "noclip disabled while hoveling";
+    msg = "noclip is disabled while occupying an activation entity";
   } else
   {
     if( ent->client->noclip )
@@ -668,7 +668,7 @@ void Cmd_Noclip_f( gentity_t *ent )
 
     if( ent->r.linked )
       trap_LinkEntity( ent );
-    }
+  }
 
   trap_SendServerCommand( ent - g_entities, va( "print \"%s\"", msg ) );
 }
@@ -684,13 +684,9 @@ void Cmd_Kill_f( gentity_t *ent )
 
   if( g_cheats.integer )
   {
-    // reset any hovels the player might be using
-    if( ent->client && ent->client->hovel )
-    {
-      ent->client->hovel->active = qfalse;
-      ent->client->hovel->builder = NULL;
-      ent->client->hovel = NULL;
-    }
+    // reset any activation entities the player might be occupying
+    if( ent->client->ps.eFlags & EF_OCCUPYING )
+      G_ResetActivation( ent->activation.occupied, ent );
 
     ent->client->ps.stats[ STAT_HEALTH ] = ent->health = 0;
     player_die( ent, ent, ent, 100000, MOD_SUICIDE );
@@ -2184,7 +2180,8 @@ void Cmd_Class_f( gentity_t *ent )
         return;
       }
 
-      if ( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING )
+
+      if ( ent->client->ps.eFlags & EF_OCCUPYING )
       {
         G_TriggerMenu( clientNum, MN_A_NOEROOM );
         return;
@@ -2288,7 +2285,7 @@ void Cmd_Destroy_f( gentity_t *ent )
 
   trap_Trace( &tr, viewOrigin, NULL, NULL, end, ent->s.number, MASK_PLAYERSOLID );
   if ( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING )
-    traceEnt = ent->client->hovel;
+    traceEnt = &g_entities[ ent->client->ps.persistant[ PERS_ACT_ENT ] ];
   else
     traceEnt = &g_entities[ tr.entityNum ];
 
@@ -2487,6 +2484,12 @@ void Cmd_Buy_f( gentity_t *ent )
   weapon_t  weapon;
   upgrade_t upgrade;
   qboolean  energyOnly;
+
+  if( ent->client->ps.eFlags & EF_OCCUPYING )
+  {
+    trap_SendServerCommand( ent-g_entities, "print \"You can't buy while occupying another structure\n\"" );
+    return;
+  }
 
   trap_Argv( 1, s, sizeof( s ) );
 
@@ -2689,6 +2692,12 @@ void Cmd_Sell_f( gentity_t *ent )
   int       i;
   weapon_t  weapon;
   upgrade_t upgrade;
+
+  if( ent->client->ps.eFlags & EF_OCCUPYING )
+  {
+    trap_SendServerCommand( ent-g_entities, "print \"You can't sell while occupying another structure\n\"" );
+    return;
+  }
 
   trap_Argv( 1, s, sizeof( s ) );
 
@@ -3019,7 +3028,7 @@ void Cmd_Reload_f( gentity_t *ent )
 
     trap_Trace( &tr, viewOrigin, NULL, NULL, end, ent->s.number, MASK_PLAYERSOLID );
     if ( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING )
-      traceEnt = ent->client->hovel;
+      traceEnt = &g_entities[ ent->client->ps.persistant[ PERS_ACT_ENT ] ];
     else
       traceEnt = &g_entities[ tr.entityNum ];
 

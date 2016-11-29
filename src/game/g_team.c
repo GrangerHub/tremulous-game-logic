@@ -168,13 +168,9 @@ void G_LeaveTeam( gentity_t *self )
   self->client->pers.readyToPlay = qfalse;
   self->client->ps.stats[ STAT_READY ] = self->client->pers.readyToPlay;
 
-  // reset any hovels the player might be using
-  if( self->client->hovel )
-  {
-    self->client->hovel->active = qfalse;
-    self->client->hovel->builder = NULL;
-    self->client->hovel = NULL;
-  }
+  // reset any activation entities the player might be occupying
+  if( self->client->ps.eFlags & EF_OCCUPYING )
+    G_ResetActivation( self->activation.occupied, self );
 
   for( i = 0; i < level.num_entities; i++ )
   {
@@ -238,6 +234,7 @@ void G_ChangeTeam( gentity_t *ent, team_t newTeam )
     {
       ent->client->noclip = qfalse;
       ent->r.contents = ent->client->cliprcontents;
+      G_BackupUnoccupyContents( ent );
     }
     ent->flags &= ~( FL_GODMODE | FL_NOTARGET );
   }

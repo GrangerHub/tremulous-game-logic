@@ -1660,6 +1660,7 @@ void MoveClientToIntermission( gentity_t *ent )
   ent->s.loopSound = 0;
   ent->s.event = 0;
   ent->r.contents = 0;
+  G_BackupUnoccupyContents( ent );
 }
 
 /*
@@ -2844,6 +2845,8 @@ void G_RunFrame( int levelTime )
     if( !ent->r.linked && ent->neverFree )
       continue;
 
+    G_OccupiedThink( ent );
+
     if( ent->s.eType == ET_MISSILE )
     {
       G_RunMissile( ent );
@@ -2920,4 +2923,3 @@ void G_RunFrame( int levelTime )
 
   level.frameMsec = trap_Milliseconds();
 }
-

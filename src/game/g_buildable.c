@@ -983,6 +983,7 @@ void AGeneric_Blast( gentity_t *self )
   self->nextthink = level.time + 500;
 
   self->r.contents = 0;    //stop collisions...
+  G_BackupUnoccupyContents( self );
   trap_LinkEntity( self ); //...requires a relink
 }
 
@@ -1656,18 +1657,18 @@ void G_PositionHovelsBuilder( gentity_t *self )
   vec3_t  mins, maxs;
   trace_t tr;
 
-  if( !self->builder )
+  if( !self->activation.occupant )
     return;
 
-  BG_ClassBoundingBox( self->builder->client->ps.stats[ STAT_CLASS ],
+  BG_ClassBoundingBox( self->activation.occupant->client->ps.stats[ STAT_CLASS ],
                        mins, maxs, NULL, NULL, NULL );
 
   VectorCopy( self->r.currentOrigin, hovelOrigin );
   hovelOrigin[2] += 128.0f;
 
-  trap_UnlinkEntity( self->builder );
+  trap_UnlinkEntity( self->activation.occupant );
   trap_TraceCapsule( &tr, self->r.currentOrigin, mins, maxs, hovelOrigin, self->s.number, MASK_DEADSOLID );
-  trap_LinkEntity( self->builder );
+  trap_LinkEntity( self->activation.occupant );
 
   if( tr.fraction < 1.0f )
     hovelOrigin[2] = tr.endpos[2];
@@ -1677,95 +1678,152 @@ void G_PositionHovelsBuilder( gentity_t *self )
   vectoangles( inverseNormal, hovelAngles );
   hovelAngles[YAW] = self->r.currentAngles[YAW];
 
-  VectorCopy( self->builder->r.currentOrigin, self->builder->client->hovelOrigin );
+  VectorCopy( self->activation.occupant->r.currentOrigin, self->activation.occupant->client->hovelOrigin );
 
-  G_SetOrigin( self->builder, hovelOrigin );
-  VectorCopy( hovelOrigin, self->builder->client->ps.origin );
-  G_SetClientViewAngle( self->builder, hovelAngles );
+  G_SetOrigin( self->activation.occupant, hovelOrigin );
+  VectorCopy( hovelOrigin, self->activation.occupant->client->ps.origin );
+  G_SetClientViewAngle( self->activation.occupant, hovelAngles );
 }
 
 /*
 ================
-AHovel_Use
+AHovel_Activate
 
-Called when an alien uses a hovel
+Called when an alien activates a hovel
 ================
 */
-void AHovel_Use( gentity_t *self, gentity_t *other, gentity_t *activator )
+qboolean AHovel_Activate( gentity_t *self, gentity_t *activator )
 {
-  if( self->spawned )
+  G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
+
+  if( self->activation.occupant->client )
   {
-    if( self->active )
-    {
-      if ( self->builder == activator )
-      {
-        // attempt to exit the hovel
-
-        // only let the player out if there is room
-        if ( !AHovel_Blocked( self, activator, qtrue ) )
-        {
-          // prevent lerping
-          activator->client->ps.eFlags ^= EF_TELEPORT_BIT;
-          activator->client->ps.eFlags &= ~EF_NODRAW;
-
-          // client leaves hovel
-          activator->client->ps.stats[ STAT_STATE ] &= ~SS_HOVELING;
-          self->builder = NULL;
-
-          // client is no longer astral
-          if( activator->client->noclip )
-            activator->client->cliprcontents = CONTENTS_BODY;
-          else
-            activator->r.contents = CONTENTS_BODY;
-
-          // hovel is empty
-          G_SetBuildableAnim( self, BANIM_ATTACK2, qfalse );
-          self->active = qfalse;
-        }
-        else
-        {
-          // exit is blocked
-          G_TriggerMenu(activator->client->ps.clientNum, MN_A_HOVEL_BLOCKED );
-        }
-      } else
-      {
-        //this hovel is in use
-        G_TriggerMenu( activator->client->ps.clientNum, MN_A_HOVEL_OCCUPIED );
-      }
-    }
-    else if( self->powered &&
-             BG_ClassHasAbility( activator->client->ps.stats[STAT_CLASS],
-                                 SCA_CANHOVEL ) &&
-             activator->health > 0 && self->health > 0 )
-    {
-      if( activator->client->noclip )
-      {
-        //activator has noclip on
-        G_TriggerMenu( activator->client->ps.clientNum, MN_A_HOVEL_NOCLIP );
-        return;
-      }
-
-      if( AHovel_Blocked( self, activator, qfalse ) )
-      {
-        //you can get in, but you can't get out
-        G_TriggerMenu( activator->client->ps.clientNum, MN_A_HOVEL_BLOCKED );
-        return;
-      }
-
-      self->active = qtrue;
-      G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
-
-      //prevent lerping
-      activator->client->ps.eFlags ^= EF_TELEPORT_BIT;
-      activator->client->ps.eFlags |= EF_NODRAW;
-
-      activator->client->ps.stats[ STAT_STATE ] |= SS_HOVELING;
-      activator->client->hovel = self;
-      self->builder = activator;
-
-      G_PositionHovelsBuilder( self );
-    }
+    //prevent lerping
+    self->activation.occupant->client->ps.eFlags ^= EF_TELEPORT_BIT;
+    self->activation.occupant->client->ps.eFlags |= EF_NODRAW;
   }
+
+  G_PositionHovelsBuilder( self );
+
+  return qtrue;
+}
+
+/*
+================
+AHovel_CanActivate
+
+custom restrictions on the search for a nearby hovel that can be activated
+================
+*/
+qboolean AHovel_CanActivate( gentity_t *self, gclient_t *client )
+{
+  return BG_ClassHasAbility( client->ps.stats[STAT_CLASS], SCA_CANHOVEL );
+}
+
+/*
+================
+AHovel_WillActivate
+
+custom restrictions called to determine if a hovel will be activated
+================
+*/
+qboolean AHovel_WillActivate( gentity_t *actEnt, gentity_t *activator )
+{
+  if( actEnt->activation.occupantFound->client &&
+      actEnt->activation.occupantFound->client->noclip )
+  {
+    //activator has noclip on
+    activator->activation.menuMsg = MN_A_HOVEL_NOCLIP;
+    return qfalse;
+  }
+
+  if( AHovel_Blocked( actEnt, actEnt->activation.occupantFound, qfalse ) )
+  {
+    //you can get in, but you can't get out
+    activator->activation.menuMsg = MN_A_HOVEL_BLOCKED;
+    return qfalse;
+  }
+
+  return qtrue;
+}
+
+/*
+================
+AHovel_Occupy
+
+called when a hovel is being entered
+================
+*/
+void AHovel_Occupy( gentity_t *occupied )
+{
+  if( !occupied->activation.occupant )
+    return;
+
+  if( occupied->activation.occupant->client )
+    occupied->activation.occupant->client->ps.stats[ STAT_STATE ] |= SS_HOVELING;
+}
+
+/*
+================
+AHovel_Unoccupy
+
+called to exit a hovel
+================
+*/
+qboolean  AHovel_Unoccupy( gentity_t *occupied, gentity_t *occupant,
+                           gentity_t *activator, qboolean force )
+{
+  if( force )
+  {
+    vec3_t    newOrigin;
+    vec3_t    newAngles;
+
+    VectorCopy( occupied->r.currentAngles, newAngles );
+    newAngles[ ROLL ] = 0;
+
+    VectorCopy( occupied->r.currentOrigin, newOrigin );
+    VectorMA( newOrigin, 1.0f, occupied->s.origin2, newOrigin );
+
+    //prevent lerping
+    occupant->client->ps.eFlags ^= EF_TELEPORT_BIT;
+    occupant->client->ps.eFlags &= ~EF_NODRAW;
+
+    G_SetOrigin( occupant, newOrigin );
+    VectorCopy( newOrigin, occupant->client->ps.origin );
+    G_SetClientViewAngle( occupant, newAngles );
+
+    return qtrue;
+  }
+
+  // only let the player out if there is room
+  if ( !AHovel_Blocked( occupied, occupant, qtrue ) )
+  {
+    // prevent lerping
+    occupant->client->ps.eFlags ^= EF_TELEPORT_BIT;
+    occupant->client->ps.eFlags &= ~EF_NODRAW;
+    return qtrue;
+  }
+
+  return qfalse;
+}
+
+/*
+================
+AHovel_Reset
+
+called to exit a hovel
+================
+*/
+void AHovel_Reset( gentity_t *occupied, gentity_t *occupant )
+{
+  if( occupant && occupant->client )
+  {
+    if( occupant->client )
+      occupant->client->ps.stats[ STAT_STATE ] &= ~SS_HOVELING;
+  }
+
+  if( occupied )
+    G_SetBuildableAnim( occupied, BANIM_ATTACK2, qfalse );
 }
 
 /*
@@ -1821,41 +1879,6 @@ void AHovel_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
     self->timestamp = level.time;
     self->think = AGeneric_CreepRecede;
     self->nextthink = level.time + 500; //wait .5 seconds before damaging others
-  }
-  
-
-  //if the hovel is occupied free the occupant
-  if( self->active )
-  {
-    gentity_t *builder = self->builder;
-    vec3_t    newOrigin;
-    vec3_t    newAngles;
-
-    VectorCopy( self->r.currentAngles, newAngles );
-    newAngles[ ROLL ] = 0;
-
-    VectorCopy( self->r.currentOrigin, newOrigin );
-    VectorMA( newOrigin, 1.0f, self->s.origin2, newOrigin );
-
-    //prevent lerping
-    builder->client->ps.eFlags ^= EF_TELEPORT_BIT;
-    builder->client->ps.eFlags &= ~EF_NODRAW;
-
-    G_SetOrigin( builder, newOrigin );
-    VectorCopy( newOrigin, builder->client->ps.origin );
-    G_SetClientViewAngle( builder, newAngles );
-
-    //client leaves hovel
-    builder->client->ps.stats[ STAT_STATE ] &= ~SS_HOVELING;
-    self->active = qfalse;
-    builder->client->hovel = NULL;
-    self->builder = NULL;
-
-    // client is no longer astral
-    if( builder->client->noclip )
-      builder->client->cliprcontents = CONTENTS_BODY;
-    else
-      builder->r.contents = CONTENTS_BODY;
   }
 
   self->r.contents = 0;    //stop collisions...
@@ -2331,13 +2354,9 @@ adds a teleporter to the teleporter linked list
 */
 static void G_AddTeleporter( gentity_t *self )
 {
-  self->nextTeleporter = level.teleporters;
+  self->teleportation.next = level.teleporters;
   level.teleporters = self;
-  self->teleporterActivated = -1;
-  self->teleporterActivator = ENTITYNUM_NONE;
-  self->teleporterCoolDown = -1;
-  self->destinationTeleporter = NULL;
-  self->originTeleporter = NULL;
+  self->teleportation.coolDown = -1;
 
   return;
 }
@@ -2362,140 +2381,138 @@ void G_RemoveTeleporter( gentity_t *self )
   // check if the teleporter is first in the teleporter linked list
   if( search == self )
   {
-    level.teleporters = self->nextTeleporter;
+    level.teleporters = self->teleportation.next;
     return;
   }
 
-  while( search->nextTeleporter != self )
+  while( search->teleportation.next != self )
   {
-    if( !search->nextTeleporter )
+    if( !search->teleportation.next )
       // this teleporter isn't in the teleporter linked list
       return;
 
-    search = search->nextTeleporter;
-  }
-
-  // the teleporter is active, deactivate the origin/destination teleporter
-  if( self->teleporterActivated >= level.time )
-  {
-    if( self->originTeleporter &&
-        self->originTeleporter->destinationTeleporter == self )
-    {
-      self->originTeleporter->teleporterActivated = -1;
-      self->originTeleporter->teleporterActivator = ENTITYNUM_NONE;
-      self->originTeleporter->destinationTeleporter = NULL;
-    }
-    
-    if( self->destinationTeleporter &&
-        self->destinationTeleporter->originTeleporter == self )
-    {
-      self->destinationTeleporter->teleporterActivated = -1;
-      self->destinationTeleporter->teleporterActivator = ENTITYNUM_NONE;
-      self->destinationTeleporter->originTeleporter = NULL;
-    }
+    search = search->teleportation.next;
   }
   
   // remove the teleporter
-  search->nextTeleporter = self->nextTeleporter;
+  search->teleportation.next = self->teleportation.next;
 
   return;
 }
 
 /*
 ================
-G_DeactivateTeleporter
+HTeleporter_Occupy
 
-Deactivates a given teleporter and its destination teleporter is one exists
+Occupies the destination teleporter with the activator of the origin teleporter
 ================
 */
-void G_DeactivateTeleporter( gentity_t *self )
+void HTeleporter_Occupy( gentity_t *occupied )
 {
-  self->teleporterActivated = -1;
-  self->teleporterActivator = ENTITYNUM_NONE;
-
-  if( self->destinationTeleporter &&
-      self->destinationTeleporter->originTeleporter == self )
-  {
-    self->destinationTeleporter->attemptSpawnTime = -1;
-    self->destinationTeleporter->teleporterActivated = -1;
-    self->destinationTeleporter->teleporterActivator = ENTITYNUM_NONE;
-    self->destinationTeleporter->originTeleporter = NULL;
-    self->destinationTeleporter = NULL;
-  }
-
-  return;
+  occupied->activation.other->activation.occupant = occupied->activation.occupant;
+  occupied->activation.other->activation.other = occupied;
+  occupied->activation.other->s.eFlags |= EF_OCCUPIED;
 }
 
 /*
 ================
-G_ActivateTeleporter
+HTeleporter_Activate
 
-Activates a given teleporter and its destination teleporter is one exists
+Called when a human uses a teleporter
 ================
 */
-static void G_ActivateTeleporter( gentity_t *self, gentity_t *activator )
+qboolean HTeleporter_Activate( gentity_t *self, gentity_t *activator )
 {
-  self->teleporterActivated = level.time + 1000;
-  self->teleporterActivator = activator->s.number;
+  
+    vec3_t    angles;
 
-  if( self->destinationTeleporter )
-  {
-    self->destinationTeleporter->teleporterActivated = level.time + 1000;
-    self->destinationTeleporter->teleporterActivator = activator->s.number;
-    self->destinationTeleporter->originTeleporter = self;
-  }
+    if( ( self->activation.other->s.eFlags & EF_OCCUPIED ) &&
+        self->activation.other->activation.occupant != self->activation.occupant )
+    {
+      trap_SendServerCommand( activator - g_entities,
+                              "cp \"^3Destination teleporter currently in use! Please stand by for teleportation!\"");
+      return qtrue;
+    }
 
+    if( self->teleportation.coolDown >= level.time ||
+        self->activation.other->teleportation.coolDown >= level.time )
+    {
+      trap_SendServerCommand( activator - g_entities,
+                              "cp \"^3Teleporters cooling down! Please stand by for teleportation!\"");
+      return qtrue;
+    }
+
+    if( self->teleportation.blocker && self->teleportation.blocker->client )
+    {
+      self->activation.other->attemptSpawnTime = level.time + 1000;
+      trap_SendServerCommand( activator - g_entities,
+                              "cp \"^3Removing a blocker! Please stand by for teleportation!\"");
+      return qtrue;
+    }
+
+    VectorCopy( self->activation.other->r.currentAngles, angles );
+    angles[ ROLL ] = 0;
+    angles[ YAW ] += 180.0f;
+    AngleNormalize360( angles[ YAW ] );
+
+    // teleport the player
+    G_SetBuildableAnim( self, BANIM_SPAWN1, qtrue );
+    G_SetBuildableAnim( self->activation.other, BANIM_SPAWN1, qtrue );
+    self->activation.occupant->noTelefrag = qtrue;
+    self->activation.occupant->client->ps.weaponTime += 200;
+    TeleportPlayer( self->activation.occupant,
+                    self->teleportation.destinationPoint, angles, 0.0f );
+
+    self->teleportation.coolDown = level.time + HTELEPORTER_COOLDOWN_TIME;
+    self->activation.other->teleportation.coolDown = level.time + HTELEPORTER_COOLDOWN_TIME;
+      
+    return qfalse;
 }
 
 /*
 ================
-G_TryTeleporter
+HTeleporter_WillActivate
 
-Attempt to teleport to an operational destination teleporter
 ================
 */
-void G_TryTeleporter( gentity_t *self, gentity_t *other, gentity_t *activator )
+qboolean HTeleporter_WillActivate( gentity_t *actEnt, gentity_t *activator )
 {
-  gentity_t *blocker, *search;
-  vec3_t    origin, angles;
-
-  if( !self->spawned )
-    return;
-
-  if( self->health <= 0 )
-    return;
-
-  if( !self->powered )
-    return;
-
-  if( self->s.groundEntityNum == ENTITYNUM_NONE )
-    return;
-
-  if( !activator->client || activator->client->pers.teamSelection != TEAM_HUMANS ||
-      !other->client || other->client->pers.teamSelection != TEAM_HUMANS )
-    return;
-
   if( activator->client->pers.classSelection == PCL_HUMAN_BSUIT )
   {
-    trap_SendServerCommand( activator - g_entities,
-                            "cp \"^1Battle suits can't use this teleporter!\"" );
-    return;
+    // Battle suits can't use this teleporter!
+    activator->activation.menuMsg = MN_H_TELEPORTER_NOBSUIT;
+    actEnt->activation.other = NULL;
+    return qfalse;
   }
 
-  if( self->teleporterActivator != activator->s.number &&
-      self->teleporterActivated >= level.time )
+  if( !actEnt->activation.other )
   {
-    trap_SendServerCommand( activator - g_entities,
-                            "cp \"^1This teleporter is currently in use! Try again later!\"");
-    return;
+    // There are no operational destination teleporters available!
+    activator->activation.menuMsg = MN_H_TELEPORTNODESTINATION;
+    return qfalse;
   }
 
-  self->destinationTeleporter = blocker = NULL;
+  return qtrue;
+}
+
+/*
+================
+HTeleporter_FindOther
+
+Finds a destination teleporter for a teleporter being activated
+================
+*/
+void HTeleporter_FindOther(gentity_t *actEnt, gentity_t *activator )
+{
+  gentity_t *search;
+  actEnt->activation.other = actEnt->teleportation.blocker = NULL;
 
   // find an operational destination teleporter
-  for( search = ( self->nextTeleporter  ) ? self->nextTeleporter : level.teleporters;
-       !self->destinationTeleporter && ( search != self );
-       search = ( search->nextTeleporter ) ? search->nextTeleporter : level.teleporters )
+  for( search = ( actEnt->teleportation.next  ) ?
+                actEnt->teleportation.next : level.teleporters;
+       !actEnt->activation.other && ( search != actEnt );
+       search = ( search->teleportation.next ) ?
+       search->teleportation.next : level.teleporters )
   {
     if( !search->spawned )
       continue;
@@ -2509,109 +2526,16 @@ void G_TryTeleporter( gentity_t *self, gentity_t *other, gentity_t *activator )
     if( search->s.groundEntityNum == ENTITYNUM_NONE )
       continue;
 
-    if( ( blocker = G_CheckSpawnPoint( search->s.number, search->r.currentOrigin,
-          search->s.origin2, BA_H_TELEPORTER, origin ) ) != NULL && !blocker->client )
+    if( ( actEnt->teleportation.blocker = G_CheckSpawnPoint( search->s.number,
+                                                       search->r.currentOrigin,
+          search->s.origin2, BA_H_TELEPORTER,
+          actEnt->teleportation.destinationPoint ) ) !=
+                                    NULL && !actEnt->teleportation.blocker->client )
       continue;
 
-    self->destinationTeleporter = search;
-  }
-
-  if( !self->destinationTeleporter )
-  {
-    trap_SendServerCommand( activator - g_entities,
-                            "cp \"^1There are no operational destination teleporters available!\"" );
-    return;
-  }
-
-  if( self->destinationTeleporter->teleporterActivator != activator->s.number &&
-      self->destinationTeleporter->teleporterActivated >= level.time )
-  {
-    G_ActivateTeleporter( self, activator );
-    trap_SendServerCommand( activator - g_entities,
-                            "cp \"^3Destination teleporter currently in use! Please stand by for teleportation!\"");
-  } else if( self->teleporterCoolDown >= level.time ||
-      self->destinationTeleporter->teleporterCoolDown >= level.time )
-  {
-    G_ActivateTeleporter( self, activator );
-    trap_SendServerCommand( activator - g_entities,
-                            "cp \"^3Teleporters cooling down! Please stand by for teleportation!\"");
-  } else if( blocker && blocker->client )
-  {
-    G_ActivateTeleporter( self, activator );
-    self->destinationTeleporter->attemptSpawnTime = level.time + 1000;
-    trap_SendServerCommand( activator - g_entities,
-                            "cp \"^3Removing a blocker! Please stand by for teleportation!\"");
-  } else
-  {
-
-    VectorCopy( self->destinationTeleporter->r.currentAngles, angles );
-    angles[ ROLL ] = 0;
-    angles[ YAW ] += 180.0f;
-    AngleNormalize360( angles[ YAW ] );
-
-    // teleport the player
-    G_SetBuildableAnim( self, BANIM_SPAWN1, qtrue );
-    G_SetBuildableAnim( self->destinationTeleporter, BANIM_SPAWN1, qtrue );
-    other->noTelefrag = qtrue;
-    other->client->ps.weaponTime += 200;
-    TeleportPlayer( other, origin, angles, 0.0f );
-
-    self->teleporterCoolDown = level.time + HTELEPORTER_COOLDOWN_TIME;
-    self->destinationTeleporter->teleporterCoolDown = level.time + HTELEPORTER_COOLDOWN_TIME;
-    
-    G_DeactivateTeleporter( self );
-  }
-
-  return;
-}
-
-/*
-================
-HTeleporter_Use
-
-Called when a human uses a teleporter
-================
-*/
-void HTeleporter_Use (gentity_t *self, gentity_t *other, gentity_t *activator)
-{
-  if( self->teleporterActivated >= level.time &&
-      self->teleporterActivator == activator->s.number )
-    G_DeactivateTeleporter( self );
-  else
-    G_TryTeleporter( self, other, activator );
-    
-  return;
-}
-
-/*
-================
-HTeleporter_Think
-
-Think for human teleporters
-================
-*/
-void HTeleporter_Think( gentity_t *self )
-{
-  HSpawn_Think( self );
-  
-  if( ( self->teleporterActivated >= level.time ) &&
-      self->powered &&
-      self->teleporterActivator !=  ENTITYNUM_NONE &&
-      ( g_entities[ self->teleporterActivator ].client->ps.groundEntityNum ==
-        self->s.number ) )
-  {
-    gentity_t *activator = &g_entities[ self->teleporterActivator ];
-    //other and activator are the same in this context( self, gentity_t *other, gentity_t *activator )
-    G_TryTeleporter( self, activator, activator );
-  } else if( self->destinationTeleporter &&
-             ( self->destinationTeleporter->originTeleporter ==
-               self ) )
-  {
-    G_DeactivateTeleporter( self );
+    actEnt->activation.other = search;
   }
 }
-
-
 
 
 //==================================================================================
@@ -2720,18 +2644,33 @@ void HRepeater_Think( gentity_t *self )
 
 /*
 ================
-HRepeater_Use
+HRepeater_Activate
 
 Use for human power repeater
 ================
 */
-void HRepeater_Use( gentity_t *self, gentity_t *other, gentity_t *activator )
+qboolean HRepeater_Activate( gentity_t *self, gentity_t *activator )
 {
-  if( self->health <= 0 || !self->spawned )
-    return;
+  if( self->activation.other && self->activation.other->client )
+    G_GiveClientMaxAmmo( self->activation.other, qtrue );
 
-  if( other && other->client )
-    G_GiveClientMaxAmmo( other, qtrue );
+  return qfalse;
+}
+
+/*
+================
+HRepeater_CanActivate
+
+Custom canActivate for human power repeater
+================
+*/
+qboolean HRepeater_CanActivate( gentity_t *self, gclient_t *client )
+{
+  if( !BG_Weapon( client->ps.weapon )->usesEnergy ||
+      BG_Weapon( client->ps.weapon )->infiniteAmmo )
+    return qfalse;
+  else
+    return qtrue;
 }
 
 /*
@@ -2823,20 +2762,11 @@ HArmoury_Activate
 Called when a human activates an Armoury
 ================
 */
-void HArmoury_Activate( gentity_t *self, gentity_t *other, gentity_t *activator )
+qboolean HArmoury_Activate( gentity_t *self, gentity_t *activator )
 {
-  if( self->spawned )
-  {
-    //only humans can activate this
-    if( activator->client->ps.stats[ STAT_TEAM ] != TEAM_HUMANS )
-      return;
+  G_TriggerMenu( activator->client->ps.clientNum, MN_H_ARMOURY );
 
-    //if this is powered then call the armoury menu
-    if( self->powered )
-      G_TriggerMenu( activator->client->ps.clientNum, MN_H_ARMOURY );
-    else
-      G_TriggerMenu( activator->client->ps.clientNum, MN_H_NOTPOWERED );
-  }
+  return qfalse;
 }
 
 /*
@@ -3893,8 +3823,8 @@ void G_BuildableThink( gentity_t *ent, int msec )
 
   // Set flags
   ent->s.eFlags &= ~( EF_B_POWERED | EF_B_SPAWNED | EF_B_MARKED );
-  if( ent->builder && ent->builder->client)
-    ent->builder->client->ps.eFlags &= ~( EF_HOVEL_MARKED );
+  if( ent->activation.occupant && ent->activation.occupant->client)
+    ent->activation.occupant->client->ps.eFlags &= ~( EF_HOVEL_MARKED );
   
   if( ent->powered )
     ent->s.eFlags |= EF_B_POWERED;
@@ -3904,8 +3834,8 @@ void G_BuildableThink( gentity_t *ent, int msec )
 
   if( ent->deconstruct )
   {
-    if( ent->builder && ent->builder->client)
-      ent->builder->client->ps.eFlags |= EF_HOVEL_MARKED;
+    if( ent->activation.occupant && ent->activation.occupant->client)
+      ent->activation.occupant->client->ps.eFlags |= EF_HOVEL_MARKED;
       
     ent->s.eFlags |= EF_B_MARKED;
   }
@@ -4833,6 +4763,11 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
   built->splashMethodOfDeath = BG_Buildable( buildable )->meansOfDeath;
 
   built->nextthink = BG_Buildable( buildable )->nextthink;
+  
+  built->activation.flags = BG_Buildable( buildable )->activationFlags;
+  built->activation.pm_type = BG_Buildable( buildable )->activationPm_type;
+  built->activation.contents = BG_Buildable( buildable )->activationContents;
+  built->activation.clipMask = BG_Buildable( buildable )->activationClipMask;
 
   built->takedamage = qtrue;
   built->spawned = qfalse;
@@ -4900,7 +4835,14 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
 
     case BA_A_HOVEL:
       built->die = AHovel_Die;
-      built->use = AHovel_Use;
+      built->activation.activate = AHovel_Activate;
+      built->activation.canActivate = AHovel_CanActivate;
+      built->activation.willActivate = AHovel_WillActivate;
+      built->activation.occupy = AHovel_Occupy;
+      built->activation.unoccupy = AHovel_Unoccupy;
+      built->activation.reset = AHovel_Reset;
+      built->activation.menuMsgOvrd[ ACTMN_ACT_OCCUPIED ] = MN_A_HOVEL_OCCUPIED;
+      built->activation.menuMsgOvrd[ ACTMN_ACT_NOEXIT ] = MN_A_HOVEL_BLOCKED;
       built->think = AHovel_Think;
       built->pain = AGeneric_Pain;
       break;
@@ -4924,8 +4866,12 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
 
     case BA_H_TELEPORTER:
       built->die = HSpawn_Die;
-      built->think = HTeleporter_Think;
-      built->use = HTeleporter_Use;
+      built->think = HSpawn_Think;
+      built->activation.activate = HTeleporter_Activate;
+      built->activation.willActivate = HTeleporter_WillActivate;
+      built->activation.occupy = HTeleporter_Occupy;
+      built->activation.findOther = HTeleporter_FindOther;
+      built->activation.menuMsgOvrd[ ACTMN_ACT_OCCUPIED ] = MN_ACT_TELEPORTER_OCCUPIED;
       break;
 
     case BA_H_MGTURRET:
@@ -4941,7 +4887,7 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
     case BA_H_ARMOURY:
       built->think = HArmoury_Think;
       built->die = HSpawn_Die;
-      built->use = HArmoury_Activate;
+      built->activation.activate = HArmoury_Activate;
       break;
 
     case BA_H_DCC:
@@ -4957,14 +4903,16 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
     case BA_H_REACTOR:
       built->think = HReactor_Think;
       built->die = HSpawn_Die;
-      built->use = HRepeater_Use;
+      built->activation.activate = HRepeater_Activate;
+      built->activation.canActivate = HRepeater_CanActivate;
       built->powered = built->active = qtrue;
       break;
 
     case BA_H_REPEATER:
       built->think = HRepeater_Think;
       built->die = HRepeater_Die;
-      built->use = HRepeater_Use;
+      built->activation.activate = HRepeater_Activate;
+      built->activation.canActivate = HRepeater_CanActivate;
       built->count = -1;
       break;
 
@@ -4973,8 +4921,8 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
       break;
   }
 
-  built->r.contents = CONTENTS_BODY;
-  built->clipmask = MASK_PLAYERSOLID;
+  G_SetContents( built, CONTENTS_BODY );
+  G_SetClipmask( built, MASK_PLAYERSOLID );
   built->enemy = NULL;
   built->s.weapon = BG_Buildable( buildable )->turretProjType;
 
@@ -5834,6 +5782,10 @@ void G_BuildLogRevert( int id )
             if( ent->s.modelindex == BA_H_TELEPORTER )
               G_RemoveTeleporter( ent );
             G_RemoveRangeMarkerFrom( ent );
+            if( ( ent->activation.flags & ACTF_OCCUPY ) &&
+                ( ent->s.eFlags & EF_OCCUPIED ) &&
+                ent->activation.occupant && ent->activation.occupant->client )
+              G_UnoccupyEnt( ent, ent->activation.occupant, ent->activation.occupant, qtrue );
             G_FreeEntity( ent );
             break;
           }

@@ -152,6 +152,87 @@ struct gentity_s
   void              (*pain)( gentity_t *self, gentity_t *attacker, int damage );
   void              (*die)( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod );
 
+  // for activation entities
+  struct activation_s
+  {
+    gentity_t *occupant; // The entity that is occupying this activation entity
+
+    gentity_t *occupantFound; // A temporary variable used in the occupying
+                               // process. This can be set by (*findOccupant)().
+
+    gentity_t *occupied; // The activation entity that is being considered.
+
+    gentity_t *other;  // An optional additional entity involved in the
+                       // activation.
+
+    int       flags; // Contains bit flags representing various abilities of a
+                     // given activation entity.
+
+    int       occupantFlags; // Contains bit flags used by occupants
+
+    pmtype_t	pm_type; // Changes client's pm_type of an occupant.
+
+    int       contents; // Changes the contents of an occupant.
+
+    int       unoccupiedContents; // Used to restore the contents of an occupant
+                              // that leaves its occupied activation entity.
+
+    int       clipMask; // Changes the clip mask of an occupant.
+
+    int       unoccupiedClipMask; // Used to restore the clip mask of an occupant
+                              // that leaves its occupied activation entity.
+
+    dynMenu_t menuMsg; // Message sent to the activator when an activation
+                       // fails.  Can be used in (*willActivate)().
+
+    dynMenu_t menuMsgOvrd[ MAX_ACTMN ]; // Used to override the general
+                                        // activation menu messages.
+
+    // If qture is returned, an occupiable activation entity would then be
+    // occupied.
+    qboolean  (*activate)( gentity_t *self, gentity_t *activator );
+
+    // Optional custom restrictions on the search for a nearby activation entity
+    // that the general activation.flags don't address.
+    qboolean  (*canActivate)( gentity_t *self, gclient_t *client );
+
+    // Optional custom restrictions on the actual activation of a nearby found
+    // activation entity.
+    qboolean  (*willActivate)( gentity_t *actEnt, gentity_t *activator );
+
+    // Optional custom function called to perform additional operations for
+    // occupation.
+    void (*occupy)( gentity_t *occupied );
+
+    // Optional custom function for leaving an occupiable activation entity.
+    // Unless force is set to qtrue, if qfalse is returned, the entity remains
+    // occupied.
+    qboolean  (*unoccupy)( gentity_t *occupied, gentity_t *occupant,
+                           gentity_t *activator, qboolean force );
+
+    // Optional custom reset for occupiable activation entities.
+    void      (*reset)( gentity_t *occupied, gentity_t *occupant );
+
+    // Optional custom conditions that would force a client to unoccupy if qtrue
+    // is returned.
+    qboolean  (*occupyUntil)( gentity_t *occupied, gentity_t *occupant );
+
+    // Optional funtion to find an occupant which isn't the activator.
+    void      (*findOccupant)( gentity_t *actEnt, gentity_t *activator );
+
+    // Optional function that returns another entity involved in the activation.
+    void      (*findOther)(gentity_t *actEnt, gentity_t *activator );
+  } activation;
+
+  // used by buildable teleporters
+  struct teleportation_s
+  {
+    gentity_t *next;    // for linking human teleporter buildables
+    gentity_t *blocker;  // an entity that is blocking the destination teleporter
+    vec3_t    destinationPoint;
+    int       coolDown; // cool down time before this teleporter can be used again
+  } teleportation;
+
   int               pain_debounce_time;
   int               last_move_time;
 
@@ -190,7 +271,6 @@ struct gentity_s
   team_t            buildableTeam;      // buildable item team
   gentity_t         *parentNode;        // for creep and defence/spawn dependencies
   gentity_t         *rangeMarker;
-  gentity_t         *nextTeleporter;    // for linking human teleporter buildables
   qboolean          active;             // for power repeater, but could be useful elsewhere
   qboolean          powered;            // for human buildables
   int               batteryPower;       // amount of time a human buildable can remain powered
@@ -214,11 +294,6 @@ struct gentity_s
   int               clientSpawnTime;    // the time until this spawn can spawn a client
   int               spawnBlockTime;     // timer for anti spawn block
   int               attemptSpawnTime;   // timer for attempting to spawn
-  int               teleporterActivated;// timer for indicating if a teleporter is in use
-  int               teleporterActivator;// the number of the entity that is currently using this teleporter
-  gentity_t         *destinationTeleporter;
-  gentity_t         *originTeleporter;
-  int               teleporterCoolDown; // cool down time before this teleporter can be used again
   qboolean          noTelefrag;         // don't telefrag at the next time you teleport
 
   qboolean          lev1Grabbed;        //TA: for turrets interacting with lev1s
@@ -232,7 +307,6 @@ struct gentity_s
   int               turretFireSpeedMod; // modification of the turret fire speed
 
   vec4_t            animation;          // animated map objects
-  gentity_t         *builder;           // occupant of this hovel
 
   qboolean          nonSegModel;        // this entity uses a nonsegmented player model
 
@@ -443,7 +517,6 @@ struct gclient_s
   int                 time10000;        // timer for ten second interval events
 
   char                *areabits;
-  gentity_t           *hovel;           // body that is being infested. must be persistant
   vec3_t              hovelOrigin;          // player origin before entering hovel
 
   int                 lastSuffocationTime;
@@ -849,12 +922,12 @@ gentity_t         *G_CheckSpawnPoint( int spawnNum, const vec3_t origin,
                                       vec3_t spawnOrigin );
 
 void              G_RemoveTeleporter( gentity_t *self );
-void              G_DeactivateTeleporter( gentity_t *self );
-void              G_TryTeleporter( gentity_t *self, gentity_t *other,
-                                   gentity_t *activator );
-void              HTeleporter_Use (gentity_t *self, gentity_t *other,
-                                   gentity_t *activator);
-void              HTeleporter_Think( gentity_t *self );
+void              HTeleporter_Occupy( gentity_t *occupied );
+qboolean          HTeleporter_Activate( gentity_t *self, gentity_t *activator );
+qboolean          HTeleporter_WillActivate( gentity_t *actEnt,
+                                            gentity_t *activator );
+void              HTeleporter_FindOther(gentity_t *actEnt,
+                                        gentity_t *activator );
 
 buildable_t       G_IsPowered( vec3_t origin );
 qboolean          G_IsDCCBuilt( void );
@@ -877,6 +950,7 @@ void              AHive_Think( gentity_t *self );
 void              ATrapper_Think( gentity_t *self );
 void              HSpawn_Think( gentity_t *self );
 void              HRepeater_Think( gentity_t *self );
+qboolean          HRepeater_CanActivate( gentity_t *self, gclient_t *client );
 void              HReactor_Think( gentity_t *self );
 void              HArmoury_Think( gentity_t *self );
 void              HDCC_Think( gentity_t *self );
@@ -911,12 +985,40 @@ gentity_t         *G_RepeaterEntityForPoint( vec3_t origin );
 gentity_t         *G_InPowerZone( gentity_t *self );
 buildLog_t        *G_BuildLogNew( gentity_t *actor, buildFate_t fate );
 void              G_BuildLogSet( buildLog_t *log, gentity_t *ent );
-void              G_BuildLogAuto( gentity_t *actor, gentity_t *buildable, buildFate_t fate );
+void              G_BuildLogAuto( gentity_t *actor, gentity_t *buildable,
+                                                    buildFate_t fate );
 void              G_BuildLogRevert( int id );
 void              G_RemoveRangeMarkerFrom( gentity_t *self );
 void              G_UpdateBuildableRangeMarkers( void );
 qboolean          AHovel_Blocked( gentity_t *hovel, gentity_t *player, qboolean provideExit );
 void              G_PositionHovelsBuilder( gentity_t *self );
+
+// activation entities functions
+qboolean          G_CanActivateEntity( gclient_t *client, gentity_t *ent );
+void              G_OvrdActMenuMsg( gentity_t *activator,
+                                    actMNOvrdIndex_t index,
+                                    dynMenu_t defaultMenu );
+qboolean          G_WillActivateEntity( gentity_t *actEnt,
+                                        gentity_t *activator );
+void              G_ActivateEntity( gentity_t *actEnt, gentity_t *activator );
+void              G_ResetActivation( gentity_t *occupied,
+                                     gentity_t *occupant ); // is called to reset
+                                       // an occupiable activation entity and
+                                       // its occupant.  Serves as a general
+                                       //  wrapper for (*activation.reset)()
+void              G_UnoccupyEnt( gentity_t *occupied,
+                                           gentity_t *occupant,
+                                           gentity_t *activator,
+                                           qboolean force ); // wrapper called
+                                             // for players leaving an
+                                             // occupiable activation entity.
+void              G_OccupyEnt( gentity_t *occupied );
+void              G_SetClipmask( gentity_t *ent, int clipmask );
+void              G_SetContents( gentity_t *ent, int contents );
+void              G_BackupUnoccupyClipmask( gentity_t *ent );
+void              G_BackupUnoccupyContents( gentity_t *ent );
+void              G_OccupantClip( gentity_t *occupant );
+void              G_OccupiedThink( gentity_t *occupied );
 
 //
 // g_utils.c

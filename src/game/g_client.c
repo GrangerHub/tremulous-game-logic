@@ -480,8 +480,8 @@ static void SpawnCorpse( gentity_t *ent )
   body->s.eType = ET_CORPSE;
   body->timestamp = level.time;
   body->s.event = 0;
-  body->r.contents = CONTENTS_CORPSE;
-  body->clipmask = MASK_DEADSOLID;
+  G_SetContents( body, CONTENTS_CORPSE );
+  G_SetClipmask( body, MASK_DEADSOLID );
   body->s.clientNum = ent->client->ps.stats[ STAT_CLASS ];
   body->nonSegModel = ent->client->ps.persistant[ PERS_STATE ] & PS_NONSEGMODEL;
 
@@ -1396,14 +1396,11 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   ent->client = &level.clients[ index ];
   ent->takedamage = qtrue;
   ent->classname = "player";
-  if( client->noclip )
-    client->cliprcontents = CONTENTS_BODY;
-  else
-    ent->r.contents = CONTENTS_BODY;
+  G_SetContents( ent, CONTENTS_BODY);
   if( client->pers.teamSelection == TEAM_NONE )
-    ent->clipmask = MASK_ASTRALSOLID;
+    G_SetClipmask( ent, MASK_ASTRALSOLID );
   else
-    ent->clipmask = MASK_PLAYERSOLID;
+    G_SetClipmask( ent, MASK_PLAYERSOLID );
   ent->die = player_die;
   ent->waterlevel = 0;
   ent->watertype = 0;

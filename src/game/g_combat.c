@@ -275,6 +275,7 @@ void GibEntity( gentity_t *self )
   self->takedamage = qfalse;
   self->s.eType    = ET_INVISIBLE;
   self->r.contents = 0;
+  G_BackupUnoccupyContents( self );
   self->nextthink  = 0;
 }
 
@@ -414,6 +415,8 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
     self->client->cliprcontents = CONTENTS_CORPSE;
   else
     self->r.contents = CONTENTS_CORPSE;
+
+  G_BackupUnoccupyContents( self );
 
   self->client->ps.viewangles[ PITCH ] = 0; // zomg
   self->client->ps.viewangles[ YAW ] = self->s.apos.trBase[ YAW ];
@@ -1273,6 +1276,10 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
       targ->enemy = attacker;
       targ->die( targ, inflictor, attacker, take, mod );
+      if( ( targ->activation.flags & ACTF_OCCUPY ) &&
+          ( targ->s.eFlags & EF_OCCUPIED ) &&
+          targ->activation.occupant && targ->activation.occupant->client )
+        G_UnoccupyEnt( targ, targ->activation.occupant, targ->activation.occupant, qtrue );
       return;
     }
     else if( targ->pain )
@@ -1495,7 +1502,7 @@ qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage,
     if( !ent->takedamage )
       continue;
 
-    if( ent-> client && ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING )
+    if( ent->client && ( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING ) )
       continue;
 
     // find the distance from the edge of the bounding box
