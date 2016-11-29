@@ -2427,7 +2427,8 @@ qboolean HTeleporter_Activate( gentity_t *self, gentity_t *activator )
     vec3_t    angles;
 
     if( ( self->activation.other->s.eFlags & EF_OCCUPIED ) &&
-        self->activation.other->activation.occupant != self->activation.occupant )
+        self->activation.other->activation.occupant !=
+                                                self->activation.occupantFound )
     {
       trap_SendServerCommand( activator - g_entities,
                               "cp \"^3Destination teleporter currently in use! Please stand by for teleportation!\"");
@@ -2458,9 +2459,9 @@ qboolean HTeleporter_Activate( gentity_t *self, gentity_t *activator )
     // teleport the player
     G_SetBuildableAnim( self, BANIM_SPAWN1, qtrue );
     G_SetBuildableAnim( self->activation.other, BANIM_SPAWN1, qtrue );
-    self->activation.occupant->noTelefrag = qtrue;
-    self->activation.occupant->client->ps.weaponTime += 200;
-    TeleportPlayer( self->activation.occupant,
+    self->activation.occupantFound->noTelefrag = qtrue;
+    self->activation.occupantFound->client->ps.weaponTime += 200;
+    TeleportPlayer( self->activation.occupantFound,
                     self->teleportation.destinationPoint, angles, 0.0f );
 
     self->teleportation.coolDown = level.time + HTELEPORTER_COOLDOWN_TIME;
