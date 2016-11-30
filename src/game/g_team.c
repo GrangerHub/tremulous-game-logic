@@ -170,7 +170,7 @@ void G_LeaveTeam( gentity_t *self )
 
   // reset any activation entities the player might be occupying
   if( self->client->ps.eFlags & EF_OCCUPYING )
-    G_ResetActivation( self->activation.occupied, self );
+    G_ResetOccupation( self->occupation.occupied, self );
 
   for( i = 0; i < level.num_entities; i++ )
   {

@@ -97,6 +97,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     ASPAWN_BT,             //int       buildTime;
     qfalse,                //qboolean  activationEnt;
     0,                     //int       activationFlags;
+    0,                     //int       occupationFlags;
     PM_NORMAL,             //pmtype_t  activationPm_type;
     MASK_PLAYERSOLID,      //int       activationContents;
     CONTENTS_BODY,         //int       activationClipMask;
@@ -137,6 +138,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     OVERMIND_BT,           //int       buildTime;
     qfalse,                //qboolean  activationEnt;
     0,                     //int       activationFlags;
+    0,                     //int       occupationFlags;
     PM_NORMAL,             //pmtype_t  activationPm_type;
     MASK_PLAYERSOLID,      //int       activationContents;
     CONTENTS_BODY,         //int       activationClipMask;
@@ -177,6 +179,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BARRICADE_BT,          //int       buildTime;
     qfalse,                //qboolean  activationEnt;
     0,                     //int       activationFlags;
+    0,                     //int       occupationFlags;
     PM_NORMAL,             //pmtype_t  activationPm_type;
     MASK_PLAYERSOLID,      //int       activationContents;
     CONTENTS_BODY,         //int       activationClipMask;
@@ -217,6 +220,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     ACIDTUBE_BT,           //int       buildTime;
     qfalse,                //qboolean  activationEnt;
     0,                     //int       activationFlags;
+    0,                     //int       occupationFlags;
     PM_NORMAL,             //pmtype_t  activationPm_type;
     MASK_PLAYERSOLID,      //int       activationContents;
     CONTENTS_BODY,         //int       activationClipMask;
@@ -257,6 +261,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     TRAPPER_BT,            //int       buildTime;
     qfalse,                //qboolean  activationEnt;
     0,                     //int       activationFlags;
+    0,                     //int       occupationFlags;
     PM_NORMAL,             //pmtype_t  activationPm_type;
     MASK_PLAYERSOLID,      //int       activationContents;
     CONTENTS_BODY,         //int       activationClipMask;
@@ -298,6 +303,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BOOSTER_BT,            //int       buildTime;
     qfalse,                //qboolean  activationEnt;
     0,                     //int       activationFlags;
+    0,                     //int       occupationFlags;
     PM_NORMAL,             //pmtype_t  activationPm_type;
     MASK_PLAYERSOLID,      //int       activationContents;
     CONTENTS_BODY,         //int       activationClipMask;
@@ -337,6 +343,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     HIVE_BT,               //int       buildTime;
     qfalse,                //qboolean  activationEnt;
     0,                     //int       activationFlags;
+    0,                     //int       occupationFlags;
     PM_NORMAL,             //pmtype_t  activationPm_type;
     MASK_PLAYERSOLID,      //int       activationContents;
     CONTENTS_BODY,         //int       activationClipMask;
@@ -379,10 +386,10 @@ static const buildableAttributes_t bg_buildableList[ ] =
      ACTF_PL_ALIVE|
      ACTF_SPAWNED|
      ACTF_LINE_OF_SIGHT|
-     ACTF_OCCUPY|
-     ACTF_OCCUPY_PM_TYPE|
-     ACTF_OCCUPY_CONTENTS|
-     ACTF_OCCUPY_CLIPMASK),//int       activationFlags;
+     ACTF_OCCUPY),         //int       activationFlags;
+    (OCCUPYF_PM_TYPE|
+     OCCUPYF_CONTENTS|
+     OCCUPYF_CLIPMASK),    //int       occupationFlags;
     PM_FREEZE,             //pmtype_t  activationPm_type;
     MASK_ASTRALSOLID,      //int       activationContents;
     CONTENTS_ASTRAL_NOCLIP,//int       activationClipMask;
@@ -423,6 +430,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     HSPAWN_BT,             //int       buildTime;
     qfalse,                //qboolean  activationEnt;
     0,                     //int       activationFlags;
+    0,                     //int       occupationFlags;
     PM_NORMAL,             //pmtype_t  activationPm_type;
     MASK_PLAYERSOLID,      //int       activationContents;
     CONTENTS_BODY,         //int       activationClipMask;
@@ -463,6 +471,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     MGTURRET_BT,           //int       buildTime;
     qfalse,                //qboolean  activationEnt;
     0,                     //int       activationFlags;
+    0,                     //int       occupationFlags;
     PM_NORMAL,             //pmtype_t  activationPm_type;
     MASK_PLAYERSOLID,      //int       activationContents;
     CONTENTS_BODY,         //int       activationClipMask;
@@ -503,6 +512,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     TESLAGEN_BT,           //int       buildTime;
     qfalse,                //qboolean  activationEnt;
     0,                     //int       activationFlags;
+    0,                     //int       occupationFlags;
     PM_NORMAL,             //pmtype_t  activationPm_type;
     MASK_PLAYERSOLID,      //int       activationContents;
     CONTENTS_BODY,         //int       activationClipMask;
@@ -547,6 +557,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
      ACTF_PL_ALIVE|
      ACTF_SPAWNED|
      ACTF_POWERED),        //int activationFlags;
+    0,                     //int       occupationFlags;
     PM_NORMAL,             //pmtype_t  activationPm_type;
     MASK_PLAYERSOLID,      //int       activationContents;
     CONTENTS_BODY,         //int       activationClipMask;
@@ -587,6 +598,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     DC_BT,                 //int       buildTime;
     qfalse,                //qboolean  activationEnt;
     0,                     //int       activationFlags;
+    0,                     //int       occupationFlags;
     PM_NORMAL,             //pmtype_t  activationPm_type;
     MASK_PLAYERSOLID,      //int       activationContents;
     CONTENTS_BODY,         //int       activationClipMask;
@@ -628,6 +640,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     MEDISTAT_BT,           //int       buildTime;
     qfalse,                //qboolean  activationEnt;
     0,                     //int       activationFlags;
+    0,                     //int       occupationFlags;
     PM_NORMAL,             //pmtype_t  activationPm_type;
     MASK_PLAYERSOLID,      //int       activationContents;
     CONTENTS_BODY,         //int       activationClipMask;
@@ -672,6 +685,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
      ACTF_PL_ALIVE|
      ACTF_SPAWNED|
      ACTF_POWERED),        //int activationFlags;
+    0,                     //int       occupationFlags;
     PM_NORMAL,             //pmtype_t  activationPm_type;
     MASK_PLAYERSOLID,      //int       activationContents;
     CONTENTS_BODY,         //int       activationClipMask;
@@ -716,6 +730,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
      ACTF_PL_ALIVE|
      ACTF_SPAWNED|
      ACTF_POWERED),        //int activationFlags;
+    0,                     //int       occupationFlags;
     PM_NORMAL,             //pmtype_t  activationPm_type;
     MASK_PLAYERSOLID,      //int       activationContents;
     CONTENTS_BODY,         //int       activationClipMask;
