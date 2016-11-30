@@ -2849,7 +2849,7 @@ void G_RunFrame( int levelTime )
     if( !ent->r.linked && ent->neverFree )
       continue;
 
-    G_OccupiedThink( ent );
+    G_OccupantThink( ent );
 
     if( ent->s.eType == ET_MISSILE )
     {

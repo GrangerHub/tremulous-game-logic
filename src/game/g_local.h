@@ -978,7 +978,7 @@ void              G_SetContents( gentity_t *ent, int contents );
 void              G_BackupUnoccupyClipmask( gentity_t *ent );
 void              G_BackupUnoccupyContents( gentity_t *ent );
 void              G_OccupantClip( gentity_t *occupant );
-void              G_OccupiedThink( gentity_t *occupied );
+void              G_OccupantThink( gentity_t *occupant );
 
 //
 // g_utils.c
