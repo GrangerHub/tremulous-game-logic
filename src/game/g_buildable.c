@@ -2234,8 +2234,8 @@ Use for human power repeater
 */
 qboolean HRepeater_Activate( gentity_t *self, gentity_t *activator )
 {
-  if( self->activation.other && self->activation.other->client )
-    G_GiveClientMaxAmmo( self->activation.other, qtrue );
+  if( self->occupation.other && self->occupation.other->client )
+    G_GiveClientMaxAmmo( self->occupation.other, qtrue );
 
   return qfalse;
 }
@@ -4271,9 +4271,10 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
   built->nextthink = BG_Buildable( buildable )->nextthink;
   
   built->activation.flags = BG_Buildable( buildable )->activationFlags;
-  built->activation.pm_type = BG_Buildable( buildable )->activationPm_type;
-  built->activation.contents = BG_Buildable( buildable )->activationContents;
-  built->activation.clipMask = BG_Buildable( buildable )->activationClipMask;
+  built->occupation.flags = BG_Buildable( buildable )->occupationFlags;
+  built->occupation.pm_type = BG_Buildable( buildable )->activationPm_type;
+  built->occupation.contents = BG_Buildable( buildable )->activationContents;
+  built->occupation.clipMask = BG_Buildable( buildable )->activationClipMask;
 
   built->takedamage = qtrue;
   built->spawned = qfalse;
@@ -5240,8 +5241,8 @@ void G_BuildLogRevert( int id )
             G_RemoveRangeMarkerFrom( ent );
             if( ( ent->activation.flags & ACTF_OCCUPY ) &&
                 ( ent->s.eFlags & EF_OCCUPIED ) &&
-                ent->activation.occupant && ent->activation.occupant->client )
-              G_UnoccupyEnt( ent, ent->activation.occupant, ent->activation.occupant, qtrue );
+                ent->occupation.occupant && ent->occupation.occupant->client )
+              G_UnoccupyEnt( ent, ent->occupation.occupant, ent->occupation.occupant, qtrue );
             G_FreeEntity( ent );
             break;
           }
