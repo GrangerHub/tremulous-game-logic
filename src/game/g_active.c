@@ -1375,7 +1375,7 @@ static void G_FindActivationEnt( gentity_t *ent )
 
   // reset PERS_ACT_ENT
   client->ps.persistant[ PERS_ACT_ENT ] = ENTITYNUM_NONE;
-  ent->activation.occupied = NULL;
+  ent->occupation.occupied = NULL;
 
   groundEnt = &g_entities[ client->ps.groundEntityNum ];
 
@@ -1389,14 +1389,14 @@ static void G_FindActivationEnt( gentity_t *ent )
   if( G_CanActivateEntity( client, traceEnt ) )
   {
     client->ps.persistant[ PERS_ACT_ENT ] = traceEnt->s.number;
-    ent->activation.occupied = traceEnt;
+    ent->occupation.occupied = traceEnt;
   }
   else if( ( groundEnt->activation.flags & ACTF_GROUND ) &&
            G_CanActivateEntity( client, groundEnt ) )
   {
     // ACTF_GROUND activation entities get preference after activation entities in front of the client
     client->ps.persistant[ PERS_ACT_ENT ] = client->ps.groundEntityNum;
-    ent->activation.occupied = groundEnt;
+    ent->occupation.occupied = groundEnt;
   }
   else
   {
@@ -1425,7 +1425,7 @@ static void G_FindActivationEnt( gentity_t *ent )
         if( activationEntDistance < bestDistance )
         {
           client->ps.persistant[ PERS_ACT_ENT ] = traceEnt->s.number;
-          ent->activation.occupied = traceEnt;
+          ent->occupation.occupied = traceEnt;
           bestDistance = activationEntDistance;
         }
       }
@@ -1444,8 +1444,8 @@ regarding each index.
 */
 void G_OvrdActMenuMsg( gentity_t *activator, actMNOvrdIndex_t index, dynMenu_t defaultMenu )
 {
-  if( activator->activation.occupied->activation.menuMsgOvrd[ index ] )
-    activator->activation.menuMsg = activator->activation.occupied->activation.menuMsgOvrd[ index ];
+  if( activator->occupation.occupied->activation.menuMsgOvrd[ index ] )
+    activator->activation.menuMsg = activator->occupation.occupied->activation.menuMsgOvrd[ index ];
   else
     activator->activation.menuMsg = defaultMenu;
 }
@@ -1485,32 +1485,32 @@ qboolean G_WillActivateEntity( gentity_t *actEnt, gentity_t *activator )
   if( actEnt->activation.flags & ACTF_OCCUPY )
   {
     if( ( actEnt->s.eFlags & EF_OCCUPIED ) &&
-        actEnt->activation.occupant != activator )
+        actEnt->occupation.occupant != activator )
     {
       // only the occupant of this activation entity can activate it when occupied 
       G_OvrdActMenuMsg( activator, ACTMN_ACT_OCCUPIED, MN_ACT_OCCUPIED );
       return qfalse;
     }
 
-    actEnt->activation.occupantFound = NULL;
-    if( actEnt->activation.findOccupant )
-      actEnt->activation.findOccupant( actEnt, activator );
+    actEnt->occupation.occupantFound = NULL;
+    if( actEnt->occupation.findOccupant )
+      actEnt->occupation.findOccupant( actEnt, activator );
     else
-      actEnt->activation.occupantFound = activator;
+      actEnt->occupation.occupantFound = activator;
     
-    if( !actEnt->activation.occupantFound )
+    if( !actEnt->occupation.occupantFound )
     {
       G_OvrdActMenuMsg( activator, ACTMN_ACT_NOOCCUPANTS, MN_ACT_NOOCCUPANTS );
       return qfalse;
     }
 
-    if( ( ( actEnt->activation.occupantFound->client &&
-          ( actEnt->activation.occupantFound->client->ps.eFlags &
-            EF_OCCUPYING ) ) || ( !( actEnt->activation.occupantFound->client ) &&
-          ( actEnt->activation.occupantFound->s.eFlags & EF_OCCUPYING ) ) ) &&
+    if( ( ( actEnt->occupation.occupantFound->client &&
+          ( actEnt->occupation.occupantFound->client->ps.eFlags &
+            EF_OCCUPYING ) ) || ( !( actEnt->occupation.occupantFound->client ) &&
+          ( actEnt->occupation.occupantFound->s.eFlags & EF_OCCUPYING ) ) ) &&
           !( ( actEnt->s.eFlags & EF_OCCUPIED ) &&
-             ( actEnt->activation.occupant ==
-                                          actEnt->activation.occupantFound ) ) )
+             ( actEnt->occupation.occupant ==
+                                          actEnt->occupation.occupantFound ) ) )
     {
       // potential occupant is preoccupied with another activation entity
       G_OvrdActMenuMsg( activator, ACTMN_ACT_OCCUPYING, MN_ACT_OCCUPYING );
@@ -1518,17 +1518,17 @@ qboolean G_WillActivateEntity( gentity_t *actEnt, gentity_t *activator )
     }
   }
 
-  if( actEnt->activation.findOther )
+  if( actEnt->occupation.findOther )
   {
-    actEnt->activation.other = NULL;
-    actEnt->activation.findOther( actEnt, activator );
+    actEnt->occupation.other = NULL;
+    actEnt->occupation.findOther( actEnt, activator );
   } else
-    actEnt->activation.other = activator;
+    actEnt->occupation.other = activator;
 
   if( actEnt->activation.willActivate )
     if( !actEnt->activation.willActivate( actEnt, activator ) )
     {
-      actEnt->activation.other = NULL;
+      actEnt->occupation.other = NULL;
       return qfalse;
     }
 
@@ -1566,46 +1566,45 @@ void G_ActivateEntity( gentity_t *actEnt, gentity_t *activator )
 
 /*
 =====================
-G_ResetActivation
+G_ResetOccupation
 
-This is a general wrapper for activation.(*reset)(). This is called to reset an occupiable activation 
-enitity and the client that occupied it
+This is called to reset occupation entities
 =====================
 */
-void G_ResetActivation( gentity_t *occupied, gentity_t *occupant )
+void G_ResetOccupation( gentity_t *occupied, gentity_t *occupant )
 {
   if( occupied )
   {
-    if( occupied->activation.occupiedReset )
-      occupied->activation.occupiedReset( occupied );
+    if( occupied->occupation.occupiedReset )
+      occupied->occupation.occupiedReset( occupied );
 
-    if( ( occupied->activation.flags & ACTF_OCCUPY_RESET_OTHER ) &&
-         occupied->activation.other &&
-         ( occupied->activation.other->s.eFlags & EF_OCCUPIED ) )
+    if( ( occupied->occupation.flags & OCCUPYF_RESET_OTHER ) &&
+         occupied->occupation.other &&
+         ( occupied->occupation.other->s.eFlags & EF_OCCUPIED ) )
     {
-      if( occupied->activation.other->activation.other == occupied )
-        occupied->activation.other->activation.other = NULL;
+      if( occupied->occupation.other->occupation.other == occupied )
+        occupied->occupation.other->occupation.other = NULL;
 
       if( occupant &&
-          occupied->activation.other->activation.occupant == occupant )
-        occupied->activation.other->activation.occupant = NULL;
+          occupied->occupation.other->occupation.occupant == occupant )
+        occupied->occupation.other->occupation.occupant = NULL;
 
-      G_ResetActivation( occupied->activation.other,
-                         occupied->activation.other->activation.occupant );
+      G_ResetOccupation( occupied->occupation.other,
+                         occupied->occupation.other->occupation.occupant );
     }
 
-    occupied->activation.occupant = NULL;
-    occupied->activation.other = NULL;
+    occupied->occupation.occupant = NULL;
+    occupied->occupation.other = NULL;
     occupied->s.eFlags &= ~EF_OCCUPIED;
   }
 
   if( occupant )
   {
-    if( occupant->activation.occupied &&
-        occupant->activation.occupied->activation.occupantReset )
-      occupant->activation.occupied->activation.occupantReset( occupant );
+    if( occupant->occupation.occupied &&
+        occupant->occupation.occupied->occupation.occupantReset )
+      occupant->occupation.occupied->occupation.occupantReset( occupant );
 
-    occupant->activation.occupied = NULL;
+    occupant->occupation.occupied = NULL;
 
     if( occupant->client )
       occupant->client->ps.eFlags &= ~EF_OCCUPYING;
@@ -1632,21 +1631,21 @@ void G_UnoccupyEnt( gentity_t *occupied, gentity_t *occupant, gentity_t *activat
 {
   if( force )
   {
-    if( occupied->activation.unoccupy )
-      occupied->activation.unoccupy( occupied, occupant, activator, qtrue );
+    if( occupied->occupation.unoccupy )
+      occupied->occupation.unoccupy( occupied, occupant, activator, qtrue );
 
-    G_ResetActivation( occupied, occupant );
-  } else if( occupied->activation.unoccupy )
+    G_ResetOccupation( occupied, occupant );
+  } else if( occupied->occupation.unoccupy )
   {
-    if( occupied->activation.unoccupy( occupied, occupant, activator, qfalse ) )
-      G_ResetActivation( occupied, occupant );
+    if( occupied->occupation.unoccupy( occupied, occupant, activator, qfalse ) )
+      G_ResetOccupation( occupied, occupant );
     else
     {
       G_OvrdActMenuMsg( activator, ACTMN_ACT_NOEXIT, MN_ACT_NOEXIT );
       G_TriggerMenu( activator->client->ps.clientNum, activator->activation.menuMsg );
     }
   } else
-    G_ResetActivation( occupied, occupant );
+    G_ResetOccupation( occupied, occupant );
 }
 
 /*
@@ -1658,26 +1657,26 @@ Called to occupy an entity with found potential occupants.
 */
 void G_OccupyEnt( gentity_t *occupied )
 {
-  if( !occupied->activation.occupantFound ) 
+  if( !occupied->occupation.occupantFound ) 
     return;
 
-  occupied->activation.occupant = occupied->activation.occupantFound;
-  occupied->activation.occupantFound = NULL;
-  occupied->activation.occupant->activation.occupied = occupied;
+  occupied->occupation.occupant = occupied->occupation.occupantFound;
+  occupied->occupation.occupantFound = NULL;
+  occupied->occupation.occupant->occupation.occupied = occupied;
 
   occupied->s.eFlags |= EF_OCCUPIED;
-  if( occupied->activation.occupant->client )
+  if( occupied->occupation.occupant->client )
   {
-    occupied->activation.occupant->client->ps.eFlags |= EF_OCCUPYING;
-    occupied->activation.occupant->client->ps.persistant[ PERS_ACT_ENT ] =
+    occupied->occupation.occupant->client->ps.eFlags |= EF_OCCUPYING;
+    occupied->occupation.occupant->client->ps.persistant[ PERS_ACT_ENT ] =
                                                              occupied->s.number;
   } else
-    occupied->activation.occupant->s.eFlags |= EF_OCCUPYING;
+    occupied->occupation.occupant->s.eFlags |= EF_OCCUPYING;
 
-  G_OccupantClip( occupied->activation.occupant );
+  G_OccupantClip( occupied->occupation.occupant );
 
-  if( occupied->activation.occupy )
-    occupied->activation.occupy( occupied );
+  if( occupied->occupation.occupy )
+    occupied->occupation.occupy( occupied );
 
   return;
 }
@@ -1692,8 +1691,8 @@ the temporary OccupantClip condition.
 */
 void G_SetClipmask( gentity_t *ent, int clipmask )
 {
-  if( ent->activation.occupantFlags & ACTF_OCCUPY_CLIPMASK )
-    ent->activation.unoccupiedClipMask = clipmask;
+  if( ent->occupation.occupantFlags & OCCUPYF_CLIPMASK )
+    ent->occupation.unoccupiedClipMask = clipmask;
   else
   {
     ent->clipmask = clipmask;
@@ -1710,9 +1709,9 @@ the temporary OccupantClip and noclip conditions.
 */
 void G_SetContents( gentity_t *ent, int contents )
 {
-  if( ent->activation.occupantFlags & ACTF_OCCUPY_CONTENTS )
+  if( ent->occupation.occupantFlags & OCCUPYF_CONTENTS )
   {
-    ent->activation.unoccupiedContents = contents;
+    ent->occupation.unoccupiedContents = contents;
   } else
   {
     if( ent->client && ent->client->noclip )
@@ -1732,7 +1731,7 @@ unoccupying an occupiable entity that alters the clip mask of its occupants.
 */
 void G_BackupUnoccupyClipmask( gentity_t *ent )
 {
-  ent->activation.unoccupiedClipMask = ent->clipmask;
+  ent->occupation.unoccupiedClipMask = ent->clipmask;
 
   return;
 }
@@ -1748,9 +1747,9 @@ unoccupying an occupiable entity that alters the contents of its occupants.
 void G_BackupUnoccupyContents( gentity_t *ent )
 {
   if( ent->client && ent->client->noclip )
-    ent->activation.unoccupiedContents = ent->client->cliprcontents;
+    ent->occupation.unoccupiedContents = ent->client->cliprcontents;
   else
-    ent->activation.unoccupiedContents = ent->r.contents;
+    ent->occupation.unoccupiedContents = ent->r.contents;
 
   return;
 }
@@ -1765,48 +1764,48 @@ activation entity occupants
 */
 void G_OccupantClip( gentity_t *occupant )
 {
-  if( occupant->activation.occupied &&
+  if( occupant->occupation.occupied &&
       ( ( occupant->client &&
           ( occupant->client->ps.eFlags & EF_OCCUPYING ) ) || 
         ( !occupant->client && ( occupant->s.eFlags & EF_OCCUPYING ) ) ) )
   {
-    if( ( occupant->activation.occupied->activation.flags & ACTF_OCCUPY_CLIPMASK ) &&
-        !( occupant->activation.occupantFlags & ACTF_OCCUPY_CLIPMASK ) )
+    if( ( occupant->occupation.occupied->occupation.flags & OCCUPYF_CLIPMASK ) &&
+        !( occupant->occupation.occupantFlags & OCCUPYF_CLIPMASK ) )
     {
       G_BackupUnoccupyClipmask( occupant );
-      occupant->clipmask = occupant->activation.occupied->activation.clipMask;
-      occupant->activation.occupantFlags |= ACTF_OCCUPY_CLIPMASK;
+      occupant->clipmask = occupant->occupation.occupied->occupation.clipMask;
+      occupant->occupation.occupantFlags |= OCCUPYF_CLIPMASK;
     }
 
-    if( ( occupant->activation.occupied->activation.flags & ACTF_OCCUPY_CONTENTS ) &&
-          !( occupant->activation.occupantFlags & ACTF_OCCUPY_CONTENTS )  )
+    if( ( occupant->occupation.occupied->occupation.flags & OCCUPYF_CONTENTS ) &&
+          !( occupant->occupation.occupantFlags & OCCUPYF_CONTENTS )  )
     {
       G_BackupUnoccupyContents( occupant );
       if( occupant->client && occupant->client->noclip )
         occupant->client->cliprcontents =
-                             occupant->activation.occupied->activation.contents;
+                             occupant->occupation.occupied->occupation.contents;
       else
         occupant->r.contents =
-                             occupant->activation.occupied->activation.contents;
+                             occupant->occupation.occupied->occupation.contents;
 
-      occupant->activation.occupantFlags |= ACTF_OCCUPY_CONTENTS;
+      occupant->occupation.occupantFlags |= OCCUPYF_CONTENTS;
     }
   } else
   {
-    if( occupant->activation.occupantFlags & ACTF_OCCUPY_CLIPMASK )
+    if( occupant->occupation.occupantFlags & OCCUPYF_CLIPMASK )
     {
-      occupant->clipmask = occupant->activation.unoccupiedClipMask;
-      occupant->activation.occupantFlags &= ~ACTF_OCCUPY_CLIPMASK;
+      occupant->clipmask = occupant->occupation.unoccupiedClipMask;
+      occupant->occupation.occupantFlags &= ~OCCUPYF_CLIPMASK;
     }
 
-    if( occupant->activation.occupantFlags & ACTF_OCCUPY_CONTENTS )
+    if( occupant->occupation.occupantFlags & OCCUPYF_CONTENTS )
     {
       if( occupant->client && occupant->client->noclip )
-        occupant->client->cliprcontents = occupant->activation.unoccupiedContents;
+        occupant->client->cliprcontents = occupant->occupation.unoccupiedContents;
       else
-        occupant->r.contents = occupant->activation.unoccupiedContents;
+        occupant->r.contents = occupant->occupation.unoccupiedContents;
 
-      occupant->activation.occupantFlags &= ~ACTF_OCCUPY_CONTENTS;
+      occupant->occupation.occupantFlags &= ~OCCUPYF_CONTENTS;
     }
   }
 }
@@ -1822,7 +1821,7 @@ void G_OccupantThink( gentity_t *occupant )
 {
   gentity_t *occupied;
 
-  occupied = occupant->activation.occupied;
+  occupied = occupant->occupation.occupied;
 
   if( ( occupant->client && ( occupant->client->ps.eFlags & EF_OCCUPYING ) ) ||
       ( !occupant->client && ( occupant->s.eFlags & EF_OCCUPYING ) ) )
@@ -1831,13 +1830,13 @@ void G_OccupantThink( gentity_t *occupant )
     {
       if( occupied->s.eFlags & EF_OCCUPIED )
       {
-        if( occupied->activation.occupyUntil &&
-            occupied->activation.occupyUntil( occupied, occupant ) )
+        if( occupied->occupation.occupyUntil &&
+            occupied->occupation.occupyUntil( occupied, occupant ) )
           G_UnoccupyEnt( occupied, occupant, occupant, qtrue );
-        else if( ( occupied->activation.flags & ACTF_OCCUPY_ACTIVATE ) &&
+        else if( ( occupied->occupation.flags & OCCUPYF_ACTIVATE ) &&
                    occupant->client )
         {
-          if( occupied->activation.flags & ACTF_OCCUPY_UNTIL_INACTIVE )
+          if( occupied->occupation.flags & OCCUPYF_UNTIL_INACTIVE )
           {
             if( !G_CanActivateEntity( occupant->client, occupied ) )
               G_UnoccupyEnt( occupied, occupant, occupant, qtrue );
@@ -1863,17 +1862,17 @@ void G_OccupantThink( gentity_t *occupant )
       } else
       {
         // this entity isn't actually occupying
-        G_ResetActivation( occupied, occupant );
+        G_ResetOccupation( occupied, occupant );
       }
     } else
     {
       // this entity isn't actually occupying
-      G_ResetActivation( NULL, occupant );
+      G_ResetOccupation( NULL, occupant );
     }
   } else if( occupied )
   {
     // this entity shouldn't be occupying
-    G_ResetActivation( NULL, occupant );
+    G_ResetOccupation( NULL, occupant );
   }
 
   //for non-client entities
@@ -1988,13 +1987,13 @@ void ClientThink_real( gentity_t *ent )
 
     // reset any activation entities the player might be occupying
     if( client->ps.eFlags & EF_OCCUPYING )
-      G_ResetActivation( ent->activation.occupied, ent );
+      G_ResetOccupation( ent->occupation.occupied, ent );
   }
   else if ( ( client->ps.eFlags & EF_OCCUPYING ) &&
-            ent->activation.occupied &&
-            ( ent->activation.occupied->activation.flags &
-              ACTF_OCCUPY_PM_TYPE ) )
-    client->ps.pm_type = ent->activation.occupied->activation.pm_type;
+            ent->occupation.occupied &&
+            ( ent->occupation.occupied->occupation.flags &
+              OCCUPYF_PM_TYPE ) )
+    client->ps.pm_type = ent->occupation.occupied->occupation.pm_type;
   else if( client->ps.stats[ STAT_STATE ] & SS_BLOBLOCKED ||
            client->ps.stats[ STAT_STATE ] & SS_GRABBED )
     client->ps.pm_type = PM_GRABBED;
@@ -2351,7 +2350,7 @@ void ClientThink_real( gentity_t *ent )
   {
     gentity_t *actEnt;
 
-    actEnt = ent->activation.occupied;
+    actEnt = ent->occupation.occupied;
 
     if( client->ps.eFlags & EF_OCCUPYING )
       G_UnoccupyEnt( actEnt, ent, ent, qfalse );
@@ -2388,7 +2387,7 @@ void ClientThink_real( gentity_t *ent )
   {
     // reset any acitvation entities the player might be occupying
     if( client->ps.eFlags & EF_OCCUPYING )
-      G_ResetActivation( ent->activation.occupied, ent );
+      G_ResetOccupation( ent->occupation.occupied, ent );
 
     ent->client->ps.stats[ STAT_HEALTH ] = ent->health = 0;
     player_die( ent, ent, ent, 100000, MOD_SUICIDE );
