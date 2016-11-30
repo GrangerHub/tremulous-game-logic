@@ -1589,11 +1589,11 @@ enitity and the client that occupied it
 */
 void G_ResetActivation( gentity_t *occupied, gentity_t *occupant )
 {
-  if( occupied->activation.reset )
-    occupied->activation.reset( occupied, occupant );
-
   if( occupied )
   {
+    if( occupied->activation.reset )
+      occupied->activation.reset( occupied, occupant );
+
     if( ( occupied->activation.flags & ACTF_OCCUPY_RESET_OTHER ) &&
          occupied->activation.other &&
          ( occupied->activation.other->s.eFlags & EF_OCCUPIED ) )
