@@ -1852,8 +1852,15 @@ void G_OccupiedThink( gentity_t *occupied )
                                         occupied ) &&
                    G_WillActivateEntity( occupied,
                                          occupied->activation.occupant ) )
-            occupied->activation.activate( occupied,
-                                           occupied->activation.occupant );
+        {
+          if ( occupied->activation.activate( occupied,
+                                         occupied->activation.occupant ) )
+          {
+            //occupy the activation entity
+            G_OccupyEnt( occupied );
+          }
+          
+        }
       }
     } else
     {
