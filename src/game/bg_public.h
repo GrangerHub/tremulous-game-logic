@@ -310,11 +310,6 @@ typedef enum
 #define EF_OCCUPYING        0x00010    // can result in bugs if applied to buildables or missles
 #define EF_OCCUPIED         0x00040    // can result in bugs if applied to players
 
-// for missiles:
-#define EF_BOUNCE           0x00008    // for missiles
-#define EF_BOUNCE_HALF      0x00010    // for missiles
-#define EF_NO_BOUNCE_SOUND  0x00020    // for missiles
-
 // buildable flags:
 #define EF_B_SPAWNED        0x00008
 #define EF_B_POWERED        0x00010
