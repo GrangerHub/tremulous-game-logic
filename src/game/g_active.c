@@ -1824,75 +1824,75 @@ void G_OccupantClip( gentity_t *occupant )
 
 /*
 ===============
-G_OccupiedThink
+G_OccupantThink
 
 This runs every frame for each entity
 ===============
 */
-void G_OccupiedThink( gentity_t *occupied )
+void G_OccupantThink( gentity_t *occupant )
 {
-  if( occupied->s.eFlags & EF_OCCUPIED )
+  gentity_t *occupied;
+
+  occupied = occupant->activation.occupied;
+
+  if( ( occupant->client && ( occupant->client->ps.eFlags & EF_OCCUPYING ) ) ||
+      ( !occupant->client && ( occupant->s.eFlags & EF_OCCUPYING ) ) )
   {
-    if( occupied->activation.occupant )
+    if( occupied )
     {
-      if( occupied->activation.occupyUntil &&
-          occupied->activation.occupyUntil( occupied,
-                                            occupied->activation.occupant ) )
-        G_UnoccupyEnt( occupied, occupied->activation.occupant,
-                                 occupied->activation.occupant, qtrue );
-      else if( ( occupied->activation.flags & ACTF_OCCUPY_ACTIVATE ) &&
-               occupied->activation.occupant->client )
+      if( occupied->s.eFlags & EF_OCCUPIED )
       {
-        if( occupied->activation.flags & ACTF_OCCUPY_UNTIL_INACTIVE )
+        if( occupied->activation.occupyUntil &&
+            occupied->activation.occupyUntil( occupied, occupant ) )
+          G_UnoccupyEnt( occupied, occupant, occupant, qtrue );
+        else if( ( occupied->activation.flags & ACTF_OCCUPY_ACTIVATE ) &&
+                   occupant->client )
         {
-          if( !G_CanActivateEntity( occupied->activation.occupant->client,
-                                    occupied ) )
-            G_UnoccupyEnt( occupied, occupied->activation.occupant,
-                                     occupied->activation.occupant, qtrue );
-          else if( !G_WillActivateEntity( occupied,
-                                          occupied->activation.occupant ) )
+          if( occupied->activation.flags & ACTF_OCCUPY_UNTIL_INACTIVE )
           {
-            G_UnoccupyEnt( occupied, occupied->activation.occupant,
-                                     occupied->activation.occupant, qtrue );
-           if( occupied->activation.occupant->activation.menuMsg )
-             G_TriggerMenu( occupied->activation.occupant->client->ps.clientNum,
-                            occupied->activation.occupant->activation.menuMsg );
-          }
-          else if( !occupied->activation.activate( occupied,
-                                                   occupied->activation.occupant ) )
-            G_UnoccupyEnt( occupied, occupied->activation.occupant,
-                                     occupied->activation.occupant, qtrue );
-        } else if( G_CanActivateEntity( occupied->activation.occupant->client,
-                                        occupied ) &&
-                   G_WillActivateEntity( occupied,
-                                         occupied->activation.occupant ) )
-        {
-          if ( occupied->activation.activate( occupied,
-                                         occupied->activation.occupant ) )
+            if( !G_CanActivateEntity( occupant->client, occupied ) )
+              G_UnoccupyEnt( occupied, occupant, occupant, qtrue );
+            else if( !G_WillActivateEntity( occupied, occupant ) )
+            {
+              G_UnoccupyEnt( occupied, occupant, occupant, qtrue );
+             if( occupant->activation.menuMsg )
+               G_TriggerMenu( occupant->client->ps.clientNum,
+                              occupant->activation.menuMsg );
+            }
+            else if( !occupied->activation.activate( occupied, occupant ) )
+              G_UnoccupyEnt( occupied, occupant, occupant, qtrue );
+          } else if( G_CanActivateEntity( occupant->client, occupied ) &&
+                     G_WillActivateEntity( occupied, occupant ) )
           {
-            //occupy the activation entity
-            G_OccupyEnt( occupied );
+            if ( occupied->activation.activate( occupied, occupant ) )
+            {
+              //occupy the activation entity
+              G_OccupyEnt( occupied );
+            }
           }
-          
         }
+      } else
+      {
+        // this entity isn't actually occupying
+        G_ResetActivation( occupied, occupant );
       }
     } else
     {
-      // this entity isn't actually occupied
-      G_ResetActivation( occupied, occupied->activation.occupant );
+      // this entity isn't actually occupying
+      G_ResetActivation( NULL, occupant );
     }
-  } else if( occupied->activation.occupant )
+  } else if( occupied )
   {
-    // this entity shouldn't be occupied
-    G_ResetActivation( occupied, occupied->activation.occupant );
+    // this entity shouldn't be occupying
+    G_ResetActivation( NULL, occupant );
   }
 
   //for non-client entities
-  if( !( occupied->client ) )
+  if( !( occupant->client ) )
   {
     // set the clip mask and/or the contents of entities that occupied an
     // activation entity
-    G_OccupantClip( occupied );
+    G_OccupantClip( occupant );
   }
 }
 
