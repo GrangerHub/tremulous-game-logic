@@ -312,10 +312,6 @@ typedef enum
 // for cleints occupying hovels
 #define EF_HOVEL_MARKED     0x00008   // tells if the hovel occupied is marked
 
-// for occupation of activation entities
-#define EF_OCCUPYING        0x00010    // can result in bugs if applied to buildables or missles
-#define EF_OCCUPIED         0x00040    // can result in bugs if applied to players
-
 // for missiles:
 #define EF_BOUNCE           0x00008    // for missiles
 #define EF_BOUNCE_HALF      0x00010    // for missiles
@@ -339,6 +335,10 @@ typedef enum
 #define EF_POISONCLOUDED    0x04000    // player hit with basilisk gas
 #define EF_CONNECTION       0x08000    // draw a connection trouble sprite
 #define EF_BLOBLOCKED       0x10000    // caught by a trapper
+
+// for occupation of activation entities
+#define EF_OCCUPYING        0x20000
+#define EF_OCCUPIED         0x40000
 
 
 /*
