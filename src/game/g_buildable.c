@@ -5796,9 +5796,7 @@ void G_BuildLogRevert( int id )
             if( ent->s.modelindex == BA_H_TELEPORTER )
               G_RemoveTeleporter( ent );
             G_RemoveRangeMarkerFrom( ent );
-            if( ( ent->activation.flags & ACTF_OCCUPY ) &&
-                ( ent->s.eFlags & EF_OCCUPIED ) &&
-                ent->occupation.occupant && ent->occupation.occupant->client )
+            if( ( ent->s.eFlags & EF_OCCUPIED ) && ent->occupation.occupant )
               G_UnoccupyEnt( ent, ent->occupation.occupant, ent->occupation.occupant, qtrue );
             G_FreeEntity( ent );
             break;
