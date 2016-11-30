@@ -210,8 +210,9 @@ struct gentity_s
     qboolean  (*unoccupy)( gentity_t *occupied, gentity_t *occupant,
                            gentity_t *activator, qboolean force );
 
-    // Optional custom reset for occupiable activation entities.
-    void      (*reset)( gentity_t *occupied, gentity_t *occupant );
+    // Optional custom resets for occupation activation entities.
+    void      (*occupiedReset)( gentity_t *occupied );
+    void      (*occupantReset)( gentity_t *occupant );
 
     // Optional custom conditions that would force a client to unoccupy if qtrue
     // is returned.

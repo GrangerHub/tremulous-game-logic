@@ -1590,8 +1590,8 @@ void G_ResetActivation( gentity_t *occupied, gentity_t *occupant )
 {
   if( occupied )
   {
-    if( occupied->activation.reset )
-      occupied->activation.reset( occupied, occupant );
+    if( occupied->activation.occupiedReset )
+      occupied->activation.occupiedReset( occupied );
 
     if( ( occupied->activation.flags & ACTF_OCCUPY_RESET_OTHER ) &&
          occupied->activation.other &&
@@ -1615,6 +1615,9 @@ void G_ResetActivation( gentity_t *occupied, gentity_t *occupant )
 
   if( occupant )
   {
+    if( occupant->activation.occupied &&
+        occupant->activation.occupied->activation.occupantReset )
+      occupant->activation.occupied->activation.occupantReset( occupant );
 
     occupant->activation.occupied = NULL;
 
