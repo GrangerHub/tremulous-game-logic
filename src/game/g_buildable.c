@@ -5435,9 +5435,7 @@ void G_BuildLogRevert( int id )
               G_LogPrintf( "revert: remove %d %s\n",
                 (int)( ent - g_entities ), BG_Buildable( ent->s.modelindex )->name );
             G_RemoveRangeMarkerFrom( ent );
-            if( ( ent->activation.flags & ACTF_OCCUPY ) &&
-                ( ent->s.eFlags & EF_OCCUPIED ) &&
-                ent->occupation.occupant && ent->occupation.occupant->client )
+            if( ( ent->s.eFlags & EF_OCCUPIED ) && ent->occupation.occupant )
               G_UnoccupyEnt( ent, ent->occupation.occupant, ent->occupation.occupant, qtrue );
             G_FreeEntity( ent );
             break;
