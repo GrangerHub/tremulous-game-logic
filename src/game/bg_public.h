@@ -306,10 +306,9 @@ typedef enum
 #define EF_TELEPORT_BIT     0x00002    // toggled every time the origin abruptly changes
 #define EF_PLAYER_EVENT     0x00004    // only used for eType > ET_EVENTS
 
-// for missiles:
-#define EF_BOUNCE           0x00008    // for missiles
-#define EF_BOUNCE_HALF      0x00010    // for missiles
-#define EF_NO_BOUNCE_SOUND  0x00020    // for missiles
+// for occupation of activation entities
+#define EF_OCCUPYING        0x00010    // can result in bugs if applied to buildables or missles
+#define EF_OCCUPIED         0x00040    // can result in bugs if applied to players
 
 // buildable flags:
 #define EF_B_SPAWNED        0x00008
@@ -329,10 +328,6 @@ typedef enum
 #define EF_POISONCLOUDED    0x04000    // player hit with basilisk gas
 #define EF_CONNECTION       0x08000    // draw a connection trouble sprite
 #define EF_BLOBLOCKED       0x10000    // caught by a trapper
-
-// for occupation of activation entities
-#define EF_OCCUPYING        0x20000
-#define EF_OCCUPIED         0x40000
 
 
 /*
