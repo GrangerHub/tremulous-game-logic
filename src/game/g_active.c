@@ -1518,10 +1518,13 @@ qboolean G_WillActivateEntity( gentity_t *actEnt, gentity_t *activator )
       return qfalse;
     }
 
-    if( ( actEnt->activation.occupantFound->client &&
+    if( ( ( actEnt->activation.occupantFound->client &&
           ( actEnt->activation.occupantFound->client->ps.eFlags &
             EF_OCCUPYING ) ) || ( !( actEnt->activation.occupantFound->client ) &&
-          ( actEnt->activation.occupantFound->s.eFlags & EF_OCCUPYING ) ) )
+          ( actEnt->activation.occupantFound->s.eFlags & EF_OCCUPYING ) ) ) &&
+          !( ( actEnt->s.eFlags & EF_OCCUPIED ) &&
+             ( actEnt->activation.occupant ==
+                                          actEnt->activation.occupantFound ) ) )
     {
       // potential occupant is preoccupied with another activation entity
       G_OvrdActMenuMsg( activator, ACTMN_ACT_OCCUPYING, MN_ACT_OCCUPYING );
@@ -1848,8 +1851,13 @@ void G_OccupiedThink( gentity_t *occupied )
                                      occupied->activation.occupant, qtrue );
           else if( !G_WillActivateEntity( occupied,
                                           occupied->activation.occupant ) )
+          {
             G_UnoccupyEnt( occupied, occupied->activation.occupant,
                                      occupied->activation.occupant, qtrue );
+           if( occupied->activation.occupant->activation.menuMsg )
+             G_TriggerMenu( occupied->activation.occupant->client->ps.clientNum,
+                            occupied->activation.occupant->activation.menuMsg );
+          }
           else if( !occupied->activation.activate( occupied,
                                                    occupied->activation.occupant ) )
             G_UnoccupyEnt( occupied, occupied->activation.occupant,
@@ -1858,8 +1866,15 @@ void G_OccupiedThink( gentity_t *occupied )
                                         occupied ) &&
                    G_WillActivateEntity( occupied,
                                          occupied->activation.occupant ) )
-            occupied->activation.activate( occupied,
-                                           occupied->activation.occupant );
+        {
+          if ( occupied->activation.activate( occupied,
+                                         occupied->activation.occupant ) )
+          {
+            //occupy the activation entity
+            G_OccupyEnt( occupied );
+          }
+          
+        }
       }
     } else
     {
