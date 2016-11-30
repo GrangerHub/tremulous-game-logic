@@ -158,32 +158,8 @@ struct gentity_s
   // for activation entities
   struct activation_s
   {
-    gentity_t *occupant; // The entity that is occupying this activation entity
-
-    gentity_t *occupantFound; // A temporary variable used in the occupying
-                               // process. This can be set by (*findOccupant)().
-
-    gentity_t *occupied; // The activation entity that is being considered.
-
-    gentity_t *other;  // An optional additional entity involved in the
-                       // activation.
-
     int       flags; // Contains bit flags representing various abilities of a
                      // given activation entity.
-
-    int       occupantFlags; // Contains bit flags used by occupants
-
-    pmtype_t	pm_type; // Changes client's pm_type of an occupant.
-
-    int       contents; // Changes the contents of an occupant.
-
-    int       unoccupiedContents; // Used to restore the contents of an occupant
-                              // that leaves its occupied activation entity.
-
-    int       clipMask; // Changes the clip mask of an occupant.
-
-    int       unoccupiedClipMask; // Used to restore the clip mask of an occupant
-                              // that leaves its occupied activation entity.
 
     dynMenu_t menuMsg; // Message sent to the activator when an activation
                        // fails.  Can be used in (*willActivate)().
@@ -202,31 +178,61 @@ struct gentity_s
     // Optional custom restrictions on the actual activation of a nearby found
     // activation entity.
     qboolean  (*willActivate)( gentity_t *actEnt, gentity_t *activator );
-
-    // Optional custom function called to perform additional operations for
-    // occupation.
-    void (*occupy)( gentity_t *occupied );
-
-    // Optional custom function for leaving an occupiable activation entity.
-    // Unless force is set to qtrue, if qfalse is returned, the entity remains
-    // occupied.
-    qboolean  (*unoccupy)( gentity_t *occupied, gentity_t *occupant,
-                           gentity_t *activator, qboolean force );
-
-    // Optional custom resets for occupation activation entities.
-    void      (*occupiedReset)( gentity_t *occupied );
-    void      (*occupantReset)( gentity_t *occupant );
-
-    // Optional custom conditions that would force a client to unoccupy if qtrue
-    // is returned.
-    qboolean  (*occupyUntil)( gentity_t *occupied, gentity_t *occupant );
-
-    // Optional funtion to find an occupant which isn't the activator.
-    void      (*findOccupant)( gentity_t *actEnt, gentity_t *activator );
-
-    // Optional function that returns another entity involved in the activation.
-    void      (*findOther)(gentity_t *actEnt, gentity_t *activator );
   } activation;
+
+  // for occupation entities
+  struct occupation_s
+  {
+    int       flags; // Contains bit flags representing various abilities of a
+                     // given occupation entity.
+
+    gentity_t *occupant; // The entity that is occupying this occupation entity
+
+    gentity_t *occupantFound; // A temporary variable used in the occupying
+                               // process. This can be set by (*findOccupant)().
+
+    gentity_t *occupied; // The occupiable entity that is being considered.
+
+    gentity_t *other;  // An optional additional entity involved in occupation.
+
+    int       occupantFlags; // Contains bit flags used by occupants
+
+    pmtype_t	pm_type; // Changes client's pm_type of an occupant.
+
+    int       contents; // Changes the contents of an occupant.
+
+    int       unoccupiedContents; // Used to restore the contents of an occupant
+               // that leaves its occupied activation entity.
+
+    int       clipMask; // Changes the clip mask of an occupant.
+
+    int       unoccupiedClipMask; // Used to restore the clip mask of an occupant
+               // that leaves its occupied activation entity.
+
+   // Optional custom function called to perform additional operations for
+   // occupation.
+   void (*occupy)( gentity_t *occupied );
+
+   // Optional custom function for leaving an occupiable entity.
+   // Unless force is set to qtrue, if qfalse is returned, the entity remains
+   // occupied.
+   qboolean  (*unoccupy)( gentity_t *occupied, gentity_t *occupant,
+                          gentity_t *activator, qboolean force );
+
+   // Optional custom resets for occupation entities.
+   void      (*occupiedReset)( gentity_t *occupied );
+   void      (*occupantReset)( gentity_t *occupant );
+
+   // Optional custom conditions that would force a client to unoccupy if qtrue
+   // is returned.
+   qboolean  (*occupyUntil)( gentity_t *occupied, gentity_t *occupant );
+
+   // Optional funtion to find an occupant which isn't an activator.
+   void      (*findOccupant)( gentity_t *actEnt, gentity_t *activator );
+
+   // Optional function that returns another entity involved in the occupation.
+   void      (*findOther)(gentity_t *actEnt, gentity_t *activator );
+  } occupation;
 
   // used by buildable teleporters
   struct teleportation_s
@@ -1005,7 +1011,7 @@ void              G_OvrdActMenuMsg( gentity_t *activator,
 qboolean          G_WillActivateEntity( gentity_t *actEnt,
                                         gentity_t *activator );
 void              G_ActivateEntity( gentity_t *actEnt, gentity_t *activator );
-void              G_ResetActivation( gentity_t *occupied,
+void              G_ResetOccupation( gentity_t *occupied,
                                      gentity_t *occupant ); // is called to reset
                                        // an occupiable activation entity and
                                        // its occupant.  Serves as a general

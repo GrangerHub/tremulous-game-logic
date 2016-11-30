@@ -376,31 +376,38 @@ activation.flags
                                           // activation entity, they occupy the
                                           // entity and can't activate any other
                                           // entity while occupying.  Nor can 
-                                          //another player not occupying a given
+                                          // another player not occupying a given
                                           // occupiable activation entity
                                           // activate that entity while it is
                                           // occupied.
+/*
+--------------------------------------------------------------------------------
+*/
 
-#define  ACTF_OCCUPY_ACTIVATE      0x0100 // Keep activating an activation
-                                          // entity while the client occupies
-                                          // it.
+/*
+--------------------------------------------------------------------------------
+occupation.flags
+*/
+#define  OCCUPYF_ACTIVATE       0x0100 // Keep activating an activation
+                                       // entity while the client occupies
+                                       // it.
 
-#define ACTF_OCCUPY_UNTIL_INACTIVE 0x0200 // Unoccupy an occupant that is no
-                                          // longer activating this entity.
-                                          // Requires ACTF_OCCUPY_ACTIVATE.
+#define  OCCUPYF_UNTIL_INACTIVE 0x0200 // Unoccupy an occupant that is no
+                                       // longer activating this entity.
+                                       // Requires OCCUPYF_ACTIVATE.
 
-#define  ACTF_OCCUPY_PM_TYPE       0x0400 // change the pm_type of an occupant
-                                          // to activation.pm_type.
+#define  OCCUPYF_PM_TYPE        0x0400 // change the pm_type of an occupant
+                                       // to occupation.pm_type.
 
-#define  ACTF_OCCUPY_CONTENTS      0x0800 // Change the contents of an occupant
-                                          // to activation.contents.
+#define  OCCUPYF_CONTENTS       0x0800 // Change the contents of an occupant
+                                       // to occupation.contents.
 
-#define  ACTF_OCCUPY_CLIPMASK      0x1000 // Change the clip mask of an occupant
-                                          // to activation.clipMask.
+#define  OCCUPYF_CLIPMASK       0x1000 // Change the clip mask of an occupant
+                                       // to occupation.clipMask.
 
-#define  ACTF_OCCUPY_RESET_OTHER   0x2000 // When an occupied activation entity
-                                          // is reset, also reset
-                                          // activation.other.
+#define  OCCUPYF_RESET_OTHER    0x2000 // When an occupied activation entity
+                                       // is reset, also reset
+                                       // occupation.other.
 /*
 --------------------------------------------------------------------------------
 */
@@ -1171,7 +1178,9 @@ typedef struct
   int           buildTime;
   qboolean      activationEnt;
   int           activationFlags; // contains bit flags representing various 
-                                //abilities of a given usable entity
+                                 //abilities of a given activation entity
+  int           occupationFlags; // contains bit flags representing various 
+                                 //abilities of a given occupation entity
   pmtype_t			activationPm_type; // changes client's pm_type of an occupant
   int           activationContents; // changes the contents of an occupant
   int           activationClipMask; // changes the clip mask of an occupant

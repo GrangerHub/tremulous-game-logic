@@ -686,7 +686,7 @@ void Cmd_Kill_f( gentity_t *ent )
   {
     // reset any activation entities the player might be occupying
     if( ent->client->ps.eFlags & EF_OCCUPYING )
-      G_ResetActivation( ent->activation.occupied, ent );
+      G_ResetOccupation( ent->occupation.occupied, ent );
 
     ent->client->ps.stats[ STAT_HEALTH ] = ent->health = 0;
     player_die( ent, ent, ent, 100000, MOD_SUICIDE );
