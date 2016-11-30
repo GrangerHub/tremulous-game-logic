@@ -313,7 +313,7 @@ typedef enum
 #define EF_HOVEL_MARKED     0x00008   // tells if the hovel occupied is marked
 
 // for occupation of activation entities
-#define EF_OCCUPYING        0x00010    // can result in bugs if applied to buildables or missles
+#define EF_OCCUPYING        0x00010    // can result in bugs if applied to buildables
 #define EF_OCCUPIED         0x00040    // can result in bugs if applied to players
 
 // buildable flags:
