@@ -43,7 +43,7 @@ void G_BounceMissile( gentity_t *ent, trace_t *trace )
   dot = DotProduct( velocity, trace->plane.normal );
   VectorMA( velocity, -2 * dot, trace->plane.normal, ent->s.pos.trDelta );
 
-  if( ent->s.eFlags & EF_BOUNCE_HALF )
+  if( ent->flags & FL_BOUNCE_HALF )
   {
     VectorScale( ent->s.pos.trDelta, 0.65, ent->s.pos.trDelta );
     // check for stop
@@ -115,12 +115,12 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace )
 
   // check for bounce
   if( !other->takedamage &&
-      ( ent->s.eFlags & ( EF_BOUNCE | EF_BOUNCE_HALF ) ) )
+      ( ent->flags & ( FL_BOUNCE | FL_BOUNCE_HALF ) ) )
   {
     G_BounceMissile( ent, trace );
 
     //only play a sound if requested
-    if( !( ent->s.eFlags & EF_NO_BOUNCE_SOUND ) )
+    if( !( ent->s.eFlags & FL_NO_BOUNCE_SOUND ) )
       G_AddEvent( ent, EV_GRENADE_BOUNCE, 0 );
 
     return;
@@ -132,7 +132,7 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace )
     G_BounceMissile( ent, trace );
 
     //only play a sound if requested
-    if( !( ent->s.eFlags & EF_NO_BOUNCE_SOUND ) )
+    if( !( ent->s.eFlags & FL_NO_BOUNCE_SOUND ) )
       G_AddEvent( ent, EV_GRENADE_BOUNCE, 0 );
 
     return;
@@ -546,7 +546,7 @@ gentity_t *launch_grenade( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->think = G_ExplodeMissile;
   bolt->s.eType = ET_MISSILE;
   bolt->s.weapon = WP_GRENADE;
-  bolt->s.eFlags = EF_BOUNCE_HALF;
+  bolt->flags |= FL_BOUNCE_HALF;
   bolt->s.generic1 = WPM_PRIMARY; //weaponMode
   bolt->r.ownerNum = self->s.number;
   bolt->parent = self;
@@ -592,7 +592,7 @@ gentity_t *launch_grenade2( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->think = G_ExplodeMissile;
   bolt->s.eType = ET_MISSILE;
   bolt->s.weapon = WP_GRENADE;
-  bolt->s.eFlags = EF_BOUNCE_HALF;
+  bolt->flags |= FL_BOUNCE_HALF;
   bolt->s.generic1 = WPM_PRIMARY; //weaponMode
   bolt->r.ownerNum = self->s.number;
   bolt->parent = self;
@@ -750,7 +750,7 @@ gentity_t *fire_hive( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->nextthink = level.time + HIVE_DIR_CHANGE_PERIOD;
   bolt->think = AHive_SearchAndDestroy;
   bolt->s.eType = ET_MISSILE;
-  bolt->s.eFlags |= EF_BOUNCE | EF_NO_BOUNCE_SOUND;
+  bolt->flags |= FL_BOUNCE | FL_NO_BOUNCE_SOUND;
   bolt->s.weapon = WP_HIVE;
   bolt->s.generic1 = WPM_PRIMARY; //weaponMode
   bolt->r.ownerNum = self->s.number;
