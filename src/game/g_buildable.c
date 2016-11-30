@@ -1809,19 +1809,29 @@ qboolean  AHovel_Unoccupy( gentity_t *occupied, gentity_t *occupant,
 
 /*
 ================
-AHovel_Reset
+AHovel_OccupantReset
 
-called to exit a hovel
+Custom reset for entities that left the hovel
 ================
 */
-void AHovel_Reset( gentity_t *occupied, gentity_t *occupant )
+void AHovel_OccupantReset( gentity_t *occupant )
 {
   if( occupant && occupant->client )
   {
     if( occupant->client )
       occupant->client->ps.stats[ STAT_STATE ] &= ~SS_HOVELING;
   }
+}
 
+/*
+================
+AHovel_OccupiedReset
+
+called to exit a hovel
+================
+*/
+void AHovel_OccupiedReset( gentity_t *occupied )
+{
   if( occupied )
     G_SetBuildableAnim( occupied, BANIM_ATTACK2, qfalse );
 }
@@ -4842,7 +4852,8 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
       built->activation.willActivate = AHovel_WillActivate;
       built->activation.occupy = AHovel_Occupy;
       built->activation.unoccupy = AHovel_Unoccupy;
-      built->activation.reset = AHovel_Reset;
+      built->activation.occupantReset = AHovel_OccupantReset;
+      built->activation.occupiedReset = AHovel_OccupiedReset;
       built->activation.menuMsgOvrd[ ACTMN_ACT_OCCUPIED ] = MN_A_HOVEL_OCCUPIED;
       built->activation.menuMsgOvrd[ ACTMN_ACT_NOEXIT ] = MN_A_HOVEL_BLOCKED;
       built->think = AHovel_Think;
