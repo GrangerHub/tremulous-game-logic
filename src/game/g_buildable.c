@@ -2457,6 +2457,7 @@ qboolean HTeleporter_Activate( gentity_t *self, gentity_t *activator )
     AngleNormalize360( angles[ YAW ] );
 
     // teleport the player
+    self->activation.other->attemptSpawnTime = -1;
     G_SetBuildableAnim( self, BANIM_SPAWN1, qtrue );
     G_SetBuildableAnim( self->activation.other, BANIM_SPAWN1, qtrue );
     self->activation.occupantFound->noTelefrag = qtrue;
