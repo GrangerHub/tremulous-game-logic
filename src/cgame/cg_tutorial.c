@@ -212,7 +212,7 @@ static void CG_AlienBuilderText( char *text, playerState_t *ps )
   {
     if( cgs.markDeconstruct && !cgs.warmup )
     {
-      if( ps->eFlags & EF_HOVEL_MARKED )
+      if( ps->stats[ STAT_STATE ] & SS_HOVEL_MARKED )
       {
         Q_strcat( text, MAX_TUTORIAL_TEXT,
             va( "Press %s to unmark this hovel for replacement\n",

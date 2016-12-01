@@ -3506,7 +3506,8 @@ void G_BuildableThink( gentity_t *ent, int msec )
   // Set flags
   ent->s.eFlags &= ~( EF_B_POWERED | EF_B_SPAWNED | EF_B_MARKED );
   if( ent->occupation.occupant && ent->occupation.occupant->client)
-    ent->occupation.occupant->client->ps.eFlags &= ~( EF_HOVEL_MARKED );
+    ent->occupation.occupant->client->ps.stats[ STAT_STATE ] &=
+                                                           ~( SS_HOVEL_MARKED );
   
   if( ent->powered )
     ent->s.eFlags |= EF_B_POWERED;
@@ -3517,7 +3518,8 @@ void G_BuildableThink( gentity_t *ent, int msec )
   if( ent->deconstruct )
   {
     if( ent->occupation.occupant && ent->occupation.occupant->client)
-      ent->occupation.occupant->client->ps.eFlags |= EF_HOVEL_MARKED;
+      ent->occupation.occupant->client->ps.stats[ STAT_STATE ] |=
+                                                                SS_HOVEL_MARKED;
       
     ent->s.eFlags |= EF_B_MARKED;
   }
@@ -5433,10 +5435,12 @@ void G_BuildLogRevert( int id )
           {
             if( ent->s.eType == ET_BUILDABLE )
               G_LogPrintf( "revert: remove %d %s\n",
-                (int)( ent - g_entities ), BG_Buildable( ent->s.modelindex )->name );
+                           (int)( ent - g_entities ),
+                           BG_Buildable( ent->s.modelindex )->name );
             G_RemoveRangeMarkerFrom( ent );
-            if( ( ent->s.eFlags & EF_OCCUPIED ) && ent->occupation.occupant )
-              G_UnoccupyEnt( ent, ent->occupation.occupant, ent->occupation.occupant, qtrue );
+            if( ( ent->flags & FL_OCCUPIED ) && ent->occupation.occupant )
+              G_UnoccupyEnt( ent, ent->occupation.occupant,
+                             ent->occupation.occupant, qtrue );
             G_FreeEntity( ent );
             break;
           }
