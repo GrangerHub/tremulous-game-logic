@@ -1012,14 +1012,6 @@ char *ClientUserinfoChanged( int clientNum, qboolean forceName )
   else
     client->pers.flySpeed = BG_Class( PCL_NONE )->speed;
 
-  // disable blueprint errors
-  s = Info_ValueForKey( userinfo, "cg_disableBlueprintErrors" );
-
-  if( atoi( s ) )
-    client->pers.disableBlueprintErrors = qtrue;
-  else
-    client->pers.disableBlueprintErrors = qfalse;
-
   client->pers.buildableRangeMarkerMask =
     atoi( Info_ValueForKey( userinfo, "cg_buildableRangeMarkerMask" ) );
 

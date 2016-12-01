@@ -2873,91 +2873,24 @@ void Cmd_Build_f( gentity_t *ent )
 
   ent->client->ps.stats[ STAT_BUILDABLE ] = buildable;
 
-  if( 1 )
+  dist = BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->buildDist;
+
+  //these are the errors displayed when the builder first selects something to use
+  switch( G_CanBuild( ent, buildable, dist, origin, normal, &groundEntNum ) )
   {
-    dynMenu_t err;
-    dist = BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->buildDist;
+    // can place right away, set the blueprint and the valid togglebit
+    case IBE_NONE:
+    case IBE_TNODEWARN:
+    case IBE_RPTNOREAC:
+    case IBE_RPTPOWERHERE:
+    case IBE_SPWNWARN:
+      ent->client->ps.stats[ STAT_BUILDABLE ] |= SB_VALID_TOGGLEBIT;
+      break;
 
-    //these are the errors displayed when the builder first selects something to use
-    switch( G_CanBuild( ent, buildable, dist, origin, normal, &groundEntNum ) )
-    {
-      // can place right away, set the blueprint and the valid togglebit
-      case IBE_NONE:
-      case IBE_TNODEWARN:
-      case IBE_RPTNOREAC:
-      case IBE_RPTPOWERHERE:
-      case IBE_SPWNWARN:
-        err = MN_NONE;
-        ent->client->ps.stats[ STAT_BUILDABLE ] |= SB_VALID_TOGGLEBIT;
-        break;
-
-      // can't place yet but maybe soon: start with valid togglebit off
-      case IBE_NORMAL:
-        err = MN_B_NORMAL;
-        break;
-
-      case IBE_NOCREEP:
-        err = MN_A_NOCREEP;
-        break;
-
-      case IBE_NOROOM:
-        err = MN_B_NOROOM;
-        break;
-
-      case IBE_NOOVERMIND:
-        err = MN_A_NOOVMND;
-        break;
-
-      case IBE_NOPOWERHERE:
-        err = MN_NONE;
-        break;
-
-      case IBE_NOALIENBP:
-        err = MN_A_NOBP;
-        break;
-
-      case IBE_ONEOVERMIND:
-        err = MN_A_ONEOVERMIND;
-        break;
-
-      case IBE_ONEREACTOR:
-        err = MN_H_ONEREACTOR;
-        break;
-
-      case IBE_NOHUMANBP:
-        err = MN_H_NOBP;
-        break;
-
-      case IBE_NODCC:
-        err = MN_H_NODCC;
-        break;
-
-      case IBE_ONEDCC:
-        err = MN_H_ONEDCC;
-        break;
-
-      case IBE_PERMISSION:
-        err = MN_B_NORMAL;
-        break;
-
-      case IBE_LASTSPAWN:
-        err = MN_B_LASTSPAWN;
-        break;
-
-      case IBE_BLOCKEDBYENEMY:
-        err = MN_B_BLOCKEDBYENEMY;
-        break;
-
-      default:
-        err = -1; // stop uninitialised warning
-        break;
-    }
-
-    if( err != MN_NONE && !ent->client->pers.disableBlueprintErrors )
-      G_TriggerMenu( ent->client->ps.clientNum, err );
+    // can't place yet but maybe soon: start with valid togglebit off
+    default:
+      break;
   }
-  else
-    G_TriggerMenu( ent->client->ps.clientNum, MN_B_CANNOT );
 }
 
 /*
