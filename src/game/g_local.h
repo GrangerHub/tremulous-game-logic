@@ -388,7 +388,6 @@ typedef struct
   int                 location;           // player locations
   int                 teamInfo;           // level.time of team overlay update (disabled = 0)
   float               flySpeed;           // for spectator/noclip moves
-  qboolean            disableBlueprintErrors; // should the buildable blueprint never be hidden from the players?
   int                 buildableRangeMarkerMask;
 
   class_t             classSelection;     // player class (copied to ent->client->ps.stats[ STAT_CLASS ] once spawned)

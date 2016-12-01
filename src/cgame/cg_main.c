@@ -180,7 +180,6 @@ vmCvar_t  cg_noTaunt;
 vmCvar_t  cg_drawSurfNormal;
 vmCvar_t  cg_drawBBOX;
 vmCvar_t  cg_wwSmoothTime;
-vmCvar_t  cg_disableBlueprintErrors;
 vmCvar_t  cg_depthSortParticles;
 vmCvar_t  cg_bounceParticles;
 vmCvar_t  cg_consoleLatency;
@@ -311,7 +310,6 @@ static cvarTable_t cvarTable[ ] =
   { &cg_wwSmoothTime, "cg_wwSmoothTime", "300", CVAR_ARCHIVE },
   { NULL, "cg_wwFollow", "1", CVAR_ARCHIVE|CVAR_USERINFO },
   { NULL, "cg_wwToggle", "1", CVAR_ARCHIVE|CVAR_USERINFO },
-  { NULL, "cg_disableBlueprintErrors", "1", CVAR_ARCHIVE|CVAR_USERINFO },
   { &cg_stickySpec, "cg_stickySpec", "1", CVAR_ARCHIVE|CVAR_USERINFO },
   { &cg_sprintToggle, "cg_sprintToggle", "0", CVAR_ARCHIVE|CVAR_USERINFO },
   { &cg_unlagged, "cg_unlagged", "1", CVAR_ARCHIVE|CVAR_USERINFO },
@@ -1899,7 +1897,6 @@ Will perform callbacks to make the loading info screen update.
 void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum )
 {
   const char  *s;
-  int          i;
   int          team;
 
   // clear everything
