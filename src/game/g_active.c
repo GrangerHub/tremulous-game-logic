@@ -1484,7 +1484,7 @@ qboolean G_WillActivateEntity( gentity_t *actEnt, gentity_t *activator )
 
   if( actEnt->activation.flags & ACTF_OCCUPY )
   {
-    if( ( actEnt->s.eFlags & EF_OCCUPIED ) &&
+    if( ( actEnt->flags & FL_OCCUPIED ) &&
         actEnt->occupation.occupant != activator )
     {
       // only the occupant of this activation entity can activate it when occupied 
@@ -1508,7 +1508,7 @@ qboolean G_WillActivateEntity( gentity_t *actEnt, gentity_t *activator )
           ( actEnt->occupation.occupantFound->client->ps.eFlags &
             EF_OCCUPYING ) ) || ( !( actEnt->occupation.occupantFound->client ) &&
           ( actEnt->occupation.occupantFound->s.eFlags & EF_OCCUPYING ) ) ) &&
-          !( ( actEnt->s.eFlags & EF_OCCUPIED ) &&
+          !( ( actEnt->flags & FL_OCCUPIED ) &&
              ( actEnt->occupation.occupant ==
                                           actEnt->occupation.occupantFound ) ) )
     {
@@ -1580,7 +1580,7 @@ void G_ResetOccupation( gentity_t *occupied, gentity_t *occupant )
 
     if( ( occupied->occupation.flags & OCCUPYF_RESET_OTHER ) &&
          occupied->occupation.other &&
-         ( occupied->occupation.other->s.eFlags & EF_OCCUPIED ) )
+         ( occupied->occupation.other->flags & FL_OCCUPIED ) )
     {
       if( occupied->occupation.other->occupation.other == occupied )
         occupied->occupation.other->occupation.other = NULL;
@@ -1595,7 +1595,7 @@ void G_ResetOccupation( gentity_t *occupied, gentity_t *occupant )
 
     occupied->occupation.occupant = NULL;
     occupied->occupation.other = NULL;
-    occupied->s.eFlags &= ~EF_OCCUPIED;
+    occupied->flags &= ~FL_OCCUPIED;
   }
 
   if( occupant )
@@ -1664,7 +1664,7 @@ void G_OccupyEnt( gentity_t *occupied )
   occupied->occupation.occupantFound = NULL;
   occupied->occupation.occupant->occupation.occupied = occupied;
 
-  occupied->s.eFlags |= EF_OCCUPIED;
+  occupied->flags |= FL_OCCUPIED;
   if( occupied->occupation.occupant->client )
   {
     occupied->occupation.occupant->client->ps.eFlags |= EF_OCCUPYING;
@@ -1828,7 +1828,7 @@ void G_OccupantThink( gentity_t *occupant )
   {
     if( occupied )
     {
-      if( occupied->s.eFlags & EF_OCCUPIED )
+      if( occupied->flags & FL_OCCUPIED )
       {
         if( occupied->occupation.occupyUntil &&
             occupied->occupation.occupyUntil( occupied, occupant ) )

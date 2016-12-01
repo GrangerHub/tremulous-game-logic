@@ -306,9 +306,8 @@ typedef enum
 #define EF_TELEPORT_BIT     0x00002    // toggled every time the origin abruptly changes
 #define EF_PLAYER_EVENT     0x00004    // only used for eType > ET_EVENTS
 
-// for occupation of activation entities
+// for occupation entities
 #define EF_OCCUPYING        0x00010    // can result in bugs if applied to buildables
-#define EF_OCCUPIED         0x00040    // can result in bugs if applied to players
 
 // buildable flags:
 #define EF_B_SPAWNED        0x00008
