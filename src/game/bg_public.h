@@ -693,6 +693,7 @@ typedef enum
 
   //shared build
   MN_B_NOROOM,
+  MN_B_NOROOM_HOVELOCCUPIED,
   MN_B_NORMAL,
   MN_B_CANNOT,
   MN_B_LASTSPAWN,

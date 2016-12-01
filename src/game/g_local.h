@@ -901,6 +901,7 @@ typedef enum
 
   IBE_NORMAL, // too steep
   IBE_NOROOM,
+  IBE_NOROOM_HOVELOCCUPIED, // can't replace a marked hovel that is occupied
   IBE_PERMISSION,
   IBE_LASTSPAWN,
   IBE_BLOCKEDBYENEMY,

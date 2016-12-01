@@ -3814,6 +3814,7 @@ static itemBuildError_t G_SufficientBPAvailable( buildable_t     buildable,
   int               buildPoints = BG_Buildable( buildable )->buildPoints;
   int               remainingBP, remainingSpawns;
   qboolean          collision = qfalse;
+  qboolean          collisionOccupiedHovel = qfalse;
   int               collisionCount = 0;
   qboolean          repeaterInRange = qfalse;
   int               repeaterInRangeCount = 0;
@@ -3954,7 +3955,12 @@ static itemBuildError_t G_SufficientBPAvailable( buildable_t     buildable,
         // so it must be removed
 
         if( collision )
+        {
           collisionCount--;
+          if ( ent->s.modelindex == BA_A_HOVEL &&
+             ( ent->flags & FL_OCCUPIED ) )
+            collisionOccupiedHovel = qtrue;
+        }
 
         if( repeaterInRange )
           repeaterInRangeCount--;
@@ -3981,6 +3987,10 @@ static itemBuildError_t G_SufficientBPAvailable( buildable_t     buildable,
   // Collided with something we can't remove
   if( collisionCount > 0 )
     return IBE_NOROOM;
+
+  // Collided with a marked hovel that is occupied
+  if( collisionOccupiedHovel )
+    return IBE_NOROOM_HOVELOCCUPIED;
 
   // There are one or more repeaters we can't remove
   if( repeaterInRangeCount > 0 )
@@ -4728,6 +4738,10 @@ qboolean G_BuildIfValid( gentity_t *ent, buildable_t buildable )
 
     case IBE_NOROOM:
       G_TriggerMenu( ent->client->ps.clientNum, MN_B_NOROOM );
+      return qfalse;
+
+    case IBE_NOROOM_HOVELOCCUPIED:
+      G_TriggerMenu( ent->client->ps.clientNum, MN_B_NOROOM_HOVELOCCUPIED );
       return qfalse;
 
     case IBE_NOHUMANBP:
