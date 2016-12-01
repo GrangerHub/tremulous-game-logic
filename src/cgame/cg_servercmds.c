@@ -806,7 +806,7 @@ void CG_Menu( int menu, int arg )
       type      = DT_BUILD;
       break;
 
-    case MN_H_TELEPORTNODESTINATION:
+    case MN_H_TELEPORTER_NODESTINATION:
       longMsg   = "There are no operational destination teleporters available! "
                   "Build another teleporter, then try activating this "
                   "teleporter again.";

@@ -273,7 +273,8 @@ typedef enum
 #define SS_HEALING_2X           0x00000800 // medkit or double healing rate
 #define SS_HEALING_3X           0x00001000 // triple healing rate
 #define SS_HOVELING             0x00002000 // indicates if the entity is occupying a hovel
-#define SS_GRABBING             0x00004000
+#define SS_HOVEL_MARKED         0x00004000 // tells if the hovel occupied is marked
+#define SS_GRABBING             0x00008000
 
 #define SB_VALID_TOGGLEBIT      0x00004000
 
@@ -315,12 +316,8 @@ typedef enum
 #define EF_TELEPORT_BIT     0x00002    // toggled every time the origin abruptly changes
 #define EF_PLAYER_EVENT     0x00004    // only used for eType > ET_EVENTS
 
-// for cleints occupying hovels
-#define EF_HOVEL_MARKED     0x00008   // tells if the hovel occupied is marked
-
-// for occupation of activation entities
+// for occupation entities
 #define EF_OCCUPYING        0x00010    // can result in bugs if applied to buildables
-#define EF_OCCUPIED         0x00040    // can result in bugs if applied to players
 
 // buildable flags:
 #define EF_B_SPAWNED        0x00008
@@ -745,7 +742,7 @@ typedef enum
   MN_H_ONEREACTOR,
   MN_H_RPTPOWERHERE,
   MN_H_TELEPORTER_NOBSUIT,
-  MN_H_TELEPORTNODESTINATION,
+  MN_H_TELEPORTER_NODESTINATION,
 
   // activation entity stuff
   MN_ACT_FAILED,

@@ -2419,9 +2419,15 @@ Occupies the destination teleporter with the activator of the origin teleporter
 */
 void HTeleporter_Occupy( gentity_t *occupied )
 {
+  // check to see if the destination teleporter is being used by someone else
+  if( ( occupied->occupation.other->flags & FL_OCCUPIED ) &&
+      occupied->occupation.other->occupation.occupant !=
+                                                occupied->occupation.occupant )
+  return;
+
   occupied->occupation.other->occupation.occupant = occupied->occupation.occupant;
   occupied->occupation.other->occupation.other = occupied;
-  occupied->occupation.other->s.eFlags |= EF_OCCUPIED;
+  occupied->occupation.other->flags |= FL_OCCUPIED;
 }
 
 /*
@@ -2436,7 +2442,7 @@ qboolean HTeleporter_Activate( gentity_t *self, gentity_t *activator )
   
     vec3_t    angles;
 
-    if( ( self->occupation.other->s.eFlags & EF_OCCUPIED ) &&
+    if( ( self->occupation.other->flags & FL_OCCUPIED ) &&
         self->occupation.other->occupation.occupant !=
                                                 self->occupation.occupantFound )
     {
@@ -2500,7 +2506,7 @@ qboolean HTeleporter_WillActivate( gentity_t *actEnt, gentity_t *activator )
   if( !actEnt->occupation.other )
   {
     // There are no operational destination teleporters available!
-    activator->activation.menuMsg = MN_H_TELEPORTNODESTINATION;
+    activator->activation.menuMsg = MN_H_TELEPORTER_NODESTINATION;
     return qfalse;
   }
 
@@ -3836,7 +3842,8 @@ void G_BuildableThink( gentity_t *ent, int msec )
   // Set flags
   ent->s.eFlags &= ~( EF_B_POWERED | EF_B_SPAWNED | EF_B_MARKED );
   if( ent->occupation.occupant && ent->occupation.occupant->client)
-    ent->occupation.occupant->client->ps.eFlags &= ~( EF_HOVEL_MARKED );
+    ent->occupation.occupant->client->ps.stats[ STAT_STATE ] &=
+                                                           ~( SS_HOVEL_MARKED );
   
   if( ent->powered )
     ent->s.eFlags |= EF_B_POWERED;
@@ -3847,7 +3854,8 @@ void G_BuildableThink( gentity_t *ent, int msec )
   if( ent->deconstruct )
   {
     if( ent->occupation.occupant && ent->occupation.occupant->client)
-      ent->occupation.occupant->client->ps.eFlags |= EF_HOVEL_MARKED;
+      ent->occupation.occupant->client->ps.stats[ STAT_STATE ] |=
+                                                                SS_HOVEL_MARKED;
       
     ent->s.eFlags |= EF_B_MARKED;
   }
@@ -5790,14 +5798,16 @@ void G_BuildLogRevert( int id )
           {
             if( ent->s.eType == ET_BUILDABLE )
               G_LogPrintf( "revert: remove %d %s\n",
-                (int)( ent - g_entities ), BG_Buildable( ent->s.modelindex )->name );
+                           (int)( ent - g_entities ),
+                           BG_Buildable( ent->s.modelindex )->name );
             if( ent->buildableTeam == TEAM_HUMANS && !ent->spawned )
                 level.numUnspawnedBuildables[ ent->buildableTeam ]--;
             if( ent->s.modelindex == BA_H_TELEPORTER )
               G_RemoveTeleporter( ent );
             G_RemoveRangeMarkerFrom( ent );
-            if( ( ent->s.eFlags & EF_OCCUPIED ) && ent->occupation.occupant )
-              G_UnoccupyEnt( ent, ent->occupation.occupant, ent->occupation.occupant, qtrue );
+            if( ( ent->flags & FL_OCCUPIED ) && ent->occupation.occupant )
+              G_UnoccupyEnt( ent, ent->occupation.occupant,
+                             ent->occupation.occupant, qtrue );
             G_FreeEntity( ent );
             break;
           }
