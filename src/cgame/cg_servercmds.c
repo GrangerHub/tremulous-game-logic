@@ -684,6 +684,15 @@ void CG_Menu( int menu, int arg )
       type      = DT_BUILD;
       break;
 
+    case MN_B_NOROOM_HOVELOCCUPIED:
+      longMsg   = "This marked hovel is occupied and can't be replaced. Move "
+                  "until the structure turns translucent green, indicating a "
+                  "valid build location.  Or wait for the hovel to become "
+                  "unoccupied.";
+      shortMsg  = "This marked hovel is occupied and can't be replaced";
+      type      = DT_BUILD;
+      break;
+
     case MN_B_NORMAL:
       longMsg   = "Cannot build on this surface. The surface is too steep or "
                   "unsuitable for building. Please choose another site for this "
