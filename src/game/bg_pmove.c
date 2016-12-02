@@ -678,6 +678,7 @@ static qboolean PM_CheckWallJump( void )
   pml.groundPlane = qfalse;   // jumping away
   pml.walking = qfalse;
   pm->ps->pm_flags |= PMF_JUMP_HELD;
+  pm->pmext->nextBunnyHopTime = pm->ps->commandTime + BUNNY_HOP_DELAY;
 
   pm->ps->groundEntityNum = ENTITYNUM_NONE;
 
@@ -780,8 +781,9 @@ static qboolean PM_CheckJump( void )
   if( pm->ps->pm_type == PM_GRABBED )
     return qfalse;
 
-  // must wait for jump to be released
-  if( pm->ps->pm_flags & PMF_JUMP_HELD )
+  // Allow for a delayed bunny hops
+  if( ( pm->ps->pm_flags & PMF_JUMP_HELD ) &&
+      ( pm->pmext->nextBunnyHopTime - pm->ps->commandTime > 0 ) )
     return qfalse;
 
   //don't allow walljump for a short while after jumping from the ground
@@ -794,6 +796,7 @@ static qboolean PM_CheckJump( void )
   pml.groundPlane = qfalse;   // jumping away
   pml.walking = qfalse;
   pm->ps->pm_flags |= PMF_JUMP_HELD;
+  pm->pmext->nextBunnyHopTime = pm->ps->commandTime + BUNNY_HOP_DELAY;
 
   // take some stamina off
   if( BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_STAMINA) )
@@ -3766,6 +3769,7 @@ void PmoveSingle( pmove_t *pmove )
   {
     // not holding jump
     pm->ps->pm_flags &= ~PMF_JUMP_HELD;
+    pm->pmext->nextBunnyHopTime = 0;
   }
 
   // decide if backpedaling animations should be used
