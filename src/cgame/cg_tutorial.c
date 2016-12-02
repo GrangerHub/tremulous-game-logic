@@ -233,7 +233,7 @@ static void CG_AlienBuilderText( char *text, playerState_t *ps )
   {
     if( ( es = CG_BuildableInRange( ps, NULL ) ) )
     {
-      if( cgs.markDeconstruct )
+      if( cgs.markDeconstruct && !cgs.warmup )
       {
         if( es->eFlags & EF_B_MARKED )
         {
