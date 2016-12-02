@@ -171,7 +171,7 @@ typedef struct
   float  fallVelocity;
   int    updateAnglesTime;
   float  diffAnglesPeriod;
-  int    nextBunnyHopTime;
+  int    bunnyHopTimer;
   vec3_t previousFrameAngles;
   vec3_t previousUpdateAngles;
   vec3_t angularVelocity;
