@@ -780,6 +780,10 @@ static qboolean PM_CheckJump( void )
   if( pm->ps->pm_type == PM_GRABBED )
     return qfalse;
 
+  // must wait for jump to be released
+  if( pm->ps->pm_flags & PMF_JUMP_HELD )
+    return qfalse;
+
   //don't allow walljump for a short while after jumping from the ground
   if( BG_ClassHasAbility( pm->ps->stats[ STAT_CLASS ], SCA_WALLJUMPER ) )
   {
