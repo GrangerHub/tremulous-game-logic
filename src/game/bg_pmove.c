@@ -711,7 +711,7 @@ static qboolean PM_CheckWallJump( void )
   pml.groundPlane = qfalse;   // jumping away
   pml.walking = qfalse;
   pm->ps->pm_flags |= PMF_JUMP_HELD;
-  pm->pmext->nextBunnyHopTime = pm->ps->commandTime + BUNNY_HOP_DELAY;
+  pm->pmext->bunnyHopTimer = BUNNY_HOP_DELAY;
 
   pm->ps->groundEntityNum = ENTITYNUM_NONE;
 
@@ -819,7 +819,7 @@ static qboolean PM_CheckJump( void )
 
   // Allow for a delayed bunny hops
   if( ( pm->ps->pm_flags & PMF_JUMP_HELD ) &&
-      ( pm->pmext->nextBunnyHopTime - pm->ps->commandTime > 0 ) )
+      ( pm->pmext->bunnyHopTimer > 0 ) )
     return qfalse;
 
   //don't allow walljump for a short while after jumping from the ground
@@ -832,7 +832,7 @@ static qboolean PM_CheckJump( void )
   pml.groundPlane = qfalse;   // jumping away
   pml.walking = qfalse;
   pm->ps->pm_flags |= PMF_JUMP_HELD;
-  pm->pmext->nextBunnyHopTime = pm->ps->commandTime + BUNNY_HOP_DELAY;
+  pm->pmext->bunnyHopTimer = BUNNY_HOP_DELAY;
 
   jetjump = ( BG_InventoryContainsUpgrade( UP_JETPACK, pm->ps->stats ) &&
               pm->ps->stats[ STAT_FUEL ] >= JETPACK_FUEL_JUMP );
@@ -3649,6 +3649,16 @@ static void PM_DropTimers( void )
       pm->ps->tauntTimer = 0;
     }
   }
+
+  if( pm->pmext->bunnyHopTimer > 0 )
+  {
+    pm->pmext->bunnyHopTimer -= pml.msec;
+
+    if( pm->pmext->bunnyHopTimer < 0 )
+    {
+      pm->pmext->bunnyHopTimer = 0;
+    }
+  }
 }
 
 
@@ -3971,7 +3981,7 @@ void PmoveSingle( pmove_t *pmove )
   {
     // not holding jump
     pm->ps->pm_flags &= ~PMF_JUMP_HELD;
-    pm->pmext->nextBunnyHopTime = 0;
+    pm->pmext->bunnyHopTimer = 0;
   }
 
   // decide if backpedaling animations should be used
