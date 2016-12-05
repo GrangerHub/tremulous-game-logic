@@ -712,6 +712,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define AVG_FALL_DISTANCE           ((MIN_FALL_DISTANCE+MAX_FALL_DISTANCE)/2.0f)
 
 #define BUNNY_HOP_DELAY             250  // minimum miliseconds delay between bunny hops
+#define DOUBLE_JUMP_MAX_TIME        400  // maximum miliseconds after a jump that
+                                         // a higher "double jump" can be made
 
 #define DEFAULT_FREEKILL_PERIOD     "120" //seconds
 #define FREEKILL_ALIEN              ALIEN_CREDITS_PER_KILL

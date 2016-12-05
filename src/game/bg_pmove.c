@@ -711,7 +711,7 @@ static qboolean PM_CheckWallJump( void )
   pml.groundPlane = qfalse;   // jumping away
   pml.walking = qfalse;
   pm->ps->pm_flags |= PMF_JUMP_HELD;
-  pm->pmext->bunnyHopTimer = BUNNY_HOP_DELAY;
+  pm->ps->persistant[PERS_JUMPTIME] = pm->ps->commandTime;
 
   pm->ps->groundEntityNum = ENTITYNUM_NONE;
 
@@ -817,9 +817,10 @@ static qboolean PM_CheckJump( void )
   if( pm->ps->pm_type == PM_GRABBED )
     return qfalse;
 
-  // Allow for a delayed bunny hops
+  // Allow for a delayed bunny hop
   if( ( pm->ps->pm_flags & PMF_JUMP_HELD ) &&
-      ( pm->pmext->bunnyHopTimer > 0 ) )
+      ( pm->ps->commandTime - pm->ps->persistant[PERS_JUMPTIME] <
+                                                             BUNNY_HOP_DELAY ) )
     return qfalse;
 
   //don't allow walljump for a short while after jumping from the ground
@@ -832,7 +833,6 @@ static qboolean PM_CheckJump( void )
   pml.groundPlane = qfalse;   // jumping away
   pml.walking = qfalse;
   pm->ps->pm_flags |= PMF_JUMP_HELD;
-  pm->pmext->bunnyHopTimer = BUNNY_HOP_DELAY;
 
   jetjump = ( BG_InventoryContainsUpgrade( UP_JETPACK, pm->ps->stats ) &&
               pm->ps->stats[ STAT_FUEL ] >= JETPACK_FUEL_JUMP );
@@ -854,13 +854,15 @@ static qboolean PM_CheckJump( void )
     && !BG_ClassHasAbility( pm->ps->stats[ STAT_CLASS ], SCA_WALLJUMPER ) ) )
     //Trust me. You don't want marauders flying out of the map from 3 wall jumps.
 		if (cpm_pm_jump_z) {
-			if (pm->ps->persistant[PERS_JUMPTIME] > 0) {
+			if (pm->ps->commandTime - pm->ps->persistant[PERS_JUMPTIME] <=
+                                                         DOUBLE_JUMP_MAX_TIME) {
 				jumpvel += (cpm_pm_jump_z * BG_Class( pm->ps->stats[ STAT_CLASS ] )->jumpMagnitude);
 				//Adding requires me to multiply by class vel again
 			}
-			pm->ps->persistant[PERS_JUMPTIME] = 400;
 			pm->ps->pm_time = pm_cliptime; //clip through walls with the same timer as walljump
 	  }
+
+  pm->ps->persistant[PERS_JUMPTIME] = pm->ps->commandTime;
 
   pm->ps->groundEntityNum = ENTITYNUM_NONE;
 
@@ -3649,16 +3651,6 @@ static void PM_DropTimers( void )
       pm->ps->tauntTimer = 0;
     }
   }
-
-  if( pm->pmext->bunnyHopTimer > 0 )
-  {
-    pm->pmext->bunnyHopTimer -= pml.msec;
-
-    if( pm->pmext->bunnyHopTimer < 0 )
-    {
-      pm->pmext->bunnyHopTimer = 0;
-    }
-  }
 }
 
 
@@ -3981,7 +3973,6 @@ void PmoveSingle( pmove_t *pmove )
   {
     // not holding jump
     pm->ps->pm_flags &= ~PMF_JUMP_HELD;
-    pm->pmext->bunnyHopTimer = 0;
   }
 
   // decide if backpedaling animations should be used
@@ -4042,9 +4033,6 @@ void PmoveSingle( pmove_t *pmove )
     PM_DeadMove( );
 
   PM_DropTimers( );
-
-  //Incremenet jumptime status
-  if (pm->ps->persistant[PERS_JUMPTIME] > 0) pm->ps->persistant[PERS_JUMPTIME] -= pml.msec;
 
   // Disable dodge
   //PM_CheckDodge( );

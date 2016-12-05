@@ -171,7 +171,6 @@ typedef struct
   float  fallVelocity;
   int    updateAnglesTime;
   float  diffAnglesPeriod;
-  int    bunnyHopTimer;
   vec3_t previousFrameAngles;
   vec3_t previousUpdateAngles;
   vec3_t angularVelocity;
@@ -299,9 +298,9 @@ typedef enum
   PERS_BP,
   PERS_BP_RESERVE,
   PERS_MARKEDBP,
-  PERS_ACT_ENT, // indicates the entity number of an entity a client can activate
-  PERS_JUMPTIME
-    // netcode has space for 0 more
+  PERS_ACT_ENT,  // indicates the entity number of an entity a client can activate
+  PERS_JUMPTIME  // the previous time the player has jumped
+  // netcode has space for 0 more
 } persEnum_t;
 
 #define MISC_HEALTH_RESERVE    ( MAX_MISC - 1 ) // hack to fit extra data in the misc[] array
