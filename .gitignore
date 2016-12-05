@@ -3,6 +3,7 @@ GNUmakefile.local
 dep
 *.swp
 .tags
+.tags_swap
 
 # OS X
 ####################
