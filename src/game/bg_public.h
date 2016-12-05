@@ -171,7 +171,6 @@ typedef struct
   float  fallVelocity;
   int    updateAnglesTime;
   float  diffAnglesPeriod;
-  int    bunnyHopTimer;
   vec3_t previousFrameAngles;
   vec3_t previousUpdateAngles;
   vec3_t angularVelocity;
@@ -292,8 +291,9 @@ typedef enum
   PERS_NEWWEAPON,  // weapon to switch to
   PERS_BP,
   PERS_MARKEDBP,
-  PERS_ACT_ENT  // indicates the entity number of an entity a client can activate
-  // netcode has space for 2 more
+  PERS_ACT_ENT,  // indicates the entity number of an entity a client can activate
+  PERS_JUMPTIME  // the previous time the player has jumped
+  // netcode has space for 1 more
 } persEnum_t;
 
 #define PS_WALLCLIMBINGFOLLOW   0x00000001
