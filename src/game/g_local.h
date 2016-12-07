@@ -500,6 +500,7 @@ struct gclient_s
   qboolean            inactivityWarning;// qtrue if the five seoond warning has been given
   int                 rewardTime;       // clear the EF_AWARD_IMPRESSIVE, etc when time > this
   int                 boostedTime;      // last time we touched a booster
+  int                 jumpTimer;        // elapsed time since the previous jump
 
   int                 airOutTime;
 

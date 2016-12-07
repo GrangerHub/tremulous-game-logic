@@ -206,6 +206,9 @@ typedef struct pmove_s
   int           pmove_fixed;
   int           pmove_msec;
 
+  // elapsed time since the previous jump
+  int           jumpTimer;
+
   // callbacks to test the world
   // these will be different functions during game and cgame
   /*void    (*trace)( trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs, const vec3_t end, int passEntityNum, int contentMask );*/
@@ -291,8 +294,7 @@ typedef enum
   PERS_NEWWEAPON,  // weapon to switch to
   PERS_BP,
   PERS_MARKEDBP,
-  PERS_ACT_ENT,  // indicates the entity number of an entity a client can activate
-  PERS_JUMPTIME  // the previous time the player has jumped
+  PERS_ACT_ENT  // indicates the entity number of an entity a client can activate
   // netcode has space for 1 more
 } persEnum_t;
 
