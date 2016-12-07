@@ -169,7 +169,6 @@ typedef struct
   int    pouncePayload;
   int    repairRepeatDelay;      // Used for for the construction kit
   float  fallVelocity;
-  int    jumpTimer;              // elapsed time since the previous jump
   int    updateAnglesTime;
   float  diffAnglesPeriod;
   vec3_t previousFrameAngles;
@@ -292,7 +291,8 @@ typedef enum
   PERS_NEWWEAPON,  // weapon to switch to
   PERS_BP,
   PERS_MARKEDBP,
-  PERS_ACT_ENT  // indicates the entity number of an entity a client can activate
+  PERS_ACT_ENT,  // indicates the entity number of an entity a client can activate
+  PERS_JUMPTIME // elapsed time since the previous jump
   // netcode has space for 1 more
 } persEnum_t;
 

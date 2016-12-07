@@ -678,7 +678,7 @@ static qboolean PM_CheckWallJump( void )
   pml.groundPlane = qfalse;   // jumping away
   pml.walking = qfalse;
   pm->ps->pm_flags |= PMF_JUMP_HELD;
-  pm->pmext->jumpTimer = 0;
+  pm->ps->persistant[PERS_JUMPTIME] = 0;
 
   pm->ps->groundEntityNum = ENTITYNUM_NONE;
 
@@ -783,7 +783,7 @@ static qboolean PM_CheckJump( void )
 
   // Allow for a delayed bunny hop
   if( ( pm->ps->pm_flags & PMF_JUMP_HELD ) &&
-      ( pm->pmext->jumpTimer < BUNNY_HOP_DELAY ) )
+      ( pm->ps->persistant[PERS_JUMPTIME] < BUNNY_HOP_DELAY ) )
     return qfalse;
 
   //don't allow walljump for a short while after jumping from the ground
@@ -796,7 +796,7 @@ static qboolean PM_CheckJump( void )
   pml.groundPlane = qfalse;   // jumping away
   pml.walking = qfalse;
   pm->ps->pm_flags |= PMF_JUMP_HELD;
-  pm->pmext->jumpTimer = 0;
+  pm->ps->persistant[PERS_JUMPTIME] = 0;
 
   // take some stamina off
   if( BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_STAMINA) )
@@ -3449,10 +3449,10 @@ static void PM_DropTimers( void )
   }
 
   // the jump timer increases
-  if( pm->pmext->jumpTimer < 0 )
-    pm->pmext->jumpTimer = 0;
+  if( pm->ps->persistant[PERS_JUMPTIME] < 0 )
+    pm->ps->persistant[PERS_JUMPTIME] = 0;
   else
-    pm->pmext->jumpTimer += pml.msec;
+    pm->ps->persistant[PERS_JUMPTIME] += pml.msec;
 }
 
 
