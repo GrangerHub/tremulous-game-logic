@@ -711,7 +711,7 @@ static qboolean PM_CheckWallJump( void )
   pml.groundPlane = qfalse;   // jumping away
   pml.walking = qfalse;
   pm->ps->pm_flags |= PMF_JUMP_HELD;
-  pm->ps->persistant[PERS_JUMPTIME] = pm->ps->commandTime;
+  pm->ps->persistant[PERS_JUMPTIME] = 0;
 
   pm->ps->groundEntityNum = ENTITYNUM_NONE;
 
@@ -819,8 +819,7 @@ static qboolean PM_CheckJump( void )
 
   // Allow for a delayed bunny hop
   if( ( pm->ps->pm_flags & PMF_JUMP_HELD ) &&
-      ( pm->ps->commandTime - pm->ps->persistant[PERS_JUMPTIME] <
-                                                             BUNNY_HOP_DELAY ) )
+      ( pm->ps->persistant[PERS_JUMPTIME] < BUNNY_HOP_DELAY ) )
     return qfalse;
 
   //don't allow walljump for a short while after jumping from the ground
@@ -853,16 +852,17 @@ static qboolean PM_CheckJump( void )
     || ( pm->ps->stats[ STAT_TEAM ] == TEAM_ALIENS
     && !BG_ClassHasAbility( pm->ps->stats[ STAT_CLASS ], SCA_WALLJUMPER ) ) )
     //Trust me. You don't want marauders flying out of the map from 3 wall jumps.
-		if (cpm_pm_jump_z) {
-			if (pm->ps->commandTime - pm->ps->persistant[PERS_JUMPTIME] <=
-                                                         DOUBLE_JUMP_MAX_TIME) {
+		if (cpm_pm_jump_z)
+    {
+			if (pm->ps->persistant[PERS_JUMPTIME] < DOUBLE_JUMP_MAX_TIME)
+      {
 				jumpvel += (cpm_pm_jump_z * BG_Class( pm->ps->stats[ STAT_CLASS ] )->jumpMagnitude);
 				//Adding requires me to multiply by class vel again
 			}
 			pm->ps->pm_time = pm_cliptime; //clip through walls with the same timer as walljump
 	  }
 
-  pm->ps->persistant[PERS_JUMPTIME] = pm->ps->commandTime;
+  pm->ps->persistant[PERS_JUMPTIME] = 0;
 
   pm->ps->groundEntityNum = ENTITYNUM_NONE;
 
@@ -3651,6 +3651,12 @@ static void PM_DropTimers( void )
       pm->ps->tauntTimer = 0;
     }
   }
+
+  // the jump timer increases
+  if( pm->ps->persistant[PERS_JUMPTIME] < 0 )
+    pm->ps->persistant[PERS_JUMPTIME] = 0;
+  else
+    pm->ps->persistant[PERS_JUMPTIME] += pml.msec;
 }
 
 

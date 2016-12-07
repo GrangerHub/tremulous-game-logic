@@ -299,7 +299,7 @@ typedef enum
   PERS_BP_RESERVE,
   PERS_MARKEDBP,
   PERS_ACT_ENT,  // indicates the entity number of an entity a client can activate
-  PERS_JUMPTIME  // the previous time the player has jumped
+  PERS_JUMPTIME // elapsed time since the previous jump
   // netcode has space for 0 more
 } persEnum_t;
 
