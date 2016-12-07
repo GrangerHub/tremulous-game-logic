@@ -169,6 +169,7 @@ typedef struct
   int    pouncePayload;
   int    repairRepeatDelay;      // Used for for the construction kit
   float  fallVelocity;
+  int    jumpTimer;              // elapsed time since the previous jump
   int    updateAnglesTime;
   float  diffAnglesPeriod;
   vec3_t previousFrameAngles;
@@ -205,9 +206,6 @@ typedef struct pmove_s
   // for fixed msec Pmove
   int           pmove_fixed;
   int           pmove_msec;
-
-  // elapsed time since the previous jump
-  int           jumpTimer;
 
   // callbacks to test the world
   // these will be different functions during game and cgame

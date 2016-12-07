@@ -468,7 +468,6 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
     pm.tracemask = ent->clipmask;
     pm.trace = trap_Trace;
     pm.pointcontents = trap_PointContents;
-    pm.jumpTimer = client->jumpTimer;
 
     // Perform a pmove
     Pmove( &pm );
@@ -478,7 +477,6 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
     VectorCopy( client->ps.origin, ent->r.currentOrigin );
     VectorCopy( client->ps.viewangles, ent->r.currentAngles );
     VectorCopy( client->ps.viewangles, ent->s.pos.trBase );
-    client->jumpTimer = pm.jumpTimer;
 
     G_TouchTriggers( ent );
     trap_UnlinkEntity( ent );
@@ -2230,7 +2228,6 @@ void ClientThink_real( gentity_t *ent )
   pm.pointcontents = trap_PointContents;
   pm.debugLevel = g_debugMove.integer;
   pm.noFootsteps = 0;
-  pm.jumpTimer = client->jumpTimer;
 
   pm.pmove_fixed = pmove_fixed.integer | client->pers.pmoveFixed;
   pm.pmove_msec = pmove_msec.integer;
@@ -2248,8 +2245,6 @@ void ClientThink_real( gentity_t *ent )
   // save results of pmove
   if( ent->client->ps.eventSequence != oldEventSequence )
     ent->eventTime = level.time;
-
-  client->jumpTimer = pm.jumpTimer;
 
   VectorCopy( ent->client->ps.viewangles, ent->r.currentAngles );
   if( g_smoothClients.integer )
