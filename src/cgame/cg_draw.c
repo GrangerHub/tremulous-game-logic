@@ -2761,7 +2761,7 @@ static void CG_ScanForCrosshairEntity( void )
       case TR_LINEAR :
         VectorScale( forward, speed, velocity );
         BG_ModifyMissleLaunchVelocity( cg.predictedPlayerEntity.currentState.pos.trDelta, 
-                                       cg.pmext.angularVelocity, velocity,
+                                       cg.predictedPlayerState.speed, velocity,
                                        BG_Weapon( weapon )->relativeMissileSpeed );
         SnapVector( velocity );
         VectorScale( velocity, BG_Weapon( weapon )->impactPrediction[ num ].missileLifeTime, end );

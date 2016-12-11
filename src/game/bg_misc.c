@@ -2358,7 +2358,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     90.0f,                //float     zoomFov;
     qfalse,               //qboolean  purchasable;
     qtrue,                //qboolean  longRanged;
-    qfalse,               //qboolean  relativeMissileSpeed;
+    qtrue,                //qboolean  relativeMissileSpeed;
     {
       {                     //impactPrediction_t impactPrediction[0];
         WPM_NONE,           //weaponMode_t  weaponMode;
@@ -2706,7 +2706,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     90.0f,                //float     zoomFov;
     qtrue,                //qboolean  purchasable;
     qtrue,                //qboolean  longRanged;
-    qfalse,               //qboolean  relativeMissileSpeed;
+    qtrue,                //qboolean  relativeMissileSpeed;
     {
       {                     //impactPrediction_t impactPrediction[0];
         WPM_NONE,           //weaponMode_t  weaponMode;
@@ -2752,7 +2752,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     90.0f,                //float     zoomFov;
     qtrue,                //qboolean  purchasable;
     qtrue,                //qboolean  longRanged;
-    qfalse,               //qboolean  relativeMissileSpeed;
+    qtrue,                //qboolean  relativeMissileSpeed;
     {
       {                     //impactPrediction_t impactPrediction[0];
         WPM_NONE,           //weaponMode_t  weaponMode;
@@ -2794,7 +2794,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     90.0f,                //float     zoomFov;
     qfalse,               //qboolean  purchasable;
     qfalse,               //qboolean  longRanged;
-    qfalse,               //qboolean  relativeMissileSpeed;
+    qtrue,                //qboolean  relativeMissileSpeed;
     {
       {                     //impactPrediction_t impactPrediction[0];
         WPM_NONE,           //weaponMode_t  weaponMode;
@@ -3351,14 +3351,23 @@ BG_ModifyMissleLaunchVelocity
 
 =============================
 */
-void BG_ModifyMissleLaunchVelocity( vec3_t pVelocity, vec3_t pAVelocity,
+void BG_ModifyMissleLaunchVelocity( vec3_t pVelocity, int speed,
                                     vec3_t mVelocity, qboolean relativeMissileSpeed )
 {
+  vec3_t mDir;
+  int    scale;
+
   // FIXME add the velocity from a mover moving the firing player to the shot
   if( relativeMissileSpeed )
   {
-    VectorAdd( mVelocity, pVelocity, mVelocity );
-    VectorAdd( mVelocity, pAVelocity, mVelocity );
+    if( VectorLength( pVelocity ) > 2 * speed )
+      VectorAdd( mVelocity, pVelocity, mVelocity );
+    else
+    {
+      VectorNormalize2( mVelocity, mDir );
+      scale = DotProduct( pVelocity , mDir );
+      VectorMA( mVelocity, scale, mDir, mVelocity );
+    }
   }
 
   return;

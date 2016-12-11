@@ -1359,7 +1359,7 @@ qboolean                    BG_UpgradeAllowedInStage( upgrade_t upgrade,
                                                       stage_t stage,
                                                       int gameIsInWarmup );
 int                         BG_GetLCannonPrimaryFireSpeed( int charge );
-void                        BG_ModifyMissleLaunchVelocity( vec3_t pVelocity, vec3_t pAVelocity,
+void                        BG_ModifyMissleLaunchVelocity( vec3_t pVelocity, int speed,
                                                            vec3_t mVelocity, qboolean relativeMissileSpeed );
 // content masks
 #define MASK_ALL          (-1)
