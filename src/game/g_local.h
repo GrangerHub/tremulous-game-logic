@@ -1313,6 +1313,7 @@ extern  vmCvar_t  g_warmupDefensiveBuildableRespawnTime;
 
 #define IS_WARMUP  ( g_doWarmup.integer && g_warmup.integer )
 
+extern  vmCvar_t  g_humanStaminaMode; // when set to 0, human stamina doesn't drain
 extern  vmCvar_t  g_friendlyFire;
 extern  vmCvar_t  g_friendlyBuildableFire;
 extern  vmCvar_t  g_dretchPunt;
