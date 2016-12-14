@@ -2556,8 +2556,9 @@ void HMedistat_Think( gentity_t *self )
         self->enemy->client->ps.stats[ STAT_HEALTH ] = self->enemy->health;
       }
 
-      //if they're completely healed, give them a medkit
-      if( self->enemy->health >= self->enemy->client->ps.stats[ STAT_MAX_HEALTH ] )
+      //if they're completely healed and have full stamina, give them a medkit
+      if( self->enemy->health >= self->enemy->client->ps.stats[ STAT_MAX_HEALTH ] &&
+          self->enemy->client->ps.stats[ STAT_STAMINA ] >= STAMINA_MAX )
       {
         if( !BG_InventoryContainsUpgrade( UP_MEDKIT, self->enemy->client->ps.stats ) )
           BG_AddUpgradeToInventory( UP_MEDKIT, self->enemy->client->ps.stats );

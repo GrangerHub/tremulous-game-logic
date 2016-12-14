@@ -277,7 +277,6 @@ typedef enum
 #define SS_HEALING_ACTIVE       0x00000400 // medistat for humans, creep for aliens
 #define SS_HEALING_2X           0x00000800 // medkit or double healing rate
 #define SS_HEALING_3X           0x00001000 // triple healing rate
-#define SS_ACTIVATING                0x00002000 // indicates a client is currently using a usable entity
 
 #define SB_VALID_TOGGLEBIT      0x00002000
 
