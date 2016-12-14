@@ -670,6 +670,8 @@ void ClientTimerActions( gentity_t *ent, int msec )
       client->ps.stats[ STAT_STAMINA ] -= STAMINA_SPRINT_TAKE;
     else if( walking || crouched )
       client->ps.stats[ STAT_STAMINA ] += STAMINA_WALK_RESTORE;
+    else
+      client->ps.stats[ STAT_STAMINA ] += STAMINA_RUN_RESTORE;
       
     // Check stamina limits
     if( client->ps.stats[ STAT_STAMINA ] > STAMINA_MAX )
