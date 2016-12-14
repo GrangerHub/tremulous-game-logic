@@ -811,8 +811,13 @@ static qboolean PM_CheckJump( void )
 
   if( BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_STAMINA) &&
       ( pm->ps->stats[ STAT_STAMINA ] < STAMINA_SLOW_LEVEL + STAMINA_JUMP_TAKE ) &&
-      ( !BG_InventoryContainsUpgrade( UP_JETPACK, pm->ps->stats ) || pm->ps->stats[ STAT_FUEL ] < JETPACK_FUEL_JUMP ) )
+      ( !BG_InventoryContainsUpgrade( UP_JETPACK, pm->ps->stats ) ||
+        pm->ps->stats[ STAT_FUEL ] < JETPACK_FUEL_JUMP ) )
+  {
+    // disable bunny hop
+    pm->ps->pm_flags &= ~PMF_ALL_HOP_FLAGS;
     return qfalse;
+  }
 
   //no bunny hopping off a dodge
   //SCA_DODGE? -vjr
