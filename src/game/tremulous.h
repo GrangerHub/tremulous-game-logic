@@ -534,7 +534,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define JETPACK_FUEL_FULL           7500 //can't exceed 32767
 #define JETPACK_FUEL_LOW            1500
 #define JETPACK_FUEL_USAGE          8 //every 100ms
-#define JETPACK_FUEL_JUMP           300
+#define JETPACK_FUEL_JUMP           150
 
 #define BSUIT_PRICE                 400
 #define BSUIT_POISON_PROTECTION     3
