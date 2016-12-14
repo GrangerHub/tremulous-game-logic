@@ -841,7 +841,8 @@ static qboolean PM_CheckJump( void )
   jetjump = ( BG_InventoryContainsUpgrade( UP_JETPACK, pm->ps->stats ) &&
               pm->ps->stats[ STAT_FUEL ] >= JETPACK_FUEL_JUMP );
 
-  if( BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_STAMINA) )
+  if( BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_STAMINA) &&
+      pm->humanStaminaMode )
   {
     if( !jetjump )
       pm->ps->stats[ STAT_STAMINA ] -= STAMINA_JUMP_TAKE;

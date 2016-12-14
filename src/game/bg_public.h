@@ -83,6 +83,8 @@ enum
   CS_WARMUP,                // g_warmup
   CS_WARMUP_READY,
 
+  CS_HUMAN_STAMINA_MODE,
+
   CS_MODELS,
   CS_SOUNDS           = CS_MODELS + MAX_MODELS,
   CS_SHADERS          = CS_SOUNDS + MAX_SOUNDS,
@@ -207,6 +209,8 @@ typedef struct pmove_s
   // for fixed msec Pmove
   int           pmove_fixed;
   int           pmove_msec;
+
+  int           humanStaminaMode; // when set to 0, human stamina doesn't drain
 
   // callbacks to test the world
   // these will be different functions during game and cgame

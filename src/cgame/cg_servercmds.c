@@ -391,6 +391,8 @@ static void CG_ConfigStringModified( void )
     CG_ParseWarmup( );
   else if( num == CS_WARMUP_READY )
     CG_ParseWarmupReady( );
+  else if( num == CS_HUMAN_STAMINA_MODE )
+    cgs.humanStaminaMode = atoi( str );
   else if( num == CS_ALIEN_STAGES )
   {
     stage_t oldAlienStage = cgs.alienStage;

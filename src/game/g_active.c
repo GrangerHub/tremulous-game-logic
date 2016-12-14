@@ -664,7 +664,8 @@ void ClientTimerActions( gentity_t *ent, int msec )
     // Restore or subtract stamina
     if( stopped || client->ps.pm_type == PM_JETPACK )
       client->ps.stats[ STAT_STAMINA ] += STAMINA_STOP_RESTORE;
-    else if( ( client->ps.stats[ STAT_STATE ] & SS_SPEEDBOOST ) &&
+    else if( ( client->ps.stats[ STAT_STATE ] & SS_SPEEDBOOST )  &&
+               g_humanStaminaMode.integer &&
              !( client->buttons & BUTTON_WALKING ) ) // walk overrides sprint
       client->ps.stats[ STAT_STAMINA ] -= STAMINA_SPRINT_TAKE;
     else if( walking || crouched )
@@ -2300,6 +2301,8 @@ void ClientThink_real( gentity_t *ent )
 
   pm.pmove_fixed = pmove_fixed.integer | client->pers.pmoveFixed;
   pm.pmove_msec = pmove_msec.integer;
+
+  pm.humanStaminaMode = g_humanStaminaMode.integer;
 
   VectorCopy( client->ps.origin, client->oldOrigin );
 
