@@ -804,7 +804,8 @@ static qboolean PM_CheckJump( void )
   pm->ps->persistant[PERS_JUMPTIME] = 0;
 
   // take some stamina off
-  if( BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_STAMINA) )
+  if( BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_STAMINA) &&
+      pm->humanStaminaMode )
     pm->ps->stats[ STAT_STAMINA ] -= STAMINA_JUMP_TAKE;
 
   pm->ps->groundEntityNum = ENTITYNUM_NONE;
