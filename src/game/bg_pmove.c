@@ -563,7 +563,8 @@ static qboolean PM_CheckPounce( void )
   }
 
   // We're building up for a pounce
-  if( pm->cmd.buttons & BUTTON_ATTACK2 )
+  if( ( pm->cmd.buttons & BUTTON_ATTACK2 ) &&
+      pm->cmd.upmove < 10 ) // allow jump to initiate a pounce
   {
     pm->ps->pm_flags &= ~PMF_CHARGE;
     return qfalse;
