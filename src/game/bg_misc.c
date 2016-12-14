@@ -699,7 +699,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     TEAM_HUMANS,           //int       team;
     ( 1 << WP_HBUILD ),    //weapon_t  buildWeapon;
     BANIM_IDLE1,           //int       idleAnim;
-    100,                   //int       nextthink;
+    MEDISTAT_REPEAT,       //int       nextthink;
     MEDISTAT_BT,           //int       buildTime;
     qfalse,                //qboolean  activationEnt;
     0,                     //int       activationFlags;
