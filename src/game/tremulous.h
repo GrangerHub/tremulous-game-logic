@@ -640,9 +640,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define STAMINA_STOP_RESTORE        30
 #define STAMINA_WALK_RESTORE        15
+#define STAMINA_RUN_RESTORE         7
 #define STAMINA_MEDISTAT_RESTORE    30 // stacked on STOP or WALK
 #define STAMINA_SPRINT_TAKE         6
-#define STAMINA_JUMP_TAKE           250
+#define STAMINA_JUMP_TAKE           125
 #define STAMINA_DODGE_TAKE          250
 #define STAMINA_MAX                 1000
 #define STAMINA_BREATHING_LEVEL     0

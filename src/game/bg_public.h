@@ -162,9 +162,14 @@ typedef enum
 #define PMF_CHARGE          0x004000 // keep track of pouncing
 #define PMF_WEAPON_SWITCH   0x008000 // force a weapon switch
 #define PMF_SPRINTHELD      0x010000
+#define PMF_HOPPED          0x020000 // a hop has occurred
+#define PMF_BUNNY_HOPPING   0x040000 // bunny hopping is enabled
+#define PMF_JUMPING         0x080000 // a jump has occurred but has not landed yet
 
 
 #define PMF_ALL_TIMES (PMF_TIME_WATERJUMP|PMF_TIME_LAND|PMF_TIME_KNOCKBACK|PMF_TIME_WALLJUMP)
+
+#define PMF_ALL_HOP_FLAGS (PMF_HOPPED|PMF_BUNNY_HOPPING|PMF_JUMPING)
 
 typedef struct
 {

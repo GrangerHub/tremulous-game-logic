@@ -670,6 +670,8 @@ void ClientTimerActions( gentity_t *ent, int msec )
       client->ps.stats[ STAT_STAMINA ] -= STAMINA_SPRINT_TAKE;
     else if( walking || crouched )
       client->ps.stats[ STAT_STAMINA ] += STAMINA_WALK_RESTORE;
+    else
+      client->ps.stats[ STAT_STAMINA ] += STAMINA_RUN_RESTORE;
 
     // Check stamina limits
     if( client->ps.stats[ STAT_STAMINA ] > STAMINA_MAX )
@@ -2057,7 +2059,8 @@ void ClientThink_real( gentity_t *ent )
     //if currently using a medkit or have no need for a medkit now
     if( client->ps.stats[ STAT_STATE ] & SS_HEALING_2X ||
         ( client->ps.stats[ STAT_HEALTH ] == client->ps.stats[ STAT_MAX_HEALTH ] &&
-          !( client->ps.stats[ STAT_STATE ] & SS_POISONED ) ) )
+          !( client->ps.stats[ STAT_STATE ] & SS_POISONED ) &&
+          client->ps.stats[ STAT_STAMINA ] == STAMINA_MAX ) )
     {
       BG_DeactivateUpgrade( UP_MEDKIT, client->ps.stats );
     }
@@ -2069,6 +2072,9 @@ void ClientThink_real( gentity_t *ent )
 
       client->ps.stats[ STAT_STATE ] &= ~SS_POISONED;
       client->poisonImmunityTime = level.time + MEDKIT_POISON_IMMUNITY_TIME;
+
+      // restore stamina
+      client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
 
       client->ps.stats[ STAT_STATE ] |= SS_HEALING_2X;
       client->lastMedKitTime = level.time;
