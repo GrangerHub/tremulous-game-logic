@@ -493,9 +493,6 @@ gentity_t *fire_luciferCannon( gentity_t *self, vec3_t start, vec3_t dir,
   bolt->classname = "lcannon";
   bolt->pointAgainstWorld = qtrue;
 
-  if( damage == LCANNON_DAMAGE )
-    bolt->nextthink = level.time;
-  else
     bolt->nextthink = level.time + LCANNON_LIFETIME;
 
   bolt->think = G_ExplodeMissile;

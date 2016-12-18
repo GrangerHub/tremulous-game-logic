@@ -3382,6 +3382,7 @@ static void PM_Weapon( void )
 
       if( pm->ps->stats[ STAT_MISC ] > LCANNON_CHARGE_TIME_MIN )
       {
+        // The lucifer cannon has overcharged
         // Fire primary attack
         attack1 = qtrue;
         attack2 = qfalse;
