@@ -3612,7 +3612,7 @@ void Cmd_Share_f( gentity_t *ent )
   }
 
   // player has no credits
-  if( shareAmount < 1 )
+  if( shareAmount <= 0 )
   {
     ADMP( va( "%s: Earn some more first, you lazy bum!\n", cmd ) );
     return;
@@ -3758,7 +3758,8 @@ void Cmd_Donate_f( gentity_t *ent )
       if( level.clients[ i ].pers.connected == CON_CONNECTED &&
           ent->client != level.clients + i &&
           level.clients[ i ].pers.teamSelection ==
-          ent->client->pers.teamSelection )
+          ent->client->pers.teamSelection  &&
+          level.clients[ i ].pers.credit < max )
       {
         new_credits = level.clients[ i ].pers.credit /
           ( ent->client->pers.teamSelection == TEAM_ALIENS
