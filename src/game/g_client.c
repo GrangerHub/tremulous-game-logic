@@ -102,8 +102,13 @@ void G_AddCreditToClient( gclient_t *client, short credit, qboolean cap )
     {
       client->pers.credit += credit;
       if( client->pers.credit > capAmount )
+      {
+        if( g_overflowFunds.integer )
+          G_DonateCredits( client, client->pers.credit - capAmount, qfalse );
         client->pers.credit = capAmount;
-    }
+      }
+    } else if( g_overflowFunds.integer )
+      G_DonateCredits( client, credit, qfalse );
   }
   else
     client->pers.credit += credit;

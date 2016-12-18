@@ -98,6 +98,7 @@ vmCvar_t  g_minNameChangePeriod;
 vmCvar_t  g_maxNameChanges;
 
 vmCvar_t  g_allowShare;
+vmCvar_t  g_overflowFunds;
 
 vmCvar_t  g_allowBuildableStacking;
 vmCvar_t  g_alienBuildPoints;
@@ -260,6 +261,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_maxNameChanges, "g_maxNameChanges", "5", 0, 0, qfalse},
 
   { &g_allowShare, "g_allowShare", "0", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qfalse},
+  { &g_overflowFunds, "g_overflowFunds", "1", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qfalse},
 
   { &g_smoothClients, "g_smoothClients", "1", 0, 0, qfalse},
   { &pmove_fixed, "pmove_fixed", "0", CVAR_SYSTEMINFO, 0, qfalse},

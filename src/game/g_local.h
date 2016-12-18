@@ -890,6 +890,7 @@ void      Cmd_PlayMap_f( gentity_t *ent );
 void      Cmd_ListMaps_f( gentity_t *ent );
 void      Cmd_Test_f( gentity_t *ent );
 void      Cmd_AdminMessage_f( gentity_t *ent );
+int       G_DonateCredits( gclient_t *client, int value, qboolean verbos );
 int       G_FloodLimited( gentity_t *ent );
 void      G_ListCommands( gentity_t *ent );
 void      G_LoadCensors( void );
@@ -1384,6 +1385,7 @@ extern  vmCvar_t  pmove_fixed;
 extern  vmCvar_t  pmove_msec;
 
 extern  vmCvar_t  g_allowShare;
+extern  vmCvar_t  g_overflowFunds;
 
 extern  vmCvar_t  g_allowBuildableStacking;
 extern  vmCvar_t  g_alienBuildPoints;
