@@ -1778,7 +1778,6 @@ void        CG_ModelDoor( centity_t *cent );
 #define MAGIC_TRACE_HACK -2
 
 void        CG_BuildSolidList( void );
-void        CG_SublimeMarkedBuildables( qboolean sublime );
 int         CG_PointContents( const vec3_t point, int passEntityNum );
 void        CG_Trace( trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs,
                 const vec3_t end, int skipNumber, int mask );
