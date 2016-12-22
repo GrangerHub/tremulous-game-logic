@@ -372,7 +372,8 @@ static void CG_TouchTriggerPrediction( void )
 
   spectator = ( cg.predictedPlayerState.pm_type == PM_SPECTATOR );
 
-  if( cg.predictedPlayerState.pm_type != PM_NORMAL && !spectator )
+  if( cg.predictedPlayerState.pm_type != PM_NORMAL && !spectator &&
+      cg.predictedPlayerState.pm_type != PM_SPITFIRE_FLY )
     return;
 
   for( i = 0; i < cg_numTriggerEntities; i++ )

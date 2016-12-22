@@ -2091,6 +2091,14 @@ void ClientThink_real( gentity_t *ent )
     client->ps.pm_type = PM_GRABBED;
   else if( BG_InventoryContainsUpgrade( UP_JETPACK, client->ps.stats ) && BG_UpgradeIsActive( UP_JETPACK, client->ps.stats ) )
     client->ps.pm_type = PM_JETPACK;
+  else if( client->ps.weapon == WP_ASPITFIRE &&
+           ent->waterlevel <= 1 &&
+           ( ent->s.groundEntityNum == ENTITYNUM_NONE ||
+             !( client->ps.stats[ STAT_STATE ] & SS_WALLCLIMBING ) ) )
+  {
+    // spitfire fly
+    client->ps.pm_type = PM_SPITFIRE_FLY;
+  }
   else
     client->ps.pm_type = PM_NORMAL;
 
@@ -2433,6 +2441,18 @@ void ClientThink_real( gentity_t *ent )
 
     case WP_ALEVEL3:
     case WP_ALEVEL3_UPG:
+      if( !CheckPounceAttack( ent ) )
+      {
+        client->ps.weaponstate = WEAPON_READY;
+      }
+      else
+      {
+        client->ps.generic1 = WPM_SECONDARY;
+        G_AddEvent( ent, EV_FIRE_WEAPON2, 0 );
+      }
+      break;
+	 
+	case WP_ASPITFIRE:
       if( !CheckPounceAttack( ent ) )
       {
         client->ps.weaponstate = WEAPON_READY;

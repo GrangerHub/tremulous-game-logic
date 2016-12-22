@@ -135,7 +135,8 @@ typedef enum
   PM_GRABBED,       // like dead, but for when the player is still alive
   PM_DEAD,          // no acceleration or turning, but free falling
   PM_FREEZE,        // stuck in place with no control
-  PM_INTERMISSION   // no movement or status bar
+  PM_INTERMISSION,  // no movement or status bar
+  PM_SPITFIRE_FLY   // physics for Spitfire
 } pmtype_t;
 
 // pmtype_t categories
@@ -182,16 +183,19 @@ typedef enum
 
 typedef struct
 {
-  int    pouncePayload;
-  int    repairRepeatDelay;      // Used for for the construction kit
-  float  fallVelocity;
-  int    updateAnglesTime;
-  float  diffAnglesPeriod;
-  vec3_t previousFrameAngles;
-  vec3_t previousUpdateAngles;
-  vec3_t angularVelocity;
-  float  luciAmmoReduction;
-  int    gasTime;
+  int      pouncePayload;
+  int      pouncePayloadTime;
+  float    spitfireGlideSpeedMod;
+  qboolean ladder;
+  int      repairRepeatDelay;      // Used for for the construction kit
+  float    fallVelocity;
+  int      updateAnglesTime;
+  float    diffAnglesPeriod;
+  vec3_t   previousFrameAngles;
+  vec3_t   previousUpdateAngles;
+  vec3_t   angularVelocity;
+  float    luciAmmoReduction;
+  int      gasTime;
 } pmoveExt_t;
 
 #define MAXTOUCH  32
@@ -461,6 +465,7 @@ typedef enum
   WP_ALEVEL1_UPG,
   WP_ALEVEL2,
   WP_ALEVEL2_UPG,
+  WP_ASPITFIRE,
   WP_ALEVEL3,
   WP_ALEVEL3_UPG,
   WP_ALEVEL4,
@@ -601,6 +606,7 @@ typedef enum
 
   EV_JUMP,
   EV_JETJUMP,
+  EV_AIRPOUNCE,
   EV_WATER_TOUCH, // foot touches
   EV_WATER_LEAVE, // foot leaves
   EV_WATER_UNDER, // head touches
@@ -986,6 +992,7 @@ typedef enum
   PCL_ALIEN_LEVEL1_UPG,
   PCL_ALIEN_LEVEL2,
   PCL_ALIEN_LEVEL2_UPG,
+  PCL_ALIEN_SPITFIRE,
   PCL_ALIEN_LEVEL3,
   PCL_ALIEN_LEVEL3_UPG,
   PCL_ALIEN_LEVEL4,
@@ -1061,6 +1068,8 @@ typedef enum
   MOD_LEVEL4_CLAW,
   MOD_LEVEL4_TRAMPLE,
   MOD_LEVEL4_CRUSH,
+  MOD_SPITFIRE_POUNCE,
+  MOD_SPITFIRE_ZAP,
 
   MOD_SLOWBLOB,
   MOD_POISON,
@@ -1427,6 +1436,7 @@ typedef enum
   ET_MODELDOOR,
   ET_LIGHTFLARE,
   ET_LEV2_ZAP_CHAIN,
+  ET_SPITFIRE_ZAP,
 
   ET_EVENTS       // any of the EV_* events can be added freestanding
               // by setting eType to ET_EVENTS + eventNum

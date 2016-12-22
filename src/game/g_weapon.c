@@ -1158,12 +1158,13 @@ void poisonCloud( gentity_t *ent )
 /*
 ======================================================================
 
-LEVEL2
+LEVEL2 & SPITFIRE zaps
 
 ======================================================================
 */
 
 bglist_t *lev2ZapList = NULL;
+bglist_t *spitfireZapList = NULL;
 
 /*
 ===============
@@ -1241,6 +1242,102 @@ static void G_FindLev2ZapChainTargets( zap_t *zap )
 }
 
 /*
+=============================
+G_SpitfireZapTargetDistanceCompare
+
+Comparison function used in a BG_Queue_Insert_Sorted()
+=============================
+*/
+static int G_SpitfireZapTargetDistanceCompare( const void *a, const void *b,
+                                              void *user_data )
+{
+  return ((zapTarget_t *)a)->distance - ((zapTarget_t *)b)->distance;
+}
+
+/*
+=============================
+G_FindSpitfireZapTarget
+=============================
+*/
+static void G_FindSpitfireZapTarget( zap_t *zap )
+{
+  int       entityList[ MAX_GENTITIES ];
+  vec3_t    range = { SPITFIRE_ZAP_RANGE,
+                      SPITFIRE_ZAP_RANGE,
+                      SPITFIRE_ZAP_RANGE };
+  vec3_t    mins, maxs;
+  int       i, num;
+  gentity_t *enemy;
+  trace_t   tr;
+  float     distance;
+
+  VectorAdd( zap->creator->r.currentOrigin, range, maxs );
+  VectorSubtract( zap->creator->r.currentOrigin, range, mins );
+
+  num = trap_EntitiesInBox( mins, maxs, entityList, MAX_GENTITIES );
+
+  for( i = 0; i < num; i++ )
+  {
+    enemy = &g_entities[ entityList[ i ] ];
+
+    if( ( enemy->client &&
+          enemy->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS ) ||
+        ( enemy->s.eType == ET_BUILDABLE &&
+          BG_Buildable( enemy->s.modelindex )->team == TEAM_HUMANS ) )
+    {
+      zapTarget_t *zapTarget;
+
+      // only target entities that can take damage
+      if( !enemy->takedamage )
+        continue;
+
+      // only target living enemies
+      if( enemy->health <= 0 )
+        continue;
+
+      // only target grounded enemies or enemies that contact water
+      if( enemy->s.groundEntityNum == ENTITYNUM_NONE &&
+          !( enemy->client && enemy->client->pmext.ladder ) &&
+          enemy->waterlevel < 1 )
+        continue;
+
+      // don't target noclippers
+      if( enemy->client && enemy->client->noclip )
+        continue;
+
+      // only target enemies that are in a line of sight and within range
+      trap_Trace( &tr, zap->creator->r.currentOrigin, NULL, NULL, enemy->r.currentOrigin,
+                zap->creator->s.number, MASK_SHOT );
+      if( tr.entityNum != enemy->s.number ||
+          (distance = Distance( zap->creator->r.currentOrigin, tr.endpos )) >
+          SPITFIRE_ZAP_RANGE )
+        continue;
+
+      // add the zap targets, giving preference to the closest targets
+      zapTarget = BG_Alloc( sizeof(zapTarget_t) );
+      zapTarget->targetEnt = enemy;
+      zapTarget->distance = distance;
+      BG_Queue_Insert_Sorted( &zap->targetQueue, zapTarget,
+                              G_SpitfireZapTargetDistanceCompare, NULL );
+
+      // ellimenate the targets over the max targets that don't
+      // have the distance preference
+      while( BG_Queue_Get_Length( &zap->targetQueue ) > SPITFIRE_ZAP_MAX_TARGETS )
+      {
+        bglist_t *tailLink = BG_Queue_Peek_Tail_Link( &zap->targetQueue );
+
+        if( tailLink )
+        {
+          BG_Free( tailLink->data );
+          BG_Queue_Delete_Link( &zap->targetQueue, tailLink );
+        }
+      }
+    }
+  }
+ 
+}
+
+/*
 ===============
 G_UpdateZapEffect
 ===============
@@ -1271,12 +1368,32 @@ static void G_DamageLev2ZapTarget( void *data, void *user_data )
                        LEVEL2_AREAZAP_CHAIN_FALLOFF ) ) + 1,
             DAMAGE_NO_KNOCKBACK | DAMAGE_NO_LOCDAMAGE, MOD_LEVEL2_ZAP );
 }
+
 /*
 ===============
-G_CreateNewZap
+G_DamageSpitfireZapTarget
 ===============
 */
-static void G_CreateNewZap( gentity_t *creator, gentity_t *targetEnt )
+static void G_DamageSpitfireZapTarget( void *data, void *user_data )
+{
+  zapTarget_t *target = (zapTarget_t *)data;
+  zap_t *zap = (zap_t *)user_data;
+  vec3_t dir;
+
+  VectorSubtract( target->targetEnt->r.currentOrigin,
+                  zap->creator->r.currentOrigin, dir );
+  G_Damage( target->targetEnt, zap->creator, zap->creator, dir,
+            target->targetEnt->r.currentOrigin,
+            SPITFIRE_ZAP_DMG / BG_Queue_Get_Length( &zap->targetQueue ),
+            DAMAGE_NO_KNOCKBACK | DAMAGE_NO_LOCDAMAGE, MOD_SPITFIRE_ZAP );
+}
+
+/*
+===============
+G_CreateNewLev2Zap
+===============
+*/
+static void G_CreateNewLev2Zap( gentity_t *creator, gentity_t *targetEnt )
 {
   zap_t   *zap = BG_Alloc0( sizeof( zap_t ) );
   zapTarget_t *primaryZapTarget;
@@ -1311,6 +1428,37 @@ static void G_CreateNewZap( gentity_t *creator, gentity_t *targetEnt )
   zap->effectChannel = G_Spawn( );
   zap->effectChannel->s.eType = ET_LEV2_ZAP_CHAIN;
   zap->effectChannel->classname = "lev2zapchain";
+  zap->effectChannel->zapLink = zap->zapLink;
+  G_UpdateZapEffect( zap );
+}
+
+/*
+===============
+G_CreateNewSpitfireZap
+===============
+*/
+static void G_CreateNewSpitfireZap( gentity_t *creator )
+{
+  zap_t   *zap = BG_Alloc0( sizeof( zap_t ) );
+
+  // add the newly created zap to the spitfireZapList
+  spitfireZapList = zap->zapLink = BG_List_Prepend( spitfireZapList, zap );
+
+  // initialize the zap
+  zap->timeToLive = SPITFIRE_ZAP_TIME;
+  zap->creator = creator;
+  BG_Queue_Init( &zap->targetQueue );
+
+  // find spitefire zap targets
+  G_FindSpitfireZapTarget( zap );
+
+  BG_Queue_Foreach( &zap->targetQueue,
+                    G_DamageSpitfireZapTarget, zap );
+
+  // create and initialize the zap's effectChannel
+  zap->effectChannel = G_Spawn( );
+  zap->effectChannel->s.eType = ET_SPITFIRE_ZAP;
+  zap->effectChannel->classname = "spitfirezap";
   zap->effectChannel->zapLink = zap->zapLink;
   G_UpdateZapEffect( zap );
 }
@@ -1358,6 +1506,48 @@ static void G_UpdateLev2Zap( void *data, void *user_data )
 
   G_UpdateZapEffect( zap );
 }
+
+/*
+===============
+G_UpdateSpitfireZap
+===============
+*/
+static void G_UpdateSpitfireZap( void *data, void *user_data )
+{
+  zap_t *zap = (zap_t *)data;
+  bglist_t    *targetZapLink = BG_Queue_Peek_Head_Link( &zap->targetQueue );
+  int j;
+  
+
+  zap->timeToLive -= *(int *)user_data;
+
+  if( zap->timeToLive <= 0 )
+  {
+    G_FreeEntity( zap->effectChannel );
+    spitfireZapList = BG_List_Delete_Link( spitfireZapList, zap->zapLink );
+    G_DeleteZapData( zap );
+    return;
+  }
+
+  // first, the disappearance of players is handled immediately in G_ClearPlayerZapEffects()
+
+  // the deconstruction or gibbing of chained buildables destroy the appropriate beams
+  for( j = 1; targetZapLink; j++ )
+  {
+    bglist_t *next = targetZapLink->next;
+
+    if( !((zapTarget_t *)targetZapLink->data)->targetEnt->inuse )
+      {
+        BG_Free( targetZapLink->data );
+        BG_Queue_Delete_Link( &zap->targetQueue, targetZapLink );
+      }
+
+      targetZapLink = next;
+  }
+
+  G_UpdateZapEffect( zap );
+}
+
 /*
 ===============
 G_UpdateZaps
@@ -1366,6 +1556,7 @@ G_UpdateZaps
 void G_UpdateZaps( int msec )
 {
   BG_List_Foreach( lev2ZapList, G_UpdateLev2Zap, &msec );
+  BG_List_Foreach( spitfireZapList, G_UpdateSpitfireZap, &msec );
 }
 
 /*
@@ -1390,7 +1581,41 @@ void G_ClearPlayerLev2ZapEffects( void *data, void *user_data )
     G_DeleteZapData( zap );
     return;
   }
+  // the disappearance of chained players destroy the appropriate beams
+  for( j = 1; targetZapLink; j++ )
+  {
+    bglist_t *next = targetZapLink->next;
 
+    if( ((zapTarget_t *)targetZapLink->data)->targetEnt == player )
+      {
+        BG_Free( targetZapLink->data );
+        BG_Queue_Delete_Link( &zap->targetQueue, targetZapLink );
+      }
+
+      targetZapLink = next;
+  }
+}
+
+/*
+===============
+G_ClearPlayerSpitfireZapEffects
+===============
+*/
+void G_ClearPlayerSpitfireZapEffects( void *data, void *user_data )
+{
+  zap_t *zap = (zap_t *)data;
+  bglist_t    *targetZapLink = BG_Queue_Peek_Head_Link( &zap->targetQueue );
+  gentity_t *player = (gentity_t *)user_data;
+  int       j;
+
+  // the disappearance of the creator destroys the whole zap effect
+  if( zap->creator == player )
+  {
+    G_FreeEntity( zap->effectChannel );
+    spitfireZapList = BG_List_Delete_Link( spitfireZapList, zap->zapLink );
+    G_DeleteZapData( zap );
+    return;
+  }
   // the disappearance of chained players destroy the appropriate beams
   for( j = 1; targetZapLink; j++ )
   {
@@ -1416,6 +1641,7 @@ called from G_LeaveTeam() and TeleportPlayer()
 void G_ClearPlayerZapEffects( gentity_t *player )
 {
   BG_List_Foreach( lev2ZapList, G_ClearPlayerLev2ZapEffects, player );
+  BG_List_Foreach( spitfireZapList, G_ClearPlayerSpitfireZapEffects, player );
 }
 
 /*
@@ -1437,10 +1663,19 @@ void areaLev2ZapFire( gentity_t *ent )
       ( traceEnt->s.eType == ET_BUILDABLE &&
         BG_Buildable( traceEnt->s.modelindex )->team == TEAM_HUMANS ) )
   {
-    G_CreateNewZap( ent, traceEnt );
+    G_CreateNewLev2Zap( ent, traceEnt );
   }
 }
 
+/*
+===============
+SpitfireZap
+===============
+*/
+void SpitfireZap( gentity_t *self )
+{
+  G_CreateNewSpitfireZap( self );
+}
 
 /*
 ======================================================================
@@ -1459,7 +1694,7 @@ qboolean CheckPounceAttack( gentity_t *ent )
 {
   trace_t tr;
   gentity_t *traceEnt;
-  int damage, timeMax, pounceRange, payload;
+  int damage, timeMax, pounceRange, pounceWidth, payload;
 
   if( ent->client->pmext.pouncePayload <= 0 )
     return qfalse;
@@ -1469,14 +1704,28 @@ qboolean CheckPounceAttack( gentity_t *ent )
   if( !( ent->client->ps.pm_flags & PMF_CHARGE ) )
     ent->client->pmext.pouncePayload = 0;
 
+  if(  ent->client->ps.weapon == WP_ASPITFIRE &&
+       ent->client->pmext.pouncePayload > 0 &&
+       level.time > ent->client->pmext.pouncePayloadTime +
+                    SPITFIRE_PAYLOAD_DISCHARGE_TIME )
+    ent->client->pmext.pouncePayload = 0;
+
   // Calculate muzzle point
   AngleVectors( ent->client->ps.viewangles, forward, right, up );
   CalcMuzzlePoint( ent, forward, right, up, muzzle );
 
   // Trace from muzzle to see what we hit
-  pounceRange = ent->client->ps.weapon == WP_ALEVEL3 ? LEVEL3_POUNCE_RANGE :
-                                                       LEVEL3_POUNCE_UPG_RANGE;
-  G_WideTrace( &tr, ent, pounceRange, LEVEL3_POUNCE_WIDTH,
+  if( ent->client->ps.weapon == WP_ASPITFIRE)
+  {
+      pounceRange = SPITFIRE_POUNCE_RANGE;
+      pounceWidth = SPITFIRE_POUNCE_WIDTH;
+  }
+  else
+  {
+      pounceRange = ent->client->ps.weapon == WP_ALEVEL3 ? LEVEL3_POUNCE_RANGE : LEVEL3_POUNCE_UPG_RANGE;
+      pounceWidth = LEVEL3_POUNCE_WIDTH;
+  }  //LEVEL3_POUNCE_UPG_RANGE;
+  G_WideTrace( &tr, ent, pounceRange, pounceWidth,
                LEVEL3_POUNCE_WIDTH, &traceEnt );
   if( traceEnt == NULL )
     return qfalse;
@@ -1489,13 +1738,22 @@ qboolean CheckPounceAttack( gentity_t *ent )
     return qfalse;
     
   // Deal damage
-  timeMax = ent->client->ps.weapon == WP_ALEVEL3 ? LEVEL3_POUNCE_TIME :
-                                                   LEVEL3_POUNCE_TIME_UPG;
-  damage = payload * LEVEL3_POUNCE_DMG / timeMax;
-  ent->client->pmext.pouncePayload = 0;
-  G_Damage( traceEnt, ent, ent, forward, tr.endpos, damage,
-            DAMAGE_NO_LOCDAMAGE, MOD_LEVEL3_POUNCE );
-
+  if( ent->client->ps.weapon == WP_ASPITFIRE)
+  {
+    timeMax = SPITFIRE_POUNCE_TIME;
+    damage = payload * SPITFIRE_POUNCE_DMG / timeMax;
+    ent->client->pmext.pouncePayload = 0;
+    G_Damage( traceEnt, ent, ent, forward, tr.endpos, damage,
+	      DAMAGE_NO_LOCDAMAGE, MOD_SPITFIRE_POUNCE );
+  }
+  else
+  {
+    timeMax = ent->client->ps.weapon == WP_ALEVEL3 ? LEVEL3_POUNCE_TIME : LEVEL3_POUNCE_TIME_UPG;
+    damage = payload * LEVEL3_POUNCE_DMG / timeMax;
+    ent->client->pmext.pouncePayload = 0;
+    G_Damage( traceEnt, ent, ent, forward, tr.endpos, damage,
+	      DAMAGE_NO_LOCDAMAGE, MOD_LEVEL3_POUNCE );
+  }
   return qtrue;
 }
 
@@ -1628,6 +1886,7 @@ void CalcMuzzlePoint( gentity_t *ent, vec3_t forward, vec3_t right, vec3_t up, v
   SnapVector( muzzlePoint );
 }
 
+
 /*
 ===============
 FireWeapon3
@@ -1752,6 +2011,9 @@ void FireWeapon( gentity_t *ent )
     case WP_ALEVEL2_UPG:
       meleeAttack( ent, LEVEL2_CLAW_U_RANGE, LEVEL2_CLAW_WIDTH, LEVEL2_CLAW_WIDTH,
                    LEVEL2_CLAW_DMG, MOD_LEVEL2_CLAW );
+      break;
+    case WP_ASPITFIRE:
+      SpitfireZap( ent );			   
       break;
     case WP_ALEVEL4:
       meleeAttack( ent, LEVEL4_CLAW_RANGE, LEVEL4_CLAW_WIDTH,

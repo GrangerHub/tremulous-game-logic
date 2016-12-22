@@ -1193,6 +1193,7 @@ typedef struct zap_s
 } zap_t;
 
 extern bglist_t *lev2ZapList;
+extern bglist_t *spitfireZapList;
 
 void      G_PackEntityNumbers( entityState_t *es, int creatorNum,
                                bgqueue_t *targetQueue );
@@ -1212,6 +1213,7 @@ void      G_DeleteZapData( void *data );
 bglist_t  *G_FindZapLinkFromEffectChannel( const gentity_t *effectChannel );
 void      G_UpdateZaps( int msec );
 void      G_ClearPlayerZapEffects( gentity_t *player );
+void      SpitfireZap( gentity_t *self );
 
 
 //

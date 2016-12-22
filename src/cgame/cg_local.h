@@ -685,6 +685,7 @@ typedef struct centity_s
   qboolean              entityPSMissing;
 
   trailSystem_t         *level2ZapTS[ LEVEL2_AREAZAP_MAX_TARGETS ];
+  trailSystem_t         *spitfireZapTS[ SPITFIRE_ZAP_MAX_TARGETS ];
   int                   level2ZapTime;
 
   trailSystem_t         *muzzleTS; //used for the tesla and reactor
@@ -1202,6 +1203,7 @@ typedef struct
   qhandle_t   outlineShader;
 
   qhandle_t   level2ZapTS;
+  qhandle_t   spitfireZapTS;
   qhandle_t   massDriverTS;
 
   qhandle_t   balloonShader;
@@ -1257,6 +1259,9 @@ typedef struct
   sfxHandle_t hardBounceSound1;
   sfxHandle_t hardBounceSound2;
 
+  sfxHandle_t airpounceSound;
+  sfxHandle_t flapSound;
+  
   sfxHandle_t voteAlarmSound;
   sfxHandle_t voteNow;
   sfxHandle_t votePassed;
@@ -1326,6 +1331,7 @@ typedef struct
   qhandle_t   poisonCloudPS;
   qhandle_t   poisonCloudedPS;
   qhandle_t   alienEvolvePS;
+  qhandle_t   airpounceblast;
   qhandle_t   alienAcidTubePS;
   qhandle_t   alienSlimeZungePS;
 

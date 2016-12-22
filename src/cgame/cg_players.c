@@ -2016,6 +2016,11 @@ void CG_Player( centity_t *cent )
   {
     legs.hModel = ci->nonSegModel;
     legs.customSkin = ci->nonSegSkin;
+
+    if( ( cent->currentState.legsAnim & ~ANIM_TOGGLEBIT ) == NSPA_SWIM  && es->weapon == WP_ASPITFIRE )
+    {
+      trap_S_AddLoopingSound( cent->currentState.number, cent->lerpOrigin, vec3_origin, cgs.media.flapSound );
+    }
   }
 
   VectorCopy( cent->lerpOrigin, legs.origin );
@@ -2171,7 +2176,7 @@ void CG_Player( centity_t *cent )
   }
 
   CG_PlayerUpgrades( cent, &torso );
-  
+
   //sanity check that particle systems are stopped when dead
   if( es->eFlags & EF_DEAD )
   {

@@ -565,6 +565,15 @@ void G_RemoveEntity( gentity_t *ent )
       lev2ZapList = BG_List_Delete_Link( lev2ZapList, ent->zapLink );
     }
   }
+  else if( ent->s.eType == ET_SPITFIRE_ZAP )
+  {
+    if( ent->zapLink &&
+        ((zap_t *)(ent->zapLink->data))->effectChannel == ent )
+    {
+      G_DeleteZapData( ent->zapLink->data );                                    
+      spitfireZapList = BG_List_Delete_Link( spitfireZapList, ent->zapLink );
+    }
+  }
   else if( ent->s.eType == ET_MOVER )
   {
     if( !strcmp( ent->classname, "func_door" ) ||

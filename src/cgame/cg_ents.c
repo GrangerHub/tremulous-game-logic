@@ -237,7 +237,8 @@ static void CG_EntityEffects( centity_t *cent )
 
   // constant light glow
   if ( cent->currentState.constantLight &&
-       cent->currentState.eType != ET_LEV2_ZAP_CHAIN )
+       cent->currentState.eType != ET_LEV2_ZAP_CHAIN &&
+       cent->currentState.eType != ET_SPITFIRE_ZAP )
   {
     int   cl;
     int   i, r, g, b;
@@ -828,6 +829,43 @@ static void CG_Lev2ZapChain( centity_t *cent )
 
 /*
 =========================
+CG_SpitfireZap
+=========================
+*/
+static void CG_SpitfireZap( centity_t *cent )
+{
+  int           i;
+  entityState_t *es;
+  centity_t     *source = NULL, *target = NULL;
+  int           entityNums[ LEVEL2_AREAZAP_MAX_TARGETS + 1 ];
+  int           count;
+
+  es = &cent->currentState;
+
+  count = BG_UnpackEntityNumbers( es, entityNums, LEVEL2_AREAZAP_MAX_TARGETS + 1 );
+
+  for( i = 1; i < count; i++ )
+  {
+    // First entity is the attacker
+    source = &cg_entities[ entityNums[ 0 ] ];
+
+    target = &cg_entities[ entityNums[ i ] ];
+
+    if( !CG_IsTrailSystemValid( &cent->spitfireZapTS[ i ] ) )
+      cent->spitfireZapTS[ i ] = CG_SpawnNewTrailSystem( cgs.media.spitfireZapTS );
+
+    if( CG_IsTrailSystemValid( &cent->spitfireZapTS[ i ] ) )
+    {
+      CG_SetAttachmentCent( &cent->spitfireZapTS[ i ]->frontAttachment, source );
+      CG_SetAttachmentCent( &cent->spitfireZapTS[ i ]->backAttachment, target );
+      CG_AttachToCent( &cent->spitfireZapTS[ i ]->frontAttachment );
+      CG_AttachToCent( &cent->spitfireZapTS[ i ]->backAttachment );
+    }
+  }
+}
+
+/*
+=========================
 CG_AdjustPositionForMover
 
 Also called by client movement prediction code
@@ -1062,6 +1100,13 @@ static void CG_CEntityPVSLeave( centity_t *cent )
           CG_DestroyTrailSystem( &cent->level2ZapTS[ i ] );
       }
       break;
+    case ET_SPITFIRE_ZAP:
+      for( i = 0; i <= SPITFIRE_ZAP_MAX_TARGETS; i++ )
+      {
+        if( CG_IsTrailSystemValid( &cent->spitfireZapTS[ i ] ) )
+          CG_DestroyTrailSystem( &cent->spitfireZapTS[ i ] );
+      }
+      break;
   }
 }
 
@@ -1154,6 +1199,9 @@ static void CG_AddCEntity( centity_t *cent )
 
     case ET_LEV2_ZAP_CHAIN:
       CG_Lev2ZapChain( cent );
+      break;
+    case ET_SPITFIRE_ZAP:
+      CG_SpitfireZap( cent );
       break;
   }
 }

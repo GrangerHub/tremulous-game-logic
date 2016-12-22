@@ -109,6 +109,9 @@ void  Svcmd_EntityList_f( void )
       case ET_LEV2_ZAP_CHAIN:
         G_Printf( "ET_LEV2_ZAP_CHAIN   " );
         break;
+      case ET_SPITFIRE_ZAP:
+        G_Printf( "ET_SPITFIRE_ZAP     " );
+        break;
       default:
         G_Printf( "%-3i                 ", check->s.eType );
         break;

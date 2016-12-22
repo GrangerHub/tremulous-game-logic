@@ -342,6 +342,18 @@ static void CG_Obituary( entityState_t *ent )
         message = "was crushed under";
         message2 = "'s weight";
         break;
+      case MOD_SPITFIRE_POUNCE:
+        message = "was air pounced upon by";
+        Com_sprintf( className, 64, "'s %s",
+            BG_ClassConfig( PCL_ALIEN_SPITFIRE )->humanName );
+        message2 = className;
+        break;
+      case MOD_SPITFIRE_ZAP:
+        message = "was zapped by";
+        Com_sprintf( className, 64, "'s %s",
+            BG_ClassConfig( PCL_ALIEN_SPITFIRE )->humanName );
+        message2 = className;
+        break;
 
       case MOD_POISON:
         message = "should have used a medkit against";
@@ -632,6 +644,46 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
 
           //add the op
           CG_addSmoothOp( rotAxis, 15.0f, 1.0f );
+        }
+
+        //copy the current normal to the lastNormal
+        VectorCopy( surfNormal, cg.lastNormal );
+      }
+
+      break;
+	  
+    case EV_AIRPOUNCE:
+      trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.airpounceSound);
+	  //airpounce gfx effect
+	  {
+        particleSystem_t *ps = CG_SpawnNewParticleSystem( cgs.media.airpounceblast );
+
+        if( CG_IsParticleSystemValid( &ps ) )
+        {
+          CG_SetAttachmentCent( &ps->attachment, cent );
+          CG_AttachToCent( &ps->attachment );
+        }
+      }
+	  
+      if( BG_ClassHasAbility( cg.predictedPlayerState.stats[ STAT_CLASS ], SCA_WALLJUMPER ) )
+      {
+        vec3_t  surfNormal, refNormal = { 0.0f, 0.0f, 1.0f };
+        vec3_t  is;
+
+        if( clientNum != cg.predictedPlayerState.clientNum )
+          break;
+
+        //set surfNormal
+        VectorCopy( cg.predictedPlayerState.grapplePoint, surfNormal );
+
+        //if we are moving from one surface to another smooth the transition
+        if( !VectorCompare( surfNormal, cg.lastNormal ) && surfNormal[ 2 ] != 1.0f )
+        {
+          CrossProduct( refNormal, surfNormal, is );
+          VectorNormalize( is );
+
+          //add the op
+          CG_addSmoothOp( is, 15.0f, 1.0f );
         }
 
         //copy the current normal to the lastNormal

@@ -258,7 +258,8 @@ void Use_target_push( gentity_t *self, gentity_t *other, gentity_t *activator )
     return;
   }
 
-  if( activator->client->ps.pm_type != PM_NORMAL )
+  if( activator->client->ps.pm_type != PM_NORMAL &&
+      activator->client->ps.pm_type != PM_SPITFIRE_FLY )
     return;
 
   VectorCopy( self->s.origin2, activator->client->ps.velocity );

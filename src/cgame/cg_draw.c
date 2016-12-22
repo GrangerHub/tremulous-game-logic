@@ -1002,7 +1002,12 @@ static float CG_ChargeProgress( qboolean chargeStamina )
   } else
   {
     rawProgress = (float)cg.predictedPlayerState.stats[ STAT_MISC ];
-    if( cg.snap->ps.weapon == WP_ALEVEL3 )
+    if( cg.snap->ps.weapon == WP_ASPITFIRE )
+    {
+      min = SPITFIRE_POUNCE_TIME_MIN;
+      max = SPITFIRE_POUNCE_TIME;
+    }
+    else if( cg.snap->ps.weapon == WP_ALEVEL3 )
     {
       min = LEVEL3_POUNCE_TIME_MIN;
       max = LEVEL3_POUNCE_TIME;

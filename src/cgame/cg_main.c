@@ -917,6 +917,9 @@ static void CG_RegisterSounds( void )
 
   cgs.media.buildableRepairSound    = trap_S_RegisterSound( "sound/buildables/human/repair.wav", qfalse );
   cgs.media.buildableRepairedSound  = trap_S_RegisterSound( "sound/buildables/human/repaired.wav", qfalse );
+  
+  cgs.media.airpounceSound          = trap_S_RegisterSound( "models/weapons/spitfire/airpounce.wav", qfalse );
+  cgs.media.flapSound               = trap_S_RegisterSound( "sound/player/spitfire/flap.wav", qfalse );
 
   cgs.media.lCannonWarningSound     = trap_S_RegisterSound( "models/weapons/lcannon/warning.wav", qfalse );
   cgs.media.lCannonWarningSound2    = trap_S_RegisterSound( "models/weapons/lcannon/warning2.wav", qfalse );
@@ -1020,6 +1023,7 @@ static void CG_RegisterGraphics( void )
   cgs.media.poisonCloudPS             = CG_RegisterParticleSystem( "firstPersonPoisonCloudPS" );
   cgs.media.poisonCloudedPS           = CG_RegisterParticleSystem( "poisonCloudedPS" );
   cgs.media.alienEvolvePS             = CG_RegisterParticleSystem( "alienEvolvePS" );
+  cgs.media.airpounceblast            = CG_RegisterParticleSystem( "airpounceblast" );
   cgs.media.alienAcidTubePS           = CG_RegisterParticleSystem( "alienAcidTubePS" );
   cgs.media.alienSlimeZungePS           = CG_RegisterParticleSystem( "alienSlimeZungePS" );
 

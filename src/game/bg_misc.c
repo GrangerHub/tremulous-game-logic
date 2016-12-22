@@ -1364,7 +1364,7 @@ static const classAttributes_t bg_classList[ ] =
     0.8f,                                           //float   knockbackScale;
     CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
-    { PCL_ALIEN_LEVEL3, PCL_ALIEN_LEVEL2_UPG, PCL_NONE }, //int  children[ 3 ];
+    { PCL_ALIEN_LEVEL3, PCL_ALIEN_LEVEL2_UPG, PCL_ALIEN_SPITFIRE }, //int  children[ 3 ];
     LEVEL2_COST,                                    //int     cost;
     LEVEL2_VALUE,                                   //int     value;
     qfalse                                          //int     stackable;
@@ -1395,9 +1395,41 @@ static const classAttributes_t bg_classList[ ] =
     0.7f,                                           //float   knockbackScale
     CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
-    { PCL_ALIEN_LEVEL3, PCL_NONE, PCL_NONE },       //int     children[ 3 ];
+    { PCL_ALIEN_LEVEL3, PCL_ALIEN_SPITFIRE, PCL_NONE }, //int     children[ 3 ];
     LEVEL2_UPG_COST,                                //int     cost;
     LEVEL2_UPG_VALUE,                               //int     value;
+    qfalse                                          //int     stackable;
+  },
+  {
+    PCL_ALIEN_SPITFIRE,                             //int     classnum;
+    "spitfire",                                     //char    *classname;
+    "The Spitfire is a flying air pouncing alien "
+    "that can zap all nearby grounded enemies.",
+    ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int  stages
+    SPITFIRE_HEALTH,                                //int     health;
+    0.0f,                                           //float   fallDamage;
+    SPITFIRE_REGEN,                                 //float   regenRate;
+    (SCA_FOVWARPS|SCA_ALIENSENSE|SCA_WALLCLIMBER|
+    SCA_CHARGE_STAMINA),                            //int     abilities;
+    WP_ASPITFIRE,                                   //weapon_t  startWeapon
+    0.0f,                                           //float   buildDist;
+    90,                                             //int     fov;
+    0.001f,                                         //float   bob;
+    1.5f,                                           //float   bobCycle;
+    0.0f,                                           //float   landBob;
+    80,                                             //int     steptime;
+    SPITFIRE_SPEED,                                 //float   speed;
+    9.0f,                                           //float   acceleration;
+    5.0f,                                           //float   airAcceleration;
+    6.0f,                                           //float   friction;
+    90.0f,                                          //float   stopSpeed;
+    250.0f,                                         //float   jumpMagnitude;
+    0.7f,                                           //float   knockbackScale;
+    SPITFIRE_POUNCE_MAX_STAMINA,                    //int     chargeStaminaMax;
+    SPITFIRE_POUNCE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
+    { PCL_ALIEN_LEVEL3, PCL_ALIEN_LEVEL2_UPG, PCL_NONE }, //int     children[ 3 ];
+    SPITFIRE_COST,                                  //int     cost;
+    SPITFIRE_VALUE,                                 //int     value;
     qfalse                                          //int     stackable;
   },
   {
@@ -1406,11 +1438,11 @@ static const classAttributes_t bg_classList[ ] =
     "Possesses a melee attack and the pounce ability, which may "
       "be used as both an attack and a means to reach remote "
       "locations inaccessible from the ground.",
-    ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
+    ( 1 << S2 )|( 1 << S3 ),                        //int     stages;
     LEVEL3_HEALTH,                                  //int     health;
     0.0f,                                           //float   fallDamage;
     LEVEL3_REGEN,                                   //float   regenRate;
-    SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,                    //int     abilities;
+    SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,          //int     abilities;
     WP_ALEVEL3,                                     //weapon_t startWeapon;
     0.0f,                                           //float   buildDist;
     110,                                            //int     fov;
@@ -1427,7 +1459,7 @@ static const classAttributes_t bg_classList[ ] =
     0.5f,                                           //float   knockbackScale;
     CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
-    { PCL_ALIEN_LEVEL4, PCL_ALIEN_LEVEL3_UPG, PCL_NONE }, //int  children[ 3 ];
+    { PCL_ALIEN_LEVEL4, PCL_ALIEN_LEVEL3_UPG, PCL_ALIEN_LEVEL2_UPG }, //int  children[ 3 ];
     LEVEL3_COST,                                    //int     cost;
     LEVEL3_VALUE,                                   //int     value;
     qfalse                                          //int     stackable;
@@ -1438,11 +1470,11 @@ static const classAttributes_t bg_classList[ ] =
     "In addition to the basic Dragoon abilities, the Advanced "
       "Dragoon has 3 barbs which may be used to attack humans "
       "from a distance.",
-    ( 1 << S2 )|( 1 << S3 ),                        //int     stages;
+    ( 1 << S3 ),                                    //int     stages;
     LEVEL3_UPG_HEALTH,                              //int     health;
     0.0f,                                           //float   fallDamage;
     LEVEL3_UPG_REGEN,                               //float   regenRate;
-    SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,                    //int     abilities;
+    SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,          //int     abilities;
     WP_ALEVEL3_UPG,                                 //weapon_t startWeapon;
     0.0f,                                           //float   buildDist;
     110,                                            //int     fov;
@@ -2253,6 +2285,48 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       reloadTime;
     LEVEL2_CLAW_U_K_SCALE, //float    knockbackScale;
     qtrue,                //qboolean  hasAltMode;
+    qfalse,               //qboolean  hasThirdMode;
+    qfalse,               //qboolean  canZoom;
+    90.0f,                //float     zoomFov;
+    qfalse,               //qboolean  purchasable;
+    qfalse,               //qboolean  longRanged;
+    qfalse,               //qboolean  relativeMissileSpeed;
+    {
+      {                     //impactPrediction_t impactPrediction[0];
+        WPM_NONE,           //weaponMode_t  weaponMode;
+        TR_STATIONARY,      //trType_t      trType;
+        0,                  //int       missileLifeTime;
+        0,                  //int       missileSize;
+        0                   //int       missileLaunchSpeed;
+      },
+      {                     //impactPrediction_t impactPrediction[1];
+        WPM_NONE,           //weaponMode_t  weaponMode;
+        TR_STATIONARY,      //trType_t      trType;
+        0,                  //int       missileLifeTime;
+        0,                  //int       missileSize;
+        0                   //int       missileLaunchSpeed;
+      }
+    },
+    TEAM_ALIENS           //team_t    team;
+  },
+  {
+    WP_ASPITFIRE,         //int       weaponNum;
+    0,                    //int       price;
+    ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages
+    SLOT_WEAPON,          //int       slots;
+    "spitfire",           //char      *weaponName;
+    "Spitfire",           //char      *humanName;
+    "",
+    0,                    //int       maxAmmo; 
+    0,                    //int       maxClips;
+    qtrue,                //int       infiniteAmmo;
+    qfalse,               //int       usesEnergy;
+    SPITFIRE_ZAP_REPEAT,  //int       repeatRate1;
+    SPITFIRE_POUNCE_REPEAT, //int       repeatRate2;
+    0,                    //int       repeatRate3;
+    0,                    //int       reloadTime;
+    SPITFIRE_ZAP_K_SCALE, //float     knockbackScale;
+    qfalse,               //qboolean  hasAltMode;
     qfalse,               //qboolean  hasThirdMode;
     qfalse,               //qboolean  canZoom;
     90.0f,                //float     zoomFov;
@@ -3649,7 +3723,7 @@ char *eventnames[ ] =
   "EV_DEBUG_LINE",
   "EV_STOPLOOPINGSOUND",
   "EV_TAUNT",
-
+  
   "EV_OVERMIND_ATTACK", // overmind under attack
   "EV_OVERMIND_DYING",  // overmind close to death
   "EV_OVERMIND_SPAWNS", // overmind needs spawns
