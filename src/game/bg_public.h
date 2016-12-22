@@ -26,6 +26,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //tremulous balance header
 #include "tremulous.h"
 
+// linked lists
+#include "bg_list.h"
+
 // because games can change separately from the main system version, we need a
 // second version that must match between game and cgame
 #define GAME_VERSION            "base"
@@ -1416,6 +1419,9 @@ typedef enum
               // by setting eType to ET_EVENTS + eventNum
               // this avoids having to set eFlags and eventNum
 } entityType_t;
+
+#define  FREEMEMCOOKIE     ((int)0xDEADBE3F)  // Any unlikely to be used value
+#define  RECYCLEDMEMCOOKIE ((int)0xB3EFDEED)  // Any other unlikely to be used value
 
 void  *BG_Alloc( int size );
 void  BG_InitMemory( void );
