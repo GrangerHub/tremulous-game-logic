@@ -4042,6 +4042,9 @@ void UI_Init( qboolean inGameLoad )
 
   UI_RegisterCvars();
   UI_InitMemory();
+  
+  // Linked Lists
+  BG_InitListMemory( );
 
   // cache redundant calulations
   trap_GetGlconfig( &uiInfo.uiDC.glconfig );

@@ -613,6 +613,9 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
   G_Printf( "gamename: %s\n", GAME_VERSION );
 
   BG_InitMemory( );
+  
+  // Linked Lists
+  BG_InitListMemory( );
 
   // set some level globals
   memset( &level, 0, sizeof( level ) );
