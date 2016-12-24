@@ -704,35 +704,35 @@ static void admin_default_levels( void )
   g_admin_level_t *l;
   int             level = 0;
 
-  l = g_admin_levels = BG_Alloc( sizeof( g_admin_level_t ) );
+  l = g_admin_levels = BG_Alloc0( sizeof( g_admin_level_t ) );
   l->level = level++;
   Q_strncpyz( l->name, "^4Unknown Player", sizeof( l->name ) );
   Q_strncpyz( l->flags,
     "listplayers admintest adminhelp time register",
     sizeof( l->flags ) );
 
-  l = l->next = BG_Alloc( sizeof( g_admin_level_t ) );
+  l = l->next = BG_Alloc0( sizeof( g_admin_level_t ) );
   l->level = level++;
   Q_strncpyz( l->name, "^5Server Regular", sizeof( l->name ) );
   Q_strncpyz( l->flags,
     "listplayers admintest adminhelp time",
     sizeof( l->flags ) );
 
-  l = l->next = BG_Alloc( sizeof( g_admin_level_t ) );
+  l = l->next = BG_Alloc0( sizeof( g_admin_level_t ) );
   l->level = level++;
   Q_strncpyz( l->name, "^6Team Manager", sizeof( l->name ) );
   Q_strncpyz( l->flags,
     "listplayers admintest adminhelp time putteam spec999",
     sizeof( l->flags ) );
 
-  l = l->next = BG_Alloc( sizeof( g_admin_level_t ) );
+  l = l->next = BG_Alloc0( sizeof( g_admin_level_t ) );
   l->level = level++;
   Q_strncpyz( l->name, "^2Junior Admin", sizeof( l->name ) );
   Q_strncpyz( l->flags,
     "listplayers admintest adminhelp time putteam spec999 kick mute ADMINCHAT",
     sizeof( l->flags ) );
 
-  l = l->next = BG_Alloc( sizeof( g_admin_level_t ) );
+  l = l->next = BG_Alloc0( sizeof( g_admin_level_t ) );
   l->level = level++;
   Q_strncpyz( l->name, "^3Senior Admin", sizeof( l->name ) );
   Q_strncpyz( l->flags,
@@ -740,7 +740,7 @@ static void admin_default_levels( void )
     "namelog ADMINCHAT",
     sizeof( l->flags ) );
 
-  l = l->next = BG_Alloc( sizeof( g_admin_level_t ) );
+  l = l->next = BG_Alloc0( sizeof( g_admin_level_t ) );
   l->level = level++;
   Q_strncpyz( l->name, "^1Server Operator", sizeof( l->name ) );
   Q_strncpyz( l->flags,
@@ -1156,7 +1156,7 @@ qboolean G_admin_readconfig( gentity_t *ent )
     admin_default_levels();
     return qfalse;
   }
-  cnf = BG_Alloc( len + 1 );
+  cnf = BG_StackPoolAlloc( len + 1 );
   cnf2 = cnf;
   trap_FS_Read( cnf, len, f );
   cnf[ len ] = '\0';
@@ -1175,9 +1175,9 @@ qboolean G_admin_readconfig( gentity_t *ent )
     if( !Q_stricmp( t, "[level]" ) )
     {
       if( l )
-        l = l->next = BG_Alloc( sizeof( g_admin_level_t ) );
+        l = l->next = BG_Alloc0( sizeof( g_admin_level_t ) );
       else
-        l = g_admin_levels = BG_Alloc( sizeof( g_admin_level_t ) );
+        l = g_admin_levels = BG_Alloc0( sizeof( g_admin_level_t ) );
       level_open = qtrue;
       admin_open = ban_open = command_open = qfalse;
       lc++;
@@ -1185,9 +1185,9 @@ qboolean G_admin_readconfig( gentity_t *ent )
     else if( !Q_stricmp( t, "[admin]" ) )
     {
       if( a )
-        a = a->next = BG_Alloc( sizeof( g_admin_admin_t ) );
+        a = a->next = BG_Alloc0( sizeof( g_admin_admin_t ) );
       else
-        a = g_admin_admins = BG_Alloc( sizeof( g_admin_admin_t ) );
+        a = g_admin_admins = BG_Alloc0( sizeof( g_admin_admin_t ) );
       admin_open = qtrue;
       level_open = ban_open = command_open = qfalse;
       ac++;
@@ -1195,9 +1195,9 @@ qboolean G_admin_readconfig( gentity_t *ent )
     else if( !Q_stricmp( t, "[ban]" ) )
     {
       if( b )
-        b = b->next = BG_Alloc( sizeof( g_admin_ban_t ) );
+        b = b->next = BG_Alloc0( sizeof( g_admin_ban_t ) );
       else
-        b = g_admin_bans = BG_Alloc( sizeof( g_admin_ban_t ) );
+        b = g_admin_bans = BG_Alloc0( sizeof( g_admin_ban_t ) );
       ban_open = qtrue;
       level_open = admin_open = command_open = qfalse;
       bc++;
@@ -1205,9 +1205,9 @@ qboolean G_admin_readconfig( gentity_t *ent )
     else if( !Q_stricmp( t, "[command]" ) )
     {
       if( c )
-        c = c->next = BG_Alloc( sizeof( g_admin_command_t ) );
+        c = c->next = BG_Alloc0( sizeof( g_admin_command_t ) );
       else
-        c = g_admin_commands = BG_Alloc( sizeof( g_admin_command_t ) );
+        c = g_admin_commands = BG_Alloc0( sizeof( g_admin_command_t ) );
       command_open = qtrue;
       level_open = admin_open = ban_open = qfalse;
       cc++;
@@ -1323,7 +1323,7 @@ qboolean G_admin_readconfig( gentity_t *ent )
       COM_ParseError( "unexpected token \"%s\"", t );
     }
   }
-  BG_Free( cnf2 );
+  BG_StackPoolFree( cnf2 );
   ADMP( va( "^3readconfig: ^7loaded %d levels, %d admins, %d bans, %d commands\n",
           lc, ac, bc, cc ) );
   if( lc == 0 )
@@ -1501,9 +1501,9 @@ qboolean G_admin_setlevel( gentity_t *ent )
   {
     for( a = g_admin_admins; a && a->next; a = a->next );
     if( a )
-      a = a->next = BG_Alloc( sizeof( g_admin_admin_t ) );
+      a = a->next = BG_Alloc0( sizeof( g_admin_admin_t ) );
     else
-      a = g_admin_admins = BG_Alloc( sizeof( g_admin_admin_t ) );
+      a = g_admin_admins = BG_Alloc0( sizeof( g_admin_admin_t ) );
     vic->client->pers.admin = a;
     Q_strncpyz( a->guid, vic->client->pers.guid, sizeof( a->guid ) );
   }
@@ -1613,10 +1613,10 @@ static void admin_create_ban( gentity_t *ent,
   if( b )
   {
     if( !b->next )
-      b = b->next = BG_Alloc( sizeof( g_admin_ban_t ) );
+      b = b->next = BG_Alloc0( sizeof( g_admin_ban_t ) );
   }
   else
-    b = g_admin_bans = BG_Alloc( sizeof( g_admin_ban_t ) );
+    b = g_admin_bans = BG_Alloc0( sizeof( g_admin_ban_t ) );
 
   Q_strncpyz( b->name, netname, sizeof( b->name ) );
   Q_strncpyz( b->guid, guid, sizeof( b->guid ) );
@@ -4564,7 +4564,6 @@ void G_admin_cleanup( void )
     BG_Free( c );
   }
   g_admin_commands = NULL;
-  BG_DefragmentMemory( );
 }
 
 qboolean G_admin_seen( gentity_t *ent )

@@ -48,7 +48,7 @@ void G_namelog_connect( gclient_t *client )
   }
   if( !n )
   {
-    n = BG_Alloc( sizeof( namelog_t ) );
+    n = BG_Alloc0( sizeof( namelog_t ) );
     strcpy( n->guid, client->pers.guid );
     n->guidless = client->pers.guidless;
     if( p )
@@ -125,4 +125,3 @@ void G_namelog_restore( gclient_t *client )
   client->ps.persistant[ PERS_CREDIT ] = 0;
   G_AddCreditToClient( client, n->credits, qfalse );
 }
-

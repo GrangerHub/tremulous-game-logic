@@ -83,7 +83,7 @@ static voice_t *BG_VoiceList( void )
     return NULL;
   }
       
-  voices = (voice_t*)BG_Alloc( sizeof( voice_t ) );
+  voices = (voice_t*)BG_Alloc0( sizeof( voice_t ) );
   Q_strncpyz( voices->name, "default", sizeof( voices->name ) );
   voices->cmds = NULL;
   voices->next = NULL;
@@ -124,7 +124,7 @@ static voice_t *BG_VoiceList( void )
       break;
     }
  
-    voices->next = (voice_t*)BG_Alloc( sizeof( voice_t ) );
+    voices->next = (voice_t*)BG_Alloc0( sizeof( voice_t ) );
     voices = voices->next;
 
     Q_strncpyz( voices->name, filePtr, sizeof( voices->name ) );
@@ -240,7 +240,7 @@ static qboolean BG_VoiceParseTrack( int handle, voiceTrack_t *voiceTrack )
           token.string ) );
       }
 
-      voiceTrack->text = (char *)BG_Alloc( strlen( token.string ) + 1 );
+      voiceTrack->text = (char *)BG_Alloc0( strlen( token.string ) + 1 );
       Q_strncpyz( voiceTrack->text, token.string, strlen( token.string ) + 1 );
       foundToken = trap_Parse_ReadToken( handle, &token );
       continue;
@@ -305,12 +305,12 @@ static voiceTrack_t *BG_VoiceParseCommand( int handle )
 
     if( top == NULL )
     {
-      voiceTracks = BG_Alloc( sizeof( voiceTrack_t ) );
+      voiceTracks = BG_Alloc0( sizeof( voiceTrack_t ) );
       top = voiceTracks;
     }
     else
     {
-      voiceTracks->next = BG_Alloc( sizeof( voiceCmd_t ) );
+      voiceTracks->next = BG_Alloc0( sizeof( voiceCmd_t ) );
       voiceTracks = voiceTracks->next;
     }
     
@@ -395,12 +395,12 @@ static voiceCmd_t *BG_VoiceParse( char *name )
    
     if( top == NULL )
     {
-      voiceCmds = BG_Alloc( sizeof( voiceCmd_t ) );
+      voiceCmds = BG_Alloc0( sizeof( voiceCmd_t ) );
       top = voiceCmds;
     }
     else
     {
-      voiceCmds->next = BG_Alloc( sizeof( voiceCmd_t ) );
+      voiceCmds->next = BG_Alloc0( sizeof( voiceCmd_t ) );
       voiceCmds = voiceCmds->next;
     }
 

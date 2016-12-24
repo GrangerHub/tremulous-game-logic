@@ -2369,7 +2369,6 @@ UIOBJ_ = \
   \
   $(B)/ui/bg_misc.o \
   $(B)/ui/bg_lib.o \
-  $(B)/ui/bg_list.o \
   $(B)/qcommon/q_math.o \
   $(B)/qcommon/q_shared.o
 
@@ -2381,7 +2380,6 @@ UIOBJ11_ = \
   \
   $(B)/ui/bg_misc.o \
   $(B)/ui/bg_lib.o \
-  $(B)/ui/bg_list.o \
   $(B)/qcommon/q_math.o \
   $(B)/qcommon/q_shared.o
 

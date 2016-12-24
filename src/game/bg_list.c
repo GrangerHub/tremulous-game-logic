@@ -144,33 +144,21 @@
 
 /*
 --------------------------------------------------------------------------------
-Custom Dedicated Memory Management for linked lists
-
-All allocated bglists are members of the listPool[] array.  A bglist has one of
-3 allocation states: free, allocated, and recycled.  A bglist can only be in the
-free state one time before becoming allocated and never enters the free state
-again (unless the list memory is reinitialized of course).  The freeListHead
-points to the first free list in the listPool, and increments to the next
-element in that array whenever the free list freeListHead gets allocated.
-"Freeing" a bglist actually puts it at the head of a built in "recyled" linked
-list, and sets that bglists to the recycled state.  When allocation for a bglist
-occurs, first recycledListHead is checked, and if that fails then freeListHead.
-This custom dedicated memory management never requires any defragging and
-has a performance of O(constant) for both allocation and "freeing."
+Custom Dynamic Memory Management for linked lists
 */
  #ifdef GAME
- # define  MAX_LISTS 100000
+ # define  MAX_LISTS ( 16 * 1024 )
  #else
  #ifdef CGAME
- # define  MAX_LISTS 50000
+ # define  MAX_LISTS ( 16 * 1024 )
  #else
- # define  MAX_LISTS 10000
+ # define  MAX_LISTS ( 16 * 1024 )
  #endif
  #endif
 
- static bglist_t listPool[MAX_LISTS];
- static bglist_t *freeListHead;
- static bglist_t *recycledListHead;
+ 
+ allocator_protos( bglist )
+ allocator( bglist, sizeof(bglist_t), MAX_LISTS )
  
 /*
 ===============
@@ -180,57 +168,9 @@ Executed in the primary initialization functions of
 the modules that use linked lists.
 ===============
 */
-void BG_InitListMemory( void )
+void BG_InitListMemory( char *calledFile, int calledLine )
 {
-  int i;
-
-  // for memory validation
-  for( i = 0; i < MAX_LISTS; i++ )
-    listPool[ 0 ].allocation = FREEMEMCOOKIE;
-
-  freeListHead = listPool;
-
-  recycledListHead = NULL;
-}
-
-/*
-===============
-_bg_list_alloc
-
-checks for 1st for availability of any recyled lists, and if there are none,
-then checks for availability of any free lists.
-===============
-*/
-static ID_INLINE bglist_t *_bg_list_alloc( void )
-{
-  bglist_t *allocatedList;
-
-  if( recycledListHead )
-  {
-    if( recycledListHead->allocation == RECYCLEDMEMCOOKIE )
-    {
-      allocatedList = recycledListHead;
-      allocatedList->allocation = 0;
-      recycledListHead = recycledListHead->next;
-      return allocatedList;
-    }
-    else
-      Com_Error( ERR_DROP, "_bg_list_alloc: Recycled memory corruption detected!" );
-  } else if( freeListHead )
-  {
-    if( freeListHead->allocation == RECYCLEDMEMCOOKIE )
-      {
-        allocatedList = freeListHead;
-        allocatedList->allocation = 0;
-        freeListHead++;
-        return allocatedList;
-      }
-      else
-        Com_Error( ERR_DROP, "_bg_list_alloc: Memory corruption detected!" );
-  } else
-    Com_Error( ERR_DROP, "_bg_list_alloc: All list memory slots are full!" );
-
-  Com_Error( ERR_DROP, "_bg_list_alloc: Memory corruption detected!" );
+  initPool_bglist( calledFile, calledLine );
 }
 
 /*
@@ -242,21 +182,19 @@ Returns an allocated list initialized to NULL
 */
 static ID_INLINE bglist_t *_bg_list_alloc0( void )
 {
-  return memset( _bg_list_alloc( ), 0, sizeof( bglist_t ) );
+  return memset( alloc_bglist( __FILE__, __LINE__ ), 0, sizeof( bglist_t ) );
 }
 
 /*
 ===============
-_bg_list_free1
+BG_MemoryInfoForLinkedLists
 
-Recycles a list for later quick reallocation
+Displays info related to the allocation of linked lists
 ===============
 */
-static ID_INLINE void _bg_list_free1( bglist_t *list )
+void BG_MemoryInfoForLinkedLists( void )
 {
-  list->next = recycledListHead->next;
-  recycledListHead = list;
-  recycledListHead->allocation = RECYCLEDMEMCOOKIE;
+  memoryInfo_bglist(  );
 }
 
 /*
@@ -294,7 +232,7 @@ void bg_list_free( bglist_t *list )
   while( list )
   {
     tmp = list->next;
-    _bg_list_free1( list );
+    free_bglist( list, __FILE__, __LINE__ );
     list = tmp;
   }
 }
@@ -316,7 +254,7 @@ void bg_list_free( bglist_t *list )
  **/
 void bg_list_free_1( bglist_t *list )
 {
-  _bg_list_free1(list);
+  free_bglist(list, __FILE__, __LINE__);
 }
 
 /**
@@ -370,7 +308,7 @@ bglist_t *bg_list_append( bglist_t *list, void *data )
   bglist_t *new_list;
   bglist_t *last;
 
-  new_list = _bg_list_alloc();
+  new_list = alloc_bglist( __FILE__, __LINE__ );
   new_list->data = data;
   new_list->next = NULL;
 
@@ -418,7 +356,7 @@ bglist_t *bg_list_prepend( bglist_t *list, void *data )
 {
   bglist_t *new_list;
 
-  new_list = _bg_list_alloc();
+  new_list = alloc_bglist( __FILE__, __LINE__ );
   new_list->data = data;
   new_list->next = list;
 
@@ -461,7 +399,7 @@ bglist_t *bg_list_insert( bglist_t *list, void *data, int position )
   if( !tmp_list )
     return bg_list_append( list, data );
 
-  new_list = _bg_list_alloc();
+  new_list = alloc_bglist( __FILE__, __LINE__ );
   new_list->data = data;
   new_list->prev = tmp_list->prev;
   tmp_list->prev->next = new_list;
@@ -498,7 +436,7 @@ bg_list_insert_before(bglist_t    *list,
     {
       bglist_t *node;
 
-      node = _bg_list_alloc();
+      node = alloc_bglist( __FILE__, __LINE__ );
       node->data = data;
       node->prev = sibling->prev;
       node->next = sibling;
@@ -522,7 +460,7 @@ bg_list_insert_before(bglist_t    *list,
       while( last->next )
         last = last->next;
 
-      last->next = _bg_list_alloc();
+      last->next = alloc_bglist( __FILE__, __LINE__ );
       last->next->data = data;
       last->next->prev = last;
       last->next->next = NULL;
@@ -621,7 +559,7 @@ bglist_t *bg_list_remove( bglist_t *list, const void *data  )
       else
         {
           list = _bg_list_remove_link( list, tmp );
-          _bg_list_free1( tmp );
+          free_bglist( tmp, __FILE__, __LINE__ );
 
           break;
         }
@@ -660,7 +598,7 @@ bglist_t *bg_list_remove_all( bglist_t *list, const void *data )
           if( next )
             next->prev = tmp->prev;
 
-          _bg_list_free1( tmp );
+          free_bglist( tmp, __FILE__, __LINE__ );
           tmp = next;
         }
     }
@@ -706,7 +644,7 @@ bglist_t *bg_list_remove_link( bglist_t *list, bglist_t *llink )
 bglist_t *bg_list_delete_link( bglist_t *list, bglist_t *link_ )
 {
   list = _bg_list_remove_link( list, link_ );
-  _bg_list_free1( link_ );
+  free_bglist( link_, __FILE__, __LINE__ );
 
   return list;
 }
@@ -768,7 +706,7 @@ bglist_t *bg_list_copy_deep( bglist_t *list, BG_CopyFunc  func, void *user_data 
     {
       bglist_t *last;
 
-      new_list = _bg_list_alloc();
+      new_list = alloc_bglist( __FILE__, __LINE__ );
       if( func )
         new_list->data = func( list->data, user_data );
       else
@@ -778,7 +716,7 @@ bglist_t *bg_list_copy_deep( bglist_t *list, BG_CopyFunc  func, void *user_data 
       list = list->next;
       while( list )
         {
-          last->next = _bg_list_alloc();
+          last->next = alloc_bglist( __FILE__, __LINE__ );
           last->next->prev = last;
           last = last->next;
           if( func )

@@ -324,7 +324,7 @@ playMapError_t G_ReloadPlayMapPool( void )
     return G_PlayMapErrorByCode( PLAYMAP_ERROR_POOL_CONFIG_UNREADABLE );
   }
 
-  cnf = BG_Alloc( len + 1 );
+  cnf = BG_StackPoolAlloc( len + 1 );
   cnf2 = cnf;
   trap_FS_Read( cnf, len, f );
   cnf[ len ] = '\0';
@@ -364,7 +364,7 @@ playMapError_t G_ReloadPlayMapPool( void )
       G_AddToPlayMapPool( mapName, mapType, minClients, maxClients, qfalse );
     }
   }
-  BG_Free( cnf2 );
+  BG_StackPoolFree( cnf2 );
 
   // Sort once after adding all
   G_SortPlayMapPool();
@@ -687,7 +687,7 @@ playMapError_t G_ReloadPlayMapQueue( void )
         return G_PlayMapErrorByCode( PLAYMAP_ERROR_QUEUE_CONFIG_UNREADABLE );
     }
 
-    cnf = BG_Alloc( len + 1 );
+    cnf = BG_StackPoolAlloc( len + 1 );
     cnf2 = cnf;
     trap_FS_Read( cnf, len, f );
     cnf[ len ] = '\0';
@@ -782,7 +782,7 @@ playMapError_t G_ReloadPlayMapQueue( void )
         if( g_debugPlayMap.integer > 0 )
             trap_Print( "PLAYMAP: enqueued\n" );
     }
-    BG_Free( cnf2 );
+    BG_StackPoolFree( cnf2 );
 
     if( g_debugPlayMap.integer > 0 )
         trap_Print( "PLAYMAP: leaving G_ReloadPlayMapQueue\n" );
@@ -1024,7 +1024,7 @@ char *G_PlayMapFlags2String( int flags )
   char 	*flagString;
   char 	 token[ MAX_TOKEN_CHARS ];
 
-  flagString = BG_Alloc( MAX_STRING_CHARS );
+  flagString = BG_Alloc0( MAX_STRING_CHARS );
   *flagString = '\0';
   
   // Loop through flags
@@ -1063,7 +1063,7 @@ playMap_t *G_PopFromPlayMapQueue( void )
   if( PLAYMAP_QUEUE_IS_EMPTY )
     return NULL;
 
-  playMap = BG_Alloc( sizeof(*playMap) );
+  playMap = BG_Alloc0( sizeof(*playMap) );
 
   // copy values from playmap in the head of the queue
   playMap->mapName = playMapQueue.playMap[ playMapQueue.head ].mapName;
