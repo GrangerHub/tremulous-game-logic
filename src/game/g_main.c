@@ -60,6 +60,7 @@ vmCvar_t  g_warmupTimeout2Trigger;
 vmCvar_t  g_warmupBuildableRespawnTime;
 vmCvar_t  g_warmupDefensiveBuildableRespawnTime;
 
+vmCvar_t  g_humanStaminaMode;
 vmCvar_t  g_friendlyFire;
 vmCvar_t  g_friendlyBuildableFire;
 vmCvar_t  g_dretchPunt;
@@ -97,6 +98,7 @@ vmCvar_t  g_minNameChangePeriod;
 vmCvar_t  g_maxNameChanges;
 
 vmCvar_t  g_allowShare;
+vmCvar_t  g_overflowFunds;
 
 vmCvar_t  g_allowBuildableStacking;
 vmCvar_t  g_alienBuildPoints;
@@ -219,6 +221,7 @@ static cvarTable_t   gameCvarTable[ ] =
 
   { &g_synchronousClients, "g_synchronousClients", "0", CVAR_SYSTEMINFO, 0, qfalse  },
 
+  { &g_humanStaminaMode, "g_humanStaminaMode", "1", CVAR_ARCHIVE, 0, qtrue  },
   { &g_friendlyFire, "g_friendlyFire", "75", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qtrue  },
   { &g_friendlyBuildableFire, "g_friendlyBuildableFire", "100", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qtrue  },
   { &g_dretchPunt, "g_dretchPunt", "1", CVAR_ARCHIVE, 0, qtrue  },
@@ -254,6 +257,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_maxNameChanges, "g_maxNameChanges", "5", 0, 0, qfalse},
 
   { &g_allowShare, "g_allowShare", "0", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qfalse},
+  { &g_overflowFunds, "g_overflowFunds", "1", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qfalse},
 
   { &g_smoothClients, "g_smoothClients", "1", 0, 0, qfalse},
   { &pmove_fixed, "pmove_fixed", "0", CVAR_SYSTEMINFO, 0, qfalse},
@@ -1665,6 +1669,7 @@ void MoveClientToIntermission( gentity_t *ent )
   ent->s.loopSound = 0;
   ent->s.event = 0;
   ent->r.contents = 0;
+  G_BackupUnoccupyContents( ent );
 }
 
 /*
@@ -2612,12 +2617,13 @@ CheckCvars
 */
 void CheckCvars( void )
 {
-  static int lastPasswordModCount      = -1;
-  static int lastMarkDeconModCount     = -1;
-  static int lastSDTimeModCount        = -1;
-  static int lastNumZones              = 0;
-  static int lastTimeLimitModCount = -1;
-  static int lastExtendTimeLimit = 0;
+  static int lastPasswordModCount         = -1;
+  static int lastMarkDeconModCount        = -1;
+  static int lastSDTimeModCount           = -1;
+  static int lastNumZones                 =  0;
+  static int lastTimeLimitModCount        = -1;
+  static int lastExtendTimeLimit          =  0;
+  static int lastHumanStaminaModeModCount = -1;
 
   if( g_password.modificationCount != lastPasswordModCount )
   {
@@ -2686,6 +2692,13 @@ void CheckCvars( void )
                                             level.extendTimeLimit ) ) );
     lastExtendTimeLimit = level.extendTimeLimit;
     lastTimeLimitModCount = g_timelimit.modificationCount;
+  }
+
+  if( g_humanStaminaMode.modificationCount != lastHumanStaminaModeModCount )
+  {
+    lastHumanStaminaModeModCount = g_humanStaminaMode.modificationCount;
+    trap_SetConfigstring( CS_HUMAN_STAMINA_MODE,
+                          va( "%i", g_humanStaminaMode.integer ) );
   }
 
   level.frameMsec = trap_Milliseconds( );
@@ -2849,6 +2862,8 @@ void G_RunFrame( int levelTime )
     if( !ent->r.linked && ent->neverFree )
       continue;
 
+    G_OccupantThink( ent );
+
     if( ent->s.eType == ET_MISSILE )
     {
       G_RunMissile( ent );
@@ -2924,4 +2939,3 @@ void G_RunFrame( int levelTime )
 
   level.frameMsec = trap_Milliseconds();
 }
-

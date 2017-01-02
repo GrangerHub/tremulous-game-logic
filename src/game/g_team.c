@@ -168,6 +168,10 @@ void G_LeaveTeam( gentity_t *self )
   self->client->pers.readyToPlay = qfalse;
   self->client->ps.stats[ STAT_READY ] = self->client->pers.readyToPlay;
 
+  // reset any activation entities the player might be occupying
+  if( self->client->ps.eFlags & EF_OCCUPYING )
+    G_ResetOccupation( self->occupation.occupied, self );
+
   for( i = 0; i < level.num_entities; i++ )
   {
     ent = &g_entities[ i ];
@@ -230,6 +234,7 @@ void G_ChangeTeam( gentity_t *ent, team_t newTeam )
     {
       ent->client->noclip = qfalse;
       ent->r.contents = ent->client->cliprcontents;
+      G_BackupUnoccupyContents( ent );
     }
     ent->flags &= ~( FL_GODMODE | FL_NOTARGET );
   }

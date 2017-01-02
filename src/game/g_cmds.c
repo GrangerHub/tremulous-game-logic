@@ -640,23 +640,29 @@ argv(0) noclip
 void Cmd_Noclip_f( gentity_t *ent )
 {
   char  *msg;
-
-  if( ent->client->noclip )
+  if ( ent->client->ps.eFlags & EF_OCCUPYING )
   {
-    msg = "noclip OFF\n";
-    ent->r.contents = ent->client->cliprcontents;
-  }
-  else
+    msg = "noclip is disabled while occupying an activation entity";
+  } else
   {
-    msg = "noclip ON\n";
-    ent->client->cliprcontents = ent->r.contents;
-    ent->r.contents = 0;
+    if( ent->client->noclip )
+    {
+      msg = "noclip OFF\n";
+      ent->r.contents = ent->client->cliprcontents;
+    }
+    else
+    {
+      msg = "noclip ON\n";
+      ent->client->cliprcontents = ent->r.contents;
+      ent->r.contents = 0;
+    }
+
+    ent->client->noclip = !ent->client->noclip;
+
+    if( ent->r.linked )
+      trap_LinkEntity( ent );
   }
 
-  ent->client->noclip = !ent->client->noclip;
-
-  if( ent->r.linked )
-    trap_LinkEntity( ent );
 
   trap_SendServerCommand( ent - g_entities, va( "print \"%s\"", msg ) );
 }
@@ -671,6 +677,10 @@ void Cmd_Kill_f( gentity_t *ent )
 {
   if( g_cheats.integer )
   {
+    // reset any activation entities the player might be occupying
+    if( ent->client->ps.eFlags & EF_OCCUPYING )
+      G_ResetOccupation( ent->occupation.occupied, ent );
+
     ent->client->ps.stats[ STAT_HEALTH ] = ent->health = 0;
     player_die( ent, ent, ent, 100000, MOD_SUICIDE );
   }
@@ -2163,6 +2173,12 @@ void Cmd_Class_f( gentity_t *ent )
         return;
       }
 
+      if ( ent->client->ps.eFlags & EF_OCCUPYING )
+      {
+        G_TriggerMenu( clientNum, MN_A_NOEROOM );
+        return;
+      }
+
       if( ent->client->sess.spectatorState == SPECTATOR_NOT &&
           ( currentClass == PCL_ALIEN_BUILDER0 ||
             currentClass == PCL_ALIEN_BUILDER0_UPG ) &&
@@ -2447,6 +2463,12 @@ void Cmd_Buy_f( gentity_t *ent )
   upgrade_t upgrade;
   qboolean  energyOnly;
 
+  if( ent->client->ps.eFlags & EF_OCCUPYING )
+  {
+    trap_SendServerCommand( ent-g_entities, "print \"You can't buy while occupying another structure\n\"" );
+    return;
+  }
+
   trap_Argv( 1, s, sizeof( s ) );
 
   weapon = BG_WeaponByName( s )->number;
@@ -2639,6 +2661,12 @@ void Cmd_Sell_f( gentity_t *ent )
   weapon_t  weapon;
   upgrade_t upgrade;
 
+  if( ent->client->ps.eFlags & EF_OCCUPYING )
+  {
+    trap_SendServerCommand( ent-g_entities, "print \"You can't sell while occupying another structure\n\"" );
+    return;
+  }
+
   trap_Argv( 1, s, sizeof( s ) );
 
   //no armoury nearby
@@ -2823,87 +2851,24 @@ void Cmd_Build_f( gentity_t *ent )
 
   ent->client->ps.stats[ STAT_BUILDABLE ] = buildable;
 
-  if( 1 )
+  dist = BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->buildDist;
+
+  //these are the errors displayed when the builder first selects something to use
+  switch( G_CanBuild( ent, buildable, dist, origin, normal, &groundEntNum ) )
   {
-    dynMenu_t err;
-    dist = BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->buildDist;
+    // can place right away, set the blueprint and the valid togglebit
+    case IBE_NONE:
+    case IBE_TNODEWARN:
+    case IBE_RPTNOREAC:
+    case IBE_RPTPOWERHERE:
+    case IBE_SPWNWARN:
+      ent->client->ps.stats[ STAT_BUILDABLE ] |= SB_VALID_TOGGLEBIT;
+      break;
 
-    //these are the errors displayed when the builder first selects something to use
-    switch( G_CanBuild( ent, buildable, dist, origin, normal, &groundEntNum ) )
-    {
-      // can place right away, set the blueprint and the valid togglebit
-      case IBE_NONE:
-      case IBE_TNODEWARN:
-      case IBE_RPTNOREAC:
-      case IBE_RPTPOWERHERE:
-      case IBE_SPWNWARN:
-        err = MN_NONE;
-        ent->client->ps.stats[ STAT_BUILDABLE ] |= SB_VALID_TOGGLEBIT;
-        break;
-
-      // can't place yet but maybe soon: start with valid togglebit off
-      case IBE_NORMAL:
-        err = MN_B_NORMAL;
-        break;
-
-      case IBE_NOCREEP:
-        err = MN_A_NOCREEP;
-        break;
-
-      case IBE_NOROOM:
-        err = MN_B_NOROOM;
-        break;
-
-      case IBE_NOOVERMIND:
-        err = MN_A_NOOVMND;
-        break;
-
-      case IBE_NOPOWERHERE:
-        err = MN_NONE;
-        break;
-
-      case IBE_NOALIENBP:
-        err = MN_A_NOBP;
-        break;
-
-      case IBE_ONEOVERMIND:
-        err = MN_A_ONEOVERMIND;
-        break;
-
-      case IBE_ONEREACTOR:
-        err = MN_H_ONEREACTOR;
-        break;
-
-      case IBE_NOHUMANBP:
-        err = MN_H_NOBP;
-        break;
-
-      case IBE_NODCC:
-        err = MN_H_NODCC;
-        break;
-
-      case IBE_PERMISSION:
-        err = MN_B_NORMAL;
-        break;
-
-      case IBE_LASTSPAWN:
-        err = MN_B_LASTSPAWN;
-        break;
-
-      case IBE_BLOCKEDBYENEMY:
-        err = MN_B_BLOCKEDBYENEMY;
-        break;
-
-      default:
-        err = -1; // stop uninitialised warning
-        break;
-    }
-
-    if( err != MN_NONE && !ent->client->pers.disableBlueprintErrors )
-      G_TriggerMenu( ent->client->ps.clientNum, err );
+    // can't place yet but maybe soon: start with valid togglebit off
+    default:
+      break;
   }
-  else
-    G_TriggerMenu( ent->client->ps.clientNum, MN_B_CANNOT );
 }
 
 /*
@@ -3647,7 +3612,7 @@ void Cmd_Share_f( gentity_t *ent )
   }
 
   // player has no credits
-  if( shareAmount < 1 )
+  if( shareAmount <= 0 )
   {
     ADMP( va( "%s: Earn some more first, you lazy bum!\n", cmd ) );
     return;
@@ -3705,6 +3670,131 @@ void Cmd_Share_f( gentity_t *ent )
 
 /*
 =================
+G_DonateCredits
+
+Used by Cmd_Donate_f and by g_overflowFundsj
+=================
+*/
+int G_DonateCredits( gclient_t *client, int value, qboolean verbos )
+{
+  char *type;
+  int i, divisor, portion, new_credits, total=0, max,
+      amounts[ MAX_CLIENTS ], totals[ MAX_CLIENTS ], creditConversion;
+  qboolean donated = qtrue;
+  gentity_t *ent;
+
+  if( !client )
+    return 0;
+
+  if( client->pers.teamSelection == TEAM_ALIENS )
+  {
+    divisor = level.numAlienClients - 1;
+    max = ALIEN_MAX_FRAGS * ALIEN_CREDITS_PER_KILL;
+    type = "evo(s)";
+    creditConversion = ALIEN_CREDITS_PER_KILL;
+  }
+  else if( client->pers.teamSelection == TEAM_HUMANS )
+  {
+    divisor = level.numHumanClients - 1;
+    max = HUMAN_MAX_CREDITS;
+    type = "credit(s)";
+    creditConversion = 1;
+  }
+  else
+    return 0;
+
+  if( divisor < 1 )
+    return 0;
+
+  if( value <= 0 )
+    return 0;
+
+  for( i = 0; i < level.maxclients; i++ )
+  {
+    amounts[ i ] = 0;
+    totals[ i ] = 0;
+  }
+
+  // determine donation amounts for each client
+  total = value;
+  while( donated && value )
+  {
+    donated = qfalse;
+
+    if( value >= creditConversion )
+    {
+      portion = value / divisor;
+      if( portion < creditConversion )
+        portion = creditConversion;
+    } else
+      portion = value;
+
+    for( i = 0; i < level.maxclients; i++ )
+    {
+      if( level.clients[ i ].pers.connected == CON_CONNECTED &&
+          client != level.clients + i &&
+          level.clients[ i ].pers.teamSelection ==
+          client->pers.teamSelection  &&
+          level.clients[ i ].pers.credit < max )
+      {
+
+        new_credits = level.clients[ i ].pers.credit + portion;
+        amounts[ i ] = portion;
+        totals[ i ] += portion;
+
+        if( new_credits > max )
+        {
+          amounts[ i ] -= new_credits - max;
+          totals[ i ] -= new_credits - max;
+          new_credits = max;
+        }
+
+        if( amounts[ i ] )
+        {
+          G_AddCreditToClient( &(level.clients[ i ]), amounts[ i ], qtrue );
+          donated = qtrue;
+          value -= amounts[ i ];
+          if( value < portion )
+          {
+            if( value > 0 )
+              portion = value;
+            else
+              break;
+          }
+        }
+      }
+    }
+  }
+
+  if( verbos )
+  {
+    // transfer funds
+    for( i = 0; i < level.maxclients; i++ )
+    {
+      if( totals[ i ] )
+      {
+        trap_SendServerCommand( i,
+            va( "print \"%s^7 donated %f %s to you, don't forget to say 'thank you'!\n\"",
+                client->pers.netname,
+                ( ( (double)totals[ i ] ) /
+                  ( (double)( creditConversion ) ) ), type ) );
+      }
+    }
+
+    if( total - value )
+    {
+      ent = &g_entities[ client->ps.clientNum];
+      ADMP( va( "Donated %f %s to the cause.\n",
+                ( ( (double)( total - value ) ) /
+                  ( (double)( creditConversion ) )  ), type ) );
+    }
+  }
+
+  return total -value;
+}
+
+/*
+=================
 Cmd_Donate_f
 
 Alms for the poor
@@ -3712,10 +3802,8 @@ Alms for the poor
 */
 void Cmd_Donate_f( gentity_t *ent )
 {
-   char cmd[ MAX_TOKEN_CHARS ], donateAmount[ MAX_TOKEN_CHARS ], *type;
-   int i, value, divisor, portion, new_credits, total=0, max,
-       amounts[ MAX_CLIENTS ], totals[ MAX_CLIENTS ];
-   qboolean donated = qtrue;
+   char cmd[ MAX_TOKEN_CHARS ], donateAmount[ MAX_TOKEN_CHARS ];
+   int value, divisor, amountDonated;
 
   if( !ent->client )
     return;
@@ -3729,17 +3817,9 @@ void Cmd_Donate_f( gentity_t *ent )
   }
 
   if( ent->client->pers.teamSelection == TEAM_ALIENS )
-  {
     divisor = level.numAlienClients - 1;
-    max = ALIEN_MAX_FRAGS;
-    type = "evo(s)";
-  }
   else if( ent->client->pers.teamSelection == TEAM_HUMANS )
-  {
     divisor = level.numHumanClients - 1;
-    max = HUMAN_MAX_CREDITS;
-    type = "credit(s)";
-  }
   else
   {
     ADMP( va( "%s: spectators cannot be so gracious\n", cmd ) );
@@ -3761,12 +3841,11 @@ void Cmd_Donate_f( gentity_t *ent )
   trap_Argv( 1, donateAmount, sizeof( donateAmount ) );
   value = atoi( donateAmount );
 
-  if( value > ent->client->pers.credit /
-      ( ent->client->pers.teamSelection == TEAM_ALIENS
-        ? ALIEN_CREDITS_PER_KILL : 1 ) )
-    value = ent->client->pers.credit /
-      ( ent->client->pers.teamSelection == TEAM_ALIENS
-        ? ALIEN_CREDITS_PER_KILL : 1 );
+  if( ent->client->pers.teamSelection == TEAM_ALIENS )
+    value *= ALIEN_CREDITS_PER_KILL;
+
+  if( value > ent->client->pers.credit )
+    value = ent->client->pers.credit;
 
   if( value <= 0 )
   {
@@ -3774,69 +3853,9 @@ void Cmd_Donate_f( gentity_t *ent )
     return;
   }
 
-  for( i = 0; i < level.maxclients; i++ )
-  {
-    amounts[ i ] = 0;
-    totals[ i ] = 0;
-  }
+  amountDonated = G_DonateCredits( ent->client, value, qtrue );
 
-  // determine donation amounts for each client
-  total = value;
-  while( donated && value )
-  {
-    donated = qfalse;
-    portion = value / divisor;
-    if( portion < 1 )
-      portion = 1;
-    for( i = 0; i < level.maxclients; i++ )
-    {
-      if( level.clients[ i ].pers.connected == CON_CONNECTED &&
-          ent->client != level.clients + i &&
-          level.clients[ i ].pers.teamSelection ==
-          ent->client->pers.teamSelection )
-      {
-        new_credits = level.clients[ i ].pers.credit /
-          ( ent->client->pers.teamSelection == TEAM_ALIENS
-            ? ALIEN_CREDITS_PER_KILL : 1 ) + portion;
-        amounts[ i ] = portion;
-        totals[ i ] += portion;
-
-        if( new_credits > max )
-        {
-          amounts[ i ] -= new_credits - max;
-          totals[ i ] -= new_credits - max;
-          new_credits = max;
-        }
-
-        if( amounts[ i ] )
-        {
-          G_AddCreditToClient( &(level.clients[ i ]), amounts[ i ] *
-              ( ent->client->pers.teamSelection == TEAM_ALIENS
-                ? ALIEN_CREDITS_PER_KILL : 1 ), qtrue );
-          donated = qtrue;
-          value -= amounts[ i ];
-          if( value < portion )
-            break;
-        }
-      }
-    }
-  }
-
-  // transfer funds
-  G_AddCreditToClient( ent->client, ( value - total ) *
-      ( ent->client->pers.teamSelection == TEAM_ALIENS
-        ? ALIEN_CREDITS_PER_KILL : 1 ), qtrue );
-  for( i = 0; i < level.maxclients; i++ )
-  {
-    if( totals[ i ] )
-    {
-      trap_SendServerCommand( i,
-          va( "print \"%s^7 donated %d %s to you, don't forget to say 'thank you'!\n\"",
-            ent->client->pers.netname, totals[ i ], type ) );
-    }
-  }
-
-  ADMP( va( "Donated %d %s to the cause.\n", total - value, type ) );
+  G_AddCreditToClient( ent->client, ( -amountDonated ) , qtrue );
 }
 
 /*

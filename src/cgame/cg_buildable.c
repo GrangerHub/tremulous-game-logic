@@ -683,7 +683,7 @@ void CG_GhostBuildable( buildable_t buildable )
 
   BG_BuildableBoundingBox( buildable, mins, maxs );
 
-  CG_SublimeMarkedBuildables( qtrue );
+  cgs.sublimeMarkedBuildables = qtrue;
 
   BG_PositionBuildableRelativeToPlayer( ps, mins, maxs, CG_Trace, entity_origin, angles, &tr );
 
@@ -693,7 +693,7 @@ void CG_GhostBuildable( buildable_t buildable )
   CG_PositionAndOrientateBuildable( ps->viewangles, entity_origin, tr.plane.normal, ps->clientNum,
                                     mins, maxs, ent.axis, ent.origin );
 
-  CG_SublimeMarkedBuildables( qfalse );
+  cgs.sublimeMarkedBuildables = qfalse;
 
   //offset on the Z axis if required
   VectorMA( ent.origin, BG_BuildableConfig( buildable )->zOffset, tr.plane.normal, ent.origin );
@@ -1160,7 +1160,9 @@ static void CG_BuildableStatusDisplay( centity_t *cent )
     }
 
     trap_R_SetColor( color );
-    if( !powered )
+    if( !powered &&
+        !( BG_Buildable( es->modelindex )->activationEnt &&
+           !( BG_Buildable( es->modelindex )->activationFlags & ACTF_POWERED ) ) )
     {
       float pX;
 

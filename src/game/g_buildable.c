@@ -1020,6 +1020,7 @@ void AGeneric_Blast( gentity_t *self )
   self->nextthink = level.time + 500;
 
   self->r.contents = 0;    //stop collisions...
+  G_BackupUnoccupyContents( self );
   trap_LinkEntity( self ); //...requires a relink
 }
 
@@ -2226,18 +2227,33 @@ void HRepeater_Think( gentity_t *self )
 
 /*
 ================
-HRepeater_Use
+HRepeater_Activate
 
 Use for human power repeater
 ================
 */
-void HRepeater_Use( gentity_t *self, gentity_t *other, gentity_t *activator )
+qboolean HRepeater_Activate( gentity_t *self, gentity_t *activator )
 {
-  if( self->health <= 0 || !self->spawned )
-    return;
+  if( self->occupation.other && self->occupation.other->client )
+    G_GiveClientMaxAmmo( self->occupation.other, qtrue );
 
-  if( other && other->client )
-    G_GiveClientMaxAmmo( other, qtrue );
+  return qfalse;
+}
+
+/*
+================
+HRepeater_CanActivate
+
+Custom canActivate for human power repeater
+================
+*/
+qboolean HRepeater_CanActivate( gentity_t *self, gclient_t *client )
+{
+  if( !BG_Weapon( client->ps.weapon )->usesEnergy ||
+      BG_Weapon( client->ps.weapon )->infiniteAmmo )
+    return qfalse;
+  else
+    return qtrue;
 }
 
 /*
@@ -2329,20 +2345,11 @@ HArmoury_Activate
 Called when a human activates an Armoury
 ================
 */
-void HArmoury_Activate( gentity_t *self, gentity_t *other, gentity_t *activator )
+qboolean HArmoury_Activate( gentity_t *self, gentity_t *activator )
 {
-  if( self->spawned )
-  {
-    //only humans can activate this
-    if( activator->client->ps.stats[ STAT_TEAM ] != TEAM_HUMANS )
-      return;
+  G_TriggerMenu( activator->client->ps.clientNum, MN_H_ARMOURY );
 
-    //if this is powered then call the armoury menu
-    if( self->powered )
-      G_TriggerMenu( activator->client->ps.clientNum, MN_H_ARMOURY );
-    else
-      G_TriggerMenu( activator->client->ps.clientNum, MN_H_NOTPOWERED );
-  }
+  return qfalse;
 }
 
 /*
@@ -2549,8 +2556,9 @@ void HMedistat_Think( gentity_t *self )
         self->enemy->client->ps.stats[ STAT_HEALTH ] = self->enemy->health;
       }
 
-      //if they're completely healed, give them a medkit
-      if( self->enemy->health >= self->enemy->client->ps.stats[ STAT_MAX_HEALTH ] )
+      //if they're completely healed and have full stamina, give them a medkit
+      if( self->enemy->health >= self->enemy->client->ps.stats[ STAT_MAX_HEALTH ] &&
+          self->enemy->client->ps.stats[ STAT_STAMINA ] >= STAMINA_MAX )
       {
         if( !BG_InventoryContainsUpgrade( UP_MEDKIT, self->enemy->client->ps.stats ) )
           BG_AddUpgradeToInventory( UP_MEDKIT, self->enemy->client->ps.stats );
@@ -4262,6 +4270,12 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
   built->splashMethodOfDeath = BG_Buildable( buildable )->meansOfDeath;
 
   built->nextthink = BG_Buildable( buildable )->nextthink;
+  
+  built->activation.flags = BG_Buildable( buildable )->activationFlags;
+  built->occupation.flags = BG_Buildable( buildable )->occupationFlags;
+  built->occupation.pm_type = BG_Buildable( buildable )->activationPm_type;
+  built->occupation.contents = BG_Buildable( buildable )->activationContents;
+  built->occupation.clipMask = BG_Buildable( buildable )->activationClipMask;
 
   built->takedamage = qtrue;
   built->spawned = qfalse;
@@ -4349,7 +4363,7 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
     case BA_H_ARMOURY:
       built->think = HArmoury_Think;
       built->die = HSpawn_Die;
-      built->use = HArmoury_Activate;
+      built->activation.activate = HArmoury_Activate;
       break;
 
     case BA_H_DCC:
@@ -4365,14 +4379,16 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
     case BA_H_REACTOR:
       built->think = HReactor_Think;
       built->die = HSpawn_Die;
-      built->use = HRepeater_Use;
+      built->activation.activate = HRepeater_Activate;
+      built->activation.canActivate = HRepeater_CanActivate;
       built->powered = built->active = qtrue;
       break;
 
     case BA_H_REPEATER:
       built->think = HRepeater_Think;
       built->die = HRepeater_Die;
-      built->use = HRepeater_Use;
+      built->activation.activate = HRepeater_Activate;
+      built->activation.canActivate = HRepeater_CanActivate;
       built->count = -1;
       break;
 
@@ -4381,8 +4397,8 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
       break;
   }
 
-  built->r.contents = CONTENTS_BODY;
-  built->clipmask = MASK_PLAYERSOLID;
+  G_SetContents( built, CONTENTS_BODY );
+  G_SetClipmask( built, MASK_PLAYERSOLID );
   built->enemy = NULL;
   built->s.weapon = BG_Buildable( buildable )->turretProjType;
 
@@ -5222,8 +5238,12 @@ void G_BuildLogRevert( int id )
           {
             if( ent->s.eType == ET_BUILDABLE )
               G_LogPrintf( "revert: remove %d %s\n",
-                (int)( ent - g_entities ), BG_Buildable( ent->s.modelindex )->name );
+                           (int)( ent - g_entities ),
+                           BG_Buildable( ent->s.modelindex )->name );
             G_RemoveRangeMarkerFrom( ent );
+            if( ( ent->flags & FL_OCCUPIED ) && ent->occupation.occupant )
+              G_UnoccupyEnt( ent, ent->occupation.occupant,
+                             ent->occupation.occupant, qtrue );
             G_FreeEntity( ent );
             break;
           }
@@ -5373,4 +5393,3 @@ void G_UpdateBuildableRangeMarkers( void )
     trap_LinkEntity( e->rangeMarker );
   }
 }
-

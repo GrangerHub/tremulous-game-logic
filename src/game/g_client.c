@@ -102,8 +102,13 @@ void G_AddCreditToClient( gclient_t *client, short credit, qboolean cap )
     {
       client->pers.credit += credit;
       if( client->pers.credit > capAmount )
+      {
+        if( g_overflowFunds.integer )
+          G_DonateCredits( client, client->pers.credit - capAmount, qfalse );
         client->pers.credit = capAmount;
-    }
+      }
+    } else if( g_overflowFunds.integer )
+      G_DonateCredits( client, credit, qfalse );
   }
   else
     client->pers.credit += credit;
@@ -470,8 +475,8 @@ static void SpawnCorpse( gentity_t *ent )
   body->s.eType = ET_CORPSE;
   body->timestamp = level.time;
   body->s.event = 0;
-  body->r.contents = CONTENTS_CORPSE;
-  body->clipmask = MASK_DEADSOLID;
+  G_SetContents( body, CONTENTS_CORPSE );
+  G_SetClipmask( body, MASK_DEADSOLID );
   body->s.clientNum = ent->client->ps.stats[ STAT_CLASS ];
   body->nonSegModel = ent->client->ps.persistant[ PERS_STATE ] & PS_NONSEGMODEL;
 
@@ -1012,14 +1017,6 @@ char *ClientUserinfoChanged( int clientNum, qboolean forceName )
   else
     client->pers.flySpeed = BG_Class( PCL_NONE )->speed;
 
-  // disable blueprint errors
-  s = Info_ValueForKey( userinfo, "cg_disableBlueprintErrors" );
-
-  if( atoi( s ) )
-    client->pers.disableBlueprintErrors = qtrue;
-  else
-    client->pers.disableBlueprintErrors = qfalse;
-
   client->pers.buildableRangeMarkerMask =
     atoi( Info_ValueForKey( userinfo, "cg_buildableRangeMarkerMask" ) );
 
@@ -1386,14 +1383,11 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   ent->client = &level.clients[ index ];
   ent->takedamage = qtrue;
   ent->classname = "player";
-  if( client->noclip )
-    client->cliprcontents = CONTENTS_BODY;
-  else
-    ent->r.contents = CONTENTS_BODY;
+  G_SetContents( ent, CONTENTS_BODY);
   if( client->pers.teamSelection == TEAM_NONE )
-    ent->clipmask = MASK_ASTRALSOLID;
+    G_SetClipmask( ent, MASK_ASTRALSOLID );
   else
-    ent->clipmask = MASK_PLAYERSOLID;
+    G_SetClipmask( ent, MASK_PLAYERSOLID );
   ent->die = player_die;
   ent->waterlevel = 0;
   ent->watertype = 0;

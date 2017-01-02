@@ -1393,6 +1393,7 @@ typedef struct
 
   // warmup-related values parsed from config strings
   qboolean      warmup;                 // Is it currently pre-game warmup?
+  int           humanStaminaMode;       // when set to 0, human stamina doesn't drain
   float         percentAliensReady;     // Percentage of alien players ready
   int           numAliensReady;         // Number of alien players ready
   int           numAliens;              // Total number of players in aliens team
@@ -1568,7 +1569,6 @@ extern  vmCvar_t    cg_noTaunt;
 extern  vmCvar_t    cg_drawSurfNormal;
 extern  vmCvar_t    cg_drawBBOX;
 extern  vmCvar_t    cg_wwSmoothTime;
-extern  vmCvar_t    cg_disableBlueprintErrors;
 extern  vmCvar_t    cg_depthSortParticles;
 extern  vmCvar_t    cg_bounceParticles;
 extern  vmCvar_t    cg_consoleLatency;
@@ -1778,7 +1778,6 @@ void        CG_ModelDoor( centity_t *cent );
 #define MAGIC_TRACE_HACK -2
 
 void        CG_BuildSolidList( void );
-void        CG_SublimeMarkedBuildables( qboolean sublime );
 int         CG_PointContents( const vec3_t point, int passEntityNum );
 void        CG_Trace( trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs,
                 const vec3_t end, int skipNumber, int mask );

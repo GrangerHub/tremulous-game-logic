@@ -41,15 +41,26 @@ typedef struct gclient_s gclient_t;
 
 #define INTERMISSION_DELAY_TIME 1000
 
-// gentity->flags
-#define FL_GODMODE        0x00000010
-#define FL_NOTARGET       0x00000020
-#define FL_TEAMSLAVE      0x00000400  // not the first on the team
-#define FL_NO_KNOCKBACK   0x00000800
-#define FL_DROPPED_ITEM   0x00001000
-#define FL_NO_BOTS        0x00002000  // spawn point not for bot use
-#define FL_NO_HUMANS      0x00004000  // spawn point just for bots
-#define FL_FORCE_GESTURE  0x00008000  // spawn point just for bots
+/*
+--------------------------------------------------------------------------------
+gentity->flags
+*/
+#define FL_GODMODE          0x00000010
+#define FL_NOTARGET         0x00000020
+#define FL_TEAMSLAVE        0x00000400  // not the first on the team
+#define FL_NO_KNOCKBACK     0x00000800
+#define FL_DROPPED_ITEM     0x00001000
+#define FL_NO_BOTS          0x00002000  // spawn point not for bot use
+#define FL_NO_HUMANS        0x00004000  // spawn point just for bots
+#define FL_FORCE_GESTURE    0x00008000  // spawn point just for bots
+#define FL_BOUNCE           0x00010000  // for missiles
+#define FL_BOUNCE_HALF      0x00020000  // for missiles
+#define FL_NO_BOUNCE_SOUND  0x00040000  // for missiles
+#define FL_OCCUPIED         0x00080000  // for occupiable entities
+
+/*
+--------------------------------------------------------------------------------
+*/
 
 // movers are things like doors, plats, buttons, etc
 typedef enum
@@ -151,6 +162,85 @@ struct gentity_s
   void              (*use)( gentity_t *self, gentity_t *other, gentity_t *activator );
   void              (*pain)( gentity_t *self, gentity_t *attacker, int damage );
   void              (*die)( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod );
+
+  // for activation entities
+  struct activation_s
+  {
+    int       flags; // Contains bit flags representing various abilities of a
+                     // given activation entity.
+
+    dynMenu_t menuMsg; // Message sent to the activator when an activation
+                       // fails.  Can be used in (*willActivate)().
+
+    dynMenu_t menuMsgOvrd[ MAX_ACTMN ]; // Used to override the general
+                                        // activation menu messages.
+
+    // If qture is returned, an occupiable activation entity would then be
+    // occupied.
+    qboolean  (*activate)( gentity_t *self, gentity_t *activator );
+
+    // Optional custom restrictions on the search for a nearby activation entity
+    // that the general activation.flags don't address.
+    qboolean  (*canActivate)( gentity_t *self, gclient_t *client );
+
+    // Optional custom restrictions on the actual activation of a nearby found
+    // activation entity.
+    qboolean  (*willActivate)( gentity_t *actEnt, gentity_t *activator );
+  } activation;
+
+  // for occupation entities
+  struct occupation_s
+  {
+    int       flags; // Contains bit flags representing various abilities of a
+                     // given occupation entity.
+
+    gentity_t *occupant; // The entity that is occupying this occupation entity
+
+    gentity_t *occupantFound; // A temporary variable used in the occupying
+                               // process. This can be set by (*findOccupant)().
+
+    gentity_t *occupied; // The occupiable entity that is being considered.
+
+    gentity_t *other;  // An optional additional entity involved in occupation.
+
+    int       occupantFlags; // Contains bit flags used by occupants
+
+    pmtype_t	pm_type; // Changes client's pm_type of an occupant.
+
+    int       contents; // Changes the contents of an occupant.
+
+    int       unoccupiedContents; // Used to restore the contents of an occupant
+               // that leaves its occupied activation entity.
+
+    int       clipMask; // Changes the clip mask of an occupant.
+
+    int       unoccupiedClipMask; // Used to restore the clip mask of an occupant
+               // that leaves its occupied activation entity.
+
+   // Optional custom function called to perform additional operations for
+   // occupation.
+   void (*occupy)( gentity_t *occupied );
+
+   // Optional custom function for leaving an occupiable entity.
+   // Unless force is set to qtrue, if qfalse is returned, the entity remains
+   // occupied.
+   qboolean  (*unoccupy)( gentity_t *occupied, gentity_t *occupant,
+                          gentity_t *activator, qboolean force );
+
+   // Optional custom resets for occupation entities.
+   void      (*occupiedReset)( gentity_t *occupied );
+   void      (*occupantReset)( gentity_t *occupant );
+
+   // Optional custom conditions that would force a client to unoccupy if qtrue
+   // is returned.
+   qboolean  (*occupyUntil)( gentity_t *occupied, gentity_t *occupant );
+
+   // Optional funtion to find an occupant which isn't an activator.
+   void      (*findOccupant)( gentity_t *actEnt, gentity_t *activator );
+
+   // Optional function that returns another entity involved in the occupation.
+   void      (*findOther)(gentity_t *actEnt, gentity_t *activator );
+  } occupation;
 
   int               pain_debounce_time;
   int               last_move_time;
@@ -306,7 +396,6 @@ typedef struct
   int                 location;           // player locations
   int                 teamInfo;           // level.time of team overlay update (disabled = 0)
   float               flySpeed;           // for spectator/noclip moves
-  qboolean            disableBlueprintErrors; // should the buildable blueprint never be hidden from the players?
   int                 buildableRangeMarkerMask;
 
   class_t             classSelection;     // player class (copied to ent->client->ps.stats[ STAT_CLASS ] once spawned)
@@ -437,6 +526,8 @@ struct gclient_s
   int                 lastMedKitTime;
   int                 medKitHealthToRestore;
   int                 medKitIncrementTime;
+  int                 nextMedKitRestoreStaminaTime;
+  int                 medKitStaminaToRestore;
   int                 lastCreepSlowTime;    // time until creep can be removed
 
   qboolean            charging;
@@ -773,6 +864,7 @@ void      Cmd_PlayMap_f( gentity_t *ent );
 void      Cmd_ListMaps_f( gentity_t *ent );
 void      Cmd_Test_f( gentity_t *ent );
 void      Cmd_AdminMessage_f( gentity_t *ent );
+int       G_DonateCredits( gclient_t *client, int value, qboolean verbos );
 int       G_FloodLimited( gentity_t *ent );
 void      G_ListCommands( gentity_t *ent );
 void      G_LoadCensors( void );
@@ -841,6 +933,7 @@ void              AHive_Think( gentity_t *self );
 void              ATrapper_Think( gentity_t *self );
 void              HSpawn_Think( gentity_t *self );
 void              HRepeater_Think( gentity_t *self );
+qboolean          HRepeater_CanActivate( gentity_t *self, gclient_t *client );
 void              HReactor_Think( gentity_t *self );
 void              HArmoury_Think( gentity_t *self );
 void              HDCC_Think( gentity_t *self );
@@ -874,10 +967,38 @@ gentity_t         *G_RepeaterEntityForPoint( vec3_t origin );
 gentity_t         *G_InPowerZone( gentity_t *self );
 buildLog_t        *G_BuildLogNew( gentity_t *actor, buildFate_t fate );
 void              G_BuildLogSet( buildLog_t *log, gentity_t *ent );
-void              G_BuildLogAuto( gentity_t *actor, gentity_t *buildable, buildFate_t fate );
+void              G_BuildLogAuto( gentity_t *actor, gentity_t *buildable,
+                                                    buildFate_t fate );
 void              G_BuildLogRevert( int id );
 void              G_RemoveRangeMarkerFrom( gentity_t *self );
 void              G_UpdateBuildableRangeMarkers( void );
+
+// activation entities functions
+qboolean          G_CanActivateEntity( gclient_t *client, gentity_t *ent );
+void              G_OvrdActMenuMsg( gentity_t *activator,
+                                    actMNOvrdIndex_t index,
+                                    dynMenu_t defaultMenu );
+qboolean          G_WillActivateEntity( gentity_t *actEnt,
+                                        gentity_t *activator );
+void              G_ActivateEntity( gentity_t *actEnt, gentity_t *activator );
+void              G_ResetOccupation( gentity_t *occupied,
+                                     gentity_t *occupant ); // is called to reset
+                                       // an occupiable activation entity and
+                                       // its occupant.  Serves as a general
+                                       //  wrapper for (*activation.reset)()
+void              G_UnoccupyEnt( gentity_t *occupied,
+                                           gentity_t *occupant,
+                                           gentity_t *activator,
+                                           qboolean force ); // wrapper called
+                                             // for players leaving an
+                                             // occupiable activation entity.
+void              G_OccupyEnt( gentity_t *occupied );
+void              G_SetClipmask( gentity_t *ent, int clipmask );
+void              G_SetContents( gentity_t *ent, int contents );
+void              G_BackupUnoccupyClipmask( gentity_t *ent );
+void              G_BackupUnoccupyContents( gentity_t *ent );
+void              G_OccupantClip( gentity_t *occupant );
+void              G_OccupantThink( gentity_t *occupant );
 
 //
 // g_utils.c
@@ -1195,6 +1316,7 @@ extern  vmCvar_t  g_warmupDefensiveBuildableRespawnTime;
 
 #define IS_WARMUP  ( g_doWarmup.integer && g_warmup.integer )
 
+extern  vmCvar_t  g_humanStaminaMode; // when set to 0, human stamina doesn't drain
 extern  vmCvar_t  g_friendlyFire;
 extern  vmCvar_t  g_friendlyBuildableFire;
 extern  vmCvar_t  g_dretchPunt;
@@ -1222,6 +1344,7 @@ extern  vmCvar_t  pmove_fixed;
 extern  vmCvar_t  pmove_msec;
 
 extern  vmCvar_t  g_allowShare;
+extern  vmCvar_t  g_overflowFunds;
 
 extern  vmCvar_t  g_allowBuildableStacking;
 extern  vmCvar_t  g_alienBuildPoints;
