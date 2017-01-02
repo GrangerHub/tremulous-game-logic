@@ -3605,7 +3605,8 @@ qboolean G_admin_playmap( gentity_t *ent )
          extra[ MAX_TOKEN_CHARS ];
   char   *flags;
   playMapError_t playMapError;
-
+  g_admin_cmd_t *admincmd;
+  
   trap_Argv( 0, cmd, sizeof( cmd ) );
 
   if( trap_Argc( ) < 2 )
@@ -3622,8 +3623,10 @@ qboolean G_admin_playmap( gentity_t *ent )
 
     G_PrintPlayMapPool( ent, 0 );
 
-    ADMP( "\nUse " S_COLOR_YELLOW "/adminhelp playmap" S_COLOR_WHITE
-	  " for more information.\n" );
+    // Get command structure
+    admincmd = G_admin_cmd( "playmap" );
+    ADMP( va( S_COLOR_YELLOW "\nusage: " S_COLOR_WHITE "%s %s\n",
+	      admincmd->keyword, admincmd->syntax ) );
     
     return qtrue;
   }
@@ -3675,6 +3678,9 @@ qboolean G_admin_playpool( gentity_t *ent )
 
   if( trap_Argc( ) < 2 )
   {
+    G_PrintPlayMapPool( ent, 0 );
+    ADMP( "\n" );
+
     ADMP( va( S_COLOR_YELLOW "usage: " S_COLOR_WHITE "%s %s\n",
 	      admincmd->keyword, admincmd->syntax ) );
     return qfalse;
@@ -3755,7 +3761,6 @@ qboolean G_admin_playpool( gentity_t *ent )
       page = atoi( map ) - 1;
     } else page = 0;
 
-    ADMP( "Maps that can be added to the playmap:" );
     G_PrintPlayMapPool( ent, page );
     ADMP( "\n" );
 
