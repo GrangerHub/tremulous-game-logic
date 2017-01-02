@@ -74,6 +74,7 @@ typedef enum
   PLAYMAP_FLAG_LGRAV, // Low Gravity
   PLAYMAP_FLAG_UBP,   // Unlimited BP
   PLAYMAP_FLAG_PORTAL,// Portal Gun
+  PLAYMAP_FLAG_STACK,// Buildable stacking
 
   PLAYMAP_NUM_FLAGS
 } playMapFlag_t;
@@ -200,3 +201,4 @@ void G_NextPlayMap( void );
 int G_ParsePlayMapFlagTokens( gentity_t *ent, char *flags );
 char *G_PlayMapFlags2String( int flags );
 int G_DefaultPlayMapFlags(void);
+void G_ExecutePlaymapFlags( int flagsValue );
