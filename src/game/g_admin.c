@@ -3600,11 +3600,10 @@ qboolean G_admin_pause( gentity_t *ent )
 
 qboolean G_admin_playmap( gentity_t *ent )
 {
-  char   cmd[ MAX_TOKEN_CHARS ], subcmd[ MAX_TOKEN_CHARS ],
+  char   cmd[ MAX_TOKEN_CHARS ],
          map[ MAX_TOKEN_CHARS ], layout[ MAX_TOKEN_CHARS ],
          extra[ MAX_TOKEN_CHARS ];
   char   *flags;
-  int 	 page;
   playMapError_t playMapError;
 
   trap_Argv( 0, cmd, sizeof( cmd ) );
@@ -3612,74 +3611,52 @@ qboolean G_admin_playmap( gentity_t *ent )
   if( trap_Argc( ) < 2 )
   {
     // TODO: [layout [flags]] announce them once they're implemented
-    ADMP( "To add maps to the playlist:\n"
-	  S_COLOR_YELLOW "  /playmap add " S_COLOR_WHITE "mapname [layout] [flags]\n"
-	  "To see a list of maps to choose:\n"
-	  S_COLOR_YELLOW "  /playmap pool " S_COLOR_WHITE "[pagenumber]\n\n" );
-
-    G_PrintPlayMapQueue( ent );
-    ADMP( "\n" );
 
     // overwrite with current map
     trap_Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
 
-    ADMP( va( S_COLOR_YELLOW "playmap" S_COLOR_WHITE
-	      ": " S_COLOR_CYAN "%d" S_COLOR_WHITE " maps queued out of "
-	      S_COLOR_CYAN "%d" S_COLOR_WHITE " pool maps. "
-	      "Current map is " S_COLOR_CYAN "%s" S_COLOR_WHITE ".\n",
-	      G_GetPlayMapQueueLength( ),
-	      G_GetPlayMapPoolLength( ), map ) );
-    return qtrue;
-  }
-
-  // read the subcommand
-  trap_Argv( 1, subcmd, sizeof( subcmd ) );
-
-  if ( !Q_stricmp( subcmd, "pool" ))
-  {
-    if( trap_Argc( ) > 2 )
-    {
-      trap_Argv( 2, extra, sizeof( extra ) );
-      page = atoi( extra ) - 1;
-    } else page = 0;
-
-    G_PrintPlayMapPool( ent, page );
+    ADMP( va( S_COLOR_YELLOW "playmap" S_COLOR_WHITE ": Current map is "
+	      S_COLOR_CYAN "%s" S_COLOR_WHITE ".\n", map ) );
+    G_PrintPlayMapQueue( ent );
     ADMP( "\n" );
 
+    G_PrintPlayMapPool( ent, 0 );
+
+    ADMP( "\nUse " S_COLOR_YELLOW "/adminhelp playmap" S_COLOR_WHITE
+	  " for more information.\n" );
+    
     return qtrue;
   }
-  else if ( !Q_stricmp( subcmd, "add" ))
+
+  // Else if argc > 1
+  trap_Argv( 1, map, sizeof( map ) );
+  trap_Argv( 2, layout, sizeof( layout ) );
+  trap_Argv( 3, extra, sizeof( extra ) );
+  if( *layout == '+' || *layout == '-' )
   {
-    trap_Argv( 2, map, sizeof( map ) );
-    trap_Argv( 3, layout, sizeof( layout ) );
-    trap_Argv( 4, extra, sizeof( extra ) );
-    if( *layout == '+' || *layout == '-' )
-    {
-      flags = ConcatArgs( 3 );
-      *layout = '\0';
-    } else
-      flags = ConcatArgs( 4 );
-
-    if( g_debugPlayMap.integer > 0 )
-      trap_SendServerCommand( ent-g_entities,
-			      va( "print \"DEBUG: cmd=%s\n"
-				  "       map=%s\n"
-				  "       layout=%s\n"
-				  "       flags=%s\n\"",
-				  cmd, map, layout, flags ) );
-
-    playMapError = G_PlayMapEnqueue( map, layout, ent->client->pers.netname, flags, ent );
-    if (playMapError.errorCode == PLAYMAP_ERROR_NONE)
-    {
-      trap_SendServerCommand( -1,
-			      va( "print \"%s" S_COLOR_WHITE
-				  " added map " S_COLOR_CYAN "%s" S_COLOR_WHITE
-				  " to playlist\n\"",
-				  ent->client->pers.netname, map ) );
-    } else
-      ADMP( va( "%s\n", playMapError.errorMessage ) );
+    flags = ConcatArgs( 2 );
+    *layout = '\0';
   } else
-    ADMP( va( "Unknown playmap subcommand: %s\n",  subcmd ) );
+    flags = ConcatArgs( 3 );
+
+  if( g_debugPlayMap.integer > 0 )
+    trap_SendServerCommand( ent-g_entities,
+			    va( "print \"DEBUG: cmd=%s\n"
+				"       map=%s\n"
+				"       layout=%s\n"
+				"       flags=%s\n\"",
+				cmd, map, layout, flags ) );
+
+  playMapError = G_PlayMapEnqueue( map, layout, ent->client->pers.netname, flags, ent );
+  if (playMapError.errorCode == PLAYMAP_ERROR_NONE)
+  {
+    trap_SendServerCommand( -1,
+			    va( "print \"%s" S_COLOR_WHITE
+				" added map " S_COLOR_CYAN "%s" S_COLOR_WHITE
+				" to playlist\n\"",
+				ent->client->pers.netname, map ) );
+  } else
+    ADMP( va( "%s\n", playMapError.errorMessage ) );
 
   return qtrue;
 }
@@ -3778,6 +3755,7 @@ qboolean G_admin_playpool( gentity_t *ent )
       page = atoi( map ) - 1;
     } else page = 0;
 
+    ADMP( "Maps that can be added to the playmap:" );
     G_PrintPlayMapPool( ent, page );
     ADMP( "\n" );
 

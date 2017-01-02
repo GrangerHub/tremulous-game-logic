@@ -452,7 +452,8 @@ void G_PrintPlayMapPool( gentity_t *ent, int page )
   if( ( len = playMapPoolCache.numMaps ) )
     {
       ADMBP_begin(); // begin buffer
-      ADMBP( "Maps that can be added to the playlist" );
+      ADMBP( va(S_COLOR_CYAN "%d" S_COLOR_WHITE " maps available in pool",
+		G_GetPlayMapPoolLength( )));
     }
   else
     {
@@ -1253,8 +1254,8 @@ void G_PrintPlayMapQueue( gentity_t *ent )
 
   if ( ( len = G_GetPlayMapQueueLength() ) )
   {
-    ADMBP( "Current playmap queue:\n"
-	   "    Map        Player     Flags\n");
+    ADMBP( va( "Playmap queue has " S_COLOR_CYAN "%d" S_COLOR_WHITE " maps:\n"
+	       "    Map        Player     Flags\n", G_GetPlayMapQueueLength( ) ) );
   }
   else
   {
