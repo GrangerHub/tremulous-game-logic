@@ -190,9 +190,15 @@ g_admin_cmd_t g_admin_cmds[ ] =
       ""
     },
 
-    {"playpool", G_admin_playpool, qfalse, "playpool",
+    {"playmap", G_admin_playmap, qtrue, "playmap",
+     "List and add to playmap queue.",
+     "^3mapname [layout] [flags]^7"
+    },
+
+    {"playpool", G_admin_playpool, qtrue, "playpool",
       "Manage the playmap pool.",
-      "[^3add (mapname)^6|^3remove (mapname)^6|^3clear^6|^3list (pagenum)^6|^3reload^6|^3save^7]"
+      "[^3add (mapname)^6|^3remove (mapname)^6|^3clear^6|^3"
+     "list (pagenum)^6|^3reload^6|^3save^7]"
     },
 
     {"putteam", G_admin_putteam, qfalse, "putteam",
@@ -3592,6 +3598,72 @@ qboolean G_admin_pause( gentity_t *ent )
   return qtrue;
 }
 
+qboolean G_admin_playmap( gentity_t *ent )
+{
+  char   cmd[ MAX_TOKEN_CHARS ],
+         map[ MAX_TOKEN_CHARS ], layout[ MAX_TOKEN_CHARS ],
+         extra[ MAX_TOKEN_CHARS ];
+  char   *flags;
+  playMapError_t playMapError;
+  g_admin_cmd_t *admincmd;
+  
+  trap_Argv( 0, cmd, sizeof( cmd ) );
+
+  if( trap_Argc( ) < 2 )
+  {
+    // TODO: [layout [flags]] announce them once they're implemented
+
+    // overwrite with current map
+    trap_Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
+
+    ADMP( va( S_COLOR_YELLOW "playmap" S_COLOR_WHITE ": Current map is "
+	      S_COLOR_CYAN "%s" S_COLOR_WHITE ".\n", map ) );
+    G_PrintPlayMapQueue( ent );
+    ADMP( "\n" );
+
+    G_PrintPlayMapPool( ent, 0 );
+
+    // Get command structure
+    admincmd = G_admin_cmd( "playmap" );
+    ADMP( va( S_COLOR_YELLOW "\nusage: " S_COLOR_WHITE "%s %s\n",
+	      admincmd->keyword, admincmd->syntax ) );
+    
+    return qtrue;
+  }
+
+  // Else if argc > 1
+  trap_Argv( 1, map, sizeof( map ) );
+  trap_Argv( 2, layout, sizeof( layout ) );
+  trap_Argv( 3, extra, sizeof( extra ) );
+  if( *layout == '+' || *layout == '-' )
+  {
+    flags = ConcatArgs( 2 );
+    *layout = '\0';
+  } else
+    flags = ConcatArgs( 3 );
+
+  if( g_debugPlayMap.integer > 0 )
+    trap_SendServerCommand( ent-g_entities,
+			    va( "print \"DEBUG: cmd=%s\n"
+				"       map=%s\n"
+				"       layout=%s\n"
+				"       flags=%s\n\"",
+				cmd, map, layout, flags ) );
+
+  playMapError = G_PlayMapEnqueue( map, layout, ent->client->pers.netname, flags, ent );
+  if (playMapError.errorCode == PLAYMAP_ERROR_NONE)
+  {
+    trap_SendServerCommand( -1,
+			    va( "print \"%s" S_COLOR_WHITE
+				" added map " S_COLOR_CYAN "%s" S_COLOR_WHITE
+				" to playlist\n\"",
+				ent->client->pers.netname, map ) );
+  } else
+    ADMP( va( "%s\n", playMapError.errorMessage ) );
+
+  return qtrue;
+}
+
 qboolean G_admin_playpool( gentity_t *ent )
 {
   char           cmd[ MAX_TOKEN_CHARS ],
@@ -3606,6 +3678,9 @@ qboolean G_admin_playpool( gentity_t *ent )
 
   if( trap_Argc( ) < 2 )
   {
+    G_PrintPlayMapPool( ent, 0 );
+    ADMP( "\n" );
+
     ADMP( va( S_COLOR_YELLOW "usage: " S_COLOR_WHITE "%s %s\n",
 	      admincmd->keyword, admincmd->syntax ) );
     return qfalse;
