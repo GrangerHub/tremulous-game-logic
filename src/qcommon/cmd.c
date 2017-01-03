@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "q_shared.h"
 #include "qcommon.h"
+#include "../client/client.h"
 
 #define	MAX_CMD_BUFFER  128*1024
 #define	MAX_CMD_LINE	1024
@@ -59,7 +60,6 @@ void Cmd_Wait_f( void ) {
 		cmd_wait = 1;
 	}
 }
-
 
 /*
 =============================================================================
@@ -341,9 +341,9 @@ void Cmd_Echo_f (void)
 typedef struct cmd_function_s
 {
 	struct cmd_function_s	*next;
-	char					*name;
-	xcommand_t				function;
-	completionFunc_t	complete;
+	char			*name;
+	xcommand_t		function;
+	completionFunc_t	complete;	
 } cmd_function_t;
 
 
@@ -756,11 +756,16 @@ Cmd_CompleteArgument
 void Cmd_CompleteArgument( const char *command, char *args, int argNum ) {
 	cmd_function_t	*cmd;
 
-	for( cmd = cmd_functions; cmd; cmd = cmd->next ) {
-		if( !Q_stricmp( command, cmd->name ) && cmd->complete ) {
-			cmd->complete( args, argNum );
-		}
-	}
+#ifndef DEDICATED
+	// Forward command argument completion to CGAME VM
+	if( !VM_Call( cgvm, CG_CONSOLE_COMPLETARGUMENT, argNum ) )
+	  // Call local completion if VM doesn't pick up
+#endif
+	  for( cmd = cmd_functions; cmd; cmd = cmd->next ) {
+	    if( !Q_stricmp( command, cmd->name ) && cmd->complete ) {
+	      cmd->complete( args, argNum );
+	    }
+	  }
 }
 
 
