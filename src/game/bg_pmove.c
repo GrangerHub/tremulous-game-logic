@@ -364,9 +364,9 @@ static float PM_CmdScale( usercmd_t *cmd, qboolean zFlight )
 
     if( pm->ps->persistant[ PERS_STATE ] & PS_SPRINTTOGGLE )
     {
-      // walking toggles off sprint
+      // walking or crouching toggles off sprint
       if( ( pm->ps->pm_flags & PMF_SPRINTHELD ) &&
-          ( cmd->buttons & BUTTON_WALKING ) )
+          ( ( cmd->buttons & BUTTON_WALKING ) || ( pm->cmd.upmove < 0 ) ) )
       {
         sprint = qfalse;
         pm->ps->pm_flags &= ~PMF_SPRINTHELD;
@@ -379,7 +379,7 @@ static float PM_CmdScale( usercmd_t *cmd, qboolean zFlight )
         pm->ps->pm_flags |= PMF_SPRINTHELD;
       }
     }
-    else
+    else if ( pm->cmd.upmove >= 0 )
       sprint = cmd->buttons & BUTTON_SPRINT;
 
     if( sprint )
