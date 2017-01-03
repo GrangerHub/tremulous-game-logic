@@ -3621,7 +3621,7 @@ qboolean G_admin_playmap( gentity_t *ent )
     G_PrintPlayMapQueue( ent );
     ADMP( "\n" );
 
-    G_PrintPlayMapPool( ent, 0 );
+    G_PrintPlayMapPool( ent, -1 );
 
     // Get command structure
     admincmd = G_admin_cmd( "playmap" );
@@ -3678,7 +3678,7 @@ qboolean G_admin_playpool( gentity_t *ent )
 
   if( trap_Argc( ) < 2 )
   {
-    G_PrintPlayMapPool( ent, 0 );
+    G_PrintPlayMapPool( ent, -1 );
     ADMP( "\n" );
 
     ADMP( va( S_COLOR_YELLOW "usage: " S_COLOR_WHITE "%s %s\n",

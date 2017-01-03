@@ -463,7 +463,11 @@ void G_PrintPlayMapPool( gentity_t *ent, int page )
     }
 
   rows = ( len + 2 ) / 3;
-  pages = MAX( 1, ( rows + MAX_MAPLIST_ROWS - 1 ) / MAX_MAPLIST_ROWS );
+
+  if( page < 0 )
+    pages = 1;			//disabled
+  else
+    pages = MAX( 1, ( rows + MAX_MAPLIST_ROWS - 1 ) / MAX_MAPLIST_ROWS );
 
   // Enforce bounds
   page = min(page, pages - 1);
@@ -474,7 +478,7 @@ void G_PrintPlayMapPool( gentity_t *ent, int page )
   ADMBP( ":\n" );
 
   start = page * MAX_MAPLIST_ROWS * 3;
-  if( len < start + ( 3 * MAX_MAPLIST_ROWS ) )
+  if( len < start + ( 3 * MAX_MAPLIST_ROWS ) || pages == 1)
     rows = ( len - start + 2 ) / 3;
   else
     rows = MAX_MAPLIST_ROWS;
