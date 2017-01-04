@@ -89,7 +89,8 @@ typedef struct playMapFlagDesc_s
   int 	   flag;		/* Flag bit */
   char 	   *flagName;		/* String to parse */
   qboolean defVal;		/* Whether flag is on by default */
-  qboolean avail;		/* Whether flag is available for users */
+  qboolean avail;		/* Whether flag is available for users. 
+				   If not, default value is ignored as well. */
   char 	   *flagDesc;		/* Description string */
 } playMapFlagDesc_t;
 
