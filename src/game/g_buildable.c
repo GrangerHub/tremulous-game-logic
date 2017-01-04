@@ -1825,11 +1825,13 @@ void AHovel_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
     //pretty events and item cleanup
     self->s.eFlags |= EF_NODRAW; //don't draw the model once its destroyed
     G_AddEvent( self, EV_ALIEN_BUILDABLE_EXPLOSION, DirToByte( dir ) );
+    self->die = nullDieFunction;
     self->s.eFlags &= ~EF_FIRING; //prevent any firing effects
     self->timestamp = level.time;
     self->think = AGeneric_CreepRecede;
     self->nextthink = level.time + 500; //wait .5 seconds before damaging others
     self->methodOfDeath = mod;
+    self->powered = qfalse;
   }
 
   self->r.contents = 0;    //stop collisions...
