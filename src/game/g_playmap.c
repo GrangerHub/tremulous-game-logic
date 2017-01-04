@@ -1079,8 +1079,9 @@ void G_ExecutePlaymapFlags( int flagsValue )
     switch( flagNum )
     {
       case PLAYMAP_FLAG_STACK:
-	g_allowBuildableStacking.integer =
-	  PlaymapFlag_IsSet( flagsValue, PLAYMAP_FLAG_STACK ) != 0;
+	trap_Cvar_Set( "g_allowBuildableStacking",
+		       ( PlaymapFlag_IsSet( flagsValue, PLAYMAP_FLAG_STACK ) != 0 )
+		       ? "1" : "0");
 	if( g_debugPlayMap.integer > 0 )
 	  trap_Print( va( "PLAYMAP: setting stackable flag to %d.\n",
 			  PlaymapFlag_IsSet( flagsValue, PLAYMAP_FLAG_STACK ) != 0 ) );
