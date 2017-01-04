@@ -1115,7 +1115,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
     {
       if( targ->buildableTeam == attacker->client->pers.teamSelection )
       {
-        if( !g_friendlyBuildableFire.integer || IS_WARMUP )
+        if( ( !g_friendlyBuildableFire.integer || IS_WARMUP ) &&
+            ( mod != MOD_TRIGGER_HURT ) )
           return;
         else
           modDamge = g_friendlyBuildableFire.integer;
