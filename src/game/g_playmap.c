@@ -114,8 +114,10 @@ static const playMapError_t playMapError[ ] =
 };
 
 // list of playmap flags and info
+// See g_playmap.h for field definitions.
+// Warning: make sure flag field is in same order as the enum.
 static const playMapFlagDesc_t playMapFlagList[ ] =
-{ // flag, flagName, defVal, avail, flagDesc
+  { // Fields: flag, flagName, defVal, avail, flagDesc 
   { PLAYMAP_FLAG_NONE,  "", 	 qfalse, qfalse, "No flags" },
   { PLAYMAP_FLAG_DPUNT, "dpunt", qfalse, qfalse, "Dretch Punt" },
   { PLAYMAP_FLAG_FF, 	"ff", 	 qtrue,  qfalse, "Friendly Fire" },
@@ -124,7 +126,7 @@ static const playMapFlagDesc_t playMapFlagList[ ] =
   { PLAYMAP_FLAG_LGRAV, "lgrav", qfalse, qfalse, "Low Gravity" },
   { PLAYMAP_FLAG_UBP, 	"ubp",	 qfalse, qfalse, "Unlimited BP" },
   { PLAYMAP_FLAG_PORTAL,"portal",qfalse, qfalse, "Portal Gun" },
-  { PLAYMAP_FLAG_STACK, "stack", qfalse,  qtrue, "Buildable stacking" }
+  { PLAYMAP_FLAG_STACK, "stack", qtrue,  qfalse, "Buildable stacking" }
 };
 
 /*
@@ -1069,6 +1071,10 @@ void G_ExecutePlaymapFlags( int flagsValue )
   for( flagNum = PLAYMAP_FLAG_NONE + 1;
        flagNum < PLAYMAP_NUM_FLAGS; flagNum++ )
   {
+    // Only process available flags even for its default value 
+    if ( ! playMapFlagList[flagNum].avail )
+      continue;
+    
     // Add special handling of each flag here
     switch( flagNum )
     {
