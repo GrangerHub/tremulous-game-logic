@@ -227,10 +227,9 @@ CG_CompletePlayMap_f
 ==================
 */
 void CG_CompletePlayMap_f( int argNum ) {
-  Com_Printf( va( "playmap completing: %s\n", CG_Argv( argNum - 1 ) ) );
   if( argNum == 2 ) {
 #ifndef MODULE_INTERFACE_11
-    trap_Field_CompleteList( "[ niveus, nexus6 ]" );
+    trap_Field_CompleteList( cgs.playMapPoolJson );
 #endif
   }
 }

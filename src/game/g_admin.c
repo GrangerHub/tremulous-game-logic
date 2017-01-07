@@ -3623,7 +3623,7 @@ qboolean G_admin_playmap( gentity_t *ent )
     G_PrintPlayMapQueue( ent );
     ADMP( "\n" );
 
-    G_PrintPlayMapPool( ent, -1 );
+    G_PrintPlayMapPool( ent, -1, qfalse );
 
     // Get command structure
     admincmd = G_admin_cmd( "playmap" );
@@ -3680,7 +3680,7 @@ qboolean G_admin_playpool( gentity_t *ent )
 
   if( trap_Argc( ) < 2 )
   {
-    G_PrintPlayMapPool( ent, -1 );
+    G_PrintPlayMapPool( ent, -1, qfalse );
     ADMP( "\n" );
 
     ADMP( va( S_COLOR_YELLOW "usage: " S_COLOR_WHITE "%s %s\n",
@@ -3763,7 +3763,7 @@ qboolean G_admin_playpool( gentity_t *ent )
       page = atoi( map ) - 1;
     } else page = 0;
 
-    G_PrintPlayMapPool( ent, page );
+    G_PrintPlayMapPool( ent, page, qfalse );
     ADMP( "\n" );
 
     return qtrue;

@@ -24,7 +24,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "q_shared.h"
 #include "qcommon.h"
+
+#ifndef DEDICATED
 #include "../client/client.h"
+#endif
 
 #define	MAX_CMD_BUFFER  128*1024
 #define	MAX_CMD_LINE	1024

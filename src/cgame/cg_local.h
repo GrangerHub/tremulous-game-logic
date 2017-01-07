@@ -1458,6 +1458,9 @@ typedef struct
   cgMedia_t           media;
 
   voice_t       *voices;
+
+  // playmap
+  char		playMapPoolJson[ MAX_PLAYMAP_POOL_CHARS ];
 } cgs_t;
 
 typedef struct

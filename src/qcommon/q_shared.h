@@ -249,6 +249,9 @@ Maximum/minimum of two ints
 
 #define	MAX_SAY_TEXT	800
 
+// Playmap
+#define MAX_PLAYMAP_POOL_CHARS 4096
+
 // paramters for command buffer stuffing
 typedef enum {
 	EXEC_NOW,			// don't return until completed, a VM should NEVER use this,
