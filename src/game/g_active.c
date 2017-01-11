@@ -505,7 +505,7 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
     trap_UnlinkEntity( ent );
 
     // Set the queue position and spawn count for the client side
-    j( ent->client );
+    G_ClientUpdateSpawnQueue( ent->client );
   }
 }
 
