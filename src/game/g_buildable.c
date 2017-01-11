@@ -2722,6 +2722,7 @@ void HMedistat_Think( gentity_t *self )
       {
         self->enemy->health++;
         self->enemy->client->ps.stats[ STAT_HEALTH ] = self->enemy->health;
+        self->enemy->client->pers.infoChangeTime = level.time;
       }
 
       //if they're completely healed and have full stamina, give them a medkit
