@@ -232,8 +232,18 @@ void SP_trigger_push( gentity_t *self )
 
 void Use_target_push( gentity_t *self, gentity_t *other, gentity_t *activator )
 {
-  if( !activator || !activator->client )
+  if( !activator )
     return;
+
+  if(!activator->client)
+  {
+    // kill buildables on "push cannons" to prevent hearing loss and to retain sanity
+    if( activator->s.eType == ET_BUILDABLE )
+      G_Damage( activator, NULL, &g_entities[ activator->dropperNum ], NULL,
+                NULL, activator->health, 0, MOD_TRIGGER_HURT );
+
+    return;
+  }
 
   if( activator->client->ps.pm_type != PM_NORMAL )
     return;
