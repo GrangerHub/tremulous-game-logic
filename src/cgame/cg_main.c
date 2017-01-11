@@ -604,9 +604,14 @@ static void CG_SetPVars( void )
     trap_Cvar_Set( "team_stage", va( "%d", cgs.humanStage+1 ) );
     break;
     }
+
+    trap_Cvar_Set( "team_spawns",
+                   va( "%d", cg.snap->ps.persistant[ PERS_SPAWNS ] ) );
     
-    trap_Cvar_Set( "player_credits", va( "%d", cg.snap->ps.persistant[ PERS_CREDIT ] ) );
-    trap_Cvar_Set( "player_score", va( "%d", cg.snap->ps.persistant[ PERS_SCORE ] ) );
+    trap_Cvar_Set( "player_credits",
+                   va( "%d", cg.snap->ps.persistant[ PERS_CREDIT ] ) );
+    trap_Cvar_Set( "player_score",
+                   va( "%d", cg.snap->ps.persistant[ PERS_SCORE ] ) );
 
     if ( CG_LastAttacker( ) != -1 )
         trap_Cvar_Set( "player_attackername", cgs.clientinfo[ CG_LastAttacker( ) ].name );

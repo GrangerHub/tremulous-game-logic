@@ -1524,6 +1524,17 @@ static void CG_DrawTeamLabel( rectDef_t *rect, team_t team, float text_x, float 
 CG_DrawStageReport
 ==================
 */
+static const char *CG_SpawnReport( qboolean eggs )
+{
+  const char *s;
+  
+  s = ( cg.snap->ps.persistant[ PERS_SPAWNS ] == 1 ? "" : "s" );
+
+  return va( "%d %s%s left",
+             cg.snap->ps.persistant[ PERS_SPAWNS ],
+             ( eggs ? "egg" : "telenode" ),
+             s );
+}
 static void CG_DrawStageReport( rectDef_t *rect, float text_x, float text_y,
     vec4_t color, float scale, int textalign, int textvalign, int textStyle )
 {
@@ -1543,13 +1554,14 @@ static void CG_DrawStageReport( rectDef_t *rect, float text_x, float text_y,
       kills = 0;
 
     if( cgs.alienNextStageThreshold < 0 )
-      Com_sprintf( s, MAX_TOKEN_CHARS, "Stage %d", cgs.alienStage + 1 );
+      Com_sprintf( s, MAX_TOKEN_CHARS, "Stage %d, %s", cgs.alienStage + 1,
+                   CG_SpawnReport( qtrue ) );
     else if( kills == 1 )
-      Com_sprintf( s, MAX_TOKEN_CHARS, "Stage %d, 1 frag for next stage",
-          cgs.alienStage + 1 );
+      Com_sprintf( s, MAX_TOKEN_CHARS, "Stage %d, 1 frag for next stage, %s",
+                   cgs.alienStage + 1, CG_SpawnReport( qtrue ) );
     else
-      Com_sprintf( s, MAX_TOKEN_CHARS, "Stage %d, %d frags for next stage",
-          cgs.alienStage + 1, kills );
+      Com_sprintf( s, MAX_TOKEN_CHARS, "Stage %d, %d frags for next stage, %s",
+                   cgs.alienStage + 1, kills, CG_SpawnReport( qtrue ) );
   }
   else if( cg.snap->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
   {
@@ -1559,13 +1571,14 @@ static void CG_DrawStageReport( rectDef_t *rect, float text_x, float text_y,
       credits = 0;
 
     if( cgs.humanNextStageThreshold < 0 )
-      Com_sprintf( s, MAX_TOKEN_CHARS, "Stage %d", cgs.humanStage + 1 );
+      Com_sprintf( s, MAX_TOKEN_CHARS, "Stage %d, %s", cgs.humanStage + 1,
+                   CG_SpawnReport( qfalse ) );
     else if( credits == 1 )
-      Com_sprintf( s, MAX_TOKEN_CHARS, "Stage %d, 1 credit for next stage",
-          cgs.humanStage + 1 );
+      Com_sprintf( s, MAX_TOKEN_CHARS, "Stage %d, 1 credit for next stage, %s",
+                   cgs.humanStage + 1, CG_SpawnReport( qfalse ) );
     else
-      Com_sprintf( s, MAX_TOKEN_CHARS, "Stage %d, %d credits for next stage",
-          cgs.humanStage + 1, credits );
+      Com_sprintf( s, MAX_TOKEN_CHARS, "Stage %d, %d credits for next stage, %s",
+          cgs.humanStage + 1, credits, CG_SpawnReport( qfalse ) );
   }
 
   CG_AlignText( rect, s, scale, 0.0f, 0.0f, textalign, textvalign, &tx, &ty );
