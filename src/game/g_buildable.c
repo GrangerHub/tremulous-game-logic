@@ -638,7 +638,9 @@ qboolean G_FindCreep( gentity_t *self )
 
   //if self does not have a parentNode or its parentNode is invalid, then find a new one
   if( self->client || self->parentNode == NULL || !self->parentNode->inuse ||
-      self->parentNode->health <= 0 )
+      self->parentNode->health <= 0 ||
+      ( Distance( self->r.currentOrigin,
+                  self->parentNode->r.currentOrigin ) > CREEP_BASESIZE ) )
   {
     for( i = MAX_CLIENTS, ent = g_entities + i; i < level.num_entities; i++, ent++ )
     {
