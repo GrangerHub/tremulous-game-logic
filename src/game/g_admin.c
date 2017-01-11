@@ -2985,11 +2985,13 @@ qboolean G_admin_endvote( gentity_t *ent )
     return qfalse;
   }
   admin_log( BG_TeamName( team ) );
-  G_EndVote( team, cancel );
   if( team == TEAM_NONE )
     AP( msg );
   else
     G_TeamCommand( team, msg );
+
+  G_EndVote( team, cancel );
+
   return qtrue;
 }
 
