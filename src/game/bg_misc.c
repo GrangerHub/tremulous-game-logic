@@ -79,7 +79,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
       "is left nearly defenseless and defeat is imminent.",
     "team_alien_spawn",    //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
-    0.0,                   //float     bounce;
+    0.1,                   //float     bounce;
     ASPAWN_BP,             //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     ASPAWN_HEALTH,         //int       health;
@@ -120,7 +120,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
       "death will render alien structures defenseless.",
     "team_alien_overmind", //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
-    0.0,                   //float     bounce;
+    0.1,                   //float     bounce;
     OVERMIND_BP,           //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     OVERMIND_HEALTH,       //int       health;
@@ -161,7 +161,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
       "to allow aliens to pass over them, however.",
     "team_alien_barricade", //char     *entityName;
     TR_GRAVITY,            //trType_t  traj;
-    0.0,                   //float     bounce;
+    0.1,                   //float     bounce;
     BARRICADE_BP,          //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     BARRICADE_HEALTH,      //int       health;
@@ -202,7 +202,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
       "to hold the victim in place.",
     "team_alien_acid_tube", //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
-    0.0,                   //float     bounce;
+    0.1,                   //float     bounce;
     ACIDTUBE_BP,           //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     ACIDTUBE_HEALTH,       //int       health;
@@ -243,7 +243,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
       "for other defensive structures or aliens.",
     "team_alien_trapper",  //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
-    0.0,                   //float     bounce;
+    0.1,                   //float     bounce;
     TRAPPER_BP,            //int       buildPoints;
     ( 1 << S2 )|( 1 << S3 ), //int     stages; //NEEDS ADV BUILDER SO S2 AND UP
     TRAPPER_HEALTH,        //int       health;
@@ -285,7 +285,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
       "any nearby aliens.",
     "team_alien_booster",  //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
-    0.0,                   //float     bounce;
+    0.1,                   //float     bounce;
     BOOSTER_BP,            //int       buildPoints;
     ( 1 << S2 )|( 1 << S3 ), //int     stages;
     BOOSTER_HEALTH,        //int       health;
@@ -325,7 +325,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
       "approaches this structure, the insectoids attack.",
     "team_alien_hive",     //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
-    0.0,                   //float     bounce;
+    0.1,                   //float     bounce;
     HIVE_BP,               //int       buildPoints;
     ( 1 << S3 ),           //int       stages;
     HIVE_HEALTH,           //int       health;
@@ -366,7 +366,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
       "cannot spawn and defeat is imminent.",
     "team_human_spawn",    //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
-    0.0,                   //float     bounce;
+    0.1,                   //float     bounce;
     HSPAWN_BP,             //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     HSPAWN_HEALTH,         //int       health;
@@ -407,7 +407,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
       "backed up by physical support.",
     "team_human_mgturret", //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
-    0.0,                   //float     bounce;
+    0.1,                   //float     bounce;
     MGTURRET_BP,           //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     MGTURRET_HEALTH,       //int       health;
@@ -448,7 +448,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
       "aliens and for consolidating basic defense.",
     "team_human_tesla",    //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
-    0.0,                   //float     bounce;
+    0.1,                   //float     bounce;
     TESLAGEN_BP,           //int       buildPoints;
     ( 1 << S3 ),           //int       stages;
     TESLAGEN_HEALTH,       //int       health;
@@ -489,7 +489,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
       "and weapons are available for sale from the armoury.",
     "team_human_armoury",  //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
-    0.0,                   //float     bounce;
+    0.1,                   //float     bounce;
     ARMOURY_BP,            //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     ARMOURY_HEALTH,        //int       health;
@@ -534,7 +534,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
       "repair rate slightly.",
     "team_human_dcc",      //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
-    0.0,                   //float     bounce;
+    0.1,                   //float     bounce;
     DC_BP,                 //int       buildPoints;
     ( 1 << S2 )|( 1 << S3 ), //int     stages;
     DC_HEALTH,             //int       health;
@@ -576,7 +576,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
       "also issues medkits.",
     "team_human_medistat", //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
-    0.0,                   //float     bounce;
+    0.1,                   //float     bounce;
     MEDISTAT_BP,           //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     MEDISTAT_HEALTH,       //int       health;
@@ -617,7 +617,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
       "directly or via repeaters. Only one reactor can be built at a time.",
     "team_human_reactor",  //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
-    0.0,                   //float     bounce;
+    0.1,                   //float     bounce;
     REACTOR_BP,            //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     REACTOR_HEALTH,        //int       health;
@@ -662,7 +662,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
       "from the reactor.",
     "team_human_repeater", //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
-    0.0,                   //float     bounce;
+    0.1,                   //float     bounce;
     REPEATER_BP,           //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     REPEATER_HEALTH,       //int       health;
