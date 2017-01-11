@@ -797,6 +797,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
           ent->client->medKitHealthToRestore--;
           ent->health++;
           ent->client->ps.stats[ STAT_HEALTH ] = ent->health;
+          client->pers.infoChangeTime = level.time;
         }
         else
           ent->client->ps.stats[ STAT_STATE ] &= ~SS_HEALING_2X;
@@ -813,6 +814,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
             ent->client->medKitHealthToRestore--;
             ent->health++;
             ent->client->ps.stats[ STAT_HEALTH ] = ent->health;
+            client->pers.infoChangeTime = level.time;
 
             client->medKitIncrementTime = level.time +
               ( remainingStartupTime / MEDKIT_STARTUP_SPEED );
@@ -2226,6 +2228,7 @@ void ClientThink_real( gentity_t *ent )
       {
         ent->health += count;
         client->ps.stats[ STAT_HEALTH ] = ent->health;
+        client->pers.infoChangeTime = level.time;
 
         // if at max health, clear damage counters
         if( ent->health >= client->ps.stats[ STAT_MAX_HEALTH ] )
