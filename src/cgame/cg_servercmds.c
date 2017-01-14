@@ -1481,6 +1481,19 @@ static void CG_ServerCloseMenus_f( void )
 
 /*
 =================
+CG_PlayMap_Pool_Json_f
+
+Receive periodic updates from server to cache playmap pool locally.
+=================
+*/
+static void CG_PlayMap_Pool_Json_f( void )
+{
+  Q_strncpyz( cgs.playMapPoolJson, CG_Argv( 1 ),
+              MAX_PLAYMAP_POOL_CHARS );
+}
+
+/*
+=================
 CG_PoisonCloud_f
 =================
 */
@@ -1541,6 +1554,7 @@ static consoleCommand_t svcommands[ ] =
   { "cp", CG_CenterPrint_f },
   { "cs", CG_ConfigStringModified },
   { "map_restart", CG_MapRestart },
+  { "playpool_json", CG_PlayMap_Pool_Json_f },
   { "poisoncloud", CG_PoisonCloud_f },
   { "print", CG_Print_f },
   { "scores", CG_ParseScores },

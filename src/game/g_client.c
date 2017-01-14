@@ -1194,7 +1194,6 @@ char *ClientConnect( int clientNum, qboolean firstTime )
     G_ChangeTeam( ent, client->sess.restartTeam );
     client->sess.restartTeam = TEAM_NONE;
   }
-
   
   return NULL;
 }
@@ -1261,6 +1260,9 @@ void ClientBegin( int clientNum )
 
   // send the client a list of commands that can be used
   G_ListCommands( ent );
+
+  // Send playmap pool
+  PlayMapPoolMessage( clientNum );
 }
 
 /*
