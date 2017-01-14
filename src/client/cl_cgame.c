@@ -481,6 +481,9 @@ intptr_t CL_CgameSystemCalls( intptr_t *args ) {
 	case CG_REMOVECOMMAND:
 		Cmd_RemoveCommandSafe( VMA(1) );
 		return 0;
+	case CG_FIELD_COMPLETELIST:
+		Field_CompleteList( VMA(1) );
+		return 0;
 	case CG_SENDCLIENTCOMMAND:
 		CL_AddReliableCommand(VMA(1), qfalse);
 		return 0;

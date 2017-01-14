@@ -1465,6 +1465,9 @@ typedef struct
   cgMedia_t           media;
 
   voice_t       *voices;
+
+  // playmap
+  char		playMapPoolJson[ MAX_PLAYMAP_POOL_CHARS ];
 } cgs_t;
 
 typedef struct
@@ -1472,6 +1475,12 @@ typedef struct
   char *cmd;
   void ( *function )( void );
 } consoleCommand_t;
+
+typedef struct
+{
+  char *cmd;
+  void (*function)( int argNum );
+} consoleCommandCompletions_t;
 
 typedef enum
 {
@@ -1877,6 +1886,7 @@ void          CG_ProcessSnapshots( void );
 // cg_consolecmds.c
 //
 qboolean      CG_ConsoleCommand( void );
+qboolean      CG_Console_CompleteArgument( int argNum );
 void          CG_InitConsoleCommands( void );
 qboolean      CG_RequestScores( void );
 
@@ -2020,7 +2030,10 @@ void          trap_SendConsoleCommand( const char *text );
 // FIXME: replace this with a normal console command "defineCommand"?
 void          trap_AddCommand( const char *cmdName );
 void          trap_RemoveCommand( const char *cmdName );
-
+#ifndef MODULE_INTERFACE_11
+void  	      trap_Field_CompleteList( char *list );
+#endif
+  
 // send a string to the server over the network
 void          trap_SendClientCommand( const char *s );
 

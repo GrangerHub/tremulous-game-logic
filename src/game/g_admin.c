@@ -3623,7 +3623,7 @@ qboolean G_admin_playmap( gentity_t *ent )
     G_PrintPlayMapQueue( ent );
     ADMP( "\n" );
 
-    G_PrintPlayMapPool( ent, -1 );
+    G_PrintPlayMapPool( ent, -1, qfalse );
 
     // Get command structure
     admincmd = G_admin_cmd( "playmap" );
@@ -3652,14 +3652,16 @@ qboolean G_admin_playmap( gentity_t *ent )
 				"       flags=%s\n\"",
 				cmd, map, layout, flags ) );
 
-  playMapError = G_PlayMapEnqueue( map, layout, ent->client->pers.netname, flags, ent );
+  playMapError = G_PlayMapEnqueue( map, layout,
+				   ent ? ent->client->pers.netname : "console",
+				   flags, ent );
   if (playMapError.errorCode == PLAYMAP_ERROR_NONE)
   {
     trap_SendServerCommand( -1,
 			    va( "print \"%s" S_COLOR_WHITE
 				" added map " S_COLOR_CYAN "%s" S_COLOR_WHITE
 				" to playlist\n\"",
-				ent->client->pers.netname, map ) );
+				ent ? ent->client->pers.netname : "console", map ) );
   } else
     ADMP( va( "%s\n", playMapError.errorMessage ) );
 
@@ -3680,7 +3682,7 @@ qboolean G_admin_playpool( gentity_t *ent )
 
   if( trap_Argc( ) < 2 )
   {
-    G_PrintPlayMapPool( ent, -1 );
+    G_PrintPlayMapPool( ent, -1, qfalse );
     ADMP( "\n" );
 
     ADMP( va( S_COLOR_YELLOW "usage: " S_COLOR_WHITE "%s %s\n",
@@ -3763,7 +3765,7 @@ qboolean G_admin_playpool( gentity_t *ent )
       page = atoi( map ) - 1;
     } else page = 0;
 
-    G_PrintPlayMapPool( ent, page );
+    G_PrintPlayMapPool( ent, page, qfalse );
     ADMP( "\n" );
 
     return qtrue;

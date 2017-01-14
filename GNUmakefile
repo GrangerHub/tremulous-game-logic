@@ -2260,7 +2260,7 @@ CGOBJ11_ = \
   $(B)/cgame/bg_alloc.o \
   $(B)/cgame/bg_voice.o \
   $(B)/cgame/bg_list.o \
-  $(B)/cgame/cg_consolecmds.o \
+  $(B)/11/cgame/cg_consolecmds.o \
   $(B)/cgame/cg_buildable.o \
   $(B)/cgame/cg_animation.o \
   $(B)/cgame/cg_animmapobj.o \
