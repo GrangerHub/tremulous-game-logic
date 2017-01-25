@@ -3633,6 +3633,7 @@ static int G_CompareBuildablesForRemoval( const void *a, const void *b )
     BA_A_TRAPPER,
     BA_A_HIVE,
     BA_A_BOOSTER,
+    BA_A_HOVEL,
     BA_A_SPAWN,
     BA_A_OVERMIND,
 
