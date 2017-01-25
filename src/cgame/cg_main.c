@@ -1021,6 +1021,7 @@ static void CG_RegisterGraphics( void )
   cgs.media.poisonCloudedPS           = CG_RegisterParticleSystem( "poisonCloudedPS" );
   cgs.media.alienEvolvePS             = CG_RegisterParticleSystem( "alienEvolvePS" );
   cgs.media.alienAcidTubePS           = CG_RegisterParticleSystem( "alienAcidTubePS" );
+  cgs.media.alienSlimeZungePS           = CG_RegisterParticleSystem( "alienSlimeZungePS" );
 
   cgs.media.jetPackDescendPS          = CG_RegisterParticleSystem( "jetPackDescendPS" );
   cgs.media.jetPackHoverPS            = CG_RegisterParticleSystem( "jetPackHoverPS" );

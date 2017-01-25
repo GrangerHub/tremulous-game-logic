@@ -284,6 +284,48 @@ static const buildableAttributes_t bg_buildableList[ ] =
     0                      //int       batteryPower;
   },
   {
+    BA_A_ZUNGE,            //int       buildNum;
+    "slime_zunge",         //char      *name;
+    "Slime Zunge",         //char      *humanName;
+	  "Used for passive and active base defense.\n"
+	  "Has the ability to slow down human players.\n"
+	  "Nearby Humans get *sucked* in and take damage.\n",
+    "team_alien_slime_zunge", //char   *entityName;
+    TR_GRAVITY,            //trType_t  traj;
+    0.1,                   //float     bounce;
+    SLIME_ZUNGE_BP,        //int       buildPoints;
+    ( 1 << S3 ),           //int       stages;
+    SLIME_ZUNGE_HEALTH,    //int       health;
+    SLIME_ZUNGE_REGEN,     //int       regenRate;
+    SLIME_ZUNGE_SPLASHDAMAGE, //int    splashDamage;
+    SLIME_ZUNGE_SPLASHRADIUS, //int    splashRadius;
+    MOD_ASPAWN,            //int       meansOfDeath;
+    TEAM_ALIENS,           //int       team;
+    ( 1 << WP_ABUILD2 ),   //weapon_t  buildWeapon;
+    BANIM_IDLE1,           //int       idleAnim;
+    200,                   //int       nextthink;
+    SLIME_ZUNGE_BT,        //int       buildTime;
+    qfalse,                //qboolean  activationEnt;
+    0,                     //int       activationFlags;
+    0,                     //int       occupationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    MASK_PLAYERSOLID,      //int       activationContents;
+    CONTENTS_BODY,         //int       activationClipMask;
+    0,                     //int       turretRange;
+    0,                     //int       turretFireSpeed;
+    WP_NONE,               //weapon_t  turretProjType;
+    0.0f,                  //float     minNormal;
+    qtrue,                 //qboolean  invertNormal;
+    qtrue,                 //qboolean  creepTest;
+    SLIME_ZUNGE_CREEPSIZE, //int       creepSize;
+    qfalse,                //qboolean  dccTest;
+    qtrue,                 //qboolean  transparentTest;
+    qfalse,                //qboolean  uniqueTest;
+	  SLIME_ZUNGE_VALUE,     //int       value;
+    qfalse,                //qboolean  stackable;
+    0                      //int       batteryPower;
+  },
+  {
     BA_A_BOOSTER,          //int       number;
     "booster",             //char      *name;
     "Booster",             //char      *humanName;
@@ -3548,6 +3590,7 @@ char *eventnames[ ] =
   "EV_MISSILE_MISS",
   "EV_MISSILE_MISS_METAL",
   "EV_TESLATRAIL",
+  "EV_ZUNGETRAIL",
   "EV_BULLET",        // otherEntity is the shooter
 
   "EV_LEV1_GRAB",
@@ -3570,6 +3613,7 @@ char *eventnames[ ] =
   "EV_HUMAN_BUILDABLE_EXPLOSION",
   "EV_ALIEN_BUILDABLE_EXPLOSION",
   "EV_ALIEN_ACIDTUBE",
+  "EV_ALIEN_SLIME_ZUNGE",
 
   "EV_MEDKIT_USED",
 
