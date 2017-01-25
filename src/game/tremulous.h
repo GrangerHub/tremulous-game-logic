@@ -338,6 +338,18 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LOCKBLOB_K_SCALE            1.0f
 #define LOCKBLOB_LIFETIME           15000
 
+#define SLIME_ZUNGE_BP              12
+#define SLIME_ZUNGE_BT              16000
+#define SLIME_ZUNGE_HEALTH          ABHM(180)
+#define SLIME_ZUNGE_REGEN           ABRM(12)
+#define SLIME_ZUNGE_SPLASHDAMAGE    15
+#define SLIME_ZUNGE_SPLASHRADIUS    200
+#define SLIME_ZUNGE_CREEPSIZE       170
+#define SLIME_ZUNGE_VALUE           ( 3 * LEVEL0_VALUE / 2 )
+#define SLIME_ZUNGE_DMGRADIUS       120
+#define SLIME_ZUNGE_REPEAT          300
+#define SLIME_ZUNGE_RANGE           180
+
 #define OVERMIND_BP                 0
 #define OVERMIND_BT                 30000
 #define OVERMIND_HEALTH             ABHM(750)

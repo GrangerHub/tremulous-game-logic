@@ -1325,6 +1325,7 @@ typedef struct
   qhandle_t   poisonCloudedPS;
   qhandle_t   alienEvolvePS;
   qhandle_t   alienAcidTubePS;
+  qhandle_t   alienSlimeZungePS;
 
   sfxHandle_t alienEvolveSound;
 
@@ -1342,6 +1343,7 @@ typedef struct
   qhandle_t   humanGibPS;
 
   qhandle_t   teslaZapTS;
+  qhandle_t   slimeZungeTS;
 
   sfxHandle_t lCannonWarningSound;
   sfxHandle_t lCannonWarningSound2;

@@ -120,6 +120,9 @@ static void CG_Obituary( entityState_t *ent )
     case MOD_ATUBE:
       message = "was melted by an acid tube";
       break;
+    case MOD_ZUNGE:
+      message = "^5was sucked by a slime zunge";
+      break;
     case MOD_OVERMIND:
       message = "got too close to the overmind";
       break;
@@ -837,6 +840,32 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       CG_AlienBuildableExplosion( position, dir );
       break;
 
+    case EV_ZUNGETRAIL:
+      cent->currentState.weapon = WP_NONE;
+      {
+        centity_t *source = &cg_entities[ es->generic1 ];
+        centity_t *target = &cg_entities[ es->clientNum ];
+        vec3_t    sourceOffset = { 0.0f, 0.0f, 0.0f };
+
+        if( !CG_IsTrailSystemValid( &source->muzzleTS ) )
+        {
+		      //trailsystem
+          source->muzzleTS = CG_SpawnNewTrailSystem( cgs.media.slimeZungeTS );
+
+          if( CG_IsTrailSystemValid( &source->muzzleTS ) )
+          {
+            CG_SetAttachmentCent( &source->muzzleTS->frontAttachment, source );
+            CG_SetAttachmentCent( &source->muzzleTS->backAttachment, target );
+            CG_AttachToCent( &source->muzzleTS->frontAttachment );
+            CG_AttachToCent( &source->muzzleTS->backAttachment );
+            CG_SetAttachmentOffset( &source->muzzleTS->frontAttachment, sourceOffset );
+
+            source->muzzleTSDeathTime = cg.time + cg_teslaTrailTime.integer;
+          }
+        }
+      }
+      break;
+
     case EV_TESLATRAIL:
       cent->currentState.weapon = WP_TESLAGEN;
       {
@@ -1027,6 +1056,20 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       }
       break;
 
+  case EV_ALIEN_SLIME_ZUNGE:
+    {
+      particleSystem_t *ps = CG_SpawnNewParticleSystem( cgs.media.alienSlimeZungePS );
+
+      if( CG_IsParticleSystemValid( &ps ) )
+      {
+        CG_SetAttachmentCent( &ps->attachment, cent );
+        ByteToDir( es->eventParm, dir );
+        CG_SetParticleSystemNormal( ps, dir );
+        CG_AttachToCent( &ps->attachment );
+      }
+    }
+    break;
+
     case EV_MEDKIT_USED:
       trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.medkitUseSound );
       break;
@@ -1104,4 +1147,3 @@ void CG_CheckEvents( centity_t *cent )
   if( oldEvent != EV_NONE )
     cent->currentState.event = oldEvent;
 }
-

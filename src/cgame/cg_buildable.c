@@ -391,6 +391,8 @@ void CG_InitBuildables( void )
   }
 
   cgs.media.teslaZapTS = CG_RegisterTrailSystem( "models/buildables/tesla/zap" );
+  cgs.media.slimeZungeTS =
+              CG_RegisterTrailSystem( "/models/buildables/slime_zunge/zunge" );
 }
 
 /*
@@ -408,6 +410,7 @@ qboolean CG_GetBuildableRangeMarkerProperties( buildable_t bType, rangeMarkerTyp
     case BA_A_OVERMIND: *range = CREEP_BASESIZE;    shc = SHC_DARK_GREEN;  break;
     case BA_A_ACIDTUBE: *range = ACIDTUBE_RANGE;    shc = SHC_RED;         break;
     case BA_A_TRAPPER:  *range = TRAPPER_RANGE;     shc = SHC_PINK;        break;
+    case BA_A_ZUNGE:    *range = SLIME_ZUNGE_RANGE; shc = SHC_PINK;        break;
     case BA_A_HIVE:     *range = HIVE_SENSE_RANGE;  shc = SHC_YELLOW;      break;
     case BA_H_MGTURRET: *range = MGTURRET_RANGE;    shc = SHC_ORANGE;      break;
     case BA_H_TESLAGEN: *range = TESLAGEN_RANGE;    shc = SHC_VIOLET;      break;

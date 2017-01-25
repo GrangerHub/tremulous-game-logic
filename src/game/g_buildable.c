@@ -2091,6 +2091,89 @@ void ATrapper_Think( gentity_t *self )
 
 /*
 ================
+ASlimeZunge_Think
+================
+*/
+void ASlimeZunge_Think( gentity_t *self )
+{
+  int       entityList[ MAX_GENTITIES ];
+  vec3_t    range = { SLIME_ZUNGE_RANGE, SLIME_ZUNGE_RANGE, SLIME_ZUNGE_RANGE };
+  vec3_t    mins, maxs;
+  int       i, num;
+  gentity_t *enemy;
+  vec3_t start,dir,end;
+  gentity_t *tent; // zunge trail
+  
+  AGeneric_Think( self );
+  VectorAdd( self->r.currentOrigin, range, maxs );
+  VectorSubtract( self->r.currentOrigin, range, mins );
+
+
+  //find a victum
+  if( self->spawned && self->health > 0 && self->powered )
+  {
+    num = trap_EntitiesInBox( mins, maxs, entityList, MAX_GENTITIES );
+    for( i = 0; i < num; i++ )
+    {
+      enemy = &g_entities[ entityList[ i ] ];
+
+      if (!enemy->client)
+        continue;
+
+      if( enemy->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS ||
+          enemy->client->ps.stats[ STAT_TEAM ] == TEAM_NONE )
+        continue;
+
+      if( enemy->flags & FL_NOTARGET )
+        continue;
+
+      if( !G_Visible( self, enemy, CONTENTS_SOLID ) )
+        continue;
+
+      if (!enemy->takedamage) 
+  			continue;
+
+      if (Distance( self->r.currentOrigin, enemy->r.currentOrigin ) >
+                                                             SLIME_ZUNGE_RANGE )
+        continue;
+
+      // attach to the victum
+      tent = G_TempEntity( enemy->s.pos.trBase, EV_ZUNGETRAIL );
+      tent->s.generic1 = self->s.number; //src
+      tent->s.clientNum = enemy->s.number; //dest
+      VectorCopy( self->s.pos.trBase, tent->s.origin2 );
+
+      // suck the vitum in
+      VectorCopy(enemy->r.currentOrigin, start); 
+  		VectorCopy(self->r.currentOrigin, end); 
+  		VectorSubtract(end, start, dir); 
+  		VectorNormalize(dir); 
+  		VectorScale(dir,200, enemy->client->ps.velocity); 
+  		VectorCopy(dir, enemy->movedir); 
+
+      G_AddEvent( self, EV_ALIEN_SLIME_ZUNGE, DirToByte( self->r.currentOrigin ) );
+
+      if( level.time >= self->timestamp + 500 )
+      {
+        self->timestamp = level.time;
+        G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
+      }
+      G_SelectiveRadiusDamage( self->s.pos.trBase, self, ACIDTUBE_DAMAGE,
+                              SLIME_ZUNGE_DMGRADIUS, self, MOD_SLIME,
+                              TEAM_ALIENS );
+                
+      self->nextthink = level.time + SLIME_ZUNGE_REPEAT;
+
+      return;
+    }
+  }
+}
+
+
+//==================================================================================
+
+/*
+================
 G_IdlePowerState
 
 Set buildable idle animation to match power state
@@ -3968,6 +4051,7 @@ static int G_CompareBuildablesForRemoval( const void *a, const void *b )
     BA_A_ACIDTUBE,
     BA_A_TRAPPER,
     BA_A_HIVE,
+    BA_A_ZUNGE,
     BA_A_BOOSTER,
     BA_A_HOVEL,
     BA_A_SPAWN,
@@ -4720,6 +4804,7 @@ static void G_AddRangeMarkerForBuildable( gentity_t *self )
     case BA_A_OVERMIND:
     case BA_A_ACIDTUBE:
     case BA_A_TRAPPER:
+    case BA_A_ZUNGE:
     case BA_A_HIVE:
     case BA_H_MGTURRET:
     case BA_H_TESLAGEN:
@@ -4896,6 +4981,12 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
     case BA_A_TRAPPER:
       built->die = AGeneric_Die;
       built->think = ATrapper_Think;
+      built->pain = AGeneric_Pain;
+      break;
+
+    case BA_A_ZUNGE:
+      built->die = AGeneric_Die;
+      built->think = ASlimeZunge_Think;
       built->pain = AGeneric_Pain;
       break;
 
