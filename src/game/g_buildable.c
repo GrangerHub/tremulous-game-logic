@@ -3978,6 +3978,7 @@ static int G_CompareBuildablesForRemoval( const void *a, const void *b )
     BA_H_DCC,
     BA_H_MEDISTAT,
     BA_H_ARMOURY,
+    BA_H_TELEPORTER,
     BA_H_SPAWN,
     BA_H_REPEATER,
     BA_H_REACTOR
