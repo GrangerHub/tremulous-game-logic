@@ -2159,7 +2159,7 @@ void ASlimeZunge_Think( gentity_t *self )
         G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
       }
       G_SelectiveRadiusDamage( self->s.pos.trBase, self, ACIDTUBE_DAMAGE,
-                              SLIME_ZUNGE_DMGRADIUS, self, MOD_SLIME,
+                              SLIME_ZUNGE_DMGRADIUS, self, MOD_ZUNGE,
                               TEAM_ALIENS );
                 
       self->nextthink = level.time + SLIME_ZUNGE_REPEAT;

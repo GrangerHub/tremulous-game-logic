@@ -126,6 +126,7 @@ char *modNames[ ] =
 
   "MOD_ASPAWN",
   "MOD_ATUBE",
+  "MOD_ZUNGE",
   "MOD_OVERMIND",
   "MOD_DECONSTRUCT",
   "MOD_REPLACE",
