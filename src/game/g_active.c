@@ -1390,22 +1390,14 @@ qboolean G_CanActivateEntity( gclient_t *client, gentity_t *ent )
       client->ps.groundEntityNum != ent->s.number )
     return qfalse;
 
-    // custom canActivate() check
-    if( ent->activation.canActivate && !ent->activation.canActivate( ent, client ) )
-      return qfalse;
+  // custom canActivate() check
+  if( ent->activation.canActivate && !ent->activation.canActivate( ent, client ) )
+    return qfalse;
 
   // entity line of sight check
-  if( ent->activation.flags & ACTF_LINE_OF_SIGHT )
-  {
-    trace_t   trace;
-    
-    trap_Trace( &trace, client->ps.origin, NULL, NULL, ent->r.currentOrigin,
-                client->ps.clientNum, MASK_DEADSOLID );
-
-    if( trace.fraction < 1.0f &&
-        trace.entityNum != ent->s.number )
-      return qfalse;
-  }
+  if( ( ent->activation.flags & ACTF_LINE_OF_SIGHT ) &&
+      !G_Visible( &g_entities[ client->ps.clientNum ], ent, MASK_DEADSOLID ) )
+    return qfalse;
 
   return qtrue;
 }
