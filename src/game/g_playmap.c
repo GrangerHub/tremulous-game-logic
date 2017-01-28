@@ -43,6 +43,10 @@ void trap_FS_Write( const void *buffer, int len, fileHandle_t f );
 // playmap pool buffer
 static char playmap_pool_str[ MAX_PLAYMAP_POOL_CHARS ];
 
+// Indicates we're in the middle of a broadcast and the ADMBP holds
+// the contents of the playmap pool
+static qboolean PlayMapPoolMessageBroadcast = qfalse;
+
 // list of error codes and messages
 static const playMapError_t playMapError[ ] =
 {
@@ -196,8 +200,10 @@ playMapError_t G_AddToPlayMapPool( char *mapName, char *mapType, int minClients,
   if ( sortPool )
     G_SortPlayMapPool();
 
-  // Notify all clients
-  SendPlayMapPoolMessageToAllClients();
+  // Notify all clients if we're not in broadcast mode during reload
+  // because they will be notified after all are loaded
+  if( ! PlayMapPoolMessageBroadcast )
+    SendPlayMapPoolMessageToAllClients();
 
   return G_PlayMapErrorByCode( PLAYMAP_ERROR_NONE );
 }
@@ -308,10 +314,6 @@ playMapError_t G_SavePlayMapPool( void )
   return G_PlayMapErrorByCode( PLAYMAP_ERROR_NONE );
 }
 
-// Indicates we're in the middle of a broadcast and the ADMBP holds
-// the contents of the playmap pool
-static qboolean PlayMapPoolMessageBroadcast = qfalse;
-
 /*
 ==================
 PlayMapPoolMessage
@@ -337,6 +339,10 @@ void SendPlayMapPoolMessageToAllClients( void )
   int   i;
   PlayMapPoolMessageBroadcast = qtrue;
   G_PrintPlayMapPool( NULL, -1, qtrue );
+
+  if( g_debugPlayMap.integer > 0 )
+    trap_Print( va( "PLAYMAP: broadcasting playmap pool to %d clients.\n",
+		    level.maxclients ) );
 
   for( i = 0; i < level.maxclients; i++ )
   {
@@ -380,6 +386,9 @@ playMapError_t G_ReloadPlayMapPool( void )
   cnf[ len ] = '\0';
   trap_FS_FCloseFile( f );
 
+  // enable broadcast flag to prevent sending info to clients for each add
+  PlayMapPoolMessageBroadcast = qtrue;
+  
   COM_BeginParseSession( g_playMapPoolConfig.string );
   while( cnf < ( cnf2 + len )  )
   {
