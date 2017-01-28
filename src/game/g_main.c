@@ -749,6 +749,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
   G_InitMapRotations( );
   G_ReloadPlayMapPool();
   G_ReloadPlayMapQueue();
+  G_ExecutePlaymapFlags( level.playmapFlags );
   G_InitSpawnQueue( &level.alienSpawnQueue );
   G_InitSpawnQueue( &level.humanSpawnQueue );
 

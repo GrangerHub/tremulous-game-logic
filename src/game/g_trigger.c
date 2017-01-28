@@ -232,8 +232,31 @@ void SP_trigger_push( gentity_t *self )
 
 void Use_target_push( gentity_t *self, gentity_t *other, gentity_t *activator )
 {
-  if( !activator || !activator->client )
+  if( !activator )
     return;
+
+  if(!activator->client)
+  {
+    // launch buildables and do some damage
+    if( activator->s.eType == ET_BUILDABLE )
+    {
+      G_Damage( activator, NULL, &g_entities[ activator->dropperNum ], NULL,
+                NULL, ( BG_Buildable( activator->s.modelindex )->health / 3 ),
+                DAMAGE_NO_PROTECTION, MOD_TRIGGER_HURT );
+
+      activator->s.groundEntityNum = ENTITYNUM_NONE;
+
+      if( activator->s.pos.trType != BG_Buildable( activator->s.modelindex )->traj )
+      {
+        activator->s.pos.trType = BG_Buildable( activator->s.modelindex )->traj;
+        activator->s.pos.trTime = level.time;
+      }
+
+      VectorCopy( self->s.origin2, activator->s.pos.trDelta );
+    }
+
+    return;
+  }
 
   if( activator->client->ps.pm_type != PM_NORMAL )
     return;

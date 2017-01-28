@@ -374,6 +374,29 @@ void  G_TouchTriggers( gentity_t *ent )
 
 /*
 =================
+G_ClientUpdateSpawnQueue
+
+Send spawn queue data to a client
+=================
+*/
+static void G_ClientUpdateSpawnQueue( gclient_t *client )
+{
+  if( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
+  {
+    client->ps.persistant[ PERS_QUEUEPOS ] =
+      G_GetPosInSpawnQueue( &level.alienSpawnQueue, client->ps.clientNum );
+    client->ps.persistant[ PERS_SPAWNS ] = level.numAlienSpawns;
+  }
+  else if( client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
+  {
+    client->ps.persistant[ PERS_QUEUEPOS ] =
+      G_GetPosInSpawnQueue( &level.humanSpawnQueue, client->ps.clientNum );
+    client->ps.persistant[ PERS_SPAWNS ] = level.numHumanSpawns;
+  }
+}
+
+/*
+=================
 SpectatorThink
 =================
 */
@@ -482,21 +505,7 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
     trap_UnlinkEntity( ent );
 
     // Set the queue position and spawn count for the client side
-    if( client->ps.pm_flags & PMF_QUEUED )
-    {
-      if( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
-      {
-        client->ps.persistant[ PERS_QUEUEPOS ] =
-          G_GetPosInSpawnQueue( &level.alienSpawnQueue, client->ps.clientNum );
-        client->ps.persistant[ PERS_SPAWNS ] = level.numAlienSpawns;
-      }
-      else if( client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
-      {
-        client->ps.persistant[ PERS_QUEUEPOS ] =
-          G_GetPosInSpawnQueue( &level.humanSpawnQueue, client->ps.clientNum );
-        client->ps.persistant[ PERS_SPAWNS ] = level.numHumanSpawns;
-      }
-    }
+    G_ClientUpdateSpawnQueue( ent->client );
   }
 }
 
@@ -788,6 +797,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
           ent->client->medKitHealthToRestore--;
           ent->health++;
           ent->client->ps.stats[ STAT_HEALTH ] = ent->health;
+          client->pers.infoChangeTime = level.time;
         }
         else
           ent->client->ps.stats[ STAT_STATE ] &= ~SS_HEALING_2X;
@@ -804,6 +814,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
             ent->client->medKitHealthToRestore--;
             ent->health++;
             ent->client->ps.stats[ STAT_HEALTH ] = ent->health;
+            client->pers.infoChangeTime = level.time;
 
             client->medKitIncrementTime = level.time +
               ( remainingStartupTime / MEDKIT_STARTUP_SPEED );
@@ -872,6 +883,8 @@ void ClientTimerActions( gentity_t *ent, int msec )
           G_AddCreditToClient( client, FREEKILL_HUMAN, qtrue );
       }
     }
+
+    G_ClientUpdateSpawnQueue( ent->client );
   }
 
   while( client->time10000 >= 10000 )
@@ -1377,22 +1390,14 @@ qboolean G_CanActivateEntity( gclient_t *client, gentity_t *ent )
       client->ps.groundEntityNum != ent->s.number )
     return qfalse;
 
-    // custom canActivate() check
-    if( ent->activation.canActivate && !ent->activation.canActivate( ent, client ) )
-      return qfalse;
+  // custom canActivate() check
+  if( ent->activation.canActivate && !ent->activation.canActivate( ent, client ) )
+    return qfalse;
 
   // entity line of sight check
-  if( ent->activation.flags & ACTF_LINE_OF_SIGHT )
-  {
-    trace_t   trace;
-    
-    trap_Trace( &trace, client->ps.origin, NULL, NULL, ent->r.currentOrigin,
-                client->ps.clientNum, MASK_DEADSOLID );
-
-    if( trace.fraction < 1.0f &&
-        trace.entityNum != ent->s.number )
-      return qfalse;
-  }
+  if( ( ent->activation.flags & ACTF_LINE_OF_SIGHT ) &&
+      !G_Visible( &g_entities[ client->ps.clientNum ], ent, MASK_DEADSOLID ) )
+    return qfalse;
 
   return qtrue;
 }
@@ -2105,8 +2110,8 @@ void ClientThink_real( gentity_t *ent )
       client->poisonImmunityTime = level.time + MEDKIT_POISON_IMMUNITY_TIME;
 
       // restore stamina
-      if( client->medKitStaminaToRestore =
-                            ( STAMINA_MAX - client->ps.stats[ STAT_STAMINA ] ) )
+      if( ( client->medKitStaminaToRestore =
+                            ( STAMINA_MAX - client->ps.stats[ STAT_STAMINA ] ) ) )
       {
         if( client->medKitStaminaToRestore > STAMINA_MEDISTAT_RESTORE )
         {
@@ -2215,6 +2220,7 @@ void ClientThink_real( gentity_t *ent )
       {
         ent->health += count;
         client->ps.stats[ STAT_HEALTH ] = ent->health;
+        client->pers.infoChangeTime = level.time;
 
         // if at max health, clear damage counters
         if( ent->health >= client->ps.stats[ STAT_MAX_HEALTH ] )

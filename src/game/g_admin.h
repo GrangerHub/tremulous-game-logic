@@ -187,6 +187,7 @@ qboolean G_admin_setnextmap( gentity_t *ent );
 qboolean G_admin_namelog( gentity_t *ent );
 qboolean G_admin_lock( gentity_t *ent );
 qboolean G_admin_pause( gentity_t *ent );
+qboolean G_admin_playmap( gentity_t *ent );
 qboolean G_admin_playpool( gentity_t *ent );
 qboolean G_admin_builder( gentity_t *ent );
 qboolean G_admin_buildlog( gentity_t *ent );

@@ -739,7 +739,9 @@ qboolean G_FindCreep( gentity_t *self )
 
   //if self does not have a parentNode or its parentNode is invalid, then find a new one
   if( self->client || self->parentNode == NULL || !self->parentNode->inuse ||
-      self->parentNode->health <= 0 )
+      self->parentNode->health <= 0 ||
+      ( Distance( self->r.currentOrigin,
+                  self->parentNode->r.currentOrigin ) > CREEP_BASESIZE ) )
   {
     for( i = MAX_CLIENTS, ent = g_entities + i; i < level.num_entities; i++, ent++ )
     {
@@ -966,7 +968,8 @@ void AGeneric_CreepRecede( gentity_t *self )
   else //creep has died
   {
     // Respawn buildable if in warmup, otherwise free the entity
-    if( IS_WARMUP && self->enemy->client )
+    if( IS_WARMUP && self->enemy->client &&
+        self->methodOfDeath != MOD_TRIGGER_HURT )
     {
       self->think = AGeneric_CreepRespawn;
       if( self->s.modelindex == BA_A_ACIDTUBE || self->s.modelindex == BA_A_HIVE )
@@ -1042,6 +1045,7 @@ void AGeneric_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, i
   self->think = AGeneric_Blast;
   self->s.eFlags &= ~EF_FIRING; //prevent any firing effects
   self->powered = qfalse;
+  self->methodOfDeath = mod;
 
   if( self->spawned )
     self->nextthink = level.time + 5000;
@@ -2004,7 +2008,8 @@ void HSpawn_Blast( gentity_t *self )
   self->s.eType = ET_EVENTS + EV_HUMAN_BUILDABLE_EXPLOSION;
   // respawn the buildable in next think in warmup
   // and attacker was a player
-  if( IS_WARMUP && self->enemy->client )
+  if( IS_WARMUP && self->enemy->client &&
+      self->methodOfDeath != MOD_TRIGGER_HURT )
   {
     self->think = HSpawn_Respawn;
     if( self->s.modelindex == BA_H_MGTURRET || self->s.modelindex == BA_H_TESLAGEN )
@@ -2039,6 +2044,7 @@ void HSpawn_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   self->killedBy = attacker - g_entities;
   self->powered = qfalse; //free up power
   self->s.eFlags &= ~EF_FIRING; //prevent any firing effects
+  self->methodOfDeath = mod;
 
   if( self->spawned )
   {
@@ -2139,6 +2145,7 @@ static void HRepeater_Die( gentity_t *self, gentity_t *inflictor, gentity_t *att
   self->killedBy = attacker - g_entities;
   self->powered = qfalse; //free up power
   self->s.eFlags &= ~EF_FIRING; //prevent any firing effects
+  self->methodOfDeath = mod;
 
   if( self->spawned )
   {
@@ -2554,6 +2561,7 @@ void HMedistat_Think( gentity_t *self )
       {
         self->enemy->health++;
         self->enemy->client->ps.stats[ STAT_HEALTH ] = self->enemy->health;
+        self->enemy->client->pers.infoChangeTime = level.time;
       }
 
       //if they're completely healed and have full stamina, give them a medkit

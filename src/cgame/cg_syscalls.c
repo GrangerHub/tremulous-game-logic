@@ -145,6 +145,11 @@ void  trap_RemoveCommand( const char *cmdName )
     syscall( CG_REMOVECOMMAND, cmdName );
 }
 
+void  trap_Field_CompleteList( char *listJson )
+{
+  syscall( CG_FIELD_COMPLETELIST, listJson );
+}
+
 void  trap_SendClientCommand( const char *s )
 {
   syscall( CG_SENDCLIENTCOMMAND, s );

@@ -40,6 +40,9 @@ void trap_FS_Write( const void *buffer, int len, fileHandle_t f );
  * globals
  */
 
+// playmap pool buffer
+static char playmap_pool_str[ MAX_PLAYMAP_POOL_CHARS ];
+
 // list of error codes and messages
 static const playMapError_t playMapError[ ] =
 {
@@ -114,8 +117,10 @@ static const playMapError_t playMapError[ ] =
 };
 
 // list of playmap flags and info
+// See g_playmap.h for field definitions.
+// Warning: make sure flag field is in same order as the enum.
 static const playMapFlagDesc_t playMapFlagList[ ] =
-{
+  { // Fields: flag, flagName, defVal, avail, flagDesc 
   { PLAYMAP_FLAG_NONE,  "", 	 qfalse, qfalse, "No flags" },
   { PLAYMAP_FLAG_DPUNT, "dpunt", qfalse, qfalse, "Dretch Punt" },
   { PLAYMAP_FLAG_FF, 	"ff", 	 qtrue,  qfalse, "Friendly Fire" },
@@ -123,7 +128,8 @@ static const playMapFlagDesc_t playMapFlagList[ ] =
   { PLAYMAP_FLAG_SD, 	"sd", 	 qtrue,  qfalse, "Sudden Death" },
   { PLAYMAP_FLAG_LGRAV, "lgrav", qfalse, qfalse, "Low Gravity" },
   { PLAYMAP_FLAG_UBP, 	"ubp",	 qfalse, qfalse, "Unlimited BP" },
-  { PLAYMAP_FLAG_PORTAL,"portal",qfalse, qfalse, "Portal Gun" }
+  { PLAYMAP_FLAG_PORTAL,"portal",qfalse, qfalse, "Portal Gun" },
+  { PLAYMAP_FLAG_STACK, "stack", qtrue,  qfalse, "Buildable stacking" }
 };
 
 /*
@@ -190,6 +196,9 @@ playMapError_t G_AddToPlayMapPool( char *mapName, char *mapType, int minClients,
   if ( sortPool )
     G_SortPlayMapPool();
 
+  // Notify all clients
+  SendPlayMapPoolMessageToAllClients();
+
   return G_PlayMapErrorByCode( PLAYMAP_ERROR_NONE );
 }
 
@@ -228,6 +237,9 @@ playMapError_t G_RemoveFromPlayMapPool( char *mapName )
 
   // decrease numMaps by one count
   playMapPoolCache.numMaps--;
+
+  // Notify all clients
+  SendPlayMapPoolMessageToAllClients();
 
   return G_PlayMapErrorByCode( PLAYMAP_ERROR_NONE );
 }
@@ -294,6 +306,44 @@ playMapError_t G_SavePlayMapPool( void )
   trap_FS_FCloseFile( f );
 
   return G_PlayMapErrorByCode( PLAYMAP_ERROR_NONE );
+}
+
+// Indicates we're in the middle of a broadcast and the ADMBP holds
+// the contents of the playmap pool
+static qboolean PlayMapPoolMessageBroadcast = qfalse;
+
+/*
+==================
+PlayMapPoolMessage
+
+==================
+*/
+void PlayMapPoolMessage( int client )
+{
+  if ( !PlayMapPoolMessageBroadcast )
+    G_PrintPlayMapPool( g_entities + client, -1, qtrue );
+  trap_SendServerCommand( client, va( "playpool_json %s", playmap_pool_str ) );
+}
+
+/*
+========================
+SendPlayMapPoolMessageToAllClients
+
+Do this at the beginning of game and everytime the pool contents change.
+========================
+*/
+void SendPlayMapPoolMessageToAllClients( void )
+{
+  int   i;
+  PlayMapPoolMessageBroadcast = qtrue;
+  G_PrintPlayMapPool( NULL, -1, qtrue );
+
+  for( i = 0; i < level.maxclients; i++ )
+  {
+    if( level.clients[ i ].pers.connected == CON_CONNECTED )
+      PlayMapPoolMessage( i );
+  }
+  PlayMapPoolMessageBroadcast = qfalse;
 }
 
 /*
@@ -372,8 +422,12 @@ playMapError_t G_ReloadPlayMapPool( void )
   trap_Print( va( "Loaded %d maps into the playmap pool from config file %s\n",
                   G_GetPlayMapPoolLength( ), g_playMapPoolConfig.string ) );
 
+  // Notify all clients
+  SendPlayMapPoolMessageToAllClients();
+  
   return G_PlayMapErrorByCode( PLAYMAP_ERROR_NONE );
 }
+
 
 /*
 ================
@@ -441,38 +495,58 @@ int G_GetPlayMapPoolLength( void )
 ================
 G_PrintPlayMapPool
 
-Print the playmap pool on the console
+Print the playmap pool on the console. If JSON is requested, prepare
+with ADMBP, but don't print it so it's still accessible.
 ================
 */
-void G_PrintPlayMapPool( gentity_t *ent, int page )
+void G_PrintPlayMapPool( gentity_t *ent, int page, qboolean isJson )
 {
   int i, j, len, rows, pages, row, start;
 
+  playmap_pool_str[ 0 ] = '\0';
+  
   if( ( len = playMapPoolCache.numMaps ) )
     {
-      ADMBP_begin(); // begin buffer
-      ADMBP( "Maps that can be added to the playlist" );
+      if( !isJson ) // discard verbose messages in JSON
+	Q_strcat( playmap_pool_str, MAX_PLAYMAP_POOL_CHARS,
+		  va( S_COLOR_CYAN "%d" S_COLOR_WHITE " maps available in pool",
+		      G_GetPlayMapPoolLength( ) ) );
+      else
+	Q_strcat( playmap_pool_str, MAX_PLAYMAP_POOL_CHARS, "[" );
     }
   else
     {
-    ADMP( va( "%s\n",
-               G_PlayMapErrorByCode(PLAYMAP_ERROR_MAP_POOL_EMPTY).errorMessage) );
+      if ( !isJson )
+	Q_strcat( playmap_pool_str, MAX_PLAYMAP_POOL_CHARS,
+		va( "%s\n",
+		    G_PlayMapErrorByCode(PLAYMAP_ERROR_MAP_POOL_EMPTY).errorMessage));
+      else
+      { // create an empty array in buffer
+	Q_strcat( playmap_pool_str, MAX_PLAYMAP_POOL_CHARS, "[]" );
+      }
     return;
     }
 
   rows = ( len + 2 ) / 3;
-  pages = MAX( 1, ( rows + MAX_MAPLIST_ROWS - 1 ) / MAX_MAPLIST_ROWS );
+
+  if( page < 0 )
+    pages = 1;			//disabled
+  else
+    pages = MAX( 1, ( rows + MAX_MAPLIST_ROWS - 1 ) / MAX_MAPLIST_ROWS );
 
   // Enforce bounds
   page = min(page, pages - 1);
   page = max(page, 0);
 
-  if( pages > 1 )
-    ADMBP( va( " (page %d out of %d)", page + 1, pages ) );
-  ADMBP( ":\n" );
-
+  if ( !isJson )
+  {
+    if( pages > 1 )
+      Q_strcat( playmap_pool_str, MAX_PLAYMAP_POOL_CHARS,
+		va( " (page %d out of %d)", page + 1, pages ));
+    Q_strcat( playmap_pool_str, MAX_PLAYMAP_POOL_CHARS, ":\n" );
+  }
   start = page * MAX_MAPLIST_ROWS * 3;
-  if( len < start + ( 3 * MAX_MAPLIST_ROWS ) )
+  if( len < start + ( 3 * MAX_MAPLIST_ROWS ) || pages == 1)
     rows = ( len - start + 2 ) / 3;
   else
     rows = MAX_MAPLIST_ROWS;
@@ -481,14 +555,24 @@ void G_PrintPlayMapPool( gentity_t *ent, int page )
   {
     for( i = start + row, j = 0; i < len && j < 3; i += rows, j++ )
     {
-      ADMBP( va( S_COLOR_CYAN " %-20s" S_COLOR_WHITE,
-                 playMapPoolCache.mapEntries[ i ].mapName ) );
+      if ( !isJson )
+	      Q_strcat( playmap_pool_str, MAX_PLAYMAP_POOL_CHARS,
+			va( S_COLOR_CYAN " %-20s" S_COLOR_WHITE,
+			    playMapPoolCache.mapEntries[ i ].mapName ) );
+      else
+	Q_strcat( playmap_pool_str, MAX_PLAYMAP_POOL_CHARS,
+		  va( "%s,",
+		      playMapPoolCache.mapEntries[ i ].mapName ) );
       // Limit per row (TODO: make one per row and write type and min/max next to it)
     }
-    ADMBP( "\n" );
+    if ( !isJson )
+      Q_strcat( playmap_pool_str, MAX_PLAYMAP_POOL_CHARS, "\n" );
   }
-  ADMBP_end();
-
+  // don't end for JSON because it prints out
+  if ( !isJson )
+    ADMP( playmap_pool_str );
+  else
+    Q_strcat( playmap_pool_str, MAX_PLAYMAP_POOL_CHARS, "]" );
 }
 
 /*
@@ -949,7 +1033,7 @@ int G_DefaultPlayMapFlags(void)
 G_ParsePlayMapFlagTokens
 
 Tokenize string to find flags and set or clear bits on a given default
-flag configuration. TODO: defaults should come from playMapFlagList?
+flag configuration. Defaults come from playMapFlagList.
 ================
 */
 int G_ParsePlayMapFlagTokens( gentity_t *ent, char *flags )
@@ -1046,6 +1130,43 @@ char *G_PlayMapFlags2String( int flags )
   }
 
   return flagString;
+}
+
+/*
+================
+G_ExecutePlaymapFlags
+
+Set cvars, etc. to execute actions associated with the selected or
+cleared flags.
+================
+*/
+void G_ExecutePlaymapFlags( int flagsValue )
+{
+  int flagNum;
+
+  for( flagNum = PLAYMAP_FLAG_NONE + 1;
+       flagNum < PLAYMAP_NUM_FLAGS; flagNum++ )
+  {
+    // Only process available flags even for its default value 
+    if ( ! playMapFlagList[flagNum].avail )
+      continue;
+    
+    // Add special handling of each flag here
+    switch( flagNum )
+    {
+      case PLAYMAP_FLAG_STACK:
+	trap_Cvar_Set( "g_allowBuildableStacking",
+		       ( PlaymapFlag_IsSet( flagsValue, PLAYMAP_FLAG_STACK ) != 0 )
+		       ? "1" : "0");
+	if( g_debugPlayMap.integer > 0 )
+	  trap_Print( va( "PLAYMAP: setting stackable flag to %d.\n",
+			  PlaymapFlag_IsSet( flagsValue, PLAYMAP_FLAG_STACK ) != 0 ) );
+	break;	
+    }
+    if( g_debugPlayMap.integer > 0 )
+      trap_Print( va( "PLAYMAP: executing flag #%d with value %d.\n",
+		      flagNum, PlaymapFlag_IsSet( flagsValue, flagNum ) != 0 ) );
+  }
 }
 
 /*
@@ -1220,8 +1341,8 @@ void G_PrintPlayMapQueue( gentity_t *ent )
 
   if ( ( len = G_GetPlayMapQueueLength() ) )
   {
-    ADMBP( "Current playmap queue:\n"
-	   "    Map        Player     Flags\n");
+    ADMBP( va( "Playmap queue has " S_COLOR_CYAN "%d" S_COLOR_WHITE " maps:\n"
+	       "    Map        Player     Flags\n", G_GetPlayMapQueueLength( ) ) );
   }
   else
   {
@@ -1279,6 +1400,8 @@ void G_NextPlayMap( void )
 
   trap_SendConsoleCommand( EXEC_APPEND, va( "map \"%s\"\n", playMap->mapName ) );
 
-  // do the flags here
+  // too early to execute the flags 
   level.playmapFlags = playMap->flags;
+  //G_ExecutePlaymapFlags( playMap->flags );
 }
+

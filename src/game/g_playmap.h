@@ -74,6 +74,7 @@ typedef enum
   PLAYMAP_FLAG_LGRAV, // Low Gravity
   PLAYMAP_FLAG_UBP,   // Unlimited BP
   PLAYMAP_FLAG_PORTAL,// Portal Gun
+  PLAYMAP_FLAG_STACK,// Buildable stacking
 
   PLAYMAP_NUM_FLAGS
 } playMapFlag_t;
@@ -88,7 +89,8 @@ typedef struct playMapFlagDesc_s
   int 	   flag;		/* Flag bit */
   char 	   *flagName;		/* String to parse */
   qboolean defVal;		/* Whether flag is on by default */
-  qboolean avail;		/* Whether flag is available for users */
+  qboolean avail;		/* Whether flag is available for users. 
+				   If not, default value is ignored as well. */
   char 	   *flagDesc;		/* Description string */
 } playMapFlagDesc_t;
 
@@ -176,12 +178,14 @@ playMapError_t G_AddToPlayMapPool( char *mapName, char *mapType, int minClients,
 				   int maxClients, qboolean sortPool );
 playMapError_t G_RemoveFromPlayMapPool( char *mapName );
 playMapError_t G_SavePlayMapPool( void );
+void PlayMapPoolMessage( int client );
+void SendPlayMapPoolMessageToAllClients( void );
 playMapError_t G_ReloadPlayMapPool( void );
 playMapError_t G_ClearPlayMapPool( void );
 int G_FindInMapPool( char *mapName );
 void G_SortPlayMapPool( void );
 int G_GetPlayMapPoolLength( void );
-void G_PrintPlayMapPool( gentity_t *ent, int page );
+void G_PrintPlayMapPool( gentity_t *ent, int page, qboolean isJson );
 void G_InitPlayMapQueue( void );
 playMapError_t G_SavePlayMapQueue( void );
 playMapError_t G_ReloadPlayMapQueue( void );
@@ -200,3 +204,4 @@ void G_NextPlayMap( void );
 int G_ParsePlayMapFlagTokens( gentity_t *ent, char *flags );
 char *G_PlayMapFlags2String( int flags );
 int G_DefaultPlayMapFlags(void);
+void G_ExecutePlaymapFlags( int flagsValue );
