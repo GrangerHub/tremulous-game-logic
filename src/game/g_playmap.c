@@ -503,23 +503,24 @@ void G_PrintPlayMapPool( gentity_t *ent, int page, qboolean isJson )
 {
   int i, j, len, rows, pages, row, start;
 
-  playmap_pool_str[ 0 ] = '\0';
+  if( !isJson ) 
+    ADMBP_begin();
+  else
+    playmap_pool_str[ 0 ] = '\0';
   
   if( ( len = playMapPoolCache.numMaps ) )
     {
       if( !isJson ) // discard verbose messages in JSON
-	Q_strcat( playmap_pool_str, MAX_PLAYMAP_POOL_CHARS,
-		  va( S_COLOR_CYAN "%d" S_COLOR_WHITE " maps available in pool",
-		      G_GetPlayMapPoolLength( ) ) );
+	ADMBP( va( S_COLOR_CYAN "%d" S_COLOR_WHITE " maps available in pool",
+		   G_GetPlayMapPoolLength( ) ) );
       else
 	Q_strcat( playmap_pool_str, MAX_PLAYMAP_POOL_CHARS, "[" );
     }
   else
     {
       if ( !isJson )
-	Q_strcat( playmap_pool_str, MAX_PLAYMAP_POOL_CHARS,
-		va( "%s\n",
-		    G_PlayMapErrorByCode(PLAYMAP_ERROR_MAP_POOL_EMPTY).errorMessage));
+	ADMBP( va( "%s\n",
+		   G_PlayMapErrorByCode(PLAYMAP_ERROR_MAP_POOL_EMPTY).errorMessage));
       else
       { // create an empty array in buffer
 	Q_strcat( playmap_pool_str, MAX_PLAYMAP_POOL_CHARS, "[]" );
@@ -541,9 +542,8 @@ void G_PrintPlayMapPool( gentity_t *ent, int page, qboolean isJson )
   if ( !isJson )
   {
     if( pages > 1 )
-      Q_strcat( playmap_pool_str, MAX_PLAYMAP_POOL_CHARS,
-		va( " (page %d out of %d)", page + 1, pages ));
-    Q_strcat( playmap_pool_str, MAX_PLAYMAP_POOL_CHARS, ":\n" );
+      ADMBP( va( " (page %d out of %d)", page + 1, pages ) );
+    ADMBP( ":\n" );
   }
   start = page * MAX_MAPLIST_ROWS * 3;
   if( len < start + ( 3 * MAX_MAPLIST_ROWS ) || pages == 1)
@@ -556,9 +556,8 @@ void G_PrintPlayMapPool( gentity_t *ent, int page, qboolean isJson )
     for( i = start + row, j = 0; i < len && j < 3; i += rows, j++ )
     {
       if ( !isJson )
-	      Q_strcat( playmap_pool_str, MAX_PLAYMAP_POOL_CHARS,
-			va( S_COLOR_CYAN " %-20s" S_COLOR_WHITE,
-			    playMapPoolCache.mapEntries[ i ].mapName ) );
+	ADMBP( va( S_COLOR_CYAN " %-20s" S_COLOR_WHITE,
+		   playMapPoolCache.mapEntries[ i ].mapName ) );
       else
 	Q_strcat( playmap_pool_str, MAX_PLAYMAP_POOL_CHARS,
 		  va( "%s,",
@@ -566,11 +565,11 @@ void G_PrintPlayMapPool( gentity_t *ent, int page, qboolean isJson )
       // Limit per row (TODO: make one per row and write type and min/max next to it)
     }
     if ( !isJson )
-      Q_strcat( playmap_pool_str, MAX_PLAYMAP_POOL_CHARS, "\n" );
+      ADMBP( "\n" );
   }
   // don't end for JSON because it prints out
   if ( !isJson )
-    ADMP( playmap_pool_str );
+    ADMBP_end();
   else
     Q_strcat( playmap_pool_str, MAX_PLAYMAP_POOL_CHARS, "]" );
 }
