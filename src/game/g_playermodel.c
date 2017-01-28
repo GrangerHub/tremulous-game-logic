@@ -190,4 +190,3 @@ char *GetSkin( char *modelname, char *wish )
 
     return lastpick;
 }
-

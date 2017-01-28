@@ -26,7 +26,6 @@ typedef struct bglist_s bglist_t;
 
 struct bglist_s
 {
-  int      allocation; // used to varify the allocation state
   void     *data;
   bglist_t *next;
   bglist_t *prev;
@@ -56,7 +55,8 @@ typedef void *(*BG_CopyFunc) ( const void *src, void *data );
 
 /* Doubly linked lists
  */
- void        BG_InitListMemory( void );
+void         BG_InitListMemory( char *calledFile, int calledLine );
+void         BG_MemoryInfoForLinkedLists( void );
 bglist_t*    bg_list_alloc( void );
 void         bg_list_free( bglist_t *list );
 void         bg_list_free_1( bglist_t *list );

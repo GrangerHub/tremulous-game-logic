@@ -5715,7 +5715,7 @@ void G_LayoutLoad( char *lstr )
     G_Printf( "ERROR: layout %s could not be opened\n", lstr );
     return;
   }
-  layoutHead = layout = BG_Alloc( len + 1 );
+  layoutHead = layout = BG_StackPoolAlloc( len + 1 );
   trap_FS_Read( layout, len, f );
   layout[ len ] = '\0';
   trap_FS_FCloseFile( f );
@@ -5767,7 +5767,7 @@ void G_LayoutLoad( char *lstr )
     }
     layout++;
   }
-  BG_Free( layoutHead );
+  BG_StackPoolFree( layoutHead );
 
   if( lstrPlusPtr )
   {

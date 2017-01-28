@@ -2008,9 +2008,6 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum )
 
   // Dynamic memory
   BG_InitMemory( );
-  
-  // Linked Lists
-  BG_InitListMemory( );
 
   CG_RegisterCvars( );
 
