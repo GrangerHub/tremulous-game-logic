@@ -501,12 +501,19 @@ with ADMBP, but don't print it so it's still accessible.
 */
 void G_PrintPlayMapPool( gentity_t *ent, int page, qboolean isJson )
 {
-  int i, j, len, rows, pages, row, start;
+  int i, j, len, rows, pages, row, start, num_cols;
 
-  if( !isJson ) 
+  if( !isJson )
+  {
     ADMBP_begin();
+    // TODO: this should be calculated from console width
+    num_cols = 3;
+  }
   else
+  {
     playmap_pool_str[ 0 ] = '\0';
+    num_cols = 1;
+  }
   
   if( ( len = playMapPoolCache.numMaps ) )
     {
@@ -528,7 +535,7 @@ void G_PrintPlayMapPool( gentity_t *ent, int page, qboolean isJson )
     return;
     }
 
-  rows = ( len + 2 ) / 3;
+  rows = ( len + ( num_cols - 1 ) ) / num_cols;
 
   if( page < 0 )
     pages = 1;			//disabled
@@ -545,15 +552,15 @@ void G_PrintPlayMapPool( gentity_t *ent, int page, qboolean isJson )
       ADMBP( va( " (page %d out of %d)", page + 1, pages ) );
     ADMBP( ":\n" );
   }
-  start = page * MAX_MAPLIST_ROWS * 3;
-  if( len < start + ( 3 * MAX_MAPLIST_ROWS ) || pages == 1)
-    rows = ( len - start + 2 ) / 3;
+  start = page * MAX_MAPLIST_ROWS * num_cols;
+  if( len < start + ( num_cols * MAX_MAPLIST_ROWS ) || pages == 1)
+    rows = ( len - start + ( num_cols - 1 ) ) / num_cols;
   else
     rows = MAX_MAPLIST_ROWS;
 
   for( row = 0; row < rows; row++ )
   {
-    for( i = start + row, j = 0; i < len && j < 3; i += rows, j++ )
+    for( i = start + row, j = 0; i < len && j < num_cols; i += rows, j++ )
     {
       if ( !isJson )
 	ADMBP( va( S_COLOR_CYAN " %-20s" S_COLOR_WHITE,
