@@ -672,7 +672,8 @@ playMapError_t G_ValidatePlayMapQueue( void )
         playMapQueue.playMap[ PLAYMAP_QUEUE_ADD( playMapQueue.head, i ) ];
 
       // Check if client is still connected
-      if ( ! G_FindClientByName( NULL, playMap.clientName ) )
+      if ( Q_stricmp_exact( playMap.clientName, "console" ) &&
+	   ! G_FindClientByName( NULL, playMap.clientName ) )
         {
           trap_SendServerCommand( -1,
                                   va( "print \"Removing playlist entry #%d for "
