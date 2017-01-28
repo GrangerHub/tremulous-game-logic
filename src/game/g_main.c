@@ -612,10 +612,8 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
   G_Printf( "------- Game Initialization -------\n" );
   G_Printf( "gamename: %s\n", GAME_VERSION );
 
+  // Dynamic memory
   BG_InitMemory( );
-  
-  // Linked Lists
-  BG_InitListMemory( );
 
   // set some level globals
   memset( &level, 0, sizeof( level ) );
@@ -2590,7 +2588,7 @@ void CheckCvars( void )
     size_t            newsize = g_humanRepeaterMaxZones.integer * sizeof( buildPointZone_t );
     size_t            oldsize = lastNumZones * sizeof( buildPointZone_t );
 
-    newZones = BG_Alloc( newsize );
+    newZones = BG_Alloc0( newsize );
     if( level.buildPointZones )
     {
       Com_Memcpy( newZones, level.buildPointZones, MIN( oldsize, newsize ) );

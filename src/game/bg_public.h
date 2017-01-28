@@ -23,11 +23,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 // bg_public.h -- definitions shared by both the server game and client game modules
 
-//tremulous balance header
+// tremulous balance header
 #include "tremulous.h"
 
 // linked lists
 #include "bg_list.h"
+
+// BGAME Dynamic Memory Allocation
+#include "bg_alloc.h"
 
 // because games can change separately from the main system version, we need a
 // second version that must match between game and cgame
@@ -1394,15 +1397,6 @@ typedef enum
               // by setting eType to ET_EVENTS + eventNum
               // this avoids having to set eFlags and eventNum
 } entityType_t;
-
-#define  FREEMEMCOOKIE     ((int)0xDEADBE3F)  // Any unlikely to be used value
-#define  RECYCLEDMEMCOOKIE ((int)0xB3EFDEED)  // Any other unlikely to be used value
-
-void  *BG_Alloc( int size );
-void  BG_InitMemory( void );
-void  BG_Free( void *ptr );
-void  BG_DefragmentMemory( void );
-void  BG_MemoryInfo( void );
 
 void  BG_EvaluateTrajectory( const trajectory_t *tr, int atTime, vec3_t result );
 void  BG_EvaluateTrajectoryDelta( const trajectory_t *tr, int atTime, vec3_t result );
