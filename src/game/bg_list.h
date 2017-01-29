@@ -22,6 +22,9 @@
  * GLib at ftp://ftp.gtk.org/pub/gtk/.
  */
 
+ #ifndef __BG_LIST_H__
+ #define __BG_LIST_H__
+
 typedef struct bglist_s bglist_t;
 
 struct bglist_s
@@ -55,51 +58,61 @@ typedef void *(*BG_CopyFunc) ( const void *src, void *data );
 
 /* Doubly linked lists
  */
-void         BG_InitListMemory( char *calledFile, int calledLine );
-void         BG_MemoryInfoForLinkedLists( void );
-bglist_t*    bg_list_alloc( void );
-void         bg_list_free( bglist_t *list );
-void         bg_list_free_1( bglist_t *list );
-#define      bg_list_free1    bg_list_free_1
-void         bg_list_free_full( bglist_t *list, BG_DestroyNotify free_func );
-bglist_t*    bg_list_append( bglist_t *list, void *data );
-bglist_t*    bg_list_prepend( bglist_t *list, void *data );
-bglist_t*    bg_list_insert( bglist_t *list, void *data, int position );
-bglist_t*    bg_list_insert_sorted( bglist_t *list, void *data,
+void         BG_List_Init_Memory( char *calledFile, int calledLine );
+void         BG_List_Memory_Info( void );
+bglist_t*    BG_List_Alloc( void );
+void         BG_List_Free( bglist_t *list );
+void         BG_List_Free_1( bglist_t *list );
+#define      BG_List_Free1    BG_List_Free_1
+void         BG_List_Free_Full( bglist_t *list,
+                                BG_DestroyNotify free_func );
+
+bglist_t*    BG_List_Append( bglist_t *list, void *data );
+bglist_t*    BG_List_prepend( bglist_t *list, void *data );
+bglist_t*    BG_List_Insert( bglist_t *list, void *data, int position );
+bglist_t*    BG_List_Insert_Sorted( bglist_t *list, void *data,
                                     BG_CompareFunc func );
-bglist_t*    bg_list_insert_sorted_with_data( bglist_t *list, void *data,
+bglist_t*    BG_List_Insert_Sorted_With_Data( bglist_t *list, void *data,
 					                                    BG_CompareDataFunc  func,
 					                                    void *user_data );
-bglist_t*    bg_list_insert_before( bglist_t *list, bglist_t *sibling,
+bglist_t*    BG_List_Insert_Before( bglist_t *list, bglist_t *sibling,
                                     void *data );
-bglist_t*    bg_list_concat( bglist_t *list1, bglist_t *list2 );
-bglist_t*    bg_list_remove( bglist_t *list, const void *data );
-bglist_t*    bg_list_remove_all( bglist_t *list, const void *data );
-bglist_t*    bg_list_remove_link( bglist_t *list, bglist_t *llink );
-bglist_t*    bg_list_delete_link( bglist_t *list, bglist_t *link_ );
-bglist_t*    bg_list_reverse( bglist_t *list );
-bglist_t*    bg_list_copy( bglist_t *list );
 
-bglist_t*    bg_list_copy_deep( bglist_t *list, BG_CopyFunc func,
+bglist_t*    BG_List_Concat( bglist_t *list1, bglist_t *list2 );
+bglist_t*    BG_List_Remove( bglist_t *list, const void *data );
+bglist_t*    BG_List_Remove_All( bglist_t *list, const void *data );
+bglist_t*    BG_List_Remove_Link( bglist_t *list, bglist_t *llink );
+bglist_t*    BG_List_Delete_Link( bglist_t *list, bglist_t *link_ );
+
+bglist_t*    BG_List_Reverse( bglist_t *list );
+bglist_t*    BG_List_Copy( bglist_t *list );
+bglist_t*    BG_List_Copy_Deep( bglist_t *list, BG_CopyFunc func,
                                 void *user_data );
 
-bglist_t*    bg_list_nth( bglist_t *list, unsigned int n );
-bglist_t*    bg_list_nth_prev ( bglist_t *list, unsigned int n );
-bglist_t*    bg_list_find( bglist_t *list, const void *data );
-bglist_t*    bg_list_find_custom( bglist_t *list, const void *data,
+bglist_t*    BG_List_nth( bglist_t *list, unsigned int n );
+bglist_t*    BG_List_nth_Prev ( bglist_t *list, unsigned int n );
+bglist_t*    BG_List_Find( bglist_t *list, const void *data );
+bglist_t*    BG_List_Find_Custom( bglist_t *list, const void *data,
 					                        BG_CompareFunc func );
-int          bg_list_position( bglist_t *list, bglist_t *llink );
-int          bg_list_index( bglist_t *list, const void *data );
-bglist_t*    bg_list_last( bglist_t *list );
-bglist_t*    bg_list_first( bglist_t *list );
-unsigned int bg_list_length( bglist_t *list );
-void         bg_list_foreach( bglist_t *list, BG_Func func, void *user_data );
-bglist_t*    bg_list_sort( bglist_t *list, BG_CompareFunc      compare_func );
-bglist_t*    bg_list_sort_with_data( bglist_t *list,
-					                          BG_CompareDataFunc compare_func,
-					                          void *user_data ) ;
-void         *bg_list_nth_data( bglist_t *list, unsigned int n );
+int          BG_List_Position( bglist_t *list, bglist_t *llink );
+int          BG_List_Index( bglist_t *list, const void *data );
+bglist_t*    BG_List_Last( bglist_t *list );
+bglist_t*    BG_List_First( bglist_t *list );
+
+unsigned int BG_List_Length( bglist_t *list );
+
+void         BG_List_Foreach( bglist_t *list, BG_Func func,
+                              void *user_data );
+
+bglist_t*    BG_List_Sort( bglist_t *list, BG_CompareFunc compare_func );
+bglist_t*    BG_List_Sort_With_Data( bglist_t *list,
+					                           BG_CompareDataFunc compare_func,
+					                           void *user_data ) ;
+
+void         *BG_List_nth_Data( bglist_t *list, unsigned int n );
 
 
-#define g_list_previous(list)	((list) ? (((bglist_t *)(list))->prev) : NULL)
-#define g_list_next(list)	    ((list) ? (((bglist_t *)(list))->next) : NULL)
+#define BG_List_Previous(list) ((list) ? (((bglist_t *)(list))->prev) : NULL)
+#define BG_List_Next(list)	   ((list) ? (((bglist_t *)(list))->next) : NULL)
+
+#endif /* __BG_LIST_H__ */

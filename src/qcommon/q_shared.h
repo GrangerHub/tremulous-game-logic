@@ -98,6 +98,26 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #else
 #define Q_EXPORT
 #endif
+/*
+========================
+Com_Assert
+
+Used primarily for debugging the game, bgame, cgame, and ui modules.  Behaves
+similarly to asser(). To turn off Com_Assert, #define NOCOMASSERT.
+========================
+*/
+//#ifndef NOCOMASSERT
+//#define NOCOMASSERT
+//#endif
+#ifdef NOCOMASSERT
+  #define Com_Assert(ignore)((void) 0)
+#else
+  #define Com_Assert( expr ) \
+    if( !( expr ) ){ \
+      Com_Error( ERR_DROP, "%s:%d: Assertion `%s' failed", \
+                 __FILE__, __LINE__, #expr ); \
+    }
+#endif
 
 /**********************************************************************
   VM Considerations
