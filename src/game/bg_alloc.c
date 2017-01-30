@@ -360,7 +360,8 @@ void  _BG_InitMemory( char *calledFile, int calledLine )
   BG_StackPoolReset( );
 
   // Init the memory for custom allocators
-  BG_InitListMemory( calledFile, calledLine );
+  BG_List_Init_Memory( calledFile, calledLine );
+  BG_Queue_Init_Memory( calledFile, calledLine );
 }
 
 /*
@@ -446,7 +447,8 @@ void BG_MemoryInfo( void )
   Com_Printf( "^3Custom Allocators^7\n"  );
   Com_Printf( "^5=================^7\n" );
 
-  BG_MemoryInfoForLinkedLists( );
+  BG_List_Memory_Info( );
+  BG_Queue_Memory_Info( );
 }
 
 /*

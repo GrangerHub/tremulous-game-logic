@@ -29,6 +29,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // linked lists
 #include "bg_list.h"
 
+// queues
+#include "bg_queue.h"
+
 // BGAME Dynamic Memory Allocation
 #include "bg_alloc.h"
 
