@@ -449,3 +449,68 @@ void SP_misc_light_flare( gentity_t *self )
 
   trap_LinkEntity( self );
 }
+
+/*
+===============
+G_PackEntityNumbers
+
+Pack entity numbers into an entityState_t.
+Used for sending zap effects to clients.
+===============
+*/
+void G_PackEntityNumbers( entityState_t *es, int creatorNum,
+                           bgqueue_t *targetQueue )
+{
+  bglist_t *targetZapLink = BG_Queue_Peek_Head_Link( targetQueue );
+  int      i;
+  int      count = BG_Queue_Get_Length( targetQueue ) + 1;
+
+  if( count > MAX_NUM_PACKED_ENTITY_NUMS )
+  {
+    count = MAX_NUM_PACKED_ENTITY_NUMS;
+    Com_Printf( S_COLOR_YELLOW "WARNING: A maximum of %d entity numbers can be "
+      "packed, but BG_PackEntityNumbers was passed %d entities",
+      MAX_NUM_PACKED_ENTITY_NUMS, count );
+  }
+
+  es->misc = es->time = es->time2 = es->constantLight = 0;
+
+  if( creatorNum & ~GENTITYNUM_MASK )
+  {
+    Com_Error( ERR_FATAL, "BG_PackEntityNumbers passed a creator entity number (%d) "
+      "which exceeds %d bits", creatorNum, GENTITYNUM_BITS );
+  }
+  es->misc |= creatorNum;
+  for( i = 1; i < MAX_NUM_PACKED_ENTITY_NUMS; i++ )
+  {
+    int entityNum;
+
+    if( i < count )
+    {
+      entityNum = ((zapTarget_t *)targetZapLink->data)->targetEnt->s.number;
+      targetZapLink = targetZapLink->next;
+    }
+    else
+      entityNum = ENTITYNUM_NONE;
+
+    if( entityNum & ~GENTITYNUM_MASK )
+    {
+      Com_Error( ERR_FATAL, "BG_PackEntityNumbers passed an entity number (%d) which "
+        "exceeds %d bits", entityNum, GENTITYNUM_BITS );
+    }
+
+    switch( i )
+    {
+      case 1: es->time |= entityNum;                                       break;
+      case 2: es->time |= entityNum << GENTITYNUM_BITS;                    break;
+      case 3: es->time |= entityNum << (GENTITYNUM_BITS * 2);              break;
+      case 4: es->time2 |= entityNum;                                      break;
+      case 5: es->time2 |= entityNum << GENTITYNUM_BITS;                   break;
+      case 6: es->time2 |= entityNum << (GENTITYNUM_BITS * 2);             break;
+      case 7: es->constantLight |= entityNum;                              break;
+      case 8: es->constantLight |= entityNum << GENTITYNUM_BITS;           break;
+      case 9: es->constantLight |= entityNum << (GENTITYNUM_BITS * 2);     break;
+      default: Com_Error( ERR_FATAL, "Entity index %d not handled", i );   break;
+    }
+  }
+}

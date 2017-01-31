@@ -351,6 +351,8 @@ struct gentity_s
 
   int               buildPointZone;                 // index for zone
   int               usesBuildPointZone;             // does it use a zone?
+
+  bglist_t          *zapLink;  // For ET_LEV2_ZAP_CHAIN
 };
 
 typedef enum
@@ -1157,23 +1159,27 @@ void TeleportPlayer( gentity_t *player, vec3_t origin, vec3_t angles, float spee
 //
 // g_weapon.c
 //
+typedef struct zapTarget_s
+{
+  gentity_t *targetEnt;
+  float     distance;
+} zapTarget_t;
 
 typedef struct zap_s
 {
-  qboolean      used;
-
+  bglist_t      *zapLink;
   gentity_t     *creator;
-  gentity_t     *targets[ LEVEL2_AREAZAP_MAX_TARGETS ];
-  int           numTargets;
-  float         distances[ LEVEL2_AREAZAP_MAX_TARGETS ];
+  bgqueue_t     targetQueue;
 
   int           timeToLive;
 
   gentity_t     *effectChannel;
 } zap_t;
 
-#define MAX_ZAPS MAX_CLIENTS
-extern zap_t zaps[ MAX_ZAPS ];
+extern bglist_t *lev2ZapList;
+
+void      G_PackEntityNumbers( entityState_t *es, int creatorNum,
+                               bgqueue_t *targetQueue );
 
 void      Blow_up( gentity_t *ent );
 void      G_ForceWeaponChange( gentity_t *ent, weapon_t weapon );
@@ -1186,6 +1192,8 @@ qboolean  CheckPounceAttack( gentity_t *ent );
 void      CheckCkitRepair( gentity_t *ent );
 void      G_ChargeAttack( gentity_t *ent, gentity_t *victim );
 void      G_CrushAttack( gentity_t *ent, gentity_t *victim );
+void      G_DeleteZapData( void *data );
+bglist_t  *G_FindZapLinkFromEffectChannel( const gentity_t *effectChannel );
 void      G_UpdateZaps( int msec );
 void      G_ClearPlayerZapEffects( gentity_t *player );
 

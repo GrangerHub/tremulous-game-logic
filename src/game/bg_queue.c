@@ -177,7 +177,8 @@ void BG_Queue_Init( bgqueue_t *queue )
  * @queue: a #bgqueue_t
  *
  * Removes all the elements in @queue. If queue elements contain
- * dynamically-allocated memory, they should be freed first.
+ * dynamically-allocated memory, they should be freed first, or use 
+ * BG_Queue_Clear_Full().
  *
  * Since: 2.14
  */
@@ -186,6 +187,23 @@ void BG_Queue_Clear( bgqueue_t *queue )
   Com_Assert( queue != NULL );
 
   BG_List_Free( queue->head );
+  BG_Queue_Init( queue );
+}
+
+/**
+ * BG_Queue_Free_Full:
+ * @queue: a pointer to a #bgqueue_t
+ * @free_func: the function to be called to free each element's data
+ *
+ * Removes all the elements in @queue, and calls the specified destroy
+ * function on every element's data.
+ *
+ */
+void BG_Queue_Clear_Full( bgqueue_t *queue, BG_DestroyNotify free_func )
+{
+  Com_Assert( queue != NULL );
+
+  BG_List_Free_Full( queue->head, free_func );
   BG_Queue_Init( queue );
 }
 
@@ -365,7 +383,7 @@ void BG_Queue_Push_Head( bgqueue_t *queue, void *data )
 {
   Com_Assert( queue != NULL );
 
-  queue->head = BG_List_prepend( queue->head, data );
+  queue->head = BG_List_Prepend( queue->head, data );
   if( !queue->tail )
     queue->tail = queue->head;
   queue->length++;

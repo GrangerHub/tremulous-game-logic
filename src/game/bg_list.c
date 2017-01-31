@@ -61,7 +61,7 @@
  * a valid, empty list so you simply set a #bglist_t* to %NULL to initialize
  * it.
  *
- * To add elements, use BG_List_Append(), BG_List_prepend(),
+ * To add elements, use BG_List_Append(), BG_List_Prepend(),
  * BG_List_Insert() and BG_List_Insert_Sorted().
  *
  * To visit all elements in the list, use a loop over the list:
@@ -202,7 +202,7 @@ void BG_List_Memory_Info( void )
  * BG_List_Alloc:
  *
  * Allocates space for one #bglist_t element. It is called by
- * BG_List_Append(), BG_List_prepend(), BG_List_Insert() and
+ * BG_List_Append(), BG_List_Prepend(), BG_List_Insert() and
  * BG_List_Insert_Sorted() and so is rarely used on its own.
  *
  * Returns: a pointer to the newly-allocated #bglist_t element
@@ -266,8 +266,15 @@ void BG_List_Free_1( bglist_t *list )
  */
 void BG_List_Free_Full( bglist_t *list, BG_DestroyNotify  free_func )
 {
-  BG_List_Foreach( list, (BG_Func) free_func, NULL );
-  BG_List_Free( list );
+  bglist_t *tmp;
+
+  while( list )
+  {
+    tmp = list->next;
+    free_func( list->data );
+    free_bglist( list, __FILE__, __LINE__ );
+    list = tmp;
+  }
 }
 
 /**
@@ -282,7 +289,7 @@ void BG_List_Free_Full( bglist_t *list, BG_DestroyNotify  free_func )
  *
  * BG_List_Append() has to traverse the entire list to find the end,
  * which is inefficient when adding multiple elements. A common idiom
- * to avoid the inefficiency is to use BG_List_prepend() and reverse
+ * to avoid the inefficiency is to use BG_List_Prepend() and reverse
  * the list with BG_List_Reverse() when all elements have been added.
  *
  * |[<!-- language="C" -->
@@ -326,7 +333,7 @@ bglist_t *BG_List_Append( bglist_t *list, void *data )
 }
 
 /**
- * BG_List_prepend:
+ * BG_List_Prepend:
  * @list: a pointer to a #bglist_t, this must point to the top of the list
  * @data: the data for the new element
  *
@@ -339,8 +346,8 @@ bglist_t *BG_List_Append( bglist_t *list, void *data )
  * // Notice that it is initialized to the empty list.
  * bglist_t *list = NULL;
  *
- * list = BG_List_prepend( list, "last" );
- * list = BG_List_prepend( list, "first" );
+ * list = BG_List_Prepend( list, "last" );
+ * list = BG_List_Prepend( list, "first" );
  * ]|
  *
  * Do not use this function to prepend a new element to a different
@@ -349,7 +356,7 @@ bglist_t *BG_List_Append( bglist_t *list, void *data )
  * Returns: a pointer to the newly prepended element, which is the new
  *     start of the #bglist_t
  */
-bglist_t *BG_List_prepend( bglist_t *list, void *data )
+bglist_t *BG_List_Prepend( bglist_t *list, void *data )
 {
   bglist_t *new_list;
 
@@ -390,7 +397,7 @@ bglist_t *BG_List_Insert( bglist_t *list, void *data, int position )
   if(position < 0)
     return BG_List_Append( list, data );
   else if( position == 0 )
-    return BG_List_prepend( list, data );
+    return BG_List_Prepend( list, data );
 
   tmp_list = BG_List_nth( list, position );
   if( !tmp_list )
@@ -853,7 +860,7 @@ bglist_t *BG_List_Find( bglist_t *list, const void *data )
  * Returns: the found #bglist_t element, or %NULL if it is not found
  */
 bglist_t *BG_List_Find_Custom( bglist_t *list, const void *data,
-                                BG_CompareFunc func )
+                               BG_CompareFunc func )
 {
   assert( func != NULL );
 
@@ -1078,7 +1085,7 @@ static bglist_t *BG_List_Insert_Sorted_real( bglist_t *list, void *data,
  *
  * If you are adding many new elements to a list, and the number of
  * new elements is much larger than the length of the list, use
- * BG_List_prepend() to add the new items and sort the list afterwards
+ * BG_List_Prepend() to add the new items and sort the list afterwards
  * with BG_List_Sort().
  *
  * Returns: the (possibly changed) start of the #bglist_t
@@ -1104,7 +1111,7 @@ bglist_t *BG_List_Insert_Sorted( bglist_t *list, void * data,
  *
  * If you are adding many new elements to a list, and the number of
  * new elements is much larger than the length of the list, use
- * BG_List_prepend() to add the new items and sort the list afterwards
+ * BG_List_Prepend() to add the new items and sort the list afterwards
  * with BG_List_Sort().
  *
  * Returns: the (possibly changed) start of the #bglist_t
