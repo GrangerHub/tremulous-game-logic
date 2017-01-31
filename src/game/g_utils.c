@@ -516,6 +516,14 @@ void G_RemoveEntity( gentity_t *ent )
 {
   gentity_t *e;
 
+  // Address occupation
+  if( ent->flags & FL_OCCUPIED )
+    G_UnoccupyEnt( ent, ent->occupation.occupant, NULL, qtrue );
+
+  if( ( ent->client && ( ent->client->ps.eFlags & EF_OCCUPYING ) ) ||
+      ( !ent->client && ( ent->s.eFlags & EF_OCCUPYING ) ) )
+    G_UnoccupyEnt( ent->occupation.occupied, ent, NULL, qtrue );
+
   if( ent->client )
   {
     // removing a player causes the player to "unspawn"
@@ -546,7 +554,7 @@ void G_RemoveEntity( gentity_t *ent )
     // the range marker (if any) goes away with the buildable
     G_RemoveRangeMarkerFrom( ent );
   }
-  else if( !strcmp( ent->classname, "lev2zapchain" ) )
+  else if( ent->s.eType == ET_LEV2_ZAP_CHAIN )
   {
     zap_t *z;
     for( z = &zaps[ 0 ]; z < &zaps[ MAX_ZAPS ]; ++z )
