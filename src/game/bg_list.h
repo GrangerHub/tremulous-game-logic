@@ -40,7 +40,7 @@ struct bglist_s
  typedef int  (*BG_CompareDataFunc) ( const void *a, const void *b,
                                       void *user_data );
  typedef void (*BG_DestroyNotify) ( void *data );
- typedef void (*BG_Func) ( void *data, void *user_data);
+ typedef void (*BG_Func) ( void *data, void *user_data );
  
  /**
  * BG_CopyFunc:
@@ -68,7 +68,7 @@ void         BG_List_Free_Full( bglist_t *list,
                                 BG_DestroyNotify free_func );
 
 bglist_t*    BG_List_Append( bglist_t *list, void *data );
-bglist_t*    BG_List_prepend( bglist_t *list, void *data );
+bglist_t*    BG_List_Prepend( bglist_t *list, void *data );
 bglist_t*    BG_List_Insert( bglist_t *list, void *data, int position );
 bglist_t*    BG_List_Insert_Sorted( bglist_t *list, void *data,
                                     BG_CompareFunc func );

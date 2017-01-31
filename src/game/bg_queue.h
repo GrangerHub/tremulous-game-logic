@@ -72,7 +72,8 @@ void        BG_Queue_Free( bgqueue_t *queue );
 void        BG_Queue_Free_Full( bgqueue_t *queue, BG_DestroyNotify free_func );
 
 void        BG_Queue_Init( bgqueue_t *queue );
-void        BG_Queue_Clear( bgqueue_t *queue) ;
+void        BG_Queue_Clear( bgqueue_t *queue ) ;
+void        BG_Queue_Clear_Full( bgqueue_t *queue, BG_DestroyNotify free_func );
 
 qboolean    BG_Queue_Is_Empty( bgqueue_t *queue );
 size_t      BG_Queue_Get_Length( bgqueue_t *queue );
@@ -102,8 +103,8 @@ void        *BG_Queue_Peek_nth( bgqueue_t *queue, size_t n );
 
 int         BG_Queue_Index( bgqueue_t *queue, const void *data );
 
-qboolean    BG_Queue_Remove(bgqueue_t *queue, const void *data );
-size_t      BG_Queue_Remove_All(bgqueue_t *queue, const void *data );
+qboolean    BG_Queue_Remove( bgqueue_t *queue, const void *data );
+size_t      BG_Queue_Remove_All( bgqueue_t *queue, const void *data );
 
 void        BG_Queue_Insert_Before( bgqueue_t *queue, bglist_t *sibling,
                                    void *data );

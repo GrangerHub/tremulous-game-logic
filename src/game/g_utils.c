@@ -556,15 +556,11 @@ void G_RemoveEntity( gentity_t *ent )
   }
   else if( ent->s.eType == ET_LEV2_ZAP_CHAIN )
   {
-    zap_t *z;
-    for( z = &zaps[ 0 ]; z < &zaps[ MAX_ZAPS ]; ++z )
+    if( ent->zapLink &&
+        ((zap_t *)(ent->zapLink->data))->effectChannel == ent )
     {
-      if( z->used && z->effectChannel == ent )
-      {
-        // free the zap slot occupied by this zap effect
-        z->used = qfalse;
-        break;
-      }
+      G_DeleteZapData( ent->zapLink->data );                                    
+      lev2ZapList = BG_List_Delete_Link( lev2ZapList, ent->zapLink );
     }
   }
   else if( ent->s.eType == ET_MOVER )

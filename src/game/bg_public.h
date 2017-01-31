@@ -1286,7 +1286,7 @@ int       BG_PlayerPoisonCloudTime( playerState_t *ps );
 weapon_t  BG_GetPlayerWeapon( playerState_t *ps );
 qboolean  BG_HasEnergyWeapon( playerState_t *ps );
 
-void      BG_PackEntityNumbers( entityState_t *es, const int *entityNums, int count );
+#define MAX_NUM_PACKED_ENTITY_NUMS 10
 int       BG_UnpackEntityNumbers( entityState_t *es, int *entityNums, int count );
 
 const buildableAttributes_t *BG_BuildableByName( const char *name );
