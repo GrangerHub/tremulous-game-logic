@@ -422,6 +422,27 @@ void  _BG_Free( void *ptr, char *calledFile, int calledLine )
 }
 
 /*
+--------------------------------------------------------------------------------
+Function wrappers that are used only for passing as arguments via a function
+pointers, otherwise use the corresponding macro wrappers as using these function
+wrappers will result in loss of debuggin infomration.
+*/
+void  *BG_AllocPassed( size_t size )
+{
+  return _BG_Alloc( size, __FILE__, __LINE__ );
+}
+void  *BG_Alloc0Passed( size_t size )
+{
+  return _BG_Alloc0( size, __FILE__, __LINE__ );
+}
+void  BG_FreePassed( void *ptr )
+{
+  _BG_Free( ptr, __FILE__, __LINE__ );
+}
+/*
+--------------------------------------------------------------------------------
+*/
+/*
 ======================
 BG_MemoryInfo
 
