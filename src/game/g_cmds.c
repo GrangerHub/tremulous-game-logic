@@ -2206,6 +2206,15 @@ void Cmd_Class_f( gentity_t *ent )
           else if( ent->client->pers.evolveHealthFraction > 1.0f )
             ent->client->pers.evolveHealthFraction = 1.0f;
 
+          ent->client->pers.evolveChargeStaminaFraction = 
+                          (float)ent->client->ps.stats[ STAT_STAMINA ] /
+                          (float)BG_Class( currentClass )->chargeStaminaMax;
+
+          if( ent->client->pers.evolveChargeStaminaFraction < 0.0f )
+            ent->client->pers.evolveChargeStaminaFraction = 0.0f;
+          else if( ent->client->pers.evolveChargeStaminaFraction > 1.0f )
+            ent->client->pers.evolveChargeStaminaFraction = 1.0f;
+
           //remove credit
           G_AddCreditToClient( ent->client, -cost, qtrue );
           ent->client->pers.classSelection = newClass;

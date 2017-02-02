@@ -671,66 +671,84 @@ void ClientTimerActions( gentity_t *ent, int msec )
     client->time100 -= 100;
 
     // Restore or subtract stamina
-    if( stopped || client->ps.pm_type == PM_JETPACK )
-      client->ps.stats[ STAT_STAMINA ] += STAMINA_STOP_RESTORE;
-    else if( ( client->ps.stats[ STAT_STATE ] & SS_SPEEDBOOST )  &&
-               g_humanStaminaMode.integer &&
-             !( client->buttons & BUTTON_WALKING ) ) // walk overrides sprint
-      client->ps.stats[ STAT_STAMINA ] -= STAMINA_SPRINT_TAKE;
-    else if( walking || crouched )
-      client->ps.stats[ STAT_STAMINA ] += STAMINA_WALK_RESTORE;
-    else
-      client->ps.stats[ STAT_STAMINA ] += STAMINA_RUN_RESTORE;
-      
-    // Check stamina limits
-    if( client->ps.stats[ STAT_STAMINA ] > STAMINA_MAX )
+    if( BG_ClassHasAbility( client->ps.stats[STAT_CLASS], SCA_STAMINA ) )
     {
-      client->medKitStaminaToRestore = 0;
-      client->nextMedKitRestoreStaminaTime = -1;
-      client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
-    }
-    else
-    {
-      int      staminaDifference;
+      if( stopped || client->ps.pm_type == PM_JETPACK )
+        client->ps.stats[ STAT_STAMINA ] += STAMINA_STOP_RESTORE;
+      else if( ( client->ps.stats[ STAT_STATE ] & SS_SPEEDBOOST )  &&
+                 g_humanStaminaMode.integer &&
+               !( client->buttons & BUTTON_WALKING ) ) // walk overrides sprint
+        client->ps.stats[ STAT_STAMINA ] -= STAMINA_SPRINT_TAKE;
+      else if( walking || crouched )
+        client->ps.stats[ STAT_STAMINA ] += STAMINA_WALK_RESTORE;
+      else
+        client->ps.stats[ STAT_STAMINA ] += STAMINA_RUN_RESTORE;
 
-      if( client->ps.stats[ STAT_STAMINA ] < -STAMINA_MAX )
-        client->ps.stats[ STAT_STAMINA ] = -STAMINA_MAX;
+      // Check stamina limits
+      if( client->ps.stats[ STAT_STAMINA ] > STAMINA_MAX )
+      {
+        client->medKitStaminaToRestore = 0;
+        client->nextMedKitRestoreStaminaTime = -1;
+        client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
+      }
+      else
+      {
+        int      staminaDifference;
 
-        //  restore stamina from medkit
-        staminaDifference = STAMINA_MAX - client->ps.stats[ STAT_STAMINA ];
+        if( client->ps.stats[ STAT_STAMINA ] < -STAMINA_MAX )
+          client->ps.stats[ STAT_STAMINA ] = -STAMINA_MAX;
 
-        if( client->medKitStaminaToRestore &&
-            client->nextMedKitRestoreStaminaTime < level.time ) 
-        {
-          if( client->medKitStaminaToRestore > STAMINA_MEDISTAT_RESTORE )
+          //  restore stamina from medkit
+          staminaDifference = STAMINA_MAX - client->ps.stats[ STAT_STAMINA ];
+
+          if( client->medKitStaminaToRestore &&
+              client->nextMedKitRestoreStaminaTime < level.time ) 
           {
-            if( staminaDifference > STAMINA_MEDISTAT_RESTORE )
+            if( client->medKitStaminaToRestore > STAMINA_MEDISTAT_RESTORE )
             {
-              client->ps.stats[ STAT_STAMINA ] += STAMINA_MEDISTAT_RESTORE;
-              client->medKitStaminaToRestore -= STAMINA_MEDISTAT_RESTORE;
-              if( client->medKitStaminaToRestore > 0 )
-                client->nextMedKitRestoreStaminaTime = level.time + MEDISTAT_REPEAT;
-              else
+              if( staminaDifference > STAMINA_MEDISTAT_RESTORE )
+              {
+                client->ps.stats[ STAT_STAMINA ] += STAMINA_MEDISTAT_RESTORE;
+                client->medKitStaminaToRestore -= STAMINA_MEDISTAT_RESTORE;
+                if( client->medKitStaminaToRestore > 0 )
+                  client->nextMedKitRestoreStaminaTime = level.time + MEDISTAT_REPEAT;
+                else
+                  client->medKitStaminaToRestore = 0;
+              } else
+              {
                 client->medKitStaminaToRestore = 0;
+                client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
+              }
+            } else if( client->medKitStaminaToRestore > 0 )
+            {
+              if( staminaDifference > client->medKitStaminaToRestore )
+              {
+                client->ps.stats[ STAT_STAMINA ] += client->medKitStaminaToRestore;
+                client->medKitStaminaToRestore = 0;
+              } else
+              {
+                client->medKitStaminaToRestore = 0;
+                client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
+              }
             } else
-            {
               client->medKitStaminaToRestore = 0;
-              client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
-            }
-          } else if( client->medKitStaminaToRestore > 0 )
-          {
-            if( staminaDifference > client->medKitStaminaToRestore )
-            {
-              client->ps.stats[ STAT_STAMINA ] += client->medKitStaminaToRestore;
-              client->medKitStaminaToRestore = 0;
-            } else
-            {
-              client->medKitStaminaToRestore = 0;
-              client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
-            }
-          } else
-            client->medKitStaminaToRestore = 0;
-        }
+          }
+      }
+    } else if( BG_ClassHasAbility( client->ps.stats[STAT_CLASS],
+                                   SCA_CHARGE_STAMINA ) )
+    {
+      if( client->ps.stats[ STAT_STAMINA ] < 0 )
+        client->ps.stats[ STAT_STAMINA ] = 0;
+
+      if( client->ps.stats[ STAT_STAMINA ] <
+                    BG_Class( client->ps.stats[STAT_CLASS] )->chargeStaminaMax )
+        client->ps.stats[ STAT_STAMINA ] += 
+                 BG_Class( client->ps.stats[STAT_CLASS] )->chargeStaminaRestore;
+
+      if(  client->ps.stats[ STAT_STAMINA ] >
+                    BG_Class( client->ps.stats[STAT_CLASS] )->chargeStaminaMax )
+        client->ps.stats[ STAT_STAMINA ] =
+                     BG_Class( client->ps.stats[STAT_CLASS] )->chargeStaminaMax;
     }
 
     if( weapon == WP_ABUILD || weapon == WP_ABUILD2 ||

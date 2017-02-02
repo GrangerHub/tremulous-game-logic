@@ -253,7 +253,7 @@ typedef enum
   STAT_CLASS,     // player class (for aliens AND humans)
   STAT_TEAM,      // player team
   STAT_READY,     // player ready state
-  STAT_STAMINA,   // stamina (human only)
+  STAT_STAMINA,   // stamina for SCA_STAMINA or SCA_CHARGE_STAMINA
   STAT_STATE,     // client states e.g. wall climbing
   STAT_MISC,      // for uh...misc stuff (pounce, trample, lcannon)
   STAT_BUILDABLE, // which ghost model to display for building
@@ -272,6 +272,8 @@ typedef enum
 #define SCA_WALLJUMPER          0x00000040
 #define SCA_STAMINA             0x00000080
 #define SCA_REGEN               0x00000100 // XXX kinda wasted- keeps alien class on human team from never dieing when team admits defeat.
+#define SCA_CANHOVEL            0x00000200
+#define SCA_CHARGE_STAMINA      0x00000400 // limits STAT_MISC use. can't be used with SCA_STAMINA
 
 #define SS_WALLCLIMBING         0x00000001
 #define SS_CREEPSLOWED          0x00000002
@@ -1086,6 +1088,9 @@ typedef struct
   float     stopSpeed;
   float     jumpMagnitude;
   float     knockbackScale;
+
+  int       chargeStaminaMax;
+  int       chargeStaminaRestore;
 
   int       children[ 3 ];
   int       cost;

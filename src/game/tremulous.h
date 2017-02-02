@@ -657,6 +657,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define BUNNY_HOP_DELAY             300  // minimum miliseconds delay between bunny hops
 
+#define CHARGE_STAMINA_MAX          10000
+#define CHARGE_STAMINA_RESTORE      15
+
 #define DEFAULT_FREEKILL_PERIOD     "120" //seconds
 #define FREEKILL_ALIEN              ALIEN_CREDITS_PER_KILL
 #define FREEKILL_HUMAN              LEVEL0_VALUE

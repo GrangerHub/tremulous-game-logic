@@ -1163,6 +1163,8 @@ typedef struct
   
   float         chargeMeterAlpha;
   float         chargeMeterValue;
+  float         chargeStaminaMeterAlpha;
+  float         chargeStaminaMeterValue;
   qhandle_t     lastHealthCross;
   float         healthCrossFade;
   int           nearUsableBuildable;
