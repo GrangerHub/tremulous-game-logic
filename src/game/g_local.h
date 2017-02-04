@@ -81,6 +81,15 @@ typedef enum
   MODEL_2TO1
 } moverState_t;
 
+/*
+--------------------------------------------------------------------------------
+*/
+
+typedef struct{
+  unsigned int id;
+  gentity_t   *ptr;
+} gentity_id;
+
 //============================================================================
 
 struct gentity_s
@@ -91,6 +100,8 @@ struct gentity_s
   // DO NOT MODIFY ANYTHING ABOVE THIS, THE SERVER
   // EXPECTS THE FIELDS IN THAT ORDER!
   //================================
+
+  int               id; // Set on spawn and cleared on free, disconnect, or death.
 
   struct gclient_s  *client;        // NULL if not a client
 
@@ -1092,6 +1103,10 @@ void        G_CloseMenus( int clientNum );
 
 qboolean    G_Visible( gentity_t *ent1, gentity_t *ent2, int contents );
 gentity_t   *G_ClosestEnt( vec3_t origin, gentity_t **entities, int numEntities );
+
+void        G_Entity_id_init(gentity_t *ptr);
+void        G_Entity_id_set(gentity_id *id,gentity_t *target);
+gentity_t   *G_Entity_id_get(gentity_id *id);
 
 //
 // g_combat.c

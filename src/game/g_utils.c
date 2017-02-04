@@ -424,6 +424,7 @@ gentity_t *G_Spawn( void )
 
       // reuse this slot
       G_InitGentity( e );
+      G_Entity_id_init( e );
       return e;
     }
 
@@ -447,6 +448,7 @@ gentity_t *G_Spawn( void )
     &level.clients[ 0 ].ps, sizeof( level.clients[ 0 ] ) );
 
   G_InitGentity( e );
+  G_Entity_id_init( e );
   return e;
 }
 
@@ -1206,4 +1208,28 @@ qboolean G_AddressCompare( const addr_t *a, const addr_t *b )
     return ( a->addr[ i ] & netmask ) == ( b->addr[ i ] & netmask );
   }
   return qtrue;
+}
+
+void G_Entity_id_init(gentity_t *ptr){
+  static unsigned int inc_id = 1;
+  Com_Assert(ptr);
+  ptr->id = inc_id++;
+}
+
+void G_Entity_id_set(gentity_id *id,gentity_t *target){
+  Com_Assert(id);
+  Com_Assert(target);
+  id->id = target->id;
+  id->ptr = target;
+}
+
+gentity_t *G_Entity_id_get(gentity_id *id){
+  assert(id);
+  if(id->ptr == NULL){
+    return NULL;
+  }
+  if(id->id != id->ptr->id){
+    id->ptr = NULL;
+  }
+  return id->ptr;
 }

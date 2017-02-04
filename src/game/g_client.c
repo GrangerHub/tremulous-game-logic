@@ -1391,6 +1391,9 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
 
   //Com_Printf( "ent->client->pers->pclass = %i\n", ent->client->pers.classSelection );
 
+  if( spawn && ent != spawn )
+    G_Entity_id_init(ent);
+
   ent->s.groundEntityNum = ENTITYNUM_NONE;
   ent->client = &level.clients[ index ];
   ent->takedamage = qtrue;
@@ -1673,6 +1676,7 @@ void ClientDisconnect( int clientNum )
   }
 
   trap_UnlinkEntity( ent );
+  ent->id = 0;
   ent->inuse = qfalse;
   ent->classname = "disconnected";
   ent->client->pers.connected = CON_DISCONNECTED;
