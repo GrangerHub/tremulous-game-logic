@@ -319,7 +319,7 @@ bglist_t *BG_List_Append( bglist_t *list, void *data )
   if(list)
     {
       last = BG_List_Last( list );
-      /* g_assert( last != NULL ); */
+      /* Com_Assert( last != NULL ); */
       last->next = new_list;
       new_list->prev = last;
 
