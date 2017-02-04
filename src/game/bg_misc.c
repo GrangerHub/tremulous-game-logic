@@ -1171,6 +1171,8 @@ static const classAttributes_t bg_classList[ ] =
     100.0f,                                         //float   stopSpeed;
     270.0f,                                         //float   jumpMagnitude;
     1.0f,                                           //float   knockbackScale;
+    CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
+    CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_NONE, PCL_NONE, PCL_NONE },               //int     children[ 3 ];
     0,                                              //int     cost;
     0,                                              //int     value;
@@ -1200,6 +1202,8 @@ static const classAttributes_t bg_classList[ ] =
     100.0f,                                         //float   stopSpeed;
     195.0f,                                         //float   jumpMagnitude;
     1.0f,                                           //float   knockbackScale;
+    CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
+    CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_ALIEN_BUILDER0_UPG, PCL_ALIEN_LEVEL0, PCL_NONE }, //int  children[ 3 ];
     ABUILDER_COST,                                  //int     cost;
     ABUILDER_VALUE,                                 //int     value;
@@ -1230,6 +1234,8 @@ static const classAttributes_t bg_classList[ ] =
     100.0f,                                         //float   stopSpeed;
     270.0f,                                         //float   jumpMagnitude;
     1.0f,                                           //float   knockbackScale;
+    CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
+    CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_ALIEN_LEVEL0, PCL_NONE, PCL_NONE },       //int     children[ 3 ];
     ABUILDER_UPG_COST,                              //int     cost;
     ABUILDER_UPG_VALUE,                             //int     value;
@@ -1259,6 +1265,8 @@ static const classAttributes_t bg_classList[ ] =
     400.0f,                                         //float   stopSpeed;
     250.0f,                                         //float   jumpMagnitude;
     2.0f,                                           //float   knockbackScale;
+    CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
+    CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_ALIEN_LEVEL1, PCL_NONE, PCL_NONE },       //int     children[ 3 ];
     LEVEL0_COST,                                    //int     cost;
     LEVEL0_VALUE,                                   //int     value;
@@ -1290,6 +1298,8 @@ static const classAttributes_t bg_classList[ ] =
     300.0f,                                         //float   stopSpeed;
     310.0f,                                         //float   jumpMagnitude;
     1.2f,                                           //float   knockbackScale;
+    CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
+    CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_ALIEN_LEVEL2, PCL_ALIEN_LEVEL1_UPG, PCL_NONE }, //int  children[ 3 ];
     LEVEL1_COST,                                    //int     cost;
     LEVEL1_VALUE,                                   //int     value;
@@ -1321,6 +1331,8 @@ static const classAttributes_t bg_classList[ ] =
     300.0f,                                         //float   stopSpeed;
     310.0f,                                         //float   jumpMagnitude;
     1.1f,                                           //float   knockbackScale;
+    CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
+    CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_ALIEN_LEVEL2, PCL_NONE, PCL_NONE },       //int     children[ 3 ];
     LEVEL1_UPG_COST,                                //int     cost;
     LEVEL1_UPG_VALUE,                               //int     value;
@@ -1350,6 +1362,8 @@ static const classAttributes_t bg_classList[ ] =
     100.0f,                                         //float   stopSpeed;
     380.0f,                                         //float   jumpMagnitude;
     0.8f,                                           //float   knockbackScale;
+    CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
+    CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_ALIEN_LEVEL3, PCL_ALIEN_LEVEL2_UPG, PCL_NONE }, //int  children[ 3 ];
     LEVEL2_COST,                                    //int     cost;
     LEVEL2_VALUE,                                   //int     value;
@@ -1378,7 +1392,9 @@ static const classAttributes_t bg_classList[ ] =
     6.0f,                                           //float   friction;
     100.0f,                                         //float   stopSpeed;
     380.0f,                                         //float   jumpMagnitude;
-    0.7f,                                           //float   knockbackScale;
+    0.7f,                                           //float   knockbackScale
+    CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
+    CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_ALIEN_LEVEL3, PCL_NONE, PCL_NONE },       //int     children[ 3 ];
     LEVEL2_UPG_COST,                                //int     cost;
     LEVEL2_UPG_VALUE,                               //int     value;
@@ -1409,6 +1425,8 @@ static const classAttributes_t bg_classList[ ] =
     200.0f,                                         //float   stopSpeed;
     270.0f,                                         //float   jumpMagnitude;
     0.5f,                                           //float   knockbackScale;
+    CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
+    CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_ALIEN_LEVEL4, PCL_ALIEN_LEVEL3_UPG, PCL_NONE }, //int  children[ 3 ];
     LEVEL3_COST,                                    //int     cost;
     LEVEL3_VALUE,                                   //int     value;
@@ -1439,6 +1457,8 @@ static const classAttributes_t bg_classList[ ] =
     200.0f,                                         //float   stopSpeed;
     270.0f,                                         //float   jumpMagnitude;
     0.4f,                                           //float   knockbackScale;
+    CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
+    CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_ALIEN_LEVEL4, PCL_NONE, PCL_NONE },       //int     children[ 3 ];
     LEVEL3_UPG_COST,                                //int     cost;
     LEVEL3_UPG_VALUE,                               //int     value;
@@ -1470,6 +1490,8 @@ static const classAttributes_t bg_classList[ ] =
     100.0f,                                         //float   stopSpeed;
     170.0f,                                         //float   jumpMagnitude;
     0.1f,                                           //float   knockbackScale;
+    CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
+    CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_NONE, PCL_NONE, PCL_NONE },               //int     children[ 3 ];
     LEVEL4_COST,                                    //int     cost;
     LEVEL4_VALUE,                                   //int     value;
@@ -1498,6 +1520,8 @@ static const classAttributes_t bg_classList[ ] =
     100.0f,                                         //float   stopSpeed;
     220.0f,                                         //float   jumpMagnitude;
     1.0f,                                           //float   knockbackScale;
+    CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
+    CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_NONE, PCL_NONE, PCL_NONE },               //int     children[ 3 ];
     0,                                              //int     cost;
     ALIEN_CREDITS_PER_KILL,                         //int     value;
@@ -1526,6 +1550,8 @@ static const classAttributes_t bg_classList[ ] =
     100.0f,                                         //float   stopSpeed;
     220.0f,                                         //float   jumpMagnitude;
     1.0f,                                           //float   knockbackScale;
+    CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
+    CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_NONE, PCL_NONE, PCL_NONE },               //int     children[ 3 ];
     0,                                              //int     cost;
     ALIEN_CREDITS_PER_KILL,                         //int     value;

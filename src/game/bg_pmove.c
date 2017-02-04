@@ -3036,9 +3036,28 @@ static void PM_Weapon( void )
   if( pm->ps->weapon == WP_ALEVEL3 || pm->ps->weapon == WP_ALEVEL3_UPG )
   {
     int max;
-    
-    max = pm->ps->weapon == WP_ALEVEL3 ? LEVEL3_POUNCE_TIME :
-                                         LEVEL3_POUNCE_TIME_UPG;
+
+    switch( pm->ps->weapon )
+    {
+      case WP_ALEVEL3:
+        max = LEVEL3_POUNCE_TIME;
+        break;
+
+      case WP_ALEVEL3_UPG:
+        max = LEVEL3_POUNCE_TIME_UPG;
+        break;
+
+      default:
+        max = LEVEL3_POUNCE_TIME_UPG;
+        break;
+    }
+
+    if( BG_ClassHasAbility( pm->ps->stats[STAT_CLASS], SCA_CHARGE_STAMINA ) )
+    {
+      if( max > pm->ps->stats[STAT_STAMINA] )
+        max = pm->ps->stats[STAT_STAMINA];
+    }
+
     if( pm->cmd.buttons & BUTTON_ATTACK2 )
       pm->ps->stats[ STAT_MISC ] += pml.msec;
     else

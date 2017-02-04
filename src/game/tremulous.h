@@ -729,6 +729,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define DOUBLE_JUMP_MAX_TIME        400  // maximum miliseconds after a jump that
                                          // a higher "double jump" can be made
 
+#define CHARGE_STAMINA_MAX          10000
+#define CHARGE_STAMINA_RESTORE      15
+
 #define DEFAULT_FREEKILL_PERIOD     "120" //seconds
 #define FREEKILL_ALIEN              ALIEN_CREDITS_PER_KILL
 #define FREEKILL_HUMAN              LEVEL0_VALUE

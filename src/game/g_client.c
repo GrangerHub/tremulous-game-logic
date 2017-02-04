@@ -1485,7 +1485,18 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   for( i = 0; i < MAX_CLIENTS; i++ )
     ent->credits[ i ] = 0;
 
-  client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
+  if( BG_ClassHasAbility( client->ps.stats[STAT_CLASS], SCA_STAMINA ) )
+    client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
+  else
+  {
+    client->ps.stats[ STAT_STAMINA ] =
+                     BG_Class( client->ps.stats[STAT_CLASS] )->chargeStaminaMax;
+
+    // if evolving scale charge stamina
+    if( ent == spawn )
+      client->ps.stats[ STAT_STAMINA ] *=
+                                  ent->client->pers.evolveChargeStaminaFraction;
+  }
 
   G_SetOrigin( ent, spawn_origin );
   VectorCopy( spawn_origin, client->ps.origin );
