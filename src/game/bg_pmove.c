@@ -45,7 +45,7 @@ float pm_flyaccelerate = 4.0f;
 float pm_friction = 6.0f;
 float pm_waterfriction = 1.0f;
 float pm_flightfriction = 6.0f;
-float pm_spitfire_flyfriction = 2.5f;
+float pm_spitfire_flyfriction = 3.5f;
 float pm_spitfire_flywalkfriction = 8.0f;
 float pm_spectatorfriction = 5.0f;
 
@@ -896,6 +896,9 @@ static qboolean PM_CheckJump( void )
   if( BG_Class( pm->ps->stats[ STAT_CLASS ] )->jumpMagnitude == 0.0f )
     return qfalse;
 
+  if( pm->ps->weapon == WP_ASPITFIRE && pm->ps->weaponTime > 0 )
+    return qfalse;
+
   //can't jump and pounce at the same time
   if( ( pm->ps->weapon == WP_ALEVEL3 ||
         pm->ps->weapon == WP_ALEVEL3_UPG ) &&
@@ -1007,6 +1010,9 @@ static qboolean PM_CheckJump( void )
   pm->ps->pm_flags |= PMF_JUMPING;
 
   pm->ps->groundEntityNum = ENTITYNUM_NONE;
+
+  if( pm->ps->weapon == WP_ASPITFIRE )
+    pm->ps->weaponTime += SPITFIRE_ASCEND_REPEAT;
 
   // jump away from wall
   BG_GetClientNormal( pm->ps, normal );
@@ -1372,9 +1378,13 @@ static void PM_SpitfireFlyMove( void )
   float    wishspeed;
   vec3_t   wishdir;
   float    scale;
-  qboolean isGliding;
-  qboolean basicFlight;
-  
+  qboolean isGliding = qfalse;
+  qboolean basicFlight = qfalse;
+  qboolean ascend = qfalse;
+
+  if( pm->ps->weapon != WP_ASPITFIRE )
+    return;
+
   if( PM_CheckAirPounce( ) )
   {
     pm->ps->torsoTimer = 1200;
@@ -1391,35 +1401,26 @@ static void PM_SpitfireFlyMove( void )
                                              SPITFIRE_PAYLOAD_DISCHARGE_TIME ) )
   {
     basicFlight = qtrue;
-    // for gliding
+
     if( pm->cmd.upmove > 0 )
     {
       pm->cmd.upmove = 0;
-      if( ( pm->ps->commandTime > pm->pmext->pouncePayloadTime +
-            SPITFIRE_PAYLOAD_DISCHARGE_TIME ) &&
-          pm->ps->stats[ STAT_MISC ] <= 0 &&
-          !( pm->cmd.buttons & BUTTON_WALKING ) )
+      if( pm->ps->weaponTime <= 0 )
       {
-        isGliding = qtrue;
-        // flight drift
-        if( pm->cmd.forwardmove < SPITFIRE_FLIGHT_DRIFT )
-          pm->cmd.forwardmove = SPITFIRE_FLIGHT_DRIFT;
-      }else
-      {
-        isGliding = qfalse;
-        pm->pmext->spitfireGlideSpeedMod = 0;
+        ascend = qtrue;
+        pm->ps->weaponTime += SPITFIRE_ASCEND_REPEAT;
       }
-    } else
-    {
-      isGliding = qfalse;
-      pm->pmext->spitfireGlideSpeedMod = 0;
     }
-  } else
-  {
-    isGliding = qfalse;
-    pm->pmext->spitfireGlideSpeedMod = 0;
-    basicFlight = qfalse;
+
+    // for gliding
+    if( pm->cmd.forwardmove > 0  && pml.forward[ 2 ] < 0 &&
+        pm->ps->stats[ STAT_MISC ] <= 0 &&
+        !( pm->cmd.buttons & BUTTON_WALKING ) && !ascend )
+      isGliding = qtrue;
   }
+
+  if( !isGliding )
+    pm->pmext->spitfireGlideSpeedMod = 0;
 
   scale = PM_CmdScale( &pm->cmd, qtrue );
 
@@ -1467,8 +1468,8 @@ static void PM_SpitfireFlyMove( void )
       wishvel[ 2 ] = 0;
     
     // gradually descend
-    if ( !( pm->cmd.buttons & BUTTON_WALKING ) )
-      wishvel[ 2 ] -= (scale ? 1 : 2) * SPITFIRE_GLIDE_DESCENT_RATE;
+    if ( !( pm->cmd.buttons & BUTTON_WALKING ) && !ascend )
+      wishvel[ 2 ] -= (scale ? 1 : 4) * SPITFIRE_GLIDE_DESCENT_RATE;
   }
 
   VectorCopy( wishvel, wishdir );
@@ -1483,13 +1484,35 @@ static void PM_SpitfireFlyMove( void )
   PM_Accelerate( wishdir, wishspeed,
                  BG_Class( pm->ps->stats[ STAT_CLASS ] )->airAcceleration  );
   PM_StepSlideMove( qfalse, qfalse );
-  
-  if( pm->ps->weapon == WP_ASPITFIRE ) {
+
+  if( ascend )
+  {
+    // ascend
+    VectorMA( pm->ps->velocity, ( scale ? 1.0f : 1.5f ) * SPITFIRE_ASCEND_MAG,
+              pml.up, pm->ps->velocity );
+
+    PM_AddEvent( EV_JUMP );
+
+    if( pm->cmd.forwardmove >= 0 )
+    {
+      if( !( pm->ps->persistant[ PERS_STATE ] & PS_NONSEGMODEL ) )
+        PM_ForceLegsAnim( LEGS_LAND );
+      else
+        PM_ForceLegsAnim( NSPA_LAND );
+
+      pm->ps->pm_flags &= ~PMF_BACKWARDS_JUMP;
+    }
+    else
+    {
+      if( !( pm->ps->persistant[ PERS_STATE ] & PS_NONSEGMODEL ) )
+        PM_ForceLegsAnim( LEGS_LANDB );
+      else
+        PM_ForceLegsAnim( NSPA_LANDBACK );
+
+      pm->ps->pm_flags |= PMF_BACKWARDS_JUMP;
+    }
+  } else
     PM_ContinueLegsAnim( NSPA_SWIM );
-  } else if( !( pm->ps->persistant[ PERS_STATE ] & PS_NONSEGMODEL ) )
-    PM_ContinueLegsAnim( LEGS_LAND );
-  else
-    PM_ContinueLegsAnim( NSPA_LAND );
 }
 
 /*
@@ -1786,11 +1809,13 @@ static void PM_WalkMove( void )
     return;
   }
 
-  if( PM_CheckJump( ) || PM_CheckPounce( ) )
+  if( PM_CheckJump( ) || PM_CheckPounce( ) || PM_CheckAirPounce( ) )
   {
     // jumped away
     if( pm->waterlevel > 1 )
       PM_WaterMove( );
+    else if( pm->ps->weapon == WP_ASPITFIRE )
+      PM_SpitfireFlyMove( );
     else
       PM_AirMove( );
 
@@ -4394,8 +4419,6 @@ void PmoveSingle( pmove_t *pmove )
     PM_WaterJumpMove( );
   else if( pm->waterlevel > 1 )
     PM_WaterMove( );
-  else if( pm->ps->pm_type == PM_SPITFIRE_FLY )
-    PM_SpitfireFlyMove( );
   else if( pml.ladder )
     PM_LadderMove( );
   else if( pml.walking )
@@ -4406,6 +4429,8 @@ void PmoveSingle( pmove_t *pmove )
     else
       PM_WalkMove( ); // walking on ground
   }
+  else if( pm->ps->pm_type == PM_SPITFIRE_FLY )
+    PM_SpitfireFlyMove( );
   else
     PM_AirMove( );
 
