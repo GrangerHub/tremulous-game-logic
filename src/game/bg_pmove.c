@@ -46,7 +46,7 @@ float pm_friction = 6.0f;
 float pm_waterfriction = 1.0f;
 float pm_flightfriction = 6.0f;
 float pm_spitfire_flyfriction = 3.5f;
-float pm_spitfire_flywalkfriction = 8.0f;
+float pm_spitfire_flywalkfriction = 6.0f;
 float pm_spectatorfriction = 5.0f;
 
 float pm_airControlAmount = 165.0f; //Equivalence to side strafes value is approx ~165
@@ -270,7 +270,7 @@ static void PM_Friction( void )
 
   speed = VectorLength( vec );
 
-  if( pm->ps->pm_type == PM_SPITFIRE_FLY && speed < 11 &&
+  if( pm->ps->pm_type == PM_SPITFIRE_FLY && speed < 16 &&
       ( pm->cmd.buttons & BUTTON_WALKING ) &&
       !(pm->cmd.forwardmove) && !(pm->cmd.rightmove) && !(pm->cmd.upmove) )
   {
@@ -896,9 +896,6 @@ static qboolean PM_CheckJump( void )
   if( BG_Class( pm->ps->stats[ STAT_CLASS ] )->jumpMagnitude == 0.0f )
     return qfalse;
 
-  if( pm->ps->weapon == WP_ASPITFIRE && pm->ps->weaponTime > 0 )
-    return qfalse;
-
   //can't jump and pounce at the same time
   if( ( pm->ps->weapon == WP_ALEVEL3 ||
         pm->ps->weapon == WP_ALEVEL3_UPG ) &&
@@ -1010,9 +1007,6 @@ static qboolean PM_CheckJump( void )
   pm->ps->pm_flags |= PMF_JUMPING;
 
   pm->ps->groundEntityNum = ENTITYNUM_NONE;
-
-  if( pm->ps->weapon == WP_ASPITFIRE )
-    pm->ps->weaponTime += SPITFIRE_ASCEND_REPEAT;
 
   // jump away from wall
   BG_GetClientNormal( pm->ps, normal );
@@ -1378,8 +1372,8 @@ static void PM_SpitfireFlyMove( void )
   float    wishspeed;
   vec3_t   wishdir;
   float    scale;
-  qboolean isGliding = qfalse;
-  qboolean basicFlight = qfalse;
+  qboolean isgliding = qfalse;
+  qboolean basicflight = qfalse;
   qboolean ascend = qfalse;
 
   if( pm->ps->weapon != WP_ASPITFIRE )
@@ -1393,36 +1387,31 @@ static void PM_SpitfireFlyMove( void )
   
   PM_CheckJump( );
 
-  //normal slowdown
-  PM_Friction( );
-
   if( pm->ps->groundEntityNum == ENTITYNUM_NONE &&
       ( pm->ps->commandTime > pm->pmext->pouncePayloadTime +
                                              SPITFIRE_PAYLOAD_DISCHARGE_TIME ) )
   {
-    basicFlight = qtrue;
+    basicflight = qtrue;
 
     if( pm->cmd.upmove > 0 )
     {
       pm->cmd.upmove = 0;
-      if( pm->ps->weaponTime <= 0 )
+      if( pm->ps->persistant[PERS_JUMPTIME] > SPITFIRE_ASCEND_REPEAT )
       {
         ascend = qtrue;
-        pm->ps->weaponTime += SPITFIRE_ASCEND_REPEAT;
+        pm->ps->persistant[PERS_JUMPTIME] = 0;
       }
     }
 
-    // for gliding
-    if( pm->cmd.forwardmove > 0  && pml.forward[ 2 ] < 0 &&
-        pm->ps->stats[ STAT_MISC ] <= 0 &&
-        !( pm->cmd.buttons & BUTTON_WALKING ) && !ascend )
-      isGliding = qtrue;
+    //gliding
+    if( !( pm->cmd.buttons & BUTTON_WALKING ) &&
+        pm->ps->persistant[PERS_JUMPTIME] > SPITFIRE_ASCEND_REPEAT )
+      isgliding = qtrue;
   }
 
-  if( !isGliding )
-    pm->pmext->spitfireGlideSpeedMod = 0;
-
   scale = PM_CmdScale( &pm->cmd, qtrue );
+
+  scale *= scale * SPITFIRE_AIRSPEED_MOD; //for faster airspeed
 
   if( !scale )
   {
@@ -1441,55 +1430,58 @@ static void PM_SpitfireFlyMove( void )
     for( i = 0; i < 3; i++ )
       wishvel[ i ] = scale * pml.forward[ i ] * pm->cmd.forwardmove;
 
-  // apply glide speed modification
-  if ( isGliding )
-  {
-    vec3_t glideSpeedModDir;
-
-    pm->pmext->spitfireGlideSpeedMod += SPITFIRE_GLIDE_ACCELERATION * pml.frametime;
-    if( pm->pmext->spitfireGlideSpeedMod > SPITFIRE_GLIDE_MAX_SPEED_MOD )
-      pm->pmext->spitfireGlideSpeedMod = SPITFIRE_GLIDE_MAX_SPEED_MOD;
-    VectorScale( pml.forward,
-                 pm->pmext->spitfireGlideSpeedMod,
-                 glideSpeedModDir );
-
-    if( glideSpeedModDir[ 2 ] > 0 )
-      glideSpeedModDir[ 2 ] = 0;
-
-    pm->pmext->spitfireGlideSpeedMod = VectorNormalize( glideSpeedModDir );
-    VectorMA( wishvel, pm->pmext->spitfireGlideSpeedMod * pm->ps->speed,
-              glideSpeedModDir, wishvel );
-  }
-
-  if( basicFlight )
+  if( basicflight )
   {
     // restrict ascent
     if( wishvel[ 2 ] > 0 )
       wishvel[ 2 ] = 0;
-    
-    // gradually descend
-    if ( !( pm->cmd.buttons & BUTTON_WALKING ) && !ascend )
-      wishvel[ 2 ] -= (scale ? 1 : 4) * SPITFIRE_GLIDE_DESCENT_RATE;
+  }
+
+  if( isgliding )
+  {
+    float  pathspeed = VectorLength( pm->ps->velocity);
+
+    //apply gravity
+    pm->ps->velocity[ 2 ] -= pm->ps->gravity * pml.frametime;
+
+    if( pathspeed )
+    {
+      vec3_t  pathdir, pathup, pathang;
+      float  liftmod = pm->ps->gravity / pow( ( SPITFIRE_MAX_FLIGHT_SPEED ), 2 );
+      float  dragmod = liftmod / tan( DEG2RAD( SPITFIRE_GLIDE_ANGLE ) );
+      float  dragmag = dragmod * pow( pathspeed, 2 );
+      float  liftmag = liftmod * pow( pathspeed, 2 );
+
+      vectoangles( pm->ps->velocity, pathang );
+      AngleVectors( pathang, pathdir, NULL, pathup );
+      //apply drag
+      VectorMA( pm->ps->velocity, -( dragmag * pml.frametime ), pathdir,
+                pm->ps->velocity );
+
+      //apply lift
+      VectorMA( pm->ps->velocity, liftmag * pml.frametime, pathup,
+                  pm->ps->velocity );
+    }
+  } else
+  {
+    //normal slowdown
+    PM_Friction( );
   }
 
   VectorCopy( wishvel, wishdir );
   wishspeed = VectorNormalize( wishdir );
-  if( scale || !basicFlight )
-    wishspeed *= scale;
-
-
-  // apply any additional glide speed
-  wishspeed += pm->ps->speed * pm->pmext->spitfireGlideSpeedMod;
 
   PM_Accelerate( wishdir, wishspeed,
                  BG_Class( pm->ps->stats[ STAT_CLASS ] )->airAcceleration  );
-  PM_StepSlideMove( qfalse, qfalse );
 
   if( ascend )
   {
-    // ascend
-    VectorMA( pm->ps->velocity, ( scale ? 1.0f : 1.5f ) * SPITFIRE_ASCEND_MAG,
-              pml.up, pm->ps->velocity );
+    //stop any decent
+    if( pm->ps->velocity[2] < 0 )
+      pm->ps->velocity[2] = 0;
+
+    //ascend
+    VectorMA( pm->ps->velocity, SPITFIRE_ASCEND_MAG, pml.up, pm->ps->velocity );
 
     PM_AddEvent( EV_JUMP );
 
@@ -1513,6 +1505,8 @@ static void PM_SpitfireFlyMove( void )
     }
   } else
     PM_ContinueLegsAnim( NSPA_SWIM );
+
+  PM_StepSlideMove( qfalse, qfalse );
 }
 
 /*

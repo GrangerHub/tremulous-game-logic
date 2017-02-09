@@ -146,24 +146,24 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define SPITFIRE_ZAP_RANGE              300.0f
 #define SPITFIRE_ZAP_DMG                ADM(10)
 #define SPITFIRE_ZAP_TIME               150
-#define SPITFIRE_ASCEND_REPEAT          750
-#define SPITFIRE_ASCEND_MAG             500.0f
+#define SPITFIRE_ASCEND_REPEAT          400
+#define SPITFIRE_ASCEND_MAG             400.0f
 #define SPITFIRE_POUNCE_JUMP_MAG        2250
 #define SPITFIRE_POUNCE_REPEAT          250
 #define SPITFIRE_POUNCE_TIME            1200
 #define SPITFIRE_POUNCE_TIME_MIN        250 
-#define SPITFIRE_POUNCE_DMG             40
+#define SPITFIRE_POUNCE_DMG             60
 #define SPITFIRE_POUNCE_RANGE           48.0f
 #define SPITFIRE_POUNCE_WIDTH           14.0f
 #define SPITFIRE_POUNCE_SPEED_MOD       0.95f
 #define SPITFIRE_PAYLOAD_DISCHARGE_TIME ( SPITFIRE_POUNCE_TIME + SPITFIRE_POUNCE_REPEAT )
-#define SPITFIRE_BACK_MODIFIER          0.8f
-#define SPITFIRE_SIDE_MODIFIER          0.9f
-#define SPITFIRE_GLIDE_DESCENT_RATE     10
-#define SPITFIRE_GLIDE_ACCELERATION     0.1f
-#define SPITFIRE_GLIDE_MAX_SPEED_MOD    1.25f
 #define SPITFIRE_POUNCE_MAX_STAMINA     ( SPITFIRE_POUNCE_TIME * 10 )
 #define SPITFIRE_POUNCE_STAMINA_RESTORE 15
+#define SPITFIRE_BACK_MODIFIER          0.8f
+#define SPITFIRE_SIDE_MODIFIER          0.9f
+#define SPITFIRE_AIRSPEED_MOD           0.6f
+#define SPITFIRE_GLIDE_ANGLE            15.0f //optimal angle of attack
+#define SPITFIRE_MAX_FLIGHT_SPEED       1500
 
 /*
  * ALIEN classes
@@ -245,7 +245,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL4_REGEN                (0.025f * LEVEL4_HEALTH)
 #define LEVEL4_COST                 2
 
-#define SPITFIRE_SPEED                1.0f
+#define SPITFIRE_SPEED                1.3f
 #define SPITFIRE_VALUE                AVM(960)
 #define SPITFIRE_HEALTH               AHM(140)
 #define SPITFIRE_REGEN                (0.03f * SPITFIRE_HEALTH)
