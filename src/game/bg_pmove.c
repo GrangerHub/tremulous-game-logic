@@ -1405,10 +1405,12 @@ static void PM_SpitfireFlyMove( void )
     if( pm->cmd.upmove > 0 )
     {
       pm->cmd.upmove = 0;
-      if( pm->ps->weaponTime <= 0 )
+      if( pm->ps->weaponTime <= 0 &&
+          pm->ps->velocity[2] < 5 * SPITFIRE_ASCEND_MAG )
       {
         ascend = qtrue;
         pm->ps->weaponTime += SPITFIRE_ASCEND_REPEAT;
+        pm->ps->persistant[PERS_JUMPTIME] = 0;
       }
     }
 
@@ -1468,7 +1470,8 @@ static void PM_SpitfireFlyMove( void )
       wishvel[ 2 ] = 0;
     
     // gradually descend
-    if ( !( pm->cmd.buttons & BUTTON_WALKING ) && !ascend )
+    if ( !( pm->cmd.buttons & BUTTON_WALKING ) &&
+         pm->ps->persistant[PERS_JUMPTIME] > ( SPITFIRE_ASCEND_REPEAT - 50 ) )
       wishvel[ 2 ] -= (scale ? 1 : 4) * SPITFIRE_GLIDE_DESCENT_RATE;
   }
 
@@ -1488,8 +1491,9 @@ static void PM_SpitfireFlyMove( void )
   if( ascend )
   {
     // ascend
-    VectorMA( pm->ps->velocity, ( scale ? 1.0f : 1.5f ) * SPITFIRE_ASCEND_MAG,
-              pml.up, pm->ps->velocity );
+    if( pm->ps->velocity[2] < 0 )
+      pm->ps->velocity[2] = 0;
+    VectorMA( pm->ps->velocity, SPITFIRE_ASCEND_MAG, pml.up, pm->ps->velocity );
 
     PM_AddEvent( EV_JUMP );
 
