@@ -247,7 +247,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define SPITFIRE_SPEED                1.3f
 #define SPITFIRE_VALUE                AVM(960)
-#define SPITFIRE_HEALTH               AHM(140)
+#define SPITFIRE_HEALTH               AHM(125)
 #define SPITFIRE_REGEN                (0.03f * SPITFIRE_HEALTH)
 #define SPITFIRE_COST                 1
 
@@ -466,7 +466,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define GRENADE_SIZE                3.0f        // missile bounding box
 #define GRENADE_LIFETIME            5000
 
-#define SHOTGUN_PRICE               150
+#define SHOTGUN_PRICE               130
 #define SHOTGUN_SHELLS              8
 #define SHOTGUN_PELLETS             11 //used to sync server and client side
 #define SHOTGUN_MAXCLIPS            3
@@ -500,7 +500,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define CHAINGUN_SPREAD             1000
 #define CHAINGUN_DMG                HDM(6)
 
-#define FLAMER_PRICE                400
+#define FLAMER_PRICE                380
 #define FLAMER_GAS                  200
 #define FLAMER_REPEAT               200
 #define FLAMER_K_SCALE              2.0f
