@@ -890,15 +890,19 @@ typedef struct
 {
   vec3_t    alienBuildablePos[ MAX_GENTITIES ];
   int       alienBuildableTimes[ MAX_GENTITIES ];
+  centity_t *alienBuildable[ MAX_GENTITIES ];
   int       numAlienBuildables;
 
   vec3_t    humanBuildablePos[ MAX_GENTITIES ];
+  centity_t *humanBuildable[ MAX_GENTITIES ];
   int       numHumanBuildables;
 
   vec3_t    alienClientPos[ MAX_CLIENTS ];
+  centity_t *alienClient[ MAX_GENTITIES ];
   int       numAlienClients;
 
   vec3_t    humanClientPos[ MAX_CLIENTS ];
+  centity_t *humanClient[ MAX_GENTITIES ];
   int       numHumanClients;
 
   int       lastUpdateTime;
@@ -1815,6 +1819,7 @@ void        CG_ModelDoor( centity_t *cent );
 
 void        CG_BuildSolidList( void );
 int         CG_PointContents( const vec3_t point, int passEntityNum );
+qboolean    CG_Visible( centity_t *cent, int contents );
 void        CG_Trace( trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs,
                 const vec3_t end, int skipNumber, int mask );
 void        CG_CapTrace( trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs,

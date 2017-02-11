@@ -288,6 +288,23 @@ int   CG_PointContents( const vec3_t point, int passEntityNum )
   return contents;
 }
 
+/*
+===============
+CG_Visible
+
+Test for a LOS between the player and another entity
+===============
+*/
+qboolean CG_Visible( centity_t *cent, int contents )
+{
+  trace_t trace;
+
+  CG_Trace( &trace, cg.predictedPlayerEntity.currentState.pos.trBase, NULL,
+            NULL, cent->currentState.pos.trBase,
+            cg.predictedPlayerEntity.currentState.number, contents );
+
+  return trace.fraction >= 1.0f || trace.entityNum == cent - cg_entities;
+}
 
 /*
 ========================
