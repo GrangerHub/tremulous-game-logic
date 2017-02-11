@@ -46,7 +46,7 @@ float pm_friction = 6.0f;
 float pm_waterfriction = 1.0f;
 float pm_flightfriction = 6.0f;
 float pm_spitfire_flyfriction = 3.5f;
-float pm_spitfire_flywalkfriction = 6.0f;
+float pm_spitfire_flywalkfriction = 5.0f;
 float pm_spectatorfriction = 5.0f;
 
 float pm_airControlAmount = 165.0f; //Equivalence to side strafes value is approx ~165
@@ -270,7 +270,7 @@ static void PM_Friction( void )
 
   speed = VectorLength( vec );
 
-  if( pm->ps->pm_type == PM_SPITFIRE_FLY && speed < 16 &&
+  if( pm->ps->pm_type == PM_SPITFIRE_FLY && speed < 20 &&
       ( pm->cmd.buttons & BUTTON_WALKING ) &&
       !(pm->cmd.forwardmove) && !(pm->cmd.rightmove) && !(pm->cmd.upmove) )
   {
@@ -1447,7 +1447,7 @@ static void PM_SpitfireFlyMove( void )
     if( pathspeed )
     {
       vec3_t  pathdir, pathup, pathang;
-      float  liftmod = pm->ps->gravity / pow( ( SPITFIRE_MAX_FLIGHT_SPEED ), 2 );
+      float  liftmod = pm->ps->gravity / pow( ( SPITFIRE_GLIDE_MOD ), 2 );
       float  dragmod = liftmod / tan( DEG2RAD( SPITFIRE_GLIDE_ANGLE ) );
       float  dragmag = dragmod * pow( pathspeed, 2 );
       float  liftmag = liftmod * pow( pathspeed, 2 );

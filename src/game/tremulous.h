@@ -161,9 +161,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define SPITFIRE_POUNCE_STAMINA_RESTORE 15
 #define SPITFIRE_BACK_MODIFIER          0.8f
 #define SPITFIRE_SIDE_MODIFIER          0.9f
-#define SPITFIRE_AIRSPEED_MOD           0.6f
+#define SPITFIRE_AIRSPEED_MOD           0.45f
 #define SPITFIRE_GLIDE_ANGLE            15.0f //optimal angle of attack
-#define SPITFIRE_MAX_FLIGHT_SPEED       1500
+#define SPITFIRE_GLIDE_MOD              1000
 
 /*
  * ALIEN classes
