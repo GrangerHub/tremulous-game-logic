@@ -1476,10 +1476,6 @@ static void PM_SpitfireFlyMove( void )
 
   if( ascend )
   {
-    //stop any decent
-    if( pm->ps->velocity[2] < 0 )
-      pm->ps->velocity[2] = 0;
-
     //ascend
     VectorMA( pm->ps->velocity, SPITFIRE_ASCEND_MAG, pml.up, pm->ps->velocity );
 
