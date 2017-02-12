@@ -3895,7 +3895,8 @@ void G_BuildableThink( gentity_t *ent, int msec )
 
         for( i = 0; i < MAX_CLIENTS; i++ )
         {
-          if( g_entities[ i ].client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
+          if( g_entities[ i ].client &&
+              g_entities[ i ].client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
               ( Distance( g_entities[ i ].client->ps.origin,
                           ent->r.currentOrigin ) < ALIENSENSE_RANGE ) &&
               PM_Alive( g_entities[ i ].client->ps.pm_type ) &&
@@ -3911,7 +3912,8 @@ void G_BuildableThink( gentity_t *ent, int msec )
 
         for( i = 0; i < MAX_CLIENTS; i++ )
         {
-          if( g_entities[ i ].client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
+          if( g_entities[ i ].client &&
+              g_entities[ i ].client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
               ( Distance( g_entities[ i ].client->ps.origin,
                           ent->r.currentOrigin ) < HELMET_RANGE ) &&
               PM_Alive( g_entities[ i ].client->ps.pm_type ) &&
