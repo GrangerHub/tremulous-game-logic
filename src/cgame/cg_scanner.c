@@ -239,15 +239,13 @@ void CG_AlienSense( rectDef_t *rect )
   //draw alien buildables
   for( i = 0; i < entityPositions.numAlienBuildables; i++ )
   {
-    if( !CG_Visible( entityPositions.alienBuildable[ i ], MASK_DEADSOLID ) ||
-        entityPositions.alienBuildable[ i ]->currentState.modelindex == BA_A_OVERMIND )
-    {
-      VectorClear( relOrigin );
-      VectorSubtract( entityPositions.alienBuildablePos[ i ], origin, relOrigin );
+    VectorClear( relOrigin );
+    VectorSubtract( entityPositions.alienBuildablePos[ i ], origin, relOrigin );
 
-      if( VectorLength( relOrigin ) < ALIENSENSE_RANGE  )
-        CG_DrawDir( rect, relOrigin, aBuildable );
-    }
+    if( VectorLength( relOrigin ) < ALIENSENSE_RANGE &&
+        ( !CG_Visible( entityPositions.alienBuildable[ i ], MASK_DEADSOLID ) ||
+          entityPositions.alienBuildable[ i ]->currentState.modelindex == BA_A_OVERMIND ) )
+      CG_DrawDir( rect, relOrigin, aBuildable );
   }
 
   //draw alien clients
@@ -263,28 +261,26 @@ void CG_AlienSense( rectDef_t *rect )
   //draw human buildables
   for( i = 0; i < entityPositions.numHumanBuildables; i++ )
   {
-    if( CG_Visible( entityPositions.humanBuildable[ i ], MASK_DEADSOLID ) )
-    {
-      VectorClear( relOrigin );
-      VectorSubtract( entityPositions.humanBuildablePos[ i ], origin, relOrigin );
+    VectorClear( relOrigin );
+    VectorSubtract( entityPositions.humanBuildablePos[ i ], origin, relOrigin );
 
-      if( VectorLength( relOrigin ) < ALIENSENSE_RANGE )
-        CG_DrawDir( rect, relOrigin, hBuildable );
-    }
+    if( VectorLength( relOrigin ) < ALIENSENSE_RANGE &&
+        ( ( entityPositions.humanBuildable[ i ]->currentState.eFlags & EF_SCAN_SPOTTED ) ||
+           CG_Visible( entityPositions.humanBuildable[ i ], MASK_DEADSOLID ) ) )
+      CG_DrawDir( rect, relOrigin, hBuildable );
   }
 
-      //draw human clients
-      for( i = 0; i < entityPositions.numHumanClients; i++ )
-      {
-        if( CG_Visible( entityPositions.humanClient[ i ], MASK_DEADSOLID ) )
-        {
-          VectorClear( relOrigin );
-          VectorSubtract( entityPositions.humanClientPos[ i ], origin, relOrigin );
+  //draw human clients
+  for( i = 0; i < entityPositions.numHumanClients; i++ )
+  {
+    VectorClear( relOrigin );
+    VectorSubtract( entityPositions.humanClientPos[ i ], origin, relOrigin );
 
-          if( VectorLength( relOrigin ) < ALIENSENSE_RANGE )
-            CG_DrawDir( rect, relOrigin, hClient );
-        }
-      }
+    if( VectorLength( relOrigin ) < ALIENSENSE_RANGE &&
+        ( ( entityPositions.humanClient[ i ]->currentState.eFlags & EF_SCAN_SPOTTED ) ||
+           CG_Visible( entityPositions.humanClient[ i ], MASK_DEADSOLID ) ) )
+      CG_DrawDir( rect, relOrigin, hClient );
+  }
 }
 
 /*
@@ -311,15 +307,13 @@ void CG_Scanner( rectDef_t *rect, qhandle_t shader, vec4_t color )
   //draw human buildables below scanner plane
   for( i = 0; i < entityPositions.numHumanBuildables; i++ )
   {
-    if( !CG_Visible( entityPositions.humanBuildable[ i ], MASK_DEADSOLID ) ||
-        entityPositions.humanBuildable[ i ]->currentState.modelindex == BA_H_REACTOR )
-    {
-      VectorClear( relOrigin );
-      VectorSubtract( entityPositions.humanBuildablePos[ i ], origin, relOrigin );
+    VectorClear( relOrigin );
+    VectorSubtract( entityPositions.humanBuildablePos[ i ], origin, relOrigin );
 
-      if( VectorLength( relOrigin ) < HELMET_RANGE && ( relOrigin[ 2 ] < 0 ) )
-        CG_DrawBlips( rect, relOrigin, hIbelow );
-    }
+    if( VectorLength( relOrigin ) < HELMET_RANGE && ( relOrigin[ 2 ] < 0 ) &&
+        ( !CG_Visible( entityPositions.humanBuildable[ i ], MASK_DEADSOLID ) ||
+            entityPositions.humanBuildable[ i ]->currentState.modelindex == BA_H_REACTOR ) )
+      CG_DrawBlips( rect, relOrigin, hIbelow );
   }
 
   //draw human clients below scanner plane
@@ -335,27 +329,25 @@ void CG_Scanner( rectDef_t *rect, qhandle_t shader, vec4_t color )
   //draw alien buildables below scanner plane
   for( i = 0; i < entityPositions.numAlienBuildables; i++ )
   {
-    if( CG_Visible( entityPositions.alienBuildable[ i ], MASK_DEADSOLID ) )
-    {
-      VectorClear( relOrigin );
-      VectorSubtract( entityPositions.alienBuildablePos[ i ], origin, relOrigin );
+    VectorClear( relOrigin );
+    VectorSubtract( entityPositions.alienBuildablePos[ i ], origin, relOrigin );
 
-      if( VectorLength( relOrigin ) < HELMET_RANGE && ( relOrigin[ 2 ] < 0 ) )
-        CG_DrawBlips( rect, relOrigin, aIbelow );
-    }
+    if( VectorLength( relOrigin ) < HELMET_RANGE && ( relOrigin[ 2 ] < 0 ) &&
+        ( ( entityPositions.alienBuildable[ i ]->currentState.eFlags & EF_SCAN_SPOTTED ) ||
+           CG_Visible( entityPositions.alienBuildable[ i ], MASK_DEADSOLID ) ) )
+      CG_DrawBlips( rect, relOrigin, aIbelow );
   }
 
   //draw alien clients below scanner plane
   for( i = 0; i < entityPositions.numAlienClients; i++ )
   {
-    if( CG_Visible( entityPositions.alienClient[ i ], MASK_DEADSOLID ) )
-    {
-      VectorClear( relOrigin );
-      VectorSubtract( entityPositions.alienClientPos[ i ], origin, relOrigin );
+    VectorClear( relOrigin );
+    VectorSubtract( entityPositions.alienClientPos[ i ], origin, relOrigin );
 
-      if( VectorLength( relOrigin ) < HELMET_RANGE && ( relOrigin[ 2 ] < 0 ) )
-        CG_DrawBlips( rect, relOrigin, aIbelow );
-    }
+    if( VectorLength( relOrigin ) < HELMET_RANGE && ( relOrigin[ 2 ] < 0 ) &&
+        ( ( entityPositions.alienClient[ i ]->currentState.eFlags & EF_SCAN_SPOTTED ) ||
+           CG_Visible( entityPositions.alienClient[ i ], MASK_DEADSOLID ) ) )
+      CG_DrawBlips( rect, relOrigin, aIbelow );
   }
 
   if( !cg_disableScannerPlane.integer )
@@ -368,15 +360,13 @@ void CG_Scanner( rectDef_t *rect, qhandle_t shader, vec4_t color )
   //draw human buildables above scanner plane
   for( i = 0; i < entityPositions.numHumanBuildables; i++ )
   {
-    if( !CG_Visible( entityPositions.humanBuildable[ i ], MASK_DEADSOLID ) ||
-        entityPositions.humanBuildable[ i ]->currentState.modelindex == BA_H_REACTOR )
-    {
-      VectorClear( relOrigin );
-      VectorSubtract( entityPositions.humanBuildablePos[ i ], origin, relOrigin );
+    VectorClear( relOrigin );
+    VectorSubtract( entityPositions.humanBuildablePos[ i ], origin, relOrigin );
 
-      if( VectorLength( relOrigin ) < HELMET_RANGE && ( relOrigin[ 2 ] > 0 ) )
-        CG_DrawBlips( rect, relOrigin, hIabove );
-    }
+    if( VectorLength( relOrigin ) < HELMET_RANGE && ( relOrigin[ 2 ] > 0 ) &&
+        ( !CG_Visible( entityPositions.humanBuildable[ i ], MASK_DEADSOLID ) ||
+            entityPositions.humanBuildable[ i ]->currentState.modelindex == BA_H_REACTOR ) )
+      CG_DrawBlips( rect, relOrigin, hIabove );
   }
 
   //draw human clients above scanner plane
@@ -392,26 +382,24 @@ void CG_Scanner( rectDef_t *rect, qhandle_t shader, vec4_t color )
   //draw alien buildables above scanner plane
   for( i = 0; i < entityPositions.numAlienBuildables; i++ )
   {
-    if( CG_Visible( entityPositions.alienBuildable[ i ], MASK_DEADSOLID ) )
-    {
-      VectorClear( relOrigin );
-      VectorSubtract( entityPositions.alienBuildablePos[ i ], origin, relOrigin );
+    VectorClear( relOrigin );
+    VectorSubtract( entityPositions.alienBuildablePos[ i ], origin, relOrigin );
 
-      if( VectorLength( relOrigin ) < HELMET_RANGE && ( relOrigin[ 2 ] > 0 ) )
-        CG_DrawBlips( rect, relOrigin, aIabove );
-    }
+    if( VectorLength( relOrigin ) < HELMET_RANGE && ( relOrigin[ 2 ] > 0 ) &&
+        ( ( entityPositions.alienBuildable[ i ]->currentState.eFlags & EF_SCAN_SPOTTED ) ||
+           CG_Visible( entityPositions.alienBuildable[ i ], MASK_DEADSOLID ) ) )
+      CG_DrawBlips( rect, relOrigin, aIabove );
   }
 
   //draw alien clients above scanner plane
   for( i = 0; i < entityPositions.numAlienClients; i++ )
   {
-    if( CG_Visible( entityPositions.alienClient[ i ], MASK_DEADSOLID ) )
-    {
-      VectorClear( relOrigin );
-      VectorSubtract( entityPositions.alienClientPos[ i ], origin, relOrigin );
+    VectorClear( relOrigin );
+    VectorSubtract( entityPositions.alienClientPos[ i ], origin, relOrigin );
 
-      if( VectorLength( relOrigin ) < HELMET_RANGE && ( relOrigin[ 2 ] > 0 ) )
-        CG_DrawBlips( rect, relOrigin, aIabove );
-    }
+    if( VectorLength( relOrigin ) < HELMET_RANGE && ( relOrigin[ 2 ] > 0 ) &&
+        ( ( entityPositions.alienClient[ i ]->currentState.eFlags & EF_SCAN_SPOTTED ) ||
+           CG_Visible( entityPositions.alienClient[ i ], MASK_DEADSOLID ) ) )
+      CG_DrawBlips( rect, relOrigin, aIabove );
   }
 }

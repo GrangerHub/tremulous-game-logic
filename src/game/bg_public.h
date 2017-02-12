@@ -143,7 +143,7 @@ typedef enum
 #define PM_Paralyzed( x ) ( (x) == PM_DEAD || (x) == PM_FREEZE ||\
                             (x) == PM_INTERMISSION )
 #define PM_Alive( x )     ( (x) == PM_NORMAL || (x) == PM_JETPACK ||\
-                            (x) == PM_GRABBED )
+                            (x) == PM_GRABBED || (x) == PM_SPITFIRE_FLY )
 
 typedef enum
 {
@@ -338,6 +338,10 @@ typedef enum
 #define EF_DEAD             0x00001    // don't draw a foe marker over players with EF_DEAD
 #define EF_TELEPORT_BIT     0x00002    // toggled every time the origin abruptly changes
 #define EF_PLAYER_EVENT     0x00004    // only used for eType > ET_EVENTS
+
+#define EF_SCAN_SPOTTED     0x00004    // only used for buildables and players.
+                                       // indicates if such an entity was spotted
+                                       // by a teammate's scanner
 
 // for occupation entities
 #define EF_OCCUPYING        0x00010    // can result in bugs if applied to buildables

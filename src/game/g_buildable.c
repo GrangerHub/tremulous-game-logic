@@ -3837,6 +3837,8 @@ void G_BuildableThink( gentity_t *ent, int msec )
 
     ent->time1000 -= 1000;
 
+    ent->s.eFlags &= ~EF_SCAN_SPOTTED;
+
     if( !ent->spawned && ent->buildProgress >= 0 )
     {
         ent->buildProgress -= 1000.0f /
@@ -3884,6 +3886,41 @@ void G_BuildableThink( gentity_t *ent, int msec )
         ent->health = maxHealth;
         for( i = 0; i < MAX_CLIENTS; i++ )
           ent->credits[ i ] = 0;
+      }
+
+      // check if a buildable was spotted by an enemy player
+      if( ent->buildableTeam == TEAM_HUMANS )
+      {
+        int i;
+
+        for( i = 0; i < MAX_CLIENTS; i++ )
+        {
+          if( g_entities[ i ].client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
+              ( Distance( g_entities[ i ].client->ps.origin,
+                          ent->r.currentOrigin ) < ALIENSENSE_RANGE ) &&
+              PM_Alive( g_entities[ i ].client->ps.pm_type ) &&
+              G_Visible( &g_entities[ i ] , ent, MASK_DEADSOLID ) )
+          {
+            ent->s.eFlags |= EF_SCAN_SPOTTED;
+            break;
+          }
+        }
+      } else if( ent->buildableTeam == TEAM_ALIENS )
+      {
+        int i;
+
+        for( i = 0; i < MAX_CLIENTS; i++ )
+        {
+          if( g_entities[ i ].client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
+              ( Distance( g_entities[ i ].client->ps.origin,
+                          ent->r.currentOrigin ) < HELMET_RANGE ) &&
+              PM_Alive( g_entities[ i ].client->ps.pm_type ) &&
+              G_Visible( &g_entities[ i ] , ent, MASK_DEADSOLID ) )
+          {
+            ent->s.eFlags |= EF_SCAN_SPOTTED;
+            break;
+          }
+        }
       }
     }
 

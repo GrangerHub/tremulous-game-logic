@@ -919,6 +919,45 @@ void ClientTimerActions( gentity_t *ent, int msec )
     }
 
     G_ClientUpdateSpawnQueue( ent->client );
+    
+    // check if the client was spotted by an enemy player
+    ent->s.eFlags &= ~EF_SCAN_SPOTTED;
+    if( PM_Alive( client->ps.pm_type ) )
+    {
+      if( client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
+      {
+        int i;
+
+        for( i = 0; i < MAX_CLIENTS; i++ )
+        {
+          if( g_entities[ i ].client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
+              ( Distance( g_entities[ i ].client->ps.origin,
+                          ent->r.currentOrigin ) < ALIENSENSE_RANGE ) &&
+              PM_Alive( g_entities[ i ].client->ps.pm_type ) &&
+              G_Visible( &g_entities[ i ] , ent, MASK_DEADSOLID ) )
+          {
+            ent->s.eFlags |= EF_SCAN_SPOTTED;
+            break;
+          }
+        }
+      } else if( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
+      {
+        int i;
+
+        for( i = 0; i < MAX_CLIENTS; i++ )
+        {
+          if( g_entities[ i ].client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
+              ( Distance( g_entities[ i ].client->ps.origin,
+                          ent->r.currentOrigin ) < HELMET_RANGE ) &&
+              PM_Alive( g_entities[ i ].client->ps.pm_type ) &&
+              G_Visible( &g_entities[ i ] , ent, MASK_DEADSOLID ) )
+          {
+            ent->s.eFlags |= EF_SCAN_SPOTTED;
+            break;
+          }
+        }
+      }
+    }
   }
 
   while( client->time10000 >= 10000 )
