@@ -3887,41 +3887,39 @@ void G_BuildableThink( gentity_t *ent, int msec )
         for( i = 0; i < MAX_CLIENTS; i++ )
           ent->credits[ i ] = 0;
       }
+    }
 
-      // check if a buildable was spotted by an enemy player
-      if( ent->buildableTeam == TEAM_HUMANS )
+    // check if a buildable was spotted by an enemy player
+    if( ent->buildableTeam == TEAM_HUMANS )
+    {
+      int i;
+
+      for( i = 0; i < level.maxclients; i++ )
       {
-        int i;
-
-        for( i = 0; i < MAX_CLIENTS; i++ )
+        if( level.clients[ i ].ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
+            ( Distance( level.clients[ i ].ps.origin,
+                        ent->r.currentOrigin ) < ALIENSENSE_RANGE ) &&
+            ( level.clients[ i ].ps.persistant[ PERS_SPECSTATE ] == SPECTATOR_NOT ) &&
+            G_Visible( &g_entities[ i ] , ent, MASK_DEADSOLID ) )
         {
-          if( g_entities[ i ].client &&
-              g_entities[ i ].client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
-              ( Distance( g_entities[ i ].client->ps.origin,
-                          ent->r.currentOrigin ) < ALIENSENSE_RANGE ) &&
-              PM_Alive( g_entities[ i ].client->ps.pm_type ) &&
-              G_Visible( &g_entities[ i ] , ent, MASK_DEADSOLID ) )
-          {
-            ent->s.eFlags |= EF_SCAN_SPOTTED;
-            break;
-          }
+          ent->s.eFlags |= EF_SCAN_SPOTTED;
+          break;
         }
-      } else if( ent->buildableTeam == TEAM_ALIENS )
-      {
-        int i;
+      }
+    } else if( ent->buildableTeam == TEAM_ALIENS )
+    {
+      int i;
 
-        for( i = 0; i < MAX_CLIENTS; i++ )
+      for( i = 0; i < level.maxclients; i++ )
+      {
+        if( level.clients[ i ].ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
+            ( Distance( level.clients[ i ].ps.origin,
+                        ent->r.currentOrigin ) < HELMET_RANGE ) &&
+            ( level.clients[ i ].ps.persistant[ PERS_SPECSTATE ] == SPECTATOR_NOT ) &&
+            G_Visible( &g_entities[ i ] , ent, MASK_DEADSOLID ) )
         {
-          if( g_entities[ i ].client &&
-              g_entities[ i ].client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
-              ( Distance( g_entities[ i ].client->ps.origin,
-                          ent->r.currentOrigin ) < HELMET_RANGE ) &&
-              PM_Alive( g_entities[ i ].client->ps.pm_type ) &&
-              G_Visible( &g_entities[ i ] , ent, MASK_DEADSOLID ) )
-          {
-            ent->s.eFlags |= EF_SCAN_SPOTTED;
-            break;
-          }
+          ent->s.eFlags |= EF_SCAN_SPOTTED;
+          break;
         }
       }
     }

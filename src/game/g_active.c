@@ -928,13 +928,12 @@ void ClientTimerActions( gentity_t *ent, int msec )
       {
         int i;
 
-        for( i = 0; i < MAX_CLIENTS; i++ )
+        for( i = 0; i < level.maxclients; i++ )
         {
-          if( g_entities[ i ].client &&
-              g_entities[ i ].client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
-              ( Distance( g_entities[ i ].client->ps.origin,
+          if( level.clients[ i ].ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
+              ( Distance( level.clients[ i ].ps.origin,
                           ent->r.currentOrigin ) < ALIENSENSE_RANGE ) &&
-              PM_Alive( g_entities[ i ].client->ps.pm_type ) &&
+              ( level.clients[ i ].ps.persistant[ PERS_SPECSTATE ] == SPECTATOR_NOT ) &&
               G_Visible( &g_entities[ i ] , ent, MASK_DEADSOLID ) )
           {
             ent->s.eFlags |= EF_SCAN_SPOTTED;
@@ -945,13 +944,12 @@ void ClientTimerActions( gentity_t *ent, int msec )
       {
         int i;
 
-        for( i = 0; i < MAX_CLIENTS; i++ )
+        for( i = 0; i < level.maxclients; i++ )
         {
-          if( g_entities[ i ].client &&
-              g_entities[ i ].client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
-              ( Distance( g_entities[ i ].client->ps.origin,
+          if( level.clients[ i ].ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
+              ( Distance( level.clients[ i ].ps.origin,
                           ent->r.currentOrigin ) < HELMET_RANGE ) &&
-              PM_Alive( g_entities[ i ].client->ps.pm_type ) &&
+              ( level.clients[ i ].ps.persistant[ PERS_SPECSTATE ] == SPECTATOR_NOT ) &&
               G_Visible( &g_entities[ i ] , ent, MASK_DEADSOLID ) )
           {
             ent->s.eFlags |= EF_SCAN_SPOTTED;
