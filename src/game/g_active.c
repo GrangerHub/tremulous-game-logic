@@ -922,7 +922,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
     
     // check if the client was spotted by an enemy player
     ent->s.eFlags &= ~EF_SCAN_SPOTTED;
-    if( PM_Alive( client->ps.pm_type ) )
+    if( client->ps.persistant[ PERS_SPECSTATE ] == SPECTATOR_NOT )
     {
       if( client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
       {
