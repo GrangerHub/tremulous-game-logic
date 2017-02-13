@@ -3913,6 +3913,7 @@ void G_BuildableThink( gentity_t *ent, int msec )
       for( i = 0; i < level.maxclients; i++ )
       {
         if( level.clients[ i ].ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
+            BG_InventoryContainsUpgrade( UP_HELMET, level.clients[ i ].ps.stats ) &&
             ( Distance( level.clients[ i ].ps.origin,
                         ent->r.currentOrigin ) < HELMET_RANGE ) &&
             ( level.clients[ i ].ps.persistant[ PERS_SPECSTATE ] == SPECTATOR_NOT ) &&

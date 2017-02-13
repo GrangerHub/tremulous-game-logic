@@ -921,7 +921,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
     G_ClientUpdateSpawnQueue( ent->client );
     
     // check if the client was spotted by an enemy player
-    ent->s.eFlags &= ~EF_SCAN_SPOTTED;
+    client->ps.eFlags &= ~EF_SCAN_SPOTTED;
     if( client->ps.persistant[ PERS_SPECSTATE ] == SPECTATOR_NOT )
     {
       if( client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
@@ -936,7 +936,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
               ( level.clients[ i ].ps.persistant[ PERS_SPECSTATE ] == SPECTATOR_NOT ) &&
               G_Visible( &g_entities[ i ] , ent, MASK_DEADSOLID ) )
           {
-            ent->s.eFlags |= EF_SCAN_SPOTTED;
+            client->ps.eFlags |= EF_SCAN_SPOTTED;
             break;
           }
         }
@@ -947,12 +947,13 @@ void ClientTimerActions( gentity_t *ent, int msec )
         for( i = 0; i < level.maxclients; i++ )
         {
           if( level.clients[ i ].ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
+              BG_InventoryContainsUpgrade( UP_HELMET, level.clients[ i ].ps.stats ) &&
               ( Distance( level.clients[ i ].ps.origin,
                           ent->r.currentOrigin ) < HELMET_RANGE ) &&
               ( level.clients[ i ].ps.persistant[ PERS_SPECSTATE ] == SPECTATOR_NOT ) &&
               G_Visible( &g_entities[ i ] , ent, MASK_DEADSOLID ) )
           {
-            ent->s.eFlags |= EF_SCAN_SPOTTED;
+            client->ps.eFlags |= EF_SCAN_SPOTTED;
             break;
           }
         }
