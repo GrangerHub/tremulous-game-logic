@@ -1372,6 +1372,7 @@ static void PM_SpitfireFlyMove( void )
   float    wishspeed;
   vec3_t   wishdir;
   float    scale;
+  float    accel = BG_Class( pm->ps->stats[ STAT_CLASS ] )->airAcceleration;
   qboolean isgliding = qfalse;
   qboolean basicflight = qfalse;
   qboolean ascend = qfalse;
@@ -1406,7 +1407,10 @@ static void PM_SpitfireFlyMove( void )
     //gliding
     if( !( pm->cmd.buttons & BUTTON_WALKING ) &&
         pm->ps->persistant[PERS_JUMPTIME] > SPITFIRE_ASCEND_REPEAT )
+    {
+      accel = SPITFIRE_GLIDE_ACCEL;
       isgliding = qtrue;
+    }
   }
 
   scale = PM_CmdScale( &pm->cmd, qtrue );
@@ -1429,13 +1433,6 @@ static void PM_SpitfireFlyMove( void )
   else
     for( i = 0; i < 3; i++ )
       wishvel[ i ] = scale * pml.forward[ i ] * pm->cmd.forwardmove;
-
-  if( basicflight )
-  {
-    // restrict ascent
-    if( wishvel[ 2 ] > 0 )
-      wishvel[ 2 ] = 0;
-  }
 
   if( isgliding )
   {
@@ -1466,13 +1463,19 @@ static void PM_SpitfireFlyMove( void )
   {
     //normal slowdown
     PM_Friction( );
+
+    // restrict ascent for hovering
+    if( basicflight &&
+        ( pm->cmd.buttons & BUTTON_WALKING ) &&
+        ( wishvel[ 2 ] > 0 ) )
+      wishvel[ 2 ] = 0;
   }
 
   VectorCopy( wishvel, wishdir );
   wishspeed = VectorNormalize( wishdir );
 
-  PM_Accelerate( wishdir, wishspeed,
-                 BG_Class( pm->ps->stats[ STAT_CLASS ] )->airAcceleration  );
+  if( !isgliding || scale )
+    PM_Accelerate( wishdir, wishspeed, accel );
 
   if( ascend )
   {
