@@ -240,21 +240,33 @@ CG_CompleteCallVote_f
 */
 void CG_CompleteCallVote_f( int argNum ) {
 #ifndef MODULE_INTERFACE_11
-    if ( argNum == 2  )
-        trap_Field_CompleteList( "["
-             "\"allowbuild\","
-             "\"cancel\","
-             "\"denybuild\","
-             "\"draw\","
-             "\"extend\","
-             "\"kick\","
-             "\"map\","
-             "\"map_restart\","
-             "\"mute\","
-             "\"nextmap\","
-             "\"poll\","
-             "\"sudden_death\","
-             "\"unmute\" ]" );
+  switch( argNum )
+  {
+    case 2:
+      trap_Field_CompleteList(
+	"["
+	"\"allowbuild\","
+	"\"cancel\","
+	"\"denybuild\","
+	"\"draw\","
+	"\"extend\","
+	"\"kick\","
+	"\"map\","
+	"\"map_restart\","
+	"\"mute\","
+	"\"nextmap\","
+	"\"poll\","
+	"\"sudden_death\","
+	"\"unmute\" ]" );
+      break;
+    case 3:
+      if( !Q_stricmp( CG_Argv( 1 ), "map" ) ||
+	  !Q_stricmp( CG_Argv( 1 ), "nextmap" ) )
+	// TODO: this should be the complete list of server maps, not
+	// just the playpool
+	trap_Field_CompleteList( cgs.playMapPoolJson );
+      break;
+  }
 #endif
 }
 
