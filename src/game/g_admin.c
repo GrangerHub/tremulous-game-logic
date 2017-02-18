@@ -192,7 +192,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
 
     {"playmap", G_admin_playmap, qtrue, "playmap",
      "List and add to playmap queue.",
-     "^3mapname [layout] [flags]^7"
+     "^3mapname [layout] [flags]^7\n(Press TAB to complete map names!)"
     },
 
     {"playpool", G_admin_playpool, qtrue, "playpool",
