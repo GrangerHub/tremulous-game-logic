@@ -270,7 +270,7 @@ Maximum/minimum of two ints
 #define	MAX_SAY_TEXT	800
 
 // Playmap
-#define MAX_PLAYMAP_POOL_CHARS 4096
+#define MAX_PLAYMAP_POOL_CHARS 32768
 
 // paramters for command buffer stuffing
 typedef enum {
