@@ -43,6 +43,10 @@ void trap_FS_Write( const void *buffer, int len, fileHandle_t f );
 // playmap pool buffer
 static char playmap_pool_str[ MAX_PLAYMAP_POOL_CHARS ];
 
+// Indicates we're in the middle of a broadcast and the ADMBP holds
+// the contents of the playmap pool
+static qboolean PlayMapPoolMessageBroadcast = qfalse;
+
 // list of error codes and messages
 static const playMapError_t playMapError[ ] =
 {
@@ -196,8 +200,10 @@ playMapError_t G_AddToPlayMapPool( char *mapName, char *mapType, int minClients,
   if ( sortPool )
     G_SortPlayMapPool();
 
-  // Notify all clients
-  SendPlayMapPoolMessageToAllClients();
+  // Notify all clients if we're not in broadcast mode during reload
+  // because they will be notified after all are loaded
+  if( ! PlayMapPoolMessageBroadcast )
+    SendPlayMapPoolMessageToAllClients();
 
   return G_PlayMapErrorByCode( PLAYMAP_ERROR_NONE );
 }
@@ -308,10 +314,6 @@ playMapError_t G_SavePlayMapPool( void )
   return G_PlayMapErrorByCode( PLAYMAP_ERROR_NONE );
 }
 
-// Indicates we're in the middle of a broadcast and the ADMBP holds
-// the contents of the playmap pool
-static qboolean PlayMapPoolMessageBroadcast = qfalse;
-
 /*
 ==================
 PlayMapPoolMessage
@@ -337,6 +339,10 @@ void SendPlayMapPoolMessageToAllClients( void )
   int   i;
   PlayMapPoolMessageBroadcast = qtrue;
   G_PrintPlayMapPool( NULL, -1, qtrue );
+
+  if( g_debugPlayMap.integer > 0 )
+    trap_Print( va( "PLAYMAP: broadcasting playmap pool to %d clients.\n",
+		    level.maxclients ) );
 
   for( i = 0; i < level.maxclients; i++ )
   {
@@ -380,6 +386,9 @@ playMapError_t G_ReloadPlayMapPool( void )
   cnf[ len ] = '\0';
   trap_FS_FCloseFile( f );
 
+  // enable broadcast flag to prevent sending info to clients for each add
+  PlayMapPoolMessageBroadcast = qtrue;
+  
   COM_BeginParseSession( g_playMapPoolConfig.string );
   while( cnf < ( cnf2 + len )  )
   {
@@ -501,25 +510,33 @@ with ADMBP, but don't print it so it's still accessible.
 */
 void G_PrintPlayMapPool( gentity_t *ent, int page, qboolean isJson )
 {
-  int i, j, len, rows, pages, row, start;
+  int i, j, len, rows, pages, row, start, num_cols;
 
-  playmap_pool_str[ 0 ] = '\0';
+  if( !isJson )
+  {
+    ADMBP_begin();
+    // TODO: this should be calculated from console width
+    num_cols = 3;
+  }
+  else
+  {
+    playmap_pool_str[ 0 ] = '\0';
+    num_cols = 1;
+  }
   
   if( ( len = playMapPoolCache.numMaps ) )
     {
       if( !isJson ) // discard verbose messages in JSON
-	Q_strcat( playmap_pool_str, MAX_PLAYMAP_POOL_CHARS,
-		  va( S_COLOR_CYAN "%d" S_COLOR_WHITE " maps available in pool",
-		      G_GetPlayMapPoolLength( ) ) );
+	ADMBP( va( S_COLOR_CYAN "%d" S_COLOR_WHITE " maps available in pool",
+		   G_GetPlayMapPoolLength( ) ) );
       else
 	Q_strcat( playmap_pool_str, MAX_PLAYMAP_POOL_CHARS, "[" );
     }
   else
     {
       if ( !isJson )
-	Q_strcat( playmap_pool_str, MAX_PLAYMAP_POOL_CHARS,
-		va( "%s\n",
-		    G_PlayMapErrorByCode(PLAYMAP_ERROR_MAP_POOL_EMPTY).errorMessage));
+	ADMBP( va( "%s\n",
+		   G_PlayMapErrorByCode(PLAYMAP_ERROR_MAP_POOL_EMPTY).errorMessage));
       else
       { // create an empty array in buffer
 	Q_strcat( playmap_pool_str, MAX_PLAYMAP_POOL_CHARS, "[]" );
@@ -527,7 +544,7 @@ void G_PrintPlayMapPool( gentity_t *ent, int page, qboolean isJson )
     return;
     }
 
-  rows = ( len + 2 ) / 3;
+  rows = ( len + ( num_cols - 1 ) ) / num_cols;
 
   if( page < 0 )
     pages = 1;			//disabled
@@ -541,24 +558,22 @@ void G_PrintPlayMapPool( gentity_t *ent, int page, qboolean isJson )
   if ( !isJson )
   {
     if( pages > 1 )
-      Q_strcat( playmap_pool_str, MAX_PLAYMAP_POOL_CHARS,
-		va( " (page %d out of %d)", page + 1, pages ));
-    Q_strcat( playmap_pool_str, MAX_PLAYMAP_POOL_CHARS, ":\n" );
+      ADMBP( va( " (page %d out of %d)", page + 1, pages ) );
+    ADMBP( ":\n" );
   }
-  start = page * MAX_MAPLIST_ROWS * 3;
-  if( len < start + ( 3 * MAX_MAPLIST_ROWS ) || pages == 1)
-    rows = ( len - start + 2 ) / 3;
+  start = page * MAX_MAPLIST_ROWS * num_cols;
+  if( len < start + ( num_cols * MAX_MAPLIST_ROWS ) || pages == 1)
+    rows = ( len - start + ( num_cols - 1 ) ) / num_cols;
   else
     rows = MAX_MAPLIST_ROWS;
 
   for( row = 0; row < rows; row++ )
   {
-    for( i = start + row, j = 0; i < len && j < 3; i += rows, j++ )
+    for( i = start + row, j = 0; i < len && j < num_cols; i += rows, j++ )
     {
       if ( !isJson )
-	      Q_strcat( playmap_pool_str, MAX_PLAYMAP_POOL_CHARS,
-			va( S_COLOR_CYAN " %-20s" S_COLOR_WHITE,
-			    playMapPoolCache.mapEntries[ i ].mapName ) );
+	ADMBP( va( S_COLOR_CYAN " %-20s" S_COLOR_WHITE,
+		   playMapPoolCache.mapEntries[ i ].mapName ) );
       else
 	Q_strcat( playmap_pool_str, MAX_PLAYMAP_POOL_CHARS,
 		  va( "%s,",
@@ -566,11 +581,11 @@ void G_PrintPlayMapPool( gentity_t *ent, int page, qboolean isJson )
       // Limit per row (TODO: make one per row and write type and min/max next to it)
     }
     if ( !isJson )
-      Q_strcat( playmap_pool_str, MAX_PLAYMAP_POOL_CHARS, "\n" );
+      ADMBP( "\n" );
   }
   // don't end for JSON because it prints out
   if ( !isJson )
-    ADMP( playmap_pool_str );
+    ADMBP_end();
   else
     Q_strcat( playmap_pool_str, MAX_PLAYMAP_POOL_CHARS, "]" );
 }
@@ -657,7 +672,8 @@ playMapError_t G_ValidatePlayMapQueue( void )
         playMapQueue.playMap[ PLAYMAP_QUEUE_ADD( playMapQueue.head, i ) ];
 
       // Check if client is still connected
-      if ( ! G_FindClientByName( NULL, playMap.clientName ) )
+      if ( Q_stricmp_exact( playMap.clientName, "console" ) &&
+	   ! G_FindClientByName( NULL, playMap.clientName ) )
         {
           trap_SendServerCommand( -1,
                                   va( "print \"Removing playlist entry #%d for "
