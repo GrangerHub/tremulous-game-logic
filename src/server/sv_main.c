@@ -187,10 +187,11 @@ void QDECL SV_SendServerCommand(client_t *cl, const char *fmt, ...) {
 	// this from happening is stopping the packet here. Ideally,
 	// we should increase the size of the downstream message.
 	if ( strlen ((char *)message) > 1022 ) {
-	  	Com_Printf( "SV_SendServerCommand( %d, %20s... ) length exceeds 1022.\n",
-			    cl - svs.clients, message );
-                Com_Printf( "text [%s]\n", message ); 
-		return;
+	  Com_Printf( "SV_SendServerCommand( %ld, %.20s... ) length %ld > 1022, "
+		      "dropping to avoid server buffer overflow.\n",
+		      cl - svs.clients, message, strlen( (char *)message ) );
+	  Com_Printf( "Full message: [%s]\n", message ); 
+	  return;
 	}
 
 	if ( cl != NULL ) {
