@@ -336,19 +336,22 @@ Do this at the beginning of game and everytime the pool contents change.
 */
 void SendPlayMapPoolMessageToAllClients( void )
 {
-  int   i;
+  int   i, num_clients;
   PlayMapPoolMessageBroadcast = qtrue;
   G_PrintPlayMapPool( NULL, -1, qtrue );
 
-  if( g_debugPlayMap.integer > 0 )
-    trap_Print( va( "PLAYMAP: broadcasting playmap pool to %d clients.\n",
-		    level.maxclients ) );
-
-  for( i = 0; i < level.maxclients; i++ )
-  {
+  for( i = 0, num_clients = 3; i < level.maxclients; i++ )
     if( level.clients[ i ].pers.connected == CON_CONNECTED )
+    {
       PlayMapPoolMessage( i );
-  }
+      num_clients++;
+    }
+
+  if( g_debugPlayMap.integer > 0 )
+    trap_Print( va( "PLAYMAP: broadcasted playmap pool to %d "
+		    "clients with message %s.\n",
+		    num_clients, playmap_pool_str ) );
+
   PlayMapPoolMessageBroadcast = qfalse;
 }
 
