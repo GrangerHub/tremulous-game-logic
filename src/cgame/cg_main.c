@@ -101,7 +101,6 @@ Q_EXPORT intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3,
   return -1;
 }
 
-
 cg_t        cg;
 cgs_t       cgs;
 centity_t   cg_entities[ MAX_GENTITIES ];

@@ -192,7 +192,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
 
     {"playmap", G_admin_playmap, qtrue, "playmap",
      "List and add to playmap queue.",
-     "^3mapname [layout] [flags]^7"
+     "^3mapname [layout] [flags]^7\n(Press TAB to complete map names!)"
     },
 
     {"playpool", G_admin_playpool, qtrue, "playpool",
@@ -4601,11 +4601,17 @@ void G_admin_buffer_end( gentity_t *ent )
 
 void G_admin_buffer_print( gentity_t *ent, char *m )
 {
+
   // 1022 - strlen("print 64 \"\"") - 1
-  if( strlen( m ) + strlen( g_bfb ) >= 1009 )
+#define MAX_CMDBUF 1009
+
+  // Loop until m is consumed
+  while( strlen( m ) + strlen( g_bfb ) >= MAX_CMDBUF )
   {
     ADMP( g_bfb );
     g_bfb[ 0 ] = '\0';
+    Q_strcat( g_bfb, MAX_CMDBUF, m );
+    m += MIN( strlen( m ), MAX_CMDBUF );
   }
   Q_strcat( g_bfb, sizeof( g_bfb ), m );
 }
