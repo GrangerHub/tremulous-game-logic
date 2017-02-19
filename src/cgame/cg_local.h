@@ -1587,6 +1587,7 @@ extern  vmCvar_t    cg_lightFlare;
 extern  vmCvar_t    cg_debugParticles;
 extern  vmCvar_t    cg_debugTrails;
 extern  vmCvar_t    cg_debugPVS;
+extern  vmCvar_t    cg_debugPlayMap;
 extern  vmCvar_t    cg_disableWarningDialogs;
 extern  vmCvar_t    cg_disableUpgradeDialogs;
 extern  vmCvar_t    cg_disableBuildDialogs;
