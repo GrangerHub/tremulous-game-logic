@@ -189,6 +189,7 @@ vmCvar_t  cg_lightFlare;
 vmCvar_t  cg_debugParticles;
 vmCvar_t  cg_debugTrails;
 vmCvar_t  cg_debugPVS;
+vmCvar_t  cg_debugPlayMap;
 vmCvar_t  cg_disableWarningDialogs;
 vmCvar_t  cg_disableUpgradeDialogs;
 vmCvar_t  cg_disableBuildDialogs;
@@ -327,6 +328,7 @@ static cvarTable_t cvarTable[ ] =
   { &cg_debugParticles, "cg_debugParticles", "0", CVAR_CHEAT },
   { &cg_debugTrails, "cg_debugTrails", "0", CVAR_CHEAT },
   { &cg_debugPVS, "cg_debugPVS", "0", CVAR_CHEAT },
+  { &cg_debugPlayMap, "cg_debugPlayMap", "0", CVAR_ARCHIVE },
   { &cg_disableWarningDialogs, "cg_disableWarningDialogs", "1", CVAR_ARCHIVE },
   { &cg_disableUpgradeDialogs, "cg_disableUpgradeDialogs", "0", CVAR_ARCHIVE },
   { &cg_disableBuildDialogs, "cg_disableBuildDialogs", "0", CVAR_ARCHIVE },
