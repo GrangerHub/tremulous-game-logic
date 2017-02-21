@@ -461,8 +461,7 @@ intptr_t CL_CgameSystemCalls( intptr_t *args ) {
 	case CG_FS_FOPENFILE:
 		return FS_FOpenFileByMode( VMA(1), VMA(2), args[3] );
 	case CG_FS_READ:
-		FS_Read2( VMA(1), args[2], args[3] );
-		return 0;
+		return FS_Read2( VMA(1), args[2], args[3] );
 	case CG_FS_WRITE:
 		FS_Write( VMA(1), args[2], args[3] );
 		return 0;
@@ -481,6 +480,9 @@ intptr_t CL_CgameSystemCalls( intptr_t *args ) {
 		return 0;
 	case CG_REMOVECOMMAND:
 		Cmd_RemoveCommandSafe( VMA(1) );
+		return 0;
+	case CG_FIELD_COMPLETELIST:
+		Field_CompleteList( VMA(1) );
 		return 0;
 	case CG_SENDCLIENTCOMMAND:
 		CL_AddReliableCommand(VMA(1), qfalse);

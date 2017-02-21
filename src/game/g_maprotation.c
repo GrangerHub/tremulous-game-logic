@@ -192,7 +192,7 @@ Allocate memory for a node_t
 */
 static node_t *G_AllocateNode( void )
 {
-  node_t *node = BG_Alloc( sizeof( node_t ) );
+  node_t *node = BG_Alloc0( sizeof( node_t ) );
 
   return node;
 }

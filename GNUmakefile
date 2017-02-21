@@ -2224,6 +2224,8 @@ CGOBJ_ = \
   $(B)/cgame/bg_lib.o \
   $(B)/cgame/bg_alloc.o \
   $(B)/cgame/bg_voice.o \
+  $(B)/cgame/bg_list.o \
+  $(B)/cgame/bg_queue.o \
   $(B)/cgame/cg_consolecmds.o \
   $(B)/cgame/cg_buildable.o \
   $(B)/cgame/cg_animation.o \
@@ -2258,7 +2260,9 @@ CGOBJ11_ = \
   $(B)/cgame/bg_lib.o \
   $(B)/cgame/bg_alloc.o \
   $(B)/cgame/bg_voice.o \
-  $(B)/cgame/cg_consolecmds.o \
+  $(B)/cgame/bg_list.o \
+  $(B)/cgame/bg_queue.o \
+  $(B)/11/cgame/cg_consolecmds.o \
   $(B)/cgame/cg_buildable.o \
   $(B)/cgame/cg_animation.o \
   $(B)/cgame/cg_animmapobj.o \
@@ -2314,6 +2318,8 @@ GOBJ_ = \
   $(B)/game/bg_lib.o \
   $(B)/game/bg_alloc.o \
   $(B)/game/bg_voice.o \
+  $(B)/game/bg_list.o \
+  $(B)/game/bg_queue.o \
   $(B)/game/g_active.o \
   $(B)/game/g_client.o \
   $(B)/game/g_cmds.o \

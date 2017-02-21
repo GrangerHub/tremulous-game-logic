@@ -424,6 +424,7 @@ gentity_t *G_Spawn( void )
 
       // reuse this slot
       G_InitGentity( e );
+      G_Entity_id_init( e );
       return e;
     }
 
@@ -447,6 +448,7 @@ gentity_t *G_Spawn( void )
     &level.clients[ 0 ].ps, sizeof( level.clients[ 0 ] ) );
 
   G_InitGentity( e );
+  G_Entity_id_init( e );
   return e;
 }
 
@@ -479,7 +481,7 @@ qboolean G_EntitiesFree( void )
 char *G_CopyString( const char *str )
 {
   size_t size = strlen( str ) + 1;
-  char *cp = BG_Alloc( size );
+  char *cp = BG_Alloc0( size );
   memcpy( cp, str, size );
   return cp;
 }
@@ -516,6 +518,14 @@ void G_RemoveEntity( gentity_t *ent )
 {
   gentity_t *e;
 
+  // Address occupation
+  if( ent->flags & FL_OCCUPIED )
+    G_UnoccupyEnt( ent, ent->occupation.occupant, NULL, qtrue );
+
+  if( ( ent->client && ( ent->client->ps.eFlags & EF_OCCUPYING ) ) ||
+      ( !ent->client && ( ent->s.eFlags & EF_OCCUPYING ) ) )
+    G_UnoccupyEnt( ent->occupation.occupied, ent, NULL, qtrue );
+
   if( ent->client )
   {
     // removing a player causes the player to "unspawn"
@@ -546,17 +556,13 @@ void G_RemoveEntity( gentity_t *ent )
     // the range marker (if any) goes away with the buildable
     G_RemoveRangeMarkerFrom( ent );
   }
-  else if( !strcmp( ent->classname, "lev2zapchain" ) )
+  else if( ent->s.eType == ET_LEV2_ZAP_CHAIN )
   {
-    zap_t *z;
-    for( z = &zaps[ 0 ]; z < &zaps[ MAX_ZAPS ]; ++z )
+    if( ent->zapLink &&
+        ((zap_t *)(ent->zapLink->data))->effectChannel == ent )
     {
-      if( z->used && z->effectChannel == ent )
-      {
-        // free the zap slot occupied by this zap effect
-        z->used = qfalse;
-        break;
-      }
+      G_DeleteZapData( ent->zapLink->data );                                    
+      lev2ZapList = BG_List_Delete_Link( lev2ZapList, ent->zapLink );
     }
   }
   else if( ent->s.eType == ET_MOVER )
@@ -1202,4 +1208,28 @@ qboolean G_AddressCompare( const addr_t *a, const addr_t *b )
     return ( a->addr[ i ] & netmask ) == ( b->addr[ i ] & netmask );
   }
   return qtrue;
+}
+
+void G_Entity_id_init(gentity_t *ptr){
+  static unsigned int inc_id = 1;
+  Com_Assert(ptr);
+  ptr->id = inc_id++;
+}
+
+void G_Entity_id_set(gentity_id *id,gentity_t *target){
+  Com_Assert(id);
+  Com_Assert(target);
+  id->id = target->id;
+  id->ptr = target;
+}
+
+gentity_t *G_Entity_id_get(gentity_id *id){
+  assert(id);
+  if(id->ptr == NULL){
+    return NULL;
+  }
+  if(id->id != id->ptr->id){
+    id->ptr = NULL;
+  }
+  return id->ptr;
 }

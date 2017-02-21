@@ -235,6 +235,7 @@ static  cvar_t          *fs_apppath;
 static	cvar_t		*fs_basepath;
 static	cvar_t		*fs_basegame;
 static	cvar_t		*fs_gamedirvar;
+static  cvar_t          *fs_pak_default;
 static	searchpath_t	*fs_searchpaths;
 static	int			fs_readCount;			// total bytes read
 static	int			fs_loadCount;			// total files read
@@ -3353,6 +3354,7 @@ static void FS_Startup( const char *gameName )
 	Cvar_Get ("fs_overpath", Sys_BinaryPath(), CVAR_INIT|CVAR_PROTECTED );
 	fs_basepath = Cvar_Get ("fs_basepath", Sys_DefaultInstallPath(), CVAR_INIT|CVAR_PROTECTED );
 	fs_basegame = Cvar_Get ("fs_basegame", "gpp", CVAR_INIT );
+        fs_pak_default = Cvar_Get( "fs_pak_default", "map-karith-1.1.0.pk3 map-uncreation-1.1.0.pk3 map-nexus6-1.1.0.pk3 data-1.1.0.pk3 map-niveus-1.1.0.pk3 vms-1.1.0.pk3 map-arachnid2-1.1.0.pk3 map-transit-1.1.0.pk3 map-atcs-1.1.0.pk3 map-tremor-1.1.0.pk3 data-gpp1.pk3 vms-gpp1.pk3", CVAR_INIT );
 	homePath = Sys_DefaultHomePath();
 	if (!homePath || !homePath[0]) {
 		homePath = fs_basepath->string;
@@ -3434,25 +3436,51 @@ Returns a space separated string containing the checksums of all loaded pk3 file
 Servers with sv_pure set will get this string and pass it to clients.
 =====================
 */
-const char *FS_LoadedPakChecksums( qboolean alternate ) {
-	static char	info[BIG_INFO_STRING];
-	searchpath_t	*search;
+const char *FS_LoadedPakChecksums( qboolean alternate )
+{
+  static char	info[BIG_INFO_STRING];
+  searchpath_t	*search;
 
-	info[0] = 0;
+  info[0] = 0;
 
-	for ( search = fs_searchpaths ; search ; search = search->next ) {
-		// is the element a pak file? 
-		if ( !search->pack ) {
-			continue;
-		}
-		if ( ( alternate && search->pack->onlyPrimary ) || ( !alternate && search->pack->onlyAlternate ) ) {
-			continue;
-		}
+  for ( search = fs_searchpaths ; search ; search = search->next )
+  {
+    // is the element a pak file? 
+    if ( !search->pack )
+    {
+      continue;
+    }
+    if ( ( alternate && search->pack->onlyPrimary ) ||
+           ( !alternate && search->pack->onlyAlternate ) )
+    {
+      continue;
+    }
 
-		Q_strcat( info, sizeof( info ), va("%i ", search->pack->checksum ) );
-	}
+    //Add if pak name contains prefix
+    if ( fs_pak_default->string[0] )
+    {
+      char name[MAX_OSPATH];
 
-	return info;
+      name[0] = 0;
+      Q_strcat( name, sizeof( name ), search->pack->pakBasename );
+      Q_strcat( name, sizeof( name ), ".pk3" );
+      if( Q_stristr( fs_pak_default->string, name ) != NULL )
+      {
+        Q_strcat( info, sizeof( info ), va("%i ", search->pack->checksum ) );
+        continue;
+      }
+    }
+    //Add all referenced paks and base paks
+    if ( search->pack->referenced ||
+         ( fs_gamedirvar->string[0] &&
+           Q_stricmp(fs_gamedirvar->string, BASEGAME) &&
+           !Q_stricmp( search->pack->pakGamename, fs_gamedirvar->string ) ) )
+      {
+        Q_strcat( info, sizeof( info ), va("%i ", search->pack->checksum ) );
+      }
+  }
+
+  return info;
 }
 
 /*
@@ -3463,28 +3491,58 @@ Returns a space separated string containing the names of all loaded pk3 files.
 Servers with sv_pure set will get this string and pass it to clients.
 =====================
 */
-const char *FS_LoadedPakNames( qboolean alternate ) {
-	static char	info[BIG_INFO_STRING];
-	searchpath_t	*search;
+const char *FS_LoadedPakNames( qboolean alternate )
+{
+  static char   info[BIG_INFO_STRING];
+  searchpath_t  *search;
 
-	info[0] = 0;
+  info[0] = 0;
 
-	for ( search = fs_searchpaths ; search ; search = search->next ) {
-		// is the element a pak file?
-		if ( !search->pack ) {
-			continue;
-		}
-		if ( ( alternate && search->pack->onlyPrimary ) || ( !alternate && search->pack->onlyAlternate ) ) {
-			continue;
-		}
+  for( search = fs_searchpaths ; search ; search = search->next )
+  {
+    // is the element a pak file?
+    if ( !search->pack )
+    {
+      continue;
+    }
+    if( ( alternate && search->pack->onlyPrimary ) ||
+        ( !alternate && search->pack->onlyAlternate ) )
+    {
+      continue;
+    }
 
-		if (*info) {
-			Q_strcat(info, sizeof( info ), " " );
-		}
-		Q_strcat( info, sizeof( info ), search->pack->pakBasename );
-	}
+    //Add if pak name contains prefix
+    if ( fs_pak_default->string[0] )
+    {
+      char name[MAX_OSPATH];
 
-	return info;
+      name[0] = 0;
+      Q_strcat( name, sizeof( name ), search->pack->pakBasename );
+      Q_strcat( name, sizeof( name ), ".pk3" );
+      if( Q_stristr( fs_pak_default->string, name ) != NULL )
+      {
+        if ( *info )
+        {
+          Q_strcat( info, sizeof( info ), " " );
+        }
+        Q_strcat( info, sizeof( info ), search->pack->pakBasename );
+        continue;
+      }
+    }
+    //Add all referenced paks and base paks
+    if ( search->pack->referenced ||
+         ( fs_gamedirvar->string[0] &&
+           Q_stricmp(fs_gamedirvar->string, BASEGAME) &&
+           !Q_stricmp( search->pack->pakGamename, fs_gamedirvar->string ) ) )
+    {
+      if ( *info )
+      {
+        Q_strcat( info, sizeof( info ), " " );
+      }
+      Q_strcat( info, sizeof( info ), search->pack->pakBasename );
+    }
+  }
+  return info;
 }
 
 /*

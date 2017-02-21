@@ -102,8 +102,13 @@ void G_AddCreditToClient( gclient_t *client, short credit, qboolean cap )
     {
       client->pers.credit += credit;
       if( client->pers.credit > capAmount )
+      {
+        if( g_overflowFunds.integer )
+          G_DonateCredits( client, client->pers.credit - capAmount, qfalse );
         client->pers.credit = capAmount;
-    }
+      }
+    } else if( g_overflowFunds.integer )
+      G_DonateCredits( client, credit, qfalse );
   }
   else
     client->pers.credit += credit;
@@ -470,8 +475,8 @@ static void SpawnCorpse( gentity_t *ent )
   body->s.eType = ET_CORPSE;
   body->timestamp = level.time;
   body->s.event = 0;
-  body->r.contents = CONTENTS_CORPSE;
-  body->clipmask = MASK_DEADSOLID;
+  G_SetContents( body, CONTENTS_CORPSE );
+  G_SetClipmask( body, MASK_DEADSOLID );
   body->s.clientNum = ent->client->ps.stats[ STAT_CLASS ];
   body->nonSegModel = ent->client->ps.persistant[ PERS_STATE ] & PS_NONSEGMODEL;
 
@@ -1012,14 +1017,6 @@ char *ClientUserinfoChanged( int clientNum, qboolean forceName )
   else
     client->pers.flySpeed = BG_Class( PCL_NONE )->speed;
 
-  // disable blueprint errors
-  s = Info_ValueForKey( userinfo, "cg_disableBlueprintErrors" );
-
-  if( atoi( s ) )
-    client->pers.disableBlueprintErrors = qtrue;
-  else
-    client->pers.disableBlueprintErrors = qfalse;
-
   client->pers.buildableRangeMarkerMask =
     atoi( Info_ValueForKey( userinfo, "cg_buildableRangeMarkerMask" ) );
 
@@ -1187,7 +1184,6 @@ char *ClientConnect( int clientNum, qboolean firstTime )
     G_ChangeTeam( ent, client->sess.restartTeam );
     client->sess.restartTeam = TEAM_NONE;
   }
-
   
   return NULL;
 }
@@ -1254,6 +1250,9 @@ void ClientBegin( int clientNum )
 
   // send the client a list of commands that can be used
   G_ListCommands( ent );
+
+  // Send playmap pool
+  PlayMapPoolMessage( clientNum );
 }
 
 /*
@@ -1382,18 +1381,18 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
 
   //Com_Printf( "ent->client->pers->pclass = %i\n", ent->client->pers.classSelection );
 
+  if( spawn && ent != spawn )
+    G_Entity_id_init(ent);
+
   ent->s.groundEntityNum = ENTITYNUM_NONE;
   ent->client = &level.clients[ index ];
   ent->takedamage = qtrue;
   ent->classname = "player";
-  if( client->noclip )
-    client->cliprcontents = CONTENTS_BODY;
-  else
-    ent->r.contents = CONTENTS_BODY;
+  G_SetContents( ent, CONTENTS_BODY);
   if( client->pers.teamSelection == TEAM_NONE )
-    ent->clipmask = MASK_ASTRALSOLID;
+    G_SetClipmask( ent, MASK_ASTRALSOLID );
   else
-    ent->clipmask = MASK_PLAYERSOLID;
+    G_SetClipmask( ent, MASK_PLAYERSOLID );
   ent->die = player_die;
   ent->waterlevel = 0;
   ent->watertype = 0;
@@ -1457,7 +1456,18 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   for( i = 0; i < MAX_CLIENTS; i++ )
     ent->credits[ i ] = 0;
 
-  client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
+  if( BG_ClassHasAbility( client->ps.stats[STAT_CLASS], SCA_STAMINA ) )
+    client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
+  else
+  {
+    client->ps.stats[ STAT_STAMINA ] =
+                     BG_Class( client->ps.stats[STAT_CLASS] )->chargeStaminaMax;
+
+    // if evolving scale charge stamina
+    if( ent == spawn )
+      client->ps.stats[ STAT_STAMINA ] *=
+                                  ent->client->pers.evolveChargeStaminaFraction;
+  }
 
   G_SetOrigin( ent, spawn_origin );
   VectorCopy( spawn_origin, client->ps.origin );
@@ -1634,6 +1644,7 @@ void ClientDisconnect( int clientNum )
   }
 
   trap_UnlinkEntity( ent );
+  ent->id = 0;
   ent->inuse = qfalse;
   ent->classname = "disconnected";
   ent->client->pers.connected = CON_DISCONNECTED;

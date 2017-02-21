@@ -739,7 +739,9 @@ qboolean G_FindCreep( gentity_t *self )
 
   //if self does not have a parentNode or its parentNode is invalid, then find a new one
   if( self->client || self->parentNode == NULL || !self->parentNode->inuse ||
-      self->parentNode->health <= 0 )
+      self->parentNode->health <= 0 ||
+      ( Distance( self->r.currentOrigin,
+                  self->parentNode->r.currentOrigin ) > CREEP_BASESIZE ) )
   {
     for( i = MAX_CLIENTS, ent = g_entities + i; i < level.num_entities; i++, ent++ )
     {
@@ -899,9 +901,9 @@ void AGeneric_CreepRespawn( gentity_t *self )
     }
   }
 
-  // cancel respawning if respawning buildable is overmind and there already is
+  // cancel respawning if respawning buildable needs to be unique and there already is
   // one on the map
-  if( self->s.modelindex == BA_A_OVERMIND && G_FindBuildable( BA_A_OVERMIND ) )
+  if( BG_Buildable( self->s.modelindex )->uniqueTest && G_FindBuildable( self->s.modelindex ) )
   {
     G_FreeEntity( self );
     return;
@@ -966,7 +968,8 @@ void AGeneric_CreepRecede( gentity_t *self )
   else //creep has died
   {
     // Respawn buildable if in warmup, otherwise free the entity
-    if( IS_WARMUP && self->enemy->client )
+    if( IS_WARMUP && self->enemy->client &&
+        self->methodOfDeath != MOD_TRIGGER_HURT )
     {
       self->think = AGeneric_CreepRespawn;
       if( self->s.modelindex == BA_A_ACIDTUBE || self->s.modelindex == BA_A_HIVE )
@@ -1020,6 +1023,7 @@ void AGeneric_Blast( gentity_t *self )
   self->nextthink = level.time + 500;
 
   self->r.contents = 0;    //stop collisions...
+  G_BackupUnoccupyContents( self );
   trap_LinkEntity( self ); //...requires a relink
 }
 
@@ -1041,6 +1045,7 @@ void AGeneric_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, i
   self->think = AGeneric_Blast;
   self->s.eFlags &= ~EF_FIRING; //prevent any firing effects
   self->powered = qfalse;
+  self->methodOfDeath = mod;
 
   if( self->spawned )
     self->nextthink = level.time + 5000;
@@ -1924,9 +1929,9 @@ void HSpawn_Respawn( gentity_t *self )
     }
   }
 
-  // cancel respawning if respawning buildable is reactor and there already is
+  // cancel respawning if respawning buildable needs to be unique and there already is
   // one on the map
-  if( self->s.modelindex == BA_H_REACTOR && G_FindBuildable( BA_H_REACTOR ) )
+  if( BG_Buildable( self->s.modelindex )->uniqueTest && G_FindBuildable( self->s.modelindex ) )
   {
     G_FreeEntity( self );
     return;
@@ -2003,7 +2008,8 @@ void HSpawn_Blast( gentity_t *self )
   self->s.eType = ET_EVENTS + EV_HUMAN_BUILDABLE_EXPLOSION;
   // respawn the buildable in next think in warmup
   // and attacker was a player
-  if( IS_WARMUP && self->enemy->client )
+  if( IS_WARMUP && self->enemy->client &&
+      self->methodOfDeath != MOD_TRIGGER_HURT )
   {
     self->think = HSpawn_Respawn;
     if( self->s.modelindex == BA_H_MGTURRET || self->s.modelindex == BA_H_TESLAGEN )
@@ -2038,6 +2044,7 @@ void HSpawn_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   self->killedBy = attacker - g_entities;
   self->powered = qfalse; //free up power
   self->s.eFlags &= ~EF_FIRING; //prevent any firing effects
+  self->methodOfDeath = mod;
 
   if( self->spawned )
   {
@@ -2138,6 +2145,7 @@ static void HRepeater_Die( gentity_t *self, gentity_t *inflictor, gentity_t *att
   self->killedBy = attacker - g_entities;
   self->powered = qfalse; //free up power
   self->s.eFlags &= ~EF_FIRING; //prevent any firing effects
+  self->methodOfDeath = mod;
 
   if( self->spawned )
   {
@@ -2226,18 +2234,33 @@ void HRepeater_Think( gentity_t *self )
 
 /*
 ================
-HRepeater_Use
+HRepeater_Activate
 
 Use for human power repeater
 ================
 */
-void HRepeater_Use( gentity_t *self, gentity_t *other, gentity_t *activator )
+qboolean HRepeater_Activate( gentity_t *self, gentity_t *activator )
 {
-  if( self->health <= 0 || !self->spawned )
-    return;
+  if( self->occupation.other && self->occupation.other->client )
+    G_GiveClientMaxAmmo( self->occupation.other, qtrue );
 
-  if( other && other->client )
-    G_GiveClientMaxAmmo( other, qtrue );
+  return qfalse;
+}
+
+/*
+================
+HRepeater_CanActivate
+
+Custom canActivate for human power repeater
+================
+*/
+qboolean HRepeater_CanActivate( gentity_t *self, gclient_t *client )
+{
+  if( !BG_Weapon( client->ps.weapon )->usesEnergy ||
+      BG_Weapon( client->ps.weapon )->infiniteAmmo )
+    return qfalse;
+  else
+    return qtrue;
 }
 
 /*
@@ -2329,20 +2352,11 @@ HArmoury_Activate
 Called when a human activates an Armoury
 ================
 */
-void HArmoury_Activate( gentity_t *self, gentity_t *other, gentity_t *activator )
+qboolean HArmoury_Activate( gentity_t *self, gentity_t *activator )
 {
-  if( self->spawned )
-  {
-    //only humans can activate this
-    if( activator->client->ps.stats[ STAT_TEAM ] != TEAM_HUMANS )
-      return;
+  G_TriggerMenu( activator->client->ps.clientNum, MN_H_ARMOURY );
 
-    //if this is powered then call the armoury menu
-    if( self->powered )
-      G_TriggerMenu( activator->client->ps.clientNum, MN_H_ARMOURY );
-    else
-      G_TriggerMenu( activator->client->ps.clientNum, MN_H_NOTPOWERED );
-  }
+  return qfalse;
 }
 
 /*
@@ -2547,10 +2561,12 @@ void HMedistat_Think( gentity_t *self )
       {
         self->enemy->health++;
         self->enemy->client->ps.stats[ STAT_HEALTH ] = self->enemy->health;
+        self->enemy->client->pers.infoChangeTime = level.time;
       }
 
-      //if they're completely healed, give them a medkit
-      if( self->enemy->health >= self->enemy->client->ps.stats[ STAT_MAX_HEALTH ] )
+      //if they're completely healed and have full stamina, give them a medkit
+      if( self->enemy->health >= self->enemy->client->ps.stats[ STAT_MAX_HEALTH ] &&
+          self->enemy->client->ps.stats[ STAT_STAMINA ] >= STAMINA_MAX )
       {
         if( !BG_InventoryContainsUpgrade( UP_MEDKIT, self->enemy->client->ps.stats ) )
           BG_AddUpgradeToInventory( UP_MEDKIT, self->enemy->client->ps.stats );
@@ -4262,6 +4278,12 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
   built->splashMethodOfDeath = BG_Buildable( buildable )->meansOfDeath;
 
   built->nextthink = BG_Buildable( buildable )->nextthink;
+  
+  built->activation.flags = BG_Buildable( buildable )->activationFlags;
+  built->occupation.flags = BG_Buildable( buildable )->occupationFlags;
+  built->occupation.pm_type = BG_Buildable( buildable )->activationPm_type;
+  built->occupation.contents = BG_Buildable( buildable )->activationContents;
+  built->occupation.clipMask = BG_Buildable( buildable )->activationClipMask;
 
   built->takedamage = qtrue;
   built->spawned = qfalse;
@@ -4349,7 +4371,7 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
     case BA_H_ARMOURY:
       built->think = HArmoury_Think;
       built->die = HSpawn_Die;
-      built->use = HArmoury_Activate;
+      built->activation.activate = HArmoury_Activate;
       break;
 
     case BA_H_DCC:
@@ -4365,14 +4387,16 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
     case BA_H_REACTOR:
       built->think = HReactor_Think;
       built->die = HSpawn_Die;
-      built->use = HRepeater_Use;
+      built->activation.activate = HRepeater_Activate;
+      built->activation.canActivate = HRepeater_CanActivate;
       built->powered = built->active = qtrue;
       break;
 
     case BA_H_REPEATER:
       built->think = HRepeater_Think;
       built->die = HRepeater_Die;
-      built->use = HRepeater_Use;
+      built->activation.activate = HRepeater_Activate;
+      built->activation.canActivate = HRepeater_CanActivate;
       built->count = -1;
       break;
 
@@ -4381,8 +4405,8 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
       break;
   }
 
-  built->r.contents = CONTENTS_BODY;
-  built->clipmask = MASK_PLAYERSOLID;
+  G_SetContents( built, CONTENTS_BODY );
+  G_SetClipmask( built, MASK_PLAYERSOLID );
   built->enemy = NULL;
   built->s.weapon = BG_Buildable( buildable )->turretProjType;
 
@@ -5021,7 +5045,7 @@ void G_LayoutLoad( char *lstr )
     G_Printf( "ERROR: layout %s could not be opened\n", lstr );
     return;
   }
-  layoutHead = layout = BG_Alloc( len + 1 );
+  layoutHead = layout = BG_StackPoolAlloc( len + 1 );
   trap_FS_Read( layout, len, f );
   layout[ len ] = '\0';
   trap_FS_FCloseFile( f );
@@ -5073,7 +5097,7 @@ void G_LayoutLoad( char *lstr )
     }
     layout++;
   }
-  BG_Free( layoutHead );
+  BG_StackPoolFree( layoutHead );
 
   if( lstrPlusPtr )
   {
@@ -5222,8 +5246,12 @@ void G_BuildLogRevert( int id )
           {
             if( ent->s.eType == ET_BUILDABLE )
               G_LogPrintf( "revert: remove %d %s\n",
-                (int)( ent - g_entities ), BG_Buildable( ent->s.modelindex )->name );
+                           (int)( ent - g_entities ),
+                           BG_Buildable( ent->s.modelindex )->name );
             G_RemoveRangeMarkerFrom( ent );
+            if( ( ent->flags & FL_OCCUPIED ) && ent->occupation.occupant )
+              G_UnoccupyEnt( ent, ent->occupation.occupant,
+                             ent->occupation.occupant, qtrue );
             G_FreeEntity( ent );
             break;
           }
@@ -5373,4 +5401,3 @@ void G_UpdateBuildableRangeMarkers( void )
     trap_LinkEntity( e->rangeMarker );
   }
 }
-

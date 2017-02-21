@@ -72,34 +72,13 @@ void CG_BuildSolidList( void )
       continue;
     }
 
-    if( cent->nextState.solid && ent->eType != ET_MISSILE &&
-        !( cgs.sublimeMarkedBuildables && ( ent->eType == ET_BUILDABLE ) &&
-           ( ent->eFlags & EF_B_MARKED ) ) )
+    if( cent->nextState.solid && ent->eType != ET_MISSILE )
     {
       cg_solidEntities[ cg_numSolidEntities ] = cent;
       cg_numSolidEntities++;
       continue;
     }
   }
-}
-
-/*
-==========================
-CG_SublimeMarkedBuildables
-
-This adds or removes marked buildables from cg_solidEntities
-==========================
-*/
-void CG_SublimeMarkedBuildables( qboolean sublime )
-{
-  if( sublime )
-    cgs.sublimeMarkedBuildables = qtrue;
-  else
-    cgs.sublimeMarkedBuildables = qfalse;
-
-  CG_BuildSolidList( );
-
-  return;
 }
 
 /*
@@ -143,6 +122,10 @@ static void CG_ClipMoveToEntities ( const vec3_t start, const vec3_t mins,
 
     if ( astralMask & ent->eFlags )
       continue;      // EF_ASTRAL_NOCLIP flagged entities don't clip with ASTRALSOLID entities
+
+    if( cgs.sublimeMarkedBuildables && ( ent->eType == ET_BUILDABLE ) &&
+       ( ent->eFlags & EF_B_MARKED ) )
+      continue;      // ghost buildables ignore marked buildables
 
     if( ent->solid == SOLID_BMODEL )
     {
@@ -662,6 +645,8 @@ void CG_PredictPlayerState( void )
 
   cg_pmove.pmove_fixed = pmove_fixed.integer;// | cg_pmove_fixed.integer;
   cg_pmove.pmove_msec = pmove_msec.integer;
+  
+  cg_pmove.humanStaminaMode = cgs.humanStaminaMode;
 
   // Like the comments described above, a player's state is entirely
   // re-predicted from the last valid snapshot every client frame, which

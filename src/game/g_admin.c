@@ -72,7 +72,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
     },
 
     {"allready", G_admin_allready, qfalse, "allready",
-      "makes everyone ready in intermission or developer mode warmup",
+      "makes everyone ready in intermission or developer mode pre-game warmup",
       ""
     },
 
@@ -190,9 +190,15 @@ g_admin_cmd_t g_admin_cmds[ ] =
       ""
     },
 
-    {"playpool", G_admin_playpool, qfalse, "playpool",
+    {"playmap", G_admin_playmap, qtrue, "playmap",
+     "List and add to playmap queue.",
+     "^3mapname [layout] [flags]^7\n(Press TAB to complete map names!)"
+    },
+
+    {"playpool", G_admin_playpool, qtrue, "playpool",
       "Manage the playmap pool.",
-      "[^3add (mapname)^6|^3remove (mapname)^6|^3clear^6|^3list (pagenum)^6|^3reload^6|^3save^7]"
+      "[^3add (mapname)^6|^3remove (mapname)^6|^3clear^6|^3"
+     "list (pagenum)^6|^3reload^6|^3save^7]"
     },
 
     {"putteam", G_admin_putteam, qfalse, "putteam",
@@ -704,35 +710,35 @@ static void admin_default_levels( void )
   g_admin_level_t *l;
   int             level = 0;
 
-  l = g_admin_levels = BG_Alloc( sizeof( g_admin_level_t ) );
+  l = g_admin_levels = BG_Alloc0( sizeof( g_admin_level_t ) );
   l->level = level++;
   Q_strncpyz( l->name, "^4Unknown Player", sizeof( l->name ) );
   Q_strncpyz( l->flags,
     "listplayers admintest adminhelp time register",
     sizeof( l->flags ) );
 
-  l = l->next = BG_Alloc( sizeof( g_admin_level_t ) );
+  l = l->next = BG_Alloc0( sizeof( g_admin_level_t ) );
   l->level = level++;
   Q_strncpyz( l->name, "^5Server Regular", sizeof( l->name ) );
   Q_strncpyz( l->flags,
     "listplayers admintest adminhelp time",
     sizeof( l->flags ) );
 
-  l = l->next = BG_Alloc( sizeof( g_admin_level_t ) );
+  l = l->next = BG_Alloc0( sizeof( g_admin_level_t ) );
   l->level = level++;
   Q_strncpyz( l->name, "^6Team Manager", sizeof( l->name ) );
   Q_strncpyz( l->flags,
     "listplayers admintest adminhelp time putteam spec999",
     sizeof( l->flags ) );
 
-  l = l->next = BG_Alloc( sizeof( g_admin_level_t ) );
+  l = l->next = BG_Alloc0( sizeof( g_admin_level_t ) );
   l->level = level++;
   Q_strncpyz( l->name, "^2Junior Admin", sizeof( l->name ) );
   Q_strncpyz( l->flags,
     "listplayers admintest adminhelp time putteam spec999 kick mute ADMINCHAT",
     sizeof( l->flags ) );
 
-  l = l->next = BG_Alloc( sizeof( g_admin_level_t ) );
+  l = l->next = BG_Alloc0( sizeof( g_admin_level_t ) );
   l->level = level++;
   Q_strncpyz( l->name, "^3Senior Admin", sizeof( l->name ) );
   Q_strncpyz( l->flags,
@@ -740,7 +746,7 @@ static void admin_default_levels( void )
     "namelog ADMINCHAT",
     sizeof( l->flags ) );
 
-  l = l->next = BG_Alloc( sizeof( g_admin_level_t ) );
+  l = l->next = BG_Alloc0( sizeof( g_admin_level_t ) );
   l->level = level++;
   Q_strncpyz( l->name, "^1Server Operator", sizeof( l->name ) );
   Q_strncpyz( l->flags,
@@ -1156,7 +1162,7 @@ qboolean G_admin_readconfig( gentity_t *ent )
     admin_default_levels();
     return qfalse;
   }
-  cnf = BG_Alloc( len + 1 );
+  cnf = BG_StackPoolAlloc( len + 1 );
   cnf2 = cnf;
   trap_FS_Read( cnf, len, f );
   cnf[ len ] = '\0';
@@ -1175,9 +1181,9 @@ qboolean G_admin_readconfig( gentity_t *ent )
     if( !Q_stricmp( t, "[level]" ) )
     {
       if( l )
-        l = l->next = BG_Alloc( sizeof( g_admin_level_t ) );
+        l = l->next = BG_Alloc0( sizeof( g_admin_level_t ) );
       else
-        l = g_admin_levels = BG_Alloc( sizeof( g_admin_level_t ) );
+        l = g_admin_levels = BG_Alloc0( sizeof( g_admin_level_t ) );
       level_open = qtrue;
       admin_open = ban_open = command_open = qfalse;
       lc++;
@@ -1185,9 +1191,9 @@ qboolean G_admin_readconfig( gentity_t *ent )
     else if( !Q_stricmp( t, "[admin]" ) )
     {
       if( a )
-        a = a->next = BG_Alloc( sizeof( g_admin_admin_t ) );
+        a = a->next = BG_Alloc0( sizeof( g_admin_admin_t ) );
       else
-        a = g_admin_admins = BG_Alloc( sizeof( g_admin_admin_t ) );
+        a = g_admin_admins = BG_Alloc0( sizeof( g_admin_admin_t ) );
       admin_open = qtrue;
       level_open = ban_open = command_open = qfalse;
       ac++;
@@ -1195,9 +1201,9 @@ qboolean G_admin_readconfig( gentity_t *ent )
     else if( !Q_stricmp( t, "[ban]" ) )
     {
       if( b )
-        b = b->next = BG_Alloc( sizeof( g_admin_ban_t ) );
+        b = b->next = BG_Alloc0( sizeof( g_admin_ban_t ) );
       else
-        b = g_admin_bans = BG_Alloc( sizeof( g_admin_ban_t ) );
+        b = g_admin_bans = BG_Alloc0( sizeof( g_admin_ban_t ) );
       ban_open = qtrue;
       level_open = admin_open = command_open = qfalse;
       bc++;
@@ -1205,9 +1211,9 @@ qboolean G_admin_readconfig( gentity_t *ent )
     else if( !Q_stricmp( t, "[command]" ) )
     {
       if( c )
-        c = c->next = BG_Alloc( sizeof( g_admin_command_t ) );
+        c = c->next = BG_Alloc0( sizeof( g_admin_command_t ) );
       else
-        c = g_admin_commands = BG_Alloc( sizeof( g_admin_command_t ) );
+        c = g_admin_commands = BG_Alloc0( sizeof( g_admin_command_t ) );
       command_open = qtrue;
       level_open = admin_open = ban_open = qfalse;
       cc++;
@@ -1323,7 +1329,7 @@ qboolean G_admin_readconfig( gentity_t *ent )
       COM_ParseError( "unexpected token \"%s\"", t );
     }
   }
-  BG_Free( cnf2 );
+  BG_StackPoolFree( cnf2 );
   ADMP( va( "^3readconfig: ^7loaded %d levels, %d admins, %d bans, %d commands\n",
           lc, ac, bc, cc ) );
   if( lc == 0 )
@@ -1501,9 +1507,9 @@ qboolean G_admin_setlevel( gentity_t *ent )
   {
     for( a = g_admin_admins; a && a->next; a = a->next );
     if( a )
-      a = a->next = BG_Alloc( sizeof( g_admin_admin_t ) );
+      a = a->next = BG_Alloc0( sizeof( g_admin_admin_t ) );
     else
-      a = g_admin_admins = BG_Alloc( sizeof( g_admin_admin_t ) );
+      a = g_admin_admins = BG_Alloc0( sizeof( g_admin_admin_t ) );
     vic->client->pers.admin = a;
     Q_strncpyz( a->guid, vic->client->pers.guid, sizeof( a->guid ) );
   }
@@ -1613,10 +1619,10 @@ static void admin_create_ban( gentity_t *ent,
   if( b )
   {
     if( !b->next )
-      b = b->next = BG_Alloc( sizeof( g_admin_ban_t ) );
+      b = b->next = BG_Alloc0( sizeof( g_admin_ban_t ) );
   }
   else
-    b = g_admin_bans = BG_Alloc( sizeof( g_admin_ban_t ) );
+    b = g_admin_bans = BG_Alloc0( sizeof( g_admin_ban_t ) );
 
   Q_strncpyz( b->name, netname, sizeof( b->name ) );
   Q_strncpyz( b->guid, guid, sizeof( b->guid ) );
@@ -2497,7 +2503,6 @@ qboolean G_admin_explode( gentity_t *ent )
 
   int pid;
   char name[ MAX_NAME_LENGTH ], *reason, err[ MAX_STRING_CHARS ];
-  int minargc;
   gentity_t *vic;
 
   if( trap_Argc() < 2 )
@@ -2923,14 +2928,17 @@ qboolean G_admin_allready( gentity_t *ent )
       cl->ps.stats[ STAT_READY ] = 1;
     }
 
-    G_LevelReady();
+    AP( va( "print \"^3allready: ^7%s ^7decided to end pre-game warmup early\n\"",
+            ent ? ent->client->pers.netname : "console" ) );
+    
+    G_LevelRestart( qtrue );
 
     return qtrue;
   }
 
   if( !level.intermissiontime )
   {
-    ADMP( "^3allready: ^7this command is only valid during intermission\n" );
+    ADMP( "^3allready: ^7this command is only valid during intermission or developer mode pre-game warmup\n" );
     return qfalse;
   }
 
@@ -2977,11 +2985,13 @@ qboolean G_admin_endvote( gentity_t *ent )
     return qfalse;
   }
   admin_log( BG_TeamName( team ) );
-  G_EndVote( team, cancel );
   if( team == TEAM_NONE )
     AP( msg );
   else
     G_TeamCommand( team, msg );
+
+  G_EndVote( team, cancel );
+
   return qtrue;
 }
 
@@ -3590,6 +3600,74 @@ qboolean G_admin_pause( gentity_t *ent )
   return qtrue;
 }
 
+qboolean G_admin_playmap( gentity_t *ent )
+{
+  char   cmd[ MAX_TOKEN_CHARS ],
+         map[ MAX_TOKEN_CHARS ], layout[ MAX_TOKEN_CHARS ],
+         extra[ MAX_TOKEN_CHARS ];
+  char   *flags;
+  playMapError_t playMapError;
+  g_admin_cmd_t *admincmd;
+  
+  trap_Argv( 0, cmd, sizeof( cmd ) );
+
+  if( trap_Argc( ) < 2 )
+  {
+    // TODO: [layout [flags]] announce them once they're implemented
+
+    // overwrite with current map
+    trap_Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
+
+    ADMP( va( S_COLOR_YELLOW "playmap" S_COLOR_WHITE ": Current map is "
+	      S_COLOR_CYAN "%s" S_COLOR_WHITE ".\n", map ) );
+    G_PrintPlayMapQueue( ent );
+    ADMP( "\n" );
+
+    G_PrintPlayMapPool( ent, -1, qfalse );
+
+    // Get command structure
+    admincmd = G_admin_cmd( "playmap" );
+    ADMP( va( S_COLOR_YELLOW "\nusage: " S_COLOR_WHITE "%s %s\n",
+	      admincmd->keyword, admincmd->syntax ) );
+    
+    return qtrue;
+  }
+
+  // Else if argc > 1
+  trap_Argv( 1, map, sizeof( map ) );
+  trap_Argv( 2, layout, sizeof( layout ) );
+  trap_Argv( 3, extra, sizeof( extra ) );
+  if( *layout == '+' || *layout == '-' )
+  {
+    flags = ConcatArgs( 2 );
+    *layout = '\0';
+  } else
+    flags = ConcatArgs( 3 );
+
+  if( g_debugPlayMap.integer > 0 )
+    trap_SendServerCommand( ent-g_entities,
+			    va( "print \"DEBUG: cmd=%s\n"
+				"       map=%s\n"
+				"       layout=%s\n"
+				"       flags=%s\n\"",
+				cmd, map, layout, flags ) );
+
+  playMapError = G_PlayMapEnqueue( map, layout,
+				   ent ? ent->client->pers.netname : "console",
+				   flags, ent );
+  if (playMapError.errorCode == PLAYMAP_ERROR_NONE)
+  {
+    trap_SendServerCommand( -1,
+			    va( "print \"%s" S_COLOR_WHITE
+				" added map " S_COLOR_CYAN "%s" S_COLOR_WHITE
+				" to playlist\n\"",
+				ent ? ent->client->pers.netname : "console", map ) );
+  } else
+    ADMP( va( "%s\n", playMapError.errorMessage ) );
+
+  return qtrue;
+}
+
 qboolean G_admin_playpool( gentity_t *ent )
 {
   char           cmd[ MAX_TOKEN_CHARS ],
@@ -3604,6 +3682,9 @@ qboolean G_admin_playpool( gentity_t *ent )
 
   if( trap_Argc( ) < 2 )
   {
+    G_PrintPlayMapPool( ent, -1, qfalse );
+    ADMP( "\n" );
+
     ADMP( va( S_COLOR_YELLOW "usage: " S_COLOR_WHITE "%s %s\n",
 	      admincmd->keyword, admincmd->syntax ) );
     return qfalse;
@@ -3684,7 +3765,7 @@ qboolean G_admin_playpool( gentity_t *ent )
       page = atoi( map ) - 1;
     } else page = 0;
 
-    G_PrintPlayMapPool( NULL, page );
+    G_PrintPlayMapPool( ent, page, qfalse );
     ADMP( "\n" );
 
     return qtrue;
@@ -4520,11 +4601,17 @@ void G_admin_buffer_end( gentity_t *ent )
 
 void G_admin_buffer_print( gentity_t *ent, char *m )
 {
+
   // 1022 - strlen("print 64 \"\"") - 1
-  if( strlen( m ) + strlen( g_bfb ) >= 1009 )
+#define MAX_CMDBUF 1009
+
+  // Loop until m is consumed
+  while( strlen( m ) + strlen( g_bfb ) >= MAX_CMDBUF )
   {
     ADMP( g_bfb );
     g_bfb[ 0 ] = '\0';
+    Q_strcat( g_bfb, MAX_CMDBUF, m );
+    m += MIN( strlen( m ), MAX_CMDBUF );
   }
   Q_strcat( g_bfb, sizeof( g_bfb ), m );
 }
@@ -4562,7 +4649,6 @@ void G_admin_cleanup( void )
     BG_Free( c );
   }
   g_admin_commands = NULL;
-  BG_DefragmentMemory( );
 }
 
 qboolean G_admin_seen( gentity_t *ent )

@@ -221,6 +221,89 @@ qboolean CG_ConsoleCommand( void )
   return qtrue;
 }
 
+/*
+==================
+CG_CompletePlayMap_f
+==================
+*/
+void CG_CompletePlayMap_f( int argNum ) {
+#ifndef MODULE_INTERFACE_11
+  if( argNum == 2 )
+    trap_Field_CompleteList( cgs.playMapPoolJson );
+#endif
+}
+
+/*
+==================
+CG_CompleteCallVote_f
+==================
+*/
+void CG_CompleteCallVote_f( int argNum ) {
+#ifndef MODULE_INTERFACE_11
+  switch( argNum )
+  {
+    case 2:
+      trap_Field_CompleteList(
+	"["
+	"\"allowbuild\","
+	"\"cancel\","
+	"\"denybuild\","
+	"\"draw\","
+	"\"extend\","
+	"\"kick\","
+	"\"map\","
+	"\"map_restart\","
+	"\"mute\","
+	"\"nextmap\","
+	"\"poll\","
+	"\"sudden_death\","
+	"\"unmute\" ]" );
+      break;
+    case 3:
+      if( !Q_stricmp( CG_Argv( 1 ), "map" ) ||
+	  !Q_stricmp( CG_Argv( 1 ), "nextmap" ) )
+	// TODO: this should be the complete list of server maps, not
+	// just the playpool
+	trap_Field_CompleteList( cgs.playMapPoolJson );
+      break;
+  }
+#endif
+}
+
+static consoleCommandCompletions_t commandCompletions[ ] =
+{
+  { "callvote", CG_CompleteCallVote_f },
+  { "playmap", CG_CompletePlayMap_f },
+};
+
+/*
+=================
+CG_Console_CompleteArgument
+
+Try to complete the client command line argument given in
+argNum. Returns true if a completion function is found in CGAME,
+otherwise client tries another completion method.
+
+The string has been tokenized and can be retrieved with
+Cmd_Argc() / Cmd_Argv()
+=================
+*/
+qboolean CG_Console_CompleteArgument( int argNum )
+{
+  consoleCommandCompletions_t *cmd;
+
+  // Skip command prefix character
+  cmd = bsearch( CG_Argv( 0 ) + 1, commandCompletions,
+    ARRAY_LEN( commandCompletions ), sizeof( commandCompletions[ 0 ] ),
+    cmdcmp );
+
+  if( !cmd )
+    return qfalse;
+
+  cmd->function( argNum );
+  return qtrue;
+}
+
 
 /*
 =================
@@ -276,4 +359,5 @@ void CG_InitConsoleCommands( void )
   trap_AddCommand( "deconstruct" );
   trap_AddCommand( "ignore" );
   trap_AddCommand( "unignore" );
+  
 }

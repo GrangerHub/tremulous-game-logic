@@ -422,8 +422,8 @@ static void Give_Class( gentity_t *ent, char *s )
     return;
   }
 
-  ent->client->pers.evolveHealthFraction 
-      = (float)ent->client->ps.stats[ STAT_HEALTH ] 
+  ent->client->pers.evolveHealthFraction
+      = (float)ent->client->ps.stats[ STAT_HEALTH ]
       / (float)BG_Class( currentClass )->health;
 
   if( ent->client->pers.evolveHealthFraction < 0.0f )
@@ -486,7 +486,7 @@ void Cmd_Give_f( gentity_t *ent )
   {
     // FIXME I am hideous :#(
     ADMP( "^3give: ^7usage: give [what]\n\nNormal\n\n"
-          "  health\n  funds <amount>\n  stamina\n  poison\n  gas\n  ammo\n" 
+          "  health\n  funds <amount>\n  stamina\n  poison\n  gas\n  ammo\n"
           "\n^3Classes\n\n"
           "  level0\n  level1\n  level1upg\n  level2\n  level2upg\n  level3\n  level3upg\n  level4\n  builder\n  builderupg\n"
           "  human_base\n  human_bsuit\n  "
@@ -517,7 +517,7 @@ void Cmd_Give_f( gentity_t *ent )
     else
     {
       credits = atof( name + 6 ) *
-        ( ent->client->pers.teamSelection == 
+        ( ent->client->pers.teamSelection ==
           TEAM_ALIENS ? ALIEN_CREDITS_PER_KILL : 1.0f );
 
       // clamp credits manually, as G_AddCreditToClient() expects a short int
@@ -640,23 +640,29 @@ argv(0) noclip
 void Cmd_Noclip_f( gentity_t *ent )
 {
   char  *msg;
-
-  if( ent->client->noclip )
+  if ( ent->client->ps.eFlags & EF_OCCUPYING )
   {
-    msg = "noclip OFF\n";
-    ent->r.contents = ent->client->cliprcontents;
-  }
-  else
+    msg = "noclip is disabled while occupying an activation entity";
+  } else
   {
-    msg = "noclip ON\n";
-    ent->client->cliprcontents = ent->r.contents;
-    ent->r.contents = 0;
+    if( ent->client->noclip )
+    {
+      msg = "noclip OFF\n";
+      ent->r.contents = ent->client->cliprcontents;
+    }
+    else
+    {
+      msg = "noclip ON\n";
+      ent->client->cliprcontents = ent->r.contents;
+      ent->r.contents = 0;
+    }
+
+    ent->client->noclip = !ent->client->noclip;
+
+    if( ent->r.linked )
+      trap_LinkEntity( ent );
   }
 
-  ent->client->noclip = !ent->client->noclip;
-
-  if( ent->r.linked )
-    trap_LinkEntity( ent );
 
   trap_SendServerCommand( ent - g_entities, va( "print \"%s\"", msg ) );
 }
@@ -671,6 +677,10 @@ void Cmd_Kill_f( gentity_t *ent )
 {
   if( g_cheats.integer )
   {
+    // reset any activation entities the player might be occupying
+    if( ent->client->ps.eFlags & EF_OCCUPYING )
+      G_ResetOccupation( ent->occupation.occupied, ent );
+
     ent->client->ps.stats[ STAT_HEALTH ] = ent->health = 0;
     player_die( ent, ent, ent, 100000, MOD_SUICIDE );
   }
@@ -806,6 +816,39 @@ void Cmd_Team_f( gentity_t *ent )
 
   // Apply the change
   G_ChangeTeam( ent, team );
+
+  // Update player ready states if in warmup
+  if( IS_WARMUP )
+    G_LevelReady();
+}
+
+/*
+=================
+Cmd_SpecMe_f
+=================
+*/
+void Cmd_SpecMe_f( gentity_t *ent )
+{
+  qboolean  force = G_admin_permission( ent, ADMF_FORCETEAMCHANGE );
+
+  // stop team join spam
+  if( ent->client->pers.teamChangeTime &&
+      level.time - ent->client->pers.teamChangeTime < 1000 )
+    return;
+
+  // stop switching teams for gameplay exploit reasons by enforcing a long
+  // wait before they can come back
+  if( !force && !g_cheats.integer && ent->client->pers.secondsAlive &&
+      level.time - ent->client->pers.teamChangeTime < 30000 )
+  {
+    trap_SendServerCommand( ent-g_entities,
+      va( "print \"You must wait another %d seconds before changing teams again\n\"",
+        (int) ( ( 30000 - ( level.time - ent->client->pers.teamChangeTime ) ) / 1000.f ) ) );
+    return;
+  }
+
+  // Apply the change
+  G_ChangeTeam( ent, TEAM_NONE );
 
   // Update player ready states if in warmup
   if( IS_WARMUP )
@@ -1280,7 +1323,7 @@ void Cmd_CallVote_f( gentity_t *ent )
   int    id = -1;
   team_t team;
   qboolean voteYes = qtrue;
-  
+
   trap_Argv( 0, cmd, sizeof( cmd ) );
   trap_Argv( 1, vote, sizeof( vote ) );
   trap_Argv( 2, arg, sizeof( arg ) );
@@ -1476,7 +1519,7 @@ void Cmd_CallVote_f( gentity_t *ent )
 
       Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
         "mute %d", id );
-      Com_sprintf( level.voteDisplayString[ team ], sizeof( level.voteDisplayString[ team ] ), 
+      Com_sprintf( level.voteDisplayString[ team ], sizeof( level.voteDisplayString[ team ] ),
                    "^4[^3Mute^4]^5 player '%s' (Needs > %d%% of %s)", name, level.voteThreshold[ team ],
                    g_impliedVoting.integer ? "active players" : "total votes" );
 
@@ -1499,7 +1542,7 @@ void Cmd_CallVote_f( gentity_t *ent )
 
       Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
         "unmute %d", id );
-      Com_sprintf( level.voteDisplayString[ team ], sizeof( level.voteDisplayString[ team ] ), 
+      Com_sprintf( level.voteDisplayString[ team ], sizeof( level.voteDisplayString[ team ] ),
                    "^4[^3Unmute^4] ^5player '%s' (Needs > %d%% of %s)", name, level.voteThreshold[ team ],
                    g_impliedVoting.integer ? "active players" : "total votes" );
 
@@ -1520,7 +1563,7 @@ void Cmd_CallVote_f( gentity_t *ent )
           return;
         }
 
-        
+
       }
 
       Com_sprintf( level.voteDisplayString[ team ], sizeof( level.voteDisplayString[ team ] ),
@@ -1645,12 +1688,49 @@ void Cmd_CallVote_f( gentity_t *ent )
 
       level.voteType[ team ] = SUDDEN_DEATH_VOTE;
     }
+    else if( !Q_stricmp( vote, "extend" ) )
+    {
+      if( !g_extendVotesPercent.integer )
+      {
+        trap_SendServerCommand( ent-g_entities, "print \"Extend votes have been disabled\n\"" );
+        return;
+      }
+      if( g_extendVotesCount.integer
+          && level.extendVoteCount >= g_extendVotesCount.integer )
+      {
+        trap_SendServerCommand( ent-g_entities,
+                                va( "print \"callvote: Maximum number of %d extend votes has been reached\n\"",
+                                    g_extendVotesCount.integer ) );
+        return;
+      }
+      if( !g_timelimit.integer ) {
+        trap_SendServerCommand( ent-g_entities,
+                                "print \"This match has no timelimit so extend votes wont work\n\"" );
+        return;
+      }
+      if( level.time - level.startTime <
+          ( g_timelimit.integer - g_extendVotesTime.integer / 2 ) * 60000 )
+      {
+        trap_SendServerCommand( ent-g_entities,
+                                va( "print \"callvote: Extend votes only allowed with less than %d minutes remaining\n\"",
+                                    g_extendVotesTime.integer / 2 ) );
+        return;
+      }
+      level.extendVoteCount++;
+      level.voteThreshold[ team ] = g_extendVotesPercent.integer;
+      Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
+                   "extend %d", g_extendVotesTime.integer );
+      Com_sprintf( level.voteDisplayString[ team ], sizeof( level.voteDisplayString[ team ] ),
+                   "^4[^1Extend^4] ^5the timelimit by %d minutes (Needs > %d%% of %s)",
+                   g_extendVotesTime.integer, g_extendVotesPercent.integer,
+                   g_impliedVoting.integer ? "active players" : "total votes" );
+    }
     else
     {
       trap_SendServerCommand( ent-g_entities, "print \"Invalid vote string\n\"" );
       trap_SendServerCommand( ent-g_entities, "print \"Valid vote commands "
-          "are: map, nextmap, map_restart, draw, sudden_death, kick, poll, mute, "
-          "unmute and cancel\n" );
+          "are: map, nextmap, map_restart, draw, sudden_death, extend, kick, poll, mute, "
+          "unmute, and cancel\n" );
       return;
     }
   }
@@ -2093,6 +2173,12 @@ void Cmd_Class_f( gentity_t *ent )
         return;
       }
 
+      if ( ent->client->ps.eFlags & EF_OCCUPYING )
+      {
+        G_TriggerMenu( clientNum, MN_A_NOEROOM );
+        return;
+      }
+
       if( ent->client->sess.spectatorState == SPECTATOR_NOT &&
           ( currentClass == PCL_ALIEN_BUILDER0 ||
             currentClass == PCL_ALIEN_BUILDER0_UPG ) &&
@@ -2119,6 +2205,15 @@ void Cmd_Class_f( gentity_t *ent )
             ent->client->pers.evolveHealthFraction = 0.0f;
           else if( ent->client->pers.evolveHealthFraction > 1.0f )
             ent->client->pers.evolveHealthFraction = 1.0f;
+
+          ent->client->pers.evolveChargeStaminaFraction = 
+                          (float)ent->client->ps.stats[ STAT_STAMINA ] /
+                          (float)BG_Class( currentClass )->chargeStaminaMax;
+
+          if( ent->client->pers.evolveChargeStaminaFraction < 0.0f )
+            ent->client->pers.evolveChargeStaminaFraction = 0.0f;
+          else if( ent->client->pers.evolveChargeStaminaFraction > 1.0f )
+            ent->client->pers.evolveChargeStaminaFraction = 1.0f;
 
           //remove credit
           G_AddCreditToClient( ent->client, -cost, qtrue );
@@ -2377,6 +2472,12 @@ void Cmd_Buy_f( gentity_t *ent )
   upgrade_t upgrade;
   qboolean  energyOnly;
 
+  if( ent->client->ps.eFlags & EF_OCCUPYING )
+  {
+    trap_SendServerCommand( ent-g_entities, "print \"You can't buy while occupying another structure\n\"" );
+    return;
+  }
+
   trap_Argv( 1, s, sizeof( s ) );
 
   weapon = BG_WeaponByName( s )->number;
@@ -2569,6 +2670,12 @@ void Cmd_Sell_f( gentity_t *ent )
   weapon_t  weapon;
   upgrade_t upgrade;
 
+  if( ent->client->ps.eFlags & EF_OCCUPYING )
+  {
+    trap_SendServerCommand( ent-g_entities, "print \"You can't sell while occupying another structure\n\"" );
+    return;
+  }
+
   trap_Argv( 1, s, sizeof( s ) );
 
   //no armoury nearby
@@ -2753,87 +2860,24 @@ void Cmd_Build_f( gentity_t *ent )
 
   ent->client->ps.stats[ STAT_BUILDABLE ] = buildable;
 
-  if( 1 )
+  dist = BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->buildDist;
+
+  //these are the errors displayed when the builder first selects something to use
+  switch( G_CanBuild( ent, buildable, dist, origin, normal, &groundEntNum ) )
   {
-    dynMenu_t err;
-    dist = BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->buildDist;
+    // can place right away, set the blueprint and the valid togglebit
+    case IBE_NONE:
+    case IBE_TNODEWARN:
+    case IBE_RPTNOREAC:
+    case IBE_RPTPOWERHERE:
+    case IBE_SPWNWARN:
+      ent->client->ps.stats[ STAT_BUILDABLE ] |= SB_VALID_TOGGLEBIT;
+      break;
 
-    //these are the errors displayed when the builder first selects something to use
-    switch( G_CanBuild( ent, buildable, dist, origin, normal, &groundEntNum ) )
-    {
-      // can place right away, set the blueprint and the valid togglebit
-      case IBE_NONE:
-      case IBE_TNODEWARN:
-      case IBE_RPTNOREAC:
-      case IBE_RPTPOWERHERE:
-      case IBE_SPWNWARN:
-        err = MN_NONE;
-        ent->client->ps.stats[ STAT_BUILDABLE ] |= SB_VALID_TOGGLEBIT;
-        break;
-
-      // can't place yet but maybe soon: start with valid togglebit off
-      case IBE_NORMAL:
-        err = MN_B_NORMAL;
-        break;
-
-      case IBE_NOCREEP:
-        err = MN_A_NOCREEP;
-        break;
-
-      case IBE_NOROOM:
-        err = MN_B_NOROOM;
-        break;
-
-      case IBE_NOOVERMIND:
-        err = MN_A_NOOVMND;
-        break;
-
-      case IBE_NOPOWERHERE:
-        err = MN_NONE;
-        break;
-
-      case IBE_NOALIENBP:
-        err = MN_A_NOBP;
-        break;
-
-      case IBE_ONEOVERMIND:
-        err = MN_A_ONEOVERMIND;
-        break;
-
-      case IBE_ONEREACTOR:
-        err = MN_H_ONEREACTOR;
-        break;
-
-      case IBE_NOHUMANBP:
-        err = MN_H_NOBP;
-        break;
-
-      case IBE_NODCC:
-        err = MN_H_NODCC;
-        break;
-
-      case IBE_PERMISSION:
-        err = MN_B_NORMAL;
-        break;
-
-      case IBE_LASTSPAWN:
-        err = MN_B_LASTSPAWN;
-        break;
-
-      case IBE_BLOCKEDBYENEMY:
-        err = MN_B_BLOCKEDBYENEMY;
-        break;
-
-      default:
-        err = -1; // stop uninitialised warning
-        break;
-    }
-
-    if( err != MN_NONE && !ent->client->pers.disableBlueprintErrors )
-      G_TriggerMenu( ent->client->ps.clientNum, err );
+    // can't place yet but maybe soon: start with valid togglebit off
+    default:
+      break;
   }
-  else
-    G_TriggerMenu( ent->client->ps.clientNum, MN_B_CANNOT );
 }
 
 /*
@@ -3396,7 +3440,7 @@ void Cmd_ListMaps_f( gentity_t *ent )
   ADMBP( ".\n" );
   ADMBP_end( );
 }
- 
+
 /*
 =================
 Cmd_ListModels_f
@@ -3577,7 +3621,7 @@ void Cmd_Share_f( gentity_t *ent )
   }
 
   // player has no credits
-  if( shareAmount < 1 )
+  if( shareAmount <= 0 )
   {
     ADMP( va( "%s: Earn some more first, you lazy bum!\n", cmd ) );
     return;
@@ -3635,6 +3679,131 @@ void Cmd_Share_f( gentity_t *ent )
 
 /*
 =================
+G_DonateCredits
+
+Used by Cmd_Donate_f and by g_overflowFundsj
+=================
+*/
+int G_DonateCredits( gclient_t *client, int value, qboolean verbos )
+{
+  char *type;
+  int i, divisor, portion, new_credits, total=0, max,
+      amounts[ MAX_CLIENTS ], totals[ MAX_CLIENTS ], creditConversion;
+  qboolean donated = qtrue;
+  gentity_t *ent;
+
+  if( !client )
+    return 0;
+
+  if( client->pers.teamSelection == TEAM_ALIENS )
+  {
+    divisor = level.numAlienClients - 1;
+    max = ALIEN_MAX_FRAGS * ALIEN_CREDITS_PER_KILL;
+    type = "evo(s)";
+    creditConversion = ALIEN_CREDITS_PER_KILL;
+  }
+  else if( client->pers.teamSelection == TEAM_HUMANS )
+  {
+    divisor = level.numHumanClients - 1;
+    max = HUMAN_MAX_CREDITS;
+    type = "credit(s)";
+    creditConversion = 1;
+  }
+  else
+    return 0;
+
+  if( divisor < 1 )
+    return 0;
+
+  if( value <= 0 )
+    return 0;
+
+  for( i = 0; i < level.maxclients; i++ )
+  {
+    amounts[ i ] = 0;
+    totals[ i ] = 0;
+  }
+
+  // determine donation amounts for each client
+  total = value;
+  while( donated && value )
+  {
+    donated = qfalse;
+
+    if( value >= creditConversion )
+    {
+      portion = value / divisor;
+      if( portion < creditConversion )
+        portion = creditConversion;
+    } else
+      portion = value;
+
+    for( i = 0; i < level.maxclients; i++ )
+    {
+      if( level.clients[ i ].pers.connected == CON_CONNECTED &&
+          client != level.clients + i &&
+          level.clients[ i ].pers.teamSelection ==
+          client->pers.teamSelection  &&
+          level.clients[ i ].pers.credit < max )
+      {
+
+        new_credits = level.clients[ i ].pers.credit + portion;
+        amounts[ i ] = portion;
+        totals[ i ] += portion;
+
+        if( new_credits > max )
+        {
+          amounts[ i ] -= new_credits - max;
+          totals[ i ] -= new_credits - max;
+          new_credits = max;
+        }
+
+        if( amounts[ i ] )
+        {
+          G_AddCreditToClient( &(level.clients[ i ]), amounts[ i ], qtrue );
+          donated = qtrue;
+          value -= amounts[ i ];
+          if( value < portion )
+          {
+            if( value > 0 )
+              portion = value;
+            else
+              break;
+          }
+        }
+      }
+    }
+  }
+
+  if( verbos )
+  {
+    // transfer funds
+    for( i = 0; i < level.maxclients; i++ )
+    {
+      if( totals[ i ] )
+      {
+        trap_SendServerCommand( i,
+            va( "print \"%s^7 donated %f %s to you, don't forget to say 'thank you'!\n\"",
+                client->pers.netname,
+                ( ( (double)totals[ i ] ) /
+                  ( (double)( creditConversion ) ) ), type ) );
+      }
+    }
+
+    if( total - value )
+    {
+      ent = &g_entities[ client->ps.clientNum];
+      ADMP( va( "Donated %f %s to the cause.\n",
+                ( ( (double)( total - value ) ) /
+                  ( (double)( creditConversion ) )  ), type ) );
+    }
+  }
+
+  return total -value;
+}
+
+/*
+=================
 Cmd_Donate_f
 
 Alms for the poor
@@ -3642,10 +3811,8 @@ Alms for the poor
 */
 void Cmd_Donate_f( gentity_t *ent )
 {
-   char cmd[ MAX_TOKEN_CHARS ], donateAmount[ MAX_TOKEN_CHARS ], *type;
-   int i, value, divisor, portion, new_credits, total=0, max,
-       amounts[ MAX_CLIENTS ], totals[ MAX_CLIENTS ];
-   qboolean donated = qtrue;
+   char cmd[ MAX_TOKEN_CHARS ], donateAmount[ MAX_TOKEN_CHARS ];
+   int value, divisor, amountDonated;
 
   if( !ent->client )
     return;
@@ -3659,17 +3826,9 @@ void Cmd_Donate_f( gentity_t *ent )
   }
 
   if( ent->client->pers.teamSelection == TEAM_ALIENS )
-  {
     divisor = level.numAlienClients - 1;
-    max = ALIEN_MAX_FRAGS;
-    type = "evo(s)";
-  }
   else if( ent->client->pers.teamSelection == TEAM_HUMANS )
-  {
     divisor = level.numHumanClients - 1;
-    max = HUMAN_MAX_CREDITS;
-    type = "credit(s)";
-  }
   else
   {
     ADMP( va( "%s: spectators cannot be so gracious\n", cmd ) );
@@ -3691,12 +3850,11 @@ void Cmd_Donate_f( gentity_t *ent )
   trap_Argv( 1, donateAmount, sizeof( donateAmount ) );
   value = atoi( donateAmount );
 
-  if( value > ent->client->pers.credit /
-      ( ent->client->pers.teamSelection == TEAM_ALIENS
-        ? ALIEN_CREDITS_PER_KILL : 1 ) )
-    value = ent->client->pers.credit /
-      ( ent->client->pers.teamSelection == TEAM_ALIENS
-        ? ALIEN_CREDITS_PER_KILL : 1 );
+  if( ent->client->pers.teamSelection == TEAM_ALIENS )
+    value *= ALIEN_CREDITS_PER_KILL;
+
+  if( value > ent->client->pers.credit )
+    value = ent->client->pers.credit;
 
   if( value <= 0 )
   {
@@ -3704,69 +3862,9 @@ void Cmd_Donate_f( gentity_t *ent )
     return;
   }
 
-  for( i = 0; i < level.maxclients; i++ )
-  {
-    amounts[ i ] = 0;
-    totals[ i ] = 0;
-  }
+  amountDonated = G_DonateCredits( ent->client, value, qtrue );
 
-  // determine donation amounts for each client
-  total = value;
-  while( donated && value )
-  {
-    donated = qfalse;
-    portion = value / divisor;
-    if( portion < 1 )
-      portion = 1;
-    for( i = 0; i < level.maxclients; i++ )
-    {
-      if( level.clients[ i ].pers.connected == CON_CONNECTED &&
-          ent->client != level.clients + i &&
-          level.clients[ i ].pers.teamSelection ==
-          ent->client->pers.teamSelection )
-      {
-        new_credits = level.clients[ i ].pers.credit /
-          ( ent->client->pers.teamSelection == TEAM_ALIENS
-            ? ALIEN_CREDITS_PER_KILL : 1 ) + portion;
-        amounts[ i ] = portion;
-        totals[ i ] += portion;
-
-        if( new_credits > max )
-        {
-          amounts[ i ] -= new_credits - max;
-          totals[ i ] -= new_credits - max;
-          new_credits = max;
-        }
-
-        if( amounts[ i ] )
-        {
-          G_AddCreditToClient( &(level.clients[ i ]), amounts[ i ] *
-              ( ent->client->pers.teamSelection == TEAM_ALIENS
-                ? ALIEN_CREDITS_PER_KILL : 1 ), qtrue );
-          donated = qtrue;
-          value -= amounts[ i ];
-          if( value < portion )
-            break;
-        }
-      }
-    }
-  }
-
-  // transfer funds
-  G_AddCreditToClient( ent->client, ( value - total ) *
-      ( ent->client->pers.teamSelection == TEAM_ALIENS
-        ? ALIEN_CREDITS_PER_KILL : 1 ), qtrue );
-  for( i = 0; i < level.maxclients; i++ )
-  {
-    if( totals[ i ] )
-    {
-      trap_SendServerCommand( i,
-          va( "print \"%s^7 donated %d %s to you, don't forget to say 'thank you'!\n\"",
-            ent->client->pers.netname, totals[ i ], type ) );
-    }
-  }
-
-  ADMP( va( "Donated %d %s to the cause.\n", total - value, type ) );
+  G_AddCreditToClient( ent->client, ( -amountDonated ) , qtrue );
 }
 
 /*
@@ -3833,8 +3931,6 @@ commands_t cmds[ ] = {
   { "mt", CMD_MESSAGE|CMD_INTERMISSION, Cmd_PrivateMessage_f },
   { "noclip", CMD_CHEAT_TEAM, Cmd_Noclip_f },
   { "notarget", CMD_CHEAT|CMD_TEAM|CMD_ALIVE, Cmd_Notarget_f },
-  { "playlist", CMD_MESSAGE, Cmd_PlayMap_f },
-  { "playmap", CMD_MESSAGE, Cmd_PlayMap_f },
   { "ready", CMD_TEAM, Cmd_Ready_f },
   { "reload", CMD_TEAM|CMD_ALIVE, Cmd_Reload_f },
   { "say", CMD_MESSAGE|CMD_INTERMISSION, Cmd_Say_f },
@@ -3844,6 +3940,7 @@ commands_t cmds[ ] = {
   { "sell", CMD_HUMAN|CMD_ALIVE, Cmd_Sell_f },
   { "setviewpos", CMD_CHEAT_TEAM, Cmd_SetViewpos_f },
   { "share", CMD_TEAM, Cmd_Share_f },
+  { "specme", CMD_TEAM, Cmd_SpecMe_f },
   { "team", 0, Cmd_Team_f },
   { "teamvote", CMD_TEAM, Cmd_Vote_f },
   { "test", CMD_CHEAT, Cmd_Test_f },
@@ -4087,88 +4184,6 @@ void Cmd_PrivateMessage_f( gentity_t *ent )
   }
 }
 
-void Cmd_PlayMap_f( gentity_t *ent )
-{
-  char   cmd[ MAX_TOKEN_CHARS ],
-    	 subcmd[ MAX_TOKEN_CHARS ],
-         map[ MAX_TOKEN_CHARS ],
-         layout[ MAX_TOKEN_CHARS ],
-         extra[ MAX_TOKEN_CHARS ];
-  char   *flags;
-  int 	 page;
-  playMapError_t playMapError;
-
-  trap_Argv( 0, cmd, sizeof( cmd ) );
-
-  if( trap_Argc( ) < 2 )
-  {
-    // TODO: [layout [flags]] announce them once they're implemented
-    ADMP( "To add maps to the playlist:\n"
-	  S_COLOR_YELLOW "  /playmap add " S_COLOR_WHITE "mapname [layout]\n"
-	  "To see a list of maps to choose:\n"
-	  S_COLOR_YELLOW "  /playmap pool " S_COLOR_WHITE "[pagenumber]\n\n" ); 
-      
-    G_PrintPlayMapQueue( ent );
-    ADMP( "\n" );
-
-    // overwrite with current map
-    trap_Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
-
-    ADMP( va( S_COLOR_YELLOW "playmap" S_COLOR_WHITE
-	      ": " S_COLOR_CYAN "%d" S_COLOR_WHITE " maps queued out of "
-	      S_COLOR_CYAN "%d" S_COLOR_WHITE " pool maps. "
-	      "Current map is " S_COLOR_CYAN "%s" S_COLOR_WHITE ".\n",
-	      G_GetPlayMapQueueLength( ),
-	      G_GetPlayMapPoolLength( ), map ) );
-    return;
-  }
-
-  // read the subcommand
-  trap_Argv( 1, subcmd, sizeof( subcmd ) );
-
-  if ( !Q_stricmp( subcmd, "pool" ))
-  {
-    if( trap_Argc( ) > 2 )
-    {
-      trap_Argv( 2, extra, sizeof( extra ) );
-      page = atoi( extra ) - 1;
-    } else page = 0;
-
-    G_PrintPlayMapPool( ent, page );
-    ADMP( "\n" );
-
-    return;
-  }
-  else if ( !Q_stricmp( subcmd, "add" ))
-  {    
-    trap_Argv( 2, map, sizeof( map ) );
-    trap_Argv( 3, layout, sizeof( layout ) );
-    trap_Argv( 4, extra, sizeof( extra ) );
-    flags = ConcatArgs( 3 );
-
-    if( g_debugPlayMap.integer > 0 )
-      trap_SendServerCommand( ent-g_entities,
-			      va( "print \"DEBUG: cmd=%s\n"
-				  "       map=%s\n"
-				  "       layout=%s\n"
-				  "       flags=%s\n\"",
-				  cmd, map, layout, flags ) );
-
-    playMapError = G_PlayMapEnqueue( map, layout, ent->client->pers.netname, flags, ent );
-    if (playMapError.errorCode == PLAYMAP_ERROR_NONE)
-    {
-      trap_SendServerCommand( -1, 
-			      va( "print \"%s" S_COLOR_WHITE
-				  " added map " S_COLOR_CYAN "%s" S_COLOR_WHITE
-				  " to playlist\n\"",
-				  ent->client->pers.netname, map ) );
-    } else 
-      ADMP( va( "%s\n", playMapError.errorMessage ) );
-  } else
-    ADMP( va( "Unknown playmap subcommand: %s\n",  subcmd ) );
-  
-}
-
 /*
 =================
 Cmd_AdminMessage_f
@@ -4201,4 +4216,3 @@ void Cmd_AdminMessage_f( gentity_t *ent )
 
   G_AdminMessage( ent, ConcatArgs( 1 ) );
 }
-

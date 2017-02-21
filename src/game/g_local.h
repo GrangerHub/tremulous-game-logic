@@ -41,15 +41,26 @@ typedef struct gclient_s gclient_t;
 
 #define INTERMISSION_DELAY_TIME 1000
 
-// gentity->flags
-#define FL_GODMODE        0x00000010
-#define FL_NOTARGET       0x00000020
-#define FL_TEAMSLAVE      0x00000400  // not the first on the team
-#define FL_NO_KNOCKBACK   0x00000800
-#define FL_DROPPED_ITEM   0x00001000
-#define FL_NO_BOTS        0x00002000  // spawn point not for bot use
-#define FL_NO_HUMANS      0x00004000  // spawn point just for bots
-#define FL_FORCE_GESTURE  0x00008000  // spawn point just for bots
+/*
+--------------------------------------------------------------------------------
+gentity->flags
+*/
+#define FL_GODMODE          0x00000010
+#define FL_NOTARGET         0x00000020
+#define FL_TEAMSLAVE        0x00000400  // not the first on the team
+#define FL_NO_KNOCKBACK     0x00000800
+#define FL_DROPPED_ITEM     0x00001000
+#define FL_NO_BOTS          0x00002000  // spawn point not for bot use
+#define FL_NO_HUMANS        0x00004000  // spawn point just for bots
+#define FL_FORCE_GESTURE    0x00008000  // spawn point just for bots
+#define FL_BOUNCE           0x00010000  // for missiles
+#define FL_BOUNCE_HALF      0x00020000  // for missiles
+#define FL_NO_BOUNCE_SOUND  0x00040000  // for missiles
+#define FL_OCCUPIED         0x00080000  // for occupiable entities
+
+/*
+--------------------------------------------------------------------------------
+*/
 
 // movers are things like doors, plats, buttons, etc
 typedef enum
@@ -70,6 +81,15 @@ typedef enum
   MODEL_2TO1
 } moverState_t;
 
+/*
+--------------------------------------------------------------------------------
+*/
+
+typedef struct{
+  unsigned int id;
+  gentity_t   *ptr;
+} gentity_id;
+
 //============================================================================
 
 struct gentity_s
@@ -80,6 +100,8 @@ struct gentity_s
   // DO NOT MODIFY ANYTHING ABOVE THIS, THE SERVER
   // EXPECTS THE FIELDS IN THAT ORDER!
   //================================
+
+  int               id; // Set on spawn and cleared on free, disconnect, or death.
 
   struct gclient_s  *client;        // NULL if not a client
 
@@ -151,6 +173,85 @@ struct gentity_s
   void              (*use)( gentity_t *self, gentity_t *other, gentity_t *activator );
   void              (*pain)( gentity_t *self, gentity_t *attacker, int damage );
   void              (*die)( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod );
+
+  // for activation entities
+  struct activation_s
+  {
+    int       flags; // Contains bit flags representing various abilities of a
+                     // given activation entity.
+
+    dynMenu_t menuMsg; // Message sent to the activator when an activation
+                       // fails.  Can be used in (*willActivate)().
+
+    dynMenu_t menuMsgOvrd[ MAX_ACTMN ]; // Used to override the general
+                                        // activation menu messages.
+
+    // If qture is returned, an occupiable activation entity would then be
+    // occupied.
+    qboolean  (*activate)( gentity_t *self, gentity_t *activator );
+
+    // Optional custom restrictions on the search for a nearby activation entity
+    // that the general activation.flags don't address.
+    qboolean  (*canActivate)( gentity_t *self, gclient_t *client );
+
+    // Optional custom restrictions on the actual activation of a nearby found
+    // activation entity.
+    qboolean  (*willActivate)( gentity_t *actEnt, gentity_t *activator );
+  } activation;
+
+  // for occupation entities
+  struct occupation_s
+  {
+    int       flags; // Contains bit flags representing various abilities of a
+                     // given occupation entity.
+
+    gentity_t *occupant; // The entity that is occupying this occupation entity
+
+    gentity_t *occupantFound; // A temporary variable used in the occupying
+                               // process. This can be set by (*findOccupant)().
+
+    gentity_t *occupied; // The occupiable entity that is being considered.
+
+    gentity_t *other;  // An optional additional entity involved in occupation.
+
+    int       occupantFlags; // Contains bit flags used by occupants
+
+    pmtype_t	pm_type; // Changes client's pm_type of an occupant.
+
+    int       contents; // Changes the contents of an occupant.
+
+    int       unoccupiedContents; // Used to restore the contents of an occupant
+               // that leaves its occupied activation entity.
+
+    int       clipMask; // Changes the clip mask of an occupant.
+
+    int       unoccupiedClipMask; // Used to restore the clip mask of an occupant
+               // that leaves its occupied activation entity.
+
+   // Optional custom function called to perform additional operations for
+   // occupation.
+   void (*occupy)( gentity_t *occupied );
+
+   // Optional custom function for leaving an occupiable entity.
+   // Unless force is set to qtrue, if qfalse is returned, the entity remains
+   // occupied.
+   qboolean  (*unoccupy)( gentity_t *occupied, gentity_t *occupant,
+                          gentity_t *activator, qboolean force );
+
+   // Optional custom resets for occupation entities.
+   void      (*occupiedReset)( gentity_t *occupied );
+   void      (*occupantReset)( gentity_t *occupant );
+
+   // Optional custom conditions that would force a client to unoccupy if qtrue
+   // is returned.
+   qboolean  (*occupyUntil)( gentity_t *occupied, gentity_t *occupant );
+
+   // Optional funtion to find an occupant which isn't an activator.
+   void      (*findOccupant)( gentity_t *actEnt, gentity_t *activator );
+
+   // Optional function that returns another entity involved in the occupation.
+   void      (*findOther)(gentity_t *actEnt, gentity_t *activator );
+  } occupation;
 
   int               pain_debounce_time;
   int               last_move_time;
@@ -242,6 +343,8 @@ struct gentity_s
 
   int               buildPointZone;                 // index for zone
   int               usesBuildPointZone;             // does it use a zone?
+
+  bglist_t          *zapLink;  // For ET_LEV2_ZAP_CHAIN
 };
 
 typedef enum
@@ -306,11 +409,11 @@ typedef struct
   int                 location;           // player locations
   int                 teamInfo;           // level.time of team overlay update (disabled = 0)
   float               flySpeed;           // for spectator/noclip moves
-  qboolean            disableBlueprintErrors; // should the buildable blueprint never be hidden from the players?
   int                 buildableRangeMarkerMask;
 
   class_t             classSelection;     // player class (copied to ent->client->ps.stats[ STAT_CLASS ] once spawned)
   float               evolveHealthFraction;
+  float               evolveChargeStaminaFraction;
   weapon_t            humanItemSelection; // humans have a starting item
   team_t              teamSelection;      // player team (copied to ps.stats[ STAT_TEAM ])
 
@@ -437,6 +540,8 @@ struct gclient_s
   int                 lastMedKitTime;
   int                 medKitHealthToRestore;
   int                 medKitIncrementTime;
+  int                 nextMedKitRestoreStaminaTime;
+  int                 medKitStaminaToRestore;
   int                 lastCreepSlowTime;    // time until creep can be removed
 
   qboolean            charging;
@@ -573,6 +678,11 @@ typedef struct
   int               frameMsec;                    // trap_Milliseconds() at end frame
 
   int               startTime;                    // level.time the map was started
+
+  int               extendTimeLimit;              // set the time limit to level.matchBaseTimeLimit + this value
+  int               extendVoteCount;
+  int               matchBaseTimeLimit;
+  qboolean          timeLimitInitialized;
 
   int               teamScores[ NUM_TEAMS ];
   int               lastTeamLocationTime;         // last time of client team location update
@@ -712,6 +822,8 @@ typedef struct
   int               buildId;
   int               numBuildLogs;
   int               lastLayoutReset;
+
+  int               playmapFlags;
   int               epochStartTime;
   char              database_data[ DATABASE_DATA_MAX ];
 } level_locals_t;
@@ -769,6 +881,7 @@ void      Cmd_PlayMap_f( gentity_t *ent );
 void      Cmd_ListMaps_f( gentity_t *ent );
 void      Cmd_Test_f( gentity_t *ent );
 void      Cmd_AdminMessage_f( gentity_t *ent );
+int       G_DonateCredits( gclient_t *client, int value, qboolean verbos );
 int       G_FloodLimited( gentity_t *ent );
 void      G_ListCommands( gentity_t *ent );
 void      G_LoadCensors( void );
@@ -837,6 +950,7 @@ void              AHive_Think( gentity_t *self );
 void              ATrapper_Think( gentity_t *self );
 void              HSpawn_Think( gentity_t *self );
 void              HRepeater_Think( gentity_t *self );
+qboolean          HRepeater_CanActivate( gentity_t *self, gclient_t *client );
 void              HReactor_Think( gentity_t *self );
 void              HArmoury_Think( gentity_t *self );
 void              HDCC_Think( gentity_t *self );
@@ -870,10 +984,38 @@ gentity_t         *G_RepeaterEntityForPoint( vec3_t origin );
 gentity_t         *G_InPowerZone( gentity_t *self );
 buildLog_t        *G_BuildLogNew( gentity_t *actor, buildFate_t fate );
 void              G_BuildLogSet( buildLog_t *log, gentity_t *ent );
-void              G_BuildLogAuto( gentity_t *actor, gentity_t *buildable, buildFate_t fate );
+void              G_BuildLogAuto( gentity_t *actor, gentity_t *buildable,
+                                                    buildFate_t fate );
 void              G_BuildLogRevert( int id );
 void              G_RemoveRangeMarkerFrom( gentity_t *self );
 void              G_UpdateBuildableRangeMarkers( void );
+
+// activation entities functions
+qboolean          G_CanActivateEntity( gclient_t *client, gentity_t *ent );
+void              G_OvrdActMenuMsg( gentity_t *activator,
+                                    actMNOvrdIndex_t index,
+                                    dynMenu_t defaultMenu );
+qboolean          G_WillActivateEntity( gentity_t *actEnt,
+                                        gentity_t *activator );
+void              G_ActivateEntity( gentity_t *actEnt, gentity_t *activator );
+void              G_ResetOccupation( gentity_t *occupied,
+                                     gentity_t *occupant ); // is called to reset
+                                       // an occupiable activation entity and
+                                       // its occupant.  Serves as a general
+                                       //  wrapper for (*activation.reset)()
+void              G_UnoccupyEnt( gentity_t *occupied,
+                                           gentity_t *occupant,
+                                           gentity_t *activator,
+                                           qboolean force ); // wrapper called
+                                             // for players leaving an
+                                             // occupiable activation entity.
+void              G_OccupyEnt( gentity_t *occupied );
+void              G_SetClipmask( gentity_t *ent, int clipmask );
+void              G_SetContents( gentity_t *ent, int contents );
+void              G_BackupUnoccupyClipmask( gentity_t *ent );
+void              G_BackupUnoccupyContents( gentity_t *ent );
+void              G_OccupantClip( gentity_t *occupant );
+void              G_OccupantThink( gentity_t *occupant );
 
 //
 // g_utils.c
@@ -923,6 +1065,10 @@ void        G_CloseMenus( int clientNum );
 
 qboolean    G_Visible( gentity_t *ent1, gentity_t *ent2, int contents );
 gentity_t   *G_ClosestEnt( vec3_t origin, gentity_t **entities, int numEntities );
+
+void        G_Entity_id_init(gentity_t *ptr);
+void        G_Entity_id_set(gentity_id *id,gentity_t *target);
+gentity_t   *G_Entity_id_get(gentity_id *id);
 
 //
 // g_combat.c
@@ -991,23 +1137,27 @@ void TeleportPlayer( gentity_t *player, vec3_t origin, vec3_t angles, float spee
 //
 // g_weapon.c
 //
+typedef struct zapTarget_s
+{
+  gentity_t *targetEnt;
+  float     distance;
+} zapTarget_t;
 
 typedef struct zap_s
 {
-  qboolean      used;
-
+  bglist_t      *zapLink;
   gentity_t     *creator;
-  gentity_t     *targets[ LEVEL2_AREAZAP_MAX_TARGETS ];
-  int           numTargets;
-  float         distances[ LEVEL2_AREAZAP_MAX_TARGETS ];
+  bgqueue_t     targetQueue;
 
   int           timeToLive;
 
   gentity_t     *effectChannel;
 } zap_t;
 
-#define MAX_ZAPS MAX_CLIENTS
-extern zap_t zaps[ MAX_ZAPS ];
+extern bglist_t *lev2ZapList;
+
+void      G_PackEntityNumbers( entityState_t *es, int creatorNum,
+                               bgqueue_t *targetQueue );
 
 void      Blow_up( gentity_t *ent );
 void      G_ForceWeaponChange( gentity_t *ent, weapon_t weapon );
@@ -1020,6 +1170,8 @@ qboolean  CheckPounceAttack( gentity_t *ent );
 void      CheckCkitRepair( gentity_t *ent );
 void      G_ChargeAttack( gentity_t *ent, gentity_t *victim );
 void      G_CrushAttack( gentity_t *ent, gentity_t *victim );
+void      G_DeleteZapData( void *data );
+bglist_t  *G_FindZapLinkFromEffectChannel( const gentity_t *effectChannel );
 void      G_UpdateZaps( int msec );
 void      G_ClearPlayerZapEffects( gentity_t *player );
 
@@ -1179,6 +1331,10 @@ extern  vmCvar_t  g_minNameChangePeriod;
 extern  vmCvar_t  g_maxNameChanges;
 
 extern  vmCvar_t  g_timelimit;
+extern  vmCvar_t  g_basetimelimit;  // this is for resetting the time limit after an extended match
+extern  vmCvar_t  g_extendVotesPercent;
+extern  vmCvar_t  g_extendVotesTime;
+extern  vmCvar_t  g_extendVotesCount;
 extern  vmCvar_t  g_suddenDeathTime;
 
 extern  vmCvar_t  g_doWarmup;
@@ -1193,6 +1349,7 @@ extern  vmCvar_t  g_warmupDefensiveBuildableRespawnTime;
 
 #define IS_WARMUP  ( g_doWarmup.integer && g_warmup.integer )
 
+extern  vmCvar_t  g_humanStaminaMode; // when set to 0, human stamina doesn't drain
 extern  vmCvar_t  g_friendlyFire;
 extern  vmCvar_t  g_friendlyBuildableFire;
 extern  vmCvar_t  g_dretchPunt;
@@ -1220,10 +1377,12 @@ extern  vmCvar_t  pmove_fixed;
 extern  vmCvar_t  pmove_msec;
 
 extern  vmCvar_t  g_allowShare;
+extern  vmCvar_t  g_overflowFunds;
 
 extern  vmCvar_t  g_allowBuildableStacking;
 extern  vmCvar_t  g_alienBuildPoints;
 extern  vmCvar_t  g_alienBuildQueueTime;
+extern  vmCvar_t  g_humanBlackout;
 extern  vmCvar_t  g_humanBuildPoints;
 extern  vmCvar_t  g_humanBuildQueueTime;
 extern  vmCvar_t  g_humanRepeaterBuildPoints;
@@ -1302,7 +1461,7 @@ int       trap_Argc( void );
 void      trap_Argv( int n, char *buffer, int bufferLength );
 void      trap_Args( char *buffer, int bufferLength );
 int       trap_FS_FOpenFile( const char *qpath, fileHandle_t *f, fsMode_t mode );
-void      trap_FS_Read( void *buffer, int len, fileHandle_t f );
+int       trap_FS_Read( void *buffer, int len, fileHandle_t f );
 void      trap_FS_Write( const void *buffer, int len, fileHandle_t f );
 void      trap_FS_FCloseFile( fileHandle_t f );
 int       trap_FS_GetFileList( const char *path, const char *extension, char *listbuf, int bufsize );

@@ -1163,6 +1163,8 @@ typedef struct
   
   float         chargeMeterAlpha;
   float         chargeMeterValue;
+  float         chargeStaminaMeterAlpha;
+  float         chargeStaminaMeterValue;
   qhandle_t     lastHealthCross;
   float         healthCrossFade;
   int           nearUsableBuildable;
@@ -1390,9 +1392,11 @@ typedef struct
   int           maxclients;
   char          mapname[ MAX_QPATH ];
   qboolean      markDeconstruct;        // Whether or not buildables are marked
+  int           humanBlackout;
 
   // warmup-related values parsed from config strings
   qboolean      warmup;                 // Is it currently pre-game warmup?
+  int           humanStaminaMode;       // when set to 0, human stamina doesn't drain
   float         percentAliensReady;     // Percentage of alien players ready
   int           numAliensReady;         // Number of alien players ready
   int           numAliens;              // Total number of players in aliens team
@@ -1457,6 +1461,9 @@ typedef struct
   cgMedia_t           media;
 
   voice_t       *voices;
+
+  // playmap
+  char		playMapPoolJson[ MAX_PLAYMAP_POOL_CHARS ];
 } cgs_t;
 
 typedef struct
@@ -1464,6 +1471,12 @@ typedef struct
   char *cmd;
   void ( *function )( void );
 } consoleCommand_t;
+
+typedef struct
+{
+  char *cmd;
+  void (*function)( int argNum );
+} consoleCommandCompletions_t;
 
 typedef enum
 {
@@ -1537,6 +1550,7 @@ extern  vmCvar_t    cg_gun_z;
 extern  vmCvar_t    cg_tracerChance;
 extern  vmCvar_t    cg_tracerWidth;
 extern  vmCvar_t    cg_tracerLength;
+extern  vmCvar_t    cg_fovOffset;
 extern  vmCvar_t    cg_thirdPerson;
 extern  vmCvar_t    cg_thirdPersonAngle;
 extern  vmCvar_t    cg_thirdPersonShoulderViewMode;
@@ -1567,7 +1581,6 @@ extern  vmCvar_t    cg_noTaunt;
 extern  vmCvar_t    cg_drawSurfNormal;
 extern  vmCvar_t    cg_drawBBOX;
 extern  vmCvar_t    cg_wwSmoothTime;
-extern  vmCvar_t    cg_disableBlueprintErrors;
 extern  vmCvar_t    cg_depthSortParticles;
 extern  vmCvar_t    cg_bounceParticles;
 extern  vmCvar_t    cg_consoleLatency;
@@ -1591,6 +1604,8 @@ extern  vmCvar_t    cg_rangeMarkerLineThickness;
 extern  vmCvar_t    cg_rangeMarkerForBlueprint;
 extern  vmCvar_t    cg_rangeMarkerBuildableTypes;
 extern  vmCvar_t    cg_binaryShaderScreenScale;
+
+extern  vmCvar_t    cg_spectatorWallhack;
 
 extern  vmCvar_t    cg_painBlendUpRate;
 extern  vmCvar_t    cg_painBlendDownRate;
@@ -1775,7 +1790,6 @@ void        CG_ModelDoor( centity_t *cent );
 #define MAGIC_TRACE_HACK -2
 
 void        CG_BuildSolidList( void );
-void        CG_SublimeMarkedBuildables( qboolean sublime );
 int         CG_PointContents( const vec3_t point, int passEntityNum );
 void        CG_Trace( trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs,
                 const vec3_t end, int skipNumber, int mask );
@@ -1864,6 +1878,7 @@ void          CG_ProcessSnapshots( void );
 // cg_consolecmds.c
 //
 qboolean      CG_ConsoleCommand( void );
+qboolean      CG_Console_CompleteArgument( int argNum );
 void          CG_InitConsoleCommands( void );
 qboolean      CG_RequestScores( void );
 
@@ -1990,7 +2005,7 @@ void          trap_LiteralArgs( char *buffer, int bufferLength );
 // filesystem access
 // returns length of file
 int           trap_FS_FOpenFile( const char *qpath, fileHandle_t *f, fsMode_t mode );
-void          trap_FS_Read( void *buffer, int len, fileHandle_t f );
+int           trap_FS_Read( void *buffer, int len, fileHandle_t f );
 void          trap_FS_Write( const void *buffer, int len, fileHandle_t f );
 void          trap_FS_FCloseFile( fileHandle_t f );
 void          trap_FS_Seek( fileHandle_t f, long offset, fsOrigin_t origin ); // fsOrigin_t
@@ -2007,7 +2022,10 @@ void          trap_SendConsoleCommand( const char *text );
 // FIXME: replace this with a normal console command "defineCommand"?
 void          trap_AddCommand( const char *cmdName );
 void          trap_RemoveCommand( const char *cmdName );
-
+#ifndef MODULE_INTERFACE_11
+void  	      trap_Field_CompleteList( char *list );
+#endif
+  
 // send a string to the server over the network
 void          trap_SendClientCommand( const char *s );
 

@@ -124,6 +124,7 @@ void CG_ParseServerinfo( void )
 
   info = CG_ConfigString( CS_SERVERINFO );
   cgs.timelimit = atoi( Info_ValueForKey( info, "timelimit" ) );
+  cgs.humanBlackout = atoi (Info_ValueForKey ( info, "g_humanBlackout") );
   cgs.maxclients = atoi( Info_ValueForKey( info, "sv_maxclients" ) );
   cgs.markDeconstruct = atoi( Info_ValueForKey( info, "g_markDeconstruct" ) );
   mapname = Info_ValueForKey( info, "mapname" );
@@ -390,6 +391,8 @@ static void CG_ConfigStringModified( void )
     CG_ParseWarmup( );
   else if( num == CS_WARMUP_READY )
     CG_ParseWarmupReady( );
+  else if( num == CS_HUMAN_STAMINA_MODE )
+    cgs.humanStaminaMode = atoi( str );
   else if( num == CS_ALIEN_STAGES )
   {
     stage_t oldAlienStage = cgs.alienStage;
@@ -790,6 +793,56 @@ void CG_Menu( int menu, int arg )
       shortMsg  = "This area already has power";
       type      = DT_BUILD;
       break;
+
+    //===============================
+
+    case MN_ACT_FAILED:
+      longMsg   = "This object failed to activate";
+      shortMsg  = "This object failed to activate";
+      break;
+
+    case MN_ACT_OCCUPIED:
+      longMsg   = "This object is fully occupied at the "
+                  "moment, and has no more room.";
+      shortMsg  = "This object is fully occupied";
+      type      = DT_COMMAND;
+      break;
+
+    case MN_ACT_OCCUPYING:
+      longMsg   = "The targeted entity is already occupying "
+                  "something else and thus can't occupy this "
+                  "object you're trying to activate.";
+      shortMsg  = "The targeted entity is preoccupied";
+      type      = DT_COMMAND;
+      break;
+      
+    case MN_ACT_NOOCCUPANTS:
+      longMsg   = "There are no targets available to occupy this object.";
+      shortMsg  = "There are no targets for occupying this object.";
+      type      = DT_COMMAND;
+      break;
+
+    case MN_ACT_NOEXIT:
+      longMsg   = "You can't exit this structure at this time.  Try again "
+                  "later.";
+      shortMsg  = "You can't exit this structure at this time.";
+      type      = DT_COMMAND;
+      break;
+
+    case MN_ACT_NOTPOWERED:
+      longMsg   = "This object requires power to be activated. Find a way "
+                  "to power it.";
+      shortMsg  = "This object is not powered";
+      break;
+
+    case MN_ACT_NOTCONTROLLED:
+      longMsg   = "There is no Overmind. An Overmind must be built to control "
+                  "this structure you are trying to activate.";
+      shortMsg  = "There is no Overmind";
+      type      = DT_BUILD;
+      break;
+
+    //===============================
 
     case MN_H_NOSLOTS:
       longMsg   = "You have no room to carry this. Please sell any conflicting "
@@ -1357,6 +1410,19 @@ static void CG_ServerCloseMenus_f( void )
 
 /*
 =================
+CG_PlayMap_Pool_Json_f
+
+Receive periodic updates from server to cache playmap pool locally.
+=================
+*/
+static void CG_PlayMap_Pool_Json_f( void )
+{
+  Q_strncpyz( cgs.playMapPoolJson, CG_Argv( 1 ),
+              MAX_PLAYMAP_POOL_CHARS );
+}
+
+/*
+=================
 CG_PoisonCloud_f
 =================
 */
@@ -1417,6 +1483,7 @@ static consoleCommand_t svcommands[ ] =
   { "cp", CG_CenterPrint_f },
   { "cs", CG_ConfigStringModified },
   { "map_restart", CG_MapRestart },
+  { "playpool_json", CG_PlayMap_Pool_Json_f },
   { "poisoncloud", CG_PoisonCloud_f },
   { "print", CG_Print_f },
   { "scores", CG_ParseScores },

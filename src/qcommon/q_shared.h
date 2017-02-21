@@ -98,6 +98,26 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #else
 #define Q_EXPORT
 #endif
+/*
+========================
+Com_Assert
+
+Used primarily for debugging the game, bgame, cgame, and ui modules.  Behaves
+similarly to asser(). To turn off Com_Assert, #define NOCOMASSERT.
+========================
+*/
+//#ifndef NOCOMASSERT
+//#define NOCOMASSERT
+//#endif
+#ifdef NOCOMASSERT
+  #define Com_Assert(ignore)((void) 0)
+#else
+  #define Com_Assert( expr ) \
+    if( !( expr ) ){ \
+      Com_Error( ERR_DROP, "%s:%d: Assertion `%s' failed", \
+                 __FILE__, __LINE__, #expr ); \
+    }
+#endif
 
 /**********************************************************************
   VM Considerations
@@ -203,6 +223,19 @@ typedef int		clipHandle_t;
 #define ARRAY_LEN(x)			(sizeof(x) / sizeof(*(x)))
 #define STRARRAY_LEN(x)			(ARRAY_LEN(x) - 1)
 
+/*
+====================
+Max/min functions
+
+Maximum/minimum of two ints
+====================
+*/
+#define max( a,b ) ( ( a ) > ( b ) ? ( a ):( b ))
+#define min( a,b ) ( ( a ) < ( b ) ? ( a ):( b ))
+
+// safe exact match check assuming 0-terminated strings
+#define Q_stricmp_exact( s1, s2 ) Q_stricmpn( s1, s2, min( strlen( s1 ), strlen( s2 )))
+
 // angle indexes
 #define	PITCH				0		// up / down
 #define	YAW					1		// left / right
@@ -235,6 +268,9 @@ typedef int		clipHandle_t;
 #define	MAX_HOSTNAME_LENGTH	80		// max length of a host name
 
 #define	MAX_SAY_TEXT	800
+
+// Playmap
+#define MAX_PLAYMAP_POOL_CHARS 32768
 
 // paramters for command buffer stuffing
 typedef enum {
@@ -384,6 +420,13 @@ extern	vec4_t		colorWhite;
 extern	vec4_t		colorLtGrey;
 extern	vec4_t		colorMdGrey;
 extern	vec4_t		colorDkGrey;
+extern	vec4_t		colorOrange;
+extern	vec4_t		colorPurple;
+extern	vec4_t		colorTeal;
+extern	vec4_t		colorPink;
+extern	vec4_t		colorChocolate;
+extern	vec4_t		colorGold;
+extern	vec4_t		colorIndigo;
 
 #define Q_COLOR_ESCAPE	'^'
 #define Q_IsColorString(p)	((p) && *(p) == Q_COLOR_ESCAPE && *((p)+1) && isalnum(*((p)+1))) // ^[0-9a-zA-Z]
@@ -396,22 +439,38 @@ extern	vec4_t		colorDkGrey;
 #define COLOR_CYAN	'5'
 #define COLOR_MAGENTA	'6'
 #define COLOR_WHITE	'7'
-#define ColorIndexForNumber(c) ((c) & 0x07)
+#define COLOR_ORANGE	'8'
+#define COLOR_PURPLE	'9'
+#define COLOR_TEAL	'j'
+#define COLOR_PINK	'k'
+#define COLOR_CHOCOLATE	'l'
+#define COLOR_GOLD	'm'
+#define COLOR_SILVER	'n'
+#define COLOR_INDIGO	'o'
+#define ColorIndexForNumber(c) ((c) & 0x0F)
 #define ColorIndex(c) (ColorIndexForNumber((c) - '0'))
 
-#define S_COLOR_BLACK	"^0"
-#define S_COLOR_RED	"^1"
-#define S_COLOR_GREEN	"^2"
-#define S_COLOR_YELLOW	"^3"
-#define S_COLOR_BLUE	"^4"
-#define S_COLOR_CYAN	"^5"
-#define S_COLOR_MAGENTA	"^6"
-#define S_COLOR_WHITE	"^7"
+#define S_COLOR_BLACK		"^0"
+#define S_COLOR_RED		"^1"
+#define S_COLOR_GREEN		"^2"
+#define S_COLOR_YELLOW		"^3"
+#define S_COLOR_BLUE		"^4"
+#define S_COLOR_CYAN		"^5"
+#define S_COLOR_MAGENTA		"^6"
+#define S_COLOR_WHITE		"^7"
+#define S_COLOR_ORANGE		"^8"
+#define S_COLOR_PURPLE		"^9"
+#define S_COLOR_TEAL		"^j"
+#define S_COLOR_PINK		"^k"
+#define S_COLOR_CHOCOLATE	"^l"
+#define S_COLOR_GOLD		"^m"
+#define S_COLOR_SILVER		"^n"
+#define S_COLOR_INDIGO		"^o"
 
 #define INDENT_MARKER '\v'
 void Q_StripIndentMarker(char *string);
 
-extern vec4_t	g_color_table[8];
+extern vec4_t	g_color_table[16];
 
 #define	MAKERGB( v, r, g, b ) v[0]=r;v[1]=g;v[2]=b
 #define	MAKERGBA( v, r, g, b, a ) v[0]=r;v[1]=g;v[2]=b;v[3]=a
@@ -775,6 +834,7 @@ int		COM_GetCurrentParseLine( void );
 char	*COM_Parse( char **data_p );
 char	*COM_ParseExt( char **data_p, qboolean allowLineBreak );
 int		COM_Compress( char *data_p );
+char 	*SkipWhitespace( char *data, qboolean *hasNewLines );
 void	COM_ParseError( char *format, ... ) __attribute__ ((format (printf, 1, 2)));
 void	COM_ParseWarning( char *format, ... ) __attribute__ ((format (printf, 1, 2)));
 //int		COM_ParseInfos( char *buf, int max, char infos[][MAX_INFO_STRING] );

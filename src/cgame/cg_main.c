@@ -88,6 +88,9 @@ Q_EXPORT intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3,
 #ifndef MODULE_INTERFACE_11
     case CG_VOIP_STRING:
       return (intptr_t)CG_VoIPString( );
+
+    case CG_CONSOLE_COMPLETARGUMENT:
+      return CG_Console_CompleteArgument( arg0 );
 #endif
 
     default:
@@ -97,7 +100,6 @@ Q_EXPORT intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3,
 
   return -1;
 }
-
 
 cg_t        cg;
 cgs_t       cgs;
@@ -137,6 +139,7 @@ vmCvar_t  cg_footsteps;
 vmCvar_t  cg_addMarks;
 vmCvar_t  cg_viewsize;
 vmCvar_t  cg_drawGun;
+vmCvar_t  cg_fovOffset;
 vmCvar_t  cg_gun_frame;
 vmCvar_t  cg_gun_x;
 vmCvar_t  cg_gun_y;
@@ -179,7 +182,6 @@ vmCvar_t  cg_noTaunt;
 vmCvar_t  cg_drawSurfNormal;
 vmCvar_t  cg_drawBBOX;
 vmCvar_t  cg_wwSmoothTime;
-vmCvar_t  cg_disableBlueprintErrors;
 vmCvar_t  cg_depthSortParticles;
 vmCvar_t  cg_bounceParticles;
 vmCvar_t  cg_consoleLatency;
@@ -203,6 +205,8 @@ vmCvar_t  cg_rangeMarkerLineThickness;
 vmCvar_t  cg_rangeMarkerForBlueprint;
 vmCvar_t  cg_rangeMarkerBuildableTypes;
 vmCvar_t  cg_binaryShaderScreenScale;
+
+vmCvar_t  cg_spectatorWallhack;
 
 vmCvar_t  cg_painBlendUpRate;
 vmCvar_t  cg_painBlendDownRate;
@@ -287,11 +291,12 @@ static cvarTable_t cvarTable[ ] =
   { &cg_tracerChance, "cg_tracerchance", "0.4", CVAR_CHEAT },
   { &cg_tracerWidth, "cg_tracerwidth", "1", CVAR_CHEAT },
   { &cg_tracerLength, "cg_tracerlength", "100", CVAR_CHEAT },
-  { &cg_thirdPersonRange, "cg_thirdPersonRange", "75", CVAR_ARCHIVE },
+  { &cg_fovOffset, "cg_fovOffset", "0", CVAR_USERINFO },
   { &cg_thirdPerson, "cg_thirdPerson", "0", CVAR_ARCHIVE },
   { &cg_thirdPersonAngle, "cg_thirdPersonAngle", "0", CVAR_CHEAT },
   { &cg_thirdPersonPitchFollow, "cg_thirdPersonPitchFollow", "0", 0 },
   { &cg_thirdPersonShoulderViewMode, "cg_thirdPersonShoulderViewMode", "1", CVAR_ARCHIVE },
+  { &cg_thirdPersonRange, "cg_thirdPersonRange", "75", CVAR_ARCHIVE },
   { &cg_staticDeathCam, "cg_staticDeathCam", "0", CVAR_ARCHIVE },
   { &cg_stats, "cg_stats", "0", 0 },
   { &cg_drawTeamOverlay, "cg_drawTeamOverlay", "1", CVAR_ARCHIVE },
@@ -307,9 +312,8 @@ static cvarTable_t cvarTable[ ] =
   { &cg_wwSmoothTime, "cg_wwSmoothTime", "300", CVAR_ARCHIVE },
   { NULL, "cg_wwFollow", "1", CVAR_ARCHIVE|CVAR_USERINFO },
   { NULL, "cg_wwToggle", "1", CVAR_ARCHIVE|CVAR_USERINFO },
-  { NULL, "cg_disableBlueprintErrors", "1", CVAR_ARCHIVE|CVAR_USERINFO },
   { &cg_stickySpec, "cg_stickySpec", "1", CVAR_ARCHIVE|CVAR_USERINFO },
-  { &cg_sprintToggle, "cg_sprintToggle", "0", CVAR_ARCHIVE|CVAR_USERINFO },
+  { &cg_sprintToggle, "cg_sprintToggle", "1", CVAR_ARCHIVE|CVAR_USERINFO },
   { &cg_unlagged, "cg_unlagged", "1", CVAR_ARCHIVE|CVAR_USERINFO },
   { NULL, "cg_flySpeed", "600", CVAR_ARCHIVE|CVAR_USERINFO },
   { &cg_depthSortParticles, "cg_depthSortParticles", "1", CVAR_ARCHIVE },
@@ -327,8 +331,8 @@ static cvarTable_t cvarTable[ ] =
   { &cg_tutorial, "cg_tutorial", "1", CVAR_ARCHIVE },
 
   { &cg_rangeMarkerDrawSurface, "cg_rangeMarkerDrawSurface", "1", CVAR_ARCHIVE },
-  { &cg_rangeMarkerDrawIntersection, "cg_rangeMarkerDrawIntersection", "1", CVAR_ARCHIVE },
-  { &cg_rangeMarkerDrawFrontline, "cg_rangeMarkerDrawFrontline", "1", CVAR_ARCHIVE },
+  { &cg_rangeMarkerDrawIntersection, "cg_rangeMarkerDrawIntersection", "0", CVAR_ARCHIVE },
+  { &cg_rangeMarkerDrawFrontline, "cg_rangeMarkerDrawFrontline", "0", CVAR_ARCHIVE },
   { &cg_rangeMarkerSurfaceOpacity, "cg_rangeMarkerSurfaceOpacity", "0.08", CVAR_ARCHIVE },
   { &cg_rangeMarkerLineOpacity, "cg_rangeMarkerLineOpacity", "0.4", CVAR_ARCHIVE },
   { &cg_rangeMarkerLineThickness, "cg_rangeMarkerLineThickness", "4.0", CVAR_ARCHIVE },
@@ -336,6 +340,8 @@ static cvarTable_t cvarTable[ ] =
   { &cg_rangeMarkerBuildableTypes, "cg_rangeMarkerBuildableTypes", "support", CVAR_ARCHIVE },
   { NULL, "cg_buildableRangeMarkerMask", "", CVAR_USERINFO },
   { &cg_binaryShaderScreenScale, "cg_binaryShaderScreenScale", "1.0", CVAR_ARCHIVE },
+
+  { &cg_spectatorWallhack, "cg_spectatorWallhack", "0", CVAR_ARCHIVE },
 
   { &cg_hudFiles, "cg_hudFiles", "ui/hud.txt", CVAR_ARCHIVE},
   { &cg_hudFilesEnable, "cg_hudFilesEnable", "0", CVAR_ARCHIVE},
@@ -554,6 +560,64 @@ void CG_UpdateBuildableRangeMarkerMask( void )
 
 /*
 =================
+CG_SetPVars
+=================
+*/
+static void CG_SetPVars( void )
+{
+    playerState_t *ps;
+
+    if( !cg.snap ) return;
+    ps = &cg.snap->ps;
+
+    trap_Cvar_Set( "player_hp", va( "%d", ps->stats[ STAT_HEALTH ] ));
+    trap_Cvar_Set( "player_maxhp",va( "%d", ps->stats[ STAT_MAX_HEALTH ] ));
+
+    switch( ps->stats[ STAT_TEAM ] )
+    {
+    case TEAM_NONE:
+    trap_Cvar_Set( "team_bp", "0" );
+    trap_Cvar_Set( "team_kns", "0" );
+    trap_Cvar_Set( "team_teamname", "spectator" );
+    trap_Cvar_Set( "team_stage", "0" );
+    break;
+
+    case TEAM_ALIENS:
+    //trap_Cvar_Set( "team_bp", va( "%d", cgs.alienBuildPoints ));
+    trap_Cvar_Set( "team_kns", va("%d", cgs.alienNextStageThreshold) );
+    trap_Cvar_Set( "team_teamname", "aliens" );
+    trap_Cvar_Set( "team_stage", va( "%d", cgs.alienStage+1 ) );
+    break;
+
+    case TEAM_HUMANS:
+    //trap_Cvar_Set( "team_bp", va("%d",cgs.humanBuildPoints) );
+    trap_Cvar_Set( "team_kns", va("%d",cgs.humanNextStageThreshold) );
+    trap_Cvar_Set( "team_teamname", "humans" );
+    trap_Cvar_Set( "team_stage", va( "%d", cgs.humanStage+1 ) );
+    break;
+    }
+
+    trap_Cvar_Set( "team_spawns",
+                   va( "%d", cg.snap->ps.persistant[ PERS_SPAWNS ] ) );
+    
+    trap_Cvar_Set( "player_credits",
+                   va( "%d", cg.snap->ps.persistant[ PERS_CREDIT ] ) );
+    trap_Cvar_Set( "player_score",
+                   va( "%d", cg.snap->ps.persistant[ PERS_SCORE ] ) );
+
+    if ( CG_LastAttacker( ) != -1 )
+        trap_Cvar_Set( "player_attackername", cgs.clientinfo[ CG_LastAttacker( ) ].name );
+    else
+        trap_Cvar_Set( "player_attackername", "" );
+
+    if ( CG_CrosshairPlayer( ) != -1 )
+        trap_Cvar_Set( "player_crosshairname", cgs.clientinfo[ CG_CrosshairPlayer( ) ].name );
+    else
+        trap_Cvar_Set( "player_crosshairname", "" );
+}
+
+/*
+=================
 CG_UpdateCvars
 =================
 */
@@ -561,6 +625,8 @@ void CG_UpdateCvars( void )
 {
   int         i;
   cvarTable_t *cv;
+
+  CG_SetPVars();
 
   for( i = 0, cv = cvarTable; i < cvarTableSize; i++, cv++ )
     if( cv->vmCvar )
@@ -1894,7 +1960,6 @@ Will perform callbacks to make the loading info screen update.
 void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum )
 {
   const char  *s;
-  int          i;
   int          team;
 
   // clear everything

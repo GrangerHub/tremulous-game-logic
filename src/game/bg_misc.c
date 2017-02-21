@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "bg_public.h"
 
 int  trap_FS_FOpenFile( const char *qpath, fileHandle_t *f, fsMode_t mode );
-void trap_FS_Read( void *buffer, int len, fileHandle_t f );
+int  trap_FS_Read( void *buffer, int len, fileHandle_t f );
 void trap_FS_Write( const void *buffer, int len, fileHandle_t f );
 void trap_FS_FCloseFile( fileHandle_t f );
 void trap_FS_Seek( fileHandle_t f, long offset, fsOrigin_t origin ); // fsOrigin_t
@@ -79,7 +79,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
       "is left nearly defenseless and defeat is imminent.",
     "team_alien_spawn",    //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
-    0.0,                   //float     bounce;
+    0.1,                   //float     bounce;
     ASPAWN_BP,             //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     ASPAWN_HEALTH,         //int       health;
@@ -92,7 +92,12 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     ASPAWN_BT,             //int       buildTime;
-    qfalse,                //qboolean  usable;
+    qfalse,                //qboolean  activationEnt;
+    0,                     //int       activationFlags;
+    0,                     //int       occupationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    MASK_PLAYERSOLID,      //int       activationContents;
+    CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
@@ -115,7 +120,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
       "death will render alien structures defenseless.",
     "team_alien_overmind", //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
-    0.0,                   //float     bounce;
+    0.1,                   //float     bounce;
     OVERMIND_BP,           //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     OVERMIND_HEALTH,       //int       health;
@@ -128,7 +133,12 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BANIM_IDLE1,           //int       idleAnim;
     OVERMIND_ATTACK_REPEAT, //int      nextthink;
     OVERMIND_BT,           //int       buildTime;
-    qfalse,                //qboolean  usable;
+    qfalse,                //qboolean  activationEnt;
+    0,                     //int       activationFlags;
+    0,                     //int       occupationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    MASK_PLAYERSOLID,      //int       activationContents;
+    CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
@@ -151,7 +161,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
       "to allow aliens to pass over them, however.",
     "team_alien_barricade", //char     *entityName;
     TR_GRAVITY,            //trType_t  traj;
-    0.0,                   //float     bounce;
+    0.1,                   //float     bounce;
     BARRICADE_BP,          //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     BARRICADE_HEALTH,      //int       health;
@@ -164,7 +174,12 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     BARRICADE_BT,          //int       buildTime;
-    qfalse,                //qboolean  usable;
+    qfalse,                //qboolean  activationEnt;
+    0,                     //int       activationFlags;
+    0,                     //int       occupationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    MASK_PLAYERSOLID,      //int       activationContents;
+    CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
@@ -187,7 +202,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
       "to hold the victim in place.",
     "team_alien_acid_tube", //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
-    0.0,                   //float     bounce;
+    0.1,                   //float     bounce;
     ACIDTUBE_BP,           //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     ACIDTUBE_HEALTH,       //int       health;
@@ -200,7 +215,12 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BANIM_IDLE1,           //int       idleAnim;
     200,                   //int       nextthink;
     ACIDTUBE_BT,           //int       buildTime;
-    qfalse,                //qboolean  usable;
+    qfalse,                //qboolean  activationEnt;
+    0,                     //int       activationFlags;
+    0,                     //int       occupationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    MASK_PLAYERSOLID,      //int       activationContents;
+    CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
@@ -223,7 +243,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
       "for other defensive structures or aliens.",
     "team_alien_trapper",  //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
-    0.0,                   //float     bounce;
+    0.1,                   //float     bounce;
     TRAPPER_BP,            //int       buildPoints;
     ( 1 << S2 )|( 1 << S3 ), //int     stages; //NEEDS ADV BUILDER SO S2 AND UP
     TRAPPER_HEALTH,        //int       health;
@@ -236,7 +256,12 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     TRAPPER_BT,            //int       buildTime;
-    qfalse,                //qboolean  usable;
+    qfalse,                //qboolean  activationEnt;
+    0,                     //int       activationFlags;
+    0,                     //int       occupationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    MASK_PLAYERSOLID,      //int       activationContents;
+    CONTENTS_BODY,         //int       activationClipMask;
     TRAPPER_RANGE,         //int       turretRange;
     TRAPPER_REPEAT,        //int       turretFireSpeed;
     WP_LOCKBLOB_LAUNCHER,  //weapon_t  turretProjType;
@@ -260,7 +285,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
       "any nearby aliens.",
     "team_alien_booster",  //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
-    0.0,                   //float     bounce;
+    0.1,                   //float     bounce;
     BOOSTER_BP,            //int       buildPoints;
     ( 1 << S2 )|( 1 << S3 ), //int     stages;
     BOOSTER_HEALTH,        //int       health;
@@ -273,7 +298,12 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     BOOSTER_BT,            //int       buildTime;
-    qfalse,                //qboolean  usable;
+    qfalse,                //qboolean  activationEnt;
+    0,                     //int       activationFlags;
+    0,                     //int       occupationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    MASK_PLAYERSOLID,      //int       activationContents;
+    CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
@@ -295,7 +325,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
       "approaches this structure, the insectoids attack.",
     "team_alien_hive",     //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
-    0.0,                   //float     bounce;
+    0.1,                   //float     bounce;
     HIVE_BP,               //int       buildPoints;
     ( 1 << S3 ),           //int       stages;
     HIVE_HEALTH,           //int       health;
@@ -308,7 +338,12 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BANIM_IDLE1,           //int       idleAnim;
     500,                   //int       nextthink;
     HIVE_BT,               //int       buildTime;
-    qfalse,                //qboolean  usable;
+    qfalse,                //qboolean  activationEnt;
+    0,                     //int       activationFlags;
+    0,                     //int       occupationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    MASK_PLAYERSOLID,      //int       activationContents;
+    CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_HIVE,               //weapon_t  turretProjType;
@@ -331,7 +366,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
       "cannot spawn and defeat is imminent.",
     "team_human_spawn",    //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
-    0.0,                   //float     bounce;
+    0.1,                   //float     bounce;
     HSPAWN_BP,             //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     HSPAWN_HEALTH,         //int       health;
@@ -344,7 +379,12 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     HSPAWN_BT,             //int       buildTime;
-    qfalse,                //qboolean  usable;
+    qfalse,                //qboolean  activationEnt;
+    0,                     //int       activationFlags;
+    0,                     //int       occupationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    MASK_PLAYERSOLID,      //int       activationContents;
+    CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
@@ -367,7 +407,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
       "backed up by physical support.",
     "team_human_mgturret", //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
-    0.0,                   //float     bounce;
+    0.1,                   //float     bounce;
     MGTURRET_BP,           //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     MGTURRET_HEALTH,       //int       health;
@@ -380,7 +420,12 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BANIM_IDLE1,           //int       idleAnim;
     50,                    //int       nextthink;
     MGTURRET_BT,           //int       buildTime;
-    qfalse,                //qboolean  usable;
+    qfalse,                //qboolean  activationEnt;
+    0,                     //int       activationFlags;
+    0,                     //int       occupationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    MASK_PLAYERSOLID,      //int       activationContents;
+    CONTENTS_BODY,         //int       activationClipMask;
     MGTURRET_RANGE,        //int       turretRange;
     MGTURRET_REPEAT,       //int       turretFireSpeed;
     WP_MGTURRET,           //weapon_t  turretProjType;
@@ -403,7 +448,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
       "aliens and for consolidating basic defense.",
     "team_human_tesla",    //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
-    0.0,                   //float     bounce;
+    0.1,                   //float     bounce;
     TESLAGEN_BP,           //int       buildPoints;
     ( 1 << S3 ),           //int       stages;
     TESLAGEN_HEALTH,       //int       health;
@@ -416,7 +461,12 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BANIM_IDLE1,           //int       idleAnim;
     150,                   //int       nextthink;
     TESLAGEN_BT,           //int       buildTime;
-    qfalse,                //qboolean  usable;
+    qfalse,                //qboolean  activationEnt;
+    0,                     //int       activationFlags;
+    0,                     //int       occupationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    MASK_PLAYERSOLID,      //int       activationContents;
+    CONTENTS_BODY,         //int       activationClipMask;
     TESLAGEN_RANGE,        //int       turretRange;
     TESLAGEN_REPEAT,       //int       turretFireSpeed;
     WP_TESLAGEN,           //weapon_t  turretProjType;
@@ -439,7 +489,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
       "and weapons are available for sale from the armoury.",
     "team_human_armoury",  //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
-    0.0,                   //float     bounce;
+    0.1,                   //float     bounce;
     ARMOURY_BP,            //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     ARMOURY_HEALTH,        //int       health;
@@ -452,7 +502,16 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     ARMOURY_BT,            //int       buildTime;
-    qtrue,                 //qboolean  usable;
+    qtrue,                 //qboolean  activationEnt;
+    (ACTF_TEAM|
+     ACTF_ENT_ALIVE|
+     ACTF_PL_ALIVE|
+     ACTF_SPAWNED|
+     ACTF_POWERED),        //int activationFlags;
+    0,                     //int       occupationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    MASK_PLAYERSOLID,      //int       activationContents;
+    CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
@@ -475,7 +534,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
       "repair rate slightly.",
     "team_human_dcc",      //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
-    0.0,                   //float     bounce;
+    0.1,                   //float     bounce;
     DC_BP,                 //int       buildPoints;
     ( 1 << S2 )|( 1 << S3 ), //int     stages;
     DC_HEALTH,             //int       health;
@@ -488,7 +547,12 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     DC_BT,                 //int       buildTime;
-    qfalse,                //qboolean  usable;
+    qfalse,                //qboolean  activationEnt;
+    0,                     //int       activationFlags;
+    0,                     //int       occupationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    MASK_PLAYERSOLID,      //int       activationContents;
+    CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
@@ -512,7 +576,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
       "also issues medkits.",
     "team_human_medistat", //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
-    0.0,                   //float     bounce;
+    0.1,                   //float     bounce;
     MEDISTAT_BP,           //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     MEDISTAT_HEALTH,       //int       health;
@@ -523,9 +587,14 @@ static const buildableAttributes_t bg_buildableList[ ] =
     TEAM_HUMANS,           //int       team;
     ( 1 << WP_HBUILD ),    //weapon_t  buildWeapon;
     BANIM_IDLE1,           //int       idleAnim;
-    100,                   //int       nextthink;
+    MEDISTAT_REPEAT,       //int       nextthink;
     MEDISTAT_BT,           //int       buildTime;
-    qfalse,                //qboolean  usable;
+    qfalse,                //qboolean  activationEnt;
+    0,                     //int       activationFlags;
+    0,                     //int       occupationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    MASK_PLAYERSOLID,      //int       activationContents;
+    CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
@@ -548,7 +617,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
       "directly or via repeaters. Only one reactor can be built at a time.",
     "team_human_reactor",  //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
-    0.0,                   //float     bounce;
+    0.1,                   //float     bounce;
     REACTOR_BP,            //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     REACTOR_HEALTH,        //int       health;
@@ -561,7 +630,16 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BANIM_IDLE1,           //int       idleAnim;
     REACTOR_ATTACK_DCC_REPEAT, //int   nextthink;
     REACTOR_BT,            //int       buildTime;
-    qtrue,                 //qboolean  usable;
+    qtrue,                 //qboolean  activationEnt;
+    (ACTF_TEAM|
+     ACTF_ENT_ALIVE|
+     ACTF_PL_ALIVE|
+     ACTF_SPAWNED|
+     ACTF_POWERED),        //int activationFlags;
+    0,                     //int       occupationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    MASK_PLAYERSOLID,      //int       activationContents;
+    CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
@@ -584,7 +662,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
       "from the reactor.",
     "team_human_repeater", //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
-    0.0,                   //float     bounce;
+    0.1,                   //float     bounce;
     REPEATER_BP,           //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     REPEATER_HEALTH,       //int       health;
@@ -597,7 +675,16 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     REPEATER_BT,           //int       buildTime;
-    qtrue,                 //qboolean  usable;
+    qtrue,                 //qboolean  activationEnt;
+    (ACTF_TEAM|
+     ACTF_ENT_ALIVE|
+     ACTF_PL_ALIVE|
+     ACTF_SPAWNED|
+     ACTF_POWERED),        //int activationFlags;
+    0,                     //int       occupationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    MASK_PLAYERSOLID,      //int       activationContents;
+    CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
     WP_NONE,               //weapon_t  turretProjType;
@@ -927,6 +1014,8 @@ static const classAttributes_t bg_classList[ ] =
     100.0f,                                         //float   stopSpeed;
     270.0f,                                         //float   jumpMagnitude;
     1.0f,                                           //float   knockbackScale;
+    CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
+    CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_NONE, PCL_NONE, PCL_NONE },               //int     children[ 3 ];
     0,                                              //int     cost;
     0,                                              //int     value;
@@ -956,6 +1045,8 @@ static const classAttributes_t bg_classList[ ] =
     100.0f,                                         //float   stopSpeed;
     195.0f,                                         //float   jumpMagnitude;
     1.0f,                                           //float   knockbackScale;
+    CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
+    CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_ALIEN_BUILDER0_UPG, PCL_ALIEN_LEVEL0, PCL_NONE }, //int  children[ 3 ];
     ABUILDER_COST,                                  //int     cost;
     ABUILDER_VALUE,                                 //int     value;
@@ -986,6 +1077,8 @@ static const classAttributes_t bg_classList[ ] =
     100.0f,                                         //float   stopSpeed;
     270.0f,                                         //float   jumpMagnitude;
     1.0f,                                           //float   knockbackScale;
+    CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
+    CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_ALIEN_LEVEL0, PCL_NONE, PCL_NONE },       //int     children[ 3 ];
     ABUILDER_UPG_COST,                              //int     cost;
     ABUILDER_UPG_VALUE,                             //int     value;
@@ -1015,6 +1108,8 @@ static const classAttributes_t bg_classList[ ] =
     400.0f,                                         //float   stopSpeed;
     250.0f,                                         //float   jumpMagnitude;
     2.0f,                                           //float   knockbackScale;
+    CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
+    CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_ALIEN_LEVEL1, PCL_NONE, PCL_NONE },       //int     children[ 3 ];
     LEVEL0_COST,                                    //int     cost;
     LEVEL0_VALUE,                                   //int     value;
@@ -1046,6 +1141,8 @@ static const classAttributes_t bg_classList[ ] =
     300.0f,                                         //float   stopSpeed;
     310.0f,                                         //float   jumpMagnitude;
     1.2f,                                           //float   knockbackScale;
+    CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
+    CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_ALIEN_LEVEL2, PCL_ALIEN_LEVEL1_UPG, PCL_NONE }, //int  children[ 3 ];
     LEVEL1_COST,                                    //int     cost;
     LEVEL1_VALUE,                                   //int     value;
@@ -1077,6 +1174,8 @@ static const classAttributes_t bg_classList[ ] =
     300.0f,                                         //float   stopSpeed;
     310.0f,                                         //float   jumpMagnitude;
     1.1f,                                           //float   knockbackScale;
+    CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
+    CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_ALIEN_LEVEL2, PCL_NONE, PCL_NONE },       //int     children[ 3 ];
     LEVEL1_UPG_COST,                                //int     cost;
     LEVEL1_UPG_VALUE,                               //int     value;
@@ -1106,6 +1205,8 @@ static const classAttributes_t bg_classList[ ] =
     100.0f,                                         //float   stopSpeed;
     380.0f,                                         //float   jumpMagnitude;
     0.8f,                                           //float   knockbackScale;
+    CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
+    CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_ALIEN_LEVEL3, PCL_ALIEN_LEVEL2_UPG, PCL_NONE }, //int  children[ 3 ];
     LEVEL2_COST,                                    //int     cost;
     LEVEL2_VALUE,                                   //int     value;
@@ -1134,7 +1235,9 @@ static const classAttributes_t bg_classList[ ] =
     6.0f,                                           //float   friction;
     100.0f,                                         //float   stopSpeed;
     380.0f,                                         //float   jumpMagnitude;
-    0.7f,                                           //float   knockbackScale;
+    0.7f,                                           //float   knockbackScale
+    CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
+    CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_ALIEN_LEVEL3, PCL_NONE, PCL_NONE },       //int     children[ 3 ];
     LEVEL2_UPG_COST,                                //int     cost;
     LEVEL2_UPG_VALUE,                               //int     value;
@@ -1165,6 +1268,8 @@ static const classAttributes_t bg_classList[ ] =
     200.0f,                                         //float   stopSpeed;
     270.0f,                                         //float   jumpMagnitude;
     0.5f,                                           //float   knockbackScale;
+    CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
+    CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_ALIEN_LEVEL4, PCL_ALIEN_LEVEL3_UPG, PCL_NONE }, //int  children[ 3 ];
     LEVEL3_COST,                                    //int     cost;
     LEVEL3_VALUE,                                   //int     value;
@@ -1195,6 +1300,8 @@ static const classAttributes_t bg_classList[ ] =
     200.0f,                                         //float   stopSpeed;
     270.0f,                                         //float   jumpMagnitude;
     0.4f,                                           //float   knockbackScale;
+    CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
+    CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_ALIEN_LEVEL4, PCL_NONE, PCL_NONE },       //int     children[ 3 ];
     LEVEL3_UPG_COST,                                //int     cost;
     LEVEL3_UPG_VALUE,                               //int     value;
@@ -1226,6 +1333,8 @@ static const classAttributes_t bg_classList[ ] =
     100.0f,                                         //float   stopSpeed;
     170.0f,                                         //float   jumpMagnitude;
     0.1f,                                           //float   knockbackScale;
+    CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
+    CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_NONE, PCL_NONE, PCL_NONE },               //int     children[ 3 ];
     LEVEL4_COST,                                    //int     cost;
     LEVEL4_VALUE,                                   //int     value;
@@ -1254,6 +1363,8 @@ static const classAttributes_t bg_classList[ ] =
     100.0f,                                         //float   stopSpeed;
     220.0f,                                         //float   jumpMagnitude;
     1.0f,                                           //float   knockbackScale;
+    CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
+    CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_NONE, PCL_NONE, PCL_NONE },               //int     children[ 3 ];
     0,                                              //int     cost;
     ALIEN_CREDITS_PER_KILL,                         //int     value;
@@ -1282,6 +1393,8 @@ static const classAttributes_t bg_classList[ ] =
     100.0f,                                         //float   stopSpeed;
     220.0f,                                         //float   jumpMagnitude;
     1.0f,                                           //float   knockbackScale;
+    CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
+    CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_NONE, PCL_NONE, PCL_NONE },               //int     children[ 3 ];
     0,                                              //int     cost;
     ALIEN_CREDITS_PER_KILL,                         //int     value;
@@ -3626,59 +3739,6 @@ int atoi_neg( char *token, qboolean allowNegative )
 }
 
 #define MAX_NUM_PACKED_ENTITY_NUMS 10
-
-/*
-===============
-BG_PackEntityNumbers
-
-Pack entity numbers into an entityState_t
-===============
-*/
-void BG_PackEntityNumbers( entityState_t *es, const int *entityNums, int count )
-{
-  int i;
-
-  if( count > MAX_NUM_PACKED_ENTITY_NUMS )
-  {
-    count = MAX_NUM_PACKED_ENTITY_NUMS;
-    Com_Printf( S_COLOR_YELLOW "WARNING: A maximum of %d entity numbers can be "
-      "packed, but BG_PackEntityNumbers was passed %d entities",
-      MAX_NUM_PACKED_ENTITY_NUMS, count );
-  }
-
-  es->misc = es->time = es->time2 = es->constantLight = 0;
-
-  for( i = 0; i < MAX_NUM_PACKED_ENTITY_NUMS; i++ )
-  {
-    int entityNum;
-
-    if( i < count )
-      entityNum = entityNums[ i ];
-    else
-      entityNum = ENTITYNUM_NONE;
-
-    if( entityNum & ~GENTITYNUM_MASK )
-    {
-      Com_Error( ERR_FATAL, "BG_PackEntityNumbers passed an entity number (%d) which "
-        "exceeds %d bits", entityNum, GENTITYNUM_BITS );
-    }
-
-    switch( i )
-    {
-      case 0: es->misc |= entityNum;                                       break;
-      case 1: es->time |= entityNum;                                       break;
-      case 2: es->time |= entityNum << GENTITYNUM_BITS;                    break;
-      case 3: es->time |= entityNum << (GENTITYNUM_BITS * 2);              break;
-      case 4: es->time2 |= entityNum;                                      break;
-      case 5: es->time2 |= entityNum << GENTITYNUM_BITS;                   break;
-      case 6: es->time2 |= entityNum << (GENTITYNUM_BITS * 2);             break;
-      case 7: es->constantLight |= entityNum;                              break;
-      case 8: es->constantLight |= entityNum << GENTITYNUM_BITS;           break;
-      case 9: es->constantLight |= entityNum << (GENTITYNUM_BITS * 2);     break;
-      default: Com_Error( ERR_FATAL, "Entity index %d not handled", i );   break;
-    }
-  }
-}
 
 /*
 ===============

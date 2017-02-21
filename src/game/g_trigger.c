@@ -30,7 +30,7 @@ void InitTrigger( gentity_t *self )
     G_SetMovedir( self->r.currentAngles, self->movedir );
 
   trap_SetBrushModel( self, self->model );
-  self->r.contents = CONTENTS_TRIGGER;    // replaces the -1 from trap_SetBrushModel
+  G_SetContents( self, CONTENTS_TRIGGER ); // replaces the -1 from trap_SetBrushModel
   self->r.svFlags = SVF_NOCLIENT;
 }
 
@@ -232,8 +232,31 @@ void SP_trigger_push( gentity_t *self )
 
 void Use_target_push( gentity_t *self, gentity_t *other, gentity_t *activator )
 {
-  if( !activator || !activator->client )
+  if( !activator )
     return;
+
+  if(!activator->client)
+  {
+    // launch buildables and do some damage
+    if( activator->s.eType == ET_BUILDABLE )
+    {
+      G_Damage( activator, NULL, &g_entities[ activator->dropperNum ], NULL,
+                NULL, ( BG_Buildable( activator->s.modelindex )->health / 3 ),
+                DAMAGE_NO_PROTECTION, MOD_TRIGGER_HURT );
+
+      activator->s.groundEntityNum = ENTITYNUM_NONE;
+
+      if( activator->s.pos.trType != BG_Buildable( activator->s.modelindex )->traj )
+      {
+        activator->s.pos.trType = BG_Buildable( activator->s.modelindex )->traj;
+        activator->s.pos.trTime = level.time;
+      }
+
+      VectorCopy( self->s.origin2, activator->s.pos.trDelta );
+    }
+
+    return;
+  }
 
   if( activator->client->ps.pm_type != PM_NORMAL )
     return;
@@ -418,7 +441,7 @@ void SP_trigger_hurt( gentity_t *self )
   if( self->damage <= 0 )
     self->damage = 5;
 
-  self->r.contents = CONTENTS_TRIGGER;
+  G_SetContents( self, CONTENTS_TRIGGER );
 
   self->use = hurt_use;
 

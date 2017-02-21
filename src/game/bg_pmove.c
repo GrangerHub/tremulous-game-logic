@@ -364,17 +364,22 @@ static float PM_CmdScale( usercmd_t *cmd, qboolean zFlight )
 
     if( pm->ps->persistant[ PERS_STATE ] & PS_SPRINTTOGGLE )
     {
-      if( cmd->buttons & BUTTON_SPRINT &&
-          !( pm->ps->pm_flags & PMF_SPRINTHELD ) )
+      // walking or crouching toggles off sprint
+      if( ( pm->ps->pm_flags & PMF_SPRINTHELD ) &&
+          ( ( cmd->buttons & BUTTON_WALKING ) || ( pm->cmd.upmove < 0 ) ) )
       {
-        sprint = !sprint;
+        sprint = qfalse;
+        pm->ps->pm_flags &= ~PMF_SPRINTHELD;
+      }
+      else if( ( cmd->buttons & BUTTON_SPRINT ) &&
+               !( pm->ps->pm_flags & PMF_SPRINTHELD ) &&
+               !( cmd->buttons & BUTTON_WALKING ) )
+      {
+        sprint = qtrue;
         pm->ps->pm_flags |= PMF_SPRINTHELD;
       }
-      else if( pm->ps->pm_flags & PMF_SPRINTHELD &&
-               !( cmd->buttons & BUTTON_SPRINT ) )
-        pm->ps->pm_flags &= ~PMF_SPRINTHELD;
     }
-    else
+    else if ( pm->cmd.upmove >= 0 )
       sprint = cmd->buttons & BUTTON_SPRINT;
 
     if( sprint )
@@ -678,6 +683,8 @@ static qboolean PM_CheckWallJump( void )
   pml.groundPlane = qfalse;   // jumping away
   pml.walking = qfalse;
   pm->ps->pm_flags |= PMF_JUMP_HELD;
+  pm->ps->persistant[PERS_JUMPTIME] = 0;
+  pm->ps->pm_flags |= PMF_JUMPING;
 
   pm->ps->groundEntityNum = ENTITYNUM_NONE;
 
@@ -752,22 +759,39 @@ static qboolean PM_CheckJump( void )
   if( ( pm->ps->weapon == WP_ALEVEL3 ||
         pm->ps->weapon == WP_ALEVEL3_UPG ) &&
       pm->ps->stats[ STAT_MISC ] > 0 )
+  {
+    // disable bunny hop
+    pm->ps->pm_flags &= ~PMF_ALL_HOP_FLAGS;
     return qfalse;
+  }
 
   //can't jump and charge at the same time
   if( ( pm->ps->weapon == WP_ALEVEL4 ) &&
       pm->ps->stats[ STAT_MISC ] > 0 )
+  {
+    // disable bunny hop
+    pm->ps->pm_flags &= ~PMF_ALL_HOP_FLAGS;
     return qfalse;
+  }
 
   if( BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_STAMINA) &&
      (pm->ps->stats[STAT_STAMINA] < STAMINA_SLOW_LEVEL + STAMINA_JUMP_TAKE) )
-    return qfalse;
+ {
+   // disable bunny hop
+   pm->ps->pm_flags &= ~PMF_ALL_HOP_FLAGS;
+   return qfalse;
+ }
+
 
   //no bunny hopping off a dodge
   //SCA_DODGE? -vjr
   if( BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_STAMINA) &&
       pm->ps->pm_time )
+  {
+    // disable bunny hop
+    pm->ps->pm_flags &= ~PMF_ALL_HOP_FLAGS;
     return qfalse;
+  }
 
   if( pm->ps->pm_flags & PMF_RESPAWNED )
     return qfalse;    // don't allow jump until all buttons are up
@@ -776,13 +800,25 @@ static qboolean PM_CheckJump( void )
     // not holding jump
     return qfalse;
 
-  //can't jump whilst grabbed
+  // can't jump whilst grabbed
   if( pm->ps->pm_type == PM_GRABBED )
+  {
+    // disable bunny hop
+    pm->ps->pm_flags &= ~PMF_ALL_HOP_FLAGS;
     return qfalse;
+  }
 
-  // must wait for jump to be released
-  if( pm->ps->pm_flags & PMF_JUMP_HELD )
+  if( !( pm->ps->pm_flags & PMF_JUMP_HELD ) )
+  {
+    if( !( pm->ps->pm_flags & PMF_JUMPING ) &&
+        (pm->ps->pm_flags & PMF_HOPPED) )
+      pm->ps->pm_flags |= PMF_BUNNY_HOPPING; // enable hunny hop
+  } else if( pm->ps->persistant[PERS_JUMPTIME] < BUNNY_HOP_DELAY ||
+             !(pm->ps->pm_flags & PMF_BUNNY_HOPPING) )
+  {
+    // don't bunnhy hop
     return qfalse;
+  }
 
   //don't allow walljump for a short while after jumping from the ground
   if( BG_ClassHasAbility( pm->ps->stats[ STAT_CLASS ], SCA_WALLJUMPER ) )
@@ -794,9 +830,12 @@ static qboolean PM_CheckJump( void )
   pml.groundPlane = qfalse;   // jumping away
   pml.walking = qfalse;
   pm->ps->pm_flags |= PMF_JUMP_HELD;
+  pm->ps->persistant[PERS_JUMPTIME] = 0;
+  pm->ps->pm_flags |= PMF_JUMPING;
 
   // take some stamina off
-  if( BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_STAMINA) )
+  if( BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_STAMINA) &&
+      pm->humanStaminaMode )
     pm->ps->stats[ STAT_STAMINA ] -= STAMINA_JUMP_TAKE;
 
   pm->ps->groundEntityNum = ENTITYNUM_NONE;
@@ -1117,6 +1156,9 @@ static void PM_JetPackMove( void )
     PM_ContinueLegsAnim( LEGS_LAND );
   else
     PM_ContinueLegsAnim( NSPA_LAND );
+
+  // disable bunny hop
+  pm->ps->pm_flags &= ~PMF_ALL_HOP_FLAGS;
 }
 
 
@@ -1851,7 +1893,12 @@ static void PM_GroundTraceMissed( void )
   if( BG_ClassHasAbility( pm->ps->stats[ STAT_CLASS ], SCA_TAKESFALLDAMAGE ) )
   {
     if( pm->ps->velocity[ 2 ] < FALLING_THRESHOLD && pml.previous_velocity[ 2 ] >= FALLING_THRESHOLD )
+    {
+      // disable bunny hop
+      pm->ps->pm_flags &= ~PMF_ALL_HOP_FLAGS;
+
       PM_AddEvent( EV_FALLING );
+    }
   }
 
   pm->ps->groundEntityNum = ENTITYNUM_NONE;
@@ -2332,6 +2379,12 @@ static void PM_GroundTrace( void )
       PM_CrashLand( );
   }
 
+  if( pm->ps->pm_flags & PMF_JUMPING )
+  {
+    pm->ps->pm_flags &= ~PMF_JUMPING;
+    pm->ps->pm_flags |= PMF_HOPPED;
+  }
+
   pm->ps->groundEntityNum = trace.entityNum;
 
   // don't reset the z velocity for slopes
@@ -2376,6 +2429,9 @@ static void PM_SetWaterLevel( void )
 
     if( cont & MASK_WATER )
     {
+      // disable bunny hop
+      pm->ps->pm_flags &= ~PMF_ALL_HOP_FLAGS;
+
       pm->waterlevel = 2;
       point[ 2 ] = pm->ps->origin[ 2 ] + MINS_Z + sample2;
       cont = pm->pointcontents( point, pm->ps->clientNum );
@@ -2829,9 +2885,28 @@ static void PM_Weapon( void )
   if( pm->ps->weapon == WP_ALEVEL3 || pm->ps->weapon == WP_ALEVEL3_UPG )
   {
     int max;
-    
-    max = pm->ps->weapon == WP_ALEVEL3 ? LEVEL3_POUNCE_TIME :
-                                         LEVEL3_POUNCE_TIME_UPG;
+
+    switch( pm->ps->weapon )
+    {
+      case WP_ALEVEL3:
+        max = LEVEL3_POUNCE_TIME;
+        break;
+
+      case WP_ALEVEL3_UPG:
+        max = LEVEL3_POUNCE_TIME_UPG;
+        break;
+
+      default:
+        max = LEVEL3_POUNCE_TIME_UPG;
+        break;
+    }
+
+    if( BG_ClassHasAbility( pm->ps->stats[STAT_CLASS], SCA_CHARGE_STAMINA ) )
+    {
+      if( max > pm->ps->stats[STAT_STAMINA] )
+        max = pm->ps->stats[STAT_STAMINA];
+    }
+
     if( pm->cmd.buttons & BUTTON_ATTACK2 )
       pm->ps->stats[ STAT_MISC ] += pml.msec;
     else
@@ -3444,6 +3519,12 @@ static void PM_DropTimers( void )
       pm->ps->tauntTimer = 0;
     }
   }
+
+  // the jump timer increases
+  if( pm->ps->persistant[PERS_JUMPTIME] < 0 )
+    pm->ps->persistant[PERS_JUMPTIME] = 0;
+  else
+    pm->ps->persistant[PERS_JUMPTIME] += pml.msec;
 }
 
 
@@ -3765,6 +3846,13 @@ void PmoveSingle( pmove_t *pmove )
   if( pm->cmd.upmove < 10 )
   {
     // not holding jump
+
+    if( pm->ps->pm_flags & PMF_HOPPED )
+    {
+      // disable bunny hop
+      pm->ps->pm_flags &= ~PMF_ALL_HOP_FLAGS;
+    }
+
     pm->ps->pm_flags &= ~PMF_JUMP_HELD;
   }
 

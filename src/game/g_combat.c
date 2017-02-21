@@ -250,6 +250,7 @@ void GibEntity( gentity_t *self )
   self->takedamage = qfalse;
   self->s.eType    = ET_INVISIBLE;
   self->r.contents = 0;
+  G_BackupUnoccupyContents( self );
   self->nextthink  = 0;
 }
 
@@ -285,6 +286,8 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
   if( level.intermissiontime )
     return;
+
+  self->id = 0;
 
   self->client->ps.pm_type = PM_DEAD;
   self->suicideTime = 0;
@@ -392,6 +395,8 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
     self->client->cliprcontents = CONTENTS_CORPSE;
   else
     self->r.contents = CONTENTS_CORPSE;
+
+  G_BackupUnoccupyContents( self );
 
   self->client->ps.viewangles[ PITCH ] = 0; // zomg
   self->client->ps.viewangles[ YAW ] = self->s.apos.trBase[ YAW ];
@@ -962,6 +967,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 {
   gclient_t *client;
   int     take;
+  int     modDamge = 100;
   int     asave = 0;
   int     knockback;
 
@@ -1095,16 +1101,21 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       {
         return;
       }
+      else
+        modDamge = g_friendlyFire.integer;
     }
 
     if( targ->s.eType == ET_BUILDABLE && attacker->client &&
         mod != MOD_DECONSTRUCT && mod != MOD_SUICIDE &&
         mod != MOD_REPLACE && mod != MOD_NOCREEP )
     {
-      if( targ->buildableTeam == attacker->client->pers.teamSelection &&
-        ( !g_friendlyBuildableFire.integer || IS_WARMUP ) )
+      if( targ->buildableTeam == attacker->client->pers.teamSelection )
       {
-        return;
+        if( ( !g_friendlyBuildableFire.integer || IS_WARMUP ) &&
+            ( mod != MOD_TRIGGER_HURT ) )
+          return;
+        else
+          modDamge = g_friendlyBuildableFire.integer;
       }
 
       // base is under attack warning if DCC'd
@@ -1128,7 +1139,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       attacker->client->ps.persistant[ PERS_HITS ]++;
   }
 
-  take = damage;
+  take = ( modDamge * damage ) / 100;
 
   // add to the damage inflicted on a player this frame
   // the total will be turned into screen blends and view angle kicks
@@ -1218,6 +1229,10 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
       targ->enemy = attacker;
       targ->die( targ, inflictor, attacker, take, mod );
+      if( ( targ->activation.flags & ACTF_OCCUPY ) &&
+          ( targ->flags & FL_OCCUPIED ) &&
+          targ->occupation.occupant && targ->occupation.occupant->client )
+        G_UnoccupyEnt( targ, targ->occupation.occupant, targ->occupation.occupant, qtrue );
       return;
     }
     else if( targ->pain )

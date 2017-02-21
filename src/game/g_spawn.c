@@ -344,7 +344,7 @@ char *G_NewString( const char *string )
 
   l = strlen( string ) + 1;
 
-  newb = BG_Alloc( l );
+  newb = BG_Alloc0( l );
 
   new_p = newb;
 

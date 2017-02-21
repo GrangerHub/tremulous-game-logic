@@ -1081,16 +1081,31 @@ LEVEL2
 ======================================================================
 */
 
-zap_t zaps[ MAX_ZAPS ];
+bglist_t *lev2ZapList = NULL;
 
 /*
 ===============
-G_FindZapChainTargets
+G_DeleteZapData
 ===============
 */
-static void G_FindZapChainTargets( zap_t *zap )
+void G_DeleteZapData( void *data )
 {
-  gentity_t *ent = zap->targets[ 0 ]; // the source
+  zap_t *zapData = (zap_t *)data;
+
+  BG_Queue_Clear_Full( &zapData->targetQueue, BG_FreePassed );
+
+  BG_Free( zapData );
+}
+
+/*
+===============
+G_FindLev2ZapChainTargets
+===============
+*/
+static void G_FindLev2ZapChainTargets( zap_t *zap )
+{
+  gentity_t *ent =
+            ((zapTarget_t *)BG_Queue_Peek_Head( &zap->targetQueue ))->targetEnt; // the source
   int       entityList[ MAX_GENTITIES ];
   vec3_t    range = { LEVEL2_AREAZAP_CHAIN_RANGE,
                       LEVEL2_AREAZAP_CHAIN_RANGE,
@@ -1128,9 +1143,15 @@ static void G_FindZapChainTargets( zap_t *zap )
 
       if( tr.entityNum == ENTITYNUM_NONE )
       {
-        zap->targets[ zap->numTargets ] = enemy;
-        zap->distances[ zap->numTargets ] = distance;
-        if( ++zap->numTargets >= LEVEL2_AREAZAP_MAX_TARGETS )
+        zapTarget_t *zapTarget;
+
+        zapTarget = BG_Alloc( sizeof(zapTarget_t) );
+        zapTarget->targetEnt = enemy;
+        zapTarget->distance = distance;
+        BG_Queue_Push_Tail( &zap->targetQueue, zapTarget );
+
+        if( BG_Queue_Get_Length( &zap->targetQueue ) >=
+                                                    LEVEL2_AREAZAP_MAX_TARGETS )
           return;
       }
     }
@@ -1144,16 +1165,8 @@ G_UpdateZapEffect
 */
 static void G_UpdateZapEffect( zap_t *zap )
 {
-  int i;
-  int entityNums[ LEVEL2_AREAZAP_MAX_TARGETS + 1 ];
-
-  entityNums[ 0 ] = zap->creator->s.number;
-
-  for( i = 0; i < zap->numTargets; i++ )
-    entityNums[ i + 1 ] = zap->targets[ i ]->s.number;
-
-  BG_PackEntityNumbers( &zap->effectChannel->s,
-                        entityNums, zap->numTargets + 1 );
+  G_PackEntityNumbers( &zap->effectChannel->s, zap->creator->s.number,
+                       &zap->targetQueue );
 
   VectorCopy( zap->creator->r.currentOrigin, zap->effectChannel->r.currentOrigin );
   trap_LinkEntity( zap->effectChannel );
@@ -1161,57 +1174,108 @@ static void G_UpdateZapEffect( zap_t *zap )
 
 /*
 ===============
+G_DamageLev2ZapTarget
+===============
+*/
+static void G_DamageLev2ZapTarget( void *data, void *user_data )
+{
+  zapTarget_t *target = (zapTarget_t *)data;
+  zap_t *zap = (zap_t *)user_data;
+  
+
+  G_Damage( target->targetEnt, target->targetEnt, zap->creator, forward,
+            target->targetEnt->r.currentOrigin, LEVEL2_AREAZAP_DMG *
+            ( 1 - pow( ( target->distance / LEVEL2_AREAZAP_CHAIN_RANGE ),
+                       LEVEL2_AREAZAP_CHAIN_FALLOFF ) ) + 1,
+            DAMAGE_NO_KNOCKBACK | DAMAGE_NO_LOCDAMAGE, MOD_LEVEL2_ZAP );
+}
+/*
+===============
 G_CreateNewZap
 ===============
 */
-static void G_CreateNewZap( gentity_t *creator, gentity_t *target )
+static void G_CreateNewZap( gentity_t *creator, gentity_t *targetEnt )
 {
-  int   i;
-  zap_t *zap;
+  zap_t   *zap = BG_Alloc0( sizeof( zap_t ) );
+  zapTarget_t *primaryZapTarget;
 
-  for( i = 0; i < MAX_ZAPS; i++ )
+  // add the newly created zap to the lev2ZapList
+  lev2ZapList = zap->zapLink = BG_List_Prepend( lev2ZapList, zap );
+
+  // initialize the zap
+  zap->timeToLive = LEVEL2_AREAzap_tIME;
+  zap->creator = creator;
+  BG_Queue_Init( &zap->targetQueue );
+  primaryZapTarget = BG_Alloc( sizeof(zapTarget_t) );
+  primaryZapTarget->targetEnt = targetEnt;
+  primaryZapTarget->distance  = 0;
+  BG_Queue_Push_Head( &zap->targetQueue, primaryZapTarget );
+
+  // the zap chains only through living entities
+  if( targetEnt->health > 0 )
   {
-    zap = &zaps[ i ];
-    if( zap->used )
-      continue;
+    G_FindLev2ZapChainTargets( zap );
 
-    zap->used = qtrue;
-    zap->timeToLive = LEVEL2_AREAZAP_TIME;
+    G_Damage( targetEnt, zap->creator, zap->creator, forward,
+              targetEnt->r.currentOrigin, LEVEL2_AREAZAP_DMG,
+              DAMAGE_NO_KNOCKBACK | DAMAGE_NO_LOCDAMAGE,
+              MOD_LEVEL2_ZAP );
 
-    zap->creator = creator;
-    zap->targets[ 0 ] = target;
-    zap->numTargets = 1;
-
-    // the zap chains only through living entities
-    if( target->health > 0 )
-    {
-      G_Damage( target, creator, creator, forward,
-                target->r.currentOrigin, LEVEL2_AREAZAP_DMG,
-                DAMAGE_NO_KNOCKBACK | DAMAGE_NO_LOCDAMAGE,
-                MOD_LEVEL2_ZAP );
-
-      G_FindZapChainTargets( zap );
-
-      for( i = 1; i < zap->numTargets; i++ )
-      {
-        G_Damage( zap->targets[ i ], target, zap->creator, forward, target->r.currentOrigin,
-                  LEVEL2_AREAZAP_DMG * ( 1 - pow( (zap->distances[ i ] /
-                    LEVEL2_AREAZAP_CHAIN_RANGE ), LEVEL2_AREAZAP_CHAIN_FALLOFF ) ) + 1,
-                  DAMAGE_NO_KNOCKBACK | DAMAGE_NO_LOCDAMAGE,
-                  MOD_LEVEL2_ZAP );
-      }
-    }
-
-    zap->effectChannel = G_Spawn( );
-    zap->effectChannel->s.eType = ET_LEV2_ZAP_CHAIN;
-    zap->effectChannel->classname = "lev2zapchain";
-    G_UpdateZapEffect( zap );
-
-    return;
+    BG_List_Foreach( BG_Queue_Peek_Head_Link( &zap->targetQueue )->next,
+                     G_DamageLev2ZapTarget, zap );
   }
+
+  // create and initialize the zap's effectChannel
+  zap->effectChannel = G_Spawn( );
+  zap->effectChannel->s.eType = ET_LEV2_ZAP_CHAIN;
+  zap->effectChannel->classname = "lev2zapchain";
+  zap->effectChannel->zapLink = zap->zapLink;
+  G_UpdateZapEffect( zap );
 }
 
+/*
+===============
+G_UpdateLev2Zap
+===============
+*/
+static void G_UpdateLev2Zap( void *data, void *user_data )
+{
+  zap_t *zap = (zap_t *)data;
+  zapTarget_t *primaryTarget =
+              (zapTarget_t *)BG_Queue_Peek_Head_Link( &zap->targetQueue )->data;
+  bglist_t    *targetZapLink = BG_Queue_Peek_Head_Link( &zap->targetQueue )->next;
+  int j;
+  
 
+  zap->timeToLive -= *(int *)user_data;
+
+  // first, the disappearance of players is handled immediately in G_ClearPlayerZapEffects()
+
+  // the deconstruction or gibbing of a directly targeted buildable destroys the whole zap effect
+  if( zap->timeToLive <= 0 || !primaryTarget->targetEnt->inuse )
+  {
+    G_FreeEntity( zap->effectChannel );
+    lev2ZapList = BG_List_Delete_Link( lev2ZapList, zap->zapLink );
+    G_DeleteZapData( zap );
+    return;
+  }
+
+  // the deconstruction or gibbing of chained buildables destroy the appropriate beams
+  for( j = 1; targetZapLink; j++ )
+  {
+    bglist_t *next = targetZapLink->next;
+
+    if( !((zapTarget_t *)targetZapLink->data)->targetEnt->inuse )
+      {
+        BG_Free( targetZapLink->data );
+        BG_Queue_Delete_Link( &zap->targetQueue, targetZapLink );
+      }
+
+      targetZapLink = next;
+  }
+
+  G_UpdateZapEffect( zap );
+}
 /*
 ===============
 G_UpdateZaps
@@ -1219,35 +1283,44 @@ G_UpdateZaps
 */
 void G_UpdateZaps( int msec )
 {
-  int   i, j;
-  zap_t *zap;
+  BG_List_Foreach( lev2ZapList, G_UpdateLev2Zap, &msec );
+}
 
-  for( i = 0; i < MAX_ZAPS; i++ )
+/*
+===============
+G_ClearPlayerLev2ZapEffects
+===============
+*/
+void G_ClearPlayerLev2ZapEffects( void *data, void *user_data )
+{
+  zap_t *zap = (zap_t *)data;
+  zapTarget_t *primaryTarget =
+              (zapTarget_t *)BG_Queue_Peek_Head_Link( &zap->targetQueue )->data;
+  bglist_t    *targetZapLink = BG_Queue_Peek_Head_Link( &zap->targetQueue )->next;
+  gentity_t *player = (gentity_t *)user_data;
+  int       j;
+
+  // the disappearance of the creator or the first target destroys the whole zap effect
+  if( zap->creator == player || primaryTarget->targetEnt == player )
   {
-    zap = &zaps[ i ];
-    if( !zap->used )
-      continue;
+    G_FreeEntity( zap->effectChannel );
+    lev2ZapList = BG_List_Delete_Link( lev2ZapList, zap->zapLink );
+    G_DeleteZapData( zap );
+    return;
+  }
 
-    zap->timeToLive -= msec;
+  // the disappearance of chained players destroy the appropriate beams
+  for( j = 1; targetZapLink; j++ )
+  {
+    bglist_t *next = targetZapLink->next;
 
-    // first, the disappearance of players is handled immediately in G_ClearPlayerZapEffects()
+    if( ((zapTarget_t *)targetZapLink->data)->targetEnt == player )
+      {
+        BG_Free( targetZapLink->data );
+        BG_Queue_Delete_Link( &zap->targetQueue, targetZapLink );
+      }
 
-    // the deconstruction or gibbing of a directly targeted buildable destroys the whole zap effect
-    if( zap->timeToLive <= 0 || !zap->targets[ 0 ]->inuse )
-    {
-      G_FreeEntity( zap->effectChannel );
-      zap->used = qfalse;
-      continue;
-    }
-
-    // the deconstruction or gibbing of chained buildables destroy the appropriate beams
-    for( j = 1; j < zap->numTargets; j++ )
-    {
-      if( !zap->targets[ j ]->inuse )
-        zap->targets[ j-- ] = zap->targets[ --zap->numTargets ];
-    }
-
-    G_UpdateZapEffect( zap );
+      targetZapLink = next;
   }
 }
 
@@ -1260,38 +1333,15 @@ called from G_LeaveTeam() and TeleportPlayer()
 */
 void G_ClearPlayerZapEffects( gentity_t *player )
 {
-  int i, j;
-  zap_t *zap;
-
-  for( i = 0; i < MAX_ZAPS; i++ )
-  {
-    zap = &zaps[ i ];
-    if( !zap->used )
-      continue;
-
-    // the disappearance of the creator or the first target destroys the whole zap effect
-    if( zap->creator == player || zap->targets[ 0 ] == player )
-    {
-      G_FreeEntity( zap->effectChannel );
-      zap->used = qfalse;
-      continue;
-    }
-
-    // the disappearance of chained players destroy the appropriate beams
-    for( j = 1; j < zap->numTargets; j++ )
-    {
-      if( zap->targets[ j ] == player )
-        zap->targets[ j-- ] = zap->targets[ --zap->numTargets ];
-    }
-  }
+  BG_List_Foreach( lev2ZapList, G_ClearPlayerLev2ZapEffects, player );
 }
 
 /*
 ===============
-areaZapFire
+areaLev2ZapFire
 ===============
 */
-void areaZapFire( gentity_t *ent )
+void areaLev2ZapFire( gentity_t *ent )
 {
   trace_t   tr;
   gentity_t *traceEnt;
@@ -1570,7 +1620,7 @@ void FireWeapon2( gentity_t *ent )
       break;
 
     case WP_ALEVEL2_UPG:
-      areaZapFire( ent );
+      areaLev2ZapFire( ent );
       break;
 
     case WP_ABUILD:
@@ -1695,4 +1745,3 @@ void FireWeapon( gentity_t *ent )
       break;
   }
 }
-

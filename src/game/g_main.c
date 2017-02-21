@@ -44,6 +44,10 @@ gentity_t   g_entities[ MAX_GENTITIES ];
 gclient_t   g_clients[ MAX_CLIENTS ];
 
 vmCvar_t  g_timelimit;
+vmCvar_t  g_basetimelimit;
+vmCvar_t  g_extendVotesPercent;
+vmCvar_t  g_extendVotesTime;
+vmCvar_t  g_extendVotesCount;
 vmCvar_t  g_suddenDeathTime;
 
 vmCvar_t  g_doWarmup;
@@ -56,6 +60,7 @@ vmCvar_t  g_warmupTimeout2Trigger;
 vmCvar_t  g_warmupBuildableRespawnTime;
 vmCvar_t  g_warmupDefensiveBuildableRespawnTime;
 
+vmCvar_t  g_humanStaminaMode;
 vmCvar_t  g_friendlyFire;
 vmCvar_t  g_friendlyBuildableFire;
 vmCvar_t  g_dretchPunt;
@@ -93,10 +98,12 @@ vmCvar_t  g_minNameChangePeriod;
 vmCvar_t  g_maxNameChanges;
 
 vmCvar_t  g_allowShare;
+vmCvar_t  g_overflowFunds;
 
 vmCvar_t  g_allowBuildableStacking;
 vmCvar_t  g_alienBuildPoints;
 vmCvar_t  g_alienBuildQueueTime;
+vmCvar_t  g_humanBlackout;
 vmCvar_t  g_humanBuildPoints;
 vmCvar_t  g_humanBuildQueueTime;
 vmCvar_t  g_humanRepeaterBuildPoints;
@@ -206,13 +213,18 @@ static cvarTable_t   gameCvarTable[ ] =
   // change anytime vars
   { &g_maxGameClients, "g_maxGameClients", "0", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qfalse  },
 
-  { &g_timelimit, "timelimit", "0", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_NORESTART, 0, qtrue },
+  { &g_timelimit, "timelimit", "0", CVAR_SERVERINFO | CVAR_NORESTART, 0, qtrue },
+  { &g_basetimelimit, "g_basetimelimit", "0", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_NORESTART, 0, qtrue },
+  { &g_extendVotesPercent, "g_extendVotesPercent", "50", CVAR_ARCHIVE, 0, qfalse },
+  { &g_extendVotesTime, "g_extendVotesTime", "10", CVAR_ARCHIVE, 0, qfalse },
+  { &g_extendVotesCount, "g_extendVotesCount", "3", CVAR_ARCHIVE, 0, qfalse },
   { &g_suddenDeathTime, "g_suddenDeathTime", "0", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_NORESTART, 0, qtrue },
 
   { &g_synchronousClients, "g_synchronousClients", "0", CVAR_SYSTEMINFO, 0, qfalse  },
 
-  { &g_friendlyFire, "g_friendlyFire", "0", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qtrue  },
-  { &g_friendlyBuildableFire, "g_friendlyBuildableFire", "0", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qtrue  },
+  { &g_humanStaminaMode, "g_humanStaminaMode", "1", CVAR_ARCHIVE, 0, qtrue  },
+  { &g_friendlyFire, "g_friendlyFire", "75", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qtrue  },
+  { &g_friendlyBuildableFire, "g_friendlyBuildableFire", "100", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qtrue  },
   { &g_dretchPunt, "g_dretchPunt", "1", CVAR_ARCHIVE, 0, qtrue  },
 
   { &g_teamForceBalance, "g_teamForceBalance", "0", CVAR_ARCHIVE, 0, qtrue },
@@ -246,6 +258,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_maxNameChanges, "g_maxNameChanges", "5", 0, 0, qfalse},
 
   { &g_allowShare, "g_allowShare", "0", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qfalse},
+  { &g_overflowFunds, "g_overflowFunds", "1", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qfalse},
 
   { &g_smoothClients, "g_smoothClients", "1", 0, 0, qfalse},
   { &pmove_fixed, "pmove_fixed", "0", CVAR_SYSTEMINFO, 0, qfalse},
@@ -254,6 +267,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_allowBuildableStacking, "g_allowBuildableStacking", "0", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qfalse},
   { &g_alienBuildPoints, "g_alienBuildPoints", DEFAULT_ALIEN_BUILDPOINTS, 0, 0, qfalse, cv_alienBuildPoints },
   { &g_alienBuildQueueTime, "g_alienBuildQueueTime", DEFAULT_ALIEN_QUEUE_TIME, CVAR_ARCHIVE, 0, qfalse  },
+  { &g_humanBlackout, "g_humanBlackout", "1", CVAR_SERVERINFO, 0, qfalse  },
   { &g_humanBuildPoints, "g_humanBuildPoints", DEFAULT_HUMAN_BUILDPOINTS, 0, 0, qfalse, cv_humanBuildPoints },
   { &g_humanBuildQueueTime, "g_humanBuildQueueTime", DEFAULT_HUMAN_QUEUE_TIME, CVAR_ARCHIVE, 0, qfalse  },
   { &g_humanRepeaterBuildPoints, "g_humanRepeaterBuildPoints", DEFAULT_HUMAN_REPEATER_BUILDPOINTS, CVAR_ARCHIVE, 0, qfalse, cv_humanRepeaterBuildPoints },
@@ -600,6 +614,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
   G_Printf( "------- Game Initialization -------\n" );
   G_Printf( "gamename: %s\n", GAME_VERSION );
 
+  // Dynamic memory
   BG_InitMemory( );
 
   // set some level globals
@@ -615,6 +630,13 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
   level.startTime = levelTime;
   level.alienStage2Time = level.alienStage3Time =
     level.humanStage2Time = level.humanStage3Time = level.startTime;
+
+  // initialize time limit values
+  level.matchBaseTimeLimit = g_basetimelimit.integer;
+  trap_Cvar_Set( "timelimit", va( "%d", level.matchBaseTimeLimit ) );
+  level.extendTimeLimit = 0;
+  level.extendVoteCount = 0;
+  level.timeLimitInitialized = qtrue;
 
   // reset the level's 1 minute and 5 minute timeouts
   level.warmup1Time = -1;
@@ -729,6 +751,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
   G_InitMapRotations( );
   G_ReloadPlayMapPool();
   G_ReloadPlayMapQueue();
+  G_ExecutePlaymapFlags( level.playmapFlags );
   G_InitSpawnQueue( &level.alienSpawnQueue );
   G_InitSpawnQueue( &level.humanSpawnQueue );
 
@@ -1649,6 +1672,7 @@ void MoveClientToIntermission( gentity_t *ent )
   ent->s.loopSound = 0;
   ent->s.event = 0;
   ent->r.contents = 0;
+  G_BackupUnoccupyContents( ent );
 }
 
 /*
@@ -2434,14 +2458,12 @@ void G_CheckVote( team_t team )
 
           if( ( ( level.clients[ i ].pers.teamSelection == team ) &&
                 ( ( level.clients[ i ].pers.voted & ( 1 << team ) ) ||
-                  ( level.time < level.clients[ i ].pers.voterInactivityTime ) ) ) ||
-              ( i == ( level.voteCaller[ team ]->pers.namelog->slot ) ) )
+                  ( level.time < level.clients[ i ].pers.voterInactivityTime ) ) ) )
             numActiveClients++;
           break;
         default:
           if( ( level.clients[ i ].pers.voted & ( 1 << team ) ) ||
-              ( level.time < level.clients[ i ].pers.voterInactivityTime ) ||
-              ( i == ( level.voteCaller[ team ]->pers.namelog->slot ) ) )
+              ( level.time < level.clients[ i ].pers.voterInactivityTime ) )
             numActiveClients++;
           break;
       }
@@ -2598,10 +2620,13 @@ CheckCvars
 */
 void CheckCvars( void )
 {
-  static int lastPasswordModCount   = -1;
-  static int lastMarkDeconModCount  = -1;
-  static int lastSDTimeModCount = -1;
-  static int lastNumZones = 0;
+  static int lastPasswordModCount         = -1;
+  static int lastMarkDeconModCount        = -1;
+  static int lastSDTimeModCount           = -1;
+  static int lastNumZones                 =  0;
+  static int lastTimeLimitModCount        = -1;
+  static int lastExtendTimeLimit          =  0;
+  static int lastHumanStaminaModeModCount = -1;
 
   if( g_password.modificationCount != lastPasswordModCount )
   {
@@ -2636,7 +2661,7 @@ void CheckCvars( void )
     size_t            newsize = g_humanRepeaterMaxZones.integer * sizeof( buildPointZone_t );
     size_t            oldsize = lastNumZones * sizeof( buildPointZone_t );
 
-    newZones = BG_Alloc( newsize );
+    newZones = BG_Alloc0( newsize );
     if( level.buildPointZones )
     {
       Com_Memcpy( newZones, level.buildPointZones, MIN( oldsize, newsize ) );
@@ -2645,6 +2670,38 @@ void CheckCvars( void )
 
     level.buildPointZones = newZones;
     lastNumZones = g_humanRepeaterMaxZones.integer;
+  }
+
+  // adjust settings related to time limit extensions
+  if( level.timeLimitInitialized )
+  {
+    lastTimeLimitModCount = g_timelimit.modificationCount;
+    level.timeLimitInitialized = qfalse;
+  }
+
+  if( g_timelimit.modificationCount != lastTimeLimitModCount )
+  {
+    if( g_timelimit.integer < 0 )
+      trap_Cvar_Set( "timelimit" , "0" );
+
+    level.extendTimeLimit = 0;
+    lastExtendTimeLimit = 0;
+    level.extendVoteCount = 0;
+    level.matchBaseTimeLimit = g_timelimit.integer;
+    lastTimeLimitModCount = g_timelimit.modificationCount;
+  } else if( level.extendTimeLimit != lastExtendTimeLimit )
+  {
+    trap_Cvar_Set( "timelimit", va( "%d", ( level.matchBaseTimeLimit +
+                                            level.extendTimeLimit ) ) );
+    lastExtendTimeLimit = level.extendTimeLimit;
+    lastTimeLimitModCount = g_timelimit.modificationCount;
+  }
+
+  if( g_humanStaminaMode.modificationCount != lastHumanStaminaModeModCount )
+  {
+    lastHumanStaminaModeModCount = g_humanStaminaMode.modificationCount;
+    trap_SetConfigstring( CS_HUMAN_STAMINA_MODE,
+                          va( "%i", g_humanStaminaMode.integer ) );
   }
 
   level.frameMsec = trap_Milliseconds( );
@@ -2808,6 +2865,8 @@ void G_RunFrame( int levelTime )
     if( !ent->r.linked && ent->neverFree )
       continue;
 
+    G_OccupantThink( ent );
+
     if( ent->s.eType == ET_MISSILE )
     {
       G_RunMissile( ent );
@@ -2883,4 +2942,3 @@ void G_RunFrame( int levelTime )
 
   level.frameMsec = trap_Milliseconds();
 }
-

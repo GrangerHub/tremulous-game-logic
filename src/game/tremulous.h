@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
 
+#define ACTIVATION_ENT_RANGE            64 // default maximum range a client can activate an activation entity
 
 /*
  * ALIEN weapons
@@ -88,7 +89,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL2_AREAZAP_CHAIN_FALLOFF 8.0f
 #define LEVEL2_AREAZAP_WIDTH        15.0f
 #define LEVEL2_AREAZAP_REPEAT       1500
-#define LEVEL2_AREAZAP_TIME         1000
+#define LEVEL2_AREAzap_tIME         1000
 #define LEVEL2_AREAZAP_MAX_TARGETS  5
 #define LEVEL2_WALLJUMP_MAXSPEED    1000.0f
 
@@ -545,6 +546,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MEDISTAT_BP                 8
 #define MEDISTAT_BT                 10000
 #define MEDISTAT_HEALTH             HBHM(190)
+#define MEDISTAT_REPEAT             100
 #define MEDISTAT_SPLASHDAMAGE       50
 #define MEDISTAT_SPLASHRADIUS       100
 #define MEDISTAT_VALUE              HBVM(MEDISTAT_BP)
@@ -629,9 +631,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define STAMINA_STOP_RESTORE        30
 #define STAMINA_WALK_RESTORE        15
+#define STAMINA_RUN_RESTORE         7
 #define STAMINA_MEDISTAT_RESTORE    30 // stacked on STOP or WALK
 #define STAMINA_SPRINT_TAKE         6
-#define STAMINA_JUMP_TAKE           250
+#define STAMINA_JUMP_TAKE           264
 #define STAMINA_DODGE_TAKE          250
 #define STAMINA_MAX                 1000
 #define STAMINA_BREATHING_LEVEL     0
@@ -657,6 +660,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MAX_FALL_DISTANCE           120.0f //the fall distance at which maximum damage is dealt
 #define AVG_FALL_DISTANCE           ((MIN_FALL_DISTANCE+MAX_FALL_DISTANCE)/2.0f)
 
+#define BUNNY_HOP_DELAY             300  // minimum miliseconds delay between bunny hops
+
+#define CHARGE_STAMINA_MAX          10000
+#define CHARGE_STAMINA_RESTORE      15
+
 #define DEFAULT_FREEKILL_PERIOD     "120" //seconds
 #define FREEKILL_ALIEN              ALIEN_CREDITS_PER_KILL
 #define FREEKILL_HUMAN              LEVEL0_VALUE
@@ -679,4 +687,3 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
                                          //do to increment the stage kill counters
                                          
 #define MAXIMUM_BUILD_TIME          20000 // used for pie timer
-

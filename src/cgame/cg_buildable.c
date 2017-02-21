@@ -683,7 +683,7 @@ void CG_GhostBuildable( buildable_t buildable )
 
   BG_BuildableBoundingBox( buildable, mins, maxs );
 
-  CG_SublimeMarkedBuildables( qtrue );
+  cgs.sublimeMarkedBuildables = qtrue;
 
   BG_PositionBuildableRelativeToPlayer( ps, mins, maxs, CG_Trace, entity_origin, angles, &tr );
 
@@ -693,7 +693,7 @@ void CG_GhostBuildable( buildable_t buildable )
   CG_PositionAndOrientateBuildable( ps->viewangles, entity_origin, tr.plane.normal, ps->clientNum,
                                     mins, maxs, ent.axis, ent.origin );
 
-  CG_SublimeMarkedBuildables( qfalse );
+  cgs.sublimeMarkedBuildables = qfalse;
 
   //offset on the Z axis if required
   VectorMA( ent.origin, BG_BuildableConfig( buildable )->zOffset, tr.plane.normal, ent.origin );
@@ -1160,7 +1160,9 @@ static void CG_BuildableStatusDisplay( centity_t *cent )
     }
 
     trap_R_SetColor( color );
-    if( !powered )
+    if( !powered &&
+        !( BG_Buildable( es->modelindex )->activationEnt &&
+           !( BG_Buildable( es->modelindex )->activationFlags & ACTF_POWERED ) ) )
     {
       float pX;
 
@@ -1410,6 +1412,11 @@ void CG_Buildable( centity_t *cent )
     ent.customShader = cgs.media.redBuildShader;
 
   //add to refresh list
+  if( cg_spectatorWallhack.integer == 2 &&
+      cgs.clientinfo[ cg.clientNum ].team == TEAM_NONE )
+  {
+    ent.renderfx |= RF_DEPTHHACK;
+  }
   trap_R_AddRefEntityToScene( &ent );
 
   CrossProduct( surfNormal, refNormal, xNormal );
@@ -1454,6 +1461,11 @@ void CG_Buildable( centity_t *cent )
     if( CG_PlayerIsBuilder( es->modelindex ) && CG_BuildableRemovalPending( es->number ) )
       turretBarrel.customShader = cgs.media.redBuildShader;
 
+    if( cg_spectatorWallhack.integer == 2 &&
+        cgs.clientinfo[ cg.clientNum ].team == TEAM_NONE )
+    {
+      turretBarrel.renderfx |= RF_DEPTHHACK;
+    }
     trap_R_AddRefEntityToScene( &turretBarrel );
   }
 
@@ -1499,6 +1511,11 @@ void CG_Buildable( centity_t *cent )
     if( CG_PlayerIsBuilder( es->modelindex ) && CG_BuildableRemovalPending( es->number ) )
       turretTop.customShader = cgs.media.redBuildShader;
 
+    if( cg_spectatorWallhack.integer == 2 &&
+        cgs.clientinfo[ cg.clientNum ].team == TEAM_NONE )
+    {
+      turretTop.renderfx |= RF_DEPTHHACK;
+    }
     trap_R_AddRefEntityToScene( &turretTop );
   }
 
