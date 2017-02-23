@@ -141,10 +141,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL4_CRUSH_REPEAT            500   // player damage repeat
 
 #define SPITFIRE_ZAP_MAX_TARGETS        6
-#define SPITFIRE_ZAP_REPEAT             250
+#define SPITFIRE_ZAP_REPEAT             750
 #define SPITFIRE_ZAP_K_SCALE            1.0f
 #define SPITFIRE_ZAP_RANGE              300.0f
-#define SPITFIRE_ZAP_DMG                ADM(10)
+#define SPITFIRE_ZAP_DMG                ADM(30)
 #define SPITFIRE_ZAP_TIME               150
 #define SPITFIRE_ASCEND_REPEAT          400
 #define SPITFIRE_ASCEND_MAG             400.0f
