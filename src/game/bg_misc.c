@@ -2579,7 +2579,7 @@ static const weaponAttributes_t bg_weapons[ ] =
   {
     WP_PORTAL_GUN,        //int       weaponNum;
     PORTALGUN_PRICE,      //int       price;
-    ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),          //int  stages
+    ( 1 << S3 ),          //int       stages
     SLOT_WEAPON,          //int       slots;
     "portalgun",          //char      *weaponName;
     "Portal Gun",         //char      *humanName;
