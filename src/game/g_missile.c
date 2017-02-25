@@ -184,6 +184,10 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace )
         return;
     }
   }
+  else if ( !strcmp( ent->classname, "portalgun" ) )
+  {
+    G_Portal_Create( ent->parent, trace->endpos, trace->plane.normal, ent->s.modelindex2 );
+  }
 
   // impact damage
   if( other->takedamage )
@@ -650,6 +654,58 @@ qboolean G_PlayerHasUnexplodedGrenades( gentity_t *player )
   return qfalse;
 }
 
+//=============================================================================
+
+/*
+=================
+fire_portalGun
+
+=================
+*/
+gentity_t *fire_portalGun( gentity_t *self, vec3_t start, vec3_t dir, portal_t portal )
+{
+  gentity_t *bolt;
+  vec3_t pvel;
+
+  VectorNormalize( dir );
+
+  bolt = G_Spawn( );
+  bolt->classname = "portalgun";
+  bolt->pointAgainstWorld = qtrue;
+
+  bolt->nextthink = level.time + 10000;
+  bolt->think = G_ExplodeMissile;
+  bolt->s.eType = ET_MISSILE;
+  //bolt->r.svFlags = SVF_USE_CURRENT_ORIGIN;
+  bolt->s.weapon = WP_PORTAL_GUN;
+  bolt->s.generic1 = self->s.generic1; //weaponMode
+  bolt->s.modelindex2 = portal;
+  bolt->r.ownerNum = self->s.number;
+  bolt->parent = self;
+  bolt->clipmask = MASK_PLAYERSOLID;
+
+  // Give the missile a small bounding box
+  bolt->r.mins[ 0 ] = bolt->r.mins[ 1 ] = bolt->r.mins[ 2 ] =
+    -PORTALGUN_SIZE;
+  bolt->r.maxs[ 0 ] = bolt->r.maxs[ 1 ] = bolt->r.maxs[ 2 ] =
+    -bolt->r.mins[ 0 ];
+
+  bolt->s.pos.trType = TR_ACCEL;
+  bolt->s.pos.trDuration = PORTALGUN_SPEED * 2;
+  bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;   // move a bit on the very first frame
+  VectorCopy( start, bolt->s.pos.trBase );
+
+  VectorScale( self->client->ps.velocity, 1.0f, pvel );
+  VectorMA( pvel, PORTALGUN_SPEED, dir, bolt->s.pos.trDelta );
+
+  SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
+
+  VectorCopy( start, bolt->r.currentOrigin );
+
+  return bolt;
+}
+
+//=============================================================================
 
 
 /*

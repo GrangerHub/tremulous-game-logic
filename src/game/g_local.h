@@ -561,6 +561,9 @@ struct gclient_s
   int                 trampleBuildablesHit[ MAX_TRAMPLE_BUILDABLES_TRACKED ];
 
   int                 lastCrushTime;        // Tyrant crush
+
+  gentity_t           *portals[PORTAL_NUM];
+  int                 portalTime;
 };
 
 
@@ -1108,9 +1111,9 @@ gentity_t *fire_paraLockBlob( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *fire_slowBlob( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *fire_bounceBall( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *fire_hive( gentity_t *self, vec3_t start, vec3_t dir );
+gentity_t *fire_portalGun( gentity_t *self, vec3_t start, vec3_t dir, portal_t portal );
 gentity_t *launch_grenade( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *launch_grenade2( gentity_t *self, vec3_t start, vec3_t dir );
-
 
 //
 // g_mover.c
@@ -1304,6 +1307,12 @@ qboolean G_IsValidPlayerModel(const char *model);
 void G_GetPlayerModelSkins( const char *modelname, char skins[MAX_PLAYER_MODEL][ 64 ], int maxskins, int *numskins );
 char *GetSkin( char *modelname, char *wish );
 
+//
+// g_portal.c
+//
+void G_Portal_Create( gentity_t *ent, vec3_t origin, vec3_t normal, portal_t portal );
+void G_Portal_Clear( gentity_t *parent, portal_t portalIndex );
+
 //some maxs
 #define MAX_FILEPATH      144
 
@@ -1442,6 +1451,7 @@ extern  vmCvar_t  g_allowTeamOverlay;
 extern  vmCvar_t  g_censorship;
 
 extern  vmCvar_t  g_pimpHuman;
+extern  vmCvar_t  g_portalGun;
 
 void      trap_Print( const char *fmt );
 void      trap_Error( const char *fmt ) __attribute__((noreturn));
