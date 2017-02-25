@@ -279,6 +279,9 @@ void CG_SetConfigValues( void )
 
   cgs.warmup = atoi( CG_ConfigString( CS_WARMUP ) );
   trap_Cvar_Set( "ui_warmup", va( "%d", cgs.warmup ) );
+
+  cgs.devMode = atoi( CG_ConfigString( CS_DEVMODE ) );
+  trap_Cvar_Set( "ui_devMode", va( "%d", cgs.devMode ) );
 }
 
 
@@ -391,6 +394,11 @@ static void CG_ConfigStringModified( void )
     CG_ParseWarmup( );
   else if( num == CS_WARMUP_READY )
     CG_ParseWarmupReady( );
+  else if( num == CS_DEVMODE )
+  {
+    cgs.devMode = atoi( CG_ConfigString( CS_DEVMODE ) );
+    trap_Cvar_Set( "ui_devMode", va( "%d", cgs.devMode ) );
+  }
   else if( num == CS_HUMAN_STAMINA_MODE )
     cgs.humanStaminaMode = atoi( str );
   else if( num == CS_ALIEN_STAGES )

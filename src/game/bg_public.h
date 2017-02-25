@@ -92,6 +92,8 @@ enum
   CS_WARMUP,                // g_warmup
   CS_WARMUP_READY,
 
+  CS_DEVMODE,
+
   CS_HUMAN_STAMINA_MODE,
 
   CS_MODELS,
@@ -1068,6 +1070,7 @@ typedef struct
 {
   class_t   number;
 
+  qboolean  enabled;
   char      *name;
   char      *info;
 
@@ -1152,6 +1155,7 @@ typedef struct
 {
   buildable_t   number;
 
+  qboolean      enabled;
   char          *name;
   char          *humanName;
   char          *info;
@@ -1221,6 +1225,7 @@ typedef struct
 {
   weapon_t  number;
 
+  qboolean  enabled;
   int       price;
   int       stages;
 
@@ -1258,6 +1263,7 @@ typedef struct
 {
   upgrade_t number;
 
+  qboolean  enabled;
   int       price;
   int       stages;
 
@@ -1330,10 +1336,12 @@ int                         BG_ClassCanEvolveFromTo( class_t fclass,
                                                      class_t tclass,
                                                      int credits,
                                                      int alienStage, int num,
-                                                     int gameIsInWarmup );
+                                                     int gameIsInWarmup,
+                                                     qboolean devMode );
 qboolean                    BG_AlienCanEvolve( class_t class, int credits,
                                                int alienStage,
-                                               int gameIsInWarmup );
+                                               int gameIsInWarmup,
+                                               qboolean devMode );
 
 void                        BG_InitClassConfigs( void );
 
@@ -1422,10 +1430,10 @@ void BG_ParseCSVEquipmentList( const char *string, weapon_t *weapons, int weapon
 void BG_ParseCSVClassList( const char *string, class_t *classes, int classesSize );
 void BG_ParseCSVBuildableList( const char *string, buildable_t *buildables, int buildablesSize );
 void BG_InitAllowedGameElements( void );
-qboolean BG_WeaponIsAllowed( weapon_t weapon );
-qboolean BG_UpgradeIsAllowed( upgrade_t upgrade );
-qboolean BG_ClassIsAllowed( class_t class );
-qboolean BG_BuildableIsAllowed( buildable_t buildable );
+qboolean BG_WeaponIsAllowed( weapon_t weapon, qboolean devMode );
+qboolean BG_UpgradeIsAllowed( upgrade_t upgrade, qboolean devMode );
+qboolean BG_ClassIsAllowed( class_t class, qboolean devMode );
+qboolean BG_BuildableIsAllowed( buildable_t buildable, qboolean devMode );
 
 // Friendly Fire Flags
 #define FFF_HUMANS         1

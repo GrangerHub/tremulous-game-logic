@@ -2627,6 +2627,7 @@ void CheckCvars( void )
   static int lastTimeLimitModCount        = -1;
   static int lastExtendTimeLimit          =  0;
   static int lastHumanStaminaModeModCount = -1;
+  static int lastCheatsModCount           = -1;
 
   if( g_password.modificationCount != lastPasswordModCount )
   {
@@ -2702,6 +2703,11 @@ void CheckCvars( void )
     lastHumanStaminaModeModCount = g_humanStaminaMode.modificationCount;
     trap_SetConfigstring( CS_HUMAN_STAMINA_MODE,
                           va( "%i", g_humanStaminaMode.integer ) );
+  }
+
+  if( g_cheats.modificationCount != lastCheatsModCount )
+  {
+    trap_SetConfigstring( CS_DEVMODE, va( "%i", g_cheats.integer ) );
   }
 
   level.frameMsec = trap_Milliseconds( );

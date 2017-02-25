@@ -561,7 +561,6 @@ Every map should have exactly one worldspawn.
 void SP_worldspawn( void )
 {
   char *s;
-  char sb[ MAX_SPAWN_VARS_CHARS ] = "";
 
   G_SpawnString( "classname", "", &s );
 
@@ -599,14 +598,7 @@ void SP_worldspawn( void )
   if( G_SpawnString( "alienBuildPoints", "", &s ) )
     trap_Cvar_Set( "g_alienBuildPoints", s );
 
-  G_SpawnString( "disabledEquipment", "", &s );
-  if ( !g_cheats.integer && !g_portalGun.integer )
-  {
-    strcpy(sb, "portalgun,");
-    strcat(sb, s);
-    trap_Cvar_Set( "g_disabledEquipment", sb );
-  } else
-    trap_Cvar_Set( "g_disabledEquipment", s );
+  trap_Cvar_Set( "g_disabledEquipment", s );
 
   G_SpawnString( "disabledClasses", "", &s );
   trap_Cvar_Set( "g_disabledClasses", s );

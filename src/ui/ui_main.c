@@ -1591,6 +1591,20 @@ static int UI_GameIsInWarmup( void )
 }
 
 /*
+==============
+UI_DevModeIsOn
+==============
+*/
+static int UI_DevModeIsOn( void )
+{
+  char buffer[ MAX_TOKEN_CHARS ];
+
+  trap_Cvar_VariableStringBuffer( "ui_devMode", buffer, sizeof( buffer ) );
+
+  return atoi( buffer );
+}
+
+/*
 ===============
 UI_GetCurrentAlienStage
 ===============
@@ -1657,7 +1671,8 @@ static void UI_DrawInfoPane( menuItem_t *item, rectDef_t *rect, float text_x, fl
     case INFOTYPE_CLASS:
       value = ( BG_ClassCanEvolveFromTo( class, item->v.pclass, credits,
                                          UI_GetCurrentAlienStage(), 0,
-                                         UI_GameIsInWarmup( ) ) +
+                                         UI_GameIsInWarmup( ),
+                                         UI_DevModeIsOn( ) ) +
                 ALIEN_CREDITS_PER_KILL - 1 ) / ALIEN_CREDITS_PER_KILL;
 
       if( value < 1 )
@@ -2294,15 +2309,15 @@ static void UI_LoadAlienClasses( void )
 {
   uiInfo.alienClassCount = 0;
 
-  if( BG_ClassIsAllowed( PCL_ALIEN_LEVEL0 ) )
+  if( BG_ClassIsAllowed( PCL_ALIEN_LEVEL0, UI_DevModeIsOn( ) ) )
     UI_AddClass( PCL_ALIEN_LEVEL0 );
 
-  if( BG_ClassIsAllowed( PCL_ALIEN_BUILDER0_UPG ) &&
+  if( BG_ClassIsAllowed( PCL_ALIEN_BUILDER0_UPG, UI_DevModeIsOn( ) ) &&
       BG_ClassAllowedInStage( PCL_ALIEN_BUILDER0_UPG,
                               UI_GetCurrentAlienStage( ),
                               UI_GameIsInWarmup( ) ) )
     UI_AddClass( PCL_ALIEN_BUILDER0_UPG );
-  else if( BG_ClassIsAllowed( PCL_ALIEN_BUILDER0 ) )
+  else if( BG_ClassIsAllowed( PCL_ALIEN_BUILDER0, UI_DevModeIsOn( ) ) )
     UI_AddClass( PCL_ALIEN_BUILDER0 );
 }
 
@@ -2332,10 +2347,10 @@ static void UI_LoadHumanItems( void )
 {
   uiInfo.humanItemCount = 0;
 
-  if( BG_WeaponIsAllowed( WP_MACHINEGUN ) )
+  if( BG_WeaponIsAllowed( WP_MACHINEGUN, UI_DevModeIsOn( ) ) )
     UI_AddItem( WP_MACHINEGUN );
 
-  if( BG_WeaponIsAllowed( WP_HBUILD ) )
+  if( BG_WeaponIsAllowed( WP_HBUILD, UI_DevModeIsOn( ) ) )
     UI_AddItem( WP_HBUILD );
 }
 
@@ -2427,7 +2442,7 @@ static void UI_LoadHumanArmouryBuys( void )
     if( BG_Weapon( i )->team == TEAM_HUMANS &&
         BG_Weapon( i )->purchasable &&
         BG_WeaponAllowedInStage( i, stage, UI_GameIsInWarmup( ) ) &&
-        BG_WeaponIsAllowed( i ) &&
+        BG_WeaponIsAllowed( i, UI_DevModeIsOn( ) ) &&
         !( BG_Weapon( i )->slots & slots ) &&
         !( uiInfo.weapons & ( 1 << i ) ) )
     {
@@ -2448,7 +2463,7 @@ static void UI_LoadHumanArmouryBuys( void )
     if( BG_Upgrade( i )->team == TEAM_HUMANS &&
         BG_Upgrade( i )->purchasable &&
         BG_UpgradeAllowedInStage( i, stage, UI_GameIsInWarmup( ) ) &&
-        BG_UpgradeIsAllowed( i ) &&
+        BG_UpgradeIsAllowed( i, UI_DevModeIsOn( ) ) &&
         !( BG_Upgrade( i )->slots & slots ) &&
         !( uiInfo.upgrades & ( 1 << i ) ) )
     {
@@ -2552,7 +2567,8 @@ static void UI_LoadAlienUpgrades( void )
   for( i = PCL_NONE + 1; i < PCL_NUM_CLASSES; i++ )
   {
     if( BG_ClassCanEvolveFromTo( class, i, credits, stage, 0,
-                                 UI_GameIsInWarmup( ) ) >= 0 )
+                                 UI_GameIsInWarmup( ),
+                                 UI_DevModeIsOn( ) ) >= 0 )
     {
       uiInfo.alienUpgradeList[ j ].text = BG_ClassConfig( i )->humanName;
       uiInfo.alienUpgradeList[ j ].cmd =
@@ -2587,7 +2603,7 @@ static void UI_LoadAlienBuilds( void )
     if( BG_Buildable( i )->team == TEAM_ALIENS &&
         BG_Buildable( i )->buildWeapon & uiInfo.weapons &&
         BG_BuildableAllowedInStage( i, stage, UI_GameIsInWarmup( ) ) &&
-        BG_BuildableIsAllowed( i ) )
+        BG_BuildableIsAllowed( i, UI_DevModeIsOn( ) ) )
     {
       uiInfo.alienBuildList[ j ].text = BG_Buildable( i )->humanName;
       uiInfo.alienBuildList[ j ].cmd =
@@ -2622,7 +2638,7 @@ static void UI_LoadHumanBuilds( void )
     if( BG_Buildable( i )->team == TEAM_HUMANS &&
         BG_Buildable( i )->buildWeapon & uiInfo.weapons &&
         BG_BuildableAllowedInStage( i, stage, UI_GameIsInWarmup( ) ) &&
-        BG_BuildableIsAllowed( i ) )
+        BG_BuildableIsAllowed( i, UI_DevModeIsOn( ) ) )
     {
       uiInfo.humanBuildList[ j ].text = BG_Buildable( i )->humanName;
       uiInfo.humanBuildList[ j ].cmd =

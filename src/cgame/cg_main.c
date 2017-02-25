@@ -224,6 +224,7 @@ vmCvar_t  ui_currentClass;
 vmCvar_t  ui_carriage;
 vmCvar_t  ui_stages;
 vmCvar_t  ui_warmup;
+vmCvar_t  ui_devMode;
 vmCvar_t  ui_dialog;
 vmCvar_t  ui_voteActive;
 vmCvar_t  ui_alienTeamVoteActive;
@@ -362,6 +363,7 @@ static cvarTable_t cvarTable[ ] =
   { &ui_carriage, "ui_carriage", "", CVAR_ROM },
   { &ui_stages, "ui_stages", "0 0", CVAR_ROM },
   { &ui_warmup, "ui_warmup", "0", CVAR_ROM },
+  { &ui_devMode, "ui_devMode", "0", CVAR_ROM },
   { &ui_dialog, "ui_dialog", "Text not set", CVAR_ROM },
   { &ui_voteActive, "ui_voteActive", "0", CVAR_ROM },
   { &ui_humanTeamVoteActive, "ui_humanTeamVoteActive", "0", CVAR_ROM },

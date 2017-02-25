@@ -1404,6 +1404,8 @@ typedef struct
   int           numHumansReady;         // Number of human players ready
   int           numHumans;              // Total number of players in humans team
 
+  qboolean      devMode;
+
   int           voteTime[ NUM_TEAMS ];
   int           voteCast[ NUM_TEAMS ];   // Total number of yes and no votes combined
   int           voteActive[ NUM_TEAMS ]; // Total number of active clients during a vote
