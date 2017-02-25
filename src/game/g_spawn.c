@@ -659,4 +659,3 @@ void G_SpawnEntitiesFromString( void )
   while( G_ParseSpawnVars( ) )
     G_SpawnGEntityFromSpawnVars( );
 }
-

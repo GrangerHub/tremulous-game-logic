@@ -777,6 +777,42 @@ void LCChargeFire( gentity_t *ent, qboolean secondary )
 /*
 ======================================================================
 
+PORTAL GUN
+
+======================================================================
+*/
+
+/*
+===============
+PGChargeClear
+===============
+*/
+void PGChargeClear( gentity_t *ent )
+{
+  // clear all portals
+  G_Portal_Clear( ent, PORTAL_BLUE );
+  G_Portal_Clear( ent, PORTAL_RED );
+  ent->client->ps.weaponTime = PORTALGUN_REPEAT;
+}
+
+/*
+===============
+PGChargeFire
+===============
+*/
+void PGChargeFire( gentity_t *ent, qboolean secondary )
+{
+  if( secondary )
+    fire_portalGun( ent, muzzle, forward, PORTAL_BLUE );
+  else
+    fire_portalGun( ent, muzzle, forward, PORTAL_RED );
+
+  ent->client->ps.weaponTime = PORTALGUN_REPEAT;
+}
+
+/*
+======================================================================
+
 TESLA GENERATOR
 
 ======================================================================
@@ -1917,6 +1953,10 @@ void FireWeapon3( gentity_t *ent )
       slowBlobFire( ent );
       break;
 
+    case WP_PORTAL_GUN:
+      PGChargeClear( ent );
+      break;
+
     default:
       break;
   }
@@ -1950,6 +1990,10 @@ void FireWeapon2( gentity_t *ent )
 
     case WP_LUCIFER_CANNON:
       LCChargeFire( ent, qtrue );
+      break;
+
+    case WP_PORTAL_GUN:
+      PGChargeFire( ent, qtrue );
       break;
 
     case WP_ALEVEL2_UPG:
@@ -2043,6 +2087,9 @@ void FireWeapon( gentity_t *ent )
       break;
     case WP_LUCIFER_CANNON:
       LCChargeFire( ent, qfalse );
+      break;
+    case WP_PORTAL_GUN:
+      PGChargeFire( ent, qfalse );
       break;
     case WP_LAS_GUN:
       lasGunFire( ent );

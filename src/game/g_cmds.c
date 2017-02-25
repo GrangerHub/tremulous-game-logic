@@ -2085,7 +2085,7 @@ void Cmd_Class_f( gentity_t *ent )
         return;
       }
 
-      if( !BG_ClassIsAllowed( newClass ) )
+      if( !BG_ClassIsAllowed( newClass, g_cheats.integer ) )
       {
         G_TriggerMenuArgs( ent->client->ps.clientNum, MN_A_CLASSNOTALLOWED, newClass );
         return;
@@ -2108,12 +2108,12 @@ void Cmd_Class_f( gentity_t *ent )
     {
       //set the item to spawn with
       if( !Q_stricmp( s, BG_Weapon( WP_MACHINEGUN )->name ) &&
-          BG_WeaponIsAllowed( WP_MACHINEGUN ) )
+          BG_WeaponIsAllowed( WP_MACHINEGUN, g_cheats.integer ) )
       {
         ent->client->pers.humanItemSelection = WP_MACHINEGUN;
       }
       else if( !Q_stricmp( s, BG_Weapon( WP_HBUILD )->name ) &&
-               BG_WeaponIsAllowed( WP_HBUILD ) )
+               BG_WeaponIsAllowed( WP_HBUILD, g_cheats.integer ) )
       {
         ent->client->pers.humanItemSelection = WP_HBUILD;
       }
@@ -2199,7 +2199,7 @@ void Cmd_Class_f( gentity_t *ent )
       cost = BG_ClassCanEvolveFromTo( currentClass, newClass,
                                       ent->client->pers.credit,
                                       g_alienStage.integer, 0,
-                                      IS_WARMUP );
+                                      IS_WARMUP, g_cheats.integer );
 
       if( G_RoomForClassChange( ent, newClass, infestOrigin ) )
       {
@@ -2547,7 +2547,8 @@ void Cmd_Buy_f( gentity_t *ent )
     }
 
     //are we /allowed/ to buy this?
-    if( !BG_WeaponAllowedInStage( weapon, g_humanStage.integer, IS_WARMUP ) || !BG_WeaponIsAllowed( weapon ) )
+    if( !BG_WeaponAllowedInStage( weapon, g_humanStage.integer, IS_WARMUP ) ||
+                                  !BG_WeaponIsAllowed( weapon, g_cheats.integer ) )
     {
       trap_SendServerCommand( ent-g_entities, "print \"You can't buy this item\n\"" );
       return;
@@ -2633,7 +2634,8 @@ void Cmd_Buy_f( gentity_t *ent )
     }
 
     //are we /allowed/ to buy this?
-    if( !BG_UpgradeAllowedInStage( upgrade, g_humanStage.integer, IS_WARMUP ) || !BG_UpgradeIsAllowed( upgrade ) )
+    if( !BG_UpgradeAllowedInStage( upgrade, g_humanStage.integer, IS_WARMUP ) ||
+                                   !BG_UpgradeIsAllowed( upgrade, g_cheats.integer ) )
     {
       trap_SendServerCommand( ent-g_entities, "print \"You can't buy this item\n\"" );
       return;
@@ -2875,7 +2877,7 @@ void Cmd_Build_f( gentity_t *ent )
   buildable = BG_BuildableByName( s )->number;
   team = ent->client->ps.stats[ STAT_TEAM ];
 
-  if( buildable == BA_NONE || !BG_BuildableIsAllowed( buildable ) ||
+  if( buildable == BA_NONE || !BG_BuildableIsAllowed( buildable, g_cheats.integer ) ||
       !( ( 1 << ent->client->ps.weapon ) & BG_Buildable( buildable )->buildWeapon ) ||
       ( team == TEAM_ALIENS && !BG_BuildableAllowedInStage( buildable, g_alienStage.integer, IS_WARMUP ) ) ||
       ( team == TEAM_HUMANS && !BG_BuildableAllowedInStage( buildable, g_humanStage.integer, IS_WARMUP ) ) )

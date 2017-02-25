@@ -352,6 +352,9 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   for( i = UP_NONE + 1; i < UP_NUM_UPGRADES; i++ )
     BG_DeactivateUpgrade( i, self->client->ps.stats );
 
+  G_Portal_Clear( self, PORTAL_BLUE );
+  G_Portal_Clear( self, PORTAL_RED );
+
   // broadcast the death event to everyone
   ent = G_TempEntity( self->r.currentOrigin, EV_OBITUARY );
   ent->s.eventParm = meansOfDeath;

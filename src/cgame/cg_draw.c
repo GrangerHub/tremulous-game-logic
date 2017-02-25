@@ -325,7 +325,7 @@ static void CG_DrawPlayerCreditsValue( rectDef_t *rect, vec4_t color, qboolean p
     if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_ALIENS )
     {
       if( !BG_AlienCanEvolve( cg.predictedPlayerState.stats[ STAT_CLASS ],
-                              value, cgs.alienStage, cgs.warmup ) &&
+                              value, cgs.alienStage, cgs.warmup, cgs.devMode ) &&
           cg.time - cg.lastEvolveAttempt <= NO_CREDITS_TIME &&
           ( ( cg.time - cg.lastEvolveAttempt ) / 300 ) & 1 )
       {
@@ -2646,7 +2646,7 @@ void CG_DrawWeaponIcon( rectDef_t *rect, vec4_t color )
   if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_ALIENS &&
       !BG_AlienCanEvolve( cg.predictedPlayerState.stats[ STAT_CLASS ],
                           ps->persistant[ PERS_CREDIT ], cgs.alienStage,
-                          cgs.warmup ) )
+                          cgs.warmup, cgs.devMode ) )
   {
     if( cg.time - cg.lastEvolveAttempt <= NO_CREDITS_TIME )
     {
