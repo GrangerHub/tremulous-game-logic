@@ -337,11 +337,12 @@ static void CG_Teleportal( centity_t *cent )
   VectorCopy( cent->lerpOrigin, ent.origin);
   VectorCopy( cent->lerpOrigin, ent.oldorigin);
 
-  ent.hModel = cg_buildables[ s1->modelindex ].models[ 0 ];
-  ent.customShader = cgs.media.humanSpawningShader;
-  // XXX: Ok so these are actually backwards.
-  if ( s1->modelindex2 == PORTAL_BLUE )
-    ent.customShader = cgs.media.humanSpawningShader2;
+  ent.hModel = cgs.media.portal;
+
+  if( s1->modelindex2 == PORTAL_BLUE )
+    ent.customSkin = cgs.media.portalBlueSkin;
+  else if( s1->modelindex2 == PORTAL_RED )
+    ent.customSkin = cgs.media.portalRedSkin;
 
   // get axis
   VectorCopy( s1->origin2, ent.axis[ 2 ] );

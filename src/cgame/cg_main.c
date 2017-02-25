@@ -993,6 +993,10 @@ static void CG_RegisterGraphics( void )
 
   cgs.media.disconnectPS              = CG_RegisterParticleSystem( "disconnectPS" );
 
+  cgs.media.portal             = trap_R_RegisterModel( "models/fx/portal/portals.md3" );
+  cgs.media.portalBlueSkin     = trap_R_RegisterSkin( "models/fx/portal/portals_blue.skin" );
+  cgs.media.portalRedSkin      = trap_R_RegisterSkin( "models/fx/portal/portals_orange.skin" );
+
   CG_UpdateMediaFraction( 0.7f );
 
   memset( cg_weapons, 0, sizeof( cg_weapons ) );

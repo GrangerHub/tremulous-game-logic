@@ -1307,6 +1307,10 @@ typedef struct
   qhandle_t jetpackFlashModel;
   qhandle_t battpackModel;
 
+  qhandle_t portal;
+  qhandle_t portalBlueSkin;
+  qhandle_t portalRedSkin;
+
   sfxHandle_t repeaterUseSound;
 
   sfxHandle_t buildableRepairSound;
