@@ -1226,6 +1226,7 @@ typedef struct
   qhandle_t   greenBuildShader;
   qhandle_t   redBuildShader;
   qhandle_t   humanSpawningShader;
+  qhandle_t   humanSpawningShader2;
 
   qhandle_t   sphereModel;
   qhandle_t   sphericalCone64Model;
@@ -1312,6 +1313,10 @@ typedef struct
   qhandle_t jetpackModel;
   qhandle_t jetpackFlashModel;
   qhandle_t battpackModel;
+
+  qhandle_t portal;
+  qhandle_t portalBlueSkin;
+  qhandle_t portalRedSkin;
 
   sfxHandle_t repeaterUseSound;
 
@@ -1409,6 +1414,8 @@ typedef struct
   float         percentHumansReady;     // Percentage of human players ready
   int           numHumansReady;         // Number of human players ready
   int           numHumans;              // Total number of players in humans team
+
+  qboolean      devMode;
 
   int           voteTime[ NUM_TEAMS ];
   int           voteCast[ NUM_TEAMS ];   // Total number of yes and no votes combined
@@ -1594,6 +1601,7 @@ extern  vmCvar_t    cg_lightFlare;
 extern  vmCvar_t    cg_debugParticles;
 extern  vmCvar_t    cg_debugTrails;
 extern  vmCvar_t    cg_debugPVS;
+extern  vmCvar_t    cg_debugPlayMap;
 extern  vmCvar_t    cg_disableWarningDialogs;
 extern  vmCvar_t    cg_disableUpgradeDialogs;
 extern  vmCvar_t    cg_disableBuildDialogs;

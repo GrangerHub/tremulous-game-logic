@@ -75,6 +75,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
 {
   {
     BA_A_SPAWN,            //int       number;
+    qtrue,                 //qboolean  enabled;
     "eggpod",              //char      *name;
     "Egg",                 //char      *humanName;
     "The most basic alien structure. It allows aliens to spawn "
@@ -116,6 +117,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
   },
   {
     BA_A_OVERMIND,         //int       number;
+    qtrue,                 //qboolean  enabled;
     "overmind",            //char      *name;
     "Overmind",            //char      *humanName;
     "A collective consciousness that controls all the alien structures "
@@ -157,6 +159,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
   },
   {
     BA_A_BARRICADE,        //int       number;
+    qtrue,                 //qboolean  enabled;
     "barricade",           //char      *name;
     "Barricade",           //char      *humanName;
     "Used to obstruct corridors and doorways, hindering humans from "
@@ -198,6 +201,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
   },
   {
     BA_A_ACIDTUBE,         //int       number;
+    qtrue,                 //qboolean  enabled;
     "acid_tube",           //char      *name;
     "Acid Tube",           //char      *humanName;
     "Ejects lethal poisonous acid at an approaching human. These "
@@ -239,6 +243,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
   },
   {
     BA_A_TRAPPER,          //int       number;
+    qtrue,                 //qboolean  enabled;
     "trapper",             //char      *name;
     "Trapper",             //char      *humanName;
     "Fires a blob of adhesive spit at any non-alien in its line of "
@@ -280,6 +285,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
   },
   {
     BA_A_BOOSTER,          //int       number;
+    qtrue,                 //qboolean  enabled;
     "booster",             //char      *name;
     "Booster",             //char      *humanName;
     "Laces the attacks of any alien that touches it with a poison "
@@ -322,6 +328,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
   },
   {
     BA_A_HIVE,             //int       number;
+    qtrue,                 //qboolean  enabled;
     "hive",                //char      *name;
     "Hive",                //char      *humanName;
     "Houses millions of tiny insectoid aliens. When a human "
@@ -362,6 +369,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
   },
   {
     BA_A_HOVEL,            //int       buildNum;
+    qtrue,                 //qboolean  enabled;
     "hovel",               //char      *buildName;
     "Hovel",               //char      *humanName;
     "Houses grangers",
@@ -408,6 +416,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
   },
   {
     BA_H_SPAWN,            //int       number;
+    qtrue,                 //qboolean  enabled;
     "telenode",            //char      *name;
     "Telenode",            //char      *humanName;
     "The most basic human structure. It provides a means for humans "
@@ -449,6 +458,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
   },
   {
     BA_H_MGTURRET,         //int       number;
+    qtrue,                 //qboolean  enabled;
     "mgturret",            //char      *name;
     "Machinegun Turret",   //char      *humanName;
     "Automated base defense that is effective against large targets "
@@ -490,6 +500,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
   },
   {
     BA_H_TESLAGEN,         //int       number;
+    qtrue,                 //qboolean  enabled;
     "tesla",               //char      *name;
     "Tesla Generator",     //char      *humanName;
     "A structure equipped with a strong electrical attack that fires "
@@ -531,6 +542,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
   },
   {
     BA_H_ARMOURY,          //int       number;
+    qtrue,                 //qboolean  enabled;
     "arm",                 //char      *name;
     "Armoury",             //char      *humanName;
     "An essential part of the human base, providing a means "
@@ -576,6 +588,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
   },
   {
     BA_H_DCC,              //int       number;
+    qtrue,                 //qboolean  enabled;
     "dcc",                 //char      *name;
     "Defence Computer",    //char      *humanName;
     "A structure that enables self-repair functionality in "
@@ -617,6 +630,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
   },
   {
     BA_H_MEDISTAT,         //int       number;
+    qtrue,                 //qboolean  enabled;
     "medistat",            //char      *name;
     "Medistation",         //char      *humanName;
     "A structure that automatically restores "
@@ -659,6 +673,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
   },
   {
     BA_H_REACTOR,          //int       number;
+    qtrue,                 //qboolean  enabled;
     "reactor",             //char      *name;
     "Reactor",             //char      *humanName;
     "All structures except the telenode rely on a reactor to operate. "
@@ -704,6 +719,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
   },
   {
     BA_H_REPEATER,         //int       number;
+    qtrue,                 //qboolean  enabled;
     "repeater",            //char      *name;
     "Repeater",            //char      *humanName;
     "A power distributor that transmits power from the reactor "
@@ -1042,6 +1058,7 @@ static const classAttributes_t bg_classList[ ] =
 {
   {
     PCL_NONE,                                       //int     number;
+    qtrue,                                          //qboolean enabled;
     "spectator",                                    //char    *name;
     "",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
@@ -1072,6 +1089,7 @@ static const classAttributes_t bg_classList[ ] =
   },
   {
     PCL_ALIEN_BUILDER0,                             //int     number;
+    qtrue,                                          //qboolean enabled;
     "builder",                                      //char    *name;
     "Responsible for building and maintaining all the alien structures. "
       "Has a weak melee slash attack.",
@@ -1103,6 +1121,7 @@ static const classAttributes_t bg_classList[ ] =
   },
   {
     PCL_ALIEN_BUILDER0_UPG,                         //int     number;
+    qtrue,                                          //qboolean enabled;
     "builderupg",                                   //char    *name;
     "Similar to the base Granger, except that in addition to "
       "being able to build structures it has a spit attack "
@@ -1135,6 +1154,7 @@ static const classAttributes_t bg_classList[ ] =
   },
   {
     PCL_ALIEN_LEVEL0,                               //int     number;
+    qtrue,                                          //qboolean enabled;
     "level0",                                       //char    *name;
     "Has a lethal reflexive bite and the ability to crawl on "
       "walls and ceilings.",
@@ -1166,6 +1186,7 @@ static const classAttributes_t bg_classList[ ] =
   },
   {
     PCL_ALIEN_LEVEL1,                               //int     number;
+    qtrue,                                          //qboolean enabled;
     "level1",                                       //char    *name;
     "A support class able to crawl on walls and ceilings. Its melee "
       "attack is most effective when combined with the ability to grab "
@@ -1199,6 +1220,7 @@ static const classAttributes_t bg_classList[ ] =
   },
   {
     PCL_ALIEN_LEVEL1_UPG,                           //int     number;
+    qtrue,                                          //qboolean enabled;
     "level1upg",                                    //char    *name;
     "In addition to the basic Basilisk abilities, the Advanced "
       "Basilisk sprays a poisonous gas which disorients any "
@@ -1232,6 +1254,7 @@ static const classAttributes_t bg_classList[ ] =
   },
   {
     PCL_ALIEN_LEVEL2,                               //int     number;
+    qtrue,                                          //qboolean enabled;
     "level2",                                       //char    *name;
     "Has a melee attack and the ability to jump off walls. This "
       "allows the Marauder to gather great speed in enclosed areas.",
@@ -1263,6 +1286,7 @@ static const classAttributes_t bg_classList[ ] =
   },
   {
     PCL_ALIEN_LEVEL2_UPG,                           //int     number;
+    qtrue,                                          //qboolean enabled;
     "level2upg",                                    //char    *name;
     "The Advanced Marauder has all the abilities of the basic Marauder "
       "with the addition of an area effect electric shock attack.",
@@ -1294,6 +1318,7 @@ static const classAttributes_t bg_classList[ ] =
   },
   {
     PCL_ALIEN_LEVEL3,                               //int     number;
+    qtrue,                                          //qboolean enabled;
     "level3",                                       //char    *name;
     "Possesses a melee attack and the pounce ability, which may "
       "be used as both an attack and a means to reach remote "
@@ -1326,6 +1351,7 @@ static const classAttributes_t bg_classList[ ] =
   },
   {
     PCL_ALIEN_LEVEL3_UPG,                           //int     number;
+    qtrue,                                          //qboolean enabled;
     "level3upg",                                    //char    *name;
     "In addition to the basic Dragoon abilities, the Advanced "
       "Dragoon has 3 barbs which may be used to attack humans "
@@ -1358,6 +1384,7 @@ static const classAttributes_t bg_classList[ ] =
   },
   {
     PCL_ALIEN_LEVEL4,                               //int     number;
+    qtrue,                                          //qboolean enabled;
     "level4",                                       //char    *name;
     "A large alien with a strong melee attack, this class can "
       "also charge at enemy humans and structures, inflicting "
@@ -1391,6 +1418,7 @@ static const classAttributes_t bg_classList[ ] =
   },
   {
     PCL_HUMAN,                                      //int     number;
+    qtrue,                                          //qboolean enabled;
     "human_base",                                   //char    *name;
     "",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
@@ -1421,6 +1449,7 @@ static const classAttributes_t bg_classList[ ] =
   },
   {
     PCL_HUMAN_BSUIT,                                //int     number;
+    qtrue,                                          //qboolean enabled;
     "human_bsuit",                                  //char    *name;
     "",
     ( 1 << S3 ),                                    //int     stages;
@@ -1561,7 +1590,8 @@ int BG_ClassCanEvolveFromTo( class_t fclass,
                              class_t tclass,
                              int credits, int stage,
                              int cost,
-                             int gameIsInWarmup )
+                             int gameIsInWarmup,
+                             qboolean devMode )
 {
   int i, j, best, value;
 
@@ -1596,7 +1626,7 @@ int BG_ClassCanEvolveFromTo( class_t fclass,
       
       thruClass = bg_classList[ i ].children[ j ];
       if( thruClass == PCL_NONE || !BG_ClassAllowedInStage( thruClass, stage, gameIsInWarmup ) ||
-          !BG_ClassIsAllowed( thruClass ) )
+          !BG_ClassIsAllowed( thruClass, devMode ) )
         continue;
 
       evolveCost = BG_Class( thruClass )->cost * ALIEN_CREDITS_PER_KILL;
@@ -1605,7 +1635,7 @@ int BG_ClassCanEvolveFromTo( class_t fclass,
       else
         value = BG_ClassCanEvolveFromTo( thruClass, tclass, credits, stage,
                                          cost + evolveCost,
-                                         gameIsInWarmup );
+                                         gameIsInWarmup, devMode );
 
       if( value >= 0 && value < best )
         best = value;
@@ -1623,7 +1653,8 @@ int BG_ClassCanEvolveFromTo( class_t fclass,
 BG_AlienCanEvolve
 ==============
 */
-qboolean BG_AlienCanEvolve( class_t class, int credits, int stage, int gameIsInWarmup )
+qboolean BG_AlienCanEvolve( class_t class, int credits, int stage,
+                            int gameIsInWarmup, qboolean devMode )
 {
   int i, j, tclass;
 
@@ -1636,7 +1667,7 @@ qboolean BG_AlienCanEvolve( class_t class, int credits, int stage, int gameIsInW
     {
       tclass = bg_classList[ i ].children[ j ];
       if( tclass != PCL_NONE && BG_ClassAllowedInStage( tclass, stage, gameIsInWarmup ) &&
-          BG_ClassIsAllowed( tclass ) &&
+          BG_ClassIsAllowed( tclass, devMode ) &&
           (gameIsInWarmup || credits >= BG_Class( tclass )->cost * ALIEN_CREDITS_PER_KILL ) )
         return qtrue;
     }
@@ -1961,6 +1992,7 @@ static const weaponAttributes_t bg_weapons[ ] =
 {
   {
     WP_ALEVEL0,           //int       number;
+    qtrue,                //qboolean enabled;
     0,                    //int       price;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
@@ -1986,6 +2018,7 @@ static const weaponAttributes_t bg_weapons[ ] =
   },
   {
     WP_ALEVEL1,           //int       number;
+    qtrue,                //qboolean enabled;
     0,                    //int       price;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
@@ -2011,6 +2044,7 @@ static const weaponAttributes_t bg_weapons[ ] =
   },
   {
     WP_ALEVEL1_UPG,       //int       number;
+    qtrue,                //qboolean enabled;
     0,                    //int       price;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
@@ -2036,6 +2070,7 @@ static const weaponAttributes_t bg_weapons[ ] =
   },
   {
     WP_ALEVEL2,           //int       number;
+    qtrue,                //qboolean enabled;
     0,                    //int       price;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
@@ -2061,6 +2096,7 @@ static const weaponAttributes_t bg_weapons[ ] =
   },
   {
     WP_ALEVEL2_UPG,       //int       number;
+    qtrue,                //qboolean enabled;
     0,                    //int       price;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
@@ -2086,6 +2122,7 @@ static const weaponAttributes_t bg_weapons[ ] =
   },
   {
     WP_ALEVEL3,           //int       number;
+    qtrue,                //qboolean enabled;
     0,                    //int       price;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
@@ -2111,6 +2148,7 @@ static const weaponAttributes_t bg_weapons[ ] =
   },
   {
     WP_ALEVEL3_UPG,       //int       number;
+    qtrue,                //qboolean enabled;
     0,                    //int       price;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
@@ -2136,6 +2174,7 @@ static const weaponAttributes_t bg_weapons[ ] =
   },
   {
     WP_ALEVEL4,           //int       number;
+    qtrue,                //qboolean enabled;
     0,                    //int       price;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
@@ -2161,6 +2200,7 @@ static const weaponAttributes_t bg_weapons[ ] =
   },
   {
     WP_BLASTER,           //int       number;
+    qtrue,                //qboolean enabled;
     0,                    //int       price;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     0,                    //int       slots;
@@ -2186,6 +2226,7 @@ static const weaponAttributes_t bg_weapons[ ] =
   },
   {
     WP_MACHINEGUN,        //int       number;
+    qtrue,                //qboolean enabled;
     RIFLE_PRICE,          //int       price;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
@@ -2212,6 +2253,7 @@ static const weaponAttributes_t bg_weapons[ ] =
   },
   {
     WP_PAIN_SAW,          //int       number;
+    qtrue,                //qboolean enabled;
     PAINSAW_PRICE,        //int       price;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
@@ -2239,6 +2281,7 @@ static const weaponAttributes_t bg_weapons[ ] =
   },
   {
     WP_SHOTGUN,           //int       number;
+    qtrue,                //qboolean enabled;
     SHOTGUN_PRICE,        //int       price;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
@@ -2266,6 +2309,7 @@ static const weaponAttributes_t bg_weapons[ ] =
   },
   {
     WP_LAS_GUN,           //int       number;
+    qtrue,                //qboolean enabled;
     LASGUN_PRICE,         //int       price;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
@@ -2292,6 +2336,7 @@ static const weaponAttributes_t bg_weapons[ ] =
   },
   {
     WP_MASS_DRIVER,       //int       number;
+    qtrue,                //qboolean enabled;
     MDRIVER_PRICE,        //int       price;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
@@ -2319,6 +2364,7 @@ static const weaponAttributes_t bg_weapons[ ] =
   },
   {
     WP_CHAINGUN,          //int       number;
+    qtrue,                //qboolean enabled;
     CHAINGUN_PRICE,       //int       price;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
@@ -2346,6 +2392,7 @@ static const weaponAttributes_t bg_weapons[ ] =
   },
   {
     WP_FLAMER,            //int       number;
+    qtrue,                //qboolean enabled;
     FLAMER_PRICE,         //int       price;
     ( 1 << S2 )|( 1 << S3 ), //int    stages;
     SLOT_WEAPON,          //int       slots;
@@ -2373,6 +2420,7 @@ static const weaponAttributes_t bg_weapons[ ] =
   },
   {
     WP_PULSE_RIFLE,       //int       number;
+    qtrue,                //qboolean enabled;
     PRIFLE_PRICE,         //int       price;
     ( 1 << S2 )|( 1 << S3 ), //int    stages;
     SLOT_WEAPON,          //int       slots;
@@ -2398,6 +2446,7 @@ static const weaponAttributes_t bg_weapons[ ] =
   },
   {
     WP_LUCIFER_CANNON,    //int       number;
+    qtrue,                //qboolean enabled;
     LCANNON_PRICE,        //int       price;
     ( 1 << S3 ),          //int       stages;
     SLOT_WEAPON,          //int       slots;
@@ -2427,6 +2476,7 @@ static const weaponAttributes_t bg_weapons[ ] =
   },
   {
     WP_GRENADE,           //int       number;
+    qtrue,                //qboolean enabled;
     GRENADE_PRICE,        //int       price;
     ( 1 << S2 )|( 1 << S3 ), //int    stages;
     SLOT_NONE,            //int       slots;
@@ -2452,6 +2502,7 @@ static const weaponAttributes_t bg_weapons[ ] =
   },
   {
     WP_LOCKBLOB_LAUNCHER, //int       number;
+    qtrue,                //qboolean enabled;
     0,                    //int       price;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
@@ -2477,6 +2528,7 @@ static const weaponAttributes_t bg_weapons[ ] =
   },
   {
     WP_HIVE,              //int       number;
+    qtrue,                //qboolean enabled;
     0,                    //int       price;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
@@ -2502,6 +2554,7 @@ static const weaponAttributes_t bg_weapons[ ] =
   },
   {
     WP_TESLAGEN,          //int       number;
+    qtrue,                //qboolean enabled;
     0,                    //int       price;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
@@ -2527,6 +2580,7 @@ static const weaponAttributes_t bg_weapons[ ] =
   },
   {
     WP_MGTURRET,          //int       number;
+    qtrue,                //qboolean enabled;
     0,                    //int       price;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
@@ -2552,6 +2606,7 @@ static const weaponAttributes_t bg_weapons[ ] =
   },
   {
     WP_ABUILD,            //int       number;
+    qtrue,                //qboolean enabled;
     0,                    //int       price;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
@@ -2577,6 +2632,7 @@ static const weaponAttributes_t bg_weapons[ ] =
   },
   {
     WP_ABUILD2,           //int       number;
+    qtrue,                //qboolean enabled;
     0,                    //int       price;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
@@ -2602,6 +2658,7 @@ static const weaponAttributes_t bg_weapons[ ] =
   },
   {
     WP_HBUILD,            //int       number;
+    qtrue,                //qboolean enabled;
     HBUILD_PRICE,         //int       price;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
@@ -2625,6 +2682,34 @@ static const weaponAttributes_t bg_weapons[ ] =
     90.0f,                //float     zoomFov;
     qtrue,                //qboolean  purchasable;
     qfalse,               //qboolean  longRanged;
+    TEAM_HUMANS           //team_t    team;
+  },
+  {
+    WP_PORTAL_GUN,        //int       weaponNum;
+    qfalse,                //qboolean enabled;
+    PORTALGUN_PRICE,      //int       price;
+    ( 1 << S3 ),          //int       stages
+    SLOT_WEAPON,          //int       slots;
+    "portalgun",          //char      *weaponName;
+    "Portal Gun",         //char      *humanName;
+    "Teleporting technology scaled into a portable gun. Prmary fire creates "
+     "the blue portal, secondsary fire creates the orange portal. Third fire "
+     "clears both portals.",
+    0,                    //int       maxAmmo;
+    0,                    //int       maxClips;
+    qtrue,                //int       infiniteAmmo;
+    qfalse,               //int       usesEnergy;
+    PORTALGUN_REPEAT,     //int       repeatRate1;
+    PORTALGUN_REPEAT,     //int       repeatRate2;
+    PORTALGUN_REPEAT,     //int       repeatRate3;
+    0,                    //int       reloadTime;
+    0.0f,                 //float     knockbackScale;
+    qtrue,                //qboolean  hasAltMode;
+    qtrue,                //qboolean  hasThirdMode;
+    qfalse,               //qboolean  canZoom;
+    90.0f,                //float     zoomFov;
+    qtrue,                //qboolean  purchasable;
+    qtrue,                //qboolean  longRanged;
     TEAM_HUMANS           //team_t    team;
   }
 };
@@ -2686,6 +2771,7 @@ static const upgradeAttributes_t bg_upgrades[ ] =
 {
   {
     UP_LIGHTARMOUR,         //int   number;
+    qtrue,                  //qboolean enabled;
     LIGHTARMOUR_PRICE,      //int   price;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_TORSO|SLOT_ARMS|SLOT_LEGS, //int   slots;
@@ -2700,6 +2786,7 @@ static const upgradeAttributes_t bg_upgrades[ ] =
   },
   {
     UP_HELMET,              //int   number;
+    qtrue,                  //qboolean enabled;
     HELMET_PRICE,           //int   price;
     ( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_HEAD,              //int   slots;
@@ -2715,6 +2802,7 @@ static const upgradeAttributes_t bg_upgrades[ ] =
   },
   {
     UP_MEDKIT,              //int   number;
+    qtrue,                  //qboolean enabled;
     MEDKIT_PRICE,           //int   price;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_NONE,              //int   slots;
@@ -2728,6 +2816,7 @@ static const upgradeAttributes_t bg_upgrades[ ] =
   },
   {
     UP_BATTPACK,            //int   number;
+    qtrue,                  //qboolean enabled;
     BATTPACK_PRICE,         //int   price;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_BACKPACK,          //int   slots;
@@ -2742,6 +2831,7 @@ static const upgradeAttributes_t bg_upgrades[ ] =
   },
   {
     UP_JETPACK,             //int   number;
+    qtrue,                  //qboolean enabled;
     JETPACK_PRICE,          //int   price;
     ( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_BACKPACK,          //int   slots;
@@ -2757,6 +2847,7 @@ static const upgradeAttributes_t bg_upgrades[ ] =
   },
   {
     UP_BATTLESUIT,          //int   number;
+    qtrue,                  //qboolean enabled;
     BSUIT_PRICE,            //int   price;
     ( 1 << S3 ),            //int   stages;
     SLOT_HEAD|SLOT_TORSO|SLOT_ARMS|SLOT_LEGS|SLOT_BACKPACK, //int  slots;
@@ -2772,6 +2863,7 @@ static const upgradeAttributes_t bg_upgrades[ ] =
   },
   {
     UP_GRENADE,             //int   number;
+    qtrue,                  //qboolean enabled;
     GRENADE_PRICE,          //int   price;
     ( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_NONE,              //int   slots;
@@ -2786,6 +2878,7 @@ static const upgradeAttributes_t bg_upgrades[ ] =
   },
   {
     UP_AMMO,                //int   number;
+    qtrue,                  //qboolean enabled;
     0,                      //int   price;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_NONE,              //int   slots;
@@ -2878,6 +2971,7 @@ void BG_EvaluateTrajectory( const trajectory_t *tr, int atTime, vec3_t result )
 {
   float   deltaTime;
   float   phase;
+  vec3_t  dir;
 
   switch( tr->trType )
   {
@@ -2920,6 +3014,30 @@ void BG_EvaluateTrajectory( const trajectory_t *tr, int atTime, vec3_t result )
       result[ 2 ] += 0.5 * DEFAULT_GRAVITY * deltaTime * deltaTime;   // FIXME: local gravity...
       break;
 
+    case TR_ACCEL:
+      // time since missile fired in seconds
+      deltaTime = ( atTime - tr->trTime ) * 0.001;
+
+      // the .5*a*t^2 part. trDuration = acceleration,
+      // phase gives the magnitude of the distance
+      // we need to move
+      phase = (tr->trDuration / 2) * (deltaTime * deltaTime);
+
+      // Make dir equal to the velocity of the object
+      VectorCopy (tr->trDelta, dir);
+
+      // Sets the magnitude of vector dir to 1
+      VectorNormalize (dir);
+
+      // Move a distance "phase" in the direction "dir"
+      // from our starting point
+      VectorMA (tr->trBase, phase, dir, result);
+
+      // The u*t part. Adds the velocity of the object
+      // multiplied by the time to the last result.
+      VectorMA (result, deltaTime, tr->trDelta, result);
+      break;
+
     default:
       Com_Error( ERR_DROP, "BG_EvaluateTrajectory: unknown trType: %i", tr->trTime );
       break;
@@ -2937,6 +3055,7 @@ void BG_EvaluateTrajectoryDelta( const trajectory_t *tr, int atTime, vec3_t resu
 {
   float deltaTime;
   float phase;
+  vec3_t dir;
 
   switch( tr->trType )
   {
@@ -2975,6 +3094,19 @@ void BG_EvaluateTrajectoryDelta( const trajectory_t *tr, int atTime, vec3_t resu
       deltaTime = ( atTime - tr->trTime ) * 0.001;  // milliseconds to seconds
       VectorCopy( tr->trDelta, result );
       result[ 2 ] += DEFAULT_GRAVITY * deltaTime;   // FIXME: local gravity...
+      break;
+
+    case TR_ACCEL:
+      // time since missile fired in seconds
+      deltaTime = ( atTime - tr->trTime ) * 0.001;
+
+      // Turn magnitude of acceleration into a vector
+      VectorCopy(tr->trDelta,dir);
+      VectorNormalize (dir);
+      VectorScale (dir, tr->trDuration, dir);
+
+      // u + t * a = v
+      VectorMA (tr->trDelta, deltaTime, dir, result);
       break;
 
     default:
@@ -3996,9 +4128,12 @@ void BG_InitAllowedGameElements( void )
 BG_WeaponIsAllowed
 ============
 */
-qboolean BG_WeaponIsAllowed( weapon_t weapon )
+qboolean BG_WeaponIsAllowed( weapon_t weapon, qboolean devMode )
 {
   int i;
+
+  if( devMode )
+    return qtrue;
 
   for( i = 0; i < WP_NUM_WEAPONS &&
       bg_disabledGameElements.weapons[ i ] != WP_NONE; i++ )
@@ -4007,7 +4142,7 @@ qboolean BG_WeaponIsAllowed( weapon_t weapon )
       return qfalse;
   }
 
-  return qtrue;
+  return BG_Weapon( weapon )->enabled;
 }
 
 /*
@@ -4015,9 +4150,12 @@ qboolean BG_WeaponIsAllowed( weapon_t weapon )
 BG_UpgradeIsAllowed
 ============
 */
-qboolean BG_UpgradeIsAllowed( upgrade_t upgrade )
+qboolean BG_UpgradeIsAllowed( upgrade_t upgrade, qboolean devMode )
 {
   int i;
+
+  if( devMode )
+    return qtrue;
 
   for( i = 0; i < UP_NUM_UPGRADES &&
       bg_disabledGameElements.upgrades[ i ] != UP_NONE; i++ )
@@ -4026,7 +4164,7 @@ qboolean BG_UpgradeIsAllowed( upgrade_t upgrade )
       return qfalse;
   }
 
-  return qtrue;
+  return BG_Upgrade( upgrade )->enabled;
 }
 
 /*
@@ -4034,9 +4172,12 @@ qboolean BG_UpgradeIsAllowed( upgrade_t upgrade )
 BG_ClassIsAllowed
 ============
 */
-qboolean BG_ClassIsAllowed( class_t class )
+qboolean BG_ClassIsAllowed( class_t class, qboolean devMode )
 {
   int i;
+
+  if( devMode )
+    return qtrue;
 
   for( i = 0; i < PCL_NUM_CLASSES &&
       bg_disabledGameElements.classes[ i ] != PCL_NONE; i++ )
@@ -4045,7 +4186,7 @@ qboolean BG_ClassIsAllowed( class_t class )
       return qfalse;
   }
 
-  return qtrue;
+  return BG_Class( class )->enabled;
 }
 
 /*
@@ -4053,9 +4194,12 @@ qboolean BG_ClassIsAllowed( class_t class )
 BG_BuildableIsAllowed
 ============
 */
-qboolean BG_BuildableIsAllowed( buildable_t buildable )
+qboolean BG_BuildableIsAllowed( buildable_t buildable, qboolean devMode )
 {
   int i;
+
+  if( devMode )
+    return qtrue;
 
   for( i = 0; i < BA_NUM_BUILDABLES &&
       bg_disabledGameElements.buildables[ i ] != BA_NONE; i++ )
@@ -4064,7 +4208,7 @@ qboolean BG_BuildableIsAllowed( buildable_t buildable )
       return qfalse;
   }
 
-  return qtrue;
+  return BG_Buildable( buildable )->enabled;
 }
 
 /*

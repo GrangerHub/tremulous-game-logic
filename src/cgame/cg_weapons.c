@@ -2174,4 +2174,3 @@ void CG_Bleed( vec3_t origin, vec3_t normal, int entityNum )
     CG_SetParticleSystemNormal( ps, normal );
   }
 }
-

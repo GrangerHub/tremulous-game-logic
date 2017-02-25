@@ -171,6 +171,7 @@ vmCvar_t  g_allowTeamOverlay;
 
 vmCvar_t  g_censorship;
 vmCvar_t  g_pimpHuman;
+vmCvar_t  g_portalGun;
 
 vmCvar_t  g_tag;
 
@@ -343,6 +344,7 @@ static cvarTable_t   gameCvarTable[ ] =
 
   { &g_censorship, "g_censorship", "", CVAR_ARCHIVE, 0, qfalse  },
   { &g_pimpHuman, "g_pimpHuman", "1", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_portalGun, "g_portalGun", "0", CVAR_ARCHIVE, 0, qfalse  },
 
   { &g_tag, "g_tag", "gpp", CVAR_INIT, 0, qfalse }
 };
@@ -2554,6 +2556,7 @@ void CheckCvars( void )
   static int lastTimeLimitModCount        = -1;
   static int lastExtendTimeLimit          =  0;
   static int lastHumanStaminaModeModCount = -1;
+  static int lastCheatsModCount           = -1;
 
   if( g_password.modificationCount != lastPasswordModCount )
   {
@@ -2629,6 +2632,11 @@ void CheckCvars( void )
     lastHumanStaminaModeModCount = g_humanStaminaMode.modificationCount;
     trap_SetConfigstring( CS_HUMAN_STAMINA_MODE,
                           va( "%i", g_humanStaminaMode.integer ) );
+  }
+
+  if( g_cheats.modificationCount != lastCheatsModCount )
+  {
+    trap_SetConfigstring( CS_DEVMODE, va( "%i", g_cheats.integer ) );
   }
 
   level.frameMsec = trap_Milliseconds( );

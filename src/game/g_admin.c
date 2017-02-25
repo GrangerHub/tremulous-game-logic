@@ -1699,6 +1699,7 @@ int G_admin_parse_time( const char *time )
 qboolean G_admin_setdevmode( gentity_t *ent )
 {
   char str[ 5 ];
+
   if( trap_Argc() != 2 )
   {
     ADMP( "^3setdevmode: ^7usage: setdevmode [on|off]\n" );
@@ -1720,11 +1721,49 @@ qboolean G_admin_setdevmode( gentity_t *ent )
   }
   else if( !Q_stricmp( str, "off" ) )
   {
+    int i;
+    gclient_t *cl;
+    gentity_t *tent;
+
     if( !g_cheats.integer )
     {
       ADMP( "^3setdevmode: ^7developer mode is already off\n" );
       return qfalse;
     }
+
+    // cycle through each client and change their ready flag
+    for( i = 0; i < g_maxclients.integer; i++ )
+    {
+      cl = level.clients + i;
+      tent = &g_entities[ cl->ps.clientNum ];
+
+      if( cl->pers.connected != CON_CONNECTED )
+        continue;
+
+      if( cl->pers.teamSelection == TEAM_NONE )
+        continue;
+
+      //disable noclip
+      if( cl->noclip )
+      {
+        tent->r.contents = cl->cliprcontents;
+
+        cl->noclip = !cl->noclip;
+
+        if( tent->r.linked )
+          trap_LinkEntity( tent );
+
+        trap_SendServerCommand( tent - g_entities, va( "print \"noclip OFF\n\"" ) );
+      }
+
+      //dissable god mode
+      if( tent->flags & FL_GODMODE )
+      {
+        tent->flags ^= FL_GODMODE;
+        trap_SendServerCommand( tent - g_entities, va( "print \"godmode OFF\n\"" ) );
+      }
+    }
+
     trap_Cvar_Set( "sv_cheats", "0" );
     trap_Cvar_Update( &g_cheats );
     AP( va( "print \"^3setdevmode: ^7%s ^7has switched developer mode off\n\"",
@@ -2909,6 +2948,7 @@ qboolean G_admin_allready( gentity_t *ent )
 {
   int i = 0;
   gclient_t *cl;
+  gentity_t *tent;
 
   // if game is in both warmup and developer mode, /allready will set all
   // players' readyToPlay flag to true
@@ -2918,19 +2958,48 @@ qboolean G_admin_allready( gentity_t *ent )
     for( i = 0; i < g_maxclients.integer; i++ )
     {
       cl = level.clients + i;
+      tent = &g_entities[ cl->ps.clientNum ];
+
       if( cl->pers.connected != CON_CONNECTED )
         continue;
 
       if( cl->pers.teamSelection == TEAM_NONE )
         continue;
 
+      //change the client's ready status
       cl->pers.readyToPlay = qtrue;
       cl->ps.stats[ STAT_READY ] = 1;
+
+      //disable noclip
+      if( cl->noclip )
+      {
+        ent->r.contents = cl->cliprcontents;
+
+        cl->noclip = !cl->noclip;
+
+        if( tent->r.linked )
+          trap_LinkEntity( tent );
+
+        trap_SendServerCommand( tent - g_entities, va( "print \"noclip OFF\n\"" ) );
+      }
+
+      //dissable god mode
+      if( tent->flags & FL_GODMODE )
+      {
+        tent->flags ^= FL_GODMODE;
+        trap_SendServerCommand( tent - g_entities, va( "print \"godmode OFF\n\"" ) );
+      }
     }
 
     AP( va( "print \"^3allready: ^7%s ^7decided to end pre-game warmup early\n\"",
             ent ? ent->client->pers.netname : "console" ) );
-    
+
+    //turn dev mode off
+    trap_Cvar_Set( "sv_cheats", "0" );
+    trap_Cvar_Update( &g_cheats );
+    AP( va( "print \"^3allready: ^7%s ^7has switched developer mode off\n\"",
+            ent ? ent->client->pers.netname : "console" ) );
+
     G_LevelRestart( qtrue );
 
     return qtrue;

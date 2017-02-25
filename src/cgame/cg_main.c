@@ -189,6 +189,7 @@ vmCvar_t  cg_lightFlare;
 vmCvar_t  cg_debugParticles;
 vmCvar_t  cg_debugTrails;
 vmCvar_t  cg_debugPVS;
+vmCvar_t  cg_debugPlayMap;
 vmCvar_t  cg_disableWarningDialogs;
 vmCvar_t  cg_disableUpgradeDialogs;
 vmCvar_t  cg_disableBuildDialogs;
@@ -224,6 +225,7 @@ vmCvar_t  ui_currentClass;
 vmCvar_t  ui_carriage;
 vmCvar_t  ui_stages;
 vmCvar_t  ui_warmup;
+vmCvar_t  ui_devMode;
 vmCvar_t  ui_dialog;
 vmCvar_t  ui_voteActive;
 vmCvar_t  ui_alienTeamVoteActive;
@@ -327,6 +329,7 @@ static cvarTable_t cvarTable[ ] =
   { &cg_debugParticles, "cg_debugParticles", "0", CVAR_CHEAT },
   { &cg_debugTrails, "cg_debugTrails", "0", CVAR_CHEAT },
   { &cg_debugPVS, "cg_debugPVS", "0", CVAR_CHEAT },
+  { &cg_debugPlayMap, "cg_debugPlayMap", "0", CVAR_ARCHIVE },
   { &cg_disableWarningDialogs, "cg_disableWarningDialogs", "1", CVAR_ARCHIVE },
   { &cg_disableUpgradeDialogs, "cg_disableUpgradeDialogs", "0", CVAR_ARCHIVE },
   { &cg_disableBuildDialogs, "cg_disableBuildDialogs", "0", CVAR_ARCHIVE },
@@ -366,6 +369,7 @@ static cvarTable_t cvarTable[ ] =
   { &ui_carriage, "ui_carriage", "", CVAR_ROM },
   { &ui_stages, "ui_stages", "0 0", CVAR_ROM },
   { &ui_warmup, "ui_warmup", "0", CVAR_ROM },
+  { &ui_devMode, "ui_devMode", "0", CVAR_ROM },
   { &ui_dialog, "ui_dialog", "Text not set", CVAR_ROM },
   { &ui_voteActive, "ui_voteActive", "0", CVAR_ROM },
   { &ui_humanTeamVoteActive, "ui_humanTeamVoteActive", "0", CVAR_ROM },
@@ -987,6 +991,7 @@ static void CG_RegisterGraphics( void )
   cgs.media.greenBuildShader          = trap_R_RegisterShader("gfx/misc/greenbuild" );
   cgs.media.redBuildShader            = trap_R_RegisterShader("gfx/misc/redbuild" );
   cgs.media.humanSpawningShader       = trap_R_RegisterShader("models/buildables/telenode/rep_cyl" );
+  cgs.media.humanSpawningShader2      = trap_R_RegisterShader("models/buildables/telenode/rep_cyl2" );
 
   for( i = 0; i < 8; i++ )
     cgs.media.buildWeaponTimerPie[ i ] = trap_R_RegisterShader( buildWeaponTimerPieShaders[ i ] );
@@ -1003,6 +1008,10 @@ static void CG_RegisterGraphics( void )
   cgs.media.balloonShader             = trap_R_RegisterShader( "gfx/sprites/chatballoon" );
 
   cgs.media.disconnectPS              = CG_RegisterParticleSystem( "disconnectPS" );
+
+  cgs.media.portal             = trap_R_RegisterModel( "models/fx/portal/portals.md3" );
+  cgs.media.portalBlueSkin     = trap_R_RegisterSkin( "models/fx/portal/portals_blue.skin" );
+  cgs.media.portalRedSkin      = trap_R_RegisterSkin( "models/fx/portal/portals_orange.skin" );
 
   CG_UpdateMediaFraction( 0.7f );
 

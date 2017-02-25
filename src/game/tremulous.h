@@ -483,6 +483,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LCANNON_SPLASH_HELMET       0.75f    // reduction of damage fraction for luci splash on helmets
 #define LCANNON_SPLASH_BATTLESUIT   0.50f    // reduction of damage fraction for luci splash on battlesuits
 
+#define PORTALGUN_PRICE             700
+#define PORTALGUN_REPEAT            1000
+#define PORTALGUN_SPEED             2000
+#define PORTALGUN_SIZE              5        // missile bounding box radius
+
 #define HBUILD_PRICE                0
 #define HBUILD_REPEAT               1000
 #define HBUILD_HEALRATE             18

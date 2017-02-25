@@ -598,7 +598,6 @@ void SP_worldspawn( void )
   if( G_SpawnString( "alienBuildPoints", "", &s ) )
     trap_Cvar_Set( "g_alienBuildPoints", s );
 
-  G_SpawnString( "disabledEquipment", "", &s );
   trap_Cvar_Set( "g_disabledEquipment", s );
 
   G_SpawnString( "disabledClasses", "", &s );
@@ -653,4 +652,3 @@ void G_SpawnEntitiesFromString( void )
   while( G_ParseSpawnVars( ) )
     G_SpawnGEntityFromSpawnVars( );
 }
-
