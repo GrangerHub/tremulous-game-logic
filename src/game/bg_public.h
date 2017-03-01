@@ -235,6 +235,8 @@ typedef struct pmove_s
 
 
   int           (*pointcontents)( const vec3_t point, int passEntityNum );
+
+  int           tauntSpam; // allow taunts to be spammed. only for clients that enable cg_tauntSpam
 } pmove_t;
 
 // if a full pmove isn't done on the client, you can just update the angles

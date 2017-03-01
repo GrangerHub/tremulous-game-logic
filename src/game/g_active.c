@@ -491,6 +491,7 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
     pm.tracemask = ent->clipmask;
     pm.trace = trap_Trace;
     pm.pointcontents = trap_PointContents;
+    pm.tauntSpam = 0;
 
     // Perform a pmove
     Pmove( &pm );
@@ -2336,6 +2337,8 @@ void ClientThink_real( gentity_t *ent )
   pm.pmove_msec = pmove_msec.integer;
 
   pm.humanStaminaMode = g_humanStaminaMode.integer;
+
+  pm.tauntSpam = 0;
 
   VectorCopy( client->ps.origin, client->oldOrigin );
 
