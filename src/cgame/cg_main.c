@@ -179,6 +179,7 @@ vmCvar_t  cg_timescaleFadeEnd;
 vmCvar_t  cg_timescaleFadeSpeed;
 vmCvar_t  cg_timescale;
 vmCvar_t  cg_noTaunt;
+vmCvar_t  cg_tauntSpam;
 vmCvar_t  cg_drawSurfNormal;
 vmCvar_t  cg_drawBBOX;
 vmCvar_t  cg_wwSmoothTime;
@@ -391,6 +392,7 @@ static cvarTable_t cvarTable[ ] =
   { &pmove_fixed, "pmove_fixed", "0", 0},
   { &pmove_msec, "pmove_msec", "8", 0},
   { &cg_noTaunt, "cg_noTaunt", "0", CVAR_ARCHIVE},
+  { &cg_tauntSpam, "cg_tauntSpam", "0", CVAR_ARCHIVE},
   
   { &cg_voice, "voice", "default", CVAR_USERINFO|CVAR_ARCHIVE},
 
