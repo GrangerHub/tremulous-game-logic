@@ -1609,6 +1609,7 @@ extern  vmCvar_t    cg_timescaleFadeEnd;
 extern  vmCvar_t    cg_timescaleFadeSpeed;
 extern  vmCvar_t    cg_timescale;
 extern  vmCvar_t    cg_noTaunt;
+extern  vmCvar_t    cg_tauntSpam;
 extern  vmCvar_t    cg_drawSurfNormal;
 extern  vmCvar_t    cg_drawBBOX;
 extern  vmCvar_t    cg_wwSmoothTime;

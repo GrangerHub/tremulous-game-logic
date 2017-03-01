@@ -3933,7 +3933,7 @@ static void PM_Animate( void )
 
   if( pm->cmd.buttons & BUTTON_GESTURE )
   {
-    if( pm->ps->tauntTimer > 0 )
+    if( !pm->tauntSpam && pm->ps->tauntTimer > 0 )
         return;
 
     if( !( pm->ps->persistant[ PERS_STATE ] & PS_NONSEGMODEL ) )
@@ -3942,7 +3942,8 @@ static void PM_Animate( void )
       {
         PM_StartTorsoAnim( TORSO_GESTURE );
         pm->ps->torsoTimer = TIMER_GESTURE;
-        pm->ps->tauntTimer = TIMER_GESTURE;
+        if( !pm->tauntSpam )
+          pm->ps->tauntTimer = TIMER_GESTURE;
 
         PM_AddEvent( EV_TAUNT );
       }
@@ -3953,7 +3954,8 @@ static void PM_Animate( void )
       {
         PM_ForceLegsAnim( NSPA_GESTURE );
         pm->ps->torsoTimer = TIMER_GESTURE;
-        pm->ps->tauntTimer = TIMER_GESTURE;
+        if( !pm->tauntSpam )
+          pm->ps->tauntTimer = TIMER_GESTURE;
 
         PM_AddEvent( EV_TAUNT );
       }
