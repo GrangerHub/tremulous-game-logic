@@ -184,7 +184,9 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace )
         return;
     }
   }
-  else if ( !strcmp( ent->classname, "portalgun" ) )
+  else if ( !strcmp( ent->classname, "portalgun" ) && !other->client &&
+            other->s.eType != ET_BUILDABLE && other->s.eType != ET_MOVER &&
+            !( other->s.eFlags & EF_ASTRAL_NOCLIP ) )
   {
     G_Portal_Create( ent->parent, trace->endpos, trace->plane.normal, ent->s.modelindex2 );
   }
