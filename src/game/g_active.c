@@ -2114,8 +2114,7 @@ void ClientThink_real( gentity_t *ent )
     //if currently using a medkit or have no need for a medkit now
     if( client->ps.stats[ STAT_STATE ] & SS_HEALING_2X ||
         ( client->ps.stats[ STAT_HEALTH ] == client->ps.stats[ STAT_MAX_HEALTH ] &&
-          !( client->ps.stats[ STAT_STATE ] & SS_POISONED ) &&
-          client->ps.stats[ STAT_STAMINA ] == STAMINA_MAX ) )
+          !( client->ps.stats[ STAT_STATE ] & SS_POISONED ) ) )
     {
       BG_DeactivateUpgrade( UP_MEDKIT, client->ps.stats );
     }
