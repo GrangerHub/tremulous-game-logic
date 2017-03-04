@@ -719,19 +719,6 @@ PORTAL GUN
 
 /*
 ===============
-PGChargeClear
-===============
-*/
-void PGChargeClear( gentity_t *ent )
-{
-  // clear all portals
-  G_Portal_Clear( ent, PORTAL_BLUE );
-  G_Portal_Clear( ent, PORTAL_RED );
-  ent->client->ps.weaponTime = PORTALGUN_REPEAT;
-}
-
-/*
-===============
 PGChargeFire
 ===============
 */
@@ -1574,10 +1561,6 @@ void FireWeapon3( gentity_t *ent )
 
     case WP_ABUILD2:
       slowBlobFire( ent );
-      break;
-
-    case WP_PORTAL_GUN:
-      PGChargeClear( ent );
       break;
 
     default:

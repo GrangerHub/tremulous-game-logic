@@ -32,13 +32,17 @@ G_Portal_Clear
 Delete a portal
 ===============
 */
-void G_Portal_Clear(gentity_t *parent, portal_t portalindex)
+void G_Portal_Clear( portal_t portalindex )
 {
-	gentity_t *self = parent->client->portals[portalindex];
+	gentity_t *self = level.humanPortals.portals[portalindex];
 	if (!self)
 		return;
-	G_FreeEntity(self);
-	parent->client->portals[portalindex] = NULL;
+
+	level.humanPortals.createTime[ portalindex ] = 0;
+	trap_SetConfigstring( ( CS_HUMAN_PORTAL_CREATETIME + portalindex ),
+												va( "%i", 0 ) );
+	level.humanPortals.portals[portalindex] = NULL;
+	G_FreeEntity( self );
 }
 
 /*
@@ -57,7 +61,7 @@ static void G_Portal_Touch(gentity_t *self, gentity_t *other, trace_t *trace)
 	if (!other->client)
 		return;
 
-	portal = self->parent->client->portals[ !self->s.modelindex2 ];
+	portal = level.humanPortals.portals[ !self->s.modelindex2 ];
 	if (!portal)
 		return;
 
@@ -133,7 +137,11 @@ void G_Portal_Create(gentity_t *ent, vec3_t origin, vec3_t normal, portal_t port
 	trap_LinkEntity(portal);
 
 	// Attach it to the client
-	G_Portal_Clear(ent, portalindex);
+	G_Portal_Clear( portalindex );
 	portal->parent = ent;
-	ent->client->portals[portalindex] = portal;
+	level.humanPortals.portals[ portalindex ] = portal;
+	level.humanPortals.lifetime[ portalindex ] = level.time + PORTAL_LIFETIME;
+	level.humanPortals.createTime[ portalindex ] = PORTAL_CREATED_REPEAT;
+	trap_SetConfigstring( ( CS_HUMAN_PORTAL_CREATETIME + portalindex ),
+												va( "%i", level.humanPortals.createTime[ portalindex ] ) );
 }

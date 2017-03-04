@@ -401,6 +401,8 @@ static void CG_ConfigStringModified( void )
   }
   else if( num == CS_HUMAN_STAMINA_MODE )
     cgs.humanStaminaMode = atoi( str );
+  else if( num >= CS_HUMAN_PORTAL_CREATETIME && num < CS_HUMAN_PORTAL_CREATETIME + PORTAL_NUM )
+    cgs.humanPortalCreateTime[ num - CS_HUMAN_PORTAL_CREATETIME ] = atoi( str );
   else if( num == CS_ALIEN_STAGES )
   {
     stage_t oldAlienStage = cgs.alienStage;

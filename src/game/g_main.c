@@ -171,7 +171,6 @@ vmCvar_t  g_allowTeamOverlay;
 
 vmCvar_t  g_censorship;
 vmCvar_t  g_pimpHuman;
-vmCvar_t  g_portalGun;
 
 vmCvar_t  g_tag;
 
@@ -344,7 +343,6 @@ static cvarTable_t   gameCvarTable[ ] =
 
   { &g_censorship, "g_censorship", "", CVAR_ARCHIVE, 0, qfalse  },
   { &g_pimpHuman, "g_pimpHuman", "1", CVAR_ARCHIVE, 0, qfalse  },
-  { &g_portalGun, "g_portalGun", "0", CVAR_ARCHIVE, 0, qfalse  },
 
   { &g_tag, "g_tag", "gpp", CVAR_INIT, 0, qfalse }
 };
@@ -630,6 +628,15 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
   level.startTime = levelTime;
   level.alienStage2Time = level.alienStage3Time =
     level.humanStage2Time = level.humanStage3Time = level.startTime;
+
+  // initialize the human portals
+
+  for( i = 0; i < PORTAL_NUM; i++ )
+  {
+    level.humanPortals.createTime[ i ] = 0;
+    level.humanPortals.portals[ i ] = NULL;
+    level.humanPortals.lifetime[ i ] = -1;
+  }
 
   // initialize time limit values
   level.matchBaseTimeLimit = g_basetimelimit.integer;
@@ -2904,6 +2911,22 @@ void G_RunFrame( int levelTime )
     }
 
     G_RunThink( ent );
+  }
+
+  for( i = 0; i < PORTAL_NUM; i++ )
+  {
+    // pump human portals fire timer delays
+    if( level.humanPortals.createTime[ i ] > 0 )
+      level.humanPortals.createTime[ i ] -= msec;
+    if( level.humanPortals.createTime[ i ] < 0 )
+      level.humanPortals.createTime[ i ] = 0;
+
+    // check if a human portal's lifetime has expired
+    if( !level.humanPortals.portals[ i ] )
+      break;
+
+    if(  level.humanPortals.lifetime[ i ] <= level.time )
+      G_Portal_Clear( i );
   }
 
   // perform final fixups on the players

@@ -473,9 +473,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LCANNON_CHARGE_AMMO         10       // ammo cost of a full charge shot
 
 #define PORTALGUN_PRICE             700
-#define PORTALGUN_REPEAT            1000
+#define PORTALGUN_REPEAT            1000    // repeat period if a portal isn't created
+#define PORTAL_CREATED_REPEAT       5000    // repeat period if a portal is created
 #define PORTALGUN_SPEED             2000
 #define PORTALGUN_SIZE              5        // missile bounding box radius
+#define PORTAL_LIFETIME             30000    // max time a portal can exist
 
 #define HBUILD_PRICE                0
 #define HBUILD_REPEAT               1000
