@@ -2031,6 +2031,7 @@ void ClientThink_real( gentity_t *ent )
   int       oldEventSequence;
   int       msec;
   usercmd_t *ucmd;
+  int       i;
 
   client = ent->client;
 
@@ -2443,6 +2444,9 @@ void ClientThink_real( gentity_t *ent )
   pm.tauntSpam = 0;
 
   VectorCopy( client->ps.origin, client->oldOrigin );
+
+  for( i = 0; i < PORTAL_NUM; i++ )
+    pm.humanPortalCreateTime[ i ] = level.humanPortals.createTime[ i ];
 
   // moved from after Pmove -- potentially the cause of
   // future triggering bugs

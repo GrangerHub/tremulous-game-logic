@@ -850,6 +850,9 @@ void CG_PredictPlayerState( void )
 
     cg_pmove.tauntSpam = cg_tauntSpam.integer;
 
+    for( i = 0; i < PORTAL_NUM; i++ )
+      cg_pmove.humanPortalCreateTime[ i ] = cgs.humanPortalCreateTime[ i ];
+
     if( !cg_optimizePrediction.integer )
     {
       Pmove( &cg_pmove );
