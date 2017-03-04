@@ -2758,6 +2758,22 @@ void G_RunFrame( int levelTime )
   // now we are done spawning
   level.spawning = qfalse;
 
+  for( i = 0; i < PORTAL_NUM; i++ )
+  {
+    // pump human portals fire timer delays
+    if( level.humanPortals.createTime[ i ] > 0 )
+      level.humanPortals.createTime[ i ] -= msec;
+    if( level.humanPortals.createTime[ i ] < 0 )
+      level.humanPortals.createTime[ i ] = 0;
+
+    // check if a human portal's lifetime has expired
+    if( !level.humanPortals.portals[ i ] )
+      break;
+
+    if(  level.humanPortals.lifetime[ i ] <= level.time )
+      G_Portal_Clear( i );
+  }
+
   //
   // go through all allocated objects
   //
@@ -2840,22 +2856,6 @@ void G_RunFrame( int levelTime )
     }
 
     G_RunThink( ent );
-  }
-
-  for( i = 0; i < PORTAL_NUM; i++ )
-  {
-    // pump human portals fire timer delays
-    if( level.humanPortals.createTime[ i ] > 0 )
-      level.humanPortals.createTime[ i ] -= msec;
-    if( level.humanPortals.createTime[ i ] < 0 )
-      level.humanPortals.createTime[ i ] = 0;
-
-    // check if a human portal's lifetime has expired
-    if( !level.humanPortals.portals[ i ] )
-      break;
-
-    if(  level.humanPortals.lifetime[ i ] <= level.time )
-      G_Portal_Clear( i );
   }
 
   // perform final fixups on the players
