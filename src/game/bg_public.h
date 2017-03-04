@@ -59,6 +59,14 @@ typedef enum
   NUM_TEAMS
 } team_t;
 
+// human portals
+typedef enum
+{
+  PORTAL_BLUE,
+  PORTAL_RED,
+  PORTAL_NUM
+} portal_t;
+
 //
 // config strings are a general means of communicating variable length strings
 // from the server to all connected clients.
@@ -96,7 +104,9 @@ enum
 
   CS_HUMAN_STAMINA_MODE,
 
-  CS_MODELS,
+  CS_HUMAN_PORTAL_CREATETIME,
+
+  CS_MODELS           = CS_HUMAN_PORTAL_CREATETIME + PORTAL_NUM,
   CS_SOUNDS           = CS_MODELS + MAX_MODELS,
   CS_SHADERS          = CS_SOUNDS + MAX_SOUNDS,
   CS_PARTICLE_SYSTEMS = CS_SHADERS + MAX_GAME_SHADERS,
@@ -237,6 +247,7 @@ typedef struct pmove_s
   int           (*pointcontents)( const vec3_t point, int passEntityNum );
 
   int           tauntSpam; // allow taunts to be spammed. only for clients that enable cg_tauntSpam
+  int           humanPortalCreateTime[ PORTAL_NUM ];
 } pmove_t;
 
 // if a full pmove isn't done on the client, you can just update the angles
@@ -490,13 +501,6 @@ typedef enum
 
   WP_NUM_WEAPONS
 } weapon_t;
-
-typedef enum
-{
-  PORTAL_BLUE,
-  PORTAL_RED,
-  PORTAL_NUM
-} portal_t;
 
 typedef enum
 {

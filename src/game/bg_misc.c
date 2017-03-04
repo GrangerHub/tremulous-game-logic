@@ -2701,11 +2701,11 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       usesEnergy;
     PORTALGUN_REPEAT,     //int       repeatRate1;
     PORTALGUN_REPEAT,     //int       repeatRate2;
-    PORTALGUN_REPEAT,     //int       repeatRate3;
+    0,                    //int       repeatRate3;
     0,                    //int       reloadTime;
     0.0f,                 //float     knockbackScale;
     qtrue,                //qboolean  hasAltMode;
-    qtrue,                //qboolean  hasThirdMode;
+    qfalse,               //qboolean  hasThirdMode;
     qfalse,               //qboolean  canZoom;
     90.0f,                //float     zoomFov;
     qtrue,                //qboolean  purchasable;

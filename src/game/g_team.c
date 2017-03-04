@@ -192,10 +192,6 @@ void G_LeaveTeam( gentity_t *self )
   // cut all relevant zap beams
   G_ClearPlayerZapEffects( self );
 
-  // clear all portals
-  G_Portal_Clear( self, PORTAL_BLUE );
-  G_Portal_Clear( self, PORTAL_RED );
-
   G_namelog_update_score( self->client );
 }
 
