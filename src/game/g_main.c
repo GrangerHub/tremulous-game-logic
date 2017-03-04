@@ -171,7 +171,6 @@ vmCvar_t  g_allowTeamOverlay;
 
 vmCvar_t  g_censorship;
 vmCvar_t  g_pimpHuman;
-vmCvar_t  g_portalGun;
 
 vmCvar_t  g_tag;
 
@@ -344,7 +343,6 @@ static cvarTable_t   gameCvarTable[ ] =
 
   { &g_censorship, "g_censorship", "", CVAR_ARCHIVE, 0, qfalse  },
   { &g_pimpHuman, "g_pimpHuman", "1", CVAR_ARCHIVE, 0, qfalse  },
-  { &g_portalGun, "g_portalGun", "0", CVAR_ARCHIVE, 0, qfalse  },
 
   { &g_tag, "g_tag", "gpp", CVAR_INIT, 0, qfalse }
 };
