@@ -562,7 +562,6 @@ struct gclient_s
 
   int                 lastCrushTime;        // Tyrant crush
 
-  gentity_t           *portals[PORTAL_NUM];
   int                 portalTime;
 };
 
@@ -826,6 +825,13 @@ typedef struct
   int               playmapFlags;
   int               epochStartTime;
   char              database_data[ DATABASE_DATA_MAX ];
+
+  struct humanPortals_s
+  {
+    gentity_t       *portals[PORTAL_NUM];
+    int             lifetime[PORTAL_NUM];
+    int             createTime[PORTAL_NUM];
+  } humanPortals;
 } level_locals_t;
 
 #define CMD_CHEAT         0x0001
@@ -1311,7 +1317,7 @@ char *GetSkin( char *modelname, char *wish );
 // g_portal.c
 //
 void G_Portal_Create( gentity_t *ent, vec3_t origin, vec3_t normal, portal_t portal );
-void G_Portal_Clear( gentity_t *parent, portal_t portalIndex );
+void G_Portal_Clear( portal_t portalIndex );
 
 //some maxs
 #define MAX_FILEPATH      144

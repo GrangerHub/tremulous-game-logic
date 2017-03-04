@@ -629,6 +629,15 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
   level.alienStage2Time = level.alienStage3Time =
     level.humanStage2Time = level.humanStage3Time = level.startTime;
 
+  // initialize the human portals
+
+  for( i = 0; i < PORTAL_NUM; i++ )
+  {
+    level.humanPortals.createTime[ i ] = 0;
+    level.humanPortals.portals[ i ] = NULL;
+    level.humanPortals.lifetime[ i ] = -1;
+  }
+
   // initialize time limit values
   level.matchBaseTimeLimit = g_basetimelimit.integer;
   trap_Cvar_Set( "timelimit", va( "%d", level.matchBaseTimeLimit ) );
@@ -2902,6 +2911,22 @@ void G_RunFrame( int levelTime )
     }
 
     G_RunThink( ent );
+  }
+
+  for( i = 0; i < PORTAL_NUM; i++ )
+  {
+    // pump human portals fire timer delays
+    if( level.humanPortals.createTime[ i ] > 0 )
+      level.humanPortals.createTime[ i ] -= msec;
+    if( level.humanPortals.createTime[ i ] < 0 )
+      level.humanPortals.createTime[ i ] = 0;
+
+    // check if a human portal's lifetime has expired
+    if( !level.humanPortals.portals[ i ] )
+      break;
+
+    if(  level.humanPortals.lifetime[ i ] <= level.time )
+      G_Portal_Clear( i );
   }
 
   // perform final fixups on the players

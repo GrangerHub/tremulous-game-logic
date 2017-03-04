@@ -3022,7 +3022,16 @@ static void PM_Weapon( void )
     return;
 
   // pump weapon delays (repeat times etc)
-  if( pm->ps->weaponTime > 0 )
+  if( pm->ps->weapon == WP_PORTAL_GUN  )
+  {
+    if( attack2 && pm->humanPortalCreateTime[ PORTAL_BLUE ] > 0 )
+      pm->ps->weaponTime = pm->humanPortalCreateTime[ PORTAL_BLUE ];
+    else if( attack1 && pm->humanPortalCreateTime[ PORTAL_RED ] > 0 )
+      pm->ps->weaponTime = pm->humanPortalCreateTime[ PORTAL_RED ];
+    else if( pm->ps->weaponTime > 0 )
+      pm->ps->weaponTime -= pml.msec;
+  }
+  else if( pm->ps->weaponTime > 0 )
     pm->ps->weaponTime -= pml.msec;
   if( pm->ps->weaponTime < 0 )
     pm->ps->weaponTime = 0;
