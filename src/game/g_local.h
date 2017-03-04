@@ -1451,7 +1451,6 @@ extern  vmCvar_t  g_allowTeamOverlay;
 extern  vmCvar_t  g_censorship;
 
 extern  vmCvar_t  g_pimpHuman;
-extern  vmCvar_t  g_portalGun;
 
 void      trap_Print( const char *fmt );
 void      trap_Error( const char *fmt ) __attribute__((noreturn));
