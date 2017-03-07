@@ -499,6 +499,7 @@ static void CG_HumanText( char *text, playerState_t *ps )
       case WP_CHAINGUN:
       case WP_SHOTGUN:
       case WP_FLAMER:
+      case WP_LAUNCHER:
         Q_strcat( text, MAX_TUTORIAL_TEXT,
             va( "Find an Armoury and press %s for more ammo\n",
               CG_KeyNameForCommand( "buy ammo" ) ) );
@@ -528,6 +529,7 @@ static void CG_HumanText( char *text, playerState_t *ps )
       case WP_CHAINGUN:
       case WP_PULSE_RIFLE:
       case WP_FLAMER:
+      case WP_LAUNCHER:
         Q_strcat( text, MAX_TUTORIAL_TEXT,
             va( "Press %s to fire the %s\n",
               CG_KeyNameForCommand( "+attack" ),

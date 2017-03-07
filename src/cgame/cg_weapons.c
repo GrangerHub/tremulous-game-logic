@@ -421,6 +421,12 @@ static qboolean CG_ParseWeaponModeSection( weaponInfoMode_t *wim, char **text_p 
 
       continue;
     }
+    else if( !Q_stricmp( token, "alwaysImpactDefaultSound" ) )
+    {
+      wim->alwaysImpactDefaultSound = qtrue;
+
+      continue;
+    }
     else if( !Q_stricmp( token, "flashDLightColor" ) )
     {
       for( i = 0 ; i < 3 ; i++ )
@@ -1810,7 +1816,8 @@ void CG_MissileHitWall( weapon_t weaponNum, weaponMode_t weaponMode, int clientN
         trap_S_StartSound( origin, ENTITYNUM_WORLD, CHAN_AUTO, weapon->wim[ weaponMode ].impactFleshSound[ c ] );
     }
   }
-  else
+  if( soundType != IMPACTSOUND_FLESH ||
+      weapon->wim[ weaponMode ].alwaysImpactDefaultSound )
   {
     //normal sound
     for( c = 0; c < 4; c++ )
