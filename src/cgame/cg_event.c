@@ -162,6 +162,7 @@ static void CG_Obituary( entityState_t *ent )
           message = "irradiated himself";
         break;
 
+      case MOD_GRENADE_LAUNCHER:
       case MOD_GRENADE:
         if( gender == GENDER_FEMALE )
           message = "blew herself up";
@@ -276,6 +277,10 @@ static void CG_Obituary( entityState_t *ent )
       case MOD_GRENADE:
         message = "couldn't escape";
         message2 = "'s grenade";
+        break;
+      case MOD_GRENADE_LAUNCHER:
+        message = "pulverized by";
+        message2 = "'s launched grenade";
         break;
 
       case MOD_DROP:

@@ -657,6 +657,19 @@ void throwGrenade( gentity_t *ent )
 /*
 ======================================================================
 
+GRENADE LAUNCHER
+
+======================================================================
+*/
+
+void launcherFire( gentity_t *ent )
+{
+  launch_grenade3( ent, muzzle, forward );
+}
+
+/*
+======================================================================
+
 LAS GUN
 
 ======================================================================
@@ -2082,6 +2095,9 @@ void FireWeapon( gentity_t *ent )
       break;
     case WP_GRENADE:
       throwGrenade( ent );
+      break;
+    case WP_LAUNCHER:
+      launcherFire(ent);
       break;
 
     case WP_LOCKBLOB_LAUNCHER:

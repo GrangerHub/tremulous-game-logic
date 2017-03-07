@@ -3010,6 +3010,49 @@ static const weaponAttributes_t bg_weapons[ ] =
     TEAM_HUMANS           //team_t    team;
   },
   {
+    WP_LAUNCHER,          //int       number;
+    qtrue,                //qboolean enabled;
+    LAUNCHER_PRICE,       //int       price;
+    ( 1 << S3 ),          //int       stages;
+    SLOT_WEAPON,          //int       slots;
+    "grenade_launcher",   //char      *name;
+    "Grenade Launcher",   //char      *humanName;
+    "Launches grenade rounds that explode on impact.",
+    LAUNCHER_AMMO,        //int       maxAmmo;
+    LAUNCHER_MAXCLIPS,    //int       maxClips;
+    qfalse,               //int       infiniteAmmo;
+    qfalse,               //int       usesEnergy;
+    LAUNCHER_REPEAT,      //int       repeatRate1;
+    0,                    //int       repeatRate2;
+    0,                    //int       repeatRate3;
+    LAUNCHER_RELOAD,      //int       reloadTime;
+    LAUNCHER_K_SCALE,     //float     knockbackScale;
+    qfalse,               //qboolean  hasAltMode;
+    qfalse,               //qboolean  hasThirdMode;
+    qfalse,               //qboolean  canZoom;
+    90.0f,                //float     zoomFov;
+    qtrue,                //qboolean  purchasable;
+    qtrue,                //qboolean  longRanged;
+    qtrue,                //qboolean  relativeMissileSpeed;
+    {
+      {                     //impactPrediction_t impactPrediction[0];
+        WPM_NONE,           //weaponMode_t  weaponMode;
+        TR_GRAVITY,         //trType_t      trType;
+        GRENADE_LIFETIME,   //int       missileLifeTime;
+        GRENADE_SIZE,       //int       missileSize;
+        LAUNCHER_SPEED      //int       missileLaunchSpeed;
+      },
+      {                     //impactPrediction_t impactPrediction[1];
+        WPM_NONE,           //weaponMode_t  weaponMode;
+        TR_STATIONARY,      //trType_t      trType;
+        0,                  //int       missileLifeTime;
+        0,                  //int       missileSize;
+        0                   //int       missileLaunchSpeed;
+      }
+    },
+    TEAM_HUMANS           //team_t    team;
+  },
+  {
     WP_LOCKBLOB_LAUNCHER, //int       number;
     qtrue,                //qboolean enabled;
     0,                    //int       price;

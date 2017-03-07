@@ -814,6 +814,7 @@ typedef struct weaponInfoMode_s
   qhandle_t   muzzleParticleSystem;
 
   qboolean    alwaysImpact;
+  qboolean    alwaysImpactDefaultSound;
   qhandle_t   impactParticleSystem;
   qhandle_t   impactMark;
   qhandle_t   impactMarkSize;

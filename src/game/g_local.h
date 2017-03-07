@@ -1161,6 +1161,7 @@ gentity_t *fire_hive( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *fire_portalGun( gentity_t *self, vec3_t start, vec3_t dir, portal_t portal );
 gentity_t *launch_grenade( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *launch_grenade2( gentity_t *self, vec3_t start, vec3_t dir );
+gentity_t *launch_grenade3( gentity_t *self, vec3_t start, vec3_t dir );
 
 //
 // g_mover.c
