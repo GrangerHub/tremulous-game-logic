@@ -214,7 +214,9 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace )
   // is it cheaper in bandwidth to just remove this ent and create a new
   // one, rather than changing the missile into the explosion?
 
-  if( other->takedamage && 
+  if( ent->s.weapon == WP_LAUNCHER )
+    G_AddEvent(ent,EV_MISSILE_MISS,DirToByte(trace->plane.normal));
+  else if( other->takedamage && 
       ( other->s.eType == ET_PLAYER || other->s.eType == ET_BUILDABLE ) )
   {
     G_AddEvent( ent, EV_MISSILE_HIT, DirToByte( trace->plane.normal ) );
@@ -583,6 +585,7 @@ gentity_t *launch_grenade( gentity_t *self, vec3_t start, vec3_t dir )
 =================
 launch_grenade2
 
+Used for /explode
 =================
 */
 gentity_t *launch_grenade2( gentity_t *self, vec3_t start, vec3_t dir )
@@ -619,6 +622,51 @@ gentity_t *launch_grenade2( gentity_t *self, vec3_t start, vec3_t dir )
   VectorCopy( start, bolt->s.pos.trBase );
   VectorScale( dir, 0, bolt->s.pos.trDelta );
   SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
+
+  VectorCopy( start, bolt->r.currentOrigin );
+
+  return bolt;
+}
+//=============================================================================
+
+/*
+=================
+launch_grenade3
+
+Used by the grenade launcher
+=================
+*/
+gentity_t *launch_grenade3( gentity_t *self, vec3_t start, vec3_t dir )
+{
+  gentity_t *bolt;
+
+  VectorNormalize(dir);
+
+  bolt = G_Spawn();
+  bolt->classname = "grenade2";
+  bolt->nextthink = level.time + 5000;
+  bolt->think = G_ExplodeMissile;
+  bolt->s.eType = ET_MISSILE;
+  bolt->s.weapon = WP_GRENADE;
+  bolt->s.generic1 = WPM_PRIMARY; //weaponMode
+  bolt->r.ownerNum = self->s.number;
+  bolt->parent = self;
+  bolt->damage = LAUNCHER_DAMAGE;
+  bolt->splashDamage = LAUNCHER_DAMAGE;
+  bolt->splashRadius = LAUNCHER_RADIUS;
+  bolt->methodOfDeath = MOD_GRENADE_LAUNCHER;
+  bolt->splashMethodOfDeath = MOD_GRENADE_LAUNCHER;
+  bolt->clipmask = MASK_SHOT;
+  bolt->target_ent = NULL;
+  bolt->r.mins[0] = bolt->r.mins[1] = bolt->r.mins[2] = -3.0f;
+  bolt->r.maxs[0] = bolt->r.maxs[1] = bolt->r.maxs[2] = 3.0f;
+  bolt->s.time = level.time;
+
+  bolt->s.pos.trType = TR_GRAVITY;
+  bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME; // move a bit on the very first frame
+  VectorCopy( start, bolt->s.pos.trBase );
+  VectorScale( dir, LAUNCHER_SPEED, bolt->s.pos.trDelta );
+  SnapVector( bolt->s.pos.trDelta ); // save net bandwidth
 
   VectorCopy( start, bolt->r.currentOrigin );
 
@@ -678,7 +726,6 @@ gentity_t *fire_portalGun( gentity_t *self, vec3_t start, vec3_t dir, portal_t p
   bolt->nextthink = level.time + 10000;
   bolt->think = G_ExplodeMissile;
   bolt->s.eType = ET_MISSILE;
-  //bolt->r.svFlags = SVF_USE_CURRENT_ORIGIN;
   bolt->s.weapon = WP_PORTAL_GUN;
   bolt->s.generic1 = self->s.generic1; //weaponMode
   bolt->s.modelindex2 = portal;

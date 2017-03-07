@@ -90,6 +90,7 @@ char *modNames[ ] =
   "MOD_FLAMER",
   "MOD_FLAMER_SPLASH",
   "MOD_GRENADE",
+  "MOD_GRENADE_LAUNCHER",
   "MOD_WATER",
   "MOD_SLIME",
   "MOD_LAVA",
