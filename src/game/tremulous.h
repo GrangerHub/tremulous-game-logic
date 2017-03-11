@@ -784,7 +784,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define DEFAULT_FREEKILL_PERIOD     "120" //seconds
 #define FREEKILL_ALIEN              ALIEN_CREDITS_PER_KILL
 #define FREEKILL_HUMAN              LEVEL0_VALUE
-#define PARTIAL_DAMAGE_CREDITS      (1.00f/10.00f)  // must be a positive fraction less than 1
 
 #define DEFAULT_ALIEN_BUILDPOINTS          "250"
 #define DEFAULT_ALIEN_BUILDPOINTS_RESERVE  "200"
