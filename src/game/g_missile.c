@@ -1041,6 +1041,7 @@ gentity_t *fire_bounceBall( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->think = G_ExplodeMissile;
   bolt->s.eType = ET_MISSILE;
   bolt->s.weapon = WP_ALEVEL3_UPG;
+  bolt->flags |= FL_BOUNCE | FL_NO_BOUNCE_SOUND;
   bolt->s.generic1 = self->s.generic1; //weaponMode
   bolt->r.ownerNum = self->s.number;
   bolt->parent = self;
