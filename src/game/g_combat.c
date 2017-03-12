@@ -150,6 +150,7 @@ float G_RewardAttackers( gentity_t *self )
   float     value, totalDamage = 0;
   int       team, i, maxHealth = 0;
   int       alienCredits = 0, humanCredits = 0;
+  int       numTeamPlayers[ NUM_TEAMS ];
   int       maxHealthReserve;
   gentity_t *player;
 
@@ -190,19 +191,37 @@ float G_RewardAttackers( gentity_t *self )
   else
     return totalDamage;
 
+  numTeamPlayers[ TEAM_ALIENS ] = level.numAlienClients;
+  numTeamPlayers[ TEAM_HUMANS ] = level.numHumanClients;
+
   // Give credits and empty the array
   for( i = 0; i < level.maxclients; i++ )
   {
     int stageValue = value * self->credits[ i ] / totalDamage;
-    player = g_entities + i;
+    team_t playersTeam;
 
-    if( player->client->pers.teamSelection != team )
+    player = g_entities + i;
+    playersTeam = player->client->pers.teamSelection;
+
+    if( playersTeam != team )
     {
+      int playersTeamDistributionEarnings;
+      int everyonesDistributionEarnings;
+      int playersPersonalEarnings;
+
       if( totalDamage < maxHealth )
         stageValue *= totalDamage / maxHealth;
 
       if( !self->credits[ i ] || player->client->ps.stats[ STAT_TEAM ] == team )
         continue;
+
+      playersTeamDistributionEarnings = stageValue / ( 10 * numTeamPlayers[ playersTeam ] );
+      everyonesDistributionEarnings = ( stageValue * 9 ) / ( 10 * level.numPlayingClients );
+
+      // any remainders goes to the player that did the damage;
+      playersPersonalEarnings = stageValue;
+      playersPersonalEarnings -= playersTeamDistributionEarnings * numTeamPlayers[ playersTeam ];
+      playersPersonalEarnings -= everyonesDistributionEarnings * level.numPlayingClients;
 
       AddScore( player, stageValue );
 
@@ -225,7 +244,22 @@ float G_RewardAttackers( gentity_t *self )
         player->client->ps.misc[ MISC_HEALTH_RESERVE ] = player->healthReserve;
       }
 
-      G_AddCreditToClient( player->client, stageValue, qtrue );
+      for( i = 0; i < level.maxclients; i++ )
+      {
+        if( level.clients[ i ].pers.connected == CON_CONNECTED &&
+            level.clients[ i ].pers.teamSelection != TEAM_NONE )
+        {
+          //distribute the team specific earnings
+          if( level.clients[ i ].pers.teamSelection == playersTeam )
+            G_AddCreditToClient( &level.clients[ i ], playersTeamDistributionEarnings, qtrue );
+
+          //distribute the earnings common to everyone playing
+          G_AddCreditToClient( &level.clients[ i ], everyonesDistributionEarnings, qtrue );
+        }
+      }
+
+      // any remaining earnings goes to the player that did the damage
+      G_AddCreditToClient( &level.clients[ i ], playersPersonalEarnings, qtrue );
 
       // killing buildables earns score and credits, but doesn't count towards stage advancement
       if( ( !IS_WARMUP ) && ( self->s.eType != ET_BUILDABLE ) )

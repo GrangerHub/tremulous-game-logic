@@ -199,7 +199,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ABUILDER_UPG_COST           0
 
 #define LEVEL0_SPEED                1.4f
-#define LEVEL0_VALUE                AVM(180)
+#define LEVEL0_VALUE                AVM(ALIEN_CREDITS_PER_KILL)
 #define LEVEL0_HEALTH               AHM(25)
 #define LEVEL0_REGEN                (0.05f * LEVEL0_HEALTH)
 #define LEVEL0_COST                 0
@@ -414,10 +414,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ALIEN_REGEN_DAMAGE_TIME     2000 //msec since damage that regen starts again
 #define ALIEN_REGEN_NOCREEP_MOD     (1.0f/2.0f) //regen off creep
 
-#define ALIEN_MAX_FRAGS             9
+#define ALIEN_MAX_FRAGS             49
 #define ALIEN_MAX_CREDITS           (ALIEN_MAX_FRAGS*ALIEN_CREDITS_PER_KILL)
-#define ALIEN_CREDITS_PER_KILL      400
-#define ALIEN_TK_SUICIDE_PENALTY    350
+#define ALIEN_CREDITS_PER_KILL      200
+#define ALIEN_TK_SUICIDE_PENALTY    150
 
 /*
  * HUMAN weapons
@@ -760,7 +760,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define HUMAN_LIFE_SUPPORT_TIME     150000 //amount of time humans can survive without any telenodes/reactor
 
-#define HUMAN_MAX_CREDITS           2000
+#define HUMAN_MAX_CREDITS           ALIEN_MAX_CREDITS
 #define HUMAN_TK_SUICIDE_PENALTY    150
 
 #define HUMAN_BUILDER_SCOREINC      50       // builders receive this many points every 10 seconds

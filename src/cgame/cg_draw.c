@@ -319,7 +319,7 @@ static void CG_DrawPlayerCreditsValue( rectDef_t *rect, vec4_t color, qboolean p
       cent->currentState.weapon == WP_ABUILD2 ) && ps->stats[ STAT_MISC ] )
     return;
 
-  value = cgs.warmup ? NO_CREDITS_TIME : ps->persistant[ PERS_CREDIT ];
+  value = cgs.warmup ? HUMAN_MAX_CREDITS : ps->persistant[ PERS_CREDIT ];
   if( value > -1 )
   {
     if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_ALIENS )
@@ -333,7 +333,7 @@ static void CG_DrawPlayerCreditsValue( rectDef_t *rect, vec4_t color, qboolean p
       }
 
       if ( cgs.warmup )
-        value = 9;
+        value = ALIEN_MAX_FRAGS;
       else
         value /= ALIEN_CREDITS_PER_KILL;
     }
@@ -342,8 +342,11 @@ static void CG_DrawPlayerCreditsValue( rectDef_t *rect, vec4_t color, qboolean p
 
     if( padding )
       CG_DrawFieldPadded( rect->x, rect->y, 4, rect->w / 4, rect->h, value );
-    else
+    else if( value < 10 )
       CG_DrawField( rect->x, rect->y, 1, rect->w, rect->h, value );
+    else
+      CG_DrawField( ( rect->x * 568 ) / 570, ( rect->y * 418 ) / 416, 2,
+                    ( rect->w * 2 ) / 3, ( rect->h * 2 ) / 3, value );
 
     trap_R_SetColor( NULL );
   }
