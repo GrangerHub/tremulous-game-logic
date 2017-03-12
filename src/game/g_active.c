@@ -671,6 +671,20 @@ void ClientTimerActions( gentity_t *ent, int msec )
 
     client->time100 -= 100;
 
+    if( !IS_WARMUP && g_freeFundPeriod.integer > 0 )
+    {
+      // Give clients some credit periodically
+      // (if not in warmup)
+      if( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
+        client->pers.timedIncome +=
+               (float)(FREEKILL_ALIEN) / (float)(g_freeFundPeriod.integer * 10);
+      else if( client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
+        client->pers.timedIncome +=
+              (float)(FREEKILL_HUMAN) / (float)(g_freeFundPeriod.integer * 10 );
+      G_AddCreditToClient( client, (int)(client->pers.timedIncome), qtrue );
+      client->pers.timedIncome -= (int)(client->pers.timedIncome);
+    }
+
     // Restore or subtract stamina
     if( BG_ClassHasAbility( client->ps.stats[STAT_CLASS], SCA_STAMINA ) )
     {
@@ -905,19 +919,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
       client->voiceEnthusiasm = 0.0f;
 
     client->pers.secondsAlive++;
-    if( !IS_WARMUP && g_freeFundPeriod.integer > 0 &&
-        client->pers.secondsAlive % g_freeFundPeriod.integer == 0 )
-    {
-      // Give clients some credit periodically
-      // (if not in warmup)
-      if( G_TimeTilSuddenDeath( ) > 0 )
-      {
-        if( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
-          G_AddCreditToClient( client, FREEKILL_ALIEN, qtrue );
-        else if( client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
-          G_AddCreditToClient( client, FREEKILL_HUMAN, qtrue );
-      }
-    }
+     
 
     G_ClientUpdateSpawnQueue( ent->client );
     

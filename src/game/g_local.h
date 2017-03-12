@@ -443,6 +443,7 @@ typedef struct
 
   int                 secondsAlive;       // time player has been alive in seconds
   qboolean            hasHealed;          // has healed a player (basi regen aura) in the last 10sec (for score use)
+  float               timedIncome;
 
   // used to save persistant[] values while in SPECTATOR_FOLLOW mode
   int                 credit;
