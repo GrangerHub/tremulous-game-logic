@@ -222,43 +222,43 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL1_UPG_VALUE            AVM(330)
 #define LEVEL1_UPG_HEALTH           AHM(80)
 #define LEVEL1_UPG_REGEN            (0.03f * LEVEL1_UPG_HEALTH)
-#define LEVEL1_UPG_COST             1
+#define LEVEL1_UPG_COST             3
 
 #define LEVEL2_SPEED                1.2f
 #define LEVEL2_VALUE                AVM(420)
 #define LEVEL2_HEALTH               AHM(150)
 #define LEVEL2_REGEN                (0.03f * LEVEL2_HEALTH)
-#define LEVEL2_COST                 1
+#define LEVEL2_COST                 2
 
 #define LEVEL2_UPG_SPEED            1.2f
 #define LEVEL2_UPG_VALUE            AVM(540)
 #define LEVEL2_UPG_HEALTH           AHM(175)
 #define LEVEL2_UPG_REGEN            (0.03f * LEVEL2_UPG_HEALTH)
-#define LEVEL2_UPG_COST             1
+#define LEVEL2_UPG_COST             4
 
 #define LEVEL3_SPEED                1.1f
 #define LEVEL3_VALUE                AVM(600)
 #define LEVEL3_HEALTH               AHM(200)
 #define LEVEL3_REGEN                (0.03f * LEVEL3_HEALTH)
-#define LEVEL3_COST                 1
+#define LEVEL3_COST                 4
 
 #define LEVEL3_UPG_SPEED            1.1f
 #define LEVEL3_UPG_VALUE            AVM(720)
 #define LEVEL3_UPG_HEALTH           AHM(250)
 #define LEVEL3_UPG_REGEN            (0.03f * LEVEL3_UPG_HEALTH)
-#define LEVEL3_UPG_COST             1
+#define LEVEL3_UPG_COST             5
 
 #define LEVEL4_SPEED                1.2f
 #define LEVEL4_VALUE                AVM(960)
 #define LEVEL4_HEALTH               AHM(400)
 #define LEVEL4_REGEN                (0.025f * LEVEL4_HEALTH)
-#define LEVEL4_COST                 2
+#define LEVEL4_COST                 7
 
 #define SPITFIRE_SPEED                1.3f
 #define SPITFIRE_VALUE                AVM(960)
 #define SPITFIRE_HEALTH               AHM(125)
 #define SPITFIRE_REGEN                (0.03f * SPITFIRE_HEALTH)
-#define SPITFIRE_COST                 1
+#define SPITFIRE_COST                 3
 
 /*
  * ALIEN buildables
@@ -493,7 +493,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LASGUN_RELOAD               2000
 #define LASGUN_DAMAGE               HDM(9)
 
-#define MDRIVER_PRICE               350
+#define MDRIVER_PRICE               600
 #define MDRIVER_CLIPSIZE            5
 #define MDRIVER_MAXCLIPS            4
 #define MDRIVER_DMG                 HDM(38)
@@ -502,14 +502,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MDRIVER_RELOAD              2000
 #define MDRIVER_MAX_HITS            3
 
-#define CHAINGUN_PRICE              400
+#define CHAINGUN_PRICE              1000
 #define CHAINGUN_BULLETS            300
 #define CHAINGUN_REPEAT             80
 #define CHAINGUN_K_SCALE            1.0f
 #define CHAINGUN_SPREAD             1000
 #define CHAINGUN_DMG                HDM(6)
 
-#define FLAMER_PRICE                375
+#define FLAMER_PRICE                1750
 #define FLAMER_GAS                  200
 #define FLAMER_REPEAT               200
 #define FLAMER_K_SCALE              2.0f
@@ -521,7 +521,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define FLAMER_SPEED                500.0f
 #define FLAMER_LAG                  0.65f    // the amount of player velocity that is added to the fireball
 
-#define PRIFLE_PRICE                450
+#define PRIFLE_PRICE                1500
 #define PRIFLE_CLIPS                40
 #define PRIFLE_MAXCLIPS             5
 #define PRIFLE_REPEAT               100
@@ -532,7 +532,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define PRIFLE_SIZE                 5
 #define PRIFLE_LIFETIME             10000
 
-#define LCANNON_PRICE               600
+#define LCANNON_PRICE               2500
 #define LCANNON_AMMO                90
 #define LCANNON_K_SCALE             1.0f
 #define LCANNON_REPEAT              500
@@ -556,14 +556,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LCANNON_SPLASH_BATTLESUIT   0.50f    // reduction of damage fraction for luci splash on battlesuits
 #define LCANNON_LIFETIME            10000
 
-#define PORTALGUN_PRICE             700
+#define PORTALGUN_PRICE             2000
 #define PORTALGUN_REPEAT            1000    // repeat period if a portal isn't created
 #define PORTAL_CREATED_REPEAT       2000    // repeat period if a portal is created
 #define PORTALGUN_SPEED             2000
 #define PORTALGUN_SIZE              5        // missile bounding box radius
 #define PORTAL_LIFETIME             45000    // max time a portal can exist
 
-#define LAUNCHER_PRICE               1500
+#define LAUNCHER_PRICE               3000
 #define LAUNCHER_AMMO                4
 #define LAUNCHER_MAXCLIPS            2
 #define LAUNCHER_REPEAT              1000
@@ -585,17 +585,17 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LIGHTARMOUR_POISON_PROTECTION 1
 #define LIGHTARMOUR_PCLOUD_PROTECTION 1000
 
-#define HELMET_PRICE                90
+#define HELMET_PRICE                250
 #define HELMET_RANGE                1000.0f
 #define HELMET_POISON_PROTECTION    1
 #define HELMET_PCLOUD_PROTECTION    1000
 
 #define MEDKIT_PRICE                0
 
-#define BATTPACK_PRICE              100
+#define BATTPACK_PRICE              150
 #define BATTPACK_MODIFIER           1.5f //modifier for extra energy storage available
 
-#define JETPACK_PRICE               120
+#define JETPACK_PRICE               500
 #define JETPACK_FLOAT_SPEED         128.0f //up movement speed
 #define JETPACK_SINK_SPEED          192.0f //down movement speed
 #define JETPACK_DISABLE_TIME        1000 //time to disable the jetpack when player damaged
@@ -605,7 +605,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define JETPACK_FUEL_USAGE          8 //every 100ms
 #define JETPACK_FUEL_JUMP           150
 
-#define BSUIT_PRICE                 400
+#define BSUIT_PRICE                 1500
 #define BSUIT_POISON_PROTECTION     3
 #define BSUIT_PCLOUD_PROTECTION     3000
 
