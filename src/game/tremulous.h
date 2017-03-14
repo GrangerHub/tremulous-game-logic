@@ -49,6 +49,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ABUILDER_BLOB_TIME          2000
 #define ABUILDER_BLOB_LIFETIME      15000
 
+#define ABUILDER2_CLAW_DMG          ADM(25)
+#define ABUILDER2_CLAW_RANGE        73.6f
+#define ABUILDER2_CLAW_WIDTH        4.6f
+#define ABUILDER2_CLAW_REPEAT       600
+#define ABUILDER2_BLOB_DMG          ADM(5)
+#define ABUILDER2_BLOB_REPEAT       600
+#define ABUILDER2_BLOB_SPEED        1000.0f
+
 #define LEVEL0_BITE_DMG             ADM(48)
 #define LEVEL0_BITE_RANGE           64.0f
 #define LEVEL0_BITE_WIDTH           6.0f
@@ -187,16 +195,16 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ALIEN_EVO_HP_RESERVE_GAIN   (1.0f/8.0f)
 
 #define ABUILDER_SPEED              0.9f
-#define ABUILDER_VALUE              AVM(240)
+#define ABUILDER_VALUE              AVM(((float)(ALIEN_CREDITS_PER_KILL)) / 2.0f)
 #define ABUILDER_HEALTH             AHM(50)
 #define ABUILDER_REGEN              (0.04f * ABUILDER_HEALTH)
 #define ABUILDER_COST               0
 
-#define ABUILDER_UPG_SPEED          0.9f
-#define ABUILDER_UPG_VALUE          AVM(300)
+#define ABUILDER_UPG_SPEED          1.1f
+#define ABUILDER_UPG_VALUE          AVM(((float)(ALIEN_CREDITS_PER_KILL)) * 1.5f)
 #define ABUILDER_UPG_HEALTH         AHM(75)
 #define ABUILDER_UPG_REGEN          (0.04f * ABUILDER_UPG_HEALTH)
-#define ABUILDER_UPG_COST           0
+#define ABUILDER_UPG_COST           2
 
 #define LEVEL0_SPEED                1.4f
 #define LEVEL0_VALUE                AVM(ALIEN_CREDITS_PER_KILL)

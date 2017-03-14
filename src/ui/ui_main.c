@@ -2312,12 +2312,7 @@ static void UI_LoadAlienClasses( void )
   if( BG_ClassIsAllowed( PCL_ALIEN_LEVEL0, UI_DevModeIsOn( ) ) )
     UI_AddClass( PCL_ALIEN_LEVEL0 );
 
-  if( BG_ClassIsAllowed( PCL_ALIEN_BUILDER0_UPG, UI_DevModeIsOn( ) ) &&
-      BG_ClassAllowedInStage( PCL_ALIEN_BUILDER0_UPG,
-                              UI_GetCurrentAlienStage( ),
-                              UI_GameIsInWarmup( ) ) )
-    UI_AddClass( PCL_ALIEN_BUILDER0_UPG );
-  else if( BG_ClassIsAllowed( PCL_ALIEN_BUILDER0, UI_DevModeIsOn( ) ) )
+  if( BG_ClassIsAllowed( PCL_ALIEN_BUILDER0, UI_DevModeIsOn( ) ) )
     UI_AddClass( PCL_ALIEN_BUILDER0 );
 }
 

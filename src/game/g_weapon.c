@@ -946,10 +946,12 @@ void cancelBuildFire( gentity_t *ent )
     return;
   }
 
-  if( ent->client->ps.weapon == WP_ABUILD ||
-      ent->client->ps.weapon == WP_ABUILD2 )
+  if( ent->client->ps.weapon == WP_ABUILD)
     meleeAttack( ent, ABUILDER_CLAW_RANGE, ABUILDER_CLAW_WIDTH,
                  ABUILDER_CLAW_WIDTH, ABUILDER_CLAW_DMG, MOD_ABUILDER_CLAW );
+  else if( ent->client->ps.weapon == WP_ABUILD2 )
+    meleeAttack( ent, ABUILDER2_CLAW_RANGE, ABUILDER2_CLAW_WIDTH,
+                 ABUILDER2_CLAW_WIDTH, ABUILDER2_CLAW_DMG, MOD_ABUILDER_CLAW );
 }
 
 /*
@@ -1949,6 +1951,7 @@ void FireWeapon3( gentity_t *ent )
       bounceBallFire( ent );
       break;
 
+    case WP_ABUILD:
     case WP_ABUILD2:
       slowBlobFire( ent );
       break;

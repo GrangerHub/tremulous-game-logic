@@ -264,7 +264,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     TRAPPER_SPLASHRADIUS,  //int       splashRadius;
     MOD_ASPAWN,            //int       meansOfDeath;
     TEAM_ALIENS,           //int       team;
-    ( 1 << WP_ABUILD2 ),   //weapon_t  buildWeapon;
+    ( 1 << WP_ABUILD )|( 1 << WP_ABUILD2 ), //weapon_t  buildWeapon;
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     TRAPPER_BT,            //int       buildTime;
@@ -307,7 +307,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     SLIME_ZUNGE_SPLASHRADIUS, //int    splashRadius;
     MOD_ASPAWN,            //int       meansOfDeath;
     TEAM_ALIENS,           //int       team;
-    ( 1 << WP_ABUILD2 ),   //weapon_t  buildWeapon;
+    ( 1 << WP_ABUILD )|( 1 << WP_ABUILD2 ), //weapon_t  buildWeapon;
     BANIM_IDLE1,           //int       idleAnim;
     200,                   //int       nextthink;
     SLIME_ZUNGE_BT,        //int       buildTime;
@@ -351,7 +351,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BOOSTER_SPLASHRADIUS,  //int       splashRadius;
     MOD_ASPAWN,            //int       meansOfDeath;
     TEAM_ALIENS,           //int       team;
-    ( 1 << WP_ABUILD2 ),   //weapon_t  buildWeapon;
+    ( 1 << WP_ABUILD )|( 1 << WP_ABUILD2 ), //weapon_t  buildWeapon;
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     BOOSTER_BT,            //int       buildTime;
@@ -393,7 +393,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     HIVE_SPLASHRADIUS,     //int       splashRadius;
     MOD_ASPAWN,            //int       meansOfDeath;
     TEAM_ALIENS,           //int       team;
-    ( 1 << WP_ABUILD2 ),   //weapon_t  buildWeapon;
+    ( 1 << WP_ABUILD )|( 1 << WP_ABUILD2 ), //weapon_t  buildWeapon;
     BANIM_IDLE1,           //int       idleAnim;
     500,                   //int       nextthink;
     HIVE_BT,               //int       buildTime;
@@ -434,7 +434,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     HOVEL_SPLASHRADIUS,    //int       splashRadius;
     MOD_ASPAWN,            //int       meansOfDeath;
     TEAM_ALIENS,           //int       team;
-    ( 1 << WP_ABUILD2 ),   //weapon_t  buildWeapon;
+    ( 1 << WP_ABUILD )|( 1 << WP_ABUILD2 ), //weapon_t  buildWeapon;
     BANIM_IDLE1,           //int       idleAnim;
     150,                   //int       nextthink;
     HOVEL_BT,              //int       buildTime;
@@ -1207,7 +1207,9 @@ static const classAttributes_t bg_classList[ ] =
     ABUILDER_HEALTH,                                //int     health;
     0.2f,                                           //float   fallDamage;
     ABUILDER_REGEN,                                 //float   regenRate;
-    SCA_TAKESFALLDAMAGE|SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN|SCA_CANHOVEL, //int    abilities;
+    SCA_TAKESFALLDAMAGE|SCA_FOVWARPS|
+    SCA_WALLCLIMBER|SCA_ALIENSENSE|
+    SCA_REGEN|SCA_CANHOVEL, //int    abilities;
     WP_ABUILD,                                      //weapon_t startWeapon;
     95.0f,                                          //float   buildDist;
     110,                                            //int     fov;
@@ -1240,7 +1242,9 @@ static const classAttributes_t bg_classList[ ] =
     ABUILDER_UPG_HEALTH,                            //int     health;
     0.2f,                                           //float   fallDamage;
     ABUILDER_UPG_REGEN,                             //float   regenRate;
-    SCA_TAKESFALLDAMAGE|SCA_FOVWARPS|SCA_WALLCLIMBER|SCA_ALIENSENSE|SCA_REGEN|SCA_CANHOVEL, //int  abilities;
+    SCA_TAKESFALLDAMAGE|SCA_FOVWARPS|
+    SCA_WALLCLIMBER|SCA_ALIENSENSE|
+    SCA_REGEN, //int  abilities;
     WP_ABUILD2,                                     //weapon_t startWeapon;
     105.0f,                                         //float   buildDist;
     110,                                            //int     fov;
@@ -1253,7 +1257,7 @@ static const classAttributes_t bg_classList[ ] =
     1.0f,                                           //float   airAcceleration;
     6.0f,                                           //float   friction;
     100.0f,                                         //float   stopSpeed;
-    270.0f,                                         //float   jumpMagnitude;
+    300.0f,                                         //float   jumpMagnitude;
     1.0f,                                           //float   knockbackScale;
     CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
@@ -1665,12 +1669,7 @@ qboolean BG_ClassAllowedInStage( class_t class,
                                  stage_t stage,
                                  int gameIsInWarmup )
 {
-  int stages = BG_Class( class )->stages;
-
-  if( gameIsInWarmup )
-    return qtrue;
-
-  return stages & ( 1 << stage );
+  return qtrue;
 }
 
 static classConfig_t bg_classConfigList[ PCL_NUM_CLASSES ];
@@ -3239,24 +3238,24 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       usesEnergy;
     ABUILDER_BUILD_REPEAT, //int      repeatRate1;
     ABUILDER_CLAW_REPEAT, //int       repeatRate2;
-    0,                    //int       repeatRate3;
+    ABUILDER_BLOB_REPEAT, //int       repeatRate3;
     0,                    //int       reloadTime;
     ABUILDER_CLAW_K_SCALE, //float    knockbackScale;
     qtrue,                //qboolean  hasAltMode;
-    qfalse,               //qboolean  hasThirdMode;
+    qtrue,                //qboolean  hasThirdMode;
     qfalse,               //qboolean  canZoom;
     90.0f,                //float     zoomFov;
     qtrue,                //qboolean  purchasable;
     qfalse,               //qboolean  longRanged;
-    qfalse,               //qboolean  relativeMissileSpeed;
+    qtrue,                //qboolean  relativeMissileSpeed;
     {
-      {                     //impactPrediction_t impactPrediction[0];
-        WPM_NONE,           //weaponMode_t  weaponMode;
-        TR_STATIONARY,      //trType_t      trType;
-        0,                  //int       missileLifeTime;
-        0,                  //int       missileSize;
-        0                   //int       missileLaunchSpeed;
-      },
+        {                     //impactPrediction_t impactPrediction[0];
+          WPM_TERTIARY,       //weaponMode_t  weaponMode;
+          TR_GRAVITY,         //trType_t      trType;
+          ABUILDER_BLOB_LIFETIME,  //int       missileLifeTime;
+          0,                  //int       missileSize;
+          ABUILDER_BLOB_SPEED //int       missileLaunchSpeed;
+        },
       {                     //impactPrediction_t impactPrediction[1];
         WPM_NONE,           //weaponMode_t  weaponMode;
         TR_STATIONARY,      //trType_t      trType;
@@ -3281,8 +3280,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     ABUILDER_BUILD_REPEAT, //int      repeatRate1;
-    ABUILDER_CLAW_REPEAT, //int       repeatRate2;
-    ABUILDER_BLOB_REPEAT, //int       repeatRate3;
+    ABUILDER2_CLAW_REPEAT,//int       repeatRate2;
+    ABUILDER2_BLOB_REPEAT,//int       repeatRate3;
     0,                    //int       reloadTime;
     ABUILDER_CLAW_K_SCALE, //float    knockbackScale;
     qtrue,                //qboolean  hasAltMode;
@@ -3298,7 +3297,7 @@ static const weaponAttributes_t bg_weapons[ ] =
         TR_GRAVITY,         //trType_t      trType;
         ABUILDER_BLOB_LIFETIME,  //int       missileLifeTime;
         0,                  //int       missileSize;
-        ABUILDER_BLOB_SPEED //int       missileLaunchSpeed;
+        ABUILDER2_BLOB_SPEED//int       missileLaunchSpeed;
       },
       {                     //impactPrediction_t impactPrediction[1];
         WPM_NONE,           //weaponMode_t  weaponMode;
@@ -3445,12 +3444,7 @@ BG_WeaponAllowedInStage
 qboolean BG_WeaponAllowedInStage( weapon_t weapon, stage_t stage,
                                   int gameIsInWarmup )
 {
-  int stages = BG_Weapon( weapon )->stages;
-
-  if( gameIsInWarmup )
-    return qtrue;
-
-  return stages & ( 1 << stage );
+  return qtrue;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -3621,12 +3615,7 @@ BG_UpgradeAllowedInStage
 qboolean BG_UpgradeAllowedInStage( upgrade_t upgrade, stage_t stage,
                                    int gameIsInWarmup )
 {
-  int stages = BG_Upgrade( upgrade )->stages;
-
-  if( gameIsInWarmup )
-    return qtrue;
-
-  return stages & ( 1 << stage );
+  return qtrue;
 }
 
 
