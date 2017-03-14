@@ -52,7 +52,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ABUILDER2_CLAW_DMG          ADM(25)
 #define ABUILDER2_CLAW_RANGE        73.6f
 #define ABUILDER2_CLAW_WIDTH        4.6f
-#define ABUILDER2_CLAW_REPEAT       600
+#define ABUILDER2_CLAW_REPEAT       400
 #define ABUILDER2_BLOB_DMG          ADM(5)
 #define ABUILDER2_BLOB_REPEAT       600
 #define ABUILDER2_BLOB_SPEED        1000.0f
@@ -200,9 +200,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ABUILDER_REGEN              (0.04f * ABUILDER_HEALTH)
 #define ABUILDER_COST               0
 
-#define ABUILDER_UPG_SPEED          1.1f
+#define ABUILDER_UPG_SPEED          1.2f
 #define ABUILDER_UPG_VALUE          AVM(((float)(ALIEN_CREDITS_PER_KILL)) * 1.5f)
-#define ABUILDER_UPG_HEALTH         AHM(75)
+#define ABUILDER_UPG_HEALTH         AHM(100)
 #define ABUILDER_UPG_REGEN          (0.04f * ABUILDER_UPG_HEALTH)
 #define ABUILDER_UPG_COST           2
 
