@@ -1011,7 +1011,7 @@ void AGeneric_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, i
   self->methodOfDeath = mod;
 
   if( self->spawned )
-    self->nextthink = level.time + 5000;
+    self->nextthink = level.time + ALIEN_CREEP_BLAST_DELAY;
   else
     self->nextthink = level.time; //blast immediately
 
