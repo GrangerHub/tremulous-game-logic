@@ -33,10 +33,11 @@ G_Portal_Effect
 Cool effects for the portals when they are used or cleared
 ===============
 */
-static void G_Portal_Effect( portal_t portalindex )
+static void G_Portal_Effect( portal_t portalindex, float speedMod )
 {
 	gentity_t *portal = level.humanPortals.portals[portalindex];
 	gentity_t *effect = G_Spawn( );
+	int       speed = (int)((float)(PORTALGUN_SPEED) * speedMod);
 
 	VectorCopy( portal->r.currentOrigin , effect->r.currentOrigin );
 	effect->s.eType = ET_MISSILE;
@@ -47,10 +48,10 @@ static void G_Portal_Effect( portal_t portalindex )
 		effect->s.generic1 = WPM_SECONDARY;
 
 	effect->s.pos.trType = TR_ACCEL;
-  effect->s.pos.trDuration = PORTALGUN_SPEED * 2;
+  effect->s.pos.trDuration = speed * 2;
   effect->s.pos.trTime = level.time;
   VectorCopy( effect->r.currentOrigin, effect->s.pos.trBase );
-  VectorScale( portal->s.origin2, PORTALGUN_SPEED, effect->s.pos.trDelta );
+  VectorScale( portal->s.origin2, speed, effect->s.pos.trDelta );
   SnapVector( effect->s.pos.trDelta );      // save net bandwidth
 
 	G_AddEvent( effect, EV_MISSILE_MISS, DirToByte( portal->s.origin2 ) );
@@ -72,7 +73,7 @@ void G_Portal_Clear( portal_t portalindex )
 		return;
 
 		
-	G_Portal_Effect( portalindex );
+	G_Portal_Effect( portalindex, 1.0 );
 	level.humanPortals.createTime[ portalindex ] = 0;
 	trap_SetConfigstring( ( CS_HUMAN_PORTAL_CREATETIME + portalindex ),
 												va( "%i", 0 ) );
@@ -142,7 +143,7 @@ static void G_Portal_Touch(gentity_t *self, gentity_t *other, trace_t *trace)
 	VectorCopy(other->client->ps.origin, other->r.currentOrigin);
 	trap_LinkEntity(other);
 	for( i = 0; i < PORTAL_NUM; i++ )
-		G_Portal_Effect( i );
+		G_Portal_Effect( i, 0.25 );
 }
 
 /*

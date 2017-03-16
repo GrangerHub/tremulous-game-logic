@@ -729,7 +729,8 @@ fire_portalGun
 
 =================
 */
-gentity_t *fire_portalGun( gentity_t *self, vec3_t start, vec3_t dir, portal_t portal )
+gentity_t *fire_portalGun( gentity_t *self, vec3_t start, vec3_t dir, 
+                           portal_t portal, qboolean relativeVelocity )
 {
   gentity_t *bolt;
   vec3_t pvel;
@@ -761,8 +762,13 @@ gentity_t *fire_portalGun( gentity_t *self, vec3_t start, vec3_t dir, portal_t p
   bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;   // move a bit on the very first frame
   VectorCopy( start, bolt->s.pos.trBase );
 
-  VectorScale( self->client->ps.velocity, 1.0f, pvel );
-  VectorMA( pvel, PORTALGUN_SPEED, dir, bolt->s.pos.trDelta );
+  if( relativeVelocity )
+  {
+    VectorScale( self->client->ps.velocity, 1.0f, pvel );
+    VectorMA( pvel, PORTALGUN_SPEED, dir, bolt->s.pos.trDelta );
+  }
+  else
+    VectorScale( dir, PORTALGUN_SPEED, bolt->s.pos.trDelta );
 
   SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
 

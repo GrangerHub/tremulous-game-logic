@@ -565,6 +565,20 @@ static void CG_HumanText( char *text, playerState_t *ps )
               BG_Weapon( ps->weapon )->humanName ) );
         break;
 
+      case WP_PORTAL_GUN:
+      Q_strcat( text, MAX_TUTORIAL_TEXT,
+          va( "Press %s to fire a red portal\n",
+            CG_KeyNameForCommand( "+attack" ) ) );
+
+      Q_strcat( text, MAX_TUTORIAL_TEXT,
+          va( "Press %s to fire a blue portal\n",
+            CG_KeyNameForCommand( "+button5" ) ) );
+
+      Q_strcat( text, MAX_TUTORIAL_TEXT,
+          va( "Hold down %s when firing a portal to turn off relative fire velocity\n",
+            CG_KeyNameForCommand( "+speed" ) ) );
+      break;
+
       case WP_HBUILD:
         CG_HumanCkitText( text, ps );
         break;

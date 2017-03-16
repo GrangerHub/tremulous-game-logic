@@ -803,9 +803,9 @@ PGChargeFire
 void PGChargeFire( gentity_t *ent, qboolean secondary )
 {
   if( secondary )
-    fire_portalGun( ent, muzzle, forward, PORTAL_BLUE );
+    fire_portalGun( ent, muzzle, forward, PORTAL_BLUE, !( ent->client->buttons & BUTTON_WALKING ) );
   else
-    fire_portalGun( ent, muzzle, forward, PORTAL_RED );
+    fire_portalGun( ent, muzzle, forward, PORTAL_RED, !( ent->client->buttons & BUTTON_WALKING ) );
 
   ent->client->ps.weaponTime = PORTALGUN_REPEAT;
 }

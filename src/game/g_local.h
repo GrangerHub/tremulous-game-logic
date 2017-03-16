@@ -1153,13 +1153,15 @@ qboolean  G_PlayerHasUnexplodedGrenades( gentity_t *player );
 gentity_t *fire_flamer( gentity_t *self, vec3_t start, vec3_t aimdir );
 gentity_t *fire_blaster( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *fire_pulseRifle( gentity_t *self, vec3_t start, vec3_t dir );
-gentity_t *fire_luciferCannon( gentity_t *self, vec3_t start, vec3_t dir, int damage, int radius, int speed );
+gentity_t *fire_luciferCannon( gentity_t *self, vec3_t start, vec3_t dir,
+                               int damage, int radius, int speed );
 gentity_t *fire_lockblob( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *fire_paraLockBlob( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *fire_slowBlob( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *fire_bounceBall( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *fire_hive( gentity_t *self, vec3_t start, vec3_t dir );
-gentity_t *fire_portalGun( gentity_t *self, vec3_t start, vec3_t dir, portal_t portal );
+gentity_t *fire_portalGun( gentity_t *self, vec3_t start, vec3_t dir,
+                           portal_t portal, qboolean relativeVelocity );
 gentity_t *launch_grenade( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *launch_grenade2( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *launch_grenade3( gentity_t *self, vec3_t start, vec3_t dir );
