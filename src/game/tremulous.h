@@ -477,7 +477,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define PORTAL_CREATED_REPEAT       200    // repeat period if a portal is created
 #define PORTALGUN_SPEED             8000
 #define PORTALGUN_SIZE              5        // missile bounding box radius
-#define PORTAL_LIFETIME             45000    // max time a portal can exist
+#define PORTAL_LIFETIME             120000   // max time a portal can exist
 
 #define LAUNCHER_PRICE               1500
 #define LAUNCHER_AMMO                4
