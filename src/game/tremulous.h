@@ -484,9 +484,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LCANNON_SPLASH_BATTLESUIT   0.50f    // reduction of damage fraction for luci splash on battlesuits
 
 #define PORTALGUN_PRICE             700
-#define PORTALGUN_REPEAT            1000    // repeat period if a portal isn't created
-#define PORTAL_CREATED_REPEAT       2000    // repeat period if a portal is created
-#define PORTALGUN_SPEED             2000
+#define PORTALGUN_REPEAT            200     // repeat period if a portal isn't created
+#define PORTAL_CREATED_REPEAT       200    // repeat period if a portal is created
+#define PORTALGUN_SPEED             8000
 #define PORTALGUN_SIZE              5        // missile bounding box radius
 #define PORTAL_LIFETIME             45000    // max time a portal can exist
 
