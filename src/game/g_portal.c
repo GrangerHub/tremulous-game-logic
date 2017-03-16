@@ -28,7 +28,40 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 /*
 ===============
+G_Portal_Effect
+
+Cool effects for the portals when they are used or cleared
+===============
+*/
+static void G_Portal_Effect( portal_t portalindex )
+{
+	gentity_t *portal = level.humanPortals.portals[portalindex];
+	gentity_t *effect = G_Spawn( );
+
+	VectorCopy( portal->r.currentOrigin , effect->r.currentOrigin );
+	effect->s.eType = ET_MISSILE;
+	effect->s.weapon = WP_PORTAL_GUN;
+	if( portalindex == PORTAL_RED )
+		effect->s.generic1 = WPM_PRIMARY;
+	else
+		effect->s.generic1 = WPM_SECONDARY;
+
+	effect->s.pos.trType = TR_ACCEL;
+  effect->s.pos.trDuration = PORTALGUN_SPEED * 2;
+  effect->s.pos.trTime = level.time;
+  VectorCopy( effect->r.currentOrigin, effect->s.pos.trBase );
+  VectorScale( portal->s.origin2, PORTALGUN_SPEED, effect->s.pos.trDelta );
+  SnapVector( effect->s.pos.trDelta );      // save net bandwidth
+
+	G_AddEvent( effect, EV_MISSILE_MISS, DirToByte( portal->s.origin2 ) );
+	effect->freeAfterEvent = qtrue;
+	trap_LinkEntity( effect );
+}
+
+/*
+===============
 G_Portal_Clear
+
 Delete a portal
 ===============
 */
@@ -38,6 +71,8 @@ void G_Portal_Clear( portal_t portalindex )
 	if (!self)
 		return;
 
+		
+	G_Portal_Effect( portalindex );
 	level.humanPortals.createTime[ portalindex ] = 0;
 	trap_SetConfigstring( ( CS_HUMAN_PORTAL_CREATETIME + portalindex ),
 												va( "%i", 0 ) );
@@ -48,6 +83,7 @@ void G_Portal_Clear( portal_t portalindex )
 /*
 ===============
 G_Portal_Touch
+
 Send someone over to the other portal.
 ===============
 */
@@ -105,11 +141,14 @@ static void G_Portal_Touch(gentity_t *self, gentity_t *other, trace_t *trace)
 	BG_PlayerStateToEntityState(&other->client->ps, &other->s, qtrue);
 	VectorCopy(other->client->ps.origin, other->r.currentOrigin);
 	trap_LinkEntity(other);
+	for( i = 0; i < PORTAL_NUM; i++ )
+		G_Portal_Effect( i );
 }
 
 /*
 ===============
 G_Portal_Create
+
 This is used to spawn a portal.
 ===============
 */
