@@ -2835,7 +2835,7 @@ void G_RunFrame( int levelTime )
 
     // check if a human portal's lifetime has expired
     if( !level.humanPortals.portals[ i ] )
-      continue;
+      break;
 
     if(  level.humanPortals.lifetime[ i ] <= level.time )
       G_Portal_Clear( i );
