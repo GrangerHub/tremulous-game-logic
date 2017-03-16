@@ -73,7 +73,7 @@ void G_Portal_Clear( portal_t portalindex )
 		return;
 
 		
-	G_Portal_Effect( portalindex, 1.0 );
+	G_Portal_Effect( portalindex, 0.25 );
 	level.humanPortals.createTime[ portalindex ] = 0;
 	trap_SetConfigstring( ( CS_HUMAN_PORTAL_CREATETIME + portalindex ),
 												va( "%i", 0 ) );
@@ -143,7 +143,7 @@ static void G_Portal_Touch(gentity_t *self, gentity_t *other, trace_t *trace)
 	VectorCopy(other->client->ps.origin, other->r.currentOrigin);
 	trap_LinkEntity(other);
 	for( i = 0; i < PORTAL_NUM; i++ )
-		G_Portal_Effect( i, 0.25 );
+		G_Portal_Effect( i, 0.0625 );
 }
 
 /*
