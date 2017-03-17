@@ -1677,15 +1677,17 @@ static void UI_DrawInfoPane( menuItem_t *item, rectDef_t *rect, float text_x, fl
 
       if( value < 1 )
       {
-        s = va( "%s\n\n%s",
+        s = va( "%s\n\n%s\n\nWorth: %d",
                 BG_ClassConfig( item->v.pclass )->humanName,
-                BG_Class( item->v.pclass )->info );
+                BG_Class( item->v.pclass )->info,
+                BG_Class( item->v.pclass )->cost );
       }
       else
       {
-        s = va( "%s\n\n%s\n\nFrags: %d",
+        s = va( "%s\n\n%s\n\nWorth: %d\nEvos: %d",
                 BG_ClassConfig( item->v.pclass )->humanName,
                 BG_Class( item->v.pclass )->info,
+                BG_Class( item->v.pclass )->cost,
                 value );
       }
 
