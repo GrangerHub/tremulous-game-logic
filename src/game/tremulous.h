@@ -442,11 +442,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define HUMAN_WDMG_MODIFIER         1.0f
 #define HDM(d)                      ((int)((float)d*HUMAN_WDMG_MODIFIER))
 
-#define BLASTER_REPEAT              600
+#define BLASTER_REPEAT              300
 #define BLASTER_K_SCALE             1.0f
 #define BLASTER_SPREAD              200
 #define BLASTER_SPEED               1400
-#define BLASTER_DMG                 HDM(10)
+#define BLASTER_DMG                 HDM(5)
 #define BLASTER_SIZE                5
 #define BLASTER_LIFETIME            10000
 
