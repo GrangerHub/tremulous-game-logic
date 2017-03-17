@@ -1721,7 +1721,7 @@ int BG_ClassCanEvolveFromTo( class_t fclass,
                              int gameIsInWarmup,
                              qboolean devMode )
 {
-  int cost;
+  int tcost, netCost;
 
   if( tclass == PCL_NONE ||
       fclass == PCL_NONE ||
@@ -1736,22 +1736,21 @@ int BG_ClassCanEvolveFromTo( class_t fclass,
   if( gameIsInWarmup )
     return 0;
 
-  cost = ( BG_Class( tclass )->cost * ALIEN_CREDITS_PER_KILL ) -
+  netCost = ( tcost = BG_Class( tclass )->cost * ALIEN_CREDITS_PER_KILL ) -
          ( BG_Class( fclass )->cost * ALIEN_CREDITS_PER_KILL );
 
-  if( cost > 0 )
+  if( netCost > 0 )
   {
-    if( cost > credits )
+    if( netCost > credits )
     {
       // Can't afford this class
       return -1;
     }
     else
-      return cost;
+      return netCost;
   }
 
-  //devolving is free
-  return 0;
+  return tcost > 0 ? 1 : 0;
 }
 
 /*
