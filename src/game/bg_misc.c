@@ -1202,27 +1202,28 @@ static const classAttributes_t bg_classList[ ] =
     qtrue,                                          //qboolean enabled;
     "builder",                                      //char    *name;
     "Responsible for building and maintaining all the alien structures. "
-      "Has a weak melee slash attack.",
+      "Has a weak melee slash attack, as well as a spit attack that "
+      "slows victums. Additionally has the ability to crawl on walls.",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
     ABUILDER_HEALTH,                                //int     health;
     0.2f,                                           //float   fallDamage;
     ABUILDER_REGEN,                                 //float   regenRate;
     SCA_TAKESFALLDAMAGE|SCA_FOVWARPS|
     SCA_WALLCLIMBER|SCA_ALIENSENSE|
-    SCA_REGEN|SCA_CANHOVEL, //int    abilities;
+    SCA_REGEN|SCA_CANHOVEL,                         //int    abilities;
     WP_ABUILD,                                      //weapon_t startWeapon;
-    95.0f,                                          //float   buildDist;
+    105.0f,                                         //float   buildDist;
     110,                                            //int     fov;
     0.001f,                                         //float   bob;
     2.0f,                                           //float   bobCycle;
     4.5f,                                           //float   landBob;
-    150,                                            //int     steptime;
+    100,                                            //int     steptime;
     ABUILDER_SPEED,                                 //float   speed;
     10.0f,                                          //float   acceleration;
     1.0f,                                           //float   airAcceleration;
     6.0f,                                           //float   friction;
     100.0f,                                         //float   stopSpeed;
-    195.0f,                                         //float   jumpMagnitude;
+    270.0f,                                         //float   jumpMagnitude;
     1.0f,                                           //float   knockbackScale;
     CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
@@ -1233,7 +1234,7 @@ static const classAttributes_t bg_classList[ ] =
   },
   {
     PCL_ALIEN_BUILDER0_UPG,                         //int     number;
-    qtrue,                                          //qboolean enabled;
+    qfalse,                                         //qboolean enabled;
     "builderupg",                                   //char    *name;
     "Similar to the base Granger, except that in addition to "
       "being able to build structures it has a spit attack "
@@ -1244,7 +1245,7 @@ static const classAttributes_t bg_classList[ ] =
     ABUILDER_UPG_REGEN,                             //float   regenRate;
     SCA_TAKESFALLDAMAGE|SCA_FOVWARPS|
     SCA_WALLCLIMBER|SCA_ALIENSENSE|
-    SCA_REGEN, //int  abilities;
+    SCA_REGEN|SCA_CANHOVEL,                         //int  abilities;
     WP_ABUILD2,                                     //weapon_t startWeapon;
     105.0f,                                         //float   buildDist;
     110,                                            //int     fov;
@@ -1257,7 +1258,7 @@ static const classAttributes_t bg_classList[ ] =
     1.0f,                                           //float   airAcceleration;
     6.0f,                                           //float   friction;
     100.0f,                                         //float   stopSpeed;
-    300.0f,                                         //float   jumpMagnitude;
+    270.0f,                                         //float   jumpMagnitude;
     1.0f,                                           //float   knockbackScale;
     CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
@@ -3270,8 +3271,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     ABUILDER_BUILD_REPEAT, //int      repeatRate1;
-    ABUILDER2_CLAW_REPEAT,//int       repeatRate2;
-    ABUILDER2_BLOB_REPEAT,//int       repeatRate3;
+    ABUILDER_CLAW_REPEAT,//int       repeatRate2;
+    ABUILDER_BLOB_REPEAT,//int       repeatRate3;
     0,                    //int       reloadTime;
     ABUILDER_CLAW_K_SCALE, //float    knockbackScale;
     qtrue,                //qboolean  hasAltMode;
@@ -3287,7 +3288,7 @@ static const weaponAttributes_t bg_weapons[ ] =
         TR_GRAVITY,         //trType_t      trType;
         ABUILDER_BLOB_LIFETIME,  //int       missileLifeTime;
         0,                  //int       missileSize;
-        ABUILDER2_BLOB_SPEED//int       missileLaunchSpeed;
+        ABUILDER_BLOB_SPEED//int       missileLaunchSpeed;
       },
       {                     //impactPrediction_t impactPrediction[1];
         WPM_NONE,           //weaponMode_t  weaponMode;

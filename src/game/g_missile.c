@@ -966,10 +966,7 @@ gentity_t *fire_slowBlob( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->s.generic1 = self->s.generic1; //weaponMode
   bolt->r.ownerNum = self->s.number;
   bolt->parent = self;
-  if( self->s.weapon == WP_ABUILD )
-    bolt->damage = ABUILDER_BLOB_DMG;
-  else
-    bolt->damage = ABUILDER2_BLOB_DMG;
+  bolt->damage = ABUILDER_BLOB_DMG;
   bolt->splashDamage = 0;
   bolt->splashRadius = 0;
   bolt->methodOfDeath = MOD_SLOWBLOB;
@@ -980,9 +977,7 @@ gentity_t *fire_slowBlob( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->s.pos.trType = TR_GRAVITY;
   bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;   // move a bit on the very first frame
   VectorCopy( start, bolt->s.pos.trBase );
-  VectorScale( dir,
-               ( self->s.weapon == WP_ABUILD ? ABUILDER_BLOB_SPEED : ABUILDER2_BLOB_SPEED ),
-               bolt->s.pos.trDelta );
+  VectorScale( dir, ABUILDER_BLOB_SPEED, bolt->s.pos.trDelta );
 
   if( self->client )
     BG_ModifyMissleLaunchVelocity( self->s.pos.trDelta, self->client->ps.speed, bolt->s.pos.trDelta,
