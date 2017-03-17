@@ -1153,7 +1153,6 @@ typedef struct
   int       chargeStaminaMax;
   int       chargeStaminaRestore;
 
-  int       children[ 3 ];
   int       cost;
   int       value;
 
@@ -1400,7 +1399,7 @@ qboolean                    BG_ClassHasAbility( class_t class, int ability );
 int                         BG_ClassCanEvolveFromTo( class_t fclass,
                                                      class_t tclass,
                                                      int credits,
-                                                     int alienStage, int num,
+                                                     int alienStage,
                                                      int gameIsInWarmup,
                                                      qboolean devMode );
 qboolean                    BG_AlienCanEvolve( class_t class, int credits,

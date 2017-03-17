@@ -1192,7 +1192,6 @@ static const classAttributes_t bg_classList[ ] =
     1.0f,                                           //float   knockbackScale;
     CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
-    { PCL_NONE, PCL_NONE, PCL_NONE },               //int     children[ 3 ];
     0,                                              //int     cost;
     0,                                              //int     value;
     qfalse                                          //int     stackable;
@@ -1227,7 +1226,6 @@ static const classAttributes_t bg_classList[ ] =
     1.0f,                                           //float   knockbackScale;
     CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
-    { PCL_ALIEN_BUILDER0_UPG, PCL_ALIEN_LEVEL0, PCL_NONE }, //int  children[ 3 ];
     ABUILDER_COST,                                  //int     cost;
     ABUILDER_VALUE,                                 //int     value;
     qfalse                                          //int     stackable;
@@ -1262,7 +1260,6 @@ static const classAttributes_t bg_classList[ ] =
     1.0f,                                           //float   knockbackScale;
     CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
-    { PCL_ALIEN_LEVEL0, PCL_NONE, PCL_NONE },       //int     children[ 3 ];
     ABUILDER_UPG_COST,                              //int     cost;
     ABUILDER_UPG_VALUE,                             //int     value;
     qfalse                                          //int     stackable;
@@ -1294,7 +1291,6 @@ static const classAttributes_t bg_classList[ ] =
     2.0f,                                           //float   knockbackScale;
     CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
-    { PCL_ALIEN_LEVEL1, PCL_NONE, PCL_NONE },       //int     children[ 3 ];
     LEVEL0_COST,                                    //int     cost;
     LEVEL0_VALUE,                                   //int     value;
     qfalse                                          //int     stackable;
@@ -1328,7 +1324,6 @@ static const classAttributes_t bg_classList[ ] =
     1.2f,                                           //float   knockbackScale;
     CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
-    { PCL_ALIEN_LEVEL2, PCL_ALIEN_LEVEL1_UPG, PCL_NONE }, //int  children[ 3 ];
     LEVEL1_COST,                                    //int     cost;
     LEVEL1_VALUE,                                   //int     value;
     qfalse                                          //int     stackable;
@@ -1362,7 +1357,6 @@ static const classAttributes_t bg_classList[ ] =
     1.1f,                                           //float   knockbackScale;
     CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
-    { PCL_ALIEN_LEVEL2, PCL_NONE, PCL_NONE },       //int     children[ 3 ];
     LEVEL1_UPG_COST,                                //int     cost;
     LEVEL1_UPG_VALUE,                               //int     value;
     qfalse                                          //int     stackable;
@@ -1394,7 +1388,6 @@ static const classAttributes_t bg_classList[ ] =
     0.8f,                                           //float   knockbackScale;
     CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
-    { PCL_ALIEN_LEVEL3, PCL_ALIEN_LEVEL2_UPG, PCL_ALIEN_SPITFIRE }, //int  children[ 3 ];
     LEVEL2_COST,                                    //int     cost;
     LEVEL2_VALUE,                                   //int     value;
     qfalse                                          //int     stackable;
@@ -1426,7 +1419,6 @@ static const classAttributes_t bg_classList[ ] =
     0.7f,                                           //float   knockbackScale
     CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
-    { PCL_ALIEN_LEVEL3_UPG, PCL_NONE, PCL_NONE }, //int     children[ 3 ];
     LEVEL2_UPG_COST,                                //int     cost;
     LEVEL2_UPG_VALUE,                               //int     value;
     qfalse                                          //int     stackable;
@@ -1459,7 +1451,6 @@ static const classAttributes_t bg_classList[ ] =
     0.7f,                                           //float   knockbackScale;
     SPITFIRE_POUNCE_MAX_STAMINA,                    //int     chargeStaminaMax;
     SPITFIRE_POUNCE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
-    { PCL_ALIEN_LEVEL3, PCL_ALIEN_LEVEL2, PCL_NONE }, //int     children[ 3 ];
     SPITFIRE_COST,                                  //int     cost;
     SPITFIRE_VALUE,                                 //int     value;
     qfalse                                          //int     stackable;
@@ -1492,7 +1483,6 @@ static const classAttributes_t bg_classList[ ] =
     0.5f,                                           //float   knockbackScale;
     CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
-    { PCL_ALIEN_LEVEL4, PCL_ALIEN_LEVEL3_UPG, PCL_ALIEN_LEVEL2 }, //int  children[ 3 ];
     LEVEL3_COST,                                    //int     cost;
     LEVEL3_VALUE,                                   //int     value;
     qfalse                                          //int     stackable;
@@ -1525,7 +1515,6 @@ static const classAttributes_t bg_classList[ ] =
     0.4f,                                           //float   knockbackScale;
     CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
-    { PCL_ALIEN_LEVEL4, PCL_ALIEN_LEVEL2_UPG, PCL_NONE }, //int     children[ 3 ];
     LEVEL3_UPG_COST,                                //int     cost;
     LEVEL3_UPG_VALUE,                               //int     value;
     qtrue                                           //int     stackable;
@@ -1559,7 +1548,6 @@ static const classAttributes_t bg_classList[ ] =
     0.1f,                                           //float   knockbackScale;
     CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
-    { PCL_NONE, PCL_NONE, PCL_NONE },               //int     children[ 3 ];
     LEVEL4_COST,                                    //int     cost;
     LEVEL4_VALUE,                                   //int     value;
     qtrue                                           //int     stackable;
@@ -1590,7 +1578,6 @@ static const classAttributes_t bg_classList[ ] =
     1.0f,                                           //float   knockbackScale;
     CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
-    { PCL_NONE, PCL_NONE, PCL_NONE },               //int     children[ 3 ];
     0,                                              //int     cost;
     ALIEN_CREDITS_PER_KILL,                         //int     value;
     qfalse                                          //int     stackable;
@@ -1621,7 +1608,6 @@ static const classAttributes_t bg_classList[ ] =
     1.0f,                                           //float   knockbackScale;
     CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
-    { PCL_NONE, PCL_NONE, PCL_NONE },               //int     children[ 3 ];
     0,                                              //int     cost;
     ALIEN_CREDITS_PER_KILL,                         //int     value;
     qtrue                                           //int     stackable;
@@ -1732,53 +1718,40 @@ BG_ClassCanEvolveFromTo
 int BG_ClassCanEvolveFromTo( class_t fclass,
                              class_t tclass,
                              int credits, int stage,
-                             int cost,
                              int gameIsInWarmup,
                              qboolean devMode )
 {
-  int i, j, best, value;
+  int cost;
 
-  if( gameIsInWarmup )
-    credits = ALIEN_MAX_CREDITS;
-
-
-
-  if( credits < cost || fclass == PCL_NONE || tclass == PCL_NONE ||
-      fclass == tclass )
+  if( tclass == PCL_NONE ||
+      fclass == PCL_NONE ||
+      fclass == tclass ||
+      tclass == PCL_ALIEN_BUILDER0 ||
+      tclass == PCL_HUMAN ||
+      tclass == PCL_HUMAN_BSUIT ||
+      !BG_ClassIsAllowed( tclass, devMode ) ||
+      !BG_ClassAllowedInStage( tclass, stage, gameIsInWarmup ) )
     return -1;
 
-  for( i = 0; i < bg_numClasses; i++ )
+  if( gameIsInWarmup )
+    return 0;
+
+  cost = ( BG_Class( tclass )->cost * ALIEN_CREDITS_PER_KILL ) -
+         ( BG_Class( fclass )->cost * ALIEN_CREDITS_PER_KILL );
+
+  if( cost > 0 )
   {
-    if( bg_classList[ i ].number != fclass )
-      continue;
-
-    best = credits + 1;
-    for( j = 0; j < 3; j++ )
+    if( cost > credits )
     {
-      int thruClass, evolveCost;
-      
-      thruClass = bg_classList[ i ].children[ j ];
-      if( thruClass == PCL_NONE || !BG_ClassAllowedInStage( thruClass, stage, gameIsInWarmup ) ||
-          !BG_ClassIsAllowed( thruClass, devMode ) )
-        continue;
-
-      evolveCost = BG_Class( thruClass )->cost * ALIEN_CREDITS_PER_KILL;
-      if( thruClass == tclass )
-        value = cost + evolveCost;
-      else
-        value = BG_ClassCanEvolveFromTo( thruClass, tclass, credits, stage,
-                                         cost + evolveCost,
-                                         gameIsInWarmup, devMode );
-
-      if( value >= 0 && value < best )
-        best = value;
+      // Can't afford this class
+      return -1;
     }
-
-    return best <= credits ? (gameIsInWarmup ? 0 : best) : -1;
+    else
+      return cost;
   }
 
-  Com_Printf( S_COLOR_YELLOW "WARNING: fallthrough in BG_ClassCanEvolveFromTo\n" );
-  return -1;
+  //devolving is free
+  return 0;
 }
 
 /*
@@ -1796,12 +1769,11 @@ qboolean BG_AlienCanEvolve( class_t class, int credits, int stage,
     if( bg_classList[ i ].number != class )
       continue;
 
-    for( j = 0; j < 3; j++ )
+    for( j = 0; j < bg_numClasses; j++ )
     {
-      tclass = bg_classList[ i ].children[ j ];
-      if( tclass != PCL_NONE && BG_ClassAllowedInStage( tclass, stage, gameIsInWarmup ) &&
-          BG_ClassIsAllowed( tclass, devMode ) &&
-          (gameIsInWarmup || credits >= BG_Class( tclass )->cost * ALIEN_CREDITS_PER_KILL ) )
+      tclass = bg_classList[ j ].number;
+      if( 0 <= BG_ClassCanEvolveFromTo( class, tclass, credits, stage,
+                                        gameIsInWarmup, devMode ) )
         return qtrue;
     }
 

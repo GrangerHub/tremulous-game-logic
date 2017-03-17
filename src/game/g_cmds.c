@@ -2197,7 +2197,7 @@ void Cmd_Class_f( gentity_t *ent )
 
       cost = BG_ClassCanEvolveFromTo( currentClass, newClass,
                                       ent->client->pers.credit,
-                                      g_alienStage.integer, 0,
+                                      g_alienStage.integer,
                                       IS_WARMUP, g_cheats.integer );
 
       if( G_RoomForClassChange( ent, newClass, infestOrigin ) )

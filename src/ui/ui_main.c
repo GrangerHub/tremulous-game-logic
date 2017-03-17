@@ -1670,7 +1670,7 @@ static void UI_DrawInfoPane( menuItem_t *item, rectDef_t *rect, float text_x, fl
 
     case INFOTYPE_CLASS:
       value = ( BG_ClassCanEvolveFromTo( class, item->v.pclass, credits,
-                                         UI_GetCurrentAlienStage(), 0,
+                                         UI_GetCurrentAlienStage(),
                                          UI_GameIsInWarmup( ),
                                          UI_DevModeIsOn( ) ) +
                 ALIEN_CREDITS_PER_KILL - 1 ) / ALIEN_CREDITS_PER_KILL;
@@ -2561,7 +2561,7 @@ static void UI_LoadAlienUpgrades( void )
 
   for( i = PCL_NONE + 1; i < PCL_NUM_CLASSES; i++ )
   {
-    if( BG_ClassCanEvolveFromTo( class, i, credits, stage, 0,
+    if( BG_ClassCanEvolveFromTo( class, i, credits, stage,
                                  UI_GameIsInWarmup( ),
                                  UI_DevModeIsOn( ) ) >= 0 )
     {
