@@ -1738,17 +1738,7 @@ int BG_ClassCanEvolveFromTo( class_t fclass,
   int i, j, best, value;
 
   if( gameIsInWarmup )
-  {
-    if( tclass == PCL_HUMAN ||
-        tclass == PCL_HUMAN_BSUIT ||
-        tclass == PCL_ALIEN_BUILDER0 )
-      return -1;
-
-    if (tclass <= fclass)
-      return -1;
-
-    return 0;
-  }
+    credits = ALIEN_MAX_CREDITS;
 
 
 
@@ -1783,7 +1773,7 @@ int BG_ClassCanEvolveFromTo( class_t fclass,
         best = value;
     }
 
-    return best <= credits ? best : -1;
+    return best <= credits ? (gameIsInWarmup ? 0 : best) : -1;
   }
 
   Com_Printf( S_COLOR_YELLOW "WARNING: fallthrough in BG_ClassCanEvolveFromTo\n" );
