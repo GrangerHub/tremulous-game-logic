@@ -483,10 +483,12 @@ static void Give_Upgrade( gentity_t *ent, char *s )
     {
       //add to inventory
       BG_AddUpgradeToInventory( u, ent->client->ps.stats );
-      if( ent->client->ps.stats[ STAT_WEAPON ] == WP_LAUNCHER )
+      if( u == UP_GRENADE &&
+          ent->client->ps.stats[ STAT_WEAPON ] == WP_LAUNCHER )
         ent->client->ps.clips = 1;
         
-    } else if( ent->client->ps.stats[ STAT_WEAPON ] == WP_LAUNCHER &&
+    } else if( u == UP_GRENADE &&
+               ent->client->ps.stats[ STAT_WEAPON ] == WP_LAUNCHER &&
                !BG_WeaponIsFull( ent->client->ps.stats[ STAT_WEAPON ],
                                  ent->client->ps.stats, ent->client->ps.ammo,
                                  ent->client->ps.clips ) )
@@ -2637,6 +2639,7 @@ void Cmd_Buy_f( gentity_t *ent )
     //already got this?
     if( BG_InventoryContainsUpgrade( upgrade, ent->client->ps.stats ) &&
         ( ent->client->ps.stats[ STAT_WEAPON ] != WP_LAUNCHER ||
+          upgrade != UP_GRENADE ||
           BG_WeaponIsFull( ent->client->ps.stats[ STAT_WEAPON ],
                            ent->client->ps.stats, ent->client->ps.ammo,
                            ent->client->ps.clips ) ) )
@@ -2714,10 +2717,12 @@ void Cmd_Buy_f( gentity_t *ent )
       {
         //add to inventory
         BG_AddUpgradeToInventory( upgrade, ent->client->ps.stats );
-        if( ent->client->ps.stats[ STAT_WEAPON ] == WP_LAUNCHER )
+        if( upgrade == UP_GRENADE && 
+            ent->client->ps.stats[ STAT_WEAPON ] == WP_LAUNCHER )
           ent->client->ps.clips = 1;
           
-      } else if( ent->client->ps.stats[ STAT_WEAPON ] == WP_LAUNCHER )
+      } else if( upgrade == UP_GRENADE &&
+                 ent->client->ps.stats[ STAT_WEAPON ] == WP_LAUNCHER )
       {
         ent->client->ps.ammo++;
         G_ForceWeaponChange( ent, ent->client->ps.weapon );
