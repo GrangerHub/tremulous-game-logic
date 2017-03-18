@@ -3142,7 +3142,16 @@ static void PM_Weapon( void )
   if( pm->ps->weaponstate == WEAPON_RELOADING )
   {
     pm->ps->clips--;
-    pm->ps->ammo = BG_Weapon( pm->ps->weapon )->maxAmmo;
+    if( pm->ps->weapon != WP_LAUNCHER )
+      pm->ps->ammo = BG_Weapon( pm->ps->weapon )->maxAmmo;
+    else
+    {
+      pm->ps->ammo++;
+      //remove grenade
+      if( BG_UpgradeIsActive( UP_GRENADE, pm->ps->stats ) )
+        BG_DeactivateUpgrade( UP_GRENADE, pm->ps->stats );
+      BG_RemoveUpgradeFromInventory( UP_GRENADE, pm->ps->stats );
+    }
 
     if( BG_Weapon( pm->ps->weapon )->usesEnergy &&
         BG_InventoryContainsUpgrade( UP_BATTPACK, pm->ps->stats ) )
@@ -3157,8 +3166,8 @@ static void PM_Weapon( void )
 
   // check for end of clip
   if( !BG_Weapon( pm->ps->weapon )->infiniteAmmo &&
-      ( pm->ps->ammo <= 0 || ( pm->ps->pm_flags & PMF_WEAPON_RELOAD ) ) &&
-      pm->ps->clips > 0 )
+      ( ( pm->ps->ammo <= 0 && pm->ps->weapon != WP_LAUNCHER ) ||
+      ( pm->ps->pm_flags & PMF_WEAPON_RELOAD ) ) && pm->ps->clips > 0 )
   {
     pm->ps->pm_flags &= ~PMF_WEAPON_RELOAD;
     pm->ps->weaponstate = WEAPON_RELOADING;
