@@ -557,13 +557,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define PORTAL_LIFETIME             120000   // max time a portal can exist
 
 #define LAUNCHER_PRICE               1800
-#define LAUNCHER_AMMO                4
-#define LAUNCHER_MAXCLIPS            2
+#define LAUNCHER_AMMO                6
+#define LAUNCHER_MAXCLIPS            0
 #define LAUNCHER_REPEAT              1000
 #define LAUNCHER_K_SCALE             1.0f
 #define LAUNCHER_RELOAD              2000
-#define LAUNCHER_DAMAGE              HDM(150)
-#define LAUNCHER_RADIUS              100
+#define LAUNCHER_DAMAGE              GRENADE_DAMAGE
+#define LAUNCHER_RADIUS              GRENADE_RANGE
 #define LAUNCHER_SPEED               1200
 
 #define HBUILD_PRICE                0
