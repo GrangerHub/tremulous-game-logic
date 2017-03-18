@@ -247,7 +247,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL4_COST                 10
 
 #define SPITFIRE_SPEED                1.3f
-#define SPITFIRE_VALUE                AVM(4 * ALIEN_CREDITS_PER_KILL))
+#define SPITFIRE_VALUE                AVM(4 * ALIEN_CREDITS_PER_KILL)
 #define SPITFIRE_HEALTH               AHM(125)
 #define SPITFIRE_REGEN                (0.03f * SPITFIRE_HEALTH)
 #define SPITFIRE_COST                 4
