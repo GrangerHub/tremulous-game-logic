@@ -2978,8 +2978,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "grenade_launcher",   //char      *name;
     "Grenade Launcher",   //char      *humanName;
-    "Launches grenade rounds that explode on impact. "
-    "Grenades sold seperately.",
+    "Launches grenade rounds that explode on impact.",
     LAUNCHER_AMMO,        //int       maxAmmo;
     LAUNCHER_MAXCLIPS,    //int       maxClips;
     qfalse,               //int       infiniteAmmo;
@@ -4172,7 +4171,7 @@ qboolean BG_WeaponIsFull( weapon_t weapon, int stats[ ], int ammo, int clips )
   if( BG_InventoryContainsUpgrade( UP_BATTPACK, stats ) )
     maxAmmo = (int)( (float)maxAmmo * BATTPACK_MODIFIER );
 
-  return ( maxAmmo == ammo ) && ( maxClips <= clips );
+  return ( maxAmmo == ammo ) && ( maxClips == clips );
 }
 
 /*

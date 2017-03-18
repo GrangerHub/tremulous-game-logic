@@ -459,41 +459,15 @@ static void Give_Gun( gentity_t *ent, char *s )
     return;
 
   ent->client->ps.stats[ STAT_WEAPON ] = w;
-  if( w != WP_LAUNCHER )
-  {
-    ent->client->ps.ammo = BG_Weapon( w )->maxAmmo;
-    ent->client->ps.clips = BG_Weapon( w )->maxClips;
-  } else
-  {
-    // the grenade launcher starts empty, and is loaded by buying grenades
-    ent->client->ps.ammo = 0;
-    if( BG_InventoryContainsUpgrade( UP_GRENADE, ent->client->ps.stats ) )
-      ent->client->ps.clips = 1;
-    else
-      ent->client->ps.clips = 0;
-  }
+  ent->client->ps.ammo = BG_Weapon( w )->maxAmmo;
+  ent->client->ps.clips = BG_Weapon( w )->maxClips;
   G_ForceWeaponChange( ent, w );
 }
 
 static void Give_Upgrade( gentity_t *ent, char *s )
 {
     int u = BG_UpgradeByName( s )->number;
-
-    if( !BG_InventoryContainsUpgrade( u, ent->client->ps.stats ) )
-    {
-      //add to inventory
-      BG_AddUpgradeToInventory( u, ent->client->ps.stats );
-      if( ent->client->ps.stats[ STAT_WEAPON ] == WP_LAUNCHER )
-        ent->client->ps.clips = 1;
-        
-    } else if( ent->client->ps.stats[ STAT_WEAPON ] == WP_LAUNCHER &&
-               !BG_WeaponIsFull( ent->client->ps.stats[ STAT_WEAPON ],
-                                 ent->client->ps.stats, ent->client->ps.ammo,
-                                 ent->client->ps.clips ) )
-    {
-      ent->client->ps.ammo++;
-      G_ForceWeaponChange( ent, ent->client->ps.weapon );
-    }
+    BG_AddUpgradeToInventory( u, ent->client->ps.stats );
 }
 
 /*
@@ -2598,19 +2572,8 @@ void Cmd_Buy_f( gentity_t *ent )
       return;
 
     ent->client->ps.stats[ STAT_WEAPON ] = weapon;
-    if( weapon != WP_LAUNCHER )
-    {
-      ent->client->ps.ammo = BG_Weapon( weapon )->maxAmmo;
-      ent->client->ps.clips = BG_Weapon( weapon )->maxClips;
-    } else
-    {
-      // the grenade launcher starts empty, and is loaded by buying grenades
-      ent->client->ps.ammo = 0;
-      if( BG_InventoryContainsUpgrade( UP_GRENADE, ent->client->ps.stats ) )
-        ent->client->ps.clips = 1;
-      else
-        ent->client->ps.clips = 0;
-    }
+    ent->client->ps.ammo = BG_Weapon( weapon )->maxAmmo;
+    ent->client->ps.clips = BG_Weapon( weapon )->maxClips;
 
     if( BG_Weapon( weapon )->usesEnergy &&
         BG_InventoryContainsUpgrade( UP_BATTPACK, ent->client->ps.stats ) )
@@ -2635,11 +2598,7 @@ void Cmd_Buy_f( gentity_t *ent )
     }
 
     //already got this?
-    if( BG_InventoryContainsUpgrade( upgrade, ent->client->ps.stats ) &&
-        ( ent->client->ps.stats[ STAT_WEAPON ] != WP_LAUNCHER ||
-          BG_WeaponIsFull( ent->client->ps.stats[ STAT_WEAPON ],
-                           ent->client->ps.stats, ent->client->ps.ammo,
-                           ent->client->ps.clips ) ) )
+    if( BG_InventoryContainsUpgrade( upgrade, ent->client->ps.stats ) )
     {
       G_TriggerMenu( ent->client->ps.clientNum, MN_H_ITEMHELD );
       return;
@@ -2710,18 +2669,8 @@ void Cmd_Buy_f( gentity_t *ent )
       else if( upgrade == UP_JETPACK )
        ent->client->ps.stats[ STAT_FUEL ] = JETPACK_FUEL_FULL;
 
-      if( !BG_InventoryContainsUpgrade( upgrade, ent->client->ps.stats ) )
-      {
-        //add to inventory
-        BG_AddUpgradeToInventory( upgrade, ent->client->ps.stats );
-        if( ent->client->ps.stats[ STAT_WEAPON ] == WP_LAUNCHER )
-          ent->client->ps.clips = 1;
-          
-      } else if( ent->client->ps.stats[ STAT_WEAPON ] == WP_LAUNCHER )
-      {
-        ent->client->ps.ammo++;
-        G_ForceWeaponChange( ent, ent->client->ps.weapon );
-      }
+      //add to inventory
+      BG_AddUpgradeToInventory( upgrade, ent->client->ps.stats );
     }
 
     if( upgrade == UP_BATTPACK )
@@ -2806,12 +2755,6 @@ void Cmd_Sell_f( gentity_t *ent )
 
       //add to funds
       G_AddCreditToClient( ent->client, (short)BG_Weapon( weapon )->price, qfalse );
-      if( ent->client->ps.stats[ STAT_WEAPON ] == WP_LAUNCHER &&
-          ent->client->ps.ammo > 0 )
-        G_AddCreditToClient( ent->client,
-                             (short)( BG_Upgrade( UP_GRENADE )->price * ent->client->ps.ammo ),
-                             qfalse );
-      
     }
 
     //if we have this weapon selected, force a new selection
@@ -2850,10 +2793,6 @@ void Cmd_Sell_f( gentity_t *ent )
 
       if( upgrade == UP_BATTPACK )
         G_GiveClientMaxAmmo( ent, qtrue );
-
-      if( upgrade == UP_GRENADE &&
-          ent->client->ps.stats[ STAT_WEAPON ] == WP_LAUNCHER )
-        ent->client->ps.clips = 0;
 
       //add to funds
       G_AddCreditToClient( ent->client, (short)BG_Upgrade( upgrade )->price, qfalse );

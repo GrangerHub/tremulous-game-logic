@@ -1605,24 +1605,6 @@ static int UI_DevModeIsOn( void )
 }
 
 /*
-==============
-UI_RoomForUpgrade
-==============
-*/
-static qboolean UI_RoomForUpgrade( int upgrade )
-{
-  char buffer[ MAX_TOKEN_CHARS ];
-
-  if( upgrade != UP_GRENADE || !( uiInfo.weapons & ( 1 << WP_LAUNCHER ) ) )
-    return !( uiInfo.upgrades & ( 1 << upgrade ) );
-
-  trap_Cvar_VariableStringBuffer( "ui_ammo", buffer, sizeof( buffer ) );
-
-  return !( atoi( buffer ) >= BG_Weapon( WP_LAUNCHER )->maxAmmo &&
-            ( uiInfo.upgrades & ( 1 << UP_GRENADE ) ) );
-}
-
-/*
 ===============
 UI_GetCurrentAlienStage
 ===============
@@ -2480,7 +2462,7 @@ static void UI_LoadHumanArmouryBuys( void )
         BG_UpgradeAllowedInStage( i, stage, UI_GameIsInWarmup( ) ) &&
         BG_UpgradeIsAllowed( i, UI_DevModeIsOn( ) ) &&
         !( BG_Upgrade( i )->slots & slots ) &&
-        UI_RoomForUpgrade( i ) )
+        !( uiInfo.upgrades & ( 1 << i ) ) )
     {
       uiInfo.humanArmouryBuyList[ j ].text = BG_Upgrade( i )->humanName;
       uiInfo.humanArmouryBuyList[ j ].cmd =
