@@ -3147,8 +3147,14 @@ static void PM_Weapon( void )
   }
 
   // check for out of ammo
-  if( !pm->ps->ammo && !pm->ps->clips && !BG_Weapon( pm->ps->weapon )->infiniteAmmo )
+  if( !pm->ps->ammo &&
+      ( ( !pm->ps->clips ) ||
+        ( pm->ps->weapon == WP_LAUNCHER &&
+          pm->ps->weaponstate != WEAPON_RELOADING ) ) &&
+      !BG_Weapon( pm->ps->weapon )->infiniteAmmo )
   {
+    
+
     if( attack1 ||
         ( BG_Weapon( pm->ps->weapon )->hasAltMode && attack2 ) ||
         ( BG_Weapon( pm->ps->weapon )->hasThirdMode && attack3 ) )
@@ -3164,7 +3170,7 @@ static void PM_Weapon( void )
   }
 
   //done reloading so give em some ammo
-  if( pm->ps->weaponstate == WEAPON_RELOADING )
+  if( pm->ps->weaponstate == WEAPON_RELOADING  )
   {
     pm->ps->clips--;
     if( pm->ps->weapon != WP_LAUNCHER )
