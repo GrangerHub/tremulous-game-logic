@@ -223,28 +223,28 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL2_COST                 2
 
 #define LEVEL2_UPG_SPEED            1.2f
-#define LEVEL2_UPG_VALUE            AVM(5 * ALIEN_CREDITS_PER_KILL)
+#define LEVEL2_UPG_VALUE            AVM(4 * ALIEN_CREDITS_PER_KILL)
 #define LEVEL2_UPG_HEALTH           AHM(175)
 #define LEVEL2_UPG_REGEN            (0.03f * LEVEL2_UPG_HEALTH)
-#define LEVEL2_UPG_COST             5
+#define LEVEL2_UPG_COST             4
 
 #define LEVEL3_SPEED                1.1f
-#define LEVEL3_VALUE                AVM(5 * ALIEN_CREDITS_PER_KILL)
+#define LEVEL3_VALUE                AVM(3 * ALIEN_CREDITS_PER_KILL)
 #define LEVEL3_HEALTH               AHM(200)
 #define LEVEL3_REGEN                (0.03f * LEVEL3_HEALTH)
-#define LEVEL3_COST                 5
+#define LEVEL3_COST                 3
 
 #define LEVEL3_UPG_SPEED            1.1f
-#define LEVEL3_UPG_VALUE            AVM(8 * ALIEN_CREDITS_PER_KILL)
+#define LEVEL3_UPG_VALUE            AVM(5 * ALIEN_CREDITS_PER_KILL)
 #define LEVEL3_UPG_HEALTH           AHM(250)
 #define LEVEL3_UPG_REGEN            (0.03f * LEVEL3_UPG_HEALTH)
-#define LEVEL3_UPG_COST             8
+#define LEVEL3_UPG_COST             5
 
 #define LEVEL4_SPEED                1.2f
-#define LEVEL4_VALUE                AVM(10 * ALIEN_CREDITS_PER_KILL)
+#define LEVEL4_VALUE                AVM(8 * ALIEN_CREDITS_PER_KILL)
 #define LEVEL4_HEALTH               AHM(400)
 #define LEVEL4_REGEN                (0.025f * LEVEL4_HEALTH)
-#define LEVEL4_COST                 10
+#define LEVEL4_COST                 8
 
 #define SPITFIRE_SPEED                1.3f
 #define SPITFIRE_VALUE                AVM(4 * ALIEN_CREDITS_PER_KILL)
@@ -782,7 +782,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define CHARGE_STAMINA_MAX          10000
 #define CHARGE_STAMINA_RESTORE      15
 
-#define DEFAULT_FREEKILL_PERIOD     "30" //seconds
+#define DEFAULT_FREEKILL_PERIOD     "20" //seconds
 #define FREEKILL_ALIEN              ALIEN_CREDITS_PER_KILL
 #define FREEKILL_HUMAN              LEVEL0_VALUE
 
