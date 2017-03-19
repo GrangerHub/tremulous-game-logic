@@ -280,7 +280,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define CREEP_MODIFIER              0.5f
 #define CREEP_ARMOUR_MODIFIER       0.75f
 #define CREEP_SCALEDOWN_TIME        3000
-#define ALIEN_CREEP_BLAST_DELAY     1500
+#define ALIEN_CREEP_BLAST_DELAY     2000
 
 #define PCLOUD_MODIFIER             0.5f
 #define PCLOUD_ARMOUR_MODIFIER      0.75f
@@ -632,7 +632,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define REACTOR_BASESIZE            1000
 #define REPEATER_BASESIZE           500
-#define HUMAN_DETONATION_DELAY      1500
+#define HUMAN_DETONATION_DELAY      2500
 
 #define HSPAWN_BP                   10
 #define HSPAWN_BT                   10000
