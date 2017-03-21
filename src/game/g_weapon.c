@@ -93,10 +93,6 @@ void G_GiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo )
                        ent->client->ps.clips ) )
     return;
 
-  // the grenage launcher gets its ammo by buying nades
-  if( weapon == WP_LAUNCHER && !g_cheats.integer )
-    return;
-
   maxAmmo = BG_Weapon( weapon )->maxAmmo;
 
   // Apply battery pack modifier
@@ -107,8 +103,7 @@ void G_GiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo )
   }
 
   ent->client->ps.ammo = maxAmmo;
-  if( weapon != WP_LAUNCHER )
-    ent->client->ps.clips = BG_Weapon( weapon )->maxClips;
+  ent->client->ps.clips = BG_Weapon( weapon )->maxClips;
 
   G_ForceWeaponChange( ent, ent->client->ps.weapon );
 
