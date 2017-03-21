@@ -2533,7 +2533,8 @@ void Cmd_Buy_f( gentity_t *ent )
     }
 
     //can afford this?
-    if( !IS_WARMUP && ( BG_Weapon( weapon )->price > (short)ent->client->pers.credit ) )
+    if( !IS_WARMUP && ( BG_TotalPriceForWeapon( weapon ) >
+                        (short)ent->client->pers.credit ) )
     {
       G_TriggerMenu( ent->client->ps.clientNum, MN_H_NOFUNDS );
       return;
@@ -2564,7 +2565,8 @@ void Cmd_Buy_f( gentity_t *ent )
     ent->client->ps.stats[ STAT_MISC ] = 0;
 
     //subtract from funds
-    G_AddCreditToClient( ent->client, -(short)BG_Weapon( weapon )->price, qfalse );
+    G_AddCreditToClient( ent->client, -(short)BG_TotalPriceForWeapon( weapon ),
+                         qfalse );
   }
   else if( upgrade != UP_NONE )
   {
@@ -2724,6 +2726,17 @@ void Cmd_Sell_f( gentity_t *ent )
 
       //add to funds
       G_AddCreditToClient( ent->client, (short)BG_Weapon( weapon )->price, qfalse );
+      if( BG_Weapon( weapon )->roundPrice && !BG_Weapon( weapon )->usesEnergy )
+      {
+        int totalAmmo = ent->client->ps.ammo +
+                        ( ent->client->ps.clips *
+                          BG_Weapon( weapon )->maxAmmo );
+
+        G_AddCreditToClient( ent->client,
+                             (short)( totalAmmo *
+                                      BG_Weapon( weapon )->roundPrice),
+                             qfalse );
+      }
     }
 
     //if we have this weapon selected, force a new selection

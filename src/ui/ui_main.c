@@ -1692,7 +1692,7 @@ static void UI_DrawInfoPane( menuItem_t *item, rectDef_t *rect, float text_x, fl
       break;
 
     case INFOTYPE_WEAPON:
-      value = BG_Weapon( item->v.weapon )->price;
+      value = BG_TotalPriceForWeapon( item->v.weapon );
 
       if( value == 0 )
       {
@@ -1711,7 +1711,19 @@ static void UI_DrawInfoPane( menuItem_t *item, rectDef_t *rect, float text_x, fl
       break;
 
     case INFOTYPE_UPGRADE:
-      value = BG_Upgrade( item->v.upgrade )->price;
+      if( item->v.upgrade == UP_AMMO )
+      {
+        int i;
+
+        for( i = WP_NONE + 1; i < WP_NUM_WEAPONS; i++ )
+        {
+          if( uiInfo.weapons & ( 1 << i ) )
+            break;
+        }
+
+        value = BG_Weapon( i )->roundPrice;
+      } else
+        value = BG_Upgrade( item->v.upgrade )->price;
 
       if( value == 0 )
       {
@@ -1721,9 +1733,10 @@ static void UI_DrawInfoPane( menuItem_t *item, rectDef_t *rect, float text_x, fl
       }
       else
       {
-        s = va( "%s\n\n%s\n\nCredits: %d",
+        s = va( "%s\n\n%s\n\nCredits%s: %d",
                 BG_Upgrade( item->v.upgrade )->humanName,
                 BG_Upgrade( item->v.upgrade )->info,
+                ( item->v.upgrade == UP_AMMO ) ? " Per Round" : "",
                 value );
       }
 
