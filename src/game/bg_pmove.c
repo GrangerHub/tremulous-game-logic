@@ -3147,14 +3147,8 @@ static void PM_Weapon( void )
   }
 
   // check for out of ammo
-  if( !pm->ps->ammo &&
-      ( ( !pm->ps->clips ) ||
-        ( pm->ps->weapon == WP_LAUNCHER &&
-          pm->ps->weaponstate != WEAPON_RELOADING ) ) &&
-      !BG_Weapon( pm->ps->weapon )->infiniteAmmo )
+  if( !pm->ps->ammo && !pm->ps->clips && !BG_Weapon( pm->ps->weapon )->infiniteAmmo )
   {
-    
-
     if( attack1 ||
         ( BG_Weapon( pm->ps->weapon )->hasAltMode && attack2 ) ||
         ( BG_Weapon( pm->ps->weapon )->hasThirdMode && attack3 ) )
@@ -3170,19 +3164,10 @@ static void PM_Weapon( void )
   }
 
   //done reloading so give em some ammo
-  if( pm->ps->weaponstate == WEAPON_RELOADING  )
+  if( pm->ps->weaponstate == WEAPON_RELOADING )
   {
     pm->ps->clips--;
-    if( pm->ps->weapon != WP_LAUNCHER )
-      pm->ps->ammo = BG_Weapon( pm->ps->weapon )->maxAmmo;
-    else
-    {
-      pm->ps->ammo++;
-      //remove grenade
-      if( BG_UpgradeIsActive( UP_GRENADE, pm->ps->stats ) )
-        BG_DeactivateUpgrade( UP_GRENADE, pm->ps->stats );
-      BG_RemoveUpgradeFromInventory( UP_GRENADE, pm->ps->stats );
-    }
+    pm->ps->ammo = BG_Weapon( pm->ps->weapon )->maxAmmo;
 
     if( BG_Weapon( pm->ps->weapon )->usesEnergy &&
         BG_InventoryContainsUpgrade( UP_BATTPACK, pm->ps->stats ) )
@@ -3200,8 +3185,8 @@ static void PM_Weapon( void )
 
   // check for end of clip
   if( !BG_Weapon( pm->ps->weapon )->infiniteAmmo &&
-      ( ( pm->ps->ammo <= 0 && pm->ps->weapon != WP_LAUNCHER ) ||
-      ( pm->ps->pm_flags & PMF_WEAPON_RELOAD ) ) && pm->ps->clips > 0 )
+      ( pm->ps->ammo <= 0 || ( pm->ps->pm_flags & PMF_WEAPON_RELOAD ) ) &&
+      pm->ps->clips > 0 )
   {
     pm->ps->pm_flags &= ~PMF_WEAPON_RELOAD;
     pm->ps->weaponstate = WEAPON_RELOADING;

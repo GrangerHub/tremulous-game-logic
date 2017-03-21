@@ -1249,7 +1249,7 @@ typedef struct
   weapon_t  number;
 
   qboolean  enabled;
-  int       price;
+  int       price; // doesn't include the price for ammo
   int       stages;
 
   int       slots;
@@ -1260,6 +1260,7 @@ typedef struct
 
   int       maxAmmo;
   int       maxClips;
+  int       roundPrice; // doesn't apply to energy weapons
   qboolean  infiniteAmmo;
   qboolean  usesEnergy;
 
@@ -1373,6 +1374,7 @@ const weaponAttributes_t    *BG_Weapon( weapon_t weapon );
 qboolean                    BG_WeaponAllowedInStage( weapon_t weapon,
                                                      stage_t stage,
                                                      int gameIsInWarmup );
+int                         BG_TotalPriceForWeapon( weapon_t weapon );
 
 const upgradeAttributes_t   *BG_UpgradeByName( const char *name );
 const upgradeAttributes_t   *BG_Upgrade( upgrade_t upgrade );
