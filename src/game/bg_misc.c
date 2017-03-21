@@ -2105,6 +2105,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    0,                    //int       roundPrice;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     LEVEL0_BITE_REPEAT,   //int       repeatRate1;
@@ -2148,6 +2149,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    0,                    //int       roundPrice;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     LEVEL1_CLAW_REPEAT,   //int       repeatRate1;
@@ -2191,6 +2193,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    0,                    //int       roundPrice;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     LEVEL1_CLAW_U_REPEAT, //int       repeatRate1;
@@ -2234,6 +2237,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    0,                    //int       roundPrice;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     LEVEL2_CLAW_REPEAT,   //int       repeatRate1;
@@ -2277,6 +2281,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    0,                    //int       roundPrice;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     LEVEL2_CLAW_U_REPEAT, //int       repeatRate1;
@@ -2320,6 +2325,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     0,                    //int       maxAmmo; 
     0,                    //int       maxClips;
+    0,                    //int       roundPrice;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     SPITFIRE_ZAP_REPEAT,  //int       repeatRate1;
@@ -2363,6 +2369,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    0,                    //int       roundPrice;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     LEVEL3_CLAW_REPEAT,   //int       repeatRate1;
@@ -2406,6 +2413,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     4,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    0,                    //int       roundPrice;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     LEVEL3_CLAW_U_REPEAT, //int       repeatRate1;
@@ -2449,6 +2457,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    0,                    //int       roundPrice;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     LEVEL4_CLAW_REPEAT,   //int       repeatRate1;
@@ -2492,6 +2501,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    0,                    //int       roundPrice;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     BLASTER_REPEAT,       //int       repeatRate1;
@@ -2536,6 +2546,7 @@ static const weaponAttributes_t bg_weapons[ ] =
       "reload system.",
     RIFLE_CLIPSIZE,       //int       maxAmmo;
     RIFLE_MAXCLIPS,       //int       maxClips;
+    0,                    //int       roundPrice;
     qfalse,               //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     RIFLE_REPEAT,         //int       repeatRate1;
@@ -2581,6 +2592,7 @@ static const weaponAttributes_t bg_weapons[ ] =
       "close range.",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    0,                    //int       roundPrice;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     PAINSAW_REPEAT,       //int       repeatRate1;
@@ -2626,6 +2638,7 @@ static const weaponAttributes_t bg_weapons[ ] =
       "effective.",
     SHOTGUN_SHELLS,       //int       maxAmmo;
     SHOTGUN_MAXCLIPS,     //int       maxClips;
+    0,                    //int       roundPrice;
     qfalse,               //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     SHOTGUN_REPEAT,       //int       repeatRate1;
@@ -2670,6 +2683,7 @@ static const weaponAttributes_t bg_weapons[ ] =
       "small packets of energy.",
     LASGUN_AMMO,          //int       maxAmmo;
     0,                    //int       maxClips;
+    0,                    //int       roundPrice;
     qfalse,               //int       infiniteAmmo;
     qtrue,                //int       usesEnergy;
     LASGUN_REPEAT,        //int       repeatRate1;
@@ -2715,6 +2729,7 @@ static const weaponAttributes_t bg_weapons[ ] =
       "payload, but fires slowly.",
     MDRIVER_CLIPSIZE,     //int       maxAmmo;
     MDRIVER_MAXCLIPS,     //int       maxClips;
+    0,                    //int       roundPrice;
     qfalse,               //int       infiniteAmmo;
     qtrue,                //int       usesEnergy;
     MDRIVER_REPEAT,       //int       repeatRate1;
@@ -2760,6 +2775,7 @@ static const weaponAttributes_t bg_weapons[ ] =
       "inaccurate.",
     CHAINGUN_BULLETS,     //int       maxAmmo;
     0,                    //int       maxClips;
+    0,                    //int       roundPrice;
     qfalse,               //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     CHAINGUN_REPEAT,      //int       repeatRate1;
@@ -2805,6 +2821,7 @@ static const weaponAttributes_t bg_weapons[ ] =
       "effective against static targets.",
     FLAMER_GAS,           //int       maxAmmo;
     0,                    //int       maxClips;
+    0,                    //int       roundPrice;
     qfalse,               //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     FLAMER_REPEAT,        //int       repeatRate1;
@@ -2848,6 +2865,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     "An energy weapon that fires rapid pulses of concentrated energy.",
     PRIFLE_CLIPS,         //int       maxAmmo;
     PRIFLE_MAXCLIPS,      //int       maxClips;
+    0,                    //int       roundPrice;
     qfalse,               //int       infiniteAmmo;
     qtrue,                //int       usesEnergy;
     PRIFLE_REPEAT,        //int       repeatRate1;
@@ -2895,6 +2913,7 @@ static const weaponAttributes_t bg_weapons[ ] =
       "secondary attack is held down simultaneously with the primary attack.",
     LCANNON_AMMO,         //int       maxAmmo;
     0,                    //int       maxClips;
+    0,                    //int       roundPrice;
     qfalse,               //int       infiniteAmmo;
     qtrue,                //int       usesEnergy;
     LCANNON_REPEAT,       //int       repeatRate1;
@@ -2938,6 +2957,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     1,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    0,                    //int       roundPrice;
     qfalse,               //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     GRENADE_REPEAT,       //int       repeatRate1;
@@ -2978,10 +2998,10 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "grenade_launcher",   //char      *name;
     "Grenade Launcher",   //char      *humanName;
-    "Launches grenade rounds that explode on impact. "
-    "Grenades sold seperately.",
+    "Launches grenade rounds that explode on impact.",
     LAUNCHER_AMMO,        //int       maxAmmo;
     LAUNCHER_MAXCLIPS,    //int       maxClips;
+    LAUNCHER_ROUND_PRICE, //int       roundPrice;
     qfalse,               //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     LAUNCHER_REPEAT,      //int       repeatRate1;
@@ -3025,6 +3045,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    0,                    //int       roundPrice;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     500,                  //int       repeatRate1;
@@ -3068,6 +3089,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    0,                    //int       roundPrice;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     500,                  //int       repeatRate1;
@@ -3111,6 +3133,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    0,                    //int       roundPrice;
     qtrue,                //int       infiniteAmmo;
     qtrue,                //int       usesEnergy;
     500,                  //int       repeatRate1;
@@ -3154,6 +3177,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    0,                    //int       roundPrice;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     0,                    //int       repeatRate1;
@@ -3197,6 +3221,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    0,                    //int       roundPrice;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     ABUILDER_BUILD_REPEAT, //int      repeatRate1;
@@ -3240,6 +3265,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    0,                    //int       roundPrice;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     ABUILDER_BUILD_REPEAT, //int      repeatRate1;
@@ -3285,6 +3311,7 @@ static const weaponAttributes_t bg_weapons[ ] =
       "available with new stages.",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    0,                    //int       roundPrice;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     HBUILD_REPEAT,        //int       repeatRate1;
@@ -3325,12 +3352,12 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "portalgun",          //char      *weaponName;
     "Portal Gun",         //char      *humanName;
-    "Teleporting technology scaled into a portable gun. Prmary fire creates "
-     "the blue portal, secondsary fire creates the orange portal. Third fire "
-     "clears both portals.",
-    0,                    //int       maxAmmo;
-    0,                    //int       maxClips;
-    qtrue,                //int       infiniteAmmo;
+    "Wormhole technology packed into a portable gun. Primary fire "
+     "creates the blue portal, secondary fire creates the red portal.",
+    PORTALGUN_AMMO,       //int       maxAmmo;
+    PORTALGUN_MAXCLIPS,   //int       maxClips;
+    PORTALGUN_ROUND_PRICE,//int       roundPrice;
+    qfalse,               //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     PORTALGUN_REPEAT,     //int       repeatRate1;
     PORTALGUN_REPEAT,     //int       repeatRate2;
@@ -3408,6 +3435,23 @@ qboolean BG_WeaponAllowedInStage( weapon_t weapon, stage_t stage,
                                   int gameIsInWarmup )
 {
   return qtrue;
+}
+
+/*
+==============
+BG_TotalPriceForWeapon
+
+Returns the base price of a weapon plus the cost of full ammo (if ammo isn't free)
+==============
+*/
+int BG_TotalPriceForWeapon( weapon_t weapon  )
+{
+  if( !BG_Weapon( weapon )->roundPrice || BG_Weapon( weapon )->usesEnergy )
+    return BG_Weapon( weapon )->price;
+
+  return ( BG_Weapon( weapon )->roundPrice * BG_Weapon( weapon )->maxAmmo *
+           ( BG_Weapon( weapon )->maxClips + 1 ) ) + BG_Weapon( weapon )->price;
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -4172,7 +4216,7 @@ qboolean BG_WeaponIsFull( weapon_t weapon, int stats[ ], int ammo, int clips )
   if( BG_InventoryContainsUpgrade( UP_BATTPACK, stats ) )
     maxAmmo = (int)( (float)maxAmmo * BATTPACK_MODIFIER );
 
-  return ( maxAmmo == ammo ) && ( maxClips <= clips );
+  return ( maxAmmo == ammo ) && ( maxClips == clips );
 }
 
 /*
@@ -4449,7 +4493,14 @@ int BG_GetValueOfPlayer( playerState_t *ps )
     }
 
     if( ps->stats[ STAT_WEAPON ] != WP_NONE )
+    {
+      int totalAmmo = ps->ammo +
+                      ( ps->clips * BG_Weapon( ps->stats[ STAT_WEAPON ] )->maxAmmo );
+
       worth += BG_Weapon( ps->stats[ STAT_WEAPON ] )->price;
+      if( !BG_Weapon( ps->stats[ STAT_WEAPON ] )->usesEnergy )
+        worth += totalAmmo * BG_Weapon( ps->stats[ STAT_WEAPON ] )->roundPrice;
+    }
   }
 
   return worth;

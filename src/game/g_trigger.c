@@ -1131,7 +1131,7 @@ void trigger_ammo_touch( gentity_t *self, gentity_t *other, trace_t *trace )
 
   if( ( other->client->ps.ammo + self->damage ) > maxAmmo )
   {
-    if( other->client->ps.clips < maxClips && weapon != WP_LAUNCHER )
+    if( other->client->ps.clips < maxClips )
     {
       other->client->ps.clips++;
       other->client->ps.ammo = 1;

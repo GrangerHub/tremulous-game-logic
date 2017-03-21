@@ -2380,9 +2380,6 @@ void ClientThink_real( gentity_t *ent )
     BG_DeactivateUpgrade( UP_GRENADE, client->ps.stats );
     BG_RemoveUpgradeFromInventory( UP_GRENADE, client->ps.stats );
 
-    if( client->ps.stats[ STAT_WEAPON ] == WP_LAUNCHER )
-      client->ps.clips = 0;
-
     //M-M-M-M-MONSTER HACK
     ent->s.weapon = WP_GRENADE;
     FireWeapon( ent );
