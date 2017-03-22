@@ -636,18 +636,24 @@ launch_grenade3
 Used by the grenade launcher
 =================
 */
-gentity_t *launch_grenade3( gentity_t *self, vec3_t start, vec3_t dir )
+gentity_t *launch_grenade3( gentity_t *self, vec3_t start, vec3_t dir,
+                            qboolean impact )
 {
   gentity_t *bolt;
 
   VectorNormalize(dir);
 
   bolt = G_Spawn();
-  bolt->classname = "grenade2";
   bolt->nextthink = level.time + 5000;
   bolt->think = G_ExplodeMissile;
   bolt->s.eType = ET_MISSILE;
   bolt->s.weapon = WP_GRENADE;
+  if( !impact )
+  {
+    bolt->classname = "grenade";
+    bolt->flags |= FL_BOUNCE_HALF;
+  } else
+    bolt->classname = "grenade2";
   bolt->s.generic1 = WPM_PRIMARY; //weaponMode
   bolt->r.ownerNum = self->s.number;
   bolt->parent = self;

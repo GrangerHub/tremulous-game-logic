@@ -473,6 +473,7 @@ static void CG_HumanText( char *text, playerState_t *ps )
       case WP_SHOTGUN:
       case WP_FLAMER:
       case WP_LAUNCHER:
+      case WP_PORTAL_GUN:
         Q_strcat( text, MAX_TUTORIAL_TEXT,
             va( "Find an Armoury and press %s for more ammo\n",
               CG_KeyNameForCommand( "buy ammo" ) ) );
@@ -502,12 +503,23 @@ static void CG_HumanText( char *text, playerState_t *ps )
       case WP_CHAINGUN:
       case WP_PULSE_RIFLE:
       case WP_FLAMER:
-      case WP_LAUNCHER:
         Q_strcat( text, MAX_TUTORIAL_TEXT,
             va( "Press %s to fire the %s\n",
               CG_KeyNameForCommand( "+attack" ),
               BG_Weapon( ps->weapon )->humanName ) );
         break;
+
+        
+      case WP_LAUNCHER:
+      Q_strcat( text, MAX_TUTORIAL_TEXT,
+          va( "Press %s to launch an impact grenade\n",
+            CG_KeyNameForCommand( "+attack" ) ) );
+
+            
+      Q_strcat( text, MAX_TUTORIAL_TEXT,
+          va( "Press %s to launch a timed grenade\n",
+            CG_KeyNameForCommand( "+button5" ) ) );
+      break;
 
       case WP_MASS_DRIVER:
         Q_strcat( text, MAX_TUTORIAL_TEXT,

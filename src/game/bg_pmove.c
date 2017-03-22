@@ -3241,7 +3241,7 @@ static void PM_Weapon( void )
       break;
 
     case WP_LAUNCHER:
-      if (!attack1 )
+      if (!attack1 && !attack2 )
       {
         pm->ps->weaponTime = 0;
         pm->ps->weaponstate = WEAPON_READY;
