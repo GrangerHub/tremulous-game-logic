@@ -2326,6 +2326,9 @@ void HSpawn_Blast( gentity_t *self )
   G_RewardAttackers( self );
   // turn into an explosion
   self->s.eType = ET_EVENTS + EV_HUMAN_BUILDABLE_EXPLOSION;
+  // ensure that the entity isn't marked as spotted, so that the explosion effect
+  // doesn't occur from a player
+  self->s.eFlags &= ~EF_SCAN_SPOTTED;
   // respawn the buildable in next think in warmup
   // and attacker was a player
   if( IS_WARMUP && self->enemy->client &&
