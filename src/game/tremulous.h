@@ -467,6 +467,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define GRENADE_SPEED               400.0f
 #define GRENADE_SIZE                3.0f        // missile bounding box
 #define GRENADE_LIFETIME            5000
+#define GRENADE_SPLASH_BATTLESUIT   0.25f  // reduction of damage fraction for
+                                          //grenade nade splash on battlesuits
 
 #define SHOTGUN_PRICE               200
 #define SHOTGUN_SHELLS              8
