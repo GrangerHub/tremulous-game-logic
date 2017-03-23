@@ -651,9 +651,9 @@ GRENADE LAUNCHER
 ======================================================================
 */
 
-void launcherFire( gentity_t *ent )
+void launcherFire( gentity_t *ent, qboolean impact )
 {
-  launch_grenade3( ent, muzzle, forward );
+  launch_grenade3( ent, muzzle, forward, impact );
 }
 
 /*
@@ -1682,6 +1682,10 @@ void FireWeapon2( gentity_t *ent )
       PGChargeFire( ent, qtrue );
       break;
 
+    case WP_LAUNCHER:
+      launcherFire( ent, qfalse );
+      break;
+
     case WP_ALEVEL2_UPG:
       areaLev2ZapFire( ent );
       break;
@@ -1784,7 +1788,7 @@ void FireWeapon( gentity_t *ent )
       throwGrenade( ent );
       break;
     case WP_LAUNCHER:
-      launcherFire(ent);
+      launcherFire(ent, qtrue);
       break;
 
     case WP_LOCKBLOB_LAUNCHER:
