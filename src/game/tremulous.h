@@ -565,7 +565,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LAUNCHER_AMMO                6
 #define LAUNCHER_MAXCLIPS            0
 #define LAUNCHER_ROUND_PRICE         GRENADE_PRICE
-#define LAUNCHER_REPEAT              1000
+#define LAUNCHER_REPEAT              2000
 #define LAUNCHER_K_SCALE             1.0f
 #define LAUNCHER_RELOAD              2000
 #define LAUNCHER_DAMAGE              GRENADE_DAMAGE

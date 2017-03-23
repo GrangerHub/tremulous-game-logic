@@ -1164,7 +1164,8 @@ gentity_t *fire_portalGun( gentity_t *self, vec3_t start, vec3_t dir,
                            portal_t portal, qboolean relativeVelocity );
 gentity_t *launch_grenade( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *launch_grenade2( gentity_t *self, vec3_t start, vec3_t dir );
-gentity_t *launch_grenade3( gentity_t *self, vec3_t start, vec3_t dir );
+gentity_t *launch_grenade3( gentity_t *self, vec3_t start, vec3_t dir,
+                            qboolean impact );
 
 //
 // g_mover.c

@@ -2998,18 +2998,20 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "grenade_launcher",   //char      *name;
     "Grenade Launcher",   //char      *humanName;
-    "Launches grenade rounds that explode on impact.",
+    "Has a primary fire that launches grenades that "
+    "explode on impact, and a secondary fire that "
+    "launches timed grenades.",
     LAUNCHER_AMMO,        //int       maxAmmo;
     LAUNCHER_MAXCLIPS,    //int       maxClips;
     LAUNCHER_ROUND_PRICE, //int       roundPrice;
     qfalse,               //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     LAUNCHER_REPEAT,      //int       repeatRate1;
-    0,                    //int       repeatRate2;
+    LAUNCHER_REPEAT,      //int       repeatRate2;
     0,                    //int       repeatRate3;
     LAUNCHER_RELOAD,      //int       reloadTime;
     LAUNCHER_K_SCALE,     //float     knockbackScale;
-    qfalse,               //qboolean  hasAltMode;
+    qtrue,                //qboolean  hasAltMode;
     qfalse,               //qboolean  hasThirdMode;
     qfalse,               //qboolean  canZoom;
     90.0f,                //float     zoomFov;
