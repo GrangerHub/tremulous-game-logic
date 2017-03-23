@@ -546,6 +546,19 @@ gentity_t *fire_luciferCannon( gentity_t *self, vec3_t start, vec3_t dir,
 
 /*
 =================
+grenade_die
+
+=================
+*/
+static void grenade_die( gentity_t *self, gentity_t *inflictor,
+                         gentity_t *attacker, int damage, int mod )
+{
+  self->nextthink = level.time;
+  self->think = G_ExplodeMissile;
+}
+
+/*
+=================
 launch_grenade
 
 =================
@@ -573,6 +586,9 @@ gentity_t *launch_grenade( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->methodOfDeath = MOD_GRENADE;
   bolt->splashMethodOfDeath = MOD_GRENADE;
   G_SetClipmask( bolt, MASK_SHOT );
+  bolt->takedamage = qtrue;
+  bolt->health = GRENADE_HEALTH;
+  bolt->die = grenade_die;
   bolt->target_ent = NULL;
   bolt->r.mins[ 0 ] = bolt->r.mins[ 1 ] = bolt->r.mins[ 2 ] = -GRENADE_SIZE;
   bolt->r.maxs[ 0 ] = bolt->r.maxs[ 1 ] = bolt->r.maxs[ 2 ] = GRENADE_SIZE;
@@ -675,7 +691,10 @@ gentity_t *launch_grenade3( gentity_t *self, vec3_t start, vec3_t dir,
   bolt->splashRadius = LAUNCHER_RADIUS;
   bolt->methodOfDeath = MOD_GRENADE_LAUNCHER;
   bolt->splashMethodOfDeath = MOD_GRENADE_LAUNCHER;
-  bolt->clipmask = MASK_SHOT;
+  G_SetClipmask( bolt, MASK_SHOT );
+  bolt->takedamage = qtrue;
+  bolt->health = GRENADE_HEALTH;
+  bolt->die = grenade_die;
   bolt->target_ent = NULL;
   bolt->r.mins[0] = bolt->r.mins[1] = bolt->r.mins[2] = -GRENADE_SIZE;
   bolt->r.maxs[0] = bolt->r.maxs[1] = bolt->r.maxs[2] = GRENADE_SIZE;
