@@ -2645,12 +2645,6 @@ void Cmd_Buy_f( gentity_t *ent )
     if( upgrade == UP_AMMO )
     {
        G_GiveClientMaxAmmo( ent, energyOnly );
-      if( !energyOnly && BG_InventoryContainsUpgrade( UP_JETPACK, ent->client->ps.stats ) &&
-          ent->client->ps.stats[ STAT_FUEL ] < JETPACK_FUEL_FULL )
-      {
-        G_AddEvent( ent, EV_JETPACK_REFUEL, 0) ;
-        ent->client->ps.stats[ STAT_FUEL ] = JETPACK_FUEL_FULL;
-      }
     }
     else
     {
@@ -2808,7 +2802,20 @@ void Cmd_Sell_f( gentity_t *ent )
         G_GiveClientMaxAmmo( ent, qtrue );
 
       //add to funds
-      G_AddCreditToClient( ent->client, (short)BG_Upgrade( upgrade )->price, qfalse );
+      if( upgrade == UP_JETPACK &&
+          ent->client->ps.stats[ STAT_FUEL ] < JETPACK_FUEL_FULL )
+      {
+        int price;
+
+        // reduce the amount of credits returned from selling a jet that isn't full
+        price = (int)( ( (float)BG_Upgrade( upgrade )->price ) *
+                       ( ( 1.0f +
+                           ( 3.0f * ( (float)ent->client->ps.stats[ STAT_FUEL ] ) /
+                                    ( (float)JETPACK_FUEL_FULL ) ) ) ) / 4.0f );
+        G_AddCreditToClient( ent->client, (short)price, qfalse );
+      } else
+        G_AddCreditToClient( ent->client, (short)BG_Upgrade( upgrade )->price,
+                             qfalse );
     }
   }
   else if( !Q_stricmp( s, "upgrades" ) )

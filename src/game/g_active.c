@@ -858,17 +858,31 @@ void ClientTimerActions( gentity_t *ent, int msec )
       }
     }
 
-    //use fuel
-    if( BG_InventoryContainsUpgrade( UP_JETPACK, ent->client->ps.stats ) &&
-        BG_UpgradeIsActive( UP_JETPACK, ent->client->ps.stats ) &&
-        ent->client->ps.stats[ STAT_FUEL ] > 0 )
+    // jet fuel
+    if( BG_InventoryContainsUpgrade( UP_JETPACK, ent->client->ps.stats ) )
     {
-      ent->client->ps.stats[ STAT_FUEL ] -= JETPACK_FUEL_USAGE;
-      if( ent->client->ps.stats[ STAT_FUEL ] <= 0 )
+      if( BG_UpgradeIsActive( UP_JETPACK, ent->client->ps.stats ) )
       {
-        ent->client->ps.stats[ STAT_FUEL ] = 0;
-        BG_DeactivateUpgrade( UP_JETPACK, client->ps.stats );
-        BG_AddPredictableEventToPlayerstate( EV_JETPACK_DEACTIVATE, 0, &client->ps );
+        if( ent->client->ps.stats[ STAT_FUEL ] > 0 )
+        {
+          // use fuel
+          ent->client->ps.stats[ STAT_FUEL ] -= JETPACK_FUEL_USAGE;
+          if( ent->client->ps.stats[ STAT_FUEL ] <= 0 )
+          {
+            ent->client->ps.stats[ STAT_FUEL ] = 0;
+            BG_DeactivateUpgrade( UP_JETPACK, client->ps.stats );
+            BG_AddPredictableEventToPlayerstate( EV_JETPACK_DEACTIVATE, 0, &client->ps );
+          }
+        } 
+      } else if( ent->client->ps.stats[ STAT_FUEL ] < JETPACK_FUEL_FULL &&
+                 client->ps.groundEntityNum != ENTITYNUM_NONE &&
+                 G_Reactor( ) &&
+                 g_entities[ client->ps.groundEntityNum ].s.eType != ET_PLAYER )
+      {
+        // recharge fuel
+        ent->client->ps.stats[ STAT_FUEL ] += JETPACK_FUEL_RECHARGE;
+        if( ent->client->ps.stats[ STAT_FUEL ] > JETPACK_FUEL_FULL )
+          ent->client->ps.stats[ STAT_FUEL ] = JETPACK_FUEL_FULL;
       }
     }
 
