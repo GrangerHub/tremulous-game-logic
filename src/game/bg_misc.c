@@ -3531,7 +3531,7 @@ static const upgradeAttributes_t bg_upgrades[ ] =
       "to reach spots.",
     "icons/iconu_jetpack",
     qtrue,                  //qboolean  purchasable;
-    qtrue,                  //qboolean  usable;
+    qfalse,                  //qboolean  usable;
     TEAM_HUMANS             //team_t    team;
   },
   {

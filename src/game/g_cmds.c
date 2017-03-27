@@ -2472,6 +2472,9 @@ void Cmd_ToggleItem_f( gentity_t *ent )
   }
   else if( BG_InventoryContainsUpgrade( upgrade, ent->client->ps.stats ) )
   {
+    if( upgrade == UP_JETPACK )
+      return;
+
     if( BG_UpgradeIsActive( upgrade, ent->client->ps.stats ) )
       BG_DeactivateUpgrade( upgrade, ent->client->ps.stats );
     else

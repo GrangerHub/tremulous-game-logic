@@ -596,14 +596,16 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define BATTPACK_MODIFIER           1.5f //modifier for extra energy storage available
 
 #define JETPACK_PRICE               425
-#define JETPACK_FLOAT_SPEED         128.0f //up movement speed
+#define JETPACK_FLOAT_SPEED         200.0f //up movement speed
 #define JETPACK_SINK_SPEED          192.0f //down movement speed
 #define JETPACK_DISABLE_TIME        1000 //time to disable the jetpack when player damaged
 #define JETPACK_DISABLE_CHANCE      0.3f
 #define JETPACK_FUEL_FULL           7500 //can't exceed 32767
 #define JETPACK_FUEL_LOW            1500
 #define JETPACK_FUEL_USAGE          8 //every 100ms
-#define JETPACK_FUEL_JUMP           150
+#define JETPACK_ACT_BOOST_FUEL_USE  ( JETPACK_FUEL_USAGE * 2 )
+#define JETPACK_ACT_BOOST_TIME      750
+#define JETPACK_ACT_BOOST_SPEED     440.0f
 #define JETPACK_FUEL_RECHARGE       2 // every 100ms
 
 #define BSUIT_PRICE                 800

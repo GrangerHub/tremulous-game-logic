@@ -451,9 +451,8 @@ static float PM_CmdScale( usercmd_t *cmd, qboolean zFlight )
 
     if( !zFlight )
     {
-      //must have have stamina or a jetpack to jump
-      if( pm->ps->stats[ STAT_STAMINA ] < STAMINA_SLOW_LEVEL + STAMINA_JUMP_TAKE &&
-          ( !BG_InventoryContainsUpgrade( UP_JETPACK, pm->ps->stats ) || pm->ps->stats[ STAT_FUEL ] < JETPACK_FUEL_JUMP ) )
+      //must have stamina to jum
+      if( pm->ps->stats[ STAT_STAMINA ] < STAMINA_SLOW_LEVEL + STAMINA_JUMP_TAKE )
         cmd->upmove = 0;
     }
 
@@ -887,7 +886,6 @@ PM_CheckJump
 static qboolean PM_CheckJump( void )
 {
   vec3_t normal;
-  qboolean jetjump;
   int jumpvel;
 
   if( pm->ps->groundEntityNum == ENTITYNUM_NONE )
@@ -918,7 +916,7 @@ static qboolean PM_CheckJump( void )
   if( BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_STAMINA) &&
       ( pm->ps->stats[ STAT_STAMINA ] < STAMINA_SLOW_LEVEL + STAMINA_JUMP_TAKE ) &&
       ( !BG_InventoryContainsUpgrade( UP_JETPACK, pm->ps->stats ) ||
-        pm->ps->stats[ STAT_FUEL ] < JETPACK_FUEL_JUMP ) )
+        pm->ps->stats[ STAT_FUEL ] < JETPACK_ACT_BOOST_FUEL_USE ) )
   {
     // disable bunny hop
     pm->ps->pm_flags &= ~PMF_ALL_HOP_FLAGS;
@@ -973,17 +971,9 @@ static qboolean PM_CheckJump( void )
   pml.walking = qfalse;
   pm->ps->pm_flags |= PMF_JUMP_HELD;
 
-  jetjump = ( BG_InventoryContainsUpgrade( UP_JETPACK, pm->ps->stats ) &&
-              pm->ps->stats[ STAT_FUEL ] >= JETPACK_FUEL_JUMP );
-
   if( BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_STAMINA) &&
       pm->humanStaminaMode )
-  {
-    if( !jetjump )
-      pm->ps->stats[ STAT_STAMINA ] -= STAMINA_JUMP_TAKE;
-    else
-     pm->ps->stats[ STAT_FUEL ] -= JETPACK_FUEL_JUMP;
-  }
+    pm->ps->stats[ STAT_STAMINA ] -= STAMINA_JUMP_TAKE;
 
 //Alright, let's start the jumping process.
   jumpvel = BG_Class( pm->ps->stats[ STAT_CLASS ] )->jumpMagnitude;
@@ -1017,9 +1007,6 @@ static qboolean PM_CheckJump( void )
   VectorMA( pm->ps->velocity, jumpvel,
             normal, pm->ps->velocity );
 
-  if( jetjump )
-    PM_AddEvent( EV_JETJUMP );
-  else
     PM_AddEvent( EV_JUMP );
 
   if( pm->cmd.forwardmove >= 0 )
@@ -1337,7 +1324,13 @@ static void PM_JetPackMove( void )
     wishvel[ i ] = scale * pml.forward[ i ] * pm->cmd.forwardmove + scale * pml.right[ i ] * pm->cmd.rightmove;
 
   if( pm->cmd.upmove > 0.0f )
-    wishvel[ 2 ] = JETPACK_FLOAT_SPEED;
+  {
+    // give an initial vertical boost when first activating the jet
+    if( pm->ps->persistant[PERS_JUMPTIME] <= JETPACK_ACT_BOOST_TIME )
+      wishvel[ 2 ] = JETPACK_ACT_BOOST_SPEED;
+    else
+      wishvel[ 2 ] = JETPACK_FLOAT_SPEED;
+  }
   else if( pm->cmd.upmove < 0.0f )
     wishvel[ 2 ] = -JETPACK_SINK_SPEED;
   else
@@ -1982,6 +1975,13 @@ static void PM_CheckLadder( void )
   {
     pm->pmext->ladder = qtrue;
     pml.ladder = qtrue;
+
+    if( BG_InventoryContainsUpgrade( UP_JETPACK, pm->ps->stats ) &&
+        BG_UpgradeIsActive( UP_JETPACK, pm->ps->stats ) )
+    {
+      BG_DeactivateUpgrade( UP_JETPACK, pm->ps->stats );
+      pm->ps->pm_type = PM_NORMAL;
+    }
   }
   else
   {
@@ -4362,6 +4362,14 @@ void PmoveSingle( pmove_t *pmove )
     }
 
     pm->ps->pm_flags &= ~PMF_JUMP_HELD;
+
+    // deactivate the jet
+    if( BG_InventoryContainsUpgrade( UP_JETPACK, pm->ps->stats ) &&
+        BG_UpgradeIsActive( UP_JETPACK, pm->ps->stats ) )
+    {
+      BG_DeactivateUpgrade( UP_JETPACK, pm->ps->stats );
+      pm->ps->pm_type = PM_NORMAL;
+    }
   }
 
   // decide if backpedaling animations should be used
@@ -4411,6 +4419,27 @@ void PmoveSingle( pmove_t *pmove )
   PM_CheckDuck( );
 
   PM_CheckLadder( );
+
+  // jet activation
+  if( pm->cmd.upmove >= 10 &&
+      BG_InventoryContainsUpgrade( UP_JETPACK, pm->ps->stats ) &&
+      !BG_UpgradeIsActive( UP_JETPACK, pm->ps->stats ) &&
+      pm->ps->groundEntityNum == ENTITYNUM_NONE &&
+      !(pm->ps->pm_flags & PMF_JUMP_HELD) &&
+      pm->ps->stats[ STAT_FUEL ] > 0 &&
+      pm->ps->pm_type == PM_NORMAL &&
+      !pml.ladder )
+  {
+    BG_ActivateUpgrade( UP_JETPACK, pm->ps->stats );
+    pm->ps->pm_type = PM_JETPACK;
+
+    if( pm->ps->stats[ STAT_FUEL ] >= JETPACK_ACT_BOOST_FUEL_USE )
+    {
+      // give an upwards boost when activating the jet
+      pm->ps->persistant[PERS_JUMPTIME] = 0;
+      PM_AddEvent( EV_JETJUMP );
+    }
+  }
 
   // set groundentity
   PM_GroundTrace( );

@@ -866,14 +866,17 @@ void ClientTimerActions( gentity_t *ent, int msec )
         if( ent->client->ps.stats[ STAT_FUEL ] > 0 )
         {
           // use fuel
-          ent->client->ps.stats[ STAT_FUEL ] -= JETPACK_FUEL_USAGE;
+          if( ent->client->ps.persistant[PERS_JUMPTIME] > JETPACK_ACT_BOOST_TIME )
+            ent->client->ps.stats[ STAT_FUEL ] -= JETPACK_FUEL_USAGE;
+          else
+            ent->client->ps.stats[ STAT_FUEL ] -= JETPACK_ACT_BOOST_FUEL_USE;
           if( ent->client->ps.stats[ STAT_FUEL ] <= 0 )
           {
             ent->client->ps.stats[ STAT_FUEL ] = 0;
             BG_DeactivateUpgrade( UP_JETPACK, client->ps.stats );
             BG_AddPredictableEventToPlayerstate( EV_JETPACK_DEACTIVATE, 0, &client->ps );
           }
-        } 
+        }
       } else if( ent->client->ps.stats[ STAT_FUEL ] < JETPACK_FUEL_FULL &&
                  client->ps.groundEntityNum != ENTITYNUM_NONE &&
                  G_Reactor( ) &&
@@ -2147,8 +2150,6 @@ void ClientThink_real( gentity_t *ent )
   else if( client->ps.stats[ STAT_STATE ] & SS_BLOBLOCKED ||
            client->ps.stats[ STAT_STATE ] & SS_GRABBED )
     client->ps.pm_type = PM_GRABBED;
-  else if( BG_InventoryContainsUpgrade( UP_JETPACK, client->ps.stats ) && BG_UpgradeIsActive( UP_JETPACK, client->ps.stats ) )
-    client->ps.pm_type = PM_JETPACK;
   else if( client->ps.weapon == WP_ASPITFIRE &&
            ent->waterlevel <= 1 &&
            ( ent->s.groundEntityNum == ENTITYNUM_NONE ||
@@ -2157,7 +2158,8 @@ void ClientThink_real( gentity_t *ent )
     // spitfire fly
     client->ps.pm_type = PM_SPITFIRE_FLY;
   }
-  else
+  else if( !BG_InventoryContainsUpgrade( UP_JETPACK, client->ps.stats ) ||
+           !BG_UpgradeIsActive( UP_JETPACK, client->ps.stats ) )
     client->ps.pm_type = PM_NORMAL;
 
   if( ( client->ps.stats[ STAT_STATE ] & SS_GRABBED ) &&

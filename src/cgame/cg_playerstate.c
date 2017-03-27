@@ -326,8 +326,8 @@ void CG_TransitionPlayerState( playerState_t *ps, playerState_t *ops )
     cg.chargeMeterAlpha = 0.0f;
   }
 
-  if( ps->stats[ STAT_FUEL ] < JETPACK_FUEL_JUMP &&
-      ops->stats[ STAT_FUEL ] >= JETPACK_FUEL_JUMP &&
+  if( ps->stats[ STAT_FUEL ] < JETPACK_ACT_BOOST_FUEL_USE &&
+      ops->stats[ STAT_FUEL ] >= JETPACK_ACT_BOOST_FUEL_USE &&
       cg.predictedPlayerEntity.jetPackJumpTime + 1000 > cg.time )
   {
     trap_S_StartSound( NULL, cg.predictedPlayerState.clientNum, CHAN_AUTO, cgs.media.jetpackNoJumpFuelSound );
