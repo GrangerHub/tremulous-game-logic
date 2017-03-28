@@ -2150,6 +2150,9 @@ void ClientThink_real( gentity_t *ent )
   else if( client->ps.stats[ STAT_STATE ] & SS_BLOBLOCKED ||
            client->ps.stats[ STAT_STATE ] & SS_GRABBED )
     client->ps.pm_type = PM_GRABBED;
+  else if( BG_InventoryContainsUpgrade( UP_JETPACK, client->ps.stats ) &&
+           BG_UpgradeIsActive( UP_JETPACK, client->ps.stats ) )
+    client->ps.pm_type = PM_JETPACK;
   else if( client->ps.weapon == WP_ASPITFIRE &&
            ent->waterlevel <= 1 &&
            ( ent->s.groundEntityNum == ENTITYNUM_NONE ||
@@ -2158,8 +2161,7 @@ void ClientThink_real( gentity_t *ent )
     // spitfire fly
     client->ps.pm_type = PM_SPITFIRE_FLY;
   }
-  else if( !BG_InventoryContainsUpgrade( UP_JETPACK, client->ps.stats ) ||
-           !BG_UpgradeIsActive( UP_JETPACK, client->ps.stats ) )
+  else
     client->ps.pm_type = PM_NORMAL;
 
   if( ( client->ps.stats[ STAT_STATE ] & SS_GRABBED ) &&
