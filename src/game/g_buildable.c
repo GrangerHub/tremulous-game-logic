@@ -6080,16 +6080,14 @@ void G_UpdateBuildableRangeMarkers( void )
       }
 
       team = client->pers.teamSelection;
-      if( team != TEAM_NONE )
-      {
-        weaponDisplays = ( BG_InventoryContainsWeapon( WP_HBUILD, client->ps.stats ) ||
-          client->ps.weapon == WP_ABUILD || client->ps.weapon == WP_ABUILD2 );
-      }
+      weaponDisplays = ( BG_InventoryContainsWeapon( WP_HBUILD, client->ps.stats ) ||
+            client->ps.weapon == WP_ABUILD || client->ps.weapon == WP_ABUILD2 );
       wantsToSee = !!( client->pers.buildableRangeMarkerMask & ( 1 << bType ) );
 
-      if( ( team == TEAM_NONE || ( (team == bTeam || ( IS_WARMUP && ( bType == BA_A_SPAWN ||
-          bType == BA_H_REACTOR || bType == BA_H_REPEATER || bType == BA_A_OVERMIND ) ) ) &&
-          weaponDisplays ) ) && wantsToSee )
+      if( ( (team == bTeam || ( IS_WARMUP &&
+          ( bType == BA_A_SPAWN || bType == BA_H_REACTOR ||
+            bType == BA_H_REPEATER || bType == BA_A_OVERMIND ) ) ) &&
+          weaponDisplays ) && wantsToSee )
       {
         if( i >= 32 )
           e->rangeMarker->r.hack.generic1 |= 1 << ( i - 32 );
