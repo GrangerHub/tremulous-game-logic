@@ -82,6 +82,31 @@ void G_Portal_Clear( portal_t portalindex )
 }
 
 /*
+ =================
+portal_destroy_think
+
+A wrapper think function for delayed clearing of a portal
+=================
+*/
+static void portal_destroy_think( gentity_t *self )
+{
+	G_Portal_Clear( self->s.modelindex2 );
+}
+
+/*
+ =================
+portal_die
+
+=================
+*/
+static void portal_die( gentity_t *self, gentity_t *inflictor,
+                         gentity_t *attacker, int damage, int mod )
+{
+  self->nextthink = level.time + 50;
+	self->think = portal_destroy_think;
+}
+
+/*
 ===============
 G_Portal_Touch
 
@@ -169,6 +194,9 @@ void G_Portal_Create(gentity_t *ent, vec3_t origin, vec3_t normal, portal_t port
 	portal->s.modelindex = BA_H_SPAWN;
 	portal->s.modelindex2 = portalindex;
 	portal->s.frame = 3;
+	portal->takedamage = qtrue;
+  portal->health = PORTAL_HEALTH;
+  portal->die = portal_die;
 	VectorCopy(range, portal->r.maxs);
 	VectorScale(range, -1, portal->r.mins);
 	VectorMA(origin, PORTAL_OFFSET, normal, origin);
