@@ -2827,8 +2827,9 @@ void HReactor_Think( gentity_t *self )
     for( i = 0; i < num; i++ )
     {
       enemy = &g_entities[ entityList[ i ] ];
-      if( !enemy->client ||
-          enemy->client->ps.stats[ STAT_TEAM ] != TEAM_ALIENS )
+      if( ( !enemy->client ||
+            enemy->client->ps.stats[ STAT_TEAM ] != TEAM_ALIENS )
+          && enemy->s.eType != ET_TELEPORTAL )
         continue;
       if( enemy->flags & FL_NOTARGET )
         continue;
@@ -3473,7 +3474,7 @@ void HTeslaGen_Think( gentity_t *self )
     VectorAdd( origin, range, maxs );
     VectorSubtract( origin, range, mins );
 
-    // Attack nearby Aliens
+    // Attack nearby Aliens and portals
     num = trap_EntitiesInBox( mins, maxs, entityList, MAX_GENTITIES );
     for( i = 0; i < num; i++ )
     {
@@ -3482,8 +3483,10 @@ void HTeslaGen_Think( gentity_t *self )
       if( self->enemy->flags & FL_NOTARGET )
         continue;
 
-      if( self->enemy->client && self->enemy->health > 0 &&
-          self->enemy->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
+      if( ( ( self->enemy->client &&
+              self->enemy->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS ) ||
+            self->enemy->s.eType == ET_TELEPORTAL ) &&
+          self->enemy->health > 0 &&
           Distance( origin, self->enemy->s.pos.trBase ) <= TESLAGEN_RANGE )
         FireWeapon( self );
     }

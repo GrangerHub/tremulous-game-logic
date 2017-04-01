@@ -889,7 +889,11 @@ void teslaFire( gentity_t *self )
   target[ 2 ] += self->enemy->r.maxs[ 2 ];
 
   // Trace to the target entity
-  trap_Trace( &tr, origin, NULL, NULL, target, self->s.number, MASK_SHOT );
+  if( self->enemy->s.eType != ET_TELEPORTAL )
+    trap_Trace( &tr, origin, NULL, NULL, target, self->s.number, MASK_SHOT );
+  else
+    trap_Trace( &tr, origin, NULL, NULL, target, self->s.number,
+                (MASK_SHOT|CONTENTS_TELEPORTER) );
   if( tr.entityNum != self->enemy->s.number )
     return;
 
@@ -1305,7 +1309,8 @@ static void G_FindLev2ZapChainTargets( zap_t *zap )
     if( ( ( enemy->client &&
             enemy->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS ) ||
           ( enemy->s.eType == ET_BUILDABLE &&
-            BG_Buildable( enemy->s.modelindex )->team == TEAM_HUMANS ) ) &&
+            BG_Buildable( enemy->s.modelindex )->team == TEAM_HUMANS ) ||
+          enemy->s.eType == ET_TELEPORTAL ) &&
         enemy->health > 0 && // only chain to living targets
         distance <= LEVEL2_AREAZAP_CHAIN_RANGE )
     {
@@ -1743,14 +1748,16 @@ void areaLev2ZapFire( gentity_t *ent )
   trace_t   tr;
   gentity_t *traceEnt;
 
-  G_WideTrace( &tr, ent, LEVEL2_AREAZAP_RANGE, LEVEL2_AREAZAP_WIDTH, LEVEL2_AREAZAP_WIDTH, &traceEnt );
+  G_WideTrace( &tr, ent, LEVEL2_AREAZAP_RANGE, LEVEL2_AREAZAP_WIDTH,
+               LEVEL2_AREAZAP_WIDTH, &traceEnt );
 
   if( traceEnt == NULL )
     return;
 
   if( ( traceEnt->client && traceEnt->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS ) ||
       ( traceEnt->s.eType == ET_BUILDABLE &&
-        BG_Buildable( traceEnt->s.modelindex )->team == TEAM_HUMANS ) )
+        BG_Buildable( traceEnt->s.modelindex )->team == TEAM_HUMANS ) || 
+      traceEnt->s.eType == ET_TELEPORTAL )
   {
     G_CreateNewLev2Zap( ent, traceEnt );
   }
