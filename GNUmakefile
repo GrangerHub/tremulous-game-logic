@@ -2200,7 +2200,7 @@ endif
 
 $(B)/$(OUT)/$(SERVERBIN)$(FULLBINEXT): $(Q3DOBJ)
 	$(echo_cmd) "LD $@"
-	$(Q)$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(THREAD_LIBS) $(Q3DOBJ) $(SERVER_LIBS) $(LIBS)
+	$(Q)$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(Q3DOBJ) $(SERVER_LIBS) $(LIBS) -lpthread
 
 
 
