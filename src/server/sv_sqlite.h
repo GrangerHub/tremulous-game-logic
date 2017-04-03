@@ -1,4 +1,4 @@
-#include <sqlite3.h>
+#include "sqlite3.h"
 #include "server.h"
 
 extern sqlite3 *sl;
