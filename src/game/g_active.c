@@ -878,7 +878,6 @@ void ClientTimerActions( gentity_t *ent, int msec )
           }
         }
       } else if( ent->client->ps.stats[ STAT_FUEL ] < JETPACK_FUEL_FULL &&
-                 client->ps.groundEntityNum != ENTITYNUM_NONE &&
                  G_Reactor( ) &&
                  g_entities[ client->ps.groundEntityNum ].s.eType != ET_PLAYER )
       {
