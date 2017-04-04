@@ -1800,12 +1800,6 @@ qboolean CheckPounceAttack( gentity_t *ent )
   if( !( ent->client->ps.pm_flags & PMF_CHARGE ) )
     ent->client->pmext.pouncePayload = 0;
 
-  if(  ent->client->ps.weapon == WP_ASPITFIRE &&
-       ent->client->pmext.pouncePayload > 0 &&
-       level.time > ent->client->pmext.pouncePayloadTime +
-                    SPITFIRE_PAYLOAD_DISCHARGE_TIME )
-    ent->client->pmext.pouncePayload = 0;
-
   // Calculate muzzle point
   AngleVectors( ent->client->ps.viewangles, forward, right, up );
   CalcMuzzlePoint( ent, forward, right, up, muzzle );
@@ -1839,6 +1833,7 @@ qboolean CheckPounceAttack( gentity_t *ent )
     timeMax = SPITFIRE_POUNCE_TIME;
     damage = payload * SPITFIRE_POUNCE_DMG / timeMax;
     ent->client->pmext.pouncePayload = 0;
+    ent->client->pmext.pouncePayloadTime = -1;
     G_Damage( traceEnt, ent, ent, forward, tr.endpos, damage,
 	      DAMAGE_NO_LOCDAMAGE, MOD_SPITFIRE_POUNCE );
   }

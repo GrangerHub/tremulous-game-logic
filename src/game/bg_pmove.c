@@ -4455,6 +4455,17 @@ void PmoveSingle( pmove_t *pmove )
   // Disable dodge
   //PM_CheckDodge( );
 
+  // cancel the spitfire's airpounce
+  if(  pm->ps->weapon == WP_ASPITFIRE &&
+       pm->pmext->pouncePayload > 0 &&
+       ( pm->ps->commandTime > pm->pmext->pouncePayloadTime +
+                               SPITFIRE_PAYLOAD_DISCHARGE_TIME ||
+         pm->ps->speed >= VectorLength( pm->ps->velocity) ) )
+  {
+    pm->pmext->pouncePayload = 0;
+    pm->pmext->pouncePayloadTime = -1;
+  }
+
   if( pm->ps->pm_type == PM_JETPACK )
     PM_JetPackMove( );
   else if( pm->ps->pm_flags & PMF_TIME_WATERJUMP )
