@@ -190,6 +190,8 @@ static void CG_AlienBuilderText( char *text, playerState_t *ps )
   {
     if( buildable > BA_NONE )
     {
+      usercmd_t       cmd;
+
       Q_strcat( text, MAX_TUTORIAL_TEXT,
           va( "Press %s to place the %s\n",
             CG_KeyNameForCommand( "+attack" ),
@@ -199,6 +201,22 @@ static void CG_AlienBuilderText( char *text, playerState_t *ps )
           va( "Press %s to cancel placing the %s\n",
             CG_KeyNameForCommand( "+button5" ),
             BG_Buildable( buildable )->humanName ) );
+
+      trap_GetUserCmd( trap_GetCurrentCmdNumber( ), &cmd );
+
+      if( cmd.buttons & BUTTON_WALKING )
+      {
+        Q_strcat( text, MAX_TUTORIAL_TEXT,
+            va( "Release %s to position the %s relative to you\n",
+              CG_KeyNameForCommand( "+speed" ),
+              BG_Buildable( buildable )->humanName ) );
+      } else
+      {
+        Q_strcat( text, MAX_TUTORIAL_TEXT,
+            va( "Hold down %s to position the %s by line of sight\n",
+              CG_KeyNameForCommand( "+speed" ),
+              BG_Buildable( buildable )->humanName ) );
+      }
     }
     else
     {
@@ -424,6 +442,8 @@ static void CG_HumanCkitText( char *text, playerState_t *ps )
 
   if( buildable > BA_NONE )
   {
+    usercmd_t       cmd;
+
     Q_strcat( text, MAX_TUTORIAL_TEXT,
         va( "Press %s to place the %s\n",
           CG_KeyNameForCommand( "+attack" ),
@@ -433,6 +453,22 @@ static void CG_HumanCkitText( char *text, playerState_t *ps )
         va( "Press %s to cancel placing the %s\n",
           CG_KeyNameForCommand( "+button5" ),
           BG_Buildable( buildable )->humanName ) );
+
+    trap_GetUserCmd( trap_GetCurrentCmdNumber( ), &cmd );
+
+    if( cmd.buttons & BUTTON_WALKING )
+    {
+      Q_strcat( text, MAX_TUTORIAL_TEXT,
+          va( "Release %s to position the %s relative to you\n",
+            CG_KeyNameForCommand( "+speed" ),
+            BG_Buildable( buildable )->humanName ) );
+    } else
+    {
+      Q_strcat( text, MAX_TUTORIAL_TEXT,
+          va( "Hold down %s to position the %s by line of sight\n",
+            CG_KeyNameForCommand( "+speed" ),
+            BG_Buildable( buildable )->humanName ) );
+    }
   }
   else
   {

@@ -4437,38 +4437,56 @@ Find a place to build a buildable
 ===============
 */
 void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
+                                           const usercmd_t *cmd,
                                            const vec3_t mins, const vec3_t maxs,
                                            void (*trace)( trace_t *, const vec3_t, const vec3_t,
                                                           const vec3_t, const vec3_t, int, int ),
                                            vec3_t outOrigin, vec3_t outAngles, trace_t *tr )
 {
   vec3_t  forward, entityOrigin, targetOrigin;
-  vec3_t  angles, playerOrigin, playerNormal;
-  float   buildDist;
+  vec3_t  playerOrigin, playerNormal;
+  float   buildDist = BG_Class( ps->stats[ STAT_CLASS ] )->buildDist;
 
   BG_GetClientNormal( ps, playerNormal );
 
-  VectorCopy( ps->viewangles, angles );
-  VectorCopy( ps->origin, playerOrigin );
-  buildDist = BG_Class( ps->stats[ STAT_CLASS ] )->buildDist;
+  VectorCopy( ps->viewangles, outAngles );
 
-  AngleVectors( angles, forward, NULL, NULL );
-  ProjectPointOnPlane( forward, forward, playerNormal );
-  VectorNormalize( forward );
+  AngleVectors( outAngles, forward, NULL, NULL );
 
-  VectorMA( playerOrigin, buildDist, forward, entityOrigin );
+  // check for LoS buildable placement mode
+  if( cmd->buttons & BUTTON_WALKING )
+  {
+    vec3_t viewOrigin;
 
-  VectorCopy( entityOrigin, targetOrigin );
+    buildDist *= 2.0f;
 
-  //so buildings can be placed facing slopes
-  VectorMA( entityOrigin, 32, playerNormal, entityOrigin );
+    BG_GetClientViewOrigin( ps, viewOrigin );
 
-  //so buildings drop to floor
-  VectorMA( targetOrigin, -128, playerNormal, targetOrigin );
+    VectorMA( viewOrigin, buildDist, forward, targetOrigin );
 
-  (*trace)( tr, entityOrigin, mins, maxs, targetOrigin, ps->clientNum, MASK_PLAYERSOLID );
+    (*trace)( tr, viewOrigin, mins, maxs, targetOrigin, ps->clientNum,
+              MASK_SOLID );
+  } else
+  {
+    VectorCopy( ps->origin, playerOrigin );
+
+    ProjectPointOnPlane( forward, forward, playerNormal );
+    VectorNormalize( forward );
+
+    VectorMA( playerOrigin, buildDist, forward, entityOrigin );
+
+    VectorCopy( entityOrigin, targetOrigin );
+
+    //so buildings can be placed facing slopes
+    VectorMA( entityOrigin, 32, playerNormal, entityOrigin );
+
+    //so buildings drop to floor
+    VectorMA( targetOrigin, -128, playerNormal, targetOrigin );
+
+    (*trace)( tr, entityOrigin, mins, maxs, targetOrigin, ps->clientNum, MASK_PLAYERSOLID );
+  }
+
   VectorCopy( tr->endpos, outOrigin );
-  vectoangles( forward, outAngles );
 }
 
 /*

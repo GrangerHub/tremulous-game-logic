@@ -675,6 +675,7 @@ void CG_GhostBuildable( buildable_t buildable )
 {
   refEntity_t     ent;
   playerState_t   *ps;
+  usercmd_t       cmd;
   vec3_t          angles, entity_origin;
   vec3_t          mins, maxs;
   trace_t         tr;
@@ -688,7 +689,10 @@ void CG_GhostBuildable( buildable_t buildable )
 
   cgs.sublimeMarkedBuildables = qtrue;
 
-  BG_PositionBuildableRelativeToPlayer( ps, mins, maxs, CG_Trace, entity_origin, angles, &tr );
+  trap_GetUserCmd( trap_GetCurrentCmdNumber( ), &cmd );
+
+  BG_PositionBuildableRelativeToPlayer( ps, &cmd, mins, maxs, CG_Trace,
+                                        entity_origin, angles, &tr );
 
   if( cg_rangeMarkerForBlueprint.integer && tr.entityNum != ENTITYNUM_NONE )
     CG_GhostBuildableRangeMarker( buildable, entity_origin, tr.plane.normal );
