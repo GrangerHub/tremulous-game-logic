@@ -471,7 +471,6 @@ Get the number of marked build points from a position
 int G_GetMarkedBuildPoints( playerState_t *ps )
 {
   gentity_t *ent;
-  gentity_t *builder = &g_entities[ ps->clientNum ];
   team_t team = ps->stats[ STAT_TEAM ];
   buildable_t buildable = ( ps->stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT );
   vec3_t            angles;
@@ -487,8 +486,8 @@ int G_GetMarkedBuildPoints( playerState_t *ps )
   if( ( IS_WARMUP || !g_markDeconstruct.integer ) )
     return 0;
 
-  BG_PositionBuildableRelativeToPlayer( ps, &builder->client->pers.cmd, mins,
-                                        maxs, trap_Trace, origin, angles, &tr1 );
+  BG_PositionBuildableRelativeToPlayer( ps, mins, maxs, trap_Trace, origin,
+                                        angles, &tr1 );
 
   for( i = MAX_CLIENTS, ent = g_entities + i; i < level.num_entities; i++, ent++ )
   {
@@ -4615,7 +4614,7 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   vec3_t            angles;
   vec3_t            entity_origin;
   vec3_t            mins, maxs;
-  trace_t           tr1, tr2, tr3;
+  trace_t           tr1, tr2, tr3, tr4;
   itemBuildError_t  reason = IBE_NONE, tempReason;
   gentity_t         *tempent, *powerBuildable;
   float             minNormal;
@@ -4632,10 +4631,14 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
 
   BG_BuildableBoundingBox( buildable, mins, maxs );
 
-  BG_PositionBuildableRelativeToPlayer( ps, &ent->client->pers.cmd, mins, maxs,
-                                        trap_Trace, entity_origin, angles, &tr1 );
-  trap_Trace( &tr2, entity_origin, mins, maxs, entity_origin, ent->s.number, MASK_PLAYERSOLID );
-  trap_Trace( &tr3, ps->origin, NULL, NULL, entity_origin, ent->s.number, MASK_PLAYERSOLID );
+  BG_PositionBuildableRelativeToPlayer( ps, mins, maxs, trap_Trace,
+                                        entity_origin, angles, &tr1 );
+  trap_Trace( &tr2, entity_origin, mins, maxs, entity_origin, ent->s.number,
+              MASK_PLAYERSOLID );
+  trap_Trace( &tr3, ps->origin, NULL, NULL, entity_origin, ent->s.number,
+              MASK_PLAYERSOLID );
+  trap_Trace( &tr4, entity_origin, mins, maxs, entity_origin, -1,
+              MASK_PLAYERSOLID );
 
   VectorCopy( entity_origin, origin );
   *groundEntNum = tr1.entityNum;
@@ -4826,7 +4829,8 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   }
 
   //this item does not fit here
-  if( reason == IBE_NONE && ( tr2.fraction < 1.0f || tr3.fraction < 1.0f ) )
+  if( reason == IBE_NONE &&
+      ( tr2.fraction < 1.0f || tr3.fraction < 1.0f || tr4.startsolid ) )
     reason = IBE_NOROOM;
 
   if( reason != IBE_NONE )

@@ -4437,7 +4437,6 @@ Find a place to build a buildable
 ===============
 */
 void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
-                                           const usercmd_t *cmd,
                                            const vec3_t mins, const vec3_t maxs,
                                            void (*trace)( trace_t *, const vec3_t, const vec3_t,
                                                           const vec3_t, const vec3_t, int, int ),
@@ -4454,7 +4453,7 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
   AngleVectors( outAngles, forward, NULL, NULL );
 
   // check for LoS buildable placement mode
-  if( cmd->buttons & BUTTON_WALKING )
+  if( ps->stats[ STAT_STATE ] & SS_LOS_TOGGLEBIT )
   {
     vec3_t viewOrigin;
 

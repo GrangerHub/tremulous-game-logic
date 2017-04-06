@@ -313,6 +313,7 @@ typedef enum
 #define SS_HOVELING             0x00002000 // indicates if the entity is occupying a hovel
 #define SS_HOVEL_MARKED         0x00004000 // tells if the hovel occupied is marked
 #define SS_GRABBING             0x00008000
+#define SS_LOS_TOGGLEBIT        0x00010000 //Line of Sight positioning for buildables
 
 #define SB_VALID_TOGGLEBIT      0x00004000
 
@@ -1359,7 +1360,6 @@ qboolean  BG_RotateAxis( vec3_t surfNormal, vec3_t inAxis[ 3 ],
 void      BG_GetClientNormal( const playerState_t *ps, vec3_t normal );
 void      BG_GetClientViewOrigin( const playerState_t *ps, vec3_t viewOrigin );
 void      BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
-                                                const usercmd_t *cmd,
                                                 const vec3_t mins, const vec3_t maxs,
                                                 void (*trace)( trace_t *, const vec3_t, const vec3_t,
                                                                const vec3_t, const vec3_t, int, int ),

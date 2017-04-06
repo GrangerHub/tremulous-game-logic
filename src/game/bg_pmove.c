@@ -4395,6 +4395,15 @@ void PmoveSingle( pmove_t *pmove )
     return;
   }
 
+  // check for LoS buildable placement mode
+  if( ( pm->ps->weapon == WP_ABUILD ||
+        pm->ps->weapon == WP_ABUILD2 ||
+        pm->ps->weapon == WP_HBUILD ) &&
+      ( pm->cmd.buttons & BUTTON_WALKING ) )
+    pm->ps->stats[ STAT_STATE ] |= SS_LOS_TOGGLEBIT;
+  else
+    pm->ps->stats[ STAT_STATE ] &= ~SS_LOS_TOGGLEBIT;
+
   if( pm->ps->pm_type == PM_NOCLIP )
   {
     PM_UpdateViewAngles( pm->ps, &pm->cmd );
