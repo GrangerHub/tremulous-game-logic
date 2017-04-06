@@ -4637,8 +4637,9 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
               MASK_PLAYERSOLID );
   trap_Trace( &tr3, ps->origin, NULL, NULL, entity_origin, ent->s.number,
               MASK_PLAYERSOLID );
-  trap_Trace( &tr4, entity_origin, mins, maxs, entity_origin, -1,
-              MASK_PLAYERSOLID );
+  if( ent->client->ps.stats[ STAT_STATE ] & SS_LOS_TOGGLEBIT )
+    trap_Trace( &tr4, entity_origin, mins, maxs, entity_origin, -1,
+                MASK_PLAYERSOLID );
 
   VectorCopy( entity_origin, origin );
   *groundEntNum = tr1.entityNum;
@@ -4830,7 +4831,9 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
 
   //this item does not fit here
   if( reason == IBE_NONE &&
-      ( tr2.fraction < 1.0f || tr3.fraction < 1.0f || tr4.startsolid ) )
+      ( tr2.fraction < 1.0f || tr3.fraction < 1.0f ||
+      ( ( ent->client->ps.stats[ STAT_STATE ] & SS_LOS_TOGGLEBIT ) &&
+          tr4.startsolid ) ) )
     reason = IBE_NOROOM;
 
   if( reason != IBE_NONE )
