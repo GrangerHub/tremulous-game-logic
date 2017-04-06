@@ -190,8 +190,6 @@ static void CG_AlienBuilderText( char *text, playerState_t *ps )
   {
     if( buildable > BA_NONE )
     {
-      usercmd_t       cmd;
-
       Q_strcat( text, MAX_TUTORIAL_TEXT,
           va( "Press %s to place the %s\n",
             CG_KeyNameForCommand( "+attack" ),
@@ -202,9 +200,7 @@ static void CG_AlienBuilderText( char *text, playerState_t *ps )
             CG_KeyNameForCommand( "+button5" ),
             BG_Buildable( buildable )->humanName ) );
 
-      trap_GetUserCmd( trap_GetCurrentCmdNumber( ), &cmd );
-
-      if( cmd.buttons & BUTTON_WALKING )
+      if( ps->stats[ STAT_STATE ] & SS_LOS_TOGGLEBIT )
       {
         Q_strcat( text, MAX_TUTORIAL_TEXT,
             va( "Release %s to position the %s relative to you\n",
@@ -442,8 +438,6 @@ static void CG_HumanCkitText( char *text, playerState_t *ps )
 
   if( buildable > BA_NONE )
   {
-    usercmd_t       cmd;
-
     Q_strcat( text, MAX_TUTORIAL_TEXT,
         va( "Press %s to place the %s\n",
           CG_KeyNameForCommand( "+attack" ),
@@ -454,9 +448,7 @@ static void CG_HumanCkitText( char *text, playerState_t *ps )
           CG_KeyNameForCommand( "+button5" ),
           BG_Buildable( buildable )->humanName ) );
 
-    trap_GetUserCmd( trap_GetCurrentCmdNumber( ), &cmd );
-
-    if( cmd.buttons & BUTTON_WALKING )
+    if( ps->stats[ STAT_STATE ] & SS_LOS_TOGGLEBIT )
     {
       Q_strcat( text, MAX_TUTORIAL_TEXT,
           va( "Release %s to position the %s relative to you\n",

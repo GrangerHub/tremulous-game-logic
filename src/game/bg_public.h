@@ -313,7 +313,7 @@ typedef enum
 #define SS_HOVELING             0x00002000 // indicates if the entity is occupying a hovel
 #define SS_HOVEL_MARKED         0x00004000 // tells if the hovel occupied is marked
 #define SS_GRABBING             0x00008000
-#define SS_LOS_TOGGLEBIT        0x00010000 //Line of Sight positioning for buildables
+#define SS_LOS_TOGGLEBIT        0x00008000 //Line of Sight positioning for buildables
 
 #define SB_VALID_TOGGLEBIT      0x00004000
 

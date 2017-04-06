@@ -4401,7 +4401,8 @@ void PmoveSingle( pmove_t *pmove )
         pm->ps->weapon == WP_HBUILD ) &&
       ( pm->cmd.buttons & BUTTON_WALKING ) )
     pm->ps->stats[ STAT_STATE ] |= SS_LOS_TOGGLEBIT;
-  else
+  else if( pm->ps->weapon != WP_ALEVEL1 &&
+           pm->ps->weapon != WP_ALEVEL1_UPG )
     pm->ps->stats[ STAT_STATE ] &= ~SS_LOS_TOGGLEBIT;
 
   if( pm->ps->pm_type == PM_NOCLIP )
