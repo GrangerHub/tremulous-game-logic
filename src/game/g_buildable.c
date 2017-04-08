@@ -2118,11 +2118,14 @@ void ASlimeZunge_Think( gentity_t *self )
     {
       enemy = &g_entities[ entityList[ i ] ];
 
-      if (!enemy->client)
-        continue;
-
-      if( enemy->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS ||
-          enemy->client->ps.stats[ STAT_TEAM ] == TEAM_NONE )
+      if (enemy->client)
+      {
+        if( enemy->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS ||
+            enemy->client->ps.stats[ STAT_TEAM ] == TEAM_NONE )
+          continue;
+      } else if( enemy->s.eType != ET_MISSILE ||
+                 !( strcmp( enemy->classname, "grenade" ) ||
+                    strcmp( enemy->classname, "grenade2" ) ) )
         continue;
 
       if( enemy->flags & FL_NOTARGET )
@@ -2148,8 +2151,11 @@ void ASlimeZunge_Think( gentity_t *self )
       VectorCopy(enemy->r.currentOrigin, start); 
   		VectorCopy(self->r.currentOrigin, end); 
   		VectorSubtract(end, start, dir); 
-  		VectorNormalize(dir); 
-  		VectorScale(dir,200, enemy->client->ps.velocity); 
+  		VectorNormalize(dir);
+      if( enemy->client )
+    		VectorScale(dir,200, enemy->client->ps.velocity );
+      else
+        VectorScale(dir,400, enemy->s.pos.trDelta );
   		VectorCopy(dir, enemy->movedir); 
 
       G_AddEvent( self, EV_ALIEN_SLIME_ZUNGE, DirToByte( self->r.currentOrigin ) );
