@@ -1319,8 +1319,8 @@ static void CG_PlayerNonSegAngles( centity_t *cent, vec3_t srcAngles, vec3_t non
   VectorCopy( srcAngles, localAngles );
   localAngles[ YAW ] = AngleMod( localAngles[ YAW ] );
   localAngles[ ROLL ] = 0.0f;
-  if(  es->groundEntityNum != ENTITYNUM_NONE ||
-       !( es->misc & ( PCL_ALIEN_SPITFIRE << 8 ) ) )
+  if( es->groundEntityNum != ENTITYNUM_NONE ||
+      !( ( ( es->misc >> 8 ) & 0xFF ) == PCL_ALIEN_SPITFIRE ) )
     localAngles[ PITCH ] = 0.0f;
 
   //set surfNormal
