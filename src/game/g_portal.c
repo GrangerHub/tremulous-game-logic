@@ -123,6 +123,10 @@ static void G_Portal_Touch(gentity_t *self, gentity_t *other, trace_t *trace)
 	if (!other->client)
 		return;
 
+	if( other->client->ps.weapon == WP_ALEVEL3_UPG ||
+	 		other->client->ps.weapon == WP_ALEVEL4 )
+		return;
+
 	portal = level.humanPortals.portals[ !self->s.modelindex2 ];
 	if (!portal)
 		return;
