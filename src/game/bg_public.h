@@ -531,6 +531,7 @@ typedef enum
   UP_GRENADE,
 
   UP_AMMO,
+  UP_JETFUEL,
 
   UP_NUM_UPGRADES
 } upgrade_t;

@@ -1638,6 +1638,23 @@ static stage_t UI_GetCurrentHumanStage( void )
 
 /*
 ===============
+UI_GetCurrentHumanStage
+===============
+*/
+static int UI_GetFuel( int *credits )
+{
+  char buffer[ MAX_TOKEN_CHARS ];
+  int fuel;
+
+  trap_Cvar_VariableStringBuffer( "ui_fuel", buffer, sizeof( buffer ) );
+
+  sscanf( buffer, "%d %d", &fuel, credits );
+
+  return fuel;
+}
+
+/*
+===============
 UI_DrawInfoPane
 ===============
 */
@@ -1650,6 +1667,10 @@ static void UI_DrawInfoPane( menuItem_t *item, rectDef_t *rect, float text_x, fl
 
   int         class, credits;
   char        ui_currentClass[ MAX_STRING_CHARS ];
+
+  qboolean fuelFull = qfalse;
+  qboolean insufficientFunds = qfalse;
+
 
   trap_Cvar_VariableStringBuffer( "ui_currentClass", ui_currentClass, MAX_STRING_CHARS );
 
@@ -1724,10 +1745,47 @@ static void UI_DrawInfoPane( menuItem_t *item, rectDef_t *rect, float text_x, fl
         }
 
         value = BG_Weapon( i )->roundPrice;
+      } else if( item->v.upgrade == UP_JETFUEL )
+      {
+        int humanCredits;
+        const int missingFuel = JETPACK_FUEL_FULL - UI_GetFuel( &humanCredits );
+        const int costToFull = ( missingFuel * JETPACK_FULL_FUEL_PRICE ) /
+                               JETPACK_FUEL_FULL;
+        const int affordableFuel = ( humanCredits * JETPACK_FUEL_FULL ) /
+                                   JETPACK_FULL_FUEL_PRICE;
+
+        if( missingFuel > 0 )
+        {
+          if( UI_GameIsInWarmup( ) || costToFull <= humanCredits )
+          {
+            value = costToFull;
+          }
+          else if( affordableFuel > 0 )
+          {
+            value = humanCredits;
+          } else
+            insufficientFunds = qtrue;
+        } else
+          fuelFull = qtrue;
       } else
         value = BG_Upgrade( item->v.upgrade )->price;
 
-      if( value == 0 )
+      if( item->v.upgrade == UP_JETFUEL &&
+          ( fuelFull || insufficientFunds ) )
+      {
+        if( fuelFull )
+        {
+          s = va( "%s\n\n%s\n\nFuel tank is full.",
+                  BG_Upgrade( item->v.upgrade )->humanName,
+                  BG_Upgrade( item->v.upgrade )->info );
+        } else if( insufficientFunds )
+        {
+          s = va( "%s\n\n%s\n\nInsufficient funds.\nEarn more credits",
+                  BG_Upgrade( item->v.upgrade )->humanName,
+                  BG_Upgrade( item->v.upgrade )->info );
+        }
+      }
+      else if( value == 0 )
       {
         s = va( "%s\n\n%s\n\nCredits: Free",
                 BG_Upgrade( item->v.upgrade )->humanName,
@@ -2475,7 +2533,8 @@ static void UI_LoadHumanArmouryBuys( void )
         BG_UpgradeAllowedInStage( i, stage, UI_GameIsInWarmup( ) ) &&
         BG_UpgradeIsAllowed( i, UI_DevModeIsOn( ) ) &&
         !( BG_Upgrade( i )->slots & slots ) &&
-        !( uiInfo.upgrades & ( 1 << i ) ) )
+        !( uiInfo.upgrades & ( 1 << i ) ) &&
+        !( i == UP_JETFUEL && !(uiInfo.upgrades & ( 1 << UP_JETPACK ) ) ) )
     {
       uiInfo.humanArmouryBuyList[ j ].text = BG_Upgrade( i )->humanName;
       uiInfo.humanArmouryBuyList[ j ].cmd =

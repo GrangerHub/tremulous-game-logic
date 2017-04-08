@@ -232,6 +232,7 @@ vmCvar_t  ui_dialog;
 vmCvar_t  ui_voteActive;
 vmCvar_t  ui_alienTeamVoteActive;
 vmCvar_t  ui_humanTeamVoteActive;
+vmCvar_t  ui_fuel;
 
 vmCvar_t  cg_debugRandom;
 
@@ -377,6 +378,7 @@ static cvarTable_t cvarTable[ ] =
   { &ui_voteActive, "ui_voteActive", "0", CVAR_ROM },
   { &ui_humanTeamVoteActive, "ui_humanTeamVoteActive", "0", CVAR_ROM },
   { &ui_alienTeamVoteActive, "ui_alienTeamVoteActive", "0", CVAR_ROM },
+  { &ui_fuel, "ui_fuel", "0", CVAR_ROM },
 
   { &cg_debugRandom, "cg_debugRandom", "0", 0 },
   
@@ -472,6 +474,10 @@ static void CG_SetUIVars( void )
   trap_Cvar_Set( "ui_stages", va( "%d %d", cgs.alienStage, cgs.humanStage ) );
 
   trap_Cvar_Set( "ui_warmup", va( "%d", cgs.warmup ) );
+
+  if( BG_InventoryContainsUpgrade( UP_JETPACK, cg.snap->ps.stats ) )
+    trap_Cvar_Set( "ui_fuel", va( "%d %d", cg.snap->ps.stats[ STAT_FUEL ],
+                                  cg.snap->ps.persistant[ PERS_CREDIT ] ) );
 }
 
 /*
