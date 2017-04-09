@@ -938,7 +938,8 @@ void AGeneric_CreepRecede( gentity_t *self )
       self->think = AGeneric_CreepRespawn;
       if( self->s.modelindex == BA_A_ACIDTUBE ||
           self->s.modelindex == BA_A_HIVE ||
-          self->s.modelindex == BA_A_TRAPPER )
+          self->s.modelindex == BA_A_TRAPPER ||
+          self->s.modelindex == BA_A_ZUNGE )
       {
         if (g_warmupDefensiveBuildableRespawnTime.integer >= 10)
           adjustedRespawnTime = g_warmupDefensiveBuildableRespawnTime.integer - 10;
