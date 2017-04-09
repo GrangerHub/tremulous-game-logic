@@ -972,7 +972,9 @@ void AGeneric_CreepRecede( gentity_t *self )
         self->methodOfDeath != MOD_TRIGGER_HURT )
     {
       self->think = AGeneric_CreepRespawn;
-      if( self->s.modelindex == BA_A_ACIDTUBE || self->s.modelindex == BA_A_HIVE )
+      if( self->s.modelindex == BA_A_ACIDTUBE ||
+          self->s.modelindex == BA_A_HIVE ||
+          self->s.modelindex == BA_A_TRAPPER )
       {
         if (g_warmupDefensiveBuildableRespawnTime.integer >= 10)
           adjustedRespawnTime = g_warmupDefensiveBuildableRespawnTime.integer - 10;
