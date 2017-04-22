@@ -459,11 +459,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define PAINSAW_WIDTH               0.0f
 #define PAINSAW_HEIGHT              8.0f
 
-#define GRENADE_PRICE               200
+#define GRENADE_PRICE               150
 #define GRENADE_HEALTH              5
 #define GRENADE_REPEAT              0
 #define GRENADE_K_SCALE             1.0f
-#define GRENADE_DAMAGE              HDM(310)
+#define GRENADE_DAMAGE              HDM(155)
 #define GRENADE_RANGE               192.0f
 #define GRENADE_SPEED               400.0f
 #define GRENADE_SIZE                3.0f        // missile bounding box
