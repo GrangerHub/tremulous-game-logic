@@ -1140,7 +1140,9 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       && targ->s.eType != ET_MISSILE
       && targ->s.eType != ET_GENERAL )
   {
-    if( OnSameTeam( targ, attacker ) )
+    if( OnSameTeam( targ, attacker ) ||
+        ( targ->s.eType == ET_BUILDABLE &&
+          attacker->client->pers.teamSelection == targ->buildableTeam ) )
       attacker->client->ps.persistant[ PERS_HITS ]--;
     else
       attacker->client->ps.persistant[ PERS_HITS ]++;
