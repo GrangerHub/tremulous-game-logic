@@ -211,6 +211,8 @@ vmCvar_t  cg_binaryShaderScreenScale;
 
 vmCvar_t  cg_spectatorWallhack;
 
+vmCvar_t  cg_hitSounds;
+
 vmCvar_t  cg_painBlendUpRate;
 vmCvar_t  cg_painBlendDownRate;
 vmCvar_t  cg_painBlendMax;
@@ -353,6 +355,8 @@ static cvarTable_t cvarTable[ ] =
   { &cg_binaryShaderScreenScale, "cg_binaryShaderScreenScale", "1.0", CVAR_ARCHIVE },
 
   { &cg_spectatorWallhack, "cg_spectatorWallhack", "0", CVAR_ARCHIVE },
+
+  { &cg_hitSounds, "cg_hitSounds", "1", CVAR_ARCHIVE },
 
   { &cg_hudFiles, "cg_hudFiles", "ui/hud.txt", CVAR_ARCHIVE},
   { &cg_hudFilesEnable, "cg_hudFilesEnable", "0", CVAR_ARCHIVE},
@@ -934,6 +938,9 @@ static void CG_RegisterSounds( void )
 
   cgs.media.lCannonWarningSound     = trap_S_RegisterSound( "models/weapons/lcannon/warning.wav", qfalse );
   cgs.media.lCannonWarningSound2    = trap_S_RegisterSound( "models/weapons/lcannon/warning2.wav", qfalse );
+
+  cgs.media.hitSound                = trap_S_RegisterSound( "sound/misc/_hit.wav", qfalse );
+  cgs.media.hitSoundFF              = trap_S_RegisterSound( "sound/misc/_hitFF.wav", qfalse );
 }
 
 
