@@ -255,6 +255,14 @@ void CG_CheckLocalSounds( playerState_t *ps, playerState_t *ops )
     if( ps->stats[ STAT_HEALTH ] > 0 )
       CG_PainEvent( &cg.predictedPlayerEntity, ps->stats[ STAT_HEALTH ] );
   }
+
+  if( cg_hitSounds.integer > 0 )
+  {
+    if( ps->persistant[ PERS_HITS ] > ops->persistant[ PERS_HITS ] )
+      trap_S_StartSound( NULL, cg.predictedPlayerState.clientNum, CHAN_AUTO, cgs.media.hitSound );
+    else if( ps->persistant[ PERS_HITS ] < ops->persistant[ PERS_HITS ] )
+      trap_S_StartSound( NULL, cg.predictedPlayerState.clientNum, CHAN_AUTO, cgs.media.hitSoundFF );
+  }
 }
 
 
@@ -311,4 +319,3 @@ void CG_TransitionPlayerState( playerState_t *ps, playerState_t *ops )
     cg.chargeMeterAlpha = 0.0f;
   }
 }
-

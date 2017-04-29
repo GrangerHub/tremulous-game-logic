@@ -1349,6 +1349,9 @@ typedef struct
   qhandle_t   healthCross3X;
   qhandle_t   healthCrossMedkit;
   qhandle_t   healthCrossPoisoned;
+
+  sfxHandle_t hitSound;
+  sfxHandle_t hitSoundFF;
 } cgMedia_t;
 
 typedef struct
@@ -1616,6 +1619,8 @@ extern  vmCvar_t    cg_rangeMarkerBuildableTypes;
 extern  vmCvar_t    cg_binaryShaderScreenScale;
 
 extern  vmCvar_t    cg_spectatorWallhack;
+
+extern  vmCvar_t    cg_hitSounds;
 
 extern  vmCvar_t    cg_painBlendUpRate;
 extern  vmCvar_t    cg_painBlendDownRate;
