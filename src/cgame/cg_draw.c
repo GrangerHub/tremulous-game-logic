@@ -2627,19 +2627,29 @@ static void CG_DrawCrosshair( rectDef_t *rect, vec4_t color )
 
   hShader = wi->crossHair;
 
-  //aiming at a friendly player/buildable, dim the crosshair
-  if( cg.time == cg.crosshairClientTime || cg.crosshairBuildable >= 0 )
+  if( cg.time <= cg.lastHitTime + 75 )
+  {
+    if( cg.snap->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
+    {
+      color[0] = 0.0;
+      color[1] = 1.0;
+      color[2] = 0.0;
+    }
+    else
+    {
+      color[0] = 1.0;
+      color[1] = 0.0;
+      color[2] = 0.0;
+    }
+  }
+  else if( cg.time == cg.crosshairClientTime || cg.crosshairBuildable >= 0 )
   {
     int i;
+
+    //aiming at a friendly player/buildable, dim the crosshair
     for( i = 0; i < 3; i++ )
       color[i] *= .5f;
 
-  }
-  else if( cg.time == cg.crosshairEnemyTime )
-  {
-    color[0] = 1.0;
-    color[1] = 0.0;
-    color[2] = 0.0;
   }
 
   if( hShader != 0 )
@@ -2687,7 +2697,6 @@ static void CG_ScanForCrosshairEntity( void )
       }
       else
       {
-        cg.crosshairEnemyTime = cg.time;
         cg.crosshairBuildable = -1;
       }
     }
@@ -2708,11 +2717,6 @@ static void CG_ScanForCrosshairEntity( void )
     cg.crosshairClientTime = cg.time;
   }
   // only display team names of those on the same team as this player,
-  // and change the crosshair color to red for enemies of this player
-  else
-  {
-    cg.crosshairEnemyTime = cg.time;
-  }
 
 
 }

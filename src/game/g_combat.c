@@ -1129,7 +1129,13 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   // add to the attacker's hit counter
   if( attacker->client && targ != attacker && targ->health > 0
       && targ->s.eType != ET_MISSILE
-      && targ->s.eType != ET_GENERAL )
+      && targ->s.eType != ET_GENERAL
+      && mod != MOD_POISON 
+      && mod != MOD_HSPAWN
+      && mod != MOD_ASPAWN
+      && mod != MOD_DROP
+      && mod != MOD_TRIGGER_HURT
+      && mod != MOD_FALLING )
   {
     if( OnSameTeam( targ, attacker ) ||
         ( targ->s.eType == ET_BUILDABLE &&
