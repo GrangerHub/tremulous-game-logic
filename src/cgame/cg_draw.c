@@ -2687,7 +2687,6 @@ static void CG_DrawCrosshair( rectDef_t *rect, vec4_t color )
   weaponInfo_t  *wi;
   weapon_t      weapon;
   vec3_t        right, up;
-  vec4_t        color2;
 
   weapon = BG_GetPlayerWeapon( &cg.snap->ps );
 
@@ -2724,20 +2723,29 @@ static void CG_DrawCrosshair( rectDef_t *rect, vec4_t color )
 
   hShader = wi->crossHair;
 
-  //aiming at a friendly player/buildable, dim the crosshair
-  if( cg.time == cg.crosshairClientTime || cg.crosshairBuildable >= 0 )
+  if( cg.time <= cg.lastHitTime + 75 )
+  {
+    if( cg.snap->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
+    {
+      color[0] = 0.0;
+      color[1] = 1.0;
+      color[2] = 0.0;
+    }
+    else
+    {
+      color[0] = 1.0;
+      color[1] = 0.0;
+      color[2] = 0.0;
+    }
+  }
+  else if( cg.time == cg.crosshairClientTime || cg.crosshairBuildable >= 0 )
   {
     int i;
+
+    //aiming at a friendly player/buildable, dim the crosshair
     for( i = 0; i < 3; i++ )
       color[ i ] *= .5f;
 
-  }
-  else if( cg.crosshairEnemy >= 0 )
-  {
-    VectorCopy( color, color2 );
-    color[0] = 1.0;
-    color[1] = 0.0;
-    color[2] = 0.0;
   }
 
   if( hShader != 0 )
@@ -2755,10 +2763,6 @@ static void CG_DrawCrosshair( rectDef_t *rect, vec4_t color )
       trap_R_SetColor( color );
       CG_DrawPic( x2, y2, w, h, hShader );
       trap_R_SetColor( NULL );
-      if( cg.crosshairEnemy >= 0 )
-      {
-        VectorCopy( color2, color );
-      }
       color[ 3 ] *= .25f;
     }
 
@@ -2855,18 +2859,15 @@ static void CG_ScanForCrosshairEntity( void )
       if( BG_Buildable( s->modelindex )->team == cg.snap->ps.stats[ STAT_TEAM ] )
       {
         cg.crosshairBuildable = trace.entityNum;
-        cg.crosshairEnemy = -1;
       }
       else
       {
-        cg.crosshairEnemy = trace.entityNum;
         cg.crosshairBuildable = -1;
       }
     }
     else
     {
       cg.crosshairBuildable = -1;
-      cg.crosshairEnemy = -1;
     }
 
     return;
@@ -2874,23 +2875,14 @@ static void CG_ScanForCrosshairEntity( void )
 
   team = cgs.clientinfo[ trace.entityNum ].team;
 
-
+  // only display team names of those on the same team as this player
   if( ( team == cg.snap->ps.stats[ STAT_TEAM ] ) ||
       ( cg.snap->ps.stats[ STAT_TEAM ] == TEAM_NONE ) )
   {
     // update the fade timer
     cg.crosshairClientNum = trace.entityNum;
     cg.crosshairClientTime = cg.time;
-    cg.crosshairEnemy = -1;
   }
-  // only display team names of those on the same team as this player,
-  // and change the crosshair color to red for enemies of this player
-  else
-  {
-    cg.crosshairEnemy = trace.entityNum;
-  }
-
-
 }
 
 

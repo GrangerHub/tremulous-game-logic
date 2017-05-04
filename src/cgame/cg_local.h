@@ -1052,9 +1052,8 @@ typedef struct
   int           crosshairBuildable;
   int           crosshairClientNum;
   int           crosshairClientTime;
-  int           crosshairEnemy;
-
   vec3_t        crosshairPredictedImpactPoint;
+  int           lastHitTime;
 
   // powerup active flashing
   int           powerupActive;
@@ -1645,7 +1644,7 @@ extern  vmCvar_t    cg_binaryShaderScreenScale;
 
 extern  vmCvar_t    cg_spectatorWallhack;
 
-extern  vmCvar_t    cg_hitSounds;
+extern  vmCvar_t    cg_hitIndicator;
 
 extern  vmCvar_t    cg_painBlendUpRate;
 extern  vmCvar_t    cg_painBlendDownRate;

@@ -211,7 +211,7 @@ vmCvar_t  cg_binaryShaderScreenScale;
 
 vmCvar_t  cg_spectatorWallhack;
 
-vmCvar_t  cg_hitSounds;
+vmCvar_t  cg_hitIndicator;
 
 vmCvar_t  cg_painBlendUpRate;
 vmCvar_t  cg_painBlendDownRate;
@@ -356,7 +356,7 @@ static cvarTable_t cvarTable[ ] =
 
   { &cg_spectatorWallhack, "cg_spectatorWallhack", "0", CVAR_ARCHIVE },
 
-  { &cg_hitSounds, "cg_hitSounds", "1", CVAR_ARCHIVE },
+  { &cg_hitIndicator, "cg_hitIndicator", "1", CVAR_ARCHIVE },
 
   { &cg_hudFiles, "cg_hudFiles", "ui/hud.txt", CVAR_ARCHIVE},
   { &cg_hudFilesEnable, "cg_hudFilesEnable", "0", CVAR_ARCHIVE},
