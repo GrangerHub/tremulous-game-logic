@@ -2950,9 +2950,9 @@ qboolean G_admin_allready( gentity_t *ent )
   gclient_t *cl;
   gentity_t *tent;
 
-  // if game is in both warmup and developer mode, /allready will set all
-  // players' readyToPlay flag to true
-  if ( g_warmup.integer && g_cheats.integer )
+  // if game is in both warmup and developer mode, while not being in intermission,
+  // /allready will set all players' readyToPlay flag to true
+  if ( g_warmup.integer && g_cheats.integer && !level.intermissiontime )
   {
     // cycle through each client and change their ready flag
     for( i = 0; i < g_maxclients.integer; i++ )
