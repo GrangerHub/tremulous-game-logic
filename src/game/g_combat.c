@@ -952,6 +952,32 @@ dflags    these flags are used to control how T_Damage works
 ============
 */
 
+/*
+============
+G_MODHitDetection
+
+Determines if a means of death would result in hit indication
+============
+*/
+static qboolean G_MODHitIndication( meansOfDeath_t mod )
+{
+  switch( mod )
+  {
+    case MOD_DROP:
+    case MOD_FALLING:
+    case MOD_TRIGGER_HURT:
+    case MOD_POISON:
+    case MOD_HSPAWN:
+    case MOD_ASPAWN:
+    case MOD_DECONSTRUCT:
+    case MOD_REPLACE:
+    case MOD_NOCREEP:
+      return qfalse;
+    default:
+      return qtrue;
+  }
+}
+
 // team is the team that is immune to this damage
 void G_SelectiveDamage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
          vec3_t dir, vec3_t point, int damage, int dflags, int mod, int team )
@@ -1130,12 +1156,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   if( attacker->client && targ != attacker && targ->health > 0
       && targ->s.eType != ET_MISSILE
       && targ->s.eType != ET_GENERAL
-      && mod != MOD_POISON 
-      && mod != MOD_HSPAWN
-      && mod != MOD_ASPAWN
-      && mod != MOD_DROP
-      && mod != MOD_TRIGGER_HURT
-      && mod != MOD_FALLING )
+      && G_MODHitIndication( mod ) )
   {
     if( OnSameTeam( targ, attacker ) ||
         ( targ->s.eType == ET_BUILDABLE &&
