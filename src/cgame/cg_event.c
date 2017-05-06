@@ -706,7 +706,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
     // other events
     //
     case EV_PLAYER_TELEPORT_IN:
-      //deprecated
+      CG_PlayerEntered( );
       break;
 
     case EV_PLAYER_TELEPORT_OUT:
