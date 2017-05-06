@@ -1246,6 +1246,7 @@ void ClientBegin( int clientNum )
   ClientSpawn( ent, NULL, NULL, NULL );
 
   trap_SendServerCommand( -1, va( "print \"%s" S_COLOR_WHITE " entered the game\n\"", client->pers.netname ) );
+  G_TempEntity( ent->client->ps.origin, EV_PLAYER_TELEPORT_IN );
 
   G_namelog_restore( client );
 

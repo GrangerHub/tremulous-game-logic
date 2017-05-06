@@ -2447,6 +2447,19 @@ void CG_ResetPlayerEntity( centity_t *cent )
 
 /*
 ==================
+CG_PlayerEntered
+
+Player entered the server
+==================
+*/
+void CG_PlayerEntered( void )
+{
+  // TODO: Find a good distinguishable sound for this
+  trap_S_StartLocalSound( cgs.media.talkSound, CHAN_LOCAL_SOUND );
+}
+
+/*
+==================
 CG_PlayerDisconnect
 
 Player disconnecting
