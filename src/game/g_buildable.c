@@ -974,7 +974,12 @@ void AGeneric_CreepCheck( gentity_t *self )
   spawn = self->parentNode;
   if( !G_FindCreep( self ) )
   {
-    if( spawn )
+    // don't use killedBy for spawns that were already freed (such as by deconning)
+    if( spawn && spawn->inuse &&
+        ( spawn->s.modelindex == BA_A_SPAWN || 
+          spawn->s.modelindex == BA_A_OVERMIND ) &&
+        ( Distance( self->r.currentOrigin,
+                    spawn->r.currentOrigin ) <= CREEP_BASESIZE ) )
       G_Damage( self, NULL, g_entities + spawn->killedBy, NULL, NULL,
                 self->health, 0, MOD_NOCREEP );
     else
