@@ -2189,9 +2189,12 @@ void HSpawn_Blast( gentity_t *self )
   // turn into an explosion
   self->s.eType = ET_EVENTS + EV_HUMAN_BUILDABLE_EXPLOSION;
   // respawn the buildable in next think in warmup
-  // and attacker was a player
+  // and attacker was a player, but don't respawn a repeater killed from another
+  // power zone.
   if( IS_WARMUP && self->enemy->client &&
-      self->methodOfDeath != MOD_TRIGGER_HURT )
+      self->methodOfDeath != MOD_TRIGGER_HURT &&
+      !( self->methodOfDeath == MOD_SUICIDE &&
+         self->s.modelindex == BA_H_REPEATER ) )
   {
     self->think = HSpawn_Respawn;
     if( self->s.modelindex == BA_H_MGTURRET || self->s.modelindex == BA_H_TESLAGEN )
