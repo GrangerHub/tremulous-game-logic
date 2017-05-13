@@ -756,6 +756,8 @@ typedef struct
   int               numAlienClientsAlive;
   int               numHumanClientsAlive;
 
+  int               lastTeamStatus[NUM_TEAMS];
+
   int               alienBuildPoints;
   int               alienBuildPointQueue;
   int               alienNextQueueTime;
@@ -1463,6 +1465,7 @@ extern  vmCvar_t  g_privateMessages;
 extern  vmCvar_t  g_specChat;
 extern  vmCvar_t  g_publicAdminMessages;
 extern  vmCvar_t  g_allowTeamOverlay;
+extern  vmCvar_t  g_teamStatus;
 
 extern  vmCvar_t  g_censorship;
 
