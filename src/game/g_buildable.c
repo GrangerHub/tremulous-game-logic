@@ -2345,9 +2345,12 @@ void HSpawn_Blast( gentity_t *self )
   // doesn't occur from a player
   self->s.eFlags &= ~EF_SCAN_SPOTTED;
   // respawn the buildable in next think in warmup
-  // and attacker was a player
+  // and attacker was a player, but don't respawn a repeater killed from another
+  // power zone.
   if( IS_WARMUP && self->enemy->client &&
-      self->methodOfDeath != MOD_TRIGGER_HURT )
+      self->methodOfDeath != MOD_TRIGGER_HURT &&
+      !( self->methodOfDeath == MOD_SUICIDE &&
+         self->s.modelindex == BA_H_REPEATER ) )
   {
     self->think = HSpawn_Respawn;
     if( self->s.modelindex == BA_H_MGTURRET || self->s.modelindex == BA_H_TESLAGEN )
