@@ -159,6 +159,14 @@ float G_RewardAttackers( gentity_t *self )
   {
     player = g_entities + i;
 
+    // don't count players that are no longer playing
+    if( player->client->pers.connected != CON_CONNECTED ||
+        player->client->ps.stats[ STAT_TEAM ] == TEAM_NONE )
+    {
+      self->credits[ i ] = 0;
+      continue;
+    }
+
     if( !OnSameTeam( self, player ) || 
         self->buildableTeam != player->client->ps.stats[ STAT_TEAM ] )
       totalDamage += (float)self->credits[ i ];
