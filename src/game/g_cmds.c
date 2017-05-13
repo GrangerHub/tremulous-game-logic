@@ -1287,6 +1287,118 @@ void Cmd_VSay_f( gentity_t *ent )
 }
 
 /*
+=================
+Cmd_TeamStatus_f
+=================
+*/
+void Cmd_TeamStatus_f( gentity_t *ent )
+{
+  char multiple[ 12 ];
+  int builders = 0;
+  int arm = 0, mediboost = 0;
+  int omrccount = 0, omrchealth = 0;
+  qboolean omrcbuild = qfalse;
+  gentity_t *tmp;
+  team_t team;
+  int i;
+
+  if( !g_teamStatus.integer )
+  {
+    trap_SendServerCommand( ent - g_entities,
+      "print \"teamstatus is disabled.\n\"" );
+    return;
+  }
+
+  team = ent->client->pers.teamSelection;
+
+  if( level.lastTeamStatus[ team ] && 
+      ( level.time - level.lastTeamStatus[ team ] ) < g_teamStatus.integer * 1000 )
+  {
+    ADMP( va("You may only check your team's status once every %i seconds.\n",
+          g_teamStatus.integer  ));
+    return;
+  }
+
+  level.lastTeamStatus[ team ] = level.time;
+
+  tmp = &g_entities[ 0 ];
+  for ( i = 0; i < level.num_entities; i++, tmp++ )
+  {
+    if( i < MAX_CLIENTS )
+    {
+      if( tmp->client &&
+          tmp->client->pers.connected == CON_CONNECTED &&
+          tmp->client->pers.teamSelection == ent->client->pers.teamSelection &&
+          tmp->health > 0 &&
+          ( tmp->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_BUILDER0 ||
+            tmp->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_BUILDER0_UPG ||
+            BG_InventoryContainsWeapon( WP_HBUILD, tmp->client->ps.stats ) ) )
+        builders++;
+      continue;
+    }
+
+    if( tmp->s.eType == ET_BUILDABLE )
+    {
+      if( tmp->buildableTeam != ent->client->pers.teamSelection ||
+          tmp->health <= 0 )
+        continue;
+
+      switch( tmp->s.modelindex )
+      {
+        case BA_H_REACTOR:
+        case BA_A_OVERMIND:
+          omrccount++;
+          if( tmp->health > omrchealth )
+            omrchealth = tmp->health;
+          if( !omrcbuild )
+            omrcbuild = tmp->spawned;
+          break;
+        case BA_H_ARMOURY:
+          arm++;
+          break;
+        case BA_H_MEDISTAT:
+        case BA_A_BOOSTER:
+          mediboost++;
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
+  if( omrccount > 1 )
+    Com_sprintf( multiple, sizeof( multiple ), "^7[x%d]", omrccount );
+  else
+    multiple[ 0 ] = '\0';
+
+  switch( ent->client->pers.teamSelection )
+  {
+    case TEAM_ALIENS:
+      G_Say( ent, SAY_TEAM,
+        va( "^3OM: %s(%d)%s ^3Eggs: ^5%d ^3Builders: ^5%d ^3Boosters: ^5%d^7" ,
+        ( !omrccount ) ? "^1Down" : ( omrcbuild ) ? "^2Up" : "^5Building",
+        omrchealth * 100 / OVERMIND_HEALTH,
+        multiple,
+        level.numAlienSpawns,
+        builders,
+        mediboost ) );
+      break;
+    case TEAM_HUMANS:
+      G_Say( ent, SAY_TEAM,
+        va( "^3RC: %s(%d)%s ^3Telenodes: ^5%d ^3Builders: ^5%d ^3Armouries: ^5%d ^3Medistations: ^5%d^7" ,
+        ( !omrccount ) ? "^1Down" : ( omrcbuild ) ? "^2Up" : "^5Building",
+        omrchealth * 100 / REACTOR_HEALTH,
+        multiple,
+        level.numHumanSpawns,
+        builders,
+        arm, mediboost ) );
+      break;
+    default:
+      break;
+  }
+}
+
+/*
 ==================
 Cmd_Where_f
 ==================
@@ -3957,6 +4069,7 @@ commands_t cmds[ ] = {
   { "share", CMD_TEAM, Cmd_Share_f },
   { "specme", CMD_TEAM, Cmd_SpecMe_f },
   { "team", 0, Cmd_Team_f },
+  { "teamstatus", CMD_MESSAGE|CMD_TEAM, Cmd_TeamStatus_f },
   { "teamvote", CMD_TEAM, Cmd_Vote_f },
   { "test", CMD_CHEAT, Cmd_Test_f },
   { "unignore", 0, Cmd_Ignore_f },

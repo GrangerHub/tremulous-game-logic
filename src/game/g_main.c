@@ -168,6 +168,7 @@ vmCvar_t  g_privateMessages;
 vmCvar_t  g_specChat;
 vmCvar_t  g_publicAdminMessages;
 vmCvar_t  g_allowTeamOverlay;
+vmCvar_t  g_teamStatus;
 
 vmCvar_t  g_censorship;
 vmCvar_t  g_pimpHuman;
@@ -340,6 +341,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_specChat, "g_specChat", "1", CVAR_ARCHIVE, 0, qfalse  },
   { &g_publicAdminMessages, "g_publicAdminMessages", "1", CVAR_ARCHIVE, 0, qfalse  },
   { &g_allowTeamOverlay, "g_allowTeamOverlay", "1", CVAR_ARCHIVE, 0, qtrue  },
+  { &g_teamStatus, "g_teamStatus", "1", CVAR_ARCHIVE, 0, qtrue },
 
   { &g_censorship, "g_censorship", "", CVAR_ARCHIVE, 0, qfalse  },
   { &g_pimpHuman, "g_pimpHuman", "1", CVAR_ARCHIVE, 0, qfalse  },
