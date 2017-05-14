@@ -1115,7 +1115,7 @@ CG_Say
 static void CG_Say( int clientNum, saymode_t mode, const char *text )
 {
   char *name;
-  char prefix[ 11 ] = "";
+  char prefix[ 13 ] = "";
   char *ignore = "";
   char *location = "";
   char *color;
