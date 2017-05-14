@@ -1147,6 +1147,7 @@ static void CG_Say( int clientNum, saymode_t mode, const char *text )
   {
     clientInfo_t *ci = &cgs.clientinfo[ clientNum ];
     char         *tcolor = S_COLOR_WHITE;
+    char         *tbcolor = S_COLOR_YELLOW;
 
     name = ci->name;
 
@@ -1154,13 +1155,20 @@ static void CG_Say( int clientNum, saymode_t mode, const char *text )
       tmsgcolor = S_COLOR_CYAN;
 
     if( ci->team == TEAM_ALIENS )
-      tcolor = S_COLOR_RED;
+    {
+      tcolor = S_COLOR_MAGENTA;
+      tbcolor = S_COLOR_RED;
+    }
     else if( ci->team == TEAM_HUMANS )
+    {
       tcolor = S_COLOR_CYAN;
+      tbcolor = S_COLOR_BLUE;
+    }
 
     if( cg_chatTeamPrefix.integer )
-      Com_sprintf( prefix, sizeof( prefix ), "[%s%c" S_COLOR_WHITE "] ",
-                   tcolor, toupper( *( BG_TeamName( ci->team ) ) ) );
+      Com_sprintf( prefix, sizeof( prefix ), "%s[%s%c%s] ",
+                   tbcolor, tcolor, toupper( *( BG_TeamName( ci->team ) ) ),
+                   tbcolor );
 
     if( ( mode == SAY_TEAM || mode == SAY_AREA ) &&
         cg.snap->ps.pm_type != PM_INTERMISSION )
