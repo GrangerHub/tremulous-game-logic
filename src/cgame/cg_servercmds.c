@@ -1145,7 +1145,7 @@ static void CG_Say( int clientNum, saymode_t mode, const char *text )
     }
 
     if( cg_chatTeamPrefix.integer )
-      Com_sprintf( prefix, sizeof( prefix ), "%s[%s%c%s] ",
+      Com_sprintf( prefix, sizeof( prefix ), "%s[%s%c%s]" S_COLOR_WHITE " ",
                    tbcolor, tcolor, toupper( *( BG_TeamName( ci->team ) ) ),
                    tbcolor );
 
