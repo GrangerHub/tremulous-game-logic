@@ -2135,8 +2135,8 @@ qboolean ASlimeZunge_CheckTarget( gentity_t *slime, gentity_t *target )
         return qfalse;
       else
       {
-        target->slimeZunge = NULL;
         target->slimeZunge->enemy = NULL;
+        target->slimeZunge = NULL;
       }
     } else
       target->slimeZunge = NULL;
@@ -2237,11 +2237,23 @@ void ASlimeZunge_Think( gentity_t *self )
   VectorAdd( self->r.currentOrigin, range, maxs );
   VectorSubtract( self->r.currentOrigin, range, mins );
 
-  if( self->enemy &&
-      ASlimeZunge_CheckTarget( self, self->enemy ))
+  if( self->enemy )
   {
-    ASlimeZunge_Suck( self, self->enemy );
-  } else if( self->spawned && self->health > 0 && self->powered )
+    if( ASlimeZunge_CheckTarget( self, self->enemy ) )
+    {
+      ASlimeZunge_Suck( self, self->enemy );
+      return;
+    } else
+    {
+      // reset
+      if( self->enemy->slimeZunge == self )
+        self->enemy->slimeZunge = NULL;
+
+      self->enemy = NULL;
+    }
+  }
+
+  if( self->spawned && self->health > 0 && self->powered )
   {
     num = trap_EntitiesInBox( mins, maxs, entityList, MAX_GENTITIES );
     for( i = 0; i < num; i++ )
