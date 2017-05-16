@@ -2129,13 +2129,13 @@ qboolean ASlimeZunge_CheckTarget( gentity_t *slime, gentity_t *target )
   if( target->slimeZunge &&
       target->slimeZunge != slime )
   {
-    if( target->slimeZunge->enemy == target )
+    if( target->slimeZunge->slimeTarget == target )
     {
       if( ASlimeZunge_CheckTarget( target->slimeZunge, target ) )
         return qfalse;
       else
       {
-        target->slimeZunge->enemy = NULL;
+        target->slimeZunge->slimeTarget = NULL;
         target->slimeZunge = NULL;
       }
     } else
@@ -2190,7 +2190,7 @@ static void ASlimeZunge_Suck( gentity_t *slime, gentity_t *target )
   tent->s.generic1 = slime->s.number; //src
   tent->s.clientNum = target->s.number; //dest
   VectorCopy( slime->s.pos.trBase, tent->s.origin2 );
-  slime->enemy = target;
+  slime->slimeTarget = target;
   target->slimeZunge = slime;
 
   // suck the victum in
@@ -2237,19 +2237,19 @@ void ASlimeZunge_Think( gentity_t *self )
   VectorAdd( self->r.currentOrigin, range, maxs );
   VectorSubtract( self->r.currentOrigin, range, mins );
 
-  if( self->enemy )
+  if( self->slimeTarget )
   {
-    if( ASlimeZunge_CheckTarget( self, self->enemy ) )
+    if( ASlimeZunge_CheckTarget( self, self->slimeTarget ) )
     {
-      ASlimeZunge_Suck( self, self->enemy );
+      ASlimeZunge_Suck( self, self->slimeTarget );
       return;
     } else
     {
       // reset
-      if( self->enemy->slimeZunge == self )
-        self->enemy->slimeZunge = NULL;
+      if( self->slimeTarget->slimeZunge == self )
+        self->slimeTarget->slimeZunge = NULL;
 
-      self->enemy = NULL;
+      self->slimeTarget = NULL;
     }
   }
 

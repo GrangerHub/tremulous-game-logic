@@ -121,7 +121,7 @@ static void CG_Obituary( entityState_t *ent )
       message = "was melted by an acid tube";
       break;
     case MOD_ZUNGE:
-      message = "^5was sucked by a slime zunge";
+      message = "was sucked by a slime zunge";
       break;
     case MOD_OVERMIND:
       message = "got too close to the overmind";

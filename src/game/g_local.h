@@ -366,6 +366,7 @@ struct gentity_s
   bglist_t          *zapLink;  // For ET_LEV2_ZAP_CHAIN
 
   gentity_t         *slimeZunge;
+  gentity_t         *slimeTarget;
 };
 
 typedef enum
