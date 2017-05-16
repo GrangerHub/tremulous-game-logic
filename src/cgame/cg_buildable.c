@@ -420,7 +420,8 @@ qboolean CG_GetBuildableRangeMarkerProperties( buildable_t bType, rangeMarkerTyp
     default: return qfalse;
   }
 
-  if( bType == BA_A_TRAPPER )
+  if( bType == BA_A_TRAPPER ||
+      bType == BA_A_ZUNGE )
     *rmType = RMT_SPHERICAL_CONE_64;
   else if( bType == BA_H_MGTURRET )
     *rmType = RMT_SPHERICAL_CONE_240;

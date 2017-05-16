@@ -2100,6 +2100,128 @@ void ATrapper_Think( gentity_t *self )
 
 /*
 ================
+ATrapper_CheckTarget
+
+Used by ASlimeZunge_Think to check enemies for validity
+================
+*/
+qboolean ASlimeZunge_CheckTarget( gentity_t *slime, gentity_t *target )
+{
+  vec3_t distance;
+
+  if( !slime->inuse )
+    return qfalse;
+
+  if( slime->s.eType != ET_BUILDABLE ||
+      slime->s.modelindex != BA_A_ZUNGE )
+    return qfalse;
+
+  if( !slime->spawned )
+    return qfalse;
+
+  if( !slime->powered )
+    return qfalse;
+
+  if( slime->health <= 0 )
+    return qfalse;
+
+  // ignore targets that are already being sucked in by another slime zunge
+  if( target->slimeZunge &&
+      target->slimeZunge != slime )
+  {
+    if( target->slimeZunge->enemy == target )
+    {
+      if( ASlimeZunge_CheckTarget( target->slimeZunge, target ) )
+        return qfalse;
+      else
+      {
+        target->slimeZunge = NULL;
+        target->slimeZunge->enemy = NULL;
+      }
+    } else
+      target->slimeZunge = NULL;
+  }
+
+  if (target->client)
+  {
+    if( target->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS ||
+        target->client->ps.stats[ STAT_TEAM ] == TEAM_NONE )
+      return qfalse;
+  } else if( target->s.eType != ET_MISSILE ||
+             !( strcmp( target->classname, "grenade" ) ||
+                strcmp( target->classname, "grenade2" ) ) )
+    return qfalse;
+
+  if( target->flags & FL_NOTARGET )
+    return qfalse;
+
+  if( !G_Visible( slime, target, CONTENTS_SOLID ) )
+    return qfalse;
+
+  if (!target->takedamage) 
+    return qfalse;
+
+  VectorSubtract( target->r.currentOrigin, slime->r.currentOrigin, distance );
+  if( VectorLength( distance ) > SLIME_ZUNGE_RANGE ) // is the target within range?
+    return qfalse;
+
+  //only allow a narrow field of "vision"
+  VectorNormalize( distance ); //is now direction of target
+  if( DotProduct( distance, slime->s.origin2 ) < SLIME_ZUNGE_DOT )
+    return qfalse;
+
+  return qtrue;
+}
+
+/*
+================
+ASlimeZunge_Suck
+
+Have the given target sucked in by the given slime
+================
+*/
+static void ASlimeZunge_Suck( gentity_t *slime, gentity_t *target )
+{
+  gentity_t *tent; // zunge trail
+  vec3_t start, end, dir;
+
+  // attach to the victum
+  tent = G_TempEntity( target->s.pos.trBase, EV_ZUNGETRAIL );
+  tent->s.generic1 = slime->s.number; //src
+  tent->s.clientNum = target->s.number; //dest
+  VectorCopy( slime->s.pos.trBase, tent->s.origin2 );
+  slime->enemy = target;
+  target->slimeZunge = slime;
+
+  // suck the victum in
+  VectorCopy(target->r.currentOrigin, start); 
+  VectorCopy(slime->r.currentOrigin, end); 
+  VectorSubtract(end, start, dir); 
+  VectorNormalize(dir);
+  if( target->client )
+    VectorScale(dir,200, target->client->ps.velocity );
+  else
+    VectorScale(dir,400, target->s.pos.trDelta );
+  VectorCopy(dir, target->movedir); 
+
+  G_AddEvent( slime, EV_ALIEN_SLIME_ZUNGE, DirToByte( slime->r.currentOrigin ) );
+
+  if( level.time >= slime->timestamp + 500 )
+  {
+    slime->timestamp = level.time;
+    G_SetBuildableAnim( slime, BANIM_ATTACK1, qfalse );
+  }
+  G_SelectiveRadiusDamage( slime->s.pos.trBase, slime, ACIDTUBE_DAMAGE,
+                          SLIME_ZUNGE_DMGRADIUS, slime, MOD_ZUNGE,
+                          TEAM_ALIENS );
+            
+  slime->nextthink = level.time + SLIME_ZUNGE_REPEAT;
+
+  return;
+}
+
+/*
+================
 ASlimeZunge_Think
 ================
 */
@@ -2109,76 +2231,27 @@ void ASlimeZunge_Think( gentity_t *self )
   vec3_t    range = { SLIME_ZUNGE_RANGE, SLIME_ZUNGE_RANGE, SLIME_ZUNGE_RANGE };
   vec3_t    mins, maxs;
   int       i, num;
-  gentity_t *enemy;
-  vec3_t start,dir,end;
-  gentity_t *tent; // zunge trail
+  gentity_t *target;
   
   AGeneric_Think( self );
   VectorAdd( self->r.currentOrigin, range, maxs );
   VectorSubtract( self->r.currentOrigin, range, mins );
 
-
-  //find a victum
-  if( self->spawned && self->health > 0 && self->powered )
+  if( self->enemy &&
+      ASlimeZunge_CheckTarget( self, self->enemy ))
+  {
+    ASlimeZunge_Suck( self, self->enemy );
+  } else if( self->spawned && self->health > 0 && self->powered )
   {
     num = trap_EntitiesInBox( mins, maxs, entityList, MAX_GENTITIES );
     for( i = 0; i < num; i++ )
     {
-      enemy = &g_entities[ entityList[ i ] ];
+      target = &g_entities[ entityList[ i ] ];
 
-      if (enemy->client)
-      {
-        if( enemy->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS ||
-            enemy->client->ps.stats[ STAT_TEAM ] == TEAM_NONE )
-          continue;
-      } else if( enemy->s.eType != ET_MISSILE ||
-                 !( strcmp( enemy->classname, "grenade" ) ||
-                    strcmp( enemy->classname, "grenade2" ) ) )
+      if( !ASlimeZunge_CheckTarget( self, target ) )
         continue;
 
-      if( enemy->flags & FL_NOTARGET )
-        continue;
-
-      if( !G_Visible( self, enemy, CONTENTS_SOLID ) )
-        continue;
-
-      if (!enemy->takedamage) 
-  			continue;
-
-      if (Distance( self->r.currentOrigin, enemy->r.currentOrigin ) >
-                                                             SLIME_ZUNGE_RANGE )
-        continue;
-
-      // attach to the victum
-      tent = G_TempEntity( enemy->s.pos.trBase, EV_ZUNGETRAIL );
-      tent->s.generic1 = self->s.number; //src
-      tent->s.clientNum = enemy->s.number; //dest
-      VectorCopy( self->s.pos.trBase, tent->s.origin2 );
-
-      // suck the vitum in
-      VectorCopy(enemy->r.currentOrigin, start); 
-  		VectorCopy(self->r.currentOrigin, end); 
-  		VectorSubtract(end, start, dir); 
-  		VectorNormalize(dir);
-      if( enemy->client )
-    		VectorScale(dir,200, enemy->client->ps.velocity );
-      else
-        VectorScale(dir,400, enemy->s.pos.trDelta );
-  		VectorCopy(dir, enemy->movedir); 
-
-      G_AddEvent( self, EV_ALIEN_SLIME_ZUNGE, DirToByte( self->r.currentOrigin ) );
-
-      if( level.time >= self->timestamp + 500 )
-      {
-        self->timestamp = level.time;
-        G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
-      }
-      G_SelectiveRadiusDamage( self->s.pos.trBase, self, ACIDTUBE_DAMAGE,
-                              SLIME_ZUNGE_DMGRADIUS, self, MOD_ZUNGE,
-                              TEAM_ALIENS );
-                
-      self->nextthink = level.time + SLIME_ZUNGE_REPEAT;
-
+      ASlimeZunge_Suck( self, target );
       return;
     }
   }

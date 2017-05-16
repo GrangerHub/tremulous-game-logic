@@ -364,6 +364,8 @@ struct gentity_s
   int               usesBuildPointZone;             // does it use a zone?
 
   bglist_t          *zapLink;  // For ET_LEV2_ZAP_CHAIN
+
+  gentity_t         *slimeZunge;
 };
 
 typedef enum
