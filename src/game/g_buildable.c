@@ -2167,7 +2167,7 @@ qboolean ASlimeZunge_CheckTarget( gentity_t *slime, gentity_t *target )
 
   //only allow a narrow field of "vision"
   VectorNormalize( distance ); //is now direction of target
-  if( DotProduct( distance, slime->s.origin2 ) < SLIME_ZUNGE_DOT )
+  if( DotProduct( distance, slime->s.origin2 ) <= SLIME_ZUNGE_DOT )
     return qfalse;
 
   return qtrue;
