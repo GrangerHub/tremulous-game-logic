@@ -382,7 +382,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define SLIME_ZUNGE_DMGRADIUS       120
 #define SLIME_ZUNGE_REPEAT          300
 #define SLIME_ZUNGE_RANGE           300
-#define SLIME_ZUNGE_DOT             0.0f // max angle = acos( SLIME_ZUNGE )
+#define SLIME_ZUNGE_DOT             0.79f // max angle = acos( SLIME_ZUNGE )
 
 #define OVERMIND_BP                 0
 #define OVERMIND_BT                 30000
