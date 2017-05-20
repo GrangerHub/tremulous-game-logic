@@ -857,7 +857,8 @@ static void CG_RegisterSounds( void )
   cgs.media.watrInSound           = trap_S_RegisterSound( "sound/player/watr_in.wav", qfalse );
   cgs.media.watrOutSound          = trap_S_RegisterSound( "sound/player/watr_out.wav", qfalse );
   cgs.media.watrUnSound           = trap_S_RegisterSound( "sound/player/watr_un.wav", qfalse );
-
+  
+  cgs.media.enterSound            = trap_S_RegisterSound( "sound/misc/enter.wav", qfalse );
   cgs.media.disconnectSound       = trap_S_RegisterSound( "sound/misc/disconnect.wav", qfalse );
 
   cgs.media.fightSound            = trap_S_RegisterSound( "sound/misc/276254__dynajinn__fight-voiceover-fight.wav", qfalse );
