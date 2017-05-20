@@ -1245,6 +1245,9 @@ typedef struct
   qhandle_t   binaryAlpha1Shader;
   cgMediaBinaryShader_t binaryShaders[ NUM_BINARY_SHADERS ];
 
+  // enter
+  qhandle_t   enterSound;
+
   // disconnect
   qhandle_t   disconnectPS;
   qhandle_t   disconnectSound;

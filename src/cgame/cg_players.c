@@ -2455,7 +2455,7 @@ Player entered the server
 void CG_PlayerEntered( void )
 {
   // TODO: Find a good distinguishable sound for this
-  trap_S_StartLocalSound( cgs.media.talkSound, CHAN_LOCAL_SOUND );
+  trap_S_StartLocalSound( cgs.media.enterSound, CHAN_LOCAL_SOUND );
 }
 
 /*
