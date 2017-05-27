@@ -775,6 +775,12 @@ void CG_RegisterWeapon( int weaponNum )
   if( !CG_ParseWeaponAnimationFile( path, weaponInfo ) )
     ; //Com_Printf( S_COLOR_RED "ERROR: failed to parse %s\n", path );
 
+  if( weaponNum == WP_LIGHTNING )
+  {
+    cgs.media.lightningShader = trap_R_RegisterShader( "models/weapons/lightning/boltnew");
+		cgs.media.lightningExplosionModel = trap_R_RegisterModel( "models/weapons/lightning/crackle.md3" );
+  }
+
   // calc midpoint for rotation
   trap_R_ModelBounds( weaponInfo->weaponModel, mins, maxs );
   for( i = 0 ; i < 3 ; i++ )
@@ -938,6 +944,129 @@ static void CG_CalculateWeaponPosition( vec3_t origin, vec3_t angles )
   }
 }
 
+/*
+===============
+CG_LightningBolt
+
+Origin will be the exact tag point, which is slightly
+different than the muzzle point used for determining hits.
+The cent should be the non-predicted cent if it is from the player,
+so the endpoint will reflect the simulated strike (lagging the predicted
+angle)
+===============
+*/
+static void CG_LightningBolt( centity_t *cent, vec3_t origin )
+{
+	trace_t  trace;
+	refEntity_t  beam;
+	vec3_t   forward;
+	vec3_t   muzzlePoint, endPoint;
+
+	if (cent->currentState.weapon != WP_LIGHTNING) {
+		return;
+	}
+
+	memset( &beam, 0, sizeof( beam ) );
+
+//unlagged - attack prediction #1
+	// if the entity is us, unlagged is on server-side, and we've got it on for the lightning gun
+	if ( cent->currentState.number == cg.predictedPlayerState.clientNum )
+  {
+		// always shoot straight forward from our current position
+		AngleVectors( cg.predictedPlayerState.viewangles, forward, NULL, NULL );
+		VectorCopy( cg.predictedPlayerState.origin, muzzlePoint );
+	}
+	else
+  {
+    //unlagged - attack prediction #1
+		// CPMA  "true" lightning
+		if ( ( cent->currentState.number == cg.predictedPlayerState.clientNum ) &&
+         ( cg_trueLightning.value != 0 ) )
+    {
+			vec3_t angle;
+			int i;
+
+//unlagged - true lightning
+			// might as well fix up true lightning while we're at it
+			vec3_t viewangles;
+			VectorCopy( cg.predictedPlayerState.viewangles, viewangles );
+//unlagged - true lightning
+
+			for (i = 0; i < 3; i++) {
+				float a = cent->lerpAngles[i] - viewangles[i]; //unlagged: was cg.refdefViewAngles[i];
+				if (a > 180) {
+					a -= 360;
+				}
+				if (a < -180) {
+					a += 360;
+				}
+
+				angle[i] = viewangles[i] /*unlagged: was cg.refdefViewAngles[i]*/ + a * (1.0 - cg_trueLightning.value);
+				if (angle[i] < 0) {
+					angle[i] += 360;
+				}
+				if (angle[i] > 360) {
+					angle[i] -= 360;
+				}
+			}
+
+			AngleVectors(angle, forward, NULL, NULL );
+//unlagged - true lightning
+//		VectorCopy(cent->lerpOrigin, muzzlePoint );
+//		VectorCopy(cg.refdef.vieworg, muzzlePoint );
+			// *this* is the correct origin for true lightning
+			VectorCopy(cg.predictedPlayerState.origin, muzzlePoint );
+//unlagged - true lightning
+		}
+		else
+    {
+			// !CPMA
+			AngleVectors( cent->lerpAngles, forward, NULL, NULL );
+			VectorCopy(cent->lerpOrigin, muzzlePoint );
+		}
+  }
+
+	VectorMA( muzzlePoint, 14, forward, muzzlePoint );
+
+	// project forward by the lightning range
+	VectorMA( muzzlePoint, LIGHTNING_BOLT_RANGE, forward, endPoint );
+
+	// see if it hit a wall
+	CG_Trace( &trace, muzzlePoint, NULL, NULL, endPoint,
+	          cent->currentState.number, MASK_SHOT );
+
+	// this is the endpoint
+	VectorCopy( trace.endpos, beam.oldorigin );
+
+	// use the provided origin, even though it may be slightly
+	// different than the muzzle origin
+	VectorCopy( origin, beam.origin );
+
+	beam.reType = RT_LIGHTNING;
+	beam.customShader = cgs.media.lightningShader;
+	trap_R_AddRefEntityToScene( &beam );
+
+	// add the impact flare if it hit something
+	if ( trace.fraction < 1.0 ) {
+		vec3_t	angles;
+		vec3_t	dir;
+
+		VectorSubtract( beam.oldorigin, beam.origin, dir );
+		VectorNormalize( dir );
+
+		memset( &beam, 0, sizeof( beam ) );
+		beam.hModel = cgs.media.lightningExplosionModel;
+
+		VectorMA( trace.endpos, -16, dir, beam.origin );
+
+		// make a random orientation
+		angles[0] = rand() % 360;
+		angles[1] = rand() % 360;
+		angles[2] = rand() % 360;
+		AnglesToAxis( angles, beam.axis );
+		trap_R_AddRefEntityToScene( &beam );
+	}
+}
 
 /*
 ======================
@@ -1075,10 +1204,13 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
   if( !ps )
   {
     // add weapon ready sound
+		cent->pe.lightningFiring = qfalse;
     if( firing && weapon->wim[ weaponMode ].firingSound )
     {
+      // lightning gun makes a different sound when fire is held down
       trap_S_AddLoopingSound( cent->currentState.number, cent->lerpOrigin, vec3_origin,
                               weapon->wim[ weaponMode ].firingSound );
+      cent->pe.lightningFiring = qtrue;
     }
     else if( weapon->readySound )
       trap_S_AddLoopingSound( cent->currentState.number, cent->lerpOrigin, vec3_origin, weapon->readySound );
@@ -1192,6 +1324,13 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
     trap_R_AddRefEntityToScene( &flash );
   }
 
+  if ( ps || cg.renderingThirdPerson ||
+  	        cent->currentState.number != cg.predictedPlayerState.clientNum )
+  {
+		// add lightning bolt
+		CG_LightningBolt( cent, flash.origin );
+  }
+
   if( ps || cg.renderingThirdPerson ||
       cent->currentState.number != cg.predictedPlayerState.clientNum )
   {
@@ -1284,6 +1423,9 @@ void CG_AddViewWeapon( playerState_t *ps )
 
     VectorCopy( cg.refdef.vieworg, origin );
     VectorMA( origin, -8, cg.refdef.viewaxis[ 2 ], origin );
+
+    if ( cg.predictedPlayerState.eFlags & EF_FIRING )
+      CG_LightningBolt( &cg_entities[ps->clientNum], origin );
 
     if( cent->muzzlePS )
       CG_SetAttachmentPoint( &cent->muzzlePS->attachment, origin );
@@ -1760,6 +1902,12 @@ void CG_FireWeapon( centity_t *cent, weaponMode_t weaponMode )
         !CG_IsParticleSystemInfinite( cent->muzzlePS ) )
       cent->muzzlePsTrigger = qtrue;
   }
+  
+
+	// lightning gun only does this this on initial press
+	if ( weaponNum == WP_LIGHTNING &&
+       cent->pe.lightningFiring )
+    return;
 
   // play a sound
   for( c = 0; c < 4; c++ )

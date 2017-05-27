@@ -180,6 +180,7 @@ vmCvar_t  cg_timescaleFadeSpeed;
 vmCvar_t  cg_timescale;
 vmCvar_t  cg_noTaunt;
 vmCvar_t  cg_tauntSpam;
+vmCvar_t  cg_trueLightning;
 vmCvar_t  cg_drawSurfNormal;
 vmCvar_t  cg_drawBBOX;
 vmCvar_t  cg_wwSmoothTime;
@@ -397,7 +398,9 @@ static cvarTable_t cvarTable[ ] =
   { &pmove_msec, "pmove_msec", "8", 0},
   { &cg_noTaunt, "cg_noTaunt", "0", CVAR_ARCHIVE},
   { &cg_tauntSpam, "cg_tauntSpam", "0", CVAR_ARCHIVE},
-  
+
+  { &cg_trueLightning, "cg_trueLightning", "0.0", CVAR_ARCHIVE},
+
   { &cg_voice, "voice", "default", CVAR_USERINFO|CVAR_ARCHIVE},
 
   { &cg_emoticons, "cg_emoticons", "1", CVAR_LATCH|CVAR_ARCHIVE},

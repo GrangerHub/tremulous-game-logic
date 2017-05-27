@@ -579,6 +579,7 @@ typedef struct
   lerpFrame_t legs, torso, nonseg, weapon;
   int         painTime;
   int         painDirection;  // flip from 0 to 1
+  qboolean    lightningFiring;
 
   // machinegun spinning
   float       barrelAngle;
@@ -1355,6 +1356,9 @@ typedef struct
 
   sfxHandle_t hitSound;
   sfxHandle_t hitSoundFF;
+
+  qhandle_t	lightningShader;
+	qhandle_t	lightningExplosionModel;
 } cgMedia_t;
 
 typedef struct
@@ -1593,6 +1597,7 @@ extern  vmCvar_t    cg_timescaleFadeSpeed;
 extern  vmCvar_t    cg_timescale;
 extern  vmCvar_t    cg_noTaunt;
 extern  vmCvar_t    cg_tauntSpam;
+extern	vmCvar_t		cg_trueLightning;
 extern  vmCvar_t    cg_drawSurfNormal;
 extern  vmCvar_t    cg_drawBBOX;
 extern  vmCvar_t    cg_wwSmoothTime;

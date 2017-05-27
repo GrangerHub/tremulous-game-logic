@@ -2487,6 +2487,34 @@ static const weaponAttributes_t bg_weapons[ ] =
     TEAM_HUMANS           //team_t    team;
   },
   {
+    WP_LIGHTNING,         //int       number;
+    qfalse,               //qboolean enabled;
+    LIGHTNING_PRICE,      //int       price;
+    ( 1 << S3 ),          //int       stages;
+    SLOT_WEAPON,          //int       slots;
+    "lightning",      //char      *name;
+    "Lightning Gun",      //char      *humanName;
+    "Generates bolts of lightning as its primary attack. "
+    "The secondary attack emmits a burst of ball lightning.",
+    LIGHTNING_AMMO,       //int       maxAmmo;
+    0,                    //int       maxClips;
+    0,                    //int       roundPrice;
+    qfalse,               //int       infiniteAmmo;
+    qtrue,                //int       usesEnergy;
+    LIGHTNING_BOLT_REPEAT,//int       repeatRate1;
+    LIGHTNING_BALL_REPEAT,//int       repeatRate2;
+    0,                    //int       repeatRate3;
+    0,                    //int       reloadTime;
+    LIGHTNING_K_SCALE,     //float     knockbackScale;
+    qtrue,                //qboolean  hasAltMode;
+    qfalse,               //qboolean  hasThirdMode;
+    qfalse,               //qboolean  canZoom;
+    90.0f,                //float     zoomFov;
+    qtrue,                //qboolean  purchasable;
+    qtrue,                //qboolean  longRanged;
+    TEAM_HUMANS           //team_t    team;
+  },
+  {
     WP_LOCKBLOB_LAUNCHER, //int       number;
     qtrue,                //qboolean enabled;
     0,                    //int       price;

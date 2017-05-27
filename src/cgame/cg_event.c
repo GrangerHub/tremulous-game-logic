@@ -280,6 +280,11 @@ static void CG_Obituary( entityState_t *ent )
         message2 = "'s launched grenade";
         break;
 
+      case MOD_LIGHTNING:
+        message = "electrocuted by";
+        message2 = "'s lightning gun";
+        break;
+
       case MOD_DROP:
         message = "was squished by";
         message2 = "'s dropped structure";
