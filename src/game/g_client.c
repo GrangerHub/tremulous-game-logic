@@ -941,7 +941,6 @@ char *ClientUserinfoChanged( int clientNum, qboolean forceName )
   }
 
   s = NULL;
-  if ( g_pimpHuman.integer )
   if ( client->pers.teamSelection == TEAM_HUMANS )
   {
     qboolean found;
@@ -950,10 +949,6 @@ char *ClientUserinfoChanged( int clientNum, qboolean forceName )
     found = G_IsValidPlayerModel(s);
 
     if ( !found )
-      s = NULL;
-    else if ( !g_cheats.integer
-           && !forceName
-           && !G_admin_permission( ent, va("MODEL%s", s) ) )
       s = NULL;
 
     if (s)
