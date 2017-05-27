@@ -1463,8 +1463,6 @@ extern  vmCvar_t  g_teamStatus;
 
 extern  vmCvar_t  g_censorship;
 
-extern  vmCvar_t  g_pimpHuman;
-
 void      trap_Print( const char *fmt );
 void      trap_Error( const char *fmt ) __attribute__((noreturn));
 int       trap_Milliseconds( void );
