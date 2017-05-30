@@ -723,6 +723,59 @@ void launcherFire( gentity_t *ent, qboolean impact )
 /*
 ======================================================================
 
+Lightning Gun
+
+======================================================================
+*/
+
+/*
+===============
+lightningBoltFire
+===============
+*/
+void lightningBoltFire( gentity_t *ent )
+{
+	trace_t		tr;
+	vec3_t		end;
+	gentity_t	*traceEnt, *tent;
+  
+	VectorMA( muzzle, LIGHTNING_BOLT_RANGE, forward, end );
+
+	trap_Trace( &tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT );
+
+
+	if ( tr.entityNum == ENTITYNUM_NONE )
+		return;
+
+	traceEnt = &g_entities[ tr.entityNum ];
+
+	if ( traceEnt->takedamage)
+    G_Damage( traceEnt, ent, ent, forward, tr.endpos,
+              LIGHTNING_BOLT_DAMAGE, 0, MOD_LIGHTNING);
+
+	if ( traceEnt->takedamage && traceEnt->client )
+  {
+		tent = G_TempEntity( tr.endpos, EV_MISSILE_HIT );
+		tent->s.otherEntityNum = traceEnt->s.number;
+		tent->s.eventParm = DirToByte( tr.plane.normal );
+		tent->s.weapon = ent->s.weapon;
+    tent->s.generic1 = ent->s.generic1;
+	}
+}
+
+/*
+===============
+lightningBallFire
+===============
+*/
+void lightningBallFire( gentity_t *ent )
+{
+  fire_lightningBall( ent, muzzle, forward );
+}
+
+/*
+======================================================================
+
 LAS GUN
 
 ======================================================================
@@ -2052,6 +2105,10 @@ void FireWeapon2( gentity_t *ent )
       launcherFire( ent, qfalse );
       break;
 
+    case WP_LIGHTNING:
+      lightningBallFire( ent );
+      break;
+
     case WP_ALEVEL2_UPG:
       areaLev2ZapFire( ent );
       break;
@@ -2158,6 +2215,10 @@ void FireWeapon( gentity_t *ent )
       break;
     case WP_LAUNCHER:
       launcherFire(ent, qtrue);
+      break;
+
+    case WP_LIGHTNING:
+      lightningBoltFire( ent );
       break;
 
     case WP_LOCKBLOB_LAUNCHER:

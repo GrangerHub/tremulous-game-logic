@@ -717,6 +717,53 @@ gentity_t *launch_grenade3( gentity_t *self, vec3_t start, vec3_t dir,
 //=============================================================================
 
 /*
+=================
+fire_lightningBall
+
+Used by the lightning gun's secondary fire
+=================
+*/
+gentity_t *fire_lightningBall( gentity_t *self, vec3_t start, vec3_t dir )
+{
+  gentity_t *bolt;
+
+  VectorNormalize (dir);
+
+  bolt = G_Spawn();
+  bolt->classname = "lightningBall";
+  bolt->flags |= ( FL_BOUNCE_HALF | FL_NO_BOUNCE_SOUND );
+  bolt->pointAgainstWorld = qtrue;
+  bolt->nextthink = level.time + LIGHTNING_BALL_LIFETIME;
+  bolt->think = G_ExplodeMissile;
+  bolt->s.eType = ET_MISSILE;
+  bolt->s.weapon = WP_LIGHTNING;
+  bolt->s.generic1 = self->s.generic1; //weaponMode
+  bolt->r.ownerNum = self->s.number;
+  bolt->parent = self;
+  bolt->damage = LIGHTNING_BALL_DAMAGE;
+  bolt->splashDamage = LIGHTNING_BALL_SPLASH_DMG;
+  bolt->splashRadius = LIGHTNING_BALL_RADIUS;
+  bolt->methodOfDeath = MOD_LIGHTNING;
+  bolt->splashMethodOfDeath = MOD_LIGHTNING;
+  G_SetClipmask( bolt, MASK_SHOT );
+  bolt->target_ent = NULL;
+  bolt->r.mins[ 0 ] = bolt->r.mins[ 1 ] = bolt->r.mins[ 2 ] = -LIGHTNING_BALL_SIZE;
+  bolt->r.maxs[ 0 ] = bolt->r.maxs[ 1 ] = bolt->r.maxs[ 2 ] = LIGHTNING_BALL_SIZE;
+
+  bolt->s.pos.trType = TR_GRAVITY;
+  bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;   // move a bit on the very first frame
+  VectorCopy( start, bolt->s.pos.trBase );
+  VectorScale( dir, LIGHTNING_BALL_SPEED, bolt->s.pos.trDelta );
+
+  SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
+
+  VectorCopy( start, bolt->r.currentOrigin );
+
+  return bolt;
+}
+//=============================================================================
+
+/*
 ================
 G_PlayerHasUnexplodedGrenades
 
