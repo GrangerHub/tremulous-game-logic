@@ -777,7 +777,7 @@ void CG_RegisterWeapon( int weaponNum )
 
   if( weaponNum == WP_LIGHTNING )
   {
-    cgs.media.lightningShader = trap_R_RegisterShader( "models/weapons/lightning/boltnew");
+    cgs.media.lightningShader = trap_R_RegisterShader( "lightningBoltNew");
 		cgs.media.lightningExplosionModel = trap_R_RegisterModel( "models/weapons/lightning/crackle.md3" );
   }
 
