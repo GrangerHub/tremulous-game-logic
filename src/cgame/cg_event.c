@@ -172,6 +172,15 @@ static void CG_Obituary( entityState_t *ent )
           message = "blew himself up";
         break;
 
+      case MOD_LIGHTNING:
+        if( gender == GENDER_FEMALE )
+          message = "electrocuted herself";
+        else if( gender == GENDER_NEUTER )
+          message = "electrocuted itself";
+        else
+          message = "electrocuted himself";
+        break;
+
       case MOD_DROP:
         if( gender == GENDER_FEMALE )
           message = "squished herself";
