@@ -161,7 +161,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define SPITFIRE_POUNCE_STAMINA_RESTORE 15
 #define SPITFIRE_BACK_MODIFIER          0.8f
 #define SPITFIRE_SIDE_MODIFIER          0.9f
-#define SPITFIRE_AIRSPEED_MOD           0.45f
+#define SPITFIRE_AIRSPEED_MOD           0.36f
 #define SPITFIRE_GLIDE_ANGLE            15.0f //optimal angle of attack
 #define SPITFIRE_GLIDE_MOD              1000
 #define SPITFIRE_GLIDE_ACCEL            3.8f
@@ -578,10 +578,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LIGHTNING_PRICE             1000
 #define LIGHTNING_AMMO              300
 #define LIGHTNING_K_SCALE           0.0f
-#define LIGHTNING_BOLT_DPS          120
+#define LIGHTNING_BOLT_DPS          100
 #define LIGHTNING_BOLT_REPEAT       50 // keep it as low as possible
 #define LIGHTNING_BOLT_DAMAGE       HDM( LIGHTNING_BOLT_DPS * LIGHTNING_BOLT_REPEAT / 1000 )
-#define LIGHTNING_BOLT_RANGE        300
+#define LIGHTNING_BOLT_RANGE        768
 #define LIGHTNING_BALL_REPEAT       1000
 #define LIGHTNING_BALL_LIFETIME     5000
 #define LIGHTNING_BALL_DAMAGE       HDM( 10 )

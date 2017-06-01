@@ -1433,8 +1433,7 @@ static const classAttributes_t bg_classList[ ] =
     SPITFIRE_HEALTH,                                //int     health;
     0.0f,                                           //float   fallDamage;
     SPITFIRE_REGEN,                                 //float   regenRate;
-    (SCA_FOVWARPS|SCA_ALIENSENSE|SCA_WALLCLIMBER|
-    SCA_CHARGE_STAMINA),                            //int     abilities;
+    (SCA_FOVWARPS|SCA_ALIENSENSE|SCA_WALLCLIMBER),  //int     abilities;
     WP_ASPITFIRE,                                   //weapon_t  startWeapon
     0.0f,                                           //float   buildDist;
     90,                                             //int     fov;
@@ -1443,7 +1442,7 @@ static const classAttributes_t bg_classList[ ] =
     0.0f,                                           //float   landBob;
     80,                                             //int     steptime;
     SPITFIRE_SPEED,                                 //float   speed;
-    10.0f,                                           //float   acceleration;
+    10.0f,                                          //float   acceleration;
     5.0f,                                           //float   airAcceleration;
     4.0f,                                           //float   friction;
     90.0f,                                          //float   stopSpeed;

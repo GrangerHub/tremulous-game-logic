@@ -741,19 +741,24 @@ void lightningBoltFire( gentity_t *ent )
   
 	VectorMA( muzzle, LIGHTNING_BOLT_RANGE, forward, end );
 
+  // damage self if in contact with water
+  if( ent->waterlevel )
+    G_Damage( ent, ent, ent, NULL, NULL,
+              LIGHTNING_BOLT_DAMAGE, 0, MOD_LIGHTNING);
+
 	trap_Trace( &tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT );
 
 
-	if ( tr.entityNum == ENTITYNUM_NONE )
+	if( tr.entityNum == ENTITYNUM_NONE )
 		return;
 
 	traceEnt = &g_entities[ tr.entityNum ];
 
-	if ( traceEnt->takedamage)
+	if( traceEnt->takedamage)
     G_Damage( traceEnt, ent, ent, forward, tr.endpos,
               LIGHTNING_BOLT_DAMAGE, 0, MOD_LIGHTNING);
 
-	if ( traceEnt->takedamage && traceEnt->client )
+	if( traceEnt->takedamage && traceEnt->client )
   {
 		tent = G_TempEntity( tr.endpos, EV_MISSILE_HIT );
 		tent->s.otherEntityNum = traceEnt->s.number;
@@ -771,6 +776,11 @@ lightningBallFire
 void lightningBallFire( gentity_t *ent )
 {
   fire_lightningBall( ent, muzzle, forward );
+
+  // damage self if in contact with water
+  if( ent->waterlevel )
+    G_Damage( ent, ent, ent, NULL, NULL,
+              LIGHTNING_BOLT_DAMAGE, 0, MOD_LIGHTNING);
 }
 
 /*
@@ -1442,12 +1452,6 @@ static void G_FindSpitfireZapTarget( zap_t *zap )
       if( enemy->health <= 0 )
         continue;
 
-      // only target grounded enemies or enemies that contact water
-      if( enemy->s.groundEntityNum == ENTITYNUM_NONE &&
-          !( enemy->client && enemy->client->pmext.ladder ) &&
-          enemy->waterlevel < 1 )
-        continue;
-
       // don't target noclippers
       if( enemy->client && enemy->client->noclip )
         continue;
@@ -1526,12 +1530,19 @@ static void G_DamageSpitfireZapTarget( void *data, void *user_data )
   zapTarget_t *target = (zapTarget_t *)data;
   zap_t *zap = (zap_t *)user_data;
   vec3_t dir;
+  int damage = SPITFIRE_ZAP_DMG;;
 
+  // apply half damage to targets niether grounded nor that contact water
+  if( target->targetEnt->s.groundEntityNum == ENTITYNUM_NONE &&
+      !( target->targetEnt->client && target->targetEnt->client->pmext.ladder ) &&
+      target->targetEnt->waterlevel < 1 )
+    damage /= 2;
+    
   VectorSubtract( target->targetEnt->r.currentOrigin,
                   zap->creator->r.currentOrigin, dir );
   G_Damage( target->targetEnt, zap->creator, zap->creator, dir,
             target->targetEnt->r.currentOrigin,
-            SPITFIRE_ZAP_DMG / BG_Queue_Get_Length( &zap->targetQueue ),
+            damage / BG_Queue_Get_Length( &zap->targetQueue ),
             DAMAGE_NO_KNOCKBACK | DAMAGE_NO_LOCDAMAGE, MOD_SPITFIRE_ZAP );
 }
 
