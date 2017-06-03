@@ -1332,9 +1332,17 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
       G_SetBuildableAnim( spawn, BANIM_SPAWN1, qtrue );
 
       if( spawn->buildableTeam == TEAM_ALIENS )
+      {
         spawn->clientSpawnTime = ALIEN_SPAWN_REPEAT_TIME;
+        ent->dmgProtectionTime = level.time + ALIEN_SPAWN_PROTECTION_TIME;
+        ent->targetProtectionTime = level.time + ALIEN_SPAWN_PROTECTION_TIME;
+      }
       else if( spawn->buildableTeam == TEAM_HUMANS )
+      {
         spawn->clientSpawnTime = HUMAN_SPAWN_REPEAT_TIME;
+        ent->dmgProtectionTime = level.time + HUMAN_SPAWN_PROTECTION_TIME;
+        ent->targetProtectionTime = level.time + HUMAN_SPAWN_PROTECTION_TIME;
+      }
     }
   }
 

@@ -66,7 +66,7 @@ static void G_Bounce( gentity_t *ent, trace_t *trace )
                        ( BG_Buildable( ent->s.modelindex )->health / 10 + 1 );
       G_Damage( ent, NULL, &g_entities[ ent->dropperNum ], NULL,
                 NULL, bounceDamage, DAMAGE_NO_PROTECTION, MOD_FALLING );
-      if( &g_entities[trace->entityNum].takedamage )
+      if( G_TakesDamage( &g_entities[trace->entityNum] ) )
       {
         G_Damage( &g_entities[trace->entityNum], NULL,
                   &g_entities[ ent->dropperNum ], NULL, NULL, bounceDamage,

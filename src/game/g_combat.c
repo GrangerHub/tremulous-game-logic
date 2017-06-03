@@ -31,6 +31,22 @@ int             g_numArmourRegions[ UP_NUM_UPGRADES ];
 
 /*
 ============
+G_TakesDamage
+
+Determines if an entity can be damaged
+============
+*/
+qboolean G_TakesDamage( gentity_t *ent )
+{
+  if( g_damageProtection.integer &&
+      ent->dmgProtectionTime > level.time )
+   return qfalse;
+
+   return ent->takedamage;
+}
+
+/*
+============
 AddScore
 
 Adds score to the client
@@ -997,7 +1013,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   int     knockback;
 
   // Can't deal damage sometimes
-  if( !targ->takedamage || level.intermissionQueued )
+  if( !G_TakesDamage( targ ) || level.intermissionQueued )
     return;
 
   if( !inflictor )
@@ -1005,6 +1021,9 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
   if( !attacker )
     attacker = &g_entities[ ENTITYNUM_WORLD ];
+
+  // end damage protection early
+  attacker->dmgProtectionTime = 0;
 
   // shootable doors / buttons don't actually have any health
   if( targ->s.eType == ET_MOVER )
@@ -1362,10 +1381,10 @@ qboolean G_SelectiveRadiusDamage( vec3_t origin, gentity_t *attacker, float dama
     if( ent == ignore )
       continue;
 
-    if( !ent->takedamage )
+    if( !G_TakesDamage( ent ) )
       continue;
 
-    if( ent->flags & FL_NOTARGET )
+    if( G_NoTarget( ent ) )
       continue;
 
     // find the distance from the edge of the bounding box
@@ -1481,7 +1500,7 @@ qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage,
     if( ent == ignore )
       continue;
 
-    if( !ent->takedamage )
+    if( !G_TakesDamage( ent ) )
       continue;
 
     // find the distance from the edge of the bounding box
@@ -1531,7 +1550,7 @@ qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage,
     if( !ent->client )
       continue;
 
-    if( !ent->takedamage )
+    if( !G_TakesDamage( ent ) )
       continue;
 
     shake = damage * 10 / Distance( origin, ent->r.currentOrigin );
