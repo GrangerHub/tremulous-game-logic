@@ -3041,7 +3041,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     LIGHTNING_PRICE,      //int       price;
     ( 1 << S3 ),          //int       stages;
     SLOT_WEAPON,          //int       slots;
-    "lightning",      //char      *name;
+    "lightning",          //char      *name;
     "Lightning Gun",      //char      *humanName;
     "Generates bolts of lightning as its primary attack. "
     "The secondary attack emmits a burst of ball lightning.",
