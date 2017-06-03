@@ -236,7 +236,11 @@ static void G_PuntBlocker( gentity_t *self, gentity_t *blocker )
     {
       // still blocked, get rid of them
       for( i = 0; i < numBlockers; i++ )
-        G_Damage( blockers[ i ], NULL, NULL, NULL, NULL, 10000, 0, MOD_TRIGGER_HURT );
+      {
+        if( self->buildableTeam == blockers[i]->client->ps.stats[ STAT_TEAM ] )
+          G_Damage( blockers[ i ], NULL, NULL, NULL, NULL, 10000, 0,
+                    MOD_TRIGGER_HURT );
+      }
 
       self->spawnBlockTime = 0;
       return;
@@ -245,15 +249,26 @@ static void G_PuntBlocker( gentity_t *self, gentity_t *blocker )
 
   for( i = 0; i < numBlockers; i++ )
   {
-    nudge[ 0 ] = crandom() * 250.0f;
-    nudge[ 1 ] = crandom() * 250.0f;
-    nudge[ 2 ] = 100.0f;
+    // punt blockers that are on the same team as the buildable
+    if( self->buildableTeam == blockers[i]->client->ps.stats[ STAT_TEAM ] )
+    {
+      nudge[ 0 ] = crandom() * 250.0f;
+      nudge[ 1 ] = crandom() * 250.0f;
+      nudge[ 2 ] = 100.0f;
 
-    VectorAdd( blockers[ i ]->client->ps.velocity, nudge, blockers[ i ]->client->ps.velocity );
-    if( self->s.modelindex == BA_H_TELEPORTER )
-      trap_SendServerCommand( blockers[ i ] - g_entities, "cp \"Don't block teleporters!\"" );
-    else
-      trap_SendServerCommand( blockers[ i ] - g_entities, "cp \"Don't spawn block!\"" );
+      VectorAdd( blockers[ i ]->client->ps.velocity, nudge, blockers[ i ]->client->ps.velocity );
+      if( self->s.modelindex == BA_H_TELEPORTER )
+        trap_SendServerCommand( blockers[ i ] - g_entities, "cp \"Don't block teleporters!\"" );
+      else
+        trap_SendServerCommand( blockers[ i ] - g_entities, "cp \"Don't spawn block!\"" );
+    } else if( blockers[ i ]->noTriggerHurtDmgTime <= level.time )
+    {
+      // damage enemy blockers
+      G_Damage( blockers[ i ], NULL, NULL, NULL, NULL, 10, 0,
+                MOD_TRIGGER_HURT );
+
+      blockers[ i ]->noTriggerHurtDmgTime = level.time + 1000;
+    }
   }
 }
 
