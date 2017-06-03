@@ -508,10 +508,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LIGHTNING_PRICE             1000
 #define LIGHTNING_AMMO              300
 #define LIGHTNING_K_SCALE           0.0f
-#define LIGHTNING_BOLT_DPS          120
+#define LIGHTNING_BOLT_DPS          100
 #define LIGHTNING_BOLT_REPEAT       50 // keep it as low as possible
 #define LIGHTNING_BOLT_DAMAGE       HDM( LIGHTNING_BOLT_DPS * LIGHTNING_BOLT_REPEAT / 1000 )
-#define LIGHTNING_BOLT_RANGE        300
+#define LIGHTNING_BOLT_RANGE        768
 #define LIGHTNING_BALL_REPEAT       1000
 #define LIGHTNING_BALL_LIFETIME     5000
 #define LIGHTNING_BALL_DAMAGE       HDM( 10 )
