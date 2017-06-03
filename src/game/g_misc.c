@@ -60,7 +60,21 @@ void SP_light( gentity_t *self )
   G_FreeEntity( self );
 }
 
+/*
+============
+G_NoTarget
 
+Determines if an entity can be targeted
+============
+*/
+qboolean G_NoTarget( gentity_t *ent )
+{
+  if( g_targetProtection.integer &&
+      ent->targetProtectionTime > level.time )
+    return qtrue;
+
+  return (ent->flags & FL_NOTARGET);
+}
 
 /*
 =================================================================================
@@ -103,6 +117,9 @@ void TeleportPlayer( gentity_t *player, vec3_t origin, vec3_t angles, float spee
   // use the precise origin for linking
   VectorCopy( player->client->ps.origin, player->r.currentOrigin );
   VectorCopy( player->client->ps.viewangles, player->r.currentAngles );
+
+  // Protect against targeting by buildables
+  player->targetProtectionTime = level.time + TELEPORT_PROTECTION_TIME;
 
   if( player->client->sess.spectatorState == SPECTATOR_NOT )
   {

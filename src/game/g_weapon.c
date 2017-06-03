@@ -360,7 +360,7 @@ void meleeAttack( gentity_t *ent, float range, float width, float height,
     heightAdjusted = ( height * (float)( n ) ) / 5.00f;
 
     G_WideTrace( &tr, ent, range, widthAdjusted, heightAdjusted, &traceEnt );
-    if( traceEnt != NULL && traceEnt->takedamage )
+    if( traceEnt != NULL && G_TakesDamage( traceEnt ) )
     {
       WideBloodSpurt( ent, traceEnt, &tr );
       G_Damage( traceEnt, ent, ent, forward, tr.endpos, damage, DAMAGE_NO_KNOCKBACK, mod );
@@ -369,7 +369,7 @@ void meleeAttack( gentity_t *ent, float range, float width, float height,
   }
 
   G_WideTrace( &tr, ent, range, width, height, &traceEnt );
-  if( traceEnt == NULL || !traceEnt->takedamage )
+  if( traceEnt == NULL || !G_TakesDamage( traceEnt ) )
     return;
 
   WideBloodSpurt( ent, traceEnt, &tr );
@@ -419,7 +419,7 @@ void bulletFire( gentity_t *ent, float spread, int damage, int mod )
   SnapVectorTowards( tr.endpos, muzzle );
 
   // send bullet impact
-  if( traceEnt->takedamage &&
+  if( G_TakesDamage( traceEnt ) &&
       (traceEnt->s.eType == ET_PLAYER ||
        traceEnt->s.eType == ET_BUILDABLE ) )
   {
@@ -433,7 +433,7 @@ void bulletFire( gentity_t *ent, float spread, int damage, int mod )
   }
   tent->s.otherEntityNum = ent->s.number;
 
-  if( traceEnt->takedamage )
+  if( G_TakesDamage( traceEnt ) )
   {
     G_Damage( traceEnt, ent, ent, forward, tr.endpos,
       damage, 0, mod );
@@ -479,7 +479,7 @@ void ShotgunPattern( vec3_t origin, vec3_t origin2, int seed, gentity_t *ent )
     // send bullet impact
     if( !( tr.surfaceFlags & SURF_NOIMPACT ) )
     {
-      if( traceEnt->takedamage )
+      if( G_TakesDamage( traceEnt ) )
         G_Damage( traceEnt, ent, ent, forward, tr.endpos,  SHOTGUN_DMG, 0, MOD_SHOTGUN );
     }
   }
@@ -531,7 +531,7 @@ void massDriverFire( gentity_t *ent )
   SnapVectorTowards( tr.endpos, muzzle );
 
   // send impact
-  if( traceEnt->takedamage && 
+  if( G_TakesDamage( traceEnt ) && 
       (traceEnt->s.eType == ET_BUILDABLE || 
        traceEnt->s.eType == ET_PLAYER ) )
   {
@@ -545,7 +545,7 @@ void massDriverFire( gentity_t *ent )
     tent->s.generic1 = ent->s.generic1; //weaponMode
   }
 
-  if( traceEnt->takedamage )
+  if( G_TakesDamage( traceEnt ) )
   {
     G_Damage( traceEnt, ent, ent, forward, tr.endpos,
       MDRIVER_DMG, 0, MOD_MDRIVER );
@@ -690,11 +690,11 @@ void lightningBoltFire( gentity_t *ent )
 
 	traceEnt = &g_entities[ tr.entityNum ];
 
-	if( traceEnt->takedamage)
+	if( G_TakesDamage( traceEnt ))
     G_Damage( traceEnt, ent, ent, forward, tr.endpos,
               LIGHTNING_BOLT_DAMAGE, 0, MOD_LIGHTNING);
 
-	if ( traceEnt->takedamage && traceEnt->client )
+	if ( G_TakesDamage( traceEnt ) && traceEnt->client )
   {
 		tent = G_TempEntity( tr.endpos, EV_MISSILE_HIT );
 		tent->s.otherEntityNum = traceEnt->s.number;
@@ -754,7 +754,7 @@ void lasGunFire( gentity_t *ent )
   SnapVectorTowards( tr.endpos, muzzle );
 
   // send impact
-  if( traceEnt->takedamage && 
+  if( G_TakesDamage( traceEnt ) && 
       (traceEnt->s.eType == ET_BUILDABLE || 
        traceEnt->s.eType == ET_PLAYER ) )
   {
@@ -768,7 +768,7 @@ void lasGunFire( gentity_t *ent )
     tent->s.generic1 = ent->s.generic1; //weaponMode
   }
 
-  if( traceEnt->takedamage )
+  if( G_TakesDamage( traceEnt ) )
     G_Damage( traceEnt, ent, ent, forward, tr.endpos, LASGUN_DAMAGE, 0, MOD_LASGUN );
 }
 
@@ -788,7 +788,7 @@ void painSawFire( gentity_t *ent )
 
   G_WideTrace( &tr, ent, PAINSAW_RANGE, PAINSAW_WIDTH, PAINSAW_HEIGHT,
                &traceEnt );
-  if( !traceEnt || !traceEnt->takedamage )
+  if( !traceEnt || !G_TakesDamage( traceEnt ) )
     return;
 
   // hack to line up particle system with weapon model
@@ -900,7 +900,7 @@ void teslaFire( gentity_t *self )
   self->s.eFlags |= EF_FIRING;
 
   // Deal damage
-  if( self->enemy->takedamage )
+  if( G_TakesDamage( self->enemy ) )
   {
     vec3_t dir;
 
@@ -1054,7 +1054,7 @@ qboolean CheckVenomAttack( gentity_t *ent )
   if( traceEnt == NULL )
     return qfalse;
 
-  if( !traceEnt->takedamage )
+  if( !G_TakesDamage( traceEnt ) )
     return qfalse;
 
   if( traceEnt->health <= 0 )
@@ -1126,7 +1126,7 @@ void CheckGrabAttack( gentity_t *ent )
 
   traceEnt = &g_entities[ tr.entityNum ];
 
-  if( !traceEnt->takedamage )
+  if( !G_TakesDamage( traceEnt ) )
     return;
 
   if( traceEnt->client )
@@ -1537,10 +1537,10 @@ qboolean CheckPounceAttack( gentity_t *ent )
     return qfalse;
 
   // Send blood impact
-  if( traceEnt->takedamage )
+  if( G_TakesDamage( traceEnt ) )
     WideBloodSpurt( ent, traceEnt, &tr );
 
-  if( !traceEnt->takedamage )
+  if( !G_TakesDamage( traceEnt ) )
     return qfalse;
     
   // Deal damage
@@ -1587,7 +1587,7 @@ void G_ChargeAttack( gentity_t *ent, gentity_t *victim )
   VectorSubtract( victim->r.currentOrigin, ent->r.currentOrigin, forward );
   VectorNormalize( forward );
 
-  if( !victim->takedamage )
+  if( !G_TakesDamage( victim ) )
     return;
 
   // For buildables, track the last MAX_TRAMPLE_BUILDABLES_TRACKED buildables
@@ -1630,7 +1630,7 @@ void G_CrushAttack( gentity_t *ent, gentity_t *victim )
   float jump;
   int damage;
 
-  if( !victim->takedamage ||
+  if( !G_TakesDamage( victim ) ||
       ent->client->ps.origin[ 2 ] + ent->r.mins[ 2 ] <
       victim->r.currentOrigin[ 2 ] + victim->r.maxs[ 2 ] ||
       ( victim->client &&

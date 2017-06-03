@@ -114,7 +114,7 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace )
   attacker = &g_entities[ ent->r.ownerNum ];
 
   // check for bounce
-  if( !other->takedamage &&
+  if( !G_TakesDamage( other ) &&
       ( ent->flags & ( FL_BOUNCE | FL_BOUNCE_HALF ) ) )
   {
     G_BounceMissile( ent, trace );
@@ -192,7 +192,7 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace )
   }
 
   // impact damage
-  if( other->takedamage )
+  if( G_TakesDamage( other ) )
   {
     // FIXME: wrong damage direction?
     if( ent->damage )
@@ -216,7 +216,7 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace )
 
   if( ent->s.weapon == WP_LAUNCHER )
     G_AddEvent(ent,EV_MISSILE_MISS,DirToByte(trace->plane.normal));
-  else if( other->takedamage && 
+  else if( G_TakesDamage( other ) && 
       ( other->s.eType == ET_PLAYER || other->s.eType == ET_BUILDABLE ) )
   {
     G_AddEvent( ent, EV_MISSILE_HIT, DirToByte( trace->plane.normal ) );
@@ -861,7 +861,7 @@ void AHive_SearchAndDestroy( gentity_t *self )
   {
     ent = &g_entities[ i ];
 
-    if( ent->flags & FL_NOTARGET )
+    if( G_NoTarget( ent ) )
       continue;
 
     if( ent->client &&

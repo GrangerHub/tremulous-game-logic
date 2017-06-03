@@ -454,7 +454,7 @@ target_hurt_use
 void target_hurt_use( gentity_t *self, gentity_t *other, gentity_t *activator )
 {
   // hurt the activator
-  if( !activator || !activator->takedamage )
+  if( !activator || !G_TakesDamage( activator ) )
     return;
 
   G_Damage( activator, self, self, NULL, NULL, self->damage, 0, MOD_TRIGGER_HURT );
