@@ -406,13 +406,13 @@ void hurt_touch( gentity_t *self, gentity_t *other, trace_t *trace )
   if( !G_TakesDamage( other ) )
     return;
 
-  if( self->timestamp > level.time )
+  if( other->noTriggerHurtDmgTime > level.time )
     return;
 
   if( self->spawnflags & 16 )
-    self->timestamp = level.time + 1000;
+    other->noTriggerHurtDmgTime = level.time + 1000;
   else
-    self->timestamp = level.time + FRAMETIME;
+    other->noTriggerHurtDmgTime = level.time + FRAMETIME;
 
   // play sound
   if( !( self->spawnflags & 4 ) )
