@@ -674,18 +674,23 @@ void lightningBoltFire( gentity_t *ent )
 	trace_t		tr;
 	vec3_t		end;
 	gentity_t	*traceEnt, *tent;
-  
+
+  // damage self if in contact with water
+  if( ent->waterlevel )
+    G_Damage( ent, ent, ent, NULL, NULL,
+              LIGHTNING_BOLT_DAMAGE, 0, MOD_LIGHTNING);
+
 	VectorMA( muzzle, LIGHTNING_BOLT_RANGE, forward, end );
 
 	trap_Trace( &tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT );
 
 
-	if ( tr.entityNum == ENTITYNUM_NONE )
+	if( tr.entityNum == ENTITYNUM_NONE )
 		return;
 
 	traceEnt = &g_entities[ tr.entityNum ];
 
-	if ( traceEnt->takedamage)
+	if( traceEnt->takedamage)
     G_Damage( traceEnt, ent, ent, forward, tr.endpos,
               LIGHTNING_BOLT_DAMAGE, 0, MOD_LIGHTNING);
 
@@ -707,6 +712,11 @@ lightningBallFire
 void lightningBallFire( gentity_t *ent )
 {
   fire_lightningBall( ent, muzzle, forward );
+
+  // damage self if in contact with water
+  if( ent->waterlevel )
+    G_Damage( ent, ent, ent, NULL, NULL,
+              LIGHTNING_BOLT_DAMAGE, 0, MOD_LIGHTNING);
 }
 
 /*
