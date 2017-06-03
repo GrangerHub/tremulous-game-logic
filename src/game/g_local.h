@@ -123,10 +123,6 @@ struct gentity_s
   qboolean          freeAfterEvent;
   qboolean          unlinkAfterEvent;
 
-  
-  int               dmgProtectionTime; // momentarily protection against damage
-  int               targetProtectionTime; // momentarily protectiion against targeting
-
   qboolean          physicsObject;  // if true, it can be pushed by movers and fall off edges
                                     // all game items are physicsObjects,
   float             physicsBounce;  // 1.0 = continuous bounce, 0.0 = no bounce
@@ -274,6 +270,9 @@ struct gentity_s
   int               lastHealth; // currently only used for overmind
 
   qboolean          takedamage;
+  int               dmgProtectionTime; // momentarily protection against damage
+  int               targetProtectionTime; // momentarily protectiion against targeting
+  int               noTriggerHurtDmgTime; // time that trigger hurt can't damage
 
   int               damage;
   int               splashDamage; // quad will increase this without increasing radius
