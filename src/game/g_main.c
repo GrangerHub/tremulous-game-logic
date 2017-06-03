@@ -60,6 +60,9 @@ vmCvar_t  g_warmupTimeout2Trigger;
 vmCvar_t  g_warmupBuildableRespawnTime;
 vmCvar_t  g_warmupDefensiveBuildableRespawnTime;
 
+vmCvar_t  g_damageProtection;
+vmCvar_t  g_targetProtection;
+
 vmCvar_t  g_humanStaminaMode;
 vmCvar_t  g_friendlyFire;
 vmCvar_t  g_friendlyBuildableFire;
@@ -202,6 +205,9 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_warmupTimeout2Trigger, "g_warmupTimeout2Trigger", "66", CVAR_ARCHIVE, 0, qtrue },
   { &g_warmupBuildableRespawnTime, "g_warmupBuildableRespawnTime", "10", CVAR_ARCHIVE, 0, qtrue },
   { &g_warmupDefensiveBuildableRespawnTime, "g_warmupDefensiveBuildableRespawnTime", "30", CVAR_ARCHIVE, 0, qtrue },
+
+  { &g_damageProtection, "g_damageProtection", "1", CVAR_ARCHIVE, 0, qtrue },
+    { &g_targetProtection, "g_targetProtection", "1", CVAR_ARCHIVE, 0, qtrue },
 
   // noset vars
   { NULL, "gamename", GAME_VERSION , CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },

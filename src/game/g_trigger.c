@@ -404,7 +404,7 @@ void hurt_touch( gentity_t *self, gentity_t *other, trace_t *trace )
   int       dflags;
   gentity_t *attacker;
 
-  if( !other->takedamage )
+  if( !G_TakesDamage( other ) )
     return;
 
   if( self->timestamp > level.time )

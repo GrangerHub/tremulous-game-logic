@@ -84,7 +84,7 @@ void G_SuffocateTrappedEntities( gentity_t *self )
     ent = &g_entities[ touch[ i ] ];
 
     // skip players with notarget set
-    if( ent->flags & FL_NOTARGET )
+    if( G_NoTarget( ent ) )
       continue;
 
     // only target players
@@ -791,7 +791,7 @@ static void G_CreepSlow( gentity_t *self )
   {
     enemy = &g_entities[ entityList[ i ] ];
 
-   if( enemy->flags & FL_NOTARGET )
+   if( G_NoTarget( enemy ) )
      continue;
 
     if( enemy->client && enemy->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
@@ -1434,7 +1434,7 @@ void AAcidTube_Think( gentity_t *self )
     {
       enemy = &g_entities[ entityList[ i ] ];
 
-      if( enemy->flags & FL_NOTARGET )
+      if( G_NoTarget( enemy ) )
         continue;
 
       if( !G_Visible( self, enemy, CONTENTS_SOLID ) )
@@ -1481,7 +1481,7 @@ static qboolean AHive_CheckTarget( gentity_t *self, gentity_t *enemy )
       enemy->client->ps.stats[ STAT_TEAM ] != TEAM_HUMANS )
     return qfalse;
 
-  if( enemy->flags & FL_NOTARGET )
+  if( G_NoTarget( enemy ) )
     return qfalse;
 
   // Check if the tip of the hive can see the target
@@ -1589,7 +1589,7 @@ void ABooster_Touch( gentity_t *self, gentity_t *other, trace_t *trace )
   if( client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
     return;
 
-  if( other->flags & FL_NOTARGET )
+  if( G_NoTarget( other ) )
     return; // notarget cancels even beneficial effects?
 
   client->ps.stats[ STAT_STATE ] |= SS_BOOSTED;
@@ -2005,7 +2005,7 @@ static qboolean ATrapper_CheckTarget( gentity_t *self, gentity_t *target, int ra
     return qfalse;
   if( !target->client ) // is the target a bot or player?
     return qfalse;
-  if( target->flags & FL_NOTARGET ) // is the target cheating?
+  if( G_NoTarget( target ) ) // is the target cheating?
     return qfalse;
   if( target->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS ) // one of us?
     return qfalse;
@@ -2152,7 +2152,7 @@ qboolean ASlimeZunge_CheckTarget( gentity_t *slime, gentity_t *target )
                 strcmp( target->classname, "grenade2" ) ) )
     return qfalse;
 
-  if( target->flags & FL_NOTARGET )
+  if( G_NoTarget( target ) )
     return qfalse;
 
   if( !G_Visible( slime, target, CONTENTS_SOLID ) )
@@ -2934,7 +2934,7 @@ void HReactor_Think( gentity_t *self )
             enemy->client->ps.stats[ STAT_TEAM ] != TEAM_ALIENS )
           && enemy->s.eType != ET_TELEPORTAL )
         continue;
-      if( enemy->flags & FL_NOTARGET )
+      if( G_NoTarget( enemy ) )
         continue;
 
       tent = G_TempEntity( enemy->s.pos.trBase, EV_TESLATRAIL );
@@ -3112,7 +3112,7 @@ void HMedistat_Think( gentity_t *self )
     {
       player = &g_entities[ entityList[ i ] ];
 
-      if( player->flags & FL_NOTARGET )
+      if( G_NoTarget( player ) )
         continue; // notarget cancels even beneficial effects?
 
       //remove poison from everyone, not just the healed player
@@ -3138,7 +3138,7 @@ void HMedistat_Think( gentity_t *self )
       {
         player = &g_entities[ entityList[ i ] ];
 
-        if( player->flags & FL_NOTARGET )
+        if( G_NoTarget( player ) )
           continue; // notarget cancels even beneficial effects?
 
         if( player->client && player->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
@@ -3222,7 +3222,7 @@ static qboolean HMGTurret_CheckTarget( gentity_t *self, gentity_t *target,
       target->client->pers.teamSelection != TEAM_ALIENS )
     return qfalse;
 
-  if( target->flags & FL_NOTARGET )
+  if( G_NoTarget( target ) )
     return qfalse;
 
   if( !los_check )
@@ -3583,7 +3583,7 @@ void HTeslaGen_Think( gentity_t *self )
     {
       self->enemy = &g_entities[ entityList[ i ] ];
 
-      if( self->enemy->flags & FL_NOTARGET )
+      if( G_NoTarget( self->enemy ) )
         continue;
 
       if( ( ( self->enemy->client &&

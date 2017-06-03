@@ -627,7 +627,7 @@ void Cmd_Notarget_f( gentity_t *ent )
 
   ent->flags ^= FL_NOTARGET;
 
-  if( !( ent->flags & FL_NOTARGET ) )
+  if( !G_NoTarget( ent ) )
     msg = "notarget OFF\n";
   else
     msg = "notarget ON\n";

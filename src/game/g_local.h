@@ -123,6 +123,10 @@ struct gentity_s
   qboolean          freeAfterEvent;
   qboolean          unlinkAfterEvent;
 
+  
+  int               dmgProtectionTime; // momentarily protection against damage
+  int               targetProtectionTime; // momentarily protectiion against targeting
+
   qboolean          physicsObject;  // if true, it can be pushed by movers and fall off edges
                                     // all game items are physicsObjects,
   float             physicsBounce;  // 1.0 = continuous bounce, 0.0 = no bounce
@@ -1135,7 +1139,8 @@ qboolean  G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage, floa
                           gentity_t *ignore, int mod );
 qboolean  G_SelectiveRadiusDamage( vec3_t origin, gentity_t *attacker, float damage, float radius,
                                    gentity_t *ignore, int mod, int team );
-void G_Knockback( gentity_t *targ, vec3_t dir, int knockback );
+void      G_Knockback( gentity_t *targ, vec3_t dir, int knockback );
+qboolean  G_TakesDamage( gentity_t *ent );
 float     G_RewardAttackers( gentity_t *self );
 void      AddScore( gentity_t *ent, int score );
 void      G_LogDestruction( gentity_t *self, gentity_t *actor, int mod );
@@ -1190,7 +1195,9 @@ void G_Checktrigger_stages( team_t team, stage_t stage );
 //
 // g_misc.c
 //
-void TeleportPlayer( gentity_t *player, vec3_t origin, vec3_t angles, float speed );
+qboolean G_NoTarget( gentity_t *ent );
+void     TeleportPlayer( gentity_t *player, vec3_t origin, vec3_t angles,
+                         float speed );
 
 //
 // g_weapon.c
@@ -1406,6 +1413,9 @@ extern  vmCvar_t  g_warmupTimeout2;
 extern  vmCvar_t  g_warmupTimeout2Trigger;
 extern  vmCvar_t  g_warmupBuildableRespawnTime;
 extern  vmCvar_t  g_warmupDefensiveBuildableRespawnTime;
+
+extern  vmCvar_t   g_damageProtection;
+extern  vmCvar_t   g_targetProtection;
 
 #define IS_WARMUP  ( g_doWarmup.integer && g_warmup.integer )
 
