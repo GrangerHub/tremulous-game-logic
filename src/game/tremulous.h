@@ -577,7 +577,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LAUNCHER_SPEED               1200
 
 #define LIGHTNING_PRICE             1000
-#define LIGHTNING_AMMO              300
+#define LIGHTNING_AMMO              500
 #define LIGHTNING_K_SCALE           0.0f
 #define LIGHTNING_BOLT_DPS          100
 #define LIGHTNING_BOLT_REPEAT       50 // keep it as low as possible
