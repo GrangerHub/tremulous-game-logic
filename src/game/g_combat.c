@@ -1022,8 +1022,9 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   if( !attacker )
     attacker = &g_entities[ ENTITYNUM_WORLD ];
 
-  // end damage protection early
+  // end damage and target protection early
   attacker->dmgProtectionTime = 0;
+  attacker->targetProtectionTime = 0;
 
   // shootable doors / buttons don't actually have any health
   if( targ->s.eType == ET_MOVER )
