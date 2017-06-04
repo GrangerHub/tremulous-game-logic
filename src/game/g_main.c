@@ -57,8 +57,10 @@ vmCvar_t  g_warmupTimeout1;
 vmCvar_t  g_warmupTimeout1Trigger;
 vmCvar_t  g_warmupTimeout2;
 vmCvar_t  g_warmupTimeout2Trigger;
+vmCvar_t  g_warmupBuildableRespawning;
 vmCvar_t  g_warmupBuildableRespawnTime;
 vmCvar_t  g_warmupDefensiveBuildableRespawnTime;
+vmCvar_t  g_warmupBlockEnemyBuilding;
 
 vmCvar_t  g_damageProtection;
 vmCvar_t  g_targetProtection;
@@ -194,13 +196,23 @@ static cvarTable_t   gameCvarTable[ ] =
   // warmup
   { &g_warmup, "g_warmup", "1", 0, 0, qfalse },
   { &g_doWarmup, "g_doWarmup", "1", CVAR_ARCHIVE, 0, qtrue  },
-  { &g_warmupReadyThreshold, "g_warmupReadyThreshold", "50", CVAR_ARCHIVE, 0, qtrue },
+  { &g_warmupReadyThreshold, "g_warmupReadyThreshold", "50", CVAR_ARCHIVE, 0,
+    qtrue },
   { &g_warmupTimeout1, "g_warmupTimeout1", "300", CVAR_ARCHIVE, 0, qtrue },
-  { &g_warmupTimeout1Trigger, "g_warmupTimeout1Trigger", "4", CVAR_ARCHIVE, 0, qtrue },
+  { &g_warmupTimeout1Trigger, "g_warmupTimeout1Trigger", "4", CVAR_ARCHIVE, 0,
+    qtrue },
   { &g_warmupTimeout2, "g_warmupTimeout2", "60", CVAR_ARCHIVE, 0, qtrue },
-  { &g_warmupTimeout2Trigger, "g_warmupTimeout2Trigger", "66", CVAR_ARCHIVE, 0, qtrue },
-  { &g_warmupBuildableRespawnTime, "g_warmupBuildableRespawnTime", "10", CVAR_ARCHIVE, 0, qtrue },
-  { &g_warmupDefensiveBuildableRespawnTime, "g_warmupDefensiveBuildableRespawnTime", "30", CVAR_ARCHIVE, 0, qtrue },
+  { &g_warmupTimeout2Trigger, "g_warmupTimeout2Trigger", "66", CVAR_ARCHIVE, 0,
+    qtrue },
+  { &g_warmupBuildableRespawning, "g_warmupBuildableRespawning", "0",
+    CVAR_ARCHIVE, 0, qtrue },
+  { &g_warmupBuildableRespawnTime, "g_warmupBuildableRespawnTime", "10",
+    CVAR_ARCHIVE, 0, qtrue },
+  { &g_warmupDefensiveBuildableRespawnTime,
+    "g_warmupDefensiveBuildableRespawnTime", "30", CVAR_ARCHIVE, 0, qtrue },
+  { &g_warmupBlockEnemyBuilding,
+    "g_warmupBlockEnemyBuilding", "0", CVAR_SERVERINFO | CVAR_ARCHIVE, 0,
+    qtrue },
 
   { &g_damageProtection, "g_damageProtection", "1", CVAR_ARCHIVE, 0, qtrue },
     { &g_targetProtection, "g_targetProtection", "1", CVAR_ARCHIVE, 0, qtrue },

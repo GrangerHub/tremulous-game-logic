@@ -514,7 +514,8 @@ int G_GetMarkedBuildPoints( playerState_t *ps )
   if( G_TimeTilSuddenDeath( ) <= 0 )
     return 0;
 
-  if( ( IS_WARMUP || !g_markDeconstruct.integer ) )
+  if( ( ( IS_WARMUP && g_warmupBuildableRespawning.integer ) ||
+        !g_markDeconstruct.integer ) )
     return 0;
 
   BG_PositionBuildableRelativeToPlayer( ps, mins, maxs, trap_Trace, origin, angles, &tr1 );
@@ -968,7 +969,8 @@ void AGeneric_CreepRecede( gentity_t *self )
   else //creep has died
   {
     // Respawn buildable if in warmup, otherwise free the entity
-    if( IS_WARMUP && self->enemy->client &&
+    if( IS_WARMUP && g_warmupBuildableRespawning.integer &&
+        self->enemy->client &&
         self->methodOfDeath != MOD_TRIGGER_HURT )
     {
       self->think = AGeneric_CreepRespawn;
@@ -2016,7 +2018,8 @@ void HSpawn_Blast( gentity_t *self )
   // respawn the buildable in next think in warmup
   // and attacker was a player, but don't respawn a repeater killed from another
   // power zone.
-  if( IS_WARMUP && self->enemy->client &&
+  if( IS_WARMUP && g_warmupBuildableRespawning.integer
+      && self->enemy->client &&
       self->methodOfDeath != MOD_TRIGGER_HURT &&
       !( self->methodOfDeath == MOD_SUICIDE &&
          self->s.modelindex == BA_H_REPEATER ) )
@@ -3326,7 +3329,8 @@ void G_BuildableThink( gentity_t *ent, int msec )
       }
     }
 
-    if(  !IS_WARMUP && g_allowBuildableStacking.integer )
+    if(  !( IS_WARMUP && g_warmupBuildableRespawning.integer ) &&
+         g_allowBuildableStacking.integer )
     {
       meansOfDeath_t meansOD;
 
@@ -3598,7 +3602,8 @@ void G_FreeMarkedBuildables( gentity_t *deconner, char *readable, int rsize,
   if( nums && nsize )
     nums[ 0 ] = '\0';
 
-  if( ( IS_WARMUP || !g_markDeconstruct.integer ) )
+  if( ( ( IS_WARMUP && g_warmupBuildableRespawning.integer ) ||
+        !g_markDeconstruct.integer ) )
     return; // Not enabled, can't deconstruct anything
 
   for( i = 0; i < level.numBuildablesForRemoval; i++ )
@@ -3702,7 +3707,8 @@ static itemBuildError_t G_SufficientBPAvailable( buildable_t     buildable,
   }
 
   // Simple non-marking case
-  if( ( IS_WARMUP || !g_markDeconstruct.integer ) )
+  if( ( ( IS_WARMUP && g_warmupBuildableRespawning.integer ) ||
+        !g_markDeconstruct.integer ) )
   {
     if( remainingBP - buildPoints < 0 )
       return bpError;
@@ -3999,7 +4005,8 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   int               contents;
   playerState_t     *ps = &ent->client->ps;
 
-  if( IS_WARMUP || !g_allowBuildableStacking.integer )
+  if( ( IS_WARMUP && g_warmupBuildableRespawning.integer ) ||
+      !g_allowBuildableStacking.integer )
   {
     // Stop all buildables from interacting with traces
     G_SetBuildableLinkState( qfalse );
@@ -4023,7 +4030,8 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
     reason = IBE_NORMAL;
 
   if( tr1.entityNum != ENTITYNUM_WORLD &&
-      ( IS_WARMUP || !g_allowBuildableStacking.integer ||
+      ( ( IS_WARMUP && g_warmupBuildableRespawning.integer ) ||
+        !g_allowBuildableStacking.integer ||
         ( g_entities[ *groundEntNum ].s.eType == ET_BUILDABLE &&
           !BG_Buildable( g_entities[ *groundEntNum ].s.modelindex )->stackable ) ||
         ( g_entities[ *groundEntNum ].client &&
@@ -4054,7 +4062,8 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
     }
 
     // Check if the enemy isn't blocking your building during pre-game warmup
-    if( ( G_IsPowered( entity_origin ) != BA_NONE ) && IS_WARMUP )
+    if( IS_WARMUP && g_warmupBlockEnemyBuilding.integer &&
+        ( G_IsPowered( entity_origin ) != BA_NONE ) )
     {
       if( G_IsPowered( entity_origin ) == BA_H_REACTOR )
       {
@@ -4083,7 +4092,8 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
     }
 
     // Check if the enemy isn't blocking your building during pre-game warmup
-    if( G_IsCreepHere( entity_origin ) && IS_WARMUP )
+    if( IS_WARMUP && g_warmupBlockEnemyBuilding.integer &&
+        G_IsCreepHere( entity_origin ) )
     {
       if( G_IsOvermindCreepHere( entity_origin ) )
       {
@@ -4117,11 +4127,13 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
 
       if( tempent == NULL ) // No reactor
         reason = IBE_RPTNOREAC;   
-      else if( !IS_WARMUP && g_markDeconstruct.integer && g_markDeconstruct.integer != 3 &&
+      else if( !( IS_WARMUP && g_warmupBuildableRespawning.integer ) &&
+                g_markDeconstruct.integer && g_markDeconstruct.integer != 3 &&
                powerBuildable && powerBuildable->s.modelindex == BA_H_REACTOR )
         reason = IBE_RPTPOWERHERE;
       else if( powerBuildable &&
-               ( IS_WARMUP || !g_markDeconstruct.integer || ( g_markDeconstruct.integer == 3 &&
+               ( ( IS_WARMUP && g_warmupBuildableRespawning.integer ) ||
+                 !g_markDeconstruct.integer || ( g_markDeconstruct.integer == 3 &&
                    !intersectsBuildable ) ) )
         reason = IBE_RPTPOWERHERE;
     }
@@ -4169,7 +4181,8 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
     }
   }
 
-  if( IS_WARMUP || !g_allowBuildableStacking.integer )
+  if( ( IS_WARMUP && g_warmupBuildableRespawning.integer ) ||
+      !g_allowBuildableStacking.integer )
   {
     // Relink buildables
     G_SetBuildableLinkState( qtrue );
@@ -5397,9 +5410,11 @@ void G_UpdateBuildableRangeMarkers( void )
             client->ps.weapon == WP_ABUILD || client->ps.weapon == WP_ABUILD2 );
       wantsToSee = !!( client->pers.buildableRangeMarkerMask & ( 1 << bType ) );
 
-      if( ( (team == bTeam || ( IS_WARMUP &&
-          ( bType == BA_A_SPAWN || bType == BA_H_REACTOR ||
-            bType == BA_H_REPEATER || bType == BA_A_OVERMIND ) ) ) &&
+      if( ( ( team == bTeam ||
+              ( IS_WARMUP &&
+                g_warmupBlockEnemyBuilding.integer &&
+                ( bType == BA_A_SPAWN || bType == BA_H_REACTOR ||
+                  bType == BA_H_REPEATER || bType == BA_A_OVERMIND ) ) ) &&
           weaponDisplays ) && wantsToSee )
       {
         if( i >= 32 )

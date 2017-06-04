@@ -3073,7 +3073,8 @@ void Cmd_Reload_f( gentity_t *ent )
           ( ent->client->ps.weapon <= WP_HBUILD ) ) )
     {
       // Cancel deconstruction (unmark)
-      if( !IS_WARMUP && traceEnt->deconstruct )
+      if( !( IS_WARMUP && g_warmupBuildableRespawning.integer ) &&
+          traceEnt->deconstruct )
       {
         traceEnt->deconstruct = qfalse;
         return;
@@ -3103,9 +3104,9 @@ void Cmd_Reload_f( gentity_t *ent )
 
       if( traceEnt->health > 0 )
       {
-        if( !IS_WARMUP &&
-                 ( ent->client->pers.teamSelection != TEAM_HUMANS ||
-                   G_FindPower( traceEnt , qtrue ) || lastSpawn ) )
+        if( !( IS_WARMUP && g_warmupBuildableRespawning.integer ) &&
+             ( ent->client->pers.teamSelection != TEAM_HUMANS ||
+               G_FindPower( traceEnt , qtrue ) || lastSpawn ) )
         {
           traceEnt->deconstruct     = qtrue; // Mark buildable for deconstruction
           traceEnt->deconstructTime = level.time;
