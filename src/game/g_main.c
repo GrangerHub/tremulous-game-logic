@@ -857,6 +857,14 @@ void G_ShutdownGame( int restart )
     level.logFile = 0;
   }
 
+  if( !restart )
+  {
+    int i;
+    // reset everyone's ready state
+    for( i = 0; i < level.maxclients; i++ )
+      level.clients[ i ].sess.readyToPlay = qfalse;
+  }
+
   // write all the client session data so we can get it back
   G_WriteSessionData( );
 
@@ -2202,6 +2210,7 @@ void G_LevelRestart( qboolean stopWarmup )
   char      map[ MAX_CVAR_VALUE_STRING ];
   int       i;
   gclient_t *cl;
+  gentity_t *tent;
 
   for( i = 0; i < g_maxclients.integer; i++ )
   {
@@ -2225,10 +2234,48 @@ void G_LevelRestart( qboolean stopWarmup )
         ( g_alienCredits.integer ),
         ( level.alienNextStageThreshold ) ) );
 
-  trap_SetConfigstring( CS_HUMAN_STAGES, va( "%d %d %d",
-        ( g_humanStage.integer ),
-        ( g_humanCredits.integer ),
-        ( level.humanNextStageThreshold ) ) );
+    trap_SetConfigstring( CS_HUMAN_STAGES, va( "%d %d %d",
+          ( g_humanStage.integer ),
+          ( g_humanCredits.integer ),
+          ( level.humanNextStageThreshold ) ) );
+
+    // reset everyone's ready state
+    for( i = 0; i < level.maxclients; i++ )
+      level.clients[ i ].sess.readyToPlay = qfalse;
+
+    // If dev mode is on, turn it off
+    if( g_cheats.integer )
+    {
+      for( i = 0; i < g_maxclients.integer; i++ )
+      {
+        cl = level.clients + i;
+        tent = &g_entities[ cl->ps.clientNum ];
+
+        //disable noclip
+        if( cl->noclip )
+        {
+          tent->r.contents = cl->cliprcontents;
+
+          cl->noclip = !cl->noclip;
+
+          if( tent->r.linked )
+            trap_LinkEntity( tent );
+
+          trap_SendServerCommand( tent - g_entities, va( "print \"noclip OFF\n\"" ) );
+        }
+
+        //dissable god mode
+        if( tent->flags & FL_GODMODE )
+        {
+          tent->flags ^= FL_GODMODE;
+          trap_SendServerCommand( tent - g_entities, va( "print \"godmode OFF\n\"" ) );
+        }
+      }
+
+      //turn dev mode off
+      trap_Cvar_Set( "sv_cheats", "0" );
+      AP( va( "print \"^3warmup ended: ^7developer mode has been switched off\n\"" ) );
+    }
   }
   trap_Cvar_Update( &g_cheats );
   trap_Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
@@ -2273,13 +2320,13 @@ void G_LevelReady( void )
       if( level.clients[ i ].pers.teamSelection == TEAM_ALIENS )
       {
         numAliens++;
-        if( level.clients[ i ].pers.readyToPlay )
+        if( level.clients[ i ].sess.readyToPlay )
           level.readyToPlay[ TEAM_ALIENS ]++;
       }
       else if( level.clients[ i ].pers.teamSelection == TEAM_HUMANS )
       {
         numHumans++;
-        if( level.clients[ i ].pers.readyToPlay )
+        if( level.clients[ i ].sess.readyToPlay )
           level.readyToPlay[ TEAM_HUMANS ]++;
       }
     }

@@ -367,6 +367,7 @@ typedef struct
   spectatorState_t  spectatorState;
   int               spectatorClient;  // for chasecam and follow mode
   team_t            restartTeam; //for !restart keepteams and !restart switchteams
+  qboolean          readyToPlay; // ready state for Warmup
   clientList_t      ignoreList;
 } clientSession_t;
 
@@ -429,9 +430,6 @@ typedef struct
 
   // used to save persistant[] values while in SPECTATOR_FOLLOW mode
   int                 credit;
-
-  // ready state
-  qboolean            readyToPlay;
 
   // voting state
   int                 voted;

@@ -1997,13 +1997,13 @@ void Cmd_Ready_f( gentity_t *ent )
   }
 
   // update client readiness
-  ent->client->pers.readyToPlay = !ent->client->pers.readyToPlay;
-  ent->client->ps.stats[ STAT_READY ] = ent->client->pers.readyToPlay ? 1 : 0;
+  ent->client->sess.readyToPlay = !ent->client->sess.readyToPlay;
+  ent->client->ps.stats[ STAT_READY ] = ent->client->sess.readyToPlay ? 1 : 0;
 
   // let people see when player changes their ready status
   trap_SendServerCommand( -1, va( "print \"^7Warmup: %s %sready^7.\n",
                                   ent->client->pers.netname,
-                                  ( ent->client->pers.readyToPlay ? "^2is " : "^1is no longer " ) ) );
+                                  ( ent->client->sess.readyToPlay ? "^2is " : "^1is no longer " ) ) );
 
   // Check if conditions are met to start the game
   G_LevelReady();

@@ -1178,7 +1178,8 @@ char *ClientConnect( int clientNum, qboolean firstTime )
   {
     G_ChangeTeam( ent, client->sess.restartTeam );
     client->sess.restartTeam = TEAM_NONE;
-  }
+  } else
+    client->sess.readyToPlay = qfalse;
   
   return NULL;
 }
@@ -1227,6 +1228,9 @@ void ClientBegin( int clientNum )
   memset( &client->ps, 0, sizeof( client->ps ) );
   memset( &client->pmext, 0, sizeof( client->pmext ) );
   client->ps.eFlags = flags;
+
+  // communicate the client's ready status
+  client->ps.stats[ STAT_READY ] = client->sess.readyToPlay;
 
   // locate ent at a spawn point
   ClientSpawn( ent, NULL, NULL, NULL );

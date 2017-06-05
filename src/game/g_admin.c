@@ -2967,37 +2967,11 @@ qboolean G_admin_allready( gentity_t *ent )
         continue;
 
       //change the client's ready status
-      cl->pers.readyToPlay = qtrue;
+      cl->sess.readyToPlay = qtrue;
       cl->ps.stats[ STAT_READY ] = 1;
-
-      //disable noclip
-      if( cl->noclip )
-      {
-        ent->r.contents = cl->cliprcontents;
-
-        cl->noclip = !cl->noclip;
-
-        if( tent->r.linked )
-          trap_LinkEntity( tent );
-
-        trap_SendServerCommand( tent - g_entities, va( "print \"noclip OFF\n\"" ) );
-      }
-
-      //dissable god mode
-      if( tent->flags & FL_GODMODE )
-      {
-        tent->flags ^= FL_GODMODE;
-        trap_SendServerCommand( tent - g_entities, va( "print \"godmode OFF\n\"" ) );
-      }
     }
 
     AP( va( "print \"^3allready: ^7%s ^7decided to end pre-game warmup early\n\"",
-            ent ? ent->client->pers.netname : "console" ) );
-
-    //turn dev mode off
-    trap_Cvar_Set( "sv_cheats", "0" );
-    trap_Cvar_Update( &g_cheats );
-    AP( va( "print \"^3allready: ^7%s ^7has switched developer mode off\n\"",
             ent ? ent->client->pers.netname : "console" ) );
 
     G_LevelRestart( qtrue );
