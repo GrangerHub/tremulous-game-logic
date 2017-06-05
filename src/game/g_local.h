@@ -404,6 +404,7 @@ typedef struct namelog_s
 typedef struct
 {
   clientConnected_t   connected;
+  qboolean            firstConnection;
   usercmd_t           cmd;                // we would lose angles if not persistant
   qboolean            localClient;        // true if "ip" info key is "localhost"
   qboolean            stickySpec;         // don't stop spectating a player after they get killed
