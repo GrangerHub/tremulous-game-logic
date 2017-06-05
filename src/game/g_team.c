@@ -165,8 +165,8 @@ void G_LeaveTeam( gentity_t *self )
   self->suicideTime = 0;
 
   // reset player's ready flag to false
-  self->client->pers.readyToPlay = qfalse;
-  self->client->ps.stats[ STAT_READY ] = self->client->pers.readyToPlay;
+  self->client->sess.readyToPlay = qfalse;
+  self->client->ps.stats[ STAT_READY ] = self->client->sess.readyToPlay;
 
   // reset any activation entities the player might be occupying
   if( self->client->ps.eFlags & EF_OCCUPYING )

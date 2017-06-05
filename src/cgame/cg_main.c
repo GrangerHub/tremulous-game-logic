@@ -248,6 +248,8 @@ vmCvar_t  cg_cameraShakeMagnitude;
 
 vmCvar_t  cg_chatTeamPrefix;
 
+vmCvar_t  cg_warmupBuildableRespawning;
+
 vmCvar_t  cg_fuelInfoX;
 vmCvar_t  cg_fuelInfoY;
 vmCvar_t  cg_fuelInfoScale;
@@ -411,7 +413,9 @@ static cvarTable_t cvarTable[ ] =
 
   { &cg_cameraShakeMagnitude, "cg_cameraShakeMagnitude", "1", CVAR_ARCHIVE },
 
-  { &cg_chatTeamPrefix, "cg_chatTeamPrefix", "1", CVAR_ARCHIVE},
+  { &cg_chatTeamPrefix, "cg_chatTeamPrefix", "1", CVAR_ARCHIVE },
+
+  { &cg_warmupBuildableRespawning, "g_warmupBuildableRespawning", "0", 0 },
 
   { &cg_fuelInfoX, "cg_fuelInfoX" ,"0", CVAR_ARCHIVE },
   { &cg_fuelInfoY, "cg_fuelInfoY" ,"150", CVAR_ARCHIVE },
