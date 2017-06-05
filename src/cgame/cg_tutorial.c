@@ -207,7 +207,8 @@ static void CG_AlienBuilderText( char *text, playerState_t *ps )
 
   if( ( es = CG_BuildableInRange( ps, NULL ) ) )
   {
-    if( cgs.markDeconstruct && !cgs.warmup )
+    if( cgs.markDeconstruct &&
+        !( cgs.warmup && cg_warmupBuildableRespawning.integer ) )
     {
       if( es->eFlags & EF_B_MARKED )
       {
@@ -416,7 +417,8 @@ static void CG_HumanCkitText( char *text, playerState_t *ps )
 
   if( ( es = CG_BuildableInRange( ps, NULL ) ) )
   {
-    if( cgs.markDeconstruct && !cgs.warmup )
+    if( cgs.markDeconstruct &&
+        !( cgs.warmup && cg_warmupBuildableRespawning.integer ) )
     {
       if( es->eFlags & EF_B_MARKED )
       {

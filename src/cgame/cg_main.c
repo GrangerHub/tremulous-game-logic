@@ -248,6 +248,8 @@ vmCvar_t  cg_cameraShakeMagnitude;
 
 vmCvar_t  cg_chatTeamPrefix;
 
+vmCvar_t  cg_warmupBuildableRespawning;
+
 typedef struct
 {
   vmCvar_t  *vmCvar;
@@ -407,7 +409,9 @@ static cvarTable_t cvarTable[ ] =
 
   { &cg_cameraShakeMagnitude, "cg_cameraShakeMagnitude", "1", CVAR_ARCHIVE },
 	
-  { &cg_chatTeamPrefix, "cg_chatTeamPrefix", "1", CVAR_ARCHIVE}
+  { &cg_chatTeamPrefix, "cg_chatTeamPrefix", "1", CVAR_ARCHIVE },
+
+  { &cg_warmupBuildableRespawning, "g_warmupBuildableRespawning", "0", 0 }
 };
 
 static size_t cvarTableSize = ARRAY_LEN( cvarTable );

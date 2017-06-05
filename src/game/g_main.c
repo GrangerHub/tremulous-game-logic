@@ -205,7 +205,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_warmupTimeout2Trigger, "g_warmupTimeout2Trigger", "66", CVAR_ARCHIVE, 0,
     qtrue },
   { &g_warmupBuildableRespawning, "g_warmupBuildableRespawning", "0",
-    CVAR_ARCHIVE, 0, qtrue },
+    CVAR_SYSTEMINFO | CVAR_ARCHIVE, 0, qtrue },
   { &g_warmupBuildableRespawnTime, "g_warmupBuildableRespawnTime", "10",
     CVAR_ARCHIVE, 0, qtrue },
   { &g_warmupDefensiveBuildableRespawnTime,
