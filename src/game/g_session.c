@@ -46,11 +46,12 @@ void G_WriteClientSessionData( gclient_t *client )
   const char  *s;
   const char  *var;
 
-  s = va( "%i %i %i %i %s",
+  s = va( "%i %i %i %i %i %s",
     client->sess.spectatorTime,
     client->sess.spectatorState,
     client->sess.spectatorClient,
     client->sess.restartTeam,
+    ( client->sess.readyToPlay ? 1 : 0 ),
     Com_ClientListString( &client->sess.ignoreList )
     );
 
@@ -73,21 +74,27 @@ void G_ReadSessionData( gclient_t *client )
   int         spectatorState;
   int         restartTeam;
   char        ignorelist[ 17 ];
+  int         readyToPlay;
 
   var = va( "session%i", (int)( client - level.clients ) );
   trap_Cvar_VariableStringBuffer( var, s, sizeof(s) );
 
-  sscanf( s, "%i %i %i %i %16s",
+  sscanf( s, "%i %i %i %i %i %16s",
     &client->sess.spectatorTime,
     &spectatorState,
     &client->sess.spectatorClient,
     &restartTeam,
+    &readyToPlay,
     ignorelist
     );
 
   client->sess.spectatorState = (spectatorState_t)spectatorState;
   client->sess.restartTeam = (team_t)restartTeam;
   Com_ClientListParse( &client->sess.ignoreList, ignorelist );
+  if( readyToPlay )
+    client->sess.readyToPlay = qtrue;
+  else
+    client->sess.readyToPlay = qfalse;
 }
 
 
@@ -126,6 +133,7 @@ void G_InitSessionData( gclient_t *client, char *userinfo )
   sess->spectatorTime = level.time;
   sess->spectatorClient = -1;
   memset( &sess->ignoreList, 0, sizeof( sess->ignoreList ) );
+  client->sess.readyToPlay = qfalse;
 
   G_WriteClientSessionData( client );
 }

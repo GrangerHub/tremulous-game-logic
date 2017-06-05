@@ -2004,13 +2004,13 @@ void Cmd_Ready_f( gentity_t *ent )
   }
 
   // update client readiness
-  ent->client->pers.readyToPlay = !ent->client->pers.readyToPlay;
-  ent->client->ps.stats[ STAT_READY ] = ent->client->pers.readyToPlay ? 1 : 0;
+  ent->client->sess.readyToPlay = !ent->client->sess.readyToPlay;
+  ent->client->ps.stats[ STAT_READY ] = ent->client->sess.readyToPlay ? 1 : 0;
 
   // let people see when player changes their ready status
   trap_SendServerCommand( -1, va( "print \"^7Warmup: %s %sready^7.\n",
                                   ent->client->pers.netname,
-                                  ( ent->client->pers.readyToPlay ? "^2is " : "^1is no longer " ) ) );
+                                  ( ent->client->sess.readyToPlay ? "^2is " : "^1is no longer " ) ) );
 
   // Check if conditions are met to start the game
   G_LevelReady();
@@ -3160,7 +3160,8 @@ void Cmd_Reload_f( gentity_t *ent )
           ( ent->client->ps.weapon <= WP_HBUILD ) ) )
     {
       // Cancel deconstruction (unmark)
-      if( !IS_WARMUP && traceEnt->deconstruct )
+      if( !( IS_WARMUP && g_warmupBuildableRespawning.integer ) &&
+          traceEnt->deconstruct )
       {
         traceEnt->deconstruct = qfalse;
         return;
@@ -3190,7 +3191,7 @@ void Cmd_Reload_f( gentity_t *ent )
 
       if( traceEnt->health > 0 )
       {
-        if( !IS_WARMUP )
+        if( !( IS_WARMUP && g_warmupBuildableRespawning.integer ) )
         {
           traceEnt->deconstruct     = qtrue; // Mark buildable for deconstruction
           traceEnt->deconstructTime = level.time;

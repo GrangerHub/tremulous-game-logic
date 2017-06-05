@@ -1188,8 +1188,11 @@ char *ClientConnect( int clientNum, qboolean firstTime )
   {
     G_ChangeTeam( ent, client->sess.restartTeam );
     client->sess.restartTeam = TEAM_NONE;
-  }
-  
+  } else
+    client->sess.readyToPlay = qfalse; // Spectators aren't suppose to have ready states
+
+  client->pers.firstConnection = firstTime;
+
   return NULL;
 }
 
@@ -1205,7 +1208,6 @@ level load and level restart, but doesn't happen on respawns.
 void ClientBegin( int clientNum )
 {
   gentity_t *ent;
-  gentity_t *tent;
   gclient_t *client;
   int       flags;
 
@@ -1238,12 +1240,20 @@ void ClientBegin( int clientNum )
   memset( &client->pmext, 0, sizeof( client->pmext ) );
   client->ps.eFlags = flags;
 
+  // communicate the client's ready status
+  client->ps.stats[ STAT_READY ] = client->sess.readyToPlay;
+
   // locate ent at a spawn point
   ClientSpawn( ent, NULL, NULL, NULL );
 
   trap_SendServerCommand( -1, va( "print \"%s" S_COLOR_WHITE " entered the game\n\"", client->pers.netname ) );
-  tent = G_TempEntity( ent->client->ps.origin, EV_PLAYER_TELEPORT_IN );
-  tent->r.svFlags = SVF_BROADCAST; // send to everyone
+  if( client->pers.firstConnection )
+  {
+    gentity_t *tent;
+
+    tent = G_TempEntity( ent->client->ps.origin, EV_PLAYER_TELEPORT_IN );
+    tent->r.svFlags = SVF_BROADCAST; // send to everyone
+  }
 
   G_namelog_restore( client );
 

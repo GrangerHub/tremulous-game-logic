@@ -57,8 +57,10 @@ vmCvar_t  g_warmupTimeout1;
 vmCvar_t  g_warmupTimeout1Trigger;
 vmCvar_t  g_warmupTimeout2;
 vmCvar_t  g_warmupTimeout2Trigger;
+vmCvar_t  g_warmupBuildableRespawning;
 vmCvar_t  g_warmupBuildableRespawnTime;
 vmCvar_t  g_warmupDefensiveBuildableRespawnTime;
+vmCvar_t  g_warmupBlockEnemyBuilding;
 
 vmCvar_t  g_damageProtection;
 vmCvar_t  g_targetProtection;
@@ -198,13 +200,23 @@ static cvarTable_t   gameCvarTable[ ] =
   // warmup
   { &g_warmup, "g_warmup", "1", 0, 0, qfalse },
   { &g_doWarmup, "g_doWarmup", "1", CVAR_ARCHIVE, 0, qtrue  },
-  { &g_warmupReadyThreshold, "g_warmupReadyThreshold", "50", CVAR_ARCHIVE, 0, qtrue },
+  { &g_warmupReadyThreshold, "g_warmupReadyThreshold", "50", CVAR_ARCHIVE, 0,
+    qtrue },
   { &g_warmupTimeout1, "g_warmupTimeout1", "300", CVAR_ARCHIVE, 0, qtrue },
-  { &g_warmupTimeout1Trigger, "g_warmupTimeout1Trigger", "4", CVAR_ARCHIVE, 0, qtrue },
+  { &g_warmupTimeout1Trigger, "g_warmupTimeout1Trigger", "4", CVAR_ARCHIVE, 0,
+    qtrue },
   { &g_warmupTimeout2, "g_warmupTimeout2", "60", CVAR_ARCHIVE, 0, qtrue },
-  { &g_warmupTimeout2Trigger, "g_warmupTimeout2Trigger", "66", CVAR_ARCHIVE, 0, qtrue },
-  { &g_warmupBuildableRespawnTime, "g_warmupBuildableRespawnTime", "10", CVAR_ARCHIVE, 0, qtrue },
-  { &g_warmupDefensiveBuildableRespawnTime, "g_warmupDefensiveBuildableRespawnTime", "30", CVAR_ARCHIVE, 0, qtrue },
+  { &g_warmupTimeout2Trigger, "g_warmupTimeout2Trigger", "66", CVAR_ARCHIVE, 0,
+    qtrue },
+  { &g_warmupBuildableRespawning, "g_warmupBuildableRespawning", "0",
+    CVAR_SYSTEMINFO | CVAR_ARCHIVE, 0, qtrue },
+  { &g_warmupBuildableRespawnTime, "g_warmupBuildableRespawnTime", "10",
+    CVAR_ARCHIVE, 0, qtrue },
+  { &g_warmupDefensiveBuildableRespawnTime,
+    "g_warmupDefensiveBuildableRespawnTime", "30", CVAR_ARCHIVE, 0, qtrue },
+  { &g_warmupBlockEnemyBuilding,
+    "g_warmupBlockEnemyBuilding", "0", CVAR_SERVERINFO | CVAR_ARCHIVE, 0,
+    qtrue },
 
   { &g_damageProtection, "g_damageProtection", "1", CVAR_ARCHIVE, 0, qtrue },
     { &g_targetProtection, "g_targetProtection", "1", CVAR_ARCHIVE, 0, qtrue },
@@ -863,6 +875,14 @@ void G_ShutdownGame( int restart )
     G_LogPrintf( "------------------------------------------------------------\n" );
     trap_FS_FCloseFile( level.logFile );
     level.logFile = 0;
+  }
+
+  if( !restart )
+  {
+    int i;
+    // reset everyone's ready state
+    for( i = 0; i < level.maxclients; i++ )
+      level.clients[ i ].sess.readyToPlay = qfalse;
   }
 
   // write all the client session data so we can get it back
@@ -2186,6 +2206,7 @@ void G_LevelRestart( qboolean stopWarmup )
   char      map[ MAX_CVAR_VALUE_STRING ];
   int       i;
   gclient_t *cl;
+  gentity_t *tent;
 
   for( i = 0; i < g_maxclients.integer; i++ )
   {
@@ -2209,10 +2230,48 @@ void G_LevelRestart( qboolean stopWarmup )
         ( g_alienCredits.integer ),
         ( level.alienNextStageThreshold ) ) );
 
-  trap_SetConfigstring( CS_HUMAN_STAGES, va( "%d %d %d",
-        ( g_humanStage.integer ),
-        ( g_humanCredits.integer ),
-        ( level.humanNextStageThreshold ) ) );
+    trap_SetConfigstring( CS_HUMAN_STAGES, va( "%d %d %d",
+          ( g_humanStage.integer ),
+          ( g_humanCredits.integer ),
+          ( level.humanNextStageThreshold ) ) );
+
+    // reset everyone's ready state
+    for( i = 0; i < level.maxclients; i++ )
+      level.clients[ i ].sess.readyToPlay = qfalse;
+
+    // If dev mode is on, turn it off
+    if( g_cheats.integer )
+    {
+      for( i = 0; i < g_maxclients.integer; i++ )
+      {
+        cl = level.clients + i;
+        tent = &g_entities[ cl->ps.clientNum ];
+
+        //disable noclip
+        if( cl->noclip )
+        {
+          tent->r.contents = cl->cliprcontents;
+
+          cl->noclip = !cl->noclip;
+
+          if( tent->r.linked )
+            trap_LinkEntity( tent );
+
+          trap_SendServerCommand( tent - g_entities, va( "print \"noclip OFF\n\"" ) );
+        }
+
+        //dissable god mode
+        if( tent->flags & FL_GODMODE )
+        {
+          tent->flags ^= FL_GODMODE;
+          trap_SendServerCommand( tent - g_entities, va( "print \"godmode OFF\n\"" ) );
+        }
+      }
+
+      //turn dev mode off
+      trap_Cvar_Set( "sv_cheats", "0" );
+      AP( va( "print \"^3warmup ended: ^7developer mode has been switched off\n\"" ) );
+    }
   }
   trap_Cvar_Update( &g_cheats );
   trap_Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
@@ -2257,13 +2316,13 @@ void G_LevelReady( void )
       if( level.clients[ i ].pers.teamSelection == TEAM_ALIENS )
       {
         numAliens++;
-        if( level.clients[ i ].pers.readyToPlay )
+        if( level.clients[ i ].sess.readyToPlay )
           level.readyToPlay[ TEAM_ALIENS ]++;
       }
       else if( level.clients[ i ].pers.teamSelection == TEAM_HUMANS )
       {
         numHumans++;
-        if( level.clients[ i ].pers.readyToPlay )
+        if( level.clients[ i ].sess.readyToPlay )
           level.readyToPlay[ TEAM_HUMANS ]++;
       }
     }

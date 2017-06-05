@@ -410,7 +410,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ALIEN_POISON_DIVIDER        (1.0f/1.32f) //about 1.0/(time`th root of damage)
 
 #define ALIEN_SPAWN_REPEAT_TIME     10000
-#define ALIEN_SPAWN_PROTECTION_TIME 2000
+#define ALIEN_SPAWN_PROTECTION_TIME 3000
 
 #define ALIEN_HIVEMIND_LINK_TIME    150000 //amount of time aliens can survive without any eggs/overmind
 
@@ -805,7 +805,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MAX_FALL_DISTANCE           120.0f //the fall distance at which maximum damage is dealt
 #define AVG_FALL_DISTANCE           ((MIN_FALL_DISTANCE+MAX_FALL_DISTANCE)/2.0f)
 
-#define TELEPORT_PROTECTION_TIME    1500 // amount of time one is protected fromtargting after teleporting
+#define TELEPORT_PROTECTION_TIME    3000 // amount of time one is protected fromtargting after teleporting
 
 #define BUNNY_HOP_DELAY             300  // minimum miliseconds delay between bunny hops
 #define DOUBLE_JUMP_MAX_TIME        400  // maximum miliseconds after a jump that

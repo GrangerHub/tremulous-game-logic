@@ -139,14 +139,14 @@ static void G_Portal_Touch(gentity_t *self, gentity_t *other, trace_t *trace)
 		VectorMA(origin, i, dir, end);
 		trap_Trace(&tr, origin, NULL, NULL, end, portal->s.number, MASK_SHOT);
 		if (tr.fraction != 1.0f)
-        {
+    {
 			return;
-        }
+    }
 		trap_Trace(&tr, end, other->r.mins, other->r.maxs, end, -1, MASK_PLAYERSOLID | CONTENTS_TELEPORTER);
 		if (tr.fraction == 1.0f)
-        {
+    {
 			break;
-        }
+    }
 	}
 
 	if (i == PORTAL_MAXRANGE)
@@ -160,9 +160,9 @@ static void G_Portal_Touch(gentity_t *self, gentity_t *other, trace_t *trace)
 	other->client->ps.eFlags ^= EF_TELEPORT_BIT;
 	G_UnlaggedClear(other);
 	if (dir[0] || dir[1])
-    {
+  {
 		if (other->client->portalTime < level.time)
-        {
+    {
 			vectoangles(dir, angles);
 			G_SetClientViewAngle(other, angles);
 		}
@@ -171,6 +171,11 @@ static void G_Portal_Touch(gentity_t *self, gentity_t *other, trace_t *trace)
 	BG_PlayerStateToEntityState(&other->client->ps, &other->s, qtrue);
 	VectorCopy(other->client->ps.origin, other->r.currentOrigin);
 	trap_LinkEntity(other);
+
+	// Protect against targeting by buildables
+  other->targetProtectionTime = level.time + TELEPORT_PROTECTION_TIME;
+
+	// Show off some fancy effects
 	for( i = 0; i < PORTAL_NUM; i++ )
 		G_Portal_Effect( i, 0.0625 );
 }

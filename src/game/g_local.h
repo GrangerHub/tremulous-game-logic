@@ -389,6 +389,7 @@ typedef struct
   spectatorState_t  spectatorState;
   int               spectatorClient;  // for chasecam and follow mode
   team_t            restartTeam; //for !restart keepteams and !restart switchteams
+  qboolean          readyToPlay; // ready state for Warmup
   clientList_t      ignoreList;
 } clientSession_t;
 
@@ -425,6 +426,7 @@ typedef struct namelog_s
 typedef struct
 {
   clientConnected_t   connected;
+  qboolean            firstConnection;
   usercmd_t           cmd;                // we would lose angles if not persistant
   qboolean            localClient;        // true if "ip" info key is "localhost"
   qboolean            stickySpec;         // don't stop spectating a player after they get killed
@@ -453,9 +455,6 @@ typedef struct
 
   // used to save persistant[] values while in SPECTATOR_FOLLOW mode
   int                 credit;
-
-  // ready state
-  qboolean            readyToPlay;
 
   // voting state
   int                 voted;
@@ -1410,8 +1409,10 @@ extern  vmCvar_t  g_warmupTimeout1;
 extern  vmCvar_t  g_warmupTimeout1Trigger;
 extern  vmCvar_t  g_warmupTimeout2;
 extern  vmCvar_t  g_warmupTimeout2Trigger;
+extern  vmCvar_t  g_warmupBuildableRespawning;
 extern  vmCvar_t  g_warmupBuildableRespawnTime;
 extern  vmCvar_t  g_warmupDefensiveBuildableRespawnTime;
+extern  vmCvar_t  g_warmupBlockEnemyBuilding;
 
 extern  vmCvar_t   g_damageProtection;
 extern  vmCvar_t   g_targetProtection;
