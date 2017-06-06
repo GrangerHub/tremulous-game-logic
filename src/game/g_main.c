@@ -51,6 +51,8 @@ vmCvar_t  g_extendVotesCount;
 vmCvar_t  g_suddenDeathTime;
 
 vmCvar_t  g_doWarmup;
+vmCvar_t  g_warmupReset;
+vmCvar_t  g_warmupTimers;
 vmCvar_t  g_warmup;
 vmCvar_t  g_warmupReadyThreshold;
 vmCvar_t  g_warmupTimeout1;
@@ -195,6 +197,8 @@ static cvarTable_t   gameCvarTable[ ] =
 
   // warmup
   { &g_warmup, "g_warmup", "1", 0, 0, qfalse },
+  { &g_warmupReset, "g_warmupReset", "0", CVAR_ROM, 0, qfalse },
+  { &g_warmupTimers, "g_warmupTimers", "", CVAR_ROM, 0, qtrue },
   { &g_doWarmup, "g_doWarmup", "1", CVAR_ARCHIVE, 0, qtrue  },
   { &g_warmupReadyThreshold, "g_warmupReadyThreshold", "50", CVAR_ARCHIVE, 0,
     qtrue },
@@ -643,7 +647,34 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
   unpack_int( &level.epochStartTime );
 
   level.time = levelTime;
-  level.startTime = levelTime;
+
+  // check for restoration of timers related to warmup reset
+  if( g_warmupReset.integer && IS_WARMUP && restart )
+  {
+    char s[ MAX_STRING_CHARS ];
+
+    trap_Cvar_VariableStringBuffer( "g_warmupTimers", s, sizeof(s) );
+    sscanf( s, "%i %i %i",
+      &level.startTime,
+      &level.warmup1Time,
+      &level.warmup2Time );
+
+    trap_Cvar_Set( "g_warmupReset", "0" );
+    trap_Cvar_Set( "g_warmupTimers", "" );
+  } else
+  {
+    if( g_warmupReset.integer )
+    {
+      trap_Cvar_Set( "g_warmupReset", "0" );
+      trap_Cvar_Set( "g_warmupTimers", "" );
+    }
+
+    level.startTime = levelTime;
+
+    // reset the level's 1 minute and 5 minute timeouts
+    level.warmup1Time = -1;
+    level.warmup2Time = -1;
+  }
   level.alienStage2Time = level.alienStage3Time =
     level.humanStage2Time = level.humanStage3Time = level.startTime;
 
@@ -662,10 +693,6 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
   level.extendTimeLimit = 0;
   level.extendVoteCount = 0;
   level.timeLimitInitialized = qtrue;
-
-  // reset the level's 1 minute and 5 minute timeouts
-  level.warmup1Time = -1;
-  level.warmup2Time = -1;
 
   level.snd_fry = G_SoundIndex( "sound/misc/fry.wav" ); // FIXME standing in lava / slime
 
@@ -2276,7 +2303,16 @@ void G_LevelRestart( qboolean stopWarmup )
       trap_Cvar_Set( "sv_cheats", "0" );
       AP( va( "print \"^3warmup ended: ^7developer mode has been switched off\n\"" ) );
     }
+  } else
+  {
+    // save warmup reset information
+    trap_Cvar_Set( "g_warmupReset", "1" );
+    trap_Cvar_Set( "g_warmupTimers", va( "%i %i %i",
+                                         level.startTime,
+                                         level.warmup1Time,
+                                         level.warmup2Time ) );
   }
+
   trap_Cvar_Update( &g_cheats );
   trap_Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
   G_MapConfigs( map );
