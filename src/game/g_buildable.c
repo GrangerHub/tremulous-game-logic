@@ -1648,10 +1648,13 @@ qboolean AHovel_Blocked( gentity_t *hovel, gentity_t *player, qboolean provideEx
   if( tr.startsolid || tr.fraction < 1.0f )
     return qtrue;
   if( provideExit == qtrue ){
+    vec3_t newAngles;
     G_SetOrigin( player, position );
     VectorCopy( position, player->client->ps.origin );
     VectorCopy( vec3_origin, player->client->ps.velocity );
-    G_SetClientViewAngle( player, hovel->r.currentAngles );
+    VectorCopy( hovel->r.currentAngles, newAngles );
+    newAngles[ ROLL ] = 0;
+    G_SetClientViewAngle( player, newAngles );
   }
   return qfalse;
 }
