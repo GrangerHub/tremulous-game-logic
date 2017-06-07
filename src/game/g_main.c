@@ -2279,16 +2279,19 @@ void G_LevelReady( void )
     if ( level.clients[ i ].pers.connected != CON_DISCONNECTED )
     {
       // spectators are not counted
-      if( level.clients[ i ].pers.teamSelection == TEAM_NONE )
+      if( level.clients[ i ].pers.teamSelection == TEAM_NONE &&
+          level.clients[ i ].sess.restartTeam == TEAM_NONE )
         continue;
 
-      if( level.clients[ i ].pers.teamSelection == TEAM_ALIENS )
+      if( level.clients[ i ].pers.teamSelection == TEAM_ALIENS ||
+          level.clients[ i ].sess.restartTeam == TEAM_ALIENS )
       {
         numAliens++;
         if( level.clients[ i ].sess.readyToPlay )
           level.readyToPlay[ TEAM_ALIENS ]++;
       }
-      else if( level.clients[ i ].pers.teamSelection == TEAM_HUMANS )
+      else if( level.clients[ i ].pers.teamSelection == TEAM_HUMANS ||
+               level.clients[ i ].sess.restartTeam == TEAM_HUMANS )
       {
         numHumans++;
         if( level.clients[ i ].sess.readyToPlay )
