@@ -2812,6 +2812,12 @@ void CheckCvars( void )
                                             level.extendTimeLimit ) ) );
     lastExtendTimeLimit = level.extendTimeLimit;
     lastTimeLimitModCount = g_timelimit.modificationCount;
+
+    // reset the time limit warnings
+    if( level.time - level.startTime < ( g_timelimit.integer - 5 ) * 60000 )
+      level.timelimitWarning = TW_NOT;
+    else if( level.time - level.startTime < ( g_timelimit.integer - 1 ) * 60000 )
+      level.timelimitWarning = TW_IMMINENT;
   }
 
   if( g_humanStaminaMode.modificationCount != lastHumanStaminaModeModCount )
