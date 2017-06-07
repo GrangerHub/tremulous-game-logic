@@ -135,8 +135,8 @@ static void SV_MapRestart_f( void ) {
 		return;
 	}
 
-	// ignore the level warmup ready conditions in case of a warmup reset
-	Cvar_Set("g_warmupIgnoreLevelReady", "1");
+	// Ignore the warmup ready conditions during a warmup reset so that the timers persist
+	Cvar_SetSafe( "g_warmupIgnoreLevelReady", "1" );
 
 	// check for changes in variables that can't just be restarted
 	// check for maxclients change
@@ -148,7 +148,7 @@ static void SV_MapRestart_f( void ) {
 		Q_strncpyz( mapname, Cvar_VariableString( "mapname" ), sizeof( mapname ) );
 
 		SV_SpawnServer( mapname, qfalse );
-		Cvar_Set("g_warmupIgnoreLevelReady", "0");
+		Cvar_SetSafe( "g_warmupIgnoreLevelReady", "0" );
 		return;
 	}
 
@@ -227,7 +227,7 @@ static void SV_MapRestart_f( void ) {
 	sv.time += 100;
 	svs.time += 100;
 
-	Cvar_Set("g_warmupIgnoreLevelReady", "0");
+	Cvar_SetSafe( "g_warmupIgnoreLevelReady", "0" );
 }
 
 
