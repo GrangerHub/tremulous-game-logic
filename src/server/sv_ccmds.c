@@ -135,6 +135,9 @@ static void SV_MapRestart_f( void ) {
 		return;
 	}
 
+	// ignore the level warmup ready conditions in case of a warmup reset
+	Cvar_Set("g_warmupIgnoreLevelReady", "1");
+
 	// check for changes in variables that can't just be restarted
 	// check for maxclients change
 	if ( sv_maxclients->modified ) {
@@ -145,6 +148,7 @@ static void SV_MapRestart_f( void ) {
 		Q_strncpyz( mapname, Cvar_VariableString( "mapname" ), sizeof( mapname ) );
 
 		SV_SpawnServer( mapname, qfalse );
+		Cvar_Set("g_warmupIgnoreLevelReady", "0");
 		return;
 	}
 
@@ -222,6 +226,8 @@ static void SV_MapRestart_f( void ) {
 	VM_Call (gvm, GAME_RUN_FRAME, sv.time);
 	sv.time += 100;
 	svs.time += 100;
+
+	Cvar_Set("g_warmupIgnoreLevelReady", "0");
 }
 
 
@@ -337,4 +343,3 @@ void SV_RemoveOperatorCommands( void ) {
 	Cmd_RemoveCommand ("sectorlist");
 #endif
 }
-
