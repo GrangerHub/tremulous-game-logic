@@ -50,10 +50,11 @@ vmCvar_t  g_extendVotesTime;
 vmCvar_t  g_extendVotesCount;
 vmCvar_t  g_suddenDeathTime;
 
-vmCvar_t  g_doWarmup;
+vmCvar_t  g_warmup;
 vmCvar_t  g_warmupReset;
 vmCvar_t  g_warmupTimers;
-vmCvar_t  g_warmup;
+vmCvar_t  g_warmupIgnoreLevelReady;
+vmCvar_t  g_doWarmup;
 vmCvar_t  g_warmupReadyThreshold;
 vmCvar_t  g_warmupTimeout1;
 vmCvar_t  g_warmupTimeout1Trigger;
@@ -198,8 +199,8 @@ static cvarTable_t   gameCvarTable[ ] =
   // warmup
   { &g_warmup, "g_warmup", "1", 0, 0, qfalse },
   { &g_warmupReset, "g_warmupReset", "0", CVAR_ROM, 0, qfalse },
-  { &g_warmupTimers, "g_warmupTimers", "", CVAR_ROM, 0, qtrue },
-  { &g_warmupIgnoreLevelReady, "g_warmupIgnoreLevelReady", "0", CVAR_ROM, 0, qtrue },
+  { &g_warmupTimers, "g_warmupTimers", "", CVAR_ROM, 0, qfalse },
+  { &g_warmupIgnoreLevelReady, "g_warmupIgnoreLevelReady", "0", CVAR_ROM, 0, qfalse },
   { &g_doWarmup, "g_doWarmup", "1", CVAR_ARCHIVE, 0, qtrue  },
   { &g_warmupReadyThreshold, "g_warmupReadyThreshold", "50", CVAR_ARCHIVE, 0,
     qtrue },
@@ -2183,7 +2184,8 @@ void CheckExitRules( void )
       ( !level.uncondAlienWin &&
         ( level.time > level.startTime + 1000 ) &&
         ( level.numAlienSpawns == 0 ) &&
-        ( level.numAlienClientsAlive == 0 ) ) )
+        ( level.numAlienClientsAlive == 0 ) &&
+        !g_warmupIgnoreLevelReady.integer ) )
   {
     // We do not want any team to win in warmup
     if( IS_WARMUP )
@@ -2205,7 +2207,8 @@ void CheckExitRules( void )
   else if( level.uncondAlienWin ||
            ( ( level.time > level.startTime + 1000 ) &&
              ( level.numHumanSpawns == 0 ) &&
-             ( level.numHumanClientsAlive == 0 ) ) )
+             ( level.numHumanClientsAlive == 0 ) &&
+             !g_warmupIgnoreLevelReady.integer ) )
   {
     // We do not want any team to win in warmup
     if( IS_WARMUP )
