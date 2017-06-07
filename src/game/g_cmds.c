@@ -1428,8 +1428,7 @@ void Cmd_CallVote_f( gentity_t *ent )
   char   caller[ MAX_NAME_LENGTH ] = "";
   char   reason[ MAX_TOKEN_CHARS ];
   char   *creason;
-  char   poll[ MAX_TOKEN_CHARS ];
-  char   *cpoll;
+  char   *poll;
   char   cVoteDisplayString[ MAX_STRING_CHARS ];
   int    clientNum = -1;
   int    id = -1;
@@ -1442,8 +1441,7 @@ void Cmd_CallVote_f( gentity_t *ent )
   trap_Argv( 3, extra, sizeof( extra ) );
   creason = ConcatArgs( 3 );
   G_DecolorString( creason, reason, sizeof( reason ) );
-  cpoll = ConcatArgs( 2 );
-  G_DecolorString( cpoll, poll, sizeof( poll ) );
+  poll = ConcatArgs( 2 );
 
   if( !Q_stricmp( cmd, "callteamvote" ) )
     team = ent->client->pers.teamSelection;
@@ -1492,7 +1490,7 @@ void Cmd_CallVote_f( gentity_t *ent )
   if( strchr( arg, '\n' ) || strchr( arg, '\r' ) ||
       strchr( extra, '\n' ) || strchr( extra, '\r' ) ||
       strchr( creason, '\n' ) || strchr( creason, '\r' ) ||
-      strchr( cpoll, '\n' ) || strchr( cpoll, '\r' ) )
+      strchr( poll, '\n' ) || strchr( poll, '\r' ) )
   {
     trap_SendServerCommand( ent-g_entities, "print \"Invalid vote string\n\"" );
     return;
@@ -1612,9 +1610,9 @@ void Cmd_CallVote_f( gentity_t *ent )
 
     // use an exec string that allows log parsers to see the vote
     Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
-                 "echo poll \"%s\"", poll );
+                 "echo poll \"^7%s^7\"", poll );
     Com_sprintf( level.voteDisplayString[ team ], sizeof( level.voteDisplayString[ team ] ),
-                 "^4[^7Poll^4]^5%c%s", STRING_DELIMITER, poll );
+                 "^4[^7Poll^4]^5%c%s^5", STRING_DELIMITER, poll );
     voteYes = qfalse;
     level.voteType[ team ] = POLL_VOTE;
   }
