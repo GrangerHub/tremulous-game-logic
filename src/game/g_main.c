@@ -199,6 +199,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_warmup, "g_warmup", "1", 0, 0, qfalse },
   { &g_warmupReset, "g_warmupReset", "0", CVAR_ROM, 0, qfalse },
   { &g_warmupTimers, "g_warmupTimers", "", CVAR_ROM, 0, qtrue },
+  { &g_warmupIgnoreLevelReady, "g_warmupIgnoreLevelReady", "0", CVAR_ROM, 0, qtrue },
   { &g_doWarmup, "g_doWarmup", "1", CVAR_ARCHIVE, 0, qtrue  },
   { &g_warmupReadyThreshold, "g_warmupReadyThreshold", "50", CVAR_ARCHIVE, 0,
     qtrue },
@@ -2339,6 +2340,10 @@ void G_LevelReady( void )
 
   // do not proceed if not in warmup
   if( !g_warmup.integer )
+    return;
+
+  // the map is still resetting
+  if( g_warmupIgnoreLevelReady.integer )
     return;
 
   // reset number of players ready to zero
