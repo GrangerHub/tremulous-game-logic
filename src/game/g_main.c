@@ -199,6 +199,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_warmup, "g_warmup", "1", 0, 0, qfalse },
   { &g_warmupReset, "g_warmupReset", "0", CVAR_ROM, 0, qfalse },
   { &g_warmupTimers, "g_warmupTimers", "", CVAR_ROM, 0, qtrue },
+  { &g_warmupIgnoreLevelReady, "g_warmupIgnoreLevelReady", "0", CVAR_ROM, 0, qtrue },
   { &g_doWarmup, "g_doWarmup", "1", CVAR_ARCHIVE, 0, qtrue  },
   { &g_warmupReadyThreshold, "g_warmupReadyThreshold", "50", CVAR_ARCHIVE, 0,
     qtrue },
@@ -2270,6 +2271,10 @@ void G_LevelReady( void )
   if( !g_warmup.integer )
     return;
 
+  // the map is still resetting
+  if( g_warmupIgnoreLevelReady.integer )
+    return;
+
   // reset number of players ready to zero
   level.readyToPlay[ TEAM_HUMANS ] = level.readyToPlay[ TEAM_ALIENS ] = 0;
 
@@ -2279,19 +2284,16 @@ void G_LevelReady( void )
     if ( level.clients[ i ].pers.connected != CON_DISCONNECTED )
     {
       // spectators are not counted
-      if( level.clients[ i ].pers.teamSelection == TEAM_NONE &&
-          level.clients[ i ].sess.restartTeam == TEAM_NONE )
+      if( level.clients[ i ].pers.teamSelection == TEAM_NONE )
         continue;
 
-      if( level.clients[ i ].pers.teamSelection == TEAM_ALIENS ||
-          level.clients[ i ].sess.restartTeam == TEAM_ALIENS )
+      if( level.clients[ i ].pers.teamSelection == TEAM_ALIENS )
       {
         numAliens++;
         if( level.clients[ i ].sess.readyToPlay )
           level.readyToPlay[ TEAM_ALIENS ]++;
       }
-      else if( level.clients[ i ].pers.teamSelection == TEAM_HUMANS ||
-               level.clients[ i ].sess.restartTeam == TEAM_HUMANS )
+      else if( level.clients[ i ].pers.teamSelection == TEAM_HUMANS )
       {
         numHumans++;
         if( level.clients[ i ].sess.readyToPlay )
