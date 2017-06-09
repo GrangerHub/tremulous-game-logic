@@ -713,6 +713,7 @@ typedef struct
                                                   // we changed gametype
 
   qboolean          restarted;                    // waiting for a map_restart to fire
+  
 
   int               numConnectedClients;
   int               numNonSpectatorClients;       // includes connecting clients
@@ -1391,6 +1392,7 @@ extern  vmCvar_t  g_cheats;
 extern  vmCvar_t  g_maxclients;     // allow this many total, including spectators
 extern  vmCvar_t  g_maxGameClients;   // allow this many active
 extern  vmCvar_t  g_restarted;
+extern  vmCvar_t  g_restartingFlags; // flags for restarting the map
 extern  vmCvar_t  g_lockTeamsAtStart;
 extern  vmCvar_t  g_minNameChangePeriod;
 extern  vmCvar_t  g_maxNameChanges;
@@ -1403,9 +1405,7 @@ extern  vmCvar_t  g_extendVotesCount;
 extern  vmCvar_t  g_suddenDeathTime;
 
 extern  vmCvar_t  g_doWarmup;
-extern  vmCvar_t  g_warmupReset;
 extern  vmCvar_t  g_warmupTimers;
-extern  vmCvar_t  g_warmupIgnoreLevelReady; // used while the map is still resetting during warmup
 extern  vmCvar_t  g_warmup;
 extern  vmCvar_t  g_warmupReadyThreshold;
 extern  vmCvar_t  g_warmupTimeout1;

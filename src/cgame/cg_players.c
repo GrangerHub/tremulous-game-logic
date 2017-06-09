@@ -712,7 +712,8 @@ static void CG_StatusMessages( clientInfo_t *new, clientInfo_t *old )
   if( strcmp( new->name, old->name ) )
     CG_Printf( "%s" S_COLOR_WHITE " renamed to %s\n", old->name, new->name );
 
-  if( old->team != new->team )
+  if( old->team != new->team &&
+      !( new->restartFlags & ( RESTART_WARMUP_RESET | RESTART_WARMUP_END ) ) )
   {
     if( new->team == TEAM_NONE )
       CG_Printf( "%s" S_COLOR_WHITE " left the %ss\n", new->name,
@@ -801,6 +802,9 @@ void CG_NewClientInfo( int clientNum )
   // voice
   v = Info_ValueForKey( configstring, "v" );
   Q_strncpyz( newInfo.voice, v, sizeof( newInfo.voice ) );
+
+  v = Info_ValueForKey( configstring, "restart" );
+  newInfo.restartFlags = atoi( v );
 
   CG_StatusMessages( &newInfo, ci );
 
