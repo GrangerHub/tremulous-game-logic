@@ -781,6 +781,8 @@ typedef struct
 
   char        voice[ MAX_VOICE_NAME_LEN ];
   int         voiceTime;
+  
+  int         restartFlags;
 } clientInfo_t;
 
 

@@ -67,6 +67,19 @@ typedef enum
   PORTAL_NUM
 } portal_t;
 
+/*
+--------------------------------------------------------------------------------
+Flags for map restarts
+*/
+#define  RESTART_WARMUP_RESET 0x00000001 // Warmup is resetting from a "win
+                                         // condition" but isn't ending.
+
+#define  RESTART_WARMUP_END   0x00000002 // Warmup is ending and the match is
+                                         // beginning.
+/*
+--------------------------------------------------------------------------------
+*/
+
 //
 // config strings are a general means of communicating variable length strings
 // from the server to all connected clients.
