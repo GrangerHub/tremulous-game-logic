@@ -1040,10 +1040,10 @@ char *ClientUserinfoChanged( int clientNum, qboolean forceName )
   // print scoreboards, display models, and play custom sounds
 
   Com_sprintf( userinfo, sizeof( userinfo ),
-    "n\\%s\\t\\%i\\model\\%s\\ig\\%16s\\v\\%s",
+    "n\\%s\\t\\%i\\model\\%s\\ig\\%16s\\v\\%s\\restart\\%i",
     client->pers.netname, client->pers.teamSelection, model,
     Com_ClientListString( &client->sess.ignoreList ),
-    client->pers.voice );
+    client->pers.voice, g_restartingFlags.integer );
 
   trap_SetConfigstring( CS_PLAYERS + clientNum, userinfo );
 
@@ -1236,7 +1236,9 @@ void ClientBegin( int clientNum )
   // locate ent at a spawn point
   ClientSpawn( ent, NULL, NULL, NULL );
 
-  trap_SendServerCommand( -1, va( "print \"%s" S_COLOR_WHITE " entered the game\n\"", client->pers.netname ) );
+  if( !( g_restartingFlags.integer &
+         ( RESTART_WARMUP_RESET | RESTART_WARMUP_END ) ) )
+    trap_SendServerCommand( -1, va( "print \"%s" S_COLOR_WHITE " entered the game\n\"", client->pers.netname ) );
   if( client->pers.firstConnection )
   {
     gentity_t *tent;

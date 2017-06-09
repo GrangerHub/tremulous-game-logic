@@ -74,6 +74,9 @@ static void SV_Map_f( void ) {
 	// and thus nuke the arguments of the map command
 	Q_strncpyz(mapname, map, sizeof(mapname));
 
+	// The map isn't restarting 
+	Cvar_SetSafe( "g_restartingFlags", "0" );
+
 	// start up the map
 	SV_SpawnServer( mapname, killBots );
 
@@ -135,9 +138,6 @@ static void SV_MapRestart_f( void ) {
 		return;
 	}
 
-	// Ignore the warmup ready conditions during a warmup reset so that the timers persist
-	Cvar_SetSafe( "g_warmupIgnoreLevelReady", "1" );
-
 	// check for changes in variables that can't just be restarted
 	// check for maxclients change
 	if ( sv_maxclients->modified ) {
@@ -148,7 +148,7 @@ static void SV_MapRestart_f( void ) {
 		Q_strncpyz( mapname, Cvar_VariableString( "mapname" ), sizeof( mapname ) );
 
 		SV_SpawnServer( mapname, qfalse );
-		Cvar_SetSafe( "g_warmupIgnoreLevelReady", "0" );
+		Cvar_SetSafe( "g_restartingFlags", "0" );
 		return;
 	}
 
@@ -227,7 +227,7 @@ static void SV_MapRestart_f( void ) {
 	sv.time += 100;
 	svs.time += 100;
 
-	Cvar_SetSafe( "g_warmupIgnoreLevelReady", "0" );
+	Cvar_SetSafe( "g_restartingFlags", "0" );
 }
 
 

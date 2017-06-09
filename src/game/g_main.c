@@ -51,9 +51,7 @@ vmCvar_t  g_extendVotesCount;
 vmCvar_t  g_suddenDeathTime;
 
 vmCvar_t  g_warmup;
-vmCvar_t  g_warmupReset;
 vmCvar_t  g_warmupTimers;
-vmCvar_t  g_warmupIgnoreLevelReady;
 vmCvar_t  g_doWarmup;
 vmCvar_t  g_warmupReadyThreshold;
 vmCvar_t  g_warmupTimeout1;
@@ -91,6 +89,7 @@ vmCvar_t  g_synchronousClients;
 vmCvar_t  g_countdown;
 vmCvar_t  g_doCountdown;
 vmCvar_t  g_restarted;
+vmCvar_t  g_restartingFlags;
 vmCvar_t  g_lockTeamsAtStart;
 vmCvar_t  g_logFile;
 vmCvar_t  g_logFileSync;
@@ -198,9 +197,7 @@ static cvarTable_t   gameCvarTable[ ] =
 
   // warmup
   { &g_warmup, "g_warmup", "1", 0, 0, qfalse },
-  { &g_warmupReset, "g_warmupReset", "0", CVAR_ROM, 0, qfalse },
   { &g_warmupTimers, "g_warmupTimers", "", CVAR_ROM, 0, qfalse },
-  { &g_warmupIgnoreLevelReady, "g_warmupIgnoreLevelReady", "0", CVAR_ROM, 0, qfalse },
   { &g_doWarmup, "g_doWarmup", "1", CVAR_ARCHIVE, 0, qtrue  },
   { &g_warmupReadyThreshold, "g_warmupReadyThreshold", "50", CVAR_ARCHIVE, 0,
     qtrue },
@@ -226,6 +223,7 @@ static cvarTable_t   gameCvarTable[ ] =
   // noset vars
   { NULL, "gamename", GAME_VERSION , CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
   { &g_restarted, "g_restarted", "0", CVAR_ROM, 0, qfalse  },
+  { &g_restartingFlags, "g_restartingFlags", "0", CVAR_ROM, 0, qfalse },
   { &g_lockTeamsAtStart, "g_lockTeamsAtStart", "0", CVAR_ROM, 0, qfalse  },
   { NULL, "sv_mapname", "", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
   { NULL, "P", "", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
@@ -651,7 +649,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
   level.time = levelTime;
 
   // check for restoration of timers related to warmup reset
-  if( g_warmupReset.integer && IS_WARMUP && restart )
+  if( g_restartingFlags.integer & RESTART_WARMUP_RESET )
   {
     char s[ MAX_STRING_CHARS ];
 
@@ -661,15 +659,10 @@ void G_InitGame( int levelTime, int randomSeed, int restart )
       &level.warmup1Time,
       &level.warmup2Time );
 
-    trap_Cvar_Set( "g_warmupReset", "0" );
     trap_Cvar_Set( "g_warmupTimers", "" );
   } else
   {
-    if( g_warmupReset.integer )
-    {
-      trap_Cvar_Set( "g_warmupReset", "0" );
-      trap_Cvar_Set( "g_warmupTimers", "" );
-    }
+    trap_Cvar_Set( "g_warmupTimers", "" );
 
     level.startTime = levelTime;
 
@@ -2185,7 +2178,7 @@ void CheckExitRules( void )
         ( level.time > level.startTime + 1000 ) &&
         ( level.numAlienSpawns == 0 ) &&
         ( level.numAlienClientsAlive == 0 ) &&
-        !g_warmupIgnoreLevelReady.integer ) )
+        !( g_restartingFlags.integer & RESTART_WARMUP_RESET ) ) )
   {
     // We do not want any team to win in warmup
     if( IS_WARMUP )
@@ -2194,7 +2187,7 @@ void CheckExitRules( void )
         return;
       // FIXME: this is awfully ugly
       G_LevelRestart( qfalse );
-      trap_SendServerCommand( -1, "print \"A mysterious force restores balance in the universe.\n\"");
+      trap_SendServerCommand( -1, "print \"^3Warmup Reset: ^7A mysterious force restores balance in the universe.\n\"");
       return;
     }
 
@@ -2208,7 +2201,7 @@ void CheckExitRules( void )
            ( ( level.time > level.startTime + 1000 ) &&
              ( level.numHumanSpawns == 0 ) &&
              ( level.numHumanClientsAlive == 0 ) &&
-             !g_warmupIgnoreLevelReady.integer ) )
+             !( g_restartingFlags.integer & RESTART_WARMUP_RESET ) ) )
   {
     // We do not want any team to win in warmup
     if( IS_WARMUP )
@@ -2217,7 +2210,7 @@ void CheckExitRules( void )
         return;
       // FIXME: this is awfully ugly
       G_LevelRestart( qfalse );
-      trap_SendServerCommand( -1, "print \"A mysterious force restores balance in the universe.\n\"");
+      trap_SendServerCommand( -1, "print \"^3Warmup Reset: ^7A mysterious force restores balance in the universe.\n\"");
       return;
     }
 
@@ -2259,6 +2252,12 @@ void G_LevelRestart( qboolean stopWarmup )
   if( stopWarmup )
   {
     trap_Cvar_Set( "g_warmup", "0" );
+    if( IS_WARMUP )
+    {
+      trap_Cvar_Set( "g_restartingFlags",
+        va( "%i", ( g_restartingFlags.integer | RESTART_WARMUP_END ) ) );
+      trap_Cvar_Update( &g_restartingFlags );
+    }
     trap_SetConfigstring( CS_WARMUP, va( "%d", IS_WARMUP ) );
     trap_SetConfigstring( CS_ALIEN_STAGES, va( "%d %d %d",
         ( g_alienStage.integer ),
@@ -2307,10 +2306,12 @@ void G_LevelRestart( qboolean stopWarmup )
       trap_Cvar_Set( "sv_cheats", "0" );
       AP( va( "print \"^3warmup ended: ^7developer mode has been switched off\n\"" ) );
     }
-  } else
+  } else if( IS_WARMUP )
   {
     // save warmup reset information
-    trap_Cvar_Set( "g_warmupReset", "1" );
+    trap_Cvar_Set( "g_restartingFlags",
+        va( "%i", ( g_restartingFlags.integer | RESTART_WARMUP_RESET ) ) );
+    trap_Cvar_Update( &g_restartingFlags );
     trap_Cvar_Set( "g_warmupTimers", va( "%i %i %i",
                                          level.startTime,
                                          level.warmup1Time,
@@ -2346,7 +2347,7 @@ void G_LevelReady( void )
     return;
 
   // the map is still resetting
-  if( g_warmupIgnoreLevelReady.integer )
+  if( g_restartingFlags.integer & RESTART_WARMUP_RESET )
     return;
 
   // reset number of players ready to zero
