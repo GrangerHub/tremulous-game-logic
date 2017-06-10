@@ -1416,6 +1416,7 @@ extern  vmCvar_t  g_warmupBuildableRespawning;
 extern  vmCvar_t  g_warmupBuildableRespawnTime;
 extern  vmCvar_t  g_warmupDefensiveBuildableRespawnTime;
 extern  vmCvar_t  g_warmupBlockEnemyBuilding;
+extern  vmCvar_t  g_warmupFriendlyBuildableFire;
 
 extern  vmCvar_t   g_damageProtection;
 extern  vmCvar_t   g_targetProtection;
