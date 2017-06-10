@@ -62,6 +62,7 @@ vmCvar_t  g_warmupBuildableRespawning;
 vmCvar_t  g_warmupBuildableRespawnTime;
 vmCvar_t  g_warmupDefensiveBuildableRespawnTime;
 vmCvar_t  g_warmupBlockEnemyBuilding;
+vmCvar_t  g_warmupFriendlyBuildableFire;
 
 vmCvar_t  g_damageProtection;
 vmCvar_t  g_targetProtection;
@@ -215,6 +216,9 @@ static cvarTable_t   gameCvarTable[ ] =
     "g_warmupDefensiveBuildableRespawnTime", "30", CVAR_ARCHIVE, 0, qtrue },
   { &g_warmupBlockEnemyBuilding,
     "g_warmupBlockEnemyBuilding", "0", CVAR_SERVERINFO | CVAR_ARCHIVE, 0,
+    qtrue },
+  { &g_warmupFriendlyBuildableFire,
+    "g_warmupFriendlyBuildableFire", "1", CVAR_SERVERINFO | CVAR_ARCHIVE, 0,
     qtrue },
 
   { &g_damageProtection, "g_damageProtection", "1", CVAR_ARCHIVE, 0, qtrue },
