@@ -1495,10 +1495,27 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   //if evolving scale health
   if( ent == spawn )
   {
+    const int oldHealth = ent->health;
+    const int oldHealthReserve = ent->healthReserve;
+
     ent->health *= ent->client->pers.evolveHealthFraction;
+
+    // ensure that evolving/devolving with low health doesn't kill
+    if( ent->health < 1 && oldHealth > 0 )
+      ent->health = 1;
+
     client->ps.stats[ STAT_HEALTH ] = ent->health;
 
     ent->healthReserve *= ent->client->pers.evolveHealthReserveFraction;
+
+    if( ent->healthReserve < 1 )
+    {
+      if( oldHealthReserve > 0 )
+        ent->healthReserve = 1;
+      else if( ent->healthReserve < 0 )
+        ent->healthReserve = 0;
+    }
+
     client->ps.misc[ MISC_HEALTH_RESERVE ] = ent->healthReserve;
   }
 
