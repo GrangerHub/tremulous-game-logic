@@ -411,6 +411,8 @@ typedef struct namelog_s
   int               nameChanges;
   int               voteCount;
 
+  int               newbieNumber;
+
   qboolean          muted;
   qboolean          denyBuild;
 
@@ -1258,6 +1260,8 @@ void      body_die( gentity_t *self, gentity_t*, gentity_t*, int, int );
 void      player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod );
 qboolean  SpotWouldTelefrag( gentity_t *spot );
 char      *GetSkin( char *modelname, char *wish );
+qboolean  G_IsNewbieName( const char *name );
+
 
 //
 // g_svcmds.c
@@ -1510,6 +1514,8 @@ extern  vmCvar_t  g_layouts[ 9 ];
 extern  vmCvar_t  g_layoutAuto;
 
 extern  vmCvar_t  g_emoticonsAllowedInNames;
+extern  vmCvar_t  g_newbieNameNumbering;
+extern  vmCvar_t  g_newbieNamePrefix;
 
 extern  vmCvar_t  g_admin;
 extern  vmCvar_t  g_adminTempBan;
