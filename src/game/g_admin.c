@@ -1538,13 +1538,18 @@ qboolean G_admin_register( gentity_t *ent )
 {
   char arg[ 16 ];
   char playerName [ MAX_NAME_LENGTH ];
-  char unnamedName [ MAX_NAME_LENGTH ] = "UnnamedPlayer";
   int  oldLevel;
   int  newLevel = 1;
 
   if( !ent )
   {
     ADMP( "^3admintest: ^7you are on the console.\n" );
+    return qfalse;
+  }
+
+  if( ent->client->pers.guidless )
+  {
+    ADMP( "^3register: ^7You need a newer client to register. You can download the latest client from www.grangerhub.com\n" );
     return qfalse;
   }
 
