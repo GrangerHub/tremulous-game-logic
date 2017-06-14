@@ -1574,9 +1574,10 @@ qboolean G_admin_register( gentity_t *ent )
     }
   }
 
-  if( newLevel != 0 && !Q_stricmpn ( playerName, unnamedName, strlen( unnamedName ) ) )
+  if( newLevel != 0 && G_IsNewbieName( playerName ) )
   {
-    ADMP( va( "^3register: ^7You cannot register names similar to '%s'\n", unnamedName ) );
+    ADMP( va( "^3register: ^7You cannot register names similar to '%s^7' or 'UnnamedPlayer'\n",
+              g_newbieNamePrefix.string ) );
     return qfalse;
   }
 

@@ -664,10 +664,69 @@ static qboolean G_IsEmoticon( const char *s, qboolean *escaped )
 
 /*
 ===========
+G_IsNewbieName
+============
+*/
+qboolean G_IsNewbieName( const char *name )
+{
+  char testName[ MAX_NAME_LENGTH ];
+
+  G_DecolorString( (char *)name, testName, sizeof( testName ) );
+
+  if( !Q_stricmp( testName, "UnnamedPlayer" ) )
+    return qtrue;
+
+  if( g_newbieNameNumbering.integer &&
+      g_newbieNamePrefix.string[ 0 ] &&
+      !Q_stricmpn( testName, g_newbieNamePrefix.string, strlen( g_newbieNamePrefix.string ) ) )
+    return qtrue;
+
+  return qfalse;
+}
+
+/*
+===========
+G_ClientNewbieName
+============
+*/
+static const char *G_ClientNewbieName( gclient_t *client )
+{
+  static int  nextNumber = 1;
+  static char name[ MAX_NAME_LENGTH ];
+  int         number;
+
+  if( !g_newbieNameNumbering.integer ||
+      !g_newbieNamePrefix.string[ 0 ] ||
+      !client )
+   return "UnnamedPlayer";
+
+  if( client->pers.namelog->newbieNumber )
+  {
+    number = client->pers.namelog->newbieNumber;
+  }
+  else if( g_newbieNameNumbering.integer > 1 )
+  {
+    number = g_newbieNameNumbering.integer;
+    trap_Cvar_Set( "g_newbieNameNumbering", va( "%d", number + 1 ) );
+  }
+  else
+  {
+    number = nextNumber++;
+  }
+
+  client->pers.namelog->newbieNumber = number;
+  Com_sprintf( name, sizeof( name ), "%s%d",
+               g_newbieNamePrefix.string, number );
+  return name;
+}
+
+/*
+===========
 G_ClientCleanName
 ============
 */
-static void G_ClientCleanName( const char *in, char *out, int outSize )
+static void G_ClientCleanName( const char *in, char *out, int outSize,
+                               gclient_t *client )
 {
   int   len, colorlessLen;
   char  *p;
@@ -758,7 +817,7 @@ static void G_ClientCleanName( const char *in, char *out, int outSize )
 
   // if something made the name bad, put them back to UnnamedPlayer
   if( invalid )
-    Q_strncpyz( p, "UnnamedPlayer", outSize );
+    Q_strncpyz( p, G_ClientNewbieName( client ), outSize );
 }
 
 
@@ -870,7 +929,7 @@ char *ClientUserinfoChanged( int clientNum, qboolean forceName )
   // set name
   Q_strncpyz( oldname, client->pers.netname, sizeof( oldname ) );
   s = Info_ValueForKey( userinfo, "name" );
-  G_ClientCleanName( s, newname, sizeof( newname ) );
+  G_ClientCleanName( s, newname, sizeof( newname ), client );
 
   if( strcmp( oldname, newname ) )
   {
@@ -905,13 +964,16 @@ char *ClientUserinfoChanged( int clientNum, qboolean forceName )
 
     if( revertName )
     {
-      Q_strncpyz( client->pers.netname, *oldname ? oldname : "UnnamedPlayer",
+      Q_strncpyz( client->pers.netname, *oldname ? oldname : G_ClientNewbieName( client ),
         sizeof( client->pers.netname ) );
       Info_SetValueForKey( userinfo, "name", oldname );
       trap_SetUserinfo( clientNum, userinfo );
     }
     else
     {
+      if( G_IsNewbieName( newname ) )
+        Q_strncpyz( newname, G_ClientNewbieName( client ), sizeof( newname ) );
+
       G_CensorString( client->pers.netname, newname,
         sizeof( client->pers.netname ), ent );
       if( !forceName && client->pers.connected == CON_CONNECTED )
