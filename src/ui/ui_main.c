@@ -2417,9 +2417,6 @@ static void UI_LoadHumanItems( void )
 
   if( BG_WeaponIsAllowed( WP_MACHINEGUN, UI_DevModeIsOn( ) ) )
     UI_AddItem( WP_MACHINEGUN );
-
-  if( BG_WeaponIsAllowed( WP_HBUILD, UI_DevModeIsOn( ) ) )
-    UI_AddItem( WP_HBUILD );
 }
 
 /*
@@ -2472,6 +2469,19 @@ static void UI_ParseCarriageList( void )
       i = atoi( buffer );
 
       uiInfo.upgrades |= ( 1 << i );
+    }
+    else if( iterator[ 0 ] == 'H' )
+    {
+      iterator++;
+
+      while( iterator[ 0 ] != ' ' )
+        *bufPointer++ = *iterator++;
+
+      *bufPointer++ = '\n';
+
+      i = atoi( buffer );
+
+      uiInfo.heldWeapon |= ( 1 << i );
     }
 
     iterator++;
@@ -2705,7 +2715,7 @@ static void UI_LoadHumanBuilds( void )
   for( i = BA_NONE + 1; i < BA_NUM_BUILDABLES; i++ )
   {
     if( BG_Buildable( i )->team == TEAM_HUMANS &&
-        BG_Buildable( i )->buildWeapon & uiInfo.weapons &&
+        BG_Buildable( i )->buildWeapon & uiInfo.heldWeapon &&
         BG_BuildableAllowedInStage( i, stage, UI_GameIsInWarmup( ) ) &&
         BG_BuildableIsAllowed( i, UI_DevModeIsOn( ) ) )
     {

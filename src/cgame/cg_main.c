@@ -478,6 +478,9 @@ static void CG_SetUIVars( void )
         BG_Upgrade( i )->purchasable )
       strcat( carriageCvar, va( "U%d ", i ) );
   }
+
+  strcat( carriageCvar, va( "H%d ", cg.snap->ps.weapon ) );
+
   strcat( carriageCvar, "$" );
 
   trap_Cvar_Set( "ui_carriage", carriageCvar );

@@ -272,6 +272,7 @@ typedef struct
 
   int         weapons;
   int         upgrades;
+  int         heldWeapon;
 
   serverStatus_t serverStatus;
 

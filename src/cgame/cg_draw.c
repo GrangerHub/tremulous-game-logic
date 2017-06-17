@@ -643,25 +643,33 @@ static void CG_DrawPlayerAmmoValue( rectDef_t *rect, vec4_t color )
   int valueReserve = -1;
   qboolean bp = qfalse;
 
-  switch( cg.snap->ps.stats[ STAT_WEAPON ] )
+  if( cg.snap->ps.weapon == WP_HBUILD )
   {
-    case WP_NONE:
-    case WP_BLASTER:
-      return;
-
-    case WP_ABUILD:
-    case WP_ABUILD2:
-      valueReserve = cg.snap->ps.persistant[ PERS_BP_RESERVE ];
-    case WP_HBUILD:
       value = cg.snap->ps.persistant[ PERS_BP ];
       valueMarked = cg.snap->ps.persistant[ PERS_MARKEDBP ];
       bp = qtrue;
-      break;
+  } else
+  {
+    switch( cg.snap->ps.stats[ STAT_WEAPON ] )
+    {
+      case WP_NONE:
+      case WP_BLASTER:
+        return;
 
-    default:
-      value = cg.snap->ps.ammo;
-      break;
+      case WP_ABUILD:
+      case WP_ABUILD2:
+        valueReserve = cg.snap->ps.persistant[ PERS_BP_RESERVE ];
+        value = cg.snap->ps.persistant[ PERS_BP ];
+        valueMarked = cg.snap->ps.persistant[ PERS_MARKEDBP ];
+        bp = qtrue;
+        break;
+
+      default:
+        value = cg.snap->ps.ammo;
+        break;
+    }
   }
+  
 
   if( value > 999 )
     value = 999;
@@ -789,16 +797,19 @@ static void CG_DrawPlayerBuildTimer( rectDef_t *rect, vec4_t color )
   if( ps->stats[ STAT_MISC ] <= 0 )
     return;
 
-  switch( ps->stats[ STAT_WEAPON ] )
+  if( cg.snap->ps.weapon != WP_HBUILD )
   {
-    case WP_ABUILD:
-    case WP_ABUILD2:
-    case WP_HBUILD:
-      break;
+    switch( ps->stats[ STAT_WEAPON ] )
+    {
+      case WP_ABUILD:
+      case WP_ABUILD2:
+        break;
 
-    default:
-      return;
+      default:
+        return;
+    }
   }
+
 
   index = 8 * ( ps->stats[ STAT_MISC ] - 1 ) / MAXIMUM_BUILD_TIME;
   if( index > 7 )
@@ -825,48 +836,52 @@ static void CG_DrawPlayerClipsValue( rectDef_t *rect, vec4_t color )
   int           value;
   playerState_t *ps = &cg.snap->ps;
 
-  switch( ps->stats[ STAT_WEAPON ] )
+  if( cg.snap->ps.weapon == WP_HBUILD )
   {
-    case WP_NONE:
-    case WP_BLASTER:
-    case WP_ABUILD:
-    case WP_ABUILD2:
-      return;
+    value = ps->persistant[ PERS_BP_RESERVE ];
 
-    case WP_HBUILD:
-      value = ps->persistant[ PERS_BP_RESERVE ];
+    if( value > 999 )
+      value = 999;
 
-      if( value > 999 )
-        value = 999;
+    if( value > -1 )
+    {
+      float tx, ty;
+      char *text;
+      float scale;
+      int len;
 
-      if( value > -1 )
-      {
-        float tx, ty;
-        char *text;
-        float scale;
-        int len;
+      trap_R_SetColor( color );
 
-        trap_R_SetColor( color );
+      text = va( "%d", value );
 
-        text = va( "%d", value );
+      len = strlen( text );
 
-        len = strlen( text );
+      if( len <= 2 )
+        scale = 0.45f;
+      else
+        scale = 0.35f;
 
-        if( len <= 2 )
-          scale = 0.45f;
-        else
-          scale = 0.35f;
+      CG_AlignText( rect, text, scale, 0.0f, 0.0f, ALIGN_RIGHT, VALIGN_CENTER, &tx, &ty );
+      UI_Text_Paint( tx + 6, ty, scale, color, text, 0, 0, ITEM_TEXTSTYLE_NORMAL );
+      trap_R_SetColor( NULL );
+    }
+    return;
+  } else
+  {
+    switch( ps->stats[ STAT_WEAPON ] )
+    {
+      case WP_NONE:
+      case WP_BLASTER:
+      case WP_ABUILD:
+      case WP_ABUILD2:
+        return;
 
-        CG_AlignText( rect, text, scale, 0.0f, 0.0f, ALIGN_RIGHT, VALIGN_CENTER, &tx, &ty );
-        UI_Text_Paint( tx + 6, ty, scale, color, text, 0, 0, ITEM_TEXTSTYLE_NORMAL );
-        trap_R_SetColor( NULL );
-      }
-      return;
-
-    default:
-      value = ps->clips;
-      break;
+      default:
+        value = ps->clips;
+        break;
+    }
   }
+
   if( value > -1 )
   {
     trap_R_SetColor( color );

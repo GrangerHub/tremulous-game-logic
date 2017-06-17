@@ -3349,7 +3349,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qtrue,                //qboolean enabled;
     HBUILD_PRICE,         //int       price;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
-    SLOT_WEAPON,          //int       slots;
+    0,          //int       slots;
     "ckit",               //char      *name;
     "Construction Kit",   //char      *humanName;
     "Used for building structures. This includes "
@@ -3369,7 +3369,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //qboolean  hasThirdMode;
     qfalse,               //qboolean  canZoom;
     90.0f,                //float     zoomFov;
-    qtrue,                //qboolean  purchasable;
+    qfalse,                //qboolean  purchasable;
     qfalse,               //qboolean  longRanged;
     qfalse,               //qboolean  relativeMissileSpeed;
     {
@@ -4288,8 +4288,9 @@ Does the player hold a weapon?
 */
 qboolean BG_InventoryContainsWeapon( int weapon, int stats[ ] )
 {
-  // humans always have a blaster
-  if( stats[ STAT_TEAM ] == TEAM_HUMANS && weapon == WP_BLASTER )
+  // humans always have a blaster and a ckit
+  if( stats[ STAT_TEAM ] == TEAM_HUMANS &&
+      ( weapon == WP_BLASTER || weapon == WP_HBUILD ) )
     return qtrue;
 
   return ( stats[ STAT_WEAPON ] == weapon );
@@ -4308,7 +4309,10 @@ int BG_SlotsForInventory( int stats[ ] )
 
   slots = BG_Weapon( stats[ STAT_WEAPON ] )->slots;
   if( stats[ STAT_TEAM ] == TEAM_HUMANS )
+  {
     slots |= BG_Weapon( WP_BLASTER )->slots;
+    slots |= BG_Weapon( WP_HBUILD )->slots;
+  }
 
   for( i = UP_NONE; i < UP_NUM_UPGRADES; i++ )
   {

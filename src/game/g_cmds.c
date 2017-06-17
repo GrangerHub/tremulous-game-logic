@@ -2221,11 +2221,6 @@ void Cmd_Class_f( gentity_t *ent )
       {
         ent->client->pers.humanItemSelection = WP_MACHINEGUN;
       }
-      else if( !Q_stricmp( s, BG_Weapon( WP_HBUILD )->name ) &&
-               BG_WeaponIsAllowed( WP_HBUILD, g_cheats.integer ) )
-      {
-        ent->client->pers.humanItemSelection = WP_HBUILD;
-      }
       else
       {
         G_TriggerMenu( ent->client->ps.clientNum, MN_H_UNKNOWNSPAWNITEM );
