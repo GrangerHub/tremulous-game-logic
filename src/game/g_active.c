@@ -767,7 +767,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
     }
 
     if( weapon == WP_ABUILD || weapon == WP_ABUILD2 ||
-        client->ps.stats[ STAT_WEAPON ] == WP_HBUILD )
+        weapon == WP_HBUILD )
     {
         // Update build timer
         if( client->ps.stats[ STAT_MISC ] > 0 )

@@ -4599,6 +4599,11 @@ qboolean BG_PlayerCanChangeWeapon( playerState_t *ps )
       ps->stats[ STAT_MISC ] > LCANNON_CHARGE_TIME_MIN )
     return qfalse;
 
+  // The ckit's build timer must be complete before switching
+  if( ps->weapon == WP_HBUILD &&
+      ps->stats[ STAT_MISC ] )
+    return qfalse;
+
   return ps->weaponTime <= 0 || ps->weaponstate != WEAPON_FIRING;
 }
 
