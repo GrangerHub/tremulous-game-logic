@@ -333,6 +333,7 @@ struct gentity_s
 
   int               credits[ MAX_CLIENTS ];     // human credits for each client
   int               killedBy;                   // clientNum of killer
+  int               creditsDeffenses[ NUM_TEAMS ];  // credits for damage done by an enemy defensive buildables.
 
   vec3_t            turretAim;          // aim vector for turrets
   vec3_t            turretAimRate;      // track turn speed for norfenturrets

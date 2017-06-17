@@ -189,6 +189,17 @@ float G_RewardAttackers( gentity_t *self )
       totalDamage += (float)self->credits[ i ];
   }
 
+  // add damage done by enemy buildables to the total
+  for( i = 0; i < NUM_TEAMS; i++ )
+  {
+    if( ( self->client &&
+          self->client->ps.stats[ STAT_TEAM ] == i ) || 
+        i == self->buildableTeam ||
+        !self->creditsDeffenses[ i ] )
+      continue;
+    totalDamage += self->creditsDeffenses[ i ];
+  }
+
   if( totalDamage <= 0.0f )
     return 0.0f;
 
@@ -297,6 +308,45 @@ float G_RewardAttackers( gentity_t *self )
       }
     }
     self->credits[ i ] = 0;
+  }
+
+  // give credits from damage by defense buildables
+  for( i = 0; i < NUM_TEAMS; i++ )
+  {
+    int dBValue = value * self->creditsDeffenses[ i ] / totalDamage;
+    int buildablesTeamDistributionEarnings;
+    int everyonesDistributionEarnings;
+    int j;
+
+    if( ( self->client &&
+          self->client->ps.stats[ STAT_TEAM ] == i ) || 
+        i == self->buildableTeam ||
+        i == TEAM_NONE ||
+        !self->creditsDeffenses[ i ] )
+      continue;
+
+    if( totalDamage < maxHealth )
+      dBValue *= totalDamage / maxHealth;
+
+    if( numTeamPlayers[ i ] )
+      buildablesTeamDistributionEarnings = ( dBValue * 2 ) / ( 10 * numTeamPlayers[ i ] );
+    else
+      buildablesTeamDistributionEarnings = 0;
+    everyonesDistributionEarnings = ( dBValue * 8 ) / ( 10 * level.numPlayingClients );
+
+    for( j = 0; j < level.maxclients; j++ )
+    {
+      if( level.clients[ j ].pers.connected == CON_CONNECTED &&
+          level.clients[ j ].pers.teamSelection != TEAM_NONE )
+      {
+        //distribute the team specific earnings
+        if( level.clients[ j ].pers.teamSelection == i )
+          G_AddCreditToClient( &level.clients[ j ], buildablesTeamDistributionEarnings, qtrue );
+
+        //distribute the earnings common to everyone playing
+        G_AddCreditToClient( &level.clients[ j ], everyonesDistributionEarnings, qtrue );
+      }
+    }
   }
 
   if( alienCredits )
@@ -1349,8 +1399,14 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
     targ->nextHPReserveRegenTime = level.time + ALIEN_REGEN_DAMAGE_TIME;
 
     // add to the attackers "account" on the target
-    if( attacker->client && attacker != targ )
-      targ->credits[ attacker->client->ps.clientNum ] += take;
+    if( attacker != targ )
+    {
+      if( attacker->client )
+        targ->credits[ attacker->client->ps.clientNum ] += take;
+      else if( attacker->s.eType == ET_BUILDABLE )
+        targ->creditsDeffenses[ attacker->buildableTeam ] += take;
+    }
+    
 
     if( targ->health <= 0 )
     {
