@@ -2566,9 +2566,18 @@ void Cmd_ToggleItem_f( gentity_t *ent )
     if( !BG_PlayerCanChangeWeapon( &ent->client->ps ) )
       return;
 
+    if( weapon == WP_HBUILD )
+    {
+      if( ent->client->ps.weapon != WP_HBUILD )
+        weapon = WP_HBUILD;
+      else if( ent->client->ps.ammo || ent->client->ps.clips )
+        weapon = WP_NONE;
+      else
+        weapon = WP_BLASTER;
+    }
     //special case to allow switching between
     //the blaster and the primary weapon
-    if( ent->client->ps.weapon != WP_BLASTER )
+    else if( ent->client->ps.weapon != WP_BLASTER )
       weapon = WP_BLASTER;
     else
       weapon = WP_NONE;

@@ -62,9 +62,10 @@ void G_ForceWeaponChange( gentity_t *ent, weapon_t weapon )
     ps->weaponstate = WEAPON_READY;
   }
 
-  ps->persistant[ PERS_NEWWEAPON ] = ( weapon == WP_BLASTER ) ?
-    WP_BLASTER : ( ps->stats[ STAT_WEAPON ] != WP_NONE ?
-        ps->stats[ STAT_WEAPON ] : WP_BLASTER );
+  ps->persistant[ PERS_NEWWEAPON ] =  ( weapon == WP_HBUILD ) ? WP_HBUILD :
+    ( ( weapon == WP_BLASTER ) ?
+      WP_BLASTER : ( ps->stats[ STAT_WEAPON ] != WP_NONE ?
+                           ps->stats[ STAT_WEAPON ] : WP_BLASTER ) );
 
   // force this here to prevent flamer effect from continuing
   ps->generic1 = WPM_NOTFIRING;
