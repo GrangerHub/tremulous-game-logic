@@ -87,6 +87,9 @@ void G_GiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo )
   if( BG_Weapon( weapon )->infiniteAmmo )
     return;
 
+  if( !BG_Weapon( weapon )->ammoPurchasable )
+    return;
+
   if( buyingEnergyAmmo && !BG_Weapon( weapon )->usesEnergy )
     return;
 
