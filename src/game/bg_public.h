@@ -1261,6 +1261,7 @@ typedef struct
   int       maxAmmo;
   int       maxClips;
   int       roundPrice; // doesn't apply to energy weapons
+  qboolean  ammoPurchasable;
   qboolean  infiniteAmmo;
   qboolean  usesEnergy;
 
