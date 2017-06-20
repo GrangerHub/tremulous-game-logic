@@ -2495,16 +2495,22 @@ UI_LoadHumanArmouryBuys
 */
 static void UI_LoadHumanArmouryBuys( void )
 {
-  int     i, j = 0;
-  stage_t stage = UI_GetCurrentHumanStage( );
-  int     slots = 0;
+  int      i, j = 0;
+  stage_t  stage = UI_GetCurrentHumanStage( );
+  int      slots = 0;
+  qboolean purchasableAmmo = qfalse;
 
   UI_ParseCarriageList( );
 
   for( i = WP_NONE + 1; i < WP_NUM_WEAPONS; i++ )
   {
     if( uiInfo.weapons & ( 1 << i ) )
+    {
       slots |= BG_Weapon( i )->slots;
+      if( BG_Weapon( i )->ammoPurchasable &&
+          !BG_Weapon( i )->infiniteAmmo )
+        purchasableAmmo = qtrue;
+    }
   }
 
   for( i = UP_NONE + 1; i < UP_NUM_UPGRADES; i++ )
@@ -2546,6 +2552,10 @@ static void UI_LoadHumanArmouryBuys( void )
         !( uiInfo.upgrades & ( 1 << i ) ) &&
         !( i == UP_JETFUEL && !(uiInfo.upgrades & ( 1 << UP_JETPACK ) ) ) )
     {
+      // only display the option to buy ammo when the held weapon can buy it.
+      if( i == UP_AMMO && !purchasableAmmo )
+        continue;
+
       uiInfo.humanArmouryBuyList[ j ].text = BG_Upgrade( i )->humanName;
       uiInfo.humanArmouryBuyList[ j ].cmd =
         String_Alloc( va( "cmd buy %s\n", BG_Upgrade( i )->name ) );

@@ -2909,7 +2909,10 @@ void Cmd_Sell_f( gentity_t *ent )
 
       //add to funds
       G_AddCreditToClient( ent->client, (short)BG_Weapon( weapon )->price, qfalse );
-      if( BG_Weapon( weapon )->roundPrice && !BG_Weapon( weapon )->usesEnergy )
+      if( BG_Weapon( weapon )->roundPrice && !BG_Weapon( weapon )->usesEnergy &&
+          ( BG_Weapon( weapon )->ammoPurchasable ||
+            ( ent->client->ps.ammo == BG_Weapon( weapon )->maxAmmo &&
+              ent->client->ps.clips == BG_Weapon( weapon )->maxClips ) ) )
       {
         int totalAmmo = ent->client->ps.ammo +
                         ( ent->client->ps.clips *

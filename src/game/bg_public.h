@@ -1302,8 +1302,8 @@ typedef struct
 {
   weapon_t           number;
 
-  qboolean           enabled; // doesn't include the price for ammo
-  int                price;
+  qboolean           enabled;
+  int                price; // doesn't include the price for ammo
   int                stages;
 
   int                slots;
@@ -1315,6 +1315,7 @@ typedef struct
   int                 maxAmmo;
   int                 maxClips;
   int                 roundPrice; // doesn't apply to energy weapons
+  qboolean            ammoPurchasable;
   qboolean            infiniteAmmo;
   qboolean            usesEnergy;
 
