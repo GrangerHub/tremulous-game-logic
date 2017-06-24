@@ -3446,8 +3446,6 @@ Think function for MG turret
 */
 void HMGTurret_Think( gentity_t *self )
 {
-#define MGTURRET_SPINUP_PERIOD( ) ( G_IsDCCBuilt( ) ? MGTURRET_DCC_SPINUP_TIME : \
-                                                      MGTURRET_SPINUP_TIME )
   self->nextthink = level.time +
                     BG_Buildable( self->s.modelindex )->nextthink;
 
@@ -3476,11 +3474,11 @@ void HMGTurret_Think( gentity_t *self )
   } else
   {
     // spinup
-    if( self->turretSpinupTime < MGTURRET_SPINUP_PERIOD( ) )
+    if( self->turretSpinupTime < MGTURRET_SPINUP_TIME )
       self->turretSpinupTime += MGTURRET_NEXTTHINK;
 
-    if( self->turretSpinupTime > MGTURRET_SPINUP_PERIOD( ) )
-      self->turretSpinupTime = MGTURRET_SPINUP_PERIOD( );
+    if( self->turretSpinupTime > MGTURRET_SPINUP_TIME )
+      self->turretSpinupTime = MGTURRET_SPINUP_TIME;
   }
 
   // If not powered don't do anything
@@ -3537,7 +3535,7 @@ void HMGTurret_Think( gentity_t *self )
                     BG_Buildable( self->s.modelindex )->turretFireSpeed +
                     ( MGTURRET_REPEAT_START - MGTURRET_REPEAT ) -
                     ( ( ( MGTURRET_REPEAT_START - MGTURRET_REPEAT ) *
-                         self->turretSpinupTime ) / MGTURRET_SPINUP_PERIOD( ) );
+                         self->turretSpinupTime ) / MGTURRET_SPINUP_TIME );
   G_AddEvent( self, EV_FIRE_WEAPON, 0 );
   G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
 }

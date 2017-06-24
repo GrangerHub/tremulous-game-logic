@@ -440,7 +440,7 @@ void bulletFire( gentity_t *ent, float spread, int damage, int mod )
   if( G_TakesDamage( traceEnt ) )
   {
     G_Damage( traceEnt, ent, ent, forward, tr.endpos,
-      damage, 0, mod );
+      damage, DAMAGE_NO_KNOCKBACK, mod );
   }
 }
 
