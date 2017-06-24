@@ -3446,6 +3446,8 @@ Think function for MG turret
 */
 void HMGTurret_Think( gentity_t *self )
 {
+#define MGTURRET_SPINUP_PERIOD( ) ( G_IsDCCBuilt( ) ? MGTURRET_DCC_SPINUP_TIME : \
+                                                      MGTURRET_SPINUP_TIME )
   self->nextthink = level.time +
                     BG_Buildable( self->s.modelindex )->nextthink;
 
@@ -3465,32 +3467,20 @@ void HMGTurret_Think( gentity_t *self )
   {
     // spin down
     if( ( self->timestamp < level.time ) &&
-        ( self->turretFireSpeedMod > MGTURRET_REPEAT_MOD_MIN ) )
+        ( self->turretSpinupTime > 0 ) )
     {
-      self->turretFireSpeedMod -= ( MGTURRET_REPEAT_MOD_DIFF * MGTURRET_NEXTTHINK ) /
-                                    MGTURRET_SPINUP_TIME;
-      if( self->turretFireSpeedMod < MGTURRET_REPEAT_MOD_MIN )
-        self->turretFireSpeedMod = MGTURRET_REPEAT_MOD_MIN;
+      self->turretSpinupTime -= MGTURRET_NEXTTHINK;
+      if( self->turretSpinupTime < 0 )
+        self->turretSpinupTime = 0;
     }
   } else
   {
-    // spin up
-    if( self->turretFireSpeedMod < 100 )
-    {
-      if( G_IsDCCBuilt( ) )
-      {
-        self->turretFireSpeedMod += ( MGTURRET_REPEAT_MOD_DIFF * MGTURRET_NEXTTHINK ) /
-                                    MGTURRET_DCC_SPINUP_TIME;
-      }
-      else
-      {
-        self->turretFireSpeedMod += ( MGTURRET_REPEAT_MOD_DIFF * MGTURRET_NEXTTHINK ) /
-                                      MGTURRET_SPINUP_TIME;
-      }
-    } else if( self->turretFireSpeedMod > 100 )
-    {
-      self->turretFireSpeedMod = 100;
-    }
+    // spinup
+    if( self->turretSpinupTime < MGTURRET_SPINUP_PERIOD( ) )
+      self->turretSpinupTime += MGTURRET_NEXTTHINK;
+
+    if( self->turretSpinupTime > MGTURRET_SPINUP_PERIOD( ) )
+      self->turretSpinupTime = MGTURRET_SPINUP_PERIOD( );
   }
 
   // If not powered don't do anything
@@ -3541,8 +3531,13 @@ void HMGTurret_Think( gentity_t *self )
 
   FireWeapon( self );
   self->s.eFlags |= EF_FIRING;
-  self->timestamp = level.time + ( ( BG_Buildable( self->s.modelindex )->turretFireSpeed *
-                                     100 ) / self->turretFireSpeedMod );
+  Com_Assert( MGTURRET_REPEAT_START >= MGTURRET_REPEAT &&
+              "Starting mg turret repeat is faster than repeat after spinup\n" ); 
+  self->timestamp = level.time +
+                    BG_Buildable( self->s.modelindex )->turretFireSpeed +
+                    ( MGTURRET_REPEAT_START - MGTURRET_REPEAT ) -
+                    ( ( ( MGTURRET_REPEAT_START - MGTURRET_REPEAT ) *
+                         self->turretSpinupTime ) / MGTURRET_SPINUP_PERIOD( ) );
   G_AddEvent( self, EV_FIRE_WEAPON, 0 );
   G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
 }
@@ -5066,11 +5061,7 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
   BG_BuildableBoundingBox( buildable, built->r.mins, built->r.maxs );
 
   if( built->buildableTeam == TEAM_HUMANS )
-  {
     built->health = BG_Buildable( buildable )->health / 10;
-    if( buildable == BA_H_MGTURRET )
-      built->turretFireSpeedMod = MGTURRET_REPEAT_MOD_MIN;
-  }
   else
     built->health = 1;
 
