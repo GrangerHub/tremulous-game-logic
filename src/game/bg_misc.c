@@ -1725,7 +1725,6 @@ int BG_ClassCanEvolveFromTo( class_t fclass,
   if( tclass == PCL_NONE ||
       fclass == PCL_NONE ||
       fclass == tclass ||
-      tclass == PCL_ALIEN_BUILDER0 ||
       tclass == PCL_HUMAN ||
       tclass == PCL_HUMAN_BSUIT ||
       !BG_ClassIsAllowed( tclass, devMode ) ||
@@ -1735,7 +1734,8 @@ int BG_ClassCanEvolveFromTo( class_t fclass,
   if( gameIsInWarmup )
     return 0;
 
-  netCost = ( tcost = BG_Class( tclass )->cost * ALIEN_CREDITS_PER_KILL ) -
+  netCost = ( tcost = ( ( tclass == PCL_ALIEN_BUILDER0 ) ? 1 : BG_Class( tclass )->cost )
+                      * ALIEN_CREDITS_PER_KILL ) -
          ( BG_Class( fclass )->cost * ALIEN_CREDITS_PER_KILL );
 
   if( netCost > 0 )
@@ -1749,7 +1749,7 @@ int BG_ClassCanEvolveFromTo( class_t fclass,
       return netCost;
   }
 
-  return tcost > 0 ? 1 : 0;
+  return tcost > 0 ? ALIEN_CREDITS_PER_KILL : 0;
 }
 
 /*
