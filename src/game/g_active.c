@@ -923,7 +923,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
     {
       int dmg = 5;
       if ( BG_ClassHasAbility(client->ps.stats[STAT_CLASS], SCA_REGEN) )
-          dmg = BG_Class(client->ps.stats[STAT_CLASS])->regenRate;
+          dmg = 0.04 * BG_Class(client->ps.stats[STAT_CLASS])->health;
       G_Damage( ent, NULL, NULL, NULL, NULL, dmg, DAMAGE_NO_ARMOR, MOD_SUICIDE );
     }
 
@@ -2252,7 +2252,8 @@ void ClientThink_real( gentity_t *ent )
 
     if( ent->health <= 0 || ent->nextRegenTime < 0 || regenRate == 0 )
       ent->nextRegenTime = -1; // no regen
-    else if( ent->healthReserve > 0 )
+    else if( ent->healthReserve > 0 ||
+             !BG_ClassHasAbility(client->ps.stats[STAT_CLASS], SCA_REGEN_RESERVE) )
     {
       int       entityList[ MAX_GENTITIES ];
       int       i, num;
@@ -2323,17 +2324,21 @@ void ClientThink_real( gentity_t *ent )
       count = 1 + ( level.time - ent->nextRegenTime ) / interval;
       ent->nextRegenTime += count * interval;
 
-      if( ( ent->healthReserve - count ) < 0 )
+      if( ( ent->healthReserve - count ) < 0 &&
+          BG_ClassHasAbility(client->ps.stats[STAT_CLASS], SCA_REGEN_RESERVE) )
         count = ent->healthReserve;
 
       if( ent->health < client->ps.stats[ STAT_MAX_HEALTH ]  )
       {
-        ent->healthReserve -= count;
+        if( BG_ClassHasAbility(client->ps.stats[STAT_CLASS], SCA_REGEN_RESERVE) )
+        {
+          ent->healthReserve -= count;
 
-        if( ent->healthReserve < 0 )
-          ent->healthReserve = 0;
+          if( ent->healthReserve < 0 )
+            ent->healthReserve = 0;
 
-        client->ps.misc[ MISC_HEALTH_RESERVE ] = ent->healthReserve;
+          client->ps.misc[ MISC_HEALTH_RESERVE ] = ent->healthReserve;
+        }
 
         ent->health += count;
         client->ps.stats[ STAT_HEALTH ] = ent->health;

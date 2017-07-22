@@ -897,7 +897,10 @@ static void CG_DrawPlayerHealthValue( rectDef_t *rect, vec4_t color )
   float scale;
   int   len;
   int   health = cg.snap->ps.stats[ STAT_HEALTH ];
-  int   healthReserve = cg.snap->ps.misc[ MISC_HEALTH_RESERVE ];
+  int   healthReserve = BG_ClassHasAbility( cg.predictedPlayerState.stats[ STAT_CLASS ],
+                          SCA_REGEN_RESERVE ) ?
+                            cg.snap->ps.misc[ MISC_HEALTH_RESERVE ] :
+                            0;
 
     
     

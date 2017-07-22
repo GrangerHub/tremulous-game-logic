@@ -309,6 +309,7 @@ typedef enum
 #define SCA_REGEN               0x00000100 // XXX kinda wasted- keeps alien class on human team from never dieing when team admits defeat.
 #define SCA_CANHOVEL            0x00000200
 #define SCA_CHARGE_STAMINA      0x00000400 // limits STAT_MISC use. can't be used with SCA_STAMINA
+#define SCA_REGEN_RESERVE       0x00000800 // When hp regen draws from an hp reserve, where if it runs out, regen becomes very slow.
 
 #define SS_WALLCLIMBING         0x00000001
 #define SS_CREEPSLOWED          0x00000002

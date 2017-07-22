@@ -1497,7 +1497,8 @@ static const classAttributes_t bg_classList[ ] =
     LEVEL3_UPG_HEALTH,                              //int     health;
     0.0f,                                           //float   fallDamage;
     LEVEL3_UPG_REGEN,                               //float   regenRate;
-    SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,          //int     abilities;
+    SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN|
+    SCA_REGEN_RESERVE,                              //int     abilities;
     WP_ALEVEL3_UPG,                                 //weapon_t startWeapon;
     0.0f,                                           //float   buildDist;
     110,                                            //int     fov;
