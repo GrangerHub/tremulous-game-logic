@@ -4401,9 +4401,9 @@ void PmoveSingle( pmove_t *pmove )
   {
     // check for LoS buildable placement mode
     if( pm->cmd.buttons & BUTTON_WALKING )
-      pm->ps->stats[ STAT_STATE ] |= SS_LOS_TOGGLEBIT;
-    else
       pm->ps->stats[ STAT_STATE ] &= ~SS_LOS_TOGGLEBIT;
+    else
+      pm->ps->stats[ STAT_STATE ] |= SS_LOS_TOGGLEBIT;
   }
     
 

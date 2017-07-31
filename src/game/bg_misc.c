@@ -4550,14 +4550,14 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
   {
     vec3_t viewOrigin;
 
-    buildDist *= 2.0f;
+    buildDist *= 2.3f;
 
     BG_GetClientViewOrigin( ps, viewOrigin );
 
     VectorMA( viewOrigin, buildDist, forward, targetOrigin );
 
     (*trace)( tr, viewOrigin, mins, maxs, targetOrigin, ps->clientNum,
-              MASK_SOLID );
+              MASK_PLAYERSOLID );
   } else
   {
     VectorCopy( ps->origin, playerOrigin );
@@ -4575,7 +4575,8 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
     //so buildings drop to floor
     VectorMA( targetOrigin, -128, playerNormal, targetOrigin );
 
-    (*trace)( tr, entityOrigin, mins, maxs, targetOrigin, ps->clientNum, MASK_PLAYERSOLID );
+    (*trace)( tr, entityOrigin, mins, maxs, targetOrigin, ps->clientNum,
+              MASK_PLAYERSOLID );
   }
 
   VectorCopy( tr->endpos, outOrigin );
