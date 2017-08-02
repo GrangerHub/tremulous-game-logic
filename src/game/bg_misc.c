@@ -4530,14 +4530,19 @@ Find a place to build a buildable
 ===============
 */
 void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
-                                           const vec3_t mins, const vec3_t maxs,
                                            void (*trace)( trace_t *, const vec3_t, const vec3_t,
                                                           const vec3_t, const vec3_t, int, int ),
                                            vec3_t outOrigin, vec3_t outAngles, trace_t *tr )
 {
   vec3_t  forward, entityOrigin, targetOrigin;
   vec3_t  playerOrigin, playerNormal;
+  vec3_t mins, maxs;
   float   buildDist = BG_Class( ps->stats[ STAT_CLASS ] )->buildDist;
+  const buildable_t buildable = ps->stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT;
+
+  BG_BuildableBoundingBox( buildable, mins, maxs );
+
+  VectorCopy( ps->origin, playerOrigin );
 
   BG_GetClientNormal( ps, playerNormal );
 
@@ -4549,6 +4554,9 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
   if( ps->stats[ STAT_STATE ] & SS_LOS_TOGGLEBIT )
   {
     vec3_t viewOrigin;
+    const float minNormal = BG_Buildable( buildable )->minNormal;
+    const qboolean invertNormal = BG_Buildable( buildable )->invertNormal;
+    qboolean validAngle;
 
     buildDist *= 2.3f;
 
@@ -4558,10 +4566,32 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
 
     (*trace)( tr, viewOrigin, mins, maxs, targetOrigin, ps->clientNum,
               MASK_PLAYERSOLID );
+
+    validAngle = tr->plane.normal[ 2 ] >= minNormal ||
+                   ( invertNormal && tr->plane.normal[ 2 ] <= -minNormal );
+ 
+    if( tr->fraction >= 1.0f || !validAngle ) //TODO: These should be utility functions like "if(traceHit(&tr))"
+    {
+      vec3_t targetDir;
+      float len;
+ 
+      len = VectorNormalize( tr->endpos );
+ 
+      VectorScale( tr->endpos, len - 1.0f, tr->endpos );
+ 
+      VectorSubtract( targetOrigin, playerOrigin, targetDir );
+ 
+      VectorNormalize( targetDir );
+ 
+      VectorMA( tr->endpos,
+        -2.0f * buildDist * fabs( DotProduct( playerNormal, targetDir ) ),
+        playerNormal, targetOrigin );
+ 
+      (*trace)( tr, viewOrigin, mins, maxs, targetOrigin, ps->clientNum,
+        MASK_PLAYERSOLID );
+    }
   } else
   {
-    VectorCopy( ps->origin, playerOrigin );
-
     ProjectPointOnPlane( forward, forward, playerNormal );
     VectorNormalize( forward );
 

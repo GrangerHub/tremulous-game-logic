@@ -490,7 +490,6 @@ int G_GetMarkedBuildPoints( playerState_t *ps )
   buildable_t buildable = ( ps->stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT );
   vec3_t            angles;
   vec3_t            origin;
-  vec3_t            mins, maxs;
   trace_t           tr1;
   int       i;
   int sum = 0;
@@ -502,7 +501,7 @@ int G_GetMarkedBuildPoints( playerState_t *ps )
         !g_markDeconstruct.integer ) )
     return 0;
 
-  BG_PositionBuildableRelativeToPlayer( ps, mins, maxs, trap_Trace, origin,
+  BG_PositionBuildableRelativeToPlayer( ps, trap_Trace, origin,
                                         angles, &tr1 );
 
   for( i = MAX_CLIENTS, ent = g_entities + i; i < level.num_entities; i++, ent++ )
@@ -4751,7 +4750,7 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
 
   BG_BuildableBoundingBox( buildable, mins, maxs );
 
-  BG_PositionBuildableRelativeToPlayer( ps, mins, maxs, trap_Trace,
+  BG_PositionBuildableRelativeToPlayer( ps, trap_Trace,
                                         entity_origin, angles, &tr1 );
   trap_Trace( &tr2, entity_origin, mins, maxs, entity_origin, ent->s.number,
               MASK_PLAYERSOLID );
