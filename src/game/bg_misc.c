@@ -4585,7 +4585,7 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
       VectorNormalize( targetDir );
  
       VectorMA( tr->endpos,
-        -2.0f * buildDist * fabs( DotProduct( playerNormal, targetDir ) ),
+        -2.0f * buildDist * fabs( DotProduct( playerNormal, targetDir ) ) - ps->viewheight - 1,
         playerNormal, targetOrigin );
  
       VectorCopy( tr->endpos , startOrigin );
