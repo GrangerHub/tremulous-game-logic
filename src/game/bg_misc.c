@@ -4572,12 +4572,13 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
  
     if( tr->fraction >= 1.0f || !validAngle ) //TODO: These should be utility functions like "if(traceHit(&tr))"
     {
-      vec3_t targetDir;
-      float len;
+      vec3_t targetDir, startOrigin;
  
-      len = VectorNormalize( tr->endpos );
- 
-      VectorScale( tr->endpos, len - 1.0f, tr->endpos );
+      if( tr->fraction < 1.0f )
+      {
+        //Bring down trace away from w/e surface it has hit.
+        VectorAdd( tr->endpos, tr->plane.normal, tr->endpos );
+      }
  
       VectorSubtract( targetOrigin, playerOrigin, targetDir );
  
@@ -4587,7 +4588,9 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
         -2.0f * buildDist * fabs( DotProduct( playerNormal, targetDir ) ),
         playerNormal, targetOrigin );
  
-      (*trace)( tr, viewOrigin, mins, maxs, targetOrigin, ps->clientNum,
+      VectorCopy( tr->endpos , startOrigin );
+ 
+      (*trace)( tr, startOrigin, mins, maxs, targetOrigin, ps->clientNum,
         MASK_PLAYERSOLID );
     }
   } else
