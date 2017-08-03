@@ -120,8 +120,7 @@ void G_namelog_restore( gclient_t *client )
 {
   namelog_t *n = client->pers.namelog;
 
-  G_ChangeTeam( g_entities + n->slot,
-                !g_teamForceBalance.integer ? n->team : TEAM_NONE );
+  G_ChangeTeam( g_entities + n->slot, n->team );
   client->ps.persistant[ PERS_SCORE ] = n->score;
   client->ps.persistant[ PERS_CREDIT ] = 0;
   G_AddCreditToClient( client, n->credits, qfalse );
