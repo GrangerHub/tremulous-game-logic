@@ -4556,8 +4556,8 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
     vec3_t viewOrigin;
     const float minNormal = BG_Buildable( buildable )->minNormal;
     const qboolean invertNormal = BG_Buildable( buildable )->invertNormal;
-    qboolean validAngle;
-    float heightOffset = 0.0f;
+    qboolean validAngle,resized = qfalse;
+    float heightOffset = 0.0f,originalHeight;
  
     buildDist *= 2.3f;
  
@@ -4569,48 +4569,30 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
  
     VectorMA( viewOrigin, buildDist, forward, targetOrigin );
  
-    //Determine and correct height for buildings that can't be built on walls.
- 
+    //Determine and correct height for buildings that can't be built on walls or ceiling.
     if( minNormal > 0.0f && invertNormal == qfalse )
     {
       maxs[2] -= mins[2];
       heightOffset = mins[2];
+      if( maxs[2] > 15.0f )
+      {
+        originalHeight = maxs[2];
+        maxs[2] = 15.0f;
+        resized = qtrue;
+      }
       mins[2] = 0.0f;
     }
  
-    //Attempt to find lowest point that a building can fit.  This has to be brute forced.
-    {
-      const int attempts = 5;
-      vec3_t newPos;
-      int i;
-      float fraction = ps->viewheight / (float)attempts;
- 
-      VectorCopy( viewOrigin, newPos );
- 
-      for( i = 0; i < attempts; i++ )
-      {
-        (*trace)( tr, newPos, mins, maxs, viewOrigin, ps->clientNum,
-                  MASK_PLAYERSOLID );
-        if( !tr->startsolid )
-        {
-          break;
-        }
-        newPos[2] -= fraction;
-      }
- 
-      if( tr->startsolid )
-      {
-        tr->endpos[2] -= heightOffset;
-        VectorCopy( tr->endpos, outOrigin );
-        return;
-      }
- 
-      (*trace)( tr, tr->endpos, mins, maxs, targetOrigin, ps->clientNum,
-                MASK_PLAYERSOLID );
-    }
+    (*trace)( tr, viewOrigin, mins, maxs, targetOrigin, ps->clientNum,
+              MASK_PLAYERSOLID );
  
     validAngle = tr->plane.normal[ 2 ] >= minNormal ||
                    ( invertNormal && tr->plane.normal[ 2 ] <= -minNormal );
+ 
+    if( resized )
+    {
+      maxs[2] = originalHeight;
+    }
  
     //Down trace if no hit or surface is too steep.
     if( tr->fraction >= 1.0f || !validAngle ) //TODO: These should be utility functions like "if(traceHit(&tr))"
@@ -4647,7 +4629,6 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
           MASK_PLAYERSOLID );
       }
     }
-
     tr->endpos[2] -= heightOffset;
   } else
   {
