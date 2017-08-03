@@ -1246,7 +1246,7 @@ char *ClientConnect( int clientNum, qboolean firstTime )
   
 
   // if this is after !restart keepteams or !restart switchteams, apply said selection
-  if ( client->sess.restartTeam != TEAM_NONE )
+  if ( client->sess.restartTeam != TEAM_NONE && !g_teamForceBalance.integer )
   {
     G_ChangeTeam( ent, client->sess.restartTeam );
     client->sess.restartTeam = TEAM_NONE;
