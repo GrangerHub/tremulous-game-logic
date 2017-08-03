@@ -4732,7 +4732,7 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   vec3_t            angles;
   vec3_t            entity_origin;
   vec3_t            mins, maxs;
-  trace_t           tr1, tr2, tr3, tr4;
+  trace_t           tr1, tr2, tr3;
   itemBuildError_t  reason = IBE_NONE, tempReason;
   gentity_t         *tempent, *powerBuildable;
   float             minNormal;
@@ -4752,12 +4752,12 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
 
   BG_PositionBuildableRelativeToPlayer( ps, trap_Trace,
                                         entity_origin, angles, &tr1 );
-  trap_Trace( &tr2, entity_origin, mins, maxs, entity_origin, ent->s.number,
-              MASK_PLAYERSOLID );
-  trap_Trace( &tr3, ps->origin, NULL, NULL, entity_origin, ent->s.number,
-              MASK_PLAYERSOLID );
-  if( ent->client->ps.stats[ STAT_STATE ] & SS_LOS_TOGGLEBIT )
-    trap_Trace( &tr4, entity_origin, mins, maxs, entity_origin, -1,
+
+  trap_Trace( &tr2, entity_origin, mins, maxs, entity_origin, -1,
+                MASK_PLAYERSOLID );
+
+  if( !( ent->client->ps.stats[ STAT_STATE ] & SS_LOS_TOGGLEBIT ) )
+    trap_Trace( &tr3, ps->origin, NULL, NULL, entity_origin, ent->s.number,
                 MASK_PLAYERSOLID );
 
   VectorCopy( entity_origin, origin );
@@ -4874,7 +4874,7 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
       G_SetBuildableMarkedLinkState( qfalse );
 
       if( tempent == NULL ) // No reactor
-        reason = IBE_RPTNOREAC;   
+        reason = IBE_RPTNOREAC;
       else if( !( IS_WARMUP && g_warmupBuildableRespawning.integer ) &&
                g_markDeconstruct.integer && g_markDeconstruct.integer != 3 &&
                powerBuildable && powerBuildable->s.modelindex == BA_H_REACTOR )
@@ -4926,7 +4926,7 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
           reason = IBE_ONEREACTOR;
           break;
 
-	case BA_H_DCC:
+        case BA_H_DCC:
           reason = IBE_ONEDCC;
           break;
 
@@ -4956,9 +4956,9 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
 
   //this item does not fit here
   if( reason == IBE_NONE &&
-      ( tr2.fraction < 1.0f || tr3.fraction < 1.0f ||
-      ( ( ent->client->ps.stats[ STAT_STATE ] & SS_LOS_TOGGLEBIT ) &&
-          tr4.startsolid ) ) )
+      ( tr1.fraction >= 1.0f || tr2.startsolid ||
+      ( !( ent->client->ps.stats[ STAT_STATE ] & SS_LOS_TOGGLEBIT ) &&
+          tr3.fraction >= 1.0f ) ) )
     reason = IBE_NOROOM;
 
   if( reason != IBE_NONE )
