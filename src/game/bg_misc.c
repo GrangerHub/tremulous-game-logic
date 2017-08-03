@@ -4556,8 +4556,8 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
     vec3_t viewOrigin;
     const float minNormal = BG_Buildable( buildable )->minNormal;
     const qboolean invertNormal = BG_Buildable( buildable )->invertNormal;
-    qboolean validAngle,resized = qfalse;
-    float heightOffset = 0.0f,originalHeight;
+    qboolean validAngle;
+    float heightOffset = 0.0f;
  
     buildDist *= 2.3f;
  
@@ -4576,9 +4576,7 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
       heightOffset = mins[2];
       if( maxs[2] > 15.0f )
       {
-        originalHeight = maxs[2];
         maxs[2] = 15.0f;
-        resized = qtrue;
       }
       mins[2] = 0.0f;
     }
@@ -4588,11 +4586,6 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
  
     validAngle = tr->plane.normal[ 2 ] >= minNormal ||
                    ( invertNormal && tr->plane.normal[ 2 ] <= -minNormal );
- 
-    if( resized )
-    {
-      maxs[2] = originalHeight;
-    }
  
     //Down trace if no hit or surface is too steep.
     if( tr->fraction >= 1.0f || !validAngle ) //TODO: These should be utility functions like "if(traceHit(&tr))"
@@ -4611,17 +4604,9 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
       VectorNormalize( targetDir );
  
       {
-        float dist, proj, offset;
         vec3_t startOrigin;
  
-        dist = Distance( tr->endpos, viewOrigin );
- 
-        proj = dist * DotProduct( playerNormal, targetDir );
- 
-        offset = ps->viewheight + 1.0f +
-          sqrt(proj * proj + buildDist * buildDist - dist * dist) + proj;
- 
-        VectorMA( tr->endpos, -offset, playerNormal, targetOrigin );
+        VectorMA( tr->endpos, -buildDist / 2.0f, playerNormal, targetOrigin );
  
         VectorCopy( tr->endpos, startOrigin );
  
