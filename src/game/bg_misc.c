@@ -4536,20 +4536,20 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
 {
   vec3_t  forward, entityOrigin, targetOrigin;
   vec3_t  playerOrigin, playerNormal;
-  vec3_t mins, maxs;
+  vec3_t  mins, maxs;
   float   buildDist = BG_Class( ps->stats[ STAT_CLASS ] )->buildDist;
-  const buildable_t buildable = ps->stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT;
-
+  const   buildable_t buildable = ps->stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT;
+ 
   BG_BuildableBoundingBox( buildable, mins, maxs );
-
+ 
   VectorCopy( ps->origin, playerOrigin );
-
+ 
   BG_GetClientNormal( ps, playerNormal );
-
+ 
   VectorCopy( ps->viewangles, outAngles );
-
+ 
   AngleVectors( outAngles, forward, NULL, NULL );
-
+ 
   // check for LoS buildable placement mode
   if( ps->stats[ STAT_STATE ] & SS_LOS_TOGGLEBIT )
   {
@@ -4557,42 +4557,98 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
     const float minNormal = BG_Buildable( buildable )->minNormal;
     const qboolean invertNormal = BG_Buildable( buildable )->invertNormal;
     qboolean validAngle;
-
+    float heightOffset = 0.0f;
+ 
     buildDist *= 2.3f;
-
+ 
+    //TODO: Make old placement work the same but with less buildDist.
+    //TODO: if building intersects player, place the building right next to the player.
+    //TODO: Partial move of canbuild to this function to allow quicker updates for the red shader.
+ 
     BG_GetClientViewOrigin( ps, viewOrigin );
-
+ 
     VectorMA( viewOrigin, buildDist, forward, targetOrigin );
-
-    (*trace)( tr, viewOrigin, mins, maxs, targetOrigin, ps->clientNum,
-              MASK_PLAYERSOLID );
-
+ 
+    //Determine and correct height for buildings that can't be built on walls.
+ 
+    if( minNormal > 0.0f && invertNormal == qfalse )
+    {
+      maxs[2] -= mins[2];
+      heightOffset = mins[2];
+      mins[2] = 0.0f;
+    }
+ 
+    //Attempt to find lowest point that a building can fit.  This has to be brute forced.
+    {
+      const int attempts = 5;
+      vec3_t newPos;
+      int i;
+      float fraction = ps->viewheight / (float)attempts;
+ 
+      VectorCopy( viewOrigin, newPos );
+ 
+      for( i = 0; i < attempts; i++ )
+      {
+        (*trace)( tr, newPos, mins, maxs, viewOrigin, ps->clientNum,
+                  MASK_PLAYERSOLID );
+        if( !tr->startsolid )
+        {
+          break;
+        }
+        newPos[2] -= fraction;
+      }
+ 
+      if( tr->startsolid )
+      {
+        tr->endpos[2] -= heightOffset;
+        VectorCopy( tr->endpos, outOrigin );
+        return;
+      }
+ 
+      (*trace)( tr, tr->endpos, mins, maxs, targetOrigin, ps->clientNum,
+                MASK_PLAYERSOLID );
+    }
+ 
     validAngle = tr->plane.normal[ 2 ] >= minNormal ||
                    ( invertNormal && tr->plane.normal[ 2 ] <= -minNormal );
  
+    //Down trace if no hit or surface is too steep.
     if( tr->fraction >= 1.0f || !validAngle ) //TODO: These should be utility functions like "if(traceHit(&tr))"
     {
-      vec3_t targetDir, startOrigin;
+      vec3_t targetDir;
  
       if( tr->fraction < 1.0f )
       {
-        //Bring down trace away from w/e surface it has hit.
+        //Bring endpos away from surface it has hit.
         VectorAdd( tr->endpos, tr->plane.normal, tr->endpos );
       }
  
-      VectorSubtract( targetOrigin, playerOrigin, targetDir );
+      //Calculate new targetOrigin without exceeding buildDist sphere.
+      VectorSubtract( targetOrigin, viewOrigin, targetDir );
  
       VectorNormalize( targetDir );
  
-      VectorMA( tr->endpos,
-        -2.0f * buildDist * fabs( DotProduct( playerNormal, targetDir ) ) - ps->viewheight - 1,
-        playerNormal, targetOrigin );
+      {
+        float dist, proj, offset;
+        vec3_t startOrigin;
  
-      VectorCopy( tr->endpos , startOrigin );
+        dist = Distance( tr->endpos, viewOrigin );
  
-      (*trace)( tr, startOrigin, mins, maxs, targetOrigin, ps->clientNum,
-        MASK_PLAYERSOLID );
+        proj = dist * DotProduct( playerNormal, targetDir );
+ 
+        offset = ps->viewheight + 1.0f +
+          sqrt(proj * proj + buildDist * buildDist - dist * dist) + proj;
+ 
+        VectorMA( tr->endpos, -offset, playerNormal, targetOrigin );
+ 
+        VectorCopy( tr->endpos, startOrigin );
+ 
+        (*trace)( tr, startOrigin, mins, maxs, targetOrigin, ps->clientNum,
+          MASK_PLAYERSOLID );
+      }
     }
+
+    tr->endpos[2] -= heightOffset;
   } else
   {
     ProjectPointOnPlane( forward, forward, playerNormal );
