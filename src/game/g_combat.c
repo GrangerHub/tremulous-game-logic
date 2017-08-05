@@ -1321,7 +1321,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       attacker->client->ps.persistant[ PERS_HITS ]++;
   }
 
-  if( client->evolveTime >= level.time )
+  if( client && client->evolveTime >= level.time )
     modDamge /= 2;
 
   take = ( modDamge * damage ) / 100;
