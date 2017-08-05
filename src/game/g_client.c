@@ -1584,7 +1584,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
     {
       //Set evolving period
       client->ps.eFlags |= EF_EVOLVING;
-      client->evolveTime = level.time + 10000;
+      client->evolveTime = level.time + 5000;
     }
   }
 
