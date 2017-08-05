@@ -2333,6 +2333,16 @@ void Cmd_Class_f( gentity_t *ent )
 
           ClientSpawn( ent, ent, ent->s.pos.trBase, ent->s.apos.trBase );
 
+          if( !g_cheats.integer )
+          {
+            //Set evolving period
+            ent->client->ps.eFlags |= EF_EVOLVING;
+            ent->client->evolveTime = level.time + 1000 +
+                                      ( abs( BG_Class( newClass )->cost -
+                                             BG_Class( currentClass )->cost ) *
+                                        1500 );
+          }
+
           VectorCopy( oldVel, ent->client->ps.velocity );
           if( oldBoostTime > 0 )
           {
