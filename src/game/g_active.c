@@ -1068,6 +1068,11 @@ void ClientEvents( gentity_t *ent, int oldEventSequence )
 
   for( i = oldEventSequence; i < client->ps.eventSequence; i++ )
   {
+    // Evolving players cannot fire weapon
+    if( ent->client && ent->client->ps.eFlags & EF_EVOLVING &&
+        ( event == EV_FIRE_WEAPON || event == EV_FIRE_WEAPON2 || event == EV_FIRE_WEAPON3 ) )
+      continue;
+
     event = client->ps.events[ i & ( MAX_PS_EVENTS - 1 ) ];
 
     switch( event )
@@ -2044,6 +2049,7 @@ void ClientThink_real( gentity_t *ent )
   gclient_t *client;
   pmove_t   pm;
   gentity_t *groundEnt;
+  vec3_t    up = { 0.0f, 0.0f, 1.0f };
   int       groundEntityNum;
   int       oldEventSequence;
   int       msec;
@@ -2130,8 +2136,20 @@ void ClientThink_real( gentity_t *ent )
   // calculate where ent is currently seeing all the other active clients
   G_UnlaggedCalc( ent->client->unlaggedTime, ent );
 
+  if( client->ps.eFlags & EF_EVOLVING &&
+      client->evolveTime < level.time )
+ {
+   // evolution has completed
+   client->ps.eFlags &= ~EF_EVOLVING;
+   if( client->ps.stats[ STAT_HEALTH ] > 0 )
+     G_AddPredictableEvent( ent, EV_ALIEN_EVOLVE,
+                                 DirToByte( up ) );
+  }
+
   if( client->noclip )
     client->ps.pm_type = PM_NOCLIP;
+  else if( client->ps.eFlags & EF_EVOLVING )
+    client->ps.pm_type = PM_EVOLVING;
   else if( client->ps.stats[ STAT_HEALTH ] <= 0 )
   {
     client->ps.pm_type = PM_DEAD;

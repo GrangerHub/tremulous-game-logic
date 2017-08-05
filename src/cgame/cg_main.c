@@ -1059,7 +1059,9 @@ static void CG_RegisterGraphics( void )
   cgs.media.alienEvolvePS             = CG_RegisterParticleSystem( "alienEvolvePS" );
   cgs.media.airpounceblast            = CG_RegisterParticleSystem( "airpounceblast" );
   cgs.media.alienAcidTubePS           = CG_RegisterParticleSystem( "alienAcidTubePS" );
-  cgs.media.alienSlimeZungePS           = CG_RegisterParticleSystem( "alienSlimeZungePS" );
+  cgs.media.alienSlimeZungePS         = CG_RegisterParticleSystem( "alienSlimeZungePS" );
+
+  cgs.media.alienEvolveShader         = trap_R_RegisterShader( "gfx/misc/alienEvolve" );
 
   cgs.media.jetPackDescendPS          = CG_RegisterParticleSystem( "jetPackDescendPS" );
   cgs.media.jetPackHoverPS            = CG_RegisterParticleSystem( "jetPackHoverPS" );

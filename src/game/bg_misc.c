@@ -1735,8 +1735,7 @@ int BG_ClassCanEvolveFromTo( class_t fclass,
   if( gameIsInWarmup )
     return 0;
 
-  netCost = ( tcost = ( ( tclass == PCL_ALIEN_BUILDER0 ) ? 1 : BG_Class( tclass )->cost )
-                      * ALIEN_CREDITS_PER_KILL ) -
+  netCost = ( tcost = BG_Class( tclass )->cost * ALIEN_CREDITS_PER_KILL ) -
          ( BG_Class( fclass )->cost * ALIEN_CREDITS_PER_KILL );
 
   if( netCost > 0 )
@@ -1750,7 +1749,7 @@ int BG_ClassCanEvolveFromTo( class_t fclass,
       return netCost;
   }
 
-  return tcost > 0 ? ALIEN_CREDITS_PER_KILL : 0;
+  return 0;
 }
 
 /*

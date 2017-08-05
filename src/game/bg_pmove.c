@@ -143,7 +143,8 @@ PM_StartLegsAnim
 */
 static void PM_StartLegsAnim( int anim )
 {
-  if( PM_Paralyzed( pm->ps->pm_type ) )
+  if( PM_Paralyzed( pm->ps->pm_type ) &&
+      pm->ps->pm_type != PM_EVOLVING )
     return;
 
   //legsTimer is clamped too tightly for nonsegmented models
@@ -3295,6 +3296,10 @@ static void PM_Weapon( void )
     return;
   }
 
+  // Player is evolving
+  if( pm->ps->pm_type == PM_EVOLVING )
+    return;
+
   // Charging for a pounce or canceling a pounce
   if( pm->ps->weapon == WP_ALEVEL3 || pm->ps->weapon == WP_ALEVEL3_UPG ||
       ( pm->ps->weapon == WP_ASPITFIRE  ) )
@@ -4121,7 +4126,9 @@ void PM_UpdateViewAngles( playerState_t *ps, const usercmd_t *cmd )
     ps->viewangles[ i ] = tempang[ i ];
 
   //pull the view into the lock point
-  if( ps->pm_type == PM_GRABBED && !BG_InventoryContainsUpgrade( UP_BATTLESUIT, ps->stats ) )
+  if( ( ps->pm_type == PM_GRABBED &&
+        !BG_InventoryContainsUpgrade( UP_BATTLESUIT, ps->stats ) ) ||
+       ps->pm_type == PM_EVOLVING )
   {
     vec3_t  dir, angles;
 
@@ -4459,7 +4466,8 @@ void PmoveSingle( pmove_t *pmove )
   // update the viewangles
   PM_UpdateViewAngles( pm->ps, &pm->cmd );
 
-  if( pm->ps->pm_type == PM_DEAD || pm->ps->pm_type == PM_GRABBED )
+  if( pm->ps->pm_type == PM_DEAD || pm->ps->pm_type == PM_GRABBED ||
+      pm->ps->pm_type == PM_EVOLVING )
     PM_DeadMove( );
 
   PM_DropTimers( );

@@ -2093,8 +2093,6 @@ void Cmd_SetViewpos_f( gentity_t *ent )
   TeleportPlayer( ent, origin, angles, 0.0f );
 }
 
-#define AS_OVER_RT3         ((ALIENSENSE_RANGE*0.5f)/M_ROOT3)
-
 static qboolean G_RoomForClassChange( gentity_t *ent, class_t class,
                                       vec3_t newOrigin )
 {
@@ -2165,15 +2163,9 @@ void Cmd_Class_f( gentity_t *ent )
 {
   char      s[ MAX_TOKEN_CHARS ];
   int       clientNum;
-  int       i;
   vec3_t    infestOrigin;
   class_t   currentClass = ent->client->pers.classSelection;
   class_t   newClass;
-  int       entityList[ MAX_GENTITIES ];
-  vec3_t    range = { AS_OVER_RT3, AS_OVER_RT3, AS_OVER_RT3 };
-  vec3_t    mins, maxs;
-  int       num;
-  gentity_t *other;
   int       oldBoostTime = -1;
   vec3_t    oldVel;
 
@@ -2252,29 +2244,17 @@ void Cmd_Class_f( gentity_t *ent )
     {
       int cost;
 
+      if( ent->client->evolveTime >= level.time )
+      {
+        G_TriggerMenu( clientNum, MN_A_EVOLVING );
+        return;
+      }
+
       //check that we have an overmind
       if( !G_Overmind( ) )
       {
         G_TriggerMenu( clientNum, MN_A_NOOVMND_EVOLVE );
         return;
-      }
-
-      //check there are no humans nearby
-      VectorAdd( ent->client->ps.origin, range, maxs );
-      VectorSubtract( ent->client->ps.origin, range, mins );
-
-      num = trap_EntitiesInBox( mins, maxs, entityList, MAX_GENTITIES );
-      for( i = 0; i < num; i++ )
-      {
-        other = &g_entities[ entityList[ i ] ];
-
-        if( ( other->client && other->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS ) ||
-            ( other->s.eType == ET_BUILDABLE && other->buildableTeam == TEAM_HUMANS &&
-              other->powered ) )
-        {
-          G_TriggerMenu( clientNum, MN_A_TOOCLOSE );
-          return;
-        }
       }
 
       //check that we are not wallwalking
@@ -2346,6 +2326,10 @@ void Cmd_Class_f( gentity_t *ent )
 
           if( ent->client->ps.stats[ STAT_STATE ] & SS_BOOSTED )
             oldBoostTime = ent->client->boostedTime;
+
+          // end damage and target protection early
+          ent->dmgProtectionTime = 0;
+          ent->targetProtectionTime = 0;
 
           ClientSpawn( ent, ent, ent->s.pos.trBase, ent->s.apos.trBase );
 
@@ -2839,6 +2823,10 @@ void Cmd_Buy_f( gentity_t *ent )
     return;
   }
 
+  // end damage and target protection early
+  ent->dmgProtectionTime = 0;
+  ent->targetProtectionTime = 0;
+
   //update ClientInfo
   ClientUserinfoChanged( ent->client->ps.clientNum, qfalse );
   ent->client->pers.infoChangeTime = level.time;
@@ -3020,6 +3008,10 @@ void Cmd_Sell_f( gentity_t *ent )
     G_TriggerMenu( ent->client->ps.clientNum, MN_H_UNKNOWNITEM );
     return;
   }
+
+  // end damage and target protection early
+  ent->dmgProtectionTime = 0;
+  ent->targetProtectionTime = 0;
 
   //update ClientInfo
   ClientUserinfoChanged( ent->client->ps.clientNum, qfalse );

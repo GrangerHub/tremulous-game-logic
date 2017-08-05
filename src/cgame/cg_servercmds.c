@@ -1036,17 +1036,16 @@ void CG_Menu( int menu, int arg )
       type      = DT_ARMOURYEVOLVE;
       break;
 
-    case MN_A_TOOCLOSE:
-      longMsg   = "This location is too close to the enemy to evolve. Move away "
-                  "from the enemy's presence and try again.";
-      shortMsg  = "This location is too close to the enemy to evolve";
-      type      = DT_ARMOURYEVOLVE;
-      break;
-
     case MN_A_NOOVMND_EVOLVE:
       longMsg   = "There is no Overmind. An Overmind must be built to allow "
                   "you to upgrade.";
       shortMsg  = "There is no Overmind";
+      type      = DT_ARMOURYEVOLVE;
+      break;
+
+    case MN_A_EVOLVING:
+      longMsg   = "You are already evolving.";
+      shortMsg  = "You are already evolving";
       type      = DT_ARMOURYEVOLVE;
       break;
 

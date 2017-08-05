@@ -1207,7 +1207,11 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
       gun.hModel = weapon->weaponModel;
   }
   else
+  {
     gun.hModel = weapon->weaponModel;
+    if( cent->currentState.eFlags & EF_EVOLVING )
+      gun.customShader = cgs.media.alienEvolveShader;
+  }
 
   noGunModel = ( ( !ps || cg.renderingThirdPerson ) && weapon->disableIn3rdPerson ) || !gun.hModel;
 

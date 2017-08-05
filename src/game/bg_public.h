@@ -161,12 +161,13 @@ typedef enum
   PM_DEAD,          // no acceleration or turning, but free falling
   PM_FREEZE,        // stuck in place with no control
   PM_INTERMISSION,  // no movement or status bar
-  PM_SPITFIRE_FLY   // physics for Spitfire
+  PM_SPITFIRE_FLY,   // physics for Spitfire
+  PM_EVOLVING
 } pmtype_t;
 
 // pmtype_t categories
 #define PM_Paralyzed( x ) ( (x) == PM_DEAD || (x) == PM_FREEZE ||\
-                            (x) == PM_INTERMISSION )
+                            (x) == PM_INTERMISSION || (x) == PM_EVOLVING )
 #define PM_Alive( x )     ( (x) == PM_NORMAL || (x) == PM_JETPACK ||\
                             (x) == PM_GRABBED || (x) == PM_SPITFIRE_FLY )
 
@@ -372,6 +373,8 @@ typedef enum
 #define EF_SCAN_SPOTTED     0x00004    // only used for buildables and players.
                                        // indicates if such an entity was spotted
                                        // by a teammate's scanner
+
+#define EF_EVOLVING         0x00008    // In transition state.  Only applicable to players.
 
 // for occupation entities
 #define EF_OCCUPYING        0x00010    // can result in bugs if applied to buildables
@@ -750,8 +753,8 @@ typedef enum
   MN_A_BUILD,
   MN_A_INFEST,
   MN_A_NOEROOM,
-  MN_A_TOOCLOSE,
   MN_A_NOOVMND_EVOLVE,
+  MN_A_EVOLVING,
   MN_A_EVOLVEBUILDTIMER,
   MN_A_CANTEVOLVE,
   MN_A_EVOLVEWALLWALK,

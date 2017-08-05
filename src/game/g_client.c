@@ -1579,6 +1579,13 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
     }
 
     client->ps.misc[ MISC_HEALTH_RESERVE ] = ent->healthReserve;
+
+    if( !g_cheats.integer )
+    {
+      //Set evolving period
+      client->ps.eFlags |= EF_EVOLVING;
+      client->evolveTime = level.time + 10000;
+    }
   }
 
   //clear the credits array

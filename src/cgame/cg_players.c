@@ -2023,6 +2023,9 @@ void CG_Player( centity_t *cent )
     legs.hModel = ci->nonSegModel;
     legs.customSkin = ci->nonSegSkin;
 
+    if( es->eFlags & EF_EVOLVING )
+      legs.customShader = cgs.media.alienEvolveShader;
+
     if( ( cent->currentState.legsAnim & ~ANIM_TOGGLEBIT ) == NSPA_SWIM  && es->weapon == WP_ASPITFIRE )
     {
       trap_S_AddLoopingSound( cent->currentState.number, cent->lerpOrigin, vec3_origin, cgs.media.flapSound );
