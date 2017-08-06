@@ -44,7 +44,7 @@ float pm_flyaccelerate = 4.0f;
 
 float pm_friction = 6.0f;
 float pm_waterfriction = 1.0f;
-float pm_flightfriction = 6.0f;
+float pm_flightfriction = 3.0f;
 float pm_spitfire_flyfriction = 3.5f;
 float pm_spitfire_flywalkfriction = 5.0f;
 float pm_spectatorfriction = 5.0f;
@@ -1328,9 +1328,9 @@ static void PM_JetPackMove( void )
   {
     // give an initial vertical boost when first activating the jet
     if( pm->ps->persistant[PERS_JUMPTIME] <= JETPACK_ACT_BOOST_TIME )
-      wishvel[ 2 ] = JETPACK_ACT_BOOST_SPEED;
+      VectorMA( wishvel, JETPACK_ACT_BOOST_SPEED, pml.up, wishvel );
     else
-      wishvel[ 2 ] = JETPACK_FLOAT_SPEED;
+      VectorMA( wishvel, JETPACK_FLOAT_SPEED, pml.up, wishvel );
   }
   else if( pm->cmd.upmove < 0.0f )
     wishvel[ 2 ] = -JETPACK_SINK_SPEED;
