@@ -4107,12 +4107,17 @@ int G_FloodLimited( gentity_t *ent )
   if( G_admin_permission( ent, ADMF_NOCENSORFLOOD ) )
     return 0;
 
-  deltatime = level.time - ent->client->pers.floodTime;
+  deltatime = level.time + level.pausedTime - ent->client->pers.floodTime;
 
   ent->client->pers.floodDemerits += g_floodMinTime.integer - deltatime;
   if( ent->client->pers.floodDemerits < 0 )
     ent->client->pers.floodDemerits = 0;
-  ent->client->pers.floodTime = level.time;
+  else if( ent->client->pers.floodDemerits > 2 * g_floodMaxDemerits.integer )
+  {
+    // cap the flood protection duration at the value of g_floodMaxDemerits
+    ent->client->pers.floodDemerits = 2 * g_floodMaxDemerits.integer;
+  }
+  ent->client->pers.floodTime = level.time + level.pausedTime;
 
   ms = ent->client->pers.floodDemerits - g_floodMaxDemerits.integer;
   if( ms <= 0 )
