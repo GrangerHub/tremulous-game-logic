@@ -488,8 +488,12 @@ static void CG_RunBuildableLerpFrame( centity_t *cent )
         CG_Printf( "Sound for animation %d for a %s\n",
             newAnimation, BG_Buildable( buildable )->humanName );
 
-      trap_S_StartSound( cent->lerpOrigin, cent->currentState.number, CHAN_AUTO,
-        cg_buildables[ buildable ].sounds[ newAnimation ].sound );
+      // don't let the overmind announce to non-aliens that it has awaken
+      if( buildable != BA_A_OVERMIND ||
+          newAnimation != BANIM_CONSTRUCT1 ||
+          cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_ALIENS )
+        trap_S_StartSound( cent->lerpOrigin, cent->currentState.number, CHAN_AUTO,
+          cg_buildables[ buildable ].sounds[ newAnimation ].sound );
     }
   }
 
