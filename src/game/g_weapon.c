@@ -979,7 +979,7 @@ void teslaFire( gentity_t *self )
 
     VectorSubtract( target, origin, dir );
     G_Damage( self->enemy, self, self, dir, tr.endpos,
-              TESLAGEN_DMG, 0, MOD_TESLAGEN );
+              TESLAGEN_DMG, DAMAGE_NO_KNOCKBACK, MOD_TESLAGEN );
   }
 
   // Send tesla zap trail
