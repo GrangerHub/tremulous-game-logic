@@ -643,10 +643,6 @@ static void CG_HumanText( char *text, playerState_t *ps )
       va( "Press %s and any direction to sprint\n",
         CG_KeyNameForCommand( "+button8" ) ) );
 
-  Q_strcat( text, MAX_TUTORIAL_TEXT,
-      va( "Press %s and back or strafe to dodge\n",
-        CG_KeyNameForCommand( "+button6" ) ) );
-
   if( BG_InventoryContainsUpgrade( UP_JETPACK, ps->stats ) )
     {
       if( ( ps->stats[ STAT_FUEL ] <= JETPACK_FUEL_LOW ) && ( ps->stats[ STAT_FUEL ] > 0 )  )
