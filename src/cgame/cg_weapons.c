@@ -804,6 +804,8 @@ void CG_InitWeapons( void )
     CG_RegisterWeapon( i );
 
   cgs.media.level2ZapTS = CG_RegisterTrailSystem( "models/weapons/lev2zap/lightning" );
+  cgs.media.spitfireZapTS = CG_RegisterTrailSystem( "models/weapons/spitfire/spitfireZapTS" );
+  cgs.media.massDriverTS = CG_RegisterTrailSystem( "models/weapons/mdriver/fireTS" );
 }
 
 

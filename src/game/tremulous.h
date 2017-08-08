@@ -285,7 +285,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define PCLOUD_MODIFIER             0.5f
 #define PCLOUD_ARMOUR_MODIFIER      0.75f
 
-#define ASPAWN_BP                   10
+#define ASPAWN_BP                   20
 #define ASPAWN_BT                   15000
 #define ASPAWN_HEALTH               ABHM(250)
 #define ASPAWN_REGEN                ABRM(8)
