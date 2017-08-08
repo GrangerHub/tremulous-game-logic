@@ -2009,11 +2009,27 @@ void CG_Player( centity_t *cent )
     }
     else
       legs.customSkin = ci->legsSkin;
+
+    if( es->eFlags & EF_INVINCIBLE )
+    {
+      if( ci->team == TEAM_HUMANS )
+        legs.customShader = cgs.media.humanInvincibleShader;
+      else if( ci->team == TEAM_ALIENS )
+        legs.customShader = cgs.media.alienInvincibleShader;
+    }
   }
   else
   {
     legs.hModel = ci->nonSegModel;
     legs.customSkin = ci->nonSegSkin;
+
+    if( es->eFlags & EF_INVINCIBLE )
+    {
+      if( ci->team == TEAM_HUMANS )
+        legs.customShader = cgs.media.humanInvincibleShader;
+      else if( ci->team == TEAM_ALIENS )
+        legs.customShader = cgs.media.alienInvincibleShader;
+    }
   }
 
   VectorCopy( cent->lerpOrigin, legs.origin );
@@ -2093,6 +2109,14 @@ void CG_Player( centity_t *cent )
     else
       torso.customSkin = ci->torsoSkin;
 
+    if( es->eFlags & EF_INVINCIBLE )
+    {
+      if( ci->team == TEAM_HUMANS )
+        torso.customShader = cgs.media.humanInvincibleShader;
+      else if( ci->team == TEAM_ALIENS )
+        torso.customShader = cgs.media.alienInvincibleShader;
+    }
+
     if( !torso.hModel )
       return;
 
@@ -2123,6 +2147,14 @@ void CG_Player( centity_t *cent )
     }
     else
       head.customSkin = ci->headSkin;
+
+    if( es->eFlags & EF_INVINCIBLE )
+    {
+      if( ci->team == TEAM_HUMANS )
+        head.customShader = cgs.media.humanInvincibleShader;
+      else if( ci->team == TEAM_ALIENS )
+        head.customShader = cgs.media.alienInvincibleShader;
+    }
 
     if( !head.hModel )
       return;
