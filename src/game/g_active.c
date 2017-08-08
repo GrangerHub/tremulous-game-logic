@@ -1985,6 +1985,7 @@ void ClientThink_real( gentity_t *ent )
 {
   gclient_t *client;
   pmove_t   pm;
+  vec3_t    up = { 0.0f, 0.0f, 1.0f };
   int       oldEventSequence;
   int       msec;
   usercmd_t *ucmd;
@@ -2065,6 +2066,18 @@ void ClientThink_real( gentity_t *ent )
 
   // calculate where ent is currently seeing all the other active clients
   G_UnlaggedCalc( ent->client->unlaggedTime, ent );
+
+  if( !G_TakesDamage( ent ) ||
+      ( ent->flags & FL_GODMODE ) ||
+      !ent->r.contents )
+    client->ps.eFlags |= EF_INVINCIBLE;
+  else if( client->ps.eFlags & EF_INVINCIBLE )
+  {
+    if( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
+      G_AddPredictableEvent( ent, EV_ALIEN_EVOLVE,
+                             DirToByte( up ) );
+    client->ps.eFlags &= ~EF_INVINCIBLE;
+  }
 
   if( client->noclip )
     client->ps.pm_type = PM_NOCLIP;
