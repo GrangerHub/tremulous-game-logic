@@ -924,6 +924,7 @@ static void CG_RegisterSounds( void )
   cgs.media.medkitUseSound          = trap_S_RegisterSound( "sound/upgrades/medkit/medkit.wav", qfalse );
 
   cgs.media.alienEvolveSound        = trap_S_RegisterSound( "sound/player/alienevolve.wav", qfalse );
+  cgs.media.alienLoopedEvolveSound  = trap_S_RegisterSound( "sound/player/alienloopedevolve.wav", qfalse );
 
   cgs.media.alienBuildableExplosion = trap_S_RegisterSound( "sound/buildables/alien/explosion.wav", qfalse );
   cgs.media.alienBuildableDamage    = trap_S_RegisterSound( "sound/buildables/alien/damage.wav", qfalse );

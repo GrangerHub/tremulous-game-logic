@@ -2341,6 +2341,8 @@ void Cmd_Class_f( gentity_t *ent )
                                       ( abs( BG_Class( newClass )->cost -
                                              BG_Class( currentClass )->cost ) *
                                         1500 );
+            // save the angles for this frame
+            VectorCopy( ent->client->ps.viewangles, ent->client->evolveRestoreAngles );
           }
 
           VectorCopy( oldVel, ent->client->ps.velocity );

@@ -1351,6 +1351,7 @@ typedef struct
   qhandle_t   alienSlimeZungePS;
 
   sfxHandle_t alienEvolveSound;
+  sfxHandle_t alienLoopedEvolveSound;
   qhandle_t   alienEvolveShader;
 
   sfxHandle_t alienInvincibleShader;

@@ -2137,13 +2137,21 @@ void ClientThink_real( gentity_t *ent )
   G_UnlaggedCalc( ent->client->unlaggedTime, ent );
 
   if( client->ps.eFlags & EF_EVOLVING &&
-      client->evolveTime < level.time )
- {
-   // evolution has completed
-   client->ps.eFlags &= ~EF_EVOLVING;
-   if( client->ps.stats[ STAT_HEALTH ] > 0 )
-     G_AddPredictableEvent( ent, EV_ALIEN_EVOLVE,
-                                 DirToByte( up ) );
+      ( client->evolveTime < level.time ||
+        client->ps.stats[ STAT_HEALTH ] <= 0 ) )
+  {
+    // evolution has completed
+    client->ps.eFlags &= ~EF_EVOLVING;
+    if( client->ps.stats[ STAT_HEALTH ] > 0 )
+    {
+      G_AddPredictableEvent( ent, EV_ALIEN_EVOLVE,
+                             DirToByte( up ) );
+
+      // Restore first person angles
+      G_SetClientViewAngle( ent, client->evolveRestoreAngles );
+    }
+    else
+      client->evolveTime = -1;
   }
 
   if( !G_TakesDamage( ent ) ||

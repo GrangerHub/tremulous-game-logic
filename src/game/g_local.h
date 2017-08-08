@@ -594,6 +594,9 @@ struct gclient_s
   int                 lastCrushTime;        // Tyrant crush
 
   int                 portalTime;
+
+  // Stores the first person angles for when evolving ends
+  vec3_t              evolveRestoreAngles;
 };
 
 
