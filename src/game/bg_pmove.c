@@ -44,7 +44,7 @@ float pm_flyaccelerate = 4.0f;
 
 float pm_friction = 6.0f;
 float pm_waterfriction = 1.0f;
-float pm_flightfriction = 3.0f;
+float pm_flightfriction = 4.0f;
 float pm_spitfire_flyfriction = 3.5f;
 float pm_spitfire_flywalkfriction = 5.0f;
 float pm_spectatorfriction = 5.0f;
