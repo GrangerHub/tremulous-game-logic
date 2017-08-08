@@ -388,9 +388,10 @@ typedef enum
 #define EF_WALLCLIMB        0x00040    // wall walking
 #define EF_WALLCLIMBCEILING 0x00080    // wall walking ceiling hack
 #define EF_NODRAW           0x00100    // may have an event, but no model (unspawned items)
-#define EF_MOVER_STOP       0x00200    // will push otherwise
+#define EF_MOVER_STOP       0x00200    // will push otherwise, used by ET_MOVER
+#define EF_INVINCIBLE       0x00200    // used to indicate if a player can't be damaged
 #define EF_ASTRAL_NOCLIP    0x00400    // EF_ASTRAL flagged entities don't clip with Astral entities,
-                                      // must be equal to CONTENTS_ASTRAL_NOCLIP
+                                       // must be equal to CONTENTS_ASTRAL_NOCLIP
 #define EF_FIRING           0x00800    // for lightning gun
 #define EF_FIRING2          0x01000    // alt fire
 #define EF_FIRING3          0x02000    // third fire

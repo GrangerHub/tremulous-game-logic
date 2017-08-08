@@ -1353,6 +1353,9 @@ typedef struct
   sfxHandle_t alienEvolveSound;
   qhandle_t   alienEvolveShader;
 
+  sfxHandle_t alienInvincibleShader;
+  sfxHandle_t humanInvincibleShader;
+
   qhandle_t   humanBuildableDamagedPS;
   qhandle_t   humanBuildableDestroyedPS;
   qhandle_t   alienBuildableDamagedPS;

@@ -804,8 +804,6 @@ void CG_InitWeapons( void )
     CG_RegisterWeapon( i );
 
   cgs.media.level2ZapTS = CG_RegisterTrailSystem( "models/weapons/lev2zap/lightning" );
-  cgs.media.spitfireZapTS = CG_RegisterTrailSystem( "models/weapons/spitfire/spitfireZapTS" );
-  cgs.media.massDriverTS = CG_RegisterTrailSystem( "models/weapons/mdriver/fireTS" );
 }
 
 
@@ -1205,11 +1203,25 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 
     if( !gun.hModel )
       gun.hModel = weapon->weaponModel;
+
+    if( cent->currentState.eFlags & EF_INVINCIBLE )
+    {
+      if( cgs.clientinfo[ cent->currentState.number ].team == TEAM_HUMANS )
+        gun.customShader = cgs.media.humanInvincibleShader;
+      else if( cgs.clientinfo[ cent->currentState.number ].team == TEAM_ALIENS )
+        gun.customShader = cgs.media.alienInvincibleShader;
+    }
   }
   else
   {
     gun.hModel = weapon->weaponModel;
-    if( cent->currentState.eFlags & EF_EVOLVING )
+    if( cent->currentState.eFlags & EF_INVINCIBLE )
+    {
+      if( cgs.clientinfo[ cent->currentState.number ].team == TEAM_HUMANS )
+        gun.customShader = cgs.media.humanInvincibleShader;
+      else if( cgs.clientinfo[ cent->currentState.number ].team == TEAM_ALIENS )
+        gun.customShader = cgs.media.alienInvincibleShader;
+    } else if( cent->currentState.eFlags & EF_EVOLVING )
       gun.customShader = cgs.media.alienEvolveShader;
   }
 

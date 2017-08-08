@@ -2146,6 +2146,18 @@ void ClientThink_real( gentity_t *ent )
                                  DirToByte( up ) );
   }
 
+  if( !G_TakesDamage( ent ) ||
+      ( ent->flags & FL_GODMODE ) ||
+      !ent->r.contents )
+    client->ps.eFlags |= EF_INVINCIBLE;
+  else if( client->ps.eFlags & EF_INVINCIBLE )
+  {
+    if( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
+      G_AddPredictableEvent( ent, EV_ALIEN_EVOLVE,
+                             DirToByte( up ) );
+    client->ps.eFlags &= ~EF_INVINCIBLE;
+  }
+
   if( client->noclip )
     client->ps.pm_type = PM_NOCLIP;
   else if( client->ps.eFlags & EF_EVOLVING )
