@@ -1615,3 +1615,32 @@ typedef enum
   NUM_VOTE_TYPES,
   VOID_VOTE
 } vote_t;
+
+//Center print order of importance
+typedef enum
+{
+  CP_ADMIN,
+  CP_ADMIN_CP,
+  CP_PAUSE,
+  CP_LIFE_SUPPORT,
+    CP_INACTIVITY = CP_LIFE_SUPPORT,
+  CP_SUDDEN_DEATH,
+    CP_TIME_LIMIT = CP_SUDDEN_DEATH,
+  CP_NEED_SPAWNS,
+  CP_UNDER_ATTACK,
+    CP_OVERMIND_AWAKEN = CP_UNDER_ATTACK,
+  CP_STAGE_UP,
+  CP_PRIVATE_MESSAGE,
+  CP_TEAM_KILL,
+  CP_SPAWN_BLOCK,
+    CP_TELEPORT = CP_SPAWN_BLOCK,
+  CP_MAP,
+  CP_EXTRA1,//Use CP_EXTRA instead of these.
+  CP_EXTRA2,
+  CP_EXTRA3,
+  CP_MAX,
+  CP_EXTRA = -CP_EXTRA1
+} centerPrintImportance;
+//  Center prints that do not need to be ordered and are of low importance
+//    can use CP_EXTRA
+#define CP_EXTRA -CP_EXTRA1

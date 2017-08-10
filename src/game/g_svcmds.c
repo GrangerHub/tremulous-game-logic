@@ -297,12 +297,16 @@ static void Svcmd_AdmitDefeat_f( void )
   team = G_TeamFromString( teamNum );
   if( team == TEAM_ALIENS )
   {
-    G_TeamCommand( TEAM_ALIENS, "cp \"Hivemind Link Broken\" 1");
+    G_TeamCommand( TEAM_ALIENS,
+                   va( "cp \"Hivemind Link Broken\" %d",
+                       CP_LIFE_SUPPORT ) );
     trap_SendServerCommand( -1, "print \"Alien team has admitted defeat\n\"" );
   }
   else if( team == TEAM_HUMANS )
   {
-    G_TeamCommand( TEAM_HUMANS, "cp \"Life Support Terminated\" 1");
+    G_TeamCommand( TEAM_HUMANS,
+                   va( "cp \"Life Support Terminated\" %d",
+                   CP_LIFE_SUPPORT ) );
     trap_SendServerCommand( -1, "print \"Human team has admitted defeat\n\"" );
   }
   else
@@ -384,17 +388,6 @@ static void Svcmd_TeamMessage_f( void )
 
   G_TeamCommand( team, va( "chat -1 %d \"%s\"", SAY_TEAM, ConcatArgs( 2 ) ) );
   G_LogPrintf( "SayTeam: -1 \"console\": %s\n", ConcatArgs( 2 ) );
-}
-
-static void Svcmd_CenterPrint_f( void )
-{
-  if( trap_Argc( ) < 2 )
-  {
-    G_Printf( "usage: cp <message>\n" );
-    return;
-  }
-
-  trap_SendServerCommand( -1, va( "cp \"%s\"", ConcatArgs( 1 ) ) );
 }
 
 static void Svcmd_EjectClient_f( void )
@@ -548,8 +541,8 @@ static void Svcmd_SuddenDeath_f( void )
 
   level.suddenDeathBeginTime = level.time - level.startTime + offset * 1000;
   trap_SendServerCommand( -1,
-    va( "cp \"Sudden Death will begin in %d second%s\"",
-      offset, offset == 1 ? "" : "s" ) );
+    va( "cp \"Sudden Death will begin in %d second%s\" %d",
+        offset, offset == 1 ? "" : "s", CP_SUDDEN_DEATH ) );
 }
 
 static void Svcmd_Extend_f( void )
@@ -561,8 +554,8 @@ static void Svcmd_Extend_f( void )
 
   level.extendTimeLimit += offset;
   trap_SendServerCommand( -1,
-    va( "cp \"The time limit has been ^2extended^7 by %d minute%s\"",
-      offset, offset == 1 ? "" : "s" ) );
+    va( "cp \"The time limit has been ^2extended^7 by %d minute%s\" %d",
+        offset, offset == 1 ? "" : "s", CP_TIME_LIMIT ) );
 }
 
 static void Svcmd_G_AdvanceMapRotation_f( void )
@@ -581,7 +574,6 @@ struct svcmd
   { "advanceMapRotation", qfalse, Svcmd_G_AdvanceMapRotation_f },
   { "alienWin", qfalse, Svcmd_TeamWin_f },
   { "chat", qtrue, Svcmd_MessageWrapper },
-  { "cp", qtrue, Svcmd_CenterPrint_f },
   { "dumpuser", qfalse, Svcmd_DumpUser_f },
   { "eject", qfalse, Svcmd_EjectClient_f },
   { "entityList", qfalse, Svcmd_EntityList_f },

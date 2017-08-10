@@ -595,8 +595,8 @@ qboolean ClientInactivityTimer( gentity_t *ent )
         client->inactivityWarning = qtrue;
         if( !G_admin_permission( ent, ADMF_ACTIVITY ) )
           trap_SendServerCommand( client - level.clients,
-                                  va( "cp \"Ten seconds until inactivity %s!\n\"",
-                                      "spectate" ) );
+            va( "cp \"Ten seconds until inactivity spectate!\n\" %d",
+            CP_INACTIVITY ) );
       }
     }
   }

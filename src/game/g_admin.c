@@ -104,6 +104,11 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "[^3mapname^7] (^5layout^7)"
     },
 
+    {"cp", G_admin_cp, qfalse, "cp",
+      "display a brief Center Print Announcement message to players, optionally specifying a team to send to",
+      "(^5-A|H|S^7) [^3message^7]"
+    },
+
     {"denybuild", G_admin_denybuild, qfalse, "denybuild",
       "take away a player's ability to build",
       "[^3name^6|^3slot#^7]"
@@ -2386,6 +2391,78 @@ qboolean G_admin_changemap( gentity_t *ent )
   return qtrue;
 }
 
+qboolean G_admin_cp( gentity_t *ent )
+{
+  char     message[ MAX_STRING_CHARS ];
+  char     arg[ 8 ];
+  int      team = -1;
+  int      i;
+  qboolean admin;
+
+  if( trap_Argc( ) < 2 )
+  {
+    ADMP( "^3cp: ^7usage: cp (-AHS) [message]\n" );
+    return qfalse;
+  }
+  trap_Argv( 1, arg, sizeof( arg ) );
+  if( arg[ 0 ] == '-' )
+  {
+    switch( arg[ 1 ] )
+    {
+      case 'a': case 'A':
+        team = TEAM_ALIENS;
+        break;
+      case 'h': case 'H':
+        team = TEAM_HUMANS;
+        break;
+      case 's': case 'S':
+        team = TEAM_NONE;
+        break;
+      default:
+        ADMP( "^3cp: ^7team not recognized as -a -h or -s\n" );
+        return qfalse;
+    }
+    if( trap_Argc( ) < 2 )
+    {
+      ADMP( "^3cp: ^7no message\n" );
+      return qfalse;
+    }
+    G_DecolorString( ConcatArgs( 2 ), message, sizeof( message ) );
+  }
+  else
+    G_DecolorString( ConcatArgs( 1 ), message, sizeof( message ) );
+
+  for( i = 0; i < level.maxclients; i++ )
+  {
+    if( level.clients[ i ].pers.connected != CON_CONNECTED )
+      continue;
+
+    admin = qfalse;
+    if( team < 0 || level.clients[ i ].pers.teamSelection == team ||
+        ( admin = G_admin_permission( &g_entities[ i ], ADMF_ADMINCHAT ) ) )
+    {
+      if( team < 0 || level.clients[ i ].pers.teamSelection == team )
+        trap_SendServerCommand( i, 
+                                va( "cp \"^%s%s\" %d",
+                                ( team < 0 ) ? "2" : "5", message,
+                                CP_ADMIN_CP ) );
+
+      trap_SendServerCommand( i,
+                              va( "print \"%s^3cp: ^7%s%s^7%s%s%s: %c%s\n\"",
+                                  ( admin ) ? "[ADMIN] " : "",
+                                  ( team >= 0 ) ? "(" : "",
+                                  ( ent ) ? ent->client->pers.admin->name : "console",
+                                  ( team >= 0 ) ? ")" : "",
+                                  ( admin ) ? " to " : "",
+                                  ( admin ) ? BG_TeamName( team ) : "",
+                                  INDENT_MARKER,
+                                  message ) );
+    }
+  }
+
+  return qtrue;
+}
+
 qboolean G_admin_warn( gentity_t *ent )
 {
   char      reason[ 64 ];
@@ -2412,8 +2489,8 @@ qboolean G_admin_warn( gentity_t *ent )
   vic = &g_entities[ pid ];
 
   G_DecolorString( ConcatArgs( 2 ), reason, sizeof( reason ) );
-  CPx( pid, va( "cp \"^1You have been warned by an administrator:\n^7%s\"",
-                      reason ) );
+  CPx( pid, va( "cp \"^1You have been warned by an administrator:\n^7%s\" %d",
+                reason, CP_ADMIN ) );
   AP( va( "print \"^3warn: ^7%s^7 has been warned: '%s' by %s\n\"",
           vic->client->pers.netname,
           reason,
@@ -2456,7 +2533,7 @@ qboolean G_admin_mute( gentity_t *ent )
     }
     vic->muted = qfalse;
     if( vic->slot > -1 )
-      CPx( vic->slot, "cp \"^1You have been unmuted\"" );
+      CPx( vic->slot, va( "cp \"^1You have been unmuted\" %d", CP_ADMIN ) );
     AP( va( "print \"^3unmute: ^7%s^7 has been unmuted by %s\n\"",
             vic->name[ vic->nameOffset ],
             ( ent ) ? ent->client->pers.netname : "console" ) );
@@ -2470,7 +2547,7 @@ qboolean G_admin_mute( gentity_t *ent )
     }
     vic->muted = qtrue;
     if( vic->slot > -1 )
-      CPx( vic->slot, "cp \"^1You've been muted\"" );
+      CPx( vic->slot, va( "cp \"^1You've been muted\" %d", CP_ADMIN ) );
     AP( va( "print \"^3mute: ^7%s^7 has been muted by ^7%s\n\"",
             vic->name[ vic->nameOffset ],
             ( ent ) ? ent->client->pers.netname : "console" ) );
@@ -2514,7 +2591,9 @@ qboolean G_admin_denybuild( gentity_t *ent )
     }
     vic->denyBuild = qfalse;
     if( vic->slot > -1 )
-      CPx( vic->slot, "cp \"^1You've regained your building rights\"" );
+      CPx( vic->slot,
+           va( "cp \"^1You've regained your building rights\" %d",
+               CP_ADMIN ) );
     AP( va(
       "print \"^3allowbuild: ^7building rights for ^7%s^7 restored by %s\n\"",
       vic->name[ vic->nameOffset ],
@@ -2531,7 +2610,9 @@ qboolean G_admin_denybuild( gentity_t *ent )
     if( vic->slot > -1 )
     {
       level.clients[ vic->slot ].ps.stats[ STAT_BUILDABLE ] = BA_NONE;
-      CPx( vic->slot, "cp \"^1You've lost your building rights\"" );
+      CPx( vic->slot,
+           va( "cp \"^1You've lost your building rights\" %d",
+               CP_ADMIN ) );
     }
     AP( va(
       "print \"^3denybuild: ^7building rights for ^7%s^7 revoked by ^7%s\n\"",
@@ -2586,7 +2667,8 @@ qboolean G_admin_explode( gentity_t *ent )
   Blow_up(vic);
 
   trap_SendServerCommand( vic-g_entities,
-			  va( "cp \"^1Boom!!!\n^7%s\n\"", reason ) );
+			                    va( "cp \"^1Boom!!!\n^7%s\n\" %d",
+                              reason, CP_ADMIN ) );
 
   AP( va( "print \"^3explode: ^7%s^7 has been exploded by %s^7 with the reason: ^7%s\n\"",
           vic->client->pers.netname,
@@ -3627,7 +3709,9 @@ qboolean G_admin_pause( gentity_t *ent )
     AP( va( "print \"^3pause: ^7%s^7 paused the game.\n\"",
           ( ent ) ? ent->client->pers.netname : "console" ) );
     level.pausedTime = 1;
-    trap_SendServerCommand( -1, "cp \"The game has been paused. Please wait.\"" );
+    trap_SendServerCommand( -1,
+                            va( "cp \"The game has been paused. Please wait.\" %d",
+                                CP_PAUSE ) );
   }
   else
   {
@@ -3641,7 +3725,9 @@ qboolean G_admin_pause( gentity_t *ent )
     AP( va( "print \"^3pause: ^7%s^7 unpaused the game (Paused for %d sec) \n\"",
           ( ent ) ? ent->client->pers.netname : "console", 
           (int) ( (float) level.pausedTime / 1000.0f ) ) );
-    trap_SendServerCommand( -1, "cp \"The game has been unpaused!\"" );
+    trap_SendServerCommand( -1,
+                            va( "cp \"The game has been unpaused!\" %d",
+                                CP_PAUSE ) );
 
     level.pausedTime = 0;
   }
@@ -3908,9 +3994,9 @@ qboolean G_admin_slap( gentity_t *ent )
   G_Knockback( vic, dir, 100 );
 
   trap_SendServerCommand( vic-g_entities,
-			  va( "cp \"%s^1 is not amused!\n^7%s\n\"", 
-			      ent ? ent->client->pers.netname : "console",
-			      reason ) );
+                          va( "cp \"%s^1 is not amused!\n^7%s\n\" %d",
+                              ent ? ent->client->pers.netname : "console",
+                              reason, CP_ADMIN ) );
   AP( va( "print \"^3slap: ^7%s^7 has been slapped by %s^7 with the reason: ^7%s\n\"",
           vic->client->pers.netname,
           ( ent ) ? ent->client->pers.netname : "console",

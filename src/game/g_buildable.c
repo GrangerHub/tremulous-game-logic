@@ -256,11 +256,16 @@ static void G_PuntBlocker( gentity_t *self, gentity_t *blocker )
       nudge[ 1 ] = crandom() * 250.0f;
       nudge[ 2 ] = 100.0f;
 
-      VectorAdd( blockers[ i ]->client->ps.velocity, nudge, blockers[ i ]->client->ps.velocity );
+      VectorAdd( blockers[ i ]->client->ps.velocity, nudge,
+                 blockers[ i ]->client->ps.velocity );
       if( self->s.modelindex == BA_H_TELEPORTER )
-        trap_SendServerCommand( blockers[ i ] - g_entities, "cp \"Don't block teleporters!\"" );
+        trap_SendServerCommand( blockers[ i ] - g_entities,
+                                va( "cp \"Don't block teleporters!\" %d",
+                                CP_SPAWN_BLOCK ) );
       else
-        trap_SendServerCommand( blockers[ i ] - g_entities, "cp \"Don't spawn block!\"" );
+        trap_SendServerCommand( blockers[ i ] - g_entities,
+                                va( "cp \"Don't spawn block!\" %d",
+                                CP_SPAWN_BLOCK ) );
     } else if( blockers[ i ]->noTriggerHurtDmgTime <= level.time )
     {
       // damage enemy blockers
@@ -2358,7 +2363,7 @@ void HSpawn_Respawn( gentity_t *self )
       velocity[2] = 20 * (hit->r.currentOrigin[2] - self->r.currentOrigin[2]);
 
       VectorAdd( hit->client->ps.velocity, velocity, hit->client->ps.velocity );
-      trap_SendServerCommand( hit-g_entities, "cp \"Don't block respawning buildables!\"" );
+      trap_SendServerCommand( hit-g_entities, va( "cp \"Don't block respawning buildables!\" %d", CP_SPAWN_BLOCK ) );
     }
     else if( hit != self )
     {
@@ -2665,7 +2670,8 @@ qboolean HTeleporter_Activate( gentity_t *self, gentity_t *activator )
                                                 self->occupation.occupantFound )
     {
       trap_SendServerCommand( activator - g_entities,
-                              "cp \"^3Destination teleporter currently in use! Please stand by for teleportation!\"");
+                              va( "cp \"^3Destination teleporter currently in use! Please stand by for teleportation!\" %d",
+                              CP_TELEPORT ) );
       return qtrue;
     }
 
@@ -2673,7 +2679,8 @@ qboolean HTeleporter_Activate( gentity_t *self, gentity_t *activator )
         self->occupation.other->teleportation.coolDown >= level.time )
     {
       trap_SendServerCommand( activator - g_entities,
-                              "cp \"^3Teleporters cooling down! Please stand by for teleportation!\"");
+                              va( "cp \"^3Teleporters cooling down! Please stand by for teleportation!\" %d",
+                              CP_TELEPORT ) );
       return qtrue;
     }
 
@@ -2681,7 +2688,8 @@ qboolean HTeleporter_Activate( gentity_t *self, gentity_t *activator )
     {
       self->occupation.other->attemptSpawnTime = level.time + 1000;
       trap_SendServerCommand( activator - g_entities,
-                              "cp \"^3Removing a blocker! Please stand by for teleportation!\"");
+                              va( "cp \"^3Removing a blocker! Please stand by for teleportation!\" %d",
+                              CP_TELEPORT ) );
       return qtrue;
     }
 
@@ -3944,7 +3952,9 @@ void G_BuildableThink( gentity_t *ent, int msec )
       level.numUnspawnedBuildables[ ent->buildableTeam ]--;
       if( ent->s.modelindex == BA_A_OVERMIND )
       {
-        G_TeamCommand( TEAM_ALIENS, "cp \"The Overmind has awakened!\"" );
+        G_TeamCommand( TEAM_ALIENS,
+                       va( "cp \"The Overmind has awakened!\" %d",
+                       CP_OVERMIND_AWAKEN ) );
       }
     }
   }

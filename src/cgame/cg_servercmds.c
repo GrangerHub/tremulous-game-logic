@@ -346,7 +346,7 @@ static void CG_AnnounceAlienStageTransistion( stage_t from, stage_t to )
     return;
 
   trap_S_StartLocalSound( cgs.media.alienStageTransition, CHAN_ANNOUNCER );
-  CG_CenterPrint( "We have evolved!", 200, GIANTCHAR_WIDTH * 4 );
+  CG_CenterPrint( CP_STAGE_UP, "We have evolved!", GIANTCHAR_WIDTH * 4, -1 );
 }
 
 /*
@@ -360,7 +360,8 @@ static void CG_AnnounceHumanStageTransistion( stage_t from, stage_t to )
     return;
 
   trap_S_StartLocalSound( cgs.media.humanStageTransition, CHAN_ANNOUNCER );
-  CG_CenterPrint( "Reinforcements have arrived!", 200, GIANTCHAR_WIDTH * 4 );
+  CG_CenterPrint( CP_STAGE_UP, "Reinforcements have arrived!",
+                  GIANTCHAR_WIDTH * 4, -1 );
 }
 
 /*
@@ -1270,8 +1271,9 @@ static void CG_Say( int clientNum, saymode_t mode, const char *text )
 #endif
       if( !ignore[0] )
       {
-        CG_CenterPrint( va( "%sPrivate message from: " S_COLOR_WHITE "%s", 
-                            color, name ), 200, GIANTCHAR_WIDTH * 4 );
+        CG_CenterPrint( CP_PRIVATE_MESSAGE,
+                        va( "%sPrivate message from: " S_COLOR_WHITE "%s", 
+                            color, name ), GIANTCHAR_WIDTH * 4, -1 );
         if( clientNum < 0 || clientNum >= MAX_CLIENTS )
           clientNum = cg.clientNum;
         CG_Printf( ">> to reply, say: /m %d [your message] <<\n", clientNum );
@@ -1441,7 +1443,19 @@ CG_CenterPrint_f
 */
 static void CG_CenterPrint_f( void )
 {
-  CG_CenterPrint( CG_Argv( 1 ), SCREEN_HEIGHT * 0.30, BIGCHAR_WIDTH );
+  if( trap_Argc( ) >= 5 )
+  {
+    CG_CenterPrint( atoi( CG_Argv( 2 ) ), CG_Argv( 1 ), atoi( CG_Argv( 3 ) ), atoi( CG_Argv( 3 ) ) );
+  } else if( trap_Argc( ) >= 4 )
+  {
+    CG_CenterPrint( atoi( CG_Argv( 2 ) ), CG_Argv( 1 ), BIGCHAR_WIDTH, atoi( CG_Argv( 3 ) ) );
+  } else if( trap_Argc( ) >= 3 )
+  {
+    CG_CenterPrint( atoi( CG_Argv( 2 ) ), CG_Argv( 1 ), BIGCHAR_WIDTH, -1 );
+  } else
+  {
+    CG_CenterPrint( 0, CG_Argv( 1 ), BIGCHAR_WIDTH, -1 );
+  }
 }
 
 /*
