@@ -2283,14 +2283,6 @@ void Cmd_Class_f( gentity_t *ent )
         }
       }
 
-      //check that we are not wallwalking
-      if( ent->client->ps.eFlags & EF_WALLCLIMB )
-      {
-        G_TriggerMenu( clientNum, MN_A_EVOLVEWALLWALK );
-        return;
-      }
-
-
       if ( ent->client->ps.eFlags & EF_OCCUPYING )
       {
         G_TriggerMenu( clientNum, MN_A_NOEROOM );
@@ -2315,6 +2307,17 @@ void Cmd_Class_f( gentity_t *ent )
       {
         if( cost >= 0 )
         {
+          //disable wallwalking
+          if( ent->client->ps.eFlags & EF_WALLCLIMB )
+          {
+            vec3_t newAngles;
+
+            ent->client->ps.eFlags &= ~EF_WALLCLIMB;
+            VectorCopy( ent->client->ps.viewangles, newAngles );
+            newAngles[ PITCH ] = 0;
+            newAngles[ ROLL ] = 0;
+            G_SetClientViewAngle( ent, newAngles );
+          }
 
           ent->client->pers.evolveHealthFraction = (float)ent->client->ps.stats[ STAT_HEALTH ] /
             (float)BG_Class( currentClass )->health;
@@ -2356,7 +2359,17 @@ void Cmd_Class_f( gentity_t *ent )
           G_TriggerMenuArgs( clientNum, MN_A_CANTEVOLVE, newClass );
       }
       else
-        G_TriggerMenu( clientNum, MN_A_NOEROOM );
+      {
+        vec3_t playerNormal;
+
+        BG_GetClientNormal( &ent->client->ps, playerNormal );
+        //check that wallwalking isn't interfering
+        if( ent->client->ps.eFlags & EF_WALLCLIMB &&
+            ( playerNormal[ 2 ] != 1.0f ) )
+          G_TriggerMenu( clientNum, MN_A_EVOLVEWALLWALK );
+        else
+          G_TriggerMenu( clientNum, MN_A_NOEROOM );
+      }
     }
   }
   else if( ent->client->pers.teamSelection == TEAM_HUMANS )
