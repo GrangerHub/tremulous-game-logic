@@ -104,7 +104,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "[^3mapname^7] (^5layout^7)"
     },
 
-    {"cp", G_admin_cp, qfalse, "cp",
+    {"cpa", G_admin_cp, qfalse, "cpa",
       "display a brief Center Print Announcement message to players, optionally specifying a team to send to",
       "(^5-A|H|S^7) [^3message^7]"
     },
@@ -2401,7 +2401,7 @@ qboolean G_admin_cp( gentity_t *ent )
 
   if( trap_Argc( ) < 2 )
   {
-    ADMP( "^3cp: ^7usage: cp (-AHS) [message]\n" );
+    ADMP( "^3cpa: ^7usage: cpa (-AHS) [message]\n" );
     return qfalse;
   }
   trap_Argv( 1, arg, sizeof( arg ) );
@@ -2419,12 +2419,12 @@ qboolean G_admin_cp( gentity_t *ent )
         team = TEAM_NONE;
         break;
       default:
-        ADMP( "^3cp: ^7team not recognized as -a -h or -s\n" );
+        ADMP( "^3cpa: ^7team not recognized as -a -h or -s\n" );
         return qfalse;
     }
     if( trap_Argc( ) < 2 )
     {
-      ADMP( "^3cp: ^7no message\n" );
+      ADMP( "^3cpa: ^7no message\n" );
       return qfalse;
     }
     G_DecolorString( ConcatArgs( 2 ), message, sizeof( message ) );
@@ -2448,17 +2448,24 @@ qboolean G_admin_cp( gentity_t *ent )
                                 CP_ADMIN_CP ) );
 
       trap_SendServerCommand( i,
-                              va( "print \"%s^3cp: ^7%s%s^7%s%s%s: %c%s\n\"",
+                              va( "print \"%s^3cpa: ^7%s%s^7%s%s: %c%s\n\"",
                                   ( admin ) ? "[ADMIN] " : "",
                                   ( team >= 0 ) ? "(" : "",
                                   ( ent ) ? ent->client->pers.admin->name : "console",
                                   ( team >= 0 ) ? ")" : "",
-                                  ( admin ) ? " to " : "",
-                                  ( admin ) ? BG_TeamName( team ) : "",
+                                  ( admin ) ? va( " to %s", ( team >= 0 ) ? va( "%ss", BG_TeamName( team ) ) : "everyone" ) : "",
                                   INDENT_MARKER,
                                   message ) );
     }
   }
+
+  G_LogPrintf( "print \"[ADMIN]^3cpa: ^7%s%s^7%s%s: %c%s\n\"",
+      ( team >= 0 ) ? "(" : "",
+      ( ent ) ? ent->client->pers.admin->name : "console",
+      ( team >= 0 ) ? ")" : "",
+      va( " to %s", ( team >= 0 ) ? va( "%ss", BG_TeamName( team ) ) : "everyone" ),
+      INDENT_MARKER,
+      message );
 
   return qtrue;
 }
