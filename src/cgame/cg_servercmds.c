@@ -1072,7 +1072,7 @@ void CG_Menu( int menu, int arg )
       break;
 
     case MN_A_EVOLVEWALLWALK:
-      shortMsg  = "You cannot evolve while wallwalking";
+      shortMsg  = "You cannot evolve to that class while wallwalking";
       type      = DT_ARMOURYEVOLVE;
       break;
 
