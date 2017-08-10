@@ -3326,10 +3326,10 @@ void CG_CenterPrint( int index, const char *str, int charWidth, int showTime )
   ce_pr->createTime = cg.time;
   if( showTime <= 0 )
   {
-    ce_pr->expireTime = cg.time + 1000 * cg_centertime.value;
+    ce_pr->expireTime = 1000 * cg_centertime.value;
   } else
   {
-    ce_pr->expireTime = cg.time + showTime;
+    ce_pr->expireTime = showTime;
   }
   ce_pr->charWidth = charWidth;
 }
@@ -3349,11 +3349,11 @@ static void CG_DrawCenterStrings( void )
 
   for( i = 0; i < CP_MAX; i++, ce_pr++ )
   {
-    if( ce_pr->expireTime < cg.time )
+    if( ce_pr->expireTime + ce_pr->createTime < cg.time )
     continue;
 
     color = CG_FadeColor( ce_pr->createTime,
-                           ce_pr->expireTime - cg.time );
+                           ce_pr->expireTime );
     if( !color )
       continue;
 
