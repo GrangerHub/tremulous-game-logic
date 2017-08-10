@@ -220,7 +220,9 @@ static void G_PuntBlocker( gentity_t *self, gentity_t *blocker )
   nudge[ 2 ] = 175.0f;
 
   VectorAdd( blocker->client->ps.velocity, nudge, blocker->client->ps.velocity );
-  trap_SendServerCommand( blocker - g_entities, "cp \"Don't spawn block!\"" );
+  trap_SendServerCommand( blocker - g_entities,
+                          va( "cp \"Don't spawn block!\" %d",
+                          CP_SPAWN_BLOCK ) );
 }
 
 #define POWER_REFRESH_TIME  2000
@@ -2106,7 +2108,7 @@ void HSpawn_Respawn( gentity_t *self )
       velocity[2] = 20 * (hit->r.currentOrigin[2] - self->r.currentOrigin[2]);
 
       VectorAdd( hit->client->ps.velocity, velocity, hit->client->ps.velocity );
-      trap_SendServerCommand( hit-g_entities, "cp \"Don't block respawning buildables!\"" );
+      trap_SendServerCommand( hit-g_entities, va( "cp \"Don't block respawning buildables!\" %d", CP_SPAWN_BLOCK ) );
     }
     else if( hit != self )
     {
@@ -3446,7 +3448,9 @@ void G_BuildableThink( gentity_t *ent, int msec )
       ent->spawned = qtrue;
       if( ent->s.modelindex == BA_A_OVERMIND )
       {
-        G_TeamCommand( TEAM_ALIENS, "cp \"The Overmind has awakened!\"" );
+        G_TeamCommand( TEAM_ALIENS,
+                       va( "cp \"The Overmind has awakened!\" %d",
+                       CP_OVERMIND_AWAKEN ) );
       }
     }
   }

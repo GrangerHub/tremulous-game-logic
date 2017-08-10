@@ -1034,11 +1034,13 @@ typedef struct
   float         spectatorOffset;                    // current offset from start
 
   // centerprinting
-  int           centerPrintTime;
-  int           centerPrintCharWidth;
-  int           centerPrintY;
-  char          centerPrint[ MAX_STRING_CHARS ];
-  int           centerPrintLines;
+  struct centerPrinting_s
+  {
+    int         createTime;
+    int         expireTime;
+    int         charWidth;
+    char        str[ MAX_STRING_CHARS ];
+  } centerPrinting[CP_MAX];
 
   // low ammo warning state
   int           lowAmmoWarning;   // 1 = low, 2 = empty
@@ -1542,6 +1544,7 @@ extern  markPoly_t      cg_markPolys[ MAX_MARK_POLYS ];
 
 extern  vmCvar_t    cg_teslaTrailTime;
 extern  vmCvar_t    cg_centertime;
+extern  vmCvar_t    cg_centerYOffset;
 extern  vmCvar_t    cg_runpitch;
 extern  vmCvar_t    cg_runroll;
 extern  vmCvar_t    cg_swingSpeed;
@@ -1768,7 +1771,7 @@ void        CG_DrawRangeMarker( rangeMarkerType_t rmType, const vec3_t origin, c
 void        CG_AddLagometerFrameInfo( void );
 void        CG_AddLagometerSnapshotInfo( snapshot_t *snap );
 void        CG_AddSpeed( void );
-void        CG_CenterPrint( const char *str, int y, int charWidth );
+void        CG_CenterPrint( int index, const char *str, int charWidth, int showTime );
 void        CG_DrawActive( stereoFrame_t stereoView );
 void        CG_OwnerDraw( float x, float y, float w, float h, float text_x,
                           float text_y, int ownerDraw, int ownerDrawFlags,

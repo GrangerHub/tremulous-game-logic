@@ -388,9 +388,10 @@ static void CG_Obituary( entityState_t *ent )
         attackerName, message2 );
       if( teamKill && attacker == cg.clientNum )
       {
-        CG_CenterPrint( va ( "You killed " S_COLOR_RED "TEAMMATE "
-          S_COLOR_WHITE "%s", targetName ),
-          SCREEN_HEIGHT * 0.30, BIGCHAR_WIDTH );
+        CG_CenterPrint( CP_TEAM_KILL,
+                        va ( "You killed " S_COLOR_RED "TEAMMATE "
+                             S_COLOR_WHITE "%s", targetName ),
+                        BIGCHAR_WIDTH, -1 );
       }
       return;
     }
@@ -907,7 +908,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_ALIENS )
       {
         trap_S_StartLocalSound( cgs.media.alienOvermindAttack, CHAN_ANNOUNCER );
-        CG_CenterPrint( "The Overmind is under attack!", 200, GIANTCHAR_WIDTH * 4 );
+        CG_CenterPrint( CP_UNDER_ATTACK, "The Overmind is under attack!", GIANTCHAR_WIDTH * 4, -1 );
       }
       break;
 
@@ -915,7 +916,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_ALIENS )
       {
         trap_S_StartLocalSound( cgs.media.alienOvermindDying, CHAN_ANNOUNCER );
-        CG_CenterPrint( "The Overmind is dying!", 200, GIANTCHAR_WIDTH * 4 );
+        CG_CenterPrint( CP_UNDER_ATTACK, "The Overmind is dying!", GIANTCHAR_WIDTH * 4, -1 );
       }
       break;
 
@@ -923,7 +924,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_HUMANS )
       {
         //trap_S_StartLocalSound( cgs.media.humanDCCAttack, CHAN_ANNOUNCER );
-        CG_CenterPrint( "Our base is under attack!", 200, GIANTCHAR_WIDTH * 4 );
+        CG_CenterPrint( CP_UNDER_ATTACK, "Our base is under attack!", GIANTCHAR_WIDTH * 4, -1 );
       }
       break;
 
@@ -935,7 +936,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_ALIENS )
       {
         trap_S_StartLocalSound( cgs.media.alienOvermindSpawns, CHAN_ANNOUNCER );
-        CG_CenterPrint( "The Overmind needs spawns!", 200, GIANTCHAR_WIDTH * 4 );
+        CG_CenterPrint( CP_NEED_SPAWNS, "The Overmind needs spawns!", GIANTCHAR_WIDTH * 4, -1 );
       }
       break;
 
