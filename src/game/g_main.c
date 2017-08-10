@@ -1322,7 +1322,9 @@ void G_CalculateBuildPoints( void )
   if( !IS_WARMUP && G_TimeTilSuddenDeath( ) <= 0 && level.suddenDeathWarning < TW_PASSED )
   {
     G_LogPrintf( "Beginning Sudden Death\n" );
-    trap_SendServerCommand( -1, "cp \"Sudden Death!\"" );
+    trap_SendServerCommand( -1,
+                            va( "cp \"Sudden Death!\" %d",
+                                CP_SUDDEN_DEATH ) );
     trap_SendServerCommand( -1, "print \"Beginning Sudden Death.\n\"" );
     level.suddenDeathWarning = TW_PASSED;
     G_ClearDeconMarks( );
@@ -1337,8 +1339,10 @@ void G_CalculateBuildPoints( void )
   else if( !IS_WARMUP && G_TimeTilSuddenDeath( ) <= SUDDENDEATHWARNING &&
     level.suddenDeathWarning < TW_IMMINENT )
   {
-    trap_SendServerCommand( -1, va( "cp \"Sudden Death in %d seconds!\"",
-          (int)( G_TimeTilSuddenDeath( ) / 1000 ) ) );
+    trap_SendServerCommand( -1,
+                            va( "cp \"Sudden Death in %d seconds!\" %d",
+                                (int)( G_TimeTilSuddenDeath( ) / 1000 ),
+                                CP_SUDDEN_DEATH ) );
     trap_SendServerCommand( -1, va( "print \"Sudden Death will begin in %d seconds.\n\"",
           (int)( G_TimeTilSuddenDeath( ) / 1000 ) ) );
     level.suddenDeathWarning = TW_IMMINENT;
@@ -2170,13 +2174,17 @@ void CheckExitRules( void )
     else if( level.time - level.startTime >= ( g_timelimit.integer - 5 ) * 60000 &&
           level.timelimitWarning < TW_IMMINENT )
     {
-      trap_SendServerCommand( -1, "cp \"5 minutes remaining!\"" );
+      trap_SendServerCommand( -1,
+                             va( "cp \"5 minutes remaining!\" %d",
+                                  CP_TIME_LIMIT ) );
       level.timelimitWarning = TW_IMMINENT;
     }
     else if( level.time - level.startTime >= ( g_timelimit.integer - 1 ) * 60000 &&
           level.timelimitWarning < TW_PASSED )
     {
-      trap_SendServerCommand( -1, "cp \"1 minute remaining!\"" );
+      trap_SendServerCommand( -1,
+                              va( "cp \"1 minute remaining!\" %d",
+                                  CP_TIME_LIMIT ) );
       level.timelimitWarning = TW_PASSED;
     }
   }
@@ -2918,7 +2926,9 @@ void G_RunFrame( int levelTime )
     while( ptime3000 > 3000 )
     {
       ptime3000 -= 3000;
-      trap_SendServerCommand( -1, "cp \"The game has been paused. Please wait.\"" );
+      trap_SendServerCommand( -1,
+                              va( "cp \"The game has been paused. Please wait.\" %d",
+                                  CP_PAUSE ) );
 
       if( level.pausedTime >= 110000  && level.pausedTime <= 119000 )
         trap_SendServerCommand( -1, va( "print \"Server: Game will auto-unpause in %d seconds\n\"",
@@ -2935,7 +2945,9 @@ void G_RunFrame( int levelTime )
     if( level.pausedTime > 120000 )
     {
       trap_SendServerCommand( -1, "print \"Server: The game has been unpaused automatically (2 minute max)\n\"" );
-      trap_SendServerCommand( -1, "cp \"The game has been unpaused!\"" );
+      trap_SendServerCommand( -1,
+                              va( "cp \"The game has been unpaused!\" %d",
+                                  CP_PAUSE ) );
       level.pausedTime = 0;
     }
 

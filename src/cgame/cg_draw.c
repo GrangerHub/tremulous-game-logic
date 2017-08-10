@@ -3250,89 +3250,106 @@ Called for important messages that should stay in the center of the screen
 for a few moments
 ==============
 */
-void CG_CenterPrint( const char *str, int y, int charWidth )
+void CG_CenterPrint( int index, const char *str, int charWidth, int showTime )
 {
-  char  *s;
   char newlineParsed[ MAX_STRING_CHARS ];
   const char *wrapped;
   static int maxWidth = (int)( ( 2.0f / 3.0f ) * (float)SCREEN_WIDTH );
+  struct centerPrinting_s *ce_pr;
+
+  if( index < 0 )
+  {
+    int i;
+    index = -index;
+    for( i = -index; i < CP_MAX; i++ )
+    {
+      if( cg.centerPrinting[ i ].expireTime < cg.time )
+      {
+        index = i;
+        break;
+      }
+    }
+  }
+
+  if( index >= CP_MAX )
+  {
+    index = CP_MAX - 1;
+  }
+
+  ce_pr = &cg.centerPrinting[ index ];
 
   Q_ParseNewlines( newlineParsed, str, sizeof( newlineParsed ) );
 
   wrapped = Item_Text_Wrap( newlineParsed, 0.5f, maxWidth );
 
-  Q_strncpyz( cg.centerPrint, wrapped, sizeof( cg.centerPrint ) );
+  Q_strncpyz( ce_pr->str, wrapped, sizeof( ce_pr->str ) );
 
-  cg.centerPrintTime = cg.time;
-  cg.centerPrintY = y;
-  cg.centerPrintCharWidth = charWidth;
-
-  // count the number of lines for centering
-  cg.centerPrintLines = 1;
-  s = cg.centerPrint;
-  while( *s )
+  ce_pr->createTime = cg.time;
+  if( showTime <= 0 )
   {
-    if( *s == '\n' )
-      cg.centerPrintLines++;
-
-    s++;
+    ce_pr->expireTime = cg.time + 1000 * cg_centertime.value;
+  } else
+  {
+    ce_pr->expireTime = cg.time + showTime;
   }
+  ce_pr->charWidth = charWidth;
 }
 
 
 /*
 ===================
-CG_DrawCenterString
+CG_DrawCenterStrings
 ===================
 */
-static void CG_DrawCenterString( void )
+static void CG_DrawCenterStrings( void )
 {
   char  *start;
-  int   l;
-  int   x, y, w;
-  int h;
+  int   i, l, y = cg_centerYOffset.integer;
   float *color;
+  struct centerPrinting_s *ce_pr = cg.centerPrinting;
 
-  if( !cg.centerPrintTime )
-    return;
-
-  color = CG_FadeColor( cg.centerPrintTime, 1000 * cg_centertime.value );
-  if( !color )
-    return;
-
-  trap_R_SetColor( color );
-
-  start = cg.centerPrint;
-
-  y = cg.centerPrintY - cg.centerPrintLines * BIGCHAR_HEIGHT / 2;
-
-  while( 1 )
+  for( i = 0; i < CP_MAX; i++, ce_pr++ )
   {
-    char linebuffer[ MAX_STRING_CHARS ];
+    if( ce_pr->expireTime < cg.time )
+    continue;
 
-    for( l = 0; l < sizeof(linebuffer) - 1; l++ )
+    color = CG_FadeColor( ce_pr->createTime,
+                           ce_pr->expireTime - cg.time );
+    if( !color )
+      continue;
+
+    trap_R_SetColor( color );
+
+    start = ce_pr->str;
+    while( 1 )
     {
-      if( !start[ l ] || start[ l ] == '\n' )
+      int w, h, x;
+      char linebuffer[ MAX_STRING_CHARS ];
+
+      for( l = 0; l < sizeof(linebuffer) - 1; l++ )
+      {
+        if( !start[ l ] || start[ l ] == '\n' )
+          break;
+
+        linebuffer[ l ] = start[ l ];
+      }
+
+      linebuffer[ l ] = 0;
+
+      w = UI_Text_Width( linebuffer, 0.5 );
+      h = UI_Text_Height( linebuffer, 0.5 );
+      x = ( SCREEN_WIDTH - w ) / 2;
+      UI_Text_Paint( x, y + h, 0.5, color, linebuffer, 0, 0,
+                     ITEM_TEXTSTYLE_SHADOWEDMORE );
+      y += h + 6;
+
+      while( *start && ( *start != '\n' ) )
+        start++;
+      if( !*start )
         break;
 
-      linebuffer[ l ] = start[ l ];
-    }
-
-    linebuffer[ l ] = 0;
-
-    w = UI_Text_Width( linebuffer, 0.5 );
-    h = UI_Text_Height( linebuffer, 0.5 );
-    x = ( SCREEN_WIDTH - w ) / 2;
-    UI_Text_Paint( x, y + h, 0.5, color, linebuffer, 0, 0, ITEM_TEXTSTYLE_SHADOWEDMORE );
-    y += h + 6;
-
-    while( *start && ( *start != '\n' ) )
-      start++;
-
-    if( !*start )
-      break;
-
-    start++;
+        start++;
+      }
   }
 
   trap_R_SetColor( NULL );
@@ -3635,7 +3652,7 @@ static void CG_Draw2D( void )
   cg.scoreBoardShowing = CG_DrawScoreboard( );
 
   if( !cg.scoreBoardShowing )
-    CG_DrawCenterString( );
+    CG_DrawCenterStrings( );
 }
 
 /*
