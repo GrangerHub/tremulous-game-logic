@@ -3185,7 +3185,9 @@ void HMedistat_Think( gentity_t *self )
               player->client->ps.stats[ STAT_STATE ] |= SS_HEALING_ACTIVE;
             }
           }
-          else if( !BG_InventoryContainsUpgrade( UP_MEDKIT, player->client->ps.stats ) )
+
+          if( player->health >= player->client->ps.stats[ STAT_MAX_HEALTH ] && 
+              !BG_InventoryContainsUpgrade( UP_MEDKIT, player->client->ps.stats ) )
             BG_AddUpgradeToInventory( UP_MEDKIT, player->client->ps.stats );
         }
       }
