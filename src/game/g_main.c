@@ -177,6 +177,7 @@ vmCvar_t  g_playMapPoolConfig;
 vmCvar_t  g_playMapQueueConfig;
 
 vmCvar_t  g_privateMessages;
+vmCvar_t  g_logPrivateMessages;
 vmCvar_t  g_specChat;
 vmCvar_t  g_publicAdminMessages;
 vmCvar_t  g_allowTeamOverlay;
@@ -373,6 +374,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_playMapQueueConfig, "g_playMapQueueConfig", "playmap_queue.dat", CVAR_ARCHIVE, 0, qfalse  },
 
   { &g_privateMessages, "g_privateMessages", "1", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_logPrivateMessages, "g_logPrivateMessages", "0", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qtrue },
   { &g_specChat, "g_specChat", "1", CVAR_ARCHIVE, 0, qfalse  },
   { &g_publicAdminMessages, "g_publicAdminMessages", "1", CVAR_ARCHIVE, 0, qfalse  },
   { &g_allowTeamOverlay, "g_allowTeamOverlay", "1", CVAR_ARCHIVE, 0, qtrue  },
