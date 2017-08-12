@@ -232,13 +232,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL3_VALUE                AVM(3 * ALIEN_CREDITS_PER_KILL)
 #define LEVEL3_HEALTH               AHM(200)
 #define LEVEL3_REGEN                (0.03f * LEVEL3_HEALTH)
-#define LEVEL3_COST                 3
+#define LEVEL3_COST                 5
 
 #define LEVEL3_UPG_SPEED            1.1f
 #define LEVEL3_UPG_VALUE            AVM(5 * ALIEN_CREDITS_PER_KILL)
 #define LEVEL3_UPG_HEALTH           AHM(250)
 #define LEVEL3_UPG_REGEN            (0.03f * LEVEL3_UPG_HEALTH)
-#define LEVEL3_UPG_COST             5
+#define LEVEL3_UPG_COST             7
 
 #define LEVEL4_SPEED                1.2f
 #define LEVEL4_VALUE                AVM(8 * ALIEN_CREDITS_PER_KILL)
@@ -248,7 +248,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define SPITFIRE_SPEED                1.3f
 #define SPITFIRE_VALUE                AVM(4 * ALIEN_CREDITS_PER_KILL)
-#define SPITFIRE_HEALTH               AHM(125)
+#define SPITFIRE_HEALTH               AHM(90)
 #define SPITFIRE_REGEN                (0.03f * SPITFIRE_HEALTH)
 #define SPITFIRE_COST                 4
 
