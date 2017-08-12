@@ -456,7 +456,15 @@ target_hurt_use
 void target_hurt_use( gentity_t *self, gentity_t *other, gentity_t *activator )
 {
   // hurt the activator
-  if( !activator || !G_TakesDamage( activator ) )
+  if( !activator || !activator->takedamage )
+    return;
+
+    // Don't damage players that are not alive
+    if( activator->client &&
+        ( activator->client->pers.teamSelection == TEAM_NONE ||
+          activator->client->pers.classSelection == PCL_NONE ||
+          activator->client->ps.persistant[ PERS_SPECSTATE ] != SPECTATOR_NOT ||
+          activator->health <= 0 ) )
     return;
 
   G_Damage( activator, self, self, NULL, NULL, self->damage, 0, MOD_TRIGGER_HURT );

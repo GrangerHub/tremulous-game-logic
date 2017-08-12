@@ -403,7 +403,15 @@ void hurt_touch( gentity_t *self, gentity_t *other, trace_t *trace )
   int       dflags;
   gentity_t *attacker;
 
-  if( !G_TakesDamage( other ) )
+  if( !other->takedamage )
+    return;
+
+  // Don't damage players that are not alive
+  if( other->client &&
+      ( other->client->pers.teamSelection == TEAM_NONE ||
+        other->client->pers.classSelection == PCL_NONE ||
+        other->client->ps.persistant[ PERS_SPECSTATE ] != SPECTATOR_NOT ||
+        other->health <= 0 ) )
     return;
 
   if( other->noTriggerHurtDmgTime > level.time )
