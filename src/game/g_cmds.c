@@ -4348,11 +4348,12 @@ void Cmd_PrivateMessage_f( gentity_t *ent )
     ADMP( va( "^%csent to %i player%s: " S_COLOR_WHITE "%s\n", color, count,
       count == 1 ? "" : "s", recipients ) );
 
-    G_LogPrintf( "%s: %d \"%s" S_COLOR_WHITE "\" \"%s\": ^%c%s\n",
-      ( teamonly ) ? "TPrivMsg" : "PrivMsg",
-      (int)( ( ent ) ? ent - g_entities : -1 ),
-      ( ent ) ? ent->client->pers.netname : "console",
-      name, color, msg );
+    if( g_logPrivateMessages.integer )
+      G_LogPrintf( "%s: %d \"%s" S_COLOR_WHITE "\" \"%s\": ^%c%s\n",
+        ( teamonly ) ? "TPrivMsg" : "PrivMsg",
+        (int)( ( ent ) ? ent - g_entities : -1 ),
+        ( ent ) ? ent->client->pers.netname : "console",
+        name, color, msg );
   }
 }
 
