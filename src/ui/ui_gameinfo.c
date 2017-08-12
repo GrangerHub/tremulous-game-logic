@@ -368,5 +368,7 @@ void UI_ServerInfo( void )
                    Info_ValueForKey( info, "g_friendlyBuildableFire" ) );
     trap_Cvar_Set( "ui_serverinfo_allowdl",
                    Info_ValueForKey( info, "sv_allowdownload" ) );
+    trap_Cvar_Set( "ui_serverinfo_logPrivateMessages",
+                   Info_ValueForKey( info, "g_logPrivateMessages" ) );
   }
 }
