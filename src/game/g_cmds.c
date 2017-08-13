@@ -2338,12 +2338,17 @@ void Cmd_Class_f( gentity_t *ent )
 
           if( !g_cheats.integer )
           {
+            int evolvePeriod = 1000 +
+                               ( abs( BG_Class( newClass )->cost -
+                                 BG_Class( currentClass )->cost ) *
+                                        1500 );
+
+            if( evolvePeriod > MAX_EVOLVE_PERIOD )
+              evolvePeriod = MAX_EVOLVE_PERIOD;
+
             //Set evolving period
             ent->client->ps.eFlags |= EF_EVOLVING;
-            ent->client->evolveTime = level.time + 1000 +
-                                      ( abs( BG_Class( newClass )->cost -
-                                             BG_Class( currentClass )->cost ) *
-                                        1500 );
+            ent->client->evolveTime = level.time + evolvePeriod;
             // save the angles for this frame
             VectorCopy( ent->client->ps.viewangles, ent->client->evolveRestoreAngles );
           }

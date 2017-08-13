@@ -176,6 +176,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
 
+#define MAX_EVOLVE_PERIOD           4500 // maximum time in ms that evolving requires.
+
 #define ALIEN_HLTH_MODIFIER         1.0f
 #define AHM(h)                      ((int)((float)h*ALIEN_HLTH_MODIFIER))
 
@@ -236,8 +238,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define LEVEL3_UPG_SPEED            1.1f
 #define LEVEL3_UPG_VALUE            AVM(5 * ALIEN_CREDITS_PER_KILL)
-#define LEVEL3_UPG_HEALTH           AHM(250)
-#define LEVEL3_UPG_REGEN            (0.03f * LEVEL3_UPG_HEALTH)
+#define LEVEL3_UPG_HEALTH           AHM(400)
+#define LEVEL3_UPG_REGEN            (4)
 #define LEVEL3_UPG_COST             7
 
 #define LEVEL4_SPEED                1.2f
