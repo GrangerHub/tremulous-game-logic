@@ -4587,11 +4587,9 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
     }
 
     {//Do a trace to find a better start origin.
-      vec3_t  mins2, maxs2, targetOrigin2;
-      mins2[0] = mins2[1] = mins2[2] = -15;
-      maxs2[0] = maxs2[1] = maxs2[2] = 15;
-      VectorMA( viewOrigin, 14.0, forward, targetOrigin2 );//Cannot be larger than player width + smallest building width.
-      (*trace)( tr, viewOrigin, mins2, maxs2, targetOrigin2, ps->clientNum,
+      vec3_t  targetOrigin2;
+      VectorMA( viewOrigin, 7.0, forward, targetOrigin2 );//Cannot be larger than player width + smallest building width.
+      (*trace)( tr, viewOrigin, NULL, NULL, targetOrigin2, ps->clientNum,
                 MASK_PLAYERSOLID );
       if( tr->startsolid || tr->fraction < 1.0f ) {
         VectorCopy( viewOrigin, outOrigin );
