@@ -4539,17 +4539,17 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
   vec3_t  mins, maxs;
   float   buildDist = BG_Class( ps->stats[ STAT_CLASS ] )->buildDist;
   const   buildable_t buildable = ps->stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT;
- 
+
   BG_BuildableBoundingBox( buildable, mins, maxs );
- 
+
   VectorCopy( ps->origin, playerOrigin );
- 
+
   BG_GetClientNormal( ps, playerNormal );
- 
+
   VectorCopy( ps->viewangles, outAngles );
- 
+
   AngleVectors( outAngles, forward, NULL, NULL );
- 
+
   {
     vec3_t viewOrigin;
     const float minNormal = BG_Buildable( buildable )->minNormal;
@@ -4557,18 +4557,18 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
     qboolean validAngle;
     float heightOffset = 0.0f;
     qboolean preciseBuild = ps->stats[ STAT_STATE ] & SS_PRECISE_BUILD;
- 
+
     if( !preciseBuild ) {
       buildDist *= 2.0f;
     }
- 
+
     //TODO: if building intersects player, place the building right next to the player.
     //TODO: Partial move of canbuild to this function to allow quicker updates for the red shader.
  
     BG_GetClientViewOrigin( ps, viewOrigin );
  
     VectorMA( viewOrigin, buildDist, forward, targetOrigin );
- 
+
     //Determine and correct height for buildings that can't be built on walls or ceiling.
     if( minNormal > 0.0f && invertNormal == qfalse )
     {
@@ -4585,41 +4585,55 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
         VectorMA( viewOrigin, taller + 1.0f, playerNormal, viewOrigin );
       }
     }
- 
+
+    {//Do a trace to find a better start origin.
+      vec3_t  mins2, maxs2, targetOrigin2;
+      mins2[0] = mins2[1] = mins2[2] = -15;
+      maxs2[0] = maxs2[1] = maxs2[2] = 15;
+      VectorMA( viewOrigin, 14.0, forward, targetOrigin2 );//Cannot be larger than player width + smallest building width.
+      (*trace)( tr, viewOrigin, mins2, maxs2, targetOrigin2, ps->clientNum,
+                MASK_PLAYERSOLID );
+      if( tr->startsolid || tr->fraction < 1.0f ) {
+        VectorCopy( viewOrigin, outOrigin );
+        return;
+      }
+      VectorCopy( tr->endpos, viewOrigin );
+    }
+
     (*trace)( tr, viewOrigin, mins, maxs, targetOrigin, ps->clientNum,
               MASK_PLAYERSOLID );
- 
+
     if( tr->startsolid ) {
       VectorCopy( viewOrigin, outOrigin );
       return;
     }
- 
+
     validAngle = tr->plane.normal[ 2 ] >= minNormal ||
                    ( invertNormal && tr->plane.normal[ 2 ] <= -minNormal );
- 
+
     //Down trace if precision building, no hit, or surface is too steep.
     if( preciseBuild ||
         tr->fraction >= 1.0f || !validAngle ) //TODO: These should be utility functions like "if(traceHit(&tr))"
     {
       vec3_t targetDir;
- 
+
       if( tr->fraction < 1.0f )
       {
         //Bring endpos away from surface it has hit.
         VectorAdd( tr->endpos, tr->plane.normal, tr->endpos );
       }
- 
+
       VectorSubtract( targetOrigin, viewOrigin, targetDir );
- 
+
       VectorNormalize( targetDir );
- 
+
       {
         vec3_t startOrigin;
- 
+
         VectorMA( tr->endpos, -buildDist / 2.0f, playerNormal, targetOrigin );
- 
+
         VectorCopy( tr->endpos, startOrigin );
- 
+
         (*trace)( tr, startOrigin, mins, maxs, targetOrigin, ps->clientNum,
           MASK_PLAYERSOLID );
       }
