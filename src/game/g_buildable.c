@@ -4744,7 +4744,7 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   vec3_t            angles;
   vec3_t            entity_origin;
   vec3_t            mins, maxs;
-  trace_t           tr1, tr2, tr3;
+  trace_t           tr1, tr2;
   itemBuildError_t  reason = IBE_NONE, tempReason;
   gentity_t         *tempent, *powerBuildable;
   float             minNormal;
@@ -4766,10 +4766,6 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
                                         entity_origin, angles, &tr1 );
 
   trap_Trace( &tr2, entity_origin, mins, maxs, entity_origin, -1,
-                MASK_PLAYERSOLID );
-
-  if( !( ent->client->ps.stats[ STAT_STATE ] & SS_LOS_TOGGLEBIT ) )
-    trap_Trace( &tr3, ps->origin, NULL, NULL, entity_origin, ent->s.number,
                 MASK_PLAYERSOLID );
 
   VectorCopy( entity_origin, origin );
@@ -4813,7 +4809,6 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
       if( !G_IsCreepHere( entity_origin ) )
         reason = IBE_NOCREEP;
     }
-
 
     if ( buildable == BA_A_HOVEL )
     {
@@ -4864,7 +4859,6 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
         reason = IBE_BLOCKEDBYENEMY;
       }
     }
-
 
     //this buildable requires a DCC
     if( BG_Buildable( buildable )->dccTest && !G_IsDCCBuilt( ) )
@@ -4968,9 +4962,7 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
 
   //this item does not fit here
   if( reason == IBE_NONE &&
-      ( tr1.fraction >= 1.0f || tr2.startsolid ||
-      ( !( ent->client->ps.stats[ STAT_STATE ] & SS_LOS_TOGGLEBIT ) &&
-          tr3.fraction >= 1.0f ) ) )
+      ( tr1.fraction >= 1.0f || tr2.startsolid ) )
     reason = IBE_NOROOM;
 
   if( reason != IBE_NONE )

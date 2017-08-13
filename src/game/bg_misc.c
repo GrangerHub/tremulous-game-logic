@@ -1211,7 +1211,7 @@ static const classAttributes_t bg_classList[ ] =
     SCA_WALLCLIMBER|SCA_ALIENSENSE|
     SCA_REGEN|SCA_CANHOVEL,                         //int    abilities;
     WP_ABUILD,                                      //weapon_t startWeapon;
-    105.0f,                                         //float   buildDist;
+    120.0f,                                         //float   buildDist;
     110,                                            //int     fov;
     0.001f,                                         //float   bob;
     2.0f,                                           //float   bobCycle;
@@ -1245,7 +1245,7 @@ static const classAttributes_t bg_classList[ ] =
     SCA_WALLCLIMBER|SCA_ALIENSENSE|
     SCA_REGEN|SCA_CANHOVEL,                         //int  abilities;
     WP_ABUILD2,                                     //weapon_t startWeapon;
-    105.0f,                                         //float   buildDist;
+    120.0f,                                         //float   buildDist;
     110,                                            //int     fov;
     0.001f,                                         //float   bob;
     2.0f,                                           //float   bobCycle;
@@ -1563,7 +1563,7 @@ static const classAttributes_t bg_classList[ ] =
     0.0f,                                           //float   regenRate;
     SCA_TAKESFALLDAMAGE|SCA_CANUSELADDERS|SCA_STAMINA,          //int     abilities;
     WP_NONE, //special-cased in g_client.c          //weapon_t startWeapon;
-    110.0f,                                         //float   buildDist;
+    125.0f,                                         //float   buildDist;
     90,                                             //int     fov;
     0.002f,                                         //float   bob;
     1.0f,                                           //float   bobCycle;
@@ -1593,7 +1593,7 @@ static const classAttributes_t bg_classList[ ] =
     0.0f,                                           //float   regenRate;
     SCA_TAKESFALLDAMAGE|SCA_CANUSELADDERS|SCA_STAMINA,          //int     abilities;
     WP_NONE, //special-cased in g_client.c          //weapon_t startWeapon;
-    110.0f,                                         //float   buildDist;
+    125.0f,                                         //float   buildDist;
     90,                                             //int     fov;
     0.002f,                                         //float   bob;
     1.0f,                                           //float   bobCycle;
@@ -4535,7 +4535,7 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
                                                           const vec3_t, const vec3_t, int, int ),
                                            vec3_t outOrigin, vec3_t outAngles, trace_t *tr )
 {
-  vec3_t  forward, entityOrigin, targetOrigin;
+  vec3_t  forward, targetOrigin;
   vec3_t  playerOrigin, playerNormal;
   vec3_t  mins, maxs;
   float   buildDist = BG_Class( ps->stats[ STAT_CLASS ] )->buildDist;
@@ -4551,18 +4551,18 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
  
   AngleVectors( outAngles, forward, NULL, NULL );
  
-  // check for LoS buildable placement mode
-  if( ps->stats[ STAT_STATE ] & SS_LOS_TOGGLEBIT )
   {
     vec3_t viewOrigin;
     const float minNormal = BG_Buildable( buildable )->minNormal;
     const qboolean invertNormal = BG_Buildable( buildable )->invertNormal;
     qboolean validAngle;
     float heightOffset = 0.0f;
+    qboolean preciseBuild = ps->stats[ STAT_STATE ] & SS_PRECISE_BUILD;
  
-    buildDist *= 2.3f;
+    if( !preciseBuild ) {
+      buildDist *= 2.0f;
+    }
  
-    //TODO: Make old placement work the same but with less buildDist.
     //TODO: if building intersects player, place the building right next to the player.
     //TODO: Partial move of canbuild to this function to allow quicker updates for the red shader.
  
@@ -4580,16 +4580,27 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
         maxs[2] = 15.0f;
       }
       mins[2] = 0.0f;
+    } else {
+      float taller = fabs( mins[2] ) - (float)ps->viewheight;
+      if( taller >= 0.0f ) {//Some large wall/ceiling buildings require viewOrigin adjustment.
+        VectorMA( viewOrigin, taller + 1.0f, playerNormal, viewOrigin );
+      }
     }
  
     (*trace)( tr, viewOrigin, mins, maxs, targetOrigin, ps->clientNum,
               MASK_PLAYERSOLID );
  
+    if( tr->startsolid ) {
+      VectorCopy( viewOrigin, outOrigin );
+      return;
+    }
+ 
     validAngle = tr->plane.normal[ 2 ] >= minNormal ||
                    ( invertNormal && tr->plane.normal[ 2 ] <= -minNormal );
  
-    //Down trace if no hit or surface is too steep.
-    if( tr->fraction >= 1.0f || !validAngle ) //TODO: These should be utility functions like "if(traceHit(&tr))"
+    //Down trace if precision building, no hit, or surface is too steep.
+    if( preciseBuild ||
+        tr->fraction >= 1.0f || !validAngle ) //TODO: These should be utility functions like "if(traceHit(&tr))"
     {
       vec3_t targetDir;
  
@@ -4599,7 +4610,6 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
         VectorAdd( tr->endpos, tr->plane.normal, tr->endpos );
       }
  
-      //Calculate new targetOrigin without exceeding buildDist sphere.
       VectorSubtract( targetOrigin, viewOrigin, targetDir );
  
       VectorNormalize( targetDir );
@@ -4616,25 +4626,7 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
       }
     }
     tr->endpos[2] -= heightOffset;
-  } else
-  {
-    ProjectPointOnPlane( forward, forward, playerNormal );
-    VectorNormalize( forward );
-
-    VectorMA( playerOrigin, buildDist, forward, entityOrigin );
-
-    VectorCopy( entityOrigin, targetOrigin );
-
-    //so buildings can be placed facing slopes
-    VectorMA( entityOrigin, 32, playerNormal, entityOrigin );
-
-    //so buildings drop to floor
-    VectorMA( targetOrigin, -128, playerNormal, targetOrigin );
-
-    (*trace)( tr, entityOrigin, mins, maxs, targetOrigin, ps->clientNum,
-              MASK_PLAYERSOLID );
   }
-
   VectorCopy( tr->endpos, outOrigin );
 }
 

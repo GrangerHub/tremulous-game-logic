@@ -4405,11 +4405,11 @@ void PmoveSingle( pmove_t *pmove )
       pm->ps->weapon == WP_ABUILD2 ||
       pm->ps->weapon == WP_HBUILD )
   {
-    // check for LoS buildable placement mode
+    // check for precise buildable placement mode
     if( pm->cmd.buttons & BUTTON_WALKING )
-      pm->ps->stats[ STAT_STATE ] &= ~SS_LOS_TOGGLEBIT;
+      pm->ps->stats[ STAT_STATE ] |= SS_PRECISE_BUILD;
     else
-      pm->ps->stats[ STAT_STATE ] |= SS_LOS_TOGGLEBIT;
+      pm->ps->stats[ STAT_STATE ] &= ~SS_PRECISE_BUILD;
   }
     
 
