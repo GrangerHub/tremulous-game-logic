@@ -4524,15 +4524,54 @@ void BG_GetClientViewOrigin( const playerState_t *ps, vec3_t viewOrigin )
 
 /*
 ===============
+BG_FindValidSpot
+===============
+*/
+qboolean BG_FindValidSpot( void (*trace)( trace_t *, const vec3_t, const vec3_t,
+                                          const vec3_t, const vec3_t, int, int ),
+                           trace_t *tr, vec3_t start, vec3_t mins, vec3_t maxs,
+                           vec3_t end, int passEntityNum, int contentmask,
+                           int limit )
+{
+  vec3_t start2, increment;
+  float range;
+
+  VectorCopy( start, start2 );
+
+  VectorSubtract( end, start2, increment );
+  range = VectorNormalize( increment );
+  VectorScale( increment, range / limit, increment );
+
+  do
+  {
+    (*trace)( tr, start2, mins, maxs, end, passEntityNum, contentmask );
+    VectorAdd( start2, increment, start2 );
+    if( !tr->allsolid )
+    {
+      return qtrue;
+    }
+    limit--;
+  } while ( tr->fraction < 1.0f && limit >= 0 );
+  return qfalse;
+}
+
+/*
+===============
 BG_PositionBuildableRelativeToPlayer
 
 Find a place to build a buildable
 ===============
 */
+//TODO: Partial move of canbuild to this function to allow quicker updates for the red shader.
 void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
-                                           void (*trace)( trace_t *, const vec3_t, const vec3_t,
-                                                          const vec3_t, const vec3_t, int, int ),
-                                           vec3_t outOrigin, vec3_t outAngles, trace_t *tr )
+                                           void (*trace)( trace_t *,
+                                                          const vec3_t,
+                                                          const vec3_t,
+                                                          const vec3_t,
+                                                          const vec3_t, int,
+                                                          int ),
+                                           vec3_t outOrigin, vec3_t outAngles,
+                                           trace_t *tr )
 {
   vec3_t  forward, targetOrigin;
   vec3_t  playerOrigin, playerNormal;
@@ -4558,52 +4597,56 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
     float heightOffset = 0.0f;
     qboolean preciseBuild = ps->stats[ STAT_STATE ] & SS_PRECISE_BUILD;
 
-    if( !preciseBuild ) {
+    if( !preciseBuild )
+    {
       buildDist *= 2.0f;
     }
 
-    //TODO: if building intersects player, place the building right next to the player.
-    //TODO: Partial move of canbuild to this function to allow quicker updates for the red shader.
- 
     BG_GetClientViewOrigin( ps, viewOrigin );
- 
+
     VectorMA( viewOrigin, buildDist, forward, targetOrigin );
 
-    //Determine and correct height for buildings that can't be built on walls or ceiling.
-    if( minNormal > 0.0f && invertNormal == qfalse )
     {
-      maxs[2] -= mins[2];
-      heightOffset = mins[2];
-      if( maxs[2] > 15.0f )
-      {
-        maxs[2] = 15.0f;
-      }
-      mins[2] = 0.0f;
-    } else {
-      float taller = fabs( mins[2] ) - (float)ps->viewheight;
-      if( taller >= 0.0f ) {//Some large wall/ceiling buildings require viewOrigin adjustment.
-        VectorMA( viewOrigin, taller + 1.0f, playerNormal, viewOrigin );
-      }
-    }
+      float smallestAxis;
+      vec3_t reverseOrigin;
 
-    {//Do a trace to find a better start origin.
-      vec3_t  targetOrigin2;
-      VectorMA( viewOrigin, 7.0, forward, targetOrigin2 );//Cannot be larger than player width + smallest building width.
-      (*trace)( tr, viewOrigin, NULL, NULL, targetOrigin2, ps->clientNum,
-                MASK_PLAYERSOLID );
-      if( tr->startsolid || tr->fraction < 1.0f ) {
-        VectorCopy( viewOrigin, outOrigin );
-        return;
+      {//Do a small bbox trace to find the true targetOrigin.
+        vec3_t mins2, maxs2;
+
+        maxs2[ 0 ] = maxs2[ 1 ] = maxs2[ 2 ] = 7;
+        mins2[ 0 ] = mins2[ 1 ] = mins2[ 2 ] = -maxs2[ 0 ];
+        (*trace)( tr, viewOrigin, mins2, maxs2, targetOrigin, ps->clientNum, MASK_PLAYERSOLID );
+        if( tr->startsolid || tr->allsolid )
+        {
+          VectorCopy( viewOrigin, outOrigin );
+          return;
+        }
+        VectorCopy( tr->endpos, targetOrigin );
       }
-      VectorCopy( tr->endpos, viewOrigin );
-    }
 
-    (*trace)( tr, viewOrigin, mins, maxs, targetOrigin, ps->clientNum,
-              MASK_PLAYERSOLID );
+      {//Center height and find the smallest axis.  This assumes that all x and y axis are the same magnitude.
+        heightOffset = -( maxs[ 2 ] + mins[ 2 ] ) / 2.0f;
 
-    if( tr->startsolid ) {
-      VectorCopy( viewOrigin, outOrigin );
-      return;
+        maxs[ 2 ] += heightOffset;
+        mins[ 2 ] += heightOffset;
+
+        smallestAxis = min( maxs[ 0 ], maxs[ 2 ] );
+        if( smallestAxis < 5.0f )
+        {
+          smallestAxis = 5.0f;
+        }
+      }
+
+      {//Do traces from behind the player to the target to find a valid spot.
+        VectorMA( viewOrigin, -(smallestAxis + 8.0f), forward, reverseOrigin );//8.0f is smallestAxis for human bbox.
+        if( !BG_FindValidSpot( trace, tr, reverseOrigin, mins, maxs,
+            targetOrigin, -1, MASK_PLAYERSOLID,
+            (int)Distance( targetOrigin, reverseOrigin ) / smallestAxis ) )
+        {
+          VectorCopy( reverseOrigin, outOrigin );
+          return;
+        }
+      }
     }
 
     validAngle = tr->plane.normal[ 2 ] >= minNormal ||
@@ -4613,17 +4656,11 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
     if( preciseBuild ||
         tr->fraction >= 1.0f || !validAngle ) //TODO: These should be utility functions like "if(traceHit(&tr))"
     {
-      vec3_t targetDir;
-
       if( tr->fraction < 1.0f )
       {
         //Bring endpos away from surface it has hit.
         VectorAdd( tr->endpos, tr->plane.normal, tr->endpos );
       }
-
-      VectorSubtract( targetOrigin, viewOrigin, targetDir );
-
-      VectorNormalize( targetDir );
 
       {
         vec3_t startOrigin;
@@ -4636,7 +4673,7 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
           MASK_PLAYERSOLID );
       }
     }
-    tr->endpos[2] -= heightOffset;
+    tr->endpos[2] += heightOffset;
   }
   VectorCopy( tr->endpos, outOrigin );
 }
