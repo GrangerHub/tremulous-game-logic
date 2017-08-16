@@ -4547,9 +4547,7 @@ qboolean BG_FindValidSpot( void (*trace)( trace_t *, const vec3_t, const vec3_t,
     (*trace)( tr, start2, mins, maxs, end, passEntityNum, contentmask );
     VectorAdd( start2, increment, start2 );
     if( !tr->allsolid )
-    {
       return qtrue;
-    }
     limit--;
   } while ( tr->fraction < 1.0f && limit >= 0 );
   return qfalse;
@@ -4598,9 +4596,7 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
     qboolean preciseBuild = ps->stats[ STAT_STATE ] & SS_PRECISE_BUILD;
 
     if( !preciseBuild )
-    {
       buildDist *= 2.0f;
-    }
 
     BG_GetClientViewOrigin( ps, viewOrigin );
 
@@ -4613,8 +4609,11 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
       {//Do a small bbox trace to find the true targetOrigin.
         vec3_t mins2, maxs2;
 
-        maxs2[ 0 ] = maxs2[ 1 ] = maxs2[ 2 ] = 7;
-        mins2[ 0 ] = mins2[ 1 ] = mins2[ 2 ] = -maxs2[ 0 ];
+        maxs2[ 0 ] = maxs2[ 1 ] = 14;
+        maxs2[ 2 ] = ps->stats[ STAT_TEAM ] == TEAM_HUMANS ? 7 :maxs2[ 0 ];
+        mins2[ 0 ] = mins2[ 1 ] = -maxs2[ 0 ];
+        mins2[ 2 ] = -maxs2[ 2 ];
+
         (*trace)( tr, viewOrigin, mins2, maxs2, targetOrigin, ps->clientNum, MASK_PLAYERSOLID );
         if( tr->startsolid || tr->allsolid )
         {
@@ -4632,18 +4631,19 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
 
         smallestAxis = min( maxs[ 0 ], maxs[ 2 ] );
         if( smallestAxis < 5.0f )
-        {
           smallestAxis = 5.0f;
-        }
+      }
+
+      if( ( minNormal > 0.0f && !invertNormal ) || preciseBuild ) {//Raise origins by 1+maxs[2].
+        VectorMA( viewOrigin, maxs[ 2 ] + 1.0f, playerNormal, viewOrigin );
+        VectorMA( targetOrigin, maxs[ 2 ] + 1.0f, playerNormal, targetOrigin );
       }
 
       {//Do traces from behind the player to the target to find a valid spot.
         VectorMA( viewOrigin, -(smallestAxis + 8.0f), forward, reverseOrigin );//8.0f is smallestAxis for human bbox.
-        if( !BG_FindValidSpot( trace, tr, reverseOrigin, mins, maxs,
-            targetOrigin, -1, MASK_PLAYERSOLID,
-            (int)Distance( targetOrigin, reverseOrigin ) / smallestAxis ) )
-        {
-          VectorCopy( reverseOrigin, outOrigin );
+        if( !BG_FindValidSpot( trace, tr, reverseOrigin, mins, maxs, targetOrigin, -1, MASK_PLAYERSOLID,
+                               (int)Distance( targetOrigin, reverseOrigin ) / smallestAxis ) ) {
+          VectorCopy( viewOrigin, outOrigin );
           return;
         }
       }
