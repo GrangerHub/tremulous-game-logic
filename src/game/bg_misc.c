@@ -4531,7 +4531,7 @@ qboolean BG_FindValidSpot( void (*trace)( trace_t *, const vec3_t, const vec3_t,
                                           const vec3_t, const vec3_t, int, int ),
                            trace_t *tr, vec3_t start, vec3_t mins, vec3_t maxs,
                            vec3_t end, int passEntityNum, int contentmask,
-                           int limit )
+                           float incDist, int limit )
 {
   vec3_t start2, increment;
   float range;
@@ -4540,12 +4540,12 @@ qboolean BG_FindValidSpot( void (*trace)( trace_t *, const vec3_t, const vec3_t,
 
   VectorSubtract( end, start2, increment );
   range = VectorNormalize( increment );
-  VectorScale( increment, range / limit, increment );
+  VectorScale( increment, incDist, increment );
 
   do
   {
     (*trace)( tr, start2, mins, maxs, end, passEntityNum, contentmask );
-    VectorAdd( start2, increment, start2 );
+    VectorAdd( tr->endpos, increment, start2 );
     if( !tr->allsolid )
       return qtrue;
     limit--;
@@ -4576,17 +4576,17 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
   vec3_t  mins, maxs;
   float   buildDist = BG_Class( ps->stats[ STAT_CLASS ] )->buildDist;
   const   buildable_t buildable = ps->stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT;
-
+ 
   BG_BuildableBoundingBox( buildable, mins, maxs );
-
+ 
   VectorCopy( ps->origin, playerOrigin );
-
+ 
   BG_GetClientNormal( ps, playerNormal );
-
+ 
   VectorCopy( ps->viewangles, outAngles );
-
+ 
   AngleVectors( outAngles, forward, NULL, NULL );
-
+ 
   {
     vec3_t viewOrigin;
     const float minNormal = BG_Buildable( buildable )->minNormal;
@@ -4595,17 +4595,15 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
     float heightOffset = 0.0f;
     qboolean preciseBuild = ps->stats[ STAT_STATE ] & SS_PRECISE_BUILD;
 
-    if( !preciseBuild )
+    if( !preciseBuild ) {
       buildDist *= 2.0f;
+    }
 
     BG_GetClientViewOrigin( ps, viewOrigin );
 
     VectorMA( viewOrigin, buildDist, forward, targetOrigin );
 
     {
-      float smallestAxis;
-      vec3_t reverseOrigin;
-
       {//Do a small bbox trace to find the true targetOrigin.
         vec3_t mins2, maxs2;
 
@@ -4613,11 +4611,12 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
         maxs2[ 2 ] = ps->stats[ STAT_TEAM ] == TEAM_HUMANS ? 7 :maxs2[ 0 ];
         mins2[ 0 ] = mins2[ 1 ] = -maxs2[ 0 ];
         mins2[ 2 ] = -maxs2[ 2 ];
-
+        
         (*trace)( tr, viewOrigin, mins2, maxs2, targetOrigin, ps->clientNum, MASK_PLAYERSOLID );
-        if( tr->startsolid || tr->allsolid )
-        {
+        if( tr->startsolid || tr->allsolid ) {
           VectorCopy( viewOrigin, outOrigin );
+          tr->plane.normal[ 2 ] = 0.0f;
+          tr->entityNum = ENTITYNUM_NONE;
           return;
         }
         VectorCopy( tr->endpos, targetOrigin );
@@ -4628,10 +4627,6 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
 
         maxs[ 2 ] += heightOffset;
         mins[ 2 ] += heightOffset;
-
-        smallestAxis = min( maxs[ 0 ], maxs[ 2 ] );
-        if( smallestAxis < 5.0f )
-          smallestAxis = 5.0f;
       }
 
       if( ( minNormal > 0.0f && !invertNormal ) || preciseBuild ) {//Raise origins by 1+maxs[2].
@@ -4640,10 +4635,11 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
       }
 
       {//Do traces from behind the player to the target to find a valid spot.
-        VectorMA( viewOrigin, -(smallestAxis + 8.0f), forward, reverseOrigin );//8.0f is smallestAxis for human bbox.
-        if( !BG_FindValidSpot( trace, tr, reverseOrigin, mins, maxs, targetOrigin, -1, MASK_PLAYERSOLID,
-                               (int)Distance( targetOrigin, reverseOrigin ) / smallestAxis ) ) {
+        if( !BG_FindValidSpot( trace, tr, viewOrigin, mins, maxs, targetOrigin, ps->clientNum, MASK_PLAYERSOLID,
+                               5.0f, 5 ) ) {
           VectorCopy( viewOrigin, outOrigin );
+          tr->plane.normal[ 2 ] = 0.0f;
+          tr->entityNum = ENTITYNUM_NONE;
           return;
         }
       }
