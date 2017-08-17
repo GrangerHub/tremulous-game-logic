@@ -688,10 +688,13 @@ void ClientTimerActions( gentity_t *ent, int msec )
     // Restore or subtract stamina
     if( BG_ClassHasAbility( client->ps.stats[STAT_CLASS], SCA_STAMINA ) )
     {
-      if( stopped || client->ps.pm_type == PM_JETPACK )
+      if( stopped || client->ps.pm_type == PM_JETPACK ||
+          ( client->ps.groundEntityNum == ENTITYNUM_NONE &&
+            client->ps.persistant[PERS_JUMPTIME] > STAMINA_JUMP_RESTORE_DELAY ) )
         client->ps.stats[ STAT_STAMINA ] += STAMINA_STOP_RESTORE;
       else if( ( client->ps.stats[ STAT_STATE ] & SS_SPEEDBOOST )  &&
                  g_humanStaminaMode.integer &&
+                 client->ps.groundEntityNum != ENTITYNUM_NONE &&
                !( client->buttons & BUTTON_WALKING ) ) // walk overrides sprint
         client->ps.stats[ STAT_STAMINA ] -= STAMINA_SPRINT_TAKE;
       else if( walking || crouched )

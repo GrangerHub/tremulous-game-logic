@@ -676,7 +676,7 @@ static void CG_HumanText( char *text, playerState_t *ps )
       if( ps->stats[ STAT_FUEL ] > JETPACK_ACT_BOOST_FUEL_USE )
         {
           Q_strcat( text, MAX_TUTORIAL_TEXT,
-                     va( "Press %s to perform a jetpack-aided jump. It uses fuel instead of stamina\n",
+                     va( "Press %s to perform a jetpack-aided jump.\n",
                          CG_KeyNameForCommand( "+moveup" ) ) );
         }
       if( ( ps->stats[ STAT_FUEL ] <= JETPACK_FUEL_LOW ) && ( ps->stats[ STAT_FUEL ] > 0 )  )

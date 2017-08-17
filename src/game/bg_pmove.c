@@ -4444,7 +4444,7 @@ void PmoveSingle( pmove_t *pmove )
       !BG_UpgradeIsActive( UP_JETPACK, pm->ps->stats ) &&
       pm->ps->groundEntityNum == ENTITYNUM_NONE &&
       !(pm->ps->pm_flags & PMF_JUMP_HELD) &&
-      pm->ps->stats[ STAT_FUEL ] > 0 &&
+      pm->ps->stats[ STAT_FUEL ] > JETPACK_FUEL_MIN_START &&
       pm->ps->pm_type == PM_NORMAL &&
       !pml.ladder )
   {
