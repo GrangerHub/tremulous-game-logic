@@ -2699,19 +2699,6 @@ void ClientThink( int clientNum )
   gentity_t *ent;
 
   ent = g_entities + clientNum;
-
-  {
-    struct fps_s *fps = &ent->client->pers.fps;
-    fps->accumulated++;
-    if( fps->time + 1000 < level.time )
-    {
-      fps->perSec = (float)fps->accumulated * 1000.0f / 
-                                              (float)( level.time - fps->time );
-      fps->accumulated = 0;
-      fps->time = level.time;
-    }
-  }
-
   trap_GetUsercmd( clientNum, &ent->client->pers.cmd );
 
   // mark the time we got info, so we can display the
@@ -2731,10 +2718,15 @@ void G_RunClient( gentity_t *ent )
     G_AddPredictableEvent( ent, EV_FIGHT, 0 );
   }
 
-  if( !g_synchronousClients.integer &&
-      level.time - ent->client->lastCmdTime <
-                                        ( level.time - level.previousTime ) * 2)
+  if( !g_synchronousClients.integer )
+  {
+    if( level.time - ent->client->lastCmdTime > 250 )
+    {
+      trap_GetUsercmd( ent->client->ps.clientNum, &ent->client->pers.cmd );
+      ClientThink_real( ent );
+    }
      return;
+  }
 
 
   ent->client->pers.cmd.serverTime = level.time;

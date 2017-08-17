@@ -485,14 +485,6 @@ typedef struct
 
   // level.time when teamoverlay info changed so we know to tell other players
   int                 infoChangeTime;
-
-  //Limited by cl_maxpackets(per second) and MAX_PACKET_USERCMDS.
-  struct fps_s
-  {
-    float             perSec;//Set after 1 second of usercmds accumulated.
-    int               accumulated;//Accumulates usercmds.
-    int               time;//Timestamp of last fps set.
-  } fps;
 } clientPersistant_t;
 
 #define MAX_UNLAGGED_MARKERS 256
