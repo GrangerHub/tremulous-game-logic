@@ -1569,6 +1569,7 @@ extern  vmCvar_t    cg_footsteps;
 extern  vmCvar_t    cg_addMarks;
 extern  vmCvar_t    cg_viewsize;
 extern  vmCvar_t    cg_drawGun;
+extern  vmCvar_t    cg_drawClaws;
 extern  vmCvar_t    cg_gun_frame;
 extern  vmCvar_t    cg_gun_x;
 extern  vmCvar_t    cg_gun_y;

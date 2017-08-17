@@ -140,6 +140,7 @@ vmCvar_t  cg_footsteps;
 vmCvar_t  cg_addMarks;
 vmCvar_t  cg_viewsize;
 vmCvar_t  cg_drawGun;
+vmCvar_t  cg_drawClaws;
 vmCvar_t  cg_fovOffset;
 vmCvar_t  cg_gun_frame;
 vmCvar_t  cg_gun_x;
@@ -262,6 +263,7 @@ typedef struct
 static cvarTable_t cvarTable[ ] =
 {
   { &cg_drawGun, "cg_drawGun", "1", CVAR_ARCHIVE },
+  { &cg_drawClaws, "cg_drawClaws", "1", CVAR_ARCHIVE },
   { &cg_viewsize, "cg_viewsize", "100", CVAR_ARCHIVE },
   { &cg_stereoSeparation, "cg_stereoSeparation", "0.4", CVAR_ARCHIVE  },
   { &cg_shadows, "cg_shadows", "1", CVAR_ARCHIVE  },
