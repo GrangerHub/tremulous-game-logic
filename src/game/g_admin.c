@@ -4421,7 +4421,7 @@ qboolean G_admin_flag( gentity_t *ent )
   trap_Argv( 0, cmd, sizeof(cmd) );
   if( trap_Argc() < 2 )
   {
-    ADMP(va("^7usage: %s [name|slot|*level] [flag]\n", cmd));
+    ADMP(va("^7usage: %s [name|slot|*level] [^3+^6|^3-^7][flag]\n", cmd));
     return qfalse;
   }
 
@@ -4580,6 +4580,11 @@ qboolean G_admin_flag( gentity_t *ent )
   {
     add = ( flag[ 0 ] == '+' );
     flagptr = flag+1;
+  } else
+  {
+    ADMP(va("^3%s:^7 use '+ to add a flag, or '-' to remove a flag\n", cmd));
+    ADMP(va("^7usage: %s [name|slot|*level] [^3+^6|^3-^7][flag]\n", cmd));
+    return qfalse;
   }
 
   if( ent && !Q_stricmp( ent->client->pers.guid, a->guid ) )
