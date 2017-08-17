@@ -1013,7 +1013,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   if( !targ->takedamage ||
       ( !G_TakesDamage( targ ) &&
         attacker && attacker->s.number != ENTITYNUM_WORLD &&
-        mod != MOD_FALLING && mod != MOD_TELEFRAG  ) ||
+        mod != MOD_TRIGGER_HURT && mod != MOD_FALLING &&
+        mod != MOD_TELEFRAG  ) ||
       level.intermissionQueued )
     return;
 
@@ -1399,7 +1400,8 @@ qboolean G_SelectiveRadiusDamage( vec3_t origin, gentity_t *attacker, float dama
     if( !ent->takedamage ||
         ( !G_TakesDamage( ent ) &&
           attacker && attacker->s.number != ENTITYNUM_WORLD &&
-          mod != MOD_FALLING && mod != MOD_TELEFRAG  ) )
+          mod != MOD_TRIGGER_HURT && mod != MOD_FALLING &&
+          mod != MOD_TELEFRAG  ) )
     continue;
 
     if( G_NoTarget( ent ) )
@@ -1521,7 +1523,8 @@ qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage,
       if( !ent->takedamage ||
           ( !G_TakesDamage( ent ) &&
             attacker && attacker->s.number != ENTITYNUM_WORLD &&
-            mod != MOD_FALLING && mod != MOD_TELEFRAG  ) )
+            mod != MOD_TRIGGER_HURT && mod != MOD_FALLING &&
+            mod != MOD_TELEFRAG  ) )
       continue;
 
     if( ent->client && ( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING ) )
@@ -1574,9 +1577,7 @@ qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage,
     if( !ent->client )
       continue;
 
-      if( !ent->takedamage ||
-          ( !G_TakesDamage( ent ) && mod != MOD_FALLING &&
-            attacker && attacker->s.number != ENTITYNUM_WORLD ) )
+      if( !ent->takedamage )
       continue;
 
     shake = damage * 10 / Distance( origin, ent->r.currentOrigin );
