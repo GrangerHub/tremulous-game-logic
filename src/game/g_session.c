@@ -57,7 +57,7 @@ void G_WriteClientSessionData( gclient_t *client )
 
   var = va( "session%i", (int)( client - level.clients ) );
 
-  trap_Cvar_Set( var, s );
+  Cvar_SetSafe( var, s );
 }
 
 /*
@@ -77,7 +77,7 @@ void G_ReadSessionData( gclient_t *client )
   int         readyToPlay;
 
   var = va( "session%i", (int)( client - level.clients ) );
-  trap_Cvar_VariableStringBuffer( var, s, sizeof(s) );
+  Cvar_VariableStringBuffer( var, s, sizeof(s) );
 
   sscanf( s, "%i %i %i %i %i %16s",
     &client->sess.spectatorTime,
@@ -150,7 +150,7 @@ void G_WriteSessionData( void )
   int    i;
 
   //FIXME: What's this for?
-  trap_Cvar_Set( "session", va( "%i", 0 ) );
+  Cvar_SetSafe( "session", va( "%i", 0 ) );
 
   for( i = 0 ; i < level.maxclients ; i++ )
   {

@@ -103,7 +103,7 @@ int G_FindConfigstringIndex( const char *name, int start, int max, qboolean crea
 
   for( i = 1; i < max; i++ )
   {
-    trap_GetConfigstring( start + i, s, sizeof( s ) );
+    SV_GetConfigstring( start + i, s, sizeof( s ) );
     if( !s[ 0 ] )
       break;
 
@@ -115,9 +115,9 @@ int G_FindConfigstringIndex( const char *name, int start, int max, qboolean crea
     return 0;
 
   if( i == max )
-    G_Error( "G_FindConfigstringIndex: overflow" );
+    Com_Error( ERR_DROP, "G_FindConfigstringIndex: overflow" );
 
-  trap_SetConfigstring( start + i, name );
+  SV_SetConfigstring( start + i, name );
 
   return i;
 }
@@ -199,7 +199,7 @@ gentity_t *G_PickTarget( char *targetname )
 
   if( !targetname )
   {
-    G_Printf("G_PickTarget called with NULL targetname\n");
+    Com_Printf("G_PickTarget called with NULL targetname\n");
     return NULL;
   }
 
@@ -218,7 +218,7 @@ gentity_t *G_PickTarget( char *targetname )
 
   if( !num_choices )
   {
-    G_Printf( "G_PickTarget: target %s not found\n", targetname );
+    Com_Printf( "G_PickTarget: target %s not found\n", targetname );
     return NULL;
   }
 
@@ -245,7 +245,7 @@ void G_UseTargets( gentity_t *ent, gentity_t *activator )
   {
     float f = level.time * 0.001;
     AddRemap( ent->targetShaderName, ent->targetShaderNewName, f );
-    trap_SetConfigstring( CS_SHADERSTATE, BuildShaderStateConfig( ) );
+    SV_SetConfigstring( CS_SHADERSTATE, BuildShaderStateConfig( ) );
   }
 
   if( !ent->target )
@@ -255,7 +255,7 @@ void G_UseTargets( gentity_t *ent, gentity_t *activator )
   while( ( t = G_Find( t, FOFS( targetname ), ent->target ) ) != NULL )
   {
     if( t == ent )
-      G_Printf( "WARNING: Entity used itself.\n" );
+      Com_Printf( "WARNING: Entity used itself.\n" );
     else
     {
       if( t->use )
@@ -264,7 +264,7 @@ void G_UseTargets( gentity_t *ent, gentity_t *activator )
 
     if( !ent->inuse )
     {
-      G_Printf( "entity was removed while using targets\n" );
+      Com_Printf( "entity was removed while using targets\n" );
       return;
     }
   }
@@ -435,16 +435,16 @@ gentity_t *G_Spawn( void )
   if( i == ENTITYNUM_MAX_NORMAL )
   {
     for( i = 0; i < MAX_GENTITIES; i++ )
-      G_Printf( "%4i: %s\n", i, g_entities[ i ].classname );
+      Com_Printf( "%4i: %s\n", i, g_entities[ i ].classname );
 
-    G_Error( "G_Spawn: no free entities" );
+    Com_Error( ERR_DROP, "G_Spawn: no free entities" );
   }
 
   // open up a new slot
   level.num_entities++;
 
   // let the server system know that there are more entities
-  trap_LocateGameData( level.gentities, level.num_entities, sizeof( gentity_t ),
+  SV_LocateGameData( level.gentities, level.num_entities, sizeof( gentity_t ),
     &level.clients[ 0 ].ps, sizeof( level.clients[ 0 ] ) );
 
   G_InitGentity( e );
@@ -496,7 +496,7 @@ Marks the entity as free
 */
 void G_FreeEntity( gentity_t *ent )
 {
-  trap_UnlinkEntity( ent );   // unlink from world
+  SV_UnlinkEntity( ent );   // unlink from world
 
   if( ent->neverFree )
     return;
@@ -561,7 +561,7 @@ void G_RemoveEntity( gentity_t *ent )
     if( ent->zapLink &&
         ((zap_t *)(ent->zapLink->data))->effectChannel == ent )
     {
-      G_DeleteZapData( ent->zapLink->data );                                    
+      G_DeleteZapData( ent->zapLink->data );
       lev2ZapList = BG_List_Delete_Link( lev2ZapList, ent->zapLink );
     }
   }
@@ -593,7 +593,7 @@ void G_RemoveEntity( gentity_t *ent )
       }
     }
     // removing a mover opens the relevant portal
-    trap_AdjustAreaPortalState( ent, qtrue );
+    SV_AdjustAreaPortalState( ent, qtrue );
   }
   else if( !strcmp( ent->classname, "path_corner" ) )
   {
@@ -712,7 +712,7 @@ gentity_t *G_TempEntity( const vec3_t origin, int event )
   G_SetOrigin( e, snapped );
 
   // find cluster for PVS
-  trap_LinkEntity( e );
+  SV_LinkEntity( e );
 
   return e;
 }
@@ -744,7 +744,7 @@ void G_KillBox( gentity_t *ent )
 
   VectorAdd( ent->r.currentOrigin, ent->r.mins, mins );
   VectorAdd( ent->r.currentOrigin, ent->r.maxs, maxs );
-  num = trap_EntitiesInBox( mins, maxs, touch, MAX_GENTITIES );
+  num = SV_AreaEntities( mins, maxs, touch, MAX_GENTITIES );
 
   for( i = 0; i < num; i++ )
   {
@@ -806,14 +806,14 @@ void G_AddEvent( gentity_t *ent, int event, int eventParm )
 
   if( !event )
   {
-    G_Printf( "G_AddEvent: zero event added for entity %i\n", ent->s.number );
+    Com_Printf( "G_AddEvent: zero event added for entity %i\n", ent->s.number );
     return;
   }
 
-  // eventParm is converted to uint8_t (0 - 255) in msg.c 
+  // eventParm is converted to uint8_t (0 - 255) in msg.c
   if( eventParm & ~0xFF )
   {
-    G_Printf( S_COLOR_YELLOW "WARNING: G_AddEvent( %s ) has eventParm %d, "
+    Com_Printf( S_COLOR_YELLOW "WARNING: G_AddEvent( %s ) has eventParm %d, "
               "which will overflow\n", BG_EventName( event ), eventParm );
   }
 
@@ -949,8 +949,8 @@ qboolean G_Visible( gentity_t *ent1, gentity_t *ent2, int contents )
 {
   trace_t trace;
 
-  trap_Trace( &trace, ent1->s.pos.trBase, NULL, NULL, ent2->s.pos.trBase,
-              ent1->s.number, contents );
+  SV_Trace( &trace, ent1->s.pos.trBase, NULL, NULL, ent2->s.pos.trBase,
+              ent1->s.number, contents, TT_AABB );
 
   return trace.fraction >= 1.0f || trace.entityNum == ent2 - g_entities;
 }
@@ -1001,7 +1001,7 @@ void G_TriggerMenu( int clientNum, dynMenu_t menu )
   char buffer[ 32 ];
 
   Com_sprintf( buffer, sizeof( buffer ), "servermenu %d", menu );
-  trap_SendServerCommand( clientNum, buffer );
+  SV_GameSendServerCommand( clientNum, buffer );
 }
 
 /*
@@ -1016,7 +1016,7 @@ void G_TriggerMenuArgs( int clientNum, dynMenu_t menu, int arg )
   char buffer[ 64 ];
 
   Com_sprintf( buffer, sizeof( buffer ), "servermenu %d %d", menu, arg );
-  trap_SendServerCommand( clientNum, buffer );
+  SV_GameSendServerCommand( clientNum, buffer );
 }
 
 /*
@@ -1031,7 +1031,7 @@ void G_CloseMenus( int clientNum )
   char buffer[ 32 ];
 
   Com_sprintf( buffer, 32, "serverclosemenus" );
-  trap_SendServerCommand( clientNum, buffer );
+  SV_GameSendServerCommand( clientNum, buffer );
 }
 
 
@@ -1094,7 +1094,7 @@ static const char *addr6parse( const char *str, addr_t *addr )
         return NULL;
       if( i == 0 )
       {
-        // 
+        //
       }
       else if( seen ) // :: has been seen already
       {
@@ -1232,4 +1232,19 @@ gentity_t *G_Entity_id_get(gentity_id *id){
     id->ptr = NULL;
   }
   return id->ptr;
+}
+
+/*
+===============
+G_TraceWrapper
+
+Wraps trace for QVM shared code
+===============
+*/
+void G_TraceWrapper( trace_t *results, const vec3_t start,
+                            const vec3_t mins, const vec3_t maxs,
+                            const vec3_t end, int passEntityNum,
+                            int contentMask )
+{
+  SV_Trace( results, start, mins, maxs, end, passEntityNum, contentMask, TT_AABB );
 }

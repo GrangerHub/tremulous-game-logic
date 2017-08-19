@@ -59,7 +59,7 @@ void G_TeamCommand( team_t team, char *cmd )
       if( level.clients[ i ].pers.teamSelection == team ||
         ( level.clients[ i ].pers.teamSelection == TEAM_NONE &&
           G_admin_permission( &g_entities[ i ], ADMF_SPEC_ALLCHAT ) ) )
-        trap_SendServerCommand( i, cmd );
+        SV_GameSendServerCommand( i, cmd );
     }
   }
 }
@@ -122,18 +122,18 @@ void G_UpdateTeamConfigStrings( void )
     Com_Memset( &humanTeam, 0, sizeof( clientList_t ) );
   }
 
-  trap_SetConfigstringRestrictions( CS_VOTE_TIME + TEAM_ALIENS,   &humanTeam );
-  trap_SetConfigstringRestrictions( CS_VOTE_STRING + TEAM_ALIENS, &humanTeam );
-  trap_SetConfigstringRestrictions( CS_VOTE_CAST + TEAM_ALIENS,    &humanTeam );
-  trap_SetConfigstringRestrictions( CS_VOTE_ACTIVE + TEAM_ALIENS,     &humanTeam );
+  SV_SetConfigstringRestrictions( CS_VOTE_TIME + TEAM_ALIENS,   &humanTeam );
+  SV_SetConfigstringRestrictions( CS_VOTE_STRING + TEAM_ALIENS, &humanTeam );
+  SV_SetConfigstringRestrictions( CS_VOTE_CAST + TEAM_ALIENS,    &humanTeam );
+  SV_SetConfigstringRestrictions( CS_VOTE_ACTIVE + TEAM_ALIENS,     &humanTeam );
 
-  trap_SetConfigstringRestrictions( CS_VOTE_TIME + TEAM_HUMANS,   &alienTeam );
-  trap_SetConfigstringRestrictions( CS_VOTE_STRING + TEAM_HUMANS, &alienTeam );
-  trap_SetConfigstringRestrictions( CS_VOTE_CAST + TEAM_HUMANS,    &alienTeam );
-  trap_SetConfigstringRestrictions( CS_VOTE_ACTIVE + TEAM_HUMANS,     &alienTeam );
+  SV_SetConfigstringRestrictions( CS_VOTE_TIME + TEAM_HUMANS,   &alienTeam );
+  SV_SetConfigstringRestrictions( CS_VOTE_STRING + TEAM_HUMANS, &alienTeam );
+  SV_SetConfigstringRestrictions( CS_VOTE_CAST + TEAM_HUMANS,    &alienTeam );
+  SV_SetConfigstringRestrictions( CS_VOTE_ACTIVE + TEAM_HUMANS,     &alienTeam );
 
-  trap_SetConfigstringRestrictions( CS_ALIEN_STAGES, &humanTeam );
-  trap_SetConfigstringRestrictions( CS_HUMAN_STAGES, &alienTeam );
+  SV_SetConfigstringRestrictions( CS_ALIEN_STAGES, &humanTeam );
+  SV_SetConfigstringRestrictions( CS_HUMAN_STAGES, &alienTeam );
 }
 
 /*
@@ -275,7 +275,7 @@ gentity_t *Team_GetLocation( gentity_t *ent )
     if( len > bestlen )
       continue;
 
-    if( !trap_InPVS( ent->r.currentOrigin, eloc->r.currentOrigin ) )
+    if( !SV_inPVS( ent->r.currentOrigin, eloc->r.currentOrigin ) )
       continue;
 
     bestlen = len;
@@ -393,7 +393,7 @@ void TeamplayInfoMessage( gentity_t *ent )
 
   if( string[ 0 ] )
   {
-    trap_SendServerCommand( ent - g_entities, va( "tinfo%s", string ) );
+    SV_GameSendServerCommand( ent - g_entities, va( "tinfo%s", string ) );
     ent->client->pers.teamInfo = level.time;
   }
 }
@@ -456,14 +456,14 @@ void CheckTeamStatus( void )
     if( level.numAlienSpawns > 0 && 
         level.numHumanClients - level.numAlienClients > 2 )
     {
-      trap_SendServerCommand( -1, "print \"Teams are imbalanced. "
+      SV_GameSendServerCommand( -1, "print \"Teams are imbalanced. "
                                   "Humans have more players.\n\"");
       level.numTeamImbalanceWarnings++;
     }
     else if( level.numHumanSpawns > 0 && 
              level.numAlienClients - level.numHumanClients > 2 )
     {
-      trap_SendServerCommand ( -1, "print \"Teams are imbalanced. "
+      SV_GameSendServerCommand ( -1, "print \"Teams are imbalanced. "
                                    "Aliens have more players.\n\"");
       level.numTeamImbalanceWarnings++;
     }

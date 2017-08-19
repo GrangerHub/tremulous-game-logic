@@ -87,7 +87,7 @@ TELEPORTERS
 void TeleportPlayer( gentity_t *player, vec3_t origin, vec3_t angles, float speed )
 {
   // unlink to make sure it can't possibly interfere with G_KillBox
-  trap_UnlinkEntity( player );
+  SV_UnlinkEntity( player );
 
   VectorCopy( origin, player->client->ps.origin );
   player->client->ps.groundEntityNum = ENTITYNUM_NONE;
@@ -126,7 +126,7 @@ void TeleportPlayer( gentity_t *player, vec3_t origin, vec3_t angles, float spee
     // kill anything at the destination
     G_KillBox( player );
 
-    trap_LinkEntity (player);
+    SV_LinkEntity (player);
   }
 }
 
@@ -152,7 +152,7 @@ void SP_misc_model( gentity_t *ent )
   ent->s.modelindex = G_ModelIndex( ent->model );
   VectorSet (ent->mins, -16, -16, -16);
   VectorSet (ent->maxs, 16, 16, 16);
-  trap_LinkEntity (ent);
+  SV_LinkEntity (ent);
 
   G_SetOrigin( ent, ent->r.currentOrigin );
 #else
@@ -171,7 +171,7 @@ void locateCamera( gentity_t *ent )
   owner = G_PickTarget( ent->target );
   if( !owner )
   {
-    G_Printf( "Couldn't find target for misc_portal_surface\n" );
+    Com_Printf( "Couldn't find target for misc_portal_surface\n" );
     G_FreeEntity( ent );
     return;
   }
@@ -222,7 +222,7 @@ void SP_misc_portal_surface( gentity_t *ent )
 {
   VectorClear( ent->r.mins );
   VectorClear( ent->r.maxs );
-  trap_LinkEntity( ent );
+  SV_LinkEntity( ent );
 
   ent->r.svFlags = SVF_PORTAL;
   ent->s.eType = ET_PORTAL;
@@ -249,7 +249,7 @@ void SP_misc_portal_camera( gentity_t *ent )
 
   VectorClear( ent->r.mins );
   VectorClear( ent->r.maxs );
-  trap_LinkEntity( ent );
+  SV_LinkEntity( ent );
 
   G_SpawnFloat( "roll", "0", &roll );
 
@@ -314,7 +314,7 @@ void SP_misc_particle_system( gentity_t *self )
 
   self->use = SP_use_particle_system;
   self->s.eType = ET_PARTICLE_SYSTEM;
-  trap_LinkEntity( self );
+  SV_LinkEntity( self );
 }
 
 /*
@@ -373,7 +373,7 @@ void SP_misc_anim_model( gentity_t *self )
   if( self->spawnflags & 2 )
     self->s.eFlags |= EF_MOVER_STOP;
 
-  trap_LinkEntity( self );
+  SV_LinkEntity( self );
 }
 
 /*
@@ -416,11 +416,11 @@ static void findEmptySpot( vec3_t origin, float radius, vec3_t spot )
 
         VectorAdd( origin, delta, test );
 
-        trap_Trace( &tr, test, NULL, NULL, test, -1, MASK_SOLID );
+        SV_Trace( &tr, test, NULL, NULL, test, -1, MASK_SOLID, TT_AABB );
 
         if( !tr.allsolid )
         {
-          trap_Trace( &tr, test, NULL, NULL, origin, -1, MASK_SOLID );
+          SV_Trace( &tr, test, NULL, NULL, origin, -1, MASK_SOLID, TT_AABB );
           VectorScale( delta, tr.fraction, delta );
           VectorAdd( total, delta, total );
         }
@@ -460,7 +460,7 @@ void SP_misc_light_flare( gentity_t *self )
   if( self->spawnflags & 1 )
     self->s.eFlags |= EF_NODRAW;
 
-  trap_LinkEntity( self );
+  SV_LinkEntity( self );
 }
 
 /*

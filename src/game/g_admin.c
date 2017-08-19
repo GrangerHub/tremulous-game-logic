@@ -266,7 +266,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "display a (partial) list of active bans",
       "(^5name^6|^5IP(/mask)^7) (^5start at ban#^7)"
     },
-	
+
     {"slap", G_admin_slap, qtrue, "slap",
       "Do damage to a player, and send them flying",
       "[^3name^6|^3slot^7]"
@@ -299,7 +299,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "unmute a muted player",
       "[^3name^6|^3slot#^7]"
     },
-	
+
     {
      "warn", G_admin_warn, qfalse, "warn",
       "warn a player to correct their current activity",
@@ -320,7 +320,7 @@ void G_admin_register_cmds( void )
   int i;
 
   for( i = 0; i < adminNumCmds; i++ )
-    trap_AddCommand( g_admin_cmds[ i ].keyword );
+    Cmd_AddCommand( g_admin_cmds[ i ].keyword, NULL );
 }
 
 void G_admin_unregister_cmds( void )
@@ -328,7 +328,7 @@ void G_admin_unregister_cmds( void )
   int i;
 
   for( i = 0; i < adminNumCmds; i++ )
-    trap_RemoveCommand( g_admin_cmds[ i ].keyword );
+    Cmd_RemoveCommand( g_admin_cmds[ i ].keyword );
 }
 
 void G_admin_cmdlist( gentity_t *ent )
@@ -347,7 +347,7 @@ void G_admin_cmdlist( gentity_t *ent )
     len = strlen( g_admin_cmds[ i ].keyword ) + 1;
     if( len + outlen >= sizeof( out ) - 1 )
     {
-      trap_SendServerCommand( ent - g_entities, va( "cmds%s\n", out ) );
+      SV_GameSendServerCommand( ent - g_entities, va( "cmds%s\n", out ) );
       outlen = 0;
     }
 
@@ -355,7 +355,7 @@ void G_admin_cmdlist( gentity_t *ent )
     outlen += len;
   }
 
-  trap_SendServerCommand( ent - g_entities, va( "cmds%s\n", out ) );
+  SV_GameSendServerCommand( ent - g_entities, va( "cmds%s\n", out ) );
 }
 
 // match a certain flag within these flags
@@ -564,8 +564,8 @@ static qboolean admin_higher( gentity_t *admin, gentity_t *victim )
 static void admin_writeconfig_string( char *s, fileHandle_t f )
 {
   if( s[ 0 ] )
-    trap_FS_Write( s, strlen( s ), f );
-  trap_FS_Write( "\n", 1, f );
+    FS_Write( s, strlen( s ), f );
+  FS_Write( "\n", 1, f );
 }
 
 static void admin_writeconfig_int( int v, fileHandle_t f )
@@ -573,7 +573,7 @@ static void admin_writeconfig_int( int v, fileHandle_t f )
   char buf[ 32 ];
 
   Com_sprintf( buf, sizeof( buf ), "%d\n", v );
-  trap_FS_Write( buf, strlen( buf ), f );
+  FS_Write( buf, strlen( buf ), f );
 }
 
 static void admin_writeconfig( void )
@@ -587,27 +587,27 @@ static void admin_writeconfig( void )
 
   if( !g_admin.string[ 0 ] )
   {
-    G_Printf( S_COLOR_YELLOW "WARNING: g_admin is not set. "
+    Com_Printf( S_COLOR_YELLOW "WARNING: g_admin is not set. "
       " configuration will not be saved to a file.\n" );
     return;
   }
-  t = trap_RealTime( NULL );
-  if( trap_FS_FOpenFile( g_admin.string, &f, FS_WRITE ) < 0 )
+  t = Com_RealTime( NULL );
+  if( FS_FOpenFileByMode( g_admin.string, &f, FS_WRITE ) < 0 )
   {
-    G_Printf( "admin_writeconfig: could not open g_admin file \"%s\"\n",
+    Com_Printf( "admin_writeconfig: could not open g_admin file \"%s\"\n",
               g_admin.string );
     return;
   }
   for( l = g_admin_levels; l; l = l->next )
   {
-    trap_FS_Write( "[level]\n", 8, f );
-    trap_FS_Write( "level   = ", 10, f );
+    FS_Write( "[level]\n", 8, f );
+    FS_Write( "level   = ", 10, f );
     admin_writeconfig_int( l->level, f );
-    trap_FS_Write( "name    = ", 10, f );
+    FS_Write( "name    = ", 10, f );
     admin_writeconfig_string( l->name, f );
-    trap_FS_Write( "flags   = ", 10, f );
+    FS_Write( "flags   = ", 10, f );
     admin_writeconfig_string( l->flags, f );
-    trap_FS_Write( "\n", 1, f );
+    FS_Write( "\n", 1, f );
   }
   for( a = g_admin_admins; a; a = a->next )
   {
@@ -615,16 +615,16 @@ static void admin_writeconfig( void )
     if( a->level == 0 )
       continue;
 
-    trap_FS_Write( "[admin]\n", 8, f );
-    trap_FS_Write( "name    = ", 10, f );
+    FS_Write( "[admin]\n", 8, f );
+    FS_Write( "name    = ", 10, f );
     admin_writeconfig_string( a->name, f );
-    trap_FS_Write( "guid    = ", 10, f );
+    FS_Write( "guid    = ", 10, f );
     admin_writeconfig_string( a->guid, f );
-    trap_FS_Write( "level   = ", 10, f );
+    FS_Write( "level   = ", 10, f );
     admin_writeconfig_int( a->level, f );
-    trap_FS_Write( "flags   = ", 10, f );
+    FS_Write( "flags   = ", 10, f );
     admin_writeconfig_string( a->flags, f );
-    trap_FS_Write( "\n", 1, f );
+    FS_Write( "\n", 1, f );
   }
   for( b = g_admin_bans; b; b = b->next )
   {
@@ -633,37 +633,37 @@ static void admin_writeconfig( void )
     if( b->expires != 0 && b->expires <= t )
       continue;
 
-    trap_FS_Write( "[ban]\n", 6, f );
-    trap_FS_Write( "name    = ", 10, f );
+    FS_Write( "[ban]\n", 6, f );
+    FS_Write( "name    = ", 10, f );
     admin_writeconfig_string( b->name, f );
-    trap_FS_Write( "guid    = ", 10, f );
+    FS_Write( "guid    = ", 10, f );
     admin_writeconfig_string( b->guid, f );
-    trap_FS_Write( "ip      = ", 10, f );
+    FS_Write( "ip      = ", 10, f );
     admin_writeconfig_string( b->ip.str, f );
-    trap_FS_Write( "reason  = ", 10, f );
+    FS_Write( "reason  = ", 10, f );
     admin_writeconfig_string( b->reason, f );
-    trap_FS_Write( "made    = ", 10, f );
+    FS_Write( "made    = ", 10, f );
     admin_writeconfig_string( b->made, f );
-    trap_FS_Write( "expires = ", 10, f );
+    FS_Write( "expires = ", 10, f );
     admin_writeconfig_int( b->expires, f );
-    trap_FS_Write( "banner  = ", 10, f );
+    FS_Write( "banner  = ", 10, f );
     admin_writeconfig_string( b->banner, f );
-    trap_FS_Write( "\n", 1, f );
+    FS_Write( "\n", 1, f );
   }
   for( c = g_admin_commands; c; c = c->next )
   {
-    trap_FS_Write( "[command]\n", 10, f );
-    trap_FS_Write( "command = ", 10, f );
+    FS_Write( "[command]\n", 10, f );
+    FS_Write( "command = ", 10, f );
     admin_writeconfig_string( c->command, f );
-    trap_FS_Write( "exec    = ", 10, f );
+    FS_Write( "exec    = ", 10, f );
     admin_writeconfig_string( c->exec, f );
-    trap_FS_Write( "desc    = ", 10, f );
+    FS_Write( "desc    = ", 10, f );
     admin_writeconfig_string( c->desc, f );
-    trap_FS_Write( "flag    = ", 10, f );
+    FS_Write( "flag    = ", 10, f );
     admin_writeconfig_string( c->flag, f );
-    trap_FS_Write( "\n", 1, f );
+    FS_Write( "\n", 1, f );
   }
-  trap_FS_FCloseFile( f );
+  FS_FCloseFile( f );
 }
 
 static void admin_readconfig_string( char **cnf, char *s, int size )
@@ -955,7 +955,7 @@ static void G_admin_ban_message(
   if( creason )
   {
     char duration[ MAX_DURATION_LENGTH ];
-    G_admin_duration( ban->expires - trap_RealTime( NULL ), duration,
+    G_admin_duration( ban->expires - Com_RealTime( NULL ), duration,
       sizeof( duration ) );
     // part of this might get cut off on the connect screen
     Com_sprintf( creason, clen,
@@ -994,7 +994,7 @@ static g_admin_ban_t *G_admin_match_ban( gentity_t *ent )
   int t;
   g_admin_ban_t *ban;
 
-  t = trap_RealTime( NULL );
+  t = Com_RealTime( NULL );
   if( ent->client->pers.localClient )
     return NULL;
 
@@ -1029,10 +1029,10 @@ qboolean G_admin_ban_check( gentity_t *ent, char *reason, int rlen )
       G_AdminMessage( NULL, warningMessage );
     // and don't fill the console
     else if( ban->warnCount < 10 )
-      trap_Print( va( "%s%s\n", warningMessage,
+      Com_Printf( "%s%s\n", warningMessage,
         ban->warnCount + 1 == 10 ?
           S_COLOR_WHITE " - future messages for this ban will be suppressed" :
-          "" ) );
+          "" );
     return qtrue;
   }
 
@@ -1047,7 +1047,7 @@ qboolean G_admin_cmd_check( gentity_t *ent )
   qboolean success;
 
   command[ 0 ] = '\0';
-  trap_Argv( 0, command, sizeof( command ) );
+  Cmd_ArgvBuffer( 0, command, sizeof( command ) );
   if( !command[ 0 ] )
     return qfalse;
 
@@ -1061,7 +1061,7 @@ qboolean G_admin_cmd_check( gentity_t *ent )
     {
       if( G_FloodLimited( ent ) )
         return qtrue;
-      trap_SendConsoleCommand( EXEC_APPEND, c->exec );
+      Cbuf_ExecuteText( EXEC_APPEND, c->exec );
     }
     else
     {
@@ -1159,19 +1159,19 @@ qboolean G_admin_readconfig( gentity_t *ent )
     return qfalse;
   }
 
-  len = trap_FS_FOpenFile( g_admin.string, &f, FS_READ );
+  len = FS_FOpenFileByMode( g_admin.string, &f, FS_READ );
   if( len < 0 )
   {
-    G_Printf( "^3readconfig: ^7could not open admin config file %s\n",
+    Com_Printf( "^3readconfig: ^7could not open admin config file %s\n",
             g_admin.string );
     admin_default_levels();
     return qfalse;
   }
   cnf = BG_StackPoolAlloc( len + 1 );
   cnf2 = cnf;
-  trap_FS_Read( cnf, len, f );
+  FS_Read2( cnf, len, f );
   cnf[ len ] = '\0';
-  trap_FS_FCloseFile( f );
+  FS_FCloseFile( f );
 
   admin_level_maxname = 0;
 
@@ -1365,7 +1365,7 @@ qboolean G_admin_time( gentity_t *ent )
 {
   qtime_t qt;
 
-  trap_RealTime( &qt );
+  Com_RealTime( &qt );
   ADMP( va( "^3time: ^7local time is %02i:%02i:%02i\n",
     qt.tm_hour, qt.tm_min, qt.tm_sec ) );
   return qtrue;
@@ -1391,14 +1391,14 @@ qboolean G_admin_setlevel( gentity_t *ent )
   g_admin_level_t *l = NULL;
   int na;
 
-  if( trap_Argc() < 3 )
+  if( Cmd_Argc() < 3 )
   {
     ADMP( "^3setlevel: ^7usage: setlevel [name|slot#] [level]\n" );
     return qfalse;
   }
 
-  trap_Argv( 1, testname, sizeof( testname ) );
-  trap_Argv( 2, lstr, sizeof( lstr ) );
+  Cmd_ArgvBuffer( 1, testname, sizeof( testname ) );
+  Cmd_ArgvBuffer( 2, lstr, sizeof( lstr ) );
 
   if( !( l = G_admin_level( atoi( lstr ) ) ) )
   {
@@ -1559,15 +1559,15 @@ qboolean G_admin_register( gentity_t *ent )
   }
 
   G_DecolorString( (char *)ent->client->pers.netname, playerName, sizeof( playerName ) );
-  
+
   if( ent->client->pers.admin )
     oldLevel = ent->client->pers.admin->level;
   else
     oldLevel = 0;
 
-  if( trap_Argc( ) > 1 )
+  if( Cmd_Argc( ) > 1 )
   {
-    trap_Argv( 1, arg, sizeof( arg ) );
+    Cmd_ArgvBuffer( 1, arg, sizeof( arg ) );
     newLevel = atoi( arg );
 
     if( newLevel < 0 || newLevel > 1 )
@@ -1594,7 +1594,7 @@ qboolean G_admin_register( gentity_t *ent )
   if( oldLevel < 0 || oldLevel > 1 )
     newLevel = oldLevel;
 
-  trap_SendConsoleCommand( EXEC_APPEND,
+  Cbuf_ExecuteText( EXEC_APPEND,
                            va( "setlevel %d %d;", (int)(ent - g_entities), newLevel ) );
 
   AP( va( "print \"^3register: ^7%s^3 is now a %s nickname. Commands unlocked. ^2Congratulations!\n\"",
@@ -1619,7 +1619,7 @@ static void admin_create_ban( gentity_t *ent,
   char          *name;
   char          disconnect[ MAX_STRING_CHARS ];
 
-  t = trap_RealTime( &qt );
+  t = Com_RealTime( &qt );
 
   for( b = g_admin_bans; b; b = b->next )
   {
@@ -1668,9 +1668,9 @@ static void admin_create_ban( gentity_t *ent,
       continue;
     if( G_admin_ban_matches( b, &g_entities[ i ] ) )
     {
-      trap_SendServerCommand( i, va( "disconnect \"%s\"", disconnect ) );
+      SV_GameSendServerCommand( i, va( "disconnect \"%s\"", disconnect ) );
 
-      trap_DropClient( i, va( "has been kicked by %s^7. reason: %s",
+      SV_GameDropClient( i, va( "has been kicked by %s^7. reason: %s",
         b->banner, b->reason ) );
     }
   }
@@ -1711,12 +1711,12 @@ qboolean G_admin_setdevmode( gentity_t *ent )
 {
   char str[ 5 ];
 
-  if( trap_Argc() != 2 )
+  if( Cmd_Argc() != 2 )
   {
     ADMP( "^3setdevmode: ^7usage: setdevmode [on|off]\n" );
     return qfalse;
   }
-  trap_Argv( 1, str, sizeof( str ) );
+  Cmd_ArgvBuffer( 1, str, sizeof( str ) );
   if( !Q_stricmp( str, "on" ) )
   {
     if( g_cheats.integer )
@@ -1724,8 +1724,8 @@ qboolean G_admin_setdevmode( gentity_t *ent )
       ADMP( "^3setdevmode: ^7developer mode is already on\n" );
       return qfalse;
     }
-    trap_Cvar_Set( "sv_cheats", "1" );
-    trap_Cvar_Update( &g_cheats );
+    Cvar_SetSafe( "sv_cheats", "1" );
+    Cvar_Update( &g_cheats );
     AP( va( "print \"^3setdevmode: ^7%s ^7has switched developer mode on\n\"",
             ent ? ent->client->pers.netname : "console" ) );
     return qtrue;
@@ -1762,21 +1762,21 @@ qboolean G_admin_setdevmode( gentity_t *ent )
         cl->noclip = !cl->noclip;
 
         if( tent->r.linked )
-          trap_LinkEntity( tent );
+          SV_LinkEntity( tent );
 
-        trap_SendServerCommand( tent - g_entities, va( "print \"noclip OFF\n\"" ) );
+        SV_GameSendServerCommand( tent - g_entities, va( "print \"noclip OFF\n\"" ) );
       }
 
       //dissable god mode
       if( tent->flags & FL_GODMODE )
       {
         tent->flags ^= FL_GODMODE;
-        trap_SendServerCommand( tent - g_entities, va( "print \"godmode OFF\n\"" ) );
+        SV_GameSendServerCommand( tent - g_entities, va( "print \"godmode OFF\n\"" ) );
       }
     }
 
-    trap_Cvar_Set( "sv_cheats", "0" );
-    trap_Cvar_Update( &g_cheats );
+    Cvar_SetSafe( "sv_cheats", "0" );
+    Cvar_Update( &g_cheats );
     AP( va( "print \"^3setdevmode: ^7%s ^7has switched developer mode off\n\"",
             ent ? ent->client->pers.netname : "console" ) );
     return qtrue;
@@ -1799,12 +1799,12 @@ qboolean G_admin_kick( gentity_t *ent )
   if( G_admin_permission( ent, ADMF_UNACCOUNTABLE ) )
     minargc = 2;
 
-  if( trap_Argc() < minargc )
+  if( Cmd_Argc() < minargc )
   {
     ADMP( "^3kick: ^7usage: kick [name] [reason]\n" );
     return qfalse;
   }
-  trap_Argv( 1, name, sizeof( name ) );
+  Cmd_ArgvBuffer( 1, name, sizeof( name ) );
   reason = ConcatArgs( 2 );
   if( ( pid = G_ClientNumberFromString( name, err, sizeof( err ) ) ) == -1 )
   {
@@ -1851,12 +1851,12 @@ qboolean G_admin_setivo( gentity_t* ent )
     return qfalse;
   }
 
-  if( trap_Argc() != 2 )
+  if( Cmd_Argc() != 2 )
   {
     ADMP( "^3setivo: ^7usage: setivo {s|a|h}\n" );
     return qfalse;
   }
-  trap_Argv( 1, arg, sizeof( arg ) );
+  Cmd_ArgvBuffer( 1, arg, sizeof( arg ) );
   if( !Q_stricmp( arg, "s" ) )
     cn = "info_player_intermission";
   else if( !Q_stricmp( arg, "a" ) )
@@ -1897,13 +1897,13 @@ qboolean G_admin_ban( gentity_t *ent )
   namelog_t *match = NULL;
   qboolean cidr = qfalse;
 
-  if( trap_Argc() < 2 )
+  if( Cmd_Argc() < 2 )
   {
     ADMP( "^3ban: ^7usage: ban [name|slot|IP(/mask)] [duration] [reason]\n" );
     return qfalse;
   }
-  trap_Argv( 1, search, sizeof( search ) );
-  trap_Argv( 2, secs, sizeof( secs ) );
+  Cmd_ArgvBuffer( 1, search, sizeof( search ) );
+  Cmd_ArgvBuffer( 2, secs, sizeof( secs ) );
 
   seconds = G_admin_parse_time( secs );
   if( seconds <= 0 )
@@ -2059,17 +2059,17 @@ qboolean G_admin_ban( gentity_t *ent )
 qboolean G_admin_unban( gentity_t *ent )
 {
   int bnum;
-  int time = trap_RealTime( NULL );
+  int time = Com_RealTime( NULL );
   char bs[ 5 ];
   int i;
   g_admin_ban_t *ban;
 
-  if( trap_Argc() < 2 )
+  if( Cmd_Argc() < 2 )
   {
     ADMP( "^3unban: ^7usage: unban [ban#]\n" );
     return qfalse;
   }
-  trap_Argv( 1, bs, sizeof( bs ) );
+  Cmd_ArgvBuffer( 1, bs, sizeof( bs ) );
   bnum = atoi( bs );
   for( ban = g_admin_bans, i = 1; ban && i < bnum; ban = ban->next, i++ )
     ;
@@ -2106,13 +2106,13 @@ qboolean G_admin_addlayout( gentity_t *ent )
 {
   char layout[ MAX_QPATH ];
 
-  if( trap_Argc( ) != 2 )
+  if( Cmd_Argc( ) != 2 )
   {
     ADMP( "^3addlayout: ^7usage: addlayout <layoutelements>\n" );
     return qfalse;
   }
 
-  trap_Argv( 1, layout, sizeof( layout ) );
+  Cmd_ArgvBuffer( 1, layout, sizeof( layout ) );
 
   G_LayoutLoad( layout );
 
@@ -2129,13 +2129,13 @@ qboolean G_admin_layoutsave( gentity_t *ent )
   int i = 0;
   qboolean pipeEncountered = qfalse;
 
-  if( trap_Argc( ) != 2 )
+  if( Cmd_Argc( ) != 2 )
   {
     ADMP( "^3layoutsave: ^7usage: layoutsave <name>\n" );
     return qfalse;
   }
 
-  trap_Argv( 1, str, sizeof( str ) );
+  Cmd_ArgvBuffer( 1, str, sizeof( str ) );
 
   // sanitize name
   str2[ 0 ] = '\0';
@@ -2159,7 +2159,7 @@ qboolean G_admin_layoutsave( gentity_t *ent )
     return qfalse;
   }
 
-  trap_SendConsoleCommand( EXEC_APPEND, va( "layoutsave %s", str2 ) );
+  Cbuf_ExecuteText( EXEC_APPEND, va( "layoutsave %s", str2 ) );
   AP( va( "print \"^3layoutsave: ^7layout has been saved as '^2%s^7' by '%s'\n", str2,
           ent ? ent->client->pers.netname : "console" ) );
   return qtrue;
@@ -2170,7 +2170,7 @@ qboolean G_admin_adjustban( gentity_t *ent )
   int bnum;
   int length, maximum;
   int expires;
-  int time = trap_RealTime( NULL );
+  int time = Com_RealTime( NULL );
   char duration[ MAX_DURATION_LENGTH ] = {""};
   char *reason;
   char bs[ 5 ];
@@ -2181,13 +2181,13 @@ qboolean G_admin_adjustban( gentity_t *ent )
   int i;
   int skiparg = 0;
 
-  if( trap_Argc() < 3 )
+  if( Cmd_Argc() < 3 )
   {
     ADMP( "^3adjustban: ^7usage: adjustban [ban#] [/mask] [duration] [reason]"
       "\n" );
     return qfalse;
   }
-  trap_Argv( 1, bs, sizeof( bs ) );
+  Cmd_ArgvBuffer( 1, bs, sizeof( bs ) );
   bnum = atoi( bs );
   for( ban = g_admin_bans, i = 1; ban && i < bnum; ban = ban->next, i++ );
   if( i != bnum || !ban )
@@ -2202,7 +2202,7 @@ qboolean G_admin_adjustban( gentity_t *ent )
     ADMP( "^3adjustban: ^7you cannot modify permanent bans\n" );
     return qfalse;
   }
-  trap_Argv( 2, secs, sizeof( secs ) );
+  Cmd_ArgvBuffer( 2, secs, sizeof( secs ) );
   if( secs[ 0 ] == '/' )
   {
     int max = ban->ip.type == IPv6 ? 128 : 32;
@@ -2220,7 +2220,7 @@ qboolean G_admin_adjustban( gentity_t *ent )
         mask, min, max ) );
       return qfalse;
     }
-    trap_Argv( 3 + skiparg++, secs, sizeof( secs ) );
+    Cmd_ArgvBuffer( 3 + skiparg++, secs, sizeof( secs ) );
   }
   if( secs[ 0 ] == '+' || secs[ 0 ] == '-' )
     mode = secs[ 0 ];
@@ -2305,9 +2305,9 @@ qboolean G_admin_putteam( gentity_t *ent )
   gentity_t *vic;
   team_t teamnum = TEAM_NONE;
 
-  trap_Argv( 1, name, sizeof( name ) );
-  trap_Argv( 2, team, sizeof( team ) );
-  if( trap_Argc() < 3 )
+  Cmd_ArgvBuffer( 1, name, sizeof( name ) );
+  Cmd_ArgvBuffer( 2, team, sizeof( team ) );
+  if( Cmd_Argc() < 3 )
   {
     ADMP( "^3putteam: ^7usage: putteam [name] [h|a|s]\n" );
     return qfalse;
@@ -2348,13 +2348,13 @@ qboolean G_admin_changemap( gentity_t *ent )
   char map[ MAX_QPATH ];
   char layout[ MAX_QPATH ] = { "" };
 
-  if( trap_Argc( ) < 2 )
+  if( Cmd_Argc( ) < 2 )
   {
     ADMP( "^3changemap: ^7usage: changemap [map] (layout)\n" );
     return qfalse;
   }
 
-  trap_Argv( 1, map, sizeof( map ) );
+  Cmd_ArgvBuffer( 1, map, sizeof( map ) );
 
   if( !G_MapExists( map ) )
   {
@@ -2362,12 +2362,12 @@ qboolean G_admin_changemap( gentity_t *ent )
     return qfalse;
   }
 
-  if( trap_Argc( ) > 2 )
+  if( Cmd_Argc( ) > 2 )
   {
-    trap_Argv( 2, layout, sizeof( layout ) );
+    Cmd_ArgvBuffer( 2, layout, sizeof( layout ) );
     if( G_LayoutExists( map, layout ) )
     {
-      trap_Cvar_Set( "g_nextLayout", layout );
+      Cvar_SetSafe( "g_nextLayout", layout );
     }
     else
     {
@@ -2379,14 +2379,14 @@ qboolean G_admin_changemap( gentity_t *ent )
   admin_log( layout );
 
   G_MapConfigs( map );
-  trap_SendConsoleCommand( EXEC_APPEND, va( "%smap \"%s\"\n",
+  Cbuf_ExecuteText( EXEC_APPEND, va( "%smap \"%s\"\n",
                              ( g_cheats.integer ? "dev" : "" ), map ) );
   level.restarted = qtrue;
   AP( va( "print \"^3changemap: ^7map '%s' started by %s^7 %s\n\"", map,
           ( ent ) ? ent->client->pers.netname : "console",
           ( layout[ 0 ] ) ? va( "(forcing layout '%s')", layout ) : "" ) );
-  trap_Cvar_Set( "g_warmup", "1" );
-  trap_SetConfigstring( CS_WARMUP, va( "%d", IS_WARMUP ) );
+  Cvar_SetSafe( "g_warmup", "1" );
+  SV_SetConfigstring( CS_WARMUP, va( "%d", IS_WARMUP ) );
 
   return qtrue;
 }
@@ -2399,12 +2399,12 @@ qboolean G_admin_cp( gentity_t *ent )
   int      i;
   qboolean admin;
 
-  if( trap_Argc( ) < 2 )
+  if( Cmd_Argc( ) < 2 )
   {
     ADMP( "^3cpa: ^7usage: cpa (-AHS) [message]\n" );
     return qfalse;
   }
-  trap_Argv( 1, arg, sizeof( arg ) );
+  Cmd_ArgvBuffer( 1, arg, sizeof( arg ) );
   if( arg[ 0 ] == '-' )
   {
     switch( arg[ 1 ] )
@@ -2422,7 +2422,7 @@ qboolean G_admin_cp( gentity_t *ent )
         ADMP( "^3cpa: ^7team not recognized as -a -h or -s\n" );
         return qfalse;
     }
-    if( trap_Argc( ) < 2 )
+    if( Cmd_Argc( ) < 2 )
     {
       ADMP( "^3cpa: ^7no message\n" );
       return qfalse;
@@ -2442,12 +2442,12 @@ qboolean G_admin_cp( gentity_t *ent )
         ( admin = G_admin_permission( &g_entities[ i ], ADMF_ADMINCHAT ) ) )
     {
       if( team < 0 || level.clients[ i ].pers.teamSelection == team )
-        trap_SendServerCommand( i, 
+        SV_GameSendServerCommand( i,
                                 va( "cp \"^%s%s\" %d",
                                 ( team < 0 ) ? "2" : "5", message,
                                 CP_ADMIN_CP ) );
 
-      trap_SendServerCommand( i,
+      SV_GameSendServerCommand( i,
                               va( "print \"%s^3cpa: ^7%s%s^7%s%s: %c%s\n\"",
                                   ( admin ) ? "[ADMIN] " : "",
                                   ( team >= 0 ) ? "(" : "",
@@ -2477,12 +2477,12 @@ qboolean G_admin_warn( gentity_t *ent )
   char      name[ MAX_NAME_LENGTH ], err[ MAX_STRING_CHARS ];
   gentity_t *vic;
 
-  if( trap_Argc() < 3 )
+  if( Cmd_Argc() < 3 )
   {
     ADMP( va( "^3warn: ^7usage: warn [name|slot#] [reason]\n" ) );
     return qfalse;
   }
-  trap_Argv( 1, name, sizeof( name ) );
+  Cmd_ArgvBuffer( 1, name, sizeof( name ) );
   if( ( pid = G_ClientNumberFromString( name, err, sizeof( err ) ) ) == -1 )
   {
     ADMP( va( "^3warn: ^7%s\n", err ) );
@@ -2512,13 +2512,13 @@ qboolean G_admin_mute( gentity_t *ent )
   char command[ MAX_ADMIN_CMD_LEN ];
   namelog_t *vic;
 
-  trap_Argv( 0, command, sizeof( command ) );
-  if( trap_Argc() < 2 )
+  Cmd_ArgvBuffer( 0, command, sizeof( command ) );
+  if( Cmd_Argc() < 2 )
   {
     ADMP( va( "^3%s: ^7usage: %s [name|slot#]\n", command, command ) );
     return qfalse;
   }
-  trap_Argv( 1, name, sizeof( name ) );
+  Cmd_ArgvBuffer( 1, name, sizeof( name ) );
   if( !( vic = G_NamelogFromString( ent, name ) ) )
   {
     ADMP( va( "^3%s: ^7no match\n", command ) );
@@ -2570,13 +2570,13 @@ qboolean G_admin_denybuild( gentity_t *ent )
   char command[ MAX_ADMIN_CMD_LEN ];
   namelog_t *vic;
 
-  trap_Argv( 0, command, sizeof( command ) );
-  if( trap_Argc() < 2 )
+  Cmd_ArgvBuffer( 0, command, sizeof( command ) );
+  if( Cmd_Argc() < 2 )
   {
     ADMP( va( "^3%s: ^7usage: %s [name|slot#]\n", command, command ) );
     return qfalse;
   }
-  trap_Argv( 1, name, sizeof( name ) );
+  Cmd_ArgvBuffer( 1, name, sizeof( name ) );
   if( !( vic = G_NamelogFromString( ent, name ) ) )
   {
     ADMP( va( "^3%s: ^7no match\n", command ) );
@@ -2638,13 +2638,13 @@ qboolean G_admin_explode( gentity_t *ent )
   char name[ MAX_NAME_LENGTH ], *reason, err[ MAX_STRING_CHARS ];
   gentity_t *vic;
 
-  if( trap_Argc() < 2 )
+  if( Cmd_Argc() < 2 )
   {
     ADMP( "^3explode: ^7usage: explode [name|slot#]\n" );
     return qfalse;
   }
 
-  trap_Argv( 1, name, sizeof( name ) );
+  Cmd_ArgvBuffer( 1, name, sizeof( name ) );
   reason = ConcatArgs( 2 );
   if( ( pid = G_ClientNumberFromString( name, err, sizeof( err ) ) ) == -1 )
   {
@@ -2673,7 +2673,7 @@ qboolean G_admin_explode( gentity_t *ent )
 
   Blow_up(vic);
 
-  trap_SendServerCommand( vic-g_entities,
+  SV_GameSendServerCommand( vic-g_entities,
 			                    va( "cp \"^1Boom!!!\n^7%s\n\" %d",
                               reason, CP_ADMIN ) );
 
@@ -2692,16 +2692,16 @@ qboolean G_admin_listadmins( gentity_t *ent )
   char s[ MAX_NAME_LENGTH ] = {""};
   int start = MAX_CLIENTS;
 
-  if( trap_Argc() == 3 )
+  if( Cmd_Argc() == 3 )
   {
-    trap_Argv( 2, s, sizeof( s ) );
+    Cmd_ArgvBuffer( 2, s, sizeof( s ) );
     start = atoi( s );
   }
-  if( trap_Argc() > 1 )
+  if( Cmd_Argc() > 1 )
   {
-    trap_Argv( 1, s, sizeof( s ) );
+    Cmd_ArgvBuffer( 1, s, sizeof( s ) );
     i = 0;
-    if( trap_Argc() == 2 )
+    if( Cmd_Argc() == 2 )
     {
       i = s[ 0 ] == '-';
       for( ; isdigit( s[ i ] ); i++ );
@@ -2725,10 +2725,10 @@ qboolean G_admin_listlayouts( gentity_t *ent )
   char layout[ MAX_QPATH ] = { "" };
   int i = 0;
 
-  if( trap_Argc( ) == 2 )
-    trap_Argv( 1, map, sizeof( map ) );
+  if( Cmd_Argc( ) == 2 )
+    Cmd_ArgvBuffer( 1, map, sizeof( map ) );
   else
-    trap_Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
+    Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
 
   count = G_LayoutList( map, list, sizeof( list ) );
   ADMBP_begin( );
@@ -2866,7 +2866,7 @@ static void ban_out( void *ban, char *str )
   char *d_color = S_COLOR_WHITE;
   char date[ 11 ];
   g_admin_ban_t *b = ( g_admin_ban_t * )ban;
-  int t = trap_RealTime( NULL );
+  int t = Com_RealTime( NULL );
   char *made = b->made;
 
   for( i = 0; b->name[ i ]; i++ )
@@ -2911,16 +2911,16 @@ qboolean G_admin_showbans( gentity_t *ent )
   qboolean ipmatch = qfalse;
   addr_t ip;
 
-  if( trap_Argc() == 3 )
+  if( Cmd_Argc() == 3 )
   {
-    trap_Argv( 2, filter, sizeof( filter ) );
+    Cmd_ArgvBuffer( 2, filter, sizeof( filter ) );
     start = atoi( filter );
   }
-  if( trap_Argc() > 1 )
+  if( Cmd_Argc() > 1 )
   {
-    trap_Argv( 1, filter, sizeof( filter ) );
+    Cmd_ArgvBuffer( 1, filter, sizeof( filter ) );
     i = 0;
-    if( trap_Argc() == 2 )
+    if( Cmd_Argc() == 2 )
       for( i = filter[ 0 ] == '-'; isdigit( filter[ i ] ); i++ );
     if( !filter[ i ] )
       start = atoi( filter );
@@ -2939,7 +2939,7 @@ qboolean G_admin_showbans( gentity_t *ent )
 qboolean G_admin_adminhelp( gentity_t *ent )
 {
   g_admin_command_t *c;
-  if( trap_Argc() < 2 )
+  if( Cmd_Argc() < 2 )
   {
     int i;
     int count = 0;
@@ -2981,7 +2981,7 @@ qboolean G_admin_adminhelp( gentity_t *ent )
     g_admin_cmd_t *admincmd;
     qboolean denied = qfalse;
 
-    trap_Argv( 1, param, sizeof( param ) );
+    Cmd_ArgvBuffer( 1, param, sizeof( param ) );
     ADMBP_begin();
     if( ( c = G_admin_command( param ) ) )
     {
@@ -3104,10 +3104,10 @@ qboolean G_admin_endvote( gentity_t *ent )
   qboolean cancel;
   char *msg;
 
-  trap_Argv( 0, command, sizeof( command ) );
+  Cmd_ArgvBuffer( 0, command, sizeof( command ) );
   cancel = !Q_stricmp( command, "cancelvote" );
-  if( trap_Argc() == 2 )
-    trap_Argv( 1, teamName, sizeof( teamName ) );
+  if( Cmd_Argc() == 2 )
+    Cmd_ArgvBuffer( 1, teamName, sizeof( teamName ) );
   team = G_TeamFromString( teamName );
   if( team == NUM_TEAMS )
   {
@@ -3167,12 +3167,12 @@ qboolean G_admin_rename( gentity_t *ent )
   char userinfo[ MAX_INFO_STRING ];
   gentity_t *victim = NULL;
 
-  if( trap_Argc() < 3 )
+  if( Cmd_Argc() < 3 )
   {
     ADMP( "^3rename: ^7usage: rename [name] [newname]\n" );
     return qfalse;
   }
-  trap_Argv( 1, name, sizeof( name ) );
+  Cmd_ArgvBuffer( 1, name, sizeof( name ) );
   Q_strncpyz( newname, ConcatArgs( 2 ), sizeof( newname ) );
   if( ( pid = G_ClientNumberFromString( name, err, sizeof( err ) ) ) == -1 )
   {
@@ -3199,13 +3199,13 @@ qboolean G_admin_rename( gentity_t *ent )
   admin_log( va( "%d (%s) \"%s" S_COLOR_WHITE "\"", pid,
     victim->client->pers.guid, victim->client->pers.netname ) );
   admin_log( newname );
-  trap_GetUserinfo( pid, userinfo, sizeof( userinfo ) );
+  SV_GetUserinfo( pid, userinfo, sizeof( userinfo ) );
   AP( va( "print \"^3rename: ^7%s^7 has been renamed to %s^7 by %s\n\"",
           victim->client->pers.netname,
           newname,
           ( ent ) ? ent->client->pers.netname : "console" ) );
   Info_SetValueForKey( userinfo, "name", newname );
-  trap_SetUserinfo( pid, userinfo );
+  SV_SetUserinfo( pid, userinfo );
   ClientUserinfoChanged( pid, qtrue );
   return qtrue;
 }
@@ -3221,19 +3221,19 @@ qboolean G_admin_transform( gentity_t *ent )
   gentity_t *victim = NULL;
   qboolean found;
 
-  if (trap_Argc() < 3)
+  if (Cmd_Argc() < 3)
   {
     ADMP("^3transform: ^7usage: transform [name|slot#] [model] <skin>\n");
     return qfalse;
   }
 
-  trap_Argv(1, name, sizeof(name));
-  trap_Argv(2, modelname, sizeof(modelname));
+  Cmd_ArgvBuffer(1, name, sizeof(name));
+  Cmd_ArgvBuffer(2, modelname, sizeof(modelname));
 
-  strcpy(skin, "default");  
-  if (trap_Argc() >= 4)
+  strcpy(skin, "default");
+  if (Cmd_Argc() >= 4)
   {
-    trap_Argv(1, skin, sizeof(skin));
+    Cmd_ArgvBuffer(1, skin, sizeof(skin));
   }
 
   pid = G_ClientNumberFromString(name, err, sizeof(err));
@@ -3258,7 +3258,7 @@ qboolean G_admin_transform( gentity_t *ent )
     return qfalse;
   }
 
-  trap_GetUserinfo(pid, userinfo, sizeof(userinfo));
+  SV_GetUserinfo(pid, userinfo, sizeof(userinfo));
   AP( va("print \"^3transform: ^7%s^7 has been changed into %s^7 by %s\n\"",
          victim->client->pers.netname, modelname,
          (ent ? ent->client->pers.netname : "console")) );
@@ -3266,7 +3266,7 @@ qboolean G_admin_transform( gentity_t *ent )
   Info_SetValueForKey( userinfo, "model", modelname );
   Info_SetValueForKey( userinfo, "skin", GetSkin(modelname, skin));
   Info_SetValueForKey( userinfo, "voice", modelname );
-  trap_SetUserinfo( pid, userinfo );
+  SV_SetUserinfo( pid, userinfo );
   ClientUserinfoChanged( pid, qtrue );
 
   return qtrue;
@@ -3280,12 +3280,12 @@ qboolean G_admin_restart( gentity_t *ent )
   int       i;
   gclient_t *cl;
 
-  if( trap_Argc( ) > 1 )
+  if( Cmd_Argc( ) > 1 )
   {
     char map[ MAX_QPATH ];
 
-    trap_Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
-    trap_Argv( 1, layout, sizeof( layout ) );
+    Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
+    Cmd_ArgvBuffer( 1, layout, sizeof( layout ) );
 
     // Figure out which argument is which
     if( Q_stricmp( layout, "keepteams" ) &&
@@ -3295,7 +3295,7 @@ qboolean G_admin_restart( gentity_t *ent )
     {
       if( G_LayoutExists( map, layout ) )
       {
-        trap_Cvar_Set( "g_nextLayout", layout );
+        Cvar_SetSafe( "g_nextLayout", layout );
       }
       else
       {
@@ -3306,12 +3306,12 @@ qboolean G_admin_restart( gentity_t *ent )
     else
     {
       layout[ 0 ] = '\0';
-      trap_Argv( 1, teampref, sizeof( teampref ) );
+      Cmd_ArgvBuffer( 1, teampref, sizeof( teampref ) );
     }
   }
 
-  if( trap_Argc( ) > 2 )
-    trap_Argv( 2, teampref, sizeof( teampref ) );
+  if( Cmd_Argc( ) > 2 )
+    Cmd_ArgvBuffer( 2, teampref, sizeof( teampref ) );
 
   admin_log( layout );
   admin_log( teampref );
@@ -3348,11 +3348,11 @@ qboolean G_admin_restart( gentity_t *ent )
 
   if( !Q_stricmp( teampref, "switchteamslock" ) ||
       !Q_stricmp( teampref, "keepteamslock" ) )
-    trap_Cvar_Set( "g_lockTeamsAtStart", "1" );
+    Cvar_SetSafe( "g_lockTeamsAtStart", "1" );
 
-  trap_Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
+  Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
   G_MapConfigs( map );
-  trap_SendConsoleCommand( EXEC_APPEND, "map_restart\n" );
+  Cbuf_ExecuteText( EXEC_APPEND, "map_restart\n" );
 
   AP( va( "print \"^3restart: ^7map restarted by %s %s %s\n\"",
           ( ent ) ? ent->client->pers.netname : "console",
@@ -3368,18 +3368,18 @@ qboolean G_admin_nextmap( gentity_t *ent )
   AP( va( "print \"^3nextmap: ^7%s^7 decided to load the next map\n\"",
     ( ent ) ? ent->client->pers.netname : "console" ) );
   level.lastWin = TEAM_NONE;
-  trap_SetConfigstring( CS_WINNER, "Evacuation" );
+  SV_SetConfigstring( CS_WINNER, "Evacuation" );
   LogExit( va( "nextmap was run by %s",
     ( ent ) ? ent->client->pers.netname : "console" ) );
-  trap_Cvar_Set( "g_warmup", "1" );
-  trap_SetConfigstring( CS_WARMUP, va( "%d", IS_WARMUP ) );
+  Cvar_SetSafe( "g_warmup", "1" );
+  SV_SetConfigstring( CS_WARMUP, va( "%d", IS_WARMUP ) );
 
   return qtrue;
 }
 
 qboolean G_admin_setnextmap( gentity_t *ent )
 {
-  int argc = trap_Argc();
+  int argc = Cmd_Argc();
   char map[ MAX_QPATH ];
   char layout[ MAX_QPATH ];
 
@@ -3389,7 +3389,7 @@ qboolean G_admin_setnextmap( gentity_t *ent )
     return qfalse;
   }
 
-  trap_Argv( 1, map, sizeof( map ) );
+  Cmd_ArgvBuffer( 1, map, sizeof( map ) );
 
   if( !G_MapExists( map ) )
   {
@@ -3399,7 +3399,7 @@ qboolean G_admin_setnextmap( gentity_t *ent )
 
   if( argc > 2 )
   {
-    trap_Argv( 2, layout, sizeof( layout ) );
+    Cmd_ArgvBuffer( 2, layout, sizeof( layout ) );
 
     if( !G_LayoutExists( map, layout ) )
     {
@@ -3407,12 +3407,12 @@ qboolean G_admin_setnextmap( gentity_t *ent )
       return qfalse;
     }
 
-    trap_Cvar_Set( "g_nextLayout", layout );
+    Cvar_SetSafe( "g_nextLayout", layout );
   }
   else
-    trap_Cvar_Set( "g_nextLayout", "" );
+    Cvar_SetSafe( "g_nextLayout", "" );
 
-  trap_Cvar_Set( "g_nextMap", map );
+  Cvar_SetSafe( "g_nextMap", map );
 
   AP( va( "print \"^3setnextmap: ^7%s^7 has set the next map to '%s'%s\n\"",
           ( ent ) ? ent->client->pers.netname : "console", map,
@@ -3491,16 +3491,16 @@ qboolean G_admin_namelog( gentity_t *ent )
   qboolean ipmatch = qfalse;
   int start = MAX_CLIENTS, i;
 
-  if( trap_Argc() == 3 )
+  if( Cmd_Argc() == 3 )
   {
-    trap_Argv( 2, search, sizeof( search ) );
+    Cmd_ArgvBuffer( 2, search, sizeof( search ) );
     start = atoi( search );
   }
-  if( trap_Argc() > 1 )
+  if( Cmd_Argc() > 1 )
   {
-    trap_Argv( 1, search, sizeof( search ) );
+    Cmd_ArgvBuffer( 1, search, sizeof( search ) );
     i = 0;
-    if( trap_Argc() == 2 )
+    if( Cmd_Argc() == 2 )
       for( i = search[ 0 ] == '-'; isdigit( search[ i ] ); i++ );
     if( !search[ i ] )
       start = atoi( search );
@@ -3595,14 +3595,14 @@ qboolean G_admin_lock( gentity_t *ent )
   team_t team;
   qboolean lock, fail = qfalse;
 
-  trap_Argv( 0, command, sizeof( command ) );
-  if( trap_Argc() < 2 )
+  Cmd_ArgvBuffer( 0, command, sizeof( command ) );
+  if( Cmd_Argc() < 2 )
   {
     ADMP( va( "^3%s: ^7usage: %s [a|h]\n", command, command ) );
     return qfalse;
   }
   lock = !Q_stricmp( command, "lock" );
-  trap_Argv( 1, teamName, sizeof( teamName ) );
+  Cmd_ArgvBuffer( 1, teamName, sizeof( teamName ) );
   team = G_TeamFromString( teamName );
 
   if( team == TEAM_ALIENS )
@@ -3668,7 +3668,7 @@ qboolean G_admin_builder( gentity_t *ent )
     VectorCopy( ent->client->ps.origin, start );
   VectorMA( start, 1000, forward, end );
 
-  trap_Trace( &tr, start, NULL, NULL, end, ent->s.number, MASK_PLAYERSOLID );
+  SV_Trace( &tr, start, NULL, NULL, end, ent->s.number, MASK_PLAYERSOLID, TT_AABB );
   traceEnt = &g_entities[ tr.entityNum ];
   if( tr.fraction < 1.0f && ( traceEnt->s.eType == ET_BUILDABLE ) )
   {
@@ -3716,7 +3716,7 @@ qboolean G_admin_pause( gentity_t *ent )
     AP( va( "print \"^3pause: ^7%s^7 paused the game.\n\"",
           ( ent ) ? ent->client->pers.netname : "console" ) );
     level.pausedTime = 1;
-    trap_SendServerCommand( -1,
+    SV_GameSendServerCommand( -1,
                             va( "cp \"The game has been paused. Please wait.\" %d",
                                 CP_PAUSE ) );
   }
@@ -3730,9 +3730,9 @@ qboolean G_admin_pause( gentity_t *ent )
     }
 
     AP( va( "print \"^3pause: ^7%s^7 unpaused the game (Paused for %d sec) \n\"",
-          ( ent ) ? ent->client->pers.netname : "console", 
+          ( ent ) ? ent->client->pers.netname : "console",
           (int) ( (float) level.pausedTime / 1000.0f ) ) );
-    trap_SendServerCommand( -1,
+    SV_GameSendServerCommand( -1,
                             va( "cp \"The game has been unpaused!\" %d",
                                 CP_PAUSE ) );
 
@@ -3750,15 +3750,15 @@ qboolean G_admin_playmap( gentity_t *ent )
   char   *flags;
   playMapError_t playMapError;
   g_admin_cmd_t *admincmd;
-  
-  trap_Argv( 0, cmd, sizeof( cmd ) );
 
-  if( trap_Argc( ) < 2 )
+  Cmd_ArgvBuffer( 0, cmd, sizeof( cmd ) );
+
+  if( Cmd_Argc( ) < 2 )
   {
     // TODO: [layout [flags]] announce them once they're implemented
 
     // overwrite with current map
-    trap_Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
+    Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
 
     ADMP( va( S_COLOR_YELLOW "playmap" S_COLOR_WHITE ": Current map is "
 	      S_COLOR_CYAN "%s" S_COLOR_WHITE ".\n", map ) );
@@ -3771,14 +3771,14 @@ qboolean G_admin_playmap( gentity_t *ent )
     admincmd = G_admin_cmd( "playmap" );
     ADMP( va( S_COLOR_YELLOW "\nusage: " S_COLOR_WHITE "%s %s\n",
 	      admincmd->keyword, admincmd->syntax ) );
-    
+
     return qtrue;
   }
 
   // Else if argc > 1
-  trap_Argv( 1, map, sizeof( map ) );
-  trap_Argv( 2, layout, sizeof( layout ) );
-  trap_Argv( 3, extra, sizeof( extra ) );
+  Cmd_ArgvBuffer( 1, map, sizeof( map ) );
+  Cmd_ArgvBuffer( 2, layout, sizeof( layout ) );
+  Cmd_ArgvBuffer( 3, extra, sizeof( extra ) );
   if( *layout == '+' || *layout == '-' )
   {
     flags = ConcatArgs( 2 );
@@ -3787,7 +3787,7 @@ qboolean G_admin_playmap( gentity_t *ent )
     flags = ConcatArgs( 3 );
 
   if( g_debugPlayMap.integer > 0 )
-    trap_SendServerCommand( ent-g_entities,
+    SV_GameSendServerCommand( ent-g_entities,
 			    va( "print \"DEBUG: cmd=%s\n"
 				"       map=%s\n"
 				"       layout=%s\n"
@@ -3799,7 +3799,7 @@ qboolean G_admin_playmap( gentity_t *ent )
 				   flags, ent );
   if (playMapError.errorCode == PLAYMAP_ERROR_NONE)
   {
-    trap_SendServerCommand( -1,
+    SV_GameSendServerCommand( -1,
 			    va( "print \"%s" S_COLOR_WHITE
 				" added map " S_COLOR_CYAN "%s" S_COLOR_WHITE
 				" to playlist\n\"",
@@ -3818,11 +3818,11 @@ qboolean G_admin_playpool( gentity_t *ent )
   int 		 page;
   playMapError_t playMapError;
   g_admin_cmd_t *admincmd;
-  
+
   // Get command structure
   admincmd = G_admin_cmd( "playpool" );
 
-  if( trap_Argc( ) < 2 )
+  if( Cmd_Argc( ) < 2 )
   {
     G_PrintPlayMapPool( ent, -1, qfalse );
     ADMP( "\n" );
@@ -3832,29 +3832,29 @@ qboolean G_admin_playpool( gentity_t *ent )
     return qfalse;
   }
 
-  trap_Argv( 1, cmd, sizeof( cmd ) );
+  Cmd_ArgvBuffer( 1, cmd, sizeof( cmd ) );
 
   if( !Q_stricmp( cmd, "add" ) )
   {
-    if( trap_Argc( ) < 3 )
+    if( Cmd_Argc( ) < 3 )
     {
       ADMP( S_COLOR_YELLOW "playpool: " S_COLOR_WHITE
 	    "usage: playpool add (^5mapname^7) [^5maptype^7]\n" );
       return qfalse;
     }
 
-    trap_Argv( 2, map, sizeof( map ) );
+    Cmd_ArgvBuffer( 2, map, sizeof( map ) );
     if( !G_MapExists( map ) )
     {
       ADMP( va( "^3playpool: ^7invalid map name '%s'\n", map ) );
       return qfalse;
     }
 
-    if( trap_Argc( ) > 3 ) 
-      trap_Argv( 3, mapType, sizeof( mapType ) );
+    if( Cmd_Argc( ) > 3 )
+      Cmd_ArgvBuffer( 3, mapType, sizeof( mapType ) );
 
     playMapError =
-      G_AddToPlayMapPool( map, ( trap_Argc( ) > 3 ) ? mapType : PLAYMAP_MAPTYPE_NONE,
+      G_AddToPlayMapPool( map, ( Cmd_Argc( ) > 3 ) ? mapType : PLAYMAP_MAPTYPE_NONE,
 			  0, 0, qtrue );
     if( playMapError.errorCode != PLAYMAP_ERROR_NONE )
     {
@@ -3868,13 +3868,13 @@ qboolean G_admin_playpool( gentity_t *ent )
 
   if( !Q_stricmp( cmd, "remove" ) )
   {
-    if( trap_Argc( ) < 3 )
+    if( Cmd_Argc( ) < 3 )
     {
       ADMP( "^3playpool: ^7usage: playpool remove (^5mapname^7)\n" );
       return qfalse;
     }
 
-    trap_Argv( 2, map, sizeof( map ) );
+    Cmd_ArgvBuffer( 2, map, sizeof( map ) );
     playMapError = G_RemoveFromPlayMapPool( map );
     if( playMapError.errorCode != PLAYMAP_ERROR_NONE )
     {
@@ -3901,9 +3901,9 @@ qboolean G_admin_playpool( gentity_t *ent )
 
   if( !Q_stricmp( cmd, "list" ) )
   {
-    if( trap_Argc( ) > 2 )
+    if( Cmd_Argc( ) > 2 )
     {
-      trap_Argv( 2, map, sizeof( map ) );
+      Cmd_ArgvBuffer( 2, map, sizeof( map ) );
       page = atoi( map ) - 1;
     } else page = 0;
 
@@ -3966,13 +3966,13 @@ qboolean G_admin_slap( gentity_t *ent )
   if( G_admin_permission( ent, ADMF_UNACCOUNTABLE ) )
     minargc = 2;
 
-  if( trap_Argc() < minargc )
+  if( Cmd_Argc() < minargc )
   {
     ADMP( "^3slap: ^7usage: slap [^3name^6|^3slot^7] (^5reason)\n" );
     return qfalse;
   }
 
-  trap_Argv( 1, name, sizeof( name ) );
+  Cmd_ArgvBuffer( 1, name, sizeof( name ) );
   reason = ConcatArgs( 2 );
   if( ( pid = G_ClientNumberFromString( name, err, sizeof( err ) ) ) == -1 )
   {
@@ -4000,7 +4000,7 @@ qboolean G_admin_slap( gentity_t *ent )
   dir[2] = random();
   G_Knockback( vic, dir, 100 );
 
-  trap_SendServerCommand( vic-g_entities,
+  SV_GameSendServerCommand( vic-g_entities,
                           va( "cp \"%s^1 is not amused!\n^7%s\n\" %d",
                               ent ? ent->client->pers.netname : "console",
                               reason, CP_ADMIN ) );
@@ -4045,19 +4045,19 @@ qboolean G_admin_buildlog( gentity_t *ent )
     return qtrue;
   }
 
-  if( trap_Argc() == 3 )
+  if( Cmd_Argc() == 3 )
   {
-    trap_Argv( 2, search, sizeof( search ) );
+    Cmd_ArgvBuffer( 2, search, sizeof( search ) );
     start = atoi( search );
   }
-  if( trap_Argc() > 1 )
+  if( Cmd_Argc() > 1 )
   {
-    trap_Argv( 1, search, sizeof( search ) );
+    Cmd_ArgvBuffer( 1, search, sizeof( search ) );
     for( i = search[ 0 ] == '-'; isdigit( search[ i ] ); i++ );
     if( i && !search[ i ] )
     {
       id = atoi( search );
-      if( trap_Argc() == 2 && ( id < 0 || id >= MAX_CLIENTS ) )
+      if( Cmd_Argc() == 2 && ( id < 0 || id >= MAX_CLIENTS ) )
       {
         start = id;
         id = -1;
@@ -4086,7 +4086,7 @@ qboolean G_admin_buildlog( gentity_t *ent )
   }
 
   if( ent && ent->client->pers.teamSelection != TEAM_NONE )
-    trap_SendServerCommand( -1,
+    SV_GameSendServerCommand( -1,
       va( "print \"^3buildlog: ^7%s^7 requested a log of recent building activity\n\"",
            ent->client->pers.netname  ) );
 
@@ -4154,13 +4154,13 @@ qboolean G_admin_revert( gentity_t *ent )
   int        id;
   buildLog_t *log;
 
-  if( trap_Argc() != 2 )
+  if( Cmd_Argc() != 2 )
   {
     ADMP( "^3revert: ^7usage: revert [id]\n" );
     return qfalse;
   }
 
-  trap_Argv( 1, arg, sizeof( arg ) );
+  Cmd_ArgvBuffer( 1, arg, sizeof( arg ) );
   id = atoi( arg ) - MAX_CLIENTS;
   if( id < level.buildId - level.numBuildLogs || id >= level.buildId )
   {
@@ -4248,7 +4248,7 @@ qboolean G_admin_listflags( gentity_t * ent )
   ADMBP( "^3\nPlayer Models:^7\n\n" );
   for ( i = 0; i < level.playerModelCount; i++ )
   {
-      ADMBP( va( " ^2MODEL%-20s^7 %s\n", level.playerModel[i], level.playerModel[i] ) ); 
+      ADMBP( va( " ^2MODEL%-20s^7 %s\n", level.playerModel[i], level.playerModel[i] ) );
   }
   ADMBP( "\n" );
 
@@ -4415,18 +4415,18 @@ qboolean G_admin_flag( gentity_t *ent )
   g_admin_level_t *l = NULL;
   g_admin_level_t *d = G_admin_level( 0 );
 
-  gentity_t *vic = NULL; 
+  gentity_t *vic = NULL;
   int i, na;
 
-  trap_Argv( 0, cmd, sizeof(cmd) );
-  if( trap_Argc() < 2 )
+  Cmd_ArgvBuffer( 0, cmd, sizeof(cmd) );
+  if( Cmd_Argc() < 2 )
   {
     ADMP(va("^7usage: %s [name|slot|*level] [^3+^6|^3-^7][flag]\n", cmd));
     return qfalse;
   }
 
-  trap_Argv( 1, testname, sizeof(testname) );
-  trap_Argv( 2, flag, sizeof(flag) );
+  Cmd_ArgvBuffer( 1, testname, sizeof(testname) );
+  Cmd_ArgvBuffer( 2, flag, sizeof(flag) );
 
   if( testname[ 0 ] == '*' )
   {
@@ -4475,7 +4475,7 @@ qboolean G_admin_flag( gentity_t *ent )
     {
       G_SanitiseString( testname, name, sizeof( name ) );
     }
-  
+
     if( vic )
     {
       a = vic->client->pers.admin;
@@ -4484,7 +4484,7 @@ qboolean G_admin_flag( gentity_t *ent )
     {
       g_admin_admin_t *wa;
       int             matches = 0;
-  
+
       for( wa = g_admin_admins; wa && matches < 2; wa = wa->next )
       {
         G_SanitiseString( wa->name, testname, sizeof( testname ) );
@@ -4494,19 +4494,19 @@ qboolean G_admin_flag( gentity_t *ent )
           matches++;
         }
       }
-  
+
       for( i = 0; i < level.maxclients && matches < 2; i++ )
       {
         if( level.clients[ i ].pers.connected == CON_DISCONNECTED )
           continue;
-  
+
         if( matches && level.clients[ i ].pers.admin &&
             level.clients[ i ].pers.admin == a )
         {
           vic = &g_entities[ i ];
           continue;
         }
-  
+
         G_SanitiseString( level.clients[ i ].pers.netname, testname,
           sizeof( testname ) );
         if( strstr( testname, name ) )
@@ -4516,7 +4516,7 @@ qboolean G_admin_flag( gentity_t *ent )
           matches++;
         }
       }
-  
+
       if( matches == 0 )
       {
         ADMP( va("^3%s:^7 no match.  use listplayers or listadmins to "
@@ -4540,7 +4540,7 @@ qboolean G_admin_flag( gentity_t *ent )
     }
   }
 
-  if( trap_Argc() < 3 )
+  if( Cmd_Argc() < 3 )
   {
     if( a )
     {
@@ -4575,7 +4575,7 @@ qboolean G_admin_flag( gentity_t *ent )
     return qtrue;
   }
 
-  trap_Argv( 2, flag, sizeof(flag) );
+  Cmd_ArgvBuffer( 2, flag, sizeof(flag) );
   if( flag[ 0 ] == '-' || flag[ 0 ] == '+' )
   {
     add = ( flag[ 0 ] == '+' );
@@ -4659,20 +4659,20 @@ qboolean G_admin_gamedir( gentity_t *ent )
     char filter[ MAX_QPATH ];
     int page = 0;
 
-    if ( trap_Argc() < 4 )
+    if ( Cmd_Argc() < 4 )
     {
         ADMP("usage: ^3gamedir^7 \"<dir>\" \"<extension>\" \"<filter>\"\n");
         return qfalse;
     }
 
-    trap_Argv( 1, dir, sizeof(dir) );
-    trap_Argv( 2, ext, sizeof(ext) );
-    trap_Argv( 3, filter, sizeof(filter) );
+    Cmd_ArgvBuffer( 1, dir, sizeof(dir) );
+    Cmd_ArgvBuffer( 2, ext, sizeof(ext) );
+    Cmd_ArgvBuffer( 3, filter, sizeof(filter) );
 
-    if ( trap_Argc() >= 5 )
+    if ( Cmd_Argc() >= 5 )
     {
       char lp[ 8 ];
-      trap_Argv( 4, lp, sizeof( lp ) );
+      Cmd_ArgvBuffer( 4, lp, sizeof( lp ) );
       page = atoi( lp );
 
       if( page < 0 )
@@ -4688,14 +4688,14 @@ qboolean G_admin_gamedir( gentity_t *ent )
 
       ADMBP_begin();
 
-      nFiles = trap_FS_GetFilteredFiles(dir, ext, filter,
+      nFiles = FS_GetFilteredFiles(dir, ext, filter,
               fileList, sizeof(fileList));
       filePtr = fileList;
       for( i = 0; i < nFiles; i++, filePtr += fileLen + 1 )
       {
         fileLen = strlen( filePtr );
 
-        if ( i < page ) 
+        if ( i < page )
           continue;
 
         ADMBP( va( "%d - %s\n", i, filePtr ) );
@@ -4722,17 +4722,17 @@ qboolean G_admin_gamedir( gentity_t *ent )
 void G_admin_print( gentity_t *ent, char *m )
 {
   if( ent )
-    trap_SendServerCommand( ent - level.gentities, va( "print \"%s\"", m ) );
+    SV_GameSendServerCommand( ent - level.gentities, va( "print \"%s\"", m ) );
   else
   {
     char m2[ MAX_STRING_CHARS ];
-    if( !trap_Cvar_VariableIntegerValue( "com_ansiColor" ) )
+    if( !Cvar_VariableIntegerValue( "com_ansiColor" ) )
     {
       G_DecolorString( m, m2, sizeof( m2 ) );
-      trap_Print( m2 );
+      Com_Printf( m2 );
     }
     else
-      trap_Print( m );
+      Com_Printf( m );
   }
 }
 
@@ -4804,15 +4804,15 @@ qboolean G_admin_seen( gentity_t *ent )
   char       offsetstr[ 10 ];
   char       name[ MAX_NAME_LENGTH ];
 
-  if( trap_Argc() < 2 )
+  if( Cmd_Argc() < 2 )
   {
     ADMP( "^3seen: ^7usage: seen [name] [offset(optional]\n" );
     return qfalse;
   }
-  trap_Argv( 1, name, sizeof( name ) );
-  if( trap_Argc() == 3 )
+  Cmd_ArgvBuffer( 1, name, sizeof( name ) );
+  if( Cmd_Argc() == 3 )
   {
-    trap_Argv( 2, offsetstr, sizeof( offsetstr ) );
+    Cmd_ArgvBuffer( 2, offsetstr, sizeof( offsetstr ) );
     offset = atoi( offsetstr );
   }
   pack_start( level.database_data, DATABASE_DATA_MAX );
@@ -4820,7 +4820,7 @@ qboolean G_admin_seen( gentity_t *ent )
   pack_text2( va( "%%%s%%", name ) );
   pack_int( 10 );
   pack_int( offset );
-  if( trap_Query( DB_SEEN, level.database_data, NULL ) != 0 )
+  if( sl_query( DB_SEEN, level.database_data, NULL ) != 0 )
   {
     ADMP( "^3seen: ^7Query failed\n" );
     return qfalse;
@@ -4834,9 +4834,9 @@ qboolean G_admin_maplog( gentity_t *ent )
   int        offset = 0;
   char       offsetstr[ 10 ];
 
-  if( trap_Argc() == 2 )
+  if( Cmd_Argc() == 2 )
   {
-    trap_Argv( 1, offsetstr, sizeof( offsetstr ) );
+    Cmd_ArgvBuffer( 1, offsetstr, sizeof( offsetstr ) );
     offset = atoi( offsetstr );
   }
 
@@ -4845,7 +4845,7 @@ qboolean G_admin_maplog( gentity_t *ent )
   pack_int( -1 );
   pack_int( 10 );
   pack_int( offset );
-  if( trap_Query( DB_LAST_MAPS, level.database_data, NULL ) != 0 )
+  if( sl_query( DB_LAST_MAPS, level.database_data, NULL ) != 0 )
   {
     ADMP( "^3maplog: ^7Query failed\n" );
     return qfalse;

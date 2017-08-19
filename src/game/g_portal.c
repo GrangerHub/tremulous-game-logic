@@ -56,7 +56,7 @@ static void G_Portal_Effect( portal_t portalindex, float speedMod )
 
 	G_AddEvent( effect, EV_MISSILE_MISS, DirToByte( portal->s.origin2 ) );
 	effect->freeAfterEvent = qtrue;
-	trap_LinkEntity( effect );
+	SV_LinkEntity( effect );
 }
 
 /*
@@ -72,10 +72,10 @@ void G_Portal_Clear( portal_t portalindex )
 	if (!self)
 		return;
 
-		
+
 	G_Portal_Effect( portalindex, 0.25 );
 	level.humanPortals.createTime[ portalindex ] = 0;
-	trap_SetConfigstring( ( CS_HUMAN_PORTAL_CREATETIME + portalindex ),
+	SV_SetConfigstring( ( CS_HUMAN_PORTAL_CREATETIME + portalindex ),
 												va( "%i", 0 ) );
 	level.humanPortals.portals[portalindex] = NULL;
 	G_FreeEntity( self );
@@ -137,12 +137,13 @@ static void G_Portal_Touch(gentity_t *self, gentity_t *other, trace_t *trace)
 	for (i = PORTAL_MINRANGE; i < PORTAL_MAXRANGE; i++)
     {
 		VectorMA(origin, i, dir, end);
-		trap_Trace(&tr, origin, NULL, NULL, end, portal->s.number, MASK_SHOT);
+		SV_Trace(&tr, origin, NULL, NULL, end, portal->s.number, MASK_SHOT, TT_AABB);
 		if (tr.fraction != 1.0f)
     {
 			return;
     }
-		trap_Trace(&tr, end, other->r.mins, other->r.maxs, end, -1, MASK_PLAYERSOLID | CONTENTS_TELEPORTER);
+		SV_Trace(&tr, end, other->r.mins, other->r.maxs, end, -1,
+			MASK_PLAYERSOLID | CONTENTS_TELEPORTER, TT_AABB);
 		if (tr.fraction == 1.0f)
     {
 			break;
@@ -153,7 +154,7 @@ static void G_Portal_Touch(gentity_t *self, gentity_t *other, trace_t *trace)
 		return;
 
 	// Teleport!
-	trap_UnlinkEntity(other);
+	SV_UnlinkEntity(other);
 	VectorCopy(end, other->client->ps.origin);
 	speed = VectorLength(other->client->ps.velocity);
 	VectorScale(portal->s.origin2, speed, other->client->ps.velocity);
@@ -170,7 +171,7 @@ static void G_Portal_Touch(gentity_t *self, gentity_t *other, trace_t *trace)
 	}
 	BG_PlayerStateToEntityState(&other->client->ps, &other->s, qtrue);
 	VectorCopy(other->client->ps.origin, other->r.currentOrigin);
-	trap_LinkEntity(other);
+	SV_LinkEntity(other);
 
 	// Protect against targeting by buildables
   other->targetProtectionTime = level.time + TELEPORT_PROTECTION_TIME;
@@ -211,7 +212,7 @@ void G_Portal_Create(gentity_t *ent, vec3_t origin, vec3_t normal, portal_t port
 	VectorMA(origin, PORTAL_OFFSET, normal, origin);
 	G_SetOrigin(portal, origin);
 	VectorCopy(normal, portal->s.origin2);
-	trap_LinkEntity(portal);
+	SV_LinkEntity(portal);
 
 	// Attach it to the client
 	G_Portal_Clear( portalindex );
@@ -219,6 +220,6 @@ void G_Portal_Create(gentity_t *ent, vec3_t origin, vec3_t normal, portal_t port
 	level.humanPortals.portals[ portalindex ] = portal;
 	level.humanPortals.lifetime[ portalindex ] = level.time + PORTAL_LIFETIME;
 	level.humanPortals.createTime[ portalindex ] = PORTAL_CREATED_REPEAT;
-	trap_SetConfigstring( ( CS_HUMAN_PORTAL_CREATETIME + portalindex ),
+	SV_SetConfigstring( ( CS_HUMAN_PORTAL_CREATETIME + portalindex ),
 												va( "%i", level.humanPortals.createTime[ portalindex ] ) );
 }

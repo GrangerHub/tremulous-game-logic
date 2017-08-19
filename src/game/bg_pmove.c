@@ -354,7 +354,7 @@ static float PM_CmdScale( usercmd_t *cmd, qboolean zFlight )
   float       total;
   float       scale;
   float       modifier = 1.0f;
-  
+
   if ( BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_STAMINA)
     && pm->ps->pm_type == PM_NORMAL )
   {
@@ -383,7 +383,7 @@ static float PM_CmdScale( usercmd_t *cmd, qboolean zFlight )
       sprint = cmd->buttons & BUTTON_SPRINT;
 
     if( sprint )
-      pm->ps->stats[ STAT_STATE ] |= SS_SPEEDBOOST;      
+      pm->ps->stats[ STAT_STATE ] |= SS_SPEEDBOOST;
     else if( wasSprinting && !sprint )
       pm->ps->stats[ STAT_STATE ] &= ~SS_SPEEDBOOST;
 
@@ -634,23 +634,23 @@ static qboolean PM_CheckWallJump( void )
 
   ProjectPointOnPlane( movedir, pml.forward, refNormal );
   VectorNormalize( movedir );
-  
+
   if( pm->cmd.forwardmove < 0 )
     VectorNegate( movedir, movedir );
-  
+
   //allow strafe transitions
   if( pm->cmd.rightmove )
   {
     VectorCopy( pml.right, movedir );
-    
+
     if( pm->cmd.rightmove < 0 )
       VectorNegate( movedir, movedir );
   }
-  
+
   //trace into direction we are moving
   VectorMA( pm->ps->origin, 0.25f, movedir, point );
   pm->trace( &trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum, pm->tracemask );
-  
+
   if( trace.fraction < 1.0f &&
       !( trace.surfaceFlags & ( SURF_SKY | SURF_SLICK ) ) &&
       trace.plane.normal[ 2 ] < MIN_WALK_NORMAL )
@@ -659,10 +659,10 @@ static qboolean PM_CheckWallJump( void )
   }
   else
     return qfalse;
-  
+
   if( pm->ps->pm_flags & PMF_RESPAWNED )
     return qfalse;    // don't allow jump until all buttons are up
-  
+
   if( pm->cmd.upmove < 10 )
     // not holding jump
     return qfalse;
@@ -842,7 +842,7 @@ static qboolean PM_CheckJump( void )
 
   // jump away from wall
   BG_GetClientNormal( pm->ps, normal );
-  
+
   if( pm->ps->velocity[ 2 ] < 0 )
     pm->ps->velocity[ 2 ] = 0;
 
@@ -932,7 +932,7 @@ static qboolean PM_CheckDodge( void )
   vec3_t right, forward, velocity = { 0.0f, 0.0f, 0.0f };
   float jump, sideModifier;
   int i;
-  
+
   if( !BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_STAMINA) )
     return qfalse;
 
@@ -972,7 +972,7 @@ static qboolean PM_CheckDodge( void )
   jump = BG_Class( pm->ps->stats[ STAT_CLASS ] )->jumpMagnitude;
   if( pm->cmd.rightmove && pm->cmd.forwardmove )
     jump *= ( 0.5f * M_SQRT2 );
-  
+
   // Weaken dodge if slowed
   if( ( pm->ps->stats[ STAT_STATE ] & SS_SLOWLOCKED )  ||
       ( pm->ps->stats[ STAT_STATE ] & SS_CREEPSLOWED ) ||
@@ -2005,7 +2005,7 @@ static void PM_GroundClimbTrace( void )
     }
 
     //if we hit something
-    if( trace.fraction < 1.0f && !( trace.surfaceFlags & ( SURF_SKY | SURF_SLICK ) ) && 
+    if( trace.fraction < 1.0f && !( trace.surfaceFlags & ( SURF_SKY | SURF_SLICK ) ) &&
         !( trace.entityNum != ENTITYNUM_WORLD && i != 4 ) )
     {
       if( i == 2 || i == 3 )
@@ -2015,7 +2015,7 @@ static void PM_GroundClimbTrace( void )
 
         VectorCopy( trace.endpos, pm->ps->origin );
       }
-      
+
       //calculate a bunch of stuff...
       CrossProduct( trace.plane.normal, surfNormal, traceCROSSsurf );
       VectorNormalize( traceCROSSsurf );
@@ -2948,7 +2948,7 @@ static void PM_Weapon( void )
         else
           pm->ps->stats[ STAT_MISC ] = 0;
       }
-      
+
       // Charge button released
       else if( !( pm->ps->stats[ STAT_STATE ] & SS_CHARGING ) )
       {
@@ -2966,7 +2966,7 @@ static void PM_Weapon( void )
           pm->ps->stats[ STAT_MISC ] -= pml.msec;
       }
     }
-    
+
     // Discharging
     else
     {
@@ -2979,7 +2979,7 @@ static void PM_Weapon( void )
       if( VectorLength( pm->ps->velocity ) < 64.0f || pm->cmd.rightmove )
         pm->ps->stats[ STAT_MISC ] -= LEVEL4_TRAMPLE_STOP_PENALTY * pml.msec;
     }
-    
+
     // Charge is over
     if( pm->ps->stats[ STAT_MISC ] <= 0 || pm->cmd.forwardmove <= 0 )
     {
@@ -3192,7 +3192,7 @@ static void PM_Weapon( void )
       // Can't fire secondary while primary is charging
       if( attack1 || pm->ps->stats[ STAT_MISC ] > 0 )
         attack2 = qfalse;
-        
+
       if( ( attack1 || pm->ps->stats[ STAT_MISC ] == 0 ) && !attack2 )
       {
         pm->ps->weaponTime = 0;
@@ -3572,7 +3572,7 @@ void PM_UpdateViewAngles( playerState_t *ps, const usercmd_t *cmd )
   // circularly clamp the angles with deltas
   for( i = 0; i < 3; i++ )
   {
-    if( i == ROLL ) 
+    if( i == ROLL )
     {
       // Guard against speed hack
       temp[ i ] = ps->delta_angles[ i ];
@@ -3678,7 +3678,7 @@ void PM_CalculateAngularVelocity( playerState_t *ps, const usercmd_t *cmd )
   // circularly clamp the angles with deltas
   for( i = 0; i < 3; i++ )
   {
-    if( i == ROLL ) 
+    if( i == ROLL )
     {
       // Guard against speed hack
       temp[ i ] = ps->delta_angles[ i ];
@@ -3738,7 +3738,7 @@ void PM_CalculateAngularVelocity( playerState_t *ps, const usercmd_t *cmd )
     pm->pmext->diffAnglesPeriod = (float)( pm->ps->commandTime - pm->pmext->updateAnglesTime );
   }
 
-  if( !( VectorCompare( tempang, pm->pmext->previousUpdateAngles ) && 
+  if( !( VectorCompare( tempang, pm->pmext->previousUpdateAngles ) &&
          pm->pmext->updateAnglesTime == pm->ps->commandTime ) )
   {
     VectorCopy( tempang, pm->pmext->previousUpdateAngles );
@@ -3774,7 +3774,6 @@ PmoveSingle
 
 ================
 */
-void trap_SnapVector( float *v );
 
 void PmoveSingle( pmove_t *pmove )
 {
@@ -3978,7 +3977,11 @@ void PmoveSingle( pmove_t *pmove )
   PM_WaterEvents( );
 
   // snap some parts of playerstate to save network bandwidth
-  trap_SnapVector( pm->ps->velocity );
+  #ifdef Q3_VM
+    trap_SnapVector( pm->ps->velocity );
+  #else
+    Q_SnapVector( pm->ps->velocity );
+  #endif
 }
 
 

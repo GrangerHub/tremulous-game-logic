@@ -23,9 +23,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef _G_ADMIN_H
 #define _G_ADMIN_H
 
-#define AP(x) trap_SendServerCommand(-1, x)
-#define CP(x) trap_SendServerCommand(ent-g_entities, x)
-#define CPx(x, y) trap_SendServerCommand(x, y)
+#define AP(x) SV_GameSendServerCommand(-1, x)
+#define CP(x) SV_GameSendServerCommand(ent-g_entities, x)
+#define CPx(x, y) SV_GameSendServerCommand(x, y)
 #define ADMP(x) G_admin_print(ent, x)
 #define ADMBP(x) G_admin_buffer_print(ent, x)
 #define ADMBP_begin() G_admin_buffer_begin()

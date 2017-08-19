@@ -2,19 +2,19 @@
 ===========================================================================
 Copyright (C) 1999-2005 Id Software, Inc.
 Copyright (C) 2000-2013 Darklegion Development
- 
+
 This file is part of Tremulous.
- 
+
 Tremulous is free software; you can redistribute it
 and/or modify it under the terms of the GNU General Public License as
 published by the Free Software Foundation; either version 2 of the License,
 or (at your option) any later version.
- 
+
 Tremulous is distributed in the hope that it will be
 useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
- 
+
 You should have received a copy of the GNU General Public License
 along with Tremulous; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
@@ -23,9 +23,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 /*
 =======================================================================
- 
+
 USER INTERFACE MAIN
- 
+
 =======================================================================
 */
 
@@ -137,7 +137,7 @@ static size_t cvarTableSize = ARRAY_LEN( cvarTable );
 /*
 ================
 vmMain
- 
+
 This is the only way control passes into the module.
 This must be the very first function compiled into the .qvm file
 ================
@@ -223,7 +223,7 @@ void AssetCache( void )
   uiInfo.uiDC.Assets.sliderBar = trap_R_RegisterShaderNoMip( ASSET_SLIDER_BAR );
   uiInfo.uiDC.Assets.sliderThumb = trap_R_RegisterShaderNoMip( ASSET_SLIDER_THUMB );
 
-  if( ui_emoticons.integer ) 
+  if( ui_emoticons.integer )
   {
     uiInfo.uiDC.Assets.emoticonCount = BG_LoadEmoticons(
       uiInfo.uiDC.Assets.emoticons, MAX_EMOTICONS );
@@ -233,7 +233,7 @@ void AssetCache( void )
 
   for( i = 0; i < uiInfo.uiDC.Assets.emoticonCount; i++ )
   {
-    uiInfo.uiDC.Assets.emoticons[ i ].shader = trap_R_RegisterShaderNoMip( 
+    uiInfo.uiDC.Assets.emoticons[ i ].shader = trap_R_RegisterShaderNoMip(
       va( "emoticons/%s_%dx1.tga", uiInfo.uiDC.Assets.emoticons[ i ].name,
           uiInfo.uiDC.Assets.emoticons[ i ].width ) );
   }
@@ -262,7 +262,7 @@ void UI_DrawTopBottom( float x, float y, float w, float h, float size )
 /*
 ================
 UI_DrawRect
- 
+
 Coordinates are 640*480 virtual values
 =================
 */
@@ -280,7 +280,7 @@ void UI_DrawRect( float x, float y, float width, float height, float size, const
 ==================
 UI_ServerInfoIsValid
 
-Return false if the infostring contains nonprinting characters, 
+Return false if the infostring contains nonprinting characters,
  or if the hostname is blank/undefined
 ==================
 */
@@ -814,7 +814,7 @@ static void UI_BuildFindPlayerList( qboolean force )
 
     if( !uiInfo.numFoundPlayerServers )
     {
-      Com_sprintf( uiInfo.foundPlayerServerNames[uiInfo.numFoundPlayerServers-1],
+      Com_sprintf( uiInfo.foundPlayerServerNames[0],
                    sizeof( uiInfo.foundPlayerServerAddresses[0] ), "no servers found" );
     }
     else
@@ -1505,7 +1505,7 @@ void UI_LoadHelp( const char *helpFile )
   char title[ 32 ], buffer[ 1024 ];
 
   start = trap_Milliseconds();
-  
+
   handle = trap_Parse_LoadSource( helpFile );
   if( !handle )
   {
@@ -1529,7 +1529,7 @@ void UI_LoadHelp( const char *helpFile )
     if( !trap_Parse_ReadToken( handle, &token ) ||
         token.string[0] == 0 || token.string[0] == '}' )
       break;
-      
+
     if( token.string[0] == '{' )
     {
       buffer[ 0 ] = 0;
@@ -1554,7 +1554,7 @@ void UI_LoadHelp( const char *helpFile )
   trap_Parse_FreeSource( handle );
 
   Com_Printf( "UI help file '%s' loaded in %d msec (%d infopanes)\n",
-              helpFile, trap_Milliseconds() - start, uiInfo.helpCount );                   
+              helpFile, trap_Milliseconds() - start, uiInfo.helpCount );
 }
 
 void UI_Load( void )
@@ -3246,7 +3246,7 @@ static void UI_RunMenuScript( char **args )
       if( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount )
       {
         char buffer[ MAX_CVAR_VALUE_STRING ];
-        trap_Cvar_VariableStringBuffer( "ui_reason", buffer, sizeof( buffer ) ); 
+        trap_Cvar_VariableStringBuffer( "ui_reason", buffer, sizeof( buffer ) );
 
         trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote kick %d%s\n",
                                                uiInfo.clientNums[ uiInfo.playerIndex ],
@@ -3259,7 +3259,7 @@ static void UI_RunMenuScript( char **args )
       if( uiInfo.playerIndex >= 0 && uiInfo.playerIndex < uiInfo.playerCount )
       {
         char buffer[ MAX_CVAR_VALUE_STRING ];
-        trap_Cvar_VariableStringBuffer( "ui_reason", buffer, sizeof( buffer ) ); 
+        trap_Cvar_VariableStringBuffer( "ui_reason", buffer, sizeof( buffer ) );
 
         trap_Cmd_ExecuteText( EXEC_APPEND, va( "callvote mute %d%s\n",
                                                uiInfo.clientNums[ uiInfo.playerIndex ],
@@ -3280,7 +3280,7 @@ static void UI_RunMenuScript( char **args )
       if( uiInfo.teamPlayerIndex >= 0 && uiInfo.teamPlayerIndex < uiInfo.myTeamCount )
       {
         char buffer[ MAX_CVAR_VALUE_STRING ];
-        trap_Cvar_VariableStringBuffer( "ui_reason", buffer, sizeof( buffer ) ); 
+        trap_Cvar_VariableStringBuffer( "ui_reason", buffer, sizeof( buffer ) );
 
         trap_Cmd_ExecuteText( EXEC_APPEND, va( "callteamvote kick %d%s\n",
                                                uiInfo.teamClientNums[ uiInfo.teamPlayerIndex ],
@@ -3293,7 +3293,7 @@ static void UI_RunMenuScript( char **args )
       if( uiInfo.teamPlayerIndex >= 0 && uiInfo.teamPlayerIndex < uiInfo.myTeamCount )
       {
         char buffer[ MAX_CVAR_VALUE_STRING ];
-        trap_Cvar_VariableStringBuffer( "ui_reason", buffer, sizeof( buffer ) ); 
+        trap_Cvar_VariableStringBuffer( "ui_reason", buffer, sizeof( buffer ) );
 
         trap_Cmd_ExecuteText( EXEC_APPEND, va( "callteamvote denybuild %d%s\n",
                                                uiInfo.teamClientNums[ uiInfo.teamPlayerIndex ],
@@ -3629,7 +3629,7 @@ static const char *UI_FeederItemText( int feederID, int index, int column, qhand
 
             if( ui_netSource.integer == AS_LOCAL )
             {
-              Com_sprintf( hostname, sizeof( hostname ), "%s [%s]", cleaned, 
+              Com_sprintf( hostname, sizeof( hostname ), "%s [%s]", cleaned,
                            netnames[atoi( Info_ValueForKey( info, "nettype" ) )] );
               return hostname;
             }
@@ -3644,12 +3644,12 @@ static const char *UI_FeederItemText( int feederID, int index, int column, qhand
                 // First char of the label response is a sorting tag. Skip it.
                 label+= 1;
 
-                Com_sprintf( hostname, sizeof( hostname ), "%s %s", 
+                Com_sprintf( hostname, sizeof( hostname ), "%s %s",
                              label, cleaned );
               }
               else
               {
-                Com_sprintf( hostname, sizeof( hostname ), "%s", 
+                Com_sprintf( hostname, sizeof( hostname ), "%s",
                              cleaned );
               }
 
@@ -4582,14 +4582,14 @@ void UI_DrawConnectScreen( qboolean overlay )
       {
         char downloadName[MAX_INFO_VALUE];
         int prompt = trap_Cvar_VariableValue( "com_downloadPrompt" );
-        
+
         if( prompt & DLP_SHOW ) {
           Com_Printf("Opening download prompt...\n");
           trap_Key_SetCatcher( KEYCATCH_UI );
           Menus_ActivateByName("download_popmenu");
           trap_Cvar_Set( "com_downloadPrompt", "0" );
         }
-        
+
         trap_Cvar_VariableStringBuffer( "cl_downloadName", downloadName, sizeof( downloadName ) );
 
         if( *downloadName )
@@ -4666,19 +4666,19 @@ void UI_UpdateNews( qboolean begin )
     uiInfo.newsInfo.refreshActive = qtrue;
   }
   else if( !uiInfo.newsInfo.refreshActive ) // do nothing
-    return; 
+    return;
   else if( uiInfo.uiDC.realTime > uiInfo.newsInfo.refreshtime ) {
-    strcpy( uiInfo.newsInfo.text[ 0 ], 
+    strcpy( uiInfo.newsInfo.text[ 0 ],
       "^1Error: Timed out while contacting the server.");
     uiInfo.newsInfo.numLines = 1;
-    return; 
+    return;
   }
 
   // start the news fetching
   finished = trap_GetNews( begin );
 
   // parse what comes back. Parse newlines and otherwise chop when necessary
-  trap_Cvar_VariableStringBuffer( "cl_newsString", newsString, 
+  trap_Cvar_VariableStringBuffer( "cl_newsString", newsString,
     sizeof( newsString ) );
 
   // FIXME remove magic width constant

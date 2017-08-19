@@ -316,7 +316,7 @@ typedef struct baseParticle_s
   qboolean        overdrawProtection;
   qboolean        realLight;
   qboolean        cullOnStartSolid;
-  
+
   float           scaleWithCharge;
 } baseParticle_t;
 
@@ -362,7 +362,7 @@ typedef struct particleSystem_s
   //for PMT_LAST_NORMAL and PMT_OPPORTUNISTIC_NORMAL
   qboolean              lastNormalIsCurrent;
   vec3_t                lastNormal;
-  
+
   int                   charge;
 } particleSystem_t;
 
@@ -471,7 +471,7 @@ typedef struct baseTrailBeam_s
 
   // the time it takes for a beam to fade out (double attached only)
   int                     fadeOutTime;
-  
+
   char                    shaderName[ MAX_QPATH ];
   qhandle_t               shader;
 
@@ -690,7 +690,7 @@ typedef struct centity_s
   int                   muzzleTSDeathTime;
 
   qboolean              valid;
-  qboolean              oldValid;  
+  qboolean              oldValid;
   struct centity_s      *nextLocation;
 } centity_t;
 
@@ -738,7 +738,7 @@ typedef struct
   int         score;                      // updated by score servercmds
   int         location;                   // location index for team mode
   int         health;                     // you only get this info about your teammates
-  int         upgrade; 
+  int         upgrade;
   int         curWeaponClass;             // sends current weapon for H, current class for A
 
   // when clientinfo is changed, the loading of models/skins/sounds
@@ -779,7 +779,7 @@ typedef struct
 
   char        voice[ MAX_VOICE_NAME_LEN ];
   int         voiceTime;
-  
+
   int         restartFlags;
 } clientInfo_t;
 
@@ -1166,7 +1166,7 @@ typedef struct
   playerState_t savedPmoveStates[ NUM_SAVED_STATES ];
   int           stateHead, stateTail;
   int           ping;
-  
+
   float         chargeMeterAlpha;
   float         chargeMeterValue;
   float         chargeStaminaMeterAlpha;
@@ -1174,7 +1174,7 @@ typedef struct
   qhandle_t     lastHealthCross;
   float         healthCrossFade;
   int           nearUsableBuildable;
-  
+
   int           nextWeaponClickTime;
 
   int           numBinaryShadersUsed;
@@ -1681,7 +1681,7 @@ const char  *CG_ConfigString( int index );
 const char  *CG_Argv( int arg );
 
 void QDECL  CG_Printf( const char *msg, ... ) __attribute__ ((format (printf, 1, 2)));
-void QDECL  CG_Error( const char *msg, ... ) __attribute__ ((noreturn, format (printf, 1, 2)));
+void QDECL  CG_Error( const char *msg, ... ) __attribute__ ((format (printf, 1, 2)));
 
 void        CG_StartMusic( void );
 int         CG_PlayerCount( void );
@@ -2060,7 +2060,7 @@ void          trap_RemoveCommand( const char *cmdName );
 #ifndef MODULE_INTERFACE_11
 void  	      trap_Field_CompleteList( char *list );
 #endif
-  
+
 // send a string to the server over the network
 void          trap_SendClientCommand( const char *s );
 
