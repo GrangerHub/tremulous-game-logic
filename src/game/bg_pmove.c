@@ -2970,7 +2970,13 @@ static void PM_Weapon( void )
           pm->ps->stats[ STAT_MISC ] -= pml.msec;
       }
     }
-    
+
+    // maul cancels trample
+    else if( attack1 )
+    {
+      pm->ps->stats[ STAT_MISC ] = 0;
+    }
+
     // Discharging
     else
     {
@@ -2983,12 +2989,16 @@ static void PM_Weapon( void )
       if( VectorLength( pm->ps->velocity ) < 64.0f || pm->cmd.rightmove )
         pm->ps->stats[ STAT_MISC ] -= LEVEL4_TRAMPLE_STOP_PENALTY * pml.msec;
     }
-    
+
     // Charge is over
     if( pm->ps->stats[ STAT_MISC ] <= 0 || pm->cmd.forwardmove <= 0 )
     {
       pm->ps->stats[ STAT_MISC ] = 0;
-      pm->ps->stats[ STAT_STATE ] &= ~SS_CHARGING;
+      if( pm->ps->stats[ STAT_STATE ] & SS_CHARGING )
+      {
+        pm->ps->weaponTime = 0;
+        pm->ps->stats[ STAT_STATE ] &= ~SS_CHARGING;
+      }
     }
   }
 
@@ -3064,10 +3074,6 @@ static void PM_Weapon( void )
     pm->pmext->repairRepeatDelay -= pml.msec;
   if( pm->pmext->repairRepeatDelay < 0 )
     pm->pmext->repairRepeatDelay = 0;
-
-  // no slash during charge
-  if( pm->ps->stats[ STAT_STATE ] & SS_CHARGING )
-    return;
 
   // check for weapon change
   // can't change if weapon is firing, but can change
