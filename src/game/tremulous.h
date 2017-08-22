@@ -121,7 +121,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL3_BOUNCEBALL_LIFETIME  3000
 
 #define LEVEL4_CLAW_DMG             ADM(100)
-#define LEVEL4_CLAW_RANGE           128.0f
+#define LEVEL4_CLAW_RANGE           100.0f
 #define LEVEL4_CLAW_WIDTH           20.0f
 #define LEVEL4_CLAW_HEIGHT          20.0f
 #define LEVEL4_CLAW_REPEAT          750
