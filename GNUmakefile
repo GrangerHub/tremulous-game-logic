@@ -5,7 +5,7 @@
 
 #############################################################################
 # *** WARNING ***
-# DO NOT MODIFY THIS FILE. 
+# DO NOT MODIFY THIS FILE.
 #
 # If you require a different configuration from the defaults below, create a
 # new file named "GNUmakefile.local" in the same directory as this file and define
@@ -31,35 +31,37 @@ endif
 
 # Build the client executable
 ifndef BUILD_CLIENT
-  BUILD_CLIENT     =
+  BUILD_CLIENT          =
 endif
 
 # Build the server executable
 ifndef BUILD_SERVER
-  BUILD_SERVER     =
+  BUILD_SERVER          =
 endif
 
-# Build shared libraries
+# Build game shared libraries
 ifndef BUILD_GAME_SO
-  BUILD_GAME_SO    =
+  BUILD_GAME_SO         =
 endif
 
-# Build game Quake virtual machine files
-ifndef BUILD_GAME_QVM
-  BUILD_GAME_QVM   =
+# Build cgame and ui Quake virtual machine files
+ifndef BUILD_CGAME_UI_QVM
+  BUILD_CGAME_UI_QVM    =
+endif
+
+#Build cgame and ui shared libraries
+ifndef BUILD_CGAME_UI_SO
+  BUILD_CGAME_UI_SO     =
 endif
 
 # Build game Quake virtual machine files for GPP
-ifndef BUILD_GAME_QVM_11
-  BUILD_GAME_QVM_11=
+ifndef BUILD_CGAME_UI_QVM_11
+  BUILD_CGAME_UI_QVM_11 =
 endif
 
-ifndef BUILD_ONLY_GAME
-  BUILD_ONLY_GAME  =
-endif
-
-ifndef BUILD_ONLY_CGUI
-  BUILD_ONLY_CGUI  =
+#Build cgame and ui shared libraries for GPP
+ifndef BUILD_CGAME_UI_SO_11
+  BUILD_CGAME_UI_SO_11  =
 endif
 
 ifndef BUILD_RENDERER_OPENGL2
@@ -477,7 +479,7 @@ ifeq ($(PLATFORM),darwin)
 
   BASE_CFLAGS += -fno-strict-aliasing -DMACOS_X -fno-common -pipe
 
-  # 
+  #
   # FIXME: This is a workaround for broken OSX build. BASE_CFLAGS is either
   # not setup correctly, or is being reset durring the build.
   #
@@ -913,7 +915,7 @@ endif
 
 ifneq ($(HAVE_VM_COMPILED),true)
   BASE_CFLAGS += -DNO_VM_COMPILED
-  BUILD_GAME_QVM=0
+  BUILD_QVM=0
 endif
 
 TARGETS =
@@ -956,47 +958,32 @@ ifneq ($(BUILD_CLIENT),0)
 endif
 
 ifneq ($(BUILD_GAME_SO),0)
-  ifeq ($(BUILD_ONLY_GAME),1)
-    TARGETS += \
-      $(B)/$(OUT)/$(BASEGAME)/game$(SHLIBNAME)
-  else
-    ifeq ($(BUILD_ONLY_CGUI),1)
-      TARGETS += \
-        $(B)/$(OUT)/$(BASEGAME)/cgame$(SHLIBNAME) \
-        $(B)/$(OUT)/$(BASEGAME)/ui$(SHLIBNAME)
-    else
-      TARGETS += \
-        $(B)/$(OUT)/$(BASEGAME)/cgame$(SHLIBNAME) \
-        $(B)/$(OUT)/$(BASEGAME)/game$(SHLIBNAME) \
-        $(B)/$(OUT)/$(BASEGAME)/ui$(SHLIBNAME)
-    endif
-  endif
+  TARGETS += \
+    $(B)/$(OUT)/$(BASEGAME)/game$(SHLIBNAME)
 endif
 
-ifneq ($(BUILD_GAME_QVM),0)
-  ifeq ($(BUILD_ONLY_GAME),1)
-    TARGETS += \
-      $(B)/$(OUT)/$(BASEGAME)/vm/game.qvm
-  else
-    ifeq ($(BUILD_ONLY_CGUI),1)
-      TARGETS += \
-        $(B)/$(OUT)/$(BASEGAME)/vm/cgame.qvm \
-        $(B)/$(OUT)/$(BASEGAME)/vm/ui.qvm
-    else
-      TARGETS += \
-        $(B)/$(OUT)/$(BASEGAME)/vm/cgame.qvm \
-        $(B)/$(OUT)/$(BASEGAME)/vm/game.qvm \
-        $(B)/$(OUT)/$(BASEGAME)/vm/ui.qvm
-    endif
-  endif
+ifneq ($(BUILD_CGAME_UI_QVM),0)
+  TARGETS += \
+    $(B)/$(OUT)/$(BASEGAME)/vm/cgame.qvm \
+    $(B)/$(OUT)/$(BASEGAME)/vm/ui.qvm
 endif
 
-ifneq ($(BUILD_GAME_QVM_11),0)
-  ifneq ($(BUILD_ONLY_GAME),1)
-    TARGETS += \
-      $(B)/$(OUT)/$(BASEGAME)_11/vm/cgame.qvm \
-      $(B)/$(OUT)/$(BASEGAME)_11/vm/ui.qvm
-  endif
+ifneq ($(BUILD_CGAME_UI_SO),0)
+  TARGETS += \
+    $(B)/$(OUT)/$(BASEGAME)/cgame$(SHLIBNAME) \
+    $(B)/$(OUT)/$(BASEGAME)/ui$(SHLIBNAME)
+endif
+
+ifneq ($(BUILD_CGAME_UI_QVM_11),0)
+  TARGETS += \
+    $(B)/$(OUT)/$(BASEGAME)_11/vm/cgame.qvm \
+    $(B)/$(OUT)/$(BASEGAME)_11/vm/ui.qvm
+endif
+
+ifneq ($(BUILD_CGAME_UI_SO_11),0)
+  TARGETS += \
+    $(B)/$(OUT)/$(BASEGAME)_11/cgame$(SHLIBNAME) \
+    $(B)/$(OUT)/$(BASEGAME)_11/ui$(SHLIBNAME)
 endif
 
 ifeq ($(USE_OPENAL),1)
@@ -1482,11 +1469,6 @@ endef
 define DO_CGAME_Q3LCC_11
 $(echo_cmd) "CGAME_Q3LCC_11 $<"
 $(Q)$(Q3LCC) $(BASEGAME_CFLAGS) -DCGAME -DMODULE_INTERFACE_11 -o $@ $<
-endef
-
-define DO_GAME_Q3LCC
-$(echo_cmd) "GAME_Q3LCC $<"
-$(Q)$(Q3LCC) $(BASEGAME_CFLAGS) -DGAME -o $@ $<
 endef
 
 define DO_UI_Q3LCC
@@ -2063,7 +2045,7 @@ endif
 ifneq ($(USE_RENDERER_DLOPEN),0)
 $(B)/$(OUT)/$(CLIENTBIN)$(FULLBINEXT): $(Q3OBJ) $(LIBSDLMAIN)
 	$(echo_cmd) "LD $@"
-	$(Q)$(CC) $(CLIENT_CFLAGS) $(CFLAGS) $(CLIENT_LDFLAGS) $(LDFLAGS) -o $@ $(Q3OBJ) $(LIBSDLMAIN) $(CLIENT_LIBS) $(LIBS) -lpthread
+	$(Q)$(CC) $(CLIENT_CFLAGS) $(CFLAGS) -rdynamic $(CLIENT_LDFLAGS) $(LDFLAGS) -o $@ $(Q3OBJ) $(LIBSDLMAIN) $(CLIENT_LIBS) $(LIBS) -lpthread
 
 $(B)/$(OUT)/renderer_opengl1$(SHLIBNAME): $(Q3ROBJ) $(JPGOBJ)
 	$(echo_cmd) "LD $@"
@@ -2075,11 +2057,11 @@ $(B)/$(OUT)/renderer_opengl2$(SHLIBNAME): $(Q3R2OBJ) $(Q3R2STRINGOBJ) $(JPGOBJ)
 else
 $(B)/$(OUT)/$(CLIENTBIN)$(FULLBINEXT): $(Q3OBJ) $(Q3ROBJ) $(JPGOBJ) $(LIBSDLMAIN)
 	$(echo_cmd) "LD $@"
-	$(Q)$(CC) $(CLIENT_CFLAGS) $(CFLAGS) $(CLIENT_LDFLAGS) $(LDFLAGS) -o $@ $(Q3OBJ) $(Q3ROBJ) $(JPGOBJ) $(LIBSDLMAIN) $(CLIENT_LIBS) $(RENDERER_LIBS) $(LIBS) -lpthread
+	$(Q)$(CC) $(CLIENT_CFLAGS) $(CFLAGS) -rdynamic $(CLIENT_LDFLAGS) $(LDFLAGS) -o $@ $(Q3OBJ) $(Q3ROBJ) $(JPGOBJ) $(LIBSDLMAIN) $(CLIENT_LIBS) $(RENDERER_LIBS) $(LIBS) -lpthread
 
 $(B)/$(OUT)/$(CLIENTBIN)_opengl2$(FULLBINEXT): $(Q3OBJ) $(Q3R2OBJ) $(Q3R2STRINGOBJ) $(JPGOBJ) $(LIBSDLMAIN)
 	$(echo_cmd) "LD $@"
-	$(Q)$(CC) $(CLIENT_CFLAGS) $(CFLAGS) $(CLIENT_LDFLAGS) $(LDFLAGS) \
+	$(Q)$(CC) $(CLIENT_CFLAGS) $(CFLAGS) -rdynamic $(CLIENT_LDFLAGS) $(LDFLAGS) \
 		-o $@ $(Q3OBJ) $(Q3R2OBJ) $(Q3R2STRINGOBJ) $(JPGOBJ) \
 		$(LIBSDLMAIN) $(CLIENT_LIBS) $(RENDERER_LIBS) $(LIBS) -lpthread
 endif
@@ -2200,7 +2182,7 @@ endif
 
 $(B)/$(OUT)/$(SERVERBIN)$(FULLBINEXT): $(Q3DOBJ)
 	$(echo_cmd) "LD $@"
-	$(Q)$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(Q3DOBJ) $(SERVER_LIBS) $(LIBS) -lpthread
+	$(Q)$(CC) $(CFLAGS) -rdynamic $(LDFLAGS) -o $@ $(Q3DOBJ) $(SERVER_LIBS) $(LIBS) -lpthread
 
 
 
@@ -2292,6 +2274,10 @@ $(B)/$(OUT)/$(BASEGAME)/vm/cgame.qvm: $(CGVMOBJ) $(CGDIR)/cg_syscalls.asm $(Q3AS
 	$(echo_cmd) "Q3ASM $@"
 	$(Q)$(Q3ASM) -o $@ $(CGVMOBJ) $(CGDIR)/cg_syscalls.asm
 
+$(B)/$(OUT)/$(BASEGAME)_11/cgame$(SHLIBNAME): $(CGOBJ)
+	$(echo_cmd) "LD $@"
+	$(Q)$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(CGOBJ)
+
 $(B)/$(OUT)/$(BASEGAME)_11/vm/cgame.qvm: $(CGVMOBJ11) $(CGDIR)/cg_syscalls_11.asm $(Q3ASM)
 	$(echo_cmd) "Q3ASM $@"
 	$(Q)$(Q3ASM) -o $@ $(CGVMOBJ11) $(CGDIR)/cg_syscalls_11.asm
@@ -2340,16 +2326,9 @@ GOBJ_ = \
   $(B)/qcommon/q_shared.o \
   $(B)/qcommon/packing.o
 
-GOBJ = $(GOBJ_) $(B)/game/g_syscalls.o
-GVMOBJ = $(GOBJ_:%.o=%.asm)
-
-$(B)/$(OUT)/$(BASEGAME)/game$(SHLIBNAME): $(GOBJ)
+$(B)/$(OUT)/$(BASEGAME)/game$(SHLIBNAME): $(GOBJ_)
 	$(echo_cmd) "LD $@"
-	$(Q)$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(GOBJ)
-
-$(B)/$(OUT)/$(BASEGAME)/vm/game.qvm: $(GVMOBJ) $(GDIR)/g_syscalls.asm $(Q3ASM)
-	$(echo_cmd) "Q3ASM $@"
-	$(Q)$(Q3ASM) -o $@ $(GVMOBJ) $(GDIR)/g_syscalls.asm
+	$(Q)$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(GOBJ_)
 
 
 
@@ -2390,6 +2369,10 @@ $(B)/$(OUT)/$(BASEGAME)/ui$(SHLIBNAME): $(UIOBJ)
 $(B)/$(OUT)/$(BASEGAME)/vm/ui.qvm: $(UIVMOBJ) $(UIDIR)/ui_syscalls.asm $(Q3ASM)
 	$(echo_cmd) "Q3ASM $@"
 	$(Q)$(Q3ASM) -o $@ $(UIVMOBJ) $(UIDIR)/ui_syscalls.asm
+
+$(B)/$(OUT)/$(BASEGAME)_11/ui$(SHLIBNAME): $(UIOBJ)
+	$(echo_cmd) "LD $@"
+	$(Q)$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(UIOBJ)
 
 $(B)/$(OUT)/$(BASEGAME)_11/vm/ui.qvm: $(UIVMOBJ11) $(UIDIR)/ui_syscalls_11.asm $(Q3ASM)
 	$(echo_cmd) "Q3ASM $@"
@@ -2552,13 +2535,8 @@ $(B)/cgame/%.asm: $(CGDIR)/%.c $(Q3LCC)
 $(B)/11/cgame/%.asm: $(CGDIR)/%.c $(Q3LCC)
 	$(DO_CGAME_Q3LCC_11)
 
-
 $(B)/game/%.o: $(GDIR)/%.c
 	$(DO_GAME_CC)
-
-$(B)/game/%.asm: $(GDIR)/%.c $(Q3LCC)
-	$(DO_GAME_Q3LCC)
-
 
 $(B)/ui/bg_%.o: $(GDIR)/bg_%.c
 	$(DO_UI_CC)
@@ -2588,8 +2566,8 @@ $(B)/qcommon/%.asm: $(CMDIR)/%.c $(Q3LCC)
 #############################################################################
 
 OBJ = $(Q3OBJ) $(Q3ROBJ) $(Q3R2OBJ) $(Q3DOBJ) $(JPGOBJ) \
-  $(GOBJ) $(CGOBJ) $(UIOBJ) $(CGOBJ11) $(UIOBJ11) \
-  $(GVMOBJ) $(CGVMOBJ) $(UIVMOBJ) $(CGVMOBJ11) $(UIVMOBJ11)
+  $(GOBJ_) $(CGOBJ) $(UIOBJ) $(CGOBJ11) $(UIOBJ11) \
+  $(CGVMOBJ) $(UIVMOBJ) $(CGVMOBJ11) $(UIVMOBJ11)
 TOOLSOBJ = $(LBURGOBJ) $(Q3CPPOBJ) $(Q3RCCOBJ) $(Q3LCCOBJ) $(Q3ASMOBJ)
 STRINGOBJ = $(Q3R2STRINGOBJ)
 

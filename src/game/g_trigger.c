@@ -29,8 +29,8 @@ void InitTrigger( gentity_t *self )
   if( !VectorCompare( self->r.currentAngles, vec3_origin ) )
     G_SetMovedir( self->r.currentAngles, self->movedir );
 
-  trap_SetBrushModel( self, self->model );
-  G_SetContents( self, CONTENTS_TRIGGER ); // replaces the -1 from trap_SetBrushModel
+  SV_SetBrushModel( self, self->model );
+  G_SetContents( self, CONTENTS_TRIGGER ); // replaces the -1 from SV_SetBrushModel
   self->r.svFlags = SVF_NOCLIENT;
 }
 
@@ -112,14 +112,14 @@ void SP_trigger_multiple( gentity_t *ent )
   if( ent->random >= ent->wait && ent->wait >= 0 )
   {
     ent->random = ent->wait - FRAMETIME;
-    G_Printf( "trigger_multiple has random >= wait\n" );
+    Com_Printf( "trigger_multiple has random >= wait\n" );
   }
 
   ent->touch = Touch_Multi;
   ent->use = Use_Multi;
 
   InitTrigger( ent );
-  trap_LinkEntity( ent );
+  SV_LinkEntity( ent );
 }
 
 
@@ -226,7 +226,7 @@ void SP_trigger_push( gentity_t *self )
   self->touch = trigger_push_touch;
   self->think = AimAtTarget;
   self->nextthink = level.time + FRAMETIME;
-  trap_LinkEntity( self );
+  SV_LinkEntity( self );
 }
 
 
@@ -320,7 +320,7 @@ void trigger_teleporter_touch( gentity_t *self, gentity_t *other, trace_t *trace
 
   if( !dest )
   {
-    G_Printf( "Couldn't find teleporter destination\n" );
+    Com_Printf( "Couldn't find teleporter destination\n" );
     return;
   }
 
@@ -367,7 +367,7 @@ void SP_trigger_teleport( gentity_t *self )
   self->touch = trigger_teleporter_touch;
   self->use = trigger_teleporter_use;
 
-  trap_LinkEntity( self );
+  SV_LinkEntity( self );
 }
 
 
@@ -394,9 +394,9 @@ NO_PROTECTION *nothing* stops the damage
 void hurt_use( gentity_t *self, gentity_t *other, gentity_t *activator )
 {
   if( self->r.linked )
-    trap_UnlinkEntity( self );
+    SV_UnlinkEntity( self );
   else
-    trap_LinkEntity( self );
+    SV_LinkEntity( self );
 }
 
 void hurt_touch( gentity_t *self, gentity_t *other, trace_t *trace )
@@ -456,9 +456,9 @@ void SP_trigger_hurt( gentity_t *self )
 
   // link in to the world if starting active
   if( self->spawnflags & 1 )
-    trap_UnlinkEntity( self );
+    SV_UnlinkEntity( self );
   else
-    trap_LinkEntity( self );
+    SV_LinkEntity( self );
 }
 
 
@@ -515,7 +515,7 @@ void SP_func_timer( gentity_t *self )
   if( self->random >= self->wait )
   {
     self->random = self->wait - FRAMETIME;
-    G_Printf( "func_timer at %s has random >= wait\n", vtos( self->r.currentOrigin ) );
+    Com_Printf( "func_timer at %s has random >= wait\n", vtos( self->r.currentOrigin ) );
   }
 
   if( self->spawnflags & 1 )
@@ -695,7 +695,7 @@ void SP_trigger_buildable( gentity_t *self )
   if( self->random >= self->wait && self->wait >= 0 )
   {
     self->random = self->wait - FRAMETIME;
-    G_Printf( S_COLOR_YELLOW "WARNING: trigger_buildable has random >= wait\n" );
+    Com_Printf( S_COLOR_YELLOW "WARNING: trigger_buildable has random >= wait\n" );
   }
 
   G_SpawnString( "buildables", "", &buffer );
@@ -714,7 +714,7 @@ void SP_trigger_buildable( gentity_t *self )
     self->s.eFlags |= EF_DEAD;
 
   InitTrigger( self );
-  trap_LinkEntity( self );
+  SV_LinkEntity( self );
 }
 
 
@@ -825,7 +825,7 @@ void SP_trigger_class( gentity_t *self )
   if( self->random >= self->wait && self->wait >= 0 )
   {
     self->random = self->wait - FRAMETIME;
-    G_Printf( S_COLOR_YELLOW "WARNING: trigger_class has random >= wait\n" );
+    Com_Printf( S_COLOR_YELLOW "WARNING: trigger_class has random >= wait\n" );
   }
 
   G_SpawnString( "classes", "", &buffer );
@@ -844,7 +844,7 @@ void SP_trigger_class( gentity_t *self )
     self->s.eFlags |= EF_DEAD;
 
   InitTrigger( self );
-  trap_LinkEntity( self );
+  SV_LinkEntity( self );
 }
 
 
@@ -960,7 +960,7 @@ void SP_trigger_equipment( gentity_t *self )
   if( self->random >= self->wait && self->wait >= 0 )
   {
     self->random = self->wait - FRAMETIME;
-    G_Printf( S_COLOR_YELLOW "WARNING: trigger_equipment has random >= wait\n" );
+    Com_Printf( S_COLOR_YELLOW "WARNING: trigger_equipment has random >= wait\n" );
   }
 
   G_SpawnString( "equipment", "", &buffer );
@@ -980,7 +980,7 @@ void SP_trigger_equipment( gentity_t *self )
     self->s.eFlags |= EF_DEAD;
 
   InitTrigger( self );
-  trap_LinkEntity( self );
+  SV_LinkEntity( self );
 }
 
 
@@ -1006,9 +1006,9 @@ trigger_gravity_use
 void trigger_gravity_use( gentity_t *ent, gentity_t *other, gentity_t *activator )
 {
   if( ent->r.linked )
-    trap_UnlinkEntity( ent );
+    SV_UnlinkEntity( ent );
   else
-    trap_LinkEntity( ent );
+    SV_LinkEntity( ent );
 }
 
 
@@ -1025,7 +1025,7 @@ void SP_trigger_gravity( gentity_t *self )
   self->use = trigger_gravity_use;
 
   InitTrigger( self );
-  trap_LinkEntity( self );
+  SV_LinkEntity( self );
 }
 
 
@@ -1037,9 +1037,9 @@ trigger_heal_use
 void trigger_heal_use( gentity_t *self, gentity_t *other, gentity_t *activator )
 {
   if( self->r.linked )
-    trap_UnlinkEntity( self );
+    SV_UnlinkEntity( self );
   else
-    trap_LinkEntity( self );
+    SV_LinkEntity( self );
 }
 
 /*
@@ -1084,7 +1084,7 @@ void SP_trigger_heal( gentity_t *self )
   if( self->damage <= 0 )
   {
     self->damage = 1;
-    G_Printf( S_COLOR_YELLOW "WARNING: trigger_heal with negative damage key\n" );
+    Com_Printf( S_COLOR_YELLOW "WARNING: trigger_heal with negative damage key\n" );
   }
 
   self->touch = trigger_heal_touch;
@@ -1094,9 +1094,9 @@ void SP_trigger_heal( gentity_t *self )
 
   // link in to the world if starting active
   if( self->spawnflags & 1 )
-    trap_UnlinkEntity( self );
+    SV_UnlinkEntity( self );
   else
-    trap_LinkEntity( self );
+    SV_LinkEntity( self );
 }
 
 
@@ -1163,11 +1163,11 @@ void SP_trigger_ammo( gentity_t *self )
   if( self->damage <= 0 )
   {
     self->damage = 1;
-    G_Printf( S_COLOR_YELLOW "WARNING: trigger_ammo with negative ammo key\n" );
+    Com_Printf( S_COLOR_YELLOW "WARNING: trigger_ammo with negative ammo key\n" );
   }
 
   self->touch = trigger_ammo_touch;
 
   InitTrigger( self );
-  trap_LinkEntity( self );
+  SV_LinkEntity( self );
 }

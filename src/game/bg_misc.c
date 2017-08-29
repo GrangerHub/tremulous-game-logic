@@ -26,12 +26,20 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../qcommon/q_shared.h"
 #include "bg_public.h"
 
-int  trap_FS_FOpenFile( const char *qpath, fileHandle_t *f, fsMode_t mode );
-int  trap_FS_Read( void *buffer, int len, fileHandle_t f );
-void trap_FS_Write( const void *buffer, int len, fileHandle_t f );
-void trap_FS_FCloseFile( fileHandle_t f );
-void trap_FS_Seek( fileHandle_t f, long offset, fsOrigin_t origin ); // fsOrigin_t
-int  trap_FS_GetFileList(  const char *path, const char *extension, char *listbuf, int bufsize );
+#ifdef Q3_VM
+  #define FS_FOpenFileByMode trap_FS_FOpenFile
+  #define FS_Read2 trap_FS_Read
+  #define FS_Write trap_FS_Write
+  #define FS_FCloseFile trap_FS_FCloseFile
+  #define FS_Seek trap_FS_Seek
+  #define FS_GetFileList trap_FS_GetFileList
+  #define Cvar_VariableStringBuffer trap_Cvar_VariableStringBuffer
+#else
+  int  FS_FOpenFileByMode( const char *qpath, fileHandle_t *f, fsMode_t mode );
+  int  FS_Read2( void *buffer, int len, fileHandle_t f );
+  void FS_FCloseFile( fileHandle_t f );
+  int  FS_GetFileList(  const char *path, const char *extension, char *listbuf, int bufsize );
+#endif
 
 static const teamAttributes_t bg_teamList[ ] =
 {
@@ -1003,7 +1011,7 @@ static qboolean BG_ParseBuildableFile( const char *filename, buildableConfig_t *
 
 
   // load the file
-  len = trap_FS_FOpenFile( filename, &f, FS_READ );
+  len = FS_FOpenFileByMode( filename, &f, FS_READ );
   if( len < 0 )
   {
     Com_Printf( S_COLOR_RED "ERROR: Buildable file %s doesn't exist\n", filename );
@@ -1012,15 +1020,15 @@ static qboolean BG_ParseBuildableFile( const char *filename, buildableConfig_t *
 
   if( len == 0 || len >= sizeof( text ) - 1 )
   {
-    trap_FS_FCloseFile( f );
+    FS_FCloseFile( f );
     Com_Printf( S_COLOR_RED "ERROR: Buildable file %s is %s\n", filename,
       len == 0 ? "empty" : "too long" );
     return qfalse;
   }
 
-  trap_FS_Read( text, len, f );
+  FS_Read2( text, len, f );
   text[ len ] = 0;
-  trap_FS_FCloseFile( f );
+  FS_FCloseFile( f );
 
   // parse the text
   text_p = text;
@@ -1818,21 +1826,21 @@ static qboolean BG_ParseClassFile( const char *filename, classConfig_t *cc )
   };
 
   // load the file
-  len = trap_FS_FOpenFile( filename, &f, FS_READ );
+  len = FS_FOpenFileByMode( filename, &f, FS_READ );
   if( len < 0 )
     return qfalse;
 
   if( len == 0 || len >= sizeof( text ) - 1 )
   {
-    trap_FS_FCloseFile( f );
+    FS_FCloseFile( f );
     Com_Printf( S_COLOR_RED "ERROR: Class file %s is %s\n", filename,
       len == 0 ? "empty" : "too long" );
     return qfalse;
   }
 
-  trap_FS_Read( text, len, f );
+  FS_Read2( text, len, f );
   text[ len ] = 0;
-  trap_FS_FCloseFile( f );
+  FS_FCloseFile( f );
 
   // parse the text
   text_p = text;
@@ -4043,14 +4051,14 @@ Handles the sequence numbers
 ===============
 */
 
-void  trap_Cvar_VariableStringBuffer( const char *var_name, char *buffer, int bufsize );
+void  Cvar_VariableStringBuffer( const char *var_name, char *buffer, int bufsize );
 
 void BG_AddPredictableEventToPlayerstate( int newEvent, int eventParm, playerState_t *ps )
 {
 #ifdef DEBUG_EVENTS
   {
     char buf[ 256 ];
-    trap_Cvar_VariableStringBuffer( "showevents", buf, sizeof( buf ) );
+    Cvar_VariableStringBuffer( "showevents", buf, sizeof( buf ) );
 
     if( atof( buf ) != 0 )
     {
@@ -4175,7 +4183,7 @@ void BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s, qboolean 
   if( s->generic1 <= WPM_NONE || s->generic1 >= WPM_NUM_WEAPONMODES )
     s->generic1 = WPM_PRIMARY;
 
-  s->otherEntityNum = ps->otherEntityNum;  
+  s->otherEntityNum = ps->otherEntityNum;
 }
 
 
@@ -4746,7 +4754,7 @@ int BG_PlayerPoisonCloudTime( playerState_t *ps )
     time -= HELMET_PCLOUD_PROTECTION;
   if( BG_InventoryContainsUpgrade( UP_LIGHTARMOUR, ps->stats ) )
     time -= LIGHTARMOUR_PCLOUD_PROTECTION;
-    
+
   return time;
 }
 
@@ -5032,20 +5040,20 @@ void BG_InitAllowedGameElements( void )
 {
   char cvar[ MAX_CVAR_VALUE_STRING ];
 
-  trap_Cvar_VariableStringBuffer( "g_disabledEquipment",
+  Cvar_VariableStringBuffer( "g_disabledEquipment",
       cvar, MAX_CVAR_VALUE_STRING );
 
   BG_ParseCSVEquipmentList( cvar,
       bg_disabledGameElements.weapons, WP_NUM_WEAPONS,
       bg_disabledGameElements.upgrades, UP_NUM_UPGRADES );
 
-  trap_Cvar_VariableStringBuffer( "g_disabledClasses",
+  Cvar_VariableStringBuffer( "g_disabledClasses",
       cvar, MAX_CVAR_VALUE_STRING );
 
   BG_ParseCSVClassList( cvar,
       bg_disabledGameElements.classes, PCL_NUM_CLASSES );
 
-  trap_Cvar_VariableStringBuffer( "g_disabledBuildables",
+  Cvar_VariableStringBuffer( "g_disabledBuildables",
       cvar, MAX_CVAR_VALUE_STRING );
 
   BG_ParseCSVBuildableList( cvar,
@@ -5154,7 +5162,7 @@ int BG_LoadEmoticons( emoticon_t *emoticons, int num )
   int fileLen;
   int count;
 
-  numFiles = trap_FS_GetFileList( "emoticons", "x1.tga", fileList,
+  numFiles = FS_GetFileList( "emoticons", "x1.tga", fileList,
     sizeof( fileList ) );
 
   if( numFiles < 1 )
@@ -5179,7 +5187,7 @@ int BG_LoadEmoticons( emoticon_t *emoticons, int num )
         filePtr, MAX_EMOTICON_NAME_LEN + 8 );
       continue;
     }
-    if( !trap_FS_FOpenFile( va( "emoticons/%s", filePtr ), NULL, FS_READ ) )
+    if( !FS_FOpenFileByMode( va( "emoticons/%s", filePtr ), NULL, FS_READ ) )
     {
       Com_Printf( S_COLOR_YELLOW "could not open \"emoticons/%s\"\n", filePtr );
       continue;

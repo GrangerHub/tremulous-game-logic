@@ -144,7 +144,7 @@ qboolean SpotWouldTelefrag( gentity_t *spot )
 
   VectorAdd( spot->r.currentOrigin, playerMins, mins );
   VectorAdd( spot->r.currentOrigin, playerMaxs, maxs );
-  num = trap_EntitiesInBox( mins, maxs, touch, MAX_GENTITIES );
+  num = SV_AreaEntities( mins, maxs, touch, MAX_GENTITIES );
 
   for( i = 0; i < num; i++ )
   {
@@ -222,7 +222,7 @@ static gentity_t *G_SelectRandomFurthestSpawnPoint ( vec3_t avoidPoint, vec3_t o
     spot = G_Find( NULL, FOFS( classname ), "info_player_deathmatch" );
 
     if( !spot )
-      G_Error( "Couldn't find a spawn point" );
+      Com_Error( ERR_DROP, "Couldn't find a spawn point" );
 
     VectorCopy( spot->r.currentOrigin, origin );
     origin[ 2 ] += 9;
@@ -470,10 +470,10 @@ static void SpawnCorpse( gentity_t *ent )
 
   VectorCopy( ent->r.currentOrigin, origin );
 
-  trap_UnlinkEntity( ent );
+  SV_UnlinkEntity( ent );
 
   // if client is in a nodrop area, don't leave the body
-  contents = trap_PointContents( origin, -1 );
+  contents = SV_PointContents( origin, -1 );
   if( contents & CONTENTS_NODROP )
     return;
 
@@ -496,7 +496,7 @@ static void SpawnCorpse( gentity_t *ent )
   else
     body->classname = "alienCorpse";
 
-  body->s.misc     = MAX_CLIENTS; // FIXIT-P: This doesn't seemto have any use. 
+  body->s.misc     = MAX_CLIENTS; // FIXIT-P: This doesn't seemto have any use.
 
   body->think      = BodySink;    // Ok, so body sinks
   body->nextthink  = level.time + 20000; // after 20seconds
@@ -506,7 +506,7 @@ static void SpawnCorpse( gentity_t *ent )
   if ( ent->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
   {
     body->takedamage = qtrue;     // Should allow body_die to call
-    body->die      = body_die;  // But it doesnt? 
+    body->die      = body_die;  // But it doesnt?
   }
   else
   {
@@ -573,7 +573,7 @@ static void SpawnCorpse( gentity_t *ent )
   body->s.pos.trTime = level.time;
   VectorCopy( ent->client->ps.velocity, body->s.pos.trDelta );
 
-  trap_LinkEntity( body );
+  SV_LinkEntity( body );
 }
 
 //======================================================================
@@ -717,7 +717,7 @@ static const char *G_ClientNewbieName( gclient_t *client )
   else if( g_newbieNameNumbering.integer > 1 )
   {
     number = g_newbieNameNumbering.integer;
-    trap_Cvar_Set( "g_newbieNameNumbering", va( "%d", number + 1 ) );
+    Cvar_SetSafe( "g_newbieNameNumbering", va( "%d", number + 1 ) );
   }
   else
   {
@@ -785,8 +785,8 @@ static void G_ClientCleanName( const char *in, char *out, int outSize,
       if( len > outSize - 2 )
         break;
 
-      *out++ = '['; 
-      *out++ = '['; 
+      *out++ = '[';
+      *out++ = '[';
       len += 2;
       if( escaped )
         in++;
@@ -847,10 +847,10 @@ static qboolean G_NonSegModel( const char *filename )
   fileHandle_t  f;
 
   // load the file
-  len = trap_FS_FOpenFile( filename, &f, FS_READ );
+  len = FS_FOpenFileByMode( filename, &f, FS_READ );
   if( !f )
   {
-    G_Printf( "File not found: %s\n", filename );
+    Com_Printf( "File not found: %s\n", filename );
     return qfalse;
   }
 
@@ -859,14 +859,14 @@ static qboolean G_NonSegModel( const char *filename )
 
   if( len == 0 || len >= sizeof( text ) - 1 )
   {
-    trap_FS_FCloseFile( f );
-    G_Printf( "File %s is %s\n", filename, len == 0 ? "empty" : "too long" );
+    FS_FCloseFile( f );
+    Com_Printf( "File %s is %s\n", filename, len == 0 ? "empty" : "too long" );
     return qfalse;
   }
 
-  trap_FS_Read( text, len, f );
+  FS_Read2( text, len, f );
   text[ len ] = 0;
-  trap_FS_FCloseFile( f );
+  FS_FCloseFile( f );
 
   // parse the text
   text_p = text;
@@ -894,11 +894,11 @@ ClientUserInfoChanged
 Called from ClientConnect when the player first connects and
 directly by the server system when the player updates a userinfo variable.
 
-The game can override any of the settings and call trap_SetUserinfo
+The game can override any of the settings and call SV_SetUserinfo
 if desired.
 ============
 */
-char *ClientUserinfoChanged( int clientNum, qboolean forceName )
+Q_EXPORT char *ClientUserinfoChanged( int clientNum, qboolean forceName )
 {
   gentity_t *ent;
   char      *s, *s2;
@@ -915,14 +915,14 @@ char *ClientUserinfoChanged( int clientNum, qboolean forceName )
   ent = g_entities + clientNum;
   client = ent->client;
 
-  trap_GetUserinfo( clientNum, userinfo, sizeof( userinfo ) );
+  SV_GetUserinfo( clientNum, userinfo, sizeof( userinfo ) );
 
   // check for malformed or illegal info strings
   if( !Info_Validate(userinfo) )
   {
-    trap_SendServerCommand( ent - g_entities,
+    SV_GameSendServerCommand( ent - g_entities,
         "disconnect \"illegal or malformed userinfo\n\"" );
-    trap_DropClient( ent - g_entities, 
+    SV_GameDropClient( ent - g_entities,
         "dropped: illegal or malformed userinfo");
     return "Illegal or malformed userinfo";
   }
@@ -933,7 +933,7 @@ char *ClientUserinfoChanged( int clientNum, qboolean forceName )
     return "Empty (overflowed) userinfo";
 
   // stickyspec toggle
-  s = Info_ValueForKey( userinfo, "cg_stickySpec" );  
+  s = Info_ValueForKey( userinfo, "cg_stickySpec" );
   client->pers.stickySpec = atoi( s ) != 0;
 
   // set name
@@ -947,7 +947,7 @@ char *ClientUserinfoChanged( int clientNum, qboolean forceName )
       level.time - client->pers.namelog->nameChangeTime <=
       g_minNameChangePeriod.value * 1000 )
     {
-      trap_SendServerCommand( ent - g_entities, va(
+      SV_GameSendServerCommand( ent - g_entities, va(
         "print \"Name change spam protection (g_minNameChangePeriod = %d)\n\"",
          g_minNameChangePeriod.integer ) );
       revertName = qtrue;
@@ -955,20 +955,20 @@ char *ClientUserinfoChanged( int clientNum, qboolean forceName )
     else if( !forceName && g_maxNameChanges.integer > 0 &&
       client->pers.namelog->nameChanges >= g_maxNameChanges.integer  )
     {
-      trap_SendServerCommand( ent - g_entities, va(
+      SV_GameSendServerCommand( ent - g_entities, va(
         "print \"Maximum name changes reached (g_maxNameChanges = %d)\n\"",
          g_maxNameChanges.integer ) );
       revertName = qtrue;
     }
     else if( !forceName && client->pers.namelog->muted )
     {
-      trap_SendServerCommand( ent - g_entities,
+      SV_GameSendServerCommand( ent - g_entities,
         "print \"You cannot change your name while you are muted\n\"" );
       revertName = qtrue;
     }
     else if( !G_admin_name_check( ent, newname, err, sizeof( err ) ) )
     {
-      trap_SendServerCommand( ent - g_entities, va( "print \"%s\n\"", err ) );
+      SV_GameSendServerCommand( ent - g_entities, va( "print \"%s\n\"", err ) );
       revertName = qtrue;
     }
 
@@ -977,7 +977,7 @@ char *ClientUserinfoChanged( int clientNum, qboolean forceName )
       Q_strncpyz( client->pers.netname, *oldname ? oldname : G_ClientNewbieName( client ),
         sizeof( client->pers.netname ) );
       Info_SetValueForKey( userinfo, "name", oldname );
-      trap_SetUserinfo( clientNum, userinfo );
+      SV_SetUserinfo( clientNum, userinfo );
     }
     else
     {
@@ -1117,7 +1117,7 @@ char *ClientUserinfoChanged( int clientNum, qboolean forceName )
     Com_ClientListString( &client->sess.ignoreList ),
     client->pers.voice, g_restartingFlags.integer );
 
-  trap_SetConfigstring( CS_PLAYERS + clientNum, userinfo );
+  SV_SetConfigstring( CS_PLAYERS + clientNum, userinfo );
 
   /*G_LogPrintf( "ClientUserinfoChanged: %i %s\n", clientNum, userinfo );*/
 
@@ -1145,7 +1145,7 @@ to the server machine, but qfalse on map changes and tournement
 restarts.
 ============
 */
-char *ClientConnect( int clientNum, qboolean firstTime )
+Q_EXPORT char *ClientConnect( int clientNum, qboolean firstTime )
 {
   char      *value;
   char      *userInfoError;
@@ -1165,7 +1165,7 @@ char *ClientConnect( int clientNum, qboolean firstTime )
   ent->client = client;
   memset( client, 0, sizeof( *client ) );
 
-  trap_GetUserinfo( clientNum, userinfo, sizeof( userinfo ) );
+  SV_GetUserinfo( clientNum, userinfo, sizeof( userinfo ) );
 
   value = Info_ValueForKey( userinfo, "cl_guid" );
   Q_strncpyz( client->pers.guid, value, sizeof( client->pers.guid ) );
@@ -1178,7 +1178,7 @@ char *ClientConnect( int clientNum, qboolean firstTime )
 
   client->pers.admin = G_admin_admin( client->pers.guid );
 
-  client->pers.alternateProtocol = trap_Cvar_VariableIntegerValue( va( "sv_clAltProto%i", clientNum ) );
+  client->pers.alternateProtocol = Cvar_VariableIntegerValue( va( "sv_clAltProto%i", clientNum ) );
 
   if( client->pers.alternateProtocol == 2 && client->pers.guid[ 0 ] == '\0' )
   {
@@ -1235,7 +1235,7 @@ char *ClientConnect( int clientNum, qboolean firstTime )
 
   // don't do the "xxx connected" messages if they were caried over from previous level
   if( firstTime )
-    trap_SendServerCommand( -1, va( "print \"%s" S_COLOR_WHITE " connected\n\"", 
+    SV_GameSendServerCommand( -1, va( "print \"%s" S_COLOR_WHITE " connected\n\"",
                                     client->pers.netname ) );
 
   if( client->pers.admin )
@@ -1243,7 +1243,7 @@ char *ClientConnect( int clientNum, qboolean firstTime )
 
   // count current clients and rank for scoreboard
   CalculateRanks( );
-  
+
 
   // if this is after !restart keepteams or !restart switchteams, apply said selection
   if ( client->sess.restartTeam != TEAM_NONE )
@@ -1267,7 +1267,7 @@ to be placed into the level. This will happen on every
 level load and level restart, but doesn't happen on respawns.
 ============
 */
-void ClientBegin( int clientNum )
+Q_EXPORT void ClientBegin( int clientNum )
 {
   gentity_t *ent;
   gclient_t *client;
@@ -1282,7 +1282,7 @@ void ClientBegin( int clientNum )
     return;
 
   if( ent->r.linked )
-    trap_UnlinkEntity( ent );
+    SV_UnlinkEntity( ent );
 
   G_InitGentity( ent );
   ent->touch = 0;
@@ -1310,7 +1310,7 @@ void ClientBegin( int clientNum )
 
   if( !( g_restartingFlags.integer &
          ( RESTART_WARMUP_RESET | RESTART_WARMUP_END ) ) )
-    trap_SendServerCommand( -1, va( "print \"%s" S_COLOR_WHITE " entered the game\n\"", client->pers.netname ) );
+    SV_GameSendServerCommand( -1, va( "print \"%s" S_COLOR_WHITE " entered the game\n\"", client->pers.netname ) );
   if( client->pers.firstConnection )
   {
     gentity_t *tent;
@@ -1403,7 +1403,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   {
     if( origin == NULL || angles == NULL )
     {
-      G_Error( "ClientSpawn: origin or angles is NULL" );
+      Com_Error( ERR_DROP, "ClientSpawn: origin or angles is NULL" );
       return;
     }
 
@@ -1466,7 +1466,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
 
   client->airOutTime = level.time + 12000;
 
-  trap_GetUserinfo( index, userinfo, sizeof( userinfo ) );
+  SV_GetUserinfo( index, userinfo, sizeof( userinfo ) );
   client->ps.eFlags = flags;
 
   //Com_Printf( "ent->client->pers->pclass = %i\n", ent->client->pers.classSelection );
@@ -1650,12 +1650,12 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   // the respawned flag will be cleared after the attack and jump keys come up
   client->ps.pm_flags |= PMF_RESPAWNED;
 
-  trap_GetUsercmd( client - level.clients, &ent->client->pers.cmd );
+  SV_GetUsercmd( client - level.clients, &ent->client->pers.cmd );
   G_SetClientViewAngle( ent, spawn_angles );
 
   if( client->sess.spectatorState == SPECTATOR_NOT )
   {
-    trap_LinkEntity( ent );
+    SV_LinkEntity( ent );
 
     // force the base weapon up
     if( client->pers.teamSelection == TEAM_HUMANS )
@@ -1701,7 +1701,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   if( client->sess.spectatorState == SPECTATOR_NOT )
   {
     BG_PlayerStateToEntityState( &client->ps, &ent->s, qtrue );
-    trap_LinkEntity( ent );
+    SV_LinkEntity( ent );
   }
 
   // must do this here so the number of active clients is calculated
@@ -1725,11 +1725,11 @@ Called when a player drops from the server.
 Will not be called between levels.
 
 This should NOT be called directly by any game logic,
-call trap_DropClient(), which will call this and do
+call SV_GameDropClient(), which will call this and do
 server system housekeeping.
 ============
 */
-void ClientDisconnect( int clientNum )
+Q_EXPORT void ClientDisconnect( int clientNum )
 {
   gentity_t *ent;
   gentity_t *tent;
@@ -1765,14 +1765,14 @@ void ClientDisconnect( int clientNum )
   {
     char cleanname[ MAX_NAME_LENGTH ];
     G_SanitiseString( ent->client->pers.netname, cleanname, sizeof( cleanname ) );
-    trap_Query( DB_SEEN_ADD, cleanname, NULL );
+    sl_query( DB_SEEN_ADD, cleanname, NULL );
     if( ent->client->pers.admin ) {
       G_SanitiseString( ent->client->pers.admin->name, cleanname, sizeof( cleanname ) );
-      trap_Query( DB_SEEN_ADD, cleanname, NULL );
+      sl_query( DB_SEEN_ADD, cleanname, NULL );
     }
   }
 
-  trap_UnlinkEntity( ent );
+  SV_UnlinkEntity( ent );
   ent->id = 0;
   ent->inuse = qfalse;
   ent->classname = "disconnected";
@@ -1780,7 +1780,7 @@ void ClientDisconnect( int clientNum )
   ent->client->sess.spectatorState =
       ent->client->ps.persistant[ PERS_SPECSTATE ] = SPECTATOR_NOT;
 
-  trap_SetConfigstring( CS_PLAYERS + clientNum, "");
+  SV_SetConfigstring( CS_PLAYERS + clientNum, "");
 
   CalculateRanks( );
 

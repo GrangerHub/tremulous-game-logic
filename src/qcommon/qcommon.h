@@ -222,7 +222,7 @@ typedef struct {
 
 	// incoming fragment assembly buffer
 	int			fragmentSequence;
-	int			fragmentLength;	
+	int			fragmentLength;
 	byte		fragmentBuffer[MAX_MSGLEN];
 
 	// outgoing fragment buffer
@@ -301,7 +301,7 @@ enum svc_ops_e {
 //
 enum clc_ops_e {
 	clc_bad,
-	clc_nop, 		
+	clc_nop,
 	clc_move,				// [[usercmd_t]
 	clc_moveNoDelta,		// [[usercmd_t]
 	clc_clientCommand,		// [string] message
@@ -346,7 +346,7 @@ typedef enum {
 } sharedTraps_t;
 
 void	VM_Init( void );
-vm_t	*VM_Create( const char *module, intptr_t (*systemCalls)(intptr_t *), 
+vm_t	*VM_Create( const char *module, intptr_t (*systemCalls)(intptr_t *),
 				   vmInterpret_t interpret );
 // module should be bare: "cgame", not "cgame.dll" or "vm/cgame.qvm"
 
@@ -704,9 +704,9 @@ const char *FS_LoadedPakPureChecksums( qboolean alternate );
 const char *FS_ReferencedPakNames( qboolean alternate );
 const char *FS_ReferencedPakChecksums( qboolean alternate );
 const char *FS_ReferencedPakPureChecksums( void );
-// Returns a space separated string containing the checksums of all loaded 
-// AND referenced pk3 files. Servers with sv_pure set will get this string 
-// back from clients for pure validation 
+// Returns a space separated string containing the checksums of all loaded
+// AND referenced pk3 files. Servers with sv_pure set will get this string
+// back from clients for pure validation
 
 void FS_ClearPakReferences( int flags );
 // clears referenced booleans on loaded pk3s
@@ -811,7 +811,7 @@ void		Com_BeginRedirect (char *buffer, int buffersize, void (*flush)(char *));
 void		Com_EndRedirect( void );
 void 		QDECL Com_Printf( const char *fmt, ... ) __attribute__ ((format (printf, 1, 2)));
 void 		QDECL Com_DPrintf( const char *fmt, ... ) __attribute__ ((format (printf, 1, 2)));
-void 		QDECL Com_Error( int code, const char *fmt, ... ) __attribute__ ((noreturn, format(printf, 2, 3)));
+void 		QDECL Com_Error( int code, const char *fmt, ... ) __attribute__ ((format(printf, 2, 3)));
 void 		Com_Quit_f( void ) __attribute__ ((noreturn));
 void		Com_GameRestart(int checksumFeed, qboolean disconnect);
 
@@ -1047,6 +1047,7 @@ void	Sys_Init (void);
 // general development dll loading for virtual machine testing
 void	* QDECL Sys_LoadGameDll( const char *name, intptr_t (QDECL **entryPoint)(int, ...),
 				  intptr_t (QDECL *systemcalls)(intptr_t, ...) );
+void *Sys_GetFunction( void *dllHandle, char *name );
 void	Sys_UnloadDll( void *dllHandle );
 
 void	QDECL Sys_Error( const char *error, ...) __attribute__ ((noreturn, format (printf, 1, 2)));
@@ -1127,7 +1128,7 @@ dialogResult_t Sys_Dialog( dialogType_t type, const char *message, const char *t
 #define INTERNAL_NODE (HMAX+1)
 
 typedef struct nodetype {
-	struct	nodetype *left, *right, *parent; /* tree structure */ 
+	struct	nodetype *left, *right, *parent; /* tree structure */
 	struct	nodetype *next, *prev; /* doubly-linked list */
 	struct	nodetype **head; /* highest ranked node in block */
 	int		weight;
@@ -1188,5 +1189,17 @@ int		Parse_SourceFileAndLine(int handle, char *filename, int *line);
 #define DLF_NO_REDIRECT 2
 #define DLF_NO_UDP 4
 #define DLF_NO_DISCONNECT 8
+
+//Game module functions loaded from dll
+extern void (*dll_G_InitGame)( int levelTime, int randomSeed, int restart );
+extern void (*dll_G_ShutdownGame)( int restart );
+extern char *(*dll_ClientConnect)( int clientNum, qboolean firstTime );
+extern void (*dll_ClientThink)( int clientNum );
+extern char *(*dll_ClientUserinfoChanged)( int clientNum, qboolean forceName );
+extern void (*dll_ClientDisconnect)( int clientNum );
+extern void (*dll_ClientBegin)( int clientNum );
+extern void (*dll_ClientCommand)( int clientNum );
+extern void (*dll_G_RunFrame)( int levelTime );
+extern qboolean (*dll_ConsoleCommand)( void );
 
 #endif // _QCOMMON_H_

@@ -442,6 +442,24 @@ void *Sys_LoadGameDll(const char *name,
 
 /*
 =================
+Sys_GetFunction
+
+Grabs the symbol/function from the DLL
+=================
+*/
+void *Sys_GetFunction( void *dllHandle, char *name )
+{
+	void *func = Sys_LoadFunction( dllHandle, name );
+	if( !func )
+	{
+		fprintf( stdout, "Sys_GetFunction: %s failed to load: %s\n", name, Sys_LibraryError( ) );
+		Sys_Exit( 0 );
+	}
+	return func;
+}
+
+/*
+=================
 Sys_ParseArgs
 =================
 */
@@ -589,4 +607,3 @@ int main( int argc, char **argv )
 
 	return 0;
 }
-

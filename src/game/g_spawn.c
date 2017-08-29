@@ -30,7 +30,7 @@ qboolean G_SpawnString( const char *key, const char *defaultString, char **out )
   if( !level.spawning )
   {
     *out = (char *)defaultString;
-//    G_Error( "G_SpawnString() called while not spawning" );
+//    Com_Error( ERR_DROP, "G_SpawnString() called while not spawning" );
     return qfalse;
   }
 
@@ -292,7 +292,7 @@ qboolean G_CallSpawn( gentity_t *ent )
 
   if( !ent->classname )
   {
-    G_Printf( "G_CallSpawn: NULL classname\n" );
+    Com_Printf( "G_CallSpawn: NULL classname\n" );
     return qfalse;
   }
 
@@ -325,7 +325,7 @@ qboolean G_CallSpawn( gentity_t *ent )
     return qtrue;
   }
 
-  G_Printf( "%s doesn't have a spawn function\n", ent->classname );
+  Com_Printf( "%s doesn't have a spawn function\n", ent->classname );
   return qfalse;
 }
 
@@ -483,7 +483,7 @@ char *G_AddSpawnVarToken( const char *string )
 
   l = strlen( string );
   if( level.numSpawnVarChars + l + 1 > MAX_SPAWN_VARS_CHARS )
-    G_Error( "G_AddSpawnVarToken: MAX_SPAWN_CHARS" );
+    Com_Error( ERR_DROP, "G_AddSpawnVarToken: MAX_SPAWN_CHARS" );
 
   dest = level.spawnVarChars + level.numSpawnVarChars;
   memcpy( dest, string, l + 1 );
@@ -512,34 +512,34 @@ qboolean G_ParseSpawnVars( void )
   level.numSpawnVarChars = 0;
 
   // parse the opening brace
-  if( !trap_GetEntityToken( com_token, sizeof( com_token ) ) )
+  if( !SV_GetEntityToken( com_token, sizeof( com_token ) ) )
   {
     // end of spawn string
     return qfalse;
   }
 
   if( com_token[ 0 ] != '{' )
-    G_Error( "G_ParseSpawnVars: found %s when expecting {", com_token );
+    Com_Error( ERR_DROP, "G_ParseSpawnVars: found %s when expecting {", com_token );
 
   // go through all the key / value pairs
   while( 1 )
   {
     // parse key
-    if( !trap_GetEntityToken( keyname, sizeof( keyname ) ) )
-      G_Error( "G_ParseSpawnVars: EOF without closing brace" );
+    if( !SV_GetEntityToken( keyname, sizeof( keyname ) ) )
+      Com_Error( ERR_DROP, "G_ParseSpawnVars: EOF without closing brace" );
 
     if( keyname[0] == '}' )
       break;
 
     // parse value
-    if( !trap_GetEntityToken( com_token, sizeof( com_token ) ) )
-      G_Error( "G_ParseSpawnVars: EOF without closing brace" );
+    if( !SV_GetEntityToken( com_token, sizeof( com_token ) ) )
+      Com_Error( ERR_DROP, "G_ParseSpawnVars: EOF without closing brace" );
 
     if( com_token[0] == '}' )
-      G_Error( "G_ParseSpawnVars: closing brace without data" );
+      Com_Error( ERR_DROP, "G_ParseSpawnVars: closing brace without data" );
 
     if( level.numSpawnVars == MAX_SPAWN_VARS )
-      G_Error( "G_ParseSpawnVars: MAX_SPAWN_VARS" );
+      Com_Error( ERR_DROP, "G_ParseSpawnVars: MAX_SPAWN_VARS" );
 
     level.spawnVars[ level.numSpawnVars ][ 0 ] = G_AddSpawnVarToken( keyname );
     level.spawnVars[ level.numSpawnVars ][ 1 ] = G_AddSpawnVarToken( com_token );
@@ -565,53 +565,53 @@ void SP_worldspawn( void )
   G_SpawnString( "classname", "", &s );
 
   if( Q_stricmp( s, "worldspawn" ) )
-    G_Error( "SP_worldspawn: The first entity isn't 'worldspawn'" );
+    Com_Error( ERR_DROP, "SP_worldspawn: The first entity isn't 'worldspawn'" );
 
   // make some data visible to connecting client
-  trap_SetConfigstring( CS_GAME_VERSION, GAME_VERSION );
+  SV_SetConfigstring( CS_GAME_VERSION, GAME_VERSION );
 
-  trap_SetConfigstring( CS_LEVEL_START_TIME, va( "%i", level.startTime ) );
+  SV_SetConfigstring( CS_LEVEL_START_TIME, va( "%i", level.startTime ) );
 
   G_SpawnString( "music", "", &s );
-  trap_SetConfigstring( CS_MUSIC, s );
+  SV_SetConfigstring( CS_MUSIC, s );
 
   G_SpawnString( "message", "", &s );
-  trap_SetConfigstring( CS_MESSAGE, s );        // map specific message
+  SV_SetConfigstring( CS_MESSAGE, s );        // map specific message
 
-  trap_SetConfigstring( CS_MOTD, g_motd.string );   // message of the day
+  SV_SetConfigstring( CS_MOTD, g_motd.string );   // message of the day
 
   if( G_SpawnString( "gravity", "", &s ) )
-    trap_Cvar_Set( "g_gravity", s );
+    Cvar_SetSafe( "g_gravity", s );
 
   if( G_SpawnString( "humanMaxStage", "", &s ) )
-    trap_Cvar_Set( "g_humanMaxStage", s );
+    Cvar_SetSafe( "g_humanMaxStage", s );
 
   if( G_SpawnString( "alienMaxStage", "", &s ) )
-    trap_Cvar_Set( "g_alienMaxStage", s );
+    Cvar_SetSafe( "g_alienMaxStage", s );
 
   if( G_SpawnString( "humanRepeaterBuildPoints", "", &s ) )
-    trap_Cvar_Set( "g_humanRepeaterBuildPoints", s );
+    Cvar_SetSafe( "g_humanRepeaterBuildPoints", s );
 
   if( G_SpawnString( "humanBuildPoints", "", &s ) )
-    trap_Cvar_Set( "g_humanBuildPoints", s );
+    Cvar_SetSafe( "g_humanBuildPoints", s );
 
   if( G_SpawnString( "humanBuildPointsReserve", "", &s ) )
-    trap_Cvar_Set( "g_humanBuildPointsReserve", s );
+    Cvar_SetSafe( "g_humanBuildPointsReserve", s );
 
   if( G_SpawnString( "alienBuildPoints", "", &s ) )
-    trap_Cvar_Set( "g_alienBuildPoints", s );
+    Cvar_SetSafe( "g_alienBuildPoints", s );
 
   if( G_SpawnString( "alienBuildPointsReserve", "", &s ) )
-    trap_Cvar_Set( "g_alienBuildPointsReserve", s );
+    Cvar_SetSafe( "g_alienBuildPointsReserve", s );
 
   G_SpawnString( "disabledEquipment", "", &s );
-  trap_Cvar_Set( "g_disabledEquipment", s );
+  Cvar_SetSafe( "g_disabledEquipment", s );
 
   G_SpawnString( "disabledClasses", "", &s );
-  trap_Cvar_Set( "g_disabledClasses", s );
+  Cvar_SetSafe( "g_disabledClasses", s );
 
   G_SpawnString( "disabledBuildables", "", &s );
-  trap_Cvar_Set( "g_disabledBuildables", s );
+  Cvar_SetSafe( "g_disabledBuildables", s );
 
   g_entities[ ENTITYNUM_WORLD ].s.number = ENTITYNUM_WORLD;
   g_entities[ ENTITYNUM_WORLD ].r.ownerNum = ENTITYNUM_NONE;
@@ -622,14 +622,14 @@ void SP_worldspawn( void )
   g_entities[ ENTITYNUM_NONE ].classname = "nothing";
 
   if( g_restarted.integer )
-    trap_Cvar_Set( "g_restarted", "0" );
+    Cvar_SetSafe( "g_restarted", "0" );
 
   // see if we want a countdown time
-  trap_SetConfigstring( CS_COUNTDOWN, "-1" );
+  SV_SetConfigstring( CS_COUNTDOWN, "-1" );
   if( !IS_WARMUP && g_doCountdown.integer )
   {
     level.countdownTime = level.startTime + ( g_countdown.integer * 1000 );
-    trap_SetConfigstring( CS_COUNTDOWN, va( "%i", level.countdownTime ) );
+    SV_SetConfigstring( CS_COUNTDOWN, va( "%i", level.countdownTime ) );
     G_LogPrintf( "Countdown: %i\n", g_countdown.integer );
   }
 
@@ -651,7 +651,7 @@ void G_SpawnEntitiesFromString( void )
   // has a "spawn" function to perform any global setup
   // needed by a level (setting configstrings or cvars, etc)
   if( !G_ParseSpawnVars( ) )
-    G_Error( "SpawnEntities: no entities" );
+    Com_Error( ERR_DROP, "SpawnEntities: no entities" );
 
   SP_worldspawn( );
 

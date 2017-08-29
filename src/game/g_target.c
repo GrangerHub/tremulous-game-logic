@@ -91,7 +91,7 @@ void Use_Target_Print( gentity_t *ent, gentity_t *other, gentity_t *activator )
   if( ent->spawnflags & 4 )
   {
     if( activator && activator->client )
-      trap_SendServerCommand( activator-g_entities,
+      SV_GameSendServerCommand( activator-g_entities,
                               va( "cp \"%s\" %d",
                                   ent->message, CP_MAP ) );
     return;
@@ -107,7 +107,7 @@ void Use_Target_Print( gentity_t *ent, gentity_t *other, gentity_t *activator )
     return;
   }
 
-  trap_SendServerCommand( -1, va("cp \"%s\" %d", ent->message, CP_MAP ) );
+  SV_GameSendServerCommand( -1, va("cp \"%s\" %d", ent->message, CP_MAP ) );
 }
 
 void SP_target_print( gentity_t *ent )
@@ -161,7 +161,7 @@ void SP_target_speaker( gentity_t *ent )
   G_SpawnFloat( "random", "0", &ent->random );
 
   if( !G_SpawnString( "noise", "NOSOUND", &s ) )
-    G_Error( "target_speaker without a noise key at %s", vtos( ent->r.currentOrigin ) );
+    Com_Error( ERR_DROP, "target_speaker without a noise key at %s", vtos( ent->r.currentOrigin ) );
 
   // force all client relative sounds to be "activator" speakers that
   // play on the entity that activates it
@@ -193,7 +193,7 @@ void SP_target_speaker( gentity_t *ent )
 
   // must link the entity so we get areas and clusters so
   // the server can determine who to send updates to
-  trap_LinkEntity( ent );
+  SV_LinkEntity( ent );
 }
 
 //==========================================================
@@ -209,7 +209,7 @@ void target_teleporter_use( gentity_t *self, gentity_t *other, gentity_t *activa
 
   if( !dest )
   {
-    G_Printf( "Couldn't find teleporter destination\n" );
+    Com_Printf( "Couldn't find teleporter destination\n" );
     return;
   }
 
@@ -222,7 +222,7 @@ The activator will be teleported away.
 void SP_target_teleporter( gentity_t *self )
 {
   if( !self->targetname )
-    G_Printf( "untargeted %s at %s\n", self->classname, vtos( self->r.currentOrigin ) );
+    Com_Printf( "untargeted %s at %s\n", self->classname, vtos( self->r.currentOrigin ) );
 
   G_SpawnFloat( "speed", "400", &self->speed );
 
@@ -307,10 +307,10 @@ void SP_target_location( gentity_t *self )
   char *message;
   self->s.eType = ET_LOCATION;
   self->r.svFlags = SVF_BROADCAST;
-  trap_LinkEntity( self ); // make the server send them to the clients
+  SV_LinkEntity( self ); // make the server send them to the clients
   if( n == MAX_LOCATIONS )
   {
-    G_Printf( S_COLOR_YELLOW "too many target_locations\n" );
+    Com_Printf( S_COLOR_YELLOW "too many target_locations\n" );
     return;
   }
   if( self->count )
@@ -326,7 +326,7 @@ void SP_target_location( gentity_t *self )
   }
   else
     message = self->message;
-  trap_SetConfigstring( CS_LOCATIONS + n, message );
+  SV_SetConfigstring( CS_LOCATIONS + n, message );
   self->nextTrain = level.locationHead;
   self->s.generic1 = n; // use for location marking
   level.locationHead = self;
@@ -392,7 +392,7 @@ void SP_target_rumble( gentity_t *self )
 {
   if( !self->targetname )
   {
-    G_Printf( S_COLOR_YELLOW "WARNING: untargeted %s at %s\n", self->classname,
+    Com_Printf( S_COLOR_YELLOW "WARNING: untargeted %s at %s\n", self->classname,
                                                                vtos( self->r.currentOrigin ) );
   }
 
@@ -479,7 +479,7 @@ void SP_target_hurt( gentity_t *self )
 {
   if( !self->targetname )
   {
-    G_Printf( S_COLOR_YELLOW "WARNING: untargeted %s at %s\n", self->classname,
+    Com_Printf( S_COLOR_YELLOW "WARNING: untargeted %s at %s\n", self->classname,
                                                                vtos( self->r.currentOrigin ) );
   }
 

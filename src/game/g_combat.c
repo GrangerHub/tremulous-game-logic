@@ -60,7 +60,7 @@ void AddScore( gentity_t *ent, int score )
   if( IS_WARMUP )
     return;
 
-  // make alien and human scores equivalent 
+  // make alien and human scores equivalent
   if ( ent->client->pers.teamSelection == TEAM_ALIENS )
   {
     score = rint( ((float)score) / 2.0f );
@@ -351,17 +351,17 @@ float G_RewardAttackers( gentity_t *self )
 
   if( alienCredits )
   {
-    trap_Cvar_Set( "g_alienCredits",
+    Cvar_SetSafe( "g_alienCredits",
       va( "%d", g_alienCredits.integer + alienCredits ) );
-    trap_Cvar_Update( &g_alienCredits );
+    Cvar_Update( &g_alienCredits );
   }
   if( humanCredits )
   {
-    trap_Cvar_Set( "g_humanCredits",
+    Cvar_SetSafe( "g_humanCredits",
       va( "%d", g_humanCredits.integer + humanCredits ) );
-    trap_Cvar_Update( &g_humanCredits );
+    Cvar_Update( &g_humanCredits );
   }
-  
+
   return totalDamage;
 }
 
@@ -373,9 +373,9 @@ GibEntity
 void GibEntity( gentity_t *self )
 {
   vec3_t dir;
- 
+
   VectorCopy( self->s.origin2, dir );
- 
+
   G_AddEvent( self, EV_GIB_PLAYER, DirToByte( dir ) );
   self->takedamage = qfalse;
   self->s.eType    = ET_INVISIBLE;
@@ -601,7 +601,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
     i = ( i + 1 ) % 3;
   }
 
-  trap_LinkEntity( self );
+  SV_LinkEntity( self );
 
   self->client->pers.infoChangeTime = level.time;
 }
@@ -709,13 +709,13 @@ static int G_ParseDmgScript( damageRegion_t *regions, char *buf )
         COM_ParseWarning("Unknown token \"%s\"", token);
       }
     }
-    
+
     // Angle portion covered
     angleSpan = regions[ count ].maxAngle - regions[ count ].minAngle;
     if( angleSpan < 0.0f )
       angleSpan += 360.0f;
     angleSpan /= 360.0f;
-          
+
     // Height portion covered
     heightSpan = regions[ count ].maxHeight - regions[ count ].minHeight;
     if( heightSpan < 0.0f )
@@ -727,7 +727,7 @@ static int G_ParseDmgScript( damageRegion_t *regions, char *buf )
     if( !regions[ count ].area )
       regions[ count ].area = 0.00001f;
   }
-  
+
   return count;
 }
 
@@ -742,12 +742,12 @@ static float GetRegionDamageModifier( gentity_t *targ, int class, int piece )
   float modifier = 0.0f, areaSum = 0.0f;
   int j, i;
   qboolean crouch;
-        
+
   crouch = targ->client->ps.pm_flags & PMF_DUCKED;
   overlap = &g_damageRegions[ class ][ piece ];
 
   if( g_debugDamage.integer > 2 )
-    G_Printf( "GetRegionDamageModifier():\n"
+    Com_Printf( "GetRegionDamageModifier():\n"
               ".   bodyRegion = [%d %d %f %f] (%s)\n"
               ".   modifier = %f\n",
               overlap->minAngle, overlap->maxAngle,
@@ -762,15 +762,15 @@ static float GetRegionDamageModifier( gentity_t *targ, int class, int piece )
         !g_numArmourRegions[ j ] )
       continue;
     regions = g_armourRegions[ j ];
-      
+
     for( i = 0; i < g_numArmourRegions[ j ]; i++ )
     {
       float overlapMaxA, regionMinA, regionMaxA, angleSpan, heightSpan, area;
-    
+
       if( regions[ i ].crouch != crouch )
         continue;
 
-      // Convert overlap angle to 0 to max    
+      // Convert overlap angle to 0 to max
       overlapMaxA = overlap->maxAngle - overlap->minAngle;
       if( overlapMaxA < 0.0f )
         overlapMaxA += 360.0f;
@@ -803,7 +803,7 @@ static float GetRegionDamageModifier( gentity_t *targ, int class, int piece )
           angleSpan += overlapMaxA - regionMinA;
       }
       angleSpan /= 360.0f;
-      
+
       // Overlapping height portion
       heightSpan = MIN( overlap->maxHeight, regions[ i ].maxHeight ) -
                    MAX( overlap->minHeight, regions[ i ].minHeight );
@@ -811,9 +811,9 @@ static float GetRegionDamageModifier( gentity_t *targ, int class, int piece )
         heightSpan = 0.0f;
       if( heightSpan > 1.0f )
         heightSpan = 1.0f;
-      
+
       if( g_debugDamage.integer > 2 )
-        G_Printf( ".   armourRegion = [%d %d %f %f] (%s)\n"
+        Com_Printf( ".   armourRegion = [%d %d %f %f] (%s)\n"
                   ".   .   modifier = %f\n"
                   ".   .   angleSpan = %f\n"
                   ".   .   heightSpan = %f\n",
@@ -821,14 +821,14 @@ static float GetRegionDamageModifier( gentity_t *targ, int class, int piece )
                   regions[ i ].minHeight, regions[ i ].maxHeight,
                   regions[ i ].name, regions[ i ].modifier,
                   angleSpan, heightSpan );
-            
+
       areaSum += area = angleSpan * heightSpan;
       modifier += regions[ i ].modifier * area;
     }
   }
 
   if( g_debugDamage.integer > 2 )
-    G_Printf( ".   areaSum = %f\n"
+    Com_Printf( ".   areaSum = %f\n"
               ".   armourModifier = %f\n", areaSum, modifier );
 
   return overlap->modifier * ( overlap->area + modifier - areaSum );
@@ -865,11 +865,11 @@ static float GetNonLocDamageModifier( gentity_t *targ, int class )
   }
 
   modifier = !scale ? 1.0f : 1.0f + ( modifier / scale - 1.0f ) * area;
-  
+
   if( g_debugDamage.integer > 1 )
-    G_Printf( "GetNonLocDamageModifier() modifier:%f, area:%f, scale:%f\n",
+    Com_Printf( "GetNonLocDamageModifier() modifier:%f, area:%f, scale:%f\n",
               modifier, area, scale );
-      
+
   return modifier;
 }
 
@@ -898,16 +898,16 @@ static float GetPointDamageModifier( gentity_t *targ, damageRegion_t *regions,
         ( regions[ i ].minAngle > regions[ i ].maxAngle &&
           angle > regions[ i ].maxAngle && angle < regions[ i ].minAngle ) )
       continue;
-    
+
     // Height must be within range
     if( height < regions[ i ].minHeight || height > regions[ i ].maxHeight )
-      continue;      
-      
+      continue;
+
     modifier *= regions[ i ].modifier;
   }
 
   if( g_debugDamage.integer )
-    G_Printf( "GetDamageRegionModifier(angle = %f, height = %f): %f\n",
+    Com_Printf( "GetDamageRegionModifier(angle = %f, height = %f): %f\n",
               angle, height, modifier );
 
   return modifier;
@@ -930,7 +930,7 @@ static float G_CalcDamageModifier( vec3_t point, gentity_t *targ, gentity_t *att
   // Don't need to calculate angles and height for non-locational damage
   if( dflags & DAMAGE_NO_LOCDAMAGE )
     return GetNonLocDamageModifier( targ, class );
-  
+
   // Get the point location relative to the floor under the target
   if( g_unlagged.integer && targ->client && targ->client->unlaggedCalc.used )
     VectorCopy( targ->client->unlaggedCalc.origin, targOrigin );
@@ -1003,26 +1003,26 @@ void G_InitDamageLocations( void )
     Com_sprintf( filename, sizeof( filename ),
                  "models/players/%s/locdamage.cfg", modelName );
 
-    len = trap_FS_FOpenFile( filename, &fileHandle, FS_READ );
+    len = FS_FOpenFileByMode( filename, &fileHandle, FS_READ );
     if ( !fileHandle )
     {
-      G_Printf( S_COLOR_RED "file not found: %s\n", filename );
+      Com_Printf( S_COLOR_RED "file not found: %s\n", filename );
       continue;
     }
 
     if( len >= MAX_DAMAGE_REGION_TEXT )
     {
-      G_Printf( S_COLOR_RED "file too large: %s is %i, max allowed is %i",
+      Com_Printf( S_COLOR_RED "file too large: %s is %i, max allowed is %i",
                 filename, len, MAX_DAMAGE_REGION_TEXT );
-      trap_FS_FCloseFile( fileHandle );
+      FS_FCloseFile( fileHandle );
       continue;
     }
 
     COM_BeginParseSession( filename );
 
-    trap_FS_Read( buffer, len, fileHandle );
+    FS_Read2( buffer, len, fileHandle );
     buffer[len] = 0;
-    trap_FS_FCloseFile( fileHandle );
+    FS_FCloseFile( fileHandle );
 
     g_numDamageRegions[ i ] = G_ParseDmgScript( g_damageRegions[ i ], buffer );
   }
@@ -1032,7 +1032,7 @@ void G_InitDamageLocations( void )
     modelName = BG_Upgrade( i )->name;
     Com_sprintf( filename, sizeof( filename ), "armour/%s.armour", modelName );
 
-    len = trap_FS_FOpenFile( filename, &fileHandle, FS_READ );
+    len = FS_FOpenFileByMode( filename, &fileHandle, FS_READ );
 
     //no file - no parsage
     if ( !fileHandle )
@@ -1040,17 +1040,17 @@ void G_InitDamageLocations( void )
 
     if( len >= MAX_DAMAGE_REGION_TEXT )
     {
-      G_Printf( S_COLOR_RED "file too large: %s is %i, max allowed is %i",
+      Com_Printf( S_COLOR_RED "file too large: %s is %i, max allowed is %i",
                 filename, len, MAX_DAMAGE_REGION_TEXT );
-      trap_FS_FCloseFile( fileHandle );
+      FS_FCloseFile( fileHandle );
       continue;
     }
 
     COM_BeginParseSession( filename );
 
-    trap_FS_Read( buffer, len, fileHandle );
+    FS_Read2( buffer, len, fileHandle );
     buffer[len] = 0;
-    trap_FS_FCloseFile( fileHandle );
+    FS_FCloseFile( fileHandle );
 
     g_numArmourRegions[ i ] = G_ParseDmgScript( g_armourRegions[ i ], buffer );
   }
@@ -1196,9 +1196,9 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       BG_Class( targ->client->ps.stats[ STAT_CLASS ] )->knockbackScale );
   }
 
-  // Too much knockback from falling really far makes you "bounce" and 
+  // Too much knockback from falling really far makes you "bounce" and
   //  looks silly. However, none at all also looks bad. Cap it.
-  if( mod == MOD_FALLING && knockback > 50 ) 
+  if( mod == MOD_FALLING && knockback > 50 )
     knockback = 50;
 
   if( knockback > 200 )
@@ -1387,7 +1387,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
   if( g_debugDamage.integer )
   {
-    G_Printf( "%i: client:%i health:%i damage:%i armor:%i\n", level.time, targ->s.number,
+    Com_Printf( "%i: client:%i health:%i damage:%i armor:%i\n", level.time, targ->s.number,
       targ->health, take, asave );
   }
 
@@ -1462,7 +1462,8 @@ qboolean CanDamage( gentity_t *targ, vec3_t origin )
   VectorScale( midpoint, 0.5, midpoint );
 
   VectorCopy( midpoint, dest );
-  trap_Trace( &tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID );
+  SV_Trace( &tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE,
+    MASK_SOLID, TT_AABB );
   if( tr.fraction == 1.0  || tr.entityNum == targ->s.number )
     return qtrue;
 
@@ -1471,28 +1472,32 @@ qboolean CanDamage( gentity_t *targ, vec3_t origin )
   VectorCopy( midpoint, dest );
   dest[ 0 ] += 15.0;
   dest[ 1 ] += 15.0;
-  trap_Trace( &tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID );
+  SV_Trace( &tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE,
+    MASK_SOLID, TT_AABB );
   if( tr.fraction == 1.0 )
     return qtrue;
 
   VectorCopy( midpoint, dest );
   dest[ 0 ] += 15.0;
   dest[ 1 ] -= 15.0;
-  trap_Trace( &tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID );
+  SV_Trace( &tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE,
+    MASK_SOLID, TT_AABB );
   if( tr.fraction == 1.0 )
     return qtrue;
 
   VectorCopy( midpoint, dest );
   dest[ 0 ] -= 15.0;
   dest[ 1 ] += 15.0;
-  trap_Trace( &tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID );
+  SV_Trace( &tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE,
+    MASK_SOLID, TT_AABB );
   if( tr.fraction == 1.0 )
     return qtrue;
 
   VectorCopy( midpoint, dest );
   dest[ 0 ] -= 15.0;
   dest[ 1 ] -= 15.0;
-  trap_Trace( &tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE, MASK_SOLID );
+  SV_Trace( &tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE,
+    MASK_SOLID, TT_AABB );
   if( tr.fraction == 1.0 )
     return qtrue;
 
@@ -1526,7 +1531,7 @@ qboolean G_SelectiveRadiusDamage( vec3_t origin, gentity_t *attacker, float dama
     maxs[ i ] = origin[ i ] + radius;
   }
 
-  numListedEntities = trap_EntitiesInBox( mins, maxs, entityList, MAX_GENTITIES );
+  numListedEntities = SV_AreaEntities( mins, maxs, entityList, MAX_GENTITIES );
 
   for( e = 0; e < numListedEntities; e++ )
   {
@@ -1649,7 +1654,7 @@ qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage,
     maxs[ i ] = origin[ i ] + radius;
   }
 
-  numListedEntities = trap_EntitiesInBox( mins, maxs, entityList, MAX_GENTITIES );
+  numListedEntities = SV_AreaEntities( mins, maxs, entityList, MAX_GENTITIES );
 
   for( e = 0; e < numListedEntities; e++ )
   {
@@ -1703,7 +1708,7 @@ qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage,
     maxs[ i ] = origin[ i ] + radius * 2;
   }
 
-  numListedEntities = trap_EntitiesInBox( mins, maxs, entityList, MAX_GENTITIES );
+  numListedEntities = SV_AreaEntities( mins, maxs, entityList, MAX_GENTITIES );
 
   for( e = 0; e < numListedEntities; e++ )
   {
@@ -1750,7 +1755,7 @@ void G_LogDestruction( gentity_t *self, gentity_t *actor, int mod )
     default:
       if( actor->client )
       {
-        if( actor->client->pers.teamSelection == 
+        if( actor->client->pers.teamSelection ==
             BG_Buildable( self->s.modelindex )->team )
         {
           fate = BF_TEAMKILL;
@@ -1779,7 +1784,7 @@ void G_LogDestruction( gentity_t *self, gentity_t *actor, int mod )
 
   // No-power deaths for humans come after some minutes and it's confusing
   //  when the messages appear attributed to the deconner. Just don't print them.
-  if( mod == MOD_NOCREEP && actor->client && 
+  if( mod == MOD_NOCREEP && actor->client &&
       actor->client->pers.teamSelection == TEAM_HUMANS )
     return;
 
