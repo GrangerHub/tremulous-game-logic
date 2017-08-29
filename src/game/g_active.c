@@ -341,7 +341,7 @@ void  G_TouchTriggers( gentity_t *ent )
   VectorSubtract( mins, range, mins );
   VectorAdd( maxs, range, maxs );
 
-  num = trap_EntitiesInBox( mins, maxs, touch, MAX_GENTITIES );
+  num = SV_AreaEntities( mins, maxs, touch, MAX_GENTITIES );
 
   // can't use ent->absmin, because that has a one unit pad
   VectorAdd( ent->client->ps.origin, ent->r.mins, mins );
@@ -362,7 +362,7 @@ void  G_TouchTriggers( gentity_t *ent )
         hit->s.eType != ET_TELEPORT_TRIGGER )
       continue;
 
-    if( !trap_EntityContact( mins, maxs, hit ) )
+    if( !SV_EntityContact( mins, maxs, hit, TT_AABB ) )
       continue;
 
     memset( &trace, 0, sizeof( trace ) );
@@ -489,8 +489,8 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
     pm.pmext = &client->pmext;
     pm.cmd = *ucmd;
     pm.tracemask = ent->clipmask;
-    pm.trace = trap_Trace;
-    pm.pointcontents = trap_PointContents;
+    pm.trace = G_TraceWrapper;
+    pm.pointcontents = SV_PointContents;
     pm.tauntSpam = 0;
 
     // Perform a pmove
@@ -503,7 +503,7 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
     VectorCopy( client->ps.viewangles, ent->s.pos.trBase );
 
     G_TouchTriggers( ent );
-    trap_UnlinkEntity( ent );
+    SV_UnlinkEntity( ent );
 
     // Set the queue position and spawn count for the client side
     G_ClientUpdateSpawnQueue( ent->client );
@@ -580,7 +580,7 @@ qboolean ClientInactivityTimer( gentity_t *ent )
           return qtrue;
         }
         {
-          trap_SendServerCommand( -1,
+          SV_GameSendServerCommand( -1,
                                   va( "print \"%s^7 moved from %s to spectators due to inactivity\n\"",
                                       client->pers.netname,
                                       BG_TeamName( client->pers.teamSelection ) ) );
@@ -594,7 +594,7 @@ qboolean ClientInactivityTimer( gentity_t *ent )
       {
         client->inactivityWarning = qtrue;
         if( !G_admin_permission( ent, ADMF_ACTIVITY ) )
-          trap_SendServerCommand( client - level.clients,
+          SV_GameSendServerCommand( client - level.clients,
             va( "cp \"Ten seconds until inactivity spectate!\n\" %d",
             CP_INACTIVITY ) );
       }
@@ -703,7 +703,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
           staminaDifference = STAMINA_MAX - client->ps.stats[ STAT_STAMINA ];
 
           if( client->medKitStaminaToRestore &&
-              client->nextMedKitRestoreStaminaTime < level.time ) 
+              client->nextMedKitRestoreStaminaTime < level.time )
           {
             if( client->medKitStaminaToRestore > STAMINA_MEDISTAT_RESTORE )
             {
@@ -743,7 +743,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
 
       if( client->ps.stats[ STAT_STAMINA ] <
                     BG_Class( client->ps.stats[STAT_CLASS] )->chargeStaminaMax )
-        client->ps.stats[ STAT_STAMINA ] += 
+        client->ps.stats[ STAT_STAMINA ] +=
                  BG_Class( client->ps.stats[STAT_CLASS] )->chargeStaminaRestore;
 
       if(  client->ps.stats[ STAT_STAMINA ] >
@@ -1259,7 +1259,7 @@ void G_UnlaggedOff( void )
     VectorCopy( ent->client->unlaggedBackup.maxs, ent->r.maxs );
     VectorCopy( ent->client->unlaggedBackup.origin, ent->r.currentOrigin );
     ent->client->unlaggedBackup.used = qfalse;
-    trap_LinkEntity( ent );
+    SV_LinkEntity( ent );
   }
 }
 
@@ -1273,7 +1273,7 @@ void G_UnlaggedOff( void )
 
  As an optimization, all clients that have an unlagged position that is
  not touchable at "range" from "muzzle" will be ignored.  This is required
- to prevent a huge amount of trap_LinkEntity() calls per user cmd.
+ to prevent a huge amount of SV_LinkEntity() calls per user cmd.
 ==============
 */
 
@@ -1322,7 +1322,7 @@ void G_UnlaggedOn( gentity_t *attacker, vec3_t muzzle, float range )
     VectorCopy( calc->mins, ent->r.mins );
     VectorCopy( calc->maxs, ent->r.maxs );
     VectorCopy( calc->origin, ent->r.currentOrigin );
-    trap_LinkEntity( ent );
+    SV_LinkEntity( ent );
   }
 }
 /*
@@ -1376,8 +1376,8 @@ static void G_UnlaggedDetectCollisions( gentity_t *ent )
 
   G_UnlaggedOn( ent, ent->client->oldOrigin, range );
 
-  trap_Trace(&tr, ent->client->oldOrigin, ent->r.mins, ent->r.maxs,
-    ent->client->ps.origin, ent->s.number,  MASK_PLAYERSOLID );
+  SV_Trace(&tr, ent->client->oldOrigin, ent->r.mins, ent->r.maxs,
+    ent->client->ps.origin, ent->s.number,  MASK_PLAYERSOLID, TT_AABB );
   if( tr.entityNum >= 0 && tr.entityNum < MAX_CLIENTS )
     g_entities[ tr.entityNum ].client->unlaggedCalc.used = qfalse;
 
@@ -1404,17 +1404,17 @@ qboolean G_CanActivateEntity( gclient_t *client, gentity_t *ent )
     return qfalse;
 
   // entity spawned check
-  if( ( ent->activation.flags & ACTF_SPAWNED ) && 
+  if( ( ent->activation.flags & ACTF_SPAWNED ) &&
       !ent->spawned )
     return qfalse;
 
   // entity alive check
-  if( ( ent->activation.flags & ACTF_ENT_ALIVE ) && 
+  if( ( ent->activation.flags & ACTF_ENT_ALIVE ) &&
       ent->health <= 0 )
     return qfalse;
 
   // player alive check
-  if( ( ent->activation.flags & ACTF_PL_ALIVE ) && 
+  if( ( ent->activation.flags & ACTF_PL_ALIVE ) &&
       !PM_Alive( client->ps.pm_type ) )
     return qfalse;
 
@@ -1468,7 +1468,7 @@ static void G_FindActivationEnt( gentity_t *ent )
   // look for an activation entity infront of player
   AngleVectors( client->ps.viewangles, view, NULL, NULL );
   VectorMA( client->ps.origin, ACTIVATION_ENT_RANGE, view, point );
-  trap_Trace( &trace, client->ps.origin, NULL, NULL, point, ent->s.number, MASK_SHOT );
+  SV_Trace( &trace, client->ps.origin, NULL, NULL, point, ent->s.number, MASK_SHOT, TT_AABB );
 
   traceEnt = &g_entities[ trace.entityNum ];
 
@@ -1494,14 +1494,15 @@ static void G_FindActivationEnt( gentity_t *ent )
     VectorAdd( client->ps.origin, range, maxs );
     VectorSubtract( client->ps.origin, range, mins );
 
-    num = trap_EntitiesInBox( mins, maxs, entityList, MAX_GENTITIES );
+    num = SV_AreaEntities( mins, maxs, entityList, MAX_GENTITIES );
     for( i = 0; i < num; i++ )
     {
       traceEnt = &g_entities[ entityList[ i ] ];
 
       if( G_CanActivateEntity( client, traceEnt ) )
       {
-        trap_Trace( &trace, client->ps.origin, NULL, NULL, traceEnt->r.currentOrigin, client->ps.clientNum, MASK_PLAYERSOLID );
+        SV_Trace( &trace, client->ps.origin, NULL, NULL, traceEnt->r.currentOrigin,
+          client->ps.clientNum, MASK_PLAYERSOLID, TT_AABB );
 
         if( trace.fraction < 1.0f && trace.entityNum == traceEnt->s.number )
           activationEntDistance = Distance( client->ps.origin, trace.endpos );
@@ -1547,7 +1548,7 @@ qboolean G_WillActivateEntity( gentity_t *actEnt, gentity_t *activator )
 {
   // set the general menu message for activation failure.
   G_OvrdActMenuMsg( activator, ACTMN_ACT_FAILED, MN_ACT_FAILED );
-  
+
   if ( ( actEnt->activation.flags & ACTF_POWERED ) &&
        !actEnt->powered )
   {
@@ -1573,7 +1574,7 @@ qboolean G_WillActivateEntity( gentity_t *actEnt, gentity_t *activator )
     if( ( actEnt->flags & FL_OCCUPIED ) &&
         actEnt->occupation.occupant != activator )
     {
-      // only the occupant of this activation entity can activate it when occupied 
+      // only the occupant of this activation entity can activate it when occupied
       G_OvrdActMenuMsg( activator, ACTMN_ACT_OCCUPIED, MN_ACT_OCCUPIED );
       return qfalse;
     }
@@ -1583,7 +1584,7 @@ qboolean G_WillActivateEntity( gentity_t *actEnt, gentity_t *activator )
       actEnt->occupation.findOccupant( actEnt, activator );
     else
       actEnt->occupation.occupantFound = activator;
-    
+
     if( !actEnt->occupation.occupantFound )
     {
       G_OvrdActMenuMsg( activator, ACTMN_ACT_NOOCCUPANTS, MN_ACT_NOOCCUPANTS );
@@ -1631,12 +1632,12 @@ This is a general wrapper for activation.(*activate)()
 void G_ActivateEntity( gentity_t *actEnt, gentity_t *activator )
 {
   gclient_t *client;
-  
+
   if( !activator->client )
     return;
 
   client = activator->client;
-  
+
   if( G_WillActivateEntity( actEnt, activator ) )
   {
     if( actEnt->activation.activate( actEnt, activator ) &&
@@ -1743,7 +1744,7 @@ Called to occupy an entity with found potential occupants.
 */
 void G_OccupyEnt( gentity_t *occupied )
 {
-  if( !occupied->occupation.occupantFound ) 
+  if( !occupied->occupation.occupantFound )
     return;
 
   occupied->occupation.occupant = occupied->occupation.occupantFound;
@@ -1852,7 +1853,7 @@ void G_OccupantClip( gentity_t *occupant )
 {
   if( occupant->occupation.occupied &&
       ( ( occupant->client &&
-          ( occupant->client->ps.eFlags & EF_OCCUPYING ) ) || 
+          ( occupant->client->ps.eFlags & EF_OCCUPYING ) ) ||
         ( !occupant->client && ( occupant->s.eFlags & EF_OCCUPYING ) ) ) )
   {
     if( ( occupant->occupation.occupied->occupation.flags & OCCUPYF_CLIPMASK ) &&
@@ -2023,9 +2024,9 @@ void ClientThink_real( gentity_t *ent )
   client->unlaggedTime = ucmd->serverTime;
 
   if( pmove_msec.integer < 8 )
-    trap_Cvar_Set( "pmove_msec", "8" );
+    Cvar_SetSafe( "pmove_msec", "8" );
   else if( pmove_msec.integer > 33 )
-    trap_Cvar_Set( "pmove_msec", "33" );
+    Cvar_SetSafe( "pmove_msec", "33" );
 
   if( pmove_fixed.integer || client->pers.pmoveFixed )
   {
@@ -2204,7 +2205,7 @@ void ClientThink_real( gentity_t *ent )
       VectorAdd( client->ps.origin, range, maxs );
       VectorSubtract( client->ps.origin, range, mins );
 
-      num = trap_EntitiesInBox( mins, maxs, entityList, MAX_GENTITIES );
+      num = SV_AreaEntities( mins, maxs, entityList, MAX_GENTITIES );
       for( i = 0; i < num; i++ )
       {
         gentity_t *boost = &g_entities[ entityList[ i ] ];
@@ -2341,8 +2342,8 @@ void ClientThink_real( gentity_t *ent )
   pm.pmext = &client->pmext;
   pm.cmd = *ucmd;
   pm.tracemask = ent->clipmask;
-  pm.trace = trap_Trace;
-  pm.pointcontents = trap_PointContents;
+  pm.trace = G_TraceWrapper;
+  pm.pointcontents = SV_PointContents;
   pm.debugLevel = g_debugMove.integer;
   pm.noFootsteps = 0;
 
@@ -2448,7 +2449,7 @@ void ClientThink_real( gentity_t *ent )
   ClientEvents( ent, oldEventSequence );
 
   // link entity now, after any personal teleporters have been used
-  trap_LinkEntity( ent );
+  SV_LinkEntity( ent );
 
   // NOTE: now copy the exact origin over otherwise clients can be snapped into solid
   VectorCopy( ent->client->ps.origin, ent->r.currentOrigin );
@@ -2527,12 +2528,12 @@ ClientThink
 A new command has arrived from the client
 ==================
 */
-void ClientThink( int clientNum )
+Q_EXPORT void ClientThink( int clientNum )
 {
   gentity_t *ent;
 
   ent = g_entities + clientNum;
-  trap_GetUsercmd( clientNum, &ent->client->pers.cmd );
+  SV_GetUsercmd( clientNum, &ent->client->pers.cmd );
 
   // mark the time we got info, so we can display the
   // phone jack if they don't get any for a while
@@ -2555,7 +2556,7 @@ void G_RunClient( gentity_t *ent )
   {
     if( level.time - ent->client->lastCmdTime > 250 )
     {
-      trap_GetUsercmd( ent->client->ps.clientNum, &ent->client->pers.cmd );
+      SV_GetUsercmd( ent->client->ps.clientNum, &ent->client->pers.cmd );
       ClientThink_real( ent );
     }
      return;

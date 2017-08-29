@@ -39,25 +39,25 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #  endif
 #endif
 
-static void __attribute__((__noreturn__)) R_JPGErrorExit(j_common_ptr cinfo)
+static void R_JPGErrorExit(j_common_ptr cinfo)
 {
   char buffer[JMSG_LENGTH_MAX];
-  
+
   (*cinfo->err->format_message) (cinfo, buffer);
-  
+
   /* Let the memory manager delete any temp files before we die */
   jpeg_destroy(cinfo);
-  
+
   ri.Error(ERR_FATAL, "%s", buffer);
 }
 
 static void R_JPGOutputMessage(j_common_ptr cinfo)
 {
   char buffer[JMSG_LENGTH_MAX];
-  
+
   /* Create the message */
   (*cinfo->err->format_message) (cinfo, buffer);
-  
+
   /* Send it to stderr, adding a newline */
   ri.Printf(PRINT_ALL, "%s\n", buffer);
 }
@@ -152,7 +152,7 @@ void R_LoadJPG(const char *filename, unsigned char **pic, int *width, int *heigh
    * output image dimensions available, as well as the output colormap
    * if we asked for color quantization.
    * In this example, we need to make an output work buffer of the right size.
-   */ 
+   */
   /* JSAMPLEs per row in output buffer */
 
   pixelcount = cinfo.output_width * cinfo.output_height;
@@ -165,7 +165,7 @@ void R_LoadJPG(const char *filename, unsigned char **pic, int *width, int *heigh
     // Free the memory to make sure we don't leak memory
     ri.FS_FreeFile (fbuffer.v);
     jpeg_destroy_decompress(&cinfo);
-  
+
     ri.Error(ERR_DROP, "LoadJPG: %s has an invalid image format: %dx%d*4=%d, components: %d", filename,
 		    cinfo.output_width, cinfo.output_height, pixelcount * 4, cinfo.output_components);
   }
@@ -193,7 +193,7 @@ void R_LoadJPG(const char *filename, unsigned char **pic, int *width, int *heigh
 	buffer = &buf;
     (void) jpeg_read_scanlines(&cinfo, buffer, 1);
   }
-  
+
   buf = out;
 
   // Expand from RGB to RGBA
@@ -201,7 +201,7 @@ void R_LoadJPG(const char *filename, unsigned char **pic, int *width, int *heigh
   dindex = memcount;
 
   do
-  {	
+  {
     buf[--dindex] = 255;
     buf[--dindex] = buf[--sindex];
     buf[--dindex] = buf[--sindex];
@@ -291,9 +291,9 @@ static boolean
 empty_output_buffer (j_compress_ptr cinfo)
 {
   my_dest_ptr dest = (my_dest_ptr) cinfo->dest;
-  
+
   jpeg_destroy_compress(cinfo);
-  
+
   // Make crash fatal or we would probably leak memory.
   ri.Error(ERR_FATAL, "Output buffer for encoded JPEG image has insufficient size of %d bytes",
            dest->size);
@@ -396,7 +396,7 @@ size_t RE_SaveJPGToBuffer(byte *buffer, size_t bufSize, int quality,
   /* Step 5: while (scan lines remain to be written) */
   /*           jpeg_write_scanlines(...); */
   row_stride = image_width * cinfo.input_components + padding; /* JSAMPLEs per row in image_buffer */
-  
+
   while (cinfo.next_scanline < cinfo.image_height) {
     /* jpeg_write_scanlines expects an array of pointers to scanlines.
      * Here the array is only one element long, but you could pass
@@ -408,10 +408,10 @@ size_t RE_SaveJPGToBuffer(byte *buffer, size_t bufSize, int quality,
 
   /* Step 6: Finish compression */
   jpeg_finish_compress(&cinfo);
-  
+
   dest = (my_dest_ptr) cinfo.dest;
   outcount = dest->size - dest->pub.free_in_buffer;
- 
+
   /* Step 7: release JPEG compression object */
   jpeg_destroy_compress(&cinfo);
 

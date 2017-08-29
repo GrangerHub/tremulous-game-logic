@@ -55,9 +55,11 @@ gentity_t *G_TestEntityPosition( gentity_t *ent )
   trace_t tr;
 
   if( ent->client )
-    trap_Trace( &tr, ent->client->ps.origin, ent->r.mins, ent->r.maxs, ent->client->ps.origin, ent->s.number, ent->clipmask );
+    SV_Trace( &tr, ent->client->ps.origin, ent->r.mins, ent->r.maxs,
+      ent->client->ps.origin, ent->s.number, ent->clipmask, TT_AABB );
   else
-    trap_Trace( &tr, ent->s.pos.trBase, ent->r.mins, ent->r.maxs, ent->s.pos.trBase, ent->s.number, ent->clipmask );
+    SV_Trace( &tr, ent->s.pos.trBase, ent->r.mins, ent->r.maxs,
+      ent->s.pos.trBase, ent->s.number, ent->clipmask, TT_AABB );
 
   if( tr.startsolid )
     return &g_entities[ tr.entityNum ];
@@ -135,7 +137,7 @@ qboolean G_TryPushingEntity( gentity_t *check, gentity_t *pusher, vec3_t move, v
 
   // save off the old position
   if( pushed_p > &pushed[ MAX_GENTITIES ] )
-    G_Error( "pushed_p > &pushed[MAX_GENTITIES]" );
+    Com_Error( ERR_DROP, "pushed_p > &pushed[MAX_GENTITIES]" );
 
   pushed_p->ent = check;
   VectorCopy( check->s.pos.trBase, pushed_p->origin );
@@ -187,7 +189,7 @@ qboolean G_TryPushingEntity( gentity_t *check, gentity_t *pusher, vec3_t move, v
     else
       VectorCopy( check->s.pos.trBase, check->r.currentOrigin );
 
-    trap_LinkEntity( check );
+    SV_LinkEntity( check );
     return qtrue;
   }
 
@@ -273,14 +275,14 @@ qboolean G_MoverPush( gentity_t *pusher, vec3_t move, vec3_t amove, gentity_t **
   }
 
   // unlink the pusher so we don't get it in the entityList
-  trap_UnlinkEntity( pusher );
+  SV_UnlinkEntity( pusher );
 
-  listedEntities = trap_EntitiesInBox( totalMins, totalMaxs, entityList, MAX_GENTITIES );
+  listedEntities = SV_AreaEntities( totalMins, totalMaxs, entityList, MAX_GENTITIES );
 
   // move the pusher to its final position
   VectorAdd( pusher->r.currentOrigin, move, pusher->r.currentOrigin );
   VectorAdd( pusher->r.currentAngles, amove, pusher->r.currentAngles );
-  trap_LinkEntity( pusher );
+  SV_LinkEntity( pusher );
 
   // see if any solid entities are inside the final position
   for( e = 0 ; e < listedEntities ; e++ )
@@ -342,7 +344,7 @@ qboolean G_MoverPush( gentity_t *pusher, vec3_t move, vec3_t amove, gentity_t **
         VectorCopy( p->origin, p->ent->client->ps.origin );
       }
 
-      trap_LinkEntity( p->ent );
+      SV_LinkEntity( p->ent );
     }
 
     return qfalse;
@@ -401,7 +403,7 @@ void G_MoverTeam( gentity_t *ent )
       part->s.apos.trTime += level.time - level.previousTime;
       BG_EvaluateTrajectory( &part->s.pos, level.time, part->r.currentOrigin );
       BG_EvaluateTrajectory( &part->s.apos, level.time, part->r.currentAngles );
-      trap_LinkEntity( part );
+      SV_LinkEntity( part );
     }
 
     // if the pusher has a "blocked" function, call it
@@ -547,7 +549,7 @@ void SetMoverState( gentity_t *ent, moverState_t moverState, int time )
   if( moverState >= ROTATOR_POS1 && moverState <= ROTATOR_2TO1 )
     BG_EvaluateTrajectory( &ent->s.apos, level.time, ent->r.currentAngles );
 
-  trap_LinkEntity( ent );
+  SV_LinkEntity( ent );
 }
 
 /*
@@ -641,7 +643,7 @@ void Think_ClosedModelDoor( gentity_t *ent )
 
   // close areaportals
   if( ent->teammaster == ent || !ent->teammaster )
-    trap_AdjustAreaPortalState( ent, qfalse );
+    SV_AdjustAreaPortalState( ent, qfalse );
 
   ent->moverState = MODEL_POS1;
 }
@@ -660,10 +662,10 @@ void Think_CloseModelDoor( gentity_t *ent )
   gentity_t *check;
   qboolean  canClose = qtrue;
 
-  numEntities = trap_EntitiesInBox( clipBrush->r.absmin, clipBrush->r.absmax, entityList, MAX_GENTITIES );
+  numEntities = SV_AreaEntities( clipBrush->r.absmin, clipBrush->r.absmax, entityList, MAX_GENTITIES );
 
   //set brush solid
-  trap_LinkEntity( ent->clipBrush );
+  SV_LinkEntity( ent->clipBrush );
 
   //see if any solid entities are inside the door
   for( i = 0; i < numEntities; i++ )
@@ -685,7 +687,7 @@ void Think_CloseModelDoor( gentity_t *ent )
   if( !canClose )
   {
     //set brush non-solid
-    trap_UnlinkEntity( ent->clipBrush );
+    SV_UnlinkEntity( ent->clipBrush );
 
     ent->nextthink = level.time + ent->wait;
     return;
@@ -713,7 +715,7 @@ Think_OpenModelDoor
 void Think_OpenModelDoor( gentity_t *ent )
 {
   //set brush non-solid
-  trap_UnlinkEntity( ent->clipBrush );
+  SV_UnlinkEntity( ent->clipBrush );
 
   // stop the looping sound
   ent->s.loopSound = 0;
@@ -778,7 +780,7 @@ void Reached_BinaryMover( gentity_t *ent )
 
     // close areaportals
     if( ent->teammaster == ent || !ent->teammaster )
-      trap_AdjustAreaPortalState( ent, qfalse );
+      SV_AdjustAreaPortalState( ent, qfalse );
   }
   else if( ent->moverState == ROTATOR_1TO2 )
   {
@@ -810,10 +812,10 @@ void Reached_BinaryMover( gentity_t *ent )
 
     // close areaportals
     if( ent->teammaster == ent || !ent->teammaster )
-      trap_AdjustAreaPortalState( ent, qfalse );
+      SV_AdjustAreaPortalState( ent, qfalse );
   }
   else
-    G_Error( "Reached_BinaryMover: bad moverState" );
+    Com_Error( ERR_DROP, "Reached_BinaryMover: bad moverState" );
 }
 
 
@@ -863,7 +865,7 @@ void Use_BinaryMover( gentity_t *ent, gentity_t *other, gentity_t *activator )
 
     // open areaportal
     if( ent->teammaster == ent || !ent->teammaster )
-      trap_AdjustAreaPortalState( ent, qtrue );
+      SV_AdjustAreaPortalState( ent, qtrue );
   }
   else if( ent->moverState == MOVER_POS2 &&
            !( teamState == MOVER_1TO2 || other == master ) )
@@ -888,7 +890,7 @@ void Use_BinaryMover( gentity_t *ent, gentity_t *other, gentity_t *activator )
 
     // open areaportal
     if( ent->teammaster == ent || !ent->teammaster )
-      trap_AdjustAreaPortalState( ent, qtrue );
+      SV_AdjustAreaPortalState( ent, qtrue );
   }
   else if( ent->moverState == MOVER_2TO1 )
   {
@@ -933,7 +935,7 @@ void Use_BinaryMover( gentity_t *ent, gentity_t *other, gentity_t *activator )
 
     // open areaportal
     if( ent->teammaster == ent || !ent->teammaster )
-      trap_AdjustAreaPortalState( ent, qtrue );
+      SV_AdjustAreaPortalState( ent, qtrue );
   }
   else if( ent->moverState == ROTATOR_POS2 &&
            !( teamState == MOVER_1TO2 || other == master ) )
@@ -958,7 +960,7 @@ void Use_BinaryMover( gentity_t *ent, gentity_t *other, gentity_t *activator )
 
     // open areaportal
     if( ent->teammaster == ent || !ent->teammaster )
-      trap_AdjustAreaPortalState( ent, qtrue );
+      SV_AdjustAreaPortalState( ent, qtrue );
   }
   else if( ent->moverState == ROTATOR_2TO1 )
   {
@@ -1005,7 +1007,7 @@ void Use_BinaryMover( gentity_t *ent, gentity_t *other, gentity_t *activator )
 
     // open areaportal
     if( ent->teammaster == ent || !ent->teammaster )
-      trap_AdjustAreaPortalState( ent, qtrue );
+      SV_AdjustAreaPortalState( ent, qtrue );
 
     ent->moverState = MODEL_1TO2;
   }
@@ -1084,7 +1086,7 @@ void InitMover( gentity_t *ent )
   ent->moverState = MOVER_POS1;
   ent->s.eType = ET_MOVER;
   VectorCopy( ent->pos1, ent->r.currentOrigin );
-  trap_LinkEntity( ent );
+  SV_LinkEntity( ent );
 
   ent->s.pos.trType = TR_STATIONARY;
   VectorCopy( ent->pos1, ent->s.pos.trBase );
@@ -1171,7 +1173,7 @@ void InitRotator( gentity_t *ent )
   ent->moverState = ROTATOR_POS1;
   ent->s.eType = ET_MOVER;
   VectorCopy( ent->pos1, ent->r.currentAngles );
-  trap_LinkEntity( ent );
+  SV_LinkEntity( ent );
 
   ent->s.apos.trType = TR_STATIONARY;
   VectorCopy( ent->pos1, ent->s.apos.trBase );
@@ -1299,7 +1301,7 @@ void Think_SpawnNewDoorTrigger( gentity_t *ent )
   other->touch = Touch_DoorTrigger;
   // remember the thinnest axis
   other->count = best;
-  trap_LinkEntity( other );
+  SV_LinkEntity( other );
 
   if( ent->moverState < MODEL_POS1 )
     Think_MatchTeam( ent );
@@ -1366,7 +1368,7 @@ void SP_func_door( gentity_t *ent )
   VectorClear( ent->s.apos.trBase );
   VectorClear( ent->r.currentOrigin );
   // calculate second position
-  trap_SetBrushModel( ent, ent->model );
+  SV_SetBrushModel( ent, ent->model );
   abs_movedir[ 0 ] = fabs( ent->movedir[ 0 ] );
   abs_movedir[ 1 ] = fabs( ent->movedir[ 1 ] );
   abs_movedir[ 2 ] = fabs( ent->movedir[ 2 ] );
@@ -1476,14 +1478,14 @@ void SP_func_door_rotating( gentity_t *ent )
   // leave out, so we'll tell him if he does.
   if( !ent->rotatorAngle )
   {
-    G_Printf( "%s at %s with no rotatorAngle set.\n",
+    Com_Printf( "%s at %s with no rotatorAngle set.\n",
               ent->classname, vtos( ent->r.currentOrigin ) );
 
     ent->rotatorAngle = 90.0;
   }
 
   VectorCopy( ent->r.currentAngles, ent->pos1 );
-  trap_SetBrushModel( ent, ent->model );
+  SV_SetBrushModel( ent, ent->model );
   VectorMA( ent->pos1, ent->rotatorAngle, ent->movedir, ent->pos2 );
 
   // if "start_open", reverse position 1 and 2
@@ -1564,9 +1566,9 @@ void SP_func_door_model( gentity_t *ent )
   clipBrush->classname = "func_door_model_clip_brush";
   clipBrush->clipBrush = ent; // link back
   clipBrush->model = ent->model;
-  trap_SetBrushModel( clipBrush, clipBrush->model );
+  SV_SetBrushModel( clipBrush, clipBrush->model );
   clipBrush->s.eType = ET_INVISIBLE;
-  trap_LinkEntity( clipBrush );
+  SV_LinkEntity( clipBrush );
 
   //copy the bounds back from the clipBrush so the
   //triggers can be made
@@ -1582,7 +1584,7 @@ void SP_func_door_model( gentity_t *ent )
   // if the "model2" key is set, use a seperate model
   // for drawing, but clip against the brushes
   if( !ent->model2 )
-    G_Printf( S_COLOR_YELLOW "WARNING: func_door_model %d spawned with no model2 key\n", ent->s.number );
+    Com_Printf( S_COLOR_YELLOW "WARNING: func_door_model %d spawned with no model2 key\n", ent->s.number );
   else
     ent->s.modelindex = G_ModelIndex( ent->model2 );
 
@@ -1639,7 +1641,7 @@ void SP_func_door_model( gentity_t *ent )
 
   ent->s.torsoAnim = ent->s.weapon * ( 1000.0f / ent->speed );  //framerate
 
-  trap_LinkEntity( ent );
+  SV_LinkEntity( ent );
 
   G_SpawnInt( "health", "0", &health );
   if( health )
@@ -1743,7 +1745,7 @@ void SpawnPlatTrigger( gentity_t *ent )
   VectorCopy( tmin, trigger->r.mins );
   VectorCopy( tmax, trigger->r.maxs );
 
-  trap_LinkEntity( trigger );
+  SV_LinkEntity( trigger );
 }
 
 
@@ -1784,7 +1786,7 @@ void SP_func_plat( gentity_t *ent )
   ent->wait = 1000;
 
   // create second position
-  trap_SetBrushModel( ent, ent->model );
+  SV_SetBrushModel( ent, ent->model );
 
   if( !G_SpawnFloat( "height", "0", &height ) )
     height = ( ent->r.maxs[ 2 ] - ent->r.mins[ 2 ] ) - lip;
@@ -1873,7 +1875,7 @@ void SP_func_button( gentity_t *ent )
   VectorClear( ent->s.apos.trBase );
   VectorClear( ent->r.currentAngles );
   // calculate second position
-  trap_SetBrushModel( ent, ent->model );
+  SV_SetBrushModel( ent, ent->model );
 
   G_SpawnFloat( "lip", "4", &lip );
 
@@ -2075,7 +2077,7 @@ void Think_SetupTrainTargets( gentity_t *ent )
 
   if( !ent->nextTrain )
   {
-    G_Printf( "func_train at %s with an unfound target\n",
+    Com_Printf( "func_train at %s with an unfound target\n",
       vtos( ent->r.absmin ) );
     return;
   }
@@ -2088,7 +2090,7 @@ void Think_SetupTrainTargets( gentity_t *ent )
 
     if( !path->target )
     {
-      G_Printf( "Train corner at %s without a target\n",
+      Com_Printf( "Train corner at %s without a target\n",
         vtos( path->r.currentOrigin ) );
       return;
     }
@@ -2103,7 +2105,7 @@ void Think_SetupTrainTargets( gentity_t *ent )
 
       if( !next )
       {
-        G_Printf( "Train corner at %s without a target path_corner\n",
+        Com_Printf( "Train corner at %s without a target path_corner\n",
           vtos( path->r.currentOrigin ) );
         return;
       }
@@ -2128,7 +2130,7 @@ void SP_path_corner( gentity_t *self )
 {
   if( !self->targetname )
   {
-    G_Printf( "path_corner with no targetname at %s\n", vtos( self->r.currentOrigin ) );
+    Com_Printf( "path_corner with no targetname at %s\n", vtos( self->r.currentOrigin ) );
     G_FreeEntity( self );
     return;
   }
@@ -2213,12 +2215,12 @@ void SP_func_train( gentity_t *self )
 
   if( !self->target )
   {
-    G_Printf( "func_train without a target at %s\n", vtos( self->r.absmin ) );
+    Com_Printf( "func_train without a target at %s\n", vtos( self->r.absmin ) );
     G_FreeEntity( self );
     return;
   }
 
-  trap_SetBrushModel( self, self->model );
+  SV_SetBrushModel( self, self->model );
   InitMover( self );
 
   self->reached = Reached_Train;
@@ -2249,7 +2251,7 @@ A bmodel that just sits there, doing nothing.  Can be used for conditional walls
 void SP_func_static( gentity_t *ent )
 {
   vec3_t savedOrigin;
-  trap_SetBrushModel( ent, ent->model );
+  SV_SetBrushModel( ent, ent->model );
   VectorCopy( ent->r.currentOrigin, savedOrigin );
   InitMover( ent );
   VectorCopy( savedOrigin, ent->r.currentOrigin );
@@ -2297,13 +2299,13 @@ void SP_func_rotating( gentity_t *ent )
   if( !ent->damage )
     ent->damage = 2;
 
-  trap_SetBrushModel( ent, ent->model );
+  SV_SetBrushModel( ent, ent->model );
   VectorCopy( ent->r.currentOrigin, savedOrigin );
   InitMover( ent );
   VectorCopy( savedOrigin, ent->r.currentOrigin );
   VectorCopy( savedOrigin, ent->s.pos.trBase );
 
-  trap_LinkEntity( ent );
+  SV_LinkEntity( ent );
 }
 
 
@@ -2337,7 +2339,7 @@ void SP_func_bobbing( gentity_t *ent )
   G_SpawnInt( "dmg", "2", &ent->damage );
   G_SpawnFloat( "phase", "0", &phase );
 
-  trap_SetBrushModel( ent, ent->model );
+  SV_SetBrushModel( ent, ent->model );
   VectorCopy( ent->r.currentOrigin, savedOrigin );
   InitMover( ent );
   VectorCopy( savedOrigin, ent->r.currentOrigin );
@@ -2388,7 +2390,7 @@ void SP_func_pendulum( gentity_t *ent )
   G_SpawnInt( "dmg", "2", &ent->damage );
   G_SpawnFloat( "phase", "0", &phase );
 
-  trap_SetBrushModel( ent, ent->model );
+  SV_SetBrushModel( ent, ent->model );
 
   // find pendulum length
   length = fabs( ent->r.mins[ 2 ] );

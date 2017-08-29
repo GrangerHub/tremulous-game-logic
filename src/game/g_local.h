@@ -678,7 +678,7 @@ typedef struct
   int               framenum;
   int               time;                         // in msec
   int               previousTime;                 // so movers can back up when blocked
-  int               frameMsec;                    // trap_Milliseconds() at end frame
+  int               frameMsec;                    // Sys_Milliseconds() at end frame
 
   int               startTime;                    // level.time the map was started
 
@@ -694,7 +694,7 @@ typedef struct
                                                   // we changed gametype
 
   qboolean          restarted;                    // waiting for a map_restart to fire
-  
+
 
   int               numConnectedClients;
   int               numNonSpectatorClients;       // includes connecting clients
@@ -1248,8 +1248,6 @@ void G_RunThink( gentity_t *ent );
 void G_AdminMessage( gentity_t *ent, const char *string );
 void QDECL G_LogPrintf( const char *fmt, ... ) __attribute__ ((format (printf, 1, 2)));
 void SendScoreboardMessageToAllClients( void );
-void QDECL G_Printf( const char *fmt, ... ) __attribute__ ((format (printf, 1, 2)));
-void QDECL G_Error( const char *fmt, ... ) __attribute__ ((noreturn, format (printf, 1, 2)));
 void G_LevelRestart( qboolean stopWarmup );
 void G_LevelReady( void );
 void G_Vote( gentity_t *ent, team_t team, qboolean voting );
@@ -1491,56 +1489,58 @@ extern  vmCvar_t  g_teamStatus;
 
 extern  vmCvar_t  g_censorship;
 
-void      trap_Print( const char *fmt );
-void      trap_Error( const char *fmt ) __attribute__((noreturn));
-int       trap_Milliseconds( void );
-int       trap_RealTime( qtime_t *qtime );
-int       trap_Argc( void );
-void      trap_Argv( int n, char *buffer, int bufferLength );
-void      trap_Args( char *buffer, int bufferLength );
-int       trap_FS_FOpenFile( const char *qpath, fileHandle_t *f, fsMode_t mode );
-int       trap_FS_Read( void *buffer, int len, fileHandle_t f );
-void      trap_FS_Write( const void *buffer, int len, fileHandle_t f );
-void      trap_FS_FCloseFile( fileHandle_t f );
-int       trap_FS_GetFileList( const char *path, const char *extension, char *listbuf, int bufsize );
-int       trap_FS_GetFilteredFiles( const char *path, const char *extension, char *filter, char *listbuf, int bufsize );
-int       trap_FS_Seek( fileHandle_t f, long offset, int origin ); // fsOrigin_t
-void      trap_SendConsoleCommand( int exec_when, const char *text );
-void      trap_Cvar_Register( vmCvar_t *cvar, const char *var_name, const char *value, int flags );
-void      trap_Cvar_Update( vmCvar_t *cvar );
-void      trap_Cvar_Set( const char *var_name, const char *value );
-int       trap_Cvar_VariableIntegerValue( const char *var_name );
-void      trap_Cvar_VariableStringBuffer( const char *var_name, char *buffer, int bufsize );
-void      trap_LocateGameData( gentity_t *gEnts, int numGEntities, int sizeofGEntity_t,
+void      Com_Printf( const char *msg, ... );
+void      Com_Error( int level, const char *error, ... );
+int       Sys_Milliseconds( void );
+int       Com_RealTime( qtime_t *qtime );
+int       Cmd_Argc( void );
+void      Cmd_ArgvBuffer( int n, char *buffer, int bufferLength );
+int       FS_FOpenFileByMode( const char *qpath, fileHandle_t *f, fsMode_t mode );
+int       FS_Read2( void *buffer, int len, fileHandle_t f );
+void      FS_Write( const void *buffer, int len, fileHandle_t f );
+void      FS_FCloseFile( fileHandle_t f );
+int       FS_GetFileList( const char *path, const char *extension, char *listbuf, int bufsize );
+int       FS_GetFilteredFiles( const char *path, const char *extension, char *filter, char *listbuf, int bufsize );
+int       FS_Seek( fileHandle_t f, long offset, int origin ); // fsOrigin_t
+void      Cbuf_ExecuteText( int exec_when, const char *text );
+void      Cvar_Register( vmCvar_t *cvar, const char *var_name, const char *value, int flags );
+void      Cvar_Update( vmCvar_t *cvar );
+void      Cvar_SetSafe( const char *var_name, const char *value );
+int       Cvar_VariableIntegerValue( const char *var_name );
+void      Cvar_VariableStringBuffer( const char *var_name, char *buffer, int bufsize );
+void      SV_LocateGameData( gentity_t *gEnts, int numGEntities, int sizeofGEntity_t,
                                playerState_t *gameClients, int sizeofGameClient );
-void      trap_DropClient( int clientNum, const char *reason );
-void      trap_SendServerCommand( int clientNum, const char *text );
-void      trap_SetConfigstring( int num, const char *string );
-void      trap_GetConfigstring( int num, char *buffer, int bufferSize );
-void      trap_SetConfigstringRestrictions( int num, const clientList_t *clientList );
-void      trap_GetUserinfo( int num, char *buffer, int bufferSize );
-void      trap_SetUserinfo( int num, const char *buffer );
-void      trap_GetServerinfo( char *buffer, int bufferSize );
-void      trap_SetBrushModel( gentity_t *ent, const char *name );
-void      trap_Trace( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs,
-                      const vec3_t end, int passEntityNum, int contentmask );
-void      trap_TraceCapsule( trace_t *results, const vec3_t start, const vec3_t mins,
-                             const vec3_t maxs, const vec3_t end, int passEntityNum, int contentmask );
-int       trap_PointContents( const vec3_t point, int passEntityNum );
-qboolean  trap_InPVS( const vec3_t p1, const vec3_t p2 );
-qboolean  trap_InPVSIgnorePortals( const vec3_t p1, const vec3_t p2 );
-void      trap_AdjustAreaPortalState( gentity_t *ent, qboolean open );
-qboolean  trap_AreasConnected( int area1, int area2 );
-void      trap_LinkEntity( gentity_t *ent );
-void      trap_UnlinkEntity( gentity_t *ent );
-int       trap_EntitiesInBox( const vec3_t mins, const vec3_t maxs, int *entityList, int maxcount );
-qboolean  trap_EntityContact( const vec3_t mins, const vec3_t maxs, const gentity_t *ent );
-void      trap_GetUsercmd( int clientNum, usercmd_t *cmd );
-qboolean  trap_GetEntityToken( char *buffer, int bufferSize );
+void      SV_GameDropClient( int clientNum, const char *reason );
+void      SV_GameSendServerCommand( int clientNum, const char *text );
+void      SV_SetConfigstring( int num, const char *string );
+void      SV_GetConfigstring( int num, char *buffer, int bufferSize );
+void      SV_SetConfigstringRestrictions( int num, const clientList_t *clientList );
+void      SV_GetUserinfo( int num, char *buffer, int bufferSize );
+void      SV_SetUserinfo( int num, const char *buffer );
+void      SV_GetServerinfo( char *buffer, int bufferSize );
+void      SV_SetBrushModel( gentity_t *ent, const char *name );
+void      SV_Trace( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs,
+                      const vec3_t end, int passEntityNum, int contentmask, traceType_t type );
+void      G_TraceWrapper( trace_t *results, const vec3_t start,
+                          const vec3_t mins, const vec3_t maxs,
+                          const vec3_t end, int passEntityNum,
+                          int contentMask );
+int       SV_PointContents( const vec3_t point, int passEntityNum );
+qboolean  SV_inPVS( const vec3_t p1, const vec3_t p2 );
+qboolean  SV_inPVSIgnorePortals( const vec3_t p1, const vec3_t p2 );
+void      SV_AdjustAreaPortalState( gentity_t *ent, qboolean open );
+qboolean  CM_AreasConnected( int area1, int area2 );
+void      SV_LinkEntity( gentity_t *ent );
+void      SV_UnlinkEntity( gentity_t *ent );
+int       SV_AreaEntities( const vec3_t mins, const vec3_t maxs, int *entityList, int maxcount );
+qboolean  SV_EntityContact( const vec3_t mins, const vec3_t maxs, const gentity_t *ent, traceType_t type );
+void      SV_GetUsercmd( int clientNum, usercmd_t *cmd );
+qboolean  SV_GetEntityToken( char *buffer, int bufferSize );
 
-void      trap_SnapVector( float *v );
+void      Q_SnapVector( float *v );
 
-void      trap_AddCommand( const char *cmdName );
-void      trap_RemoveCommand( const char *cmdName );
+typedef void (*xcommand_t) (void);
+void      Cmd_AddCommand( const char *cmdName, xcommand_t function );
+void      Cmd_RemoveCommand( const char *cmdName );
 
-int       trap_Query( dbArray_t type, char *data, int *steps );
+int       sl_query( dbArray_t type, char *data, int *steps );

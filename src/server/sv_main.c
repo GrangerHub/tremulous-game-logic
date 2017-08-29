@@ -162,7 +162,7 @@ void SV_AddServerCommand( client_t *client, const char *cmd ) {
 =================
 SV_SendServerCommand
 
-Sends a reliable command string to be interpreted by 
+Sends a reliable command string to be interpreted by
 the client game module: "cp", "print", "chat", etc
 A NULL client will broadcast to all clients
 =================
@@ -172,7 +172,7 @@ void QDECL SV_SendServerCommand(client_t *cl, const char *fmt, ...) {
 	byte		message[MAX_MSGLEN];
 	client_t	*client;
 	int			j;
-	
+
 	va_start (argptr,fmt);
 	Q_vsnprintf ((char *)message, sizeof(message), fmt,argptr);
 	va_end (argptr);
@@ -180,7 +180,7 @@ void QDECL SV_SendServerCommand(client_t *cl, const char *fmt, ...) {
 	// Fix to http://aluigi.altervista.org/adv/q3msgboom-adv.txt
 	// The actual cause of the bug is probably further downstream
 	// and should maybe be addressed later, but this certainly
-	// fixes the problem for now.	
+	// fixes the problem for now.
 	// Summary: The bug is that messages longer than 1022 are not
 	// allowed downstream and there is a buffer overflow issue
 	// affecting network traffic etc. Therefore, one way to stop
@@ -190,7 +190,7 @@ void QDECL SV_SendServerCommand(client_t *cl, const char *fmt, ...) {
 	  Com_Printf( "SV_SendServerCommand( %ld, %.20s... ) length %ld > 1022, "
 		      "dropping to avoid server buffer overflow.\n",
 		      cl - svs.clients, message, strlen( (char *)message ) );
-	  Com_Printf( "Full message: [%s]\n", message ); 
+	  Com_Printf( "Full message: [%s]\n", message );
 	  return;
 	}
 
@@ -275,7 +275,7 @@ void SV_MasterHeartbeat(const char *message)
 		if(sv_masters[a][i]->modified || (adrs[a][i][0].type == NA_BAD && adrs[a][i][1].type == NA_BAD))
 		{
 			sv_masters[a][i]->modified = qfalse;
-			
+
 			if(netenabled & NET_ENABLEV4)
 			{
 				Com_Printf("Resolving %s (IPv4)\n", sv_masters[a][i]->string);
@@ -287,13 +287,13 @@ void SV_MasterHeartbeat(const char *message)
 					// if no port was specified, use the default master port
 					adrs[a][i][0].port = BigShort(a == 2 ? ALT2PORT_MASTER : a == 1 ? ALT1PORT_MASTER : PORT_MASTER);
 				}
-				
+
 				if(res)
 					Com_Printf( "%s resolved to %s\n", sv_masters[a][i]->string, NET_AdrToStringwPort(adrs[a][i][0]));
 				else
 					Com_Printf( "%s has no IPv4 address.\n", sv_masters[a][i]->string);
 			}
-			
+
 			if(netenabled & NET_ENABLEV6)
 			{
 				Com_Printf("Resolving %s (IPv6)\n", sv_masters[a][i]->string);
@@ -305,7 +305,7 @@ void SV_MasterHeartbeat(const char *message)
 					// if no port was specified, use the default master port
 					adrs[a][i][1].port = BigShort(a == 2 ? ALT2PORT_MASTER : a == 1 ? ALT1PORT_MASTER : PORT_MASTER);
 				}
-				
+
 				if(res)
 					Com_Printf( "%s resolved to %s\n", sv_masters[a][i]->string, NET_AdrToStringwPort(adrs[a][i][1]));
 				else
@@ -445,7 +445,7 @@ static leakyBucket_t *SVC_BucketForAddress( netadr_t address, int burst, int per
 			} else {
 				bucketHashes[ bucket->hash ] = bucket->next;
 			}
-			
+
 			if ( bucket->next != NULL ) {
 				bucket->next->prev = bucket->prev;
 			}
@@ -578,7 +578,7 @@ static void SVC_Status( netadr_t from ) {
 		cl = &svs.clients[i];
 		if ( cl->state >= CS_CONNECTED ) {
 			ps = SV_GameClientNum( i );
-			Com_sprintf (player, sizeof(player), "%i %i \"%s\"\n", 
+			Com_sprintf (player, sizeof(player), "%i %i \"%s\"\n",
 				ps->persistant[PERS_SCORE], cl->ping, cl->name);
 			playerLength = strlen(player);
 			if (statusLength + playerLength >= sizeof(status) ) {
@@ -647,7 +647,7 @@ void SVC_Info( netadr_t from ) {
 	Info_SetValueForKey( infostring, "hostname", sv_hostname->string );
 	Info_SetValueForKey( infostring, "mapname", sv_mapname->string );
 	Info_SetValueForKey( infostring, "clients", va("%i", count) );
-	Info_SetValueForKey( infostring, "sv_maxclients", 
+	Info_SetValueForKey( infostring, "sv_maxclients",
 		va("%i", sv_maxclients->integer - sv_privateClients->integer ) );
 	Info_SetValueForKey( infostring, "pure", va("%i", sv_pure->integer ) );
 
@@ -733,7 +733,7 @@ static void SVC_RemoteCommand( netadr_t from, msg_t *msg ) {
 		Com_Printf ("Bad rconpassword.\n");
 	} else {
 		remaining[0] = 0;
-		
+
 		// https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=543
 		// get the command directly, "rcon <pass> <command>" to avoid quoting issues
 		// extract the command by walking
@@ -746,9 +746,9 @@ static void SVC_RemoteCommand( netadr_t from, msg_t *msg ) {
 			cmd_aux++;
 		while(cmd_aux[0]==' ')
 			cmd_aux++;
-		
+
 		Q_strcat( remaining, sizeof(remaining), cmd_aux);
-		
+
 		Cmd_ExecuteString (remaining);
 
 	}
@@ -918,7 +918,7 @@ static void SV_CalcPings( void ) {
 ==================
 SV_CheckTimeouts
 
-If a packet has not been received from a client for timeout->integer 
+If a packet has not been received from a client for timeout->integer
 seconds, drop the conneciton.  Server time is used instead of
 realtime to avoid dropping the local client while debugging.
 
@@ -953,7 +953,7 @@ static void SV_CheckTimeouts( void ) {
 			// wait several frames so a debugger session doesn't
 			// cause a timeout
 			if ( ++cl->timeoutCount > 5 ) {
-				SV_DropClient (cl, "timed out"); 
+				SV_DropClient (cl, "timed out");
 				cl->state = CS_FREE;	// don't bother with zombie state
 			}
 		} else {
@@ -1008,9 +1008,9 @@ int SV_FrameMsec()
 	if(sv_fps)
 	{
 		int frameMsec;
-		
+
 		frameMsec = 1000.0f / sv_fps->value;
-		
+
 		if(frameMsec < sv.timeResidual)
 			return 0;
 		else
@@ -1118,7 +1118,7 @@ void SV_Frame( int msec ) {
 		sv.time += frameMsec;
 
 		// let everything in the world think and move
-		VM_Call (gvm, GAME_RUN_FRAME, sv.time);
+		dll_G_RunFrame( sv.time );
 	}
 
 	if ( com_speeds->integer ) {
@@ -1151,7 +1151,7 @@ int SV_RateMsec(client_t *client)
 {
 	int rate, rateMsec;
 	int messageSize;
-	
+
 	messageSize = client->netchan.lastSentSize;
 	rate = client->rate;
 
@@ -1175,13 +1175,13 @@ int SV_RateMsec(client_t *client)
 		messageSize += UDPIP6_HEADER_SIZE;
 	else
 		messageSize += UDPIP_HEADER_SIZE;
-		
+
 	rate = (int)(rate * com_timescale->value);
 	if(rate < 1)
 		rate = 1;
 	rateMsec = messageSize * 1000 / rate;
 	rate = Sys_Milliseconds() - client->netchan.lastSentTime;
-	
+
 	if(rate > rateMsec)
 		return 0;
 	else

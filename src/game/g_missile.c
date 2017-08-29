@@ -93,7 +93,7 @@ void G_ExplodeMissile( gentity_t *ent )
     G_RadiusDamage( ent->r.currentOrigin, ent->parent, ent->splashDamage,
                     ent->splashRadius, ent, ent->splashMethodOfDeath );
 
-  trap_LinkEntity( ent );
+  SV_LinkEntity( ent );
 }
 
 void AHive_ReturnToHive( gentity_t *self );
@@ -162,7 +162,7 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace )
     if( other->s.eType == ET_BUILDABLE && other->s.modelindex == BA_A_HIVE )
     {
       if( !ent->parent )
-        G_Printf( S_COLOR_YELLOW "WARNING: hive entity has no parent in G_MissileImpact\n" );
+        Com_Printf( S_COLOR_YELLOW "WARNING: hive entity has no parent in G_MissileImpact\n" );
       else
         ent->parent->active = qfalse;
 
@@ -216,7 +216,7 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace )
 
   if( ent->s.weapon == WP_LAUNCHER )
     G_AddEvent(ent,EV_MISSILE_MISS,DirToByte(trace->plane.normal));
-  else if( G_TakesDamage( other ) && 
+  else if( G_TakesDamage( other ) &&
       ( other->s.eType == ET_PLAYER || other->s.eType == ET_BUILDABLE ) )
   {
     G_AddEvent( ent, EV_MISSILE_HIT, DirToByte( trace->plane.normal ) );
@@ -241,7 +241,7 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace )
     G_RadiusDamage( trace->endpos, ent->parent, ent->splashDamage, ent->splashRadius,
                     other, ent->splashMethodOfDeath );
 
-  trap_LinkEntity( ent );
+  SV_LinkEntity( ent );
 }
 
 
@@ -265,8 +265,8 @@ void G_RunMissile( gentity_t *ent )
   passent = ent->r.ownerNum;
 
   // general trace to see if we hit anything at all
-  trap_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs,
-              origin, passent, ent->clipmask );
+  SV_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs,
+              origin, passent, ent->clipmask, TT_AABB );
 
   if( tr.startsolid || tr.allsolid )
   {
@@ -283,8 +283,8 @@ void G_RunMissile( gentity_t *ent )
     }
     else
     {
-      trap_Trace( &tr, ent->r.currentOrigin, NULL, NULL, origin, 
-                  passent, ent->clipmask );
+      SV_Trace( &tr, ent->r.currentOrigin, NULL, NULL, origin,
+                  passent, ent->clipmask, TT_AABB );
 
       if( tr.fraction < 1.0f )
       {
@@ -300,8 +300,8 @@ void G_RunMissile( gentity_t *ent )
         }
         else
         {
-          trap_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, 
-                      origin, passent, CONTENTS_BODY );
+          SV_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs,
+                      origin, passent, CONTENTS_BODY, TT_AABB );
 
           if( tr.fraction < 1.0f )
             impact = qtrue;
@@ -327,8 +327,8 @@ void G_RunMissile( gentity_t *ent )
       return;   // exploded
   }
 
-  G_SetContents( ent, CONTENTS_SOLID ); //trick trap_LinkEntity into...
-  trap_LinkEntity( ent );
+  G_SetContents( ent, CONTENTS_SOLID ); //trick SV_LinkEntity into...
+  SV_LinkEntity( ent );
   G_SetContents( ent, 0 ); //...encoding bbox information
 
   // check think function after bouncing
@@ -511,13 +511,13 @@ gentity_t *fire_luciferCannon( gentity_t *self, vec3_t start, vec3_t dir,
   bolt->splashMethodOfDeath = MOD_LCANNON_SPLASH;
   G_SetClipmask( bolt, MASK_SHOT );
   bolt->target_ent = NULL;
-  
+
   // Give the missile a small bounding box
   bolt->r.mins[ 0 ] = bolt->r.mins[ 1 ] = bolt->r.mins[ 2 ] =
     -LCANNON_SIZE;
   bolt->r.maxs[ 0 ] = bolt->r.maxs[ 1 ] = bolt->r.maxs[ 2 ] =
     -bolt->r.mins[ 0 ];
-  
+
   // Pass the missile charge through
   charge = (float)( damage - LCANNON_SECONDARY_DAMAGE ) / LCANNON_DAMAGE;
   bolt->s.torsoAnim = charge * 255;
@@ -765,7 +765,7 @@ fire_portalGun
 
 =================
 */
-gentity_t *fire_portalGun( gentity_t *self, vec3_t start, vec3_t dir, 
+gentity_t *fire_portalGun( gentity_t *self, vec3_t start, vec3_t dir,
                            portal_t portal, qboolean relativeVelocity )
 {
   gentity_t *bolt;
@@ -865,13 +865,14 @@ void AHive_SearchAndDestroy( gentity_t *self )
       continue;
 
     if( ent->client &&
-        ent->health > 0 &&   
+        ent->health > 0 &&
         ent->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
         ( d = DistanceSquared( ent->r.currentOrigin, self->r.currentOrigin ),
           ( self->target_ent == NULL || d < nearest ) ) )
     {
-      trap_Trace( &tr, self->r.currentOrigin, self->r.mins, self->r.maxs,
-                  ent->r.currentOrigin, self->r.ownerNum, self->clipmask );
+      SV_Trace( &tr, self->r.currentOrigin, self->r.mins, self->r.maxs,
+                  ent->r.currentOrigin, self->r.ownerNum, self->clipmask,
+                  TT_AABB);
       if( tr.entityNum != ENTITYNUM_WORLD )
       {
         nearest = d;

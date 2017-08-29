@@ -87,17 +87,17 @@ void SV_GetChallenge(netadr_t from)
 		if(!challenge->connected && NET_CompareAdr(from, challenge->adr))
 		{
 			wasfound = qtrue;
-			
+
 			if(challenge->time < oldestClientTime)
 				oldestClientTime = challenge->time;
 		}
-		
+
 		if(wasfound && i >= MAX_CHALLENGES_MULTI)
 		{
 			i = MAX_CHALLENGES;
 			break;
 		}
-		
+
 		if(challenge->time < oldestTime)
 		{
 			oldestTime = challenge->time;
@@ -148,7 +148,7 @@ void SV_DirectConnect( netadr_t from ) {
 	char		*ip;
 
 	Com_DPrintf ("SVC_DirectConnect ()\n");
-	
+
 	Q_strncpyz( userinfo, Cmd_Argv(1), sizeof(userinfo) );
 
 	version = atoi( Info_ValueForKey( userinfo, "protocol" ) );
@@ -168,9 +168,9 @@ void SV_DirectConnect( netadr_t from ) {
 			continue;
 		}
 		if ( NET_CompareBaseAdr( from, cl->netchan.remoteAddress )
-			&& ( cl->netchan.qport == qport 
+			&& ( cl->netchan.qport == qport
 			|| from.port == cl->netchan.remoteAddress.port ) ) {
-			if (( svs.time - cl->lastConnectTime) 
+			if (( svs.time - cl->lastConnectTime)
 				< (sv_reconnectlimit->integer * 1000)) {
 				Com_DPrintf ("%s:reconnect rejected : too soon\n", NET_AdrToString (from));
 				return;
@@ -178,7 +178,7 @@ void SV_DirectConnect( netadr_t from ) {
 			break;
 		}
 	}
-	
+
 	// don't let "ip" overflow userinfo string
 	if ( NET_IsLocalAddress (from) )
 		ip = "localhost";
@@ -211,9 +211,9 @@ void SV_DirectConnect( netadr_t from ) {
 			NET_OutOfBandPrint( NS_SERVER, from, "print\nNo or bad challenge for your address.\n" );
 			return;
 		}
-	
+
 		challengeptr = &svs.challenges[i];
-		
+
 		if(challengeptr->wasrefused)
 		{
 			// Return silently, so that error messages written by the server keep being displayed.
@@ -251,7 +251,7 @@ void SV_DirectConnect( netadr_t from ) {
 			continue;
 		}
 		if ( NET_CompareBaseAdr( from, cl->netchan.remoteAddress )
-			&& ( cl->netchan.qport == qport 
+			&& ( cl->netchan.qport == qport
 			|| from.port == cl->netchan.remoteAddress.port ) ) {
 			Com_Printf ("%s:reconnect\n", NET_AdrToString (from));
 			newcl = cl;
@@ -260,7 +260,7 @@ void SV_DirectConnect( netadr_t from ) {
 
 //			// disconnect the client from the game first so any flags the
 //			// player might have are dropped
-//			VM_Call( gvm, GAME_CLIENT_DISCONNECT, newcl - svs.clients );
+//			dll_ClientDisconnect( newcl - svs.clients );
 			//
 			goto gotnewcl;
 		}
@@ -310,7 +310,7 @@ void SV_DirectConnect( netadr_t from ) {
 	cl->reliableAcknowledge = 0;
 	cl->reliableSequence = 0;
 
-gotnewcl:	
+gotnewcl:
 	// build a new connection
 	// accept the new client
 	// this is the only place a client_t is ever initialized
@@ -333,7 +333,7 @@ gotnewcl:
 	Q_strncpyz( newcl->userinfo, userinfo, sizeof(newcl->userinfo) );
 
 	// get the game a chance to reject this connection or modify the userinfo
-	denied = VM_Call( gvm, GAME_CLIENT_CONNECT, clientNum, qtrue ); // firstTime = qtrue
+	denied = (intptr_t)dll_ClientConnect( clientNum, qtrue ); // firstTime = qtrue
 	if ( denied ) {
 		// we can't just use VM_ArgPtr, because that is only valid inside a VM_Call
 		char *str = VM_ExplicitArgPtr( gvm, denied );
@@ -354,7 +354,7 @@ gotnewcl:
 	newcl->lastSnapshotTime = 0;
 	newcl->lastPacketTime = svs.time;
 	newcl->lastConnectTime = svs.time;
-	
+
 	// when we receive the first packet from the client, we will
 	// notice that it is from a different serverid and that the
 	// gamestate message was not just sent, forcing a retransmit
@@ -384,14 +384,14 @@ void SV_FreeClient(client_t *client)
 {
 #ifdef USE_VOIP
 	int index;
-	
+
 	for(index = client->queuedVoipIndex; index < client->queuedVoipPackets; index++)
 	{
 		index %= ARRAY_LEN(client->voipPacket);
-		
+
 		Z_Free(client->voipPacket[index]);
 	}
-	
+
 	client->queuedVoipPackets = 0;
 #endif
 
@@ -434,14 +434,14 @@ void SV_DropClient( client_t *drop, const char *reason ) {
 
 	// call the prog function for removing a client
 	// this will remove the body, among other things
-	VM_Call( gvm, GAME_CLIENT_DISCONNECT, drop - svs.clients );
+	dll_ClientDisconnect( drop - svs.clients );
 
 	// add the disconnect command
 	SV_SendServerCommand( drop, "disconnect \"%s\"", reason);
 
 	// nuke user info
 	SV_SetUserinfo( drop - svs.clients, "" );
-	
+
 	Com_DPrintf( "Going to CS_ZOMBIE for %s\n", drop->name );
 	drop->state = CS_ZOMBIE;		// become free in a few seconds
 
@@ -575,7 +575,7 @@ void SV_ClientEnterWorld( client_t *client, usercmd_t *cmd ) {
 		memset(&client->lastUsercmd, '\0', sizeof(client->lastUsercmd));
 
 	// call the game begin function
-	VM_Call( gvm, GAME_CLIENT_BEGIN, client - svs.clients );
+	dll_ClientBegin( client - svs.clients );
 }
 
 /*
@@ -714,7 +714,7 @@ int SV_WriteDownloadToClient(client_t *cl, msg_t *msg)
  		// Chop off filename extension.
 		Com_sprintf(pakbuf, sizeof(pakbuf), "%s", cl->downloadName);
 		pakptr = strrchr(pakbuf, '.');
-		
+
 		if(pakptr)
 		{
 			*pakptr = '\0';
@@ -779,15 +779,15 @@ int SV_WriteDownloadToClient(client_t *cl, msg_t *msg)
 			MSG_WriteString( msg, errorMessage );
 
 			*cl->downloadName = 0;
-			
+
 			if(cl->download)
 				FS_FCloseFile(cl->download);
-			
+
 			return 1;
 		}
- 
+
 		Com_Printf( "clientDownload: %d : beginning \"%s\"\n", (int) (cl - svs.clients), cl->downloadName );
-		
+
 		// Init
 		cl->downloadCurrentBlock = cl->downloadClientBlock = cl->downloadXmitBlock = 0;
 		cl->downloadCount = 0;
@@ -881,11 +881,11 @@ int SV_SendQueuedMessages(void)
 {
 	int i, retval = -1, nextFragT;
 	client_t *cl;
-	
+
 	for(i=0; i < sv_maxclients->integer; i++)
 	{
 		cl = &svs.clients[i];
-		
+
 		if(cl->state)
 		{
 			nextFragT = SV_RateMsec(cl);
@@ -916,18 +916,18 @@ int SV_SendDownloadMessages(void)
 	client_t *cl;
 	msg_t msg;
 	byte msgBuffer[MAX_MSGLEN];
-	
+
 	for(i=0; i < sv_maxclients->integer; i++)
 	{
 		cl = &svs.clients[i];
-		
+
 		if(cl->state && *cl->downloadName)
 		{
 			MSG_Init(&msg, msgBuffer, sizeof(msgBuffer));
 			MSG_WriteLong(&msg, cl->lastClientCommand);
-			
+
 			retval = SV_WriteDownloadToClient(cl, &msg);
-				
+
 			if(retval)
 			{
 				MSG_WriteByte(&msg, svc_EOF);
@@ -971,7 +971,7 @@ static void SV_VerifyPaks_f( client_t *cl ) {
 	const char *pPaks, *pArg;
 	qboolean bGood = qtrue;
 
-	// if we are pure, we "expect" the client to load certain things from 
+	// if we are pure, we "expect" the client to load certain things from
 	// certain pk3 files, namely we want the client to have loaded the
 	// ui and cgame that we think should be loaded based on the pure setting
 	//
@@ -1003,7 +1003,7 @@ static void SV_VerifyPaks_f( client_t *cl ) {
 				return;
 			}
 		}
-	
+
 		// we basically use this while loop to avoid using 'goto' :)
 		while (bGood) {
 
@@ -1102,7 +1102,7 @@ static void SV_VerifyPaks_f( client_t *cl ) {
 
 		if (bGood) {
 			cl->pureAuthentic = 1;
-		} 
+		}
 		else {
 			cl->pureAuthentic = 0;
 			cl->lastSnapshotTime = 0;
@@ -1174,11 +1174,11 @@ void SV_UserinfoChanged( client_t *cl ) {
 
 	// snaps command
 	val = Info_ValueForKey (cl->userinfo, "snaps");
-	
+
 	if(strlen(val))
 	{
 		i = atoi(val);
-		
+
 		if(i < 1)
 			i = 1;
 		else if(i > sv_fps->integer)
@@ -1193,9 +1193,9 @@ void SV_UserinfoChanged( client_t *cl ) {
 	{
 		// Reset last sent snapshot so we avoid desync between server frame time and snapshot send time
 		cl->lastSnapshotTime = 0;
-		cl->snapshotMsec = i;		
+		cl->snapshotMsec = i;
 	}
-	
+
 #ifdef USE_VOIP
 	val = Info_ValueForKey(cl->userinfo, "cl_voip");
 	cl->hasVoip = atoi(val);
@@ -1233,7 +1233,7 @@ static void SV_UpdateUserinfo_f( client_t *cl ) {
 
 	SV_UserinfoChanged( cl );
 	// call prog code to allow overrides
-	VM_Call( gvm, GAME_CLIENT_USERINFO_CHANGED, cl - svs.clients );
+	dll_ClientUserinfoChanged( cl - svs.clients, qfalse );
 }
 
 
@@ -1301,7 +1301,7 @@ Also called by bot code
 void SV_ExecuteClientCommand( client_t *cl, const char *s, qboolean clientOK ) {
 	ucmd_t	*u;
 	qboolean bProcessed = qfalse;
-	
+
 	Cmd_TokenizeString( s );
 
 	// see if it is a server level command
@@ -1316,7 +1316,7 @@ void SV_ExecuteClientCommand( client_t *cl, const char *s, qboolean clientOK ) {
 	if (clientOK) {
 		// pass unknown strings to the game
 		if (!u->name && sv.state == SS_GAME && (cl->state == CS_ACTIVE || cl->state == CS_PRIMED)) {
-			VM_Call( gvm, GAME_CLIENT_COMMAND, cl - svs.clients );
+			dll_ClientCommand( cl - svs.clients );
 		}
 	}
 	else if (!bProcessed)
@@ -1345,7 +1345,7 @@ static qboolean SV_ClientCommand( client_t *cl, msg_t *msg ) {
 
 	// drop the connection if we have somehow lost commands
 	if ( seq > cl->lastClientCommand + 1 ) {
-		Com_Printf( "Client %s lost %i clientCommands\n", cl->name, 
+		Com_Printf( "Client %s lost %i clientCommands\n", cl->name,
 			seq - cl->lastClientCommand + 1 );
 		SV_DropClient( cl, "Lost reliable commands" );
 		return qfalse;
@@ -1359,9 +1359,9 @@ static qboolean SV_ClientCommand( client_t *cl, msg_t *msg ) {
 	// We don't do this when the client hasn't been active yet since it's
 	// normal to spam a lot of commands when downloading
 #if 0 // flood protection in game for trem
-	if ( !com_cl_running->integer && 
+	if ( !com_cl_running->integer &&
 		cl->state >= CS_ACTIVE &&
-		sv_floodProtect->integer && 
+		sv_floodProtect->integer &&
 		svs.time < cl->nextReliableTime ) {
 		// ignore any other text messages from this client but let them keep playing
 		// TTimo - moved the ignored verbose to the actual processing in SV_ExecuteClientCommand, only printing if the core doesn't intercept
@@ -1398,14 +1398,14 @@ void SV_ClientThink (client_t *cl, usercmd_t *cmd) {
 		return;		// may have been kicked during the last usercmd
 	}
 
-	VM_Call( gvm, GAME_CLIENT_THINK, cl - svs.clients );
+	dll_ClientThink( cl - svs.clients );
 }
 
 /*
 ==================
 SV_UserMove
 
-The message usually contains all the movement commands 
+The message usually contains all the movement commands
 that were in the last three packets, so that the information
 in dropped packets can be recovered.
 
@@ -1468,17 +1468,17 @@ static void SV_UserMove( client_t *cl, msg_t *msg, qboolean delta ) {
 			SV_SendClientGameState( cl );
 		}
 		return;
-	}			
-	
+	}
+
 	// if this is the first usercmd we have received
 	// this gamestate, put the client into the world
 	if ( cl->state == CS_PRIMED ) {
 		SV_ClientEnterWorld( cl, &cmds[0] );
 		// the moves can be processed normaly
 	}
-	
+
 	// a bad cp command was sent, drop the client
-	if (sv_pure->integer != 0 && cl->pureAuthentic == 0) {		
+	if (sv_pure->integer != 0 && cl->pureAuthentic == 0) {
 		SV_DropClient( cl, "Cannot validate pure client!");
 		return;
 	}
@@ -1525,7 +1525,7 @@ static qboolean SV_ShouldIgnoreVoipSender(const client_t *cl)
 		return qtrue;  // VoIP disabled on this server.
 	else if (!cl->hasVoip)  // client doesn't have VoIP support?!
 		return qtrue;
-    
+
 	// !!! FIXME: implement player blacklist.
 
 	return qfalse;  // don't ignore.
@@ -1688,7 +1688,7 @@ void SV_ExecuteClientMessage( client_t *cl, msg_t *msg ) {
 	}
 	// if this is a usercmd from a previous gamestate,
 	// ignore it or retransmit the current gamestate
-	// 
+	//
 	// if the client was downloading, let it stay at whatever serverId and
 	// gamestate it was at.  This allows it to keep downloading even when
 	// the gamestate changes.  After the download is finished, we'll

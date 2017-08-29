@@ -44,7 +44,7 @@ void G_InitPlayerModel(void)
     int  i;
 
     // TODO: Add an FS trap which is does correct file globbing
-    numFiles = trap_FS_GetFilteredFiles( "/models/players", "",
+    numFiles = FS_GetFilteredFiles( "/models/players", "",
             "models*players*head_*.skin",
             fileList, sizeof(fileList) );
     filePtr = fileList;
@@ -99,7 +99,7 @@ void G_GetPlayerModelSkins( const char *modelname, char skins[][ 64 ],
     int i;
 
     *numskins = 0;
-    nFiles = trap_FS_GetFilteredFiles("models/players", ".skin",
+    nFiles = FS_GetFilteredFiles("models/players", ".skin",
             va("models*players*%s*skin", modelname),
             fileList, sizeof(fileList));
     filePtr = fileList;

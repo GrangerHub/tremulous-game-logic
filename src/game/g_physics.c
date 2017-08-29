@@ -62,7 +62,7 @@ static void G_Bounce( gentity_t *ent, trace_t *trace )
     if( ent->s.eType == ET_BUILDABLE &&
         VectorLength( ent->s.pos.trDelta ) > 20 )
     {
-      int bounceDamage = (VectorLength( ent->s.pos.trDelta ) / 300 ) * 
+      int bounceDamage = (VectorLength( ent->s.pos.trDelta ) / 300 ) *
                        ( BG_Buildable( ent->s.modelindex )->health / 10 + 1 );
       G_Damage( ent, NULL, &g_entities[ ent->dropperNum ], NULL,
                 NULL, bounceDamage, DAMAGE_NO_PROTECTION, MOD_FALLING );
@@ -86,7 +86,7 @@ static void G_Bounce( gentity_t *ent, trace_t *trace )
       // check if a buildable should be damaged at its new location
       if( !IS_WARMUP && g_allowBuildableStacking.integer )
       {
-        int contents = trap_PointContents( ent->r.currentOrigin, -1 );
+        int contents = SV_PointContents( ent->r.currentOrigin, -1 );
         int surfaceFlags = trace->surfaceFlags;
 
         if( !( normal[ 2 ] >= minNormal || ( invert && normal[ 2 ] <= -minNormal ) ) ||
@@ -172,18 +172,20 @@ void G_Physics( gentity_t *ent, int msec )
 
       VectorMA( origin, -2.0f, ent->s.origin2, origin );
 
-      trap_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin, ent->s.number, ent->clipmask );
+      SV_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin,
+        ent->s.number, ent->clipmask, TT_AABB );
 
       while( g_entities[ tr.entityNum ].client && ( tr.fraction != 1.0f ) )
       {
         unlinkedClientNums[ numUnlinkedClientNums ] = tr.entityNum;
         numUnlinkedClientNums++;
-        trap_UnlinkEntity( &g_entities[ tr.entityNum ] );
-        trap_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin, ent->s.number, ent->clipmask );
+        SV_UnlinkEntity( &g_entities[ tr.entityNum ] );
+        SV_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin,
+          ent->s.number, ent->clipmask, TT_AABB );
       }
 
       for( i = 0; i < numUnlinkedClientNums; i++ )
-        trap_LinkEntity( &g_entities[ unlinkedClientNums[ i ] ] );
+        SV_LinkEntity( &g_entities[ unlinkedClientNums[ i ] ] );
 
       if( tr.fraction == 1.0f )
       {
@@ -209,14 +211,15 @@ void G_Physics( gentity_t *ent, int msec )
   // get current position
   BG_EvaluateTrajectory( &ent->s.pos, level.time, origin );
 
-  trap_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin, ent->s.number, ent->clipmask );
+  SV_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs,
+    origin, ent->s.number, ent->clipmask, TT_AABB );
 
   VectorCopy( tr.endpos, ent->r.currentOrigin );
 
   if( tr.startsolid )
     tr.fraction = 0;
 
-  trap_LinkEntity( ent ); // FIXME: avoid this for stationary?
+  SV_LinkEntity( ent ); // FIXME: avoid this for stationary?
 
   // check think function
   G_RunThink( ent );
@@ -225,7 +228,7 @@ void G_Physics( gentity_t *ent, int msec )
     return;
 
   // if it is in a nodrop volume, remove it
-  contents = trap_PointContents( ent->r.currentOrigin, -1 );
+  contents = SV_PointContents( ent->r.currentOrigin, -1 );
   if( contents & CONTENTS_NODROP )
   {
     if( ent->s.eType == ET_BUILDABLE )

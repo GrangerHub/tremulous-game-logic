@@ -197,7 +197,7 @@ void SV_SetConfigstring (int index, const char *val) {
 			if ( index == CS_SERVERINFO && client->gentity && (client->gentity->r.svFlags & SVF_NOSERVERINFO) ) {
 				continue;
 			}
-		
+
 			SV_SendConfigstring(client, index);
 		}
 	}
@@ -297,7 +297,7 @@ baseline will be transmitted
 */
 static void SV_CreateBaseline( void ) {
 	sharedEntity_t *svent;
-	int				entnum;	
+	int				entnum;
 
 	for ( entnum = 1; entnum < sv.num_entities ; entnum++ ) {
 		svent = SV_GentityNum(entnum);
@@ -365,7 +365,7 @@ static void SV_Startup( void ) {
 	}
 
 	Cvar_Set( "sv_running", "1" );
-	
+
 	// Join the ipv6 multicast group now that a map is running so clients can scan for us on the local network.
 	NET_JoinMulticast6();
 }
@@ -427,7 +427,7 @@ void SV_ChangeMaxClients( void ) {
 
 	// free the old clients on the hunk
 	Hunk_FreeTempMemory( oldClients );
-	
+
 	// allocate new snapshot entities
 	if ( com_dedicated->integer ) {
 		svs.numSnapshotEntities = sv_maxclients->integer * PACKET_BACKUP * MAX_SNAPSHOT_ENTITIES;
@@ -508,7 +508,7 @@ void SV_SpawnServer( char *server, qboolean killBots ) {
 	// clear collision map data
 	CM_ClearMap();
 
-	// init client structures and svs.numSnapshotEntities 
+	// init client structures and svs.numSnapshotEntities
 	if ( !Cvar_VariableValue("sv_running") ) {
 		SV_Startup();
 	} else {
@@ -572,7 +572,7 @@ void SV_SpawnServer( char *server, qboolean killBots ) {
 
 	// clear physics interaction links
 	SV_ClearWorld ();
-	
+
 	// media configstring setting should be done during
 	// the loading stage, so connected clients don't have
 	// to load during actual gameplay
@@ -584,7 +584,7 @@ void SV_SpawnServer( char *server, qboolean killBots ) {
 	// run a few frames to allow everything to settle
 	for (i = 0;i < 3; i++)
 	{
-		VM_Call (gvm, GAME_RUN_FRAME, sv.time);
+		dll_G_RunFrame( sv.time );
 		sv.time += 100;
 		svs.time += 100;
 	}
@@ -598,7 +598,7 @@ void SV_SpawnServer( char *server, qboolean killBots ) {
 			char	*denied;
 
 			// connect the client again
-			denied = VM_ExplicitArgPtr( gvm, VM_Call( gvm, GAME_CLIENT_CONNECT, i, qfalse ) );	// firstTime = qfalse
+			denied = VM_ExplicitArgPtr( gvm, (intptr_t)dll_ClientConnect( i, qfalse ) );	// firstTime = qfalse
 			if ( denied ) {
 				// this generally shouldn't happen, because the client
 				// was connected before the level change
@@ -609,10 +609,10 @@ void SV_SpawnServer( char *server, qboolean killBots ) {
 				svs.clients[i].state = CS_CONNECTED;
 			}
 		}
-	}	
+	}
 
 	// run another frame to allow things to look at all the players
-	VM_Call (gvm, GAME_RUN_FRAME, sv.time);
+	dll_G_RunFrame( sv.time );
 	sv.time += 100;
 	svs.time += 100;
 
@@ -737,7 +737,7 @@ void SV_Init (void)
 
 	sv_allowDownload = Cvar_Get ("sv_allowDownload", "0", CVAR_SERVERINFO);
 	Cvar_Get ("sv_dlURL", "http://downloads.tremulous.net", CVAR_SERVERINFO | CVAR_ARCHIVE);
-	
+
 	for (a = 0; a < 3; ++a)
 	{
 		sv_masters[a][0] = Cvar_Get(va("sv_%smaster1", (a == 2 ? "alt2" : a == 1 ? "alt1" : "")), MASTER_SERVER_NAME, 0);
@@ -767,7 +767,7 @@ to totally exit after returning from this function.
 void SV_FinalMessage( char *message ) {
 	int			i, j;
 	client_t	*cl;
-	
+
 	// send it twice, ignoring rate
 	for ( j = 0 ; j < 2 ; j++ ) {
 		for (i=0, cl = svs.clients ; i < sv_maxclients->integer ; i++, cl++) {
@@ -818,10 +818,10 @@ void SV_Shutdown( char *finalmsg ) {
 	if(svs.clients)
 	{
 		int index;
-		
+
 		for(index = 0; index < sv_maxclients->integer; index++)
 			SV_FreeClient(&svs.clients[index]);
-		
+
 		Z_Free(svs.clients);
 	}
 	Com_Memset( &svs, 0, sizeof( svs ) );
@@ -835,4 +835,3 @@ void SV_Shutdown( char *finalmsg ) {
 	if( sv_killserver->integer != 2 )
 		CL_Disconnect( qfalse );
 }
-
