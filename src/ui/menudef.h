@@ -200,4 +200,7 @@
 #define CG_PLAYER_CHARGE_STAMINA_BAR    87
 #define CG_PLAYER_CHARGE_STAMINA_BAR_BG 88
 
+#define CG_HUMAN_ARMOR_ARM              89
+#define CG_HUMAN_ARMOR_SHIELD           90
+
 #endif
