@@ -203,7 +203,8 @@
 
 #define CG_PLAYER_EQUIP_HUD             89
 #define CG_PLAYER_JETPACK_ICON          90
-#define CG_PLAYER_ARMOR_SHIELD          91
-#define CG_PLAYER_ARMOR                 92
+#define CG_PLAYER_JETPACK_FUEL          91
+#define CG_PLAYER_ARMOR_SHIELD          92
+#define CG_PLAYER_ARMOR                 93
 
 #endif
