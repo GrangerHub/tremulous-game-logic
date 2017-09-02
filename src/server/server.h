@@ -52,8 +52,8 @@ typedef struct voipServerPacket_s
 typedef struct svEntity_s {
 	struct worldSector_s *worldSector;
 	struct svEntity_s *nextEntityInWorldSector;
-	
-	entityState_t	baseline;		// for delta compression of initial sighting
+
+	entityState_t		baseline[MAX_GENTITIES];// for delta compression of initial sighting. Must always be larger than sv_maxclients cvar.
 	int			numClusters;		// if -1, use headnode instead
 	int			clusternums[MAX_ENT_CLUSTERS];
 	int			lastCluster;		// if all the clusters don't fit in clusternums
@@ -82,7 +82,7 @@ typedef struct {
 	int				checksumFeed;		// the feed key that we use to compute the pure checksum strings
 	// https://zerowing.idsoftware.com/bugzilla/show_bug.cgi?id=475
 	// the serverId associated with the current checksumFeed (always <= serverId)
-	int       checksumFeedServerId;	
+	int       checksumFeedServerId;
 	int				snapshotCounter;	// incremented for each snapshot built
 	int				timeResidual;		// <= 1000 / sv_frame->value
 	int				nextFrameTime;		// when time > nextFrameTime, process world
@@ -360,6 +360,7 @@ void SV_ClientThink (client_t *cl, usercmd_t *cmd);
 int SV_WriteDownloadToClient(client_t *cl , msg_t *msg);
 int SV_SendDownloadMessages(void);
 int SV_SendQueuedMessages(void);
+void SV_SendClientGameState( client_t *client );
 
 
 //

@@ -899,6 +899,7 @@ int       G_FloodLimited( gentity_t *ent );
 void      G_ListCommands( gentity_t *ent );
 void      G_LoadCensors( void );
 void      G_CensorString( char *out, const char *in, int len, gentity_t *ent );
+void      Cmd_Delag_f( gentity_t *ent );
 
 //
 // g_physics.c
@@ -1505,6 +1506,7 @@ void      SV_LocateGameData( gentity_t *gEnts, int numGEntities, int sizeofGEnti
                                playerState_t *gameClients, int sizeofGameClient );
 void      SV_GameDropClient( int clientNum, const char *reason );
 void      SV_GameSendServerCommand( int clientNum, const char *text );
+void      SV_SendClientGameState2( int clientNum );
 void      SV_SetConfigstring( int num, const char *string );
 void      SV_GetConfigstring( int num, char *buffer, int bufferSize );
 void      SV_SetConfigstringRestrictions( int num, const clientList_t *clientList );

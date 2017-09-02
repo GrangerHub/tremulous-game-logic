@@ -472,7 +472,7 @@ It will be resent if the client acknowledges a later message but has
 the wrong gamestate.
 ================
 */
-static void SV_SendClientGameState( client_t *client ) {
+void SV_SendClientGameState( client_t *client ) {
 	int			start;
 	entityState_t	*base, nullstate;
 	msg_t		msg;
@@ -521,13 +521,40 @@ static void SV_SendClientGameState( client_t *client ) {
 		}
 	}
 
+	// Generate baselines
+	{
+		entityState_t es_zero = {0};
+		sharedEntity_t *svent;
+		int		entnum;
+
+		for ( entnum = 1; entnum < sv.num_entities ; entnum++ ) {
+			svent = SV_GentityNum(entnum);
+			if (!svent->r.linked) {
+				continue;
+			}
+
+			//
+			// take current state as baseline
+			//
+			if ( entnum < sv_maxclients->integer ) { //Ignore players
+				sv.svEntities[entnum].baseline[client - svs.clients] = es_zero;
+			}
+			else {
+				sv.svEntities[entnum].baseline[client - svs.clients] = svent->s;
+			}
+		}
+	}
+
 	// write the baselines
 	Com_Memset( &nullstate, 0, sizeof( nullstate ) );
 	for ( start = 0 ; start < MAX_GENTITIES; start++ ) {
-		base = &sv.svEntities[start].baseline;
+		base = &sv.svEntities[start].baseline[client - svs.clients];
 		if ( !base->number ) {
 			continue;
 		}
+        if ( msg.cursize > msg.maxsize - 64 ) { //Ensure that there is extra space for the last few bytes.
+            break;
+        }
 		MSG_WriteByte( &msg, svc_baseline );
 		MSG_WriteDeltaEntity( client->netchan.alternateProtocol, &msg, &nullstate, base, qtrue );
 	}
@@ -543,6 +570,9 @@ static void SV_SendClientGameState( client_t *client ) {
 	SV_SendMessageToClient( &msg, client );
 }
 
+void SV_SendClientGameState2( int clientNum ) {
+	SV_SendClientGameState( svs.clients[ clientNum ] );
+}
 
 /*
 ==================
