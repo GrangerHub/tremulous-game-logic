@@ -102,16 +102,16 @@
 #define UI_SHOW_NOTSPECTATING             0x00000040
 
 // owner draw types
-#define CG_PLAYER_HEALTH                 0
-#define CG_PLAYER_HEALTH_CROSS           1
-#define CG_PLAYER_AMMO_VALUE             2
-#define CG_PLAYER_CLIPS_VALUE            3
-#define CG_PLAYER_BUILD_TIMER            4
-#define CG_PLAYER_CREDITS_VALUE          5
-#define CG_PLAYER_CREDITS_VALUE_NOPAD    6
-#define CG_PLAYER_STAMINA                7
-#define CG_PLAYER_STAMINA_1              8
-#define CG_PLAYER_STAMINA_2              9
+#define CG_PLAYER_HEALTH                0
+#define CG_PLAYER_HEALTH_CROSS          1
+#define CG_PLAYER_AMMO_VALUE            2
+#define CG_PLAYER_CLIPS_VALUE           3
+#define CG_PLAYER_BUILD_TIMER           4
+#define CG_PLAYER_CREDITS_VALUE         5
+#define CG_PLAYER_CREDITS_VALUE_NOPAD   6
+#define CG_PLAYER_STAMINA               7
+#define CG_PLAYER_STAMINA_1             8
+#define CG_PLAYER_STAMINA_2             9
 #define CG_PLAYER_STAMINA_3             10
 #define CG_PLAYER_STAMINA_4             11
 #define CG_PLAYER_STAMINA_BOLT          12
@@ -196,11 +196,14 @@
 #define CG_WARMUP_HUMANS_READY_HDR      84
 #define CG_WARMUP_ALIENS_READY_HDR      85
 
+#define UI_VOICECMDINFOPANE             86
 
 #define CG_PLAYER_CHARGE_STAMINA_BAR    87
 #define CG_PLAYER_CHARGE_STAMINA_BAR_BG 88
 
-#define CG_HUMAN_ARMOR_ARM              89
-#define CG_HUMAN_ARMOR_SHIELD           90
+#define CG_PLAYER_EQUIP_HUD             89
+#define CG_PLAYER_JETPACK_ICON          90
+#define CG_PLAYER_ARMOR_SHIELD          91
+#define CG_PLAYER_ARMOR                 92
 
 #endif
