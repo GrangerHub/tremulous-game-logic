@@ -906,6 +906,124 @@ static void CG_DrawPlayerHealthCross( rectDef_t *rect, vec4_t ref_color )
   trap_R_SetColor( NULL );
 }
 
+/*
+==============
+CG_DrawEquipmentHUD
+==============
+*/
+static void CG_DrawEquipmentHUD( rectDef_t *rect, vec4_t color,
+                                 qhandle_t shader )
+{
+
+  if( !BG_InventoryContainsUpgrade( UP_JETPACK,
+                                    cg.predictedPlayerState.stats ) )
+    return;
+
+  trap_R_SetColor( color );
+  CG_DrawPic( rect->x, rect->y, rect->w, rect->h, shader );
+  trap_R_SetColor( NULL );
+}
+
+/*
+==============
+CG_DrawJetpackIcon
+==============
+*/
+static void CG_DrawJetpackIcon( rectDef_t *rect, vec4_t foreColor,
+                                vec4_t backColor, qhandle_t shader )
+{
+  if( !BG_InventoryContainsUpgrade( UP_JETPACK,
+                                    cg.predictedPlayerState.stats ) )
+    return;
+
+  trap_R_SetColor( backColor );
+  CG_DrawPic( rect->x, rect->y, rect->w, rect->h, cgs.media.whiteShader );
+
+  if( BG_UpgradeIsActive( UP_JETPACK, cg.predictedPlayerState.stats ) )
+    foreColor[3] = 1.0f;
+
+  if( cg.predictedPlayerState.stats[ STAT_FUEL ] <= JETPACK_FUEL_LOW )
+  {
+    if( cg.predictedPlayerState.stats[ STAT_FUEL ] > 0 )
+    {
+      cg.jetpackIconAlert += cg.frametime / 500.0f;
+      if( foreColor[0] + cg.jetpackIconAlert > 1.0f )
+      {
+        cg.jetpackIconAlert = 0.0f;
+      } else
+      {
+        foreColor[0] += cg.jetpackIconAlert;
+        foreColor[1] -= cg.jetpackIconAlert;
+        if( foreColor[1] < 0 )
+          foreColor[1] = 0;
+        foreColor[2] -= cg.jetpackIconAlert;
+        if( foreColor[2] < 0 )
+          foreColor[2] = 0;
+      }
+    } else
+    {
+      cg.jetpackIconAlert = 0.0f;
+      foreColor[0] = 1.0f;
+      foreColor[1] = 0.0f;
+      foreColor[2] = 0.0f;
+      foreColor[3] = 1.0f;
+    }
+  }
+
+  trap_R_SetColor( foreColor );
+  CG_DrawPic( rect->x, rect->y, rect->w, rect->h, shader );
+  trap_R_SetColor( NULL );
+}
+
+/*
+==============
+CG_DrawJetpackFuel
+==============
+*/
+static void CG_DrawJetpackFuel( rectDef_t *rect, vec4_t color )
+{
+  float fuel;
+  float fuelRounded;
+
+  if( !BG_InventoryContainsUpgrade( UP_JETPACK,
+                                    cg.predictedPlayerState.stats ) )
+    return;
+
+  if( BG_UpgradeIsActive( UP_JETPACK, cg.predictedPlayerState.stats ) )
+    color[3] = 1.0f;
+
+  if( cg.predictedPlayerState.stats[ STAT_FUEL ] <= JETPACK_FUEL_LOW )
+  {
+    if( cg.predictedPlayerState.stats[ STAT_FUEL ] > 0 )
+    {
+      color[0] += cg.jetpackIconAlert;
+      if( color[0] > 1.0f )
+        color[0] = 1.0f;
+      color[1] -= cg.jetpackIconAlert;
+      if( color[1] < 0 )
+        color[1] = 0;
+      color[2] -= cg.jetpackIconAlert;
+      if( color[2] < 0 )
+        color[2] = 0;
+    } else
+    {
+      color[0] = 1.0f;
+      color[1] = 0.0f;
+      color[2] = 0.0f;
+      color[3] = 1.0f;
+    }
+  }
+
+  fuel = 100.0f * (float)cg.predictedPlayerState.stats[ STAT_FUEL ] / JETPACK_FUEL_FULL;
+  fuelRounded = ceil( fuel );
+  if( fuelRounded != 100 || !( fuel - fuelRounded ) )
+    fuel = fuelRounded;
+
+  trap_R_SetColor( color );
+  CG_DrawField( rect->x, rect->y, 4, rect->w / 4, rect->h, (int)fuel );
+  trap_R_SetColor( NULL );
+}
+
 static float CG_ChargeProgress( qboolean chargeStamina )
 {
   float progress, rawProgress;
@@ -2807,45 +2925,6 @@ static void CG_DrawWarmup( int ownerDraw, rectDef_t *rect, float textScale, int 
 
   trap_R_SetColor( NULL );
 }
-/*
-======================
-CG_DrawFuel
-======================
-*/
-void CG_DrawFuel( void )
-{
-  int i;
-  float x, y, w, h, scale, fuel;
-  vec4_t color;
-  char text[20];
-  qboolean active;
-
-
-  if( !BG_InventoryContainsUpgrade( UP_JETPACK, cg.predictedPlayerState.stats ) )
-    return;
-
-  active = BG_UpgradeIsActive( UP_JETPACK, cg.predictedPlayerState.stats ) ||
-           cg.predictedPlayerEntity.jetPackJumpTime + 100 > cg.time;
-
-  fuel = (float)cg.predictedPlayerState.stats[ STAT_FUEL ] / JETPACK_FUEL_FULL;
-  fuel = ceil( fuel * 100 );
-
-  Com_sprintf( text, sizeof(text), "%.0f%%", fuel );
-
-  scale = cg_fuelInfoScale.value;
-
-  w = UI_Text_Width( text, scale );
-  h = UI_Text_Height( text, scale );
-  x = 320.0f - w / 2.0f + cg_fuelInfoX.value;
-  y = 240.0f - h / 2.0f + cg_fuelInfoY.value;
-
-  for( i = 0; i < 3; i++ )
-    color[ i ] = ( active ? 1 : 0.5 );
-  color[ 3 ] = 1.0f;
-
-  UI_Text_Paint( x, y, scale, color, text, 0, 0, ITEM_TEXTSTYLE_SHADOWEDMORE );
-}
-
 
 /*
 =====================
@@ -3121,6 +3200,18 @@ void CG_OwnerDraw( float x, float y, float w, float h, float text_x,
     case CG_WARMUP_ALIENS_READY_HDR: case CG_WARMUP_ALIENS_READY:
     case CG_WARMUP_HUMANS_READY_HDR: case CG_WARMUP_HUMANS_READY:
       CG_DrawWarmup( ownerDraw, &rect, scale, textalign, textStyle, foreColor );
+      break;
+
+    // Equipment values
+    case CG_PLAYER_EQUIP_HUD:
+      CG_DrawEquipmentHUD( &rect, foreColor, shader );
+      break;
+    // Jet Fuel
+    case CG_PLAYER_JETPACK_ICON:
+      CG_DrawJetpackIcon( &rect, foreColor, backColor, shader );
+      break;
+    case CG_PLAYER_JETPACK_FUEL:
+      CG_DrawJetpackFuel( &rect, foreColor );
       break;
 
     default:
@@ -3669,7 +3760,6 @@ static void CG_Draw2D( void )
       cg.predictedPlayerState.stats[ STAT_CLASS ] )->hudName );
 
     CG_DrawBuildableStatus( );
-    CG_DrawFuel( );
   }
 
   if( !menu )

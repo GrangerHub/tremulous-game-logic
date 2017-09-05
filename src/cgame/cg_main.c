@@ -252,10 +252,6 @@ vmCvar_t  cg_chatTeamPrefix;
 
 vmCvar_t  cg_warmupBuildableRespawning;
 
-vmCvar_t  cg_fuelInfoX;
-vmCvar_t  cg_fuelInfoY;
-vmCvar_t  cg_fuelInfoScale;
-
 typedef struct
 {
   vmCvar_t  *vmCvar;
@@ -419,11 +415,7 @@ static cvarTable_t cvarTable[ ] =
 
   { &cg_chatTeamPrefix, "cg_chatTeamPrefix", "1", CVAR_ARCHIVE },
 
-  { &cg_warmupBuildableRespawning, "g_warmupBuildableRespawning", "0", 0 },
-
-  { &cg_fuelInfoX, "cg_fuelInfoX" ,"0", CVAR_ARCHIVE },
-  { &cg_fuelInfoY, "cg_fuelInfoY" ,"150", CVAR_ARCHIVE },
-  { &cg_fuelInfoScale, "cg_fuelInfoScale" ,"0.5", CVAR_ARCHIVE }
+  { &cg_warmupBuildableRespawning, "g_warmupBuildableRespawning", "0", 0 }
 };
 
 static size_t cvarTableSize = ARRAY_LEN( cvarTable );
