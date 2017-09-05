@@ -929,48 +929,45 @@ static void CG_DrawEquipmentHUD( rectDef_t *rect, vec4_t color,
 CG_DrawJetpackIcon
 ==============
 */
-static void CG_DrawJetpackIcon( rectDef_t *rect, vec4_t foreColor,
-                                vec4_t backColor, qhandle_t shader )
+static void CG_DrawJetpackIcon( rectDef_t *rect, vec4_t color,
+                                qhandle_t shader )
 {
   if( !BG_InventoryContainsUpgrade( UP_JETPACK,
                                     cg.predictedPlayerState.stats ) )
     return;
 
-  trap_R_SetColor( backColor );
-  CG_DrawPic( rect->x, rect->y, rect->w, rect->h, cgs.media.whiteShader );
-
   if( BG_UpgradeIsActive( UP_JETPACK, cg.predictedPlayerState.stats ) )
-    foreColor[3] = 1.0f;
+    color[3] = 1.0f;
 
   if( cg.predictedPlayerState.stats[ STAT_FUEL ] <= JETPACK_FUEL_LOW )
   {
     if( cg.predictedPlayerState.stats[ STAT_FUEL ] > 0 )
     {
       cg.jetpackIconAlert += cg.frametime / 500.0f;
-      if( foreColor[0] + cg.jetpackIconAlert > 1.0f )
+      if( color[0] + cg.jetpackIconAlert > 1.0f )
       {
         cg.jetpackIconAlert = 0.0f;
       } else
       {
-        foreColor[0] += cg.jetpackIconAlert;
-        foreColor[1] -= cg.jetpackIconAlert;
-        if( foreColor[1] < 0 )
-          foreColor[1] = 0;
-        foreColor[2] -= cg.jetpackIconAlert;
-        if( foreColor[2] < 0 )
-          foreColor[2] = 0;
+        color[0] += cg.jetpackIconAlert;
+        color[1] -= cg.jetpackIconAlert;
+        if( color[1] < 0 )
+          color[1] = 0;
+        color[2] -= cg.jetpackIconAlert;
+        if( color[2] < 0 )
+          color[2] = 0;
       }
     } else
     {
       cg.jetpackIconAlert = 0.0f;
-      foreColor[0] = 1.0f;
-      foreColor[1] = 0.0f;
-      foreColor[2] = 0.0f;
-      foreColor[3] = 1.0f;
+      color[0] = 1.0f;
+      color[1] = 0.0f;
+      color[2] = 0.0f;
+      color[3] = 1.0f;
     }
   }
 
-  trap_R_SetColor( foreColor );
+  trap_R_SetColor( color );
   CG_DrawPic( rect->x, rect->y, rect->w, rect->h, shader );
   trap_R_SetColor( NULL );
 }
@@ -3208,7 +3205,7 @@ void CG_OwnerDraw( float x, float y, float w, float h, float text_x,
       break;
     // Jet Fuel
     case CG_PLAYER_JETPACK_ICON:
-      CG_DrawJetpackIcon( &rect, foreColor, backColor, shader );
+      CG_DrawJetpackIcon( &rect, foreColor, shader );
       break;
     case CG_PLAYER_JETPACK_FUEL:
       CG_DrawJetpackFuel( &rect, foreColor );
