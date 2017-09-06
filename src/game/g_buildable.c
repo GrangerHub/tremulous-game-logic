@@ -1196,12 +1196,28 @@ void AOvermind_Think( gentity_t *self )
 
   if( self->spawned && ( self->health > 0 ) )
   {
+    vec3_t    range = { OVERMIND_ATTACK_RANGE, OVERMIND_ATTACK_RANGE, OVERMIND_ATTACK_RANGE };
+    vec3_t    mins, maxs;
+    int       entityList[ MAX_GENTITIES ];
+    int       num;
+    gentity_t *enemy;
+
+    VectorAdd( self->s.pos.trBase, range, maxs );
+    VectorSubtract( self->s.pos.trBase, range, mins );
     //do some damage
-    if( G_SelectiveRadiusDamage( self->s.pos.trBase, self, self->splashDamage,
-          self->splashRadius, self, MOD_OVERMIND, TEAM_ALIENS ) )
+    num = SV_AreaEntities( mins, maxs, entityList, MAX_GENTITIES );
+    for( i = 0; i < num; i++ )
     {
-      self->timestamp = level.time;
-      G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
+      enemy = &g_entities[ entityList[ i ] ];
+
+      if( enemy->client && enemy->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
+          G_SelectiveRadiusDamage( self->s.pos.trBase, self, self->splashDamage,
+                                   self->splashRadius, self, MOD_OVERMIND,
+                                   TEAM_ALIENS ) )
+      {
+        self->timestamp = level.time;
+        G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
+      }
     }
 
     // just in case an egg finishes building after we tell overmind to stfu
