@@ -5413,7 +5413,13 @@ buildLog_t *G_BuildLogNew( gentity_t *actor, buildFate_t fate )
     level.numBuildLogs++;
   log->time = level.time;
   log->fate = fate;
-  log->actor = actor && actor->client ? actor->client->pers.namelog : NULL;
+  if( actor && actor->s.eType == ET_BUILDABLE )
+  {
+    log->actor = actor->builtBy;
+    log->attackerBuildable = actor->s.modelindex;
+  }
+  else
+    log->actor = actor && actor->client ? actor->client->pers.namelog : NULL;
   return log;
 }
 
@@ -5429,6 +5435,8 @@ void G_BuildLogSet( buildLog_t *log, gentity_t *ent )
   VectorCopy( ent->s.angles2, log->angles2 );
   log->powerSource = ent->parentNode ? ent->parentNode->s.modelindex : BA_NONE;
   log->powerValue = G_QueueValue( ent );
+  if( log->fate == BF_CONSTRUCT )
+    ent->buildLog = log;
 }
 
 void G_BuildLogAuto( gentity_t *actor, gentity_t *buildable, buildFate_t fate )

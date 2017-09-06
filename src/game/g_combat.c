@@ -1625,6 +1625,16 @@ void G_LogDestruction( gentity_t *self, gentity_t *actor, int mod )
         else
           fate = BF_DESTROY;
       }
+      else if( actor->s.eType == ET_BUILDABLE )
+      {
+        if( actor->buildableTeam == 
+            BG_Buildable( self->s.modelindex )->team )
+        {
+          fate = BF_TEAMKILL;
+        }
+        else
+          fate = BF_DESTROY;
+      }
       else
         fate = BF_AUTO;
       break;
@@ -1635,14 +1645,21 @@ void G_LogDestruction( gentity_t *self, gentity_t *actor, int mod )
   if( mod == MOD_REPLACE )
     return;
 
-  G_LogPrintf( S_COLOR_YELLOW "Deconstruct: %d %d %s %s: %s %s by %s\n",
+  G_LogPrintf( S_COLOR_YELLOW "Deconstruct: %d %d %s %s: %s %s by %s%s\n",
     (int)( actor - g_entities ),
     (int)( self - g_entities ),
     BG_Buildable( self->s.modelindex )->name,
     modNames[ mod ],
     BG_Buildable( self->s.modelindex )->humanName,
     mod == MOD_DECONSTRUCT ? "deconstructed" : "destroyed",
-    actor->client ? actor->client->pers.netname : "<world>" );
+    actor->client ?
+        actor->client->pers.netname :
+        ( actor->s.eType == ET_BUILDABLE ?
+            va( "some %s%s", actor->builtBy ? "" : "default ",
+                BG_Buildable( actor->s.modelindex )->humanName ) :
+            "<world>" ),
+    ( actor->s.eType == ET_BUILDABLE && actor->builtBy ) ?
+                    va( " built by %s", actor->builtBy->name[ actor->builtBy->nameOffset ] ) : "" );
 
   // No-power deaths for humans come after some minutes and it's confusing
   //  when the messages appear attributed to the deconner. Just don't print them.
@@ -1660,4 +1677,16 @@ void G_LogDestruction( gentity_t *self, gentity_t *actor, int mod )
         actor->client->pers.netname ) );
   }
 
+  // warn if a teammate builder might be feeding friendly buildables to enemy buildables
+  if( actor->s.eType == ET_BUILDABLE &&
+      self->buildLog &&
+      ( !actor->buildLog ||
+        actor->buildLog->time < self->buildLog->time ) )
+  {
+    G_TeamCommand( self->buildableTeam,
+      va( "print \"%s (built^7 by %s^7) was ^3DESTROYED^7 by some %s\n\"",
+        BG_Buildable( self->s.modelindex )->humanName,
+        self->builtBy->name[ self->builtBy->nameOffset ],
+        BG_Buildable( actor->s.modelindex )->humanName ) );
+  }
 }
