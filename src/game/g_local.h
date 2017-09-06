@@ -296,6 +296,7 @@ struct gentity_s
   qboolean          active;             // for power repeater, but could be useful elsewhere
   qboolean          powered;            // for human buildables
   struct namelog_s  *builtBy;           // person who built this
+  struct buildlog_s *buildLog;          // the build log for when this buildable was constructured (NULL if built by the world)
   int               dcc;                // number of controlling dccs
   qboolean          spawned;            // whether or not this buildable has finished spawning
   int               shrunkTime;         // time when a barricade shrunk or zero
@@ -634,12 +635,13 @@ typedef enum
 } buildFate_t;
 
 // data needed to revert a change in layout
-typedef struct
+typedef struct buildlog_s
 {
   int          time;
   buildFate_t  fate;
   namelog_t    *actor;
   namelog_t    *builtBy;
+  buildable_t  attackerBuildable; // if destroyed by another buildable
   buildable_t  modelindex;
   qboolean     deconstruct;
   int          deconstructTime;
