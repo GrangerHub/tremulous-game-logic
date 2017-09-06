@@ -1086,6 +1086,15 @@ typedef enum
   MOD_SLAP
 } meansOfDeath_t;
 
+typedef enum
+{
+  PAIN_25,
+  PAIN_50,
+  PAIN_75,
+  PAIN_100
+} pain_t;
+
+pain_t BG_GetPainState( playerState_t *ps );
 
 //---------------------------------------------------------
 
