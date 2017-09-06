@@ -2985,8 +2985,8 @@ void HReactor_Think( gentity_t *self )
       if( ( !enemy->client ||
             enemy->client->ps.stats[ STAT_TEAM ] != TEAM_ALIENS ) &&
            enemy->s.eType != ET_TELEPORTAL &&
-           ( enemy->s.eType != ET_BUILDABLE ||
-             enemy->buildableTeam != TEAM_HUMANS )  )
+           !( enemy->s.eType == ET_BUILDABLE &&
+              enemy->buildableTeam == TEAM_ALIENS )  )
         continue;
       if( G_NoTarget( enemy ) )
         continue;
