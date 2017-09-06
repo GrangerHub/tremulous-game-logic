@@ -1210,7 +1210,10 @@ void AOvermind_Think( gentity_t *self )
     {
       enemy = &g_entities[ entityList[ i ] ];
 
-      if( enemy->client && enemy->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
+      if( ( ( enemy->client &&
+              enemy->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS ) ||
+            ( enemy->s.eType == ET_BUILDABLE &&
+              enemy->buildableTeam == TEAM_HUMANS ) ) &&
           G_SelectiveRadiusDamage( self->s.pos.trBase, self, self->splashDamage,
                                    self->splashRadius, self, MOD_OVERMIND,
                                    TEAM_ALIENS ) )
@@ -1477,7 +1480,10 @@ void AAcidTube_Think( gentity_t *self )
       if( !G_Visible( self, enemy, CONTENTS_SOLID ) )
         continue;
 
-      if( enemy->client && enemy->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
+      if( ( enemy->client &&
+            enemy->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS ) ||
+          ( enemy->s.eType == ET_BUILDABLE &&
+            enemy->buildableTeam == TEAM_HUMANS ) )
       {
         // start the attack animation
         if( level.time >= self->timestamp + ACIDTUBE_REPEAT_ANIM )
@@ -2977,8 +2983,10 @@ void HReactor_Think( gentity_t *self )
     {
       enemy = &g_entities[ entityList[ i ] ];
       if( ( !enemy->client ||
-            enemy->client->ps.stats[ STAT_TEAM ] != TEAM_ALIENS )
-          && enemy->s.eType != ET_TELEPORTAL )
+            enemy->client->ps.stats[ STAT_TEAM ] != TEAM_ALIENS ) &&
+           enemy->s.eType != ET_TELEPORTAL &&
+           ( enemy->s.eType != ET_BUILDABLE ||
+             enemy->buildableTeam != TEAM_HUMANS )  )
         continue;
       if( G_NoTarget( enemy ) )
         continue;
@@ -3266,8 +3274,11 @@ static qboolean HMGTurret_CheckTarget( gentity_t *self, gentity_t *target,
   trace_t   tr;
   vec3_t    dir, end;
 
-  if( !target || target->health <= 0 || !target->client ||
-      target->client->pers.teamSelection != TEAM_ALIENS )
+  if( !target || target->health <= 0 ||
+      ( !( target->client &&
+           target->client->pers.teamSelection == TEAM_ALIENS ) &&
+         !( target->s.eType == ET_BUILDABLE &&
+            target->buildableTeam == TEAM_ALIENS ) ) )
     return qfalse;
 
   if( G_NoTarget( target ) )

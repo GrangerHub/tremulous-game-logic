@@ -1569,6 +1569,7 @@ qboolean G_SelectiveRadiusDamage( vec3_t origin, gentity_t *attacker, float dama
 
     if( CanDamage( ent, origin ) &&
         ( ( ent->client && ent->client->ps.stats[ STAT_TEAM ] != team ) ||
+          ( ent->s.eType == ET_BUILDABLE && ent->buildableTeam != team ) ||
           ( mod == MOD_REACTOR && ent->s.eType == ET_TELEPORTAL ) ) )
     {
       VectorSubtract( ent->r.currentOrigin, origin, dir );
