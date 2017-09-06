@@ -368,7 +368,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
       }
     }
   }
-  else if( attacker->s.eType != ET_BUILDABLE )
+  else if( attacker && attacker->s.eType != ET_BUILDABLE )
   {
     if( self->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
       AddScore( self, -ALIEN_TK_SUICIDE_PENALTY );
