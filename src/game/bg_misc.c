@@ -5128,6 +5128,26 @@ qboolean BG_ClassIsAllowed( class_t class, qboolean devMode )
 
 /*
 ============
+BG_GetPainState
+============
+*/
+pain_t BG_GetPainState( playerState_t *ps )
+{
+  int maxHealth = BG_Class( ps->stats[ STAT_CLASS ] )->health;
+  int health = ps->stats[ STAT_HEALTH ];
+
+  if( health < maxHealth / 4 )
+    return PAIN_25;
+  else if( health < maxHealth /2 )
+    return PAIN_50;
+  else if( health < ( ( maxHealth * 3 ) / 4 ) )
+    return PAIN_75;
+  else
+    return PAIN_100;
+}
+
+/*
+============
 BG_BuildableIsAllowed
 ============
 */

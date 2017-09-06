@@ -427,7 +427,7 @@ CG_PainEvent
 Also called by playerstate transition
 ================
 */
-void CG_PainEvent( centity_t *cent, int health )
+void CG_PainEvent( centity_t *cent, pain_t painState )
 {
   char  *snd;
 
@@ -435,14 +435,23 @@ void CG_PainEvent( centity_t *cent, int health )
   if( cg.time - cent->pe.painTime < 500 )
     return;
 
-  if( health < 25 )
-    snd = "*pain25_1.wav";
-  else if( health < 50 )
-    snd = "*pain50_1.wav";
-  else if( health < 75 )
-    snd = "*pain75_1.wav";
-  else
-    snd = "*pain100_1.wav";
+  switch ( painState )
+  {
+    case PAIN_25:
+      snd = "*pain25_1.wav";
+      break;
+
+    case PAIN_50:
+      snd = "*pain50_1.wav";
+      break;
+
+    case PAIN_75:
+      snd = "*pain75_1.wav";
+      break;
+
+    default:
+      snd = "*pain100_1.wav";
+  }
 
   trap_S_StartSound( NULL, cent->currentState.number, CHAN_VOICE,
     CG_CustomSound( cent->currentState.number, snd ) );
