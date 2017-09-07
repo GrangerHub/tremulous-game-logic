@@ -192,8 +192,9 @@ Move spawn blockers
 static void G_PuntBlocker( gentity_t *self, gentity_t *blocker )
 {
   vec3_t     nudge;
-  gentity_t  *tempEnt, *blockers[ MAX_GENTITIES ];
-  int        i, numBlockers = 0;
+  gentity_t  *tempEnt = blocker;
+  gentity_t  *blockers[ MAX_GENTITIES ], *ignoredEnts[ MAX_GENTITIES ];
+  int        i, numBlockers = 0, numIgnoredEnts = 0;
 
   if( !g_antiSpawnBlock.integer )
     return;
@@ -204,21 +205,32 @@ static void G_PuntBlocker( gentity_t *self, gentity_t *blocker )
     return;
   }
 
-  for( tempEnt = blocker; tempEnt; tempEnt = G_CheckSpawnPoint( self->s.number,
-                                                    self->r.currentOrigin, self->s.origin2,
-                                                    self->s.modelindex, NULL ) )
+  while( tempEnt )
   {
     if( tempEnt->client )
     {
       blockers[ numBlockers ] = tempEnt;
       numBlockers++;
-      SV_UnlinkEntity( tempEnt );
+    } else
+    {
+      ignoredEnts[ numIgnoredEnts ] = tempEnt;
+      numIgnoredEnts++;
     }
+
+    SV_UnlinkEntity( tempEnt );
+
+    tempEnt = G_CheckSpawnPoint( self->s.number,self->r.currentOrigin,
+                                 self->s.origin2, self->s.modelindex, NULL );
   }
 
   for( i = 0; i < numBlockers; i++ )
   {
     SV_LinkEntity( blockers[ i ] );
+  }
+
+  for( i = 0; i < numIgnoredEnts; i++ )
+  {
+    SV_LinkEntity( ignoredEnts[ i ] );
   }
 
   if( numBlockers <= 0 )
