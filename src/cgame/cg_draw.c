@@ -3479,8 +3479,10 @@ void CG_OwnerDraw( float x, float y, float w, float h, float text_x,
       break;
     case CG_PLAYER_ARMOR_SHIELD:
       CG_DrawArmorShield( &rect, foreColor, shader );
+      break;
     case CG_PLAYER_ARMOR:
       CG_DrawArmorValue(&rect, foreColor );
+      break;
 
     default:
       break;
