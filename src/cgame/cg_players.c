@@ -2433,6 +2433,30 @@ void CG_GibPlayer( vec3_t origin, vec3_t dir )
   }
 }
 
+/*
+===================
+CG_GibBsuit
+
+Generated a bunch of gibs launching out from a location
+===================
+*/
+void CG_GibBsuit( vec3_t origin, vec3_t dir )
+{
+  particleSystem_t  *ps;
+
+  trap_S_StartSound( origin, ENTITYNUM_WORLD, CHAN_AUTO, cgs.media.humanBuildableExplosion );
+
+  //particle system
+  ps = CG_SpawnNewParticleSystem( cgs.media.bsuitGibPS );
+
+  if( CG_IsParticleSystemValid( &ps ) )
+  {
+    CG_SetAttachmentPoint( &ps->attachment, origin );
+    CG_SetParticleSystemNormal( ps, dir );
+    CG_AttachToPoint( &ps->attachment );
+  }
+}
+
 //=====================================================================
 
 /*

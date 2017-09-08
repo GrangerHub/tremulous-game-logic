@@ -826,7 +826,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
 
       if( remainingStartupTime < 0 )
       {
-        if( ent->health < ent->client->ps.stats[ STAT_MAX_HEALTH ] &&
+        if( ent->health < BG_Class( client->ps.stats[ STAT_CLASS ] )->health &&
             ent->client->medKitHealthToRestore &&
             ent->client->ps.pm_type != PM_DEAD )
         {
@@ -840,7 +840,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
       }
       else
       {
-        if( ent->health < ent->client->ps.stats[ STAT_MAX_HEALTH ] &&
+        if( ent->health < BG_Class( client->ps.stats[ STAT_CLASS ] )->health &&
             ent->client->medKitHealthToRestore &&
             ent->client->ps.pm_type != PM_DEAD )
         {
@@ -2050,17 +2050,16 @@ once for each server frame, which makes for smooth demo recording.
 */
 void ClientThink_real( gentity_t *ent )
 {
-  gclient_t *client;
+  gclient_t *client = ent->client;
   pmove_t   pm;
   gentity_t *groundEnt;
   vec3_t    up = { 0.0f, 0.0f, 1.0f };
+  const int maxHealth = BG_Class( client->ps.stats[ STAT_CLASS ] )->health;
   int       groundEntityNum;
   int       oldEventSequence;
   int       msec;
   usercmd_t *ucmd;
   int       i;
-
-  client = ent->client;
 
   groundEntityNum = client->ps.groundEntityNum;
 
@@ -2243,7 +2242,7 @@ void ClientThink_real( gentity_t *ent )
   {
     //if currently using a medkit or have no need for a medkit now
     if( client->ps.stats[ STAT_STATE ] & SS_HEALING_2X ||
-        ( client->ps.stats[ STAT_HEALTH ] == client->ps.stats[ STAT_MAX_HEALTH ] &&
+        ( client->ps.stats[ STAT_HEALTH ] == maxHealth &&
           !( client->ps.stats[ STAT_STATE ] & SS_POISONED ) ) )
     {
       BG_DeactivateUpgrade( UP_MEDKIT, client->ps.stats );
@@ -2276,7 +2275,7 @@ void ClientThink_real( gentity_t *ent )
       client->ps.stats[ STAT_STATE ] |= SS_HEALING_2X;
       client->lastMedKitTime = level.time;
       client->medKitHealthToRestore =
-        client->ps.stats[ STAT_MAX_HEALTH ] - client->ps.stats[ STAT_HEALTH ];
+        maxHealth - client->ps.stats[ STAT_HEALTH ];
       client->medKitIncrementTime = level.time +
         ( MEDKIT_STARTUP_TIME / MEDKIT_STARTUP_SPEED );
 
@@ -2343,7 +2342,7 @@ void ClientThink_real( gentity_t *ent )
             didBoost = qtrue;
           }
 
-          if( didBoost && ent->health < client->ps.stats[ STAT_MAX_HEALTH ] )
+          if( didBoost && ent->health < maxHealth )
             boost->client->pers.hasHealed = qtrue;
         }
       }
@@ -2370,7 +2369,7 @@ void ClientThink_real( gentity_t *ent )
           BG_ClassHasAbility(client->ps.stats[STAT_CLASS], SCA_REGEN_RESERVE) )
         count = ent->healthReserve;
 
-      if( ent->health < client->ps.stats[ STAT_MAX_HEALTH ]  )
+      if( ent->health < maxHealth  )
       {
         if( BG_ClassHasAbility(client->ps.stats[STAT_CLASS], SCA_REGEN_RESERVE) )
         {
@@ -2387,9 +2386,9 @@ void ClientThink_real( gentity_t *ent )
         client->pers.infoChangeTime = level.time;
 
         // if at max health, clear damage counters
-        if( ent->health >= client->ps.stats[ STAT_MAX_HEALTH ] )
+        if( ent->health >= maxHealth )
         {
-          ent->health = client->ps.stats[ STAT_HEALTH ] = client->ps.stats[ STAT_MAX_HEALTH ];
+          ent->health = client->ps.stats[ STAT_HEALTH ] = maxHealth;
           for( i = 0; i < MAX_CLIENTS; i++ )
             ent->credits[ i ] = 0;
         }
@@ -2416,17 +2415,17 @@ void ClientThink_real( gentity_t *ent )
       count = 1 + ( level.time - ent->nextHPReserveRegenTime ) / interval;
       ent->nextHPReserveRegenTime += count * interval;
 
-      if( ( ( ent->health >= client->ps.stats[ STAT_MAX_HEALTH ] ) ||
+      if( ( ( ent->health >= maxHealth ) ||
             ( ent->healthReserve <= 0 ) ) &&
           ( ent->healthReserve < (int)( ALIEN_HP_RESERVE_MAX *
-                                        client->ps.stats[ STAT_MAX_HEALTH ] ) ) )
+                                        maxHealth ) ) )
       {
         ent->healthReserve += count;
         if( ent->healthReserve > (int)( ALIEN_HP_RESERVE_MAX *
-                                         client->ps.stats[ STAT_MAX_HEALTH ] ) )
+                                         maxHealth ) )
         {
           ent->healthReserve = (int)( ALIEN_HP_RESERVE_MAX *
-                                      client->ps.stats[ STAT_MAX_HEALTH ] );
+                                      maxHealth );
         }
 
         client->ps.misc[ MISC_HEALTH_RESERVE ] = ent->healthReserve;

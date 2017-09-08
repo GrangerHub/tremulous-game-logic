@@ -1021,6 +1021,8 @@ static void CG_DrawEquipmentHUD( rectDef_t *rect, vec4_t color,
 {
 
   if( !BG_InventoryContainsUpgrade( UP_JETPACK,
+                                    cg.predictedPlayerState.stats ) &&
+      !BG_InventoryContainsUpgrade( UP_BATTLESUIT,
                                     cg.predictedPlayerState.stats ) )
     return;
 
@@ -1123,6 +1125,92 @@ static void CG_DrawJetpackFuel( rectDef_t *rect, vec4_t color )
 
   trap_R_SetColor( color );
   CG_DrawField( rect->x, rect->y, 4, rect->w / 4, rect->h, (int)fuel );
+  trap_R_SetColor( NULL );
+}
+
+/*
+==============
+CG_DrawArmorShield
+==============
+*/
+static void CG_DrawArmorShield( rectDef_t *rect, vec4_t color,
+                                qhandle_t shader )
+{
+  if( !BG_InventoryContainsUpgrade( UP_BATTLESUIT,
+                                    cg.predictedPlayerState.stats ) )
+    return;
+
+
+  if( cg.predictedPlayerState.stats[ STAT_MAX_HEALTH ] <= BSUIT_ARMOR_LOW )
+  {
+    if( cg.predictedPlayerState.stats[ STAT_MAX_HEALTH ] > 0 )
+    {
+      cg.lowArmorAlert += cg.frametime / 500.0f;
+      if( color[0] + cg.lowArmorAlert > 1.0f )
+      {
+        cg.lowArmorAlert = 0.0f;
+      } else
+      {
+        color[0] += cg.lowArmorAlert;
+        color[1] -= cg.lowArmorAlert;
+        if( color[1] < 0 )
+          color[1] = 0;
+        color[2] -= cg.lowArmorAlert;
+        if( color[2] < 0 )
+          color[2] = 0;
+      }
+    } else
+    {
+      cg.lowArmorAlert = 0.0f;
+      color[0] = 1.0f;
+      color[1] = 0.0f;
+      color[2] = 0.0f;
+      color[3] = 1.0f;
+    }
+  }
+
+  trap_R_SetColor( color );
+  CG_DrawPic( rect->x, rect->y, rect->w, rect->h, shader );
+  trap_R_SetColor( NULL );
+}
+
+/*
+==============
+CG_DrawArmorValue
+==============
+*/
+static void CG_DrawArmorValue( rectDef_t *rect, vec4_t color )
+{
+
+  if( !BG_InventoryContainsUpgrade( UP_BATTLESUIT,
+                                    cg.predictedPlayerState.stats ) )
+    return;
+
+  if( cg.predictedPlayerState.stats[ STAT_MAX_HEALTH ] <= BSUIT_ARMOR_LOW )
+  {
+    if( cg.predictedPlayerState.stats[ STAT_MAX_HEALTH ] > 0 )
+    {
+      color[0] += cg.lowArmorAlert;
+      if( color[0] > 1.0f )
+        color[0] = 1.0f;
+      color[1] -= cg.lowArmorAlert;
+      if( color[1] < 0 )
+        color[1] = 0;
+      color[2] -= cg.lowArmorAlert;
+      if( color[2] < 0 )
+        color[2] = 0;
+    } else
+    {
+      color[0] = 1.0f;
+      color[1] = 0.0f;
+      color[2] = 0.0f;
+      color[3] = 1.0f;
+    }
+  }
+
+  trap_R_SetColor( color );
+  CG_DrawField( rect->x, rect->y, 4, rect->w / 4,rect->h,
+                cg.predictedPlayerState.stats[ STAT_MAX_HEALTH ] );
   trap_R_SetColor( NULL );
 }
 
@@ -3389,6 +3477,10 @@ void CG_OwnerDraw( float x, float y, float w, float h, float text_x,
     case CG_PLAYER_JETPACK_FUEL:
       CG_DrawJetpackFuel( &rect, foreColor );
       break;
+    case CG_PLAYER_ARMOR_SHIELD:
+      CG_DrawArmorShield( &rect, foreColor, shader );
+    case CG_PLAYER_ARMOR:
+      CG_DrawArmorValue(&rect, foreColor );
 
     default:
       break;
@@ -4010,7 +4102,7 @@ static void CG_PainBlend( void )
   if( damage < 0 )
     damage = 0;
 
-  damageAsFracOfMax = (float)damage / cg.snap->ps.stats[ STAT_MAX_HEALTH ];
+  damageAsFracOfMax = (float)damage / BG_Class( cg.snap->ps.stats[ STAT_CLASS ] )->health;
   cg.lastHealth = cg.snap->ps.stats[ STAT_HEALTH ];
 
   cg.painBlendValue += damageAsFracOfMax * cg_painBlendScale.value;

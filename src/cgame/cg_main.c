@@ -603,7 +603,7 @@ static void CG_SetPVars( void )
     ps = &cg.snap->ps;
 
     trap_Cvar_Set( "player_hp", va( "%d", ps->stats[ STAT_HEALTH ] ));
-    trap_Cvar_Set( "player_maxhp",va( "%d", ps->stats[ STAT_MAX_HEALTH ] ));
+    trap_Cvar_Set( "player_maxhp",va( "%d", BG_Class( ps->stats[ STAT_CLASS ] )->health ));
 
     switch( ps->stats[ STAT_TEAM ] )
     {
@@ -1078,7 +1078,8 @@ static void CG_RegisterGraphics( void )
   cgs.media.alienBleedPS              = CG_RegisterParticleSystem( "alienBleedPS" );
   cgs.media.humanBleedPS              = CG_RegisterParticleSystem( "humanBleedPS" );
 
-  cgs.media.humanGibPS              = CG_RegisterParticleSystem( "humanPlayerGibsPS" );
+  cgs.media.humanGibPS                = CG_RegisterParticleSystem( "humanPlayerGibsPS" );
+  cgs.media.bsuitGibPS                = CG_RegisterParticleSystem( "bsuitPlayerGibsPS" );
 
   cgs.media.sphereModel               = trap_R_RegisterModel( "models/generic/sphere" );
   cgs.media.sphericalCone64Model      = trap_R_RegisterModel( "models/generic/sphericalCone64" );

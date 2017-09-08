@@ -3993,6 +3993,7 @@ char *eventnames[ ] =
   "EV_OBITUARY",
 
   "EV_GIB_PLAYER",
+  "EV_GIB_BSUIT",
 
   "EV_BUILD_CONSTRUCT",
   "EV_BUILD_DESTROY",
@@ -5135,6 +5136,12 @@ pain_t BG_GetPainState( playerState_t *ps )
 {
   int maxHealth = BG_Class( ps->stats[ STAT_CLASS ] )->health;
   int health = ps->stats[ STAT_HEALTH ];
+
+  if( BG_InventoryContainsUpgrade( UP_BATTLESUIT, ps->stats ) )
+  {
+    maxHealth = BSUIT_MAX_ARMOR;
+    health = ps->stats[ STAT_MAX_HEALTH ];
+  }
 
   if( health < maxHealth / 4 )
     return PAIN_25;

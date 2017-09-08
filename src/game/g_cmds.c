@@ -23,8 +23,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "g_local.h"
 
-static qboolean G_RoomForClassChange( gentity_t*, class_t, vec3_t );
-
 /*
 ==================
 G_SanitiseString
@@ -504,7 +502,7 @@ void Cmd_Give_f( gentity_t *ent )
 
   if( give_all || Q_stricmp( name, "health" ) == 0 )
   {
-    ent->health = ent->client->ps.stats[ STAT_MAX_HEALTH ];
+    ent->health = BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->health;
     BG_AddUpgradeToInventory( UP_MEDKIT, ent->client->ps.stats );
   }
 
@@ -2094,8 +2092,8 @@ void Cmd_SetViewpos_f( gentity_t *ent )
   TeleportPlayer( ent, origin, angles, 0.0f );
 }
 
-static qboolean G_RoomForClassChange( gentity_t *ent, class_t class,
-                                      vec3_t newOrigin )
+qboolean G_RoomForClassChange( gentity_t *ent, class_t class,
+                               vec3_t newOrigin )
 {
   vec3_t    fromMins, fromMaxs;
   vec3_t    toMins, toMaxs;
@@ -2835,6 +2833,7 @@ void Cmd_Buy_f( gentity_t *ent )
           ent->client->ps.stats[ STAT_CLASS ] = PCL_HUMAN_BSUIT;
           ent->client->pers.classSelection = PCL_HUMAN_BSUIT;
           ent->client->ps.eFlags ^= EF_TELEPORT_BIT;
+          ent->client->ps.stats[ STAT_MAX_HEALTH ] = BSUIT_MAX_ARMOR;
         }
         else if( upgrade == UP_JETPACK )
          ent->client->ps.stats[ STAT_FUEL ] = JETPACK_FUEL_FULL;
@@ -2875,6 +2874,8 @@ Cmd_Sell_f
 void Cmd_Sell_f( gentity_t *ent )
 {
   char      s[ MAX_TOKEN_CHARS ];
+  const int usedFuel = JETPACK_FUEL_FULL -
+                          ent->client->ps.stats[ STAT_FUEL ];
   int       i;
   weapon_t  weapon;
   upgrade_t upgrade;
@@ -2962,8 +2963,6 @@ void Cmd_Sell_f( gentity_t *ent )
     //remove upgrade if carried
     if( BG_InventoryContainsUpgrade( upgrade, ent->client->ps.stats ) )
     {
-      const int usedFuel = JETPACK_FUEL_FULL -
-                              ent->client->ps.stats[ STAT_FUEL ];
 
       // shouldn't really need to test for this, but just to be safe
       if( upgrade == UP_BATTLESUIT )
@@ -2997,6 +2996,16 @@ void Cmd_Sell_f( gentity_t *ent )
         G_AddCreditToClient( ent->client,
                             (short)( BG_Upgrade( upgrade )->price - costToFull ),
                             qfalse );
+      } else if( upgrade == UP_BATTLESUIT )
+      {
+        if( !IS_WARMUP &&
+            ent->client->ps.stats[ STAT_MAX_HEALTH ] < BSUIT_MAX_ARMOR )
+        {
+          G_AddCreditToClient( ent->client, (short)( BSUIT_PRINCE_USED ),
+                               qfalse );
+        }
+
+        ent->client->ps.stats[ STAT_MAX_HEALTH ] = 0;
       } else
         G_AddCreditToClient( ent->client, (short)BG_Upgrade( upgrade )->price,
                              qfalse );
@@ -3033,7 +3042,28 @@ void Cmd_Sell_f( gentity_t *ent )
           G_GiveClientMaxAmmo( ent, qtrue );
 
         //add to funds
-        G_AddCreditToClient( ent->client, (short)BG_Upgrade( i )->price, qfalse );
+        if( !IS_WARMUP && upgrade == UP_JETPACK && usedFuel )
+        {
+          const int costToFull = ( usedFuel * JETPACK_FULL_FUEL_PRICE ) /
+                                 JETPACK_FUEL_FULL;
+
+          // reduce the amount of credits returned from selling a jet that isn't full
+          G_AddCreditToClient( ent->client,
+                              (short)( BG_Upgrade( upgrade )->price - costToFull ),
+                              qfalse );
+        } else if( upgrade == UP_BATTLESUIT )
+        {
+          if( !IS_WARMUP &&
+              ent->client->ps.stats[ STAT_MAX_HEALTH ] < BSUIT_MAX_ARMOR )
+          {
+            G_AddCreditToClient( ent->client, (short)( BSUIT_PRINCE_USED ),
+                                 qfalse );
+          }
+
+          ent->client->ps.stats[ STAT_MAX_HEALTH ] = 0;
+        } else
+          G_AddCreditToClient( ent->client, (short)BG_Upgrade( upgrade )->price,
+                               qfalse );
       }
     }
   }

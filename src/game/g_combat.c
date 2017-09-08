@@ -208,7 +208,7 @@ float G_RewardAttackers( gentity_t *self )
   {
     value = BG_GetValueOfPlayer( &self->client->ps );
     team = self->client->pers.teamSelection;
-    maxHealth = self->client->ps.stats[ STAT_MAX_HEALTH ];
+    maxHealth = BG_Class( self->client->ps.stats[ STAT_CLASS ] )->health;
   }
   else if( self->s.eType == ET_BUILDABLE )
   {
@@ -262,7 +262,7 @@ float G_RewardAttackers( gentity_t *self )
       AddScore( player, stageValue );
 
       maxHealthReserve = (int)( ALIEN_HP_RESERVE_MAX *
-                                player->client->ps.stats[ STAT_MAX_HEALTH ] );
+                                BG_Class( player->client->ps.stats[ STAT_CLASS ] )->health );
 
       // increase the health reserve for aliens
       if( BG_Class( player->client->ps.stats[ STAT_CLASS ] )->regenRate &&
@@ -1394,7 +1394,38 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   // do the damage
   if( take )
   {
-    targ->health = targ->health - take;
+    // Battlesuit absorbs the damage
+    if( targ->client &&
+        BG_InventoryContainsUpgrade( UP_BATTLESUIT, targ->client->ps.stats ) )
+    {
+      targ->client->ps.stats[ STAT_MAX_HEALTH ] -= take;
+      take = 0;
+      if( targ->client->ps.stats[ STAT_MAX_HEALTH ] <= 0 )
+      {
+        vec3_t newOrigin, dir;
+
+        // have damage that is greater than the remaining armor transfer to the main helth
+        take -= targ->client->ps.stats[ STAT_MAX_HEALTH ];
+
+        // Break the BSuit off into pieces
+        BG_GetClientNormal( &targ->client->ps, dir );
+        G_RoomForClassChange( targ, PCL_HUMAN, newOrigin );
+        VectorCopy( newOrigin, targ->client->ps.origin );
+        targ->client->ps.stats[ STAT_CLASS ] = PCL_HUMAN;
+        targ->client->pers.classSelection = PCL_HUMAN;
+        targ->client->ps.eFlags ^= EF_TELEPORT_BIT;
+        BG_RemoveUpgradeFromInventory( UP_BATTLESUIT,
+                                       targ->client->ps.stats );
+        G_AddEvent( targ, EV_GIB_BSUIT, DirToByte( dir ) );
+        targ->client->ps.stats[ STAT_MAX_HEALTH ] = 0;
+        //update ClientInfo
+        ClientUserinfoChanged( targ->client->ps.clientNum, qfalse );
+        targ->client->pers.infoChangeTime = level.time;
+      }
+    }
+
+    if( take )
+      targ->health = targ->health - take;
 
     if( targ->client )
     {

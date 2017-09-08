@@ -927,6 +927,7 @@ void      G_DecolorString( char *in, char *out, int len );
 void      G_UnEscapeString( char *in, char *out, int len );
 void      G_SanitiseString( char *in, char *out, int len );
 void      Cmd_PrivateMessage_f( gentity_t *ent );
+qboolean  G_RoomForClassChange( gentity_t *ent, class_t class, vec3_t newOrigin );
 void      Cmd_PlayMap_f( gentity_t *ent );
 void      Cmd_ListMaps_f( gentity_t *ent );
 void      Cmd_Test_f( gentity_t *ent );

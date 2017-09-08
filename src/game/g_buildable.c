@@ -120,8 +120,9 @@ void G_SuffocateTrappedEntities( gentity_t *self )
     if( tr.startsolid )
     {
       G_Damage( ent, self, self, NULL, NULL,
-          ent->client->ps.stats[ STAT_MAX_HEALTH ] / 10, DAMAGE_NO_PROTECTION,
-          MOD_SUFFOCATION );
+                BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->health / 10,
+                DAMAGE_NO_PROTECTION,
+                MOD_SUFFOCATION );
 
       ent->client->lastSuffocationTime = level.time;
 
@@ -3187,7 +3188,7 @@ void HMedistat_Think( gentity_t *self )
 
       if( self->enemy == player && player->client &&
           player->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
-          player->health < player->client->ps.stats[ STAT_MAX_HEALTH ] &&
+          player->health < BG_Class( player->client->ps.stats[ STAT_CLASS ] )->health &&
           PM_Alive( player->client->ps.pm_type ) )
       {
         occupied = qtrue;
@@ -3209,7 +3210,9 @@ void HMedistat_Think( gentity_t *self )
 
         if( player->client && player->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
         {
-          if( ( player->health < player->client->ps.stats[ STAT_MAX_HEALTH ] ||
+          const int maxHealth = BG_Class( player->client->ps.stats[ STAT_CLASS ] )->health;
+
+          if( ( player->health < maxHealth ||
                 player->client->ps.stats[ STAT_STAMINA ] < STAMINA_MAX ) &&
               PM_Alive( player->client->ps.pm_type ) )
           {
@@ -3224,7 +3227,7 @@ void HMedistat_Think( gentity_t *self )
             }
           }
 
-          if( player->health >= player->client->ps.stats[ STAT_MAX_HEALTH ] &&
+          if( player->health >= maxHealth &&
               !BG_InventoryContainsUpgrade( UP_MEDKIT, player->client->ps.stats ) )
             BG_AddUpgradeToInventory( UP_MEDKIT, player->client->ps.stats );
         }
@@ -3241,13 +3244,15 @@ void HMedistat_Think( gentity_t *self )
     }
     else if( self->enemy && self->enemy->client ) //heal!
     {
+      const int maxHealth = BG_Class( self->enemy->client->ps.stats[ STAT_CLASS ] )->health;
+
       if( self->enemy->client->ps.stats[ STAT_STAMINA ] <  STAMINA_MAX )
         self->enemy->client->ps.stats[ STAT_STAMINA ] += STAMINA_MEDISTAT_RESTORE;
 
       if( self->enemy->client->ps.stats[ STAT_STAMINA ] > STAMINA_MAX )
         self->enemy->client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
 
-      if( self->enemy->health < self->enemy->client->ps.stats[ STAT_MAX_HEALTH ] )
+      if( self->enemy->health < maxHealth )
       {
         self->enemy->health++;
         self->enemy->client->ps.stats[ STAT_HEALTH ] = self->enemy->health;
@@ -3255,7 +3260,7 @@ void HMedistat_Think( gentity_t *self )
       }
 
       //if they're completely healed and have full stamina, give them a medkit
-      if( self->enemy->health >= self->enemy->client->ps.stats[ STAT_MAX_HEALTH ] &&
+      if( self->enemy->health >= maxHealth &&
           self->enemy->client->ps.stats[ STAT_STAMINA ] >= STAMINA_MAX )
       {
         if( !BG_InventoryContainsUpgrade( UP_MEDKIT, self->enemy->client->ps.stats ) )

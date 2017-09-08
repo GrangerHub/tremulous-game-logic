@@ -1182,6 +1182,7 @@ typedef struct
   qhandle_t     lastHealthCross;
   float         healthCrossFade;
   float         jetpackIconAlert;
+  float         lowArmorAlert;
   int           nearUsableBuildable;
 
   int           nextWeaponClickTime;
@@ -1372,6 +1373,7 @@ typedef struct
   qhandle_t   humanBleedPS;
 
   qhandle_t   humanGibPS;
+  qhandle_t   bsuitGibPS;
 
   qhandle_t   teslaZapTS;
   qhandle_t   slimeZungeTS;
@@ -1821,6 +1823,7 @@ void        CG_PlayerDisconnect( vec3_t org );
 void        CG_PlayerEntered( void );
 void        CG_Bleed( vec3_t origin, vec3_t normal, int entityNum );
 void        CG_GibPlayer( vec3_t origin, vec3_t dir );
+void        CG_GibBsuit( vec3_t origin, vec3_t dir );
 centity_t   *CG_GetPlayerLocation( void );
 
 //

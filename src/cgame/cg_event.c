@@ -980,6 +980,11 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       CG_GibPlayer( position, dir );
       break;
 
+    case EV_GIB_BSUIT:
+      ByteToDir( es->eventParm, dir );
+      CG_GibBsuit( position, dir );
+      break;
+
     case EV_STOPLOOPINGSOUND:
       trap_S_StopLoopingSound( es->number );
       es->loopSound = 0;

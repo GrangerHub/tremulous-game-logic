@@ -1501,18 +1501,15 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
 
   if( client->sess.spectatorState == SPECTATOR_NOT )
   {
-    client->ps.stats[ STAT_MAX_HEALTH ] =
-      BG_Class( ent->client->pers.classSelection )->health;
     if( BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->regenRate )
       ent->healthReserve = client->ps.misc[ MISC_HEALTH_RESERVE ] =
                            (int)( ALIEN_HP_RESERVE_MAX *
-                           client->ps.stats[ STAT_MAX_HEALTH ] );
+                           BG_Class( ent->client->pers.classSelection )->health );
     else
       ent->healthReserve = client->ps.misc[ MISC_HEALTH_RESERVE ] = 0;
   }
   else
   {
-    client->ps.stats[ STAT_MAX_HEALTH ] = 100;
     ent->healthReserve = client->ps.misc[ MISC_HEALTH_RESERVE ] = 0;
   }
 
@@ -1545,12 +1542,13 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   VectorSet( ent->client->ps.grapplePoint, 0.0f, 0.0f, 1.0f );
 
   // health will count down towards max_health
-  ent->health = client->ps.stats[ STAT_HEALTH ] = client->ps.stats[ STAT_MAX_HEALTH ]; //* 1.25;
+  ent->health = client->ps.stats[ STAT_HEALTH ] =
+                   BG_Class( client->ps.stats[ STAT_CLASS ] )->health; //* 1.25;
 
   if( BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->regenRate )
     ent->healthReserve = client->ps.misc[ MISC_HEALTH_RESERVE ] =
                          (int)( ALIEN_HP_RESERVE_MAX *
-                         client->ps.stats[ STAT_MAX_HEALTH ] );
+                         BG_Class( client->ps.stats[ STAT_CLASS ] )->health );
   else
     ent->healthReserve = client->ps.misc[ MISC_HEALTH_RESERVE ] = 0;
 
