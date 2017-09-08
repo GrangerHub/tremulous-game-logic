@@ -3003,7 +3003,9 @@ void Cmd_Sell_f( gentity_t *ent )
         {
           G_AddCreditToClient( ent->client, (short)( BSUIT_PRINCE_USED ),
                                qfalse );
-        }
+        } else
+          G_AddCreditToClient( ent->client, (short)BG_Upgrade( UP_BATTLESUIT )->price,
+                               qfalse );
 
         ent->client->ps.stats[ STAT_MAX_HEALTH ] = 0;
       } else
