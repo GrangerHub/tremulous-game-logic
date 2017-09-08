@@ -981,8 +981,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       break;
 
     case EV_GIB_BSUIT:
-      ByteToDir( es->eventParm, dir );
-      CG_GibBsuit( position, dir );
+      CG_GibBsuit( position, es->origin2 );
       break;
 
     case EV_STOPLOOPINGSOUND:

@@ -3001,7 +3001,7 @@ void Cmd_Sell_f( gentity_t *ent )
         if( !IS_WARMUP &&
             ent->client->ps.stats[ STAT_MAX_HEALTH ] < BSUIT_MAX_ARMOR )
         {
-          G_AddCreditToClient( ent->client, (short)( BSUIT_PRINCE_USED ),
+          G_AddCreditToClient( ent->client, (short)( BSUIT_PRICE_USED ),
                                qfalse );
         } else
           G_AddCreditToClient( ent->client, (short)BG_Upgrade( UP_BATTLESUIT )->price,
@@ -3058,7 +3058,7 @@ void Cmd_Sell_f( gentity_t *ent )
           if( !IS_WARMUP &&
               ent->client->ps.stats[ STAT_MAX_HEALTH ] < BSUIT_MAX_ARMOR )
           {
-            G_AddCreditToClient( ent->client, (short)( BSUIT_PRINCE_USED ),
+            G_AddCreditToClient( ent->client, (short)( BSUIT_PRICE_USED ),
                                  qfalse );
           }
 

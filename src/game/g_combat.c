@@ -1402,13 +1402,13 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       take = 0;
       if( targ->client->ps.stats[ STAT_MAX_HEALTH ] <= 0 )
       {
-        vec3_t newOrigin, dir;
+        gentity_t *tent;
+        vec3_t newOrigin;
 
         // have damage that is greater than the remaining armor transfer to the main helth
         take -= targ->client->ps.stats[ STAT_MAX_HEALTH ];
 
         // Break the BSuit off into pieces
-        BG_GetClientNormal( &targ->client->ps, dir );
         G_RoomForClassChange( targ, PCL_HUMAN, newOrigin );
         VectorCopy( newOrigin, targ->client->ps.origin );
         targ->client->ps.stats[ STAT_CLASS ] = PCL_HUMAN;
@@ -1416,7 +1416,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
         targ->client->ps.eFlags ^= EF_TELEPORT_BIT;
         BG_RemoveUpgradeFromInventory( UP_BATTLESUIT,
                                        targ->client->ps.stats );
-        G_AddEvent( targ, EV_GIB_BSUIT, DirToByte( dir ) );
+        tent = G_TempEntity( targ->client->ps.origin, EV_GIB_BSUIT );
+        BG_GetClientNormal( &targ->client->ps, tent->s.origin2 );
         targ->client->ps.stats[ STAT_MAX_HEALTH ] = 0;
         //update ClientInfo
         ClientUserinfoChanged( targ->client->ps.clientNum, qfalse );
