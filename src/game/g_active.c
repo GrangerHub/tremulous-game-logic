@@ -907,9 +907,6 @@ void ClientTimerActions( gentity_t *ent, int msec )
     {
       int damage = ALIEN_POISON_DMG;
 
-      if( BG_InventoryContainsUpgrade( UP_BATTLESUIT, client->ps.stats ) )
-        damage -= BSUIT_POISON_PROTECTION;
-
       if( BG_InventoryContainsUpgrade( UP_HELMET, client->ps.stats ) )
         damage -= HELMET_POISON_PROTECTION;
 

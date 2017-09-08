@@ -575,7 +575,8 @@ void Cmd_Give_f( gentity_t *ent )
     client->ps.clips = BG_Weapon( client->ps.weapon )->maxClips;
 
     if( BG_Weapon( client->ps.weapon )->usesEnergy &&
-        BG_InventoryContainsUpgrade( UP_BATTPACK, client->ps.stats ) )
+        ( BG_InventoryContainsUpgrade( UP_BATTPACK, client->ps.stats ) ||
+          BG_InventoryContainsUpgrade( UP_BATTLESUIT, client->ps.stats ) ) )
       client->ps.ammo = (int)( (float)client->ps.ammo * BATTPACK_MODIFIER );
   }
 
@@ -2710,7 +2711,8 @@ void Cmd_Buy_f( gentity_t *ent )
     ent->client->ps.clips = BG_Weapon( weapon )->maxClips;
 
     if( BG_Weapon( weapon )->usesEnergy &&
-        BG_InventoryContainsUpgrade( UP_BATTPACK, ent->client->ps.stats ) )
+        ( BG_InventoryContainsUpgrade( UP_BATTPACK, ent->client->ps.stats ) ||
+          BG_InventoryContainsUpgrade( UP_BATTLESUIT, ent->client->ps.stats ) ) )
       ent->client->ps.ammo *= BATTPACK_MODIFIER;
 
     G_ForceWeaponChange( ent, weapon );
@@ -2842,7 +2844,8 @@ void Cmd_Buy_f( gentity_t *ent )
         BG_AddUpgradeToInventory( upgrade, ent->client->ps.stats );
       }
 
-      if( upgrade == UP_BATTPACK )
+      if( upgrade == UP_BATTPACK ||
+          upgrade == UP_BATTLESUIT )
         G_GiveClientMaxAmmo( ent, qtrue );
 
       //subtract from funds
@@ -2983,7 +2986,8 @@ void Cmd_Sell_f( gentity_t *ent )
       //add to inventory
       BG_RemoveUpgradeFromInventory( upgrade, ent->client->ps.stats );
 
-      if( upgrade == UP_BATTPACK )
+      if( upgrade == UP_BATTPACK ||
+          upgrade == UP_BATTLESUIT )
         G_GiveClientMaxAmmo( ent, qtrue );
 
       //add to funds
@@ -3040,7 +3044,8 @@ void Cmd_Sell_f( gentity_t *ent )
 
         BG_RemoveUpgradeFromInventory( i, ent->client->ps.stats );
 
-        if( i == UP_BATTPACK )
+        if( i == UP_BATTPACK ||
+            i == UP_BATTLESUIT )
           G_GiveClientMaxAmmo( ent, qtrue );
 
         //add to funds
@@ -3176,7 +3181,8 @@ void Cmd_Reload_f( gentity_t *ent )
       return;
 
     if( BG_Weapon( ps->weapon )->usesEnergy &&
-        BG_InventoryContainsUpgrade( UP_BATTPACK, ps->stats ) )
+        ( BG_InventoryContainsUpgrade( UP_BATTPACK, ps->stats ) ||
+          BG_InventoryContainsUpgrade( UP_BATTLESUIT, ps->stats )) )
       ammo = BG_Weapon( ps->weapon )->maxAmmo * BATTPACK_MODIFIER;
     else
       ammo = BG_Weapon( ps->weapon )->maxAmmo;

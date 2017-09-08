@@ -244,7 +244,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define LEVEL4_SPEED                1.2f
 #define LEVEL4_VALUE                AVM(8 * ALIEN_CREDITS_PER_KILL)
-#define LEVEL4_HEALTH               AHM(1200)
+#define LEVEL4_HEALTH               AHM(1000)
 #define LEVEL4_REGEN                (2)
 #define LEVEL4_COST                 15
 
@@ -634,7 +634,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define BSUIT_PRICE_USED            200
 #define BSUIT_POISON_PROTECTION     3
 #define BSUIT_PCLOUD_PROTECTION     3000
-#define BSUIT_MAX_ARMOR             200
+#define BSUIT_MAX_ARMOR             250
 #define BSUIT_ARMOR_LOW             25 // Value at which the armor indicator starts to flash
 
 #define MEDKIT_POISON_IMMUNITY_TIME 0

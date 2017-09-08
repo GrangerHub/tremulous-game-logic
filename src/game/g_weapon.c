@@ -102,7 +102,8 @@ void G_GiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo )
 
   // Apply battery pack modifier
   if( BG_Weapon( weapon )->usesEnergy &&
-      BG_InventoryContainsUpgrade( UP_BATTPACK, ent->client->ps.stats ) )
+      ( BG_InventoryContainsUpgrade( UP_BATTPACK, ent->client->ps.stats ) ||
+        BG_InventoryContainsUpgrade( UP_BATTLESUIT, ent->client->ps.stats ) ) )
   {
     maxAmmo *= BATTPACK_MODIFIER;
   }

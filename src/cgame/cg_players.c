@@ -2009,7 +2009,8 @@ void CG_Player( centity_t *cent )
   {
     legs.hModel = ci->legsModel;
 
-    if( held & ( 1 << UP_LIGHTARMOUR ) )
+    if( ( held & ( 1 << UP_LIGHTARMOUR ) ) &&
+        !( held & ( 1 << UP_BATTLESUIT ) ) )
     {
       legs.customSkin = cgs.media.larmourLegsSkin;
       if (!!strcmp(ci->modelName, "human_base"))
@@ -2114,7 +2115,8 @@ void CG_Player( centity_t *cent )
     //
     torso.hModel = ci->torsoModel;
 
-    if( held & ( 1 << UP_LIGHTARMOUR ) )
+    if( ( held & ( 1 << UP_LIGHTARMOUR ) ) &&
+        !( held & ( 1 << UP_BATTLESUIT ) ) )
     {
       torso.customSkin = cgs.media.larmourTorsoSkin;
       if (!!strcmp(ci->modelName, "human_base"))
@@ -2153,7 +2155,8 @@ void CG_Player( centity_t *cent )
     //
     head.hModel = ci->headModel;
 
-    if( held & ( 1 << UP_HELMET ) )
+    if( ( held & ( 1 << UP_HELMET ) ) &&
+        !( held & ( 1 << UP_BATTLESUIT ) ) )
     {
       head.customSkin = cgs.media.larmourHeadSkin;
       if (!!strcmp(ci->modelName, "human_base"))

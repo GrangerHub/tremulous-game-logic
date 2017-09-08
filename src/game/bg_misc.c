@@ -3620,12 +3620,13 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     qtrue,                  //qboolean enabled;
     BSUIT_PRICE,            //int   price;
     ( 1 << S3 ),            //int   stages;
-    SLOT_HEAD|SLOT_TORSO|SLOT_ARMS|SLOT_LEGS|SLOT_BACKPACK, //int  slots;
+    SLOT_BACKPACK, //int  slots;
     "bsuit",                //char  *name;
     "Battlesuit",           //char  *humanName;
     "A full body armour that is highly effective at repelling alien attacks. "
-      "It allows the user to enter hostile situations with a greater degree "
-      "of confidence.",
+      "Includes a built-in battery pack for energy weapons. A helmet and light"
+      "can be worn inside the battlesuit. It allows the user to enter hostile"
+      "situations with a greater degree of confidence.",
     "icons/iconu_bsuit",
     qtrue,                  //qboolean  purchasable;
     qfalse,                 //qboolean  usable;
@@ -4313,7 +4314,8 @@ qboolean BG_WeaponIsFull( weapon_t weapon, int stats[ ], int ammo, int clips )
   maxAmmo = BG_Weapon( weapon )->maxAmmo;
   maxClips = BG_Weapon( weapon )->maxClips;
 
-  if( BG_InventoryContainsUpgrade( UP_BATTPACK, stats ) )
+  if( BG_InventoryContainsUpgrade( UP_BATTPACK, stats ) ||
+      BG_InventoryContainsUpgrade( UP_BATTLESUIT, stats ) )
     maxAmmo = (int)( (float)maxAmmo * BATTPACK_MODIFIER );
 
   return ( maxAmmo == ammo ) && ( maxClips == clips );

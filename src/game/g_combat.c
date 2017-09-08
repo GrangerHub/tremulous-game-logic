@@ -761,6 +761,11 @@ static float GetRegionDamageModifier( gentity_t *targ, int class, int piece )
     if( !BG_InventoryContainsUpgrade( j, targ->client->ps.stats ) ||
         !g_numArmourRegions[ j ] )
       continue;
+
+    if( ( j == UP_LIGHTARMOUR || j == UP_HELMET ) &&
+        BG_InventoryContainsUpgrade( UP_BATTLESUIT, targ->client->ps.stats ) )
+      continue;
+
     regions = g_armourRegions[ j ];
 
     for( i = 0; i < g_numArmourRegions[ j ]; i++ )
@@ -1367,6 +1372,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
     if( attacker->client && attacker->client->ps.stats[ STAT_STATE ] & SS_BOOSTED )
     {
       if( targ->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
+          !BG_InventoryContainsUpgrade( UP_BATTLESUIT, targ->client->ps.stats ) &&
           mod != MOD_LEVEL2_ZAP && mod != MOD_POISON &&
           mod != MOD_LEVEL1_PCLOUD && mod != MOD_HSPAWN &&
           mod != MOD_SPITFIRE_ZAP &&
@@ -1396,7 +1402,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   {
     // Battlesuit absorbs the damage
     if( targ->client &&
-        BG_InventoryContainsUpgrade( UP_BATTLESUIT, targ->client->ps.stats ) )
+        BG_InventoryContainsUpgrade( UP_BATTLESUIT, targ->client->ps.stats ) &&
+        mod != MOD_POISON )
     {
       targ->client->ps.stats[ STAT_MAX_HEALTH ] -= take;
       take = 0;
@@ -1404,6 +1411,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       {
         gentity_t *tent;
         vec3_t newOrigin;
+        const weapon_t weapon = targ->client->ps.stats[ STAT_WEAPON ];
 
         // have damage that is greater than the remaining armor transfer to the main helth
         take -= targ->client->ps.stats[ STAT_MAX_HEALTH ];
@@ -1419,6 +1427,11 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
         tent = G_TempEntity( targ->client->ps.origin, EV_GIB_BSUIT );
         BG_GetClientNormal( &targ->client->ps, tent->s.origin2 );
         targ->client->ps.stats[ STAT_MAX_HEALTH ] = 0;
+
+        if( BG_Weapon( weapon )->usesEnergy &&
+            targ->client->ps.ammo > BG_Weapon( weapon )->maxAmmo )
+          G_GiveClientMaxAmmo( targ, qtrue );
+
         //update ClientInfo
         ClientUserinfoChanged( targ->client->ps.clientNum, qfalse );
         targ->client->pers.infoChangeTime = level.time;
