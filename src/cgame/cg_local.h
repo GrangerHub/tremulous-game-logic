@@ -664,6 +664,8 @@ typedef struct centity_s
   float                 lastBuildableHealth;
   int                   lastBuildableDamageSoundTime;
 
+  particleSystem_t      *weakArmorPS;
+
   lightFlareStatus_t    lfs;
 
   qboolean              doorState;
@@ -1373,7 +1375,9 @@ typedef struct
   qhandle_t   humanBleedPS;
 
   qhandle_t   humanGibPS;
+
   qhandle_t   bsuitGibPS;
+  qhandle_t   weakArmorPS;
 
   qhandle_t   teslaZapTS;
   qhandle_t   slimeZungeTS;

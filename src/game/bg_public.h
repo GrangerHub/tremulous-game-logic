@@ -374,7 +374,9 @@ typedef enum
                                        // indicates if such an entity was spotted
                                        // by a teammate's scanner
 
-#define EF_EVOLVING         0x00008    // In transition state.  Only applicable to players.
+#define EF_EVOLVING         0x00008    // In transition state.  Only applicable to alien players.
+
+#define EF_WEAK_ARMOR       0X00008    // Only applicable to human players
 
 // for occupation entities
 #define EF_OCCUPYING        0x00010    // can result in bugs if applied to buildables

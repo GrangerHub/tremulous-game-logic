@@ -1943,6 +1943,24 @@ void CG_Player( centity_t *cent )
     CG_DrawBoundingBox( cent->lerpOrigin, mins, maxs );
   }
 
+  // check if weak armor effects should be shown
+  if( ci->team == TEAM_HUMANS )
+  {
+      if( es->eFlags & EF_WEAK_ARMOR )
+      {
+        if( !CG_IsParticleSystemValid( &cent->weakArmorPS ) )
+          cent->weakArmorPS = CG_SpawnNewParticleSystem( cgs.media.weakArmorPS );
+
+        if( CG_IsParticleSystemValid( &cent->weakArmorPS ) )
+        {
+          CG_SetAttachmentCent( &cent->weakArmorPS->attachment, cent );
+          CG_AttachToCent( &cent->weakArmorPS->attachment );
+        }
+      }
+      else if( CG_IsParticleSystemValid( &cent->weakArmorPS ) )
+        CG_DestroyParticleSystem( &cent->weakArmorPS );
+  }
+
   memset( &legs,    0, sizeof( legs ) );
   memset( &torso,   0, sizeof( torso ) );
   memset( &head,    0, sizeof( head ) );
@@ -2038,7 +2056,8 @@ void CG_Player( centity_t *cent )
         legs.customShader = cgs.media.humanInvincibleShader;
       else if( ci->team == TEAM_ALIENS )
         legs.customShader = cgs.media.alienInvincibleShader;
-    } else if( es->eFlags & EF_EVOLVING )
+    } else if( ci->team == TEAM_ALIENS &&
+               ( es->eFlags & EF_EVOLVING ) )
       legs.customShader = cgs.media.alienEvolveShader;
 
     if( ( cent->currentState.legsAnim & ~ANIM_TOGGLEBIT ) == NSPA_SWIM  && es->weapon == WP_ASPITFIRE )
@@ -2227,6 +2246,9 @@ void CG_Player( centity_t *cent )
 
     if( CG_IsParticleSystemValid( &cent->jetPackPS ) )
       CG_DestroyParticleSystem( &cent->jetPackPS );
+
+    if( CG_IsParticleSystemValid( &cent->weakArmorPS ) )
+      CG_DestroyParticleSystem( &cent->weakArmorPS );
   }
 
   VectorCopy( surfNormal, cent->pe.lastNormal );

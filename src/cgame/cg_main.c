@@ -1079,7 +1079,9 @@ static void CG_RegisterGraphics( void )
   cgs.media.humanBleedPS              = CG_RegisterParticleSystem( "humanBleedPS" );
 
   cgs.media.humanGibPS                = CG_RegisterParticleSystem( "humanPlayerGibsPS" );
+
   cgs.media.bsuitGibPS                = CG_RegisterParticleSystem( "bsuitPlayerGibsPS" );
+  cgs.media.weakArmorPS               = CG_RegisterParticleSystem( "humanWeakArmorPS" );
 
   cgs.media.sphereModel               = trap_R_RegisterModel( "models/generic/sphere" );
   cgs.media.sphericalCone64Model      = trap_R_RegisterModel( "models/generic/sphericalCone64" );

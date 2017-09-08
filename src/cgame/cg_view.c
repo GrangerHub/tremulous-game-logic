@@ -309,7 +309,8 @@ void CG_OffsetThirdPersonView( void )
   }
 
   // get and rangecheck cg_thirdPersonRange
-  range = ( cg.predictedPlayerEntity.currentState.eFlags & EF_EVOLVING ) ? 100 : cg_thirdPersonRange.value;
+  range = ( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_ALIENS &&
+            ( cg.predictedPlayerEntity.currentState.eFlags & EF_EVOLVING ) ) ? 100 : cg_thirdPersonRange.value;
   if( range > 150.0f ) range = 150.0f;
   if( range < 30.0f ) range = 30.0f;
 
@@ -1430,10 +1431,12 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
   // decide on third person view
   cg.renderingThirdPerson = ( cg_thirdPerson.integer || ( cg.snap->ps.stats[ STAT_HEALTH ] <= 0 ) || 
                             ( cg.chaseFollow && cg.snap->ps.pm_flags & PMF_FOLLOW ) ||
-                            ( cg.predictedPlayerEntity.currentState.eFlags & EF_EVOLVING ) );
+                            ( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_ALIENS &&
+                              ( cg.predictedPlayerEntity.currentState.eFlags & EF_EVOLVING ) ) );
 
   // play the looped evolving sound
-  if( cg.predictedPlayerEntity.currentState.eFlags & EF_EVOLVING )
+  if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_ALIENS &&
+      ( cg.predictedPlayerEntity.currentState.eFlags & EF_EVOLVING ) )
     trap_S_AddLoopingSound( cg.clientNum, cg.refdef.vieworg,
                             cg.predictedPlayerState.velocity,
                             cgs.media.alienLoopedEvolveSound );

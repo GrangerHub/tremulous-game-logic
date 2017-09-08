@@ -1223,7 +1223,8 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
         gun.customShader = cgs.media.humanInvincibleShader;
       else if( cgs.clientinfo[ cent->currentState.number ].team == TEAM_ALIENS )
         gun.customShader = cgs.media.alienInvincibleShader;
-    } else if( cent->currentState.eFlags & EF_EVOLVING )
+    } else if( cgs.clientinfo[ cent->currentState.number ].team == TEAM_ALIENS &&
+               ( cent->currentState.eFlags & EF_EVOLVING ) )
       gun.customShader = cgs.media.alienEvolveShader;
   }
 

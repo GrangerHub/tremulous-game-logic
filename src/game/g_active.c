@@ -40,6 +40,17 @@ void P_DamageFeedback( gentity_t *player )
   vec3_t    angles;
 
   client = player->client;
+
+  // create damage effects for weak armor
+  if( client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
+  {
+    if( BG_InventoryContainsUpgrade( UP_BATTLESUIT, client->ps.stats ) &&
+        client->ps.stats[ STAT_MAX_HEALTH ] <= BSUIT_ARMOR_LOW )
+    client->ps.eFlags |= EF_WEAK_ARMOR;
+    else
+      client->ps.eFlags &= ~EF_WEAK_ARMOR;
+  }
+
   if( !PM_Alive( client->ps.pm_type ) )
     return;
 
@@ -1069,7 +1080,8 @@ void ClientEvents( gentity_t *ent, int oldEventSequence )
   for( i = oldEventSequence; i < client->ps.eventSequence; i++ )
   {
     // Evolving players cannot fire weapon
-    if( ent->client && ent->client->ps.eFlags & EF_EVOLVING &&
+    if( client && client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
+        ( client->ps.eFlags & EF_EVOLVING ) &&
         ( event == EV_FIRE_WEAPON || event == EV_FIRE_WEAPON2 || event == EV_FIRE_WEAPON3 ) )
       continue;
 
@@ -2136,7 +2148,8 @@ void ClientThink_real( gentity_t *ent )
   // calculate where ent is currently seeing all the other active clients
   G_UnlaggedCalc( ent->client->unlaggedTime, ent );
 
-  if( client->ps.eFlags & EF_EVOLVING &&
+  if( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
+      ( client->ps.eFlags & EF_EVOLVING ) &&
       ( client->evolveTime < level.time ||
         client->ps.stats[ STAT_HEALTH ] <= 0 ) )
   {
@@ -2168,7 +2181,8 @@ void ClientThink_real( gentity_t *ent )
 
   if( client->noclip )
     client->ps.pm_type = PM_NOCLIP;
-  else if( client->ps.eFlags & EF_EVOLVING )
+  else if( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
+           ( client->ps.eFlags & EF_EVOLVING ) )
     client->ps.pm_type = PM_EVOLVING;
   else if( client->ps.stats[ STAT_HEALTH ] <= 0 )
   {

@@ -1141,7 +1141,7 @@ static void CG_DrawArmorShield( rectDef_t *rect, vec4_t color,
     return;
 
 
-  if( cg.predictedPlayerState.stats[ STAT_MAX_HEALTH ] <= BSUIT_ARMOR_LOW )
+  if( cg.predictedPlayerState.eFlags & EF_WEAK_ARMOR )
   {
     if( cg.predictedPlayerState.stats[ STAT_MAX_HEALTH ] > 0 )
     {
@@ -1186,7 +1186,7 @@ static void CG_DrawArmorValue( rectDef_t *rect, vec4_t color )
                                     cg.predictedPlayerState.stats ) )
     return;
 
-  if( cg.predictedPlayerState.stats[ STAT_MAX_HEALTH ] <= BSUIT_ARMOR_LOW )
+  if( cg.predictedPlayerState.eFlags & EF_WEAK_ARMOR )
   {
     if( cg.predictedPlayerState.stats[ STAT_MAX_HEALTH ] > 0 )
     {
