@@ -460,12 +460,26 @@ static void Give_Gun( gentity_t *ent, char *s )
   ent->client->ps.ammo = BG_Weapon( w )->maxAmmo;
   ent->client->ps.clips = BG_Weapon( w )->maxClips;
   G_ForceWeaponChange( ent, w );
+
+  if( BG_Weapon( w )->usesEnergy &&
+      ( BG_InventoryContainsUpgrade( UP_BATTPACK, ent->client->ps.stats ) ||
+        BG_InventoryContainsUpgrade( UP_BATTLESUIT, ent->client->ps.stats ) ) )
+    ent->client->ps.ammo = (int)( (float)ent->client->ps.ammo * BATTPACK_MODIFIER );
+
+  if( !BG_Weapon( w )->usesEnergy &&
+      !BG_Weapon( w )->infiniteAmmo &&
+      BG_Weapon( w )->ammoPurchasable &&
+      !BG_Weapon( w )->roundPrice &&
+      BG_InventoryContainsUpgrade( UP_BATTLESUIT, ent->client->ps.stats ) )
+    ent->client->ps.clips += ent->client->ps.clips + 1;
 }
 
 static void Give_Upgrade( gentity_t *ent, char *s )
 {
     int u = BG_UpgradeByName( s )->number;
     BG_AddUpgradeToInventory( u, ent->client->ps.stats );
+    if( u == UP_BATTLESUIT )
+      ent->client->ps.stats[ STAT_MAX_HEALTH ] = BSUIT_MAX_ARMOR;
 }
 
 /*
@@ -578,6 +592,13 @@ void Cmd_Give_f( gentity_t *ent )
         ( BG_InventoryContainsUpgrade( UP_BATTPACK, client->ps.stats ) ||
           BG_InventoryContainsUpgrade( UP_BATTLESUIT, client->ps.stats ) ) )
       client->ps.ammo = (int)( (float)client->ps.ammo * BATTPACK_MODIFIER );
+
+    if( !BG_Weapon( client->ps.weapon )->usesEnergy &&
+        !BG_Weapon( client->ps.weapon )->infiniteAmmo &&
+        BG_Weapon( client->ps.weapon )->ammoPurchasable &&
+        !BG_Weapon( client->ps.weapon )->roundPrice &&
+        BG_InventoryContainsUpgrade( UP_BATTLESUIT, client->ps.stats ) )
+      client->ps.clips += client->ps.clips + 1;
   }
 
   if( give_all || Q_stricmp( name, "fuel" ) == 0 )
@@ -2715,6 +2736,13 @@ void Cmd_Buy_f( gentity_t *ent )
           BG_InventoryContainsUpgrade( UP_BATTLESUIT, ent->client->ps.stats ) ) )
       ent->client->ps.ammo *= BATTPACK_MODIFIER;
 
+    if( !BG_Weapon( weapon )->usesEnergy &&
+        !BG_Weapon( weapon )->infiniteAmmo &&
+        BG_Weapon( weapon )->ammoPurchasable &&
+        !BG_Weapon( weapon )->roundPrice &&
+        BG_InventoryContainsUpgrade( UP_BATTLESUIT, ent->client->ps.stats ) )
+      ent->client->ps.clips += ent->client->ps.clips + 1;
+
     G_ForceWeaponChange( ent, weapon );
 
     //set build delay/pounce etc to 0
@@ -2847,6 +2875,13 @@ void Cmd_Buy_f( gentity_t *ent )
       if( upgrade == UP_BATTPACK ||
           upgrade == UP_BATTLESUIT )
         G_GiveClientMaxAmmo( ent, qtrue );
+
+      if( !BG_Weapon( ent->client->ps.weapon )->usesEnergy &&
+          !BG_Weapon( ent->client->ps.weapon )->infiniteAmmo &&
+          BG_Weapon( ent->client->ps.weapon )->ammoPurchasable &&
+          !BG_Weapon( ent->client->ps.weapon )->roundPrice &&
+          BG_InventoryContainsUpgrade( UP_BATTLESUIT, ent->client->ps.stats ) )
+        ent->client->ps.clips = ( 2 * BG_Weapon( ent->client->ps.weapon )->maxClips ) + 1;
 
       //subtract from funds
       G_AddCreditToClient( ent->client, -(short)BG_Upgrade( upgrade )->price,
@@ -2989,6 +3024,14 @@ void Cmd_Sell_f( gentity_t *ent )
       if( upgrade == UP_BATTPACK ||
           upgrade == UP_BATTLESUIT )
         G_GiveClientMaxAmmo( ent, qtrue );
+
+      if( !BG_Weapon( ent->client->ps.weapon )->usesEnergy &&
+          !BG_Weapon( ent->client->ps.weapon )->infiniteAmmo &&
+          BG_Weapon( ent->client->ps.weapon )->ammoPurchasable &&
+          !BG_Weapon( ent->client->ps.weapon )->roundPrice &&
+          upgrade == UP_BATTLESUIT &&
+          ent->client->ps.clips > BG_Weapon( ent->client->ps.weapon )->maxClips )
+        ent->client->ps.clips = BG_Weapon( ent->client->ps.weapon )->maxClips;
 
       //add to funds
       if( !IS_WARMUP && upgrade == UP_JETPACK && usedFuel )

@@ -1428,9 +1428,17 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
         BG_GetClientNormal( &targ->client->ps, tent->s.origin2 );
         targ->client->ps.stats[ STAT_MAX_HEALTH ] = 0;
 
+        //adjust ammo and clips
         if( BG_Weapon( weapon )->usesEnergy &&
             targ->client->ps.ammo > BG_Weapon( weapon )->maxAmmo )
           G_GiveClientMaxAmmo( targ, qtrue );
+
+        if( !BG_Weapon( targ->client->ps.weapon )->usesEnergy &&
+            !BG_Weapon( targ->client->ps.weapon )->infiniteAmmo &&
+            BG_Weapon( targ->client->ps.weapon )->ammoPurchasable &&
+            !BG_Weapon( targ->client->ps.weapon )->roundPrice &&
+            targ->client->ps.clips > BG_Weapon( targ->client->ps.weapon )->maxClips )
+          targ->client->ps.clips = BG_Weapon( targ->client->ps.weapon )->maxClips;
 
         //update ClientInfo
         ClientUserinfoChanged( targ->client->ps.clientNum, qfalse );

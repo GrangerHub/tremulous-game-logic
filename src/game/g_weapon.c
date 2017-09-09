@@ -82,6 +82,7 @@ G_GiveClientMaxAmmo
 void G_GiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo )
 {
   int maxAmmo;
+  int maxClips;
   weapon_t weapon = ent->client->ps.stats[ STAT_WEAPON ];
   int roundPrice = BG_Weapon( weapon )->roundPrice;
 
@@ -99,6 +100,7 @@ void G_GiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo )
     return;
 
   maxAmmo = BG_Weapon( weapon )->maxAmmo;
+  maxClips = BG_Weapon( weapon )->maxClips;
 
   // Apply battery pack modifier
   if( BG_Weapon( weapon )->usesEnergy &&
@@ -108,12 +110,20 @@ void G_GiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo )
     maxAmmo *= BATTPACK_MODIFIER;
   }
 
+  // Apply clip capacity modification
+  if( !BG_Weapon( weapon )->usesEnergy &&
+        !BG_Weapon( weapon )->infiniteAmmo &&
+        BG_Weapon( weapon )->ammoPurchasable &&
+        !BG_Weapon( weapon )->roundPrice &&
+        BG_InventoryContainsUpgrade( UP_BATTLESUIT, ent->client->ps.stats ) )
+      maxClips += maxClips + 1;
+
   // charge for ammo when applicable
   if(  !IS_WARMUP && roundPrice && !BG_Weapon( weapon )->usesEnergy )
   {
     int roundDiff = maxAmmo - ent->client->ps.ammo;
-    int clipDiff = BG_Weapon( weapon )->maxClips - ent->client->ps.clips;
-    int clipPrice = roundPrice * BG_Weapon( weapon )->maxClips;
+    int clipDiff = maxClips - ent->client->ps.clips;
+    int clipPrice = roundPrice * maxClips;
     int numAffordableRounds, numAffordableClips;
 
     if( roundPrice > ent->client->pers.credit )
@@ -154,13 +164,13 @@ void G_GiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo )
         G_AddCreditToClient( ent->client,
                              -(short)(clipDiff * clipPrice ),
                              qfalse );
-        ent->client->ps.clips = BG_Weapon( weapon )->maxClips;
+        ent->client->ps.clips = maxClips;
       }
     }
   } else
   {
     ent->client->ps.ammo = maxAmmo;
-    ent->client->ps.clips = BG_Weapon( weapon )->maxClips;
+    ent->client->ps.clips = maxClips;
   }
 
   G_ForceWeaponChange( ent, ent->client->ps.weapon );

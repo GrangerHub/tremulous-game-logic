@@ -1137,6 +1137,18 @@ void trigger_ammo_touch( gentity_t *self, gentity_t *other, trace_t *trace )
   maxAmmo = BG_Weapon( weapon )->maxAmmo;
   maxClips = BG_Weapon( weapon )->maxClips;
 
+  if( BG_Weapon( other->client->ps.weapon )->usesEnergy &&
+        ( BG_InventoryContainsUpgrade( UP_BATTPACK, other->client->ps.stats ) ||
+          BG_InventoryContainsUpgrade( UP_BATTLESUIT, other->client->ps.stats ) ) )
+      maxAmmo = (int)( (float)maxAmmo * BATTPACK_MODIFIER );
+
+  if( !BG_Weapon( other->client->ps.weapon )->usesEnergy &&
+      !BG_Weapon( other->client->ps.weapon )->infiniteAmmo &&
+      BG_Weapon( other->client->ps.weapon )->ammoPurchasable &&
+      !BG_Weapon( other->client->ps.weapon )->roundPrice &&
+      BG_InventoryContainsUpgrade( UP_BATTLESUIT, other->client->ps.stats ) )
+    maxClips += maxClips + 1;
+
   if( ( other->client->ps.ammo + self->damage ) > maxAmmo )
   {
     if( other->client->ps.clips < maxClips )

@@ -3624,9 +3624,10 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     "bsuit",                //char  *name;
     "Battlesuit",           //char  *humanName;
     "A full body armour that is highly effective at repelling alien attacks. "
-      "Includes a built-in battery pack for energy weapons. A helmet and light"
-      "can be worn inside the battlesuit. It allows the user to enter hostile"
-      "situations with a greater degree of confidence.",
+    "Includes a built-in battery pack for energy weapons, as well as a higher "
+    "clip capacity for various non-energy weapons. A helmet and light can be "
+    "worn inside the battlesuit. It allows the user to enter hostile situations "
+    "with a greater degree of confidence.",
     "icons/iconu_bsuit",
     qtrue,                  //qboolean  purchasable;
     qfalse,                 //qboolean  usable;
