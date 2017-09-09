@@ -1180,7 +1180,7 @@ static const classAttributes_t bg_classList[ ] =
     "spectator",                                    //char    *name;
     "",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
-    0,                                              //int     health;
+    100,                                            //int     health;
     0.0f,                                           //float   fallDamage;
     0.0f,                                           //float   regenRate;
     0,                                              //int     abilities;
