@@ -508,6 +508,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define CHAINGUN_K_SCALE            1.0f
 #define CHAINGUN_SPREAD             1000
 #define CHAINGUN_DMG                HDM(6)
+#define CHAINGUN_RELOAD             2000
 
 #define FLAMER_PRICE                450
 #define FLAMER_GAS                  200
@@ -520,6 +521,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define FLAMER_LIFETIME             700
 #define FLAMER_SPEED                500.0f
 #define FLAMER_LAG                  0.65f    // the amount of player velocity that is added to the fireball
+#define FLAMER_RELOAD               2000
 
 #define PRIFLE_PRICE                500
 #define PRIFLE_CLIPS                40

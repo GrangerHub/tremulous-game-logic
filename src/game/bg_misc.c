@@ -2803,7 +2803,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     CHAINGUN_REPEAT,      //int       repeatRate1;
     0,                    //int       repeatRate2;
     0,                    //int       repeatRate3;
-    0,                    //int       reloadTime;
+    CHAINGUN_RELOAD,      //int       reloadTime;
     CHAINGUN_K_SCALE,     //float     knockbackScale;
     qfalse,               //qboolean  hasAltMode;
     qfalse,               //qboolean  hasThirdMode;
@@ -2850,7 +2850,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     FLAMER_REPEAT,        //int       repeatRate1;
     0,                    //int       repeatRate2;
     0,                    //int       repeatRate3;
-    0,                    //int       reloadTime;
+    FLAMER_RELOAD,        //int       reloadTime;
     FLAMER_K_SCALE,       //float     knockbackScale;
     qfalse,               //qboolean  hasAltMode;
     qfalse,               //qboolean  hasThirdMode;
