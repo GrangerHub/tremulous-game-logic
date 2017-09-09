@@ -162,7 +162,7 @@ Function to distribute rewards to entities that killed this one.
 Returns the total damage dealt.
 ==================
 */
-float G_RewardAttackers( gentity_t *self )
+float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
 {
   float     value, totalDamage = 0;
   int       team, i, maxHealth = 0;
@@ -206,9 +206,17 @@ float G_RewardAttackers( gentity_t *self )
   // Only give credits for killing players and buildables
   if( self->client )
   {
-    value = BG_GetValueOfPlayer( &self->client->ps );
+    if( destroyedUp == UP_NONE )
+      value = BG_GetValueOfPlayer( &self->client->ps );
+    else
+      value = BG_Upgrade( destroyedUp )->price;
+
     team = self->client->pers.teamSelection;
-    maxHealth = BG_Class( self->client->ps.stats[ STAT_CLASS ] )->health;
+
+    if( destroyedUp == UP_BATTLESUIT )
+      maxHealth = BSUIT_MAX_ARMOR;
+    else
+      maxHealth = BG_Class( self->client->ps.stats[ STAT_CLASS ] )->health;
   }
   else if( self->s.eType == ET_BUILDABLE )
   {
@@ -252,7 +260,7 @@ float G_RewardAttackers( gentity_t *self )
         continue;
 
       playersTeamDistributionEarnings = stageValue / ( 10 * numTeamPlayers[ playersTeam ] );
-      everyonesDistributionEarnings = ( stageValue * 9 ) / ( 10 * level.numPlayingClients );
+      everyonesDistributionEarnings = ( stageValue * 7 ) / ( 10 * level.numPlayingClients );
 
       // any remainders goes to the player that did the damage;
       playersPersonalEarnings = stageValue;
@@ -492,7 +500,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   }
 
   // give credits for killing this player
-  G_RewardAttackers( self );
+  G_RewardAttackers( self, UP_NONE );
 
   ScoreboardMessage( self );    // show scores
 
@@ -1400,6 +1408,15 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   // do the damage
   if( take )
   {
+    // add to the attackers "account" on the target
+    if( attacker != targ )
+    {
+      if( attacker->client )
+        targ->credits[ attacker->client->ps.clientNum ] += take;
+      else if( attacker->s.eType == ET_BUILDABLE )
+        targ->creditsDeffenses[ attacker->buildableTeam ] += take;
+    }
+
     // Battlesuit absorbs the damage
     if( targ->client &&
         BG_InventoryContainsUpgrade( UP_BATTLESUIT, targ->client->ps.stats ) &&
@@ -1427,6 +1444,9 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
         tent = G_TempEntity( targ->client->ps.origin, EV_GIB_BSUIT );
         BG_GetClientNormal( &targ->client->ps, tent->s.origin2 );
         targ->client->ps.stats[ STAT_MAX_HEALTH ] = 0;
+
+        // Give income for destroying the battlesuit
+        G_RewardAttackers( targ, UP_NONE );
 
         //adjust ammo and clips
         if( BG_Weapon( weapon )->usesEnergy &&
@@ -1458,16 +1478,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
     targ->lastDamageTime = level.time;
     targ->nextRegenTime = level.time + ALIEN_REGEN_DAMAGE_TIME;
     targ->nextHPReserveRegenTime = level.time + ALIEN_REGEN_DAMAGE_TIME;
-
-    // add to the attackers "account" on the target
-    if( attacker != targ )
-    {
-      if( attacker->client )
-        targ->credits[ attacker->client->ps.clientNum ] += take;
-      else if( attacker->s.eType == ET_BUILDABLE )
-        targ->creditsDeffenses[ attacker->buildableTeam ] += take;
-    }
-    
 
     if( targ->health <= 0 )
     {

@@ -1150,7 +1150,7 @@ qboolean  G_SelectiveRadiusDamage( vec3_t origin, gentity_t *attacker, float dam
                                    gentity_t *ignore, int mod, int team );
 void      G_Knockback( gentity_t *targ, vec3_t dir, int knockback );
 qboolean  G_TakesDamage( gentity_t *ent );
-float     G_RewardAttackers( gentity_t *self );
+float     G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp );
 void      AddScore( gentity_t *ent, int score );
 void      G_LogDestruction( gentity_t *self, gentity_t *actor, int mod );
 

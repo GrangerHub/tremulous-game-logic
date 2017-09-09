@@ -946,7 +946,7 @@ void AGeneric_CreepRecede( gentity_t *self )
     self->s.eFlags |= EF_DEAD;
     G_QueueBuildPoints( self );
 
-    G_RewardAttackers( self );
+    G_RewardAttackers( self, UP_NONE );
 
     G_AddEvent( self, EV_BUILD_DESTROY, 0 );
 
@@ -2454,7 +2454,7 @@ void HSpawn_Disappear( gentity_t *self )
 {
   self->timestamp = level.time;
   G_QueueBuildPoints( self );
-  G_RewardAttackers( self );
+  G_RewardAttackers( self, UP_NONE );
 
   G_FreeEntity( self );
 }
@@ -2484,7 +2484,7 @@ void HSpawn_Blast( gentity_t *self )
 
   // begin freeing build points
   G_QueueBuildPoints( self );
-  G_RewardAttackers( self );
+  G_RewardAttackers( self, UP_NONE );
   // turn into an explosion
   self->s.eType = ET_EVENTS + EV_HUMAN_BUILDABLE_EXPLOSION;
   // ensure that the entity isn't marked as spotted, so that the explosion effect
