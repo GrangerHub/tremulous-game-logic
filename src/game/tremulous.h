@@ -244,7 +244,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define LEVEL4_SPEED                1.2f
 #define LEVEL4_VALUE                AVM(8 * ALIEN_CREDITS_PER_KILL)
-#define LEVEL4_HEALTH               AHM(1000)
+#define LEVEL4_HEALTH               AHM(1200)
 #define LEVEL4_REGEN                (2)
 #define LEVEL4_COST                 15
 
@@ -632,7 +632,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define JETPACK_ACT_BOOST_SPEED     440.0f
 #define JETPACK_FUEL_RECHARGE       2 // every 100ms
 
-#define BSUIT_PRICE                 800
+#define BSUIT_PRICE                 650
 #define BSUIT_PRICE_USED            200
 #define BSUIT_POISON_PROTECTION     3
 #define BSUIT_PCLOUD_PROTECTION     3000
