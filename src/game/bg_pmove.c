@@ -2153,7 +2153,7 @@ static void PM_GroundClimbTrace( void )
     }
   }
 
-  if( trace.fraction >= 1.0f )
+  if( trace.fraction >= 1.0f || ( trace.surfaceFlags & SURF_SLICK ) )
   {
     // if the trace didn't hit anything, we are in free fall
     PM_GroundTraceMissed( );
