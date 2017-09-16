@@ -2043,6 +2043,11 @@ void CG_Player( centity_t *cent )
         legs.customShader = cgs.media.humanInvincibleShader;
       else if( ci->team == TEAM_ALIENS )
         legs.customShader = cgs.media.alienInvincibleShader;
+    } else if( ci->team == TEAM_HUMANS &&
+               ( es->eFlags & EF_WEAK_ARMOR ) )
+    {
+      if( held & ( 1 << UP_BATTLESUIT ) )
+        legs.customShader = cgs.media.weakBsuitShader;
     }
   }
   else
@@ -2058,7 +2063,14 @@ void CG_Player( centity_t *cent )
         legs.customShader = cgs.media.alienInvincibleShader;
     } else if( ci->team == TEAM_ALIENS &&
                ( es->eFlags & EF_EVOLVING ) )
+    {
       legs.customShader = cgs.media.alienEvolveShader;
+    } else if( ci->team == TEAM_HUMANS &&
+               ( es->eFlags & EF_WEAK_ARMOR ) )
+    {
+      if( held & ( 1 << UP_BATTLESUIT ) )
+        legs.customShader = cgs.media.weakBsuitShader;
+    }
 
     if( ( cent->currentState.legsAnim & ~ANIM_TOGGLEBIT ) == NSPA_SWIM  && es->weapon == WP_ASPITFIRE )
     {
@@ -2150,6 +2162,11 @@ void CG_Player( centity_t *cent )
         torso.customShader = cgs.media.humanInvincibleShader;
       else if( ci->team == TEAM_ALIENS )
         torso.customShader = cgs.media.alienInvincibleShader;
+    } else if( ci->team == TEAM_HUMANS &&
+               ( es->eFlags & EF_WEAK_ARMOR ) )
+    {
+      if( held & ( 1 << UP_BATTLESUIT ) )
+        torso.customShader = cgs.media.weakBsuitShader;
     }
 
     if( !torso.hModel )
@@ -2190,6 +2207,11 @@ void CG_Player( centity_t *cent )
         head.customShader = cgs.media.humanInvincibleShader;
       else if( ci->team == TEAM_ALIENS )
         head.customShader = cgs.media.alienInvincibleShader;
+    } else if( ci->team == TEAM_HUMANS &&
+               ( es->eFlags & EF_WEAK_ARMOR ) )
+    {
+      if( held & ( 1 << UP_BATTLESUIT ) )
+        head.customShader = cgs.media.weakBsuitShader;
     }
 
     if( !head.hModel )

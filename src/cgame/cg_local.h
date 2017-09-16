@@ -1378,6 +1378,7 @@ typedef struct
 
   qhandle_t   bsuitGibPS;
   qhandle_t   weakArmorPS;
+  qhandle_t   weakBsuitShader;
 
   qhandle_t   teslaZapTS;
   qhandle_t   slimeZungeTS;
