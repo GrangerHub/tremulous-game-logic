@@ -329,7 +329,7 @@ static cvarTable_t cvarTable[ ] =
   { &cg_unlagged, "cg_unlagged", "1", CVAR_ARCHIVE|CVAR_USERINFO },
   { NULL, "cg_flySpeed", "600", CVAR_ARCHIVE|CVAR_USERINFO },
   { &cg_depthSortParticles, "cg_depthSortParticles", "1", CVAR_ARCHIVE },
-  { &cg_bounceParticles, "cg_bounceParticles", "0", CVAR_ARCHIVE },
+  { &cg_bounceParticles, "cg_bounceParticles", "1", CVAR_ARCHIVE },
   { &cg_consoleLatency, "cg_consoleLatency", "3000", CVAR_ARCHIVE },
   { &cg_lightFlare, "cg_lightFlare", "3", CVAR_ARCHIVE },
   { &cg_debugParticles, "cg_debugParticles", "0", CVAR_CHEAT },
@@ -392,7 +392,7 @@ static cvarTable_t cvarTable[ ] =
   // but we also reference them here
 
   { &cg_paused, "cl_paused", "0", CVAR_ROM },
-  { &cg_blood, "cg_blood", "0", CVAR_ARCHIVE },
+  { &cg_blood, "cg_blood", "1", CVAR_ARCHIVE },
   { &cg_synchronousClients, "g_synchronousClients", "0", 0 }, // communicated by systeminfo
   { &cg_timescaleFadeEnd, "cg_timescaleFadeEnd", "1", CVAR_CHEAT },
   { &cg_timescaleFadeSpeed, "cg_timescaleFadeSpeed", "0", CVAR_CHEAT },
