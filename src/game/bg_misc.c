@@ -5148,11 +5148,11 @@ pain_t BG_GetPainState( playerState_t *ps )
     health = ps->stats[ STAT_MAX_HEALTH ];
   }
 
-  if( health < maxHealth / 4 )
+  if( health < ( maxHealth * 3 ) / 32 )
     return PAIN_25;
-  else if( health < maxHealth /2 )
+  else if( health < ( maxHealth * 3 ) / 8 )
     return PAIN_50;
-  else if( health < ( ( maxHealth * 3 ) / 4 ) )
+  else if( health < ( maxHealth * 3 ) / 4 )
     return PAIN_75;
   else
     return PAIN_100;
