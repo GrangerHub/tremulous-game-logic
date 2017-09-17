@@ -571,7 +571,7 @@ void SV_SendClientGameState( client_t *client ) {
 }
 
 void SV_SendClientGameState2( int clientNum ) {
-	SV_SendClientGameState( svs.clients[ clientNum ] );
+	SV_SendClientGameState( &svs.clients[ clientNum ] );
 }
 
 /*
