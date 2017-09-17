@@ -4115,7 +4115,7 @@ qboolean G_admin_buildlog( gentity_t *ent )
     printed++;
     time = ( log->time - level.startTime ) / 1000;
     Com_sprintf( stamp, sizeof( stamp ), "%3d:%02d", time / 60, time % 60 );
-    ADMBP( va( "^2%c^7%-3d %s %s^7%s%s%s %s%s%s\n",
+    ADMBP( va( "^2%c^7%-3d %s %s^7%s%s%s %s%s%s%s\n",
       log->actor && log->fate != BF_REPLACE && log->fate != BF_UNPOWER ?
         '*' : ' ',
       i + MAX_CLIENTS,
@@ -4132,10 +4132,12 @@ qboolean G_admin_buildlog( gentity_t *ent )
         "^7)" :
         "",
       fates[ log->fate ],
-      log->actor ? " by " : "",
+      log->attackerBuildable ?
+               va( " by some %s%s", log->actor ? "" : "default ",
+                              BG_Buildable( log->attackerBuildable )->humanName ) : "",
+      log->actor ? ( log->attackerBuildable ? " built by " : " by " ) : "",
       log->actor ?
-        log->actor->name[ log->actor->nameOffset ] :
-        "" ) );
+        log->actor->name[ log->actor->nameOffset ] : "") );
   }
   ADMBP( va( "^3buildlog: ^7showing %d build logs %d - %d of %d - %d.  %s\n",
     printed, start + MAX_CLIENTS, i + MAX_CLIENTS - 1,
