@@ -288,14 +288,13 @@ void SV_GetUserinfo( int index, char *buffer, int bufferSize ) {
 
 /*
 ================
-SV_CreateBaseline
+SV_SetNumbers
 
-Entity baselines are used to compress non-delta messages
-to the clients -- only the fields that differ from the
-baseline will be transmitted
+Remnant from SV_CreateBaseline().
 ================
 */
-static void SV_CreateBaseline( void ) {
+
+static void SV_SetNumbers( void ) {
 	sharedEntity_t *svent;
 	int				entnum;
 
@@ -305,11 +304,6 @@ static void SV_CreateBaseline( void ) {
 			continue;
 		}
 		svent->s.number = entnum;
-
-		//
-		// take current state as baseline
-		//
-		sv.svEntities[entnum].baseline = svent->s;
 	}
 }
 
@@ -589,8 +583,8 @@ void SV_SpawnServer( char *server, qboolean killBots ) {
 		svs.time += 100;
 	}
 
-	// create a baseline for more efficient communications
-	SV_CreateBaseline ();
+	// Set Numbers. Not sure if necessary.
+	SV_SetNumbers();
 
 	for (i=0 ; i<sv_maxclients->integer ; i++) {
 		// send the new gamestate to all connected clients
