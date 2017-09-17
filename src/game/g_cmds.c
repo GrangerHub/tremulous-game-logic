@@ -4243,6 +4243,7 @@ commands_t cmds[ ] = {
   { "class", CMD_TEAM, Cmd_Class_f },
   { "damage", CMD_CHEAT|CMD_ALIVE, Cmd_Damage_f },
   { "deconstruct", CMD_TEAM|CMD_ALIVE, Cmd_Destroy_f },
+  { "delag", 0, Cmd_Delag_f },
   { "destroy", CMD_CHEAT|CMD_TEAM|CMD_ALIVE, Cmd_Destroy_f },
   { "donate", CMD_TEAM, Cmd_Donate_f },
   { "follow", CMD_SPEC, Cmd_Follow_f },
@@ -4548,4 +4549,17 @@ void Cmd_AdminMessage_f( gentity_t *ent )
   }
 
   G_AdminMessage( ent, ConcatArgs( 1 ) );
+}
+
+/*
+=================
+Cmd_Delag_f
+
+Resend Gamestate
+TODO: We may need a longer flood limit time.
+=================
+*/
+void Cmd_Delag_f( gentity_t *ent )
+{
+  SV_SendClientGameState2( ent->client->ps.clientNum );
 }
