@@ -387,8 +387,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define SLIME_ZUNGE_DOT             0.79f // max angle = acos( SLIME_ZUNGE )
 
 #define OVERMIND_BP                 0
-#define OVERMIND_BT                 30000
-#define OVERMIND_HEALTH             ABHM(750)
+#define OVERMIND_BT                 20000
+#define OVERMIND_HEALTH             ABHM(1000)
 #define OVERMIND_REGEN              ABRM(6)
 #define OVERMIND_SPLASHDAMAGE       15
 #define OVERMIND_SPLASHRADIUS       300
@@ -746,7 +746,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define REACTOR_BP                  0
 #define REACTOR_BT                  20000
-#define REACTOR_HEALTH              HBHM(930)
+#define REACTOR_HEALTH              HBHM(1000)
 #define REACTOR_SPLASHDAMAGE        200
 #define REACTOR_SPLASHRADIUS        300
 #define REACTOR_ATTACK_RANGE        100.0f
