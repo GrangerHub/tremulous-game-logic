@@ -653,7 +653,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
 {
   gclient_t *client;
   usercmd_t *ucmd;
-  int       aForward, aRight;
+  int       aForward, aRight, aUp;
   qboolean  walking = qfalse, stopped = qfalse,
             crouched = qfalse;
   int       i;
@@ -662,6 +662,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
 
   aForward  = abs( ucmd->forwardmove );
   aRight    = abs( ucmd->rightmove );
+  aUp       = abs( ucmd->upmove );
 
   if( aForward == 0 && aRight == 0 )
     stopped = qtrue;
@@ -778,6 +779,27 @@ void ClientTimerActions( gentity_t *ent, int msec )
                     BG_Class( client->ps.stats[STAT_CLASS] )->chargeStaminaMax )
         client->ps.stats[ STAT_STAMINA ] =
                      BG_Class( client->ps.stats[STAT_CLASS] )->chargeStaminaMax;
+    }
+
+    //client is not moving or is boosted
+    if( ( client->ps.weapon == WP_ALEVEL1 || 
+         client->ps.weapon == WP_ALEVEL1_UPG ) )
+    {
+      client->ps.eFlags &= ~EF_INVISIBILE;
+      if( !( ucmd->buttons & BUTTON_ATTACK ) &&
+          !( client->ps.stats[ STAT_STATE ] & SS_GRABBING ) &&
+          !( ( ucmd->buttons & BUTTON_ATTACK2 ) &&
+             BG_Weapon( client->ps.weapon )->hasAltMode ) &&
+          !( ucmd->buttons & BUTTON_GESTURE ) &&
+          G_Overmind( ) )
+      {
+        if( aForward <= 5 && aRight <= 5 && aUp <= 5 )
+          client->ps.eFlags |= EF_INVISIBILE;
+        else if( client->ps.weapon == WP_ALEVEL1_UPG &&
+                 ( client->ps.stats[ STAT_STATE ] & SS_BOOSTED ) &&
+                 ent->health >= BG_Class( client->ps.stats[ STAT_CLASS ] )->health )
+          client->ps.eFlags |= EF_INVISIBILE;
+      }
     }
 
     if( weapon == WP_ABUILD || weapon == WP_ABUILD2 ||
@@ -959,7 +981,9 @@ void ClientTimerActions( gentity_t *ent, int msec )
 
         for( i = 0; i < level.maxclients; i++ )
         {
-          if( level.clients[ i ].ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
+          if( !( ( level.clients[ i ].ps.eFlags & EF_INVISIBILE ) &&
+                   level.clients[ i ].ps.weapon != WP_LUCIFER_CANNON ) &&
+              level.clients[ i ].ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
               ( Distance( level.clients[ i ].ps.origin,
                           ent->r.currentOrigin ) < ALIENSENSE_RANGE ) &&
               ( level.clients[ i ].ps.persistant[ PERS_SPECSTATE ] == SPECTATOR_NOT ) &&
@@ -975,7 +999,9 @@ void ClientTimerActions( gentity_t *ent, int msec )
 
         for( i = 0; i < level.maxclients; i++ )
         {
-          if( level.clients[ i ].ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
+          if( !( ( level.clients[ i ].ps.eFlags & EF_INVISIBILE ) &&
+                   level.clients[ i ].ps.weapon != WP_LUCIFER_CANNON ) &&
+              level.clients[ i ].ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
               BG_InventoryContainsUpgrade( UP_HELMET, level.clients[ i ].ps.stats ) &&
               ( Distance( level.clients[ i ].ps.origin,
                           ent->r.currentOrigin ) < HELMET_RANGE ) &&

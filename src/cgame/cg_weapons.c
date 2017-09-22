@@ -1134,6 +1134,7 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
   weaponInfo_t  *weapon;
   qboolean      noGunModel;
   qboolean      firing;
+  clientInfo_t  *ci = &cgs.clientinfo[ cent->currentState.clientNum ];
 
   weaponNum = cent->currentState.weapon;
   weaponMode = cent->currentState.generic1;
@@ -1212,6 +1213,29 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
         gun.customShader = cgs.media.humanInvincibleShader;
       else if( cgs.clientinfo[ cent->currentState.number ].team == TEAM_ALIENS )
         gun.customShader = cgs.media.alienInvincibleShader;
+    } else if( cent->invis &&
+        !( cent->currentState.modelindex & ( 1 << UP_BATTLESUIT ) ) )
+    {
+      gun.shaderTime = cent->invisTime/1000.0f;
+      if( ci->team != cg.snap->ps.stats[ STAT_TEAM ] ||
+          cent->currentState.number == cg.snap->ps.clientNum )
+      {
+        if( cg.time - cent->invisTime < 1000  )
+          gun.customShader = cgs.media.invisFadeShader;
+        else
+          gun.customShader = cgs.media.invisShader;
+      }
+      else if( cg.time - cent->invisTime < 1000  )
+        gun.customShader = cgs.media.invisFadeShader;
+      else if( ci->team == TEAM_HUMANS )
+        gun.customShader = cgs.media.invisShaderTeamH;
+      else if( ci->team == TEAM_ALIENS )
+        gun.customShader = cgs.media.invisShaderTeamA;
+    }
+    else if( cg.time - cent->invisTime < 500  )
+    {
+      gun.shaderTime = ( cent->invisTime + 500.0 ) / 1000.0;
+      gun.customShader = cgs.media.invisFadeShader;
     }
   }
   else
@@ -1226,6 +1250,30 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
     } else if( cgs.clientinfo[ cent->currentState.number ].team == TEAM_ALIENS &&
                ( cent->currentState.eFlags & EF_EVOLVING ) )
       gun.customShader = cgs.media.alienEvolveShader;
+    else if( cent->invis &&
+        !( cent->currentState.modelindex & ( 1 << UP_BATTLESUIT ) ) )
+    {
+      gun.shaderTime = cent->invisTime/1000.0f;
+      if( ci->team != cg.snap->ps.stats[ STAT_TEAM ] ||
+          cent->currentState.number == cg.snap->ps.clientNum )
+      {
+        if( cg.time - cent->invisTime < 1000  )
+          gun.customShader = cgs.media.invisFadeShader;
+        else
+          gun.customShader = cgs.media.invisShader;
+      }
+      else if( cg.time - cent->invisTime < 1000  )
+        gun.customShader = cgs.media.invisFadeShader;
+      else if( ci->team == TEAM_HUMANS )
+        gun.customShader = cgs.media.invisShaderTeamH;
+      else if( ci->team == TEAM_ALIENS )
+        gun.customShader = cgs.media.invisShaderTeamA;
+    }
+    else if( cg.time - cent->invisTime < 500  )
+    {
+      gun.shaderTime = ( cent->invisTime + 500.0 ) / 1000.0;
+      gun.customShader = cgs.media.invisFadeShader;
+    }
   }
 
   noGunModel = ( ( !ps || cg.renderingThirdPerson ) && weapon->disableIn3rdPerson ) || !gun.hModel;
@@ -1276,6 +1324,40 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
     }
     else
       barrel.hModel = weapon->barrelModel;
+
+    if( cent->currentState.eFlags & EF_INVINCIBLE )
+    {
+      if( cgs.clientinfo[ cent->currentState.number ].team == TEAM_HUMANS )
+        barrel.customShader = cgs.media.humanInvincibleShader;
+      else if( cgs.clientinfo[ cent->currentState.number ].team == TEAM_ALIENS )
+        barrel.customShader = cgs.media.alienInvincibleShader;
+    } else if( cgs.clientinfo[ cent->currentState.number ].team == TEAM_ALIENS &&
+               ( cent->currentState.eFlags & EF_EVOLVING ) )
+      barrel.customShader = cgs.media.alienEvolveShader;
+    else if( cent->invis &&
+        !( cent->currentState.modelindex & ( 1 << UP_BATTLESUIT ) ) )
+    {
+      barrel.shaderTime = cent->invisTime/1000.0f;
+      if( ci->team != cg.snap->ps.stats[ STAT_TEAM ] ||
+          cent->currentState.number == cg.snap->ps.clientNum )
+      {
+        if( cg.time - cent->invisTime < 1000  )
+          barrel.customShader = cgs.media.invisFadeShader;
+        else
+          barrel.customShader = cgs.media.invisShader;
+      }
+      else if( cg.time - cent->invisTime < 1000  )
+        barrel.customShader = cgs.media.invisFadeShader;
+      else if( ci->team == TEAM_HUMANS )
+        barrel.customShader = cgs.media.invisShaderTeamH;
+      else if( ci->team == TEAM_ALIENS )
+        barrel.customShader = cgs.media.invisShaderTeamA;
+    }
+    else if( cg.time - cent->invisTime < 500  )
+    {
+      barrel.shaderTime = ( cent->invisTime + 500.0 ) / 1000.0;
+      barrel.customShader = cgs.media.invisFadeShader;
+    }
 
     // add the spinning barrel
     if( barrel.hModel )

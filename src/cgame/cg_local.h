@@ -697,6 +697,9 @@ typedef struct centity_s
   qboolean              valid;
   qboolean              oldValid;
   struct centity_s      *nextLocation;
+
+  int                   invisTime;
+  qboolean              invis;
 } centity_t;
 
 
@@ -1239,6 +1242,12 @@ typedef struct
 
   qhandle_t   shadowMarkShader;
   qhandle_t   wakeMarkShader;
+
+  //invisibility shader
+  qhandle_t   invisShader;
+  qhandle_t   invisFadeShader;
+  qhandle_t   invisShaderTeamA; //Alien's invisibility shader
+  qhandle_t   invisShaderTeamH; //Human's invisibility shader
 
   // buildable shaders
   qhandle_t   greenBuildShader;

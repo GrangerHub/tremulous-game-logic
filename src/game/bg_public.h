@@ -387,6 +387,7 @@ typedef enum
 #define EF_B_MARKED         0x00020
 
 #define EF_WARN_CHARGE      0x00020    // Lucifer Cannon is about to overcharge
+#define EF_INVISIBILE       0x00020    // player currently can't be seen, doesn't work while carrying a lucifer cannon
 #define EF_WALLCLIMB        0x00040    // wall walking
 #define EF_WALLCLIMBCEILING 0x00080    // wall walking ceiling hack
 #define EF_NODRAW           0x00100    // may have an event, but no model (unspawned items)

@@ -1654,6 +1654,13 @@ static qboolean CG_PlayerShadow( centity_t *cent, float *shadowPlane, class_t cl
   mins[ 2 ] = 0.0f;
   maxs[ 2 ] = 2.0f;
 
+  //invis
+  if( es->eFlags & EF_INVISIBILE &&
+      es->weapon != WP_LUCIFER_CANNON )
+  {
+    return qfalse;
+  }
+
   if( es->eFlags & EF_WALLCLIMB )
   {
     if( es->eFlags & EF_WALLCLIMBCEILING )
@@ -2020,6 +2027,30 @@ void CG_Player( centity_t *cent )
 
   renderfx |= RF_LIGHTING_ORIGIN;     // use the same origin for all
 
+  // check for invisibility transitions
+  if( ( es->eFlags & EF_INVINCIBLE ) ||
+      ( ci->team == TEAM_ALIENS &&
+        ( es->eFlags & EF_EVOLVING ) ) )
+      cent->invis = qfalse;
+  else if( es->eFlags & EF_INVISIBILE &&
+      es->weapon != WP_LUCIFER_CANNON )
+  {
+    if( !cent->invis )
+    {
+      cent->invisTime = cg.time;
+      cent->invis = qtrue;
+    }
+  }
+  else
+  {
+    if( cent->invis )
+    {
+      cent->invisTime = cg.time;
+      cent->invis = qfalse;
+    }
+  }
+
+
   //
   // add the legs
   //
@@ -2027,8 +2058,32 @@ void CG_Player( centity_t *cent )
   {
     legs.hModel = ci->legsModel;
 
-    if( ( held & ( 1 << UP_LIGHTARMOUR ) ) &&
+    if( cent->invis &&
         !( held & ( 1 << UP_BATTLESUIT ) ) )
+    {
+      legs.shaderTime = cent->invisTime/1000.0f;
+      if( ci->team != cg.snap->ps.stats[ STAT_TEAM ] ||
+          es->number == cg.snap->ps.clientNum )
+      {
+        if( cg.time - cent->invisTime < 1000  )
+          legs.customShader = cgs.media.invisFadeShader;
+        else
+          legs.customShader = cgs.media.invisShader;
+      }
+      else if( cg.time - cent->invisTime < 1000  )
+        legs.customShader = cgs.media.invisFadeShader;
+      else if( ci->team == TEAM_HUMANS )
+        legs.customShader = cgs.media.invisShaderTeamH;
+      else if( ci->team == TEAM_ALIENS )
+        legs.customShader = cgs.media.invisShaderTeamA;
+    }
+    else if( cg.time - cent->invisTime < 500  )
+    {
+      legs.shaderTime = ( cent->invisTime + 500.0 ) / 1000.0;
+      legs.customShader = cgs.media.invisFadeShader;
+    }
+    else if( ( held & ( 1 << UP_LIGHTARMOUR ) ) &&
+             !( held & ( 1 << UP_BATTLESUIT ) ) )
     {
       legs.customSkin = cgs.media.larmourLegsSkin;
       if (!!strcmp(ci->modelName, "human_base"))
@@ -2065,7 +2120,32 @@ void CG_Player( centity_t *cent )
                ( es->eFlags & EF_EVOLVING ) )
     {
       legs.customShader = cgs.media.alienEvolveShader;
-    } else if( ci->team == TEAM_HUMANS &&
+    }
+    else if( cent->invis &&
+             !( held & ( 1 << UP_BATTLESUIT ) ) )
+    {
+      legs.shaderTime = cent->invisTime/1000.0f;
+      if( ci->team != cg.snap->ps.stats[ STAT_TEAM ] ||
+          es->number == cg.snap->ps.clientNum )
+      {
+        if( cg.time - cent->invisTime < 1000  )
+          legs.customShader = cgs.media.invisFadeShader;
+        else
+          legs.customShader = cgs.media.invisShader;
+      }
+      else if( cg.time - cent->invisTime < 1000  )
+        legs.customShader = cgs.media.invisFadeShader;
+      else if( ci->team == TEAM_HUMANS )
+        legs.customShader = cgs.media.invisShaderTeamH;
+      else if( ci->team == TEAM_ALIENS )
+        legs.customShader = cgs.media.invisShaderTeamA;
+    }
+    else if( cg.time - cent->invisTime < 500  )
+    {
+      legs.shaderTime = ( cent->invisTime + 500.0 ) / 1000.0;
+      legs.customShader = cgs.media.invisFadeShader;
+    }
+    else if( ci->team == TEAM_HUMANS &&
                ( es->eFlags & EF_WEAK_ARMOR ) )
     {
       if( held & ( 1 << UP_BATTLESUIT ) )
@@ -2162,6 +2242,29 @@ void CG_Player( centity_t *cent )
         torso.customShader = cgs.media.humanInvincibleShader;
       else if( ci->team == TEAM_ALIENS )
         torso.customShader = cgs.media.alienInvincibleShader;
+    } else if( cent->invis &&
+        !( held & ( 1 << UP_BATTLESUIT ) ) )
+    {
+      torso.shaderTime = cent->invisTime/1000.0f;
+      if( ci->team != cg.snap->ps.stats[ STAT_TEAM ] ||
+          es->number == cg.snap->ps.clientNum )
+      {
+        if( cg.time - cent->invisTime < 1000  )
+          torso.customShader = cgs.media.invisFadeShader;
+        else
+          torso.customShader = cgs.media.invisShader;
+      }
+      else if( cg.time - cent->invisTime < 1000  )
+        torso.customShader = cgs.media.invisFadeShader;
+      else if( ci->team == TEAM_HUMANS )
+        torso.customShader = cgs.media.invisShaderTeamH;
+      else if( ci->team == TEAM_ALIENS )
+        torso.customShader = cgs.media.invisShaderTeamA;
+    }
+    else if( cg.time - cent->invisTime < 500  )
+    {
+      torso.shaderTime = ( cent->invisTime + 500.0 ) / 1000.0;
+      torso.customShader = cgs.media.invisFadeShader;
     } else if( ci->team == TEAM_HUMANS &&
                ( es->eFlags & EF_WEAK_ARMOR ) )
     {
@@ -2207,6 +2310,29 @@ void CG_Player( centity_t *cent )
         head.customShader = cgs.media.humanInvincibleShader;
       else if( ci->team == TEAM_ALIENS )
         head.customShader = cgs.media.alienInvincibleShader;
+    } else if( cent->invis &&
+        !( held & ( 1 << UP_BATTLESUIT ) ) )
+    {
+      head.shaderTime = cent->invisTime/1000.0f;
+      if( ci->team != cg.snap->ps.stats[ STAT_TEAM ] ||
+          es->number == cg.snap->ps.clientNum )
+      {
+        if( cg.time - cent->invisTime < 1000  )
+          head.customShader = cgs.media.invisFadeShader;
+        else
+          head.customShader = cgs.media.invisShader;
+      }
+      else if( cg.time - cent->invisTime < 1000  )
+        head.customShader = cgs.media.invisFadeShader;
+      else if( ci->team == TEAM_HUMANS )
+        head.customShader = cgs.media.invisShaderTeamH;
+      else if( ci->team == TEAM_ALIENS )
+        head.customShader = cgs.media.invisShaderTeamA;
+    }
+    else if( cg.time - cent->invisTime < 500  )
+    {
+      head.shaderTime = ( cent->invisTime + 500.0 ) / 1000.0;
+      head.customShader = cgs.media.invisFadeShader;
     } else if( ci->team == TEAM_HUMANS &&
                ( es->eFlags & EF_WEAK_ARMOR ) )
     {

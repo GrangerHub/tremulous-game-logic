@@ -1016,6 +1016,10 @@ static void CG_RegisterGraphics( void )
 
   cgs.media.backTileShader            = trap_R_RegisterShader( "console" );
 
+  cgs.media.invisShader               = trap_R_RegisterShader("gfx/invis/invis" );
+  cgs.media.invisFadeShader           = trap_R_RegisterShader("gfx/invis/fade" );
+  cgs.media.invisShaderTeamA          = trap_R_RegisterShader("gfx/invis/ateam");
+  cgs.media.invisShaderTeamH          = trap_R_RegisterShader("gfx/invis/hteam");
 
   // building shaders
   cgs.media.greenBuildShader          = trap_R_RegisterShader("gfx/misc/greenbuild" );
