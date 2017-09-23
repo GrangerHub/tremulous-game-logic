@@ -144,7 +144,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define SPITFIRE_ZAP_REPEAT             750
 #define SPITFIRE_ZAP_K_SCALE            1.0f
 #define SPITFIRE_ZAP_RANGE              300.0f
-#define SPITFIRE_ZAP_DMG                ADM(30)
+#define SPITFIRE_ZAP_DMG                ADM(24)
 #define SPITFIRE_ZAP_TIME               150
 #define SPITFIRE_ASCEND_REPEAT          400
 #define SPITFIRE_ASCEND_MAG             400.0f
@@ -249,8 +249,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL4_COST                 15
 
 #define SPITFIRE_SPEED                1.3f
-#define SPITFIRE_VALUE                AVM(4 * ALIEN_CREDITS_PER_KILL)
-#define SPITFIRE_HEALTH               AHM(90)
+#define SPITFIRE_VALUE                AVM(3 * ALIEN_CREDITS_PER_KILL)
+#define SPITFIRE_HEALTH               AHM(75)
 #define SPITFIRE_REGEN                (0.03f * SPITFIRE_HEALTH)
 #define SPITFIRE_COST                 4
 
