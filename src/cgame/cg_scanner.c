@@ -278,7 +278,8 @@ void CG_AlienSense( rectDef_t *rect )
 
     if( VectorLength( relOrigin ) < ALIENSENSE_RANGE &&
         ( ( entityPositions.humanClient[ i ]->currentState.eFlags & EF_SCAN_SPOTTED ) ||
-           CG_Visible( entityPositions.humanClient[ i ], MASK_DEADSOLID ) ) )
+           ( !( entityPositions.humanClient[ i ]->currentState.eFlags & EF_INVISIBILE ) &&
+             CG_Visible( entityPositions.humanClient[ i ], MASK_DEADSOLID ) ) ) )
       CG_DrawDir( rect, relOrigin, hClient );
   }
 }
@@ -346,7 +347,8 @@ void CG_Scanner( rectDef_t *rect, qhandle_t shader, vec4_t color )
 
     if( VectorLength( relOrigin ) < HELMET_RANGE && ( relOrigin[ 2 ] < 0 ) &&
         ( ( entityPositions.alienClient[ i ]->currentState.eFlags & EF_SCAN_SPOTTED ) ||
-           CG_Visible( entityPositions.alienClient[ i ], MASK_DEADSOLID ) ) )
+          ( !( entityPositions.alienClient[ i ]->currentState.eFlags & EF_INVISIBILE ) &&
+            CG_Visible( entityPositions.alienClient[ i ], MASK_DEADSOLID ) ) ) )
       CG_DrawBlips( rect, relOrigin, aIbelow );
   }
 
@@ -399,7 +401,8 @@ void CG_Scanner( rectDef_t *rect, qhandle_t shader, vec4_t color )
 
     if( VectorLength( relOrigin ) < HELMET_RANGE && ( relOrigin[ 2 ] > 0 ) &&
         ( ( entityPositions.alienClient[ i ]->currentState.eFlags & EF_SCAN_SPOTTED ) ||
-           CG_Visible( entityPositions.alienClient[ i ], MASK_DEADSOLID ) ) )
+          ( !( entityPositions.alienClient[ i ]->currentState.eFlags & EF_INVISIBILE ) &&
+            CG_Visible( entityPositions.alienClient[ i ], MASK_DEADSOLID ) ) ) )
       CG_DrawBlips( rect, relOrigin, aIabove );
   }
 }

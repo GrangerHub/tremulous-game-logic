@@ -796,8 +796,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
         if( aForward <= 5 && aRight <= 5 && aUp <= 5 )
           client->ps.eFlags |= EF_INVISIBILE;
         else if( client->ps.weapon == WP_ALEVEL1_UPG &&
-                 ( client->ps.stats[ STAT_STATE ] & SS_BOOSTED ) &&
-                 ent->health >= BG_Class( client->ps.stats[ STAT_CLASS ] )->health )
+                 ( client->ps.stats[ STAT_STATE ] & SS_BOOSTED ) )
           client->ps.eFlags |= EF_INVISIBILE;
       }
     }
