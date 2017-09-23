@@ -277,9 +277,10 @@ void CG_AlienSense( rectDef_t *rect )
     VectorSubtract( entityPositions.humanClientPos[ i ], origin, relOrigin );
 
     if( VectorLength( relOrigin ) < ALIENSENSE_RANGE &&
+        !( ( entityPositions.humanClient[ i ]->currentState.eFlags & EF_INVISIBILE ) &&
+           entityPositions.humanClient[ i ]->currentState.weapon != WP_LUCIFER_CANNON ) &&
         ( ( entityPositions.humanClient[ i ]->currentState.eFlags & EF_SCAN_SPOTTED ) ||
-           ( !( entityPositions.humanClient[ i ]->currentState.eFlags & EF_INVISIBILE ) &&
-             CG_Visible( entityPositions.humanClient[ i ], MASK_DEADSOLID ) ) ) )
+           CG_Visible( entityPositions.humanClient[ i ], MASK_DEADSOLID ) ) )
       CG_DrawDir( rect, relOrigin, hClient );
   }
 }
@@ -346,9 +347,10 @@ void CG_Scanner( rectDef_t *rect, qhandle_t shader, vec4_t color )
     VectorSubtract( entityPositions.alienClientPos[ i ], origin, relOrigin );
 
     if( VectorLength( relOrigin ) < HELMET_RANGE && ( relOrigin[ 2 ] < 0 ) &&
+        !( ( entityPositions.alienClient[ i ]->currentState.eFlags & EF_INVISIBILE ) &&
+             entityPositions.alienClient[ i ]->currentState.weapon != WP_LUCIFER_CANNON ) &&
         ( ( entityPositions.alienClient[ i ]->currentState.eFlags & EF_SCAN_SPOTTED ) ||
-          ( !( entityPositions.alienClient[ i ]->currentState.eFlags & EF_INVISIBILE ) &&
-            CG_Visible( entityPositions.alienClient[ i ], MASK_DEADSOLID ) ) ) )
+          CG_Visible( entityPositions.alienClient[ i ], MASK_DEADSOLID ) ) )
       CG_DrawBlips( rect, relOrigin, aIbelow );
   }
 
@@ -400,9 +402,10 @@ void CG_Scanner( rectDef_t *rect, qhandle_t shader, vec4_t color )
     VectorSubtract( entityPositions.alienClientPos[ i ], origin, relOrigin );
 
     if( VectorLength( relOrigin ) < HELMET_RANGE && ( relOrigin[ 2 ] > 0 ) &&
+        !( ( entityPositions.alienClient[ i ]->currentState.eFlags & EF_INVISIBILE ) &&
+           entityPositions.alienClient[ i ]->currentState.weapon != WP_LUCIFER_CANNON ) &&
         ( ( entityPositions.alienClient[ i ]->currentState.eFlags & EF_SCAN_SPOTTED ) ||
-          ( !( entityPositions.alienClient[ i ]->currentState.eFlags & EF_INVISIBILE ) &&
-            CG_Visible( entityPositions.alienClient[ i ], MASK_DEADSOLID ) ) ) )
+          CG_Visible( entityPositions.alienClient[ i ], MASK_DEADSOLID ) ) )
       CG_DrawBlips( rect, relOrigin, aIabove );
   }
 }
