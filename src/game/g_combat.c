@@ -778,81 +778,82 @@ static float GetRegionDamageModifier( gentity_t *targ, int class, int piece )
               overlap->minHeight, overlap->maxHeight,
               overlap->name, overlap->modifier );
 
-  // Find the armour layer modifier, assuming that none of the armour regions
-  // overlap and that any areas that are not covered have a modifier of 1.0
-  for( j = UP_NONE + 1; j < UP_NUM_UPGRADES; j++ )
+              
+  // Battlesuits use armor points
+  if( !BG_InventoryContainsUpgrade( UP_BATTLESUIT, targ->client->ps.stats ) )
   {
-    if( !BG_InventoryContainsUpgrade( j, targ->client->ps.stats ) ||
-        !g_numArmourRegions[ j ] )
-      continue;
-
-    if( ( j == UP_LIGHTARMOUR || j == UP_HELMET ) &&
-        BG_InventoryContainsUpgrade( UP_BATTLESUIT, targ->client->ps.stats ) )
-      continue;
-
-    regions = g_armourRegions[ j ];
-
-    for( i = 0; i < g_numArmourRegions[ j ]; i++ )
+    // Find the armour layer modifier, assuming that none of the armour regions
+    // overlap and that any areas that are not covered have a modifier of 1.0
+    for( j = UP_NONE + 1; j < UP_NUM_UPGRADES; j++ )
     {
-      float overlapMaxA, regionMinA, regionMaxA, angleSpan, heightSpan, area;
-
-      if( regions[ i ].crouch != crouch )
+      if( !BG_InventoryContainsUpgrade( j, targ->client->ps.stats ) ||
+          !g_numArmourRegions[ j ] )
         continue;
 
-      // Convert overlap angle to 0 to max
-      overlapMaxA = overlap->maxAngle - overlap->minAngle;
-      if( overlapMaxA < 0.0f )
-        overlapMaxA += 360.0f;
+      regions = g_armourRegions[ j ];
 
-      // Convert region angles to match overlap
-      regionMinA = regions[ i ].minAngle - overlap->minAngle;
-      if( regionMinA < 0.0f )
-        regionMinA += 360.0f;
-      regionMaxA = regions[ i ].maxAngle - overlap->minAngle;
-      if( regionMaxA < 0.0f )
-        regionMaxA += 360.0f;
-
-      // Overlapping Angle portion
-      if( regionMinA <= regionMaxA )
+      for( i = 0; i < g_numArmourRegions[ j ]; i++ )
       {
-        angleSpan = 0.0f;
-        if( regionMinA < overlapMaxA )
+        float overlapMaxA, regionMinA, regionMaxA, angleSpan, heightSpan, area;
+
+        if( regions[ i ].crouch != crouch )
+          continue;
+
+        // Convert overlap angle to 0 to max
+        overlapMaxA = overlap->maxAngle - overlap->minAngle;
+        if( overlapMaxA < 0.0f )
+          overlapMaxA += 360.0f;
+
+        // Convert region angles to match overlap
+        regionMinA = regions[ i ].minAngle - overlap->minAngle;
+        if( regionMinA < 0.0f )
+          regionMinA += 360.0f;
+        regionMaxA = regions[ i ].maxAngle - overlap->minAngle;
+        if( regionMaxA < 0.0f )
+          regionMaxA += 360.0f;
+
+        // Overlapping Angle portion
+        if( regionMinA <= regionMaxA )
+        {
+          angleSpan = 0.0f;
+          if( regionMinA < overlapMaxA )
+          {
+            if( regionMaxA > overlapMaxA )
+              regionMaxA = overlapMaxA;
+            angleSpan = regionMaxA - regionMinA;
+          }
+        }
+        else
         {
           if( regionMaxA > overlapMaxA )
             regionMaxA = overlapMaxA;
-          angleSpan = regionMaxA - regionMinA;
+          angleSpan = regionMaxA;
+          if( regionMinA < overlapMaxA )
+            angleSpan += overlapMaxA - regionMinA;
         }
+        angleSpan /= 360.0f;
+
+        // Overlapping height portion
+        heightSpan = MIN( overlap->maxHeight, regions[ i ].maxHeight ) -
+                     MAX( overlap->minHeight, regions[ i ].minHeight );
+        if( heightSpan < 0.0f )
+          heightSpan = 0.0f;
+        if( heightSpan > 1.0f )
+          heightSpan = 1.0f;
+
+        if( g_debugDamage.integer > 2 )
+          Com_Printf( ".   armourRegion = [%d %d %f %f] (%s)\n"
+                    ".   .   modifier = %f\n"
+                    ".   .   angleSpan = %f\n"
+                    ".   .   heightSpan = %f\n",
+                    regions[ i ].minAngle, regions[ i ].maxAngle,
+                    regions[ i ].minHeight, regions[ i ].maxHeight,
+                    regions[ i ].name, regions[ i ].modifier,
+                    angleSpan, heightSpan );
+
+        areaSum += area = angleSpan * heightSpan;
+        modifier += regions[ i ].modifier * area;
       }
-      else
-      {
-        if( regionMaxA > overlapMaxA )
-          regionMaxA = overlapMaxA;
-        angleSpan = regionMaxA;
-        if( regionMinA < overlapMaxA )
-          angleSpan += overlapMaxA - regionMinA;
-      }
-      angleSpan /= 360.0f;
-
-      // Overlapping height portion
-      heightSpan = MIN( overlap->maxHeight, regions[ i ].maxHeight ) -
-                   MAX( overlap->minHeight, regions[ i ].minHeight );
-      if( heightSpan < 0.0f )
-        heightSpan = 0.0f;
-      if( heightSpan > 1.0f )
-        heightSpan = 1.0f;
-
-      if( g_debugDamage.integer > 2 )
-        Com_Printf( ".   armourRegion = [%d %d %f %f] (%s)\n"
-                  ".   .   modifier = %f\n"
-                  ".   .   angleSpan = %f\n"
-                  ".   .   heightSpan = %f\n",
-                  regions[ i ].minAngle, regions[ i ].maxAngle,
-                  regions[ i ].minHeight, regions[ i ].maxHeight,
-                  regions[ i ].name, regions[ i ].modifier,
-                  angleSpan, heightSpan );
-
-      areaSum += area = angleSpan * heightSpan;
-      modifier += regions[ i ].modifier * area;
     }
   }
 
@@ -956,6 +957,10 @@ static float G_CalcDamageModifier( vec3_t point, gentity_t *targ, gentity_t *att
   if( point == NULL )
     return 1.0f;
 
+  // Battlesuits use armor points
+  if( BG_InventoryContainsUpgrade( UP_BATTLESUIT, targ->client->ps.stats ) )
+    return 1.0f;
+
   // Don't need to calculate angles and height for non-locational damage
   if( dflags & DAMAGE_NO_LOCDAMAGE )
     return GetNonLocDamageModifier( targ, class );
@@ -997,6 +1002,10 @@ static float G_CalcDamageModifier( vec3_t point, gentity_t *targ, gentity_t *att
   modifier = GetPointDamageModifier( targ, g_damageRegions[ class ],
                                      g_numDamageRegions[ class ],
                                      hitRotation, hitRatio );
+
+ // Battlesuits use armor points
+  if( BG_InventoryContainsUpgrade( UP_BATTLESUIT, targ->client->ps.stats ) )
+    return modifier;
 
   for( i = UP_NONE + 1; i < UP_NUM_UPGRADES; i++ )
   {
@@ -1200,12 +1209,15 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
     {
       // luci splash does less damage to non-naked humans, but still deals the
       // same knockback
-      if( BG_InventoryContainsUpgrade( UP_LIGHTARMOUR, targ->client->ps.stats ) )
-        damage *= LCANNON_SPLASH_LIGHTARMOUR;
-      if( BG_InventoryContainsUpgrade( UP_HELMET, targ->client->ps.stats ) )
-        damage *= LCANNON_SPLASH_HELMET;
       if( BG_InventoryContainsUpgrade( UP_BATTLESUIT, targ->client->ps.stats ) )
         damage *= LCANNON_SPLASH_BATTLESUIT;
+      else
+      {
+        if( BG_InventoryContainsUpgrade( UP_LIGHTARMOUR, targ->client->ps.stats ) )
+          damage *= LCANNON_SPLASH_LIGHTARMOUR;
+        if( BG_InventoryContainsUpgrade( UP_HELMET, targ->client->ps.stats ) )
+          damage *= LCANNON_SPLASH_HELMET;
+      }
     } else if( mod == MOD_GRENADE || mod == MOD_GRENADE_LAUNCHER )
     {
       if( BG_InventoryContainsUpgrade( UP_BATTLESUIT, targ->client->ps.stats ) )
