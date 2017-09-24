@@ -1454,6 +1454,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   client->noclip = savedNoclip;
   client->cliprcontents = savedCliprcontents;
   client->lastkilled_client = -1;
+  client->lasthurt_client = -1;
 
   for( i = 0; i < MAX_PERSISTANT; i++ )
     client->ps.persistant[ i ] = persistant[ i ];

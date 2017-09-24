@@ -2991,10 +2991,10 @@ Q_EXPORT void G_RunFrame( int levelTime )
   if( !g_doCountdown.integer || level.countdownTime <= level.time )
   {
     G_CalculateBuildPoints( );
+    G_CalculateAvgPlayers( );
     G_CalculateStages( );
     G_SpawnClients( TEAM_ALIENS );
     G_SpawnClients( TEAM_HUMANS );
-    G_CalculateAvgPlayers( );
     G_UpdateZaps( msec );
     G_CheckLifeSupport( );
   }

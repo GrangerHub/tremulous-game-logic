@@ -170,6 +170,7 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
   int       numTeamPlayers[ NUM_TEAMS ];
   int       maxHealthReserve;
   gentity_t *player;
+  qboolean  damagedByEnemyPlayer = qfalse;
 
   // Total up all the damage done by non-teammates
   for( i = 0; i < level.maxclients; i++ )
@@ -186,7 +187,10 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
 
     if( !OnSameTeam( self, player ) || 
         self->buildableTeam != player->client->ps.stats[ STAT_TEAM ] )
+    {
       totalDamage += (float)self->credits[ i ];
+      damagedByEnemyPlayer = qtrue;
+    }
   }
 
   // add damage done by enemy buildables to the total
@@ -306,8 +310,8 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
       // any remaining earnings goes to the player that did the damage
       G_AddCreditToClient( &level.clients[ i ], playersPersonalEarnings, qtrue );
 
-      // killing buildables earns score and credits, but doesn't count towards stage advancement
-      if( ( !IS_WARMUP ) && ( self->s.eType != ET_BUILDABLE ) )
+      // Only the value from killed players counts towards stage advancement
+      if( ( !IS_WARMUP ) && ( self->client ) )
       {
         // add to stage counters
         if( player->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
@@ -355,6 +359,17 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
         //distribute the earnings common to everyone playing
         G_AddCreditToClient( &level.clients[ j ], everyonesDistributionEarnings, qtrue );
       }
+    }
+
+    // The value from killed players that have been damaged by another player counts towards stage advancement
+    if( ( !IS_WARMUP ) && ( self->client ) &&
+        damagedByEnemyPlayer )
+    {
+      // add to stage counters
+      if( player->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
+        alienCredits += dBValue;
+      else if( player->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
+        humanCredits += dBValue;
     }
   }
 
