@@ -3613,7 +3613,8 @@ static void PM_Weapon( void )
     pm->ps->ammo = BG_Weapon( pm->ps->weapon )->maxAmmo;
 
     if( BG_Weapon( pm->ps->weapon )->usesEnergy &&
-        BG_InventoryContainsUpgrade( UP_BATTPACK, pm->ps->stats ) )
+        ( BG_InventoryContainsUpgrade( UP_BATTPACK, pm->ps->stats ) ||
+          BG_InventoryContainsUpgrade( UP_BATTLESUIT, pm->ps->stats ) ) )
       pm->ps->ammo *= BATTPACK_MODIFIER;
 
     if( pm->ps->weapon == WP_LUCIFER_CANNON )

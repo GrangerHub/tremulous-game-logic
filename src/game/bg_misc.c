@@ -4319,9 +4319,17 @@ qboolean BG_WeaponIsFull( weapon_t weapon, int stats[ ], int ammo, int clips )
   maxAmmo = BG_Weapon( weapon )->maxAmmo;
   maxClips = BG_Weapon( weapon )->maxClips;
 
-  if( BG_InventoryContainsUpgrade( UP_BATTPACK, stats ) ||
-      BG_InventoryContainsUpgrade( UP_BATTLESUIT, stats ) )
+  if( BG_Weapon( weapon )->usesEnergy &&
+      ( BG_InventoryContainsUpgrade( UP_BATTPACK, stats ) ||
+        BG_InventoryContainsUpgrade( UP_BATTLESUIT, stats ) ) )
     maxAmmo = (int)( (float)maxAmmo * BATTPACK_MODIFIER );
+
+  if( !BG_Weapon( weapon )->usesEnergy &&
+      !BG_Weapon( weapon )->infiniteAmmo &&
+      BG_Weapon( weapon )->ammoPurchasable &&
+      !BG_Weapon( weapon )->roundPrice &&
+      BG_InventoryContainsUpgrade( UP_BATTLESUIT, stats ) )
+    maxClips = ( 2 * BG_Weapon( weapon )->maxClips ) + 1;
 
   return ( maxAmmo == ammo ) && ( maxClips == clips );
 }
