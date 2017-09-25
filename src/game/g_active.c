@@ -790,6 +790,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
           !( client->ps.stats[ STAT_STATE ] & SS_GRABBING ) &&
           !( ( ucmd->buttons & BUTTON_ATTACK2 ) &&
              BG_Weapon( client->ps.weapon )->hasAltMode ) &&
+          ent->pain_debounce_time <= level.time &&
           !( ucmd->buttons & BUTTON_GESTURE ) &&
           G_Overmind( ) )
       {
