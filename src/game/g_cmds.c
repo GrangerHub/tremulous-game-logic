@@ -476,10 +476,20 @@ static void Give_Gun( gentity_t *ent, char *s )
 
 static void Give_Upgrade( gentity_t *ent, char *s )
 {
-    int u = BG_UpgradeByName( s )->number;
-    BG_AddUpgradeToInventory( u, ent->client->ps.stats );
-    if( u == UP_BATTLESUIT )
-      ent->client->ps.stats[ STAT_MAX_HEALTH ] = BSUIT_MAX_ARMOR;
+  int i;
+  int u = BG_UpgradeByName( s )->number;
+
+  BG_AddUpgradeToInventory( u, ent->client->ps.stats );
+
+  if( u == UP_BATTLESUIT )
+    ent->client->ps.stats[ STAT_MAX_HEALTH ] = BSUIT_MAX_ARMOR;
+
+  for( i = 0; i < MAX_CLIENTS; i++ )
+    ent->creditsUpgrade[ u ][ i ] = 0;
+
+  for( i = 0; i < NUM_TEAMS; i++ )
+    ent->creditsUpgradeDeffenses[ u ][ i ] = 0;
+
 }
 
 /*
@@ -498,7 +508,7 @@ void Cmd_Give_f( gentity_t *ent )
   {
     // FIXME I am hideous :#(
     ADMP( "^3give: ^7usage: give [what]\n\nNormal\n\n"
-          "  health\n  funds <amount>\n  stamina\n  poison\n  gas\n  ammo\n"
+          "  health\n  funds <amount>\n  stamina\n  poison\n  gas\n  ammo\n armor\n"
           "\n^3Classes\n\n"
           "  level0\n  level1\n  level1upg\n  level2\n  level2upg\n  level3\n  level3upg\n  level4\n  builder\n  builderupg\n"
           "  human_base\n  human_bsuit\n  "
@@ -605,6 +615,21 @@ void Cmd_Give_f( gentity_t *ent )
   {
     if( BG_InventoryContainsUpgrade( UP_JETPACK, ent->client->ps.stats ) )
       ent->client->ps.stats[ STAT_FUEL ] = JETPACK_FUEL_FULL;
+  }
+
+  if( give_all || Q_stricmp( name, "armor" ) == 0 )
+  {
+    if( BG_InventoryContainsUpgrade( UP_BATTLESUIT, ent->client->ps.stats ) )
+    {
+      int i;
+
+      ent->client->ps.stats[ STAT_MAX_HEALTH ] = BSUIT_MAX_ARMOR;
+      for( i = 0; i < MAX_CLIENTS; i++ )
+        ent->creditsUpgrade[ UP_BATTLESUIT ][ i ] = 0;
+
+      for( i = 0; i < NUM_TEAMS; i++ )
+        ent->creditsUpgradeDeffenses[ UP_BATTLESUIT ][ i ] = 0;
+    }
   }
 }
 
@@ -3050,6 +3075,8 @@ void Cmd_Sell_f( gentity_t *ent )
         {
           G_AddCreditToClient( ent->client, (short)( BSUIT_PRICE_USED ),
                                qfalse );
+          // Give credits for the damaged part of the battlesuit
+          G_RewardAttackers( ent, UP_BATTLESUIT );
         } else
           G_AddCreditToClient( ent->client, (short)BG_Upgrade( UP_BATTLESUIT )->price,
                                qfalse );

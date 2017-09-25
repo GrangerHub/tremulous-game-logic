@@ -169,8 +169,19 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
   int       alienCredits = 0, humanCredits = 0;
   int       numTeamPlayers[ NUM_TEAMS ];
   int       maxHealthReserve;
+  int       ( *credits )[ MAX_CLIENTS ], ( *creditsDeffenses )[ NUM_TEAMS ];
   gentity_t *player;
   qboolean  damagedByEnemyPlayer = qfalse;
+
+  if( destroyedUp != UP_NONE)
+  {
+    credits = self->creditsUpgrade[ destroyedUp ];
+    creditsDeffenses = self->creditsUpgradeDeffenses[ destroyedUp ];
+  } else
+  {
+    credits = self->credits;
+    creditsDeffenses = self->creditsDeffenses;
+  }
 
   // Total up all the damage done by non-teammates
   for( i = 0; i < level.maxclients; i++ )
@@ -181,14 +192,14 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
     if( player->client->pers.connected != CON_CONNECTED ||
         player->client->ps.stats[ STAT_TEAM ] == TEAM_NONE )
     {
-      self->credits[ i ] = 0;
+      ( *credits )[ i ] = 0;
       continue;
     }
 
     if( !OnSameTeam( self, player ) || 
         self->buildableTeam != player->client->ps.stats[ STAT_TEAM ] )
     {
-      totalDamage += (float)self->credits[ i ];
+      totalDamage += (float)( *credits )[ i ];
       damagedByEnemyPlayer = qtrue;
     }
   }
@@ -199,9 +210,10 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
     if( ( self->client &&
           self->client->ps.stats[ STAT_TEAM ] == i ) || 
         i == self->buildableTeam ||
-        !self->creditsDeffenses[ i ] )
+        !( *creditsDeffenses )[ i ] )
       continue;
-    totalDamage += self->creditsDeffenses[ i ];
+
+    totalDamage += ( *creditsDeffenses )[ i ];
   }
 
   if( totalDamage <= 0.0f )
@@ -246,7 +258,7 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
   // Give credits and empty the array
   for( i = 0; i < level.maxclients; i++ )
   {
-    int stageValue = value * self->credits[ i ] / totalDamage;
+    int stageValue = value * ( *credits )[ i ] / totalDamage;
     team_t playersTeam;
 
     player = g_entities + i;
@@ -261,7 +273,7 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
       if( totalDamage < maxHealth )
         stageValue *= totalDamage / maxHealth;
 
-      if( !self->credits[ i ] || player->client->ps.stats[ STAT_TEAM ] == team )
+      if( !( *credits )[ i ] || player->client->ps.stats[ STAT_TEAM ] == team )
         continue;
 
       playersTeamDistributionEarnings = stageValue / ( 10 * numTeamPlayers[ playersTeam ] );
@@ -320,13 +332,13 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
           humanCredits += stageValue;
       }
     }
-    self->credits[ i ] = 0;
+    ( *credits )[ i ] = 0;
   }
 
-  // give credits from damage by defense buildables
+  // give credits from damage by defense buildables  and empty the array
   for( i = 0; i < NUM_TEAMS; i++ )
   {
-    int dBValue = value * self->creditsDeffenses[ i ] / totalDamage;
+    int dBValue = value * ( *creditsDeffenses )[ i ] / totalDamage;
     int buildablesTeamDistributionEarnings;
     int everyonesDistributionEarnings;
     int j;
@@ -335,7 +347,7 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
           self->client->ps.stats[ STAT_TEAM ] == i ) || 
         i == self->buildableTeam ||
         i == TEAM_NONE ||
-        !self->creditsDeffenses[ i ] )
+        !( *creditsDeffenses )[ i ] )
       continue;
 
     if( totalDamage < maxHealth )
@@ -371,6 +383,8 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
       else if( player->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
         humanCredits += dBValue;
     }
+
+    ( *creditsDeffenses )[ i ] = 0;
   }
 
   if( alienCredits )
@@ -1436,20 +1450,20 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   // do the damage
   if( take )
   {
-    // add to the attackers "account" on the target
-    if( attacker != targ )
-    {
-      if( attacker->client )
-        targ->credits[ attacker->client->ps.clientNum ] += take;
-      else if( attacker->s.eType == ET_BUILDABLE )
-        targ->creditsDeffenses[ attacker->buildableTeam ] += take;
-    }
-
     // Battlesuit absorbs the damage
     if( targ->client &&
         BG_InventoryContainsUpgrade( UP_BATTLESUIT, targ->client->ps.stats ) &&
         mod != MOD_POISON )
     {
+      // add to the attackers "account" on the target
+      if( attacker != targ )
+      {
+        if( attacker->client )
+          targ->creditsUpgrade[ UP_BATTLESUIT ][ attacker->client->ps.clientNum ] += take;
+        else if( attacker->s.eType == ET_BUILDABLE )
+          targ->creditsUpgradeDeffenses[ UP_BATTLESUIT ][ attacker->buildableTeam ] += take;
+      }
+
       targ->client->ps.stats[ STAT_MAX_HEALTH ] -= take;
       take = 0;
       if( targ->client->ps.stats[ STAT_MAX_HEALTH ] <= 0 )
@@ -1474,7 +1488,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
         targ->client->ps.stats[ STAT_MAX_HEALTH ] = 0;
 
         // Give income for destroying the battlesuit
-        G_RewardAttackers( targ, UP_NONE );
+        G_RewardAttackers( targ, UP_BATTLESUIT );
 
         //adjust ammo and clips
         if( BG_Weapon( weapon )->usesEnergy &&
@@ -1491,11 +1505,44 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
         //update ClientInfo
         ClientUserinfoChanged( targ->client->ps.clientNum, qfalse );
         targ->client->pers.infoChangeTime = level.time;
+
+        // Apply any remaining damage after the bsuit breaks off
+        if( take )
+          G_Damage( targ, inflictor, attacker, dir, point, damage, dflags, mod );
+        else
+        {
+          targ->lastDamageTime = level.time;
+
+          if( targ->pain )
+            targ->pain( targ, attacker, take );
+        }
+
+        return;
+      } else
+      {
+        targ->lastDamageTime = level.time;
+
+        //update ClientInfo
+        ClientUserinfoChanged( targ->client->ps.clientNum, qfalse );
+        targ->client->pers.infoChangeTime = level.time;
+
+        if( targ->pain )
+          targ->pain( targ, attacker, take );
+
+        return;
       }
     }
 
-    if( take )
-      targ->health = targ->health - take;
+    // add to the attackers "account" on the target
+    if( attacker != targ )
+    {
+      if( attacker->client )
+        targ->credits[ attacker->client->ps.clientNum ] += take;
+      else if( attacker->s.eType == ET_BUILDABLE )
+        targ->creditsDeffenses[ attacker->buildableTeam ] += take;
+    }
+
+    targ->health = targ->health - take;
 
     if( targ->client )
     {

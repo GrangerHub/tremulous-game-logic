@@ -332,9 +332,11 @@ struct gentity_s
   qboolean          lev1Grabbed;        //TA: for turrets interacting with lev1s
   int               lev1GrabTime;       //TA: for turrets interacting with lev1s
 
-  int               credits[ MAX_CLIENTS ];     // human credits for each client
+  int               credits[ MAX_CLIENTS ]; // human credits for each client
+  int               creditsUpgrade[ UP_NUM_UPGRADES ][ MAX_CLIENTS ]; // human breakable upgrade credits for each client
   int               killedBy;                   // clientNum of killer
   int               creditsDeffenses[ NUM_TEAMS ];  // credits for damage done by an enemy defensive buildables.
+  int               creditsUpgradeDeffenses[ UP_NUM_UPGRADES ][ NUM_TEAMS ]; // breakable upgrade credits for damage done by an enemy defensive buildables.
 
   vec3_t            turretAim;          // aim vector for turrets
   vec3_t            turretAimRate;      // track turn speed for norfenturrets

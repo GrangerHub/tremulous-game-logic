@@ -2421,9 +2421,15 @@ void ClientThink_real( gentity_t *ent )
         client->ps.stats[ STAT_HEALTH ] = ent->health;
         client->pers.infoChangeTime = level.time;
 
+        // if at max health, clear damage counters
         if( ent->health >= maxHealth )
         {
           ent->health = client->ps.stats[ STAT_HEALTH ] = maxHealth;
+          for( i = 0; i < MAX_CLIENTS; i++ )
+            ent->credits[ i ] = 0;
+
+          for( i = 0; i < NUM_TEAMS; i++ )
+            ent->creditsDeffenses[ i ] = 0;
         }
       }
     }

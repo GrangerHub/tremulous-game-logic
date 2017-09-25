@@ -4066,6 +4066,8 @@ void G_BuildableThink( gentity_t *ent, int msec )
         ent->health = maxHealth;
         for( i = 0; i < MAX_CLIENTS; i++ )
           ent->credits[ i ] = 0;
+        for( i = 0; i < NUM_TEAMS; i++ )
+          ent->creditsDeffenses[ i ] = 0;
       }
     }
 
