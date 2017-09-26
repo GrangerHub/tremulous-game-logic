@@ -269,7 +269,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define BOOSTER_CREEPSIZE           120
 #define BOOSTER_REGEN_MOD           3.0f
 #define BOOSTER_VALUE               0
-#define BOOST_TIME                  20000
+#define BOOST_TIME                  30000
 #define BOOST_WARN_TIME             15000
 
 #define ACIDTUBE_BP                 8
@@ -346,7 +346,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ALIENSENSE_RANGE            1000.0f
 #define REGEN_BOOST_RANGE           200.0f
 
-#define ALIEN_POISON_TIME           10000
+#define ALIEN_POISON_TIME           5000
 #define ALIEN_POISON_DMG            5
 #define ALIEN_POISON_DIVIDER        (1.0f/1.32f) //about 1.0/(time`th root of damage)
 
