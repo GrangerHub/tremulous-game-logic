@@ -149,7 +149,9 @@ static qboolean CG_ParseAnimationFile( const char *filename, clientInfo_t *ci )
 
       if( !Q_stricmp( token, "default" ) || !Q_stricmp( token, "normal" ) )
         ci->footsteps = FOOTSTEP_NORMAL;
-      else if( !Q_stricmp( token, "flesh" ) )
+      else if( !Q_stricmp( token, "flesh" ) ||
+               ( !Q_stricmp( ci->modelName, "level1" ) &&
+                 !Q_stricmp( ci->skinName, "upgrade" ) ) )
         ci->footsteps = FOOTSTEP_FLESH;
       else if( !Q_stricmp( token, "none" ) )
         ci->footsteps = FOOTSTEP_NONE;
