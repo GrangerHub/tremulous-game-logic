@@ -3102,6 +3102,10 @@ static void PM_Footsteps( void )
             PM_ContinueLegsAnim( NSPA_WALK );
         }
       }
+
+      // adv basi still makes footstep sounds while walking
+      if( pm->ps->weapon == WP_ALEVEL1_UPG )
+        footstep = qtrue;
     }
   }
 
