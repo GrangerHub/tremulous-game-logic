@@ -636,7 +636,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define BSUIT_PRICE_USED            200
 #define BSUIT_POISON_PROTECTION     3
 #define BSUIT_PCLOUD_PROTECTION     3000
-#define BSUIT_MAX_ARMOR             1200
+#define BSUIT_MAX_ARMOR             1000
 #define BSUIT_ARMOR_LOW             300 // Value at which the armor indicator starts to flash
 
 #define MEDKIT_POISON_IMMUNITY_TIME 0
