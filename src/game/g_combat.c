@@ -1241,6 +1241,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
   // Hack to ensure that old maps with trigger hurt meant to instantly kill, does so to the new bsuits.
   if( mod == MOD_TRIGGER_HURT &&
+      targ->client &&
       BG_InventoryContainsUpgrade( UP_BATTLESUIT, targ->client->ps.stats ) &&
     damage >= 400 &&
     damage < 10000 )
