@@ -287,7 +287,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define PCLOUD_MODIFIER             0.5f
 #define PCLOUD_ARMOUR_MODIFIER      0.75f
 
-#define ASPAWN_BP                   16
+#define ASPAWN_BP                   20
 #define ASPAWN_BT                   15000
 #define ASPAWN_HEALTH               ABHM(250)
 #define ASPAWN_REGEN                ABRM(8)
@@ -696,22 +696,22 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MEDISTAT_SPLASHRADIUS       100
 #define MEDISTAT_VALUE              ( ALIEN_CREDITS_PER_KILL )
 
-#define MGTURRET_BP                 12
+#define MGTURRET_BP                 8
 #define MGTURRET_BT                 10000
-#define MGTURRET_HEALTH             HBHM(400)
+#define MGTURRET_HEALTH             HBHM(190)
 #define MGTURRET_SPLASHDAMAGE       100
 #define MGTURRET_SPLASHRADIUS       100
 #define MGTURRET_ANGULARSPEED       12
 #define MGTURRET_ACCURACY_TO_FIRE   15
 #define MGTURRET_VERTICALCAP        30  // +/- maximum pitch
-#define MGTURRET_REPEAT             100  // repeat after full spin up
-#define MGTURRET_REPEAT_START       750 // the repeat at the start of spinup
+#define MGTURRET_REPEAT             50  // repeat after full spin up
+#define MGTURRET_REPEAT_START       500 // the repeat at the start of spinup
 #define MGTURRET_NEXTTHINK          50
 #define MGTURRET_K_SCALE            1.0f
 #define MGTURRET_RANGE              500.0f
 #define MGTURRET_SPREAD             200
 #define MGTURRET_DMG                HBDM(3)
-#define MGTURRET_SPINUP_TIME        6000 // time to increase the fire rate to full speed
+#define MGTURRET_SPINUP_TIME        4000 // time to increase the fire rate to full speed
 #define MGTURRET_VALUE              ( ALIEN_CREDITS_PER_KILL / 2 )
 #define MGTURRET_DCC_ANGULARSPEED   15
 #define MGTURRET_GRAB_ANGULARSPEED  5
