@@ -794,7 +794,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
           !( ucmd->buttons & BUTTON_GESTURE ) &&
           G_Overmind( ) )
       {
-        if( aForward <= 5 && aRight <= 5 && aUp <= 5 )
+        if( aForward <= 5 && aRight <= 5 && ucmd->upmove <= 5 )
           client->ps.eFlags |= EF_INVISIBILE;
         else if( client->ps.weapon == WP_ALEVEL1_UPG &&
                  ( client->ps.stats[ STAT_STATE ] & SS_BOOSTED ) )
