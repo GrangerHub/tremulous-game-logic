@@ -257,10 +257,11 @@ Handles both ground friction and water friction
 */
 static void PM_Friction( void )
 {
-  vec3_t  vec;
-  float   *vel;
-  float   speed, newspeed, control;
-  float   drop, modifier;
+  vec3_t   vec;
+  float    *vel;
+  float    speed, newspeed, control;
+  float    drop, modifier;
+  qboolean groundFriction = qfalse;
 
   vel = pm->ps->velocity;
 
@@ -303,6 +304,7 @@ static void PM_Friction( void )
 
         control = speed < stopSpeed ? stopSpeed : speed;
         drop += control * friction * pml.frametime;
+        groundFriction = qtrue;
       }
     }
   }
@@ -333,7 +335,12 @@ static void PM_Friction( void )
 
   vel[ 0 ] = vel[ 0 ] * newspeed;
   vel[ 1 ] = vel[ 1 ] * newspeed;
-  vel[ 2 ] = vel[ 2 ] * newspeed;
+  // Don't reduce upward velocity while using a jetpack
+  if( !( pm->ps->pm_type == PM_JETPACK &&
+         vel[2] > 0 &&
+         !groundFriction &&
+         !pm->waterlevel ) )
+    vel[ 2 ] = vel[ 2 ] * newspeed;
 }
 
 
@@ -1336,6 +1343,11 @@ static void PM_JetPackMove( void )
     wishvel[ 2 ] = -JETPACK_SINK_SPEED;
   else
     wishvel[ 2 ] = 0.0f;
+
+  // apply the appropirate amount of gravity if the upward velocity is greater
+  // than the max upward jet velocity.
+  if( pm->ps->velocity[ 2 ] > wishvel[ 2 ] )
+    pm->ps->velocity[ 2 ] -= MIN( pm->ps->gravity * pml.frametime, pm->ps->velocity[ 2 ] - wishvel[ 2 ] );
 
   VectorCopy( wishvel, wishdir );
   wishspeed = VectorNormalize( wishdir );
