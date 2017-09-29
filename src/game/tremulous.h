@@ -624,14 +624,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define JETPACK_SINK_SPEED          192.0f //down movement speed
 #define JETPACK_DISABLE_TIME        500 //time to disable the jetpack when player damaged
 #define JETPACK_DISABLE_CHANCE      0.3f
-#define JETPACK_FUEL_FULL           7500 //can't exceed 32767
-#define JETPACK_FUEL_LOW            1500
+#define JETPACK_FUEL_FULL           5000 //can't exceed 32767
+#define JETPACK_FUEL_LOW            1000
 #define JETPACK_FUEL_USAGE          8 //every 100ms
-#define JETPACK_FUEL_MIN_START      75 // Minimum fuel required to start the jet
+#define JETPACK_FUEL_MIN_START      150 // Minimum fuel required to start the jet
 #define JETPACK_ACT_BOOST_FUEL_USE  ( JETPACK_FUEL_USAGE * 2 )
 #define JETPACK_ACT_BOOST_TIME      750
 #define JETPACK_ACT_BOOST_SPEED     440.0f
-#define JETPACK_FUEL_RECHARGE       2 // every 100ms
+#define JETPACK_FUEL_RECHARGE       5 // every 100ms
 
 #define BSUIT_PRICE                 650
 #define BSUIT_PRICE_USED            200
