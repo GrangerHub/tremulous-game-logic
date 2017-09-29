@@ -1333,11 +1333,16 @@ static void PM_JetPackMove( void )
 
   if( pm->cmd.upmove > 0.0f )
   {
+    vec3_t thrustDir = { 0.0f, 0.0f, 1.0f };
+
+    if( pm->ps->viewangles[ PITCH ] > 0.0f )
+      VectorCopy( pml.up, thrustDir ) ;
+
     // give an initial vertical boost when first activating the jet
     if( pm->ps->persistant[PERS_JUMPTIME] <= JETPACK_ACT_BOOST_TIME )
-      VectorMA( wishvel, JETPACK_ACT_BOOST_SPEED, pml.up, wishvel );
+      VectorMA( wishvel, JETPACK_ACT_BOOST_SPEED, thrustDir, wishvel );
     else
-      VectorMA( wishvel, JETPACK_FLOAT_SPEED, pml.up, wishvel );
+      VectorMA( wishvel, JETPACK_FLOAT_SPEED, thrustDir, wishvel );
   }
   else if( pm->cmd.upmove < 0.0f )
     wishvel[ 2 ] = -JETPACK_SINK_SPEED;
