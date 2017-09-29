@@ -918,7 +918,10 @@ static void CG_CalculateWeaponPosition( vec3_t origin, vec3_t angles )
 
   // gun angles from bobbing
   // bob amount is class dependant
-  bob = BG_Class( cg.predictedPlayerState.stats[ STAT_CLASS ] )->bob;
+  if( cg.predictedPlayerState.pm_type == PM_SPITFIRE_FLY )
+    bob = SPITFIRE_HOVER_BOB;
+  else
+    bob = BG_Class( cg.predictedPlayerState.stats[ STAT_CLASS ] )->bob;
 
   if( bob != 0 )
   {

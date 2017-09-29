@@ -1387,6 +1387,7 @@ static void PM_SpitfireFlyMove( void )
   qboolean isgliding = qfalse;
   qboolean basicflight = qfalse;
   qboolean ascend = qfalse;
+  qboolean upmovePressed = qfalse;
 
   if( pm->ps->weapon != WP_ASPITFIRE )
     return;
@@ -1407,6 +1408,7 @@ static void PM_SpitfireFlyMove( void )
 
     if( pm->cmd.upmove > 0 )
     {
+      upmovePressed = qtrue;
       pm->cmd.upmove = 0;
       if( pm->ps->persistant[PERS_JUMPTIME] > SPITFIRE_ASCEND_REPEAT )
       {
@@ -1421,6 +1423,10 @@ static void PM_SpitfireFlyMove( void )
     {
       accel = SPITFIRE_GLIDE_ACCEL;
       isgliding = qtrue;
+    } else if( upmovePressed )
+    {
+      //apply gravity
+      pm->ps->velocity[ 2 ] -= pm->ps->gravity * pml.frametime;
     }
   }
 
@@ -1475,11 +1481,21 @@ static void PM_SpitfireFlyMove( void )
     //normal slowdown
     PM_Friction( );
 
-    // restrict ascent for hovering
+    // hovering
     if( basicflight &&
-        ( pm->cmd.buttons & BUTTON_WALKING ) &&
-        ( wishvel[ 2 ] > 0 ) )
-      wishvel[ 2 ] = 0;
+        ( pm->cmd.buttons & BUTTON_WALKING ) )
+    {
+      int bobmove, old;
+
+      // restrict ascent for hovering
+      if( wishvel[ 2 ] > 0 )
+        wishvel[ 2 ] = 0;
+
+      //apply bobbing
+      bobmove = BG_Class( pm->ps->stats[ STAT_CLASS ] )->bobCycle;
+      old = pm->ps->bobCycle;
+      pm->ps->bobCycle = (int)( old + bobmove * pml.msec ) & 255;
+    }
   }
 
   VectorCopy( wishvel, wishdir );
@@ -1491,7 +1507,9 @@ static void PM_SpitfireFlyMove( void )
   if( ascend )
   {
     //ascend
-    VectorMA( pm->ps->velocity, SPITFIRE_ASCEND_MAG, pml.up, pm->ps->velocity );
+    VectorMA( pm->ps->velocity,
+              SPITFIRE_ASCEND_MAG + pm->ps->gravity * pml.frametime,
+              pml.up, pm->ps->velocity );
 
     PM_AddEvent( EV_JUMP );
 

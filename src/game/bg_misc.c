@@ -1449,7 +1449,7 @@ static const classAttributes_t bg_classList[ ] =
     0.0f,                                           //float   buildDist;
     90,                                             //int     fov;
     0.001f,                                         //float   bob;
-    1.5f,                                           //float   bobCycle;
+    1.8f,                                           //float   bobCycle;
     0.0f,                                           //float   landBob;
     80,                                             //int     steptime;
     SPITFIRE_SPEED,                                 //float   speed;

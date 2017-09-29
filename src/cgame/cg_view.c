@@ -634,6 +634,8 @@ void CG_OffsetFirstPersonView( void )
 
   if( cg.snap->ps.persistant[ PERS_SPECSTATE ] != SPECTATOR_NOT )
     bob2 = 0.0f;
+  else if( cg.snap->ps.pm_type == PM_SPITFIRE_FLY )
+    bob2 = SPITFIRE_HOVER_BOB;
   else
     bob2 = BG_Class( cg.predictedPlayerState.stats[ STAT_CLASS ] )->bob;
 
