@@ -430,6 +430,137 @@ static void CG_AlienLevel4Text( char *text, playerState_t *ps )
 
 /*
 ===============
+CG_AlienSpitfireText
+===============
+*/
+static void CG_AlienSpitfireText( char *text, playerState_t *ps )
+{
+  usercmd_t cmd;
+  int cmdNum;
+  vec3_t  point;
+  int     cont;
+  vec3_t  mins;
+
+  cmdNum = trap_GetCurrentCmdNumber( );
+  trap_GetUserCmd( cmdNum, &cmd );
+
+  if( cgs.warmup )
+  {
+    Q_strcat( text, MAX_TUTORIAL_TEXT,
+        va( "Press %s when ready to start the game\n",
+          CG_KeyNameForCommand( "ready" ) ) );
+  }
+
+  Q_strcat( text, MAX_TUTORIAL_TEXT,
+      va( "Press %s to zap\n",
+        CG_KeyNameForCommand( "+attack" ) ) );
+
+  BG_ClassBoundingBox( ps->stats[ STAT_CLASS ], mins, NULL, NULL, NULL, NULL );
+
+  point[ 0 ] = ps->origin[ 0 ];
+  point[ 1 ] = ps->origin[ 1 ];
+  point[ 2 ] = ps->origin[ 2 ] + mins[2] + ( ( ps->viewheight - mins[2] ) / 2 );
+  cont = CG_PointContents( point, ps->clientNum );
+
+  if( cont & MASK_WATER )
+    Q_strcat( text, MAX_TUTORIAL_TEXT,
+        va( "Exit the water, then hold down and release %s to air pounce\n",
+          CG_KeyNameForCommand( "+button5" ) ) );
+  else
+    Q_strcat( text, MAX_TUTORIAL_TEXT,
+        va( "Hold down and release %s to air pounce\n",
+          CG_KeyNameForCommand( "+button5" ) ) );
+
+  if( !(cont & MASK_WATER) )
+  {
+    if( ps->groundEntityNum == ENTITYNUM_NONE )
+    {
+      if( !( cmd.buttons & BUTTON_WALKING ) )
+        Q_strcat( text, MAX_TUTORIAL_TEXT,
+            va( "Hold down %s to hover\n",
+              CG_KeyNameForCommand( "+speed" ) ) );
+      else
+        Q_strcat( text, MAX_TUTORIAL_TEXT,
+            va( "Release %s to stop hovering\n",
+              CG_KeyNameForCommand( "+speed" ) ) );
+    }
+    else
+    {
+      if( !( cmd.buttons & BUTTON_WALKING ) )
+        Q_strcat( text, MAX_TUTORIAL_TEXT,
+            va( "Hold down %s to walk slower\n",
+              CG_KeyNameForCommand( "+speed" ) ) );
+      else
+        Q_strcat( text, MAX_TUTORIAL_TEXT,
+            va( "Release %s to walk faster\n",
+              CG_KeyNameForCommand( "+speed" ) ) );
+    }
+  }
+
+  if( cmd.upmove >= 0 )
+  {
+    if( cont & MASK_WATER )
+    {
+      if( cmd.upmove == 0 )
+        Q_strcat( text, MAX_TUTORIAL_TEXT,
+              va( "Press %s to swim up\n",
+                CG_KeyNameForCommand( "+moveup" ) ) );
+      else
+        Q_strcat( text, MAX_TUTORIAL_TEXT,
+              va( "Release %s to stop swimming up\n",
+                CG_KeyNameForCommand( "+moveup" ) ) );
+    }
+    else if( ps->groundEntityNum == ENTITYNUM_NONE )
+    {
+      if( cmd.upmove == 0 )
+        Q_strcat( text, MAX_TUTORIAL_TEXT,
+              va( "Press %s to ascend\n",
+                CG_KeyNameForCommand( "+moveup" ) ) );
+      else
+        Q_strcat( text, MAX_TUTORIAL_TEXT,
+              va( "Release %s to stop ascending\n",
+                CG_KeyNameForCommand( "+moveup" ) ) );
+    }
+    else
+      Q_strcat( text, MAX_TUTORIAL_TEXT,
+            va( "Press %s to jump\n",
+              CG_KeyNameForCommand( "+moveup" ) ) );
+  }
+
+  if( cont & MASK_WATER )
+  {
+    if( cmd.upmove < 0 )
+      Q_strcat( text, MAX_TUTORIAL_TEXT,
+            va( "Release %s to stop swimming down\n",
+              CG_KeyNameForCommand( "+movedown" ) ) );
+    else if( cmd.upmove == 0 )
+      Q_strcat( text, MAX_TUTORIAL_TEXT,
+            va( "Press %s to swim down\n",
+              CG_KeyNameForCommand( "+movedown" ) ) );
+  }
+  else if( cmd.buttons & BUTTON_WALKING )
+  {
+    if( cmd.upmove < 0 )
+      Q_strcat( text, MAX_TUTORIAL_TEXT,
+            va( "Release %s to not descend while hovering\n",
+              CG_KeyNameForCommand( "+movedown" ) ) );
+    else if( cmd.upmove == 0 )
+      Q_strcat( text, MAX_TUTORIAL_TEXT,
+            va( "Press %s to descend while hovering\n",
+              CG_KeyNameForCommand( "+movedown" ) ) );
+  }
+  else if( cmd.upmove == 0  )
+    Q_strcat( text, MAX_TUTORIAL_TEXT,
+          va( "Hold down %s to free fall while in the air\n",
+            CG_KeyNameForCommand( "+movedown" ) ) );
+  else if( cmd.upmove < 0 )
+    Q_strcat( text, MAX_TUTORIAL_TEXT,
+          va( "Release %s to not free fall while in the air\n",
+            CG_KeyNameForCommand( "+movedown" ) ) );
+}
+
+/*
+===============
 CG_HumanCkitText
 ===============
 */
@@ -672,26 +803,34 @@ static void CG_HumanText( char *text, playerState_t *ps )
         CG_KeyNameForCommand( "+button8" ) ) );
 
   if( BG_InventoryContainsUpgrade( UP_JETPACK, ps->stats ) )
+  {
+    if( ps->stats[ STAT_FUEL ] >= JETPACK_FUEL_MIN_START )
     {
-      if( ps->stats[ STAT_FUEL ] > JETPACK_ACT_BOOST_FUEL_USE )
-        {
-          Q_strcat( text, MAX_TUTORIAL_TEXT,
-                     va( "Press %s to perform a jetpack-aided jump.\n",
-                         CG_KeyNameForCommand( "+moveup" ) ) );
-        }
-      if( ( ps->stats[ STAT_FUEL ] <= JETPACK_FUEL_LOW ) && ( ps->stats[ STAT_FUEL ] > 0 )  )
-      {
-        Q_strcat( text, MAX_TUTORIAL_TEXT,
-                  va( "You are running low on jet fuel. Find an Armoury and press %s to refuel\n",
-                      CG_KeyNameForCommand( "buy ammo" ) ) );
-      }
-      else if( ps->stats[ STAT_FUEL ] <= 0 )
-      {
-        Q_strcat( text, MAX_TUTORIAL_TEXT,
-                  va( "You are out of jet fuel. You can no longer fly. Find an Armoury and press %s to refuel\n",
-                      CG_KeyNameForCommand( "buy ammo" ) ) );
-      }
+      Q_strcat( text, MAX_TUTORIAL_TEXT,
+                 va( "%sress and hold %s while off of the ground to activate the jetpack\n",
+                     ps->groundEntityNum == ENTITYNUM_NONE ? "P" : va( "Jump off the ground by pressing %s, then p",
+                                                                       CG_KeyNameForCommand( "+moveup" ) ),
+                     CG_KeyNameForCommand( "+moveup" ) ) );
     }
+
+    if( ps->stats[ STAT_FUEL ] < JETPACK_FUEL_MIN_START &&
+             !BG_UpgradeIsActive( UP_JETPACK, ps->stats ) )
+    {
+             Q_strcat( text, MAX_TUTORIAL_TEXT,
+                       va( "You don't have enough jet fuel to activate your jetpack. Find an Armoury to buy jet fuel, or wait for your jet fuel to regenerate\n" ) );
+    }
+    else if( ps->stats[ STAT_FUEL ] <= JETPACK_FUEL_LOW &&
+             ps->stats[ STAT_FUEL ] > 0 )
+    {
+      Q_strcat( text, MAX_TUTORIAL_TEXT,
+                va( "You are running low on jet fuel. Find an Armoury to buy jet fuel, or wait for your jet fuel to regenerate while your jetpack is deactivated\n" ) );
+    }
+    else if( ps->stats[ STAT_FUEL ] <= 0 )
+    {
+      Q_strcat( text, MAX_TUTORIAL_TEXT,
+                va( "You are out of jet fuel. You can no longer fly. Find an Armoury to buy jet fuel, or wait for your jet fuel to regenerate\n" ) );
+    }
+  }
 }
 
 /*
@@ -808,6 +947,10 @@ const char *CG_TutorialText( void )
         case PCL_ALIEN_LEVEL2:
         case PCL_ALIEN_LEVEL2_UPG:
           CG_AlienLevel2Text( text, ps );
+          break;
+
+        case PCL_ALIEN_SPITFIRE:
+          CG_AlienSpitfireText( text, ps );
           break;
 
         case PCL_ALIEN_LEVEL3:

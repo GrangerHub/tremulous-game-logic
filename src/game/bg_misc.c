@@ -1444,7 +1444,7 @@ static const classAttributes_t bg_classList[ ] =
     SPITFIRE_HEALTH,                                //int     health;
     0.0f,                                           //float   fallDamage;
     SPITFIRE_REGEN,                                 //float   regenRate;
-    (SCA_FOVWARPS|SCA_ALIENSENSE|SCA_WALLCLIMBER),  //int     abilities;
+    (SCA_FOVWARPS|SCA_ALIENSENSE),                  //int     abilities;
     WP_ASPITFIRE,                                   //weapon_t  startWeapon
     0.0f,                                           //float   buildDist;
     90,                                             //int     fov;

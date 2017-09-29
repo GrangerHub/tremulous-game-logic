@@ -320,7 +320,12 @@ static void PM_Friction( void )
   if( pm->ps->pm_type == PM_SPECTATOR )
     drop += speed * pm_spectatorfriction * pml.frametime;
 
-  if( pm->ps->pm_type == PM_SPITFIRE_FLY /*&& pm->ps->torsoTimer <= 0*/ )
+  if( pm->ps->pm_type == PM_SPITFIRE_FLY &&
+      !( pm->cmd.upmove < 0 &&
+         !( pm->cmd.buttons & BUTTON_WALKING ) &&
+         pm->ps->groundEntityNum == ENTITYNUM_NONE &&
+         ( pm->ps->commandTime > pm->pmext->pouncePayloadTime +
+                                 SPITFIRE_PAYLOAD_DISCHARGE_TIME ) ) )
   {
     modifier = ( pm->cmd.buttons & BUTTON_WALKING ) ? pm_spitfire_flywalkfriction : pm_spitfire_flyfriction;
     drop += speed * modifier * pml.frametime;
@@ -691,16 +696,6 @@ static qboolean PM_CheckAirPounce( void )
   
   if( pm->ps->weapon != WP_ASPITFIRE )
     return qfalse;
-
-  // We were pouncing, but we've landed
-  /*if( pm->ps->groundEntityNum != ENTITYNUM_NONE && 
-      !( client->ps.stats[ STAT_STATE ] & SS_WALLCLIMBING ) &&
-      ( pm->ps->pm_flags & PMF_CHARGE ) )
-  {
-    pm->ps->pm_flags &= ~PMF_CHARGE;
-    pm->ps->weaponTime += SPITFIRE_POUNCE_REPEAT;
-    return qfalse;
-  }*/
 
   // We're building up for a pounce
   if( pm->cmd.buttons & BUTTON_ATTACK2)
@@ -1388,6 +1383,8 @@ static void PM_SpitfireFlyMove( void )
   qboolean basicflight = qfalse;
   qboolean ascend = qfalse;
   qboolean upmovePressed = qfalse;
+  qboolean freefall = qfalse;
+  qboolean gravity = qfalse;
 
   if( pm->ps->weapon != WP_ASPITFIRE )
     return;
@@ -1415,24 +1412,32 @@ static void PM_SpitfireFlyMove( void )
         ascend = qtrue;
         pm->ps->persistant[PERS_JUMPTIME] = 0;
       }
+    } else if ( pm->cmd.upmove < 0 &&
+           !( pm->cmd.buttons & BUTTON_WALKING ) )
+    {
+      freefall = qtrue;
+
+      // project moves down to flat plane
+      pml.forward[ 2 ] = 0;
+      pml.right[ 2 ] = 0;
+      VectorNormalize( pml.forward );
+      VectorNormalize( pml.right );
     }
 
     //gliding
     if( !( pm->cmd.buttons & BUTTON_WALKING ) &&
-        pm->ps->persistant[PERS_JUMPTIME] > SPITFIRE_ASCEND_REPEAT )
+        pm->ps->persistant[PERS_JUMPTIME] > SPITFIRE_ASCEND_REPEAT &&
+        !freefall )
     {
       accel = SPITFIRE_GLIDE_ACCEL;
       isgliding = qtrue;
-    } else if( upmovePressed )
-    {
-      //apply gravity
-      pm->ps->velocity[ 2 ] -= pm->ps->gravity * pml.frametime;
     }
   }
 
-  scale = PM_CmdScale( &pm->cmd, qtrue );
+  scale = PM_CmdScale( &pm->cmd, freefall ? qfalse : qtrue );
 
-  scale *= scale * SPITFIRE_AIRSPEED_MOD; //for faster airspeed
+  if( !freefall )
+    scale *= scale * SPITFIRE_AIRSPEED_MOD; //for faster airspeed
 
   if( !scale )
   {
@@ -1446,6 +1451,13 @@ static void PM_SpitfireFlyMove( void )
     for( i = 0; i < 3; i++ )
       wishvel[ i ] = scale * pml.forward[ i ] * pm->cmd.forwardmove + scale * pml.right[ i ] * pm->cmd.rightmove;
     wishvel[ 2 ] += scale * pm->cmd.upmove;
+  }
+  else if( freefall )
+  {
+    for( i = 0; i < 2; i++ )
+      wishvel[ i ] = scale * pml.forward[ i ] * pm->cmd.forwardmove + scale * pml.right[ i ] * pm->cmd.rightmove;
+
+    wishvel[ 2 ] = 0;
   }
   else
     for( i = 0; i < 3; i++ )
@@ -1531,10 +1543,23 @@ static void PM_SpitfireFlyMove( void )
 
       pm->ps->pm_flags |= PMF_BACKWARDS_JUMP;
     }
-  } else
+  } else if( !freefall )
     PM_ContinueLegsAnim( NSPA_SWIM );
 
-  PM_StepSlideMove( qfalse, qfalse );
+  if( freefall )
+  {
+    // we may have a ground plane that is very steep, even
+    // though we don't have a groundentity
+    // slide along the steep plane
+    if( pml.groundPlane )
+      PM_ClipVelocity( pm->ps->velocity, pml.groundTrace.plane.normal, pm->ps->velocity );
+  }
+
+  if( ( upmovePressed || freefall ) &&
+        !isgliding )
+    gravity = qtrue;
+
+  PM_StepSlideMove( gravity, qfalse );
 }
 
 /*
