@@ -4382,5 +4382,10 @@ TODO: We may need a longer flood limit time.
 */
 void Cmd_Delag_f( gentity_t *ent )
 {
-  SV_SendClientGameState2( ent->client->ps.clientNum );
+  const int clientNum = ent->s.number;
+
+  if( clientNum < 0 || clientNum >= MAX_CLIENTS )
+    return;
+
+  SV_SendClientGameState2( clientNum );
 }
