@@ -770,7 +770,7 @@ void *VM_ExplicitArgPtr( vm_t *vm, intptr_t intValue ) {
 
 	// currentVM is missing on reconnect here as well?
 	if ( currentVM==NULL )
-	  return NULL;
+	  return (void *)intValue;
 
 	//
 	if ( vm->entryPoint ) {
