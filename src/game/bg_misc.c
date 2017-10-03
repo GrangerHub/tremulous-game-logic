@@ -1533,10 +1533,11 @@ static const classAttributes_t bg_classList[ ] =
     PCL_ALIEN_LEVEL4,                               //int     number;
     qtrue,                                          //qboolean enabled;
     "level4",                                       //char    *name;
-    "A large alien with a strong melee attack, this class can "
+    "A large tanky alien with a strong melee attack, this class can "
       "also charge at enemy humans and structures, inflicting "
       "great damage. Any humans or their structures caught under "
-      "a falling Tyrant will be crushed by its weight.",
+      "a falling Tyrant will be crushed by its weight. It has a large "
+      "amount of health, but it can't heal.",
     ( 1 << S3 ),                                    //int     stages;
     LEVEL4_HEALTH,                                  //int     health;
     0.0f,                                           //float   fallDamage;
