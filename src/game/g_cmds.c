@@ -3118,28 +3118,33 @@ void Cmd_Sell_f( gentity_t *ent )
             i == UP_BATTLESUIT )
           G_GiveClientMaxAmmo( ent, qtrue );
 
+        if( IS_WARMUP )
+          continue;
+
         //add to funds
-        if( !IS_WARMUP && upgrade == UP_JETPACK && usedFuel )
+        if( i == UP_JETPACK && usedFuel )
         {
           const int costToFull = ( usedFuel * JETPACK_FULL_FUEL_PRICE ) /
                                  JETPACK_FUEL_FULL;
 
           // reduce the amount of credits returned from selling a jet that isn't full
           G_AddCreditToClient( ent->client,
-                              (short)( BG_Upgrade( upgrade )->price - costToFull ),
+                              (short)( BG_Upgrade( i )->price - costToFull ),
                               qfalse );
-        } else if( upgrade == UP_BATTLESUIT )
+        } else if( i == UP_BATTLESUIT )
         {
           if( !IS_WARMUP &&
               ent->client->ps.stats[ STAT_MAX_HEALTH ] < BSUIT_MAX_ARMOR )
           {
             G_AddCreditToClient( ent->client, (short)( BSUIT_PRICE_USED ),
                                  qfalse );
-          }
+          } else
+            G_AddCreditToClient( ent->client, (short)BG_Upgrade( i )->price,
+                                 qfalse );
 
           ent->client->ps.stats[ STAT_MAX_HEALTH ] = 0;
         } else
-          G_AddCreditToClient( ent->client, (short)BG_Upgrade( upgrade )->price,
+          G_AddCreditToClient( ent->client, (short)BG_Upgrade( i )->price,
                                qfalse );
       }
     }
