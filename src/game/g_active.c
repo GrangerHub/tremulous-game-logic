@@ -2188,6 +2188,9 @@ void ClientThink_real( gentity_t *ent )
 
       // Restore first person angles
       G_SetClientViewAngle( ent, client->evolveRestoreAngles );
+
+      //remove credit
+      G_AddCreditToClient( ent->client, -client->evolveCost, qtrue );
     }
     else
       client->evolveTime = -1;

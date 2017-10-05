@@ -2368,8 +2368,6 @@ void Cmd_Class_f( gentity_t *ent )
           else if( ent->client->pers.evolveChargeStaminaFraction > 1.0f )
             ent->client->pers.evolveChargeStaminaFraction = 1.0f;
 
-          //remove credit
-          G_AddCreditToClient( ent->client, -cost, qtrue );
           ent->client->pers.classSelection = newClass;
           ClientUserinfoChanged( clientNum, qfalse );
           VectorCopy( infestOrigin, ent->s.pos.trBase );
@@ -2399,6 +2397,13 @@ void Cmd_Class_f( gentity_t *ent )
             ent->client->evolveTime = level.time + evolvePeriod;
             // save the angles for this frame
             VectorCopy( ent->client->ps.viewangles, ent->client->evolveRestoreAngles );
+
+            //save the cost to be applied after evolving is completed
+            ent->client->evolveCost = cost;
+          } else
+          {
+            //remove credit
+            G_AddCreditToClient( ent->client, -cost, qtrue );
           }
 
           VectorCopy( oldVel, ent->client->ps.velocity );
@@ -3920,6 +3925,13 @@ void Cmd_Share_f( gentity_t *ent )
     return;
   }
 
+  if( ent->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
+      ( ent->client->ps.eFlags & EF_EVOLVING ) )
+  {
+    SV_GameSendServerCommand( ent-g_entities, "print \"You can't share while you are evolving.\n\"" );
+    return;
+  }
+
   team = ent->client->pers.teamSelection;
 
   if( Cmd_Argc( ) < 3 )
@@ -4174,6 +4186,13 @@ void Cmd_Donate_f( gentity_t *ent )
   if( !g_allowShare.integer )
   {
     ADMP( "Donate has been disabled.\n" );
+    return;
+  }
+
+  if( ent->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
+      ( ent->client->ps.eFlags & EF_EVOLVING ) )
+  {
+    SV_GameSendServerCommand( ent-g_entities, "print \"You can't donate while you are evolving.\n\"" );
     return;
   }
 

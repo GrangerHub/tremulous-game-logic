@@ -544,7 +544,7 @@ struct gclient_s
   int                 respawnTime;      // can respawn when time > this
   int                 inactivityTime;   // kick players when time > this
   qboolean            inactivityWarning;// qtrue if the five seoond warning has been given
-  int                 evolveTime;       // can move and attack when time > this
+  int                 evolveTime;       // can't move and attack when time > this
   int                 rewardTime;       // clear the EF_AWARD_IMPRESSIVE, etc when time > this
   int                 boostedTime;      // last time we touched a booster
 
@@ -600,6 +600,8 @@ struct gclient_s
 
   // Stores the first person angles for when evolving ends
   vec3_t              evolveRestoreAngles;
+
+  int                 evolveCost; //amount of evos to deduct 
 };
 
 
