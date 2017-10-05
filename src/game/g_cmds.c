@@ -3043,7 +3043,7 @@ void Cmd_Sell_f( gentity_t *ent )
         ent->client->ps.eFlags ^= EF_TELEPORT_BIT;
       }
 
-      //add to inventory
+      //Remove from inventory
       BG_RemoveUpgradeFromInventory( upgrade, ent->client->ps.stats );
 
       if( upgrade == UP_BATTPACK ||
@@ -3089,14 +3089,14 @@ void Cmd_Sell_f( gentity_t *ent )
   }
   else if( !Q_stricmp( s, "upgrades" ) )
   {
+    const int statMaxHealth = ent->client->ps.stats[ STAT_MAX_HEALTH ];
+
     for( i = UP_NONE + 1; i < UP_NUM_UPGRADES; i++ )
     {
       //remove upgrade if carried
       if( BG_InventoryContainsUpgrade( i, ent->client->ps.stats ) &&
           BG_Upgrade( i )->purchasable )
       {
-
-        // shouldn't really need to test for this, but just to be safe
         if( i == UP_BATTLESUIT )
         {
           vec3_t newOrigin;
@@ -3110,6 +3110,7 @@ void Cmd_Sell_f( gentity_t *ent )
           ent->client->ps.stats[ STAT_CLASS ] = PCL_HUMAN;
           ent->client->pers.classSelection = PCL_HUMAN;
           ent->client->ps.eFlags ^= EF_TELEPORT_BIT;
+          ent->client->ps.stats[ STAT_MAX_HEALTH ] = 0;
         }
 
         BG_RemoveUpgradeFromInventory( i, ent->client->ps.stats );
@@ -3131,18 +3132,11 @@ void Cmd_Sell_f( gentity_t *ent )
           G_AddCreditToClient( ent->client,
                               (short)( BG_Upgrade( i )->price - costToFull ),
                               qfalse );
-        } else if( i == UP_BATTLESUIT )
+        } else if( i == UP_BATTLESUIT &&
+                   statMaxHealth < BSUIT_MAX_ARMOR )
         {
-          if( !IS_WARMUP &&
-              ent->client->ps.stats[ STAT_MAX_HEALTH ] < BSUIT_MAX_ARMOR )
-          {
-            G_AddCreditToClient( ent->client, (short)( BSUIT_PRICE_USED ),
-                                 qfalse );
-          } else
-            G_AddCreditToClient( ent->client, (short)BG_Upgrade( i )->price,
-                                 qfalse );
-
-          ent->client->ps.stats[ STAT_MAX_HEALTH ] = 0;
+          G_AddCreditToClient( ent->client, (short)( BSUIT_PRICE_USED ),
+                               qfalse );
         } else
           G_AddCreditToClient( ent->client, (short)BG_Upgrade( i )->price,
                                qfalse );
