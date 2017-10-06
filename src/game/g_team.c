@@ -145,7 +145,7 @@ void G_LeaveTeam( gentity_t *self )
 {
   team_t    team = self->client->pers.teamSelection;
   gentity_t *ent;
-  int       i;
+  int       i, u;
 
   if( team == TEAM_ALIENS )
     G_RemoveFromSpawnQueue( &level.alienSpawnQueue, self->client->ps.clientNum );
@@ -189,6 +189,8 @@ void G_LeaveTeam( gentity_t *self )
       G_FreeEntity( ent );
 
     ent->credits[ self->s.number ] = 0;
+    for( u = 0; u < UP_NUM_UPGRADES; u++ )
+      ent->creditsUpgrade[ u ][ self->s.number ] = 0;
   }
 
   // cut all relevant zap beams
