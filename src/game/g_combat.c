@@ -173,8 +173,9 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
   gentity_t *player;
   qboolean  damagedByEnemyPlayer = qfalse;
 
-  if( destroyedUp != UP_NONE)
+  if( destroyedUp != UP_NONE )
   {
+    Com_Assert( self->client && "Only clients are suppose to have breakable upgrades" );
     credits = self->creditsUpgrade[ destroyedUp ];
     creditsDeffenses = self->creditsUpgradeDeffenses[ destroyedUp ];
   } else
@@ -530,6 +531,8 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   }
 
   // give credits for killing this player
+  if( BG_InventoryContainsUpgrade( UP_BATTLESUIT, self->client->ps.stats) )
+    G_RewardAttackers( self, UP_BATTLESUIT );
   G_RewardAttackers( self, UP_NONE );
 
   ScoreboardMessage( self );    // show scores

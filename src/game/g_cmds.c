@@ -2784,6 +2784,8 @@ void Cmd_Buy_f( gentity_t *ent )
   }
   else if( upgrade != UP_NONE )
   {
+    int i;
+
     // If buying grenades, do not allow if player still has unexploded grenades
     // (basenade protection)
     if( upgrade == UP_GRENADE && G_PlayerHasUnexplodedGrenades( ent ) )
@@ -2917,6 +2919,12 @@ void Cmd_Buy_f( gentity_t *ent )
       G_AddCreditToClient( ent->client, -(short)BG_Upgrade( upgrade )->price,
                            qfalse );
     }
+
+    //initialize damage credits
+    for( i = 0; i < MAX_CLIENTS; i++ )
+      ent->creditsUpgrade[ upgrade ][ i ] = 0;
+    for( i = 0; i < NUM_TEAMS; i++ )
+      ent->creditsUpgradeDeffenses[ upgrade ][ i ] = 0;
   }
   else
   {
@@ -3124,6 +3132,14 @@ void Cmd_Sell_f( gentity_t *ent )
             i == UP_BATTLESUIT )
           G_GiveClientMaxAmmo( ent, qtrue );
 
+        if( !BG_Weapon( ent->client->ps.weapon )->usesEnergy &&
+            !BG_Weapon( ent->client->ps.weapon )->infiniteAmmo &&
+            BG_Weapon( ent->client->ps.weapon )->ammoPurchasable &&
+            !BG_Weapon( ent->client->ps.weapon )->roundPrice &&
+            upgrade == UP_BATTLESUIT &&
+            ent->client->ps.clips > BG_Weapon( ent->client->ps.weapon )->maxClips )
+          ent->client->ps.clips = BG_Weapon( ent->client->ps.weapon )->maxClips;
+
         if( IS_WARMUP )
           continue;
 
@@ -3142,6 +3158,9 @@ void Cmd_Sell_f( gentity_t *ent )
         {
           G_AddCreditToClient( ent->client, (short)( BSUIT_PRICE_USED ),
                                qfalse );
+
+          // Give credits for the damaged part of the battlesuit
+          G_RewardAttackers( ent, UP_BATTLESUIT );
         } else
           G_AddCreditToClient( ent->client, (short)BG_Upgrade( i )->price,
                                qfalse );

@@ -1351,7 +1351,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   int                 index;
   vec3_t              spawn_origin, spawn_angles;
   gclient_t           *client;
-  int                 i;
+  int                 i, u;
   clientPersistant_t  saved;
   clientSession_t     savedSess;
   qboolean            savedNoclip, savedCliprcontents;
@@ -1584,7 +1584,18 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
 
   //clear the credits array
   for( i = 0; i < MAX_CLIENTS; i++ )
+  {
     ent->credits[ i ] = 0;
+    for( u = 0; i < UP_NUM_UPGRADES; u++ )
+      ent->creditsUpgrade[ u ][ i ] = 0;
+  }
+  for( i = 0; i < NUM_TEAMS; i++ )
+  {
+    ent->creditsDeffenses[ i ] = 0;
+    for( u = 0; i < UP_NUM_UPGRADES; u++ )
+      ent->creditsUpgradeDeffenses[ u ][ i ] = 0;
+  }
+    
 
   if( BG_ClassHasAbility( client->ps.stats[STAT_CLASS], SCA_STAMINA ) )
     client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
