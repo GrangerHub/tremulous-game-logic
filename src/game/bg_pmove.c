@@ -38,7 +38,6 @@ float pm_swimScale = 0.50f;
 float pm_wadeScale = 0.70f;
 
 float pm_accelerate = 10.0f;
-float pm_airaccelerate = 1.0f;
 float pm_wateraccelerate = 4.0f;
 float pm_flyaccelerate = 4.0f;
 
@@ -48,14 +47,6 @@ float pm_flightfriction = 4.0f;
 float pm_spitfire_flyfriction = 3.5f;
 float pm_spitfire_flywalkfriction = 5.0f;
 float pm_spectatorfriction = 5.0f;
-
-float pm_airControlAmount = 165.0f; //Equivalence to side strafes value is approx ~165
-
-//Side Air Strafes
-float	cpm_pm_strafeaccelerate = 150; //GoldSRC used 150. vq3: 1
-float	cpm_pm_wishspeed = 30; //vq3: 400. I personally set this to 500 on vanilla mode since dretch travels at 448 ups
-//You missed this. VQ3 just has "1.0"
-float	cpm_pm_airstopaccelerate = 2.5;
 
 //TODO: Marauder doesn't have a double jump since I removed it because it'll stack heavily when wall climbing.
 //It doesn't need it though, but may feel akward
@@ -1608,42 +1599,6 @@ static void PM_FlyMove( void )
 
 /*
 ===================
-PM_AirControl
-
-===================
-*/
-static void PM_AirControl(vec3_t wishdir, float wishspeed)
-{
-  float   zspeed, speed, dot, k;
-  int     i;
-
-  if((pm->ps->movementDir && pm->ps->movementDir != 4) || wishspeed == 0.0)
-    return; // can't control movement if not moving forward or backward
-
-  zspeed = pm->ps->velocity[2];
-  pm->ps->velocity[2] = 0;
-  speed = VectorNormalize(pm->ps->velocity);
-
-  dot = DotProduct(pm->ps->velocity, wishdir);
-  k = 32;
-  k *= pm_airControlAmount * BG_Class( pm->ps->stats[ STAT_CLASS ] )->airAcceleration * dot * dot * pml.frametime;
-
-  if(dot > 0)
-  {
-    // we can't change direction while slowing down
-    for(i = 0; i < 2; i++)
-      pm->ps->velocity[i] = pm->ps->velocity[i] * speed + wishdir[i] * k;
-    VectorNormalize(pm->ps->velocity);
-  }
-
-  for(i = 0; i < 2; i++)
-    pm->ps->velocity[i] *= speed;
-
-  pm->ps->velocity[2] = zspeed;
-}
-
-/*
-===================
 PM_AirMove
 
 ===================
@@ -1657,11 +1612,6 @@ static void PM_AirMove( void )
   float     wishspeed;
   float     scale;
   usercmd_t cmd;
-
-  float	    accel; // CPM
-  float     velscale;//classes temp.var
-
-  velscale = BG_Class( pm->ps->stats[ STAT_CLASS ] )->airAcceleration;
 
   PM_CheckWallJump( );
   PM_Friction( );
@@ -1690,24 +1640,9 @@ static void PM_AirMove( void )
   wishspeed = VectorNormalize( wishdir );
   wishspeed *= scale;
 
-  if( DotProduct(pm->ps->velocity, wishdir) < 0 &&
-      (pm_airaccelerate * velscale) < cpm_pm_airstopaccelerate ) // Stop marauders from climbing walls easily
-    accel = cpm_pm_airstopaccelerate * velscale;
-
-  //ZdrytchX: Use side strafes for Q1 style turning
-  if( pm->ps->movementDir == 2 || pm->ps->movementDir == 6 ) //Detect for side strafe buttons
-  {
-    wishspeed = cpm_pm_wishspeed * velscale;
-    accel = cpm_pm_strafeaccelerate * velscale;
-    PM_Accelerate (wishdir, wishspeed, accel);
-  }
-  else //accelerte normally
-  {
-    PM_Accelerate( wishdir, wishspeed, velscale );
-  }
-
-  // cpma air control
-  PM_AirControl (wishdir, wishspeed);
+  // not on ground, so little effect on velocity
+  PM_Accelerate( wishdir, wishspeed,
+    BG_Class( pm->ps->stats[ STAT_CLASS ] )->airAcceleration );
 
   // we may have a ground plane that is very steep, even
   // though we don't have a groundentity
