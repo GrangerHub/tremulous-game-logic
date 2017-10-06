@@ -1346,19 +1346,50 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       }
 
       // don't do friendly fire on clients that can't regen
-      if( BG_InventoryContainsUpgrade( UP_BATTLESUIT, targ->client->ps.stats ) ||
-          targ->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_LEVEL4 )
+      if( targ->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_LEVEL4 &&
+            mod != MOD_HSPAWN )
       {
         return;
       }
 
       // check if friendly fire has been disabled or if Warmup is in progress
-      if( !g_friendlyFire.integer || IS_WARMUP )
+      if( ( !g_friendlyFire.integer &&
+            mod != MOD_HSPAWN &&
+            mod != MOD_ASPAWN ) ||
+          IS_WARMUP )
       {
         return;
       }
       else
         modDamge = g_friendlyFire.integer;
+    }
+
+    if( targ->client &&
+        BG_InventoryContainsUpgrade( UP_BATTLESUIT, targ->client->ps.stats ) )
+    {
+      switch ( mod )
+      {
+        case MOD_SHOTGUN:
+        case MOD_BLASTER:
+        case MOD_PAINSAW:
+        case MOD_MACHINEGUN:
+        case MOD_CHAINGUN:
+        case MOD_PRIFLE:
+        case MOD_MDRIVER:
+        case MOD_LASGUN:
+        case MOD_LCANNON:
+        case MOD_LCANNON_SPLASH:
+        case MOD_FLAMER:
+        case MOD_FLAMER_SPLASH:
+        case MOD_GRENADE:
+        case MOD_GRENADE_LAUNCHER:
+        case MOD_LIGHTNING:
+        case MOD_HSPAWN:
+        case MOD_TESLAGEN:
+        case MOD_MGTURRET:
+        case MOD_REACTOR:
+          return;
+      }
     }
 
     if( targ->s.eType == ET_BUILDABLE && attacker->client &&
