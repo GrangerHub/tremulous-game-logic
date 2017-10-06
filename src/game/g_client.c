@@ -1586,13 +1586,13 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   for( i = 0; i < MAX_CLIENTS; i++ )
   {
     ent->credits[ i ] = 0;
-    for( u = 0; i < UP_NUM_UPGRADES; u++ )
+    for( u = 0; u < UP_NUM_UPGRADES; u++ )
       ent->creditsUpgrade[ u ][ i ] = 0;
   }
   for( i = 0; i < NUM_TEAMS; i++ )
   {
     ent->creditsDeffenses[ i ] = 0;
-    for( u = 0; i < UP_NUM_UPGRADES; u++ )
+    for( u = 0; u < UP_NUM_UPGRADES; u++ )
       ent->creditsUpgradeDeffenses[ u ][ i ] = 0;
   }
     

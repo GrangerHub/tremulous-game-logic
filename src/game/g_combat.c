@@ -1364,6 +1364,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
         modDamge = g_friendlyFire.integer;
     }
 
+    // Battlesuit protects against all human weapons since it can't regen
     if( targ->client &&
         BG_InventoryContainsUpgrade( UP_BATTLESUIT, targ->client->ps.stats ) )
     {
