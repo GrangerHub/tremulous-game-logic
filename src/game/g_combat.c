@@ -1382,10 +1382,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
         case MOD_LCANNON_SPLASH:
         case MOD_FLAMER:
         case MOD_FLAMER_SPLASH:
-        case MOD_GRENADE:
-        case MOD_GRENADE_LAUNCHER:
         case MOD_LIGHTNING:
-        case MOD_HSPAWN:
         case MOD_TESLAGEN:
         case MOD_MGTURRET:
         case MOD_REACTOR:
