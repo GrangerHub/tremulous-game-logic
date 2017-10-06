@@ -1345,6 +1345,13 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
         return;
       }
 
+      // don't do friendly fire on clients that can't regen
+      if( BG_InventoryContainsUpgrade( UP_BATTLESUIT, targ->client->ps.stats ) ||
+          targ->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_LEVEL4 )
+      {
+        return;
+      }
+
       // check if friendly fire has been disabled or if Warmup is in progress
       if( !g_friendlyFire.integer || IS_WARMUP )
       {
