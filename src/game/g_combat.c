@@ -995,6 +995,34 @@ static qboolean G_MODHitIndication( meansOfDeath_t mod )
   }
 }
 
+/*
+============
+G_MODSpawnProtected
+
+Determines if a means of death doesn't apply damage when spawn protected
+============
+*/
+static qboolean G_MODSpawnProtected( meansOfDeath_t mod )
+{
+  switch ( mod ) 
+  {
+    case MOD_WATER:
+    case MOD_SLIME:
+    case MOD_LAVA:
+    case MOD_CRUSH:
+    case MOD_DROP:
+    case MOD_TELEFRAG:
+    case MOD_FALLING:
+    case MOD_SUICIDE:
+    case MOD_TARGET_LASER:
+    case MOD_TRIGGER_HURT:
+    case MOD_SUFFOCATION:
+      return qfalse;
+    default:
+      return qtrue;
+  }
+}
+
 // team is the team that is immune to this damage
 void G_SelectiveDamage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
          vec3_t dir, vec3_t point, int damage, int dflags, int mod, int team )
@@ -1016,8 +1044,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   if( !targ->takedamage ||
       ( !G_TakesDamage( targ ) &&
         attacker && attacker->s.number != ENTITYNUM_WORLD &&
-        mod != MOD_TRIGGER_HURT && mod != MOD_FALLING &&
-        mod != MOD_TELEFRAG  ) ||
+        G_MODSpawnProtected( mod )  ) ||
       level.intermissionQueued )
     return;
 
