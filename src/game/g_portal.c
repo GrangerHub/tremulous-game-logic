@@ -106,6 +106,11 @@ static void portal_die( gentity_t *self, gentity_t *inflictor,
 	self->think = portal_destroy_think;
 }
 
+static void portal_pain( gentity_t *self, gender_t *attacker, int damage )
+{
+	G_AddEvent( self, EV_MISSILE_MISS, DirToByte( self->s.origin2 ) );
+}
+
 /*
 ===============
 G_Portal_Touch
@@ -203,10 +208,16 @@ void G_Portal_Create(gentity_t *ent, vec3_t origin, vec3_t normal, portal_t port
 	portal->touch = G_Portal_Touch;
 	portal->s.modelindex = BA_H_SPAWN;
 	portal->s.modelindex2 = portalindex;
+	portal->s.weapon = WP_PORTAL_GUN;
+	if( portalindex == PORTAL_RED )
+		portal->s.generic1 = WPM_PRIMARY;
+	else
+		portal->s.generic1 = WPM_SECONDARY;
 	portal->s.frame = 3;
 	portal->takedamage = qtrue;
   portal->health = PORTAL_HEALTH;
   portal->die = portal_die;
+	portal->pain = portal_pain;
 	VectorCopy(range, portal->r.maxs);
 	VectorScale(range, -1, portal->r.mins);
 	VectorMA(origin, PORTAL_OFFSET, normal, origin);
