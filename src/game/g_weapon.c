@@ -1456,7 +1456,7 @@ static void G_FindSpitfireZapTarget( zap_t *zap )
 
     if( ( enemy->client &&
           enemy->client->ps.stats[ STAT_TEAM ] != zap->creator->client->ps.stats[ STAT_TEAM ] &&
-          enemy->client->sess.spectatorState != SPECTATOR_NOT ) ||
+          enemy->client->sess.spectatorState == SPECTATOR_NOT ) ||
         ( enemy->s.eType == ET_BUILDABLE &&
           BG_Buildable( enemy->s.modelindex )->team != zap->creator->client->ps.stats[ STAT_TEAM ] ) ||
         ( enemy->s.eType == ET_MISSILE ||
