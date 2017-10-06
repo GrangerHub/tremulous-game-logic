@@ -187,6 +187,8 @@ void G_LeaveTeam( gentity_t *self )
     }
     else if( ent->s.eType == ET_MISSILE && ent->r.ownerNum == self->s.number )
       G_FreeEntity( ent );
+
+    ent->credits[ self->s.number ] = 0;
   }
 
   // cut all relevant zap beams
