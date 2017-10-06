@@ -3449,7 +3449,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     PORTALGUN_REPEAT,     //int       repeatRate1;
     PORTALGUN_REPEAT,     //int       repeatRate2;
     0,                    //int       repeatRate3;
-    0,                    //int       reloadTime;
+    PORTALGUN_RELOAD,     //int       reloadTime;
     0.0f,                 //float     knockbackScale;
     qtrue,                //qboolean  hasAltMode;
     qfalse,               //qboolean  hasThirdMode;

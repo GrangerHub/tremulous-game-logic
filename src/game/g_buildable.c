@@ -2997,7 +2997,6 @@ void HReactor_Think( gentity_t *self )
       enemy = &g_entities[ entityList[ i ] ];
       if( ( !enemy->client ||
             enemy->client->ps.stats[ STAT_TEAM ] != TEAM_ALIENS ) &&
-           enemy->s.eType != ET_TELEPORTAL &&
            !( enemy->s.eType == ET_BUILDABLE &&
               enemy->buildableTeam == TEAM_ALIENS )  )
         continue;
@@ -3655,9 +3654,8 @@ void HTeslaGen_Think( gentity_t *self )
       if( G_NoTarget( self->enemy ) )
         continue;
 
-      if( ( ( self->enemy->client &&
-              self->enemy->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS ) ||
-            self->enemy->s.eType == ET_TELEPORTAL ) &&
+      if( ( self->enemy->client &&
+            self->enemy->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS ) &&
           self->enemy->health > 0 &&
           Distance( origin, self->enemy->s.pos.trBase ) <= TESLAGEN_RANGE )
         FireWeapon( self );

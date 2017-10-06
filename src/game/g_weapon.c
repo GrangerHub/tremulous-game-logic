@@ -972,11 +972,8 @@ void teslaFire( gentity_t *self )
   target[ 2 ] += self->enemy->r.maxs[ 2 ];
 
   // Trace to the target entity
-  if( self->enemy->s.eType != ET_TELEPORTAL )
-    SV_Trace( &tr, origin, NULL, NULL, target, self->s.number, MASK_SHOT, TT_AABB );
-  else
-    SV_Trace( &tr, origin, NULL, NULL, target, self->s.number,
-                (MASK_SHOT|CONTENTS_TELEPORTER), TT_AABB );
+  SV_Trace( &tr, origin, NULL, NULL, target, self->s.number, MASK_SHOT, TT_AABB );
+
   if( tr.entityNum != self->enemy->s.number )
     return;
 
@@ -1458,9 +1455,12 @@ static void G_FindSpitfireZapTarget( zap_t *zap )
     enemy = &g_entities[ entityList[ i ] ];
 
     if( ( enemy->client &&
-          enemy->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS ) ||
+          enemy->client->ps.stats[ STAT_TEAM ] != zap->creator->client->ps.stats[ STAT_TEAM ] &&
+          enemy->client->sess.spectatorState != SPECTATOR_NOT ) ||
         ( enemy->s.eType == ET_BUILDABLE &&
-          BG_Buildable( enemy->s.modelindex )->team == TEAM_HUMANS ) )
+          BG_Buildable( enemy->s.modelindex )->team != zap->creator->client->ps.stats[ STAT_TEAM ] ) ||
+        ( enemy->s.eType == ET_MISSILE ||
+          enemy->s.eType == ET_TELEPORTAL ) )
     {
       zapTarget_t *zapTarget;
 
@@ -1479,7 +1479,8 @@ static void G_FindSpitfireZapTarget( zap_t *zap )
       // only target enemies that are in a line of sight and within range
       SV_Trace( &tr, zap->creator->r.currentOrigin, NULL, NULL, enemy->r.currentOrigin,
                 zap->creator->s.number, MASK_SHOT, TT_AABB );
-      if( tr.entityNum != enemy->s.number ||
+      if( ( tr.fraction < 1.0f &&
+            tr.entityNum != enemy->s.number ) ||
           (distance = Distance( zap->creator->r.currentOrigin, tr.endpos )) >
           SPITFIRE_ZAP_RANGE )
         continue;
