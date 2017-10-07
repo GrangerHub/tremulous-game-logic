@@ -1645,9 +1645,6 @@ void ABooster_Touch( gentity_t *self, gentity_t *other, trace_t *trace )
   if( client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
     return;
 
-  if( G_NoTarget( other ) )
-    return; // notarget cancels even beneficial effects?
-
   client->ps.stats[ STAT_STATE ] |= SS_BOOSTED;
   client->boostedTime = level.time;
 }
