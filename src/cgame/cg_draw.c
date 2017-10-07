@@ -4035,6 +4035,28 @@ static void CG_Draw2D( void )
 
 /*
 ===============
+CG_InvisibleVision
+===============
+*/
+static void CG_InvisibleVision( void )
+{
+  if( cg.renderingThirdPerson )
+    return;
+
+  if( !(cg.predictedPlayerEntity.invis) &&
+      cg.time - cg.predictedPlayerEntity.invisTime > 500 )
+    return;
+  else if( cg.predictedPlayerEntity.invis &&
+           cg.predictedPlayerEntity.invisTime > 1000 )
+  {
+    trap_R_SetColor( NULL );
+
+    CG_DrawPic( 0, 0, 640, 480, cgs.media.invisVisionShader );
+  }
+}
+
+/*
+===============
 CG_ScalePainBlendTCs
 ===============
 */
@@ -4280,6 +4302,9 @@ void CG_DrawActive( stereoFrame_t stereoView )
   // restore original viewpoint if running stereo
   if( separation != 0 )
     VectorCopy( baseOrg, cg.refdef.vieworg );
+
+  //for invisible players to know that they are invisible
+  CG_InvisibleVision( );
 
   // first person blend blobs, done after AnglesToAxis
   if( !cg.renderingThirdPerson )

@@ -1019,6 +1019,7 @@ static void CG_RegisterGraphics( void )
   cgs.media.invisShader               = trap_R_RegisterShader("gfx/invis/invis" );
   cgs.media.invisFadeShader           = trap_R_RegisterShader("gfx/invis/fade" );
   cgs.media.invisShaderTeamA          = trap_R_RegisterShader("gfx/invis/ateam");
+  cgs.media.invisVisionShader    = trap_R_RegisterShader("gfx/misc/invis_view");
   cgs.media.invisShaderTeamH          = trap_R_RegisterShader("gfx/invis/hteam");
 
   // building shaders
