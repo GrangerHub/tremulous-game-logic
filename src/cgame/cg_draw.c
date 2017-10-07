@@ -4040,7 +4040,8 @@ CG_InvisibleVision
 */
 static void CG_InvisibleVision( void )
 {
-  if( cg.renderingThirdPerson )
+  if( cg.renderingThirdPerson ||
+      cg.snap->ps.persistant[ PERS_SPECSTATE ] != SPECTATOR_NOT )
     return;
 
   if( !(cg.predictedPlayerEntity.invis) &&
