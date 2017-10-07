@@ -1345,8 +1345,7 @@ static const classAttributes_t bg_classList[ ] =
       "Basilisk sprays a poisonous gas which disorients any "
       "nearby humans. Has a strong healing aura that "
       "that accelerates the healing rate of nearby aliens. Can "
-      "remain invisible while moving if boosted, however, its "
-      "footsteps are not silent, unlike the basic Basilisk.",
+      "remain invisible while moving if boosted.",
     ( 1 << S2 )|( 1 << S3 ),                        //int     stages;
     LEVEL1_UPG_HEALTH,                              //int     health;
     0.0f,                                           //float   fallDamage;
