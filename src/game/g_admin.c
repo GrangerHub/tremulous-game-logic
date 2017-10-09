@@ -4818,7 +4818,7 @@ qboolean G_admin_seen( gentity_t *ent )
     offset = atoi( offsetstr );
   }
   pack_start( level.database_data, DATABASE_DATA_MAX );
-  pack_int( ent - g_entities );
+  pack_int( ( ent ? ent - g_entities : -1 ) );
   pack_text2( va( "%%%s%%", name ) );
   pack_int( 10 );
   pack_int( offset );
@@ -4843,7 +4843,7 @@ qboolean G_admin_maplog( gentity_t *ent )
   }
 
   pack_start( level.database_data, DATABASE_DATA_MAX );
-  pack_int( ent - g_entities );
+  pack_int( ( ent ? ent - g_entities : -1 ) );
   pack_int( -1 );
   pack_int( 10 );
   pack_int( offset );
