@@ -3030,12 +3030,21 @@ qboolean G_admin_admintest( gentity_t *ent )
 
   l = G_admin_level( ent->client->pers.admin ? ent->client->pers.admin->level : 0 );
 
-  AP( va( "print \"^3admintest: ^7%s^7 is a level %d admin %s%s^7%s\n\"",
-          ent->client->pers.netname,
-          l ? l->level : 0,
-          l ? "(" : "",
-          l ? l->name : "",
-          l ? ")" : "" ) );
+  if( G_admin_permission( ent, ADMF_INCOGNITO ) )
+    AP( va( "print \"^3admintest: ^7%s^7 is a level %d admin %s%s^7%s\n\"",
+            ent->client->pers.netname,
+            l ? l->level : 0,
+            l ? "(" : "",
+            l ? l->name : "",
+            l ? ")" : "" ) );
+  else
+    ADMP( va( "^3admintest: ^7%s^7 is a level %d admin %s%s^7%s\n\"",
+            ent->client->pers.netname,
+            l ? l->level : 0,
+            l ? "(" : "",
+            l ? l->name : "",
+            l ? ")" : "" ) );
+
   return qtrue;
 }
 
