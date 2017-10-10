@@ -707,7 +707,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MGTURRET_ANGULARSPEED       12
 #define MGTURRET_ACCURACY_TO_FIRE   15
 #define MGTURRET_VERTICALCAP        30  // +/- maximum pitch
-#define MGTURRET_REPEAT             50  // repeat after full spin up
+#define MGTURRET_REPEAT             100  // repeat after full spin up
 #define MGTURRET_REPEAT_START       500 // the repeat at the start of spinup
 #define MGTURRET_NEXTTHINK          50
 #define MGTURRET_K_SCALE            1.0f
