@@ -4054,16 +4054,16 @@ void G_BuildableThink( gentity_t *ent, int msec )
             ent->health += (int)( ceil( (float)( DC_HEALRATE ) / 10.0f ) );
         }
       }
+    }
 
-      if( ent->health >= maxHealth )
-      {
-        int i;
-        ent->health = maxHealth;
-        for( i = 0; i < MAX_CLIENTS; i++ )
-          ent->credits[ i ] = 0;
-        for( i = 0; i < NUM_TEAMS; i++ )
-          ent->creditsDeffenses[ i ] = 0;
-      }
+    if( ent->health >= maxHealth )
+    {
+      int i;
+      ent->health = maxHealth;
+      for( i = 0; i < MAX_CLIENTS; i++ )
+        ent->credits[ i ] = 0;
+      for( i = 0; i < NUM_TEAMS; i++ )
+        ent->creditsDeffenses[ i ] = 0;
     }
 
     // check if a buildable was spotted by an enemy player
@@ -5079,6 +5079,7 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
   char      readable[ MAX_STRING_CHARS ];
   char      buildnums[ MAX_STRING_CHARS ];
   buildLog_t *log;
+  int i;
 
   if( builder->client )
     log = G_BuildLogNew( builder, BF_CONSTRUCT );
@@ -5128,6 +5129,11 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
   built->buildProgress = BG_Buildable( buildable )->buildTime;
   built->attemptSpawnTime = -1;
   built->batteryPower = -1;
+
+  for( i = 0; i < MAX_CLIENTS; i++ )
+    built->credits[ i ] = 0;
+  for( i = 0; i < NUM_TEAMS; i++ )
+    built->creditsDeffenses[ i ] = 0;
 
   if( buildable == BA_H_TELEPORTER )
     G_AddTeleporter( built );

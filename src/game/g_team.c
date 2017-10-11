@@ -193,6 +193,10 @@ void G_LeaveTeam( gentity_t *self )
       ent->creditsUpgrade[ u ][ self->s.number ] = 0;
   }
 
+  if( BG_InventoryContainsUpgrade( UP_BATTLESUIT, self->client->ps.stats) )
+    G_RewardAttackers( self, UP_BATTLESUIT );
+  G_RewardAttackers( self, UP_NONE );
+
   // cut all relevant zap beams
   G_ClearPlayerZapEffects( self );
 

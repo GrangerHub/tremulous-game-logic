@@ -1582,7 +1582,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
     client->ps.misc[ MISC_HEALTH_RESERVE ] = ent->healthReserve;
   }
 
-  //clear the credits array
+  //clear the damage credits arrays
   for( i = 0; i < MAX_CLIENTS; i++ )
   {
     ent->credits[ i ] = 0;
@@ -1595,7 +1595,6 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
     for( u = 0; u < UP_NUM_UPGRADES; u++ )
       ent->creditsUpgradeDeffenses[ u ][ i ] = 0;
   }
-    
 
   if( BG_ClassHasAbility( client->ps.stats[STAT_CLASS], SCA_STAMINA ) )
     client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
