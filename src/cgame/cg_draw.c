@@ -4040,20 +4040,28 @@ CG_InvisibleVision
 */
 static void CG_InvisibleVision( void )
 {
+  vec4_t      color = { 0.0f, 0.0f, 0.0f, 1.0f };
   if( cg.renderingThirdPerson ||
       cg.snap->ps.persistant[ PERS_SPECSTATE ] != SPECTATOR_NOT )
     return;
 
-  if( !(cg.predictedPlayerEntity.invis) &&
-      cg.time - cg.predictedPlayerEntity.invisTime > 500 )
-    return;
-  else if( cg.predictedPlayerEntity.invis &&
-           cg.predictedPlayerEntity.invisTime > 1000 )
+  if( cg.predictedPlayerEntity.invis )
   {
-    trap_R_SetColor( NULL );
+    if( cg.time - cg.predictedPlayerEntity.invisTime >= 1000 )
+      color[ 3 ] = 1.0f;
+    else
+    {
+      color[ 3 ] = ( (float)( cg.time - cg.predictedPlayerEntity.invisTime ) ) / 1000.0f;
+    }
+  } else if( cg.time - cg.predictedPlayerEntity.invisTime < 500 )
+  {
+    color[ 3 ] = ( (float)( 500 - ( cg.time - cg.predictedPlayerEntity.invisTime ) ) ) / 500.0f;
+    
+  } else
+    return;
 
-    CG_DrawPic( 0, 0, 640, 480, cgs.media.invisVisionShader );
-  }
+  trap_R_SetColor( color );
+  CG_DrawPic( 0, 0, 640, 480, cgs.media.invisVisionShader );
 }
 
 /*
