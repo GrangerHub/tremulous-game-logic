@@ -1438,10 +1438,12 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 
   // play the looped evolving sound
   if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_ALIENS &&
-      ( cg.predictedPlayerEntity.currentState.eFlags & EF_EVOLVING ) )
-    trap_S_AddLoopingSound( cg.clientNum, cg.refdef.vieworg,
-                            cg.predictedPlayerState.velocity,
-                            cgs.media.alienLoopedEvolveSound );
+      ( cg.predictedPlayerEntity.currentState.eFlags & EF_EVOLVING ) &&
+      cgs.media.alienLoopedEvolveSoundTime < cg.time )
+  {
+    trap_S_StartLocalSound( cgs.media.alienLoopedEvolveSound, CHAN_LOCAL_SOUND );
+    cgs.media.alienLoopedEvolveSoundTime = cg.time + 3500;
+  }
 
   // update speedometer
   CG_AddSpeed( );
