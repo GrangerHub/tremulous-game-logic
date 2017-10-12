@@ -950,6 +950,7 @@ void CheckCkitRepair( gentity_t *ent )
     bHealth = BG_Buildable( traceEnt->s.modelindex )->health;
     if( traceEnt->health < bHealth )
     {
+      gentity_t *tent;
       traceEnt->health += HBUILD_HEALRATE;
       if( traceEnt->health >= bHealth )
       {
@@ -958,6 +959,15 @@ void CheckCkitRepair( gentity_t *ent )
       }
       else
         G_AddEvent( ent, EV_BUILD_REPAIR, 0 );
+
+      // send ckit build effects
+      tent = G_TempEntity( traceEnt->r.currentOrigin, EV_BUILD_FIRE );
+      tent->s.weapon = ent->s.weapon;
+      tent->s.otherEntityNum = ent->s.number;
+      tent->s.otherEntityNum2 = tr.entityNum;
+      tent->s.generic1 = WPM_SECONDARY;
+      ent->client->ps.eFlags |= EF_FIRING;
+      ent->client->buildFireTime = level.time + 250;
 
       ent->client->pmext.repairRepeatDelay += BG_Weapon( ent->client->ps.weapon )->repeatRate1;
     }
@@ -1008,6 +1018,22 @@ void buildFire( gentity_t *ent, dynMenu_t menu )
       {
         ent->client->ps.stats[ STAT_MISC ] +=
           BG_Buildable( buildable )->buildTime;
+      }
+
+      // send ckit build effects
+      if( ent->client->ps.weapon == WP_HBUILD &&
+          ent->client->built )
+      {
+        gentity_t *tent;
+
+        tent = G_TempEntity( ent->client->built->r.currentOrigin, EV_BUILD_FIRE );
+        tent->s.weapon = ent->s.weapon;
+        tent->s.otherEntityNum = ent->s.number;
+        tent->s.otherEntityNum2 = ent->client->built->s.number;
+        tent->s.generic1 = ent->client->ps.generic1;
+        ent->client->ps.eFlags |= EF_FIRING;
+        ent->client->built = NULL;
+        ent->client->buildFireTime = level.time + 250;
       }
 
       ent->client->ps.stats[ STAT_BUILDABLE ] = BA_NONE;

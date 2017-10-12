@@ -572,6 +572,9 @@ struct gclient_s
   int                 lastCrushTime;        // Tyrant crush
 
   int                 portalTime;
+
+  gentity_t           *built; //temporary pointer for building fx, indacting which buildable a builder just built.
+  int                 buildFireTime;
 };
 
 

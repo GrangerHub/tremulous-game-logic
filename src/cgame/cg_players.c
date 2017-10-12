@@ -2208,6 +2208,9 @@ void CG_Player( centity_t *cent )
     if( CG_IsParticleSystemValid( &cent->muzzlePS ) )
       CG_DestroyParticleSystem( &cent->muzzlePS );
 
+    if( CG_IsTrailSystemValid( &cent->muzzleTS ) )
+      CG_DestroyTrailSystem( &cent->muzzleTS );
+
     if( CG_IsParticleSystemValid( &cent->jetPackPS ) )
       CG_DestroyParticleSystem( &cent->jetPackPS );
   }
