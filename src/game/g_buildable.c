@@ -4529,13 +4529,18 @@ qboolean G_BuildIfValid( gentity_t *ent, buildable_t buildable )
   float         dist;
   vec3_t        origin, normal;
   int           groundEntNum;
+  gentity_t     *built;
 
   dist = BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->buildDist;
 
   switch( G_CanBuild( ent, buildable, dist, origin, normal, &groundEntNum ) )
   {
     case IBE_NONE:
-      G_Build( ent, buildable, origin, normal, ent->s.apos.trBase, groundEntNum );
+      built = G_Build( ent, buildable, origin, normal, ent->s.apos.trBase, groundEntNum );
+      if( ent->client )
+      {
+        ent->client->built = built;
+      }
       return qtrue;
 
     case IBE_NOALIENBP:

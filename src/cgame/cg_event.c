@@ -713,15 +713,18 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       break;
 
     case EV_FIRE_WEAPON:
-      CG_FireWeapon( cent, WPM_PRIMARY );
+      if( es->weapon != WP_HBUILD )
+        CG_FireWeapon( cent, WPM_PRIMARY );
       break;
 
     case EV_FIRE_WEAPON2:
-      CG_FireWeapon( cent, WPM_SECONDARY );
+      if( es->weapon != WP_HBUILD )
+        CG_FireWeapon( cent, WPM_SECONDARY );
       break;
 
     case EV_FIRE_WEAPON3:
-      CG_FireWeapon( cent, WPM_TERTIARY );
+      if( es->weapon != WP_HBUILD )
+        CG_FireWeapon( cent, WPM_TERTIARY );
       break;
 
     //=================================================================
@@ -735,6 +738,10 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
 
     case EV_PLAYER_TELEPORT_OUT:
       CG_PlayerDisconnect( position );
+      break;
+
+    case EV_BUILD_FIRE:
+      CG_BuildFire( es );
       break;
 
     case EV_BUILD_CONSTRUCT:

@@ -688,6 +688,12 @@ typedef struct centity_s
 
   trailSystem_t         *muzzleTS; //used for the tesla and reactor
   int                   muzzleTSDeathTime;
+  qhandle_t             *muzzleTSHandle;
+  struct centity_s      *muzzleTSEndEntity;
+  qboolean              addMuzzleTS;
+
+  int                   buildFireTime; // used for the ckit flash
+  weaponMode_t          buildFireMode;
 
   qboolean              valid;
   qboolean              oldValid;
@@ -1204,6 +1210,7 @@ typedef struct
   qhandle_t   outlineShader;
 
   qhandle_t   level2ZapTS;
+  qhandle_t   ckitTS;
 
   qhandle_t   balloonShader;
   qhandle_t   connectionShader;
@@ -1878,6 +1885,7 @@ void        CG_MissileHitEntity( weapon_t weaponNum, weaponMode_t weaponMode,
                                  vec3_t origin, vec3_t dir, int entityNum, int charge );
 void        CG_Bullet( vec3_t origin, int sourceEntityNum, vec3_t normal, qboolean flesh, int fleshEntityNum );
 void        CG_ShotgunFire( entityState_t *es );
+void        CG_BuildFire( entityState_t *es );
 
 void        CG_AddViewWeapon (playerState_t *ps);
 void        CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent );

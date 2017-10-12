@@ -3245,6 +3245,7 @@ char *eventnames[ ] =
 
   "EV_GIB_PLAYER",
 
+  "EV_BUILD_FIRE",
   "EV_BUILD_CONSTRUCT",
   "EV_BUILD_DESTROY",
   "EV_BUILD_DELAY",     // can't build yet
