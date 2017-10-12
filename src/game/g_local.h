@@ -598,9 +598,11 @@ struct gclient_s
 
   int                 portalTime;
 
+  gentity_t           *built; //temporary pointer for building fx, indacting which buildable a builder just built.
+  int                 buildFireTime;
+
   // Stores the first person angles for when evolving ends
   vec3_t              evolveRestoreAngles;
-
   int                 evolveCost; //amount of evos to deduct 
 };
 

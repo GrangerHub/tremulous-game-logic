@@ -804,6 +804,7 @@ void CG_InitWeapons( void )
     CG_RegisterWeapon( i );
 
   cgs.media.level2ZapTS = CG_RegisterTrailSystem( "models/weapons/lev2zap/lightning" );
+  cgs.media.ckitTS = CG_RegisterTrailSystem( "models/weapons/ckit/ckitTS" );
   cgs.media.spitfireZapTS = CG_RegisterTrailSystem( "models/weapons/spitfire/spitfireZapTS" );
   cgs.media.massDriverTS = CG_RegisterTrailSystem( "models/weapons/mdriver/fireTS" );
 }
@@ -1154,7 +1155,7 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 
   if( ( ( cent->currentState.eFlags & EF_FIRING ) && weaponMode == WPM_PRIMARY ) ||
       ( ( cent->currentState.eFlags & EF_FIRING2 ) && weaponMode == WPM_SECONDARY ) ||
-      ( ( cent->currentState.eFlags & EF_FIRING3 ) && weaponMode == WPM_TERTIARY ) )
+      ( ( cent->currentState.eFlags & EF_FIRING3 ) &&weaponMode == WPM_TERTIARY ) )
     firing = qtrue;
   else
     firing = qfalse;
@@ -1383,6 +1384,32 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
       }
       trap_R_AddRefEntityToScene( &barrel );
     }
+  }
+
+  // add muzzel trail
+  if( cent->addMuzzleTS &&
+      cent->muzzleTSDeathTime >= cg.time &&
+      cent->muzzleTSHandle &&
+      cent->muzzleTSEndEntity )
+  {
+    cent->muzzleTS = CG_SpawnNewTrailSystem( *cent->muzzleTSHandle );
+
+    if( CG_IsTrailSystemValid( &cent->muzzleTS ) )
+    {
+      if( noGunModel )
+        CG_SetAttachmentTag( &cent->muzzleTS->frontAttachment, *parent, parent->hModel, "tag_weapon" );
+      else
+        CG_SetAttachmentTag( &cent->muzzleTS->frontAttachment, gun, gun.hModel, "tag_flash" );
+
+      CG_SetAttachmentCent( &cent->muzzleTS->frontAttachment, cent );
+      CG_AttachToTag( &cent->muzzleTS->frontAttachment );
+      CG_SetAttachmentCent( &cent->muzzleTS->backAttachment, cent->muzzleTSEndEntity );
+      CG_AttachToCent( &cent->muzzleTS->backAttachment );
+    }
+
+    cent->addMuzzleTS = qfalse;
+    cent->muzzleTSHandle = NULL;
+    cent->muzzleTSEndEntity = NULL;
   }
 
   if( CG_IsParticleSystemValid( &cent->muzzlePS ) )
@@ -2197,6 +2224,59 @@ void CG_MassDriverFire( entityState_t *es )
   // trail back attaches to the impact point
   CG_SetAttachmentPoint( &ts->backAttachment, es->pos.trBase );
   CG_AttachToPoint( &ts->backAttachment );
+}
+
+/*
+==============
+CG_BuildFire
+
+Construction kit build effects
+==============
+*/
+void CG_BuildFire( entityState_t *es )
+{
+  centity_t     *builder;
+  centity_t     *built = &cg_entities[ es->otherEntityNum2 ];
+
+  if( es->otherEntityNum == cg.clientNum )
+    builder = &cg.predictedPlayerEntity;
+  else
+    builder = &cg_entities[ es->otherEntityNum ];
+
+  if( es->weapon != WP_HBUILD ||
+      ( ( es->otherEntityNum == cg.clientNum ) ?
+           ( cg.predictedPlayerState.weapon != WP_HBUILD ) :
+           ( builder->currentState.weapon != WP_HBUILD ) ) )
+    return;
+
+  // produce the flash and sound effects
+  builder->buildFireMode = es->generic1;
+  builder->currentState.generic1 = es->generic1;
+  builder->buildFireTime = cg.time + 250;
+  CG_FireWeapon( builder, es->generic1 );
+  switch ( es->generic1 )
+  {
+    case WPM_PRIMARY:
+      builder->currentState.eFlags |= EF_FIRING;
+      break;
+
+    case WPM_SECONDARY:
+      builder->currentState.eFlags |= EF_FIRING2;
+      break;
+
+    case WPM_TERTIARY:
+      builder->currentState.eFlags |= EF_FIRING3;
+      break;
+
+    default:
+      break;
+  }
+
+  // create the build fire trail
+  builder->muzzleTSHandle = &cgs.media.ckitTS;
+  builder->muzzleTSEndEntity = built;
+  builder->addMuzzleTS = qtrue;
+  builder->muzzleTSDeathTime = cg.time + 250;
 }
 
 /*

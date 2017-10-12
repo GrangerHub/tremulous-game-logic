@@ -880,6 +880,29 @@ void CG_PredictPlayerState( void )
       stateIndex = ( stateIndex + 1 ) % NUM_SAVED_STATES;
     }
 
+    // for ckit firing effects
+    if( cg.predictedPlayerEntity.buildFireTime >= cg.time )
+    {
+      cg.predictedPlayerState.generic1 = cg.predictedPlayerEntity.buildFireMode;
+      switch ( cg.predictedPlayerEntity.buildFireMode )
+      {
+        case WPM_PRIMARY:
+          cg.predictedPlayerState.eFlags |= EF_FIRING;
+          break;
+
+        case WPM_SECONDARY:
+          cg.predictedPlayerState.eFlags |= EF_FIRING2;
+          break;
+
+        case WPM_TERTIARY:
+          cg.predictedPlayerState.eFlags |= EF_FIRING3;
+          break;
+
+        default:
+          break;
+      }
+    }
+
     // add push trigger movement effects
     CG_TouchTriggerPrediction( );
 

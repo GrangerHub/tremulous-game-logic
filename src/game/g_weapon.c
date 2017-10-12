@@ -1025,6 +1025,9 @@ void CheckCkitRepair( gentity_t *ent )
   if( tr.fraction < 1.0f && traceEnt->health > 0 &&
       traceEnt->s.eType == ET_BUILDABLE && traceEnt->buildableTeam == TEAM_HUMANS )
   {
+    gentity_t *tent = G_TempEntity( traceEnt->r.currentOrigin, EV_BUILD_FIRE );
+    qboolean sendEffects = qfalse;
+
     bHealth = BG_Buildable( traceEnt->s.modelindex )->health;
     if( traceEnt->spawned )
     {
@@ -1039,7 +1042,10 @@ void CheckCkitRepair( gentity_t *ent )
           G_AddEvent( ent, EV_BUILD_REPAIR, 0 );
 
         ent->client->pmext.repairRepeatDelay += BG_Weapon( ent->client->ps.weapon )->repeatRate1;
+        sendEffects = qtrue;
       }
+
+      tent->s.generic1 = WPM_SECONDARY;
     } else
     {
       // progress the contruction of an unspawned buildable
@@ -1065,6 +1071,19 @@ void CheckCkitRepair( gentity_t *ent )
           G_AddEvent( ent, EV_BUILD_REPAIR, 0 );
 
       ent->client->pmext.repairRepeatDelay += repeatRate;
+
+      tent->s.generic1 = WPM_PRIMARY;
+      sendEffects = qtrue;
+    }
+
+    if( sendEffects )
+    {
+      // send ckit build effects
+      tent->s.weapon = ent->s.weapon;
+      tent->s.otherEntityNum = ent->s.number;
+      tent->s.otherEntityNum2 = tr.entityNum;
+      ent->client->ps.eFlags |= EF_FIRING;
+      ent->client->buildFireTime = level.time + 250;
     }
   }
 }
@@ -1117,6 +1136,22 @@ void buildFire( gentity_t *ent, dynMenu_t menu )
       {
         ent->client->ps.stats[ STAT_MISC ] +=
           BG_Buildable( buildable )->buildTime;
+      }
+
+      // send ckit build effects
+      if( ent->client->ps.weapon == WP_HBUILD &&
+          ent->client->built )
+      {
+        gentity_t *tent;
+
+        tent = G_TempEntity( ent->client->built->r.currentOrigin, EV_BUILD_FIRE );
+        tent->s.weapon = ent->s.weapon;
+        tent->s.otherEntityNum = ent->s.number;
+        tent->s.otherEntityNum2 = ent->client->built->s.number;
+        tent->s.generic1 = ent->client->ps.generic1;
+        ent->client->ps.eFlags |= EF_FIRING;
+        ent->client->built = NULL;
+        ent->client->buildFireTime = level.time + 250;
       }
 
       ent->client->ps.stats[ STAT_BUILDABLE ] = BA_NONE;
