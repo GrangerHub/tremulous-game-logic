@@ -1137,6 +1137,17 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
   weaponNum = cent->currentState.weapon;
   weaponMode = cent->currentState.generic1;
 
+  if( weaponNum != cent->oldWeaponNum )
+  {
+    cent->oldWeaponNum = weaponNum;
+    //sanity check that particle systems are stopped when switching weapons
+    if( CG_IsParticleSystemValid( &cent->muzzlePS ) )
+      CG_DestroyParticleSystem( &cent->muzzlePS );
+
+    if( CG_IsTrailSystemValid( &cent->muzzleTS ) )
+      CG_DestroyTrailSystem( &cent->muzzleTS );
+  }
+
   if( weaponNum <= WP_NONE || weaponNum >= WP_NUM_WEAPONS )
   {
     Com_Printf( S_COLOR_YELLOW "WARNING: CG_AddPlayerWeapon: weapon "
