@@ -269,6 +269,26 @@ static void CG_EntityEffects( centity_t *cent )
   }
 }
 
+/*
+==================
+CG_Invisible
+==================
+*/
+static void CG_Invisible( centity_t *cent )
+{
+  if( cent->currentState.number >= MAX_CLIENTS )
+    return;
+
+  //sanity check that particle systems are stopped when become a spectator without dying
+  if( CG_IsParticleSystemValid( &cent->muzzlePS ) )
+    CG_DestroyParticleSystem( &cent->muzzlePS );
+
+  if( CG_IsTrailSystemValid( &cent->muzzleTS ) )
+    CG_DestroyTrailSystem( &cent->muzzleTS );
+
+  if( CG_IsParticleSystemValid( &cent->jetPackPS ) )
+    CG_DestroyParticleSystem( &cent->jetPackPS );
+}
 
 /*
 ==================
@@ -1135,6 +1155,9 @@ static void CG_AddCEntity( centity_t *cent )
       break;
 
     case ET_INVISIBLE:
+      CG_Invisible( cent );
+      break;
+
     case ET_PUSH_TRIGGER:
     case ET_TELEPORT_TRIGGER:
     case ET_LOCATION:
