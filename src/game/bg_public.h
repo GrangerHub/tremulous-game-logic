@@ -1155,8 +1155,6 @@ typedef struct
   int       children[ 3 ];
   int       cost;
   int       value;
-
-  qboolean  stackable;
 } classAttributes_t;
 
 typedef struct
