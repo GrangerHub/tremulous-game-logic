@@ -692,6 +692,8 @@ typedef struct centity_s
   struct centity_s      *muzzleTSEndEntity;
   qboolean              addMuzzleTS;
 
+  weapon_t              oldWeaponNum; // used for resetting player weapon firing effects when changing weapons.
+
   int                   buildFireTime; // used for the ckit flash
   weaponMode_t          buildFireMode;
 
