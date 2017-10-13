@@ -280,7 +280,7 @@ static void CG_Invisible( centity_t *cent )
   if( cent->currentState.number >= MAX_CLIENTS )
     return;
 
-  //sanity check that particle systems are stopped when become a spectator without dying
+  //sanity check that particle systems are stopped when becoming a spectator without dying
   if( CG_IsParticleSystemValid( &cent->muzzlePS ) )
     CG_DestroyParticleSystem( &cent->muzzlePS );
 
