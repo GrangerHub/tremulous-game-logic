@@ -1143,7 +1143,8 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
   weaponNum = cent->currentState.weapon;
   weaponMode = cent->currentState.generic1;
 
-  if( weaponNum != cent->oldWeaponNum )
+  if( !cg_flameLols.integer &&
+      weaponNum != cent->oldWeaponNum )
   {
     cent->oldWeaponNum = weaponNum;
     //sanity check that particle systems are stopped when switching weapons
