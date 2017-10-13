@@ -1270,7 +1270,7 @@ void G_SetPlayersLinkState( qboolean link, gentity_t *skipPlayer )
   int       i;
   gentity_t *ent;
 
-  for ( i = 1, ent = g_entities + i; i < level.num_entities; i++, ent++ )
+  for ( i = 0, ent = g_entities + i; i < level.num_entities; i++, ent++ )
   {
     if( ent->s.eType != ET_PLAYER )
       continue;
