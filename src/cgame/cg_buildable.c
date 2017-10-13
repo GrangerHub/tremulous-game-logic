@@ -692,6 +692,7 @@ void CG_GhostBuildable( buildable_t buildable )
   BG_BuildableBoundingBox( buildable, mins, maxs );
 
   cgs.sublimeMarkedBuildables = qtrue;
+  cgs.sublimePlayers = qtrue;
 
   BG_PositionBuildableRelativeToPlayer( ps, CG_Trace,
                                         entity_origin, angles, &tr );
@@ -703,6 +704,7 @@ void CG_GhostBuildable( buildable_t buildable )
                                     mins, maxs, ent.axis, ent.origin );
 
   cgs.sublimeMarkedBuildables = qfalse;
+  cgs.sublimePlayers = qfalse;
 
   //offset on the Z axis if required
   VectorMA( ent.origin, BG_BuildableConfig( buildable )->zOffset, tr.plane.normal, ent.origin );

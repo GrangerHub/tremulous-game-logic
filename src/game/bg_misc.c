@@ -1202,7 +1202,6 @@ static const classAttributes_t bg_classList[ ] =
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     0,                                              //int     cost;
     0,                                              //int     value;
-    qfalse                                          //int     stackable;
   },
   {
     PCL_ALIEN_BUILDER0,                             //int     number;
@@ -1236,7 +1235,6 @@ static const classAttributes_t bg_classList[ ] =
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     ABUILDER_COST,                                  //int     cost;
     ABUILDER_VALUE,                                 //int     value;
-    qfalse                                          //int     stackable;
   },
   {
     PCL_ALIEN_BUILDER0_UPG,                         //int     number;
@@ -1270,7 +1268,6 @@ static const classAttributes_t bg_classList[ ] =
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     ABUILDER_UPG_COST,                              //int     cost;
     ABUILDER_UPG_VALUE,                             //int     value;
-    qfalse                                          //int     stackable;
   },
   {
     PCL_ALIEN_LEVEL0,                               //int     number;
@@ -1301,7 +1298,6 @@ static const classAttributes_t bg_classList[ ] =
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     LEVEL0_COST,                                    //int     cost;
     LEVEL0_VALUE,                                   //int     value;
-    qfalse                                          //int     stackable;
   },
   {
     PCL_ALIEN_LEVEL1,                               //int     number;
@@ -1335,7 +1331,6 @@ static const classAttributes_t bg_classList[ ] =
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     LEVEL1_COST,                                    //int     cost;
     LEVEL1_VALUE,                                   //int     value;
-    qfalse                                          //int     stackable;
   },
   {
     PCL_ALIEN_LEVEL1_UPG,                           //int     number;
@@ -1369,7 +1364,6 @@ static const classAttributes_t bg_classList[ ] =
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     LEVEL1_UPG_COST,                                //int     cost;
     LEVEL1_UPG_VALUE,                               //int     value;
-    qfalse                                          //int     stackable;
   },
   {
     PCL_ALIEN_LEVEL2,                               //int     number;
@@ -1400,7 +1394,6 @@ static const classAttributes_t bg_classList[ ] =
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     LEVEL2_COST,                                    //int     cost;
     LEVEL2_VALUE,                                   //int     value;
-    qfalse                                          //int     stackable;
   },
   {
     PCL_ALIEN_LEVEL2_UPG,                           //int     number;
@@ -1431,7 +1424,6 @@ static const classAttributes_t bg_classList[ ] =
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     LEVEL2_UPG_COST,                                //int     cost;
     LEVEL2_UPG_VALUE,                               //int     value;
-    qfalse                                          //int     stackable;
   },
   {
     PCL_ALIEN_SPITFIRE,                             //int     number;
@@ -1462,7 +1454,6 @@ static const classAttributes_t bg_classList[ ] =
     SPITFIRE_POUNCE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     SPITFIRE_COST,                                  //int     cost;
     SPITFIRE_VALUE,                                 //int     value;
-    qfalse                                          //int     stackable;
   },
   {
     PCL_ALIEN_LEVEL3,                               //int     number;
@@ -1494,7 +1485,6 @@ static const classAttributes_t bg_classList[ ] =
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     LEVEL3_COST,                                    //int     cost;
     LEVEL3_VALUE,                                   //int     value;
-    qfalse                                          //int     stackable;
   },
   {
     PCL_ALIEN_LEVEL3_UPG,                           //int     number;
@@ -1526,7 +1516,6 @@ static const classAttributes_t bg_classList[ ] =
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     LEVEL3_UPG_COST,                                //int     cost;
     LEVEL3_UPG_VALUE,                               //int     value;
-    qtrue                                           //int     stackable;
   },
   {
     PCL_ALIEN_LEVEL4,                               //int     number;
@@ -1560,7 +1549,6 @@ static const classAttributes_t bg_classList[ ] =
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     LEVEL4_COST,                                    //int     cost;
     LEVEL4_VALUE,                                   //int     value;
-    qtrue                                           //int     stackable;
   },
   {
     PCL_HUMAN,                                      //int     number;
@@ -1590,7 +1578,6 @@ static const classAttributes_t bg_classList[ ] =
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     0,                                              //int     cost;
     ALIEN_CREDITS_PER_KILL,                         //int     value;
-    qfalse                                          //int     stackable;
   },
   {
     PCL_HUMAN_BSUIT,                                //int     number;
@@ -1620,7 +1607,6 @@ static const classAttributes_t bg_classList[ ] =
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     0,                                              //int     cost;
     ALIEN_CREDITS_PER_KILL,                         //int     value;
-    qtrue                                           //int     stackable;
   }
 };
 

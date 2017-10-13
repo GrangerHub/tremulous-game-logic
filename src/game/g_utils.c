@@ -1257,3 +1257,33 @@ void G_TraceWrapper( trace_t *results, const vec3_t start,
 {
   SV_Trace( results, start, mins, maxs, end, passEntityNum, contentMask, TT_AABB );
 }
+
+/*
+================
+G_SetPlayersLinkState
+
+Links or unlinks all the player entities, with the option to skip a specific player for unlinking
+================
+*/
+void G_SetPlayersLinkState( qboolean link, gentity_t *skipPlayer )
+{
+  int       i;
+  gentity_t *ent;
+
+  for ( i = 1, ent = g_entities + i; i < level.num_entities; i++, ent++ )
+  {
+    if( ent->s.eType != ET_PLAYER )
+      continue;
+
+    if( link )
+      SV_LinkEntity( ent );
+    else
+    {
+      if( skipPlayer && 
+          ent->s.number == skipPlayer->s.number )
+        continue;
+
+      SV_UnlinkEntity( ent );
+    }
+  }
+}

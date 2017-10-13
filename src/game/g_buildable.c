@@ -4124,8 +4124,7 @@ void G_BuildableThink( gentity_t *ent, int msec )
         else if( ( groundEnt->s.modelindex != BA_H_TELEPORTER ) || groundEnt->powered )
           ent->damageDroppedBuildable = qtrue;
       }
-      else if( groundEnt->client &&
-               !BG_Class( groundEnt->client->ps.stats[STAT_CLASS] )->stackable )
+      else if( groundEnt->client )
         G_Damage( groundEnt, ent, &g_entities[ ent->dropperNum ], NULL, NULL,
             20 , DAMAGE_NO_PROTECTION, meansOD );
 
@@ -4805,8 +4804,10 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
 
   BG_BuildableBoundingBox( buildable, mins, maxs );
 
+  G_SetPlayersLinkState( qfalse, ent );
   BG_PositionBuildableRelativeToPlayer( ps, G_TraceWrapper,
                                         entity_origin, angles, &tr1 );
+  G_SetPlayersLinkState( qtrue, ent );
 
   SV_Trace( &tr2, entity_origin, mins, maxs, entity_origin, -1,
                 MASK_PLAYERSOLID, TT_AABB );
@@ -4826,8 +4827,7 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
         !g_allowBuildableStacking.integer ||
         ( g_entities[ *groundEntNum ].s.eType == ET_BUILDABLE &&
           !BG_Buildable( g_entities[ *groundEntNum ].s.modelindex )->stackable ) ||
-        ( g_entities[ *groundEntNum ].client &&
-          !BG_Class( g_entities[ *groundEntNum ].client->ps.stats[STAT_CLASS] )->stackable ) ) )
+        g_entities[ *groundEntNum ].client ) )
     reason = IBE_NORMAL;
 
   contents = SV_PointContents( entity_origin, -1 );

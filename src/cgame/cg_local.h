@@ -1504,6 +1504,7 @@ typedef struct
   int           humanNextStageThreshold;
 
   qboolean      sublimeMarkedBuildables;  // make marked buildables non-solid
+  qboolean      sublimePlayers; // make all players except this client non-solid
 
   //
   // locally derived information from gamestate

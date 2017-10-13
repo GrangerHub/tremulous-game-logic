@@ -1191,8 +1191,6 @@ typedef struct
 
   int       cost;
   int       value;
-
-  qboolean  stackable;
 } classAttributes_t;
 
 typedef struct
