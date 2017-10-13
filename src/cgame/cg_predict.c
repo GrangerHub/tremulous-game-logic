@@ -123,9 +123,15 @@ static void CG_ClipMoveToEntities ( const vec3_t start, const vec3_t mins,
     if ( astralMask & ent->eFlags )
       continue;      // EF_ASTRAL_NOCLIP flagged entities don't clip with ASTRALSOLID entities
 
-    if( cgs.sublimeMarkedBuildables && ( ent->eType == ET_BUILDABLE ) &&
+    if( cgs.sublimeMarkedBuildables &&
+        ( ent->eType == ET_BUILDABLE ) &&
        ( ent->eFlags & EF_B_MARKED ) )
       continue;      // ghost buildables ignore marked buildables
+
+    if( cgs.sublimePlayers &&
+        ( ent->eType == ET_PLAYER ) &&
+        ( ent->number !=cg.predictedPlayerState.clientNum ) )
+    continue;
 
     if( ent->solid == SOLID_BMODEL )
     {

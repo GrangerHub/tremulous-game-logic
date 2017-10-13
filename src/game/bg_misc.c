@@ -1043,7 +1043,6 @@ static const classAttributes_t bg_classList[ ] =
     { PCL_NONE, PCL_NONE, PCL_NONE },               //int     children[ 3 ];
     0,                                              //int     cost;
     0,                                              //int     value;
-    qfalse                                          //int     stackable;
   },
   {
     PCL_ALIEN_BUILDER0,                             //int     number;
@@ -1075,7 +1074,6 @@ static const classAttributes_t bg_classList[ ] =
     { PCL_ALIEN_BUILDER0_UPG, PCL_ALIEN_LEVEL0, PCL_NONE }, //int  children[ 3 ];
     ABUILDER_COST,                                  //int     cost;
     ABUILDER_VALUE,                                 //int     value;
-    qfalse                                          //int     stackable;
   },
   {
     PCL_ALIEN_BUILDER0_UPG,                         //int     number;
@@ -1108,7 +1106,6 @@ static const classAttributes_t bg_classList[ ] =
     { PCL_ALIEN_LEVEL0, PCL_NONE, PCL_NONE },       //int     children[ 3 ];
     ABUILDER_UPG_COST,                              //int     cost;
     ABUILDER_UPG_VALUE,                             //int     value;
-    qfalse                                          //int     stackable;
   },
   {
     PCL_ALIEN_LEVEL0,                               //int     number;
@@ -1140,7 +1137,6 @@ static const classAttributes_t bg_classList[ ] =
     { PCL_ALIEN_LEVEL1, PCL_NONE, PCL_NONE },       //int     children[ 3 ];
     LEVEL0_COST,                                    //int     cost;
     LEVEL0_VALUE,                                   //int     value;
-    qfalse                                          //int     stackable;
   },
   {
     PCL_ALIEN_LEVEL1,                               //int     number;
@@ -1174,7 +1170,6 @@ static const classAttributes_t bg_classList[ ] =
     { PCL_ALIEN_LEVEL2, PCL_ALIEN_LEVEL1_UPG, PCL_NONE }, //int  children[ 3 ];
     LEVEL1_COST,                                    //int     cost;
     LEVEL1_VALUE,                                   //int     value;
-    qfalse                                          //int     stackable;
   },
   {
     PCL_ALIEN_LEVEL1_UPG,                           //int     number;
@@ -1208,7 +1203,6 @@ static const classAttributes_t bg_classList[ ] =
     { PCL_ALIEN_LEVEL2, PCL_NONE, PCL_NONE },       //int     children[ 3 ];
     LEVEL1_UPG_COST,                                //int     cost;
     LEVEL1_UPG_VALUE,                               //int     value;
-    qfalse                                          //int     stackable;
   },
   {
     PCL_ALIEN_LEVEL2,                               //int     number;
@@ -1240,7 +1234,6 @@ static const classAttributes_t bg_classList[ ] =
     { PCL_ALIEN_LEVEL3, PCL_ALIEN_LEVEL2_UPG, PCL_NONE }, //int  children[ 3 ];
     LEVEL2_COST,                                    //int     cost;
     LEVEL2_VALUE,                                   //int     value;
-    qfalse                                          //int     stackable;
   },
   {
     PCL_ALIEN_LEVEL2_UPG,                           //int     number;
@@ -1272,7 +1265,6 @@ static const classAttributes_t bg_classList[ ] =
     { PCL_ALIEN_LEVEL3, PCL_NONE, PCL_NONE },       //int     children[ 3 ];
     LEVEL2_UPG_COST,                                //int     cost;
     LEVEL2_UPG_VALUE,                               //int     value;
-    qfalse                                          //int     stackable;
   },
   {
     PCL_ALIEN_LEVEL3,                               //int     number;
@@ -1305,7 +1297,6 @@ static const classAttributes_t bg_classList[ ] =
     { PCL_ALIEN_LEVEL4, PCL_ALIEN_LEVEL3_UPG, PCL_NONE }, //int  children[ 3 ];
     LEVEL3_COST,                                    //int     cost;
     LEVEL3_VALUE,                                   //int     value;
-    qfalse                                          //int     stackable;
   },
   {
     PCL_ALIEN_LEVEL3_UPG,                           //int     number;
@@ -1338,7 +1329,6 @@ static const classAttributes_t bg_classList[ ] =
     { PCL_ALIEN_LEVEL4, PCL_NONE, PCL_NONE },       //int     children[ 3 ];
     LEVEL3_UPG_COST,                                //int     cost;
     LEVEL3_UPG_VALUE,                               //int     value;
-    qtrue                                           //int     stackable;
   },
   {
     PCL_ALIEN_LEVEL4,                               //int     number;
@@ -1372,7 +1362,6 @@ static const classAttributes_t bg_classList[ ] =
     { PCL_NONE, PCL_NONE, PCL_NONE },               //int     children[ 3 ];
     LEVEL4_COST,                                    //int     cost;
     LEVEL4_VALUE,                                   //int     value;
-    qtrue                                           //int     stackable;
   },
   {
     PCL_HUMAN,                                      //int     number;
@@ -1403,7 +1392,6 @@ static const classAttributes_t bg_classList[ ] =
     { PCL_NONE, PCL_NONE, PCL_NONE },               //int     children[ 3 ];
     0,                                              //int     cost;
     ALIEN_CREDITS_PER_KILL,                         //int     value;
-    qfalse                                          //int     stackable;
   },
   {
     PCL_HUMAN_BSUIT,                                //int     number;
@@ -1434,7 +1422,6 @@ static const classAttributes_t bg_classList[ ] =
     { PCL_NONE, PCL_NONE, PCL_NONE },               //int     children[ 3 ];
     0,                                              //int     cost;
     ALIEN_CREDITS_PER_KILL,                         //int     value;
-    qtrue                                           //int     stackable;
   }
 };
 

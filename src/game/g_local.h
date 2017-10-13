@@ -1089,6 +1089,7 @@ void        G_Entity_id_init(gentity_t *ptr);
 void        G_Entity_id_set(gentity_id *id,gentity_t *target);
 gentity_t   *G_Entity_id_get(gentity_id *id);
 
+void        G_SetPlayersLinkState( qboolean link, gentity_t *skipPlayer );
 //
 // g_combat.c
 //

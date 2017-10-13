@@ -2085,6 +2085,8 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum )
 
   CG_InitBuildables( );
  
+  cgs.sublimePlayers = qfalse;
+ 
   cgs.voices = BG_VoiceInit( );
   BG_PrintVoices( cgs.voices, cg_debugVoices.integer );
 
