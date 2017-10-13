@@ -941,8 +941,10 @@ void CheckCkitRepair( gentity_t *ent )
   AngleVectors( ent->client->ps.viewangles, forward, NULL, NULL );
   VectorMA( viewOrigin, 100, forward, end );
 
+  G_SetPlayersLinkState( qfalse, ent );
   SV_Trace( &tr, viewOrigin, NULL, NULL, end, ent->s.number, MASK_PLAYERSOLID, TT_AABB );
   traceEnt = &g_entities[ tr.entityNum ];
+  G_SetPlayersLinkState( qtrue, ent );
 
   if( tr.fraction < 1.0f && traceEnt->spawned && traceEnt->health > 0 &&
       traceEnt->s.eType == ET_BUILDABLE && traceEnt->buildableTeam == TEAM_HUMANS )
