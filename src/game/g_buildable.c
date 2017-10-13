@@ -519,8 +519,10 @@ int G_GetMarkedBuildPoints( playerState_t *ps )
         !g_markDeconstruct.integer ) )
     return 0;
 
+G_SetPlayersLinkState( qfalse, &g_entities[ ps->clientNum ] );
   BG_PositionBuildableRelativeToPlayer( ps, G_TraceWrapper, origin,
                                         angles, &tr1 );
+G_SetPlayersLinkState( qtrue, &g_entities[ ps->clientNum ] );
 
   for( i = MAX_CLIENTS, ent = g_entities + i; i < level.num_entities; i++, ent++ )
   {
