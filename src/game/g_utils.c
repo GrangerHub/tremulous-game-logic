@@ -1275,6 +1275,10 @@ void G_SetPlayersLinkState( qboolean link, gentity_t *skipPlayer )
     if( ent->s.eType != ET_PLAYER )
       continue;
 
+    if( ent->client &&
+        ent->client->pers.connected != CON_CONNECTED )
+      continue;
+
     if( link )
       SV_LinkEntity( ent );
     else
