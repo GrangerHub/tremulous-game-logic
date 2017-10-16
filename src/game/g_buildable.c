@@ -2626,6 +2626,7 @@ static void G_AddTeleporter( gentity_t *self )
   self->teleportation.next = level.teleporters;
   level.teleporters = self;
   self->teleportation.coolDown = -1;
+  self->r.svFlags |= SVF_BROADCAST;
 
   return;
 }
