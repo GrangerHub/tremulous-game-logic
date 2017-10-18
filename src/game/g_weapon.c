@@ -1004,6 +1004,34 @@ BUILD GUN
 
 ======================================================================
 */
+/*
+================
+G_SetBuildableLinkState
+
+Links or unlinks all the buildable entities
+================
+*/
+static void G_SetUndamagedBuildableLinkState( qboolean link )
+{
+  int       i;
+  gentity_t *ent;
+
+  for ( i = 1, ent = g_entities + i; i < level.num_entities; i++, ent++ )
+  {
+    if( ent->s.eType != ET_BUILDABLE )
+      continue;
+
+    if( ent->health < BG_Buildable( ent->s.modelindex )->health )
+      continue;
+    
+
+    if( link )
+      SV_LinkEntity( ent );
+    else
+      SV_UnlinkEntity( ent );
+  }
+}
+
 void CheckCkitRepair( gentity_t *ent )
 {
   vec3_t      viewOrigin, forward, end;
@@ -1017,11 +1045,15 @@ void CheckCkitRepair( gentity_t *ent )
 
   BG_GetClientViewOrigin( &ent->client->ps, viewOrigin );
   AngleVectors( ent->client->ps.viewangles, forward, NULL, NULL );
-  VectorMA( viewOrigin, 100, forward, end );
+  VectorMA( viewOrigin,
+            ( 2 * BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->buildDist ),
+            forward, end );
 
   G_SetPlayersLinkState( qfalse, ent );
+  G_SetUndamagedBuildableLinkState( qfalse );
   SV_Trace( &tr, viewOrigin, NULL, NULL, end, ent->s.number, MASK_PLAYERSOLID, TT_AABB );
   traceEnt = &g_entities[ tr.entityNum ];
+  G_SetUndamagedBuildableLinkState( qtrue );
   G_SetPlayersLinkState( qtrue, ent );
 
   if( tr.fraction < 1.0f && traceEnt->health > 0 &&
