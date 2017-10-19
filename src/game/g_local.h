@@ -854,6 +854,7 @@ typedef struct
 
   team_t            surrenderTeam;
   int               lifeSupportTimer[ NUM_TEAMS ];
+  int               lifeSupportAlertTime[ NUM_TEAMS ];
   int               lastTeamImbalancedTime;
   int               numTeamImbalanceWarnings;
 
