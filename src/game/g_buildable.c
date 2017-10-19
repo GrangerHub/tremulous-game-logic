@@ -4020,7 +4020,7 @@ void G_BuildableThink( gentity_t *ent, int msec )
     if( !ent->spawned && ent->buildProgress >= 0 )
     {
         ent->buildProgress -= 1000.0f /
-                              (float)( ( ent->dcc ? 2 : 10 ) *
+                              (float)( ( ent->dcc ? 1 : 2 ) *
                                        level.numUnspawnedBuildables[ TEAM_HUMANS ] );
     }
 
