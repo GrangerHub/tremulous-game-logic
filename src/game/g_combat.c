@@ -278,7 +278,7 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
         continue;
 
       playersTeamDistributionEarnings = stageValue / ( 10 * numTeamPlayers[ playersTeam ] );
-      everyonesDistributionEarnings = ( stageValue * 7 ) / ( 10 * level.numPlayingClients );
+      everyonesDistributionEarnings = ( stageValue * 5 ) / ( 10 * level.numPlayingClients );
 
       // any remainders goes to the player that did the damage;
       playersPersonalEarnings = stageValue;
