@@ -962,10 +962,10 @@ void CheckCkitRepair( gentity_t *ent )
         G_AddEvent( ent, EV_BUILD_REPAIR, 0 );
 
       // send ckit build effects
-      tent = G_TempEntity( traceEnt->r.currentOrigin, EV_BUILD_FIRE );
+      tent = G_TempEntity( tr.endpos, EV_BUILD_FIRE );
       tent->s.weapon = ent->s.weapon;
       tent->s.otherEntityNum = ent->s.number;
-      tent->s.otherEntityNum2 = tr.entityNum;
+      tent->s.otherEntityNum2 = ENTITYNUM_NONE;
       tent->s.generic1 = WPM_SECONDARY;
       ent->client->ps.eFlags |= EF_FIRING;
       ent->client->buildFireTime = level.time + 250;
