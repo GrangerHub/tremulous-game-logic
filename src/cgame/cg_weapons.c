@@ -2125,7 +2125,6 @@ Construction kit build effects
 void CG_BuildFire( entityState_t *es )
 {
   centity_t     *builder;
-  centity_t     *built = &cg_entities[ es->otherEntityNum2 ];
 
   if( es->otherEntityNum == cg.clientNum )
     builder = &cg.predictedPlayerEntity;
@@ -2163,7 +2162,10 @@ void CG_BuildFire( entityState_t *es )
 
   // create the build fire trail
   builder->muzzleTSHandle = &cgs.media.ckitTS;
-  builder->muzzleTSEndEntity = built;
+  if( es->otherEntityNum2 == ENTITYNUM_NONE )
+    builder->muzzleTSEndEntity = &cg_entities[ es->number ];
+  else
+    builder->muzzleTSEndEntity = &cg_entities[ es->otherEntityNum2 ];
   builder->addMuzzleTS = qtrue;
   builder->muzzleTSDeathTime = cg.time + 250;
 }
