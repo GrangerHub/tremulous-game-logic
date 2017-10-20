@@ -4075,6 +4075,37 @@ static void CG_InvincibleVision( void )
 
 /*
 ===============
+CG_EvolveVision
+===============
+*/
+static void CG_EvolveVision( void )
+{
+  vec4_t      color = { 0.0f, 0.0f, 0.0f, 1.0f };
+  if( cg.snap->ps.persistant[ PERS_SPECSTATE ] != SPECTATOR_NOT )
+    return;
+
+  if( cg.predictedPlayerEntity.evolve )
+  {
+    if( cg.time - cg.predictedPlayerEntity.evolveTime >= 500 )
+      color[ 3 ] = 1.0f;
+    else
+    {
+      color[ 3 ] = ( (float)( cg.time - cg.predictedPlayerEntity.evolveTime ) ) / 500.0f;
+    }
+  } else if( cg.time - cg.predictedPlayerEntity.evolveTime < 500 )
+  {
+    color[ 3 ] = ( (float)( 500 - ( cg.time - cg.predictedPlayerEntity.evolveTime ) ) ) / 500.0f;
+    
+  } else
+    return;
+
+  trap_R_SetColor( color );
+  CG_DrawPic( 0, 0, 640, 480, cgs.media.alienEvolveVisionShader );
+  trap_R_SetColor( NULL );
+}
+
+/*
+===============
 CG_InvisibleVision
 ===============
 */
@@ -4355,6 +4386,9 @@ void CG_DrawActive( stereoFrame_t stereoView )
 
   //for invisible players to know that they are invisible
   CG_InvisibleVision( );
+
+  //for invincible players to know that they are invincible
+  CG_EvolveVision( );
 
   //for invincible players to know that they are invincible
   CG_InvincibleVision( );

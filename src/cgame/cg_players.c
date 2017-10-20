@@ -2045,10 +2045,30 @@ void CG_Player( centity_t *cent )
     }
   }
 
+  if( !cent->invincible &&
+      ci->team == TEAM_ALIENS &&
+      ( es->eFlags & EF_EVOLVING ) &&
+      !cg.intermissionStarted )
+  {
+    if( !cent->evolve )
+    {
+      cent->evolveTime = cg.time;
+      cent->evolve = qtrue;
+    }
+  }
+  else
+  {
+    if( cent->evolve )
+    {
+      cent->evolveTime = cg.time;
+      cent->evolve = qfalse;
+    }
+  }
+
   // check for invisibility transitions
-  if( ( es->eFlags & EF_INVINCIBLE ) ||
-      ( ci->team == TEAM_ALIENS &&
-        ( es->eFlags & EF_EVOLVING ) ) )
+  if( cent->invincible ||
+      cent->evolve ||
+      cg.intermissionStarted )
       cent->invis = qfalse;
   else if( es->eFlags & EF_INVISIBILE &&
       es->weapon != WP_LUCIFER_CANNON )
@@ -2133,8 +2153,7 @@ void CG_Player( centity_t *cent )
         legs.customShader = cgs.media.humanInvincibleShader;
       else if( ci->team == TEAM_ALIENS )
         legs.customShader = cgs.media.alienInvincibleShader;
-    } else if( ci->team == TEAM_ALIENS &&
-               ( es->eFlags & EF_EVOLVING ) )
+    } else if( cent->evolve )
     {
       legs.customShader = cgs.media.alienEvolveShader;
     }

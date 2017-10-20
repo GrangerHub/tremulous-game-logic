@@ -705,12 +705,15 @@ typedef struct centity_s
   qboolean              invincible;
   int                   invincibleTime;
 
-  qboolean              valid;
-  qboolean              oldValid;
-  struct centity_s      *nextLocation;
+  qboolean              evolve;
+  int                   evolveTime;
 
   int                   invisTime;
   qboolean              invis;
+
+  qboolean              valid;
+  qboolean              oldValid;
+  struct centity_s      *nextLocation;
 } centity_t;
 
 
@@ -1382,6 +1385,7 @@ typedef struct
   sfxHandle_t alienLoopedEvolveSound;
   int         alienLoopedEvolveSoundTime;
   qhandle_t   alienEvolveShader;
+  qhandle_t   alienEvolveVisionShader;
 
   qhandle_t   alienInvincibleShader;
   qhandle_t   alienInvincibleViewShader;
