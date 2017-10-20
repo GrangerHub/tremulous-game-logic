@@ -4042,7 +4042,8 @@ static void CG_InvisibleVision( void )
 {
   vec4_t      color = { 0.0f, 0.0f, 0.0f, 1.0f };
   if( cg.renderingThirdPerson ||
-      cg.snap->ps.persistant[ PERS_SPECSTATE ] != SPECTATOR_NOT )
+      cg.snap->ps.persistant[ PERS_SPECSTATE ] != SPECTATOR_NOT ||
+      cg.intermissionStarted )
     return;
 
   if( cg.predictedPlayerEntity.invis )
@@ -4062,6 +4063,7 @@ static void CG_InvisibleVision( void )
 
   trap_R_SetColor( color );
   CG_DrawPic( 0, 0, 640, 480, cgs.media.invisVisionShader );
+  trap_R_SetColor( NULL );
 }
 
 /*
