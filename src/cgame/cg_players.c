@@ -1994,6 +1994,24 @@ void CG_Player( centity_t *cent )
 
   renderfx |= RF_LIGHTING_ORIGIN;     // use the same origin for all
 
+  if( ( es->eFlags & EF_INVINCIBLE ) &&
+      !cg.intermissionStarted )
+  {
+    if( !cent->invincible )
+    {
+      cent->invincibleTime = cg.time;
+      cent->invincible = qtrue;
+    }
+  }
+  else
+  {
+    if( cent->invincible )
+    {
+      cent->invincible = cg.time;
+      cent->invincible = qfalse;
+    }
+  }
+
   //
   // add the legs
   //
@@ -2010,7 +2028,7 @@ void CG_Player( centity_t *cent )
     else
       legs.customSkin = ci->legsSkin;
 
-    if( es->eFlags & EF_INVINCIBLE )
+    if( cent->invincible )
     {
       if( ci->team == TEAM_HUMANS )
         legs.customShader = cgs.media.humanInvincibleShader;
@@ -2023,7 +2041,7 @@ void CG_Player( centity_t *cent )
     legs.hModel = ci->nonSegModel;
     legs.customSkin = ci->nonSegSkin;
 
-    if( es->eFlags & EF_INVINCIBLE )
+    if( cent->invincible )
     {
       if( ci->team == TEAM_HUMANS )
         legs.customShader = cgs.media.humanInvincibleShader;
@@ -2109,7 +2127,7 @@ void CG_Player( centity_t *cent )
     else
       torso.customSkin = ci->torsoSkin;
 
-    if( es->eFlags & EF_INVINCIBLE )
+    if( cent->invincible )
     {
       if( ci->team == TEAM_HUMANS )
         torso.customShader = cgs.media.humanInvincibleShader;
@@ -2148,7 +2166,7 @@ void CG_Player( centity_t *cent )
     else
       head.customSkin = ci->headSkin;
 
-    if( es->eFlags & EF_INVINCIBLE )
+    if( cent->invincible )
     {
       if( ci->team == TEAM_HUMANS )
         head.customShader = cgs.media.humanInvincibleShader;

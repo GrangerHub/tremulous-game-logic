@@ -699,6 +699,9 @@ typedef struct centity_s
   int                   buildFireTime; // used for the ckit flash
   weaponMode_t          buildFireMode;
 
+  qboolean              invincible;
+  int                   invincibleTime;
+
   qboolean              valid;
   qboolean              oldValid;
   struct centity_s      *nextLocation;
@@ -1349,8 +1352,10 @@ typedef struct
 
   sfxHandle_t alienEvolveSound;
 
-  sfxHandle_t alienInvincibleShader;
-  sfxHandle_t humanInvincibleShader;
+  qhandle_t   alienInvincibleShader;
+  qhandle_t   alienInvincibleViewShader;
+  qhandle_t   humanInvincibleShader;
+  qhandle_t   humanInvincibleViewShader;
 
   qhandle_t   humanBuildableDamagedPS;
   qhandle_t   humanBuildableDestroyedPS;
@@ -1663,6 +1668,8 @@ extern  vmCvar_t    cg_painBlendDownRate;
 extern  vmCvar_t    cg_painBlendMax;
 extern  vmCvar_t    cg_painBlendScale;
 extern  vmCvar_t    cg_painBlendZoom;
+
+extern  vmCvar_t    cg_drawInvincibleVision;
 
 extern  vmCvar_t    cg_stickySpec;
 extern  vmCvar_t    cg_sprintToggle;
