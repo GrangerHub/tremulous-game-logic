@@ -2153,7 +2153,10 @@ void CG_Player( centity_t *cent )
         legs.customShader = cgs.media.humanInvincibleShader;
       else if( ci->team == TEAM_ALIENS )
         legs.customShader = cgs.media.alienInvincibleShader;
-    } else if( cent->evolve )
+    } else if( cent->evolve ||
+               ( ( cg.clientNum == cent->currentState.number ) &&
+                 ( cg.time - cent->evolveTime < 75 ) &&
+                 cg.renderingThirdPerson ) )
     {
       legs.customShader = cgs.media.alienEvolveShader;
     }

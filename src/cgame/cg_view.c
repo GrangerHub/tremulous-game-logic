@@ -309,8 +309,7 @@ void CG_OffsetThirdPersonView( void )
   }
 
   // get and rangecheck cg_thirdPersonRange
-  range = ( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_ALIENS &&
-            ( cg.predictedPlayerEntity.evolve ) ) ? 100 : cg_thirdPersonRange.value;
+  range = cg.predictedPlayerEntity.evolve ? 100 : cg_thirdPersonRange.value;
   if( range > 150.0f ) range = 150.0f;
   if( range < 30.0f ) range = 30.0f;
 
