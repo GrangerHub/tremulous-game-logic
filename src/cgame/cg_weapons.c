@@ -1220,7 +1220,7 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
     if( !gun.hModel )
       gun.hModel = weapon->weaponModel;
 
-    if( cent->currentState.eFlags & EF_INVINCIBLE )
+    if( cent->invincible )
     {
       if( cgs.clientinfo[ cent->currentState.number ].team == TEAM_HUMANS )
         gun.customShader = cgs.media.humanInvincibleShader;
@@ -1229,7 +1229,16 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
     }
   }
   else
+  {
     gun.hModel = weapon->weaponModel;
+    if( cent->invincible )
+    {
+      if( cgs.clientinfo[ cent->currentState.number ].team == TEAM_HUMANS )
+        gun.customShader = cgs.media.humanInvincibleShader;
+      else if( cgs.clientinfo[ cent->currentState.number ].team == TEAM_ALIENS )
+        gun.customShader = cgs.media.alienInvincibleShader;
+    }
+  }
 
   noGunModel = ( ( !ps || cg.renderingThirdPerson ) && weapon->disableIn3rdPerson ) || !gun.hModel;
 

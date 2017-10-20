@@ -3657,6 +3657,46 @@ static void CG_Draw2D( void )
 
 /*
 ===============
+CG_InvincibleVision
+===============
+*/
+static void CG_InvincibleVision( void )
+{
+  vec4_t    color = { 0.0f, 0.0f, 0.0f, 1.0f };
+  qhandle_t shader;
+
+  if( cg.renderingThirdPerson ||
+      cg.snap->ps.persistant[ PERS_SPECSTATE ] != SPECTATOR_NOT ||
+      !cg_drawInvincibleVision.integer )
+    return;
+
+  if( cg.snap->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
+    shader = cgs.media.humanInvincibleViewShader;
+  else if( cg.snap->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
+    shader = cgs.media.alienInvincibleViewShader;
+
+  if( cg.predictedPlayerEntity.invincible )
+  {
+    if( cg.time - cg.predictedPlayerEntity.invincibleTime >= 500 )
+      color[ 3 ] = 1.0f;
+    else
+    {
+      color[ 3 ] = ( (float)( cg.time - cg.predictedPlayerEntity.invincibleTime ) ) / 500.0f;
+    }
+  } else if( cg.time - cg.predictedPlayerEntity.invincibleTime < 500 )
+  {
+    color[ 3 ] = ( (float)( 500 - ( cg.time - cg.predictedPlayerEntity.invincibleTime ) ) ) / 500.0f;
+    
+  } else
+    return;
+
+  trap_R_SetColor( color );
+  CG_DrawPic( 0, 0, 640, 480, shader );
+  trap_R_SetColor( NULL );
+}
+
+/*
+===============
 CG_ScalePainBlendTCs
 ===============
 */
@@ -3902,6 +3942,10 @@ void CG_DrawActive( stereoFrame_t stereoView )
   // restore original viewpoint if running stereo
   if( separation != 0 )
     VectorCopy( baseOrg, cg.refdef.vieworg );
+
+  //for invincible players to know that they are invincible
+  CG_InvincibleVision( );
+
 
   // first person blend blobs, done after AnglesToAxis
   if( !cg.renderingThirdPerson )

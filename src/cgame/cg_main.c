@@ -222,6 +222,8 @@ vmCvar_t  cg_painBlendMax;
 vmCvar_t  cg_painBlendScale;
 vmCvar_t  cg_painBlendZoom;
 
+vmCvar_t  cg_drawInvincibleVision;
+
 vmCvar_t  cg_stickySpec;
 vmCvar_t  cg_sprintToggle;
 vmCvar_t  cg_unlagged;
@@ -371,6 +373,8 @@ static cvarTable_t cvarTable[ ] =
   { &cg_painBlendMax, "cg_painBlendMax", "0.7", 0 },
   { &cg_painBlendScale, "cg_painBlendScale", "7.0", 0 },
   { &cg_painBlendZoom, "cg_painBlendZoom", "0.65", 0 },
+
+  { &cg_drawInvincibleVision, "cg_drawInvincibleVision", "1", 0 },
   
   { &cg_debugVoices, "cg_debugVoices", "0", 0 },
 
@@ -1031,7 +1035,9 @@ static void CG_RegisterGraphics( void )
   cgs.media.wakeMarkShader            = trap_R_RegisterShader( "gfx/marks/wake" );
 
   cgs.media.alienInvincibleShader     = trap_R_RegisterShader( "gfx/misc/aspawned" );
+  cgs.media.alienInvincibleViewShader = trap_R_RegisterShader( "gfx/misc/aspawn_view" );
   cgs.media.humanInvincibleShader     = trap_R_RegisterShader( "gfx/misc/hspawned" );
+  cgs.media.humanInvincibleViewShader = trap_R_RegisterShader( "gfx/misc/hspawn_view" );
 
   cgs.media.poisonCloudPS             = CG_RegisterParticleSystem( "firstPersonPoisonCloudPS" );
   cgs.media.poisonCloudedPS           = CG_RegisterParticleSystem( "poisonCloudedPS" );
