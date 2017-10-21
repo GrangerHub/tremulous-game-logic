@@ -2126,7 +2126,7 @@ void CG_BuildFire( entityState_t *es )
 {
   centity_t     *builder;
 
-  if( es->otherEntityNum == cg.clientNum )
+  if( es->otherEntityNum == cg.predictedPlayerState.clientNum )
     builder = &cg.predictedPlayerEntity;
   else
     builder = &cg_entities[ es->otherEntityNum ];
