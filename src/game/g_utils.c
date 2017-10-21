@@ -1335,7 +1335,7 @@ void G_SetExpiration( gentity_t *ent, expire_t index, int expiration )
               "G_Expired: expire_t out of bounds" );
 
   if( ent )
-    ent->expireTimes[ index ] = expiration;
+    ent->expireTimes[ index ] = expiration + level.time;
   else
-    level.expireTimes[ index ] = expiration;
+    level.expireTimes[ index ] = expiration + level.time;
 }
