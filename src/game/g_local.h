@@ -83,6 +83,22 @@ typedef enum
 
 /*
 --------------------------------------------------------------------------------
+To create a new expiration timer, add a new member to the expire_t enum below.
+Expiration timers are set by G_SetExpiration(), and are checked by G_Expired().
+*/
+typedef enum
+{
+  EXP_SPAWN_BLOCK,
+  EXP_MAP_PRINT,
+  EXP_READY,
+  EXP_PORTAL_EFFECT,
+  EXP_TELEPORTER_ALERTS,
+
+  NUM_EXPIRE_TYPES
+} expire_t;
+
+/*
+--------------------------------------------------------------------------------
 */
 
 typedef struct{
@@ -146,6 +162,8 @@ struct gentity_s
   char              *message;
 
   int               timestamp;      // body queue sinking, etc
+
+  int               expireTimes[ NUM_EXPIRE_TYPES ]; // used by G_Expired()
 
   char              *target;
   char              *targetname;
@@ -716,6 +734,8 @@ typedef struct
 
   int               startTime;                    // level.time the map was started
 
+  int               expireTimes[ NUM_EXPIRE_TYPES ]; // used by G_Expired()
+
   int               extendTimeLimit;              // set the time limit to level.matchBaseTimeLimit + this value
   int               extendVoteCount;
   int               matchBaseTimeLimit;
@@ -1145,6 +1165,9 @@ void        G_Entity_id_set(gentity_id *id,gentity_t *target);
 gentity_t   *G_Entity_id_get(gentity_id *id);
 
 void        G_SetPlayersLinkState( qboolean link, gentity_t *skipPlayer );
+
+qboolean    G_Expired( gentity_t *ent, expire_t index );
+void        G_SetExpiration( gentity_t *ent, expire_t index, int expiration );
 //
 // g_combat.c
 //

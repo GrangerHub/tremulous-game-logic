@@ -271,14 +271,19 @@ static void G_PuntBlocker( gentity_t *self, gentity_t *blocker )
 
       VectorAdd( blockers[ i ]->client->ps.velocity, nudge,
                  blockers[ i ]->client->ps.velocity );
-      if( self->s.modelindex == BA_H_TELEPORTER )
-        SV_GameSendServerCommand( blockers[ i ] - g_entities,
-                                  va( "cp \"Don't block teleporters!\" %d",
-                                  CP_SPAWN_BLOCK ) );
-      else
-        SV_GameSendServerCommand( blockers[ i ] - g_entities,
-                                  va( "cp \"Don't spawn block!\" %d",
-                                  CP_SPAWN_BLOCK ) );
+      if( G_Expired( blocker, EXP_SPAWN_BLOCK ) )
+      {
+        if( self->s.modelindex == BA_H_TELEPORTER )
+          SV_GameSendServerCommand( blockers[ i ] - g_entities,
+                                    va( "cp \"Don't block teleporters!\" %d",
+                                    CP_SPAWN_BLOCK ) );
+        else
+          SV_GameSendServerCommand( blockers[ i ] - g_entities,
+                                    va( "cp \"Don't spawn block!\" %d",
+                                    CP_SPAWN_BLOCK ) );
+
+        G_SetExpiration( blocker, EXP_SPAWN_BLOCK, 1000 );
+      }
     } else if( blockers[ i ]->noTriggerHurtDmgTime <= level.time )
     {
       // damage enemy blockers
@@ -2706,27 +2711,39 @@ qboolean HTeleporter_Activate( gentity_t *self, gentity_t *activator )
         self->occupation.other->occupation.occupant !=
                                                 self->occupation.occupantFound )
     {
-      SV_GameSendServerCommand( activator - g_entities,
-                              va( "cp \"^3Destination teleporter currently in use! Please stand by for teleportation!\" %d",
-                              CP_TELEPORT ) );
+      if( G_Expired( activator, EXP_TELEPORTER_ALERTS ) )
+      {
+        SV_GameSendServerCommand( activator - g_entities,
+                                va( "cp \"^3Destination teleporter currently in use! Please stand by for teleportation!\" %d",
+                                CP_TELEPORT ) );
+        G_SetExpiration( activator, EXP_TELEPORTER_ALERTS, 1000 );
+      }
       return qtrue;
     }
 
     if( self->teleportation.coolDown >= level.time ||
         self->occupation.other->teleportation.coolDown >= level.time )
     {
-      SV_GameSendServerCommand( activator - g_entities,
-                              va( "cp \"^3Teleporters cooling down! Please stand by for teleportation!\" %d",
-                              CP_TELEPORT ) );
+      if( G_Expired( activator, EXP_TELEPORTER_ALERTS ) )
+      {
+        SV_GameSendServerCommand( activator - g_entities,
+                                va( "cp \"^3Teleporters cooling down! Please stand by for teleportation!\" %d",
+                                CP_TELEPORT ) );
+        G_SetExpiration( activator, EXP_TELEPORTER_ALERTS, 1000 );
+      }
       return qtrue;
     }
 
     if( self->teleportation.blocker && self->teleportation.blocker->client )
     {
       self->occupation.other->attemptSpawnTime = level.time + 1000;
-      SV_GameSendServerCommand( activator - g_entities,
-                              va( "cp \"^3Removing a blocker! Please stand by for teleportation!\" %d",
-                              CP_TELEPORT ) );
+      if( G_Expired( activator, EXP_TELEPORTER_ALERTS ) )
+      {
+        SV_GameSendServerCommand( activator - g_entities,
+                                va( "cp \"^3Removing a blocker! Please stand by for teleportation!\" %d",
+                                CP_TELEPORT ) );
+        G_SetExpiration( activator, EXP_TELEPORTER_ALERTS, 1000 );
+      }
       return qtrue;
     }
 
