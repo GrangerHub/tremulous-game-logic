@@ -220,9 +220,14 @@ static void G_PuntBlocker( gentity_t *self, gentity_t *blocker )
   nudge[ 2 ] = 175.0f;
 
   VectorAdd( blocker->client->ps.velocity, nudge, blocker->client->ps.velocity );
-  SV_GameSendServerCommand( blocker - g_entities,
-                          va( "cp \"Don't spawn block!\" %d",
-                          CP_SPAWN_BLOCK ) );
+  if( G_Expired( blocker, EXP_SPAWN_BLOCK ) )
+  {
+    SV_GameSendServerCommand( blocker - g_entities,
+                            va( "cp \"Don't spawn block!\" %d",
+                            CP_SPAWN_BLOCK ) );
+    G_SetExpiration( blocker, EXP_SPAWN_BLOCK, 1000 );
+  }
+  
 }
 
 #define POWER_REFRESH_TIME  2000

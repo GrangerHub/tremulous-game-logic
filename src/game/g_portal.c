@@ -36,8 +36,15 @@ Cool effects for the portals when they are used or cleared
 static void G_Portal_Effect( portal_t portalindex, float speedMod )
 {
 	gentity_t *portal = level.humanPortals.portals[portalindex];
-	gentity_t *effect = G_Spawn( );
+	gentity_t *effect;
 	int       speed = (int)((float)(PORTALGUN_SPEED) * speedMod);
+	
+	if( !G_Expired( portal, EXP_PORTAL_EFFECT ) )
+		return;
+
+	G_SetExpiration( portal, EXP_PORTAL_EFFECT, 1000 );
+
+	effect = G_Spawn( );
 
 	VectorCopy( portal->r.currentOrigin , effect->r.currentOrigin );
 	effect->s.eType = ET_MISSILE;

@@ -1282,3 +1282,51 @@ void G_SetPlayersLinkState( qboolean link, gentity_t *skipPlayer )
     }
   }
 }
+
+/*
+================
+G_Expired
+
+Checks to see if an expireTimes time stamp expired.  If ent is null, Checks
+the level expireTimes.  New expiration timers can be created by adding a new
+member to the expire_t enum in g_local.h
+================
+*/
+
+qboolean G_Expired( gentity_t *ent, expire_t index )
+{
+  int expireTime;
+
+  Com_Assert( ( index < NUM_EXPIRE_TYPES ) && ( index >= 0 ) &&
+              "G_Expired: expire_t out of bounds" );
+
+  if( ent )
+    expireTime = ent->expireTimes[ index ];
+  else
+    expireTime = level.expireTimes[ index ];
+
+  if( expireTime < level.time )
+    return qtrue;
+
+  return qfalse;
+}
+
+/*
+================
+G_SetExpiration
+
+Sets the expirationTimes for a given entity.  If ent is NULL, expirationTime for
+the level is used.
+================
+*/
+
+void G_SetExpiration( gentity_t *ent, expire_t index, int expiration )
+{
+  Com_Assert( ( index < NUM_EXPIRE_TYPES ) && ( index >= 0 ) &&
+              "G_Expired: expire_t out of bounds" );
+
+  if( ent )
+    ent->expireTimes[ index ] = expiration;
+  else
+    level.expireTimes[ index ] = expiration;
+}
