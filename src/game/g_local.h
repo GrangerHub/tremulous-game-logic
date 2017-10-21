@@ -92,6 +92,7 @@ typedef enum
   EXP_MAP_PRINT,
   EXP_READY,
   EXP_PORTAL_EFFECT,
+  EXP_PORTAL_PARTICLES,
 
   NUM_EXPIRE_TYPES
 } expire_t;

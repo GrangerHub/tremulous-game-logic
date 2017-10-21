@@ -38,11 +38,11 @@ static void G_Portal_Effect( portal_t portalindex, float speedMod )
 	gentity_t *portal = level.humanPortals.portals[portalindex];
 	gentity_t *effect;
 	int       speed = (int)((float)(PORTALGUN_SPEED) * speedMod);
-	
+
 	if( !G_Expired( portal, EXP_PORTAL_EFFECT ) )
 		return;
 
-	G_SetExpiration( portal, EXP_PORTAL_EFFECT, 1000 );
+	G_SetExpiration( portal, EXP_PORTAL_PARTICLES, 500 );
 
 	effect = G_Spawn( );
 
@@ -61,7 +61,13 @@ static void G_Portal_Effect( portal_t portalindex, float speedMod )
   VectorScale( portal->s.origin2, speed, effect->s.pos.trDelta );
   SnapVector( effect->s.pos.trDelta );      // save net bandwidth
 
-	G_AddEvent( effect, EV_MISSILE_MISS, DirToByte( portal->s.origin2 ) );
+	if( G_Expired( portal, EXP_PORTAL_PARTICLES ) )
+	{
+		G_AddEvent( effect, EV_MISSILE_MISS, DirToByte( portal->s.origin2 ) );
+		G_SetExpiration( portal, EXP_PORTAL_PARTICLES, 1000 );
+	} else
+		G_AddEvent( effect, EV_MISSILE_HIT, DirToByte( portal->s.origin2 ) );
+
 	effect->freeAfterEvent = qtrue;
 	SV_LinkEntity( effect );
 }
