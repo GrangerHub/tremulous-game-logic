@@ -96,7 +96,7 @@ void Use_Target_Print( gentity_t *ent, gentity_t *other, gentity_t *activator )
       SV_GameSendServerCommand( activator-g_entities,
                               va( "cp \"%s\" %d",
                                   ent->message, CP_MAP ) );
-      G_SetExpiration( activator, EXP_MAP_PRINT, 1000 );
+      G_SetExpiration( activator, EXP_MAP_PRINT, 500 );
     }
     return;
   }
@@ -104,7 +104,7 @@ void Use_Target_Print( gentity_t *ent, gentity_t *other, gentity_t *activator )
   if( !G_Expired( ent, EXP_MAP_PRINT ) )
     return;
 
-  G_SetExpiration( ent, EXP_MAP_PRINT, 1000 );
+  G_SetExpiration( ent, EXP_MAP_PRINT, 500 );
 
   if( ent->spawnflags & 3 )
   {
