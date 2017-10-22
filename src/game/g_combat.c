@@ -260,6 +260,7 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
   for( i = 0; i < level.maxclients; i++ )
   {
     int stageValue = value * ( *credits )[ i ] / totalDamage;
+    int j;
     team_t playersTeam;
 
     player = g_entities + i;
@@ -306,17 +307,17 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
         player->client->ps.misc[ MISC_HEALTH_RESERVE ] = player->healthReserve;
       }
 
-      for( i = 0; i < level.maxclients; i++ )
+      for( j = 0; j < level.maxclients; j++ )
       {
-        if( level.clients[ i ].pers.connected == CON_CONNECTED &&
-            level.clients[ i ].pers.teamSelection != TEAM_NONE )
+        if( level.clients[ j ].pers.connected == CON_CONNECTED &&
+            level.clients[ j ].pers.teamSelection != TEAM_NONE )
         {
           //distribute the team specific earnings
-          if( level.clients[ i ].pers.teamSelection == playersTeam )
-            G_AddCreditToClient( &level.clients[ i ], playersTeamDistributionEarnings, qtrue );
+          if( level.clients[ j ].pers.teamSelection == playersTeam )
+            G_AddCreditToClient( &level.clients[ j ], playersTeamDistributionEarnings, qtrue );
 
           //distribute the earnings common to everyone playing
-          G_AddCreditToClient( &level.clients[ i ], everyonesDistributionEarnings, qtrue );
+          G_AddCreditToClient( &level.clients[ j ], everyonesDistributionEarnings, qtrue );
         }
       }
 
