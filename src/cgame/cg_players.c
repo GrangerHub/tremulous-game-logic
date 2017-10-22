@@ -2040,7 +2040,7 @@ void CG_Player( centity_t *cent )
   {
     if( cent->invincible )
     {
-      cent->invincible = cg.time;
+      cent->invincibleTime = cg.time;
       cent->invincible = qfalse;
     }
   }

@@ -1081,6 +1081,8 @@ static void CG_RegisterGraphics( void )
   cgs.media.jetPackHoverPS            = CG_RegisterParticleSystem( "jetPackHoverPS" );
   cgs.media.jetPackAscendPS           = CG_RegisterParticleSystem( "jetPackAscendPS" );
 
+  cgs.media.helmetViewShader          = trap_R_RegisterShader( "gfx/misc/helmet_view" );
+
   cgs.media.humanBuildableDamagedPS   = CG_RegisterParticleSystem( "humanBuildableDamagedPS" );
   cgs.media.alienBuildableDamagedPS   = CG_RegisterParticleSystem( "alienBuildableDamagedPS" );
   cgs.media.humanBuildableDestroyedPS = CG_RegisterParticleSystem( "humanBuildableDestroyedPS" );
