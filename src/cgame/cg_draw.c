@@ -714,6 +714,56 @@ static void CG_DrawAlienSense( rectDef_t *rect )
     CG_AlienSense( rect );
 }
 
+/*
+===============
+CG_HelmetVision
+===============
+*/
+static void CG_HelmetVision( void )
+{
+  vec4_t    color = { 0.0f, 0.0f, 0.0f, 1.0f };
+
+  if( BG_InventoryContainsUpgrade( UP_HELMET, cg.snap->ps.stats ) &&
+      !cg.intermissionStarted )
+  {
+    if( !cg.predictedPlayerEntity.helmetVision )
+    {
+      cg.predictedPlayerEntity.helmetVisionTime = cg.time;
+      cg.predictedPlayerEntity.helmetVision = qtrue;
+    }
+  }
+  else
+  {
+    if( cg.predictedPlayerEntity.helmetVision )
+    {
+      cg.predictedPlayerEntity.helmetVisionTime = cg.time;
+      cg.predictedPlayerEntity.helmetVision = qfalse;
+    }
+  }
+
+  if( cg.renderingThirdPerson ||
+      cg.snap->ps.persistant[ PERS_SPECSTATE ] != SPECTATOR_NOT )
+    return;
+
+  if( cg.predictedPlayerEntity.helmetVision )
+  {
+    if( cg.time - cg.predictedPlayerEntity.helmetVisionTime >= 500 )
+      color[ 3 ] = 1.0f;
+    else
+    {
+      color[ 3 ] = ( (float)( cg.time - cg.predictedPlayerEntity.helmetVisionTime ) ) / 500.0f;
+    }
+  } else if( cg.time - cg.predictedPlayerEntity.helmetVisionTime < 500 )
+  {
+    color[ 3 ] = ( (float)( 500 - ( cg.time - cg.predictedPlayerEntity.helmetVisionTime ) ) ) / 500.0f;
+    
+  } else
+    return;
+
+  trap_R_SetColor( color );
+  CG_DrawPic( 0, 0, 640, 480, cgs.media.helmetViewShader );
+  trap_R_SetColor( NULL );
+}
 
 /*
 ==============
@@ -3946,6 +3996,7 @@ void CG_DrawActive( stereoFrame_t stereoView )
   //for invincible players to know that they are invincible
   CG_InvincibleVision( );
 
+  CG_HelmetVision();
 
   // first person blend blobs, done after AnglesToAxis
   if( !cg.renderingThirdPerson )

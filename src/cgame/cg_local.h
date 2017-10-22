@@ -697,6 +697,9 @@ typedef struct centity_s
   int                   buildFireTime; // used for the ckit flash
   weaponMode_t          buildFireMode;
 
+  qboolean              helmetVision;
+  int                   helmetVisionTime;
+
   qboolean              invincible;
   int                   invincibleTime;
 
@@ -1290,6 +1293,8 @@ typedef struct
   qhandle_t   jetPackDescendPS;
   qhandle_t   jetPackHoverPS;
   qhandle_t   jetPackAscendPS;
+
+  qhandle_t   helmetViewShader;
 
   sfxHandle_t medkitUseSound;
 
