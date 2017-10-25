@@ -4447,7 +4447,9 @@ void PmoveSingle( pmove_t *pmove )
         pm->ps->stats[ STAT_STATE ] & SS_GRABBED ) &&
       !(pm->ps->pm_flags & PMF_JUMP_HELD) &&
       pm->ps->stats[ STAT_FUEL ] > JETPACK_FUEL_MIN_START &&
-      pm->ps->pm_type == PM_NORMAL &&
+      ( pm->ps->pm_type == PM_NORMAL || 
+        ( pm->ps->pm_type == PM_GRABBED && 
+          pm->ps->stats[ STAT_STATE ] & SS_GRABBED ) ) &&
       !pml.ladder )
   {
     BG_ActivateUpgrade( UP_JETPACK, pm->ps->stats );
