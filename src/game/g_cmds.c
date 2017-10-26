@@ -2376,9 +2376,8 @@ void Cmd_Class_f( gentity_t *ent )
           if( ent->client->ps.stats[ STAT_STATE ] & SS_BOOSTED )
             oldBoostTime = ent->client->boostedTime;
 
-          // end damage and target protection early
+          // end damage protection early
           ent->dmgProtectionTime = 0;
-          ent->targetProtectionTime = 0;
 
           ClientSpawn( ent, ent, ent->s.pos.trBase, ent->s.apos.trBase );
 
