@@ -783,15 +783,19 @@ typedef struct
 
   qhandle_t   legsModel;
   qhandle_t   legsSkin;
+  qhandle_t   corpseLegsSkin;
 
   qhandle_t   torsoModel;
   qhandle_t   torsoSkin;
+  qhandle_t   corpseTorsoSkin;
 
   qhandle_t   headModel;
   qhandle_t   headSkin;
+  qhandle_t   corpseHeadSkin;
 
   qhandle_t   nonSegModel;                //non-segmented model system
   qhandle_t   nonSegSkin;                 //non-segmented model system
+  qhandle_t   corpseNonSegSkin;           //non-segmented model system
 
   qhandle_t   modelIcon;
 

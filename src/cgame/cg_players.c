@@ -422,6 +422,42 @@ static qboolean CG_RegisterClientSkin( clientInfo_t *ci, const char *modelName, 
 
 /*
 ==========================
+CG_RegisterClientCorpseSkin
+==========================
+*/
+static void CG_RegisterClientCorpseSkin( clientInfo_t *ci, const char *modelName, const char *skinName )
+{
+  char filename[ MAX_QPATH ];
+
+  if( !ci->nonsegmented )
+  {
+    Com_sprintf( filename, sizeof( filename ), "models/players/%s/corpse_lower_%s.skin", modelName, skinName );
+    ci->corpseLegsSkin = trap_R_RegisterSkin( filename );
+    if( !ci->corpseLegsSkin )
+      ci->corpseLegsSkin = ci->legsSkin;
+
+    Com_sprintf( filename, sizeof( filename ), "models/players/%s/corpse_upper_%s.skin", modelName, skinName );
+    ci->corpseTorsoSkin = trap_R_RegisterSkin( filename );
+    if( !ci->corpseTorsoSkin )
+      ci->corpseTorsoSkin = ci->torsoSkin;
+
+    Com_sprintf( filename, sizeof( filename ), "models/players/%s/corpse_head_%s.skin", modelName, skinName );
+    ci->corpseHeadSkin = trap_R_RegisterSkin( filename );
+    if( !ci->corpseHeadSkin )
+      ci->corpseHeadSkin = ci->headSkin;
+  }
+  else
+  {
+    Com_sprintf( filename, sizeof( filename ), "models/players/%s/corpse_nonseg_%s.skin", modelName, skinName );
+    ci->corpseNonSegSkin = trap_R_RegisterSkin( filename );
+    if( !ci->corpseNonSegSkin )
+      ci->corpseNonSegSkin = ci->nonSegSkin;
+
+  }
+}
+
+/*
+==========================
 CG_RegisterClientModelname
 ==========================
 */
@@ -486,8 +522,10 @@ static qboolean CG_RegisterClientModelname( clientInfo_t *ci, const char *modelN
     {
         Com_Printf( "^1Failed to load default skin file!\n" );
         return qfalse;
-    }
-  }
+    } else
+      CG_RegisterClientCorpseSkin( ci, modelName, "default" );
+  } else
+    CG_RegisterClientCorpseSkin( ci, modelName, skinName );
 
   return qtrue;
 }
@@ -2532,12 +2570,12 @@ void CG_Corpse( centity_t *cent )
   if( !ci->nonsegmented )
   {
     legs.hModel = ci->legsModel;
-    legs.customSkin = ci->legsSkin;
+    legs.customSkin = ci->corpseLegsSkin;
   }
   else
   {
     legs.hModel = ci->nonSegModel;
-    legs.customSkin = ci->nonSegSkin;
+    legs.customSkin = ci->corpseNonSegSkin;
   }
 
   VectorCopy( origin, legs.origin );
@@ -2580,7 +2618,7 @@ void CG_Corpse( centity_t *cent )
     if( !torso.hModel )
       return;
 
-    torso.customSkin = ci->torsoSkin;
+    torso.customSkin = ci->corpseTorsoSkin;
 
     VectorCopy( origin, torso.lightingOrigin );
 
@@ -2603,7 +2641,7 @@ void CG_Corpse( centity_t *cent )
     if( !head.hModel )
       return;
 
-    head.customSkin = ci->headSkin;
+    head.customSkin = ci->corpseHeadSkin;
 
     VectorCopy( origin, head.lightingOrigin );
 
