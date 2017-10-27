@@ -242,9 +242,13 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
     // only give partial credits for a buildable not yet completed
     if( !self->spawned )
     {
-      value *= ( BG_Buildable( self->s.modelindex )->buildTime - 
-                 self->buildProgress ) /
-               BG_Buildable( self->s.modelindex )->buildTime;
+      if( self->buildableTeam == TEAM_HUMANS )
+        value = ( value * ( BG_Buildable( self->s.modelindex )->buildTime - 
+                            self->buildProgress ) ) /
+                 BG_Buildable( self->s.modelindex )->buildTime;
+      else if( self->buildableTeam == TEAM_ALIENS )
+        value = ( value * ( level.time - self->buildTime ) ) /
+                 BG_Buildable( self->s.modelindex )->buildTime;
     }
 
     team = self->buildableTeam;
