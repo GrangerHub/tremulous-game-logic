@@ -3985,6 +3985,7 @@ char *eventnames[ ] =
 
   "EV_GIB_PLAYER",
   "EV_GIB_BSUIT",
+  "EV_GIB_SPITFIRE_WINGS",
 
   "EV_BUILD_FIRE",
   "EV_BUILD_CONSTRUCT",

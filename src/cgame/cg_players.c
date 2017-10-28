@@ -2710,6 +2710,41 @@ void CG_GibBsuit( vec3_t origin, vec3_t dir )
   }
 }
 
+/*
+===================
+CG_GibSpitfireWings
+
+Detach the spitfire's wings
+===================
+*/
+void CG_GibSpitfireWings( vec3_t origin, vec3_t dir )
+{
+  particleSystem_t  *gibsPS;
+  particleSystem_t *poofPS;
+
+  trap_S_StartSound( origin, ENTITYNUM_WORLD, CHAN_AUTO, cgs.media.airpounceSound );
+
+  //wing gibs particle system
+  gibsPS = CG_SpawnNewParticleSystem( cgs.media.spitfireWingsGibPS );
+
+  if( CG_IsParticleSystemValid( &gibsPS ) )
+  {
+    CG_SetAttachmentPoint( &gibsPS->attachment, origin );
+    CG_SetParticleSystemNormal( gibsPS, dir );
+    CG_AttachToPoint( &gibsPS->attachment );
+  }
+
+  //one last poof
+  poofPS = CG_SpawnNewParticleSystem( cgs.media.airpounceblast );
+
+  if( CG_IsParticleSystemValid( &poofPS ) )
+  {
+    CG_SetAttachmentPoint( &poofPS->attachment, origin );
+    CG_SetParticleSystemNormal( poofPS, dir );
+    CG_AttachToPoint( &poofPS->attachment );
+  }
+}
+
 //=====================================================================
 
 /*

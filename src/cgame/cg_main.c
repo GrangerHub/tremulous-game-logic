@@ -1100,6 +1100,8 @@ static void CG_RegisterGraphics( void )
   cgs.media.weakArmorPS               = CG_RegisterParticleSystem( "humanWeakArmorPS" );
   cgs.media.weakBsuitShader           = trap_R_RegisterShader( "models/fx/bsuit_gibs/bsuitgibs" );
 
+  cgs.media.spitfireWingsGibPS        = CG_RegisterParticleSystem( "spitfireWingsGibsPS" );
+
   cgs.media.sphereModel               = trap_R_RegisterModel( "models/generic/sphere" );
   cgs.media.sphericalCone64Model      = trap_R_RegisterModel( "models/generic/sphericalCone64" );
   cgs.media.sphericalCone240Model     = trap_R_RegisterModel( "models/generic/sphericalCone240" );

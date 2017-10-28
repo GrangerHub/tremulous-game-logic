@@ -464,7 +464,7 @@ just like the existing corpse to leave behind.
 */
 static void SpawnCorpse( gentity_t *ent )
 {
-  gentity_t   *body;
+  gentity_t   *body, *tent;
   int         contents;
   vec3_t      origin, mins;
 
@@ -572,6 +572,15 @@ static void SpawnCorpse( gentity_t *ent )
   body->s.pos.trType = TR_GRAVITY;
   body->s.pos.trTime = level.time;
   VectorCopy( ent->client->ps.velocity, body->s.pos.trDelta );
+
+  // special case for the spitfire's wings to fly off
+  if( body->s.clientNum == PCL_ALIEN_SPITFIRE )
+  {
+    vec3_t up;
+    AngleVectors( body->r.currentAngles, NULL, NULL, up);
+    tent = G_TempEntity( body->r.currentOrigin, EV_GIB_SPITFIRE_WINGS );
+    VectorCopy( up, tent->s.origin2 );
+  }
 
   SV_LinkEntity( body );
 }

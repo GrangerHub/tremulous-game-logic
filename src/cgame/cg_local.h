@@ -1418,6 +1418,8 @@ typedef struct
   qhandle_t   weakArmorPS;
   qhandle_t   weakBsuitShader;
 
+  qhandle_t   spitfireWingsGibPS;
+
   qhandle_t   teslaZapTS;
   qhandle_t   slimeZungeTS;
 
@@ -1871,6 +1873,7 @@ void        CG_PlayerEntered( void );
 void        CG_Bleed( vec3_t origin, vec3_t normal, int entityNum );
 void        CG_GibPlayer( vec3_t origin, vec3_t dir );
 void        CG_GibBsuit( vec3_t origin, vec3_t dir );
+void        CG_GibSpitfireWings( vec3_t origin, vec3_t dir );
 centity_t   *CG_GetPlayerLocation( void );
 
 //

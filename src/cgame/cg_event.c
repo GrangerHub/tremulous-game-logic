@@ -991,6 +991,10 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       CG_GibBsuit( position, es->origin2 );
       break;
 
+    case EV_GIB_SPITFIRE_WINGS:
+      CG_GibSpitfireWings( position, es->origin2 );
+      break;
+
     case EV_STOPLOOPINGSOUND:
       trap_S_StopLoopingSound( es->number );
       es->loopSound = 0;
