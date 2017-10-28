@@ -545,10 +545,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LCANNON_SIZE                5        // missile bounding box radius
 #define LCANNON_SECONDARY_DAMAGE    HDM( LCANNON_DAMAGE / LCANNON_CHARGE_AMMO )
 #define LCANNON_SECONDARY_RADIUS    75       // secondary splash damage radius
-#define LCANNON_SECONDARY_SPEED     700
+#define LCANNON_SECONDARY_SPEED     900
 #define LCANNON_SECONDARY_RELOAD    2000
 #define LCANNON_SECONDARY_REPEAT    500
-#define LCANNON_SPEED_MIN           350
+#define LCANNON_SPEED_MIN           550
 #define LCANNON_CHARGE_TIME_MAX     2000
 #define LCANNON_CHARGE_TIME_MIN     400
 #define LCANNON_CHARGE_TIME_WARN    ( LCANNON_CHARGE_TIME_MAX - ( 2000 / 3 ) )
