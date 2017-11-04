@@ -3639,7 +3639,10 @@ static void CG_DrawCountdown( void )
   else
     Q_strncpyz( text, "Countdown to Battle:", sizeof( text ) );
 
-  sec = ( cg.countdownTime - cg.time ) / 1000;
+  if( cgs.warmup )
+    sec = ( cg.time - cg.countdownTime ) / 1000;
+  else
+    sec = ( cg.countdownTime - cg.time ) / 1000;
 
   if( sec < 0 )
     return;

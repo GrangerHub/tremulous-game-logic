@@ -1992,6 +1992,11 @@ void Cmd_Ready_f( gentity_t *ent )
     SV_GameSendServerCommand( ent-g_entities,
       va( "print \"%s: game is no longer in warmup\n\"", cmd ) );
     return;
+  }else if( g_doWarmupCountdown.integer && level.countdownTime )
+  {
+    SV_GameSendServerCommand( ent-g_entities,
+      va( "print \"%s: ready or not, warmup is ending\n\"", cmd ) );
+    return;
   }
 
   // update client readiness
