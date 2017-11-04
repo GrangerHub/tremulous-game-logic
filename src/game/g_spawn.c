@@ -624,7 +624,8 @@ void SP_worldspawn( void )
     level.countdownTime = level.startTime + ( g_countdown.integer * 1000 );
     SV_SetConfigstring( CS_COUNTDOWN, va( "%i", level.countdownTime ) );
     G_LogPrintf( "Countdown: %i\n", g_countdown.integer );
-  }
+  } else
+    level.countdownTime = 0;
 
 }
 

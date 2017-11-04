@@ -53,6 +53,7 @@ vmCvar_t  g_suddenDeathTime;
 vmCvar_t  g_warmup;
 vmCvar_t  g_warmupTimers;
 vmCvar_t  g_doWarmup;
+vmCvar_t  g_doWarmupCountdown;
 vmCvar_t  g_warmupReadyThreshold;
 vmCvar_t  g_warmupTimeout1;
 vmCvar_t  g_warmupTimeout1Trigger;
@@ -203,6 +204,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_warmup, "g_warmup", "1", 0, 0, qfalse },
   { &g_warmupTimers, "g_warmupTimers", "", CVAR_ROM, 0, qfalse },
   { &g_doWarmup, "g_doWarmup", "1", CVAR_ARCHIVE, 0, qtrue  },
+  { &g_doWarmupCountdown, "g_doWarmupCountdown", "10", CVAR_ARCHIVE, 0, qtrue  },
   { &g_warmupReadyThreshold, "g_warmupReadyThreshold", "50", CVAR_ARCHIVE, 0,
     qtrue },
   { &g_warmupTimeout1, "g_warmupTimeout1", "300", CVAR_ARCHIVE, 0, qtrue },
@@ -775,7 +777,8 @@ Q_EXPORT void G_InitGame( int levelTime, int randomSeed, int restart )
     level.voteType[ i ] = VOID_VOTE;
   }
 
-  level.fight = qtrue;
+  if( !IS_WARMUP )
+    level.fight = qtrue;
 }
 
 /*
@@ -2272,113 +2275,125 @@ void G_LevelReady( void )
   if( g_restartingFlags.integer & RESTART_WARMUP_RESET )
     return;
 
-  // reset number of players ready to zero
-  level.readyToPlay[ TEAM_HUMANS ] = level.readyToPlay[ TEAM_ALIENS ] = 0;
-
-  // update number of clients ready to play
-  for( i = 0; i < level.maxclients; i++ )
+  if( !level.countdownTime )
   {
-    if ( level.clients[ i ].pers.connected != CON_DISCONNECTED )
-    {
-      // spectators are not counted
-      if( level.clients[ i ].pers.teamSelection == TEAM_NONE )
-        continue;
+    // reset number of players ready to zero
+    level.readyToPlay[ TEAM_HUMANS ] = level.readyToPlay[ TEAM_ALIENS ] = 0;
 
-      if( level.clients[ i ].pers.teamSelection == TEAM_ALIENS )
+    // update number of clients ready to play
+    for( i = 0; i < level.maxclients; i++ )
+    {
+      if ( level.clients[ i ].pers.connected != CON_DISCONNECTED )
       {
-        numAliens++;
-        if( level.clients[ i ].sess.readyToPlay )
-          level.readyToPlay[ TEAM_ALIENS ]++;
+        // spectators are not counted
+        if( level.clients[ i ].pers.teamSelection == TEAM_NONE )
+          continue;
+
+        if( level.clients[ i ].pers.teamSelection == TEAM_ALIENS )
+        {
+          numAliens++;
+          if( level.clients[ i ].sess.readyToPlay )
+            level.readyToPlay[ TEAM_ALIENS ]++;
+        }
+        else if( level.clients[ i ].pers.teamSelection == TEAM_HUMANS )
+        {
+          numHumans++;
+          if( level.clients[ i ].sess.readyToPlay )
+            level.readyToPlay[ TEAM_HUMANS ]++;
+        }
       }
-      else if( level.clients[ i ].pers.teamSelection == TEAM_HUMANS )
+    }
+
+    // calculate percentage ready for both teams
+    percentAliens = ( (float) level.readyToPlay[ TEAM_ALIENS ] /
+        ( numAliens > 0 ? (float) numAliens : 1.0 ) ) * 100.0;
+    percentHumans = ( (float) level.readyToPlay[ TEAM_HUMANS ] /
+        ( numHumans > 0 ? (float) numHumans : 1.0 ) ) * 100.0;
+
+    // if cvar g_warmupReadyThreshold is > 50 use it as threshold, if not use 50
+    threshold = g_warmupReadyThreshold.integer > 50 ?
+      (float) g_warmupReadyThreshold.integer : 50.0;
+
+    // default condition for ending warmup is when >= (threshold)% of both teams
+    // are ready
+    startGame = ( percentAliens >= threshold && percentHumans >= threshold );
+
+    // if previous conditions are not met and there are at least
+    // (g_warmupTimeout1Trigger) players who are not spectators, start a
+    // (g_warmupTimeout1) second countdown until warmup timeout
+    if( !startGame && ( numAliens > 0 ) && ( numHumans > 0 ) &&
+        ( numAliens + numHumans ) >= g_warmupTimeout1Trigger.integer )
+    {
+      if( ( level.warmup1Time > -1 ) &&
+          ( level.time - level.warmup1Time ) >= ( g_warmupTimeout1.integer * 1000 ) )
       {
-        numHumans++;
-        if( level.clients[ i ].sess.readyToPlay )
-          level.readyToPlay[ TEAM_HUMANS ]++;
+        startGame = qtrue;
+      }
+      else if ( level.warmup1Time == -1 ) // start countdown
+      {
+        SV_GameSendServerCommand( -1, va( "print \"There are at least %d "
+              " non-spectating players. Pre-game warmup will expire in %d"
+              " seconds.\n\"", g_warmupTimeout1Trigger.integer,
+              g_warmupTimeout1.integer ) );
+        level.warmup1Time = level.time;
       }
     }
-  }
-
-  // calculate percentage ready for both teams
-  percentAliens = ( (float) level.readyToPlay[ TEAM_ALIENS ] /
-      ( numAliens > 0 ? (float) numAliens : 1.0 ) ) * 100.0;
-  percentHumans = ( (float) level.readyToPlay[ TEAM_HUMANS ] /
-      ( numHumans > 0 ? (float) numHumans : 1.0 ) ) * 100.0;
-
-  // if cvar g_warmupReadyThreshold is > 50 use it as threshold, if not use 50
-  threshold = g_warmupReadyThreshold.integer > 50 ?
-    (float) g_warmupReadyThreshold.integer : 50.0;
-
-  // default condition for ending warmup is when >= (threshold)% of both teams
-  // are ready
-  startGame = ( percentAliens >= threshold && percentHumans >= threshold );
-
-  // if previous conditions are not met and there are at least
-  // (g_warmupTimeout1Trigger) players who are not spectators, start a
-  // (g_warmupTimeout1) second countdown until warmup timeout
-  if( !startGame && ( numAliens > 0 ) && ( numHumans > 0 ) &&
-      ( numAliens + numHumans ) >= g_warmupTimeout1Trigger.integer )
-  {
-    if( ( level.warmup1Time > -1 ) &&
-        ( level.time - level.warmup1Time ) >= ( g_warmupTimeout1.integer * 1000 ) )
+    else
     {
-      startGame = qtrue;
+      // reset the 5 minute timeout
+      level.warmup1Time = -1;
     }
-    else if ( level.warmup1Time == -1 ) // start countdown
-    {
-      SV_GameSendServerCommand( -1, va( "print \"There are at least %d "
-            " non-spectating players. Pre-game warmup will expire in %d"
-            " seconds.\n\"", g_warmupTimeout1Trigger.integer,
-            g_warmupTimeout1.integer ) );
-      level.warmup1Time = level.time;
-    }
-  }
-  else
-  {
-    // reset the 5 minute timeout
-    level.warmup1Time = -1;
-  }
 
-  // if previous conditions are not met and at least (g_warmupTimeout2Trigger)%
-  // of players in one team is ready, start a (g_warmupTimeout2) second
-  // countdown until warmup timeout
-  if( !startGame && ( numAliens > 1 ) && ( numHumans > 1 ) &&
-      ( percentAliens >= (float) g_warmupTimeout2Trigger.integer ||
-        percentHumans >= (float) g_warmupTimeout2Trigger.integer ) )
-  {
-    if( ( level.warmup2Time > -1 ) &&
-        ( level.time - level.warmup2Time ) >= ( g_warmupTimeout2.integer * 1000 ) )
+    // if previous conditions are not met and at least (g_warmupTimeout2Trigger)%
+    // of players in one team is ready, start a (g_warmupTimeout2) second
+    // countdown until warmup timeout
+    if( !startGame && ( numAliens > 1 ) && ( numHumans > 1 ) &&
+        ( percentAliens >= (float) g_warmupTimeout2Trigger.integer ||
+          percentHumans >= (float) g_warmupTimeout2Trigger.integer ) )
     {
-      startGame = qtrue;
+      if( ( level.warmup2Time > -1 ) &&
+          ( level.time - level.warmup2Time ) >= ( g_warmupTimeout2.integer * 1000 ) )
+      {
+        startGame = qtrue;
+      }
+      else if ( level.warmup2Time == -1 ) // start countdown
+      {
+        SV_GameSendServerCommand( -1, va( "print \"At least %d percent of players"
+              " in a team have become ready. Pre-game warmup will expire in %d"
+              " seconds.\n\"", g_warmupTimeout2Trigger.integer,
+              g_warmupTimeout2.integer ) );
+        level.warmup2Time = level.time;
+      }
     }
-    else if ( level.warmup2Time == -1 ) // start countdown
+    else
     {
-      SV_GameSendServerCommand( -1, va( "print \"At least %d percent of players"
-            " in a team have become ready. Pre-game warmup will expire in %d"
-            " seconds.\n\"", g_warmupTimeout2Trigger.integer,
-            g_warmupTimeout2.integer ) );
-      level.warmup2Time = level.time;
+      // reset the 1 minute timeout
+      level.warmup2Time = -1;
     }
-  }
-  else
-  {
-    // reset the 1 minute timeout
-    level.warmup2Time = -1;
-  }
 
-  SV_SetConfigstring( CS_WARMUP_READY, va( "%.0f %d %d %.2f %d %d %d %d",
-        percentAliens, level.readyToPlay[ TEAM_ALIENS ], numAliens,
-        percentHumans, level.readyToPlay[ TEAM_HUMANS ], numHumans,
-        ( level.warmup1Time > -1 ?  ( level.time - level.warmup1Time ) / 1000 :
-          -1 ),
-        ( level.warmup2Time > -1 ?  ( level.time - level.warmup2Time ) / 1000 :
-          -1 ) ) );
+    SV_SetConfigstring( CS_WARMUP_READY, va( "%.0f %d %d %.2f %d %d %d %d",
+          percentAliens, level.readyToPlay[ TEAM_ALIENS ], numAliens,
+          percentHumans, level.readyToPlay[ TEAM_HUMANS ], numHumans,
+          ( level.warmup1Time > -1 ?  ( level.time - level.warmup1Time ) / 1000 :
+            -1 ),
+          ( level.warmup2Time > -1 ?  ( level.time - level.warmup2Time ) / 1000 :
+            -1 ) ) );
+  } else
+    startGame = qtrue;
 
   // only continue to start game when conditions are met
   if( !startGame )
     return;
 
-  G_LevelRestart( qtrue );
+  if( g_doWarmupCountdown.integer && !level.countdownTime )
+  {
+    level.countdownTime = level.time + ( g_doWarmupCountdown.integer * 1000 );
+    SV_SetConfigstring( CS_COUNTDOWN, va( "%i", level.countdownTime ) );
+    G_LogPrintf( "Countdown to the End of Warmup: %i\n", g_doWarmupCountdown.integer );
+  }
+
+  if( level.countdownTime <= level.time )
+    G_LevelRestart( qtrue );
 }
 
 /*
@@ -2984,7 +2999,9 @@ Q_EXPORT void G_RunFrame( int levelTime )
   G_UnlaggedStore( );
 
   G_CountSpawns( );
-  if( !g_doCountdown.integer || level.countdownTime <= level.time )
+  if( IS_WARMUP ||
+      !g_doCountdown.integer ||
+      level.countdownTime <= level.time )
   {
     G_CalculateBuildPoints( );
     G_CalculateStages( );
