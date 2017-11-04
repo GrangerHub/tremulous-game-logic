@@ -1289,6 +1289,11 @@ typedef struct
   sfxHandle_t votePassed;
   sfxHandle_t voteFailed;
 
+  sfxHandle_t intermissionDrawSound;
+  sfxHandle_t intermissionLossSound;
+  sfxHandle_t intermissionWinSound;
+  sfxHandle_t warmupEndSound;
+
   sfxHandle_t watrInSound;
   sfxHandle_t watrOutSound;
   sfxHandle_t watrUnSound;

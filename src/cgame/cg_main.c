@@ -858,6 +858,11 @@ static void CG_RegisterSounds( void )
 
   cgs.media.voteAlarmSound        = trap_S_RegisterSound( "sound/misc/213096__soundsexciting__gong-with-music.wav", qfalse );
 
+  cgs.media.intermissionDrawSound = trap_S_RegisterSound( "sound/misc/intermission_draw.wav", qfalse );
+  cgs.media.intermissionLossSound = trap_S_RegisterSound( "sound/misc/intermission_loss.wav", qfalse );
+  cgs.media.intermissionWinSound  = trap_S_RegisterSound( "sound/misc/intermission_win.wav", qfalse );
+  cgs.media.warmupEndSound        = trap_S_RegisterSound( "sound/misc/warmup_end.wav", qfalse );
+
   cgs.media.talkSound             = trap_S_RegisterSound( "sound/misc/talk.wav", qfalse );
   cgs.media.alienTalkSound        = trap_S_RegisterSound( "sound/misc/alien_talk.wav", qfalse );
   cgs.media.humanTalkSound        = trap_S_RegisterSound( "sound/misc/human_talk.wav", qfalse );
@@ -2054,7 +2059,7 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum )
   // get the gamestate from the client system
   trap_GetGameState( &cgs.gameState );
 
-    for( team = TEAM_NONE; team < NUM_TEAMS; ++team )
+  for( team = TEAM_NONE; team < NUM_TEAMS; ++team )
   {
     cgs.voteAlarmPlay[ team ] = qfalse;
 

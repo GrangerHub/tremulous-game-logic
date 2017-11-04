@@ -183,6 +183,9 @@ static void CG_ParseCountdown( void )
 
   countdown = atoi( info );
   cg.countdownTime = countdown;
+
+  if( cgs.warmup && countdown )
+    trap_S_StartLocalSound( cgs.media.warmupEndSound, CHAN_LOCAL_SOUND );
 }
 
 /*
@@ -492,7 +495,44 @@ static void CG_ConfigStringModified( void )
   }
   else if( num == CS_WINNER )
   {
+    team_t team = cg.snap->ps.stats[ STAT_TEAM ];
+
     trap_Cvar_Set( "ui_winner", str );
+    if( !Q_stricmp( str, "Evacuation" ) ||
+        !Q_stricmp( str, "Stalemate" ) )
+      trap_S_StartLocalSound( cgs.media.intermissionDrawSound, CHAN_LOCAL_SOUND );
+    else if( !Q_stricmp( str, "Humans Win" ) )
+    {
+      switch ( team )
+      {
+        case TEAM_NONE:
+          trap_S_StartLocalSound( cgs.media.intermissionDrawSound, CHAN_LOCAL_SOUND );
+          break;
+        case TEAM_HUMANS:
+          trap_S_StartLocalSound( cgs.media.intermissionWinSound, CHAN_LOCAL_SOUND );
+          break;
+
+        default:
+          trap_S_StartLocalSound( cgs.media.intermissionLossSound, CHAN_LOCAL_SOUND );
+          break;
+      }
+    }
+    else if( !Q_stricmp( str, "Aliens Win" ) )
+    {
+      switch ( team )
+      {
+        case TEAM_NONE:
+          trap_S_StartLocalSound( cgs.media.intermissionDrawSound, CHAN_LOCAL_SOUND );
+          break;
+        case TEAM_ALIENS:
+          trap_S_StartLocalSound( cgs.media.intermissionWinSound, CHAN_LOCAL_SOUND );
+          break;
+
+        default:
+          trap_S_StartLocalSound( cgs.media.intermissionLossSound, CHAN_LOCAL_SOUND );
+          break;
+      }
+    }
   }
   else if( num == CS_SHADERSTATE )
   {

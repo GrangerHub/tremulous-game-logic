@@ -3754,12 +3754,17 @@ static void CG_DrawCountdown( void )
   int    w;
   int    h;
   float  size = 0.5f;
-  char   text[ MAX_STRING_CHARS ] = "Countdown to Battle:";
+  char   text[ MAX_STRING_CHARS ] = "";
 
   if( !cg.countdownTime )
   {
     return;
   }
+
+  if( cgs.warmup )
+    Q_strncpyz( text, "^3Warmup is Ending:^7", sizeof( text ) );
+  else
+    Q_strncpyz( text, "Countdown to Battle:", sizeof( text ) );
 
   sec = ( cg.countdownTime - cg.time ) / 1000;
 
@@ -3769,6 +3774,9 @@ static void CG_DrawCountdown( void )
   w = UI_Text_Width( text, size );
   h = UI_Text_Height( text, size );
   UI_Text_Paint( 320 - w / 2, 200, size, colorWhite, text, 0, 0, ITEM_TEXTSTYLE_SHADOWED );
+
+  if( cgs.warmup )
+    return;
 
   Com_sprintf( text, sizeof( text ), "%s", sec ? va( "%d", sec ) : "DESTROY THE ENEMY!" );    
 
