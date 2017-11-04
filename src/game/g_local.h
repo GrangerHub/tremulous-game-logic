@@ -1450,6 +1450,7 @@ extern  vmCvar_t  g_suddenDeathTime;
 extern  vmCvar_t  g_doWarmup;
 extern  vmCvar_t  g_warmupTimers;
 extern  vmCvar_t  g_warmup;
+extern  vmCvar_t  g_doWarmupCountdown;
 extern  vmCvar_t  g_warmupReadyThreshold;
 extern  vmCvar_t  g_warmupTimeout1;
 extern  vmCvar_t  g_warmupTimeout1Trigger;
