@@ -3994,7 +3994,7 @@ static qboolean CG_DrawQueue( void )
 
 /*
 =================
-CG_DrawCountdown
+CG_Draw
 =================
 */
 static void CG_DrawCountdown( void )
@@ -4015,10 +4015,7 @@ static void CG_DrawCountdown( void )
   else
     Q_strncpyz( text, "Countdown to Battle:", sizeof( text ) );
 
-  if( cgs.warmup )
-    sec = ( cg.time - cg.countdownTime ) / 1000;
-  else
-    sec = ( cg.countdownTime - cg.time ) / 1000;
+  sec = ( cg.countdownTime - cg.time ) / 1000;
 
   if( sec < 0 )
     return;
@@ -4027,10 +4024,7 @@ static void CG_DrawCountdown( void )
   h = UI_Text_Height( text, size );
   UI_Text_Paint( 320 - w / 2, 200, size, colorWhite, text, 0, 0, ITEM_TEXTSTYLE_SHADOWED );
 
-  if( cgs.warmup )
-    return;
-
-  Com_sprintf( text, sizeof( text ), "%s", sec ? va( "%d", sec ) : "DESTROY THE ENEMY!" );    
+  Com_sprintf( text, sizeof( text ), "%s", ( sec || cgs.warmup ) ? va( "%d", sec ) : "DESTROY THE ENEMY!" );    
 
   w = UI_Text_Width( text, size );
   UI_Text_Paint( 320 - w / 2, 200 + 1.5f * h, size, colorWhite, text, 0, 0, ITEM_TEXTSTYLE_SHADOWED );
