@@ -331,6 +331,27 @@ static void PM_Accelerate( vec3_t wishdir, float wishspeed, float accel )
   float pushlen;       //- How much to push the player.
   float pushmaxlen;    //- How much can the player be pushed this frame.
 
+  //check for quake 2 style acceleration
+  if( pml.q2Accelerattion )
+  {
+    int     i;
+    float   addspeed, accelspeed, currentspeed;
+
+    currentspeed = DotProduct( pm->ps->velocity, wishdir );
+    addspeed = wishspeed - currentspeed;
+    if( addspeed <= 0 )
+      return;
+
+    accelspeed = accel * pml.frametime * wishspeed;
+    if( accelspeed > addspeed )
+      accelspeed = addspeed;
+
+    for( i = 0; i < 3; i++ )
+      pm->ps->velocity[ i ] += accelspeed * wishdir[ i ];
+
+    return;
+  }
+
   // No direction provided, do nothing.
   if( wishspeed < 0.1f )
     return;
@@ -1532,6 +1553,7 @@ static void PM_WaterMove( void )
   if( wishspeed > pm->ps->speed * pm_swimScale )
     wishspeed = pm->ps->speed * pm_swimScale;
 
+  pml.q2Accelerattion = qfalse;
   PM_Accelerate( wishdir, wishspeed, pm_wateraccelerate );
 
   // make sure we can go up slopes easily under water
@@ -1582,6 +1604,7 @@ static void PM_JetPackMove( void )
   VectorCopy( wishvel, wishdir );
   wishspeed = VectorNormalize( wishdir );
 
+  pml.q2Accelerattion = qtrue;
   PM_Accelerate( wishdir, wishspeed, pm_flyaccelerate );
 
   PM_StepSlideMove( qfalse, qfalse );
@@ -1637,6 +1660,7 @@ static void PM_FlyMove( void )
   VectorCopy( wishvel, wishdir );
   wishspeed = VectorNormalize( wishdir );
 
+  pml.q2Accelerattion = qtrue;
   PM_Accelerate( wishdir, wishspeed, pm_flyaccelerate );
 
   PM_StepSlideMove( qfalse, qfalse );
@@ -1698,6 +1722,7 @@ static void PM_AirMove( void )
   if( PM_IsMarauder( ) )
     PM_RedirectMomentum( wishdir, wishspeed, 1.5f * controlFactor );
 
+  pml.q2Accelerattion = qfalse;
   PM_WallCoast( wishdir );
   PM_AccelerateHorizontal( wishdir, wishspeed,
      BG_Class( pm->ps->stats[ STAT_CLASS ] )->airAcceleration * controlFactor );
@@ -1801,6 +1826,7 @@ static void PM_ClimbMove( void )
   else
     accelerate = BG_Class( pm->ps->stats[ STAT_CLASS ] )->acceleration;
 
+  pml.q2Accelerattion = qfalse;
   PM_Accelerate( wishdir, wishspeed, accelerate );
 
   if( ( pml.groundTrace.surfaceFlags & SURF_SLICK ) || pm->ps->pm_flags & PMF_TIME_KNOCKBACK )
@@ -1924,6 +1950,7 @@ static void PM_WalkMove( void )
   else
     accelerate = BG_Class( pm->ps->stats[ STAT_CLASS ] )->acceleration;
 
+  pml.q2Accelerattion = qfalse;
   PM_WallCoast( wishdir );
   PM_Accelerate( wishdir, wishspeed, accelerate );
 
@@ -1983,6 +2010,7 @@ static void PM_LadderMove( void )
   if( wishspeed > pm->ps->speed * pm_swimScale )
     wishspeed = pm->ps->speed * pm_swimScale;
 
+  pml.q2Accelerattion = qfalse;
   PM_Accelerate( wishdir, wishspeed, pm_accelerate );
 
   //slanty ladders
@@ -2118,6 +2146,7 @@ static void PM_NoclipMove( void )
   wishspeed = VectorNormalize( wishdir );
   wishspeed *= scale;
 
+  pml.q2Accelerattion = qtrue;
   PM_Accelerate( wishdir, wishspeed, pm_accelerate );
 
   // move

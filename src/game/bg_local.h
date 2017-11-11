@@ -55,6 +55,8 @@ typedef struct
   vec3_t    previous_origin;
   vec3_t    previous_velocity;
   int       previous_waterlevel;
+
+  qboolean  q2Accelerattion; //quake 2 style acceleration
 } pml_t;
 
 extern  pmove_t       *pm;
