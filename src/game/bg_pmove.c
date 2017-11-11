@@ -1121,17 +1121,6 @@ static qboolean PM_CheckWallJump( void )
   if( upLook < 0.2f )
     return qfalse;
 
-  // Find out if we look at the wall enough.
-  VectorCopy( pml.forward, horizLookDir );
-  VectorCopy( wall.plane.normal, horizWallNormal );
-  horizLookDir[ 2 ] = 0.0f;
-  horizWallNormal[ 2 ] = 0.0f;
-  VectorNormalize( horizLookDir );
-  VectorNormalize( horizWallNormal );
-  horizWallLook = MAX( 0.0f, -DotProduct( horizWallNormal, horizLookDir ) );
-  if( horizWallLook < 0.4f )
-    return qfalse;
-
   // Calculate how much we look at or away from the wall.
   wallLook = fabs( -DotProduct( wall.plane.normal, lookDir ) );
 
