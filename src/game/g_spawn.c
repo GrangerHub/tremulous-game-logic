@@ -618,7 +618,6 @@ void SP_worldspawn( void )
     Cvar_SetSafe( "g_restarted", "0" );
 
   // see if we want a countdown time
-  SV_SetConfigstring( CS_COUNTDOWN, "-1" );
   if( !IS_WARMUP && g_doCountdown.integer )
   {
     level.countdownTime = level.startTime + ( g_countdown.integer * 1000 );
