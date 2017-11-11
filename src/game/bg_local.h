@@ -50,6 +50,7 @@ typedef struct
   trace_t   groundTrace;
 
   float     impactSpeed;
+  float     wallSpeedFactor;
 
   vec3_t    previous_origin;
   vec3_t    previous_velocity;
