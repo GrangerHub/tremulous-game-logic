@@ -146,6 +146,15 @@ qboolean  PM_SlideMove( qboolean gravity )
     if( i < numplanes )
       continue;
 
+    // When walking, treat all steep slopes as vertical walls.
+    if ( pml.walking &&
+         trace.plane.normal[ 2 ] < MIN_WALK_NORMAL &&
+         trace.plane.normal[ 2 ] >= 0.02f )
+    {
+      trace.plane.normal[ 2 ] = 0.0f;
+      VectorNormalize( trace.plane.normal );
+    }
+
     VectorCopy( trace.plane.normal, planes[ numplanes ] );
     numplanes++;
 
@@ -320,6 +329,11 @@ qboolean PM_StepSlideMove( qboolean gravity, qboolean predictive )
   }
   else
   {
+    trace_t stepCheckTrace;
+    vec3_t stepCheckDir;
+    vec3_t stepCheckStart;
+    vec3_t stepCheckEnd;
+
     VectorCopy( start_o, down );
     VectorMA( down, -STEPSIZE, normal, down );
     pm->trace( &trace, start_o, pm->mins, pm->maxs, down, pm->ps->clientNum, pm->tracemask );
@@ -349,6 +363,17 @@ qboolean PM_StepSlideMove( qboolean gravity, qboolean predictive )
     VectorSubtract( trace.endpos, start_o, step_v );
     VectorCopy( step_v, step_vNormal );
     VectorNormalize( step_vNormal );
+
+    // Check if there is, in fact, a step in front of us.
+    ProjectPointOnPlane( stepCheckDir, start_v, normal );
+    VectorNormalize( stepCheckDir );
+    VectorMA( trace.endpos, STEPSIZE * 1.5f, stepCheckDir, stepCheckEnd );
+    pm->trace( &stepCheckTrace, trace.endpos, pm->mins, pm->maxs, stepCheckEnd, pm->ps->clientNum, pm->tracemask );
+    VectorCopy( stepCheckTrace.endpos, stepCheckStart );
+    pm->trace( &stepCheckTrace, stepCheckStart, pm->mins, pm->maxs, down, pm->ps->clientNum, pm->tracemask );
+    if( stepCheckTrace.fraction >= 1.0f ||
+        stepCheckTrace.plane.normal[ 2 ] < MIN_WALK_NORMAL )
+      return stepped;
 
     stepSize = DotProduct( normal, step_vNormal ) * VectorLength( step_v );
     // try slidemove from this position
