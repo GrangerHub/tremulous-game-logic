@@ -766,7 +766,9 @@ void lightningBoltFire( gentity_t *ent )
     G_Damage( ent, ent, ent, NULL, NULL,
               LIGHTNING_BOLT_DAMAGE, 0, MOD_LIGHTNING);
 
+  G_UnlaggedOn( ent, muzzle, LIGHTNING_BOLT_RANGE );
 	SV_Trace( &tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT, TT_AABB );
+  G_UnlaggedOff( );
 
 
 	if( tr.entityNum == ENTITYNUM_NONE )
