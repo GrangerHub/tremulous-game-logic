@@ -685,7 +685,9 @@ void lightningBoltFire( gentity_t *ent )
 
 	VectorMA( muzzle, LIGHTNING_BOLT_RANGE, forward, end );
 
+  G_UnlaggedOn( ent, muzzle, LIGHTNING_BOLT_RANGE );
 	SV_Trace( &tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT, TT_AABB );
+  G_UnlaggedOff( );
 
 
 	if( tr.entityNum == ENTITYNUM_NONE )
