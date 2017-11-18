@@ -219,13 +219,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL1_UPG_REGEN            (0.03f * LEVEL1_UPG_HEALTH)
 #define LEVEL1_UPG_COST             2
 
-#define LEVEL2_SPEED                1.2f
+#define LEVEL2_SPEED                1.35f
 #define LEVEL2_VALUE                AVM(2 * ALIEN_CREDITS_PER_KILL)
 #define LEVEL2_HEALTH               AHM(150)
 #define LEVEL2_REGEN                (0.03f * LEVEL2_HEALTH)
 #define LEVEL2_COST                 2
 
-#define LEVEL2_UPG_SPEED            1.2f
+#define LEVEL2_UPG_SPEED            1.35f
 #define LEVEL2_UPG_VALUE            AVM(4 * ALIEN_CREDITS_PER_KILL)
 #define LEVEL2_UPG_HEALTH           AHM(175)
 #define LEVEL2_UPG_REGEN            (0.03f * LEVEL2_UPG_HEALTH)
