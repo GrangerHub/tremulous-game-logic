@@ -394,7 +394,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     TR_GRAVITY,            //trType_t  traj;
     0.1,                   //float     bounce;
     HIVE_BP,               //int       buildPoints;
-    ( 1 << S3 ),           //int       stages;
+    ( 1 << S2 )|( 1 << S3 ),           //int       stages;
     HIVE_HEALTH,           //int       health;
     HIVE_REGEN,            //int       regenRate;
     HIVE_SPLASHDAMAGE,     //int       splashDamage;
