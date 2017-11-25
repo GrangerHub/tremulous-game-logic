@@ -2347,6 +2347,8 @@ UIOBJ_ = \
   \
   $(B)/ui/bg_alloc.o \
   $(B)/ui/bg_voice.o \
+  $(B)/cgame/bg_list.o \
+  $(B)/cgame/bg_queue.o \
   $(B)/ui/bg_misc.o \
   $(B)/ui/bg_lib.o \
   $(B)/qcommon/q_math.o \
@@ -2360,6 +2362,8 @@ UIOBJ11_ = \
   \
   $(B)/ui/bg_alloc.o \
   $(B)/ui/bg_voice.o \
+  $(B)/cgame/bg_list.o \
+  $(B)/cgame/bg_queue.o \
   $(B)/ui/bg_misc.o \
   $(B)/ui/bg_lib.o \
   $(B)/qcommon/q_math.o \

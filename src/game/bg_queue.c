@@ -59,7 +59,7 @@
   #ifdef CGAME
   # define  MAX_QUEUES 1024
   #else
-  # define  MAX_QUEUES 1024
+  # define  MAX_QUEUES 128
   #endif
   #endif
 
