@@ -2390,10 +2390,12 @@ void Cmd_Class_f( gentity_t *ent )
 
           if( !g_cheats.integer )
           {
-            int evolvePeriod = 1000 +
-                               ( abs( BG_Class( newClass )->cost -
-                                 BG_Class( currentClass )->cost ) *
-                                        1500 );
+            int evolvePeriod = 1000;
+
+            if( !G_FindCreep( ent ) )
+              evolvePeriod += ( abs( BG_Class( newClass )->cost -
+                                     BG_Class( currentClass )->cost ) *
+                                1500 );
 
             if( evolvePeriod > MAX_EVOLVE_PERIOD )
               evolvePeriod = MAX_EVOLVE_PERIOD;
