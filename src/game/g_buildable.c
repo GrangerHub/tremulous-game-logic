@@ -4037,7 +4037,7 @@ void G_BuildableThink( gentity_t *ent, int msec )
     if( !ent->spawned && ent->buildProgress >= 0 )
     {
         ent->buildProgress -= 1000.0f /
-                              (float)( ( ent->dcc ? 1 : 2 ) *
+                              (float)( ( ent->dcc ? 0.5 : 1 ) *
                                        level.numUnspawnedBuildables[ TEAM_HUMANS ] );
     }
 
@@ -4045,19 +4045,12 @@ void G_BuildableThink( gentity_t *ent, int msec )
     {
       if( !ent->spawned )
       {
-        if( ent->buildableTeam != TEAM_HUMANS )
-          ent->health += (int)( ceil( (float)( maxHealth ) / (float)( buildTime * 0.001f ) ) );
-        else
-        {
-          int healRate = (int)( ceil( (float)( maxHealth * 0.9f ) / (float)( buildTime * 0.001f ) ) );
+        int healthIncrement = (int)( ceil( (float)( maxHealth ) / (float)( buildTime * 0.001f ) ) );
 
-          if( healRate > DC_HEALRATE )
-            healRate = DC_HEALRATE;
-
-          ent->health += (int)( ceil( (float)( healRate ) /
-                                      ( ( ent->dcc ? 1.0f : 10.0f ) *
-                                        (float)( level.numUnspawnedBuildables[ TEAM_HUMANS ] ) ) ) );
-        }
+        if( ent->buildableTeam == TEAM_HUMANS && ent->dcc )
+          healthIncrement *= 2;
+          
+        ent->health += healthIncrement;
       } else
       {
         if( ent->buildableTeam == TEAM_ALIENS && regenRate &&

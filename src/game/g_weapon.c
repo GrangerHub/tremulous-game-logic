@@ -1087,10 +1087,7 @@ void CheckCkitRepair( gentity_t *ent )
       // progress the contruction of an unspawned buildable
       int buildTime = BG_Buildable( traceEnt->s.modelindex )->buildTime;
       int repeatRate = BG_Weapon( ent->client->ps.weapon )->repeatRate1;
-      int healRate = (int)( ceil( (float)( bHealth * 0.9f ) / (float)( buildTime / repeatRate ) ) );
-
-      if( healRate > HBUILD_HEALRATE )
-        healRate = HBUILD_HEALRATE;
+      int healRate = (int)( ceil( (float)( bHealth ) / ( ( (float)buildTime ) / ( (float)repeatRate ) ) ) );
 
       traceEnt->buildProgress -= repeatRate;
       traceEnt->health += healRate;
