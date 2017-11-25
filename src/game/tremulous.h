@@ -76,10 +76,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL1_REGEN_SCOREINC       AVM(100) // score added for healing per 10s
 #define LEVEL1_UPG_REGEN_SCOREINC   AVM(200)
 
-#define LEVEL2_CLAW_DMG             ADM(40)
-#define LEVEL2_CLAW_RANGE           80.0f
+#define LEVEL2_CLAW_DMG             ADM(50)
+#define LEVEL2_CLAW_RANGE           85.0f
 #define LEVEL2_CLAW_U_RANGE         LEVEL2_CLAW_RANGE + 2.0f
-#define LEVEL2_CLAW_WIDTH           14.0f
+#define LEVEL2_CLAW_WIDTH           17.0f
 #define LEVEL2_CLAW_REPEAT          500
 #define LEVEL2_CLAW_K_SCALE         1.0f
 #define LEVEL2_CLAW_U_REPEAT        400
