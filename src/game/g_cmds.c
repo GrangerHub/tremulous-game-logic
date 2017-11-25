@@ -2551,6 +2551,7 @@ void Cmd_Destroy_f( gentity_t *ent )
             ent->client->ps.stats[ STAT_MISC ] +=
               BG_Buildable( traceEnt->s.modelindex )->buildTime / 4;
         }
+        G_QueueBuildPoints( traceEnt );
         G_Damage( traceEnt, ent, ent, forward, tr.endpos,
                   traceEnt->health, 0, MOD_DECONSTRUCT );
         G_RemoveRangeMarkerFrom( traceEnt );
