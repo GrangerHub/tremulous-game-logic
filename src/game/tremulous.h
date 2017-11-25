@@ -245,7 +245,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define LEVEL4_SPEED                1.2f
 #define LEVEL4_VALUE                AVM(8 * ALIEN_CREDITS_PER_KILL)
-#define LEVEL4_HEALTH               AHM(1100)
+#define LEVEL4_HEALTH               AHM(1500)
 #define LEVEL4_REGEN                (0)
 #define LEVEL4_COST                 15
 
@@ -269,7 +269,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
 
-#define ALIEN_BHLTH_MODIFIER        8.0f
+#define ALIEN_BHLTH_MODIFIER        5.0f
 #define ABHM(h)                     ((int)((float)h*ALIEN_BHLTH_MODIFIER))
 
 #define ALIEN_BDMG_MODIFIER         (1.0f)
@@ -636,7 +636,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define JETPACK_ACT_BOOST_SPEED     440.0f
 #define JETPACK_FUEL_RECHARGE       5 // every 100ms
 
-#define BSUIT_PRICE                 750
+#define BSUIT_PRICE                 1000
 #define BSUIT_PRICE_USED            200
 #define BSUIT_POISON_PROTECTION     3
 #define BSUIT_PCLOUD_PROTECTION     3000
@@ -661,7 +661,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
 
-#define HUMAN_BHLTH_MODIFIER        8.0f
+#define HUMAN_BHLTH_MODIFIER        5.0f
 #define HBHM(h)                     ((int)((float)h*HUMAN_BHLTH_MODIFIER))
 
 #define HUMAN_BDMG_MODIFIER         (1.0f)
