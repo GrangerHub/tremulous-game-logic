@@ -714,7 +714,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MGTURRET_K_SCALE            1.0f
 #define MGTURRET_RANGE              500.0f
 #define MGTURRET_SPREAD             200
-#define MGTURRET_DMG                HBDM(2)
+#define MGTURRET_DMG                HBDM(1)
 #define MGTURRET_SPINUP_TIME        4000 // time to increase the fire rate to full speed
 #define MGTURRET_VALUE              ( 3 * ALIEN_CREDITS_PER_KILL / 2 )
 #define MGTURRET_DCC_ANGULARSPEED   15
