@@ -3999,7 +3999,6 @@ General think function for buildables
 void G_BuildableThink( gentity_t *ent, int msec )
 {
   int maxHealth = BG_Buildable( ent->s.modelindex )->health;
-  int regenRate = BG_Buildable( ent->s.modelindex )->regenRate;
   int buildTime = BG_Buildable( ent->s.modelindex )->buildTime;
 
   //toggle spawned flag for buildables
@@ -4051,21 +4050,6 @@ void G_BuildableThink( gentity_t *ent, int msec )
           healthIncrement *= 2;
           
         ent->health += healthIncrement;
-      } else
-      {
-        if( ent->buildableTeam == TEAM_ALIENS && regenRate &&
-          ( ent->lastDamageTime + ALIEN_REGEN_DAMAGE_TIME ) < level.time )
-        {
-          ent->health += regenRate;
-        }
-        else if( ent->buildableTeam == TEAM_HUMANS &&
-          ( ent->lastDamageTime + HUMAN_REGEN_DAMAGE_TIME ) < level.time )
-        {
-          if( ent->dcc )
-            ent->health += DC_HEALRATE;
-          else if( ent->powered )
-            ent->health += (int)( ceil( (float)( DC_HEALRATE ) / 10.0f ) );
-        }
       }
     }
 

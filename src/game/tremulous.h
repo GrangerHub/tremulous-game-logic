@@ -269,7 +269,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
 
-#define ALIEN_BHLTH_MODIFIER        1.0f
+#define ALIEN_BHLTH_MODIFIER        8.0f
 #define ABHM(h)                     ((int)((float)h*ALIEN_BHLTH_MODIFIER))
 
 #define ALIEN_BDMG_MODIFIER         (1.0f)
@@ -661,7 +661,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
 
-#define HUMAN_BHLTH_MODIFIER        1.0f
+#define HUMAN_BHLTH_MODIFIER        8.0f
 #define HBHM(h)                     ((int)((float)h*HUMAN_BHLTH_MODIFIER))
 
 #define HUMAN_BDMG_MODIFIER         (1.0f)
@@ -714,7 +714,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MGTURRET_K_SCALE            1.0f
 #define MGTURRET_RANGE              500.0f
 #define MGTURRET_SPREAD             200
-#define MGTURRET_DMG                HBDM(3)
+#define MGTURRET_DMG                HBDM(2)
 #define MGTURRET_SPINUP_TIME        4000 // time to increase the fire rate to full speed
 #define MGTURRET_VALUE              ( ALIEN_CREDITS_PER_KILL / 2 )
 #define MGTURRET_DCC_ANGULARSPEED   15
@@ -728,7 +728,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define TESLAGEN_REPEAT             250
 #define TESLAGEN_K_SCALE            4.0f
 #define TESLAGEN_RANGE              250
-#define TESLAGEN_DMG                HBDM(9)
+#define TESLAGEN_DMG                HBDM(6)
 #define TESLAGEN_VALUE              ( ALIEN_CREDITS_PER_KILL / 2 )
 
 #define DC_BP                       8

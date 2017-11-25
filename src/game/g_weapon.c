@@ -1065,24 +1065,7 @@ void CheckCkitRepair( gentity_t *ent )
     qboolean sendEffects = qfalse;
 
     bHealth = BG_Buildable( traceEnt->s.modelindex )->health;
-    if( traceEnt->spawned )
-    {
-      if( traceEnt->health < bHealth )
-      {
-        traceEnt->health += HBUILD_HEALRATE;
-        if( traceEnt->health >= bHealth )
-        {
-          traceEnt->health = bHealth;
-          G_AddEvent( ent, EV_BUILD_REPAIRED, 0 );
-        } else
-          G_AddEvent( ent, EV_BUILD_REPAIR, 0 );
-
-        ent->client->pmext.repairRepeatDelay += BG_Weapon( ent->client->ps.weapon )->repeatRate1;
-        sendEffects = qtrue;
-      }
-
-      tent->s.generic1 = WPM_SECONDARY;
-    } else
+    if( !traceEnt->spawned )
     {
       // progress the contruction of an unspawned buildable
       int buildTime = BG_Buildable( traceEnt->s.modelindex )->buildTime;
