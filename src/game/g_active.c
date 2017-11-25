@@ -2500,21 +2500,6 @@ void ClientThink_real( gentity_t *ent )
   if( client->lastCreepSlowTime + CREEP_TIMEOUT < level.time )
     client->ps.stats[ STAT_STATE ] &= ~SS_CREEPSLOWED;
 
-  //randomly disable the jet pack if damaged
-  if( BG_InventoryContainsUpgrade( UP_JETPACK, client->ps.stats ) &&
-      BG_UpgradeIsActive( UP_JETPACK, client->ps.stats ) )
-  {
-    if( ent->lastDamageTime + JETPACK_DISABLE_TIME > level.time )
-    {
-      if( random( ) > JETPACK_DISABLE_CHANCE )
-        client->ps.pm_type = PM_NORMAL;
-    }
-
-    //[DISABLED]switch jetpack off if no reactor
-   // if( !G_Reactor( ) )
-     // BG_DeactivateUpgrade( UP_JETPACK, client->ps.stats );
-  }
-
   // set the clip mask and/or the contents of clients that occupied an
   // activation entity
   G_OccupantClip( ent );
