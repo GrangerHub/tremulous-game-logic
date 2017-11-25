@@ -1358,7 +1358,7 @@ static void PM_GetDesiredDirAndSpeed( vec3_t dir, float *speed, vec3_t normal )
 PM_CheckJump
 =============
 */
-static qboolean PM_CheckJump( void )
+static qboolean PM_CheckJump( vec3_t customNormal )
 {
   // Ground normal under the player.
   vec3_t normal;
@@ -1374,9 +1374,6 @@ static qboolean PM_CheckJump( void )
   float maxKickFraction;
   // Loop index.
   int i;
-
-  if( pm->ps->groundEntityNum == ENTITYNUM_NONE )
-    return qfalse;
 
   if( BG_Class( pm->ps->stats[ STAT_CLASS ] )->jumpMagnitude == 0.0f )
     return qfalse;
@@ -1465,8 +1462,10 @@ static qboolean PM_CheckJump( void )
 
   pm->ps->groundEntityNum = ENTITYNUM_NONE;
 
-  // jump away from wall
-  BG_GetClientNormal( pm->ps, normal );
+  if( customNormal )
+    VectorCopy( customNormal, normal );
+  else
+    BG_GetClientNormal( pm->ps, normal );
 
   if( pm->ps->velocity[ 2 ] < 0 )
     pm->ps->velocity[ 2 ] = 0;
@@ -1993,10 +1992,22 @@ static void PM_AirMove( void )
   if( pml.groundPlane )
   {
     float *groundNormal = pml.groundTrace.plane.normal;
-    PM_ClipVelocity( pm->ps->velocity, groundNormal, pm->ps->velocity );
-  }
+    float previousZ = pm->ps->origin[ 2 ];
 
-  PM_StepSlideMove( qtrue, qfalse );
+    PM_ClipVelocity( pm->ps->velocity, groundNormal, pm->ps->velocity );
+    PM_StepSlideMove( qtrue, qfalse );
+
+    // Check if we haven't moved down despite the gravity pulling on us. If this
+    // is the case, we're probably stuck between two steep planes, allow jumping
+    // as if on a level ground.
+    if( abs( pm->ps->gravity ) > 0 &&
+        fabs( pm->ps->origin[ 2 ] - previousZ ) < 0.05f )
+      PM_CheckJump( upNormal );
+  }
+  else
+  {
+    PM_StepSlideMove( qtrue, qfalse );
+  }
 }
 
 /*
@@ -2025,7 +2036,7 @@ static void PM_ClimbMove( void )
   }
 
 
-  if( PM_CheckJump( ) || PM_CheckPounce( ) )
+  if( PM_CheckJump( NULL ) || PM_CheckPounce( ) )
   {
     // jumped away
     if( pm->waterlevel > 1 )
@@ -2141,7 +2152,7 @@ static void PM_WalkMove( void )
     return;
   }
 
-  if( PM_CheckJump( ) || PM_CheckPounce( ) )
+  if( PM_CheckJump( NULL ) || PM_CheckPounce( ) )
   {
     // jumped away
     if( pm->waterlevel > 1 )
