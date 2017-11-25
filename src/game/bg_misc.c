@@ -217,7 +217,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     "Acid Tube",           //char      *humanName;
     "Ejects lethal poisonous acid at an approaching human. These "
       "are highly effective when used in conjunction with a trapper "
-      "to hold the victim in place.",
+      "to hold greatly slow the victim down.",
     "team_alien_acid_tube", //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
     0.1,                   //float     bounce;

@@ -1025,6 +1025,9 @@ static float PM_CmdScale( usercmd_t *cmd, qboolean zFlight )
   if( pm->ps->stats[ STAT_STATE ] & SS_SLOWLOCKED )
     modifier *= ABUILDER_BLOB_SPEED_MOD;
 
+  if( pm->ps->stats[ STAT_STATE ] & SS_BLOBLOCKED )
+    modifier *= LOCKBLOB_SPEED_MOD;
+
   if( pm->ps->pm_type == PM_GRABBED )
     modifier = 0.0f;
 

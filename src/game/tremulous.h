@@ -369,7 +369,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define TRAPPER_REPEAT              1000
 #define TRAPPER_VALUE               ( LEVEL0_VALUE / 2 )
 #define LOCKBLOB_SPEED              650.0f
-#define LOCKBLOB_LOCKTIME           5000
+#define LOCKBLOB_SPEED_MOD          0.1f
+#define LOCKBLOB_LOCKTIME           10000
 #define LOCKBLOB_DOT                0.85f // max angle = acos( LOCKBLOB_DOT )
 #define LOCKBLOB_K_SCALE            1.0f
 #define LOCKBLOB_LIFETIME           15000
