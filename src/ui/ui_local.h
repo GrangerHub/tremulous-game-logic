@@ -171,7 +171,8 @@ typedef enum
   INFOTYPE_BUILDABLE,
   INFOTYPE_CLASS,
   INFOTYPE_WEAPON,
-  INFOTYPE_UPGRADE
+  INFOTYPE_UPGRADE,
+  INFOTYPE_VOICECMD
 } infoType_t;
 
 typedef struct
@@ -266,6 +267,10 @@ typedef struct
   int         humanBuildCount;
   int         humanBuildIndex;
 
+  menuItem_t  voiceCmdList[ 32 ];
+  int         voiceCmdCount;
+  int         voiceCmdIndex;
+
   menuItem_t  helpList[ MAX_HELP_INFOPANES ];
   int         helpCount;
   int         helpIndex;
@@ -297,9 +302,12 @@ typedef struct
   int           numResolutions;
   int           resolutionIndex;
 
+  voice_t       *voices;
+
   qboolean inGameLoad;
 
   qboolean  chatTeam;
+  qboolean  voiceCmd;
 }
 uiInfo_t;
 

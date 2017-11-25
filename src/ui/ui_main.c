@@ -1682,6 +1682,10 @@ static void UI_DrawInfoPane( menuItem_t *item, rectDef_t *rect, float text_x, fl
       s = item->v.text;
       break;
 
+    case INFOTYPE_VOICECMD:
+      s = item->v.text;
+      break;
+
     case INFOTYPE_TEAM:
       if( item->v.team == NUM_TEAMS )
         s = "Join the team with the least players.";
@@ -2072,6 +2076,11 @@ static void UI_OwnerDraw( float x, float y, float w, float h,
   {
     case UI_TEAMINFOPANE:
       UI_DrawInfoPane( &uiInfo.teamList[ uiInfo.teamIndex ],
+                       &rect, text_x, text_y, scale, textalign, textvalign, foreColor, textStyle );
+      break;
+
+    case UI_VOICECMDINFOPANE:
+      UI_DrawInfoPane( &uiInfo.voiceCmdList[ uiInfo.voiceCmdIndex ],
                        &rect, text_x, text_y, scale, textalign, textvalign, foreColor, textStyle );
       break;
 
@@ -2744,6 +2753,55 @@ static void UI_LoadHumanBuilds( void )
 
 /*
 ===============
+UI_LoadVoiceCmds
+===============
+*/
+static void UI_LoadVoiceCmds( void )
+{
+  voice_t *v;
+  voiceCmd_t *c;
+
+  const char *cmd;
+  char mode[2];
+  char ui_voice[ MAX_VOICE_CMD_LEN ];
+
+  trap_Cvar_VariableStringBuffer("ui_voicemenu", mode, sizeof(mode));
+  trap_Cvar_VariableStringBuffer("voice", ui_voice, sizeof(ui_voice));
+
+  uiInfo.voiceCmdCount = 0;
+
+  switch (mode[0]) {
+      default:
+      case '1':
+          cmd = "vsay";
+          break;
+      case '2':
+          cmd = "vsay_team";
+          break;
+      case '3':
+          cmd = "vsay_local";
+          break;
+  };
+
+
+  v = BG_VoiceByName(uiInfo.voices, ui_voice);
+  if (!v)
+      return;
+
+  for( c = v->cmds; c; c = c->next )
+  {
+      uiInfo.voiceCmdList[ uiInfo.voiceCmdCount ].text = c->cmd;
+      uiInfo.voiceCmdList[ uiInfo.voiceCmdCount ].cmd = String_Alloc(va("cmd %s %s\n", cmd, c->cmd));
+      uiInfo.voiceCmdList[ uiInfo.voiceCmdCount ].type = INFOTYPE_VOICECMD;
+      uiInfo.voiceCmdList[ uiInfo.voiceCmdCount ].v.text = c->tracks[0].text;
+
+      uiInfo.voiceCmdCount++;
+  }
+}
+
+
+/*
+===============
 UI_LoadMods
 ===============
 */
@@ -3132,6 +3190,15 @@ static void UI_RunMenuScript( char **args )
     else if( Q_stricmp( name, "BuildHumanBuildable" ) == 0 )
     {
       if( ( cmd = uiInfo.humanBuildList[ uiInfo.humanBuildIndex ].cmd ) )
+        trap_Cmd_ExecuteText( EXEC_APPEND, cmd );
+    }
+    else if ( Q_stricmp( name, "LoadVoiceCmds" ) == 0 )
+    {
+      UI_LoadVoiceCmds( );
+    }
+    else if ( Q_stricmp( name, "ExecuteVoiceCmd" ) == 0 )
+    {
+      if( ( cmd = uiInfo.voiceCmdList[ uiInfo.voiceCmdIndex ].cmd ) )
         trap_Cmd_ExecuteText( EXEC_APPEND, cmd );
     }
     else if( Q_stricmp( name, "Say" ) == 0 )
@@ -3596,6 +3663,8 @@ static int UI_FeederCount( int feederID )
     else
       return uiInfo.numResolutions;
   }
+  else if ( feederID == FEEDER_TREMVOICECMD )
+      return uiInfo.voiceCmdCount;
 
   return 0;
 }
@@ -3884,6 +3953,11 @@ static const char *UI_FeederItemText( int feederID, int index, int column, qhand
 
     return resolution;
   }
+  else if ( feederID == FEEDER_TREMVOICECMD )
+  {
+    if( index >= 0 && index < uiInfo.voiceCmdCount )
+      return uiInfo.voiceCmdList[ index ].text;
+  }
 
   return "";
 }
@@ -4021,6 +4095,8 @@ static void UI_FeederSelection( int feederID, int index )
 
     uiInfo.resolutionIndex = index;
   }
+  else if ( feederID == FEEDER_TREMVOICECMD )
+      uiInfo.voiceCmdIndex = index;
 }
 
 static int UI_FeederInitialise( int feederID )
@@ -4147,6 +4223,7 @@ void UI_Init( qboolean inGameLoad )
 
   UI_RegisterCvars();
   UI_InitMemory();
+  BG_InitMemory(); // Shouldn't really have 2 of these but whatev for now
 
   // cache redundant calulations
   trap_GetGlconfig( &uiInfo.uiDC.glconfig );
@@ -4233,6 +4310,8 @@ void UI_Init( qboolean inGameLoad )
   uiInfo.previewMovie = -1;
 
   UI_ParseResolutions( );
+
+  uiInfo.voices = BG_VoiceInit( );
 }
 
 
