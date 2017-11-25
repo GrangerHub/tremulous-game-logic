@@ -150,7 +150,7 @@ Custom Dynamic Memory Management for linked lists
  #ifdef CGAME
  # define  MAX_LISTS ( 16 * 1024 )
  #else
- # define  MAX_LISTS ( 16 * 1024 )
+ # define  MAX_LISTS ( 2 * 1024 )
  #endif
  #endif
 
