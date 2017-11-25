@@ -2304,7 +2304,9 @@ void Cmd_Class_f( gentity_t *ent )
       }
 
       //check that we have an overmind
-      if( !G_Overmind( ) )
+      if( !G_Overmind( ) &&
+          newClass != PCL_ALIEN_BUILDER0 &&
+          newClass != PCL_ALIEN_BUILDER0_UPG )
       {
         G_TriggerMenu( clientNum, MN_A_NOOVMND_EVOLVE );
         return;
