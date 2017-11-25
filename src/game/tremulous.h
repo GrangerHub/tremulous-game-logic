@@ -388,7 +388,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define SLIME_ZUNGE_RANGE           300
 #define SLIME_ZUNGE_DOT             0.79f // max angle = acos( SLIME_ZUNGE )
 
-#define OVERMIND_BP                 0
+#define OVERMIND_BP                 30
 #define OVERMIND_BT                 20000
 #define OVERMIND_HEALTH             ABHM(1000)
 #define OVERMIND_REGEN              ABRM(6)
@@ -748,7 +748,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ARMOURY_SPLASHRADIUS        100
 #define ARMOURY_VALUE               ( 3 * ALIEN_CREDITS_PER_KILL / 2 )
 
-#define REACTOR_BP                  0
+#define REACTOR_BP                  30
 #define REACTOR_BT                  20000
 #define REACTOR_HEALTH              HBHM(1000)
 #define REACTOR_SPLASHDAMAGE        200

@@ -162,7 +162,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     OVERMIND_CREEPSIZE,    //int       creepSize;
     qfalse,                //qboolean  dccTest;
     qfalse,                //qboolean  transparentTest;
-    qtrue,                 //qboolean  uniqueTest;
+    qfalse,                //qboolean  uniqueTest;
     OVERMIND_VALUE,        //int       value;
     qtrue,                 //qboolean  stackable;
     0                      //int       batteryPower;
@@ -794,7 +794,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     "Reactor",             //char      *humanName;
     "All structures except the telenode rely on a reactor to operate. "
       "The reactor provides power for all the human structures either "
-      "directly or via repeaters. Only one reactor can be built at a time.",
+      "directly or via repeaters.",
     "team_human_reactor",  //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
     0.1,                   //float     bounce;
@@ -829,7 +829,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     0,                     //int       creepSize;
     qfalse,                //qboolean  dccTest;
     qfalse,                //qboolean  transparentTest;
-    qtrue,                 //qboolean  uniqueTest;
+    qfalse,                //qboolean  uniqueTest;
     REACTOR_VALUE,         //int       value;
     qtrue,                 //qboolean  stackable;
     0                      //int       batteryPower;
