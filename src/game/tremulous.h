@@ -269,7 +269,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
 
-#define ALIEN_BHLTH_MODIFIER        5.0f
+#define ALIEN_BHLTH_MODIFIER        3.0f
 #define ABHM(h)                     ((int)((float)h*ALIEN_BHLTH_MODIFIER))
 
 #define ALIEN_BDMG_MODIFIER         (1.0f)
@@ -661,7 +661,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
 
-#define HUMAN_BHLTH_MODIFIER        5.0f
+#define HUMAN_BHLTH_MODIFIER        3.0f
 #define HBHM(h)                     ((int)((float)h*HUMAN_BHLTH_MODIFIER))
 
 #define HUMAN_BDMG_MODIFIER         (1.0f)
