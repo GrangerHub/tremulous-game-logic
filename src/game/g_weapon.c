@@ -1223,14 +1223,9 @@ qboolean CheckVenomAttack( gentity_t *ent )
   if( traceEnt->health <= 0 )
       return qfalse;
 
-  // only allow bites to work against buildings as they are constructing
+  // Allow the attacking of all enemy buildables.
   if( traceEnt->s.eType == ET_BUILDABLE )
   {
-    if( ( traceEnt->spawned ) &&
-        ( traceEnt->s.modelindex != BA_H_MGTURRET ) &&
-        ( traceEnt->s.modelindex != BA_H_TESLAGEN ) )
-      return qfalse;
-
     if( traceEnt->buildableTeam == TEAM_ALIENS )
       return qfalse;
 
