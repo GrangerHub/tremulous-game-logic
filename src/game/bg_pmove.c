@@ -471,50 +471,54 @@ void PM_Push( vec3_t velocity, vec3_t push, float maxSpeed, vec3_t out )
 ==============
 PM_Accelerate
 
-Handles user intended acceleration. Note that this function may counteract the
-gravity, use PM_AccelerateHorizontal to avoid that.
+Handles user intended acceleration.
 ==============
 */
 static void PM_Accelerate( vec3_t wishDir, float wishSpeed, float accel )
 {
   // How much to push the player during this frame.
-  float push = accel * pml.frametime * wishSpeed;
-  // Original speed of the player.
-  float originalSpeed = VectorLength( pm->ps->velocity );
-  // Speed of the player immediately after being pushed.
-  float pushedSpeed;
+  float  push = accel * pml.frametime * wishSpeed;
+  // Original velocity of the player projected onto the horizontal plane.
+  vec3_t originalHorizontalVelocity;
+  // Original speed of the player projected onto the horizontal plane.
+  float  originalHorizontalSpeed;
+  // the wish velocity projected onto the horizontal plane.
+  vec3_t horizontalWishVelocity;
+  // the wish speed projected onto the horizontal plane.
+  float  horizontalWishSpeed;
+  // Speed of the player immediately after being pushed projected onto the horizontal plane.
+  vec3_t horizontalPushedVelocity;
+  // Speed of the player immediately after being pushed projected onto the horizontal plane.
+  float  horizontalPushedSpeed;
+
+  // initialize the speed limiting variables
+  VectorCopy( pm->ps->velocity, originalHorizontalVelocity );
+  originalHorizontalVelocity[ 2 ] = 0;
+  originalHorizontalSpeed = VectorLength( originalHorizontalVelocity );
+  VectorScale( wishDir, wishSpeed, horizontalWishVelocity );
+  horizontalWishVelocity[ 2 ] = 0;
+  horizontalWishSpeed = VectorLength( horizontalWishVelocity );
 
   // Push the player in the intended direction.
   VectorMA( pm->ps->velocity, push, wishDir, pm->ps->velocity );
-  pushedSpeed = VectorLength( pm->ps->velocity );
+  VectorCopy( pm->ps->velocity, horizontalPushedVelocity );
+  horizontalPushedVelocity[ 2 ] = 0;
+  horizontalPushedSpeed = VectorLength( horizontalPushedVelocity );
 
   // If the push accelerated the player past the maximum movement speed, limit
   // the resulting speed to either the maximum movement speed or to the original
   // speed if the player was already going faster than that.
-  if( pushedSpeed > originalSpeed && pushedSpeed > wishSpeed )
+  if( horizontalPushedSpeed > originalHorizontalSpeed &&
+      horizontalPushedSpeed > horizontalWishSpeed )
   {
-    float speedLimit = MAX( wishSpeed, originalSpeed );
+    float speedLimit = MAX( horizontalWishSpeed, originalHorizontalSpeed );
+    float verticalSpeed = pm->ps->velocity[ 2 ];
+
+    pm->ps->velocity[ 2 ] = 0.0f;
     VectorNormalize( pm->ps->velocity );
     VectorScale( pm->ps->velocity, speedLimit, pm->ps->velocity );
+    pm->ps->velocity[ 2 ] = verticalSpeed;
   }
-}
-
-
-/*
-===========
-PM_AccelerateHorizontal
-
-Handles user intended acceleration, only limiting the speed along the
-horizontal plane.
-=====
-*/
-static void PM_AccelerateHorizontal( vec3_t wishDir, float wishSpeed,
-                                     float accel )
-{
-  float verticalSpeed = pm->ps->velocity[ 2 ];
-  pm->ps->velocity[ 2 ] = 0.0f;
-  PM_Accelerate( wishDir, wishSpeed, accel );
-  pm->ps->velocity[ 2 ] = verticalSpeed;
 }
 
 
@@ -801,7 +805,6 @@ static void PM_WallCoast( vec3_t wishDir, wallcoast_t grounded )
     float diff;
     float maxDiff;
     float fraction;
-    float minFraction;
 
     // Calculate how much of the speed to keep.
     diff = ramFactor - SLOWDOWN_THRESHOLD;
@@ -857,7 +860,6 @@ static void PM_ComputeWallSpeedFactor( void )
   float*   groundNormal; //- Ground normal.
   vec3_t   searchDir;    //- Direction for searching for a wall.
   trace_t  wall;         //- Wall we are moving along.
-  qboolean foundWall;    //- Whether we have found a wall.
   vec3_t   lookDir;      //- Look direction (horizontal only).
   vec3_t   normal;       //- Wall normal (horizontal only).
   float    alignment;    //- How much the look direction aligns with the wall
@@ -1272,7 +1274,6 @@ static qboolean PM_CheckWallJump( vec3_t wishDir, float wishSpeed )
   trace_t wall;           //- Which wall we are jumping off.
   vec3_t searchEnd;       //- Point of contact with the wall.
   vec3_t moveDir;         //- Desired or actual movement direction.
-  vec3_t lookDir;         //- Look direction.
   vec3_t horizWallNormal; //- Horizontal wall normal.
 
   float upLook;        //- How much the player is looking up (0 to 1).
@@ -1501,8 +1502,6 @@ static qboolean PM_CheckJump( vec3_t customNormal )
   float minKickFraction;
   // Maximum fraction of the jump speed we can add to the horizontal movement.
   float maxKickFraction;
-  // Loop index.
-  int i;
 
   if( BG_Class( pm->ps->stats[ STAT_CLASS ] )->jumpMagnitude == 0.0f )
     return qfalse;
@@ -2351,7 +2350,7 @@ static void PM_AirMove( void )
     PM_BoostBraking( wishdir, wishspeed, wishspeed * 1.75f, 1.5f, &accel );
   }
 
-  PM_AccelerateHorizontal( wishdir, wishspeed, accel * controlFactor );
+  PM_Accelerate( wishdir, wishspeed, accel * controlFactor );
 
   // We may have a ground plane that is very steep, even though we don't have a
   // groundentity slide along the steep plane.
@@ -3663,7 +3662,6 @@ PM_Footsteps
 static void PM_Footsteps( void )
 {
   float     bobmove;
-  float     wallFactor;
   int       old;
   qboolean  footstep;
 
