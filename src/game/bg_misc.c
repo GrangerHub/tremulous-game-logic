@@ -3428,8 +3428,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     PORTALGUN_AMMO,       //int       maxAmmo;
     PORTALGUN_MAXCLIPS,   //int       maxClips;
     PORTALGUN_ROUND_PRICE,//int       roundPrice;
-    qtrue,                //qboolean  ammoPurchasable;
-    qfalse,               //int       infiniteAmmo;
+    qfalse,               //qboolean  ammoPurchasable;
+    qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     PORTALGUN_REPEAT,     //int       repeatRate1;
     PORTALGUN_REPEAT,     //int       repeatRate2;

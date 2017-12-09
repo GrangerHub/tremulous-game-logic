@@ -560,10 +560,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LCANNON_SPLASH_BATTLESUIT   0.50f    // reduction of damage fraction for luci splash on battlesuits
 #define LCANNON_LIFETIME            10000
 
-#define PORTALGUN_PRICE             800
+#define PORTALGUN_PRICE             1250
 #define PORTALGUN_AMMO              40
-#define PORTALGUN_MAXCLIPS          2
-#define PORTALGUN_ROUND_PRICE       20
+#define PORTALGUN_MAXCLIPS          1
+#define PORTALGUN_ROUND_PRICE       0
 #define PORTALGUN_REPEAT            200     // repeat period if a portal isn't created
 #define PORTAL_CREATED_REPEAT       1500    // repeat period if a portal is created
 #define PORTALGUN_RELOAD            2000
