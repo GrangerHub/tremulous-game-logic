@@ -477,7 +477,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define GRENADE_SPLASH_BATTLESUIT   0.30f // reduction of damage fraction for
                                           //grenade nade splash on battlesuits
 
-#define SHOTGUN_PRICE               200
+#define SHOTGUN_PRICE               175
 #define SHOTGUN_SHELLS              8
 #define SHOTGUN_PELLETS             11 //used to sync server and client side
 #define SHOTGUN_MAXCLIPS            3
@@ -611,7 +611,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LIGHTARMOUR_POISON_PROTECTION 1
 #define LIGHTARMOUR_PCLOUD_PROTECTION 1000
 
-#define HELMET_PRICE                200
+#define HELMET_PRICE                125
 #define HELMET_RANGE                1000.0f
 #define HELMET_POISON_PROTECTION    1
 #define HELMET_PCLOUD_PROTECTION    1000
