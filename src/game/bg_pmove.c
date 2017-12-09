@@ -446,16 +446,19 @@ static void PM_Accelerate( vec3_t wishDir, float wishSpeed, float accel )
 
   // initialize the speed limiting variables
   VectorCopy( pm->ps->velocity, originalHorizontalVelocity );
-  originalHorizontalVelocity[ 2 ] = 0;
+  if( !pml.groundPlane ) // apply the speed limit to all directions grounded
+    originalHorizontalVelocity[ 2 ] = 0;
   originalHorizontalSpeed = VectorLength( originalHorizontalVelocity );
   VectorScale( wishDir, wishSpeed, horizontalWishVelocity );
-  horizontalWishVelocity[ 2 ] = 0;
+  if( !pml.groundPlane )
+    horizontalWishVelocity[ 2 ] = 0;
   horizontalWishSpeed = VectorLength( horizontalWishVelocity );
 
   // Push the player in the intended direction.
   VectorMA( pm->ps->velocity, push, wishDir, pm->ps->velocity );
   VectorCopy( pm->ps->velocity, horizontalPushedVelocity );
-  horizontalPushedVelocity[ 2 ] = 0;
+  if( !pml.groundPlane )
+    horizontalPushedVelocity[ 2 ] = 0;
   horizontalPushedSpeed = VectorLength( horizontalPushedVelocity );
 
   // If the push accelerated the player past the maximum movement speed, limit
@@ -467,10 +470,12 @@ static void PM_Accelerate( vec3_t wishDir, float wishSpeed, float accel )
     float speedLimit = MAX( horizontalWishSpeed, originalHorizontalSpeed );
     float verticalSpeed = pm->ps->velocity[ 2 ];
 
-    pm->ps->velocity[ 2 ] = 0.0f;
+    if( !pml.groundPlane )
+      pm->ps->velocity[ 2 ] = 0.0f;
     VectorNormalize( pm->ps->velocity );
     VectorScale( pm->ps->velocity, speedLimit, pm->ps->velocity );
-    pm->ps->velocity[ 2 ] = verticalSpeed;
+    if( !pml.groundPlane )
+      pm->ps->velocity[ 2 ] = verticalSpeed;
   }
 }
 
