@@ -2784,7 +2784,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     "Chaingun",           //char      *humanName;
     "Belt drive, cased projectile weapon. It has a high repeat "
       "rate but a wide firing angle and is therefore relatively "
-      "inaccurate.",
+      "inaccurate.  Has a secondary lower rate of fire for better "
+      "for better accuracy",
     CHAINGUN_BULLETS,     //int       maxAmmo;
     0,                    //int       maxClips;
     0,                    //int       roundPrice;
@@ -2792,11 +2793,11 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     CHAINGUN_REPEAT,      //int       repeatRate1;
-    0,                    //int       repeatRate2;
+    CHAINGUN_REPEAT2,     //int       repeatRate2;
     0,                    //int       repeatRate3;
     CHAINGUN_RELOAD,      //int       reloadTime;
     CHAINGUN_K_SCALE,     //float     knockbackScale;
-    qfalse,               //qboolean  hasAltMode;
+    qtrue,                //qboolean  hasAltMode;
     qfalse,               //qboolean  hasThirdMode;
     qfalse,               //qboolean  canZoom;
     90.0f,                //float     zoomFov;

@@ -2206,6 +2206,10 @@ void FireWeapon2( gentity_t *ent )
       shotgunFire( ent, qtrue );
       break;
 
+    case WP_CHAINGUN:
+      bulletFire( ent, CHAINGUN_SPREAD2, CHAINGUN_DMG2, MOD_CHAINGUN );
+      break;
+
     case WP_LUCIFER_CANNON:
       LCChargeFire( ent, qtrue );
       break;
