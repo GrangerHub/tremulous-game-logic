@@ -2171,6 +2171,10 @@ void FireWeapon2( gentity_t *ent )
       poisonCloud( ent );
       break;
 
+    case WP_MACHINEGUN:
+      bulletFire( ent, RIFLE_SPREAD2, RIFLE_DMG2, MOD_MACHINEGUN );
+      break;
+
     case WP_LUCIFER_CANNON:
       LCChargeFire( ent, qtrue );
       break;

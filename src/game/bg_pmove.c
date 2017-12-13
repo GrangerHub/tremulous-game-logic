@@ -1006,10 +1006,15 @@ static float PM_CmdScale( usercmd_t *cmd, qboolean zFlight )
   //slow player if charging up for a pounce
   if( cmd->buttons & BUTTON_ATTACK2 )
   {
+    //slow player if charging up for a pounce
     if( pm->ps->weapon == WP_ALEVEL3 || pm->ps->weapon == WP_ALEVEL3_UPG )
       modifier *= LEVEL3_POUNCE_SPEED_MOD;
     else if ( pm->ps->weapon == WP_ASPITFIRE )
       modifier *= SPITFIRE_POUNCE_SPEED_MOD;
+    //slow player if using 2nd rifle mode
+    else if( pm->ps->weapon == WP_MACHINEGUN &&
+        pm->ps->weaponstate != WEAPON_RELOADING )
+    	modifier *= RIFLE_2NDMOD;
   }
 
   // the spitfire strafes and moves backwards slower when flying

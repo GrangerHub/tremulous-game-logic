@@ -2548,7 +2548,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     "rifle",              //char      *name;
     "Rifle",              //char      *humanName;
     "Basic weapon. Cased projectile weapon, with a slow clip based "
-      "reload system.",
+      "reload system. Includes a less accurate rapid fire secondary mode.",
     RIFLE_CLIPSIZE,       //int       maxAmmo;
     RIFLE_MAXCLIPS,       //int       maxClips;
     0,                    //int       roundPrice;
@@ -2556,11 +2556,11 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     RIFLE_REPEAT,         //int       repeatRate1;
-    0,                    //int       repeatRate2;
+    RIFLE_REPEAT2,        //int       repeatRate2;
     0,                    //int       repeatRate3;
     RIFLE_RELOAD,         //int       reloadTime;
     RIFLE_K_SCALE,        //float     knockbackScale;
-    qfalse,               //qboolean  hasAltMode;
+    qtrue,                //qboolean  hasAltMode;
     qfalse,               //qboolean  hasThirdMode;
     qfalse,               //qboolean  canZoom;
     90.0f,                //float     zoomFov;
