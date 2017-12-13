@@ -464,9 +464,10 @@ SHOTGUN
 */
 
 // this should match CG_ShotgunPattern
-void ShotgunPattern( vec3_t origin, vec3_t origin2, int seed, gentity_t *ent )
+void ShotgunPattern( vec3_t origin, vec3_t origin2, int seed,
+                     gentity_t *ent, qboolean choke )
 {
-  int        i;
+  int        i, spread;
   float      r, u;
   vec3_t    end;
   vec3_t    forward, right, up;
@@ -479,11 +480,18 @@ void ShotgunPattern( vec3_t origin, vec3_t origin2, int seed, gentity_t *ent )
   PerpendicularVector( right, forward );
   CrossProduct( forward, right, up );
 
+  if( choke )
+    spread = SHOTGUN_CHOKE_SPREAD;
+  else
+    spread = SHOTGUN_SPREAD;
+
+  Com_Printf( "^6GAME spread: ^1%i^7\n", spread );
+
   // generate the "random" spread pattern
   for( i = 0; i < SHOTGUN_PELLETS; i++ )
   {
-    r = Q_crandom( &seed ) * SHOTGUN_SPREAD * 16;
-    u = Q_crandom( &seed ) * SHOTGUN_SPREAD * 16;
+    r = Q_crandom( &seed ) * spread * 16;
+    u = Q_crandom( &seed ) * spread * 16;
     VectorMA( origin, SHOTGUN_RANGE, forward, end );
     VectorMA( end, r, right, end );
     VectorMA( end, u, up, end );
@@ -495,13 +503,30 @@ void ShotgunPattern( vec3_t origin, vec3_t origin2, int seed, gentity_t *ent )
     if( !( tr.surfaceFlags & SURF_NOIMPACT ) )
     {
       if( G_TakesDamage( traceEnt ) )
-        G_Damage( traceEnt, ent, ent, forward, tr.endpos,  SHOTGUN_DMG, 0, MOD_SHOTGUN );
+      {
+        int damage;
+
+        if( choke )
+        {
+          float distance = Distance( origin, tr.endpos );
+
+          damage = (int)ceil( ( (float)SHOTGUN_DMG ) *
+                              ( 1 - ( distance / SHOTGUN_CHOKE_DMG_FALLOFF ) ) );
+
+          if( damage <= 0 )
+            damage = 1;
+        } else
+          damage = SHOTGUN_DMG;
+
+          G_Damage( traceEnt, ent, ent, forward, tr.endpos,
+                    damage, 0, MOD_SHOTGUN );
+      }
     }
   }
 }
 
 
-void shotgunFire( gentity_t *ent )
+void shotgunFire( gentity_t *ent, qboolean choke )
 {
   gentity_t    *tent;
 
@@ -511,8 +536,10 @@ void shotgunFire( gentity_t *ent )
   SnapVector( tent->s.origin2 );
   tent->s.eventParm = rand() / ( RAND_MAX / 0x100 + 1 );    // seed for spread pattern
   tent->s.otherEntityNum = ent->s.number;
+  tent->s.generic1 = ent->client ? ent->client->ps.generic1 : ent->s.generic1;
   G_UnlaggedOn( ent, muzzle, SHOTGUN_RANGE );
-  ShotgunPattern( tent->s.pos.trBase, tent->s.origin2, tent->s.eventParm, ent );
+  ShotgunPattern( tent->s.pos.trBase, tent->s.origin2,
+                  tent->s.eventParm, ent, choke );
   G_UnlaggedOff();
 }
 
@@ -2175,6 +2202,10 @@ void FireWeapon2( gentity_t *ent )
       bulletFire( ent, RIFLE_SPREAD2, RIFLE_DMG2, MOD_MACHINEGUN );
       break;
 
+    case WP_SHOTGUN:
+      shotgunFire( ent, qtrue );
+      break;
+
     case WP_LUCIFER_CANNON:
       LCChargeFire( ent, qtrue );
       break;
@@ -2266,7 +2297,7 @@ void FireWeapon( gentity_t *ent )
       bulletFire( ent, RIFLE_SPREAD, RIFLE_DMG, MOD_MACHINEGUN );
       break;
     case WP_SHOTGUN:
-      shotgunFire( ent );
+      shotgunFire( ent, qfalse );
       break;
     case WP_CHAINGUN:
       bulletFire( ent, CHAINGUN_SPREAD, CHAINGUN_DMG, MOD_CHAINGUN );

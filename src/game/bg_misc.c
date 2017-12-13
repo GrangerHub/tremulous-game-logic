@@ -2642,7 +2642,9 @@ static const weaponAttributes_t bg_weapons[ ] =
     "Shotgun",            //char      *humanName;
     "Close range weapon that is useful against larger foes. "
       "It has a slow repeat rate, but can be devastatingly "
-      "effective.",
+      "effective.  Includes a secondary choke with a more "
+      "focused spread, however, yeilds reduced damage "
+      "over greater distances",
     SHOTGUN_SHELLS,       //int       maxAmmo;
     SHOTGUN_MAXCLIPS,     //int       maxClips;
     0,                    //int       roundPrice;
@@ -2650,11 +2652,11 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     SHOTGUN_REPEAT,       //int       repeatRate1;
-    0,                    //int       repeatRate2;
+    SHOTGUN_CHOKE_REPEAT, //int       repeatRate2;
     0,                    //int       repeatRate3;
     SHOTGUN_RELOAD,       //int       reloadTime;
     SHOTGUN_K_SCALE,      //float     knockbackScale;
-    qfalse,               //qboolean  hasAltMode;
+    qtrue,                //qboolean  hasAltMode;
     qfalse,               //qboolean  hasThirdMode;
     qfalse,               //qboolean  canZoom;
     90.0f,                //float     zoomFov;

@@ -483,15 +483,18 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
                                           //grenade nade splash on battlesuits
 
 #define SHOTGUN_PRICE               175
-#define SHOTGUN_SHELLS              8
-#define SHOTGUN_PELLETS             11 //used to sync server and client side
+#define SHOTGUN_SHELLS              10
+#define SHOTGUN_PELLETS             16 //used to sync server and client side
 #define SHOTGUN_MAXCLIPS            3
 #define SHOTGUN_REPEAT              1000
 #define SHOTGUN_K_SCALE             1.0f
 #define SHOTGUN_RELOAD              2000
 #define SHOTGUN_SPREAD              700
-#define SHOTGUN_DMG                 HDM(5)
+#define SHOTGUN_DMG                 HDM(4)
 #define SHOTGUN_RANGE               (8192 * 12)
+#define SHOTGUN_CHOKE_REPEAT        1000
+#define SHOTGUN_CHOKE_SPREAD        250
+#define SHOTGUN_CHOKE_DMG_FALLOFF   768.0f
 
 #define LASGUN_PRICE                275
 #define LASGUN_AMMO                 200

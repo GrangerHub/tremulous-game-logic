@@ -2474,9 +2474,10 @@ Perform the same traces the server did to locate the
 hit splashes
 ================
 */
-static void CG_ShotgunPattern( vec3_t origin, vec3_t origin2, int seed, int otherEntNum )
+static void CG_ShotgunPattern( vec3_t origin, vec3_t origin2, int seed,
+                               int otherEntNum, weaponMode_t mode )
 {
-  int       i;
+  int       i, spread;
   float     r, u;
   vec3_t    end;
   vec3_t    forward, right, up;
@@ -2488,11 +2489,18 @@ static void CG_ShotgunPattern( vec3_t origin, vec3_t origin2, int seed, int othe
   PerpendicularVector( right, forward );
   CrossProduct( forward, right, up );
 
+  if( mode == WPM_SECONDARY )
+    spread = SHOTGUN_CHOKE_SPREAD;
+  else
+    spread = SHOTGUN_SPREAD;
+
+  Com_Printf( "^5CGAME spread: ^1%i^7\n", spread );
+
   // generate the "random" spread pattern
   for( i = 0; i < SHOTGUN_PELLETS; i++ )
   {
-    r = Q_crandom( &seed ) * SHOTGUN_SPREAD * 16;
-    u = Q_crandom( &seed ) * SHOTGUN_SPREAD * 16;
+    r = Q_crandom( &seed ) * spread * 16;
+    u = Q_crandom( &seed ) * spread * 16;
     VectorMA( origin, 8192 * 16, forward, end );
     VectorMA( end, r, right, end );
     VectorMA( end, u, up, end );
@@ -2503,11 +2511,11 @@ static void CG_ShotgunPattern( vec3_t origin, vec3_t origin2, int seed, int othe
     {
       if( cg_entities[ tr.entityNum ].currentState.eType == ET_PLAYER ||
           cg_entities[ tr.entityNum ].currentState.eType == ET_BUILDABLE )
-        CG_MissileHitEntity( WP_SHOTGUN, WPM_PRIMARY, tr.endpos, tr.plane.normal, tr.entityNum, 0 );
+        CG_MissileHitEntity( WP_SHOTGUN, mode, tr.endpos, tr.plane.normal, tr.entityNum, 0 );
       else if( tr.surfaceFlags & SURF_METALSTEPS )
-        CG_MissileHitWall( WP_SHOTGUN, WPM_PRIMARY, 0, tr.endpos, tr.plane.normal, IMPACTSOUND_METAL, 0 );
+        CG_MissileHitWall( WP_SHOTGUN, mode, 0, tr.endpos, tr.plane.normal, IMPACTSOUND_METAL, 0 );
       else
-        CG_MissileHitWall( WP_SHOTGUN, WPM_PRIMARY, 0, tr.endpos, tr.plane.normal, IMPACTSOUND_DEFAULT, 0 );
+        CG_MissileHitWall( WP_SHOTGUN, mode, 0, tr.endpos, tr.plane.normal, IMPACTSOUND_DEFAULT, 0 );
     }
   }
 }
@@ -2526,7 +2534,8 @@ void CG_ShotgunFire( entityState_t *es )
   VectorScale( v, 32, v );
   VectorAdd( es->pos.trBase, v, v );
 
-  CG_ShotgunPattern( es->pos.trBase, es->origin2, es->eventParm, es->otherEntityNum );
+  CG_ShotgunPattern( es->pos.trBase, es->origin2, es->eventParm,
+                     es->otherEntityNum, es->generic1 );
 }
 
 /*
