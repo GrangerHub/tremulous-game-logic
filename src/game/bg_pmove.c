@@ -5206,7 +5206,8 @@ void PmoveSingle( pmove_t *pmove )
       pm->ps->pm_type == PM_EVOLVING )
     PM_DeadMove( );
 
-  PM_ComputeWallSpeedFactor();
+  if( pm->ps->pm_type != PM_JETPACK )
+    PM_ComputeWallSpeedFactor();
 
   PM_DropTimers( );
 
