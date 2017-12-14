@@ -485,8 +485,6 @@ void ShotgunPattern( vec3_t origin, vec3_t origin2, int seed,
   else
     spread = SHOTGUN_SPREAD;
 
-  Com_Printf( "^6GAME spread: ^1%i^7\n", spread );
-
   // generate the "random" spread pattern
   for( i = 0; i < SHOTGUN_PELLETS; i++ )
   {
