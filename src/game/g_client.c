@@ -1468,6 +1468,11 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   for( i = 0; i < MAX_PERSISTANT; i++ )
     client->ps.persistant[ i ] = persistant[ i ];
 
+  //Set the seed for predicted psuedorandomness in bg_pmove.c.
+  //Do not touch this value outside of PM_PSRandom(), and
+  //do not use PM_PSRandom() outside of bg_pmove.c.
+  client->ps.misc[ MISC_SEED ] = rand() / ( RAND_MAX / 0x100 + 1 );
+
   client->ps.eventSequence = eventSequence;
 
   // increment the spawncount so the client will detect the respawn

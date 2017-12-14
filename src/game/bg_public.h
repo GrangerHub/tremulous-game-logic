@@ -357,7 +357,11 @@ typedef enum
   // netcode has space for 0 more
 } persEnum_t;
 
-#define MISC_HEALTH_RESERVE    ( MAX_MISC - 1 ) // hack to fit extra data in the misc[] array
+// hack to fit extra data in the misc[] array
+#define MISC_HEALTH_RESERVE    ( MAX_MISC - 1 )
+//Do not use MISC_SEED outside of PM_PSRandom(),
+//and don't use PM_PSRandom() outside of bg_pmove.c.
+#define MISC_SEED              ( MAX_MISC - 2 ) // for predicted psudorandom things
 
 #define PS_WALLCLIMBINGFOLLOW   0x00000001
 #define PS_WALLCLIMBINGTOGGLE   0x00000002
@@ -1342,6 +1346,9 @@ typedef struct
   int                 repeatRate3;
   int                 reloadTime;
   float               knockbackScale;
+  float               recoil1;
+  float               recoil2;
+  float               recoil3;
 
   qboolean            hasAltMode;
   qboolean            hasThirdMode;

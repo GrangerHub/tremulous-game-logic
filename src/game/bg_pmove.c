@@ -66,6 +66,20 @@ static vec3_t upNormal = { 0.0f, 0.0f, 1.0f };
 #define MIX(x, y, factor) ((x) * (1 - (factor)) + (y) * (factor))
 
 /*
+========================
+PM_PSRandom
+
+Generates a predicted random number from the playerState_t
+Do not use MISC_SEED outside of this function, and don't
+use this function outside of bg_pmove.c.
+========================
+*/
+static float PM_PSRandom( playerState_t *ps )
+{
+  return Q_crandom( &ps->misc[ MISC_SEED ] );
+}
+
+/*
 ===============
 PM_AddEvent
 
@@ -4014,6 +4028,7 @@ Generates weapon events and modifes the weapon counter
 static void PM_Weapon( void )
 {
   int           addTime = 200; //default addTime - should never be used
+  float         recoil;
   qboolean      attack1 = pm->cmd.buttons & BUTTON_ATTACK;
   qboolean      attack2 = pm->cmd.buttons & BUTTON_ATTACK2;
   qboolean      attack3 = pm->cmd.buttons & BUTTON_USE_HOLDABLE;
@@ -4404,7 +4419,7 @@ static void PM_Weapon( void )
         return;
       break;
 	  
-	case WP_ASPITFIRE:
+	  case WP_ASPITFIRE:
       //pouncing has primary secondary AND autohit procedures
       // pounce is autohit
       if( !attack1 && !attack2 )
@@ -4665,20 +4680,36 @@ static void PM_Weapon( void )
       pm->ps->ammo = 0;
   }
 
-  //FIXME: predicted angles miss a problem??
-  if( pm->ps->weapon == WP_CHAINGUN )
+  //set the recoil
+  switch ( pm->ps->generic1 )
   {
+    case WPM_PRIMARY:
+      recoil = BG_Weapon( pm->ps->weapon )->recoil1;
+      break;
+
+    case WPM_SECONDARY:
+      recoil = BG_Weapon( pm->ps->weapon )->recoil2;
+      break;
+
+    case WPM_TERTIARY:
+      recoil = BG_Weapon( pm->ps->weapon )->recoil3;
+      break;
+
+    default:
+      recoil = 0;
+      break;
+}
+
+  if( recoil )
+  {
+    //Recoil is reduced when crouching or when wearing a bsuit.
     if( pm->ps->pm_flags & PMF_DUCKED ||
         BG_InventoryContainsUpgrade( UP_BATTLESUIT, pm->ps->stats ) )
-    {
-      pm->ps->delta_angles[ PITCH ] -= ANGLE2SHORT( ( ( random() * 0.5 ) - 0.125 ) * ( 30 / (float)addTime ) );
-      pm->ps->delta_angles[ YAW ] -= ANGLE2SHORT( ( ( random() * 0.5 ) - 0.25 ) * ( 30.0 / (float)addTime ) );
-    }
-    else
-    {
-      pm->ps->delta_angles[ PITCH ] -= ANGLE2SHORT( ( ( random() * 8 ) - 2 ) * ( 30.0 / (float)addTime ) );
-      pm->ps->delta_angles[ YAW ] -= ANGLE2SHORT( ( ( random() * 8 ) - 4 ) * ( 30.0 / (float)addTime ) );
-    }
+      recoil /= 16;
+
+    pm->ps->delta_angles[ PITCH ] -= ANGLE2SHORT( ( ( PM_PSRandom( pm->ps ) * recoil ) - ( recoil / 4.0f ) ) * ( 30.0f / (float)addTime ) );
+    pm->ps->delta_angles[ YAW ] -= ANGLE2SHORT( ( ( PM_PSRandom( pm->ps ) * recoil ) - ( recoil / 2.0f ) ) * ( 30.0f / (float)addTime ) );
+
   }
 
   pm->ps->weaponTime += addTime;

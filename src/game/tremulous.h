@@ -451,7 +451,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define RIFLE_CLIPSIZE              30
 #define RIFLE_MAXCLIPS              6
 #define RIFLE_REPEAT                90
-#define RIFLE_K_SCALE               1.0f
+#define RIFLE_K_SCALE               0.5f
+#define RIFLE_RECOIL                0.5f
 #define RIFLE_RELOAD                2000
 #define RIFLE_PRICE                 0
 #define RIFLE_SPREAD                200
@@ -488,6 +489,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define SHOTGUN_MAXCLIPS            3
 #define SHOTGUN_REPEAT              1000
 #define SHOTGUN_K_SCALE             1.0f
+#define SHOTGUN_RECOIL1             75.0f
+#define SHOTGUN_RECOIL2             120.0f
 #define SHOTGUN_RELOAD              2000
 #define SHOTGUN_SPREAD              700
 #define SHOTGUN_DMG                 HDM(4)
@@ -508,6 +511,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MDRIVER_MAXCLIPS            4
 #define MDRIVER_DMG                 HDM(38)
 #define MDRIVER_REPEAT              1000
+#define MDRIVER_RECOIL              20.0f
 #define MDRIVER_K_SCALE             1.0f
 #define MDRIVER_RELOAD              2000
 #define MDRIVER_MAX_HITS            3
@@ -516,6 +520,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define CHAINGUN_BULLETS            300
 #define CHAINGUN_REPEAT             80
 #define CHAINGUN_K_SCALE            1.0f
+#define CHAINGUN_RECOIL             8.0f
 #define CHAINGUN_SPREAD             1000
 #define CHAINGUN_DMG                HDM(6)
 #define CHAINGUN_RELOAD             2000
