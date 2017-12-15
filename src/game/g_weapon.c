@@ -391,17 +391,22 @@ void bulletFire( gentity_t *ent, float spread, int damage, int mod )
 {
   trace_t   tr;
   vec3_t    end;
-  float   r;
-  float   u;
+  float     t, u, r, x, y;
   gentity_t *tent;
   gentity_t *traceEnt;
 
-  r = random( ) * M_PI * 2.0f;
-  u = sin( r ) * crandom( ) * spread * 16;
-  r = cos( r ) * crandom( ) * spread * 16;
+  spread *= 16;
+
+  t = 2 * M_PI * random( );
+  u = random( ) + random( );
+  r = u > 1? 2 - u : u;
+  r *= spread;
+  x = r * cos( t );
+  y = r * sin( t );
+
   VectorMA( muzzle, 8192 * 16, forward, end );
-  VectorMA( end, r, right, end );
-  VectorMA( end, u, up, end );
+  VectorMA( end, x, right, end );
+  VectorMA( end, y, up, end );
 
   // don't use unlagged if this is not a client (e.g. turret)
   if( ent->client )
