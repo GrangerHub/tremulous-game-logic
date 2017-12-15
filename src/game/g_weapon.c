@@ -701,8 +701,16 @@ void lightningBoltFire( gentity_t *ent )
 	traceEnt = &g_entities[ tr.entityNum ];
 
 	if( G_TakesDamage( traceEnt ))
+  {
+    float damageMod = 1 - ( Distance( muzzle, tr.endpos ) / (float)LIGHTNING_BOLT_RANGE );
+    int damage = (int)ceil( ( damageMod *
+                              (float)( LIGHTNING_BOLT_DAMAGE -
+                                       LIGHTNING_BOLT_DAMAGE_MIN ) ) +
+                            ( (float)LIGHTNING_BOLT_DAMAGE_MIN - 0.1f ) ); 
+
     G_Damage( traceEnt, ent, ent, forward, tr.endpos,
-              LIGHTNING_BOLT_DAMAGE, 0, MOD_LIGHTNING);
+              damage, 0, MOD_LIGHTNING);
+  }
 
 	if ( G_TakesDamage( traceEnt ) && traceEnt->client )
   {
