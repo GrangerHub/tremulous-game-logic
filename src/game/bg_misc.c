@@ -2100,6 +2100,9 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -2148,6 +2151,9 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -2196,6 +2202,9 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -2244,6 +2253,9 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -2292,6 +2304,9 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -2340,6 +2355,9 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     0,                    //int       maxAmmo; 
     0,                    //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -2388,6 +2406,9 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -2436,6 +2457,9 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     4,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -2484,6 +2508,9 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -2532,6 +2559,9 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -2581,6 +2611,9 @@ static const weaponAttributes_t bg_weapons[ ] =
       "reload system. Includes a less accurate rapid fire secondary mode.",
     RIFLE_CLIPSIZE,       //int       maxAmmo;
     RIFLE_MAXCLIPS,       //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
@@ -2631,6 +2664,9 @@ static const weaponAttributes_t bg_weapons[ ] =
       "close range.",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -2683,6 +2719,9 @@ static const weaponAttributes_t bg_weapons[ ] =
       "over greater distances",
     SHOTGUN_SHELLS,       //int       maxAmmo;
     SHOTGUN_MAXCLIPS,     //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
@@ -2732,6 +2771,9 @@ static const weaponAttributes_t bg_weapons[ ] =
       "small packets of energy.",
     LASGUN_AMMO,          //int       maxAmmo;
     0,                    //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
@@ -2782,6 +2824,9 @@ static const weaponAttributes_t bg_weapons[ ] =
       "payload, but fires slowly.",
     MDRIVER_CLIPSIZE,     //int       maxAmmo;
     MDRIVER_MAXCLIPS,     //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
@@ -2833,6 +2878,9 @@ static const weaponAttributes_t bg_weapons[ ] =
       "for better accuracy",
     CHAINGUN_BULLETS,     //int       maxAmmo;
     0,                    //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
@@ -2883,6 +2931,9 @@ static const weaponAttributes_t bg_weapons[ ] =
       "effective against static targets.",
     FLAMER_GAS,           //int       maxAmmo;
     0,                    //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
@@ -2931,6 +2982,9 @@ static const weaponAttributes_t bg_weapons[ ] =
     "An energy weapon that fires rapid pulses of concentrated energy.",
     PRIFLE_CLIPS,         //int       maxAmmo;
     PRIFLE_MAXCLIPS,      //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
@@ -2983,6 +3037,9 @@ static const weaponAttributes_t bg_weapons[ ] =
       "secondary attack is held down simultaneously with the primary attack.",
     LCANNON_AMMO,         //int       maxAmmo;
     0,                    //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
@@ -3031,6 +3088,9 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     1,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
@@ -3081,6 +3141,9 @@ static const weaponAttributes_t bg_weapons[ ] =
     "launches timed grenades.",
     LAUNCHER_AMMO,        //int       maxAmmo;
     LAUNCHER_MAXCLIPS,    //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
     LAUNCHER_ROUND_PRICE, //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
@@ -3127,20 +3190,24 @@ static const weaponAttributes_t bg_weapons[ ] =
     "lightning",          //char      *name;
     "Lightning Gun",      //char      *humanName;
     "Generates bolts of lightning as its primary attack. "
-    "The secondary attack emmits a burst of ball lightning.",
+    "The secondary attack emmits a burst of ball lightning, "
+    "that can be destabilized early by the primer shot.",
     LIGHTNING_AMMO,       //int       maxAmmo;
     0,                    //int       maxClips;
+    1,                    //int       ammoUsage1;
+    20,                   //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
     qtrue,                //int       usesEnergy;
     LIGHTNING_BOLT_REPEAT,//int       repeatRate1;
-    LIGHTNING_BALL_REPEAT,//int       repeatRate2;
+    LIGHTNING_BALL2_REPEAT,//int       repeatRate2;
     0,                    //int       repeatRate3;
     0,                    //int       reloadTime;
-    LIGHTNING_K_SCALE,     //float     knockbackScale;
-    0.0f,                 //float     recoil1;
-    0.0f,                 //float     recoil2;
+    LIGHTNING_K_SCALE,    //float     knockbackScale;
+    0.5f,                 //float     recoil1;
+    20.0f,                //float     recoil2;
     0.0f,                 //float     recoil3;
     qtrue,                //qboolean  hasAltMode;
     qfalse,               //qboolean  hasThirdMode;
@@ -3148,7 +3215,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     90.0f,                //float     zoomFov;
     qtrue,                //qboolean  purchasable;
     qtrue,                //qboolean  longRanged;
-    qfalse,               //qboolean  relativeMissileSpeed;
+    qtrue,                //qboolean  relativeMissileSpeed;
     {
       {                     //impactPrediction_t impactPrediction[0];
         WPM_NONE,           //weaponMode_t  weaponMode;
@@ -3178,6 +3245,9 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -3226,6 +3296,9 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -3274,6 +3347,9 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -3322,6 +3398,9 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -3370,6 +3449,9 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -3418,6 +3500,9 @@ static const weaponAttributes_t bg_weapons[ ] =
     "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -3468,6 +3553,9 @@ static const weaponAttributes_t bg_weapons[ ] =
       "available with new stages.",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -3517,6 +3605,9 @@ static const weaponAttributes_t bg_weapons[ ] =
      "creates the blue portal, secondary fire creates the red portal.",
     PORTALGUN_AMMO,       //int       maxAmmo;
     PORTALGUN_MAXCLIPS,   //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
     PORTALGUN_ROUND_PRICE,//int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -3600,6 +3691,29 @@ qboolean BG_WeaponAllowedInStage( weapon_t weapon, stage_t stage,
                                   int gameIsInWarmup )
 {
   return qtrue;
+}
+
+/*
+==============
+BG_AmmoUsage
+==============
+*/
+int BG_AmmoUsage( playerState_t *ps )
+{
+  switch ( ps->generic1 )
+  {
+    case WPM_PRIMARY:
+      return BG_Weapon( ps->weapon )->ammoUsage1;
+
+    case WPM_SECONDARY:
+      return BG_Weapon( ps->weapon )->ammoUsage2;
+
+    case WPM_TERTIARY:
+      return BG_Weapon( ps->weapon )->ammoUsage3;
+
+    default:
+      return 1;
+  }
 }
 
 /*

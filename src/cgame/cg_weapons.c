@@ -427,6 +427,29 @@ static qboolean CG_ParseWeaponModeSection( weaponInfoMode_t *wim, char **text_p 
 
       continue;
     }
+    else if( !Q_stricmp( token, "bounceSound" ) )
+    {
+      int index = 0;
+
+      token = COM_Parse( text_p );
+      if( !token )
+        break;
+
+      index = atoi( token );
+
+      if( index < 0 )
+        index = 0;
+      else if( index > 3 )
+        index = 3;
+
+      token = COM_Parse( text_p );
+      if( !token )
+        break;
+
+      wim->bounceSound[ index ] = trap_S_RegisterSound( token, qfalse );
+
+      continue;
+    }
     else if( !Q_stricmp( token, "flashDLightColor" ) )
     {
       for( i = 0 ; i < 3 ; i++ )

@@ -849,6 +849,7 @@ typedef struct weaponInfoMode_s
   qhandle_t   impactMarkSize;
   sfxHandle_t impactSound[ 4 ]; //random impact sound
   sfxHandle_t impactFleshSound[ 4 ]; //random impact sound
+  sfxHandle_t bounceSound[ 4 ]; //random bounce sound
 } weaponInfoMode_t;
 
 // each WP_* weapon enum has an associated weaponInfo_t

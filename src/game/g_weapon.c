@@ -775,6 +775,39 @@ Lightning Gun
 
 /*
 ===============
+lightningBall2Fire
+===============
+*/
+void lightningBall2Fire( gentity_t *ent )
+{
+  fire_lightningBall( ent, qfalse, muzzle, forward );
+
+  // damage self if in contact with water
+  if( ent->waterlevel )
+    G_Damage( ent, ent, ent, NULL, NULL,
+              LIGHTNING_BOLT_DAMAGE, 0, MOD_LIGHTNING);
+}
+
+/*
+===============
+lightningBall1Fire
+===============
+*/
+void lightningBall1Fire( gentity_t *ent )
+{
+  if( !( ent->client->ps.stats[ STAT_STATE ] & SS_CHARGING ) )
+  {
+    weaponMode_t mode = ent->s.generic1;
+
+    ent->s.generic1 = WPM_TERTIARY; //hax!!
+    fire_lightningBall( ent, qtrue, muzzle, forward );
+    ent->s.generic1 = mode;
+    ent->client->ps.stats[ STAT_STATE ] |= SS_CHARGING;
+  }
+}
+
+/*
+===============
 lightningBoltFire
 ===============
 */
@@ -800,6 +833,7 @@ void lightningBoltFire( gentity_t *ent )
 	SV_Trace( &tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT, TT_AABB );
   G_UnlaggedOff( );
 
+  lightningBall1Fire( ent );
 
 	if( tr.entityNum == ENTITYNUM_NONE )
 		return;
@@ -807,32 +841,33 @@ void lightningBoltFire( gentity_t *ent )
 	traceEnt = &g_entities[ tr.entityNum ];
 
 	if( G_TakesDamage( traceEnt ))
-    G_Damage( traceEnt, ent, ent, forward, tr.endpos,
-              LIGHTNING_BOLT_DAMAGE, 0, MOD_LIGHTNING);
+  {
+    float damageMod = 1 - ( Distance( muzzle, tr.endpos ) / (float)LIGHTNING_BOLT_RANGE );
+    int damage = (int)ceil( ( damageMod *
+                              (float)( LIGHTNING_BOLT_DAMAGE -
+                                       LIGHTNING_BOLT_DAMAGE_MIN ) ) +
+                            ( (float)LIGHTNING_BOLT_DAMAGE_MIN - 0.1f ) ); 
 
-	if ( G_TakesDamage( traceEnt ) && traceEnt->client )
+    G_Damage( traceEnt, ent, ent, forward, tr.endpos,
+              damage, 0, MOD_LIGHTNING);
+  }
+
+	if ( G_TakesDamage( traceEnt ) &&
+       ( traceEnt->client ||
+         traceEnt->s.eType == ET_BUILDABLE ) )
   {
 		tent = G_TempEntity( tr.endpos, EV_MISSILE_HIT );
 		tent->s.otherEntityNum = traceEnt->s.number;
 		tent->s.eventParm = DirToByte( tr.plane.normal );
 		tent->s.weapon = ent->s.weapon;
     tent->s.generic1 = ent->s.generic1;
-	}
-}
-
-/*
-===============
-lightningBallFire
-===============
-*/
-void lightningBallFire( gentity_t *ent )
-{
-  fire_lightningBall( ent, muzzle, forward );
-
-  // damage self if in contact with water
-  if( ent->waterlevel )
-    G_Damage( ent, ent, ent, NULL, NULL,
-              LIGHTNING_BOLT_DAMAGE, 0, MOD_LIGHTNING);
+	} else
+  {
+    tent = G_TempEntity( tr.endpos, EV_MISSILE_MISS );
+    tent->s.eventParm = DirToByte( tr.plane.normal );
+    tent->s.weapon = ent->s.weapon;
+    tent->s.generic1 = ent->s.generic1; //weaponMode
+  }
 }
 
 /*
@@ -2226,7 +2261,7 @@ void FireWeapon2( gentity_t *ent )
       break;
 
     case WP_LIGHTNING:
-      lightningBallFire( ent );
+      lightningBall2Fire( ent );
       break;
 
     case WP_ALEVEL2_UPG:

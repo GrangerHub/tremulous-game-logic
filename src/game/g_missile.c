@@ -718,20 +718,58 @@ gentity_t *launch_grenade3( gentity_t *self, vec3_t start, vec3_t dir,
 
 /*
 =================
+lightningBall_die
+=================
+*/
+static void lightningBall_die( gentity_t *self, gentity_t *inflictor,
+                               gentity_t *attacker, int damage, int mod )
+{
+  self->nextthink = level.time;
+  self->think = G_ExplodeMissile;
+  self->classname = "lightningBall1"; //trigger the detonation of any other secondary lightning balls
+}
+
+/*
+=================
 fire_lightningBall
 
 Used by the lightning gun's secondary fire
 =================
 */
-gentity_t *fire_lightningBall( gentity_t *self, vec3_t start, vec3_t dir )
+gentity_t *fire_lightningBall( gentity_t *self, qboolean primary,
+                               vec3_t start, vec3_t dir )
 {
   gentity_t *bolt;
+  int speed;
 
   VectorNormalize (dir);
 
   bolt = G_Spawn();
   bolt->classname = "lightningBall";
-  bolt->flags |= ( FL_BOUNCE_HALF | FL_NO_BOUNCE_SOUND );
+  bolt->damage = LIGHTNING_BALL_DAMAGE;
+  if( primary )
+  {
+    bolt->classname = "lightningBall1";
+    bolt->splashDamage = LIGHTNING_BALL_SPLASH_DMG;
+    bolt->s.pos.trType = TR_LINEAR;
+    bolt->methodOfDeath = MOD_LIGHTNING_PRIMER;
+    bolt->splashMethodOfDeath = MOD_LIGHTNING_PRIMER;
+    bolt->splashRadius = LIGHTNING_BALL1_RADIUS;
+    speed = LIGHTNING_BALL1_SPEED;
+  } else
+  {
+    bolt->classname = "lightningBall2";
+    bolt->flags |= ( FL_BOUNCE_HALF | FL_NO_BOUNCE_SOUND );
+    bolt->splashDamage = LIGHTNING_BALL2_SPLASH_DMG;
+    bolt->s.pos.trType = TR_GRAVITY;
+    bolt->takedamage = qtrue;
+    bolt->health = 1;
+    bolt->die = lightningBall_die;
+    bolt->methodOfDeath = MOD_LIGHTNING;
+    bolt->splashMethodOfDeath = MOD_LIGHTNING;
+    bolt->splashRadius = LIGHTNING_BALL2_RADIUS;
+    speed = LIGHTNING_BALL2_SPEED;
+  }
   bolt->pointAgainstWorld = qtrue;
   bolt->nextthink = level.time + LIGHTNING_BALL_LIFETIME;
   bolt->think = G_ExplodeMissile;
@@ -740,21 +778,18 @@ gentity_t *fire_lightningBall( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->s.generic1 = self->s.generic1; //weaponMode
   bolt->r.ownerNum = self->s.number;
   bolt->parent = self;
-  bolt->damage = LIGHTNING_BALL_DAMAGE;
-  bolt->splashDamage = LIGHTNING_BALL_SPLASH_DMG;
-  bolt->splashRadius = LIGHTNING_BALL_RADIUS;
-  bolt->methodOfDeath = MOD_LIGHTNING;
-  bolt->splashMethodOfDeath = MOD_LIGHTNING;
   G_SetClipmask( bolt, MASK_SHOT );
   bolt->target_ent = NULL;
   bolt->r.mins[ 0 ] = bolt->r.mins[ 1 ] = bolt->r.mins[ 2 ] = -LIGHTNING_BALL_SIZE;
   bolt->r.maxs[ 0 ] = bolt->r.maxs[ 1 ] = bolt->r.maxs[ 2 ] = LIGHTNING_BALL_SIZE;
 
-  bolt->s.pos.trType = TR_GRAVITY;
   bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;   // move a bit on the very first frame
   VectorCopy( start, bolt->s.pos.trBase );
-  VectorScale( dir, LIGHTNING_BALL_SPEED, bolt->s.pos.trDelta );
+  VectorScale( dir, speed, bolt->s.pos.trDelta );
 
+  if( self->client )
+    BG_ModifyMissleLaunchVelocity( self->s.pos.trDelta, self->client->ps.speed, bolt->s.pos.trDelta,
+                                   BG_Weapon( bolt->s.weapon )->relativeMissileSpeed );
   SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
 
   VectorCopy( start, bolt->r.currentOrigin );
