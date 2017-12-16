@@ -199,6 +199,7 @@ typedef enum
 #define PMF_HOPPED          0x020000 // a hop has occurred
 #define PMF_BUNNY_HOPPING   0x040000 // bunny hopping is enabled
 #define PMF_JUMPING         0x080000 // a jump has occurred but has not landed yet
+#define PMF_PAUSE_BEAM      0x100000 //for special cases of when continous beam wepons are not being fired 
 
 
 #define PMF_ALL_TIMES (PMF_TIME_WATERJUMP|PMF_TIME_LAND|PMF_TIME_KNOCKBACK|PMF_TIME_WALLJUMP)
@@ -1059,6 +1060,7 @@ typedef enum
   MOD_GRENADE,
   MOD_GRENADE_LAUNCHER,
   MOD_LIGHTNING,
+  MOD_LIGHTNING_PRIMER,
   MOD_WATER,
   MOD_SLIME,
   MOD_LAVA,
@@ -1284,6 +1286,9 @@ typedef struct
 
   int       maxAmmo;
   int       maxClips;
+  int       ammoUsage1;
+  int       ammoUsage2;
+  int       ammoUsage3;
   int       roundPrice; // doesn't apply to energy weapons
   qboolean  ammoPurchasable;
   qboolean  infiniteAmmo;
@@ -1399,6 +1404,7 @@ const weaponAttributes_t    *BG_Weapon( weapon_t weapon );
 qboolean                    BG_WeaponAllowedInStage( weapon_t weapon,
                                                      stage_t stage,
                                                      int gameIsInWarmup );
+int                         BG_AmmoUsage( playerState_t *ps );
 int                         BG_TotalPriceForWeapon( weapon_t weapon );
 
 const upgradeAttributes_t   *BG_UpgradeByName( const char *name );

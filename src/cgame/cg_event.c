@@ -170,6 +170,7 @@ static void CG_Obituary( entityState_t *ent )
         break;
 
       case MOD_LIGHTNING:
+      case MOD_LIGHTNING_PRIMER:
         if( gender == GENDER_FEMALE )
           message = "electrocuted herself";
         else if( gender == GENDER_NEUTER )
@@ -290,6 +291,7 @@ static void CG_Obituary( entityState_t *ent )
         break;
 
       case MOD_LIGHTNING:
+      case MOD_LIGHTNING_PRIMER:
         message = "electrocuted by";
         message2 = "'s lightning gun";
         break;
@@ -780,11 +782,31 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       break;
 
     case EV_GRENADE_BOUNCE:
-      if( rand( ) & 1 )
-        trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.hardBounceSound1 );
-      else
-        trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.hardBounceSound2 );
-      break;
+      {
+        weaponInfo_t *weapon = &cg_weapons[ es->weapon ];
+        weaponMode_t weaponMode = es->generic1;
+        int          c;
+
+        for( c = 0; c < 4; c++ )
+        {
+          if( !weapon->wim[ weaponMode ].bounceSound[ c ] )
+            break;
+        }
+
+        if( c > 0 )
+        {
+          c = rand( ) % c;
+          if( weapon->wim[ weaponMode ].bounceSound[ c ] )
+            trap_S_StartSound( NULL, es->number, CHAN_AUTO, weapon->wim[ weaponMode ].bounceSound[ c ] );
+        } else
+        {
+          if( rand( ) & 1 )
+            trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.hardBounceSound1 );
+          else
+            trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.hardBounceSound2 );
+        }
+        break;
+      }
 
     //
     // missile impacts

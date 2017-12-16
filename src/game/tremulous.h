@@ -507,19 +507,25 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LAUNCHER_SPEED               1200
 
 #define LIGHTNING_PRICE             1000
-#define LIGHTNING_AMMO              500
+#define LIGHTNING_AMMO              660
+#define LIGHTNING_BALL_AMMO_USAGE   20
 #define LIGHTNING_K_SCALE           0.0f
 #define LIGHTNING_BOLT_DPS          100
 #define LIGHTNING_BOLT_REPEAT       50 // keep it as low as possible
 #define LIGHTNING_BOLT_DAMAGE       HDM( LIGHTNING_BOLT_DPS * LIGHTNING_BOLT_REPEAT / 1000 )
+#define LIGHTNING_BOLT_DAMAGE_MIN   ( LIGHTNING_BOLT_DAMAGE / 5 ) //must be less than LIGHTNING_BOLT_DAMAGE
 #define LIGHTNING_BOLT_RANGE        768
-#define LIGHTNING_BALL_REPEAT       1000
+#define LIGHTNING_BALL1_REPEAT      500
+#define LIGHTNING_BALL2_REPEAT      500
 #define LIGHTNING_BALL_LIFETIME     5000
-#define LIGHTNING_BALL_DAMAGE       HDM( 10 )
-#define LIGHTNING_BALL_SPLASH_DMG   HDM( 40 )
-#define LIGHTNING_BALL_RADIUS       50
+#define LIGHTNING_BALL_DAMAGE       HDM( 5 )
+#define LIGHTNING_BALL_SPLASH_DMG   HDM( 1 )
+#define LIGHTNING_BALL2_SPLASH_DMG  HDM( 60 )
+#define LIGHTNING_BALL1_RADIUS      200
+#define LIGHTNING_BALL2_RADIUS      150
 #define LIGHTNING_BALL_SIZE         5
-#define LIGHTNING_BALL_SPEED        500
+#define LIGHTNING_BALL1_SPEED       2000
+#define LIGHTNING_BALL2_SPEED       750
 
 #define HBUILD_PRICE                0
 #define HBUILD_REPEAT               1000
