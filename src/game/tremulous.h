@@ -269,7 +269,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
 
-#define ALIEN_BHLTH_MODIFIER        3.5f
+#define ALIEN_BHLTH_MODIFIER        3.25f
 #define ABHM(h)                     ((int)((float)h*ALIEN_BHLTH_MODIFIER))
 
 #define ALIEN_BDMG_MODIFIER         (1.0f)
@@ -649,7 +649,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define JETPACK_DISABLE_CHANCE      0.3f
 #define JETPACK_FUEL_FULL           5000 //can't exceed 32767
 #define JETPACK_FUEL_LOW            1000
-#define JETPACK_FUEL_USAGE          8 //every 100ms
+#define JETPACK_FUEL_USAGE          16 //every 100ms
 #define JETPACK_FUEL_MIN_START      150 // Minimum fuel required to start the jet
 #define JETPACK_ACT_BOOST_FUEL_USE  ( JETPACK_FUEL_USAGE * 2 )
 #define JETPACK_ACT_BOOST_TIME      750
@@ -681,7 +681,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
 
-#define HUMAN_BHLTH_MODIFIER        3.5f
+#define HUMAN_BHLTH_MODIFIER        3.25f
 #define HBHM(h)                     ((int)((float)h*HUMAN_BHLTH_MODIFIER))
 
 #define HUMAN_BDMG_MODIFIER         (1.0f)
