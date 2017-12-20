@@ -1939,6 +1939,8 @@ static void ATrapper_FireOnEnemy( gentity_t *self, int firespeed )
       VectorCopy( bestDirToTarget, dirToTarget );
       break;
     }
+
+    i++;
   }
 
   VectorNormalize( dirToTarget );
