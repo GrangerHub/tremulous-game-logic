@@ -162,7 +162,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     OVERMIND_CREEPSIZE,    //int       creepSize;
     qfalse,                //qboolean  dccTest;
     qfalse,                //qboolean  transparentTest;
-    qfalse,                //qboolean  uniqueTest;
+    qtrue,                 //qboolean  uniqueTest;
     OVERMIND_VALUE,        //int       value;
     qtrue,                 //qboolean  stackable;
     0                      //int       batteryPower;
@@ -208,7 +208,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     BARRICADE_VALUE,       //int       value;
     qfalse,                //qboolean  stackable;
-    0                      //int       batteryPower;
+    BARRICADE_BAT_PWR      //int       batteryPower;
   },
   {
     BA_A_ACIDTUBE,         //int       number;
@@ -251,7 +251,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     ACIDTUBE_VALUE,        //int       value;
     qfalse,                //qboolean  stackable;
-    0                      //int       batteryPower;
+    ACIDTUBE_BAT_PWR       //int       batteryPower;
   },
   {
     BA_A_TRAPPER,          //int       number;
@@ -294,7 +294,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     TRAPPER_VALUE,         //int       value;
     qfalse,                //qboolean  stackable;
-    0                      //int       batteryPower;
+    TRAPPER_BAT_PWR        //int       batteryPower;
   },
   {
     BA_A_ZUNGE,            //int       buildNum;
@@ -337,7 +337,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
 	  SLIME_ZUNGE_VALUE,     //int       value;
     qfalse,                //qboolean  stackable;
-    0                      //int       batteryPower;
+    SLIME_ZUNGE_BAT_PWR    //int       batteryPower;
   },
   {
     BA_A_BOOSTER,          //int       number;
@@ -381,7 +381,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     BOOSTER_VALUE,         //int       value;
     qfalse,                //qboolean  stackable;
-    0                      //int       batteryPower;
+    BOOSTER_BAT_PWR        //int       batteryPower;
   },
   {
     BA_A_HIVE,             //int       number;
@@ -423,7 +423,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     HIVE_VALUE,            //int       value;
     qfalse,                //qboolean  stackable;
-    0                      //int       batteryPower;
+    HIVE_BAT_PWR           //int       batteryPower;
   },
   {
     BA_A_HOVEL,            //int       buildNum;
@@ -471,7 +471,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  uniqueTest;
     HOVEL_VALUE,           //int       value;
     qfalse,                //qboolean  stackable;
-    0                      //int       batteryPower;
+    HOVEL_BAT_PWR          //int       batteryPower;
   },
   {
     BA_H_SPAWN,            //int       number;
@@ -608,7 +608,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     MGTURRET_VALUE,        //int       value;
     qfalse,                //qboolean  stackable;
-    0                      //int       batteryPower;
+    MGTURRET_BAT_PWR       //int       batteryPower;
   },
   {
     BA_H_TESLAGEN,         //int       number;
@@ -651,7 +651,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     TESLAGEN_VALUE,        //int       value;
     qfalse,                //qboolean  stackable;
-    0                      //int       batteryPower;
+    TESLAGEN_BAT_PWR       //int       batteryPower;
   },
   {
     BA_H_ARMOURY,          //int       number;
@@ -698,7 +698,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     ARMOURY_VALUE,         //int       value;
     qtrue,                 //qboolean  stackable;
-    0                      //int       batteryPower;
+    ARMOURY_BAT_PWR        //int       batteryPower;
   },
   {
     BA_H_DCC,              //int       number;
@@ -741,7 +741,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  uniqueTest;
     DC_VALUE,              //int       value;
     qtrue,                 //qboolean  stackable;
-    0                      //int       batteryPower;
+    DC_BAT_PWR             //int       batteryPower;
   },
   {
     BA_H_MEDISTAT,         //int       number;
@@ -785,7 +785,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     MEDISTAT_VALUE,        //int       value;
     qfalse,                //qboolean  stackable;
-    0                      //int       batteryPower;
+    MEDISTAT_BAT_PWR       //int       batteryPower;
   },
   {
     BA_H_REACTOR,          //int       number;
@@ -829,7 +829,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     0,                     //int       creepSize;
     qfalse,                //qboolean  dccTest;
     qfalse,                //qboolean  transparentTest;
-    qfalse,                //qboolean  uniqueTest;
+    qtrue,                 //qboolean  uniqueTest;
     REACTOR_VALUE,         //int       value;
     qtrue,                 //qboolean  stackable;
     0                      //int       batteryPower;

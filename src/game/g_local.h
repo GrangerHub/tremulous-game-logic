@@ -324,8 +324,10 @@ struct gentity_s
   gentity_t         *rangeMarker;
   qboolean          active;             // for power repeater, but could be useful elsewhere
   qboolean          powered;            // for human buildables
-  int               batteryPower;       // amount of time a human buildable can remain powered
+  int               batteryPower;       // amount of time a buildable can remain powered
                                         // without an external power source
+  int               creepReserve;       // amount of time an alien buildable can survive
+                                        // without an external creep source
   struct namelog_s  *builtBy;           // person who built this
   struct buildlog_s *buildLog;          // the build log for when this buildable was constructured (NULL if built by the world)
   int               dcc;                // number of controlling dccs

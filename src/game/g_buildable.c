@@ -349,6 +349,9 @@ qboolean G_FindPower( gentity_t *self, qboolean searchUnspawned )
       if( ent->s.modelindex == BA_H_REACTOR && distance <= REACTOR_BASESIZE )
       {
         self->parentNode = ent;
+
+        // extend the batery power supply
+        self->batteryPower = level.time + BG_Buildable( self->s.modelindex )->batteryPower;
        return qtrue;
       }
       else if( distance < minDistance )
@@ -671,6 +674,9 @@ qboolean G_IsDCCBuilt( void )
     if( ent->health <= 0 )
       continue;
 
+    if( !ent->powered )
+      continue;
+
     return qtrue;
   }
 
@@ -769,17 +775,26 @@ qboolean G_FindCreep( gentity_t *self )
     if( minDistance <= CREEP_BASESIZE )
     {
       if( !self->client )
+      {
         self->parentNode = closestSpawn;
+        self->creepReserve = level.time + ALIEN_CREEP_RESERVE;
+      }
       return qtrue;
     }
     else
-      return qfalse;
+    {
+      if( self->client )
+        return qfalse;
+      else
+        return self->creepReserve >= level.time;
+    }
   }
 
   if( self->client )
     return qfalse;
 
   //if we haven't returned by now then we must already have a valid parent
+  self->creepReserve = level.time + ALIEN_CREEP_RESERVE;
   return qtrue;
 }
 
@@ -1056,7 +1071,12 @@ void AGeneric_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, i
   self->methodOfDeath = mod;
 
   if( self->spawned )
+  {
     self->nextthink = level.time + ALIEN_CREEP_BLAST_DELAY;
+    if( self->s.modelindex == BA_A_OVERMIND &&
+        self->methodOfDeath != MOD_DECONSTRUCT )
+      G_BroadcastEvent( EV_OVERMIND_DYING, 0 );
+  }
   else
     self->nextthink = level.time; //blast immediately
 
@@ -1105,7 +1125,10 @@ A generic think function for Alien buildables
 */
 void AGeneric_Think( gentity_t *self )
 {
-  self->powered = G_Overmind( ) != NULL;
+  if( G_Overmind( ) )
+    self->batteryPower = level.time + BG_Buildable( self->s.modelindex )->batteryPower;
+
+  self->powered = ( self->batteryPower >= level.time );
   self->nextthink = level.time + BG_Buildable( self->s.modelindex )->nextthink;
 
   G_SuffocateTrappedEntities( self );
@@ -1275,13 +1298,6 @@ void AOvermind_Think( gentity_t *self )
       // aliens now know they have no eggs, but they're screwed, so stfu
       if( !haveBuilder || G_TimeTilSuddenDeath( ) <= 0 )
         level.overmindMuted = qtrue;
-    }
-
-    //overmind dying
-    if( self->health < ( OVERMIND_HEALTH / 10.0f ) && level.time > self->overmindDyingTimer )
-    {
-      self->overmindDyingTimer = level.time + OVERMIND_DYING_PERIOD;
-      G_BroadcastEvent( EV_OVERMIND_DYING, 0 );
     }
 
     //overmind under attack
@@ -3634,10 +3650,12 @@ void HTeslaGen_Think( gentity_t *self )
 
   G_SuffocateTrappedEntities( self );
 
-  self->powered = G_FindPower( self, qfalse );
-
   if( !G_IsDCCBuilt( ) )
+  {
     self->powered = qfalse;
+    self->batteryPower = -1;
+  } else
+    self->powered = G_FindPower( self, qfalse );
 
   G_IdlePowerState( self );
 
@@ -5128,6 +5146,7 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
   built->buildProgress = BG_Buildable( buildable )->buildTime;
   built->attemptSpawnTime = -1;
   built->batteryPower = -1;
+  built->creepReserve = -1;
 
   for( i = 0; i < MAX_CLIENTS; i++ )
     built->credits[ i ] = 0;
