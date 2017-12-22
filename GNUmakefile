@@ -513,8 +513,7 @@ ifeq ($(PLATFORM),darwin)
   #  the file has been modified by each build.
   LIBSDLMAIN=$(B)/libSDL2main.a
   LIBSDLMAINSRC=$(LIBSDIR)/macosx/libSDL2main.a
-  CLIENT_LIBS += -framework IOKit \
-    $(LIBSDIR)/macosx/libSDL2-2.0.0.dylib
+  CLIENT_LIBS += -framework IOKit $(LIBSDIR)/macosx/libSDL2-2.0.0.dylib
   RENDERER_LIBS += -framework OpenGL $(LIBSDIR)/macosx/libSDL2-2.0.0.dylib
   CLIENT_EXTRA_FILES += $(LIBSDIR)/macosx/libSDL2-2.0.0.dylib
 
@@ -523,9 +522,6 @@ ifeq ($(PLATFORM),darwin)
   SHLIBEXT=dylib
   SHLIBCFLAGS=-fPIC -fno-common
   SHLIBLDFLAGS=-dynamiclib $(LDFLAGS) -Wl,-U,_com_altivec
-
-  NOTSHLIBCFLAGS=-mdynamic-no-pic
-
 else # ifeq darwin
 
 
@@ -2067,6 +2063,7 @@ $(B)/$(OUT)/$(CLIENTBIN)_opengl2$(FULLBINEXT): $(Q3OBJ) $(Q3R2OBJ) $(Q3R2STRINGO
 	$(Q)$(CC) $(CLIENT_CFLAGS) $(CFLAGS) -rdynamic $(CLIENT_LDFLAGS) $(LDFLAGS) \
 		-o $@ $(Q3OBJ) $(Q3R2OBJ) $(Q3R2STRINGOBJ) $(JPGOBJ) \
 		$(LIBSDLMAIN) $(CLIENT_LIBS) $(RENDERER_LIBS) $(LIBS) -lpthread
+
 endif
 
 ifneq ($(strip $(LIBSDLMAIN)),)
@@ -2329,10 +2326,17 @@ GOBJ_ = \
   $(B)/qcommon/q_shared.o \
   $(B)/qcommon/packing.o
 
+#WTFBBQHAX 
+
+ifeq ($(PLATFORM),darwin)
+$(B)/$(OUT)/$(BASEGAME)/game$(SHLIBNAME): $(GOBJ_)
+	$(echo_cmd) "LD $@"
+	$(Q)$(CC) $(CFLAGS) -bundle -bundle_loader $(B)/$(OUT)/$(SERVERBIN) -o $@ $(GOBJ_)
+else
 $(B)/$(OUT)/$(BASEGAME)/game$(SHLIBNAME): $(GOBJ_)
 	$(echo_cmd) "LD $@"
 	$(Q)$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(GOBJ_)
-
+endif
 
 
 #############################################################################
