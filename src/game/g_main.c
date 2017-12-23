@@ -1980,6 +1980,9 @@ can see the last frag.
 */
 void CheckExitRules( void )
 {
+  int    index = rand( ) % MAX_INTERMISSION_SOUND_SETS; // randomly select an intermission sound set
+  team_t winningTeam = TEAM_NONE;
+
   // if at the intermission, wait for all non-bots to
   // signal ready, then go to next level
   if( level.intermissiontime )
@@ -2002,10 +2005,10 @@ void CheckExitRules( void )
   if( g_timelimit.integer )
   {
     if( level.time - level.startTime >= g_timelimit.integer * 60000 )
-    {
+    { 
       level.lastWin = TEAM_NONE;
       SV_GameSendServerCommand( -1, "print \"Timelimit hit\n\"" );
-      SV_SetConfigstring( CS_WINNER, "Stalemate" );
+      SV_SetConfigstring( CS_WINNER, va( "%i|Stalemate", index ) );
       LogExit( "Timelimit hit." );
       return;
     }
@@ -2046,10 +2049,7 @@ void CheckExitRules( void )
     }
 
     //humans win
-    level.lastWin = TEAM_HUMANS;
-    SV_GameSendServerCommand( -1, "print \"Humans win\n\"");
-    SV_SetConfigstring( CS_WINNER, "Humans Win" );
-    LogExit( "Humans win." );
+    winningTeam = level.lastWin = TEAM_HUMANS;
   }
   else if( level.uncondAlienWin ||
            ( ( level.time > level.startTime + 1000 ) &&
@@ -2069,10 +2069,16 @@ void CheckExitRules( void )
     }
 
     //aliens win
-    level.lastWin = TEAM_ALIENS;
-    SV_GameSendServerCommand( -1, "print \"Aliens win\n\"");
-    SV_SetConfigstring( CS_WINNER, "Aliens Win" );
-    LogExit( "Aliens win." );
+    winningTeam = level.lastWin = TEAM_ALIENS;
+  }
+
+  if( winningTeam != TEAM_NONE )
+  {
+    SV_GameSendServerCommand( -1, va( "print \"%s win\n\"", BG_Team( winningTeam )->humanName ));
+    SV_SetConfigstring( CS_WINNER,
+                        va( "%i|%s Win", index,
+                            BG_Team( winningTeam )->humanName ) );
+    LogExit( va( "%s win.", BG_Team( winningTeam )->humanName ) );
   }
 }
 
@@ -2489,7 +2495,7 @@ void G_CheckVote( team_t team )
     level.voteExecuteTime[ team ] = level.time + level.voteDelay[ team ];
 
   G_LogPrintf( "EndVote: %s %s %d(yes) %d(no) %d(num of voting clients) %d(num of counted voting clients) %s\n",
-               team == TEAM_NONE ? "global" : BG_TeamName( team ),
+               team == TEAM_NONE ? "global" : BG_Team( team )->name2,
                pass ? "^2pass^7" : "^1fail^7",
                level.voteYes[ team ], level.voteNo[ team ], level.numVotingClients[ team ],
                level.numCountedVotingClients[ team ],

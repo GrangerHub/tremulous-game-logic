@@ -255,6 +255,8 @@ vmCvar_t  cg_chatTeamPrefix;
 
 vmCvar_t  cg_warmupBuildableRespawning;
 
+vmCvar_t  cg_intermissionMusic;
+
 typedef struct
 {
   vmCvar_t  *vmCvar;
@@ -421,7 +423,9 @@ static cvarTable_t cvarTable[ ] =
 
   { &cg_chatTeamPrefix, "cg_chatTeamPrefix", "1", CVAR_ARCHIVE },
 
-  { &cg_warmupBuildableRespawning, "g_warmupBuildableRespawning", "0", 0 }
+  { &cg_warmupBuildableRespawning, "g_warmupBuildableRespawning", "0", 0 },
+
+  { &cg_intermissionMusic, "cg_intermissionMusic", "1", CVAR_ARCHIVE }
 };
 
 static size_t cvarTableSize = ARRAY_LEN( cvarTable );
@@ -836,7 +840,7 @@ called during a precache command
 */
 static void CG_RegisterSounds( void )
 {
-  int         i;
+  int         i, j;
   char        name[ MAX_QPATH ];
   const char  *soundName;
 
@@ -858,9 +862,38 @@ static void CG_RegisterSounds( void )
 
   cgs.media.voteAlarmSound        = trap_S_RegisterSound( "sound/misc/213096__soundsexciting__gong-with-music.wav", qfalse );
 
-  cgs.media.intermissionDrawSound = trap_S_RegisterSound( "sound/misc/intermission_draw.wav", qfalse );
-  cgs.media.intermissionLossSound = trap_S_RegisterSound( "sound/misc/intermission_loss.wav", qfalse );
-  cgs.media.intermissionWinSound  = trap_S_RegisterSound( "sound/misc/intermission_win.wav", qfalse );
+  for( i = 0; i < NUM_TEAMS; i++ )
+  {
+    for( j = 0; j < MAX_INTERMISSION_SOUND_SETS; j++ )
+    {
+      if( i != TEAM_NONE )
+      {
+        cgs.media.intermissionCustomSounds[ i ][ INTMSN_SND_WIN ][ j ] =
+                trap_S_RegisterSound( va( "sound/teams/%s/intermission_win%i",
+                                          BG_Team( i )->name2, j ), qfalse );
+        cgs.media.intermissionCustomSounds[ i ][ INTMSN_SND_LOSS ][ j ] =
+                trap_S_RegisterSound( va( "sound/teams/%s/intermission_loss%i",
+                                          BG_Team( i )->name2, j ), qfalse );
+      }
+      cgs.media.intermissionCustomSounds[ i ][ INTMSN_SND_EVAC ][ j ] =
+                trap_S_RegisterSound( va( "sound/teams/%s/intermission_evac%i",
+                                          BG_Team( i )->name2, j ), qfalse );
+      cgs.media.intermissionCustomSounds[ i ][ INTMSN_SND_TIME ][ j ] =
+                trap_S_RegisterSound( va( "sound/teams/%s/intermission_time%i",
+                                          BG_Team( i )->name2, j ), qfalse );
+    }
+  }
+
+  //these defaults must be .wav so that the old clients can play them
+  cgs.media.intermissionDefaultSounds[ INTMSN_SND_WIN ] =
+          trap_S_RegisterSound( "sound/misc/intermission_default_win.wav", qfalse );
+  cgs.media.intermissionDefaultSounds[ INTMSN_SND_LOSS ] =
+          trap_S_RegisterSound( "sound/misc/intermission_default_loss.wav", qfalse );
+  cgs.media.intermissionDefaultSounds[ INTMSN_SND_EVAC ] =
+            trap_S_RegisterSound( "sound/misc/intermission_default_evac.wav", qfalse );
+  cgs.media.intermissionDefaultSounds[ INTMSN_SND_TIME ] =
+            trap_S_RegisterSound( "sound/misc/intermission_default_time.wav", qfalse );
+
   cgs.media.warmupEndSound        = trap_S_RegisterSound( "sound/misc/warmup_end.wav", qfalse );
 
   cgs.media.talkSound             = trap_S_RegisterSound( "sound/misc/talk.wav", qfalse );

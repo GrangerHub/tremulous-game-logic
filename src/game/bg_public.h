@@ -133,6 +133,8 @@ enum
 #error overflow: CS_MAX > MAX_CONFIGSTRINGS
 #endif
 
+#define MAX_INTERMISSION_SOUND_SETS 1
+
 typedef enum
 {
   GENDER_MALE,
@@ -1193,6 +1195,7 @@ typedef struct
   team_t         number;
 
   char          *name;
+  char          *name2;
   char          *humanName;
   char          *info;
 } teamAttributes_t;
@@ -1555,7 +1558,6 @@ voiceTrack_t *BG_VoiceTrackFind( voiceTrack_t *head, team_t team,
 int BG_LoadEmoticons( emoticon_t *emoticons, int num );
 
 const teamAttributes_t *BG_Team( team_t team );
-char                   *BG_TeamName( team_t team );
 
 typedef struct
 {
