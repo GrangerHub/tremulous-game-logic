@@ -2079,7 +2079,10 @@ void CheckExitRules( void )
     { 
       level.lastWin = TEAM_NONE;
       SV_GameSendServerCommand( -1, "print \"Timelimit hit\n\"" );
-      SV_SetConfigstring( CS_WINNER, va( "%i|Stalemate", index ) );
+      SV_SetConfigstring( CS_WINNER, va( "%i %i %i",
+                                         MATCHOUTCOME_TIME,
+                                         index,
+                                         TEAM_NONE ) );
       LogExit( "Timelimit hit." );
       return;
     }
@@ -2146,9 +2149,10 @@ void CheckExitRules( void )
   if( winningTeam != TEAM_NONE )
   {
     SV_GameSendServerCommand( -1, va( "print \"%s win\n\"", BG_Team( winningTeam )->humanName ));
-    SV_SetConfigstring( CS_WINNER,
-                        va( "%i|%s Win", index,
-                            BG_Team( winningTeam )->humanName ) );
+    SV_SetConfigstring( CS_WINNER, va( "%i %i %i",
+                                       MATCHOUTCOME_WON,
+                                       index,
+                                       winningTeam ) );
     LogExit( va( "%s win.", BG_Team( winningTeam )->humanName ) );
   }
 }

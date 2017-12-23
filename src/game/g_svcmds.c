@@ -344,7 +344,10 @@ static void Svcmd_Evacuation_f( void )
     return;
   SV_GameSendServerCommand( -1, "print \"Evacuation ordered\n\"" );
   level.lastWin = TEAM_NONE;
-  SV_SetConfigstring( CS_WINNER, va( "%i|Evacuation", index ) );
+  SV_SetConfigstring( CS_WINNER, va( "%i %i %i",
+                                     MATCHOUTCOME_EVAC,
+                                     index,
+                                     TEAM_NONE ) );
   LogExit( "Evacuation." );
 }
 

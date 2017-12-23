@@ -137,6 +137,13 @@ enum
 
 typedef enum
 {
+  MATCHOUTCOME_WON,
+  MATCHOUTCOME_EVAC,
+  MATCHOUTCOME_TIME
+} matchOutcomes_t;
+
+typedef enum
+{
   GENDER_MALE,
   GENDER_FEMALE,
   GENDER_NEUTER
