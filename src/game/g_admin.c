@@ -3379,7 +3379,10 @@ qboolean G_admin_nextmap( gentity_t *ent )
   AP( va( "print \"^3nextmap: ^7%s^7 decided to load the next map\n\"",
     ( ent ) ? ent->client->pers.netname : "console" ) );
   level.lastWin = TEAM_NONE;
-  SV_SetConfigstring( CS_WINNER, va( "%i|Evacuation", index ) );
+  SV_SetConfigstring( CS_WINNER, va( "%i %i %i",
+                                     MATCHOUTCOME_EVAC,
+                                     index,
+                                     TEAM_NONE ) );
   LogExit( va( "nextmap was run by %s",
     ( ent ) ? ent->client->pers.netname : "console" ) );
   Cvar_SetSafe( "g_warmup", "1" );

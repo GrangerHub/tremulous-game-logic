@@ -518,54 +518,49 @@ static void CG_ConfigStringModified( void )
   }
   else if( num == CS_WINNER )
   {
-    team_t team = cg.snap->ps.stats[ STAT_TEAM ];
-    int    index;
-    team_t winningTeam;
-    char winner[ MAX_TOKENLENGTH ] = {'\0'};
+    char winner[ MAX_CVAR_VALUE_STRING ] = "";
 
     //parse the CS_WINNER string
-    if( str )
+    if( str[0] )
     {
-      int  rawCharNum, subCharNum;
-      char *indexStr = "";
+      int             index, intOutcome, intWinningTeam;
+      matchOutcomes_t outcome;
+      team_t          winningTeam;
+      team_t          team = cg.snap->ps.stats[ STAT_TEAM ];
 
-      for( rawCharNum = 0;
-           str[rawCharNum] && ( str[rawCharNum] != '|' );
-           rawCharNum++ )
-        indexStr[ rawCharNum ] = str[ rawCharNum ];
+      sscanf( str, "%i %i %i",
+              &intOutcome,
+              &index,
+              &intWinningTeam );
 
-      index = atoi( indexStr );
+      outcome = (matchOutcomes_t)intOutcome;
+      winningTeam =(team_t)intWinningTeam;
 
-      if( str[rawCharNum] == '|' )
-        rawCharNum++;
-
-      for( subCharNum = 0;
-           str[rawCharNum];
-           rawCharNum++, subCharNum++ )
-        winner[ subCharNum ] = str[ rawCharNum ];
-
-      if( cg_intermissionMusic.integer )
+      switch ( outcome )
       {
-        if( !Q_stricmp( winner, "Evacuation" ) )
-          CG_PlayIntermissionSound( team, INTMSN_SND_EVAC, index );
-        if( !Q_stricmp( winner, "Stalemate" ) )
-          CG_PlayIntermissionSound( team, INTMSN_SND_TIME, index );
-        else if( winner )
-        {
-          for( winningTeam = 0; winningTeam < NUM_TEAMS; winningTeam++ )
+        case MATCHOUTCOME_WON:
+          strcpy( winner, va( "%s win.", BG_Team( winningTeam )->humanName ) );
+          if( cg_intermissionMusic.integer )
           {
-            if( Q_stricmp( winner, va( "%s Win", BG_Team( winningTeam )->humanName ) ) )
-              continue;
-
             if( team == winningTeam ||
                 team == TEAM_NONE )
               CG_PlayIntermissionSound( winningTeam, INTMSN_SND_WIN, index );
             else
               CG_PlayIntermissionSound( team, INTMSN_SND_LOSS, index );
-
-            break;
           }
-        }
+          break;
+
+        case MATCHOUTCOME_EVAC:
+          strcpy( winner, "Evacuation" );
+          if( cg_intermissionMusic.integer )
+            CG_PlayIntermissionSound( team, INTMSN_SND_EVAC, index );
+          break;
+
+        case MATCHOUTCOME_TIME:
+          strcpy( winner, "Stalemate" );
+          if( cg_intermissionMusic.integer )
+            CG_PlayIntermissionSound( team, INTMSN_SND_TIME, index );
+          break;
       }
     }
 
