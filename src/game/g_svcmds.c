@@ -338,11 +338,13 @@ static void Svcmd_TeamWin_f( void )
 
 static void Svcmd_Evacuation_f( void )
 {
+  int index = rand( ) % MAX_INTERMISSION_SOUND_SETS;
+
   if( level.exited )
     return;
   SV_GameSendServerCommand( -1, "print \"Evacuation ordered\n\"" );
   level.lastWin = TEAM_NONE;
-  SV_SetConfigstring( CS_WINNER, "Evacuation" );
+  SV_SetConfigstring( CS_WINNER, va( "%i|Evacuation", index ) );
   LogExit( "Evacuation." );
 }
 

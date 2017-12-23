@@ -583,7 +583,7 @@ qboolean ClientInactivityTimer( gentity_t *ent )
           SV_GameSendServerCommand( -1,
                                   va( "print \"%s^7 moved from %s to spectators due to inactivity\n\"",
                                       client->pers.netname,
-                                      BG_TeamName( client->pers.teamSelection ) ) );
+                                      BG_Team( client->pers.teamSelection )->name2 ) );
           G_LogPrintf( "Inactivity: %d", (int)(client - level.clients) );
           G_ChangeTeam( ent, TEAM_NONE );
         }

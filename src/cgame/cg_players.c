@@ -755,13 +755,13 @@ static void CG_StatusMessages( clientInfo_t *new, clientInfo_t *old )
   {
     if( new->team == TEAM_NONE )
       CG_Printf( "%s" S_COLOR_WHITE " left the %ss\n", new->name,
-        BG_TeamName( old->team ) );
+        BG_Team( old->team )->name2 );
     else if( old->team == TEAM_NONE )
       CG_Printf( "%s" S_COLOR_WHITE " joined the %ss\n", new->name,
-        BG_TeamName( new->team ) );
+        BG_Team( new->team )->name2 );
     else
       CG_Printf( "%s" S_COLOR_WHITE " left the %ss and joined the %ss\n",
-        new->name, BG_TeamName( old->team ), BG_TeamName( new->team ) );
+        new->name, BG_Team( old->team )->name2, BG_Team( new->team )->name2 );
   }
 }
 
@@ -812,7 +812,7 @@ void CG_NewClientInfo( int clientNum )
     char config[ MAX_CVAR_VALUE_STRING ];
 
     trap_Cvar_VariableStringBuffer(
-      va( "cg_%sConfig", BG_TeamName( newInfo.team ) ),
+      va( "cg_%sConfig", BG_Team( newInfo.team )->name2 ),
       config, sizeof( config ) );
 
     if( config[ 0 ] )

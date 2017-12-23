@@ -1216,6 +1216,16 @@ typedef struct
   qhandle_t b3;
 } cgMediaBinaryShader_t;
 
+typedef enum
+{
+  INTMSN_SND_WIN,
+  INTMSN_SND_LOSS,
+  INTMSN_SND_EVAC,
+  INTMSN_SND_TIME,
+
+  NUM_INTMSN_SNDS
+} intermissionSound_t;
+
 typedef struct
 {
   qhandle_t   charsetShader;
@@ -1287,9 +1297,8 @@ typedef struct
   sfxHandle_t votePassed;
   sfxHandle_t voteFailed;
 
-  sfxHandle_t intermissionDrawSound;
-  sfxHandle_t intermissionLossSound;
-  sfxHandle_t intermissionWinSound;
+  sfxHandle_t intermissionCustomSounds[ NUM_TEAMS ][ NUM_INTMSN_SNDS ][ MAX_INTERMISSION_SOUND_SETS ];
+  sfxHandle_t intermissionDefaultSounds[ NUM_INTMSN_SNDS ];
   sfxHandle_t warmupEndSound;
 
   sfxHandle_t watrInSound;
@@ -1706,6 +1715,8 @@ extern  vmCvar_t    cg_emoticons;
 extern  vmCvar_t    cg_chatTeamPrefix;
 
 extern  vmCvar_t    cg_warmupBuildableRespawning;
+
+extern  vmCvar_t    cg_intermissionMusic;
 
 //
 // cg_main.c
