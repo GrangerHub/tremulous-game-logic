@@ -217,7 +217,7 @@ void CG_ParseVoteStrings( int team, const char *conStr )
       cgs.voteString[ subStringIndex ][ team ][subStringChar] = cgs.voteString[ RAW_VOTE_STRING ][ team ][rawStringChar];
       ++subStringChar;
     }
-   }
+  }
 
   cgs.voteString[ subStringIndex ][ team ][subStringChar] = 0;
   ++subStringIndex;
@@ -369,6 +369,29 @@ static void CG_AnnounceHumanStageTransistion( stage_t from, stage_t to )
 
 /*
 ================
+CG_PlayIntermissionSound
+
+================
+*/
+static void CG_PlayIntermissionSound( team_t team, intermissionSound_t soundType, int index )
+{
+  int i = ( index > MAX_INTERMISSION_SOUND_SETS ) ? MAX_INTERMISSION_SOUND_SETS : index;
+  sfxHandle_t sound = cgs.media.intermissionCustomSounds[ team ][ soundType ][ i ];
+
+  if( !sound )
+    sound = cgs.media.intermissionCustomSounds[ team ][ soundType ][ 0 ];
+
+  if( !sound )
+    sound = cgs.media.intermissionDefaultSounds[ soundType ];
+
+  if( !sound )
+    return;
+
+  trap_S_StartLocalSound( sound, CHAN_LOCAL_SOUND );
+}
+
+/*
+================
 CG_ConfigStringModified
 
 ================
@@ -496,43 +519,57 @@ static void CG_ConfigStringModified( void )
   else if( num == CS_WINNER )
   {
     team_t team = cg.snap->ps.stats[ STAT_TEAM ];
+    int    index;
+    team_t winningTeam;
+    char winner[ MAX_TOKENLENGTH ] = {'\0'};
 
-    trap_Cvar_Set( "ui_winner", str );
-    if( !Q_stricmp( str, "Evacuation" ) ||
-        !Q_stricmp( str, "Stalemate" ) )
-      trap_S_StartLocalSound( cgs.media.intermissionDrawSound, CHAN_LOCAL_SOUND );
-    else if( !Q_stricmp( str, "Humans Win" ) )
+    //parse the CS_WINNER string
+    if( str )
     {
-      switch ( team )
-      {
-        case TEAM_NONE:
-          trap_S_StartLocalSound( cgs.media.intermissionDrawSound, CHAN_LOCAL_SOUND );
-          break;
-        case TEAM_HUMANS:
-          trap_S_StartLocalSound( cgs.media.intermissionWinSound, CHAN_LOCAL_SOUND );
-          break;
+      int  rawCharNum, subCharNum;
+      char *indexStr = "";
 
-        default:
-          trap_S_StartLocalSound( cgs.media.intermissionLossSound, CHAN_LOCAL_SOUND );
-          break;
+      for( rawCharNum = 0;
+           str[rawCharNum] && ( str[rawCharNum] != '|' );
+           rawCharNum++ )
+        indexStr[ rawCharNum ] = str[ rawCharNum ];
+
+      index = atoi( indexStr );
+
+      if( str[rawCharNum] == '|' )
+        rawCharNum++;
+
+      for( subCharNum = 0;
+           str[rawCharNum];
+           rawCharNum++, subCharNum++ )
+        winner[ subCharNum ] = str[ rawCharNum ];
+
+      if( cg_intermissionMusic.integer )
+      {
+        if( !Q_stricmp( winner, "Evacuation" ) )
+          CG_PlayIntermissionSound( team, INTMSN_SND_EVAC, index );
+        if( !Q_stricmp( winner, "Stalemate" ) )
+          CG_PlayIntermissionSound( team, INTMSN_SND_TIME, index );
+        else if( winner )
+        {
+          for( winningTeam = 0; winningTeam < NUM_TEAMS; winningTeam++ )
+          {
+            if( Q_stricmp( winner, va( "%s Win", BG_Team( winningTeam )->humanName ) ) )
+              continue;
+
+            if( team == winningTeam ||
+                team == TEAM_NONE )
+              CG_PlayIntermissionSound( winningTeam, INTMSN_SND_WIN, index );
+            else
+              CG_PlayIntermissionSound( team, INTMSN_SND_LOSS, index );
+
+            break;
+          }
+        }
       }
     }
-    else if( !Q_stricmp( str, "Aliens Win" ) )
-    {
-      switch ( team )
-      {
-        case TEAM_NONE:
-          trap_S_StartLocalSound( cgs.media.intermissionDrawSound, CHAN_LOCAL_SOUND );
-          break;
-        case TEAM_ALIENS:
-          trap_S_StartLocalSound( cgs.media.intermissionWinSound, CHAN_LOCAL_SOUND );
-          break;
 
-        default:
-          trap_S_StartLocalSound( cgs.media.intermissionLossSound, CHAN_LOCAL_SOUND );
-          break;
-      }
-    }
+    trap_Cvar_Set( "ui_winner", winner );
   }
   else if( num == CS_SHADERSTATE )
   {
@@ -1207,7 +1244,8 @@ static void CG_Say( int clientNum, saymode_t mode, const char *text )
 
     if( cg_chatTeamPrefix.integer )
       Com_sprintf( prefix, sizeof( prefix ), "%s[%s%c%s]" S_COLOR_WHITE " ",
-                   tbcolor, tcolor, toupper( *( BG_TeamName( ci->team ) ) ),
+                   tbcolor, tcolor,
+                   toupper( *( BG_Team( ci->team )->name2 ) ),
                    tbcolor );
 
     if( ( mode == SAY_TEAM || mode == SAY_AREA ) &&

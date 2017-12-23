@@ -792,7 +792,7 @@ void Cmd_Team_f( gentity_t *ent )
   if( !s[ 0 ] )
   {
     SV_GameSendServerCommand( ent-g_entities, va( "print \"team: %s\n\"",
-      BG_TeamName( oldteam ) ) );
+      BG_Team( oldteam )->name2 ) );
     return;
   }
 
@@ -1993,7 +1993,7 @@ void Cmd_CallVote_f( gentity_t *ent )
         {
           SV_GameSendServerCommand( i, va( "chat -1 %d \"" S_COLOR_YELLOW "%s"
             S_COLOR_YELLOW " called a team vote (%ss): %s\"", SAY_ADMINS,
-            ent->client->pers.netname, BG_TeamName( team ),
+            ent->client->pers.netname, BG_Team( team )->name2,
             cVoteDisplayString ) );
         }
       }

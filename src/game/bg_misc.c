@@ -46,12 +46,14 @@ static const teamAttributes_t bg_teamList[ ] =
   {
     TEAM_NONE,             //int       number;
     "spectate",            //char     *name;
+    "spectator",           //char     *name2;
     "Spectators",          //char     *humanName;
     "Spectators watch the game without participating.",
   },
   {
     TEAM_ALIENS,           //int       number;
     "aliens",              //char     *name;
+    "alien",               //char     *name2;
     "Aliens",              //char     *humanName;
     "The strength of Aliens lie in their agility, fierce melee attacks and "
     "their ability to construct new bases without much restriction. They "
@@ -63,6 +65,7 @@ static const teamAttributes_t bg_teamList[ ] =
   {
     TEAM_HUMANS,           //int       number;
     "humans",              //char     *name;
+    "human",               //char     *name2;
     "Humans",              //char     *humanName;
     "Humans are the masters of technology. Although their bases are "
     "restricted by power requirements, automated defenses help ensure that "
@@ -5452,22 +5455,6 @@ const teamAttributes_t *BG_Team( team_t team )
 {
   return ( team < NUM_TEAMS ) ?
     &bg_teamList[ team ] : &nullTeam;
-}
-
-/*
-============
-BG_TeamName
-============
-*/
-char *BG_TeamName( team_t team )
-{
-  if( team == TEAM_NONE )
-    return "spectator";
-  if( team == TEAM_ALIENS )
-    return "alien";
-  if( team == TEAM_HUMANS )
-    return "human";
-  return "<team>";
 }
 
 int cmdcmp( const void *a, const void *b )

@@ -2339,7 +2339,7 @@ qboolean G_admin_putteam( gentity_t *ent )
 
   AP( va( "print \"^3putteam: ^7%s^7 put %s^7 on to the %s team\n\"",
           ( ent ) ? ent->client->pers.netname : "console",
-          vic->client->pers.netname, BG_TeamName( teamnum ) ) );
+          vic->client->pers.netname, BG_Team( teamnum )->name2 ) );
   return qtrue;
 }
 
@@ -2453,7 +2453,7 @@ qboolean G_admin_cp( gentity_t *ent )
                                   ( team >= 0 ) ? "(" : "",
                                   ( ent ) ? ent->client->pers.admin->name : "console",
                                   ( team >= 0 ) ? ")" : "",
-                                  ( admin ) ? va( " to %s", ( team >= 0 ) ? va( "%ss", BG_TeamName( team ) ) : "everyone" ) : "",
+                                  ( admin ) ? va( " to %s", ( team >= 0 ) ? va( "%ss", BG_Team( team )->name2 ) : "everyone" ) : "",
                                   INDENT_MARKER,
                                   message ) );
     }
@@ -2463,7 +2463,7 @@ qboolean G_admin_cp( gentity_t *ent )
       ( team >= 0 ) ? "(" : "",
       ( ent ) ? ent->client->pers.admin->name : "console",
       ( team >= 0 ) ? ")" : "",
-      va( " to %s", ( team >= 0 ) ? va( "%ss", BG_TeamName( team ) ) : "everyone" ),
+      va( " to %s", ( team >= 0 ) ? va( "%ss", BG_Team( team )->name2 ) : "everyone" ),
       INDENT_MARKER,
       message );
 
@@ -2786,7 +2786,7 @@ qboolean G_admin_listplayers( gentity_t *ent )
     }
     else
     {
-      t = toupper( *( BG_TeamName( p->pers.teamSelection ) ) );
+      t = toupper( *( BG_Team( p->pers.teamSelection )->name2 ) );
       if( p->pers.teamSelection == TEAM_HUMANS )
         c = COLOR_CYAN;
       else if( p->pers.teamSelection == TEAM_ALIENS )
@@ -3131,7 +3131,7 @@ qboolean G_admin_endvote( gentity_t *ent )
     ADMP( va( "^3%s: ^7no vote in progress\n", command ) );
     return qfalse;
   }
-  admin_log( BG_TeamName( team ) );
+  admin_log( BG_Team( team )->name2 );
   if( team == TEAM_NONE )
     AP( msg );
   else
@@ -3372,12 +3372,14 @@ qboolean G_admin_restart( gentity_t *ent )
 
 qboolean G_admin_nextmap( gentity_t *ent )
 {
+  int index = rand( ) % MAX_INTERMISSION_SOUND_SETS;
+
   if( level.exited )
     return qfalse;
   AP( va( "print \"^3nextmap: ^7%s^7 decided to load the next map\n\"",
     ( ent ) ? ent->client->pers.netname : "console" ) );
   level.lastWin = TEAM_NONE;
-  SV_SetConfigstring( CS_WINNER, "Evacuation" );
+  SV_SetConfigstring( CS_WINNER, va( "%i|Evacuation", index ) );
   LogExit( va( "nextmap was run by %s",
     ( ent ) ? ent->client->pers.netname : "console" ) );
   Cvar_SetSafe( "g_warmup", "1" );
@@ -3637,14 +3639,14 @@ qboolean G_admin_lock( gentity_t *ent )
   if( fail )
   {
     ADMP( va( "^3%s: ^7the %s team is %s locked\n",
-      command, BG_TeamName( team ), lock ? "already" : "not currently" ) );
+      command, BG_Team( team )->name2, lock ? "already" : "not currently" ) );
 
     return qfalse;
   }
 
-  admin_log( BG_TeamName( team ) );
+  admin_log( BG_Team( team )->name2 );
   AP( va( "print \"^3%s: ^7the %s team has been %slocked by %s\n\"",
-    command, BG_TeamName( team ), lock ? "" : "un",
+    command, BG_Team( team )->name2, lock ? "" : "un",
     ent ? ent->client->pers.netname : "console" ) );
 
   return qtrue;
