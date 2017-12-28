@@ -1617,12 +1617,8 @@ This is a general wrapper for activation.(*activate)()
 */
 void G_ActivateEntity( gentity_t *actEnt, gentity_t *activator )
 {
-  gclient_t *client;
-
   if( !activator->client )
     return;
-
-  client = activator->client;
 
   if( G_WillActivateEntity( actEnt, activator ) )
   {
