@@ -3052,7 +3052,6 @@ qboolean G_admin_allready( gentity_t *ent )
 {
   int i = 0;
   gclient_t *cl;
-  gentity_t *tent;
 
   // if game is in both warmup and developer mode, while not being in intermission,
   // /allready will set all players' readyToPlay flag to true
@@ -3062,7 +3061,6 @@ qboolean G_admin_allready( gentity_t *ent )
     for( i = 0; i < g_maxclients.integer; i++ )
     {
       cl = level.clients + i;
-      tent = &g_entities[ cl->ps.clientNum ];
 
       if( cl->pers.connected != CON_CONNECTED )
         continue;

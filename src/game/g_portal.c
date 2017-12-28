@@ -119,7 +119,7 @@ static void portal_die( gentity_t *self, gentity_t *inflictor,
 	self->think = portal_destroy_think;
 }
 
-static void portal_pain( gentity_t *self, gender_t *attacker, int damage )
+static void portal_pain( gentity_t *self, gentity_t *attacker, int damage )
 {
 	G_AddEvent( self, EV_MISSILE_MISS, DirToByte( self->s.origin2 ) );
 }

@@ -3303,7 +3303,6 @@ void Cmd_Reload_f( gentity_t *ent )
     vec3_t      viewOrigin, forward, end;
     trace_t     tr;
     gentity_t   *traceEnt;
-    qboolean    lastSpawn = qfalse;
 
     if( ent->client->pers.namelog->denyBuild &&
         ( ps->weapon == WP_HBUILD ||
@@ -3339,21 +3338,6 @@ void Cmd_Reload_f( gentity_t *ent )
         traceEnt->deconstruct = qfalse;
         return;
       }
-
-      // determine if the team has one or less spawns left
-      if( ent->client->pers.teamSelection == TEAM_ALIENS &&
-          traceEnt->s.modelindex == BA_A_SPAWN )
-      {
-        if( level.numAlienSpawns <= 1 )
-          lastSpawn = qtrue;
-      }
-      else if( ent->client->pers.teamSelection == TEAM_HUMANS &&
-               traceEnt->s.modelindex == BA_H_SPAWN )
-      {
-        if( level.numHumanSpawns <= 1 )
-          lastSpawn = qtrue;
-      }
-
 
       // Don't allow destruction of buildables that cannot be rebuilt
       if( !IS_WARMUP && G_TimeTilSuddenDeath( ) <= 0 )

@@ -4757,12 +4757,11 @@ qboolean BG_FindValidSpot( void (*trace)( trace_t *, const vec3_t, const vec3_t,
                            float incDist, int limit )
 {
   vec3_t start2, increment;
-  float range;
 
   VectorCopy( start, start2 );
 
   VectorSubtract( end, start2, increment );
-  range = VectorNormalize( increment );
+  VectorNormalize( increment );
   VectorScale( increment, incDist, increment );
 
   do
@@ -4795,21 +4794,19 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
                                            trace_t *tr )
 {
   vec3_t  forward, targetOrigin;
-  vec3_t  playerOrigin, playerNormal;
+  vec3_t  playerNormal;
   vec3_t  mins, maxs;
   float   buildDist = BG_Class( ps->stats[ STAT_CLASS ] )->buildDist;
   const   buildable_t buildable = ps->stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT;
  
   BG_BuildableBoundingBox( buildable, mins, maxs );
- 
-  VectorCopy( ps->origin, playerOrigin );
- 
+
   BG_GetClientNormal( ps, playerNormal );
- 
+
   VectorCopy( ps->viewangles, outAngles );
- 
+
   AngleVectors( outAngles, forward, NULL, NULL );
- 
+
   {
     vec3_t viewOrigin;
     const float minNormal = BG_Buildable( buildable )->minNormal;
@@ -4834,7 +4831,7 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
         maxs2[ 2 ] = ps->stats[ STAT_TEAM ] == TEAM_HUMANS ? 7 :maxs2[ 0 ];
         mins2[ 0 ] = mins2[ 1 ] = -maxs2[ 0 ];
         mins2[ 2 ] = -maxs2[ 2 ];
-        
+
         (*trace)( tr, viewOrigin, mins2, maxs2, targetOrigin, ps->clientNum, MASK_PLAYERSOLID );
         if( tr->startsolid || tr->allsolid ) {
           VectorCopy( viewOrigin, outOrigin );

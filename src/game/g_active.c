@@ -653,7 +653,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
 {
   gclient_t *client;
   usercmd_t *ucmd;
-  int       aForward, aRight, aUp;
+  int       aForward, aRight;
   qboolean  walking = qfalse, stopped = qfalse,
             crouched = qfalse;
   int       i;
@@ -662,7 +662,6 @@ void ClientTimerActions( gentity_t *ent, int msec )
 
   aForward  = abs( ucmd->forwardmove );
   aRight    = abs( ucmd->rightmove );
-  aUp       = abs( ucmd->upmove );
 
   if( aForward == 0 && aRight == 0 )
     stopped = qtrue;
@@ -1732,12 +1731,8 @@ This is a general wrapper for activation.(*activate)()
 */
 void G_ActivateEntity( gentity_t *actEnt, gentity_t *activator )
 {
-  gclient_t *client;
-
   if( !activator->client )
     return;
-
-  client = activator->client;
 
   if( G_WillActivateEntity( actEnt, activator ) )
   {
@@ -2087,18 +2082,12 @@ void ClientThink_real( gentity_t *ent )
 {
   gclient_t *client = ent->client;
   pmove_t   pm;
-  gentity_t *groundEnt;
   vec3_t    up = { 0.0f, 0.0f, 1.0f };
   const int maxHealth = BG_Class( client->ps.stats[ STAT_CLASS ] )->health;
-  int       groundEntityNum;
   int       oldEventSequence;
   int       msec;
   usercmd_t *ucmd;
   int       i;
-
-  groundEntityNum = client->ps.groundEntityNum;
-
-  groundEnt = &g_entities[ client->ps.groundEntityNum ];
 
   ComparePreviousCmdAngles( client );
 
