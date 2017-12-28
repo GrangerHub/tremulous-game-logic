@@ -457,18 +457,18 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define BLASTER_SIZE                5
 #define BLASTER_LIFETIME            10000
 
-#define RIFLE_CLIPSIZE              30
+#define RIFLE_CLIPSIZE              75
 #define RIFLE_MAXCLIPS              6
-#define RIFLE_REPEAT                90
+#define RIFLE_REPEAT                35
 #define RIFLE_K_SCALE               0.5f
-#define RIFLE_RECOIL                0.5f
+#define RIFLE_RECOIL                0.2f
 #define RIFLE_RELOAD                2000
 #define RIFLE_PRICE                 0
 #define RIFLE_SPREAD                200
-#define RIFLE_DMG                   HDM(5)
-#define RIFLE_REPEAT2               50
-#define RIFLE_SPREAD2               800
-#define RIFLE_DMG2                  HDM(4)
+#define RIFLE_DMG                   HDM(2)
+#define RIFLE_REPEAT2               25
+#define RIFLE_SPREAD2               500
+#define RIFLE_DMG2                  HDM(2)
 
 #define PAINSAW_PRICE               100
 #define PAINSAW_REPEAT              75
@@ -478,21 +478,21 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define PAINSAW_WIDTH               0.0f
 #define PAINSAW_HEIGHT              8.0f
 
-#define GRENADE_PRICE               200
+#define GRENADE_PRICE               150
 #define GRENADE_HEALTH              5
 #define GRENADE_REPEAT              0
 #define GRENADE_K_SCALE             1.0f
-#define GRENADE_DAMAGE              HDM(310)
+#define GRENADE_DAMAGE              HDM(200)
 #define GRENADE_RANGE               192.0f
 #define GRENADE_SPEED               400.0f
 #define GRENADE_SIZE                3.0f        // missile bounding box
 #define GRENADE_LIFETIME            5000
-#define GRENADE_SPLASH_BATTLESUIT   0.30f // reduction of damage fraction for
+#define GRENADE_SPLASH_BATTLESUIT   0.50f // reduction of damage fraction for
                                           //grenade nade splash on battlesuits
 
 #define SHOTGUN_PRICE               175
 #define SHOTGUN_SHELLS              10
-#define SHOTGUN_PELLETS             16 //used to sync server and client side
+#define SHOTGUN_PELLETS             15 //used to sync server and client side
 #define SHOTGUN_MAXCLIPS            3
 #define SHOTGUN_REPEAT              1000
 #define SHOTGUN_K_SCALE             1.0f
@@ -503,8 +503,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define SHOTGUN_DMG                 HDM(4)
 #define SHOTGUN_RANGE               (8192 * 12)
 #define SHOTGUN_CHOKE_REPEAT        1000
-#define SHOTGUN_CHOKE_SPREAD        250
-#define SHOTGUN_CHOKE_DMG_FALLOFF   768.0f
+#define SHOTGUN_CHOKE_SPREAD        450
+#define SHOTGUN_CHOKE_DMG_FALLOFF   512.0f
 
 #define LASGUN_PRICE                275
 #define LASGUN_AMMO                 200
@@ -531,8 +531,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define CHAINGUN_SPREAD             1000
 #define CHAINGUN_DMG                HDM(6)
 #define CHAINGUN_RELOAD             2000
-#define CHAINGUN_REPEAT2            100
-#define CHAINGUN_SPREAD2            800
+#define CHAINGUN_REPEAT2            120
+#define CHAINGUN_SPREAD2            600
 #define CHAINGUN_DMG2               HDM(6)
 
 #define FLAMER_PRICE                450
@@ -574,7 +574,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LCANNON_SECONDARY_REPEAT    500
 #define LCANNON_SPEED_MIN           550
 #define LCANNON_CHARGE_TIME_MAX     2000
-#define LCANNON_CHARGE_TIME_MIN     400
+#define LCANNON_CHARGE_TIME_MIN     500
 #define LCANNON_CHARGE_TIME_WARN    ( LCANNON_CHARGE_TIME_MAX - ( 2000 / 3 ) )
 #define LCANNON_CHARGE_AMMO         10       // ammo cost of a full charge shot
 #define LCANNON_CHARGE_AMMO_REDUCE  0.25f    // rate at which luci ammo is reduced when using +attack2
@@ -662,7 +662,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define JETPACK_FUEL_MIN_START      150 // Minimum fuel required to start the jet
 #define JETPACK_ACT_BOOST_FUEL_USE  ( JETPACK_FUEL_USAGE * 2 )
 #define JETPACK_ACT_BOOST_TIME      750
-#define JETPACK_ACT_BOOST_SPEED     400.0f
+#define JETPACK_ACT_BOOST_SPEED     300.0f
 #define JETPACK_FUEL_RECHARGE       5 // every 100ms
 
 #define BSUIT_PRICE                 1000
