@@ -754,7 +754,6 @@ static void PM_WallCoast( vec3_t wishDir, wallcoast_t grounded )
     float diff;
     float maxDiff;
     float fraction;
-    float minFraction;
 
     // Calculate how much of the speed to keep.
     diff = ramFactor - SLOWDOWN_THRESHOLD;
@@ -810,7 +809,6 @@ static void PM_ComputeWallSpeedFactor( void )
   float*   groundNormal; //- Ground normal.
   vec3_t   searchDir;    //- Direction for searching for a wall.
   trace_t  wall;         //- Wall we are moving along.
-  qboolean foundWall;    //- Whether we have found a wall.
   vec3_t   lookDir;      //- Look direction (horizontal only).
   vec3_t   normal;       //- Wall normal (horizontal only).
   float    alignment;    //- How much the look direction aligns with the wall
@@ -1143,7 +1141,6 @@ static qboolean PM_CheckWallJump( vec3_t wishDir, float wishSpeed )
   trace_t wall;           //- Which wall we are jumping off.
   vec3_t searchEnd;       //- Point of contact with the wall.
   vec3_t moveDir;         //- Desired or actual movement direction.
-  vec3_t lookDir;         //- Look direction.
   vec3_t horizWallNormal; //- Horizontal wall normal.
 
   float upLook;        //- How much the player is looking up (0 to 1).
@@ -1372,8 +1369,6 @@ static qboolean PM_CheckJump( vec3_t customNormal )
   float minKickFraction;
   // Maximum fraction of the jump speed we can add to the horizontal movement.
   float maxKickFraction;
-  // Loop index.
-  int i;
 
   if( BG_Class( pm->ps->stats[ STAT_CLASS ] )->jumpMagnitude == 0.0f )
     return qfalse;
@@ -3279,7 +3274,6 @@ PM_Footsteps
 static void PM_Footsteps( void )
 {
   float     bobmove;
-  float     wallFactor;
   int       old;
   qboolean  footstep;
 

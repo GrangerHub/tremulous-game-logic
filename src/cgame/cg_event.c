@@ -671,6 +671,8 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
     case EV_JETPACK_DEACTIVATE:
       switch( cent->jetPackState )
       {
+        case JPS_OFF:
+          break;
         case JPS_DESCENDING:
           trap_S_StartSound( NULL, es->number, CHAN_VOICE, cgs.media.jetpackDescendDeactivateSound );
           break;

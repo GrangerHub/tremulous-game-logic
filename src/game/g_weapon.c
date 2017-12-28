@@ -36,13 +36,11 @@ Blow_up
 */
 void Blow_up( gentity_t *ent )
 {
-  gentity_t *m;
-
   // set directions
   AngleVectors( ent->client->ps.viewangles, forward, right, up );
   CalcMuzzlePoint( ent, forward, right, up, muzzle );
 
-  m = launch_grenade2( ent, muzzle, forward );
+  launch_grenade2( ent, muzzle, forward );
 }
 
 /*
