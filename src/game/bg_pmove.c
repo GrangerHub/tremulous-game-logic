@@ -618,7 +618,8 @@ Checks if the given surface is a wall.
 */
 static qboolean PM_IsWall( trace_t *trace )
 {
-  return trace->fraction < 1.0f && trace->plane.normal[ 2 ] < MIN_WALK_NORMAL;
+  return trace->fraction < 1.0f && trace->plane.normal[ 2 ] < MIN_WALK_NORMAL &&
+         !( trace->contents & CONTENTS_BODY ) ;
 }
 
 
@@ -1469,67 +1470,70 @@ static qboolean PM_CheckJump( vec3_t customNormal )
 
   VectorMA( pm->ps->velocity, jumpMagnitude, normal, pm->ps->velocity );
 
-  // Add some ground speed as well, but limit the maximum speed. Returns from
-  // subsequent jumps are diminishing, to prevent players from accelerating
-  // too much too quickly.
+  if( pm->cmd.forwardmove > 0 )
+  {
+    // Add some ground speed as well, but limit the maximum speed. Returns from
+    // subsequent jumps are diminishing, to prevent players from accelerating
+    // too much too quickly.
 
-  PM_GetDesiredVelocity( wishDir, normal );
-  maxHoppingSpeed = VectorNormalize( wishDir );
+    PM_GetDesiredVelocity( wishDir, normal );
+    maxHoppingSpeed = VectorNormalize( wishDir );
 
-  if( pm->ps->stats[ STAT_TEAM ] == TEAM_HUMANS )
-  {
-    maxHoppingSpeed *= 2.0f;
-    minKickFraction = 0.3f;
-    maxKickFraction = 0.4f;
-  }
-  else if( PM_IsDretchOrBasilisk( ) )
-  {
-    maxHoppingSpeed *= 1.75f;
-    maxKickFraction = 0.5f;
-    minKickFraction = 0.3f;
-  }
-  else if( PM_IsMarauder( ) )
-  {
-    maxHoppingSpeed *= 3.0f;
-    maxKickFraction = 0.5f;
-    minKickFraction = 0.2f;
-  }
-  else
-  {
-    maxHoppingSpeed *= 1.75f;
-    maxKickFraction = 0.4f;
-    minKickFraction = 0.2f;
-  }
-
-  if( maxHoppingSpeed >= 1.0f )
-  {
-    // How much we are already moving in the desired direction.
-    float goodSpeed = DotProduct( pm->ps->velocity, wishDir );
-    // How much of the maximum speed we can get from jumping we already have.
-    float haveFraction = goodSpeed / maxHoppingSpeed;
-
-    if( haveFraction <= 1.0f )
+    if( pm->ps->stats[ STAT_TEAM ] == TEAM_HUMANS )
     {
-      // Fraction of the jump speed to add to the horizontal velocity.
-      float kickFraction;
-      // Player velocity projected onto the ground.
-      vec3_t groundVelocity;
-      // Non-ground component of the player velocity.
-      float nonGroundSpeed;
-      // Push the player by this vector.
-      vec3_t push;
-  
-      // Calculate how much we need to push the player.
-      kickFraction = MIX( maxKickFraction, minKickFraction, haveFraction );
-      VectorScale( wishDir, jumpMagnitude * kickFraction, push );
+      maxHoppingSpeed *= 2.0f;
+      minKickFraction = 0.3f;
+      maxKickFraction = 0.4f;
+    }
+    else if( PM_IsDretchOrBasilisk( ) )
+    {
+      maxHoppingSpeed *= 1.75f;
+      maxKickFraction = 0.5f;
+      minKickFraction = 0.3f;
+    }
+    else if( PM_IsMarauder( ) )
+    {
+      maxHoppingSpeed *= 3.0f;
+      maxKickFraction = 0.5f;
+      minKickFraction = 0.2f;
+    }
+    else
+    {
+      maxHoppingSpeed *= 1.75f;
+      maxKickFraction = 0.4f;
+      minKickFraction = 0.2f;
+    }
 
-      // Separate the player speed into the ground and non-ground components.
-      ProjectPointOnPlane( groundVelocity, pm->ps->velocity, normal );
-      nonGroundSpeed = DotProduct( pm->ps->velocity, normal );
+    if( maxHoppingSpeed >= 1.0f )
+    {
+      // How much we are already moving in the desired direction.
+      float goodSpeed = DotProduct( pm->ps->velocity, wishDir );
+      // How much of the maximum speed we can get from jumping we already have.
+      float haveFraction = goodSpeed / maxHoppingSpeed;
 
-      // Push the player in the desired direction.
-      PM_Push( groundVelocity, push, maxHoppingSpeed, pm->ps->velocity );
-      VectorMA( pm->ps->velocity, nonGroundSpeed, normal, pm->ps->velocity );
+      if( haveFraction <= 1.0f )
+      {
+        // Fraction of the jump speed to add to the horizontal velocity.
+        float kickFraction;
+        // Player velocity projected onto the ground.
+        vec3_t groundVelocity;
+        // Non-ground component of the player velocity.
+        float nonGroundSpeed;
+        // Push the player by this vector.
+        vec3_t push;
+    
+        // Calculate how much we need to push the player.
+        kickFraction = MIX( maxKickFraction, minKickFraction, haveFraction );
+        VectorScale( wishDir, jumpMagnitude * kickFraction, push );
+
+        // Separate the player speed into the ground and non-ground components.
+        ProjectPointOnPlane( groundVelocity, pm->ps->velocity, normal );
+        nonGroundSpeed = DotProduct( pm->ps->velocity, normal );
+
+        // Push the player in the desired direction.
+        PM_Push( groundVelocity, push, maxHoppingSpeed, pm->ps->velocity );
+        VectorMA( pm->ps->velocity, nonGroundSpeed, normal, pm->ps->velocity );
+      }
     }
   }
 
