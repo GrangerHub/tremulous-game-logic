@@ -217,14 +217,17 @@ typedef enum
 
 typedef struct
 {
-  int    pouncePayload;
-  int    repairRepeatDelay;      // Used for for the construction kit
-  float  fallVelocity;
-  int    updateAnglesTime;
-  float  diffAnglesPeriod;
-  vec3_t previousFrameAngles;
-  vec3_t previousUpdateAngles;
-  vec3_t angularVelocity;
+  trace_t  impactTriggerTrace; // Used for the lightning gun
+  int      pulsatingBeamTime;
+  qboolean impactTriggerTraceChecked;
+  int      pouncePayload;
+  int      repairRepeatDelay;      // Used for for the construction kit
+  float    fallVelocity;
+  int      updateAnglesTime;
+  float    diffAnglesPeriod;
+  vec3_t   previousFrameAngles;
+  vec3_t   previousUpdateAngles;
+  vec3_t   angularVelocity;
 } pmoveExt_t;
 
 #define MAXTOUCH  32
@@ -1343,6 +1346,16 @@ qboolean  BG_RotateAxis( vec3_t surfNormal, vec3_t inAxis[ 3 ],
                          vec3_t outAxis[ 3 ], qboolean inverse, qboolean ceiling );
 void      BG_GetClientNormal( const playerState_t *ps, vec3_t normal );
 void      BG_GetClientViewOrigin( const playerState_t *ps, vec3_t viewOrigin );
+void      BG_CalcMuzzlePointFromPS( const playerState_t *ps, vec3_t forward,
+                                    vec3_t right, vec3_t up, vec3_t muzzlePoint );
+int       BG_LightningBoltRange( const entityState_t *es, const playerState_t *ps );
+void      BG_CheckBoltImpactTrigger( pmove_t *pmove,
+                                     void (*trace)( trace_t *, const vec3_t,
+                                                    const vec3_t, const vec3_t,
+                                                    const vec3_t, int, int ),
+                                     void (*UnlaggedOn)( int, vec3_t, float ),
+                                     void (*UnlaggedOff)( void ) );
+void      BG_ResetLightningBoltCharge( playerState_t *ps, pmoveExt_t *pmext );
 void      BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
                                                 const vec3_t mins, const vec3_t maxs,
                                                 void (*trace)( trace_t *, const vec3_t, const vec3_t,

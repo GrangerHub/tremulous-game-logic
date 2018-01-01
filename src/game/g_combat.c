@@ -1075,7 +1075,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       targ->die( targ, inflictor, attacker, targ->health, mod );
 
     return;
-  }
+  } else if( mod == MOD_LIGHTNING_PRIMER && !damage )
+    return;
 
   client = targ->client;
   if( client && client->noclip )

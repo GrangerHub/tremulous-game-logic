@@ -3675,7 +3675,7 @@ qboolean G_admin_builder( gentity_t *ent )
   AngleVectors( ent->client->ps.viewangles, forward, right, up );
   if( ent->client->pers.teamSelection != TEAM_NONE &&
       ent->client->sess.spectatorState == SPECTATOR_NOT )
-    CalcMuzzlePoint( ent, forward, right, up, start );
+    BG_CalcMuzzlePointFromPS( &ent->client->ps, forward, right, up, start );
   else
     VectorCopy( ent->client->ps.origin, start );
   VectorMA( start, 1000, forward, end );

@@ -1214,7 +1214,6 @@ void      G_PackEntityNumbers( entityState_t *es, int creatorNum,
 void      Blow_up( gentity_t *ent );
 void      G_ForceWeaponChange( gentity_t *ent, weapon_t weapon );
 void      G_GiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo );
-void      CalcMuzzlePoint( gentity_t *ent, vec3_t forward, vec3_t right, vec3_t up, vec3_t muzzlePoint );
 void      SnapVectorTowards( vec3_t v, vec3_t to );
 qboolean  CheckVenomAttack( gentity_t *ent );
 void      CheckGrabAttack( gentity_t *ent );
@@ -1297,7 +1296,7 @@ void VoterInactivityTimer( gentity_t *ent );
 void G_UnlaggedStore( void );
 void G_UnlaggedClear( gentity_t *ent );
 void G_UnlaggedCalc( int time, gentity_t *skipEnt );
-void G_UnlaggedOn( gentity_t *attacker, vec3_t muzzle, float range );
+void G_UnlaggedOn( int attackerNum, vec3_t muzzle, float range );
 void G_UnlaggedOff( void );
 void ClientThink( int clientNum );
 void ClientEndFrame( gentity_t *ent );
