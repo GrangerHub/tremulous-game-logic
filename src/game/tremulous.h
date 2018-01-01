@@ -502,7 +502,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LIGHTNING_BOLT_DPS             70
 #define LIGHTNING_BOLT_CHARGE_TIME_MIN 50 // keep it as low as possible
 #define LIGHTNING_BOLT_CHARGE_TIME_MAX 1500
-#define LIGHTNING_BOLT_BEAM_DURATION   300
+#define LIGHTNING_BOLT_BEAM_DURATION   750
 #define LIGHTNING_BOLT_RANGE_MAX       768
 #define LIGHTNING_BALL2_REPEAT         250
 #define LIGHTNING_BALL_LIFETIME        5000
