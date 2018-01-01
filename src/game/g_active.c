@@ -493,6 +493,10 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
     pm.pointcontents = SV_PointContents;
     pm.tauntSpam = 0;
 
+    // For firing lightning bolts early
+    BG_CheckBoltImpactTrigger( &pm, G_TraceWrapper,
+                               G_UnlaggedOn, G_UnlaggedOff );
+
     // Perform a pmove
     Pmove( &pm );
 
@@ -1277,14 +1281,16 @@ void G_UnlaggedOff( void )
 ==============
 */
 
-void G_UnlaggedOn( gentity_t *attacker, vec3_t muzzle, float range )
+void G_UnlaggedOn( int attackerNum, vec3_t muzzle, float range )
 {
   int i = 0;
-  gentity_t *ent;
+  gentity_t *ent, *attacker;
   unlagged_t *calc;
 
   if( !g_unlagged.integer )
     return;
+
+  attacker = &g_entities[ attackerNum ];
 
   if( !attacker->client->pers.useUnlagged )
     return;
@@ -1374,7 +1380,7 @@ static void G_UnlaggedDetectCollisions( gentity_t *ent )
   r2 = Distance( calc->origin, calc->maxs );
   range += ( r1 > r2 ) ? r1 : r2;
 
-  G_UnlaggedOn( ent, ent->client->oldOrigin, range );
+  G_UnlaggedOn( ent->s.number, ent->client->oldOrigin, range );
 
   SV_Trace(&tr, ent->client->oldOrigin, ent->r.mins, ent->r.maxs,
     ent->client->ps.origin, ent->s.number,  MASK_PLAYERSOLID, TT_AABB );
@@ -2358,6 +2364,10 @@ void ClientThink_real( gentity_t *ent )
   // moved from after Pmove -- potentially the cause of
   // future triggering bugs
   G_TouchTriggers( ent );
+
+  // For firing lightning bolts early
+  BG_CheckBoltImpactTrigger( &pm, G_TraceWrapper,
+                             G_UnlaggedOn, G_UnlaggedOff );
 
   Pmove( &pm );
 

@@ -3543,8 +3543,13 @@ static void PM_BeginWeaponChange( int weapon )
   if( pm->ps->weapon == WP_LUCIFER_CANNON )
     pm->ps->stats[ STAT_MISC ] = 0;
 
+
   if( weapon == WP_LUCIFER_CANNON )
     pm->pmext->luciAmmoReduction = 0;
+
+  if( pm->ps->weapon == WP_LIGHTNING )
+    BG_ResetLightningBoltCharge( pm->ps, pm->pmext);
+
 
   pm->ps->weaponstate = WEAPON_DROPPING;
   pm->ps->weaponTime += 200;
@@ -3675,14 +3680,16 @@ static void PM_Weapon( void )
       pm->ps->stats[ STAT_MISC ] = 0;
   }
 
-  //lightning gun primary fire has been released
   if( pm->ps->weapon == WP_LIGHTNING &&
-      ( pm->ps->stats[ STAT_STATE ] & SS_CHARGING ) &&
-      !( pm->cmd.buttons & BUTTON_ATTACK ) )
+      ( pm->ps->stats[ STAT_STATE ] & SS_CHARGING ) )
   {
-    pm->ps->stats[ STAT_STATE ] &= ~SS_CHARGING;
-    pm->ps->weaponTime += LIGHTNING_BALL1_REPEAT;
-    pm->ps->pm_flags |= PMF_PAUSE_BEAM;
+    if( !( pm->cmd.buttons & BUTTON_ATTACK ) )
+    {
+      //lightning gun primary fire has been released
+      pm->ps->stats[ STAT_STATE ] &= ~SS_CHARGING;
+      pm->ps->pm_flags |= PMF_PAUSE_BEAM;
+    }else if( pm->pmext->pulsatingBeamTime <= 0 )
+      pm->ps->pm_flags |= PMF_PAUSE_BEAM;
   }
 
   // Trample charge mechanics
@@ -3811,6 +3818,20 @@ static void PM_Weapon( void )
     // Set overcharging flag so other players can hear the warning beep
     if( pm->ps->stats[ STAT_MISC ] > LCANNON_CHARGE_TIME_WARN )
       pm->ps->eFlags |= EF_WARN_CHARGE;
+  }
+
+  if( pm->ps->weapon == WP_LIGHTNING )
+  {
+    // Charging up
+    if( !pm->ps->weaponTime &&
+        ( pm->cmd.buttons & BUTTON_ATTACK ) )
+    {
+      pm->ps->stats[ STAT_MISC ] += pml.msec;
+      if( pm->ps->stats[ STAT_MISC ] >= LIGHTNING_BOLT_CHARGE_TIME_MAX )
+        pm->ps->stats[ STAT_MISC ] = LIGHTNING_BOLT_CHARGE_TIME_MAX;
+      if( pm->ps->stats[ STAT_MISC ] > pm->ps->ammo * LIGHTNING_BOLT_CHARGE_TIME_MIN )
+        pm->ps->stats[ STAT_MISC ] = pm->ps->ammo * LIGHTNING_BOLT_CHARGE_TIME_MIN;
+    }
   }
 
   // no bite during pounce
@@ -4059,6 +4080,56 @@ static void PM_Weapon( void )
       }
       break;
 
+    case WP_LIGHTNING:
+      attack3 = qfalse;
+
+      // Can't fire secondary while primary is charging
+      if( attack1 || pm->ps->stats[ STAT_MISC ] > 0 )
+        attack2 = qfalse;
+
+      if( ( pm->ps->stats[ STAT_MISC ] == 0 ||
+            ( attack1 && 
+              !( pm->pmext->impactTriggerTraceChecked &&
+                 ( pm->pmext->impactTriggerTrace.fraction < 1.0f ||
+                   pm->pmext->impactTriggerTrace.allsolid ||
+                   pm->pmext->impactTriggerTrace.startsolid ) ) &&
+              pm->ps->stats[ STAT_MISC ] < LIGHTNING_BOLT_CHARGE_TIME_MAX &&
+              pm->ps->stats[ STAT_MISC ] < pm->ps->ammo * LIGHTNING_BOLT_CHARGE_TIME_MIN ) ) &&
+          !attack2 )
+      {
+        pm->ps->weaponTime = 0;
+
+        // Charging
+        if( pm->ps->stats[ STAT_MISC ] < LIGHTNING_BOLT_CHARGE_TIME_MAX )
+        {
+          pm->ps->weaponstate = WEAPON_READY;
+          return;
+        }
+      }
+
+      if( pm->ps->stats[ STAT_MISC ] > LIGHTNING_BOLT_CHARGE_TIME_MIN )
+      {
+        // Fire primary attack
+        attack1 = qtrue;
+        attack2 = qfalse;
+      }
+      else if( pm->ps->stats[ STAT_MISC ] > 0 )
+      {
+        // Not enough charge
+        pm->ps->stats[ STAT_MISC ] = 0;
+        pm->ps->weaponTime = 0;
+        pm->ps->weaponstate = WEAPON_READY;
+        return;
+      }
+      else if( !attack2 )
+      {
+        // Idle
+        pm->ps->weaponTime = 0;
+        pm->ps->weaponstate = WEAPON_READY;
+        return;
+      }
+      break;
+
     default:
       if( !attack1 && !attack2 && !attack3 )
       {
@@ -4114,6 +4185,8 @@ static void PM_Weapon( void )
     pm->ps->generic1 = WPM_PRIMARY;
     PM_AddEvent( EV_FIRE_WEAPON );
     addTime = BG_Weapon( pm->ps->weapon )->repeatRate1;
+    if( pm->ps->weapon == WP_LIGHTNING )
+      pm->pmext->pulsatingBeamTime = LIGHTNING_BOLT_BEAM_DURATION;
     if( pm->ps->pm_flags & PMF_PAUSE_BEAM )
       pm->ps->pm_flags &= ~PMF_PAUSE_BEAM;
   }
@@ -4236,6 +4309,8 @@ static void PM_Weapon( void )
     if( pm->ps->weapon == WP_LUCIFER_CANNON && attack1 && !attack2 )
       pm->ps->ammo -= ( pm->ps->stats[ STAT_MISC ] * LCANNON_CHARGE_AMMO +
                 LCANNON_CHARGE_TIME_MAX - 1 ) / LCANNON_CHARGE_TIME_MAX;
+    else if( pm->ps->weapon == WP_LIGHTNING && attack1 && !attack2 )
+      pm->ps->ammo -= pm->ps->stats[ STAT_MISC ] / LIGHTNING_BOLT_CHARGE_TIME_MIN;
     else
       pm->ps->ammo -= BG_AmmoUsage( pm->ps );
 
@@ -4357,6 +4432,16 @@ static void PM_DropTimers( void )
     pm->ps->persistant[PERS_JUMPTIME] = 0;
   else
     pm->ps->persistant[PERS_JUMPTIME] += pml.msec;
+
+  // pulsating beam timer
+  if( pm->pmext->pulsatingBeamTime )
+  {
+    if( pm->pmext->pulsatingBeamTime > 0)
+      pm->pmext->pulsatingBeamTime -= pml.msec;
+
+    if( pm->pmext->pulsatingBeamTime < 0 )
+      pm->pmext->pulsatingBeamTime = 0;
+  }
 }
 
 

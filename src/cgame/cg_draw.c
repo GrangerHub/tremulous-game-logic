@@ -1112,6 +1112,11 @@ static float CG_ChargeProgress( qboolean chargeStamina )
       min = LCANNON_CHARGE_TIME_MIN;
       max = LCANNON_CHARGE_TIME_MAX;
     }
+    else if( cg.snap->ps.weapon == WP_LIGHTNING )
+    {
+      min = LIGHTNING_BOLT_CHARGE_TIME_MIN;
+      max = LIGHTNING_BOLT_CHARGE_TIME_MAX;
+    }
   }
 
   if( max - min <= 0.0f )

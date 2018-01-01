@@ -841,6 +841,10 @@ void CG_PredictPlayerState( void )
     for( i = 0; i < PORTAL_NUM; i++ )
       cg_pmove.humanPortalCreateTime[ i ] = cgs.humanPortalCreateTime[ i ];
 
+    // For firing lightning bolts early
+    BG_CheckBoltImpactTrigger( &cg_pmove, CG_Trace,
+                               NULL, NULL );
+
     if( !cg_optimizePrediction.integer )
     {
       Pmove( &cg_pmove );
