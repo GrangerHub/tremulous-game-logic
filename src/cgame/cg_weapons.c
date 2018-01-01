@@ -1661,6 +1661,18 @@ void CG_AddViewWeapon( playerState_t *ps )
               hand.origin );
   }
 
+  // Lighting Gun vibration effect
+  if( weapon == WP_LIGHTNING && ps->stats[ STAT_MISC ] > 0 )
+  {
+    float fraction;
+
+    fraction = (float)ps->stats[ STAT_MISC ] / LIGHTNING_BOLT_CHARGE_TIME_MAX;
+    VectorMA( hand.origin, random( ) * fraction, cg.refdef.viewaxis[ 0 ],
+              hand.origin );
+    VectorMA( hand.origin, random( ) * fraction, cg.refdef.viewaxis[ 1 ],
+              hand.origin );
+  }
+
   AnglesToAxis( angles, hand.axis );
 
   // map torso animations to weapon animations
