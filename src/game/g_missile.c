@@ -89,7 +89,8 @@ void G_ExplodeMissile( gentity_t *ent )
   ent->freeAfterEvent = qtrue;
 
   // splash damage
-  if( ent->splashDamage )
+  if( ent->splashDamage ||
+      !strcmp( ent->classname, "lightningBall1" ) )
     G_RadiusDamage( ent->r.currentOrigin, ent->parent, ent->splashDamage,
                     ent->splashRadius, ent, ent->splashMethodOfDeath );
 
@@ -195,7 +196,8 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace )
   if( G_TakesDamage( other ) )
   {
     // FIXME: wrong damage direction?
-    if( ent->damage )
+    if( ent->damage ||
+        !strcmp( ent->classname, "lightningBall1" ) )
     {
       vec3_t  velocity;
 
@@ -237,7 +239,8 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace )
   G_SetOrigin( ent, trace->endpos );
 
   // splash damage (doesn't apply to person directly hit)
-  if( ent->splashDamage )
+  if( ent->splashDamage ||
+      !strcmp( ent->classname, "lightningBall1" ) )
     G_RadiusDamage( trace->endpos, ent->parent, ent->splashDamage, ent->splashRadius,
                     other, ent->splashMethodOfDeath );
 
@@ -745,12 +748,12 @@ gentity_t *fire_lightningBall( gentity_t *self, qboolean primary,
   VectorNormalize (dir);
 
   bolt = G_Spawn();
-  bolt->classname = "lightningBall";
-  bolt->damage = LIGHTNING_BALL_DAMAGE;
+
   if( primary )
   {
     bolt->classname = "lightningBall1";
-    bolt->splashDamage = LIGHTNING_BALL_SPLASH_DMG;
+    bolt->damage = LIGHTNING_BALL1_DAMAGE;
+    bolt->splashDamage = LIGHTNING_BALL1_SPLASH_DMG;
     bolt->s.pos.trType = TR_LINEAR;
     bolt->methodOfDeath = MOD_LIGHTNING_PRIMER;
     bolt->splashMethodOfDeath = MOD_LIGHTNING_PRIMER;
@@ -759,6 +762,7 @@ gentity_t *fire_lightningBall( gentity_t *self, qboolean primary,
   } else
   {
     bolt->classname = "lightningBall2";
+    bolt->damage = LIGHTNING_BALL2_DAMAGE;
     bolt->flags |= ( FL_BOUNCE_HALF | FL_NO_BOUNCE_SOUND );
     bolt->splashDamage = LIGHTNING_BALL2_SPLASH_DMG;
     bolt->s.pos.trType = TR_GRAVITY;

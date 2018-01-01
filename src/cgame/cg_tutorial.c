@@ -655,31 +655,17 @@ static void CG_HumanText( char *text, playerState_t *ps )
   if( !ps->ammo && !ps->clips && !BG_Weapon( ps->weapon )->infiniteAmmo )
   {
     //no ammo
-    switch( ps->weapon )
-    {
-      case WP_MACHINEGUN:
-      case WP_CHAINGUN:
-      case WP_SHOTGUN:
-      case WP_FLAMER:
-      case WP_LAUNCHER:
-      case WP_PORTAL_GUN:
-        Q_strcat( text, MAX_TUTORIAL_TEXT,
-            va( "Find an Armoury and press %s for more ammo\n",
-              CG_KeyNameForCommand( "buy ammo" ) ) );
-        break;
-
-      case WP_LAS_GUN:
-      case WP_PULSE_RIFLE:
-      case WP_MASS_DRIVER:
-      case WP_LUCIFER_CANNON:
-        Q_strcat( text, MAX_TUTORIAL_TEXT,
-            va( "Find an Armoury, Reactor, or Repeater and press %s for more ammo\n",
-              CG_KeyNameForCommand( "buy ammo" ) ) );
-        break;
-
-      default:
-        break;
-    }
+    if( !BG_Weapon( ps->weapon )->ammoPurchasable )
+      Q_strcat( text, MAX_TUTORIAL_TEXT,
+          "Ammo can't be purchased for this weapon.\nFind an armoury to exchange this weapon for another one\n" );
+    else if( BG_Weapon( ps->weapon )->usesEnergy )
+      Q_strcat( text, MAX_TUTORIAL_TEXT,
+          va( "Find an Armoury, Reactor, or Repeater and press %s for more ammo\n",
+            CG_KeyNameForCommand( "buy ammo" ) ) );
+    else
+      Q_strcat( text, MAX_TUTORIAL_TEXT,
+          va( "Find an Armoury and press %s for more ammo\n",
+            CG_KeyNameForCommand( "buy ammo" ) ) );
   }
   else
   {
@@ -752,6 +738,16 @@ static void CG_HumanText( char *text, playerState_t *ps )
           va( "Hold down %s when firing a portal to turn off relative fire velocity\n",
             CG_KeyNameForCommand( "+speed" ) ) );
       break;
+
+      case WP_LIGHTNING:
+        Q_strcat( text, MAX_TUTORIAL_TEXT,
+            va( "Hold %s to charge and fire pulsating lightning bolts\n",
+              CG_KeyNameForCommand( "+attack" ) ) );
+
+        Q_strcat( text, MAX_TUTORIAL_TEXT,
+            va( "Press %s to fire lightning balls\n",
+              CG_KeyNameForCommand( "+button5" ) ) );
+        break;
 
       case WP_HBUILD:
         CG_HumanCkitText( text, ps );

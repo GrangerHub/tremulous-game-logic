@@ -3204,7 +3204,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
     qtrue,                //int       usesEnergy;
-    LIGHTNING_BOLT_REPEAT,//int       repeatRate1;
+    LIGHTNING_BOLT_CHARGE_TIME_MIN,//int       repeatRate1;
     LIGHTNING_BALL2_REPEAT,//int       repeatRate2;
     0,                    //int       repeatRate3;
     0,                    //int       reloadTime;
@@ -4389,6 +4389,8 @@ void BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s, qboolean 
     s->generic1 = WPM_PRIMARY;
 
   s->otherEntityNum = ps->otherEntityNum;
+
+  s->constantLight = ps->stats[ STAT_MISC ];
 }
 
 
@@ -4502,6 +4504,8 @@ void BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s
     s->generic1 = WPM_PRIMARY;
 
   s->otherEntityNum = ps->otherEntityNum;
+
+  s->constantLight = ps->stats[ STAT_MISC ];
 }
 
 /*
@@ -4747,6 +4751,102 @@ void BG_GetClientViewOrigin( const playerState_t *ps, vec3_t viewOrigin )
 
 /*
 ===============
+<<<<<<< HEAD
+BG_CalcMuzzlePointFromPS
+
+set muzzle location relative to pivoting eye
+===============
+*/
+void BG_CalcMuzzlePointFromPS( const playerState_t *ps, vec3_t forward,
+                               vec3_t right, vec3_t up, vec3_t muzzlePoint )
+{
+  vec3_t normal;
+
+  VectorCopy( ps->origin, muzzlePoint );
+  BG_GetClientNormal( ps, normal );
+  VectorMA( muzzlePoint, ps->viewheight, normal, muzzlePoint );
+  VectorMA( muzzlePoint, 1, forward, muzzlePoint );
+  // snap to integer coordinates for more efficient network bandwidth usage
+  SnapVector( muzzlePoint );
+}
+
+/*
+===============
+BG_LightningBoltRange
+
+Finds the current lightning bolt range of a charged lightning gun
+===============
+*/
+int BG_LightningBoltRange( const entityState_t *es, const playerState_t *ps )
+{
+  if( ps )
+  {
+    Com_Assert( ps->weapon == WP_LIGHTNING && "BG_LightningBoltRange: Attempt to find the range for the wrong weapon" );
+    return ( ps->stats[ STAT_MISC ] * LIGHTNING_BOLT_RANGE_MAX ) / LIGHTNING_BOLT_CHARGE_TIME_MAX;
+  }
+  
+  Com_Assert( es && "BG_LightningBoltRange: Failed to pass playerState_t and entityState_t to " )
+  Com_Assert( es->weapon == WP_LIGHTNING && "BG_LightningBoltRange: Attempt to find the range for the wrong weapon" );
+  return ( es->constantLight * LIGHTNING_BOLT_RANGE_MAX ) / LIGHTNING_BOLT_CHARGE_TIME_MAX;
+}
+
+/*
+===============
+BG_CheckBoltImpactTrigger
+
+For firing lightning bolts early
+===============
+*/
+void BG_CheckBoltImpactTrigger( pmove_t *pm,
+                                void (*trace)( trace_t *, const vec3_t,
+                                               const vec3_t, const vec3_t,
+                                               const vec3_t, int, int ),
+                                void (*UnlaggedOn)( int, vec3_t, float ),
+                                void (*UnlaggedOff)( void ) )
+{
+  if( pm->ps->weapon == WP_LIGHTNING &&
+      pm->ps->stats[ STAT_MISC ] > 0 &&
+      pm->ps->stats[ STAT_MISC ] - pm->pmext->pouncePayload > 50 )
+  {
+    vec3_t forward, right, up;
+    vec3_t muzzle, end;
+
+    AngleVectors( pm->ps->viewangles, forward, right, up );
+    BG_CalcMuzzlePointFromPS( pm->ps, forward, right, up, muzzle );
+
+    VectorMA( muzzle, BG_LightningBoltRange( NULL, pm->ps ), forward, end );
+
+    if( UnlaggedOn )
+      UnlaggedOn( pm->ps->clientNum, muzzle, BG_LightningBoltRange( NULL, pm->ps ) );
+  	trace( &pm->pmext->impactTriggerTrace, muzzle, NULL, NULL, end,
+              pm->ps->clientNum, MASK_SHOT );
+    if( UnlaggedOff )
+      UnlaggedOff( );
+
+    pm->pmext->pouncePayload = pm->ps->stats[ STAT_MISC ];
+    pm->pmext->impactTriggerTraceChecked = qtrue;
+  } else
+    pm->pmext->impactTriggerTraceChecked = qfalse;
+}
+
+/*
+===============
+BG_ResetLightningBoltCharge
+
+Resets the charging of lightning bolts
+===============
+*/
+void BG_ResetLightningBoltCharge( playerState_t *ps, pmoveExt_t *pmext )
+{
+  if( ps->weapon != WP_LIGHTNING )
+    return;
+
+  pmext->pouncePayload = ps->stats[ STAT_MISC ] = 0;
+  pmext->impactTriggerTraceChecked = qfalse;
+}
+
+/*
+===============
 BG_FindValidSpot
 ===============
 */
@@ -4941,6 +5041,10 @@ qboolean BG_PlayerCanChangeWeapon( playerState_t *ps )
   // Do not allow Lucifer Cannon "canceling" via weapon switch
   if( ps->weapon == WP_LUCIFER_CANNON &&
       ps->stats[ STAT_MISC ] > LCANNON_CHARGE_TIME_MIN )
+    return qfalse;
+
+  if( ps->weapon == WP_LIGHTNING &&
+      ps->stats[ STAT_MISC ] > LIGHTNING_BOLT_CHARGE_TIME_MIN )
     return qfalse;
 
   // The ckit's build timer must be complete before switching

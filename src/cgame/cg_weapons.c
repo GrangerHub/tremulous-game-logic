@@ -1066,7 +1066,7 @@ static void CG_LightningBolt( centity_t *cent, vec3_t origin )
 	VectorMA( muzzlePoint, 14, forward, muzzlePoint );
 
 	// project forward by the lightning range
-	VectorMA( muzzlePoint, LIGHTNING_BOLT_RANGE, forward, endPoint );
+	VectorMA( muzzlePoint, BG_LightningBoltRange( &cent->currentState, NULL ), forward, endPoint );
 
 	// see if it hit a wall
 	CG_Trace( &trace, muzzlePoint, NULL, NULL, endPoint,
@@ -1193,7 +1193,7 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 
   if( ( ( cent->currentState.eFlags & EF_FIRING ) && weaponMode == WPM_PRIMARY ) ||
       ( ( cent->currentState.eFlags & EF_FIRING2 ) && weaponMode == WPM_SECONDARY ) ||
-      ( ( cent->currentState.eFlags & EF_FIRING3 ) &&weaponMode == WPM_TERTIARY ) )
+      ( ( cent->currentState.eFlags & EF_FIRING3 ) && weaponMode == WPM_TERTIARY ) )
     firing = qtrue;
   else
     firing = qfalse;

@@ -38,7 +38,7 @@ void Blow_up( gentity_t *ent )
 {
   // set directions
   AngleVectors( ent->client->ps.viewangles, forward, right, up );
-  CalcMuzzlePoint( ent, forward, right, up, muzzle );
+  BG_CalcMuzzlePointFromPS( &ent->client->ps, forward, right, up, muzzle );
 
   launch_grenade2( ent, muzzle, forward );
 }
@@ -217,7 +217,7 @@ static void G_WideTrace( trace_t *tr, gentity_t *ent, float range,
   if( !ent->client )
     return;
 
-  G_UnlaggedOn( ent, muzzle, range + width );
+  G_UnlaggedOn( ent->s.number, muzzle, range + width );
 
   VectorMA( muzzle, range, forward, end );
 
@@ -421,7 +421,7 @@ void bulletFire( gentity_t *ent, float spread, int damage, int mod )
   // don't use unlagged if this is not a client (e.g. turret)
   if( ent->client )
   {
-    G_UnlaggedOn( ent, muzzle, 8192 * 16 );
+    G_UnlaggedOn( ent->s.number, muzzle, 8192 * 16 );
     SV_Trace( &tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT, TT_AABB );
     G_UnlaggedOff( );
   }
@@ -538,7 +538,7 @@ void shotgunFire( gentity_t *ent, qboolean choke )
   tent->s.eventParm = rand() / ( RAND_MAX / 0x100 + 1 );    // seed for spread pattern
   tent->s.otherEntityNum = ent->s.number;
   tent->s.generic1 = ent->client ? ent->client->ps.generic1 : ent->s.generic1;
-  G_UnlaggedOn( ent, muzzle, SHOTGUN_RANGE );
+  G_UnlaggedOn( ent->s.number, muzzle, SHOTGUN_RANGE );
   ShotgunPattern( tent->s.pos.trBase, tent->s.origin2,
                   tent->s.eventParm, ent, choke );
   G_UnlaggedOff();
@@ -562,7 +562,7 @@ void massDriverFire( gentity_t *ent )
   int i, hits = 0, skipent;
 
   // loop through all entities hit by a line trace
-  G_UnlaggedOn( ent, muzzle, 8192.0f * 16.0f );
+  G_UnlaggedOn( ent->s.number, muzzle, 8192.0f * 16.0f );
   VectorMA( muzzle, 8192 * 16, forward, end );
   VectorCopy( muzzle, tr.endpos );
   skipent = ent->s.number;
@@ -783,7 +783,7 @@ void lightningBall2Fire( gentity_t *ent )
   // damage self if in contact with water
   if( ent->waterlevel )
     G_Damage( ent, ent, ent, NULL, NULL,
-              LIGHTNING_BOLT_DAMAGE, 0, MOD_LIGHTNING);
+              LIGHTNING_BALL2_DAMAGE, 0, MOD_LIGHTNING);
 }
 
 /*
@@ -811,58 +811,41 @@ lightningBoltFire
 */
 void lightningBoltFire( gentity_t *ent )
 {
-	trace_t		tr;
-	vec3_t		end;
+	trace_t		*tr = &ent->client->pmext.impactTriggerTrace;
 	gentity_t	*traceEnt, *tent;
+  int       damage = ( LIGHTNING_BOLT_DPS * ent->client->ps.stats[ STAT_MISC ] ) / 1000;
 
   // damage self if in contact with water
   if( ent->waterlevel )
-    G_Damage( ent, ent, ent, NULL, NULL,
-              LIGHTNING_BOLT_DAMAGE, 0, MOD_LIGHTNING);
+    G_Damage( ent, ent, ent, NULL, NULL, damage, 0, MOD_LIGHTNING);
 
-	VectorMA( muzzle, LIGHTNING_BOLT_RANGE, forward, end );
-
-  // damage self if in contact with water
-  if( ent->waterlevel )
-    G_Damage( ent, ent, ent, NULL, NULL,
-              LIGHTNING_BOLT_DAMAGE, 0, MOD_LIGHTNING);
-
-  G_UnlaggedOn( ent, muzzle, LIGHTNING_BOLT_RANGE );
-	SV_Trace( &tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT, TT_AABB );
-  G_UnlaggedOff( );
 
   lightningBall1Fire( ent );
 
-	if( tr.entityNum == ENTITYNUM_NONE )
+  BG_ResetLightningBoltCharge( &ent->client->ps, &ent->client->pmext);
+
+	if( tr->entityNum == ENTITYNUM_NONE )
 		return;
 
-	traceEnt = &g_entities[ tr.entityNum ];
+	traceEnt = &g_entities[ tr->entityNum ];
 
 	if( G_TakesDamage( traceEnt ))
-  {
-    float damageMod = 1 - ( Distance( muzzle, tr.endpos ) / (float)LIGHTNING_BOLT_RANGE );
-    int damage = (int)ceil( ( damageMod *
-                              (float)( LIGHTNING_BOLT_DAMAGE -
-                                       LIGHTNING_BOLT_DAMAGE_MIN ) ) +
-                            ( (float)LIGHTNING_BOLT_DAMAGE_MIN - 0.1f ) ); 
-
-    G_Damage( traceEnt, ent, ent, forward, tr.endpos,
+    G_Damage( traceEnt, ent, ent, forward, tr->endpos,
               damage, 0, MOD_LIGHTNING);
-  }
 
 	if ( G_TakesDamage( traceEnt ) &&
        ( traceEnt->client ||
          traceEnt->s.eType == ET_BUILDABLE ) )
   {
-		tent = G_TempEntity( tr.endpos, EV_MISSILE_HIT );
+		tent = G_TempEntity( tr->endpos, EV_MISSILE_HIT );
 		tent->s.otherEntityNum = traceEnt->s.number;
-		tent->s.eventParm = DirToByte( tr.plane.normal );
+		tent->s.eventParm = DirToByte( tr->plane.normal );
 		tent->s.weapon = ent->s.weapon;
     tent->s.generic1 = ent->s.generic1;
 	} else
   {
-    tent = G_TempEntity( tr.endpos, EV_MISSILE_MISS );
-    tent->s.eventParm = DirToByte( tr.plane.normal );
+    tent = G_TempEntity( tr->endpos, EV_MISSILE_MISS );
+    tent->s.eventParm = DirToByte( tr->plane.normal );
     tent->s.weapon = ent->s.weapon;
     tent->s.generic1 = ent->s.generic1; //weaponMode
   }
@@ -890,7 +873,7 @@ void lasGunFire( gentity_t *ent )
 
   VectorMA( muzzle, 8192 * 16, forward, end );
 
-  G_UnlaggedOn( ent, muzzle, 8192 * 16 );
+  G_UnlaggedOn( ent->s.number, muzzle, 8192 * 16 );
   SV_Trace( &tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT, TT_AABB );
   G_UnlaggedOff( );
 
@@ -1272,7 +1255,7 @@ qboolean CheckVenomAttack( gentity_t *ent )
 
   // Calculate muzzle point
   AngleVectors( ent->client->ps.viewangles, forward, right, up );
-  CalcMuzzlePoint( ent, forward, right, up, muzzle );
+  BG_CalcMuzzlePointFromPS( &ent->client->ps, forward, right, up, muzzle );
 
   G_WideTrace( &tr, ent, LEVEL0_BITE_RANGE, LEVEL0_BITE_WIDTH,
                LEVEL0_BITE_WIDTH, &traceEnt );
@@ -1337,7 +1320,7 @@ void CheckGrabAttack( gentity_t *ent )
   // set aiming directions
   AngleVectors( ent->client->ps.viewangles, forward, right, up );
 
-  CalcMuzzlePoint( ent, forward, right, up, muzzle );
+  BG_CalcMuzzlePointFromPS( &ent->client->ps, forward, right, up, muzzle );
 
   if( ent->client->ps.weapon == WP_ALEVEL1 )
     VectorMA( muzzle, LEVEL1_GRAB_RANGE, forward, end );
@@ -1410,7 +1393,7 @@ void poisonCloud( gentity_t *ent )
   VectorAdd( ent->client->ps.origin, range, maxs );
   VectorSubtract( ent->client->ps.origin, range, mins );
 
-  G_UnlaggedOn( ent, ent->client->ps.origin, LEVEL1_PCLOUD_RANGE );
+  G_UnlaggedOn( ent->s.number, ent->client->ps.origin, LEVEL1_PCLOUD_RANGE );
   num = SV_AreaEntities( mins, maxs, entityList, MAX_GENTITIES );
   for( i = 0; i < num; i++ )
   {
@@ -1996,7 +1979,7 @@ qboolean CheckPounceAttack( gentity_t *ent )
 
   // Calculate muzzle point
   AngleVectors( ent->client->ps.viewangles, forward, right, up );
-  CalcMuzzlePoint( ent, forward, right, up, muzzle );
+  BG_CalcMuzzlePointFromPS( &ent->client->ps, forward, right, up, muzzle );
 
   // Trace from muzzle to see what we hit
   if( ent->client->ps.weapon == WP_ASPITFIRE)
@@ -2154,6 +2137,7 @@ void G_CrushAttack( gentity_t *ent, gentity_t *victim )
 
 /*
 ===============
+<<<<<<< HEAD
 CalcMuzzlePoint
 
 set muzzle location relative to pivoting eye
@@ -2174,6 +2158,8 @@ void CalcMuzzlePoint( gentity_t *ent, vec3_t forward, vec3_t right, vec3_t up, v
 
 /*
 ===============
+=======
+>>>>>>> swirl-vanilla-common
 FireWeapon3
 ===============
 */
@@ -2183,7 +2169,7 @@ void FireWeapon3( gentity_t *ent )
   {
     // set aiming directions
     AngleVectors( ent->client->ps.viewangles, forward, right, up );
-    CalcMuzzlePoint( ent, forward, right, up, muzzle );
+    BG_CalcMuzzlePointFromPS( &ent->client->ps, forward, right, up, muzzle );
   }
   else
   {
@@ -2219,7 +2205,7 @@ void FireWeapon2( gentity_t *ent )
   {
     // set aiming directions
     AngleVectors( ent->client->ps.viewangles, forward, right, up );
-    CalcMuzzlePoint( ent, forward, right, up, muzzle );
+    BG_CalcMuzzlePointFromPS( &ent->client->ps, forward, right, up, muzzle );
   }
   else
   {
@@ -2287,7 +2273,7 @@ void FireWeapon( gentity_t *ent )
   {
     // set aiming directions
     AngleVectors( ent->client->ps.viewangles, forward, right, up );
-    CalcMuzzlePoint( ent, forward, right, up, muzzle );
+    BG_CalcMuzzlePointFromPS( &ent->client->ps, forward, right, up, muzzle );
   }
   else
   {
