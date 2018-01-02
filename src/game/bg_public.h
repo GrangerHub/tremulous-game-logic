@@ -220,6 +220,7 @@ typedef struct
   trace_t  impactTriggerTrace; // Used for the lightning gun
   int      pulsatingBeamTime;
   qboolean impactTriggerTraceChecked;
+  int      miscAtLastFire;
   int      pouncePayload;
   int      repairRepeatDelay;      // Used for for the construction kit
   float    fallVelocity;
@@ -1490,8 +1491,8 @@ void  BG_EvaluateTrajectoryDelta( const trajectory_t *tr, int atTime, vec3_t res
 
 void  BG_AddPredictableEventToPlayerstate( int newEvent, int eventParm, playerState_t *ps );
 
-void  BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s, qboolean snap );
-void  BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s, int time, qboolean snap );
+void  BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s, pmoveExt_t *pmext, qboolean snap );
+void  BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s, pmoveExt_t *pmext, int time, qboolean snap );
 
 qboolean  BG_PlayerTouchesItem( playerState_t *ps, entityState_t *item, int atTime );
 
