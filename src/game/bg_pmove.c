@@ -4120,6 +4120,7 @@ static void PM_Weapon( void )
       pm->ps->generic1 = WPM_TERTIARY;
       PM_AddEvent( EV_FIRE_WEAPON3 );
       addTime = BG_Weapon( pm->ps->weapon )->repeatRate3;
+      pm->pmext->miscAtLastFire = pm->ps->stats[ STAT_MISC ];
     }
     else
     {
@@ -4136,6 +4137,7 @@ static void PM_Weapon( void )
       pm->ps->generic1 = WPM_SECONDARY;
       PM_AddEvent( EV_FIRE_WEAPON2 );
       addTime = BG_Weapon( pm->ps->weapon )->repeatRate2;
+      pm->pmext->miscAtLastFire = pm->ps->stats[ STAT_MISC ];
     }
     else
     {
@@ -4154,6 +4156,7 @@ static void PM_Weapon( void )
       pm->pmext->pulsatingBeamTime = LIGHTNING_BOLT_BEAM_DURATION;
     if( pm->ps->pm_flags & PMF_PAUSE_BEAM )
       pm->ps->pm_flags &= ~PMF_PAUSE_BEAM;
+    pm->pmext->miscAtLastFire = pm->ps->stats[ STAT_MISC ];
   }
 
   // fire events for autohit weapons
