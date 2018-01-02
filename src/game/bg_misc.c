@@ -4930,7 +4930,7 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
         maxs2[ 0 ] = maxs2[ 1 ] = 14;
         maxs2[ 2 ] = ps->stats[ STAT_TEAM ] == TEAM_HUMANS ? 7 :maxs2[ 0 ];
         mins2[ 0 ] = mins2[ 1 ] = -maxs2[ 0 ];
-        mins2[ 2 ] = -maxs2[ 2 ];
+        mins2[ 2 ] = 0;
 
         (*trace)( tr, viewOrigin, mins2, maxs2, targetOrigin, ps->clientNum, MASK_PLAYERSOLID );
         if( tr->startsolid || tr->allsolid ) {

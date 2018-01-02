@@ -5015,9 +5015,11 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   if( reason == IBE_NONE )
   {
     G_SetBuildableMarkedLinkState( qfalse );
+    SV_UnlinkEntity( ent );
     if( G_CheckSpawnPoint( ENTITYNUM_NONE, origin, normal, buildable, NULL ) != NULL )
       reason = IBE_NORMAL;
     G_SetBuildableMarkedLinkState( qtrue );
+    SV_LinkEntity( ent );
   }
 
   //this item does not fit here
