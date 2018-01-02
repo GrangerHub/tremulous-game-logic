@@ -4292,7 +4292,8 @@ This is done after each set of usercmd_t on the server,
 and after local prediction on the client
 ========================
 */
-void BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s, qboolean snap )
+void BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s,
+                                  pmoveExt_t *pmext, qboolean snap )
 {
   int     i;
 
@@ -4390,7 +4391,7 @@ void BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s, qboolean 
 
   s->otherEntityNum = ps->otherEntityNum;
 
-  s->constantLight = ps->stats[ STAT_MISC ];
+  s->constantLight = pmext->miscAtLastFire;
 }
 
 
@@ -4402,7 +4403,8 @@ This is done after each set of usercmd_t on the server,
 and after local prediction on the client
 ========================
 */
-void BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s, int time, qboolean snap )
+void BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s,
+                                             pmoveExt_t *pmext, int time, qboolean snap )
 {
   int     i;
 
@@ -4505,7 +4507,7 @@ void BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s
 
   s->otherEntityNum = ps->otherEntityNum;
 
-  s->constantLight = ps->stats[ STAT_MISC ];
+  s->constantLight = pmext->miscAtLastFire;
 }
 
 /*
