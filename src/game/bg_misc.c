@@ -4807,7 +4807,7 @@ void BG_CheckBoltImpactTrigger( pmove_t *pm,
                                 void (*UnlaggedOff)( void ) )
 {
   if( pm->ps->weapon == WP_LIGHTNING &&
-      pm->ps->stats[ STAT_MISC ] > 0 &&
+      pm->ps->stats[ STAT_MISC ] > LIGHTNING_BOLT_CHARGE_TIME_MIN &&
       pm->ps->stats[ STAT_MISC ] - pm->pmext->pouncePayload > 50 )
   {
     vec3_t forward, right, up;

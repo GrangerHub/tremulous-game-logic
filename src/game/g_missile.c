@@ -729,7 +729,11 @@ static void lightningBall_die( gentity_t *self, gentity_t *inflictor,
 {
   self->nextthink = level.time;
   self->think = G_ExplodeMissile;
-  self->classname = "lightningBall1"; //trigger the detonation of any other secondary lightning balls
+  //trigger the detonation of any other secondary lightning balls
+  self->classname = "lightningBall1";
+  self->methodOfDeath = MOD_LIGHTNING_PRIMER;
+  self->splashMethodOfDeath = MOD_LIGHTNING_PRIMER;
+  self->splashRadius = LIGHTNING_BALL1_RADIUS;
 }
 
 /*
