@@ -517,7 +517,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LIGHTNING_BOLT_RANGE_MAX       768
 #define LIGHTNING_BALL2_REPEAT         250
 #define LIGHTNING_BALL_LIFETIME        5000
-#define LIGHTNING_BALL1_DAMAGE         HDM( 0 )
+#define LIGHTNING_BALL1_DAMAGE         HDM( 1 )
 #define LIGHTNING_BALL2_DAMAGE         HDM( 30 )
 #define LIGHTNING_BALL1_SPLASH_DMG     HDM( 0 )
 #define LIGHTNING_BALL2_SPLASH_DMG     HDM( 30 )

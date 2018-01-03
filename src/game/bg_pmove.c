@@ -3680,15 +3680,17 @@ static void PM_Weapon( void )
       pm->ps->stats[ STAT_MISC ] = 0;
   }
 
-  if( pm->ps->weapon == WP_LIGHTNING &&
-      ( pm->ps->stats[ STAT_STATE ] & SS_CHARGING ) )
+  if( pm->ps->weapon == WP_LIGHTNING )
   {
-    if( !( pm->cmd.buttons & BUTTON_ATTACK ) )
+    if( ( pm->ps->stats[ STAT_STATE ] & SS_CHARGING ) &&
+        !( pm->cmd.buttons & BUTTON_ATTACK ) &&
+         pm->ps->stats[ STAT_MISC ] < LIGHTNING_BOLT_CHARGE_TIME_MIN )
     {
-      //lightning gun primary fire has been released
+      //no longer charging the lightning gun
       pm->ps->stats[ STAT_STATE ] &= ~SS_CHARGING;
-      pm->ps->pm_flags |= PMF_PAUSE_BEAM;
-    }else if( pm->pmext->pulsatingBeamTime <= 0 )
+    }
+
+    if( pm->pmext->pulsatingBeamTime[ 0 ] <= 0 )
       pm->ps->pm_flags |= PMF_PAUSE_BEAM;
   }
 
@@ -4107,7 +4109,7 @@ static void PM_Weapon( void )
         }
       }
 
-      if( pm->ps->stats[ STAT_MISC ] > LIGHTNING_BOLT_CHARGE_TIME_MIN )
+      if( pm->ps->stats[ STAT_MISC ] >= LIGHTNING_BOLT_CHARGE_TIME_MIN )
       {
         // Fire primary attack
         attack1 = qtrue;
@@ -4155,7 +4157,6 @@ static void PM_Weapon( void )
       pm->ps->generic1 = WPM_TERTIARY;
       PM_AddEvent( EV_FIRE_WEAPON3 );
       addTime = BG_Weapon( pm->ps->weapon )->repeatRate3;
-      pm->pmext->miscAtLastFire = pm->ps->stats[ STAT_MISC ];
     }
     else
     {
@@ -4172,7 +4173,8 @@ static void PM_Weapon( void )
       pm->ps->generic1 = WPM_SECONDARY;
       PM_AddEvent( EV_FIRE_WEAPON2 );
       addTime = BG_Weapon( pm->ps->weapon )->repeatRate2;
-      pm->pmext->miscAtLastFire = pm->ps->stats[ STAT_MISC ];
+      if( pm->ps->weapon == WP_LIGHTNING )
+        pm->ps->pm_flags |= PMF_PAUSE_BEAM;
     }
     else
     {
@@ -4188,7 +4190,7 @@ static void PM_Weapon( void )
     PM_AddEvent( EV_FIRE_WEAPON );
     addTime = BG_Weapon( pm->ps->weapon )->repeatRate1;
     if( pm->ps->weapon == WP_LIGHTNING )
-      pm->pmext->pulsatingBeamTime = LIGHTNING_BOLT_BEAM_DURATION;
+      pm->pmext->pulsatingBeamTime[ 0 ] = LIGHTNING_BOLT_BEAM_DURATION;
     if( pm->ps->pm_flags & PMF_PAUSE_BEAM )
       pm->ps->pm_flags &= ~PMF_PAUSE_BEAM;
     pm->pmext->miscAtLastFire = pm->ps->stats[ STAT_MISC ];
@@ -4391,6 +4393,8 @@ PM_DropTimers
 */
 static void PM_DropTimers( void )
 {
+  int i;
+
   // drop misc timing counter
   if( pm->ps->pm_time )
   {
@@ -4436,14 +4440,17 @@ static void PM_DropTimers( void )
   else
     pm->ps->persistant[PERS_JUMPTIME] += pml.msec;
 
-  // pulsating beam timer
-  if( pm->pmext->pulsatingBeamTime )
+  // pulsating beam timers
+  for( i = 0; i < 3; i++ )
   {
-    if( pm->pmext->pulsatingBeamTime > 0)
-      pm->pmext->pulsatingBeamTime -= pml.msec;
+    if( pm->pmext->pulsatingBeamTime[ i ] )
+    {
+      if( pm->pmext->pulsatingBeamTime[ i ] > 0)
+        pm->pmext->pulsatingBeamTime[ i ] -= pml.msec;
 
-    if( pm->pmext->pulsatingBeamTime < 0 )
-      pm->pmext->pulsatingBeamTime = 0;
+      if( pm->pmext->pulsatingBeamTime[ i ] < 0 )
+        pm->pmext->pulsatingBeamTime[ i ] = 0;
+    }
   }
 }
 
@@ -4698,7 +4705,8 @@ void PmoveSingle( pmove_t *pmove )
 
   // set the firing flag for continuous beam weapons
   if( !(pm->ps->pm_flags & PMF_RESPAWNED) && pm->ps->pm_type != PM_INTERMISSION &&
-      ( pm->cmd.buttons & BUTTON_ATTACK ) &&
+      ( ( pm->cmd.buttons & BUTTON_ATTACK ) ||
+        pm->pmext->pulsatingBeamTime[ 0 ] ) &&
       ( ( pm->ps->ammo > 0 || pm->ps->clips > 0 ) || BG_Weapon( pm->ps->weapon )->infiniteAmmo ) &&
       !( pm->ps->pm_flags & PMF_PAUSE_BEAM ) )
     pm->ps->eFlags |= EF_FIRING;
@@ -4707,7 +4715,8 @@ void PmoveSingle( pmove_t *pmove )
 
   // set the firing flag for continuous beam weapons
   if( !(pm->ps->pm_flags & PMF_RESPAWNED) && pm->ps->pm_type != PM_INTERMISSION &&
-      ( pm->cmd.buttons & BUTTON_ATTACK2 ) &&
+      ( ( pm->cmd.buttons & BUTTON_ATTACK2 ) ||
+        pm->pmext->pulsatingBeamTime[ 1 ] ) &&
       ( ( pm->ps->ammo > 0 || pm->ps->clips > 0 ) || BG_Weapon( pm->ps->weapon )->infiniteAmmo ) &&
       !( pm->ps->pm_flags & PMF_PAUSE_BEAM ) )
     pm->ps->eFlags |= EF_FIRING2;
@@ -4716,7 +4725,8 @@ void PmoveSingle( pmove_t *pmove )
 
   // set the firing flag for continuous beam weapons
   if( !(pm->ps->pm_flags & PMF_RESPAWNED) && pm->ps->pm_type != PM_INTERMISSION &&
-      ( pm->cmd.buttons & BUTTON_USE_HOLDABLE ) &&
+      ( ( pm->cmd.buttons & BUTTON_USE_HOLDABLE ) ||
+        pm->pmext->pulsatingBeamTime[ 2 ] ) &&
       ( ( pm->ps->ammo > 0 || pm->ps->clips > 0 ) || BG_Weapon( pm->ps->weapon )->infiniteAmmo ) &&
       !( pm->ps->pm_flags & PMF_PAUSE_BEAM ) )
     pm->ps->eFlags |= EF_FIRING3;
