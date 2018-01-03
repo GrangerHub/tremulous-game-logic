@@ -788,21 +788,26 @@ void ClientTimerActions( gentity_t *ent, int msec )
     if( ( client->ps.weapon == WP_ALEVEL1 || 
          client->ps.weapon == WP_ALEVEL1_UPG ) )
     {
-      client->ps.eFlags &= ~EF_INVISIBILE;
-      if( !( ucmd->buttons & BUTTON_ATTACK ) &&
-          !( client->ps.stats[ STAT_STATE ] & SS_GRABBING ) &&
-          !( ( ucmd->buttons & BUTTON_ATTACK2 ) &&
-             BG_Weapon( client->ps.weapon )->hasAltMode ) &&
-          ent->pain_debounce_time <= level.time &&
-          !( ucmd->buttons & BUTTON_GESTURE ) &&
-          G_Overmind( ) )
+      if( ( ucmd->buttons & BUTTON_ATTACK ) ||
+          ( client->ps.stats[ STAT_STATE ] & SS_GRABBING ) ||
+          ( ( ucmd->buttons & BUTTON_ATTACK2 ) &&
+             BG_Weapon( client->ps.weapon )->hasAltMode ) ||
+          ent->pain_debounce_time > level.time ||
+          ( ucmd->buttons & BUTTON_GESTURE ) ||
+          !G_Overmind( ) )
       {
-        if( aForward <= 5 && aRight <= 5 && ucmd->upmove <= 5 )
-          client->ps.eFlags |= EF_INVISIBILE;
-        else if( client->ps.weapon == WP_ALEVEL1_UPG &&
-                 ( client->ps.stats[ STAT_STATE ] & SS_BOOSTED ) )
-          client->ps.eFlags |= EF_INVISIBILE;
-      }
+        client->timeToInvisibility = LEVEL1_INVISIBILITY_DELAY + level.time;
+      } else if( ( client->ps.weapon == WP_ALEVEL1 ||
+               !( client->ps.stats[ STAT_STATE ] & SS_BOOSTED ) ) &&
+               ( ( aForward > 0 ) ||
+                 ( aRight > 0 ) ||
+                 ( ucmd->upmove > 0 ) ) )
+        client->timeToInvisibility = LEVEL1_INVISIBILITY_DELAY + level.time;
+
+      if( client->timeToInvisibility <= level.time )
+        client->ps.eFlags |= EF_INVISIBILE;
+      else
+        client->ps.eFlags &= ~EF_INVISIBILE;
     }
 
     if( weapon == WP_ABUILD || weapon == WP_ABUILD2 ||

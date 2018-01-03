@@ -625,6 +625,8 @@ struct gclient_s
   // Stores the first person angles for when evolving ends
   vec3_t              evolveRestoreAngles;
   int                 evolveCost; //amount of evos to deduct 
+
+  int                 timeToInvisibility; //for the invisible basilisk
 };
 
 
