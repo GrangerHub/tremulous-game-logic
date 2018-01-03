@@ -741,7 +741,12 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
 
     case EV_FIRE_WEAPON:
       if( es->weapon != WP_HBUILD )
+      {
         CG_FireWeapon( cent, WPM_PRIMARY );
+        if( cent->currentState.number == cg.predictedPlayerState.clientNum )
+          BG_ResetLightningBoltCharge( &cg.predictedPlayerState,
+                                       &cg.pmext );
+      }
       break;
 
     case EV_FIRE_WEAPON2:

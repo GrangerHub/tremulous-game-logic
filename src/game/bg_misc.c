@@ -2624,14 +2624,15 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "lightning",          //char      *name;
     "Lightning Gun",      //char      *humanName;
-    "Generates bolts of lightning as its primary attack. "
-    "The secondary attack emmits a burst of ball lightning, "
-    "that can be destabilized early by the primer shot.",
+    "Generates charged pulsating bolts of lightning as its "
+    "primary attack. The secondary attack emmits a burst of ball "
+    "lightning, that can be set off into a simultanous chained "
+    "detonation by the destabilizer shot.",
     LIGHTNING_AMMO,       //int       maxAmmo;
     0,                    //int       maxClips;
     1,                    //int       ammoUsage1;
     20,                   //int       ammoUsage2;
-    1,                    //int       ammoUsage3;
+    0,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;

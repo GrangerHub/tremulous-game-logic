@@ -1518,7 +1518,7 @@ void CG_AddViewWeapon( playerState_t *ps )
     VectorMA( origin, -8, cg.refdef.viewaxis[ 2 ], origin );
 
     if ( cg.predictedPlayerState.eFlags & EF_FIRING )
-      CG_LightningBolt( &cg_entities[ps->clientNum], origin );
+      CG_LightningBolt( &cg.predictedPlayerEntity, origin );
 
     if( cent->muzzlePS )
       CG_SetAttachmentPoint( &cent->muzzlePS->attachment, origin );

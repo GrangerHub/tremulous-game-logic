@@ -720,6 +720,7 @@ gentity_t *fire_lightningBall( gentity_t *self, qboolean primary,
   if( primary )
   {
     bolt->classname = "lightningBall1";
+    bolt->s.generic1 = WPM_TERTIARY; //weaponMode
     bolt->damage = LIGHTNING_BALL1_DAMAGE;
     bolt->splashDamage = LIGHTNING_BALL1_SPLASH_DMG;
     bolt->s.pos.trType = TR_LINEAR;
@@ -730,6 +731,7 @@ gentity_t *fire_lightningBall( gentity_t *self, qboolean primary,
   } else
   {
     bolt->classname = "lightningBall2";
+    bolt->s.generic1 = self->s.generic1; //weaponMode
     bolt->damage = LIGHTNING_BALL2_DAMAGE;
     bolt->flags |= ( FL_BOUNCE_HALF | FL_NO_BOUNCE_SOUND );
     bolt->splashDamage = LIGHTNING_BALL2_SPLASH_DMG;
@@ -747,7 +749,6 @@ gentity_t *fire_lightningBall( gentity_t *self, qboolean primary,
   bolt->think = G_ExplodeMissile;
   bolt->s.eType = ET_MISSILE;
   bolt->s.weapon = WP_LIGHTNING;
-  bolt->s.generic1 = self->s.generic1; //weaponMode
   bolt->r.ownerNum = self->s.number;
   bolt->parent = self;
   G_SetClipmask( bolt, MASK_SHOT );
