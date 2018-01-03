@@ -727,6 +727,10 @@ void lightningBoltFire( gentity_t *ent )
 
 	traceEnt = &g_entities[ tr->entityNum ];
 
+  if( traceEnt->s.groundEntityNum == ENTITYNUM_NONE &&
+      !( traceEnt->client && traceEnt->waterlevel ) )
+    damage = (int)( damage * LIGHTNING_BOLT_NOGRND_DMG_MOD );
+
 	if( G_TakesDamage( traceEnt ))
     G_Damage( traceEnt, ent, ent, forward, tr->endpos,
               damage, 0, MOD_LIGHTNING);
