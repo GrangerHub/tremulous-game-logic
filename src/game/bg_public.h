@@ -218,7 +218,7 @@ typedef enum
 typedef struct
 {
   trace_t  impactTriggerTrace; // Used for the lightning gun
-  int      pulsatingBeamTime;
+  int      pulsatingBeamTime[ 3 ];
   qboolean impactTriggerTraceChecked;
   int      miscAtLastFire;
   int      pouncePayload;
