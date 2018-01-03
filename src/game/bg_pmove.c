@@ -3676,16 +3676,9 @@ static void PM_Weapon( void )
 
   if( pm->ps->weapon == WP_LIGHTNING )
   {
-    if( ( pm->ps->stats[ STAT_STATE ] & SS_CHARGING ) &&
-        !( pm->cmd.buttons & BUTTON_ATTACK ) &&
-         pm->ps->stats[ STAT_MISC ] < LIGHTNING_BOLT_CHARGE_TIME_MIN )
-    {
-      //no longer charging the lightning gun
-      pm->ps->stats[ STAT_STATE ] &= ~SS_CHARGING;
-    }
-
+    //hide continous beam
     if( pm->pmext->pulsatingBeamTime[ 0 ] <= 0 )
-      pm->ps->pm_flags |= PMF_PAUSE_BEAM;
+        pm->ps->pm_flags |= PMF_PAUSE_BEAM;
   }
 
   // Trample charge mechanics
@@ -4073,6 +4066,11 @@ static void PM_Weapon( void )
           return;
         }
       }
+
+      //fire the lightning ball destabilizer
+      if( pm->ps->stats[ STAT_MISC ] > 0 &&
+         !attack1 )
+         PM_AddEvent( EV_FIRE_WEAPON3 );
 
       if( pm->ps->stats[ STAT_MISC ] >= LIGHTNING_BOLT_CHARGE_TIME_MIN )
       {

@@ -692,15 +692,7 @@ lightningBall1Fire
 */
 void lightningBall1Fire( gentity_t *ent )
 {
-  if( !( ent->client->ps.stats[ STAT_STATE ] & SS_CHARGING ) )
-  {
-    weaponMode_t mode = ent->s.generic1;
-
-    ent->s.generic1 = WPM_TERTIARY; //hax!!
-    fire_lightningBall( ent, qtrue, muzzle, forward );
-    ent->s.generic1 = mode;
-    ent->client->ps.stats[ STAT_STATE ] |= SS_CHARGING;
-  }
+  fire_lightningBall( ent, qtrue, muzzle, forward );
 }
 
 /*
@@ -717,8 +709,6 @@ void lightningBoltFire( gentity_t *ent )
   // damage self if in contact with water
   if( ent->waterlevel )
     G_Damage( ent, ent, ent, NULL, NULL, damage, 0, MOD_LIGHTNING);
-
-  lightningBall1Fire( ent );
 
   BG_ResetLightningBoltCharge( &ent->client->ps, &ent->client->pmext);
 
@@ -1736,6 +1726,10 @@ void FireWeapon3( gentity_t *ent )
   {
     case WP_ALEVEL3_UPG:
       bounceBallFire( ent );
+      break;
+
+    case WP_LIGHTNING:
+      lightningBall1Fire( ent );
       break;
 
     case WP_ABUILD2:
