@@ -1999,6 +1999,12 @@ static const weaponAttributes_t bg_weapons[ ] =
     LEVEL0_BITE_REPEAT,   //int       repeatRate1;
     0,                    //int       repeatRate2;
     0,                    //int       repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
     0,                    //int       reloadTime;
     LEVEL0_BITE_K_SCALE,  //float     knockbackScale;
     qfalse,               //qboolean  hasAltMode;
@@ -2030,6 +2036,12 @@ static const weaponAttributes_t bg_weapons[ ] =
     LEVEL1_CLAW_REPEAT,   //int       repeatRate1;
     0,                    //int       repeatRate2;
     0,                    //int       repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
     0,                    //int       reloadTime;
     LEVEL1_CLAW_K_SCALE,  //float     knockbackScale;
     qfalse,               //qboolean  hasAltMode;
@@ -2061,6 +2073,12 @@ static const weaponAttributes_t bg_weapons[ ] =
     LEVEL1_CLAW_U_REPEAT, //int       repeatRate1;
     LEVEL1_PCLOUD_REPEAT, //int       repeatRate2;
     0,                    //int       repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
     0,                    //int       reloadTime;
     LEVEL1_CLAW_U_K_SCALE, //float    knockbackScale;
     qtrue,                //qboolean  hasAltMode;
@@ -2092,6 +2110,12 @@ static const weaponAttributes_t bg_weapons[ ] =
     LEVEL2_CLAW_REPEAT,   //int       repeatRate1;
     0,                    //int       repeatRate2;
     0,                    //int       repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
     0,                    //int       reloadTime;
     LEVEL2_CLAW_K_SCALE,  //float     knockbackScale;
     qfalse,               //qboolean  hasAltMode;
@@ -2123,6 +2147,12 @@ static const weaponAttributes_t bg_weapons[ ] =
     LEVEL2_CLAW_U_REPEAT, //int       repeatRate1;
     LEVEL2_AREAZAP_REPEAT, //int      repeatRate2;
     0,                    //int       repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
     0,                    //int       reloadTime;
     LEVEL2_CLAW_U_K_SCALE, //float    knockbackScale;
     qtrue,                //qboolean  hasAltMode;
@@ -2154,6 +2184,12 @@ static const weaponAttributes_t bg_weapons[ ] =
     LEVEL3_CLAW_REPEAT,   //int       repeatRate1;
     0,                    //int       repeatRate2;
     0,                    //int       repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
     0,                    //int       reloadTime;
     LEVEL3_CLAW_K_SCALE,  //float     knockbackScale;
     qfalse,               //qboolean  hasAltMode;
@@ -2185,6 +2221,12 @@ static const weaponAttributes_t bg_weapons[ ] =
     LEVEL3_CLAW_U_REPEAT, //int       repeatRate1;
     0,                    //int       repeatRate2;
     LEVEL3_BOUNCEBALL_REPEAT, //int   repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
     0,                    //int       reloadTime;
     LEVEL3_CLAW_U_K_SCALE, //float    knockbackScale;
     qfalse,               //qboolean  hasAltMode;
@@ -2216,6 +2258,12 @@ static const weaponAttributes_t bg_weapons[ ] =
     LEVEL4_CLAW_REPEAT,   //int       repeatRate1;
     0,                    //int       repeatRate2;
     0,                    //int       repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
     0,                    //int       reloadTime;
     LEVEL4_CLAW_K_SCALE,  //float     knockbackScale;
     qfalse,               //qboolean  hasAltMode;
@@ -2247,6 +2295,12 @@ static const weaponAttributes_t bg_weapons[ ] =
     BLASTER_REPEAT,       //int       repeatRate1;
     0,                    //int       repeatRate2;
     0,                    //int       repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
     0,                    //int       reloadTime;
     BLASTER_K_SCALE,      //float     knockbackScale;
     qfalse,               //qboolean  hasAltMode;
@@ -2279,6 +2333,12 @@ static const weaponAttributes_t bg_weapons[ ] =
     RIFLE_REPEAT,         //int       repeatRate1;
     0,                    //int       repeatRate2;
     0,                    //int       repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
     RIFLE_RELOAD,         //int       reloadTime;
     RIFLE_K_SCALE,        //float     knockbackScale;
     qfalse,               //qboolean  hasAltMode;
@@ -2312,6 +2372,12 @@ static const weaponAttributes_t bg_weapons[ ] =
     PAINSAW_REPEAT,       //int       repeatRate1;
     0,                    //int       repeatRate2;
     0,                    //int       repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
     0,                    //int       reloadTime;
     PAINSAW_K_SCALE,      //float     knockbackScale;
     qfalse,               //qboolean  hasAltMode;
@@ -2345,6 +2411,12 @@ static const weaponAttributes_t bg_weapons[ ] =
     SHOTGUN_REPEAT,       //int       repeatRate1;
     0,                    //int       repeatRate2;
     0,                    //int       repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
     SHOTGUN_RELOAD,       //int       reloadTime;
     SHOTGUN_K_SCALE,      //float     knockbackScale;
     qfalse,               //qboolean  hasAltMode;
@@ -2377,6 +2449,12 @@ static const weaponAttributes_t bg_weapons[ ] =
     LASGUN_REPEAT,        //int       repeatRate1;
     0,                    //int       repeatRate2;
     0,                    //int       repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
     LASGUN_RELOAD,        //int       reloadTime;
     LASGUN_K_SCALE,       //float     knockbackScale;
     qfalse,               //qboolean  hasAltMode;
@@ -2410,6 +2488,12 @@ static const weaponAttributes_t bg_weapons[ ] =
     MDRIVER_REPEAT,       //int       repeatRate1;
     0,                    //int       repeatRate2;
     0,                    //int       repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
     MDRIVER_RELOAD,       //int       reloadTime;
     MDRIVER_K_SCALE,      //float     knockbackScale;
     qfalse,               //qboolean  hasAltMode;
@@ -2443,6 +2527,12 @@ static const weaponAttributes_t bg_weapons[ ] =
     CHAINGUN_REPEAT,      //int       repeatRate1;
     0,                    //int       repeatRate2;
     0,                    //int       repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
     0,                    //int       reloadTime;
     CHAINGUN_K_SCALE,     //float     knockbackScale;
     qfalse,               //qboolean  hasAltMode;
@@ -2476,6 +2566,12 @@ static const weaponAttributes_t bg_weapons[ ] =
     FLAMER_REPEAT,        //int       repeatRate1;
     0,                    //int       repeatRate2;
     0,                    //int       repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
     0,                    //int       reloadTime;
     FLAMER_K_SCALE,       //float     knockbackScale;
     qfalse,               //qboolean  hasAltMode;
@@ -2507,6 +2603,12 @@ static const weaponAttributes_t bg_weapons[ ] =
     PRIFLE_REPEAT,        //int       repeatRate1;
     0,                    //int       repeatRate2;
     0,                    //int       repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
     PRIFLE_RELOAD,        //int       reloadTime;
     PRIFLE_K_SCALE,       //float     knockbackScale;
     qfalse,               //qboolean  hasAltMode;
@@ -2542,6 +2644,12 @@ static const weaponAttributes_t bg_weapons[ ] =
     LCANNON_REPEAT,       //int       repeatRate1;
     LCANNON_SECONDARY_REPEAT, //int   repeatRate2;
     0,                    //int       repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
     LCANNON_RELOAD,       //int       reloadTime;
     LCANNON_K_SCALE,      //float     knockbackScale;
     qtrue,                //qboolean  hasAltMode;
@@ -2573,6 +2681,12 @@ static const weaponAttributes_t bg_weapons[ ] =
     GRENADE_REPEAT,       //int       repeatRate1;
     0,                    //int       repeatRate2;
     0,                    //int       repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
     0,                    //int       reloadTime;
     GRENADE_K_SCALE,      //float     knockbackScale;
     qfalse,               //qboolean  hasAltMode;
@@ -2606,6 +2720,12 @@ static const weaponAttributes_t bg_weapons[ ] =
     LAUNCHER_REPEAT,      //int       repeatRate1;
     LAUNCHER_REPEAT,      //int       repeatRate2;
     0,                    //int       repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
     LAUNCHER_RELOAD,      //int       reloadTime;
     LAUNCHER_K_SCALE,     //float     knockbackScale;
     qtrue,                //qboolean  hasAltMode;
@@ -2629,9 +2749,9 @@ static const weaponAttributes_t bg_weapons[ ] =
     "lightning, that can be set off into a simultanous chained "
     "detonation by the destabilizer shot.",
     LIGHTNING_AMMO,       //int       maxAmmo;
-    0,                    //int       maxClips;
+    LIGHTNING_MAXCLIPS,   //int       maxClips;
     1,                    //int       ammoUsage1;
-    20,                   //int       ammoUsage2;
+    LIGHTNING_BALL2_AMMO_USAGE,//int       ammoUsage2;
     0,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
     qtrue,                //qboolean  ammoPurchasable;
@@ -2640,7 +2760,13 @@ static const weaponAttributes_t bg_weapons[ ] =
     LIGHTNING_BOLT_CHARGE_TIME_MIN,//int       repeatRate1;
     LIGHTNING_BALL2_REPEAT,//int       repeatRate2;
     0,                    //int       repeatRate3;
-    0,                    //int       reloadTime;
+    0,                    //int       burstRounds1;
+    LIGHTNING_BALL2_BURST_ROUNDS,//int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    LIGHTNING_BALL2_BURST_DELAY,//int       burstDelay2;
+    0,                    //int       burstDelay3;
+    LIGHTNING_RELOAD,     //int       reloadTime;
     LIGHTNING_K_SCALE,    //float     knockbackScale;
     qtrue,                //qboolean  hasAltMode;
     qfalse,               //qboolean  hasThirdMode;
@@ -2671,6 +2797,12 @@ static const weaponAttributes_t bg_weapons[ ] =
     500,                  //int       repeatRate1;
     500,                  //int       repeatRate2;
     500,                  //int       repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
     0,                    //int       reloadTime;
     LOCKBLOB_K_SCALE,     //float     knockbackScale;
     qfalse,               //qboolean  hasAltMode;
@@ -2702,6 +2834,12 @@ static const weaponAttributes_t bg_weapons[ ] =
     500,                  //int       repeatRate1;
     500,                  //int       repeatRate2;
     500,                  //int       repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
     0,                    //int       reloadTime;
     HIVE_K_SCALE,         //float     knockbackScale;
     qfalse,               //qboolean  hasAltMode;
@@ -2733,6 +2871,12 @@ static const weaponAttributes_t bg_weapons[ ] =
     500,                  //int       repeatRate1;
     500,                  //int       repeatRate2;
     500,                  //int       repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
     0,                    //int       reloadTime;
     TESLAGEN_K_SCALE,     //float     knockbackScale;
     qfalse,               //qboolean  hasAltMode;
@@ -2764,6 +2908,12 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       repeatRate1;
     0,                    //int       repeatRate2;
     0,                    //int       repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
     0,                    //int       reloadTime;
     MGTURRET_K_SCALE,     //float     knockbackScale;
     qfalse,               //qboolean  hasAltMode;
@@ -2795,6 +2945,12 @@ static const weaponAttributes_t bg_weapons[ ] =
     ABUILDER_BUILD_REPEAT, //int      repeatRate1;
     ABUILDER_CLAW_REPEAT, //int       repeatRate2;
     0,                    //int       repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
     0,                    //int       reloadTime;
     ABUILDER_CLAW_K_SCALE, //float    knockbackScale;
     qtrue,                //qboolean  hasAltMode;
@@ -2826,6 +2982,12 @@ static const weaponAttributes_t bg_weapons[ ] =
     ABUILDER_BUILD_REPEAT, //int      repeatRate1;
     ABUILDER_CLAW_REPEAT, //int       repeatRate2;
     ABUILDER_BLOB_REPEAT, //int       repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
     0,                    //int       reloadTime;
     ABUILDER_CLAW_K_SCALE, //float    knockbackScale;
     qtrue,                //qboolean  hasAltMode;
@@ -2859,6 +3021,12 @@ static const weaponAttributes_t bg_weapons[ ] =
     HBUILD_REPEAT,        //int       repeatRate1;
     0,                    //int       repeatRate2;
     0,                    //int       repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
     0,                    //int       reloadTime;
     0.0f,                 //float     knockbackScale;
     qtrue,                //qboolean  hasAltMode;
@@ -2891,6 +3059,12 @@ static const weaponAttributes_t bg_weapons[ ] =
     PORTALGUN_REPEAT,     //int       repeatRate1;
     PORTALGUN_REPEAT,     //int       repeatRate2;
     0,                    //int       repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
     0,                    //int       reloadTime;
     0.0f,                 //float     knockbackScale;
     qtrue,                //qboolean  hasAltMode;
@@ -4130,7 +4304,7 @@ int BG_GetValueOfPlayer( playerState_t *ps )
 BG_PlayerCanChangeWeapon
 =================
 */
-qboolean BG_PlayerCanChangeWeapon( playerState_t *ps )
+qboolean BG_PlayerCanChangeWeapon( playerState_t *ps, pmoveExt_t *pmext )
 {
   // Do not allow Lucifer Cannon "canceling" via weapon switch
   if( ps->weapon == WP_LUCIFER_CANNON &&
@@ -4139,6 +4313,12 @@ qboolean BG_PlayerCanChangeWeapon( playerState_t *ps )
 
   if( ps->weapon == WP_LIGHTNING &&
       ps->stats[ STAT_MISC ] > LIGHTNING_BOLT_CHARGE_TIME_MIN )
+    return qfalse;
+
+  //bursts must complete
+  if( pmext->burstRoundsToFired[ 2 ] ||
+      pmext->burstRoundsToFired[ 1 ] ||
+      pmext->burstRoundsToFired[ 0 ] )
     return qfalse;
 
   return ps->weaponTime <= 0 || ps->weaponstate != WEAPON_FIRING;

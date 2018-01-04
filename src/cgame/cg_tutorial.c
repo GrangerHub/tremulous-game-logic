@@ -590,7 +590,7 @@ static void CG_HumanText( char *text, playerState_t *ps )
               CG_KeyNameForCommand( "+attack" ) ) );
 
         Q_strcat( text, MAX_TUTORIAL_TEXT,
-            va( "Press %s to fire a burst of ball lightning\n",
+            va( "Press %s to spray a burst of ball lightning\n",
               CG_KeyNameForCommand( "+button5" ) ) );
         break;
 
