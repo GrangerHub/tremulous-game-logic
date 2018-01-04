@@ -223,6 +223,7 @@ typedef struct
   int      pulsatingBeamTime[ 3 ];
   qboolean impactTriggerTraceChecked;
   int      miscAtLastFire;
+  int      burstRoundsToFired[ 3 ];
   int      pouncePayload;
   int      pouncePayloadTime;
   float    spitfireGlideSpeedMod;
@@ -1363,6 +1364,12 @@ typedef struct
   int                 repeatRate1;
   int                 repeatRate2;
   int                 repeatRate3;
+  int                 burstRounds1;
+  int                 burstRounds2;
+  int                 burstRounds3;
+  int                 burstDelay1;
+  int                 burstDelay2;
+  int                 burstDelay3;
   int                 reloadTime;
   float               knockbackScale;
   float               recoil1;
@@ -1435,7 +1442,7 @@ void      BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
                                                                const vec3_t, const vec3_t, int, int ),
                                                 vec3_t outOrigin, vec3_t outAngles, trace_t *tr );
 int       BG_GetValueOfPlayer( playerState_t *ps );
-qboolean  BG_PlayerCanChangeWeapon( playerState_t *ps );
+qboolean  BG_PlayerCanChangeWeapon( playerState_t *ps, pmoveExt_t *pmext );
 int       BG_PlayerPoisonCloudTime( playerState_t *ps );
 weapon_t  BG_GetPlayerWeapon( playerState_t *ps );
 qboolean  BG_HasEnergyWeapon( playerState_t *ps );
