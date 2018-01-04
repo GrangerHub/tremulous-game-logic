@@ -847,14 +847,14 @@ PM_ScanForWall
 Scans for a wall in the given direction.
 ==============
 */
-static qboolean PM_ScanForWall( trace_t *wall, vec3_t searchDir )
+/*static qboolean PM_ScanForWall( trace_t *wall, vec3_t searchDir )
 {
   vec3_t searchEnd;
   VectorMA( pm->ps->origin, 0.25f, searchDir, searchEnd );
   pm->trace( wall, pm->ps->origin, pm->mins, pm->maxs,
              searchEnd, pm->ps->clientNum, pm->tracemask );
   return PM_IsWall( wall );
-}
+}*/
 
 
 /*
@@ -866,7 +866,7 @@ potential speed increase to actually add to the maximum speed, putting the
 result in pml.wallSpeedFactor.
 ==============
 */
-static void PM_ComputeWallSpeedFactor( void )
+/*static void PM_ComputeWallSpeedFactor( void )
 {
   float*   groundNormal; //- Ground normal.
   vec3_t   searchDir;    //- Direction for searching for a wall.
@@ -903,7 +903,7 @@ static void PM_ComputeWallSpeedFactor( void )
 
   // Use sqrt to make this easier to use. MAX is used just in case.
   pml.wallSpeedFactor = sqrt( MAX( 0.0f, alignment ) );
-}
+}*/
 
 
 /*
@@ -5359,8 +5359,9 @@ void PmoveSingle( pmove_t *pmove )
       pm->ps->pm_type == PM_EVOLVING )
     PM_DeadMove( );
 
-  if( pm->ps->pm_type != PM_JETPACK )
-    PM_ComputeWallSpeedFactor();
+
+  //if( pm->ps->pm_type != PM_JETPACK )
+    //PM_ComputeWallSpeedFactor();
 
   PM_DropTimers( );
 
