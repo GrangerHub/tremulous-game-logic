@@ -2508,7 +2508,7 @@ void Cmd_ActivateItem_f( gentity_t *ent )
   if( !Q_stricmp( "weapon", s ) )
   {
     if( ent->client->ps.weapon == WP_BLASTER &&
-        BG_PlayerCanChangeWeapon( &ent->client->ps ) )
+        BG_PlayerCanChangeWeapon( &ent->client->ps, &ent->client->pmext ) )
       G_ForceWeaponChange( ent, WP_NONE );
     return;
   }
@@ -2522,7 +2522,7 @@ void Cmd_ActivateItem_f( gentity_t *ent )
            BG_InventoryContainsWeapon( weapon, ent->client->ps.stats ) )
   {
     if( ent->client->ps.weapon != weapon &&
-        BG_PlayerCanChangeWeapon( &ent->client->ps ) )
+        BG_PlayerCanChangeWeapon( &ent->client->ps, &ent->client->pmext ) )
       G_ForceWeaponChange( ent, weapon );
   }
   else
@@ -2569,7 +2569,7 @@ void Cmd_ToggleItem_f( gentity_t *ent )
 
   if( weapon != WP_NONE )
   {
-    if( !BG_PlayerCanChangeWeapon( &ent->client->ps ) )
+    if( !BG_PlayerCanChangeWeapon( &ent->client->ps, &ent->client->pmext ) )
       return;
 
     //special case to allow switching between
@@ -2680,7 +2680,7 @@ void Cmd_Buy_f( gentity_t *ent )
     }
 
     // In some instances, weapons can't be changed
-    if( !BG_PlayerCanChangeWeapon( &ent->client->ps ) )
+    if( !BG_PlayerCanChangeWeapon( &ent->client->ps, &ent->client->pmext ) )
       return;
 
     ent->client->ps.stats[ STAT_WEAPON ] = weapon;
@@ -2832,7 +2832,7 @@ void Cmd_Sell_f( gentity_t *ent )
   {
     weapon_t selected = BG_GetPlayerWeapon( &ent->client->ps );
 
-    if( !BG_PlayerCanChangeWeapon( &ent->client->ps ) )
+    if( !BG_PlayerCanChangeWeapon( &ent->client->ps, &ent->client->pmext ) )
       return;
 
     //are we /allowed/ to sell this?
