@@ -672,26 +672,56 @@ Lightning Gun
 
 /*
 ===============
-lightningBall2Fire
+lightningBallFire
 ===============
 */
-void lightningBall2Fire( gentity_t *ent )
+void lightningBallFire( gentity_t *ent )
 {
-  fire_lightningBall( ent, qfalse, muzzle, forward );
+  gentity_t *missile;
+  gclient_t *client = ent ->client;
+
+  Com_Assert( client && "lightningBallFire: Can only be used by clients" );
+
+  Com_Assert( client->firedBallLightningNum < LIGHTNING_BALL_BURST_ROUNDS &&
+              "lightningBallFire: attempted to exceed the ball lightning burst limit" );
+
+  missile = fire_lightningBall( ent, qfalse, muzzle, forward );
+
+  //add to the client's ball lightning array
+  G_Entity_id_set( &client->firedBallLightning[ client->firedBallLightningNum ],
+                   missile );
+  client->firedBallLightningNum++;
 
   // damage self if in contact with water
   if( ent->waterlevel )
     G_Damage( ent, ent, ent, NULL, NULL,
-              LIGHTNING_BALL2_DAMAGE, 0, MOD_LIGHTNING);
+              LIGHTNING_BALL_DAMAGE, 0, MOD_LIGHTNING);
 }
 
 /*
 ===============
-lightningBall1Fire
+lightningEMPFire
 ===============
 */
-void lightningBall1Fire( gentity_t *ent )
+void lightningEMPFire( gentity_t *ent )
 {
+  int i;
+  gclient_t *client = ent->client;
+
+  Com_Assert( client && "lightningEMPFire: Can only be used by clients" );
+
+  for( i = 0; i < LIGHTNING_BALL_BURST_ROUNDS; i++ )
+  {
+    gentity_t *missile = G_Entity_id_get( &client->firedBallLightning[ i ] );
+
+    if( missile &&
+        missile->s.eType == ET_MISSILE &&
+        !strcmp( missile->classname, "lightningBall" ) )
+      missile->die( missile, ent, ent, missile->health, MOD_LIGHTNING_EMP );
+  }
+
+  client->firedBallLightningNum = 0;
+
   fire_lightningBall( ent, qtrue, muzzle, forward );
 }
 
@@ -1729,7 +1759,7 @@ void FireWeapon3( gentity_t *ent )
       break;
 
     case WP_LIGHTNING:
-      lightningBall1Fire( ent );
+      lightningEMPFire( ent );
       break;
 
     case WP_ABUILD2:
@@ -1780,7 +1810,7 @@ void FireWeapon2( gentity_t *ent )
       break;
 
     case WP_LIGHTNING:
-      lightningBall2Fire( ent );
+      lightningBallFire( ent );
       break;
 
     case WP_ALEVEL2_UPG:

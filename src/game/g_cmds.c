@@ -2754,7 +2754,20 @@ void Cmd_Buy_f( gentity_t *ent )
     }
 
     if( upgrade == UP_AMMO )
+    {
+      //bursts must complete
+      if( ent->client->pmext.burstRoundsToFire[ 2 ] ||
+          ent->client->pmext.burstRoundsToFire[ 1 ] ||
+          ent->client->pmext.burstRoundsToFire[ 0 ] )
+        return;
+
+      if( ent->client->ps.weapon == WP_LIGHTNING &&
+      ( ent->client->ps.stats[ STAT_MISC ] > LIGHTNING_BOLT_CHARGE_TIME_MIN ||
+        ( ent->client->ps.stats[ STAT_STATE ] & SS_CHARGING ) ) )
+        return;
+
       G_GiveClientMaxAmmo( ent, energyOnly );
+    }
     else
     {
       if( upgrade == UP_BATTLESUIT )

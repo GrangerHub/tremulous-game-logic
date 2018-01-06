@@ -554,15 +554,16 @@ static void CG_HumanText( char *text, playerState_t *ps )
 
       case WP_LIGHTNING:
         Q_strcat( text, MAX_TUTORIAL_TEXT,
-            va( "Press and release %s to fire a ball lightning destabilizer shot\n",
-              CG_KeyNameForCommand( "+attack" ) ) );
-
-        Q_strcat( text, MAX_TUTORIAL_TEXT,
             va( "Hold %s to charge and fire pulsating lightning bolts\n",
               CG_KeyNameForCommand( "+attack" ) ) );
 
         Q_strcat( text, MAX_TUTORIAL_TEXT,
-            va( "Press %s to spray a burst of ball lightning\n",
+            va( "Hold %s to spray a burst of ball lightning\n",
+              CG_KeyNameForCommand( "+button5" ) ) );
+
+              
+        Q_strcat( text, MAX_TUTORIAL_TEXT,
+            va( "Release %s to emmit an EMP field that destabilizes ball lightning\n",
               CG_KeyNameForCommand( "+button5" ) ) );
         break;
 
