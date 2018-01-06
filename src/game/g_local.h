@@ -601,6 +601,9 @@ struct gclient_s
 
   qboolean            charging;
 
+  gentity_id          firedBallLightning[ LIGHTNING_BALL_BURST_ROUNDS ];
+  int                 firedBallLightningNum;
+
   int                 lastFlameBall;        // s.number of the last flame ball fired
 
   unlagged_t          unlaggedHist[ MAX_UNLAGGED_MARKERS ];

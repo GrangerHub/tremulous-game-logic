@@ -3934,6 +3934,16 @@ static void PM_BeginWeaponChange( int weapon )
   if( pm->ps->weaponstate == WEAPON_DROPPING )
     return;
 
+  if( pm->ps->weapon == WP_LIGHTNING &&
+      ( pm->ps->stats[ STAT_STATE ] & SS_CHARGING ) )
+    return;
+
+  for( i = 0; i < 3; i++ )
+  {
+    if( pm->pmext->burstRoundsToFire[ i ] )
+      return;
+  }
+
   // cancel a reload
   pm->ps->pm_flags &= ~PMF_WEAPON_RELOAD;
   if( pm->ps->weaponstate == WEAPON_RELOADING )
@@ -3947,9 +3957,6 @@ static void PM_BeginWeaponChange( int weapon )
     pm->pmext->luciAmmoReduction = 0;
 
   BG_ResetLightningBoltCharge( pm->ps, pm->pmext);
-
-  for( i = 0; i < 3; i++ )
-      pm->pmext->burstRoundsToFired[ i ] = 0;
 
   pm->ps->weaponstate = WEAPON_DROPPING;
   pm->ps->weaponTime += 200;
@@ -4094,13 +4101,6 @@ static void PM_Weapon( void )
       pm->ps->stats[ STAT_MISC ] = 0;
   }
 
-  if( pm->ps->weapon == WP_LIGHTNING )
-  {
-    //hide continous beam
-    if( pm->pmext->pulsatingBeamTime[ 0 ] <= 0 )
-        pm->ps->pm_flags |= PMF_PAUSE_BEAM;
-  }
-
   // Trample charge mechanics
   if( pm->ps->weapon == WP_ALEVEL4 )
   {
@@ -4229,18 +4229,30 @@ static void PM_Weapon( void )
       pm->ps->eFlags |= EF_WARN_CHARGE;
   }
 
-  if( pm->ps->weapon == WP_LIGHTNING &&
-      !pm->pmext->burstRoundsToFired[ 1 ] )
+  if( pm->ps->weapon == WP_LIGHTNING )
   {
-    // Charging up
-    if( !pm->ps->weaponTime &&
-        ( pm->cmd.buttons & BUTTON_ATTACK ) )
+    attack3 = qfalse;
+
+    //hide continous beam
+    if( pm->pmext->pulsatingBeamTime[ 0 ] <= 0 )
+        pm->ps->pm_flags |= PMF_PAUSE_BEAM;
+
+    if( pm->ps->stats[ STAT_STATE ] & SS_CHARGING )
     {
-      pm->ps->stats[ STAT_MISC ] += pml.msec;
-      if( pm->ps->stats[ STAT_MISC ] >= LIGHTNING_BOLT_CHARGE_TIME_MAX )
-        pm->ps->stats[ STAT_MISC ] = LIGHTNING_BOLT_CHARGE_TIME_MAX;
-      if( pm->ps->stats[ STAT_MISC ] > pm->ps->ammo * LIGHTNING_BOLT_CHARGE_TIME_MIN )
-        pm->ps->stats[ STAT_MISC ] = pm->ps->ammo * LIGHTNING_BOLT_CHARGE_TIME_MIN;
+      //clear any remaining burst rounds for the EMP
+      if( !attack2 )
+        pm->pmext->burstRoundsToFire[ 1 ] = 0;
+    } else if( !pm->pmext->burstRoundsToFire[ 1 ] )
+    {
+      // Charging up
+      if( pm->cmd.buttons & BUTTON_ATTACK )
+      {
+        pm->ps->stats[ STAT_MISC ] += pml.msec;
+        if( pm->ps->stats[ STAT_MISC ] >= LIGHTNING_BOLT_CHARGE_TIME_MAX )
+          pm->ps->stats[ STAT_MISC ] = LIGHTNING_BOLT_CHARGE_TIME_MAX;
+        if( pm->ps->stats[ STAT_MISC ] > pm->ps->ammo * LIGHTNING_BOLT_CHARGE_TIME_MIN )
+          pm->ps->stats[ STAT_MISC ] = pm->ps->ammo * LIGHTNING_BOLT_CHARGE_TIME_MIN;
+      }
     }
   }
 
@@ -4353,9 +4365,12 @@ static void PM_Weapon( void )
     switch( pm->ps->weapon )
     {
       case WP_LIGHTNING:
-        if( ( attack1 ||
-              pm->ps->stats[ STAT_MISC ] > 0 ) &&
-            pm->pmext->burstRoundsToFired[ 1 ] <= 0 )
+        if( ( ( attack1 ||
+                pm->ps->stats[ STAT_MISC ] > 0 ) &&
+              pm->pmext->burstRoundsToFire[ 1 ] <= 0 ) ||
+            ( ( pm->ps->stats[ STAT_STATE ] & SS_CHARGING ) &&
+              pm->pmext->burstRoundsToFire[ 1 ] <= 0 &&
+              !attack2 ) )
           byPassWeaponTime = qtrue;
         break;
 
@@ -4398,27 +4413,26 @@ static void PM_Weapon( void )
   {
     int i;
 
-    if( attack1 ||
-        ( BG_Weapon( pm->ps->weapon )->hasAltMode && attack2 ) ||
-        ( BG_Weapon( pm->ps->weapon )->hasThirdMode && attack3 ) )
+    if( !( pm->ps->weapon == WP_LIGHTNING &&
+        ( pm->ps->stats[ STAT_STATE ] & SS_CHARGING ) ) )
     {
-      PM_AddEvent( EV_NOAMMO );
-      pm->ps->weaponTime += 500;
-    }
+      if( attack1 ||
+          ( BG_Weapon( pm->ps->weapon )->hasAltMode && attack2 ) ||
+          ( BG_Weapon( pm->ps->weapon )->hasThirdMode && attack3 ) )
+      {
+        PM_AddEvent( EV_NOAMMO );
+        pm->ps->weaponTime += 500;
+      }
 
-    if( pm->ps->weaponstate == WEAPON_FIRING )
-      pm->ps->weaponstate = WEAPON_READY;
+      if( pm->ps->weaponstate == WEAPON_FIRING )
+        pm->ps->weaponstate = WEAPON_READY;
+
+      return;
+    }
 
     //clear bursts
     for( i = 0; i < 3; i++ )
-      pm->pmext->burstRoundsToFired[ i ] = 0;
-
-    //Ball Lightning Destabilizers don't require ammo
-    if( pm->ps->weapon == WP_LIGHTNING &&
-       attack1 )
-       PM_AddEvent( EV_FIRE_WEAPON3 );
-
-    return;
+      pm->pmext->burstRoundsToFire[ i ] = 0;
   }
 
   //done reloading so give em some ammo
@@ -4455,24 +4469,28 @@ static void PM_Weapon( void )
   {
     int i;
 
-    pm->ps->pm_flags &= ~PMF_WEAPON_RELOAD;
-    pm->ps->weaponstate = WEAPON_RELOADING;
+    if( pm->ps->weapon != WP_LIGHTNING ||
+        !( pm->ps->stats[ STAT_STATE ] & SS_CHARGING ) )
+    {
+      pm->ps->pm_flags &= ~PMF_WEAPON_RELOAD;
+      pm->ps->weaponstate = WEAPON_RELOADING;
 
-    //drop the weapon
-    PM_StartTorsoAnim( TORSO_DROP );
-    PM_StartWeaponAnim( WANIM_RELOAD );
+      //drop the weapon
+      PM_StartTorsoAnim( TORSO_DROP );
+      PM_StartWeaponAnim( WANIM_RELOAD );
+
+      pm->ps->weaponTime += BG_Weapon( pm->ps->weapon )->reloadTime;
+      return;
+    }
 
     //clear bursts
     for( i = 0; i < 3; i++ )
-      pm->pmext->burstRoundsToFired[ i ] = 0;
-
-    pm->ps->weaponTime += BG_Weapon( pm->ps->weapon )->reloadTime;
-    return;
+      pm->pmext->burstRoundsToFire[ i ] = 0;
   }
 
-  if( !pm->pmext->burstRoundsToFired[ 2 ] &&
-      !pm->pmext->burstRoundsToFired[ 1 ] &&
-      !pm->pmext->burstRoundsToFired[ 0 ] )
+  if( !pm->pmext->burstRoundsToFire[ 2 ] &&
+      !pm->pmext->burstRoundsToFire[ 1 ] &&
+      !pm->pmext->burstRoundsToFire[ 0 ] )
   {
     //check if non-auto primary/secondary attacks are permited
     switch( pm->ps->weapon )
@@ -4598,8 +4616,6 @@ static void PM_Weapon( void )
         break;
 
       case WP_LIGHTNING:
-        attack3 = qfalse;
-
         // Can't fire secondary while primary is charging
         if( attack1 || pm->ps->stats[ STAT_MISC ] > 0 )
           attack2 = qfalse;
@@ -4612,10 +4628,9 @@ static void PM_Weapon( void )
                      pm->pmext->impactTriggerTrace.startsolid ) ) &&
                 pm->ps->stats[ STAT_MISC ] < LIGHTNING_BOLT_CHARGE_TIME_MAX &&
                 pm->ps->stats[ STAT_MISC ] < pm->ps->ammo * LIGHTNING_BOLT_CHARGE_TIME_MIN ) ) &&
-            !attack2 )
+            !attack2 &&
+            !(pm->ps->stats[ STAT_STATE ] & SS_CHARGING) )
         {
-          pm->ps->weaponTime = 0;
-
           // Charging
           if( pm->ps->stats[ STAT_MISC ] < LIGHTNING_BOLT_CHARGE_TIME_MAX )
           {
@@ -4624,16 +4639,30 @@ static void PM_Weapon( void )
           }
         }
 
-        //fire the lightning ball destabilizer
-        if( pm->ps->stats[ STAT_MISC ] > 0 &&
-           !attack1 )
-           PM_AddEvent( EV_FIRE_WEAPON3 );
+        if( pm->ps->stats[ STAT_STATE ] & SS_CHARGING )
+        {
+          if( attack2 )
+          {
+            // holding the emp charge
+            pm->ps->weaponstate = WEAPON_READY;
+            return;
+          }
 
-        if( pm->ps->stats[ STAT_MISC ] >= LIGHTNING_BOLT_CHARGE_TIME_MIN )
+          // Fire the EMP
+          attack3 = qtrue;
+          attack1 = attack2 = qfalse;
+          pm->ps->weaponTime += BG_Weapon( pm->ps->weapon )->burstDelay2;
+          pm->ps->stats[ STAT_STATE ] &= ~SS_CHARGING;
+        }
+        else if( pm->ps->stats[ STAT_MISC ] >= LIGHTNING_BOLT_CHARGE_TIME_MIN )
         {
           // Fire primary attack
           attack1 = qtrue;
           attack2 = qfalse;
+          pm->pmext->pulsatingBeamTime[ 0 ] = LIGHTNING_BOLT_BEAM_DURATION;
+          if( pm->ps->pm_flags & PMF_PAUSE_BEAM )
+            pm->ps->pm_flags &= ~PMF_PAUSE_BEAM;
+          pm->ps->misc[ MISC_STATMISC_AT_LAST_FIRE ] = pm->ps->stats[ STAT_MISC ];
         }
         else if( pm->ps->stats[ STAT_MISC ] > 0 )
         {
@@ -4649,6 +4678,12 @@ static void PM_Weapon( void )
           pm->ps->weaponTime = 0;
           pm->ps->weaponstate = WEAPON_READY;
           return;
+        } else if( !pm->pmext->burstRoundsToFire[ 1 ] )
+        {
+          pm->ps->pm_flags |= PMF_PAUSE_BEAM;
+
+          //charge the EMP to prepare to be fired upon release
+          pm->ps->stats[ STAT_STATE ] |= SS_CHARGING;
         }
         break;
 
@@ -4667,47 +4702,47 @@ static void PM_Weapon( void )
       BG_Weapon( pm->ps->weapon )->burstDelay3 > 0 &&
       BG_Weapon( pm->ps->weapon )->burstRounds3 > 0 &&
       attack3 &&
-      !pm->pmext->burstRoundsToFired[ 2 ] )
-    pm->pmext->burstRoundsToFired[ 2 ] = BG_Weapon( pm->ps->weapon )->burstRounds3;
+      !pm->pmext->burstRoundsToFire[ 2 ] )
+    pm->pmext->burstRoundsToFire[ 2 ] = BG_Weapon( pm->ps->weapon )->burstRounds3;
   else if( BG_Weapon( pm->ps->weapon )->hasAltMode &&
            BG_Weapon( pm->ps->weapon )->burstDelay2 > 0 &&
            BG_Weapon( pm->ps->weapon )->burstRounds2 > 0 &&
            attack2 &&
-           !pm->pmext->burstRoundsToFired[ 1 ] )
-    pm->pmext->burstRoundsToFired[ 1 ] = BG_Weapon( pm->ps->weapon )->burstRounds2;
+           !pm->pmext->burstRoundsToFire[ 1 ] )
+    pm->pmext->burstRoundsToFire[ 1 ] = BG_Weapon( pm->ps->weapon )->burstRounds2;
   else if( BG_Weapon( pm->ps->weapon )->burstDelay1 > 0 &&
            BG_Weapon( pm->ps->weapon )->burstRounds1 > 0 &&
            attack1 &&
-           !pm->pmext->burstRoundsToFired[ 0 ] )
-    pm->pmext->burstRoundsToFired[ 0 ] = BG_Weapon( pm->ps->weapon )->burstRounds1;
+           !pm->pmext->burstRoundsToFire[ 0 ] )
+    pm->pmext->burstRoundsToFire[ 0 ] = BG_Weapon( pm->ps->weapon )->burstRounds1;
 
   // fire events for burst weapons
-  if( pm->pmext->burstRoundsToFired[ 2 ] > 0 )
+  if( pm->pmext->burstRoundsToFire[ 2 ] > 0 )
   {
     pm->ps->generic1 = WPM_TERTIARY;
     PM_AddEvent( EV_FIRE_WEAPON3 );
-    pm->pmext->burstRoundsToFired[ 2 ]--;
-    if( pm->pmext->burstRoundsToFired[ 2 ] )
+    pm->pmext->burstRoundsToFire[ 2 ]--;
+    if( pm->pmext->burstRoundsToFire[ 2 ] )
       addTime = BG_Weapon( pm->ps->weapon )->repeatRate3;
     else
       addTime = BG_Weapon( pm->ps->weapon )->burstDelay3;
   }
-  else if( pm->pmext->burstRoundsToFired[ 1 ] > 0 )
+  else if( pm->pmext->burstRoundsToFire[ 1 ] > 0 )
   {
     pm->ps->generic1 = WPM_SECONDARY;
     PM_AddEvent( EV_FIRE_WEAPON2 );
-    pm->pmext->burstRoundsToFired[ 1 ]--;
-    if( pm->pmext->burstRoundsToFired[ 1 ] )
+    pm->pmext->burstRoundsToFire[ 1 ]--;
+    if( pm->pmext->burstRoundsToFire[ 1 ] )
       addTime = BG_Weapon( pm->ps->weapon )->repeatRate2;
     else
       addTime = BG_Weapon( pm->ps->weapon )->burstDelay2;
   }
-  else if( pm->pmext->burstRoundsToFired[ 0 ] > 0 )
+  else if( pm->pmext->burstRoundsToFire[ 0 ] > 0 )
   {
     pm->ps->generic1 = WPM_PRIMARY;
     PM_AddEvent( EV_FIRE_WEAPON );
-    pm->pmext->burstRoundsToFired[ 0 ]--;
-    if( pm->pmext->burstRoundsToFired[ 0 ] )
+    pm->pmext->burstRoundsToFire[ 0 ]--;
+    if( pm->pmext->burstRoundsToFire[ 0 ] )
       addTime = BG_Weapon( pm->ps->weapon )->repeatRate1;
     else
       addTime = BG_Weapon( pm->ps->weapon )->burstDelay1;
@@ -4745,8 +4780,6 @@ static void PM_Weapon( void )
         pm->ps->generic1 = WPM_SECONDARY;
         PM_AddEvent( EV_FIRE_WEAPON2 );
         addTime = BG_Weapon( pm->ps->weapon )->repeatRate2;
-        if( pm->ps->weapon == WP_LIGHTNING )
-          pm->ps->pm_flags |= PMF_PAUSE_BEAM;
       }
       else
       {
@@ -4761,11 +4794,6 @@ static void PM_Weapon( void )
       pm->ps->generic1 = WPM_PRIMARY;
       PM_AddEvent( EV_FIRE_WEAPON );
       addTime = BG_Weapon( pm->ps->weapon )->repeatRate1;
-      if( pm->ps->weapon == WP_LIGHTNING )
-        pm->pmext->pulsatingBeamTime[ 0 ] = LIGHTNING_BOLT_BEAM_DURATION;
-      if( pm->ps->pm_flags & PMF_PAUSE_BEAM )
-        pm->ps->pm_flags &= ~PMF_PAUSE_BEAM;
-      pm->pmext->miscAtLastFire = pm->ps->stats[ STAT_MISC ];
     }
 
     // fire events for autohit weapons

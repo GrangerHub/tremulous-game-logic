@@ -1066,7 +1066,14 @@ static void CG_LightningBolt( centity_t *cent, vec3_t origin )
 	VectorMA( muzzlePoint, 14, forward, muzzlePoint );
 
 	// project forward by the lightning range
-	VectorMA( muzzlePoint, BG_LightningBoltRange( &cent->currentState, NULL ), forward, endPoint );
+  if( cent->currentState.number == cg.predictedPlayerState.clientNum )
+	  VectorMA( muzzlePoint,
+              BG_LightningBoltRange( NULL, &cg.predictedPlayerState, qfalse ),
+              forward, endPoint );
+  else
+	  VectorMA( muzzlePoint,
+              BG_LightningBoltRange( &cent->currentState, NULL, qfalse ),
+              forward, endPoint );
 
 	// see if it hit a wall
 	CG_Trace( &trace, muzzlePoint, NULL, NULL, endPoint,

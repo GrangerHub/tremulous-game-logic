@@ -222,8 +222,7 @@ typedef struct
   trace_t  impactTriggerTrace; // Used for the lightning gun
   int      pulsatingBeamTime[ 3 ];
   qboolean impactTriggerTraceChecked;
-  int      miscAtLastFire;
-  int      burstRoundsToFired[ 3 ];
+  int      burstRoundsToFire[ 3 ];
   int      pouncePayload;
   int      pouncePayloadTime;
   float    spitfireGlideSpeedMod;
@@ -373,10 +372,12 @@ typedef enum
 } persEnum_t;
 
 // hack to fit extra data in the misc[] array
-#define MISC_HEALTH_RESERVE    ( MAX_MISC - 1 )
+#define MISC_STATMISC_AT_LAST_FIRE     ( MAX_MISC - 1 )
+#define MISC_BOLT_CHARGE_AT_LAST_CHECK ( MAX_MISC - 2 )
+#define MISC_HEALTH_RESERVE            ( MAX_MISC - 3 )
 //Do not use MISC_SEED outside of PM_PSRandom(),
 //and don't use PM_PSRandom() outside of bg_pmove.c.
-#define MISC_SEED              ( MAX_MISC - 2 ) // for predicted psudorandom things
+#define MISC_SEED                      ( MAX_MISC - 4 ) // for predicted psudorandom things
 
 #define PS_WALLCLIMBINGFOLLOW   0x00000001
 #define PS_WALLCLIMBINGTOGGLE   0x00000002
@@ -1113,7 +1114,7 @@ typedef enum
   MOD_GRENADE,
   MOD_GRENADE_LAUNCHER,
   MOD_LIGHTNING,
-  MOD_LIGHTNING_PRIMER,
+  MOD_LIGHTNING_EMP,
   MOD_WATER,
   MOD_SLIME,
   MOD_LAVA,
@@ -1429,7 +1430,9 @@ void      BG_GetClientNormal( const playerState_t *ps, vec3_t normal );
 void      BG_GetClientViewOrigin( const playerState_t *ps, vec3_t viewOrigin );
 void      BG_CalcMuzzlePointFromPS( const playerState_t *ps, vec3_t forward,
                                     vec3_t right, vec3_t up, vec3_t muzzlePoint );
-int       BG_LightningBoltRange( const entityState_t *es, const playerState_t *ps );
+int       BG_LightningBoltRange( const entityState_t *es,
+                                 const playerState_t *ps,
+                                 qboolean currentRange );
 void      BG_CheckBoltImpactTrigger( pmove_t *pmove,
                                      void (*trace)( trace_t *, const vec3_t,
                                                     const vec3_t, const vec3_t,

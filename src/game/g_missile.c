@@ -90,7 +90,7 @@ void G_ExplodeMissile( gentity_t *ent )
 
   // splash damage
   if( ent->splashDamage ||
-      !strcmp( ent->classname, "lightningBall1" ) )
+      !strcmp( ent->classname, "lightningEMP" ) )
     G_RadiusDamage( ent->r.currentOrigin, ent->parent, ent->splashDamage,
                     ent->splashRadius, ent, ent->splashMethodOfDeath );
 
@@ -197,7 +197,7 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace )
   {
     // FIXME: wrong damage direction?
     if( ent->damage ||
-        !strcmp( ent->classname, "lightningBall1" ) )
+        !strcmp( ent->classname, "lightningEMP" ) )
     {
       vec3_t  velocity;
 
@@ -240,7 +240,7 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace )
 
   // splash damage (doesn't apply to person directly hit)
   if( ent->splashDamage ||
-      !strcmp( ent->classname, "lightningBall1" ) )
+      !strcmp( ent->classname, "lightningEMP" ) )
     G_RadiusDamage( trace->endpos, ent->parent, ent->splashDamage, ent->splashRadius,
                     other, ent->splashMethodOfDeath );
 
@@ -728,12 +728,10 @@ static void lightningBall_die( gentity_t *self, gentity_t *inflictor,
                                gentity_t *attacker, int damage, int mod )
 {
   self->nextthink = level.time;
-  self->think = G_ExplodeMissile;
   //trigger the detonation of any other secondary lightning balls
-  self->classname = "lightningBall1";
-  self->methodOfDeath = MOD_LIGHTNING_PRIMER;
-  self->splashMethodOfDeath = MOD_LIGHTNING_PRIMER;
-  self->splashRadius = LIGHTNING_BALL1_RADIUS;
+  self->methodOfDeath = MOD_LIGHTNING_EMP;
+  self->splashMethodOfDeath = MOD_LIGHTNING_EMP;
+  self->splashRadius = LIGHTNING_BALL_RADIUS2;
 }
 
 /*
@@ -743,7 +741,7 @@ fire_lightningBall
 Used by the lightning gun's secondary fire
 =================
 */
-gentity_t *fire_lightningBall( gentity_t *self, qboolean primary,
+gentity_t *fire_lightningBall( gentity_t *self, qboolean EMP,
                                vec3_t start, vec3_t dir )
 {
   gentity_t *bolt;
@@ -753,35 +751,36 @@ gentity_t *fire_lightningBall( gentity_t *self, qboolean primary,
 
   bolt = G_Spawn();
 
-  if( primary )
+  if( EMP )
   {
-    bolt->classname = "lightningBall1";
+    bolt->classname = "lightningEMP";
     bolt->s.generic1 = WPM_TERTIARY; //weaponMode
-    bolt->damage = LIGHTNING_BALL1_DAMAGE;
-    bolt->splashDamage = LIGHTNING_BALL1_SPLASH_DMG;
+    bolt->nextthink = level.time;
+    bolt->damage = LIGHTNING_EMP_DAMAGE;
+    bolt->splashDamage = LIGHTNING_EMP_SPLASH_DMG;
     bolt->s.pos.trType = TR_LINEAR;
-    bolt->methodOfDeath = MOD_LIGHTNING_PRIMER;
-    bolt->splashMethodOfDeath = MOD_LIGHTNING_PRIMER;
-    bolt->splashRadius = LIGHTNING_BALL1_RADIUS;
-    speed = LIGHTNING_BALL1_SPEED;
+    bolt->methodOfDeath = MOD_LIGHTNING_EMP;
+    bolt->splashMethodOfDeath = MOD_LIGHTNING_EMP;
+    bolt->splashRadius = LIGHTNING_EMP_RADIUS;
+    speed = LIGHTNING_EMP_SPEED;
   } else
   {
-    bolt->classname = "lightningBall2";
+    bolt->classname = "lightningBall";
     bolt->s.generic1 = self->s.generic1; //weaponMode
-    bolt->damage = LIGHTNING_BALL2_DAMAGE;
+    bolt->nextthink = level.time + LIGHTNING_BALL_LIFETIME;
+    bolt->damage = LIGHTNING_BALL_DAMAGE;
     bolt->flags |= ( FL_BOUNCE_HALF | FL_NO_BOUNCE_SOUND );
-    bolt->splashDamage = LIGHTNING_BALL2_SPLASH_DMG;
+    bolt->splashDamage = LIGHTNING_BALL_SPLASH_DMG;
     bolt->s.pos.trType = TR_GRAVITY;
     bolt->takedamage = qtrue;
     bolt->health = 1;
     bolt->die = lightningBall_die;
     bolt->methodOfDeath = MOD_LIGHTNING;
     bolt->splashMethodOfDeath = MOD_LIGHTNING;
-    bolt->splashRadius = LIGHTNING_BALL2_RADIUS;
-    speed = LIGHTNING_BALL2_SPEED;
+    bolt->splashRadius = LIGHTNING_BALL_RADIUS1;
+    speed = LIGHTNING_BALL_SPEED;
   }
   bolt->pointAgainstWorld = qtrue;
-  bolt->nextthink = level.time + LIGHTNING_BALL_LIFETIME;
   bolt->think = G_ExplodeMissile;
   bolt->s.eType = ET_MISSILE;
   bolt->s.weapon = WP_LIGHTNING;
