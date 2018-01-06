@@ -108,7 +108,7 @@ char *modNames[ ] =
   "MOD_GRENADE",
   "MOD_GRENADE_LAUNCHER",
   "MOD_LIGHTNING",
-  "MOD_LIGHTNING_PRIMER",
+  "MOD_LIGHTNING_EMP",
   "MOD_WATER",
   "MOD_SLIME",
   "MOD_LAVA",
@@ -1065,14 +1065,14 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
     return;
   } else if ( targ->s.eType == ET_MISSILE &&
-              !strcmp( targ->classname, "lightningBall2" ) )
+              !strcmp( targ->classname, "lightningBall" ) )
   {
     //special case for detonating lightning balls
-    if( mod == MOD_LIGHTNING_PRIMER )
+    if( mod == MOD_LIGHTNING_EMP )
       targ->die( targ, inflictor, attacker, targ->health, mod );
 
     return;
-  } else if( mod == MOD_LIGHTNING_PRIMER && !damage )
+  } else if( mod == MOD_LIGHTNING_EMP && !damage )
     return;
 
   client = targ->client;

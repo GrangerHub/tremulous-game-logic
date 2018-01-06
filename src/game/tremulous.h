@@ -510,7 +510,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LIGHTNING_AMMO                 660
 #define LIGHTNING_MAXCLIPS             1
 #define LIGHTNING_RELOAD               750
-#define LIGHTNING_BALL2_AMMO_USAGE     6
 #define LIGHTNING_K_SCALE              0.0f
 #define LIGHTNING_BOLT_DPS             40
 #define LIGHTNING_BOLT_CHARGE_TIME_MIN 150
@@ -518,19 +517,21 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LIGHTNING_BOLT_BEAM_DURATION   350
 #define LIGHTNING_BOLT_RANGE_MAX       768
 #define LIGHTNING_BOLT_NOGRND_DMG_MOD  0.50f
-#define LIGHTNING_BALL2_REPEAT         200
-#define LIGHTNING_BALL2_BURST_ROUNDS   6
-#define LIGHTNING_BALL2_BURST_DELAY    1800
+#define LIGHTNING_BALL_AMMO_USAGE      6
+#define LIGHTNING_BALL_REPEAT          200
+#define LIGHTNING_BALL_BURST_ROUNDS    6
+#define LIGHTNING_BALL_BURST_DELAY     1800
 #define LIGHTNING_BALL_LIFETIME        5000
-#define LIGHTNING_BALL1_DAMAGE         HDM( 1 )
-#define LIGHTNING_BALL2_DAMAGE         HDM( 40 )
-#define LIGHTNING_BALL1_SPLASH_DMG     HDM( 0 )
-#define LIGHTNING_BALL2_SPLASH_DMG     HDM( 40 )
-#define LIGHTNING_BALL1_RADIUS         200
-#define LIGHTNING_BALL2_RADIUS         150
+#define LIGHTNING_BALL_DAMAGE          HDM( 40 )
+#define LIGHTNING_BALL_SPLASH_DMG      HDM( 40 )
+#define LIGHTNING_BALL_RADIUS1         150
+#define LIGHTNING_BALL_RADIUS2         200
 #define LIGHTNING_BALL_SIZE            5
-#define LIGHTNING_BALL1_SPEED          1500
-#define LIGHTNING_BALL2_SPEED          750
+#define LIGHTNING_BALL_SPEED           750
+#define LIGHTNING_EMP_DAMAGE           HDM( 0 )
+#define LIGHTNING_EMP_SPLASH_DMG       HDM( 0 )
+#define LIGHTNING_EMP_RADIUS           0
+#define LIGHTNING_EMP_SPEED            1500
 
 #define HBUILD_PRICE                0
 #define HBUILD_REPEAT               1000

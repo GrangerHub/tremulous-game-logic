@@ -2746,30 +2746,30 @@ static const weaponAttributes_t bg_weapons[ ] =
     "Lightning Gun",      //char      *humanName;
     "Generates charged pulsating bolts of lightning as its "
     "primary attack. The secondary attack emmits a burst of ball "
-    "lightning, that can be set off into a simultanous chained "
-    "detonation by the destabilizer shot.",
+    "lightning, that can destabilized into a high energy electrical "
+    "explosion triggered by an EMP emitted from the lightning gun.",
     LIGHTNING_AMMO,       //int       maxAmmo;
     LIGHTNING_MAXCLIPS,   //int       maxClips;
     1,                    //int       ammoUsage1;
-    LIGHTNING_BALL2_AMMO_USAGE,//int       ammoUsage2;
+    LIGHTNING_BALL_AMMO_USAGE,//int       ammoUsage2;
     0,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
     qtrue,                //int       usesEnergy;
     LIGHTNING_BOLT_CHARGE_TIME_MIN,//int       repeatRate1;
-    LIGHTNING_BALL2_REPEAT,//int       repeatRate2;
+    LIGHTNING_BALL_REPEAT,//int       repeatRate2;
     0,                    //int       repeatRate3;
     0,                    //int       burstRounds1;
-    LIGHTNING_BALL2_BURST_ROUNDS,//int       burstRounds2;
+    LIGHTNING_BALL_BURST_ROUNDS,//int       burstRounds2;
     0,                    //int       burstRounds3;
     0,                    //int       burstDelay1;
-    LIGHTNING_BALL2_BURST_DELAY,//int       burstDelay2;
+    LIGHTNING_BALL_BURST_DELAY,//int       burstDelay2;
     0,                    //int       burstDelay3;
     LIGHTNING_RELOAD,     //int       reloadTime;
     LIGHTNING_K_SCALE,    //float     knockbackScale;
     qtrue,                //qboolean  hasAltMode;
-    qfalse,               //qboolean  hasThirdMode;
+    qtrue,                //qboolean  hasThirdMode;
     qfalse,               //qboolean  canZoom;
     90.0f,                //float     zoomFov;
     qtrue,                //qboolean  purchasable;
@@ -3780,7 +3780,7 @@ void BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s,
 
   s->otherEntityNum = ps->otherEntityNum;
 
-  s->constantLight = pmext->miscAtLastFire;
+  s->constantLight = ps->misc[ MISC_STATMISC_AT_LAST_FIRE ];
 }
 
 
@@ -3894,7 +3894,7 @@ void BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s
 
   s->otherEntityNum = ps->otherEntityNum;
 
-  s->constantLight = pmext->miscAtLastFire;
+  s->constantLight = ps->misc[ MISC_STATMISC_AT_LAST_FIRE ];
 }
 
 /*
@@ -4152,12 +4152,22 @@ BG_LightningBoltRange
 Finds the current lightning bolt range of a charged lightning gun
 ===============
 */
-int BG_LightningBoltRange( const entityState_t *es, const playerState_t *ps )
+int BG_LightningBoltRange( const entityState_t *es,
+                           const playerState_t *ps,
+                           qboolean currentRange )
 {
   if( ps )
   {
+    int charge;
+
     Com_Assert( ps->weapon == WP_LIGHTNING && "BG_LightningBoltRange: Attempt to find the range for the wrong weapon" );
-    return ( ps->stats[ STAT_MISC ] * LIGHTNING_BOLT_RANGE_MAX ) / LIGHTNING_BOLT_CHARGE_TIME_MAX;
+
+    if( currentRange )
+      charge = ps->stats[ STAT_MISC ];
+    else
+      charge = ps->misc[ MISC_STATMISC_AT_LAST_FIRE ];
+
+    return ( charge * LIGHTNING_BOLT_RANGE_MAX ) / LIGHTNING_BOLT_CHARGE_TIME_MAX;
   }
   
   Com_Assert( es && "BG_LightningBoltRange: Failed to pass playerState_t and entityState_t to " )
@@ -4181,7 +4191,7 @@ void BG_CheckBoltImpactTrigger( pmove_t *pm,
 {
   if( pm->ps->weapon == WP_LIGHTNING &&
       pm->ps->stats[ STAT_MISC ] > LIGHTNING_BOLT_CHARGE_TIME_MIN &&
-      pm->ps->stats[ STAT_MISC ] - pm->pmext->pouncePayload > 50 )
+      pm->ps->stats[ STAT_MISC ] - pm->ps->misc[ MISC_BOLT_CHARGE_AT_LAST_CHECK ] > 50 )
   {
     vec3_t forward, right, up;
     vec3_t muzzle, end;
@@ -4189,16 +4199,18 @@ void BG_CheckBoltImpactTrigger( pmove_t *pm,
     AngleVectors( pm->ps->viewangles, forward, right, up );
     BG_CalcMuzzlePointFromPS( pm->ps, forward, right, up, muzzle );
 
-    VectorMA( muzzle, BG_LightningBoltRange( NULL, pm->ps ), forward, end );
+    VectorMA( muzzle, BG_LightningBoltRange( NULL, pm->ps, qtrue ),
+              forward, end );
 
     if( UnlaggedOn )
-      UnlaggedOn( pm->ps->clientNum, muzzle, BG_LightningBoltRange( NULL, pm->ps ) );
+      UnlaggedOn( pm->ps->clientNum, muzzle,
+                  BG_LightningBoltRange( NULL, pm->ps, qtrue ) );
   	trace( &pm->pmext->impactTriggerTrace, muzzle, NULL, NULL, end,
               pm->ps->clientNum, MASK_SHOT );
     if( UnlaggedOff )
       UnlaggedOff( );
 
-    pm->pmext->pouncePayload = pm->ps->stats[ STAT_MISC ];
+    pm->ps->misc[ MISC_BOLT_CHARGE_AT_LAST_CHECK ] = pm->ps->stats[ STAT_MISC ];
     pm->pmext->impactTriggerTraceChecked = qtrue;
   } else
     pm->pmext->impactTriggerTraceChecked = qfalse;
@@ -4216,7 +4228,8 @@ void BG_ResetLightningBoltCharge( playerState_t *ps, pmoveExt_t *pmext )
   if( ps->weapon != WP_LIGHTNING )
     return;
 
-  pmext->pouncePayload = ps->stats[ STAT_MISC ] = 0;
+  ps->misc[ MISC_BOLT_CHARGE_AT_LAST_CHECK ] = 0;
+  ps->stats[ STAT_MISC ] = 0;
   pmext->impactTriggerTraceChecked = qfalse;
 }
 
@@ -4312,13 +4325,14 @@ qboolean BG_PlayerCanChangeWeapon( playerState_t *ps, pmoveExt_t *pmext )
     return qfalse;
 
   if( ps->weapon == WP_LIGHTNING &&
-      ps->stats[ STAT_MISC ] > LIGHTNING_BOLT_CHARGE_TIME_MIN )
+      ( ps->stats[ STAT_MISC ] > LIGHTNING_BOLT_CHARGE_TIME_MIN ||
+        ( ps->stats[ STAT_STATE ] & SS_CHARGING ) ) )
     return qfalse;
 
   //bursts must complete
-  if( pmext->burstRoundsToFired[ 2 ] ||
-      pmext->burstRoundsToFired[ 1 ] ||
-      pmext->burstRoundsToFired[ 0 ] )
+  if( pmext->burstRoundsToFire[ 2 ] ||
+      pmext->burstRoundsToFire[ 1 ] ||
+      pmext->burstRoundsToFire[ 0 ] )
     return qfalse;
 
   return ps->weaponTime <= 0 || ps->weaponstate != WEAPON_FIRING;

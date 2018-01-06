@@ -170,7 +170,7 @@ static void CG_Obituary( entityState_t *ent )
         break;
 
       case MOD_LIGHTNING:
-      case MOD_LIGHTNING_PRIMER:
+      case MOD_LIGHTNING_EMP:
         if( gender == GENDER_FEMALE )
           message = "electrocuted herself";
         else if( gender == GENDER_NEUTER )
@@ -291,7 +291,7 @@ static void CG_Obituary( entityState_t *ent )
         break;
 
       case MOD_LIGHTNING:
-      case MOD_LIGHTNING_PRIMER:
+      case MOD_LIGHTNING_EMP:
         message = "electrocuted by";
         message2 = "'s lightning gun";
         break;
