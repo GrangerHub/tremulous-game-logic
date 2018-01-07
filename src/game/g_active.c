@@ -45,7 +45,7 @@ void P_DamageFeedback( gentity_t *player )
   if( client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
   {
     if( BG_InventoryContainsUpgrade( UP_BATTLESUIT, client->ps.stats ) &&
-        client->ps.stats[ STAT_MAX_HEALTH ] <= BSUIT_ARMOR_LOW )
+        client->ps.stats[ STAT_ARMOR ] <= BSUIT_ARMOR_LOW )
     client->ps.eFlags |= EF_WEAK_ARMOR;
     else
       client->ps.eFlags &= ~EF_WEAK_ARMOR;

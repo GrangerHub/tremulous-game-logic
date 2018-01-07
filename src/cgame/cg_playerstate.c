@@ -251,7 +251,7 @@ void CG_CheckLocalSounds( playerState_t *ps, playerState_t *ops )
 
   // health changes of more than -1 should make pain sounds
   if( ps->stats[ STAT_HEALTH ] < ops->stats[ STAT_HEALTH ] - 1 ||
-      ( ps->stats[ STAT_MAX_HEALTH ] < ops->stats[ STAT_MAX_HEALTH ] - 1 &&
+      ( ps->stats[ STAT_ARMOR ] < ops->stats[ STAT_ARMOR ] - 1 &&
         BG_InventoryContainsUpgrade( UP_BATTLESUIT, ps->stats ) ) )
   {
     if( ps->stats[ STAT_HEALTH ] > 0 )

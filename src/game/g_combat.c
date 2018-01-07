@@ -1551,16 +1551,16 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
           targ->creditsUpgradeDeffenses[ UP_BATTLESUIT ][ attacker->buildableTeam ] += take;
       }
 
-      targ->client->ps.stats[ STAT_MAX_HEALTH ] -= take;
+      targ->client->ps.stats[ STAT_ARMOR ] -= take;
       take = 0;
-      if( targ->client->ps.stats[ STAT_MAX_HEALTH ] <= 0 )
+      if( targ->client->ps.stats[ STAT_ARMOR ] <= 0 )
       {
         gentity_t *tent;
         vec3_t newOrigin;
         const weapon_t weapon = targ->client->ps.stats[ STAT_WEAPON ];
 
         // have damage that is greater than the remaining armor transfer to the main helth
-        take -= targ->client->ps.stats[ STAT_MAX_HEALTH ];
+        take -= targ->client->ps.stats[ STAT_ARMOR ];
 
         // Break the BSuit off into pieces
         G_RoomForClassChange( targ, PCL_HUMAN, newOrigin );
@@ -1572,7 +1572,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
                                        targ->client->ps.stats );
         tent = G_TempEntity( targ->client->ps.origin, EV_GIB_BSUIT );
         BG_GetClientNormal( &targ->client->ps, tent->s.origin2 );
-        targ->client->ps.stats[ STAT_MAX_HEALTH ] = 0;
+        targ->client->ps.stats[ STAT_ARMOR ] = 0;
 
         // Give income for destroying the battlesuit
         G_RewardAttackers( targ, UP_BATTLESUIT );

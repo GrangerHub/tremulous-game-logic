@@ -1169,7 +1169,7 @@ static void CG_DrawArmorShield( rectDef_t *rect, vec4_t color,
 
   if( cg.predictedPlayerState.eFlags & EF_WEAK_ARMOR )
   {
-    if( cg.predictedPlayerState.stats[ STAT_MAX_HEALTH ] > 0 )
+    if( cg.predictedPlayerState.stats[ STAT_ARMOR ] > 0 )
     {
       cg.lowArmorAlert += cg.frametime / 500.0f;
       if( color[0] + cg.lowArmorAlert > 1.0f )
@@ -1214,7 +1214,7 @@ static void CG_DrawArmorValue( rectDef_t *rect, vec4_t color )
 
   if( cg.predictedPlayerState.eFlags & EF_WEAK_ARMOR )
   {
-    if( cg.predictedPlayerState.stats[ STAT_MAX_HEALTH ] > 0 )
+    if( cg.predictedPlayerState.stats[ STAT_ARMOR ] > 0 )
     {
       color[0] += cg.lowArmorAlert;
       if( color[0] > 1.0f )
@@ -1236,7 +1236,7 @@ static void CG_DrawArmorValue( rectDef_t *rect, vec4_t color )
 
   trap_R_SetColor( color );
   CG_DrawField( rect->x, rect->y, 4, rect->w / 4,rect->h,
-                cg.predictedPlayerState.stats[ STAT_MAX_HEALTH ] );
+                cg.predictedPlayerState.stats[ STAT_ARMOR ] );
   trap_R_SetColor( NULL );
 }
 

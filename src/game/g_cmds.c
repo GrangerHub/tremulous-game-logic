@@ -482,7 +482,7 @@ static void Give_Upgrade( gentity_t *ent, char *s )
   BG_AddUpgradeToInventory( u, ent->client->ps.stats );
 
   if( u == UP_BATTLESUIT )
-    ent->client->ps.stats[ STAT_MAX_HEALTH ] = BSUIT_MAX_ARMOR;
+    ent->client->ps.stats[ STAT_ARMOR ] = BSUIT_MAX_ARMOR;
 
   for( i = 0; i < MAX_CLIENTS; i++ )
     ent->creditsUpgrade[ u ][ i ] = 0;
@@ -623,7 +623,7 @@ void Cmd_Give_f( gentity_t *ent )
     {
       int i;
 
-      ent->client->ps.stats[ STAT_MAX_HEALTH ] = BSUIT_MAX_ARMOR;
+      ent->client->ps.stats[ STAT_ARMOR ] = BSUIT_MAX_ARMOR;
       for( i = 0; i < MAX_CLIENTS; i++ )
         ent->creditsUpgrade[ UP_BATTLESUIT ][ i ] = 0;
 
@@ -2916,7 +2916,7 @@ void Cmd_Buy_f( gentity_t *ent )
           ent->client->ps.stats[ STAT_CLASS ] = PCL_HUMAN_BSUIT;
           ent->client->pers.classSelection = PCL_HUMAN_BSUIT;
           ent->client->ps.eFlags ^= EF_TELEPORT_BIT;
-          ent->client->ps.stats[ STAT_MAX_HEALTH ] = BSUIT_MAX_ARMOR;
+          ent->client->ps.stats[ STAT_ARMOR ] = BSUIT_MAX_ARMOR;
         }
         else if( upgrade == UP_JETPACK )
          ent->client->ps.stats[ STAT_FUEL ] = JETPACK_FUEL_FULL;
@@ -3105,7 +3105,7 @@ void Cmd_Sell_f( gentity_t *ent )
       } else if( upgrade == UP_BATTLESUIT )
       {
         if( !IS_WARMUP &&
-            ent->client->ps.stats[ STAT_MAX_HEALTH ] < BSUIT_MAX_ARMOR )
+            ent->client->ps.stats[ STAT_ARMOR ] < BSUIT_MAX_ARMOR )
         {
           G_AddCreditToClient( ent->client, (short)( BSUIT_PRICE_USED ),
                                qfalse );
@@ -3115,7 +3115,7 @@ void Cmd_Sell_f( gentity_t *ent )
           G_AddCreditToClient( ent->client, (short)BG_Upgrade( UP_BATTLESUIT )->price,
                                qfalse );
 
-        ent->client->ps.stats[ STAT_MAX_HEALTH ] = 0;
+        ent->client->ps.stats[ STAT_ARMOR ] = 0;
       } else
         G_AddCreditToClient( ent->client, (short)BG_Upgrade( upgrade )->price,
                              qfalse );
@@ -3123,7 +3123,7 @@ void Cmd_Sell_f( gentity_t *ent )
   }
   else if( !Q_stricmp( s, "upgrades" ) )
   {
-    const int statMaxHealth = ent->client->ps.stats[ STAT_MAX_HEALTH ];
+    const int statMaxHealth = ent->client->ps.stats[ STAT_ARMOR ];
 
     for( i = UP_NONE + 1; i < UP_NUM_UPGRADES; i++ )
     {
@@ -3144,7 +3144,7 @@ void Cmd_Sell_f( gentity_t *ent )
           ent->client->ps.stats[ STAT_CLASS ] = PCL_HUMAN;
           ent->client->pers.classSelection = PCL_HUMAN;
           ent->client->ps.eFlags ^= EF_TELEPORT_BIT;
-          ent->client->ps.stats[ STAT_MAX_HEALTH ] = 0;
+          ent->client->ps.stats[ STAT_ARMOR ] = 0;
         }
 
         BG_RemoveUpgradeFromInventory( i, ent->client->ps.stats );

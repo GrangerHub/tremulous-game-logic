@@ -5658,7 +5658,7 @@ pain_t BG_GetPainState( playerState_t *ps )
   if( BG_InventoryContainsUpgrade( UP_BATTLESUIT, ps->stats ) )
   {
     maxHealth = BSUIT_MAX_ARMOR;
-    health = ps->stats[ STAT_MAX_HEALTH ];
+    health = ps->stats[ STAT_ARMOR ];
   }
 
   if( health < ( maxHealth * 3 ) / 32 )

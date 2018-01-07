@@ -298,7 +298,7 @@ typedef enum
   STAT_ITEMS,
   STAT_ACTIVEITEMS,
   STAT_WEAPON,    // current primary weapon
-  STAT_MAX_HEALTH,// health / armor limit, changable by handicap
+  STAT_ARMOR,     // armor points
   STAT_CLASS,     // player class (for aliens AND humans)
   STAT_TEAM,      // player team
   STAT_READY,     // player ready state
