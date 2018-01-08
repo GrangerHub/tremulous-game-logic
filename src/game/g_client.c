@@ -1492,7 +1492,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
     client->ps.stats[ STAT_MAX_HEALTH ] =
       BG_Class( ent->client->pers.classSelection )->health;
   else
-    client->ps.stats[ STAT_MAX_HEALTH ] = 100;
+    client->ps.stats[ STAT_MAX_HEALTH ] = HP2SU( 100 );
 
   // clear entity values
   if( ent->client->pers.classSelection == PCL_HUMAN )

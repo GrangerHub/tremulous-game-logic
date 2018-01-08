@@ -1087,7 +1087,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   else
     VectorNormalize( dir );
 
-  knockback = damage;
+  knockback = SU2HP( damage );
 
   if( inflictor->s.weapon != WP_NONE )
   {
@@ -1467,7 +1467,8 @@ qboolean G_SelectiveRadiusDamage( vec3_t origin, gentity_t *attacker, float dama
       dir[ 2 ] += 24;
       hitClient = qtrue;
       G_Damage( ent, NULL, attacker, dir, origin,
-          (int)points, DAMAGE_RADIUS|DAMAGE_NO_LOCDAMAGE, mod );
+                (int)points ? (int)points : 1,
+                DAMAGE_RADIUS|DAMAGE_NO_LOCDAMAGE, mod );
     }
   }
 
@@ -1585,7 +1586,8 @@ qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage,
       dir[ 2 ] += 24;
       hitClient = qtrue;
       G_Damage( ent, NULL, attacker, dir, origin,
-          (int)points, DAMAGE_RADIUS|DAMAGE_NO_LOCDAMAGE, mod );
+                (int)points ? (int)points : 1,
+                DAMAGE_RADIUS|DAMAGE_NO_LOCDAMAGE, mod );
     }
   }
 
@@ -1611,7 +1613,7 @@ qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage,
       continue;
 
     shake = damage * 10 / Distance( origin, ent->r.currentOrigin );
-    ent->client->ps.stats[ STAT_SHAKE ] += (int) shake;
+    ent->client->ps.stats[ STAT_SHAKE ] += SU2HP( (int) shake );
   }
 
   return hitClient;
