@@ -204,7 +204,7 @@ static void G_PuntBlocker( gentity_t *self, gentity_t *blocker )
     else if( level.time - self->spawnBlockTime > 10000 )
     {
       // still blocked, get rid of them
-      G_Damage( blocker, NULL, NULL, NULL, NULL, 10000, 0, MOD_TRIGGER_HURT );
+      G_Damage( blocker, NULL, NULL, NULL, NULL, blocker->health, 0, MOD_TRIGGER_HURT );
       self->spawnBlockTime = 0;
       return;
     }
@@ -806,7 +806,7 @@ void AGeneric_CreepRespawn( gentity_t *self )
     else if( hit != self )
     {
       // buildables taking the same space kill themselves
-      G_Damage( hit, NULL, NULL, NULL, NULL, 10000, 0, MOD_SUICIDE );
+      G_Damage( hit, NULL, NULL, NULL, NULL, hit->health, 0, MOD_SUICIDE );
     }
   }
 
@@ -1063,15 +1063,15 @@ void ASpawn_Think( gentity_t *self )
         {
           // don't queue the bp from this
           if( ent->builtBy && ent->builtBy->slot >= 0 )
-            G_Damage( ent, NULL, g_entities + ent->builtBy->slot, NULL, NULL, 10000, 0, MOD_SUICIDE );
+            G_Damage( ent, NULL, g_entities + ent->builtBy->slot, NULL, NULL, ent->health, 0, MOD_SUICIDE );
           else
-            G_Damage( ent, NULL, NULL, NULL, NULL, 10000, 0, MOD_SUICIDE );
+            G_Damage( ent, NULL, NULL, NULL, NULL, ent->health, 0, MOD_SUICIDE );
 
           G_SetBuildableAnim( self, BANIM_SPAWN1, qtrue );
         }
         else if( ent->s.number == ENTITYNUM_WORLD || ent->s.eType == ET_MOVER )
         {
-          G_Damage( self, NULL, NULL, NULL, NULL, 10000, 0, MOD_SUICIDE );
+          G_Damage( self, NULL, NULL, NULL, NULL, self->health, 0, MOD_SUICIDE );
           return;
         }
         else if( g_antiSpawnBlock.integer &&
@@ -1405,6 +1405,10 @@ void AAcidTube_Think( gentity_t *self )
 
       if( enemy->client && enemy->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
       {
+        if( !G_SelectiveRadiusDamage( self->s.pos.trBase, self, ACIDTUBE_DAMAGE,
+                                 ACIDTUBE_RANGE, self, MOD_ATUBE, TEAM_ALIENS ) )
+          return;
+
         // start the attack animation
         if( level.time >= self->timestamp + ACIDTUBE_REPEAT_ANIM )
         {
@@ -1413,8 +1417,6 @@ void AAcidTube_Think( gentity_t *self )
           G_AddEvent( self, EV_ALIEN_ACIDTUBE, DirToByte( self->s.origin2 ) );
         }
 
-        G_SelectiveRadiusDamage( self->s.pos.trBase, self, ACIDTUBE_DAMAGE,
-                                 ACIDTUBE_RANGE, self, MOD_ATUBE, TEAM_ALIENS );
         self->nextthink = level.time + ACIDTUBE_REPEAT;
         return;
       }
@@ -2138,7 +2140,7 @@ void HSpawn_Respawn( gentity_t *self )
     {
       // buildables taking the same space kill themselves
       G_Damage( hit, self, self, NULL, NULL,
-        100000, DAMAGE_NO_PROTECTION, MOD_SUICIDE );
+        hit->health, DAMAGE_NO_PROTECTION, MOD_SUICIDE );
     }
   }
 
@@ -2767,7 +2769,9 @@ void HMedistat_Think( gentity_t *self )
 
       if( self->enemy->health < self->enemy->client->ps.stats[ STAT_MAX_HEALTH ] )
       {
-        self->enemy->health++;
+        self->enemy->health += HP2SU( 1 );
+        if( self->enemy->health > self->enemy->client->ps.stats[ STAT_MAX_HEALTH ] )
+          self->enemy->health = self->enemy->client->ps.stats[ STAT_MAX_HEALTH ];
         self->enemy->client->ps.stats[ STAT_HEALTH ] = self->enemy->health;
         self->enemy->client->pers.infoChangeTime = level.time;
       }
@@ -3541,7 +3545,7 @@ void G_BuildableThink( gentity_t *ent, int msec )
       }
       else if( groundEnt->client )
         G_Damage( groundEnt, ent, &g_entities[ ent->dropperNum ], NULL, NULL,
-            20 , DAMAGE_NO_PROTECTION, meansOD );
+            HP2SU( 20 ), DAMAGE_NO_PROTECTION, meansOD );
 
       if( ent->damageDroppedBuildable )
         G_Damage( ent, ent, &g_entities[ ent->dropperNum ], NULL, NULL,
@@ -3562,7 +3566,7 @@ void G_BuildableThink( gentity_t *ent, int msec )
   ent->dcc = ( ent->buildableTeam != TEAM_HUMANS ) ? 0 : G_FindDCC( ent );
 
   // Set health
-  ent->s.misc = MAX( ent->health, 0 );
+  ent->s.misc = MAX( SU2HP( ent->health ), 0 );
 
   // Set flags
   ent->s.eFlags &= ~( EF_B_POWERED | EF_B_SPAWNED | EF_B_MARKED );
@@ -4698,7 +4702,7 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
     VectorScale( normal, -50.0f, built->s.pos.trDelta );
   }
 
-  built->s.misc = MAX( built->health, 0 );
+  built->s.misc = MAX( SU2HP( built->health ), 0 );
 
   if( BG_Buildable( buildable )->team == TEAM_ALIENS )
   {
@@ -5407,7 +5411,7 @@ void G_BaseSelfDestruct( team_t team )
       continue;
     if( ent->buildableTeam != team )
       continue;
-    G_Damage( ent, NULL, NULL, NULL, NULL, 10000, 0, MOD_SUICIDE );
+    G_Damage( ent, NULL, NULL, NULL, NULL, ent->health, 0, MOD_SUICIDE );
   }
 }
 

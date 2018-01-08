@@ -250,7 +250,7 @@ void CG_CheckLocalSounds( playerState_t *ps, playerState_t *ops )
     return;
 
   // health changes of more than -1 should make pain sounds
-  if( ps->stats[ STAT_HEALTH ] < ops->stats[ STAT_HEALTH ] - 1 )
+  if( ps->stats[ STAT_HEALTH ] < ops->stats[ STAT_HEALTH ] )
   {
     if( ps->stats[ STAT_HEALTH ] > 0 )
       CG_PainEvent( &cg.predictedPlayerEntity, BG_GetPainState( ps ) );

@@ -881,7 +881,7 @@ static void CG_DrawPlayerHealthValue( rectDef_t *rect, vec4_t color )
 {
   trap_R_SetColor( color );
   CG_DrawField( rect->x, rect->y, 4, rect->w / 4, rect->h,
-                cg.snap->ps.stats[ STAT_HEALTH ] );
+                SU2HP( cg.snap->ps.stats[ STAT_HEALTH ] ) );
   trap_R_SetColor( NULL );
 }
 
@@ -913,7 +913,7 @@ static void CG_DrawPlayerHealthCross( rectDef_t *rect, vec4_t ref_color )
   // Pick the alpha value
   Vector4Copy( ref_color, color );
   if( cg.snap->ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
-      cg.snap->ps.stats[ STAT_HEALTH ] < 10 )
+      SU2HP( cg.snap->ps.stats[ STAT_HEALTH ] ) < 10  )
   {
     color[ 0 ] = 1.0f;
     color[ 1 ] = color[ 2 ] = 0.0f;
@@ -1493,7 +1493,7 @@ float CG_GetValue( int ownerDraw )
         return ps->clips;
       break;
     case CG_PLAYER_HEALTH:
-      return ps->stats[ STAT_HEALTH ];
+      return ( SU2HP( ps->stats[ STAT_HEALTH ] ) );
       break;
     default:
       break;

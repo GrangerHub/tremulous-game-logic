@@ -3747,7 +3747,7 @@ void Cmd_Damage_f( gentity_t *ent )
   vec3_t point;
   char arg[ 16 ];
   float dx = 0.0f, dy = 0.0f, dz = 100.0f;
-  int damage = 100;
+  int damage = HP2SU( 100 );
   qboolean nonloc = qtrue;
 
   if( Cmd_Argc() > 1 )

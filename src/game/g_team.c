@@ -379,7 +379,7 @@ void TeamplayInfoMessage( gentity_t *ent )
 
     Com_sprintf( entry, sizeof( entry ), format, i,
       cl->pers.location,
-      cl->ps.stats[ STAT_HEALTH ] < 1 ? 0 : cl->ps.stats[ STAT_HEALTH ],
+      SU2HP( cl->ps.stats[ STAT_HEALTH ] ),
       curWeaponClass,
       upgrade );
 
