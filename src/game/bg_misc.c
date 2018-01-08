@@ -3621,7 +3621,7 @@ void BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s,
     s->eType = ET_INVISIBLE;
   else if( ps->persistant[ PERS_SPECSTATE ] != SPECTATOR_NOT )
     s->eType = ET_INVISIBLE;
-  else if( ps->stats[ STAT_HEALTH ] <= GIB_HEALTH )
+  else if( ps->misc[ MISC_HEALTH ] <= GIB_HEALTH )
     s->eType = ET_INVISIBLE;
   else
     s->eType = ET_PLAYER;
@@ -3650,7 +3650,7 @@ void BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s,
   s->clientNum = ps->clientNum;   // ET_PLAYER looks here instead of at number
                     // so corpses can also reference the proper config
   s->eFlags = ps->eFlags;
-  if( ps->stats[STAT_HEALTH] <= 0 )
+  if( ps->misc[ MISC_HEALTH ] <= 0 )
     s->eFlags |= EF_DEAD;
   else
     s->eFlags &= ~EF_DEAD;
@@ -3709,7 +3709,7 @@ void BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s,
 
   s->otherEntityNum = ps->otherEntityNum;
 
-  s->constantLight = ps->misc[ MISC_STATMISC_AT_LAST_FIRE ];
+  s->constantLight = ps->stats[ STAT_STATMISC_AT_LAST_FIRE ];
 }
 
 
@@ -3730,7 +3730,7 @@ void BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s
     s->eType = ET_INVISIBLE;
   else if( ps->persistant[ PERS_SPECSTATE ] != SPECTATOR_NOT )
     s->eType = ET_INVISIBLE;
-  else if( ps->stats[ STAT_HEALTH ] <= GIB_HEALTH )
+  else if( ps->misc[ MISC_HEALTH ] <= GIB_HEALTH )
     s->eType = ET_INVISIBLE;
   else
     s->eType = ET_PLAYER;
@@ -3763,7 +3763,7 @@ void BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s
                     // so corpses can also reference the proper config
   s->eFlags = ps->eFlags;
 
-  if( ps->stats[STAT_HEALTH] <= 0 )
+  if( ps->misc[ MISC_HEALTH ] <= 0 )
     s->eFlags |= EF_DEAD;
   else
     s->eFlags &= ~EF_DEAD;
@@ -3823,7 +3823,7 @@ void BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s
 
   s->otherEntityNum = ps->otherEntityNum;
 
-  s->constantLight = ps->misc[ MISC_STATMISC_AT_LAST_FIRE ];
+  s->constantLight = ps->stats[ STAT_STATMISC_AT_LAST_FIRE ];
 }
 
 /*
@@ -4093,7 +4093,7 @@ int BG_LightningBoltRange( const entityState_t *es,
     if( currentRange )
       charge = ps->stats[ STAT_MISC ];
     else
-      charge = ps->misc[ MISC_STATMISC_AT_LAST_FIRE ];
+      charge = ps->stats[ STAT_STATMISC_AT_LAST_FIRE ];
 
     return ( charge * LIGHTNING_BOLT_RANGE_MAX ) / LIGHTNING_BOLT_CHARGE_TIME_MAX;
   }
@@ -4119,7 +4119,7 @@ void BG_CheckBoltImpactTrigger( pmove_t *pm,
 {
   if( pm->ps->weapon == WP_LIGHTNING &&
       pm->ps->stats[ STAT_MISC ] > LIGHTNING_BOLT_CHARGE_TIME_MIN &&
-      pm->ps->stats[ STAT_MISC ] - pm->ps->misc[ MISC_BOLT_CHARGE_AT_LAST_CHECK ] > 50 )
+      pm->ps->stats[ STAT_MISC ] - pm->ps->stats[ STAT_BOLT_CHARGE_AT_LAST_CHECK ] > 50 )
   {
     vec3_t forward, right, up;
     vec3_t muzzle, end;
@@ -4138,7 +4138,7 @@ void BG_CheckBoltImpactTrigger( pmove_t *pm,
     if( UnlaggedOff )
       UnlaggedOff( );
 
-    pm->ps->misc[ MISC_BOLT_CHARGE_AT_LAST_CHECK ] = pm->ps->stats[ STAT_MISC ];
+    pm->ps->stats[ STAT_BOLT_CHARGE_AT_LAST_CHECK ] = pm->ps->stats[ STAT_MISC ];
     pm->pmext->impactTriggerTraceChecked = qtrue;
   } else
     pm->pmext->impactTriggerTraceChecked = qfalse;
@@ -4156,7 +4156,7 @@ void BG_ResetLightningBoltCharge( playerState_t *ps, pmoveExt_t *pmext )
   if( ps->weapon != WP_LIGHTNING )
     return;
 
-  ps->misc[ MISC_BOLT_CHARGE_AT_LAST_CHECK ] = 0;
+  ps->stats[ STAT_BOLT_CHARGE_AT_LAST_CHECK ] = 0;
   ps->stats[ STAT_MISC ] = 0;
   pmext->impactTriggerTraceChecked = qfalse;
 }
@@ -4661,7 +4661,7 @@ BG_GetPainState
 pain_t BG_GetPainState( playerState_t *ps )
 {
   int maxHealth = BG_Class( ps->stats[ STAT_CLASS ] )->health;
-  int health = ps->stats[ STAT_HEALTH ];
+  int health = ps->misc[ MISC_HEALTH ];
 
   if( health < ( maxHealth * 3 ) / 32 )
     return PAIN_25;

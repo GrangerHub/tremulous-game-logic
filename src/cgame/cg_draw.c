@@ -881,7 +881,7 @@ static void CG_DrawPlayerHealthValue( rectDef_t *rect, vec4_t color )
 {
   trap_R_SetColor( color );
   CG_DrawField( rect->x, rect->y, 4, rect->w / 4, rect->h,
-                SU2HP( cg.snap->ps.stats[ STAT_HEALTH ] ) );
+                SU2HP( cg.snap->ps.misc[ MISC_HEALTH ] ) );
   trap_R_SetColor( NULL );
 }
 
@@ -913,7 +913,7 @@ static void CG_DrawPlayerHealthCross( rectDef_t *rect, vec4_t ref_color )
   // Pick the alpha value
   Vector4Copy( ref_color, color );
   if( cg.snap->ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
-      SU2HP( cg.snap->ps.stats[ STAT_HEALTH ] ) < 10  )
+      SU2HP( cg.snap->ps.misc[ MISC_HEALTH ] ) < 10  )
   {
     color[ 0 ] = 1.0f;
     color[ 1 ] = color[ 2 ] = 0.0f;
@@ -1378,7 +1378,7 @@ float CG_GetValue( int ownerDraw )
         return ps->clips;
       break;
     case CG_PLAYER_HEALTH:
-      return ( SU2HP( ps->stats[ STAT_HEALTH ] ) );
+      return ( SU2HP( ps->misc[ MISC_HEALTH ] ) );
       break;
     default:
       break;
@@ -2585,7 +2585,7 @@ void CG_DrawWeaponIcon( rectDef_t *rect, vec4_t color )
   maxAmmo = BG_Weapon( weapon )->maxAmmo;
 
   // don't display if dead
-  if( cg.predictedPlayerState.stats[ STAT_HEALTH ] <= 0 )
+  if( cg.predictedPlayerState.misc[ MISC_HEALTH ] <= 0 )
     return;
 
   if( weapon <= WP_NONE || weapon >= WP_NUM_WEAPONS )
@@ -3684,7 +3684,7 @@ static void CG_Draw2D( void )
   }
 
   if( cg.snap->ps.persistant[ PERS_SPECSTATE ] == SPECTATOR_NOT &&
-      cg.snap->ps.stats[ STAT_HEALTH ] > 0 )
+      cg.snap->ps.misc[ MISC_HEALTH ] > 0 )
   {
     menu = Menus_FindByName( BG_ClassConfig(
       cg.predictedPlayerState.stats[ STAT_CLASS ] )->hudName );
@@ -3797,13 +3797,13 @@ static void CG_PainBlend( void )
   if( cg.snap->ps.persistant[ PERS_SPECSTATE ] != SPECTATOR_NOT || cg.intermissionStarted )
     return;
 
-  damage = cg.lastHealth - cg.snap->ps.stats[ STAT_HEALTH ];
+  damage = cg.lastHealth - cg.snap->ps.misc[ MISC_HEALTH ];
 
   if( damage < 0 )
     damage = 0;
 
-  damageAsFracOfMax = (float)damage / cg.snap->ps.stats[ STAT_MAX_HEALTH ];
-  cg.lastHealth = cg.snap->ps.stats[ STAT_HEALTH ];
+  damageAsFracOfMax = (float)damage / cg.snap->ps.misc[ MISC_MAX_HEALTH ];
+  cg.lastHealth = cg.snap->ps.misc[ MISC_HEALTH ];
 
   cg.painBlendValue += damageAsFracOfMax * cg_painBlendScale.value;
 
@@ -3889,7 +3889,7 @@ void CG_ResetPainBlend( void )
 {
   cg.painBlendValue = 0.0f;
   cg.painBlendTarget = 0.0f;
-  cg.lastHealth = cg.snap->ps.stats[ STAT_HEALTH ];
+  cg.lastHealth = cg.snap->ps.misc[ MISC_HEALTH ];
 }
 
 /*

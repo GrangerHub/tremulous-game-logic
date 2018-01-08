@@ -3644,7 +3644,7 @@ static void PM_Weapon( void )
     return;
 
   // Check for dead player
-  if( pm->ps->stats[ STAT_HEALTH ] <= 0 )
+  if( pm->ps->misc[ MISC_HEALTH ] <= 0 )
   {
     pm->ps->weapon = WP_NONE;
     return;
@@ -4159,7 +4159,7 @@ static void PM_Weapon( void )
           pm->pmext->pulsatingBeamTime[ 0 ] = LIGHTNING_BOLT_BEAM_DURATION;
           if( pm->ps->pm_flags & PMF_PAUSE_BEAM )
             pm->ps->pm_flags &= ~PMF_PAUSE_BEAM;
-          pm->ps->misc[ MISC_STATMISC_AT_LAST_FIRE ] = pm->ps->stats[ STAT_MISC ];
+          pm->ps->stats[ STAT_STATMISC_AT_LAST_FIRE ] = pm->ps->stats[ STAT_MISC ];
         }
         else if( pm->ps->stats[ STAT_MISC ] > 0 )
         {
@@ -4571,7 +4571,7 @@ void PM_UpdateViewAngles( playerState_t *ps, const usercmd_t *cmd )
   if( ps->pm_type == PM_INTERMISSION )
     return;   // no view changes at all
 
-  if( ps->pm_type != PM_SPECTATOR && ps->stats[ STAT_HEALTH ] <= 0 )
+  if( ps->pm_type != PM_SPECTATOR && ps->misc[ MISC_HEALTH ] <= 0 )
     return;   // no view changes at all
 
   // circularly clamp the angles with deltas
@@ -4677,7 +4677,7 @@ void PM_CalculateAngularVelocity( playerState_t *ps, const usercmd_t *cmd )
   if( ps->pm_type == PM_INTERMISSION )
     return;   // no view changes at all
 
-  if( ps->pm_type != PM_SPECTATOR && ps->stats[ STAT_HEALTH ] <= 0 )
+  if( ps->pm_type != PM_SPECTATOR && ps->misc[ MISC_HEALTH ] <= 0 )
     return;   // no view changes at all
 
   // circularly clamp the angles with deltas
@@ -4793,7 +4793,7 @@ void PmoveSingle( pmove_t *pmove )
   pm->watertype = 0;
   pm->waterlevel = 0;
 
-  if( pm->ps->stats[ STAT_HEALTH ] <= 0 )
+  if( pm->ps->misc[ MISC_HEALTH ] <= 0 )
     pm->tracemask &= ~CONTENTS_BODY;  // corpses can fly through bodies
 
   // make sure walking button is clear if they are running, to avoid
@@ -4833,7 +4833,7 @@ void PmoveSingle( pmove_t *pmove )
 
 
   // clear the respawned flag if attack and use are cleared
-  if( pm->ps->stats[STAT_HEALTH] > 0 &&
+  if( pm->ps->misc[ MISC_HEALTH ] > 0 &&
       !( pm->cmd.buttons & ( BUTTON_ATTACK | BUTTON_USE_HOLDABLE ) ) )
     pm->ps->pm_flags &= ~PMF_RESPAWNED;
 

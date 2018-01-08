@@ -287,11 +287,11 @@ void Pmove( pmove_t *pmove );
 // player_state->stats[] indexes
 typedef enum
 {
-  STAT_HEALTH,
+  STAT_STATMISC_AT_LAST_FIRE,
+  STAT_BOLT_CHARGE_AT_LAST_CHECK,
   STAT_ITEMS,
   STAT_ACTIVEITEMS,
   STAT_WEAPON,    // current primary weapon
-  STAT_MAX_HEALTH,// health / armor limit, changable by handicap
   STAT_CLASS,     // player class (for aliens AND humans)
   STAT_TEAM,      // player team
   STAT_READY,     // player ready state
@@ -358,12 +358,11 @@ typedef enum
 } persEnum_t;
 
 // hack to fit extra data in the misc[] array
-#define MISC_STATMISC_AT_LAST_FIRE     ( MAX_MISC - 1 )
-#define MISC_BOLT_CHARGE_AT_LAST_CHECK ( MAX_MISC - 2 )
-#define MISC_HEALTH_RESERVE            ( MAX_MISC - 3 )
+#define MISC_HEALTH                    ( MAX_MISC - 1 )
+#define MISC_MAX_HEALTH                ( MAX_MISC - 2 ) // health / armor limit, changable by handicap
 //Do not use MISC_SEED outside of PM_PSRandom(),
 //and don't use PM_PSRandom() outside of bg_pmove.c.
-#define MISC_SEED                      ( MAX_MISC - 4 ) // for predicted psudorandom things
+#define MISC_SEED                      ( MAX_MISC - 3 ) // for predicted psudorandom things
 
 #define PS_WALLCLIMBINGFOLLOW   0x00000001
 #define PS_WALLCLIMBINGTOGGLE   0x00000002

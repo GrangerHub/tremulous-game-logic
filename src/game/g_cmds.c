@@ -423,7 +423,7 @@ static void Give_Class( gentity_t *ent, char *s )
   }
 
   ent->client->pers.evolveHealthFraction
-      = (float)ent->client->ps.stats[ STAT_HEALTH ]
+      = (float)ent->client->ps.misc[ MISC_HEALTH ]
       / (float)BG_Class( currentClass )->health;
 
   if( ent->client->pers.evolveHealthFraction < 0.0f )
@@ -504,7 +504,7 @@ void Cmd_Give_f( gentity_t *ent )
 
   if( give_all || Q_stricmp( name, "health" ) == 0 )
   {
-    ent->health = ent->client->ps.stats[ STAT_MAX_HEALTH ];
+    ent->health = ent->client->ps.misc[ MISC_MAX_HEALTH ];
     BG_AddUpgradeToInventory( UP_MEDKIT, ent->client->ps.stats );
   }
 
@@ -681,7 +681,7 @@ void Cmd_Kill_f( gentity_t *ent )
     if( ent->client->ps.eFlags & EF_OCCUPYING )
       G_ResetOccupation( ent->occupation.occupied, ent );
 
-    ent->client->ps.stats[ STAT_HEALTH ] = ent->health = 0;
+    ent->client->ps.misc[ MISC_HEALTH ] = ent->health = 0;
     player_die( ent, ent, ent, 100000, MOD_SUICIDE );
   }
   else
@@ -2319,7 +2319,7 @@ void Cmd_Class_f( gentity_t *ent )
             G_SetClientViewAngle( ent, newAngles );
           }
 
-          ent->client->pers.evolveHealthFraction = (float)ent->client->ps.stats[ STAT_HEALTH ] /
+          ent->client->pers.evolveHealthFraction = (float)ent->client->ps.misc[ MISC_HEALTH ] /
             (float)BG_Class( currentClass )->health;
 
           if( ent->client->pers.evolveHealthFraction < 0.0f )
@@ -4270,7 +4270,7 @@ Q_EXPORT void ClientCommand( int clientNum )
   }
 
   if( command->cmdFlags & CMD_ALIVE &&
-    ( ent->client->ps.stats[ STAT_HEALTH ] <= 0 ||
+    ( ent->client->ps.misc[ MISC_HEALTH ] <= 0 ||
       ent->client->sess.spectatorState != SPECTATOR_NOT ) )
   {
     G_TriggerMenu( clientNum, MN_CMD_ALIVE );

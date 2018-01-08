@@ -185,7 +185,7 @@ float G_RewardAttackers( gentity_t *self )
   {
     value = BG_GetValueOfPlayer( &self->client->ps );
     team = self->client->pers.teamSelection;
-    maxHealth = self->client->ps.stats[ STAT_MAX_HEALTH ];
+    maxHealth = self->client->ps.misc[ MISC_MAX_HEALTH ];
   }
   else if( self->s.eType == ET_BUILDABLE )
   {
@@ -1295,7 +1295,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
     if( targ->client )
     {
-      targ->client->ps.stats[ STAT_HEALTH ] = targ->health;
+      targ->client->ps.misc[ MISC_HEALTH ] = targ->health;
       targ->client->pers.infoChangeTime = level.time;
     }
 
@@ -1315,7 +1315,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       {
         targ->health = -999;
         if( targ->client )
-          targ->client->ps.stats[ STAT_HEALTH ] = -999;
+          targ->client->ps.misc[ MISC_HEALTH ] = -999;
       }
 
       targ->enemy = attacker;
