@@ -320,7 +320,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define TRAPPER_BP                  8
 #define TRAPPER_BT                  12000
-#define TRAPPER_HEALTH              ABHM(50)
+#define TRAPPER_HEALTH              ABHM(500)
 #define TRAPPER_REGEN               60
 #define TRAPPER_SPLASHDAMAGE        ABDM(150)
 #define TRAPPER_SPLASHRADIUS        100
