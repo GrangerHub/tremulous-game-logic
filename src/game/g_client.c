@@ -149,7 +149,7 @@ qboolean SpotWouldTelefrag( gentity_t *spot )
   for( i = 0; i < num; i++ )
   {
     hit = &g_entities[ touch[ i ] ];
-    //if ( hit->client && hit->client->ps.stats[STAT_HEALTH] > 0 ) {
+    //if ( hit->client && hit->client->ps.misc[ MISC_HEALTH ] > 0 ) {
     if( hit->client )
       return qtrue;
   }
@@ -1489,10 +1489,10 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   BG_ClassBoundingBox( ent->client->pers.classSelection, ent->r.mins, ent->r.maxs, NULL, NULL, NULL );
 
   if( client->sess.spectatorState == SPECTATOR_NOT )
-    client->ps.stats[ STAT_MAX_HEALTH ] =
+    client->ps.misc[ MISC_MAX_HEALTH ] =
       BG_Class( ent->client->pers.classSelection )->health;
   else
-    client->ps.stats[ STAT_MAX_HEALTH ] = HP2SU( 100 );
+    client->ps.misc[ MISC_MAX_HEALTH ] = HP2SU( 100 );
 
   // clear entity values
   if( ent->client->pers.classSelection == PCL_HUMAN )
@@ -1523,7 +1523,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   VectorSet( ent->client->ps.grapplePoint, 0.0f, 0.0f, 1.0f );
 
   // health will count down towards max_health
-  ent->health = client->ps.stats[ STAT_HEALTH ] = client->ps.stats[ STAT_MAX_HEALTH ]; //* 1.25;
+  ent->health = client->ps.misc[ MISC_HEALTH ] = client->ps.misc[ MISC_MAX_HEALTH ]; //* 1.25;
 
   //if evolving scale health
   if( ent == spawn )
@@ -1536,7 +1536,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
     if( ent->health < 1 && oldHealth > 0 )
       ent->health = 1;
 
-    client->ps.stats[ STAT_HEALTH ] = ent->health;
+    client->ps.misc[ MISC_HEALTH ] = ent->health;
   }
 
   //clear the credits array

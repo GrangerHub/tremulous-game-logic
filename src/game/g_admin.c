@@ -4022,7 +4022,7 @@ qboolean G_admin_slap( gentity_t *ent )
           ( *reason ) ? reason : "No reason specified" ) );
 
   vic->health -= 25;
-  vic->client->ps.stats[ STAT_HEALTH ] = vic->health;
+  vic->client->ps.misc[ MISC_HEALTH ] = vic->health;
   vic->lastDamageTime = level.time;
   if( vic->health <= 1 )
   {

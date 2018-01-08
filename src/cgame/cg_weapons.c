@@ -1674,7 +1674,7 @@ void CG_DrawItemSelect( rectDef_t *rect, vec4_t color )
   ps = &cg.snap->ps;
 
   // don't display if dead
-  if( cg.predictedPlayerState.stats[ STAT_HEALTH ] <= 0 )
+  if( cg.predictedPlayerState.misc[ MISC_HEALTH ] <= 0 )
     return;
 
   if( !( cg.snap->ps.pm_flags & PMF_FOLLOW ) )
