@@ -313,7 +313,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define TRAPPER_BP                  8
 #define TRAPPER_BT                  12000
-#define TRAPPER_HEALTH              ABHM(50)
+#define TRAPPER_HEALTH              ABHM(500)
 #define TRAPPER_REGEN               60
 #define TRAPPER_SPLASHDAMAGE        ABDM(150)
 #define TRAPPER_SPLASHRADIUS        100
@@ -640,7 +640,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define DC_SPLASHDAMAGE             HBDM(500)
 #define DC_SPLASHRADIUS             100
 #define DC_ATTACK_PERIOD            10000 // how often to spam "under attack"
-#define DC_HEALRATE                 40000
+#define DC_HEALRATE                 40
 #define DC_RANGE                    1000
 #define DC_VALUE                    HBVM(DC_BP)
 
