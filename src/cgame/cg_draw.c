@@ -918,10 +918,10 @@ static void CG_DrawPlayerHealthValue( rectDef_t *rect, vec4_t color )
   char  *text;
   float scale;
   int   len;
-  int   health = cg.snap->ps.stats[ STAT_HEALTH ];
+  int   health = SU2HP( cg.snap->ps.stats[ STAT_HEALTH ] );
   int   healthReserve = BG_ClassHasAbility( cg.predictedPlayerState.stats[ STAT_CLASS ],
                           SCA_REGEN_RESERVE ) ?
-                            cg.snap->ps.misc[ MISC_HEALTH_RESERVE ] :
+                            SU2HP( cg.snap->ps.misc[ MISC_HEALTH_RESERVE ] ):
                             0;
 
     
@@ -959,7 +959,7 @@ static void CG_DrawPlayerHealthValue( rectDef_t *rect, vec4_t color )
 
   CG_AlignText( rect, text, scale, 0.0f, 0.0f, ALIGN_RIGHT, VALIGN_CENTER, &tx, &ty );
   UI_Text_Paint( tx + 1, ty, scale, color, text, 0, 0, ITEM_TEXTSTYLE_NORMAL );
-  trap_R_SetColor( NULL );  
+  trap_R_SetColor( NULL );
 }
 
 /*
@@ -990,7 +990,7 @@ static void CG_DrawPlayerHealthCross( rectDef_t *rect, vec4_t ref_color )
   // Pick the alpha value
   Vector4Copy( ref_color, color );
   if( cg.snap->ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
-      cg.snap->ps.stats[ STAT_HEALTH ] < 10 )
+      SU2HP( cg.snap->ps.stats[ STAT_HEALTH ] ) < 10  )
   {
     color[ 0 ] = 1.0f;
     color[ 1 ] = color[ 2 ] = 0.0f;
@@ -1236,7 +1236,7 @@ static void CG_DrawArmorValue( rectDef_t *rect, vec4_t color )
 
   trap_R_SetColor( color );
   CG_DrawField( rect->x, rect->y, 4, rect->w / 4,rect->h,
-                cg.predictedPlayerState.stats[ STAT_ARMOR ] );
+                SU2HP( cg.predictedPlayerState.stats[ STAT_ARMOR ] ) );
   trap_R_SetColor( NULL );
 }
 
@@ -1667,7 +1667,7 @@ float CG_GetValue( int ownerDraw )
         return ps->clips;
       break;
     case CG_PLAYER_HEALTH:
-      return ps->stats[ STAT_HEALTH ];
+      return ( SU2HP( ps->stats[ STAT_HEALTH ] ) );
       break;
     default:
       break;

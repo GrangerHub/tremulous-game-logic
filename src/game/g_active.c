@@ -171,13 +171,13 @@ void P_WorldEffects( gentity_t *ent )
       if( ent->watertype & CONTENTS_LAVA )
       {
         G_Damage( ent, NULL, NULL, NULL, NULL,
-          30 * waterlevel, 0, MOD_LAVA );
+          HP2SU( 30 ) * waterlevel, 0, MOD_LAVA );
       }
 
       if( ent->watertype & CONTENTS_SLIME )
       {
         G_Damage( ent, NULL, NULL, NULL, NULL,
-          10 * waterlevel, 0, MOD_SLIME );
+          HP2SU( 10 ) * waterlevel, 0, MOD_SLIME );
       }
     }
   }
@@ -871,8 +871,12 @@ void ClientTimerActions( gentity_t *ent, int msec )
             ent->client->medKitHealthToRestore &&
             ent->client->ps.pm_type != PM_DEAD )
         {
-          ent->client->medKitHealthToRestore--;
-          ent->health++;
+          ent->client->medKitHealthToRestore -= HP2SU( 1 );
+          if( ent->client->medKitHealthToRestore < 0 )
+            ent->client->medKitHealthToRestore = 0;
+          ent->health += HP2SU( 1 );
+          if( ent->health > BG_Class( client->ps.stats[ STAT_CLASS ] )->health )
+            ent->health = BG_Class( client->ps.stats[ STAT_CLASS ] )->health;
           ent->client->ps.stats[ STAT_HEALTH ] = ent->health;
           client->pers.infoChangeTime = level.time;
         }
@@ -888,8 +892,12 @@ void ClientTimerActions( gentity_t *ent, int msec )
           //partial increase
           if( level.time > client->medKitIncrementTime )
           {
-            ent->client->medKitHealthToRestore--;
-            ent->health++;
+            ent->client->medKitHealthToRestore -= HP2SU( 1 );
+            if( ent->client->medKitHealthToRestore < 0 )
+              ent->client->medKitHealthToRestore = 0;
+            ent->health += HP2SU( 1 );
+            if( ent->health > BG_Class( client->ps.stats[ STAT_CLASS ] )->health )
+              ent->health = BG_Class( client->ps.stats[ STAT_CLASS ] )->health;
             ent->client->ps.stats[ STAT_HEALTH ] = ent->health;
             client->pers.infoChangeTime = level.time;
 
@@ -962,7 +970,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
     if( ( client->ps.stats[ STAT_TEAM ] == level.surrenderTeam ) ||
         ( level.lifeSupportTimer[ client->ps.stats[ STAT_TEAM ] ] < level.time ) )
     {
-      int dmg = 5;
+      int dmg = BG_Class(client->ps.stats[STAT_CLASS])->health / 20;
       if ( BG_ClassHasAbility(client->ps.stats[STAT_CLASS], SCA_REGEN) )
           dmg = 0.04 * BG_Class(client->ps.stats[STAT_CLASS])->health;
       G_Damage( ent, NULL, NULL, NULL, NULL, dmg, DAMAGE_NO_ARMOR, MOD_SUICIDE );
@@ -2399,6 +2407,9 @@ void ClientThink_real( gentity_t *ent )
         client->ps.stats[ STAT_STATE ] |= SS_HEALING_3X;
       else if( modifier >= 2.0f )
         client->ps.stats[ STAT_STATE ] |= SS_HEALING_2X;
+
+      Com_Assert( regenRate * modifier <= 1000 &&
+                  "Health Regen Rate Exceeds 1 Health Sub-Unit Per Millisecond." );
 
       interval = 1000 / ( regenRate * modifier );
       // if recovery interval is less than frametime, compensate

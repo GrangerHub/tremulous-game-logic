@@ -89,8 +89,7 @@ void G_ExplodeMissile( gentity_t *ent )
   ent->freeAfterEvent = qtrue;
 
   // splash damage
-  if( ent->splashDamage ||
-      !strcmp( ent->classname, "lightningEMP" ) )
+  if( ent->splashDamage )
     G_RadiusDamage( ent->r.currentOrigin, ent->parent, ent->splashDamage,
                     ent->splashRadius, ent, ent->splashMethodOfDeath );
 
@@ -196,8 +195,7 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace )
   if( G_TakesDamage( other ) )
   {
     // FIXME: wrong damage direction?
-    if( ent->damage ||
-        !strcmp( ent->classname, "lightningEMP" ) )
+    if( ent->damage )
     {
       vec3_t  velocity;
 

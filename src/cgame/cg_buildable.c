@@ -747,7 +747,7 @@ static void CG_BuildableParticleEffects( centity_t *cent )
   entityState_t   *es = &cent->currentState;
   team_t          team = BG_Buildable( es->modelindex )->team;
   int             health = es->misc;
-  float           healthFrac = (float)health / BG_Buildable( es->modelindex )->health;
+  float           healthFrac = (float)health / SU2HP( BG_Buildable( es->modelindex )->health );
 
   if( !( es->eFlags & EF_B_SPAWNED ) )
     return;
@@ -988,7 +988,7 @@ static void CG_BuildableStatusDisplay( centity_t *cent )
 
   // don't display health bars and icons when the buildable has
   // full health, is powered, & is unmarked
-  if( ( es->misc < BG_Buildable( es->modelindex )->health ) ||
+  if( ( es->misc < SU2HP( BG_Buildable( es->modelindex )->health) ) ||
       !( es->eFlags & EF_B_POWERED ) ||
        ( es->eFlags & EF_B_MARKED ) )
   {
@@ -1075,7 +1075,7 @@ static void CG_BuildableStatusDisplay( centity_t *cent )
   }
 
   health = es->misc;
-  healthScale = (float)health / BG_Buildable( es->modelindex )->health;
+  healthScale = (float)health / SU2HP( BG_Buildable( es->modelindex )->health );
 
   if( health > 0 && healthScale < 0.01f )
     healthScale = 0.01f;
@@ -1194,7 +1194,7 @@ static void CG_BuildableStatusDisplay( centity_t *cent )
       int healthMax;
       int healthPoints;
 
-      healthMax = BG_Buildable( es->modelindex )->health;
+      healthMax = SU2HP( BG_Buildable( es->modelindex )->health );
       healthPoints = (int)( healthScale * healthMax );
       if( health > 0 && healthPoints < 1 )
         healthPoints = 1;

@@ -1183,7 +1183,7 @@ static const classAttributes_t bg_classList[ ] =
     "spectator",                                    //char    *name;
     "",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
-    100,                                            //int     health;
+    HP2SU( 100 ),                                   //int     health;
     0.0f,                                           //float   fallDamage;
     0.0f,                                           //float   regenRate;
     0,                                              //int     abilities;
@@ -1559,7 +1559,7 @@ static const classAttributes_t bg_classList[ ] =
     "human_base",                                   //char    *name;
     "",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
-    100,                                            //int     health;
+    HP2SU( 100 ),                                   //int     health;
     1.0f,                                           //float   fallDamage;
     0.0f,                                           //float   regenRate;
     SCA_TAKESFALLDAMAGE|SCA_CANUSELADDERS|SCA_STAMINA,          //int     abilities;
@@ -1588,7 +1588,7 @@ static const classAttributes_t bg_classList[ ] =
     "human_bsuit",                                  //char    *name;
     "",
     ( 1 << S3 ),                                    //int     stages;
-    100,                                            //int     health;
+    HP2SU( 100 ),                                   //int     health;
     1.0f,                                           //float   fallDamage;
     0.0f,                                           //float   regenRate;
     SCA_TAKESFALLDAMAGE|SCA_CANUSELADDERS|SCA_STAMINA,          //int     abilities;
