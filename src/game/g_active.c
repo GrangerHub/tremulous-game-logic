@@ -647,6 +647,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
   gclient_t *client;
   usercmd_t *ucmd;
   int       aForward, aRight;
+  const int maxHealth = BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->health;
   qboolean  walking = qfalse, stopped = qfalse,
             crouched = qfalse;
   int       i;
@@ -813,7 +814,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
 
       if( remainingStartupTime < 0 )
       {
-        if( ent->health < BG_Class( client->ps.stats[ STAT_CLASS ] )->health &&
+        if( ent->health < maxHealth &&
             ent->client->medKitHealthToRestore &&
             ent->client->ps.pm_type != PM_DEAD )
         {
@@ -821,8 +822,8 @@ void ClientTimerActions( gentity_t *ent, int msec )
           if( ent->client->medKitHealthToRestore < 0 )
             ent->client->medKitHealthToRestore = 0;
           ent->health += HP2SU( 1 );
-          if( ent->health > BG_Class( client->ps.stats[ STAT_CLASS ] )->health )
-            ent->health = BG_Class( client->ps.stats[ STAT_CLASS ] )->health;
+          if( ent->health > maxHealth )
+            ent->health = maxHealth;
           ent->client->ps.misc[ MISC_HEALTH ] = ent->health;
           client->pers.infoChangeTime = level.time;
         }
@@ -831,7 +832,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
       }
       else
       {
-        if( ent->health < BG_Class( client->ps.stats[ STAT_CLASS ] )->health &&
+        if( ent->health < maxHealth &&
             ent->client->medKitHealthToRestore &&
             ent->client->ps.pm_type != PM_DEAD )
         {
@@ -842,8 +843,8 @@ void ClientTimerActions( gentity_t *ent, int msec )
             if( ent->client->medKitHealthToRestore < 0 )
               ent->client->medKitHealthToRestore = 0;
             ent->health += HP2SU( 1 );
-            if( ent->health > BG_Class( client->ps.stats[ STAT_CLASS ] )->health )
-              ent->health = BG_Class( client->ps.stats[ STAT_CLASS ] )->health;
+            if( ent->health > maxHealth )
+              ent->health = maxHealth;
             ent->client->ps.misc[ MISC_HEALTH ] = ent->health;
             client->pers.infoChangeTime = level.time;
 
@@ -903,7 +904,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
     // turn off life support when a team admits defeat
     if( client->ps.stats[ STAT_TEAM ] == level.surrenderTeam )
     {
-      int dmg = BG_Class(client->ps.stats[STAT_CLASS])->health / 20;
+      int dmg = maxHealth / 20;
       if ( BG_ClassHasAbility(client->ps.stats[STAT_CLASS], SCA_REGEN) )
           dmg = BG_Class(client->ps.stats[STAT_CLASS])->regenRate;
       G_Damage( ent, NULL, NULL, NULL, NULL, dmg, DAMAGE_NO_ARMOR, MOD_SUICIDE );
@@ -1994,15 +1995,14 @@ once for each server frame, which makes for smooth demo recording.
 */
 void ClientThink_real( gentity_t *ent )
 {
-  gclient_t *client;
+  gclient_t *client = ent->client;
   pmove_t   pm;
   vec3_t    up = { 0.0f, 0.0f, 1.0f };
+  const int maxHealth = BG_Class( client->ps.stats[ STAT_CLASS ] )->health;
   int       oldEventSequence;
   int       msec;
   usercmd_t *ucmd;
   int       i;
-
-  client = ent->client;
 
   ComparePreviousCmdAngles( client );
 
@@ -2152,7 +2152,7 @@ void ClientThink_real( gentity_t *ent )
   {
     //if currently using a medkit or have no need for a medkit now
     if( client->ps.stats[ STAT_STATE ] & SS_HEALING_2X ||
-        ( client->ps.misc[ MISC_HEALTH ] == BG_Class( client->ps.stats[ STAT_CLASS ] )->health &&
+        ( client->ps.misc[ MISC_HEALTH ] == maxHealth &&
           !( client->ps.stats[ STAT_STATE ] & SS_POISONED ) ) )
     {
       BG_DeactivateUpgrade( UP_MEDKIT, client->ps.stats );
@@ -2184,8 +2184,7 @@ void ClientThink_real( gentity_t *ent )
 
       client->ps.stats[ STAT_STATE ] |= SS_HEALING_2X;
       client->lastMedKitTime = level.time;
-      client->medKitHealthToRestore =
-        BG_Class( client->ps.stats[ STAT_CLASS ] )->health - client->ps.misc[ MISC_HEALTH ];
+      client->medKitHealthToRestore = maxHealth - client->ps.misc[ MISC_HEALTH ];
       client->medKitIncrementTime = level.time +
         ( MEDKIT_STARTUP_TIME / MEDKIT_STARTUP_SPEED );
 
@@ -2250,7 +2249,7 @@ void ClientThink_real( gentity_t *ent )
             didBoost = qtrue;
           }
 
-          if( didBoost && ent->health < BG_Class( client->ps.stats[ STAT_CLASS ] )->health )
+          if( didBoost && ent->health < maxHealth )
             boost->client->pers.hasHealed = qtrue;
         }
       }
@@ -2282,16 +2281,16 @@ void ClientThink_real( gentity_t *ent )
         ent->nextRegenTime += count * interval;
       }
 
-      if( ent->health < BG_Class( client->ps.stats[ STAT_CLASS ] )->health )
+      if( ent->health < maxHealth )
       {
         ent->health += count;
         client->ps.misc[ MISC_HEALTH ] = ent->health;
         client->pers.infoChangeTime = level.time;
 
         // if at max health, clear damage counters
-        if( ent->health >= BG_Class( client->ps.stats[ STAT_CLASS ] )->health )
+        if( ent->health >= maxHealth )
         {
-          ent->health = client->ps.misc[ MISC_HEALTH ] = BG_Class( client->ps.stats[ STAT_CLASS ] )->health;
+          ent->health = client->ps.misc[ MISC_HEALTH ] = maxHealth;
           for( i = 0; i < MAX_CLIENTS; i++ )
             ent->credits[ i ] = 0;
         }

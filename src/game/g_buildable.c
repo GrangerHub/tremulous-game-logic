@@ -2729,7 +2729,6 @@ void HMedistat_Think( gentity_t *self )
       for( i = 0; i < num; i++ )
       {
         player = &g_entities[ entityList[ i ] ];
-        int maxHealth;
 
         if( G_NoTarget( player ) )
           continue; // notarget cancels even beneficial effects?
@@ -2737,10 +2736,10 @@ void HMedistat_Think( gentity_t *self )
         if( !player->client )
           continue;
 
-        maxHealth = BG_Class( player->client->ps.stats[ STAT_CLASS ] )->health;
-
         if( player->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
         {
+          const int maxHealth = BG_Class( player->client->ps.stats[ STAT_CLASS ] )->health;
+
           if( ( player->health < maxHealth ||
                 player->client->ps.stats[ STAT_STAMINA ] < STAMINA_MAX ) &&
               PM_Alive( player->client->ps.pm_type ) )
@@ -2775,7 +2774,7 @@ void HMedistat_Think( gentity_t *self )
     {
       gentity_t *player = self->enemy;
       gclient_t *client = player->client;
-      int maxHealth = maxHealth = BG_Class( client->ps.stats[ STAT_CLASS ] )->health;
+      const int maxHealth = BG_Class( client->ps.stats[ STAT_CLASS ] )->health;
 
       if( client->ps.stats[ STAT_STAMINA ] <  STAMINA_MAX )
         client->ps.stats[ STAT_STAMINA ] += STAMINA_MEDISTAT_RESTORE;
