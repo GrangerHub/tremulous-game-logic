@@ -2193,7 +2193,7 @@ void ClientThink_real( gentity_t *ent )
     {
       int       entityList[ MAX_GENTITIES ];
       int       i, num;
-      int       count;
+      int       count, interval;
       vec3_t    range, mins, maxs;
       float     modifier = 1.0f;
 
@@ -2255,11 +2255,19 @@ void ClientThink_real( gentity_t *ent )
       else if( modifier >= 2.0f )
         client->ps.stats[ STAT_STATE ] |= SS_HEALING_2X;
 
-      regenRate = ( regenRate * modifier ) / 1000;
-
-      count = ( level.time - ent->nextRegenTime - 1 ) * regenRate;
-
-      ent->nextRegenTime = level.time + 1;
+      interval = 1000 / ( regenRate * modifier );
+      if( !interval )
+      {
+        // interval is less than one millisecond
+        regenRate = ( regenRate * modifier ) / 1000;
+        count = ( level.time - ent->nextRegenTime - 1 ) * regenRate;
+        ent->nextRegenTime = level.time + 1;
+      } else
+      {
+        // if recovery interval is less than frametime, compensate
+        count = 1 + ( level.time - ent->nextRegenTime ) / interval;
+        ent->nextRegenTime += count * interval;
+      }
 
       if( ent->health < client->ps.misc[ MISC_MAX_HEALTH ] )
       {
