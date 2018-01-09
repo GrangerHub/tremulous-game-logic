@@ -470,24 +470,6 @@ void SP_misc_light_flare( gentity_t *self )
 
 /*
 ===============
-G_TotalDamageToKill
-
-Returns the total health sufficient to kill this
-entity, taking into account things like armor
-===============
-*/
-int G_TotalDamageToKill( gentity_t ent );
-{
-  int health = ent->health
-
-  if( !client )
-    return health;
-
-  if( BG_InventoryContainsUpgrade( UP_HELMET, client->ps.stats ) )
-}
-
-/*
-===============
 G_PackEntityNumbers
 
 Pack entity numbers into an entityState_t.

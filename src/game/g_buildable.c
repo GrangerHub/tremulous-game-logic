@@ -251,7 +251,7 @@ static void G_PuntBlocker( gentity_t *self, gentity_t *blocker )
       for( i = 0; i < numBlockers; i++ )
       {
         if( self->buildableTeam == blockers[i]->client->ps.stats[ STAT_TEAM ] )
-          G_Damage( blockers[ i ], NULL, NULL, NULL, NULL, blocker->health, 0,
+          G_Damage( blockers[ i ], NULL, NULL, NULL, NULL, G_TotalDamageToKill( blocker ), 0,
                     MOD_TRIGGER_HURT );
       }
 
@@ -916,7 +916,7 @@ void AGeneric_CreepRespawn( gentity_t *self )
     else if( hit != self )
     {
       // buildables taking the same space kill themselves
-      G_Damage( hit, NULL, NULL, NULL, NULL, hit->health, 0, MOD_SUICIDE );
+      G_Damage( hit, NULL, NULL, NULL, NULL, G_TotalDamageToKill( hit ), 0, MOD_SUICIDE );
     }
   }
 
@@ -1108,9 +1108,9 @@ void AGeneric_CreepCheck( gentity_t *self )
         ( Distance( self->r.currentOrigin,
                     spawn->r.currentOrigin ) <= CREEP_BASESIZE ) )
       G_Damage( self, NULL, g_entities + spawn->killedBy, NULL, NULL,
-                self->health, 0, MOD_NOCREEP );
+                G_TotalDamageToKill( self ), 0, MOD_NOCREEP );
     else
-      G_Damage( self, NULL, NULL, NULL, NULL, self->health, 0, MOD_NOCREEP );
+      G_Damage( self, NULL, NULL, NULL, NULL, G_TotalDamageToKill( self ), 0, MOD_NOCREEP );
     return;
   }
   G_CreepSlow( self );
@@ -1182,16 +1182,16 @@ void ASpawn_Think( gentity_t *self )
         {
           // don't queue the bp from this
           if( ent->builtBy && ent->builtBy->slot >= 0 )
-            G_Damage( ent, NULL, g_entities + ent->builtBy->slot, NULL, NULL, ent->health, 0, MOD_SUICIDE );
+            G_Damage( ent, NULL, g_entities + ent->builtBy->slot, NULL, NULL, G_TotalDamageToKill( ent ), 0, MOD_SUICIDE );
           else
-            G_Damage( ent, NULL, NULL, NULL, NULL, ent->health, 0, MOD_SUICIDE );
+            G_Damage( ent, NULL, NULL, NULL, NULL, G_TotalDamageToKill( ent ), 0, MOD_SUICIDE );
 
           if( ent->health > 0 )
             G_SetBuildableAnim( self, BANIM_SPAWN1, qtrue );
         }
         else if( ent->s.number == ENTITYNUM_WORLD || ent->s.eType == ET_MOVER )
         {
-          G_Damage( self, NULL, NULL, NULL, NULL, self->health, 0, MOD_SUICIDE );
+          G_Damage( self, NULL, NULL, NULL, NULL, G_TotalDamageToKill( self ), 0, MOD_SUICIDE );
           return;
         }
 
@@ -2430,7 +2430,7 @@ void HSpawn_Respawn( gentity_t *self )
     {
       // buildables taking the same space kill themselves
       G_Damage( hit, self, self, NULL, NULL,
-        hit->health, DAMAGE_NO_PROTECTION, MOD_SUICIDE );
+        G_TotalDamageToKill( hit ), DAMAGE_NO_PROTECTION, MOD_SUICIDE );
     }
   }
 
@@ -2608,11 +2608,11 @@ void HSpawn_Think( gentity_t *self )
           if( ent->health > 0 )
             G_SetBuildableAnim( self, BANIM_SPAWN1, qtrue );
 
-          G_Damage( ent, NULL, NULL, NULL, NULL, ent->health, 0, MOD_SUICIDE );
+          G_Damage( ent, NULL, NULL, NULL, NULL, G_TotalDamageToKill( ent ), 0, MOD_SUICIDE );
         }
         else if( ent->s.number == ENTITYNUM_WORLD || ent->s.eType == ET_MOVER )
         {
-          G_Damage( self, NULL, NULL, NULL, NULL, self->health, 0, MOD_SUICIDE );
+          G_Damage( self, NULL, NULL, NULL, NULL, G_TotalDamageToKill( self ), 0, MOD_SUICIDE );
           return;
         }
 
@@ -2927,9 +2927,9 @@ void HRepeater_Think( gentity_t *self )
     // Attribute death to whoever built the reactor if that's a human,
     // which will ensure that it does not queue the BP
     if( powerEnt->builtBy && powerEnt->builtBy->slot >= 0 )
-      G_Damage( self, NULL, g_entities + powerEnt->builtBy->slot, NULL, NULL, self->health, 0, MOD_SUICIDE );
+      G_Damage( self, NULL, g_entities + powerEnt->builtBy->slot, NULL, NULL, G_TotalDamageToKill( self ), 0, MOD_SUICIDE );
     else
-      G_Damage( self, NULL, NULL, NULL, NULL, self->health, 0, MOD_SUICIDE );
+      G_Damage( self, NULL, NULL, NULL, NULL, G_TotalDamageToKill( self ), 0, MOD_SUICIDE );
     return;
   }
 
@@ -4430,7 +4430,7 @@ void G_FreeMarkedBuildables( gentity_t *deconner, char *readable, int rsize,
     if( removalCounts[ bNum ] == 0 )
       totalListItems++;
 
-    G_Damage( ent, NULL, deconner, NULL, NULL, ent->health, 0, MOD_REPLACE );
+    G_Damage( ent, NULL, deconner, NULL, NULL, G_TotalDamageToKill( ent ), 0, MOD_REPLACE );
 
     removalCounts[ bNum ]++;
 
@@ -6054,7 +6054,7 @@ void G_BaseSelfDestruct( team_t team )
       continue;
     if( ent->buildableTeam != team )
       continue;
-    G_Damage( ent, NULL, NULL, NULL, NULL, ent->health, 0, MOD_SUICIDE );
+    G_Damage( ent, NULL, NULL, NULL, NULL, G_TotalDamageToKill( ent ), 0, MOD_SUICIDE );
   }
 }
 

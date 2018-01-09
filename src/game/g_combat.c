@@ -1272,9 +1272,9 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   if( mod == MOD_TRIGGER_HURT &&
       targ->client &&
       BG_InventoryContainsUpgrade( UP_BATTLESUIT, targ->client->ps.stats ) &&
-    damage >= 400 &&
-    damage < 10000 )
-    damage = 10000;
+    damage >= HP2SU( 400 ) &&
+    damage <  HP2SU( 10000 ) )
+    damage = HP2SU( 10000 );
 
   if( inflictor->s.weapon != WP_NONE )
   {
@@ -2039,4 +2039,28 @@ void G_LogDestruction( gentity_t *self, gentity_t *actor, int mod )
         self->builtBy->name[ self->builtBy->nameOffset ],
         BG_Buildable( actor->s.modelindex )->humanName ) );
   }
+}
+
+
+
+/*
+===============
+G_TotalDamageToKill
+
+Returns the total health sufficient to kill this
+entity, taking into account things like armor
+===============
+*/
+int G_TotalDamageToKill( gentity_t *ent )
+{
+  if( ent->client )
+  {
+    int damage = BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->health;
+
+    damage += ent->client->ps.misc[ MISC_ARMOR ];
+
+    return damage * 100;
+  }
+
+  return ent->health;
 }
