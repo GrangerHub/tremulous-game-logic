@@ -120,9 +120,8 @@ void G_SuffocateTrappedEntities( gentity_t *self )
     if( tr.startsolid )
     {
       G_Damage( ent, self, self, NULL, NULL,
-                BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->health / 10,
-                DAMAGE_NO_PROTECTION,
-                MOD_SUFFOCATION );
+          BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->health / 10, DAMAGE_NO_PROTECTION,
+          MOD_SUFFOCATION );
 
       ent->client->lastSuffocationTime = level.time;
 
@@ -3214,17 +3213,23 @@ void HMedistat_Think( gentity_t *self )
     for( i = 0; i < num; i++ )
     {
       player = &g_entities[ entityList[ i ] ];
+      int maxHealth;
 
       if( G_NoTarget( player ) )
         continue; // notarget cancels even beneficial effects?
 
+      if( !player->client )
+        continue;
+
+      maxHealth = BG_Class( player->client->ps.stats[ STAT_CLASS ] )->health;
+
       //remove poison from everyone, not just the healed player
-      if( player->client && player->client->ps.stats[ STAT_STATE ] & SS_POISONED )
+      if(player->client->ps.stats[ STAT_STATE ] & SS_POISONED )
         player->client->ps.stats[ STAT_STATE ] &= ~SS_POISONED;
 
-      if( self->enemy == player && player->client &&
+      if( self->enemy == player &&
           player->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
-          player->health < BG_Class( player->client->ps.stats[ STAT_CLASS ] )->health &&
+          player->health < maxHealth &&
           PM_Alive( player->client->ps.pm_type ) )
       {
         occupied = qtrue;
@@ -3244,7 +3249,10 @@ void HMedistat_Think( gentity_t *self )
         if( G_NoTarget( player ) )
           continue; // notarget cancels even beneficial effects?
 
-        if( player->client && player->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
+        if( !player->client )
+          continue;
+
+        if( player->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
         {
           const int maxHealth = BG_Class( player->client->ps.stats[ STAT_CLASS ] )->health;
 
@@ -3280,26 +3288,28 @@ void HMedistat_Think( gentity_t *self )
     }
     else if( self->enemy && self->enemy->client ) //heal!
     {
-      const int maxHealth = BG_Class( self->enemy->client->ps.stats[ STAT_CLASS ] )->health;
+      gentity_t *player = self->enemy;
+      gclient_t *client = player->client;
+      const int maxHealth = BG_Class( client->ps.stats[ STAT_CLASS ] )->health;
 
-      if( self->enemy->client->ps.stats[ STAT_STAMINA ] <  STAMINA_MAX )
-        self->enemy->client->ps.stats[ STAT_STAMINA ] += STAMINA_MEDISTAT_RESTORE;
+      if( client->ps.stats[ STAT_STAMINA ] <  STAMINA_MAX )
+        client->ps.stats[ STAT_STAMINA ] += STAMINA_MEDISTAT_RESTORE;
 
-      if( self->enemy->client->ps.stats[ STAT_STAMINA ] > STAMINA_MAX )
-        self->enemy->client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
+      if( client->ps.stats[ STAT_STAMINA ] > STAMINA_MAX )
+        client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
 
-      if( self->enemy->health < maxHealth )
+      if( player->health < maxHealth )
       {
-        self->enemy->health += HP2SU( 1 );
-        if( self->enemy->health > BG_Class( self->enemy->client->ps.stats[ STAT_CLASS ] )->health )
-          self->enemy->health = BG_Class( self->enemy->client->ps.stats[ STAT_CLASS ] )->health;
-        self->enemy->client->ps.misc[ MISC_HEALTH ] = self->enemy->health;
-        self->enemy->client->pers.infoChangeTime = level.time;
+        player->health += HP2SU( 1 );
+        if( player->health > maxHealth )
+          player->health = maxHealth;
+        client->ps.misc[ MISC_HEALTH ] = player->health;
+        client->pers.infoChangeTime = level.time;
       }
 
       //if they're completely healed and have full stamina, give them a medkit
-      if( self->enemy->health >= maxHealth &&
-          self->enemy->client->ps.stats[ STAT_STAMINA ] >= STAMINA_MAX )
+      if( player->health >= maxHealth &&
+          player->client->ps.stats[ STAT_STAMINA ] >= STAMINA_MAX )
       {
         if( !BG_InventoryContainsUpgrade( UP_MEDKIT, self->enemy->client->ps.stats ) )
           BG_AddUpgradeToInventory( UP_MEDKIT, self->enemy->client->ps.stats );
