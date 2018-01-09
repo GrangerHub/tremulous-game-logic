@@ -1630,11 +1630,11 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       if( client )
         targ->flags |= FL_NO_KNOCKBACK;
 
-      if( targ->health < -999 )
+      if( targ->health < HP2SU( -999 ) )
       {
-        targ->health = -999;
+        targ->health = HP2SU( -999 );
         if( targ->client )
-          targ->client->ps.misc[ MISC_HEALTH ] = -999;
+          targ->client->ps.misc[ MISC_HEALTH ] = HP2SU( -999 );
       }
 
       targ->enemy = attacker;
