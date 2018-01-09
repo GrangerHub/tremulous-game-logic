@@ -1073,7 +1073,7 @@ static const classAttributes_t bg_classList[ ] =
     "spectator",                                    //char    *name;
     "",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
-    0,                                              //int     health;
+    100,                                              //int     health;
     0.0f,                                           //float   fallDamage;
     0.0f,                                           //float   regenRate;
     0,                                              //int     abilities;
@@ -3684,7 +3684,7 @@ and after local prediction on the client
 ========================
 */
 void BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s,
-                                  pmoveExt_t *pmext, qboolean snap )
+                                  qboolean snap )
 {
   int     i;
 
@@ -3780,7 +3780,7 @@ void BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s,
 
   s->otherEntityNum = ps->otherEntityNum;
 
-  s->constantLight = ps->stats[ STAT_STATMISC_AT_LAST_FIRE ];
+  s->constantLight = ps->stats[ STAT_MISC2 ];
 }
 
 
@@ -3793,7 +3793,7 @@ and after local prediction on the client
 ========================
 */
 void BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s,
-                                             pmoveExt_t *pmext, int time, qboolean snap )
+                                             int time, qboolean snap )
 {
   int     i;
 
@@ -3894,7 +3894,7 @@ void BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s
 
   s->otherEntityNum = ps->otherEntityNum;
 
-  s->constantLight = ps->stats[ STAT_STATMISC_AT_LAST_FIRE ];
+  s->constantLight = ps->stats[ STAT_MISC2 ];
 }
 
 /*
@@ -4165,7 +4165,7 @@ int BG_LightningBoltRange( const entityState_t *es,
     if( currentRange )
       charge = ps->stats[ STAT_MISC ];
     else
-      charge = ps->stats[ STAT_STATMISC_AT_LAST_FIRE ];
+      charge = ps->stats[ STAT_MISC2 ];
 
     return ( charge * LIGHTNING_BOLT_RANGE_MAX ) / LIGHTNING_BOLT_CHARGE_TIME_MAX;
   }
@@ -4191,7 +4191,7 @@ void BG_CheckBoltImpactTrigger( pmove_t *pm,
 {
   if( pm->ps->weapon == WP_LIGHTNING &&
       pm->ps->stats[ STAT_MISC ] > LIGHTNING_BOLT_CHARGE_TIME_MIN &&
-      pm->ps->stats[ STAT_MISC ] - pm->ps->stats[ STAT_BOLT_CHARGE_AT_LAST_CHECK ] > 50 )
+      pm->ps->stats[ STAT_MISC ] - pm->ps->stats[ STAT_MISC3 ] > 50 )
   {
     vec3_t forward, right, up;
     vec3_t muzzle, end;
@@ -4210,7 +4210,7 @@ void BG_CheckBoltImpactTrigger( pmove_t *pm,
     if( UnlaggedOff )
       UnlaggedOff( );
 
-    pm->ps->stats[ STAT_BOLT_CHARGE_AT_LAST_CHECK ] = pm->ps->stats[ STAT_MISC ];
+    pm->ps->stats[ STAT_MISC3 ] = pm->ps->stats[ STAT_MISC ];
     pm->pmext->impactTriggerTraceChecked = qtrue;
   } else
     pm->pmext->impactTriggerTraceChecked = qfalse;
@@ -4228,7 +4228,7 @@ void BG_ResetLightningBoltCharge( playerState_t *ps, pmoveExt_t *pmext )
   if( ps->weapon != WP_LIGHTNING )
     return;
 
-  ps->stats[ STAT_BOLT_CHARGE_AT_LAST_CHECK ] = 0;
+  ps->stats[ STAT_MISC3 ] = 0;
   ps->stats[ STAT_MISC ] = 0;
   pmext->impactTriggerTraceChecked = qfalse;
 }

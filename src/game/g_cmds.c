@@ -504,7 +504,7 @@ void Cmd_Give_f( gentity_t *ent )
 
   if( give_all || Q_stricmp( name, "health" ) == 0 )
   {
-    ent->health = ent->client->ps.misc[ MISC_MAX_HEALTH ];
+    ent->health = BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->health;
     BG_AddUpgradeToInventory( UP_MEDKIT, ent->client->ps.stats );
   }
 

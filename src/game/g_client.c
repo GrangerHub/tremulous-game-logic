@@ -1488,12 +1488,6 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
 
   BG_ClassBoundingBox( ent->client->pers.classSelection, ent->r.mins, ent->r.maxs, NULL, NULL, NULL );
 
-  if( client->sess.spectatorState == SPECTATOR_NOT )
-    client->ps.misc[ MISC_MAX_HEALTH ] =
-      BG_Class( ent->client->pers.classSelection )->health;
-  else
-    client->ps.misc[ MISC_MAX_HEALTH ] = HP2SU( 100 );
-
   // clear entity values
   if( ent->client->pers.classSelection == PCL_HUMAN )
   {
@@ -1523,7 +1517,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   VectorSet( ent->client->ps.grapplePoint, 0.0f, 0.0f, 1.0f );
 
   // health will count down towards max_health
-  ent->health = client->ps.misc[ MISC_HEALTH ] = client->ps.misc[ MISC_MAX_HEALTH ]; //* 1.25;
+  ent->health = client->ps.misc[ MISC_HEALTH ] = BG_Class( client->ps.stats[ STAT_CLASS ] )->health; //* 1.25;
 
   //if evolving scale health
   if( ent == spawn )
@@ -1658,7 +1652,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   // positively link the client, even if the command times are weird
   if( client->sess.spectatorState == SPECTATOR_NOT )
   {
-    BG_PlayerStateToEntityState( &client->ps, &ent->s, &client->pmext, qtrue );
+    BG_PlayerStateToEntityState( &client->ps, &ent->s, qtrue );
     SV_LinkEntity( ent );
   }
 
@@ -1669,7 +1663,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   ClientEndFrame( ent );
 
   // clear entity state values
-  BG_PlayerStateToEntityState( &client->ps, &ent->s, &client->pmext, qtrue );
+  BG_PlayerStateToEntityState( &client->ps, &ent->s, qtrue );
 
   client->pers.infoChangeTime = level.time;
 }

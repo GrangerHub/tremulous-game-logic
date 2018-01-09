@@ -813,7 +813,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
 
       if( remainingStartupTime < 0 )
       {
-        if( ent->health < ent->client->ps.misc[ MISC_MAX_HEALTH ] &&
+        if( ent->health < BG_Class( client->ps.stats[ STAT_CLASS ] )->health &&
             ent->client->medKitHealthToRestore &&
             ent->client->ps.pm_type != PM_DEAD )
         {
@@ -821,8 +821,8 @@ void ClientTimerActions( gentity_t *ent, int msec )
           if( ent->client->medKitHealthToRestore < 0 )
             ent->client->medKitHealthToRestore = 0;
           ent->health += HP2SU( 1 );
-          if( ent->health > ent->client->ps.misc[ MISC_MAX_HEALTH ] )
-            ent->health = ent->client->ps.misc[ MISC_MAX_HEALTH ];
+          if( ent->health > BG_Class( client->ps.stats[ STAT_CLASS ] )->health )
+            ent->health = BG_Class( client->ps.stats[ STAT_CLASS ] )->health;
           ent->client->ps.misc[ MISC_HEALTH ] = ent->health;
           client->pers.infoChangeTime = level.time;
         }
@@ -831,7 +831,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
       }
       else
       {
-        if( ent->health < ent->client->ps.misc[ MISC_MAX_HEALTH ] &&
+        if( ent->health < BG_Class( client->ps.stats[ STAT_CLASS ] )->health &&
             ent->client->medKitHealthToRestore &&
             ent->client->ps.pm_type != PM_DEAD )
         {
@@ -842,8 +842,8 @@ void ClientTimerActions( gentity_t *ent, int msec )
             if( ent->client->medKitHealthToRestore < 0 )
               ent->client->medKitHealthToRestore = 0;
             ent->health += HP2SU( 1 );
-            if( ent->health > ent->client->ps.misc[ MISC_MAX_HEALTH ] )
-              ent->health = ent->client->ps.misc[ MISC_MAX_HEALTH ];
+            if( ent->health > BG_Class( client->ps.stats[ STAT_CLASS ] )->health )
+              ent->health = BG_Class( client->ps.stats[ STAT_CLASS ] )->health;
             ent->client->ps.misc[ MISC_HEALTH ] = ent->health;
             client->pers.infoChangeTime = level.time;
 
@@ -1097,8 +1097,7 @@ void SendPendingPredictableEvents( playerState_t *ps )
     // create temporary entity for event
     t = G_TempEntity( ps->origin, event );
     number = t->s.number;
-    BG_PlayerStateToEntityState( ps, &t->s, &level.clients[ps->clientNum].pmext,
-                                 qtrue );
+    BG_PlayerStateToEntityState( ps, &t->s, qtrue );
     t->s.number = number;
     t->s.eType = ET_EVENTS + event;
     t->s.eFlags |= EF_PLAYER_EVENT;
@@ -2153,7 +2152,7 @@ void ClientThink_real( gentity_t *ent )
   {
     //if currently using a medkit or have no need for a medkit now
     if( client->ps.stats[ STAT_STATE ] & SS_HEALING_2X ||
-        ( client->ps.misc[ MISC_HEALTH ] == client->ps.misc[ MISC_MAX_HEALTH ] &&
+        ( client->ps.misc[ MISC_HEALTH ] == BG_Class( client->ps.stats[ STAT_CLASS ] )->health &&
           !( client->ps.stats[ STAT_STATE ] & SS_POISONED ) ) )
     {
       BG_DeactivateUpgrade( UP_MEDKIT, client->ps.stats );
@@ -2186,7 +2185,7 @@ void ClientThink_real( gentity_t *ent )
       client->ps.stats[ STAT_STATE ] |= SS_HEALING_2X;
       client->lastMedKitTime = level.time;
       client->medKitHealthToRestore =
-        client->ps.misc[ MISC_MAX_HEALTH ] - client->ps.misc[ MISC_HEALTH ];
+        BG_Class( client->ps.stats[ STAT_CLASS ] )->health - client->ps.misc[ MISC_HEALTH ];
       client->medKitIncrementTime = level.time +
         ( MEDKIT_STARTUP_TIME / MEDKIT_STARTUP_SPEED );
 
@@ -2207,7 +2206,7 @@ void ClientThink_real( gentity_t *ent )
     {
       int       entityList[ MAX_GENTITIES ];
       int       i, num;
-      int       count;
+      int       count, interval;
       vec3_t    range, mins, maxs;
       float     modifier = 1.0f;
 
@@ -2251,7 +2250,7 @@ void ClientThink_real( gentity_t *ent )
             didBoost = qtrue;
           }
 
-          if( didBoost && ent->health < client->ps.misc[ MISC_MAX_HEALTH ] )
+          if( didBoost && ent->health < BG_Class( client->ps.stats[ STAT_CLASS ] )->health )
             boost->client->pers.hasHealed = qtrue;
         }
       }
@@ -2269,22 +2268,30 @@ void ClientThink_real( gentity_t *ent )
       else if( modifier >= 2.0f )
         client->ps.stats[ STAT_STATE ] |= SS_HEALING_2X;
 
-      regenRate = ( regenRate * modifier ) / 1000;
+      interval = 1000 / ( regenRate * modifier );
+      if( !interval )
+      {
+        // interval is less than one millisecond
+        regenRate = ( regenRate * modifier ) / 1000;
+        count = ( level.time - ent->nextRegenTime - 1 ) * regenRate;
+        ent->nextRegenTime = level.time + 1;
+      } else
+      {
+        // if recovery interval is less than frametime, compensate
+        count = 1 + ( level.time - ent->nextRegenTime ) / interval;
+        ent->nextRegenTime += count * interval;
+      }
 
-      count = ( level.time - ent->nextRegenTime - 1 ) * regenRate;
-
-      ent->nextRegenTime = level.time + 1;
-
-      if( ent->health < client->ps.misc[ MISC_MAX_HEALTH ] )
+      if( ent->health < BG_Class( client->ps.stats[ STAT_CLASS ] )->health )
       {
         ent->health += count;
         client->ps.misc[ MISC_HEALTH ] = ent->health;
         client->pers.infoChangeTime = level.time;
 
         // if at max health, clear damage counters
-        if( ent->health >= client->ps.misc[ MISC_MAX_HEALTH ] )
+        if( ent->health >= BG_Class( client->ps.stats[ STAT_CLASS ] )->health )
         {
-          ent->health = client->ps.misc[ MISC_HEALTH ] = client->ps.misc[ MISC_MAX_HEALTH ];
+          ent->health = client->ps.misc[ MISC_HEALTH ] = BG_Class( client->ps.stats[ STAT_CLASS ] )->health;
           for( i = 0; i < MAX_CLIENTS; i++ )
             ent->credits[ i ] = 0;
         }
@@ -2391,12 +2398,10 @@ void ClientThink_real( gentity_t *ent )
   if( g_smoothClients.integer )
     BG_PlayerStateToEntityStateExtraPolate( &ent->client->ps,
                                             &ent->s,
-                                            &ent->client->pmext,
                                             ent->client->ps.commandTime,
                                             qtrue );
   else
-    BG_PlayerStateToEntityState( &ent->client->ps, &ent->s,
-                                 &ent->client->pmext, qtrue );
+    BG_PlayerStateToEntityState( &ent->client->ps, &ent->s, qtrue );
 
   switch( client->ps.weapon )
   {
@@ -2672,11 +2677,9 @@ void ClientEndFrame( gentity_t *ent )
   // set the latest infor
   if( g_smoothClients.integer )
     BG_PlayerStateToEntityStateExtraPolate( &ent->client->ps, &ent->s,
-                                            &ent->client->pmext,
                                             ent->client->ps.commandTime, qtrue );
   else
-    BG_PlayerStateToEntityState( &ent->client->ps, &ent->s,
-                                 &ent->client->pmext, qtrue );
+    BG_PlayerStateToEntityState( &ent->client->ps, &ent->s, qtrue );
 
   SendPendingPredictableEvents( &ent->client->ps );
 }

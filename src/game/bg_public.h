@@ -288,8 +288,6 @@ void Pmove( pmove_t *pmove );
 // player_state->stats[] indexes
 typedef enum
 {
-  STAT_STATMISC_AT_LAST_FIRE,
-  STAT_BOLT_CHARGE_AT_LAST_CHECK,
   STAT_ITEMS,
   STAT_ACTIVEITEMS,
   STAT_WEAPON,    // current primary weapon
@@ -299,6 +297,8 @@ typedef enum
   STAT_STAMINA,   // stamina for SCA_STAMINA or SCA_CHARGE_STAMINA
   STAT_STATE,     // client states e.g. wall climbing
   STAT_MISC,      // for uh...misc stuff (pounce, trample, lcannon)
+  STAT_MISC2,     // for more misc stuff, copied into constantLight of the entity state.
+  STAT_MISC3,     // for even more misc stuff.
   STAT_BUILDABLE, // which ghost model to display for building
   STAT_FALLDIST,  // the distance the player fell
   STAT_VIEWLOCK,  // direction to lock the view in
@@ -363,7 +363,7 @@ typedef enum
 
 // hack to fit extra data in the misc[] array
 #define MISC_HEALTH                    ( MAX_MISC - 1 )
-#define MISC_MAX_HEALTH                ( MAX_MISC - 2 ) // health / armor limit, changable by handicap
+#define MISC_ARMOR                     ( MAX_MISC - 2 ) // health / armor limit, changable by handicap
 //Do not use MISC_SEED outside of PM_PSRandom(),
 //and don't use PM_PSRandom() outside of bg_pmove.c.
 #define MISC_SEED                      ( MAX_MISC - 3 ) // for predicted psudorandom things
@@ -1506,8 +1506,8 @@ void  BG_EvaluateTrajectoryDelta( const trajectory_t *tr, int atTime, vec3_t res
 
 void  BG_AddPredictableEventToPlayerstate( int newEvent, int eventParm, playerState_t *ps );
 
-void  BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s, pmoveExt_t *pmext, qboolean snap );
-void  BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s, pmoveExt_t *pmext, int time, qboolean snap );
+void  BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s, qboolean snap );
+void  BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s, int time, qboolean snap );
 
 qboolean  BG_PlayerTouchesItem( playerState_t *ps, entityState_t *item, int atTime );
 

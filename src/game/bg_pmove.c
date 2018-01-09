@@ -4192,7 +4192,7 @@ static void PM_Weapon( void )
           pm->pmext->pulsatingBeamTime[ 0 ] = LIGHTNING_BOLT_BEAM_DURATION;
           if( pm->ps->pm_flags & PMF_PAUSE_BEAM )
             pm->ps->pm_flags &= ~PMF_PAUSE_BEAM;
-          pm->ps->stats[ STAT_STATMISC_AT_LAST_FIRE ] = pm->ps->stats[ STAT_MISC ];
+          pm->ps->stats[ STAT_MISC2 ] = pm->ps->stats[ STAT_MISC ];
         }
         else if( pm->ps->stats[ STAT_MISC ] > 0 )
         {
