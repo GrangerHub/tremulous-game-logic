@@ -1082,8 +1082,7 @@ void SendPendingPredictableEvents( playerState_t *ps )
     // create temporary entity for event
     t = G_TempEntity( ps->origin, event );
     number = t->s.number;
-    BG_PlayerStateToEntityState( ps, &t->s, &level.clients[ps->clientNum].pmext,
-                                 qtrue );
+    BG_PlayerStateToEntityState( ps, &t->s, qtrue );
     t->s.number = number;
     t->s.eType = ET_EVENTS + event;
     t->s.eFlags |= EF_PLAYER_EVENT;
@@ -2385,12 +2384,10 @@ void ClientThink_real( gentity_t *ent )
   if( g_smoothClients.integer )
     BG_PlayerStateToEntityStateExtraPolate( &ent->client->ps,
                                             &ent->s,
-                                            &ent->client->pmext,
                                             ent->client->ps.commandTime,
                                             qtrue );
   else
-    BG_PlayerStateToEntityState( &ent->client->ps, &ent->s,
-                                 &ent->client->pmext, qtrue );
+    BG_PlayerStateToEntityState( &ent->client->ps, &ent->s, qtrue );
 
   switch( client->ps.weapon )
   {
@@ -2666,11 +2663,9 @@ void ClientEndFrame( gentity_t *ent )
   // set the latest infor
   if( g_smoothClients.integer )
     BG_PlayerStateToEntityStateExtraPolate( &ent->client->ps, &ent->s,
-                                            &ent->client->pmext,
                                             ent->client->ps.commandTime, qtrue );
   else
-    BG_PlayerStateToEntityState( &ent->client->ps, &ent->s,
-                                 &ent->client->pmext, qtrue );
+    BG_PlayerStateToEntityState( &ent->client->ps, &ent->s, qtrue );
 
   SendPendingPredictableEvents( &ent->client->ps );
 }
