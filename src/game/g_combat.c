@@ -1729,3 +1729,25 @@ void G_LogDestruction( gentity_t *self, gentity_t *actor, int mod )
         BG_Buildable( actor->s.modelindex )->humanName ) );
   }
 }
+
+
+
+/*
+===============
+G_TotalDamageToKill
+
+Returns the total health sufficient to kill this
+entity, taking into account things like armor
+===============
+*/
+int G_TotalDamageToKill( gentity_t *ent )
+{
+  if( ent->client )
+  {
+    int damage = BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->health;
+
+    return damage * 100;
+  }
+
+  return ent->health;
+}

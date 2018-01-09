@@ -2478,7 +2478,7 @@ void Cmd_Destroy_f( gentity_t *ent )
       if( !deconstruct )
       {
         G_Damage( traceEnt, ent, ent, forward, tr.endpos,
-                  traceEnt->health, 0, MOD_SUICIDE );
+                  G_TotalDamageToKill( traceEnt ), 0, MOD_SUICIDE );
       }
       else
       {
@@ -2494,7 +2494,7 @@ void Cmd_Destroy_f( gentity_t *ent )
               BG_Buildable( traceEnt->s.modelindex )->buildTime / 4;
         }
         G_Damage( traceEnt, ent, ent, forward, tr.endpos,
-                  traceEnt->health, 0, MOD_DECONSTRUCT );
+                  G_TotalDamageToKill( traceEnt ), 0, MOD_DECONSTRUCT );
         G_RemoveRangeMarkerFrom( traceEnt );
         G_FreeEntity( traceEnt );
       }
