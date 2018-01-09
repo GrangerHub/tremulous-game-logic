@@ -149,7 +149,7 @@ qboolean SpotWouldTelefrag( gentity_t *spot )
   for( i = 0; i < num; i++ )
   {
     hit = &g_entities[ touch[ i ] ];
-    //if ( hit->client && hit->client->ps.stats[STAT_HEALTH] > 0 ) {
+    //if ( hit->client && hit->client->ps.misc[ MISC_HEALTH ] > 0 ) {
     if( hit->client )
       return qtrue;
   }
@@ -1514,20 +1514,6 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
 
   BG_ClassBoundingBox( ent->client->pers.classSelection, ent->r.mins, ent->r.maxs, NULL, NULL, NULL );
 
-  if( client->sess.spectatorState == SPECTATOR_NOT )
-  {
-    if( BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->regenRate )
-      ent->healthReserve = client->ps.misc[ MISC_HEALTH_RESERVE ] =
-                           (int)( ALIEN_HP_RESERVE_MAX *
-                           BG_Class( ent->client->pers.classSelection )->health );
-    else
-      ent->healthReserve = client->ps.misc[ MISC_HEALTH_RESERVE ] = 0;
-  }
-  else
-  {
-    ent->healthReserve = client->ps.misc[ MISC_HEALTH_RESERVE ] = 0;
-  }
-
   // clear entity values
   if( ent->client->pers.classSelection == PCL_HUMAN )
   {
@@ -1557,21 +1543,13 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   VectorSet( ent->client->ps.grapplePoint, 0.0f, 0.0f, 1.0f );
 
   // health will count down towards max_health
-  ent->health = client->ps.stats[ STAT_HEALTH ] =
+  ent->health = client->ps.misc[ MISC_HEALTH ] =
                    BG_Class( client->ps.stats[ STAT_CLASS ] )->health; //* 1.25;
-
-  if( BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->regenRate )
-    ent->healthReserve = client->ps.misc[ MISC_HEALTH_RESERVE ] =
-                         (int)( ALIEN_HP_RESERVE_MAX *
-                         BG_Class( client->ps.stats[ STAT_CLASS ] )->health );
-  else
-    ent->healthReserve = client->ps.misc[ MISC_HEALTH_RESERVE ] = 0;
 
   //if evolving scale health
   if( ent == spawn )
   {
     const int oldHealth = ent->health;
-    const int oldHealthReserve = ent->healthReserve;
 
     //Alien classes don't don't have health regen start at full health
     if( BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->regenRate )
@@ -1581,19 +1559,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
     if( ent->health < 1 && oldHealth > 0 )
       ent->health = 1;
 
-    client->ps.stats[ STAT_HEALTH ] = ent->health;
-
-    ent->healthReserve *= ent->client->pers.evolveHealthReserveFraction;
-
-    if( ent->healthReserve < 1 )
-    {
-      if( oldHealthReserve > 0 )
-        ent->healthReserve = 1;
-      else if( ent->healthReserve < 0 )
-        ent->healthReserve = 0;
-    }
-
-    client->ps.misc[ MISC_HEALTH_RESERVE ] = ent->healthReserve;
+    client->ps.misc[ MISC_HEALTH ] = ent->health;
   }
 
   //clear the damage credits arrays

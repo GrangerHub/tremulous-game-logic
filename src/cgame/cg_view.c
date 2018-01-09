@@ -275,7 +275,7 @@ void CG_OffsetThirdPersonView( void )
   if( ( cg_thirdPersonShoulderViewMode.integer == 2 ) ||
       ( ( cg_thirdPersonShoulderViewMode.integer == 1 ) &&
         ( cg.snap->ps.stats[ STAT_STATE ] & SS_WALLCLIMBING ) &&
-        ( cg.snap->ps.stats[ STAT_HEALTH ] > 0 ) ) )
+        ( cg.snap->ps.misc[ MISC_HEALTH ] > 0 ) ) )
   {
     CG_OffsetShoulderView( );
     return;
@@ -290,7 +290,7 @@ void CG_OffsetThirdPersonView( void )
 
   // If player is dead, we want the player to be between us and the killer
   // so pretend that the player was looking at the killer, then place cam behind them.
-  if( cg.predictedPlayerState.stats[ STAT_HEALTH ] <= 0 )
+  if( cg.predictedPlayerState.misc[ MISC_HEALTH ] <= 0 )
   {
     int killerEntNum = cg.predictedPlayerState.stats[ STAT_VIEWLOCK ];
 
@@ -318,7 +318,7 @@ void CG_OffsetThirdPersonView( void )
   // to control camera position offsets using the mouse position.
   if( cg.demoPlayback || 
     ( ( cg.snap->ps.pm_flags & PMF_FOLLOW ) && 
-      ( cg.predictedPlayerState.stats[ STAT_HEALTH ] > 0 ) ) )
+      ( cg.predictedPlayerState.misc[ MISC_HEALTH ] > 0 ) ) )
   {
     // Collect our input values from the mouse.
     cmdNum = trap_GetCurrentCmdNumber();
@@ -376,7 +376,7 @@ void CG_OffsetThirdPersonView( void )
   }
   else 
   {
-    if( cg.predictedPlayerState.stats[ STAT_HEALTH ] > 0 )
+    if( cg.predictedPlayerState.misc[ MISC_HEALTH ] > 0 )
     {
       // If we're playing the game in third person, the viewangles already
       // take care of our mouselook, so just use them.
@@ -423,7 +423,7 @@ void CG_OffsetThirdPersonView( void )
   // The above checks may have moved the camera such that the existing viewangles
   // may not still face the player. Recalculate them to do so.
   // but if we're dead, don't bother because we'd rather see what killed us
-  if( cg.predictedPlayerState.stats[ STAT_HEALTH ] > 0 )
+  if( cg.predictedPlayerState.misc[ MISC_HEALTH ] > 0 )
   {
     VectorSubtract( focusPoint, cg.refdef.vieworg, focusPoint );
     vectoangles( focusPoint, cg.refdefViewAngles );
@@ -568,7 +568,7 @@ void CG_OffsetFirstPersonView( void )
   angles = cg.refdefViewAngles;
 
   // if dead, fix the angle and don't add any kick
-  if( cg.snap->ps.stats[ STAT_HEALTH ] <= 0 )
+  if( cg.snap->ps.misc[ MISC_HEALTH ] <= 0 )
   {
     angles[ ROLL ] = 40;
     angles[ PITCH ] = -15;
@@ -976,7 +976,7 @@ static int CG_CalcFov( void )
 
   if( ( cg.predictedPlayerEntity.currentState.eFlags & EF_POISONCLOUDED ) &&
       ( cg.time - cg.poisonedTime < PCLOUD_DISORIENT_DURATION) &&
-      cg.predictedPlayerState.stats[ STAT_HEALTH ] > 0 &&
+      cg.predictedPlayerState.misc[ MISC_HEALTH ] > 0 &&
       !( cg.snap->ps.pm_flags & PMF_FOLLOW ) )
   {
     float scale = 1.0f - (float)( cg.time - cg.poisonedTime ) /
@@ -1306,7 +1306,7 @@ static int CG_CalcViewValues( void )
   }
 
   //shut off the poison cloud effect if it's still on the go
-  if( cg.snap->ps.stats[ STAT_HEALTH ] <= 0 )
+  if( cg.snap->ps.misc[ MISC_HEALTH ] <= 0 )
   {
     if( CG_IsParticleSystemValid( &cg.poisonCloudPS ) )
       CG_DestroyParticleSystem( &cg.poisonCloudPS );
@@ -1430,7 +1430,7 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
   CG_PredictPlayerState( );
 
   // decide on third person view
-  cg.renderingThirdPerson = ( cg_thirdPerson.integer || ( cg.snap->ps.stats[ STAT_HEALTH ] <= 0 ) || 
+  cg.renderingThirdPerson = ( cg_thirdPerson.integer || ( cg.snap->ps.misc[ MISC_HEALTH ] <= 0 ) || 
                             ( cg.chaseFollow && cg.snap->ps.pm_flags & PMF_FOLLOW ) ||
                             ( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_ALIENS &&
                               ( cg.predictedPlayerEntity.evolve ) ) );

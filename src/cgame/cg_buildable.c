@@ -1272,7 +1272,7 @@ static qboolean CG_BuildableRemovalPending( int entityNum )
   if( !( ps->stats[ STAT_BUILDABLE ] & SB_VALID_TOGGLEBIT ) )
     return qfalse;
 
-  for( i = 0; i < ( MAX_MISC - 4 ); i++ )
+  for( i = 0; i < ( MAX_MISC - 3 ); i++ )
   {
     if( ps->misc[ i ] == entityNum )
       return qtrue;

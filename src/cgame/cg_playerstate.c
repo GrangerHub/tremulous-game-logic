@@ -49,7 +49,7 @@ void CG_DamageFeedback( int yawByte, int pitchByte, int damage )
   cg.attackerTime = cg.time;
 
   // the lower on health you are, the greater the view kick will be
-  health = cg.snap->ps.stats[STAT_HEALTH];
+  health = cg.snap->ps.misc[ MISC_HEALTH ];
 
   if( health < 40 )
     scale = 1;
@@ -250,11 +250,11 @@ void CG_CheckLocalSounds( playerState_t *ps, playerState_t *ops )
     return;
 
   // health changes of more than -1 should make pain sounds
-  if( ps->stats[ STAT_HEALTH ] < ops->stats[ STAT_HEALTH ] ||
-      ( ps->stats[ STAT_ARMOR ] < ops->stats[ STAT_ARMOR ] &&
+  if( ps->misc[ MISC_HEALTH ] < ops->misc[ MISC_HEALTH ] ||
+      ( ps->misc[ MISC_ARMOR ] < ops->misc[ MISC_ARMOR ] &&
         BG_InventoryContainsUpgrade( UP_BATTLESUIT, ps->stats ) ) )
   {
-    if( ps->stats[ STAT_HEALTH ] > 0 )
+    if( ps->misc[ MISC_HEALTH ] > 0 )
       CG_PainEvent( &cg.predictedPlayerEntity, BG_GetPainState( ps ) );
   }
 

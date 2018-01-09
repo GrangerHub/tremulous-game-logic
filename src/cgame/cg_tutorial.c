@@ -779,7 +779,7 @@ static void CG_HumanText( char *text, playerState_t *ps )
             name ) );
   }
 
-  if( ps->stats[ STAT_HEALTH ] <= 35 &&
+  if( ps->misc[ MISC_HEALTH ] <= 35 &&
       BG_InventoryContainsUpgrade( UP_MEDKIT, ps->stats ) )
   {
     Q_strcat( text, MAX_TUTORIAL_TEXT,
@@ -927,7 +927,7 @@ const char *CG_TutorialText( void )
     {
       CG_SpectatorText( text, ps );
     }
-    else if( ps->stats[ STAT_HEALTH ] > 0 )
+    else if( ps->misc[ MISC_HEALTH ] > 0 )
     {
       switch( ps->stats[ STAT_CLASS ] )
       {

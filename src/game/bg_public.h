@@ -294,11 +294,11 @@ void Pmove( pmove_t *pmove );
 // player_state->stats[] indexes
 typedef enum
 {
-  STAT_HEALTH,
+  STAT_STATMISC_AT_LAST_FIRE,
+  STAT_BOLT_CHARGE_AT_LAST_CHECK,
   STAT_ITEMS,
   STAT_ACTIVEITEMS,
   STAT_WEAPON,    // current primary weapon
-  STAT_ARMOR,     // armor points
   STAT_CLASS,     // player class (for aliens AND humans)
   STAT_TEAM,      // player team
   STAT_READY,     // player ready state
@@ -324,7 +324,6 @@ typedef enum
 #define SCA_REGEN               0x00000100 // XXX kinda wasted- keeps alien class on human team from never dieing when team admits defeat.
 #define SCA_CANHOVEL            0x00000200
 #define SCA_CHARGE_STAMINA      0x00000400 // limits STAT_MISC use. can't be used with SCA_STAMINA
-#define SCA_REGEN_RESERVE       0x00000800 // When hp regen draws from an hp reserve, where if it runs out, regen becomes very slow.
 
 #define SS_WALLCLIMBING         0x00000001
 #define SS_CREEPSLOWED          0x00000002
@@ -372,12 +371,11 @@ typedef enum
 } persEnum_t;
 
 // hack to fit extra data in the misc[] array
-#define MISC_STATMISC_AT_LAST_FIRE     ( MAX_MISC - 1 )
-#define MISC_BOLT_CHARGE_AT_LAST_CHECK ( MAX_MISC - 2 )
-#define MISC_HEALTH_RESERVE            ( MAX_MISC - 3 )
+#define MISC_HEALTH                    ( MAX_MISC - 1 )
+#define MISC_ARMOR                     ( MAX_MISC - 2 ) // health / armor limit, changable by handicap
 //Do not use MISC_SEED outside of PM_PSRandom(),
 //and don't use PM_PSRandom() outside of bg_pmove.c.
-#define MISC_SEED                      ( MAX_MISC - 4 ) // for predicted psudorandom things
+#define MISC_SEED                      ( MAX_MISC - 3 ) // for predicted psudorandom things
 
 #define PS_WALLCLIMBINGFOLLOW   0x00000001
 #define PS_WALLCLIMBINGTOGGLE   0x00000002

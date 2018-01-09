@@ -3293,7 +3293,7 @@ void HMedistat_Think( gentity_t *self )
         self->enemy->health += HP2SU( 1 );
         if( self->enemy->health > BG_Class( self->enemy->client->ps.stats[ STAT_CLASS ] )->health )
           self->enemy->health = BG_Class( self->enemy->client->ps.stats[ STAT_CLASS ] )->health;
-        self->enemy->client->ps.stats[ STAT_HEALTH ] = self->enemy->health;
+        self->enemy->client->ps.misc[ MISC_HEALTH ] = self->enemy->health;
         self->enemy->client->pers.infoChangeTime = level.time;
       }
 

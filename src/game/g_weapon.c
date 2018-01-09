@@ -1306,7 +1306,7 @@ qboolean CheckVenomAttack( gentity_t *ent )
   {
     if( traceEnt->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
       return qfalse;
-    if( traceEnt->client->ps.stats[ STAT_HEALTH ] <= 0 )
+    if( traceEnt->client->ps.misc[ MISC_HEALTH ] <= 0 )
       return qfalse;
   }
 
@@ -1364,7 +1364,7 @@ void CheckGrabAttack( gentity_t *ent )
     if( traceEnt->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
       return;
 
-    if( traceEnt->client->ps.stats[ STAT_HEALTH ] <= 0 )
+    if( traceEnt->client->ps.misc[ MISC_HEALTH ] <= 0 )
       return;
 
     if( !( traceEnt->client->ps.stats[ STAT_STATE ] & SS_GRABBED ) )
@@ -1696,7 +1696,7 @@ static void G_CreateNewLev2Zap( gentity_t *creator, gentity_t *targetEnt )
   lev2ZapList = zap->zapLink = BG_List_Prepend( lev2ZapList, zap );
 
   // initialize the zap
-  zap->timeToLive = LEVEL2_AREAzap_tIME;
+  zap->timeToLive = LEVEL2_AREAZAP_TIME;
   zap->creator = creator;
   BG_Queue_Init( &zap->targetQueue );
   primaryZapTarget = BG_Alloc( sizeof(zapTarget_t) );

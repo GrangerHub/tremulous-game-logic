@@ -285,7 +285,6 @@ struct gentity_s
   int               last_move_time;
 
   int               health;
-  int               healthReserve;
   int               lastHealth; // currently only used for overmind
 
   qboolean          takedamage;
@@ -467,7 +466,6 @@ typedef struct
 
   class_t             classSelection;     // player class (copied to ent->client->ps.stats[ STAT_CLASS ] once spawned)
   float               evolveHealthFraction;
-  float               evolveHealthReserveFraction;
   float               evolveChargeStaminaFraction;
   weapon_t            humanItemSelection; // humans have a starting item
   team_t              teamSelection;      // player team (copied to ps.stats[ STAT_TEAM ])

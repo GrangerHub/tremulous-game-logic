@@ -421,7 +421,7 @@ static void Give_Class( gentity_t *ent, char *s )
   }
 
   ent->client->pers.evolveHealthFraction
-      = (float)ent->client->ps.stats[ STAT_HEALTH ]
+      = (float)ent->client->ps.misc[ MISC_HEALTH ]
       / (float)BG_Class( currentClass )->health;
 
   if( ent->client->pers.evolveHealthFraction < 0.0f )
@@ -482,7 +482,7 @@ static void Give_Upgrade( gentity_t *ent, char *s )
   BG_AddUpgradeToInventory( u, ent->client->ps.stats );
 
   if( u == UP_BATTLESUIT )
-    ent->client->ps.stats[ STAT_ARMOR ] = BSUIT_MAX_ARMOR;
+    ent->client->ps.misc[ MISC_ARMOR ] = BSUIT_MAX_ARMOR;
 
   for( i = 0; i < MAX_CLIENTS; i++ )
     ent->creditsUpgrade[ u ][ i ] = 0;
@@ -623,7 +623,7 @@ void Cmd_Give_f( gentity_t *ent )
     {
       int i;
 
-      ent->client->ps.stats[ STAT_ARMOR ] = BSUIT_MAX_ARMOR;
+      ent->client->ps.misc[ MISC_ARMOR ] = BSUIT_MAX_ARMOR;
       for( i = 0; i < MAX_CLIENTS; i++ )
         ent->creditsUpgrade[ UP_BATTLESUIT ][ i ] = 0;
 
@@ -734,7 +734,7 @@ void Cmd_Kill_f( gentity_t *ent )
     if( ent->client->ps.eFlags & EF_OCCUPYING )
       G_ResetOccupation( ent->occupation.occupied, ent );
 
-    ent->client->ps.stats[ STAT_HEALTH ] = ent->health = 0;
+    ent->client->ps.misc[ MISC_HEALTH ] = ent->health = 0;
     player_die( ent, ent, ent, 100000, MOD_SUICIDE );
   }
   else
@@ -2348,23 +2348,13 @@ void Cmd_Class_f( gentity_t *ent )
             G_SetClientViewAngle( ent, newAngles );
           }
 
-          ent->client->pers.evolveHealthFraction = (float)ent->client->ps.stats[ STAT_HEALTH ] /
+          ent->client->pers.evolveHealthFraction = (float)ent->client->ps.misc[ MISC_HEALTH ] /
                                                    (float)BG_Class( currentClass )->health;
 
           if( ent->client->pers.evolveHealthFraction < 0.0f )
             ent->client->pers.evolveHealthFraction = 0.0f;
           else if( ent->client->pers.evolveHealthFraction > 1.0f )
             ent->client->pers.evolveHealthFraction = 1.0f;
-
-          ent->client->pers.evolveHealthReserveFraction =
-                          (float)ent->client->ps.misc[ MISC_HEALTH_RESERVE ] /
-                          ( (float)BG_Class( currentClass )->health *
-                          ALIEN_HP_RESERVE_MAX );
-
-          if( ent->client->pers.evolveHealthReserveFraction < 0.0f )
-            ent->client->pers.evolveHealthReserveFraction = 0.0f;
-          else if( ent->client->pers.evolveHealthReserveFraction > 1.0f )
-            ent->client->pers.evolveHealthReserveFraction = 1.0f;
 
           ent->client->pers.evolveChargeStaminaFraction = 
                           (float)ent->client->ps.stats[ STAT_STAMINA ] /
@@ -2916,7 +2906,7 @@ void Cmd_Buy_f( gentity_t *ent )
           ent->client->ps.stats[ STAT_CLASS ] = PCL_HUMAN_BSUIT;
           ent->client->pers.classSelection = PCL_HUMAN_BSUIT;
           ent->client->ps.eFlags ^= EF_TELEPORT_BIT;
-          ent->client->ps.stats[ STAT_ARMOR ] = BSUIT_MAX_ARMOR;
+          ent->client->ps.misc[ MISC_ARMOR ] = BSUIT_MAX_ARMOR;
         }
         else if( upgrade == UP_JETPACK )
          ent->client->ps.stats[ STAT_FUEL ] = JETPACK_FUEL_FULL;
@@ -3105,7 +3095,7 @@ void Cmd_Sell_f( gentity_t *ent )
       } else if( upgrade == UP_BATTLESUIT )
       {
         if( !IS_WARMUP &&
-            ent->client->ps.stats[ STAT_ARMOR ] < BSUIT_MAX_ARMOR )
+            ent->client->ps.misc[ MISC_ARMOR ] < BSUIT_MAX_ARMOR )
         {
           G_AddCreditToClient( ent->client, (short)( BSUIT_PRICE_USED ),
                                qfalse );
@@ -3115,7 +3105,7 @@ void Cmd_Sell_f( gentity_t *ent )
           G_AddCreditToClient( ent->client, (short)BG_Upgrade( UP_BATTLESUIT )->price,
                                qfalse );
 
-        ent->client->ps.stats[ STAT_ARMOR ] = 0;
+        ent->client->ps.misc[ MISC_ARMOR ] = 0;
       } else
         G_AddCreditToClient( ent->client, (short)BG_Upgrade( upgrade )->price,
                              qfalse );
@@ -3123,7 +3113,7 @@ void Cmd_Sell_f( gentity_t *ent )
   }
   else if( !Q_stricmp( s, "upgrades" ) )
   {
-    const int statMaxHealth = ent->client->ps.stats[ STAT_ARMOR ];
+    const int statMaxHealth = ent->client->ps.misc[ MISC_ARMOR ];
 
     for( i = UP_NONE + 1; i < UP_NUM_UPGRADES; i++ )
     {
@@ -3144,7 +3134,7 @@ void Cmd_Sell_f( gentity_t *ent )
           ent->client->ps.stats[ STAT_CLASS ] = PCL_HUMAN;
           ent->client->pers.classSelection = PCL_HUMAN;
           ent->client->ps.eFlags ^= EF_TELEPORT_BIT;
-          ent->client->ps.stats[ STAT_ARMOR ] = 0;
+          ent->client->ps.misc[ MISC_ARMOR ] = 0;
         }
 
         BG_RemoveUpgradeFromInventory( i, ent->client->ps.stats );
@@ -4500,7 +4490,7 @@ Q_EXPORT void ClientCommand( int clientNum )
   }
 
   if( command->cmdFlags & CMD_ALIVE &&
-    ( ent->client->ps.stats[ STAT_HEALTH ] <= 0 ||
+    ( ent->client->ps.misc[ MISC_HEALTH ] <= 0 ||
       ent->client->sess.spectatorState != SPECTATOR_NOT ) )
   {
     G_TriggerMenu( clientNum, MN_CMD_ALIVE );
