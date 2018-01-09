@@ -3638,6 +3638,7 @@ static void PM_Weapon( void )
   qboolean      attack3 = pm->cmd.buttons & BUTTON_USE_HOLDABLE;
   qboolean      outOfAmmo = qfalse;
   qboolean      byPassWeaponTime = qfalse;
+  qboolean      burstClearedByEmp = qfalse;
 
   // Ignore weapons in some cases
   if( pm->ps->persistant[ PERS_SPECSTATE ] != SPECTATOR_NOT )
@@ -3795,8 +3796,11 @@ static void PM_Weapon( void )
     if( pm->ps->stats[ STAT_STATE ] & SS_CHARGING )
     {
       //clear any remaining burst rounds for the EMP
-      if( !attack2 )
+      if( !attack2 && pm->pmext->burstRoundsToFire[ 1 ] )
+      {
         pm->pmext->burstRoundsToFire[ 1 ] = 0;
+        burstClearedByEmp = qtrue;
+      }
     } else if( !pm->pmext->burstRoundsToFire[ 1 ] )
     {
       // Charging up
@@ -3841,10 +3845,26 @@ static void PM_Weapon( void )
       pm->ps->weapon == WP_ALEVEL4 )
     return;
 
+  // allways allow upgrades to be usable
+  if( pm->cmd.weapon >= 32 &&
+      ( pm->cmd.buttons & BUTTON_USE_HOLDABLE ) &&
+      !( pm->ps->pm_flags & PMF_USE_ITEM_HELD ) )
+  {
+    //if trying to toggle an upgrade, toggle it
+    if( BG_InventoryContainsUpgrade( pm->cmd.weapon - 32, pm->ps->stats ) ) //sanity check
+    {
+      if( BG_UpgradeIsActive( pm->cmd.weapon - 32, pm->ps->stats ) )
+        BG_DeactivateUpgrade( pm->cmd.weapon - 32, pm->ps->stats );
+      else
+        BG_ActivateUpgrade( pm->cmd.weapon - 32, pm->ps->stats );
+    }
+
+    pm->ps->pm_flags |= PMF_USE_ITEM_HELD;
+  }
   // check for weapon change
   // can't change if weapon is firing, but can change
   // again if lowering or raising
-  if( BG_PlayerCanChangeWeapon( pm->ps, pm->pmext ) )
+  else if( BG_PlayerCanChangeWeapon( pm->ps, pm->pmext ) )
   {
     // must press use to switch weapons
     if( pm->cmd.buttons & BUTTON_USE_HOLDABLE )
@@ -3857,17 +3877,7 @@ static void PM_Weapon( void )
           if( pm->ps->weapon != pm->cmd.weapon )
             PM_BeginWeaponChange( pm->cmd.weapon );
         }
-        else
-        {
-          //if trying to toggle an upgrade, toggle it
-          if( BG_InventoryContainsUpgrade( pm->cmd.weapon - 32, pm->ps->stats ) ) //sanity check
-          {
-            if( BG_UpgradeIsActive( pm->cmd.weapon - 32, pm->ps->stats ) )
-              BG_DeactivateUpgrade( pm->cmd.weapon - 32, pm->ps->stats );
-            else
-              BG_ActivateUpgrade( pm->cmd.weapon - 32, pm->ps->stats );
-          }
-        }
+
         pm->ps->pm_flags |= PMF_USE_ITEM_HELD;
       }
     }
@@ -4148,7 +4158,8 @@ static void PM_Weapon( void )
           // Fire the EMP
           attack3 = qtrue;
           attack1 = attack2 = qfalse;
-          pm->ps->weaponTime += BG_Weapon( pm->ps->weapon )->burstDelay2;
+          if( burstClearedByEmp )
+            pm->ps->weaponTime += BG_Weapon( pm->ps->weapon )->burstDelay2;
           pm->ps->stats[ STAT_STATE ] &= ~SS_CHARGING;
         }
         else if( pm->ps->stats[ STAT_MISC ] >= LIGHTNING_BOLT_CHARGE_TIME_MIN )
