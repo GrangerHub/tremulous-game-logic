@@ -286,7 +286,7 @@ void target_kill_use( gentity_t *self, gentity_t *other, gentity_t *activator )
   if( !activator )
     return;
 
-  G_Damage( activator, NULL, NULL, NULL, NULL, activator->health, DAMAGE_NO_PROTECTION, MOD_TELEFRAG );
+  G_Damage( activator, NULL, NULL, NULL, NULL, G_TotalDamageToKill( activator ), DAMAGE_NO_PROTECTION, MOD_TELEFRAG );
 }
 
 void SP_target_kill( gentity_t *self )
@@ -495,7 +495,7 @@ void SP_target_hurt( gentity_t *self )
   if( !self->damage )
     self->damage = 5;
 
-  self->damage *= HP2SU( 1 );
+  self->damage = HP2SU( self->damage );
 
   self->use = target_hurt_use;
 }

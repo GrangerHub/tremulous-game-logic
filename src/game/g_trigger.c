@@ -445,6 +445,8 @@ void SP_trigger_hurt( gentity_t *self )
   if( self->damage <= 0 )
     self->damage = 5;
 
+  self->damage = HP2SU( self->damage );
+
   G_SetContents( self, CONTENTS_TRIGGER );
 
   self->use = hurt_use;
