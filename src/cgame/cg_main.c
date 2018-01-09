@@ -602,7 +602,7 @@ static void CG_SetPVars( void )
     ps = &cg.snap->ps;
 
     trap_Cvar_Set( "player_hp", va( "%d", ps->misc[ MISC_HEALTH ] ));
-    trap_Cvar_Set( "player_maxhp",va( "%d", ps->misc[ MISC_MAX_HEALTH ] ));
+    trap_Cvar_Set( "player_maxhp",va( "%d", BG_Class( ps->stats[ STAT_CLASS ] )->health ));
 
     switch( ps->stats[ STAT_TEAM ] )
     {

@@ -359,7 +359,7 @@ typedef enum
 
 // hack to fit extra data in the misc[] array
 #define MISC_HEALTH                    ( MAX_MISC - 1 )
-#define MISC_MAX_HEALTH                ( MAX_MISC - 2 ) // health / armor limit, changable by handicap
+#define MISC_ARMOR                     ( MAX_MISC - 2 ) // health / armor limit, changable by handicap
 //Do not use MISC_SEED outside of PM_PSRandom(),
 //and don't use PM_PSRandom() outside of bg_pmove.c.
 #define MISC_SEED                      ( MAX_MISC - 3 ) // for predicted psudorandom things

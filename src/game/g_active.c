@@ -813,7 +813,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
 
       if( remainingStartupTime < 0 )
       {
-        if( ent->health < ent->client->ps.misc[ MISC_MAX_HEALTH ] &&
+        if( ent->health < BG_Class( client->ps.stats[ STAT_CLASS ] )->health &&
             ent->client->medKitHealthToRestore &&
             ent->client->ps.pm_type != PM_DEAD )
         {
@@ -821,8 +821,8 @@ void ClientTimerActions( gentity_t *ent, int msec )
           if( ent->client->medKitHealthToRestore < 0 )
             ent->client->medKitHealthToRestore = 0;
           ent->health += HP2SU( 1 );
-          if( ent->health > ent->client->ps.misc[ MISC_MAX_HEALTH ] )
-            ent->health = ent->client->ps.misc[ MISC_MAX_HEALTH ];
+          if( ent->health > BG_Class( client->ps.stats[ STAT_CLASS ] )->health )
+            ent->health = BG_Class( client->ps.stats[ STAT_CLASS ] )->health;
           ent->client->ps.misc[ MISC_HEALTH ] = ent->health;
           client->pers.infoChangeTime = level.time;
         }
@@ -831,7 +831,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
       }
       else
       {
-        if( ent->health < ent->client->ps.misc[ MISC_MAX_HEALTH ] &&
+        if( ent->health < BG_Class( client->ps.stats[ STAT_CLASS ] )->health &&
             ent->client->medKitHealthToRestore &&
             ent->client->ps.pm_type != PM_DEAD )
         {
@@ -842,8 +842,8 @@ void ClientTimerActions( gentity_t *ent, int msec )
             if( ent->client->medKitHealthToRestore < 0 )
               ent->client->medKitHealthToRestore = 0;
             ent->health += HP2SU( 1 );
-            if( ent->health > ent->client->ps.misc[ MISC_MAX_HEALTH ] )
-              ent->health = ent->client->ps.misc[ MISC_MAX_HEALTH ];
+            if( ent->health > BG_Class( client->ps.stats[ STAT_CLASS ] )->health )
+              ent->health = BG_Class( client->ps.stats[ STAT_CLASS ] )->health;
             ent->client->ps.misc[ MISC_HEALTH ] = ent->health;
             client->pers.infoChangeTime = level.time;
 
@@ -2138,7 +2138,7 @@ void ClientThink_real( gentity_t *ent )
   {
     //if currently using a medkit or have no need for a medkit now
     if( client->ps.stats[ STAT_STATE ] & SS_HEALING_2X ||
-        ( client->ps.misc[ MISC_HEALTH ] == client->ps.misc[ MISC_MAX_HEALTH ] &&
+        ( client->ps.misc[ MISC_HEALTH ] == BG_Class( client->ps.stats[ STAT_CLASS ] )->health &&
           !( client->ps.stats[ STAT_STATE ] & SS_POISONED ) ) )
     {
       BG_DeactivateUpgrade( UP_MEDKIT, client->ps.stats );
@@ -2171,7 +2171,7 @@ void ClientThink_real( gentity_t *ent )
       client->ps.stats[ STAT_STATE ] |= SS_HEALING_2X;
       client->lastMedKitTime = level.time;
       client->medKitHealthToRestore =
-        client->ps.misc[ MISC_MAX_HEALTH ] - client->ps.misc[ MISC_HEALTH ];
+        BG_Class( client->ps.stats[ STAT_CLASS ] )->health - client->ps.misc[ MISC_HEALTH ];
       client->medKitIncrementTime = level.time +
         ( MEDKIT_STARTUP_TIME / MEDKIT_STARTUP_SPEED );
 
@@ -2236,7 +2236,7 @@ void ClientThink_real( gentity_t *ent )
             didBoost = qtrue;
           }
 
-          if( didBoost && ent->health < client->ps.misc[ MISC_MAX_HEALTH ] )
+          if( didBoost && ent->health < BG_Class( client->ps.stats[ STAT_CLASS ] )->health )
             boost->client->pers.hasHealed = qtrue;
         }
       }
@@ -2268,16 +2268,16 @@ void ClientThink_real( gentity_t *ent )
         ent->nextRegenTime += count * interval;
       }
 
-      if( ent->health < client->ps.misc[ MISC_MAX_HEALTH ] )
+      if( ent->health < BG_Class( client->ps.stats[ STAT_CLASS ] )->health )
       {
         ent->health += count;
         client->ps.misc[ MISC_HEALTH ] = ent->health;
         client->pers.infoChangeTime = level.time;
 
         // if at max health, clear damage counters
-        if( ent->health >= client->ps.misc[ MISC_MAX_HEALTH ] )
+        if( ent->health >= BG_Class( client->ps.stats[ STAT_CLASS ] )->health )
         {
-          ent->health = client->ps.misc[ MISC_HEALTH ] = client->ps.misc[ MISC_MAX_HEALTH ];
+          ent->health = client->ps.misc[ MISC_HEALTH ] = BG_Class( client->ps.stats[ STAT_CLASS ] )->health;
           for( i = 0; i < MAX_CLIENTS; i++ )
             ent->credits[ i ] = 0;
         }

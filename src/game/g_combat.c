@@ -185,7 +185,7 @@ float G_RewardAttackers( gentity_t *self )
   {
     value = BG_GetValueOfPlayer( &self->client->ps );
     team = self->client->pers.teamSelection;
-    maxHealth = self->client->ps.misc[ MISC_MAX_HEALTH ];
+    maxHealth = BG_Class( self->client->ps.stats[ STAT_CLASS ] )->health;
   }
   else if( self->s.eType == ET_BUILDABLE )
   {

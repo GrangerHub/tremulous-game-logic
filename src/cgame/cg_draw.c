@@ -3802,7 +3802,7 @@ static void CG_PainBlend( void )
   if( damage < 0 )
     damage = 0;
 
-  damageAsFracOfMax = (float)damage / cg.snap->ps.misc[ MISC_MAX_HEALTH ];
+  damageAsFracOfMax = (float)damage / BG_Class( cg.snap->ps.stats[ STAT_CLASS ] )->health;
   cg.lastHealth = cg.snap->ps.misc[ MISC_HEALTH ];
 
   cg.painBlendValue += damageAsFracOfMax * cg_painBlendScale.value;

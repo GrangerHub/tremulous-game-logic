@@ -1059,7 +1059,7 @@ void trigger_heal_touch( gentity_t *self, gentity_t *other, trace_t *trace )
   else
     self->timestamp = level.time + FRAMETIME;
 
-  max = other->client->ps.misc[ MISC_MAX_HEALTH ];
+  max = BG_Class( other->client->ps.stats[ STAT_CLASS ] )->health;
 
   other->health += self->damage;
 
