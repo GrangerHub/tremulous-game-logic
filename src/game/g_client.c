@@ -482,10 +482,14 @@ static void SpawnCorpse( gentity_t *ent )
   VectorCopy( ent->s.apos.trBase, body->s.apos.trBase );
   VectorCopy( ent->s.apos.trBase, body->r.currentAngles );
   body->s.eFlags = EF_DEAD;
+  body->s.otherEntityNum2 = ent->client->ps.misc[ MISC_CLIENT_FLAGS ] & CLF_GIBBED;
   body->s.eType = ET_CORPSE;
   body->timestamp = level.time;
   body->s.event = 0;
-  G_SetContents( body, CONTENTS_CORPSE );
+  if( ent->client && ent->client->noclip )
+    G_SetContents( body, ent->client->cliprcontents );
+  else
+    G_SetContents( body, ent->r.contents );
   G_SetClipmask( body, MASK_DEADSOLID );
   body->s.clientNum = ent->client->ps.stats[ STAT_CLASS ];
   body->nonSegModel = ent->client->ps.persistant[ PERS_STATE ] & PS_NONSEGMODEL;

@@ -402,15 +402,31 @@ GibEntity
 void GibEntity( gentity_t *self )
 {
   vec3_t dir;
+  gentity_t *tent;
 
   VectorCopy( self->s.origin2, dir );
 
-  G_AddEvent( self, EV_GIB_PLAYER, DirToByte( dir ) );
+  //send gibbing event
+  tent = G_TempEntity( self->r.currentOrigin, EV_GIB_PLAYER );
+  tent->s.eventParm = DirToByte( dir );
+  tent->s.pos.trType = TR_GRAVITY;
+  tent->s.pos.trTime = level.time;
+  if( self->client )
+    VectorCopy( self->client->ps.velocity, tent->s.pos.trDelta );
+  else
+    VectorCopy( self->s.pos.trDelta, tent->s.pos.trDelta );
+
   self->takedamage = qfalse;
-  self->s.eType    = ET_INVISIBLE;
-  self->r.contents = 0;
-  G_BackupUnoccupyContents( self );
-  self->nextthink  = 0;
+  G_SetContents( self, CONTENTS_CORPSE );
+
+  //set the gibbed flag
+  if( self->client )
+  {
+    self->client->ps.misc[ MISC_CLIENT_FLAGS ] |= CLF_GIBBED;
+  } else
+  {
+    self->s.otherEntityNum2 |= CLF_GIBBED;
+  }
 }
 
 /*
@@ -546,15 +562,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
   VectorCopy( self->r.currentOrigin, self->client->pers.lastDeathLocation );
 
-  self->takedamage = qtrue; // can still be gibbed
-
   self->s.weapon = WP_NONE;
-  if( self->client->noclip )
-    self->client->cliprcontents = CONTENTS_CORPSE;
-  else
-    self->r.contents = CONTENTS_CORPSE;
-
-  G_BackupUnoccupyContents( self );
 
   self->client->ps.viewangles[ PITCH ] = 0; // zomg
   self->client->ps.viewangles[ YAW ] = self->s.apos.trBase[ YAW ];
@@ -572,12 +580,23 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   // clear misc
   memset( self->client->ps.misc, 0, sizeof( self->client->ps.misc ) );
 
-  if ( self->health <= GIB_HEALTH
-    && self->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
+  if( self->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
   {
-    GibEntity( self );
+    if ( self->health <= GIB_HEALTH )
+    {
+      GibEntity( self );
+    } else
+    {
+      self->takedamage = qtrue; // can still be gibbed
+      G_SetContents( self, CONTENTS_CORPSE );
+    }
+  } else
+  {
+    self->takedamage = qfalse;
+    G_SetContents( self, 0 );
   }
-  else
+  
+
   {
     // normal death
     static int i;
