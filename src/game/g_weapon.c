@@ -222,7 +222,7 @@ static void G_WideTrace( trace_t *tr, gentity_t *ent, float range,
   VectorMA( muzzle, range, forward, end );
 
   // Trace against entities
-  SV_Trace( tr, muzzle, mins, maxs, end, ent->s.number, CONTENTS_BODY, TT_AABB );
+  SV_Trace( tr, muzzle, mins, maxs, end, ent->s.number, CONTENTS_BODY | CONTENTS_CORPSE, TT_AABB );
   if( tr->entityNum != ENTITYNUM_NONE )
     *target = &g_entities[ tr->entityNum ];
 
@@ -316,7 +316,8 @@ static void WideBloodSpurt( gentity_t *attacker, gentity_t *victim, trace_t *tr 
   if( !attacker->client )
     return;
 
-  if( victim->health <= 0 )
+  if( victim->health <= 0 &&
+      victim->s.eType == ET_BUILDABLE )
     return;
 
   if( tr )
@@ -1289,12 +1290,13 @@ qboolean CheckVenomAttack( gentity_t *ent )
   if( !G_TakesDamage( traceEnt ) )
     return qfalse;
 
-  if( traceEnt->health <= 0 )
-      return qfalse;
-
   // Allow the attacking of all enemy buildables.
   if( traceEnt->s.eType == ET_BUILDABLE )
   {
+
+    if( traceEnt->health <= 0 )
+        return qfalse;
+
     if( traceEnt->buildableTeam == TEAM_ALIENS )
       return qfalse;
 
@@ -1305,8 +1307,6 @@ qboolean CheckVenomAttack( gentity_t *ent )
   if( traceEnt->client )
   {
     if( traceEnt->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
-      return qfalse;
-    if( traceEnt->client->ps.misc[ MISC_HEALTH ] <= 0 )
       return qfalse;
   }
 
