@@ -788,7 +788,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
             client->ps.stats[ STAT_BUILDABLE ] &= ~SB_VALID_TOGGLEBIT;
 
           // Let the client know which buildables will be removed by building
-          for( i = 0; i < ( MAX_MISC - 3 ); i++ )
+          for( i = 0; i < ( MAX_MISC - 4 ); i++ )
           {
             if( i < level.numBuildablesForRemoval )
               client->ps.misc[ i ] = level.markedBuildables[ i ]->s.number;
@@ -798,7 +798,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
         }
         else
         {
-          for( i = 0; i < ( MAX_MISC - 3 ); i++ )
+          for( i = 0; i < ( MAX_MISC - 4 ); i++ )
             client->ps.misc[ i ] = 0;
         }
         break;
@@ -2078,9 +2078,10 @@ void ClientThink_real( gentity_t *ent )
   // calculate where ent is currently seeing all the other active clients
   G_UnlaggedCalc( ent->client->unlaggedTime, ent );
 
-  if( !G_TakesDamage( ent ) ||
-      ( ent->flags & FL_GODMODE ) ||
-      !ent->r.contents )
+  if( client->ps.misc[ MISC_HEALTH ] > 0 &&
+      ( !G_TakesDamage( ent ) ||
+        ( ent->flags & FL_GODMODE ) ||
+        !ent->r.contents ) )
     client->ps.eFlags |= EF_INVINCIBLE;
   else if( client->ps.eFlags & EF_INVINCIBLE )
   {

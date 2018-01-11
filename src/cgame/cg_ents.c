@@ -1146,6 +1146,13 @@ static void CG_AddCEntity( centity_t *cent )
   // calculate the current origin
   CG_CalcEntityLerpPositions( cent );
 
+  // check to see if a body has been gibbed
+  if( cg_blood.integer &&
+      ( cent->currentState.eType == ET_PLAYER ||
+        cent->currentState.eType == ET_CORPSE ) &&
+      ( cent->currentState.otherEntityNum2 & CLF_GIBBED ) )
+    cent->currentState.eType = ET_INVISIBLE;
+
   // add automatic effects
   CG_EntityEffects( cent );
 
