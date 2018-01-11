@@ -364,6 +364,13 @@ typedef enum
 //and don't use PM_PSRandom() outside of bg_pmove.c.
 #define MISC_SEED                      ( MAX_MISC - 3 ) // for predicted psudorandom things
 
+// Additional flags only used by clients.  Copied over to otherEntityNum2 in
+// the entity state, but keep in mind that otherEntityNum2 can only hold
+// GENTITYNUM_BITS number of bits (current default is 10).
+#define MISC_CLIENT_FLAGS              ( MAX_MISC - 4 )
+
+#define CLF_GIBBED             0x0000000001
+
 #define PS_WALLCLIMBINGFOLLOW   0x00000001
 #define PS_WALLCLIMBINGTOGGLE   0x00000002
 #define PS_NONSEGMODEL          0x00000004
