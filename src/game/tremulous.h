@@ -150,7 +150,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define SPITFIRE_ZAP_REPEAT             1250
 #define SPITFIRE_ZAP_K_SCALE            1.0f
 #define SPITFIRE_ZAP_RANGE              300.0f
-#define SPITFIRE_ZAP_DMG                AWDM(200)
+#define SPITFIRE_ZAP_DMG                AWDM(20000)
 #define SPITFIRE_ZAP_TIME               150
 #define SPITFIRE_ASCEND_REPEAT          400
 #define SPITFIRE_ASCEND_MAG             800.0f
@@ -158,7 +158,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define SPITFIRE_POUNCE_REPEAT          250
 #define SPITFIRE_POUNCE_TIME            1200
 #define SPITFIRE_POUNCE_TIME_MIN        250 
-#define SPITFIRE_POUNCE_DMG             AWDM(600)
+#define SPITFIRE_POUNCE_DMG             AWDM(60000)
 #define SPITFIRE_POUNCE_RANGE           48.0f
 #define SPITFIRE_POUNCE_WIDTH           14.0f
 #define SPITFIRE_POUNCE_SPEED_MOD       0.95f
@@ -602,7 +602,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define PORTAL_HEALTH               750000
 #define PORTALGUN_DAMAGE           HWDM(6000)
 
-#define LAUNCHER_PRICE               600
+#define LAUNCHER_PRICE               3200
 #define LAUNCHER_AMMO                6
 #define LAUNCHER_MAXCLIPS            1
 #define LAUNCHER_ROUND_PRICE         GRENADE_PRICE
