@@ -427,6 +427,8 @@ void GibEntity( gentity_t *self )
   {
     self->s.otherEntityNum2 |= CLF_GIBBED;
   }
+
+  self->die = NULL;
 }
 
 /*
@@ -589,11 +591,13 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
     {
       self->takedamage = qtrue; // can still be gibbed
       G_SetContents( self, CONTENTS_CORPSE );
+      self->die = body_die;
     }
   } else
   {
     self->takedamage = qfalse;
     G_SetContents( self, 0 );
+    self->die = NULL;
   }
   
 

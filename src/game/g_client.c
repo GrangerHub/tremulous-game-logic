@@ -507,17 +507,8 @@ static void SpawnCorpse( gentity_t *ent )
 
   body->health     = ent->health;
 
-  if ( ent->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
-  {
-    body->takedamage = qtrue;     // Should allow body_die to call
-    body->die      = body_die;  // But it doesnt?
-  }
-  else
-  {
-    body->takedamage = qfalse;
-    body->die      = NULL;
-  }
-
+  body->takedamage = ent->takedamage;
+  body->die = ent->die;
 
   body->s.legsAnim = ent->s.legsAnim;
 
