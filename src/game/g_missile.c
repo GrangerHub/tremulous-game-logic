@@ -733,7 +733,7 @@ gentity_t *fire_lightningBall( gentity_t *self, qboolean EMP,
     bolt->damage = LIGHTNING_BALL_DAMAGE;
     bolt->flags |= ( FL_BOUNCE_HALF | FL_NO_BOUNCE_SOUND );
     bolt->splashDamage = LIGHTNING_BALL_SPLASH_DMG;
-    bolt->s.pos.trType = TR_GRAVITY;
+    bolt->s.pos.trType = TR_HALF_GRAVITY;
     bolt->takedamage = qtrue;
     bolt->health = 1;
     bolt->die = lightningBall_die;

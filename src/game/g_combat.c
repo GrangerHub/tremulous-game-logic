@@ -1595,6 +1595,11 @@ qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage,
     if( dist >= radius )
       continue;
 
+    if( ( mod == MOD_LIGHTNING_EMP ||
+          mod == MOD_LIGHTNING ) &&
+        attacker->s.number == ent->s.number )
+      continue;
+
     points = damage * ( 1.0 - dist / radius );
 
     if( CanDamage( ent, origin ) )
