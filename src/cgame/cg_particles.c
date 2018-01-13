@@ -1523,6 +1523,13 @@ static qboolean CG_ParseParticleFile( const char *fileName )
       {
         Q_strncpyz( baseParticleSystems[ numBaseParticleSystems ].name, psName, MAX_QPATH );
 
+        if( numBaseParticleSystems == MAX_BASEPARTICLE_SYSTEMS )
+        {
+          CG_Printf( S_COLOR_RED "ERROR: maximum number of particle systems (%d) reached\n",
+              MAX_BASEPARTICLE_SYSTEMS );
+          return qfalse;
+        }
+
         if( !CG_ParseParticleSystem( &baseParticleSystems[ numBaseParticleSystems ], &text_p, psName ) )
         {
           CG_Printf( S_COLOR_RED "ERROR: %s: failed to parse particle system %s\n", fileName, psName );
@@ -1531,13 +1538,6 @@ static qboolean CG_ParseParticleFile( const char *fileName )
 
         //start parsing particle systems again
         psNameSet = qfalse;
-
-        if( numBaseParticleSystems == MAX_BASEPARTICLE_SYSTEMS )
-        {
-          CG_Printf( S_COLOR_RED "ERROR: maximum number of particle systems (%d) reached\n",
-              MAX_BASEPARTICLE_SYSTEMS );
-          return qfalse;
-        }
 
         numBaseParticleSystems++;
       }
