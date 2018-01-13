@@ -2103,7 +2103,7 @@ static void CG_DrawTeamOverlay( rectDef_t *rect, float scale, vec4_t color )
 
       s = va( " [^%c%3d^7] ^7%s",
               CG_GetColorCharForHealth( displayClients[ i ] ),
-              ci->health,
+              SU2HP( ci->health ),
               CG_ConfigString( CS_LOCATIONS + ci->location ) );
     }
 
@@ -3015,7 +3015,7 @@ static void CG_DrawCrosshairNames( rectDef_t *rect, float scale, int textStyle )
   {
     name = va( "%s ^7[^%c%d^7]", name,
                CG_GetColorCharForHealth( cg.crosshairClientNum ),
-               cgs.clientinfo[ cg.crosshairClientNum ].health );
+               SU2HP( cgs.clientinfo[ cg.crosshairClientNum ].health ) );
   }
 
   if( cg.snap->ps.stats[ STAT_TEAM ] == TEAM_NONE )
