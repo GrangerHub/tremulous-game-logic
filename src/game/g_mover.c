@@ -1361,6 +1361,8 @@ void SP_func_door( gentity_t *ent )
   // default damage of 2 points
   G_SpawnInt( "dmg", "2", &ent->damage );
 
+  ent->damage = HP2SU( ent->damage);
+
   // first position at start
   VectorCopy( ent->r.currentOrigin, ent->pos1 );
 
@@ -1782,6 +1784,8 @@ void SP_func_plat( gentity_t *ent )
   G_SpawnInt( "dmg", "2", &ent->damage );
   G_SpawnFloat( "wait", "1", &ent->wait );
   G_SpawnFloat( "lip", "8", &lip );
+
+  ent->damage = HP2SU( ent->damage);
 
   ent->wait = 1000;
 
@@ -2339,6 +2343,8 @@ void SP_func_bobbing( gentity_t *ent )
   G_SpawnInt( "dmg", "2", &ent->damage );
   G_SpawnFloat( "phase", "0", &phase );
 
+  ent->damage = HP2SU( ent->damage);
+
   SV_SetBrushModel( ent, ent->model );
   VectorCopy( ent->r.currentOrigin, savedOrigin );
   InitMover( ent );
@@ -2389,6 +2395,8 @@ void SP_func_pendulum( gentity_t *ent )
   G_SpawnFloat( "speed", "30", &speed );
   G_SpawnInt( "dmg", "2", &ent->damage );
   G_SpawnFloat( "phase", "0", &phase );
+
+  ent->damage = HP2SU( ent->damage);
 
   SV_SetBrushModel( ent, ent->model );
 
