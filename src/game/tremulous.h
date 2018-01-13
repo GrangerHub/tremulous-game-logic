@@ -809,7 +809,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define REPEATER_BP                 4
 #define REPEATER_BT                 10000
-#define REPEATER_HEALTH             HBHM(2500)
+#define REPEATER_HEALTH             HBHM(250000)
 #define REPEATER_SPLASHDAMAGE       HBDM(50000)
 #define REPEATER_SPLASHRADIUS       100
 #define REPEATER_VALUE              ( 3 * ALIEN_CREDITS_PER_KILL )
