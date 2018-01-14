@@ -40,7 +40,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define GAME_VERSION            "base"
 
 #define DEFAULT_GRAVITY         800
-#define GIB_HEALTH              HP2SU( -100 )
+#define GIB_HEALTH              HP2SU( -125 )
 
 #define VOTE_TIME               30000 // 30 seconds before vote times out
 

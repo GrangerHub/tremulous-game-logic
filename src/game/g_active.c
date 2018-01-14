@@ -133,9 +133,9 @@ void P_WorldEffects( gentity_t *ent )
       if( ent->health > 0 )
       {
         // take more damage the longer underwater
-        ent->damage += 2;
-        if( ent->damage > 15 )
-          ent->damage = 15;
+        ent->damage += HP2SU( 2 );
+        if( ent->damage > HP2SU( 15 ) )
+          ent->damage = HP2SU( 15 );
 
         // play a gurp sound instead of a normal pain sound
         if( ent->health <= ent->damage )
@@ -156,7 +156,7 @@ void P_WorldEffects( gentity_t *ent )
   else
   {
     ent->client->airOutTime = level.time + 12000;
-    ent->damage = 2;
+    ent->damage = HP2SU( 2 );
   }
 
   //
