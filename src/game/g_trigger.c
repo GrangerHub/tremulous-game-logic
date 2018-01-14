@@ -1084,6 +1084,8 @@ void SP_trigger_heal( gentity_t *self )
     Com_Printf( S_COLOR_YELLOW "WARNING: trigger_heal with negative damage key\n" );
   }
 
+  self->damage = HP2SU( self->damage );
+
   self->touch = trigger_heal_touch;
   self->use = trigger_heal_use;
 
