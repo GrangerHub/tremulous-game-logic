@@ -59,6 +59,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL0_BITE_WIDTH           6.0f
 #define LEVEL0_BITE_REPEAT          500
 #define LEVEL0_BITE_K_SCALE         1.0f
+#define LEVEL0_POUNCE_RANGE         48.0f
+#define LEVEL0_POUNCE_WIDTH         14.0f
+#define LEVEL0_POUNCE_TIME          600      // msec for full Dretch pounce
+#define LEVEL0_POUNCE_TIME_MIN      200      // msec before which pounce cancels  
+#define LEVEL0_POUNCE_REPEAT        320      // msec before a new pounce starts
+#define LEVEL0_POUNCE_SPEED_MOD     0.75f    // walking speed modifier for pounce charging
+#define LEVEL0_POUNCE_JUMP_MAG      750      // Dretch pounce jump power
 
 #define LEVEL1_CLAW_DMG             AWDM(32000)
 #define LEVEL1_CLAW_RANGE           96.0f
@@ -209,7 +216,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define LEVEL0_SPEED                1.4f
 #define LEVEL0_VALUE                AVM(ALIEN_CREDITS_PER_KILL)
-#define LEVEL0_HEALTH               AHM(25000)
+#define LEVEL0_HEALTH               AHM(30000)
 #define LEVEL0_REGEN                (0.05f * LEVEL0_HEALTH)
 #define LEVEL0_COST                 0
 

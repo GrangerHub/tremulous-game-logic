@@ -1021,8 +1021,10 @@ static float PM_CmdScale( usercmd_t *cmd, qboolean zFlight )
     //slow player if charging up for a pounce
     if( pm->ps->weapon == WP_ALEVEL3 || pm->ps->weapon == WP_ALEVEL3_UPG )
       modifier *= LEVEL3_POUNCE_SPEED_MOD;
-    else if ( pm->ps->weapon == WP_ASPITFIRE )
+    else if( pm->ps->weapon == WP_ASPITFIRE )
       modifier *= SPITFIRE_POUNCE_SPEED_MOD;
+    else if( pm->ps->weapon == WP_ALEVEL0 )
+      modifier *= LEVEL0_POUNCE_SPEED_MOD;
   }
 
   // the spitfire strafes and moves backwards slower when flying
@@ -1141,7 +1143,8 @@ static qboolean PM_CheckPounce( void )
 {
   int jumpMagnitude;
 
-  if( pm->ps->weapon != WP_ALEVEL3 &&
+  if( pm->ps->weapon != WP_ALEVEL0 &&
+      pm->ps->weapon != WP_ALEVEL3 &&
       pm->ps->weapon != WP_ALEVEL3_UPG )
     return qfalse;
 
@@ -1150,7 +1153,10 @@ static qboolean PM_CheckPounce( void )
       ( pm->ps->pm_flags & PMF_CHARGE ) )
   {
     pm->ps->pm_flags &= ~PMF_CHARGE;
-    pm->ps->weaponTime += LEVEL3_POUNCE_REPEAT;
+    if( pm->ps->weapon == WP_ALEVEL0 )
+      pm->ps->weaponTime += LEVEL0_POUNCE_REPEAT;
+    else
+      pm->ps->weaponTime += LEVEL3_POUNCE_REPEAT;
     return qfalse;
   }
 
@@ -1162,8 +1168,12 @@ static qboolean PM_CheckPounce( void )
   }
 
   // Can't start a pounce
+  if( pm->ps->weapon == WP_ALEVEL0 &&
+      pm->ps->stats[ STAT_MISC ] < LEVEL0_POUNCE_TIME_MIN )
+    return qfalse;
+  else if( pm->ps->stats[ STAT_MISC ] < LEVEL3_POUNCE_TIME_MIN )
+    return qfalse;
   if( ( pm->ps->pm_flags & PMF_CHARGE ) ||
-      pm->ps->stats[ STAT_MISC ] < LEVEL3_POUNCE_TIME_MIN ||
       pm->ps->groundEntityNum == ENTITYNUM_NONE )
     return qfalse;
 
@@ -1172,7 +1182,10 @@ static qboolean PM_CheckPounce( void )
   pml.walking = qfalse;
   pm->ps->pm_flags |= PMF_CHARGE;
   pm->ps->groundEntityNum = ENTITYNUM_NONE;
-  if( pm->ps->weapon == WP_ALEVEL3 )
+  if( pm->ps->weapon == WP_ALEVEL0 )
+    jumpMagnitude = pm->ps->stats[ STAT_MISC ] *
+                    LEVEL0_POUNCE_JUMP_MAG / LEVEL0_POUNCE_TIME;
+  else if( pm->ps->weapon == WP_ALEVEL3 )
     jumpMagnitude = pm->ps->stats[ STAT_MISC ] *
                     LEVEL3_POUNCE_JUMP_MAG / LEVEL3_POUNCE_TIME;
   else
@@ -1518,7 +1531,8 @@ static qboolean PM_CheckJump( vec3_t customNormal )
     return qfalse;
 
   //can't jump and pounce at the same time
-  if( ( pm->ps->weapon == WP_ALEVEL3 ||
+  if( ( pm->ps->weapon == WP_ALEVEL0 ||
+        pm->ps->weapon == WP_ALEVEL3 ||
         pm->ps->weapon == WP_ALEVEL3_UPG ) &&
       pm->ps->stats[ STAT_MISC ] > 0 )
   {
@@ -4059,13 +4073,19 @@ static void PM_Weapon( void )
     return;
 
   // Charging for a pounce or canceling a pounce
-  if( pm->ps->weapon == WP_ALEVEL3 || pm->ps->weapon == WP_ALEVEL3_UPG ||
-      ( pm->ps->weapon == WP_ASPITFIRE  ) )
+  if( pm->ps->weapon == WP_ALEVEL0 ||
+      pm->ps->weapon == WP_ALEVEL3 ||
+      pm->ps->weapon == WP_ALEVEL3_UPG ||
+      pm->ps->weapon == WP_ASPITFIRE )
   {
     int max;
 
     switch( pm->ps->weapon )
     {
+      case WP_ALEVEL0:
+        max = LEVEL0_POUNCE_TIME;
+        break;
+
       case WP_ALEVEL3:
         max = LEVEL3_POUNCE_TIME;
         break;

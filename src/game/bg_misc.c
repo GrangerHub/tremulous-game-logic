@@ -1277,7 +1277,7 @@ static const classAttributes_t bg_classList[ ] =
     qtrue,                                          //qboolean enabled;
     "level0",                                       //char    *name;
     "Has a lethal reflexive bite and the ability to crawl on "
-      "walls and ceilings.",
+      "walls and ceilings.  Can also leap from surface to surface.",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
     LEVEL0_HEALTH,                                  //int     health;
     0.0f,                                           //float   fallDamage;
