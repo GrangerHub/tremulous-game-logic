@@ -286,7 +286,7 @@ static void G_PuntBlocker( gentity_t *self, gentity_t *blocker )
     } else if( blockers[ i ]->noTriggerHurtDmgTime <= level.time )
     {
       // damage enemy blockers
-      G_Damage( blockers[ i ], NULL, NULL, NULL, NULL, 10, 0,
+      G_Damage( blockers[ i ], NULL, NULL, NULL, NULL, HP2SU( 10 ), 0,
                 MOD_TRIGGER_HURT );
 
       blockers[ i ]->noTriggerHurtDmgTime = level.time + 1000;
