@@ -3620,6 +3620,13 @@ void HMGTurret_Think( gentity_t *self )
     self->active = qtrue;
 
     G_AddEvent( self, EV_MGTURRET_SPINUP, 0 );
+
+    // the first shot is skipped
+    self->timestamp = level.time +
+                      BG_Buildable( self->s.modelindex )->turretFireSpeed +
+                      ( MGTURRET_REPEAT_START - MGTURRET_REPEAT ) -
+                      ( ( ( MGTURRET_REPEAT_START - MGTURRET_REPEAT ) *
+                           self->turretSpinupTime ) / MGTURRET_SPINUP_TIME );
   }
 
   // Not firing or haven't spun up yet
