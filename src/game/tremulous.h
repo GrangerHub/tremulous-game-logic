@@ -65,7 +65,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL0_POUNCE_TIME_MIN      200      // msec before which pounce cancels  
 #define LEVEL0_POUNCE_REPEAT        320      // msec before a new pounce starts
 #define LEVEL0_POUNCE_SPEED_MOD     0.75f    // walking speed modifier for pounce charging
-#define LEVEL0_POUNCE_JUMP_MAG      750      // Dretch pounce jump power
+#define LEVEL0_POUNCE_JUMP_MAG      600      // Dretch pounce jump power
 
 #define LEVEL1_CLAW_DMG             AWDM(32000)
 #define LEVEL1_CLAW_RANGE           96.0f
@@ -264,7 +264,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define SPITFIRE_SPEED                1.3f
 #define SPITFIRE_VALUE                AVM(3 * ALIEN_CREDITS_PER_KILL)
-#define SPITFIRE_HEALTH               AHM(100000)
+#define SPITFIRE_HEALTH               AHM(125000)
 #define SPITFIRE_REGEN                (0.03f * SPITFIRE_HEALTH)
 #define SPITFIRE_COST                 3
 
