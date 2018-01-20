@@ -238,6 +238,7 @@ static void CG_EntityEffects( centity_t *cent )
   // constant light glow
   if ( cent->currentState.constantLight &&
        cent->currentState.eType != ET_PLAYER &&
+       cent->currentState.eType != ET_BUILDABLE &&
        cent->currentState.eType != ET_LEV2_ZAP_CHAIN &&
        cent->currentState.eType != ET_SPITFIRE_ZAP )
   {

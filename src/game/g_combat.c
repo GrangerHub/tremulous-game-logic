@@ -166,11 +166,12 @@ Returns the total damage dealt.
 float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
 {
   float     value, totalDamage = 0;
-  int       team, i, maxHealth = 0;
+  int       i, maxHealth = 0;
   int       alienCredits = 0, humanCredits = 0;
   int       numTeamPlayers[ NUM_TEAMS ];
   int       maxHealthReserve;
   int       ( *credits )[ MAX_CLIENTS ], ( *creditsDeffenses )[ NUM_TEAMS ];
+  team_t    team;
   gentity_t *player;
   qboolean  damagedByEnemyPlayer = qfalse;
 
@@ -254,6 +255,20 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
 
     team = self->buildableTeam;
     maxHealth = BG_Buildable( self->s.modelindex )->health;
+    // account for repaired damage
+    switch ( team )
+    {
+      case TEAM_ALIENS:
+        maxHealth += ( maxHealth - self->s.constantLight ) * ( 1000 / ALIEN_BMAXHEALTH_DECAY( 1000 ) );
+        break;
+
+      case TEAM_HUMANS:
+        maxHealth += ( maxHealth - self->s.constantLight ) * ( 1000 / HUMAN_BMAXHEALTH_DECAY( 1000 ) );
+        break;
+
+      default:
+        break;
+    }
   }
   else
     return totalDamage;

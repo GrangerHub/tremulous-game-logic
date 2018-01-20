@@ -1109,7 +1109,6 @@ void CheckCkitRepair( gentity_t *ent )
   vec3_t      viewOrigin, forward, end;
   trace_t     tr;
   gentity_t   *traceEnt;
-  int         bHealth;
 
   if( ent->client->pmext.repairRepeatDelay > 0 ||
       ent->client->ps.stats[ STAT_MISC ] > 0 )
@@ -1134,22 +1133,41 @@ void CheckCkitRepair( gentity_t *ent )
     gentity_t *tent = G_TempEntity( tr.endpos, EV_BUILD_FIRE );
     qboolean sendEffects = qfalse;
 
-    bHealth = BG_Buildable( traceEnt->s.modelindex )->health;
-    if( !traceEnt->spawned )
+    if( traceEnt->spawned )
+    {
+      if( traceEnt->health < traceEnt->s.constantLight &&
+          HUMAN_BMAXHEALTH_DECAY( HBUILD_HEALRATE ) < traceEnt->s.constantLight )
+      {
+        traceEnt->health += HBUILD_HEALRATE;
+        traceEnt->s.constantLight -= HUMAN_BMAXHEALTH_DECAY( HBUILD_HEALRATE );
+
+        if( traceEnt->health >= traceEnt->s.constantLight )
+        {
+          traceEnt->health = traceEnt->s.constantLight;
+          G_AddEvent( ent, EV_BUILD_REPAIRED, 0 );
+        } else
+          G_AddEvent( ent, EV_BUILD_REPAIR, 0 );
+
+        ent->client->pmext.repairRepeatDelay += BG_Weapon( ent->client->ps.weapon )->repeatRate1;
+        sendEffects = qtrue;
+      }
+
+      tent->s.generic1 = WPM_SECONDARY;
+    } else
     {
       // progress the contruction of an unspawned buildable
       int buildTime = BG_Buildable( traceEnt->s.modelindex )->buildTime;
       int repeatRate = BG_Weapon( ent->client->ps.weapon )->repeatRate1;
-      int healRate = (int)( ceil( (float)( bHealth ) / ( ( (float)buildTime ) / ( (float)repeatRate ) ) ) );
+      int healRate = (int)( ceil( (float)( traceEnt->s.constantLight ) / ( ( (float)buildTime ) / ( (float)repeatRate ) ) ) );
 
       traceEnt->buildProgress -= repeatRate;
       traceEnt->health += healRate;
       if( traceEnt->buildProgress <= 0 )
       {
         traceEnt->buildProgress = 0;
-        if( traceEnt->health >= bHealth )
+        if( traceEnt->health >= traceEnt->s.constantLight )
         {
-          traceEnt->health = bHealth;
+          traceEnt->health = traceEnt->s.constantLight;
           G_AddEvent( ent, EV_BUILD_REPAIRED, 0 );
         } else
             G_AddEvent( ent, EV_BUILD_REPAIR, 0 );

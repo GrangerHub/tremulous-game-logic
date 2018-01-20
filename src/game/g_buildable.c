@@ -4032,7 +4032,7 @@ General think function for buildables
 */
 void G_BuildableThink( gentity_t *ent, int msec )
 {
-  int maxHealth = BG_Buildable( ent->s.modelindex )->health;
+  int regenRate = BG_Buildable( ent->s.modelindex )->regenRate;
   int buildTime = BG_Buildable( ent->s.modelindex )->buildTime;
 
   //toggle spawned flag for buildables
@@ -4042,7 +4042,7 @@ void G_BuildableThink( gentity_t *ent, int msec )
           ent->buildTime + buildTime < level.time ) ||
         ( ent->buildableTeam == TEAM_HUMANS &&
           ( ent->buildProgress <= 0 ||
-            ent->health >= maxHealth ) ) )
+            ent->health >= ent->s.constantLight ) ) )
     {
       ent->spawned = qtrue;
       level.numUnspawnedBuildables[ ent->buildableTeam ]--;
@@ -4074,28 +4074,48 @@ void G_BuildableThink( gentity_t *ent, int msec )
                                        level.numUnspawnedBuildables[ TEAM_HUMANS ] );
     }
 
-    if( ent->health > 0 && ent->health < maxHealth )
+    if( ent->health > 0 && ent->health < ent->s.constantLight )
     {
       if( !ent->spawned )
       {
-        int healthIncrement = (int)( ceil( (float)( maxHealth ) / (float)( buildTime * 0.001f ) ) );
+        int healthIncrement = (int)( ceil( (float)( ent->s.constantLight ) / (float)( buildTime * 0.001f ) ) );
 
         if( ent->buildableTeam == TEAM_HUMANS && ent->dcc )
           healthIncrement *= 2;
           
         ent->health += healthIncrement;
+      } else
+      {
+        int regen = 0;
+
+        if( ent->buildableTeam == TEAM_ALIENS && regenRate &&
+          ( ent->lastDamageTime + ALIEN_REGEN_DAMAGE_TIME ) < level.time &&
+          ALIEN_BMAXHEALTH_DECAY( regenRate ) < ent->s.constantLight )
+        {
+          ent->health += regenRate;
+          ent->s.constantLight -= ALIEN_BMAXHEALTH_DECAY( regenRate );
+        }
+        else if( ent->buildableTeam == TEAM_HUMANS &&
+          ( ent->lastDamageTime + HUMAN_REGEN_DAMAGE_TIME ) < level.time )
+        {
+          if( ent->dcc )
+            regen = DC_HEALRATE;
+          else if( ent->powered )
+            regen = (int)( ceil( (float)( DC_HEALRATE ) / 10.0f ) );
+
+          if( regen &&
+              HUMAN_BMAXHEALTH_DECAY( regen ) < ent->s.constantLight )
+          {
+            ent->health += regen;
+            ent->s.constantLight -= HUMAN_BMAXHEALTH_DECAY( regen );
+          }
+        }
       }
     }
 
-    if( ent->health >= maxHealth )
-    {
-      int i;
-      ent->health = maxHealth;
-      for( i = 0; i < MAX_CLIENTS; i++ )
-        ent->credits[ i ] = 0;
-      for( i = 0; i < NUM_TEAMS; i++ )
-        ent->creditsDeffenses[ i ] = 0;
-    }
+    if( ent->health >= ent->s.constantLight )
+      ent->health = ent->s.constantLight;
+
 
     // check if a buildable was spotted by an enemy player
     if( ent->buildableTeam == TEAM_HUMANS )
@@ -5138,8 +5158,12 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
   built->buildableTeam = built->s.modelindex2 = BG_Buildable( buildable )->team;
   BG_BuildableBoundingBox( buildable, built->r.mins, built->r.maxs );
 
+  // store the max health in constantLight so that the max health can be reduced
+  // from healing, and be communicated to the cgame.
+  built->s.constantLight = BG_Buildable( buildable )->health;
+
   if( built->buildableTeam == TEAM_HUMANS )
-    built->health = BG_Buildable( buildable )->health / 10;
+    built->health = built->s.constantLight / 10;
   else
     built->health = 1;
 
@@ -5182,7 +5206,7 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
   // build instantly in cheat mode
   if( builder->client && ( g_cheats.integer || IS_WARMUP ) )
   {
-    built->health = BG_Buildable( buildable )->health;
+    built->health = built->s.constantLight;
     built->buildTime = built->s.time =
       level.time - BG_Buildable( buildable )->buildTime;
     built->buildProgress = 0;

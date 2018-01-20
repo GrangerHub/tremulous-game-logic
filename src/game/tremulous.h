@@ -280,16 +280,19 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  * CREEP_BASESIZE - the maximum distance a buildable can be from an egg/overmind
  * ALIEN_BHLTH_MODIFIER - overall health modifier for coarse tuning
  * ALIEN_BDMG_MODIFIER  - overall damage modifier for coarse tuning
+ * ALIEN_BMAXHEALTH_DECAY - the amount the max health is reduced by from repair
  *
  */
 
-#define ALIEN_BHLTH_MODIFIER        3.25f
+#define ALIEN_BHLTH_MODIFIER        2.0f
 #define ABHM(h)                     ((int)((float)h*ALIEN_BHLTH_MODIFIER))
 #define ALIEN_BDMG_MODIFIER         1.0f
 #define ABDM(d)                     ((int)((float)d*ALIEN_BDMG_MODIFIER))
 
 #define ALIEN_BREGEN_MODIFIER       (1.0f)
 #define ABRM(r)                     ((int)((float)r*ALIEN_BREGEN_MODIFIER))
+
+#define ALIEN_BMAXHEALTH_DECAY( h )  ( h / 2 )
 
 #define CREEP_BASESIZE              700
 #define CREEP_TIMEOUT               1000
@@ -707,10 +710,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  * REPEATER_BASESIZE - the maximum distance a buildable can be from a repeater
  * HUMAN_BHLTH_MODIFIER - overall health modifier for coarse tuning
  * HUMAN_BDMG_MODIFIER  - overall damage modifier for coarse tuning
+ * ALIEN_BMAXHEALTH_DECAY - the amount the max health is reduced by from repair
  *
  */
 
-#define HUMAN_BHLTH_MODIFIER        3.25f
+#define HUMAN_BHLTH_MODIFIER        2.0f
 #define HBHM(h)                     ((int)((float)h*HUMAN_BHLTH_MODIFIER))
 #define HUMAN_BDMG_MODIFIER         1.0f
 #define HBDM(d)                     ((int)((float)d*ALIEN_WDMG_MODIFIER))
@@ -718,6 +722,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define HUMAN_BREGEN_MODIFIER       (1.0f)
 #define HBRM(r)                     ((int)((float)r*HUMAN_BREGEN_MODIFIER))
 
+#define HUMAN_BMAXHEALTH_DECAY(h)  ( h / 2 )
 
 #define REACTOR_BASESIZE            1000
 #define REPEATER_BASESIZE           500
