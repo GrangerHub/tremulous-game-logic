@@ -519,8 +519,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define SHOTGUN_DMG                 HWDM(4000)
 #define SHOTGUN_RANGE               (8192 * 12)
 #define SHOTGUN_CHOKE_REPEAT        1300
-#define SHOTGUN_CHOKE_DMG           HWDM(6000)
-#define SHOTGUN_CHOKE_DMG_CAP       HWDM( 5000 )
+#define SHOTGUN_CHOKE_DMG           HWDM(5375)
+#define SHOTGUN_CHOKE_DMG_CAP       HWDM(5000)
 #define SHOTGUN_CHOKE_SPREAD        450
 #define SHOTGUN_CHOKE_DMG_FALLOFF   2048.0f
 
