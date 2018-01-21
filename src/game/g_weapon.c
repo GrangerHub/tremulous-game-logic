@@ -514,6 +514,7 @@ void ShotgunPattern( vec3_t origin, vec3_t origin2, int seed,
 
           damage = (int)ceil( ( (float)SHOTGUN_CHOKE_DMG ) *
                               ( 1 - ( distance / SHOTGUN_CHOKE_DMG_FALLOFF ) ) );
+          damage = MIN( damage, SHOTGUN_CHOKE_DMG_CAP);
 
           if( damage <= 0 )
             damage = 1;
