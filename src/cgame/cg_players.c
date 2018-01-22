@@ -2033,7 +2033,8 @@ void CG_Player( centity_t *cent )
   renderfx |= RF_LIGHTING_ORIGIN;     // use the same origin for all
 
   if( ( es->eFlags & EF_INVINCIBLE ) &&
-      !cg.intermissionStarted )
+      !cg.intermissionStarted &&
+      !( es->eFlags & EF_DEAD ) )
   {
     if( !cent->invincible )
     {
