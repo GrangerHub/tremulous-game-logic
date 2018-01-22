@@ -1209,7 +1209,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
         VectorSubtract( targ->r.currentOrigin, attacker->r.currentOrigin, dir );
         VectorNormalizeFast( dir );
-        VectorScale( dir, ( damage * 10.0f ), push );
+        VectorScale( dir, ( SU2HP( damage ) * 10.0f ), push );
         push[2] = 64.0f;
         VectorAdd( targ->client->ps.velocity, push, targ->client->ps.velocity );
         return;
@@ -1262,7 +1262,14 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       attacker->client->ps.persistant[ PERS_HITS ]++;
   }
 
-  take = ( modDamge * damage ) / 100;
+  if( modDamge != 100 )
+  {
+    if( damage < ( INT_MAX / modDamge ) )
+      take = ( modDamge * damage ) / 100;
+    else
+      take = (int)( ((float)damage) * (((float)modDamge) / 100.0f) );
+  } else
+    take = damage;
 
   // add to the damage inflicted on a player this frame
   // the total will be turned into screen blends and view angle kicks
