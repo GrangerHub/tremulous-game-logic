@@ -59,6 +59,11 @@ void P_DamageFeedback( gentity_t *player )
   if( count == 0 )
     return;   // didn't take any damage
 
+  if( SU2HP( count ) )
+    count = SU2HP( count );
+  else
+    count = 1;
+
   if( count > 255 )
     count = 255;
 
