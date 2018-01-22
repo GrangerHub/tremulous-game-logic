@@ -286,7 +286,7 @@ void target_kill_use( gentity_t *self, gentity_t *other, gentity_t *activator )
   if( !activator )
     return;
 
-  G_Damage( activator, NULL, NULL, NULL, NULL, G_TotalDamageToKill( activator ), DAMAGE_NO_PROTECTION, MOD_TELEFRAG );
+  G_Damage( activator, NULL, NULL, NULL, NULL, 0, DAMAGE_INSTAGIB|DAMAGE_NO_PROTECTION, MOD_TELEFRAG );
 }
 
 void SP_target_kill( gentity_t *self )

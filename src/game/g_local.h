@@ -1142,14 +1142,13 @@ void      G_LogDestruction( gentity_t *self, gentity_t *actor, int mod );
 
 void      G_InitDamageLocations( void );
 
-int       G_TotalDamageToKill( gentity_t *ent );
-
 // damage flags
 #define DAMAGE_RADIUS         0x00000001  // damage was indirect
 #define DAMAGE_NO_ARMOR       0x00000002  // armour does not protect from this damage
 #define DAMAGE_NO_KNOCKBACK   0x00000004  // do not affect velocity, just view angles
 #define DAMAGE_NO_PROTECTION  0x00000008  // kills everything except godmode
 #define DAMAGE_NO_LOCDAMAGE   0x00000010  // do not apply locational damage
+#define DAMAGE_INSTAGIB       0x00000020  // instally kill the target
 
 //
 // g_missile.c
