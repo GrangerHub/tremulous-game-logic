@@ -777,7 +777,7 @@ void G_KillBox( gentity_t *ent )
 
     // nail it
     G_Damage( hit, ent, ent, NULL, NULL,
-      G_TotalDamageToKill( hit ), DAMAGE_NO_PROTECTION, MOD_TELEFRAG );
+      0, DAMAGE_INSTAGIB|DAMAGE_NO_PROTECTION, MOD_TELEFRAG );
   }
 
 }

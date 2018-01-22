@@ -1253,6 +1253,26 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   attacker->dmgProtectionTime = 0;
   attacker->targetProtectionTime = 0;
 
+  if(dflags & DAMAGE_INSTAGIB)
+  {
+    damage = targ->health;
+    if( targ->s.eType == ET_PLAYER ||
+        targ->s.eType == ET_CORPSE )
+    {
+      if( targ->health > GIB_HEALTH )
+        damage = targ->health - GIB_HEALTH;
+      else
+        damage = 1;
+    } else if( targ->health > 0 )
+      damage = targ->health;
+    else
+      damage = 1;
+
+    if( targ->client &&
+        targ->client->ps.misc[ MISC_ARMOR ] > 0 )
+      damage += targ->client->ps.misc[ MISC_ARMOR ];
+  }
+
   // shootable doors / buttons don't actually have any health
   if( targ->s.eType == ET_MOVER )
   {
@@ -1492,7 +1512,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       attacker->client->ps.persistant[ PERS_HITS ]++;
   }
 
-  if( modDamge != 100 )
+  if( modDamge != 100 &&
+      !(dflags & DAMAGE_INSTAGIB) )
   {
     if( damage < ( INT_MAX / modDamge ) )
       take = ( modDamge * damage ) / 100;
@@ -1529,9 +1550,11 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
     // set the last client who damaged the target
     targ->client->lasthurt_client = attacker->s.number;
     targ->client->lasthurt_mod = mod;
-    take = (int)( take * G_CalcDamageModifier( point, targ, attacker,
-                                               client->ps.stats[ STAT_CLASS ],
-                                               dflags ) + 0.5f );
+    
+    if( !(dflags & DAMAGE_INSTAGIB) )
+      take = (int)( take * G_CalcDamageModifier( point, targ, attacker,
+                                                 client->ps.stats[ STAT_CLASS ],
+                                                 dflags ) + 0.5f );
 
     //if boosted poison every attack
     if( attacker->client && attacker->client->ps.stats[ STAT_STATE ] & SS_BOOSTED )
@@ -1563,7 +1586,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   }
 
   // do the damage
-  if( take )
+  if( take || (dflags & DAMAGE_INSTAGIB) )
   {
     // Battlesuit absorbs the damage
     if( targ->client &&
@@ -1582,7 +1605,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
       targ->client->ps.misc[ MISC_ARMOR ] -= take;
       take = 0;
-      if( targ->client->ps.misc[ MISC_ARMOR ] <= 0 )
+      if( targ->client->ps.misc[ MISC_ARMOR ] <= 0 ||
+          (dflags & DAMAGE_INSTAGIB) )
       {
         gentity_t *tent;
         vec3_t newOrigin;
@@ -1590,6 +1614,18 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
         // have damage that is greater than the remaining armor transfer to the main helth
         take -= targ->client->ps.misc[ MISC_ARMOR ];
+
+        if(dflags & DAMAGE_INSTAGIB)
+        {
+          targ->client->ps.misc[ MISC_ARMOR ] = 0;
+          if( take <= 0)
+          {
+            if( targ->health > GIB_HEALTH )
+              take = targ->health - GIB_HEALTH;
+            else
+              take = 1;
+          }
+        }
 
         // Break the BSuit off into pieces
         G_RoomForClassChange( targ, PCL_HUMAN, newOrigin );
@@ -1658,7 +1694,18 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
         targ->creditsDeffenses[ attacker->buildableTeam ] += take;
     }
 
-    targ->health = targ->health - take;
+    if( !(dflags & DAMAGE_INSTAGIB) )
+    {
+      targ->health = targ->health - take;
+    }
+    else
+    {
+      if( targ->s.eType == ET_PLAYER ||
+          targ->s.eType == ET_CORPSE )
+        targ->health = GIB_HEALTH;
+      else
+        targ->health = 0;
+    }
 
     if( targ->client )
     {
@@ -1670,7 +1717,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
     targ->nextRegenTime = level.time + ALIEN_REGEN_DAMAGE_TIME;
     targ->nextHPReserveRegenTime = level.time + ALIEN_REGEN_DAMAGE_TIME;
 
-    if( targ->health <= 0 )
+    if( targ->health <= 0 ||
+        (dflags & DAMAGE_INSTAGIB) )
     {
       if( client )
         targ->flags |= FL_NO_KNOCKBACK;
@@ -2089,28 +2137,4 @@ void G_LogDestruction( gentity_t *self, gentity_t *actor, int mod )
         self->builtBy->name[ self->builtBy->nameOffset ],
         BG_Buildable( actor->s.modelindex )->humanName ) );
   }
-}
-
-
-
-/*
-===============
-G_TotalDamageToKill
-
-Returns the total health sufficient to kill this
-entity, taking into account things like armor
-===============
-*/
-int G_TotalDamageToKill( gentity_t *ent )
-{
-  if( ent->client )
-  {
-    int damage = BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->health;
-
-    damage += ent->client->ps.misc[ MISC_ARMOR ];
-
-    return damage * 100;
-  }
-
-  return ent->health;
 }
