@@ -1704,9 +1704,12 @@ static qboolean PM_CheckJump( vec3_t customNormal )
         ProjectPointOnPlane( groundVelocity, pm->ps->velocity, normal );
         nonGroundSpeed = DotProduct( pm->ps->velocity, normal );
 
-        // Push the player in the desired direction.
-        PM_Push( groundVelocity, push, maxHoppingSpeed, pm->ps->velocity );
-        VectorMA( pm->ps->velocity, nonGroundSpeed, normal, pm->ps->velocity );
+        if( VectorLength( groundVelocity ) )
+        {
+          // Push the player in the desired direction.
+          PM_Push( groundVelocity, push, maxHoppingSpeed, pm->ps->velocity );
+          VectorMA( pm->ps->velocity, nonGroundSpeed, normal, pm->ps->velocity );
+        }
       }
     }
   }
