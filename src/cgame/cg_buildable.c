@@ -987,10 +987,11 @@ static void CG_BuildableStatusDisplay( centity_t *cent )
   entNum = cg.predictedPlayerState.clientNum;
 
   // don't display health bars and icons when the buildable has
-  // full health, is powered, & is unmarked
+  // full health, is powered, is unmarked, and is not in the crosshair
   if( ( es->misc < SU2HP( es->constantLight ) ) ||
       !( es->eFlags & EF_B_POWERED ) ||
-       ( es->eFlags & EF_B_MARKED ) )
+       ( es->eFlags & EF_B_MARKED ) ||
+      ( es->number == cg.crosshairBuildable ) )
   {
     // if first try fails, step left, step right
     for( j = 0; j < 3; j++ )
@@ -1299,7 +1300,9 @@ void CG_DrawBuildableStatus( void )
     cent  = &cg_entities[ cg.snap->entities[ i ].number ];
     es    = &cent->currentState;
 
-    if( es->eType == ET_BUILDABLE && CG_PlayerIsBuilder( es->modelindex ) )
+    if( es->eType == ET_BUILDABLE &&
+        ( CG_PlayerIsBuilder( es->modelindex ) ||
+          es->number == cg.crosshairBuildable ) )
       buildableList[ buildables++ ] = cg.snap->entities[ i ].number;
   }
 
