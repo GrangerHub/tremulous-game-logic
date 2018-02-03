@@ -940,7 +940,9 @@ static void CG_BuildableStatusDisplay( centity_t *cent )
   entityState_t   *es = &cent->currentState;
   vec3_t          origin;
   float           healthScale;
+  float           maxHealthScale;
   int             health;
+  int             maxHealth;
   float           x, y;
   vec4_t          color;
   qboolean        powered, marked;
@@ -1076,7 +1078,9 @@ static void CG_BuildableStatusDisplay( centity_t *cent )
   }
 
   health = es->misc;
-  healthScale = (float)health / SU2HP( es->constantLight );
+  maxHealth = SU2HP( es->constantLight );
+  healthScale = (float)health / maxHealth;
+  maxHealthScale = (float)maxHealth / SU2HP( BG_Buildable( es->modelindex )->health );
 
   if( health > 0 && healthScale < 0.01f )
     healthScale = 0.01f;
@@ -1085,12 +1089,20 @@ static void CG_BuildableStatusDisplay( centity_t *cent )
   else if( healthScale > 1.0f )
     healthScale = 1.0f;
 
+  if( maxHealth > 0 && maxHealthScale < 0.01f )
+    maxHealthScale = 0.01f;
+  else if( maxHealthScale < 0.0f )
+    maxHealthScale = 0.0f;
+  else if( maxHealthScale > 1.0f )
+    maxHealthScale = 1.0f;
+
   if( CG_WorldToScreen( origin, &x, &y ) )
   {
     float  picH = bs->frameHeight;
     float  picW = bs->frameWidth;
     float  picX = x;
     float  picY = y;
+    float  maxHP_YOffset;
     float  scale;
     float  subH, subY;
     float  clipX, clipY, clipW, clipH;
@@ -1106,6 +1118,7 @@ static void CG_BuildableStatusDisplay( centity_t *cent )
     picW *= scale;
     picX -= ( picW * 0.5f );
     picY -= ( picH * 0.5f );
+    maxHP_YOffset = bs->healthPadding + picH;
 
     // sub-elements such as icons and number
     subH = picH - ( picH * bs->verticalMargin );
@@ -1123,6 +1136,8 @@ static void CG_BuildableStatusDisplay( centity_t *cent )
       frameColor[ 3 ] = color[ 3 ];
       trap_R_SetColor( frameColor );
       CG_DrawPic( picX, picY, picW, picH, bs->frameShader );
+      CG_DrawPic( picX, ( picY + maxHP_YOffset ), picW, picH,
+                  bs->frameShader );
       trap_R_SetColor( NULL );
     }
 
@@ -1154,6 +1169,34 @@ static void CG_BuildableStatusDisplay( centity_t *cent )
       trap_R_SetColor( NULL );
     }
 
+    if( maxHealth > 0 )
+    {
+      float hX, hY, hW, hH;
+      vec4_t maxHealthColor;
+
+      hX = picX + ( bs->healthPadding * scale );
+      hY = picY + ( bs->healthPadding * scale );
+      hH = picH - ( bs->healthPadding * 2.0f * scale );
+      hW = picW * maxHealthScale - ( bs->healthPadding * 2.0f * scale );
+
+      if( maxHealthScale == 1.0f )
+        Vector4Copy( bs->healthLowColor, maxHealthColor );
+      else if( maxHealthScale >= 0.75f )
+        Vector4Copy( bs->healthGuardedColor, maxHealthColor );
+      else if( maxHealthScale >= 0.50f )
+        Vector4Copy( bs->healthElevatedColor, maxHealthColor );
+      else if( maxHealthScale >= 0.25f )
+        Vector4Copy( bs->healthHighColor, maxHealthColor );
+      else
+        Vector4Copy( bs->healthSevereColor, maxHealthColor );
+
+      maxHealthColor[ 3 ] = color[ 3 ];
+      trap_R_SetColor( maxHealthColor );
+
+      CG_DrawPic( hX, ( hY + maxHP_YOffset ), hW, hH, cgs.media.whiteShader );
+      trap_R_SetColor( NULL );
+    }
+
     if( bs->overlayShader )
     {
       float oW = bs->overlayWidth;
@@ -1168,6 +1211,8 @@ static void CG_BuildableStatusDisplay( centity_t *cent )
 
       trap_R_SetColor( frameColor );
       CG_DrawPic( oX, oY, oW, oH, bs->overlayShader );
+      CG_DrawPic( oX, ( oY + maxHP_YOffset ), oW, oH,
+                  bs->overlayShader );
       trap_R_SetColor( NULL );
     }
 
@@ -1192,11 +1237,9 @@ static void CG_BuildableStatusDisplay( centity_t *cent )
 
     {
       float nX;
-      int healthMax;
       int healthPoints;
 
-      healthMax = SU2HP( es->constantLight );
-      healthPoints = (int)( healthScale * healthMax );
+      healthPoints = (int)( healthScale * maxHealth );
       if( health > 0 && healthPoints < 1 )
         healthPoints = 1;
       nX = picX + ( picW * 0.5f ) - 2.0f - ( ( subH * 4 ) * 0.5f );
@@ -1211,6 +1254,28 @@ static void CG_BuildableStatusDisplay( centity_t *cent )
         nX -= subH * 1.5f;
 
       CG_DrawField( nX, subY, 4, subH, subH, healthPoints );
+    }
+
+    {
+      float nX;
+      int maxHealthPoints;
+
+      maxHealthPoints = (int)( maxHealthScale * SU2HP( BG_Buildable( es->modelindex )->health ) );
+      if( maxHealth > 0 && maxHealthPoints < 1 )
+        maxHealthPoints = 1;
+      nX = picX + ( picW * 0.5f ) - 2.0f - ( ( subH * 4 ) * 0.5f );
+
+      if( maxHealthPoints > 999 )
+        nX -= 0.0f;
+      else if( maxHealthPoints > 99 )
+        nX -= subH * 0.5f;
+      else if( maxHealthPoints > 9 )
+        nX -= subH * 1.0f;
+      else
+        nX -= subH * 1.5f;
+
+      CG_DrawField( nX, ( subY + maxHP_YOffset ), 4, subH, subH,
+                    maxHealthPoints );
     }
 
     trap_R_SetColor( NULL );
