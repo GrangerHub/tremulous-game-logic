@@ -1096,7 +1096,11 @@ Q_EXPORT char *ClientUserinfoChanged( int clientNum, qboolean forceName )
 
   // wall jumper mode
   // swap attacks
-  client->pers.wallJumperMode = atoi( Info_ValueForKey( userinfo, "cg_wallJumperMode" ) );
+  client->pers.wallJumperMinFactor = atof( Info_ValueForKey( userinfo, "cg_wallJumperMinFactor" ) );
+  if( client->pers.wallJumperMinFactor > 1.0f )
+    client->pers.wallJumperMinFactor = 1.0f;
+  else if( client->pers.wallJumperMinFactor < 0.0f )
+    client->pers.wallJumperMinFactor = 0.0f;
 
   // teamInfo
   s = Info_ValueForKey( userinfo, "teamoverlay" );
