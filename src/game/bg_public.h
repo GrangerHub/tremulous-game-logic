@@ -276,7 +276,7 @@ typedef struct pmove_s
   int           humanPortalCreateTime[ PORTAL_NUM ];
 
   int           swapAttacks;
-  int           wallJumperMode;
+  float         wallJumperMinFactor;
 } pmove_t;
 
 // if a full pmove isn't done on the client, you can just update the angles

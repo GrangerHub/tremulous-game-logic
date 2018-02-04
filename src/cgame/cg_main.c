@@ -228,7 +228,7 @@ vmCvar_t  cg_stickySpec;
 vmCvar_t  cg_sprintToggle;
 vmCvar_t  cg_unlagged;
 vmCvar_t  cg_swapAttacks;
-vmCvar_t  cg_wallJumperMode;
+vmCvar_t  cg_wallJumperMinFactor;
 
 vmCvar_t  cg_debugVoices;
 
@@ -337,7 +337,7 @@ static cvarTable_t cvarTable[ ] =
   { &cg_unlagged, "cg_unlagged", "1", CVAR_ARCHIVE|CVAR_USERINFO },
   { NULL, "cg_flySpeed", "600", CVAR_ARCHIVE|CVAR_USERINFO },
   { &cg_swapAttacks, "cg_swapAttacks", "0", CVAR_ARCHIVE|CVAR_USERINFO },
-  { &cg_wallJumperMode, "cg_wallJumperMode", "0", CVAR_ARCHIVE|CVAR_USERINFO },
+  { &cg_wallJumperMinFactor, "cg_wallJumperMinFactor", "0.0", CVAR_ARCHIVE|CVAR_USERINFO },
   { &cg_depthSortParticles, "cg_depthSortParticles", "1", CVAR_ARCHIVE },
   { &cg_bounceParticles, "cg_bounceParticles", "1", CVAR_ARCHIVE },
   { &cg_consoleLatency, "cg_consoleLatency", "3000", CVAR_ARCHIVE },
@@ -594,6 +594,26 @@ void CG_UpdateBuildableRangeMarkerMask( void )
 }
 
 /*
+====================
+CG_UpdatePMoveCvars
+====================
+*/
+static void CG_UpdatePMoveCvars( void )
+{
+  static int modificationCount = -1;
+
+  if( cg_wallJumperMinFactor.modificationCount != modificationCount )
+  {
+    if( cg_wallJumperMinFactor.value > 1.0f )
+      trap_Cvar_Set( "cg_wallJumperMinFactor", "1.0" );
+    else if( cg_wallJumperMinFactor.value < 0.0f )
+      trap_Cvar_Set( "cg_wallJumperMinFactor", "0.0" );
+
+    modificationCount = cg_wallJumperMinFactor.modificationCount;
+  }
+}
+
+/*
 =================
 CG_SetPVars
 =================
@@ -670,7 +690,8 @@ void CG_UpdateCvars( void )
   // check for modications here
 
   CG_SetUIVars( );
-  CG_UpdateBuildableRangeMarkerMask();
+  CG_UpdateBuildableRangeMarkerMask( );
+  CG_UpdatePMoveCvars( );
 }
 
 
