@@ -2863,6 +2863,8 @@ static void CG_ScanForCrosshairEntity( void )
     {
       if( BG_Buildable( s->modelindex )->team == cg.snap->ps.stats[ STAT_TEAM ] )
       {
+        if( cg.crosshairBuildable != trace.entityNum )
+          cg.crosshairNewBuildableTime = cg.time;
         cg.crosshairBuildable = trace.entityNum;
       }
       else

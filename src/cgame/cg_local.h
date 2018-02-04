@@ -1069,6 +1069,7 @@ typedef struct
 
   // crosshair client ID
   int           crosshairBuildable;
+  int           crosshairNewBuildableTime;
   int           crosshairClientNum;
   int           crosshairClientTime;
   int           lastHitTime;
@@ -1698,6 +1699,8 @@ extern  vmCvar_t    cg_drawInvincibleVision;
 extern  vmCvar_t    cg_stickySpec;
 extern  vmCvar_t    cg_sprintToggle;
 extern  vmCvar_t    cg_unlagged;
+extern  vmCvar_t    cg_swapAttacks;
+extern  vmCvar_t    cg_wallJumperMode;
 
 extern  vmCvar_t    cg_debugVoices;
 

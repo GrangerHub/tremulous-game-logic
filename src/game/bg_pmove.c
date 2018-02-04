@@ -957,7 +957,8 @@ static float PM_CmdScale( usercmd_t *cmd, qboolean zFlight )
 
   //slow player if charging up for a pounce
   if( ( pm->ps->weapon == WP_ALEVEL3 || pm->ps->weapon == WP_ALEVEL3_UPG ) &&
-      cmd->buttons & BUTTON_ATTACK2 )
+      ( !pm->swapAttacks ?
+        (cmd->buttons & BUTTON_ATTACK2) : (cmd->buttons & BUTTON_ATTACK) ) )
     modifier *= LEVEL3_POUNCE_SPEED_MOD;
 
   //slow the player if slow locked
@@ -1042,7 +1043,8 @@ static void PM_CheckCharge( void )
   if( pm->ps->weapon != WP_ALEVEL4 )
     return;
 
-  if( pm->cmd.buttons & BUTTON_ATTACK2 &&
+  if( ( !pm->swapAttacks ?
+        (pm->cmd.buttons & BUTTON_ATTACK2) : (pm->cmd.buttons & BUTTON_ATTACK) ) &&
       !( pm->ps->stats[ STAT_STATE ] & SS_CHARGING ) )
   {
     pm->ps->pm_flags &= ~PMF_CHARGE;
@@ -1078,7 +1080,8 @@ static qboolean PM_CheckPounce( void )
   }
 
   // We're building up for a pounce
-  if( pm->cmd.buttons & BUTTON_ATTACK2 )
+  if( ( !pm->swapAttacks ?
+        (pm->cmd.buttons & BUTTON_ATTACK2) : (pm->cmd.buttons & BUTTON_ATTACK) ) )
   {
     pm->ps->pm_flags &= ~PMF_CHARGE;
     return qfalse;
@@ -1205,8 +1208,16 @@ static qboolean PM_CheckWallJump( vec3_t wishDir, float wishSpeed )
   if( wall.surfaceFlags & ( SURF_SKY | SURF_SLICK ) )
     return qfalse;
 
-  // Find out how much we look up.
-  upLook = MAX( 0.0f, DotProduct( upNormal, pml.forward ) );
+  if( pm->wallJumperMode )
+  {
+    // Find out how much we look up.
+    upLook = MAX( 0.5f, DotProduct( upNormal, pml.forward ) );
+  }
+  else
+  {
+    // Find out how much we look up.
+    upLook = MAX( 0.0f, DotProduct( upNormal, pml.forward ) );
+  }
 
   // Check if we are looking up the wall.
   if( upLook < minUpLook )
@@ -3640,8 +3651,8 @@ Generates weapon events and modifes the weapon counter
 static void PM_Weapon( void )
 {
   int           addTime = 200; //default addTime - should never be used
-  qboolean      attack1 = pm->cmd.buttons & BUTTON_ATTACK;
-  qboolean      attack2 = pm->cmd.buttons & BUTTON_ATTACK2;
+  qboolean      attack1 = !pm->swapAttacks ? (pm->cmd.buttons & BUTTON_ATTACK) : (pm->cmd.buttons & BUTTON_ATTACK2);
+  qboolean      attack2 = !pm->swapAttacks ? (pm->cmd.buttons & BUTTON_ATTACK2) : (pm->cmd.buttons & BUTTON_ATTACK);
   qboolean      attack3 = pm->cmd.buttons & BUTTON_USE_HOLDABLE;
   qboolean      outOfAmmo = qfalse;
   qboolean      byPassWeaponTime = qfalse;
@@ -3684,7 +3695,8 @@ static void PM_Weapon( void )
         max = pm->ps->stats[STAT_STAMINA];
     }
 
-    if( pm->cmd.buttons & BUTTON_ATTACK2 )
+    if( ( !pm->swapAttacks ?
+          (pm->cmd.buttons & BUTTON_ATTACK2) : (pm->cmd.buttons & BUTTON_ATTACK) ) )
       pm->ps->stats[ STAT_MISC ] += pml.msec;
     else
       pm->ps->stats[ STAT_MISC ] -= pml.msec;
@@ -3703,7 +3715,8 @@ static void PM_Weapon( void )
     {
       // Charge button held
       if( pm->ps->stats[ STAT_MISC ] < LEVEL4_TRAMPLE_CHARGE_TRIGGER &&
-          ( pm->cmd.buttons & BUTTON_ATTACK2 ) )
+          ( ( !pm->swapAttacks ?
+                (pm->cmd.buttons & BUTTON_ATTACK2) : (pm->cmd.buttons & BUTTON_ATTACK) ) ) )
       {
         pm->ps->stats[ STAT_STATE ] &= ~SS_CHARGING;
         if( pm->cmd.forwardmove > 0 )
@@ -3786,7 +3799,8 @@ static void PM_Weapon( void )
   {
     // Charging up and charging down
     if( !pm->ps->weaponTime &&
-        ( pm->cmd.buttons & BUTTON_ATTACK ) )
+        ( ( !pm->swapAttacks ?
+              (pm->cmd.buttons & BUTTON_ATTACK) : (pm->cmd.buttons & BUTTON_ATTACK2) ) ) )
     {
       if( ( pm->cmd.buttons & BUTTON_ATTACK2 ) && ( pm->ps->stats[ STAT_MISC ] > 0 ) )
       {
@@ -3842,7 +3856,8 @@ static void PM_Weapon( void )
     } else if( !pm->pmext->burstRoundsToFire[ 1 ] )
     {
       // Charging up
-      if( pm->cmd.buttons & BUTTON_ATTACK )
+      if( ( ( !pm->swapAttacks ?
+            (pm->cmd.buttons & BUTTON_ATTACK) : (pm->cmd.buttons & BUTTON_ATTACK2) ) ) )
       {
         pm->ps->stats[ STAT_MISC ] += pml.msec;
         if( pm->ps->stats[ STAT_MISC ] >= LIGHTNING_BOLT_CHARGE_TIME_MAX )
@@ -3855,7 +3870,8 @@ static void PM_Weapon( void )
 
   // no bite during pounce
   if( ( pm->ps->weapon == WP_ALEVEL3 || pm->ps->weapon == WP_ALEVEL3_UPG )
-      && ( pm->cmd.buttons & BUTTON_ATTACK )
+      && ( ( ( !pm->swapAttacks ?
+            (pm->cmd.buttons & BUTTON_ATTACK) : (pm->cmd.buttons & BUTTON_ATTACK2) ) ) )
       && ( pm->ps->pm_flags & PMF_CHARGE ) )
     return;
 
@@ -4850,7 +4866,8 @@ void PmoveSingle( pmove_t *pmove )
 
   // set the firing flag for continuous beam weapons
   if( !(pm->ps->pm_flags & PMF_RESPAWNED) && pm->ps->pm_type != PM_INTERMISSION &&
-      ( ( pm->cmd.buttons & BUTTON_ATTACK ) ||
+      ( ( ( ( !pm->swapAttacks ?
+            (pm->cmd.buttons & BUTTON_ATTACK) : (pm->cmd.buttons & BUTTON_ATTACK2) ) ) ) ||
         pm->pmext->pulsatingBeamTime[ 0 ] ) &&
       ( ( pm->ps->ammo > 0 || pm->ps->clips > 0 ) || BG_Weapon( pm->ps->weapon )->infiniteAmmo ) &&
       !( pm->ps->pm_flags & PMF_PAUSE_BEAM ) )
@@ -4860,7 +4877,8 @@ void PmoveSingle( pmove_t *pmove )
 
   // set the firing flag for continuous beam weapons
   if( !(pm->ps->pm_flags & PMF_RESPAWNED) && pm->ps->pm_type != PM_INTERMISSION &&
-      ( ( pm->cmd.buttons & BUTTON_ATTACK2 ) ||
+      ( ( ( ( !pm->swapAttacks ?
+            (pm->cmd.buttons & BUTTON_ATTACK2) : (pm->cmd.buttons & BUTTON_ATTACK) ) ) ) ||
         pm->pmext->pulsatingBeamTime[ 1 ] ) &&
       ( ( pm->ps->ammo > 0 || pm->ps->clips > 0 ) || BG_Weapon( pm->ps->weapon )->infiniteAmmo ) &&
       !( pm->ps->pm_flags & PMF_PAUSE_BEAM ) )
@@ -4881,7 +4899,9 @@ void PmoveSingle( pmove_t *pmove )
 
   // clear the respawned flag if attack and use are cleared
   if( pm->ps->misc[ MISC_HEALTH ] > 0 &&
-      !( pm->cmd.buttons & ( BUTTON_ATTACK | BUTTON_USE_HOLDABLE ) ) )
+      !( ( !pm->swapAttacks ?
+            (pm->cmd.buttons & ( BUTTON_ATTACK | BUTTON_USE_HOLDABLE )) :
+            (pm->cmd.buttons & ( BUTTON_ATTACK2 | BUTTON_USE_HOLDABLE )) ) ) )
     pm->ps->pm_flags &= ~PMF_RESPAWNED;
 
   // if talk button is down, dissallow all other input
