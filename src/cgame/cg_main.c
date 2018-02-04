@@ -227,6 +227,8 @@ vmCvar_t  cg_drawInvincibleVision;
 vmCvar_t  cg_stickySpec;
 vmCvar_t  cg_sprintToggle;
 vmCvar_t  cg_unlagged;
+vmCvar_t  cg_swapAttacks;
+vmCvar_t  cg_wallJumperMode;
 
 vmCvar_t  cg_debugVoices;
 
@@ -334,6 +336,8 @@ static cvarTable_t cvarTable[ ] =
   { &cg_sprintToggle, "cg_sprintToggle", "1", CVAR_ARCHIVE|CVAR_USERINFO },
   { &cg_unlagged, "cg_unlagged", "1", CVAR_ARCHIVE|CVAR_USERINFO },
   { NULL, "cg_flySpeed", "600", CVAR_ARCHIVE|CVAR_USERINFO },
+  { &cg_swapAttacks, "cg_swapAttacks", "0", CVAR_ARCHIVE|CVAR_USERINFO },
+  { &cg_wallJumperMode, "cg_wallJumperMode", "0", CVAR_ARCHIVE|CVAR_USERINFO },
   { &cg_depthSortParticles, "cg_depthSortParticles", "1", CVAR_ARCHIVE },
   { &cg_bounceParticles, "cg_bounceParticles", "1", CVAR_ARCHIVE },
   { &cg_consoleLatency, "cg_consoleLatency", "3000", CVAR_ARCHIVE },

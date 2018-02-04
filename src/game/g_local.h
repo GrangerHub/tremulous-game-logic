@@ -435,6 +435,8 @@ typedef struct
   int                 location;           // player locations
   int                 teamInfo;           // level.time of team overlay update (disabled = 0)
   float               flySpeed;           // for spectator/noclip moves
+  int                 swapAttacks;
+  int                 wallJumperMode;
   int                 buildableRangeMarkerMask;
 
   class_t             classSelection;     // player class (copied to ent->client->ps.stats[ STAT_CLASS ] once spawned)

@@ -1072,6 +1072,13 @@ Q_EXPORT char *ClientUserinfoChanged( int clientNum, qboolean forceName )
   client->pers.buildableRangeMarkerMask =
     atoi( Info_ValueForKey( userinfo, "cg_buildableRangeMarkerMask" ) );
 
+  // swap attacks
+  client->pers.swapAttacks = atoi( Info_ValueForKey( userinfo, "cg_swapAttacks" ) );
+
+  // wall jumper mode
+  // swap attacks
+  client->pers.wallJumperMode = atoi( Info_ValueForKey( userinfo, "cg_wallJumperMode" ) );
+
   // teamInfo
   s = Info_ValueForKey( userinfo, "teamoverlay" );
 

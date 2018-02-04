@@ -417,8 +417,11 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
   client->oldbuttons = client->buttons;
   client->buttons = ucmd->buttons;
 
-  attack1 = ( client->buttons & BUTTON_ATTACK ) &&
-            !( client->oldbuttons & BUTTON_ATTACK );
+  attack1 = !client->pers.swapAttacks ?
+                ( ( client->buttons & BUTTON_ATTACK ) &&
+                  !( client->oldbuttons & BUTTON_ATTACK ) ) :
+                ( ( client->buttons & BUTTON_ATTACK2 ) &&
+                  !( client->oldbuttons & BUTTON_ATTACK2 ) );
 
   // We are in following mode only if we are following a non-spectating client
   following = client->sess.spectatorState == SPECTATOR_FOLLOW;
@@ -497,6 +500,8 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
     pm.trace = G_TraceWrapper;
     pm.pointcontents = SV_PointContents;
     pm.tauntSpam = 0;
+    pm.swapAttacks = client->pers.swapAttacks;
+    pm.wallJumperMode = client->pers.wallJumperMode;
 
     // For firing lightning bolts early
     BG_CheckBoltImpactTrigger( &pm, G_TraceWrapper,
@@ -570,6 +575,7 @@ qboolean ClientInactivityTimer( gentity_t *ent )
            client->pers.cmd.rightmove ||
            client->pers.cmd.upmove ||
            ( client->pers.cmd.buttons & BUTTON_ATTACK ) ||
+           ( client->pers.cmd.buttons & BUTTON_ATTACK2 ) ||
            client->pers.cmdAnglesChanged ||
            G_SearchSpawnQueue( &level.alienSpawnQueue, ent-g_entities ) ||
            G_SearchSpawnQueue( &level.humanSpawnQueue, ent-g_entities ) )
@@ -630,6 +636,7 @@ void VoterInactivityTimer( gentity_t *ent )
       client->pers.cmd.rightmove ||
       client->pers.cmd.upmove ||
       ( client->pers.cmd.buttons & BUTTON_ATTACK ) ||
+      ( client->pers.cmd.buttons & BUTTON_ATTACK2 ) ||
       client->pers.cmdAnglesChanged ||
       G_SearchSpawnQueue( &level.alienSpawnQueue, ent-g_entities ) ||
       G_SearchSpawnQueue( &level.humanSpawnQueue, ent-g_entities ) )
@@ -981,7 +988,7 @@ void ClientIntermissionThink( gclient_t *client )
   // swap and latch button actions
   client->oldbuttons = client->buttons;
   client->buttons = client->pers.cmd.buttons;
-  if( client->buttons & ( BUTTON_ATTACK | BUTTON_USE_HOLDABLE ) & ( client->oldbuttons ^ client->buttons ) )
+  if( client->buttons & ( ( !client->pers.swapAttacks ? BUTTON_ATTACK : BUTTON_ATTACK2 ) | BUTTON_USE_HOLDABLE ) & ( client->oldbuttons ^ client->buttons ) )
     client->readyToExit = 1;
 }
 
@@ -2363,6 +2370,9 @@ void ClientThink_real( gentity_t *ent )
   pm.humanStaminaMode = g_humanStaminaMode.integer;
 
   pm.tauntSpam = 0;
+
+  pm.swapAttacks = client->pers.swapAttacks;
+  pm.wallJumperMode = client->pers.wallJumperMode;
 
   VectorCopy( client->ps.origin, client->oldOrigin );
 
