@@ -281,6 +281,9 @@ typedef struct pmove_s
 
   int           tauntSpam; // allow taunts to be spammed. only for clients that enable cg_tauntSpam
   int           humanPortalCreateTime[ PORTAL_NUM ];
+
+  int           swapAttacks;
+  int           wallJumperMode;
 } pmove_t;
 
 // if a full pmove isn't done on the client, you can just update the angles

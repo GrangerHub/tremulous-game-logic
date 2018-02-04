@@ -91,10 +91,17 @@ static void CG_GetBindings( void )
 CG_KeyNameForCommand
 ===============
 */
-static const char *CG_KeyNameForCommand( const char *command )
+static const char *CG_KeyNameForCommand( const char *commandIn )
 {
   int         i, j;
   static char buffer[ MAX_STRING_CHARS ];
+  const char  *command = !cg_swapAttacks.integer ?
+                              commandIn :
+                              ( !Q_stricmp( commandIn, "+attack" ) ?
+                                  "+button5" :
+                                  ( !Q_stricmp( commandIn, "+button5" ) ?
+                                      "+attack" :
+                                      commandIn ) ) ;
   int         firstKeyLength;
 
   buffer[ 0 ] = '\0';

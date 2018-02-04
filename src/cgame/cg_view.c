@@ -931,7 +931,8 @@ static int CG_CalcFov( void )
           fov_y = fov_y + f * ( zoomFov - fov_y );
 
         // BUTTON_ATTACK2 isn't held so unzoom next time
-        if( !( cmd.buttons & BUTTON_ATTACK2 ) )
+        if( !( !cg_swapAttacks.integer ?
+               ( cmd.buttons & BUTTON_ATTACK2 ) : ( cmd.buttons & BUTTON_ATTACK ) ) )
         {
           cg.zoomed   = qfalse;
           cg.zoomTime = MIN( cg.time, 
@@ -946,7 +947,8 @@ static int CG_CalcFov( void )
           fov_y = zoomFov + f * ( fov_y - zoomFov );
 
         // BUTTON_ATTACK2 is held so zoom next time
-        if( cmd.buttons & BUTTON_ATTACK2 )
+        if( ( !cg_swapAttacks.integer ?
+               ( cmd.buttons & BUTTON_ATTACK2 ) : ( cmd.buttons & BUTTON_ATTACK ) ) )
         {
           cg.zoomed   = qtrue;
           cg.zoomTime = MIN( cg.time,
