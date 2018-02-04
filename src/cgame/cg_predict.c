@@ -596,7 +596,7 @@ void CG_PredictPlayerState( void )
   cg_pmove.pointcontents = CG_PointContents;
   cg_pmove.debugLevel = cg_debugMove.integer;
   cg_pmove.swapAttacks = cg_swapAttacks.integer;
-  cg_pmove.wallJumperMode = cg_wallJumperMode.integer;
+  cg_pmove.wallJumperMinFactor = cg_wallJumperMinFactor.value;
 
   if( cg_pmove.ps->pm_type == PM_DEAD )
     cg_pmove.tracemask = MASK_DEADSOLID;

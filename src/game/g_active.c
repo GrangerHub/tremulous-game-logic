@@ -501,7 +501,7 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
     pm.pointcontents = SV_PointContents;
     pm.tauntSpam = 0;
     pm.swapAttacks = client->pers.swapAttacks;
-    pm.wallJumperMode = client->pers.wallJumperMode;
+    pm.wallJumperMinFactor = client->pers.wallJumperMinFactor;
 
     // For firing lightning bolts early
     BG_CheckBoltImpactTrigger( &pm, G_TraceWrapper,
@@ -2386,7 +2386,7 @@ void ClientThink_real( gentity_t *ent )
   pm.tauntSpam = 0;
 
   pm.swapAttacks = client->pers.swapAttacks;
-  pm.wallJumperMode = client->pers.wallJumperMode;
+  pm.wallJumperMinFactor = client->pers.wallJumperMinFactor;
 
   VectorCopy( client->ps.origin, client->oldOrigin );
 
