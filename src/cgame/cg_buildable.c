@@ -940,6 +940,7 @@ static void CG_BuildableStatusDisplay( centity_t *cent )
   entityState_t   *es = &cent->currentState;
   vec3_t          origin;
   float           healthScale;
+  float           healthColorFraction;
   int             health;
   float           x, y;
   vec4_t          color;
@@ -1077,6 +1078,7 @@ static void CG_BuildableStatusDisplay( centity_t *cent )
 
   health = es->misc;
   healthScale = (float)health / SU2HP( es->constantLight );
+  healthColorFraction = (float)health / SU2HP( BG_Buildable( es->modelindex )->health );
 
   if( health > 0 && healthScale < 0.01f )
     healthScale = 0.01f;
@@ -1084,6 +1086,13 @@ static void CG_BuildableStatusDisplay( centity_t *cent )
     healthScale = 0.0f;
   else if( healthScale > 1.0f )
     healthScale = 1.0f;
+
+  if( health > 0 && healthColorFraction < 0.01f )
+    healthColorFraction = 0.01f;
+  else if( healthColorFraction < 0.0f )
+    healthColorFraction = 0.0f;
+  else if( healthColorFraction > 1.0f )
+    healthColorFraction = 1.0f;
 
   if( CG_WorldToScreen( origin, &x, &y ) )
   {
@@ -1136,13 +1145,13 @@ static void CG_BuildableStatusDisplay( centity_t *cent )
       hH = picH - ( bs->healthPadding * 2.0f * scale );
       hW = picW * healthScale - ( bs->healthPadding * 2.0f * scale );
 
-      if( healthScale == 1.0f )
+      if( healthColorFraction == 1.0f )
         Vector4Copy( bs->healthLowColor, healthColor );
-      else if( healthScale >= 0.75f )
+      else if( healthColorFraction >= 0.75f )
         Vector4Copy( bs->healthGuardedColor, healthColor );
-      else if( healthScale >= 0.50f )
+      else if( healthColorFraction >= 0.50f )
         Vector4Copy( bs->healthElevatedColor, healthColor );
-      else if( healthScale >= 0.25f )
+      else if( healthColorFraction >= 0.25f )
         Vector4Copy( bs->healthHighColor, healthColor );
       else
         Vector4Copy( bs->healthSevereColor, healthColor );
