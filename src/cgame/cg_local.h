@@ -1067,6 +1067,7 @@ typedef struct
 
   // crosshair client ID
   int           crosshairBuildable;
+  int           crosshairNewBuildableTime;
   int           crosshairClientNum;
   int           crosshairClientTime;
   int           lastHitTime;

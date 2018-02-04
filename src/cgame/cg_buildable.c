@@ -986,7 +986,8 @@ static void CG_BuildableStatusDisplay( centity_t *cent )
   if( ( es->misc < SU2HP( BG_Buildable( es->modelindex )->health) ) ||
       !( es->eFlags & EF_B_POWERED ) ||
        ( es->eFlags & EF_B_MARKED ) ||
-      ( es->number == cg.crosshairBuildable ) )
+      ( es->number == cg.crosshairBuildable &&
+        ( ( cg.crosshairNewBuildableTime + 500 ) < cg.time ) ) )
   {
     // if first try fails, step left, step right
     for( j = 0; j < 3; j++ )
@@ -1297,7 +1298,8 @@ void CG_DrawBuildableStatus( void )
 
     if( es->eType == ET_BUILDABLE &&
         ( CG_PlayerIsBuilder( es->modelindex ) ||
-          es->number == cg.crosshairBuildable ) )
+        ( es->number == cg.crosshairBuildable &&
+          ( ( cg.crosshairNewBuildableTime + 500 ) < cg.time ) ) ) )
       buildableList[ buildables++ ] = cg.snap->entities[ i ].number;
   }
 
