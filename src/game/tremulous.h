@@ -345,7 +345,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #define ALIENSENSE_RANGE            1000.0f
-#define REGEN_BOOST_RANGE           200.0f
+#define REGEN_BOOST_RANGE           250.0f
 
 #define ALIEN_POISON_TIME           10000
 #define ALIEN_POISON_DMG            5000

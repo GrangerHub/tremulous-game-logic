@@ -1636,14 +1636,58 @@ void ABooster_Touch( gentity_t *self, gentity_t *other, trace_t *trace )
   if( !client )
     return;
 
-  if( client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
+  if( client->ps.stats[ STAT_TEAM ] != TEAM_ALIENS )
     return;
 
   client->ps.stats[ STAT_STATE ] |= SS_BOOSTED;
   client->boostedTime = level.time;
 }
 
+/*
+================
+ABooster_Think
 
+Called when an alien touches a booster
+================
+*/
+void ABooster_Think( gentity_t *self )
+{
+  int i, num;
+  int entityList[ MAX_GENTITIES ];
+  vec3_t range, mins, maxs;
+
+  AGeneric_Think( self );
+
+  if( !self->spawned || !self->powered || self->health <= 0 )
+    return;
+
+  VectorSet( range, REGEN_BOOST_RANGE, REGEN_BOOST_RANGE,
+             REGEN_BOOST_RANGE );
+  VectorAdd( self->r.currentOrigin, range, maxs );
+  VectorSubtract( self->r.currentOrigin, range, mins );
+
+  num = SV_AreaEntities( mins, maxs, entityList, MAX_GENTITIES );
+  for( i = 0; i < num; i++ )
+  {
+    gentity_t *player = &g_entities[ entityList[ i ] ];
+    gclient_t *client = player->client;
+
+    if( !client )
+      continue;
+
+    if( client->ps.stats[ STAT_TEAM ] != TEAM_ALIENS )
+      continue;
+
+    if( Distance( client->ps.origin, self->r.currentOrigin ) > REGEN_BOOST_RANGE )
+      continue;
+
+    if( !G_Visible( self, player, (CONTENTS_SOLID|CONTENTS_PLAYERCLIP) ) )
+      continue;
+
+    client->ps.stats[ STAT_STATE ] |= SS_BOOSTED;
+    client->boostedTime = level.time;
+  }
+}
 
 
 //==================================================================================
@@ -4381,7 +4425,7 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
 
     case BA_A_BOOSTER:
       built->die = AGeneric_Die;
-      built->think = AGeneric_Think;
+      built->think = ABooster_Think;
       built->pain = AGeneric_Pain;
       built->touch = ABooster_Touch;
       break;
