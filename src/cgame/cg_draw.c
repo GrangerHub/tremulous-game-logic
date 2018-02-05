@@ -316,7 +316,7 @@ static void CG_DrawPlayerCreditsValue( rectDef_t *rect, vec4_t color, qboolean p
 
   //if the build timer pie is showing don't show this
   if( ( cent->currentState.weapon == WP_ABUILD ||
-      cent->currentState.weapon == WP_ABUILD2 ) && ps->stats[ STAT_MISC ] )
+      cent->currentState.weapon == WP_ABUILD2 ) && ps->misc[ MISC_MISC ] )
     return;
 
   value = cgs.warmup ? HUMAN_MAX_CREDITS : ps->persistant[ PERS_CREDIT ];
@@ -461,7 +461,7 @@ static void CG_DrawPlayerClipsRing( rectDef_t *rect, vec4_t backColor,
 {
   playerState_t *ps = &cg.snap->ps;
   centity_t     *cent;
-  float         buildTime = ps->stats[ STAT_MISC ];
+  float         buildTime = ps->misc[ MISC_MISC ];
   float         progress;
   float         maxDelay;
   weapon_t      weapon;
@@ -509,7 +509,7 @@ static void CG_DrawPlayerBuildTimerRing( rectDef_t *rect, vec4_t backColor,
                                          vec4_t foreColor, qhandle_t shader )
 {
   playerState_t *ps = &cg.snap->ps;
-  float         buildTime = ps->stats[ STAT_MISC ];
+  float         buildTime = ps->misc[ MISC_MISC ];
   float         progress;
   vec4_t        color;
 
@@ -844,7 +844,7 @@ static void CG_DrawPlayerBuildTimer( rectDef_t *rect, vec4_t color )
 
   ps = &cg.snap->ps;
 
-  if( ps->stats[ STAT_MISC ] <= 0 )
+  if( ps->misc[ MISC_MISC ] <= 0 )
     return;
 
   if( cg.snap->ps.weapon != WP_HBUILD )
@@ -860,8 +860,7 @@ static void CG_DrawPlayerBuildTimer( rectDef_t *rect, vec4_t color )
     }
   }
 
-
-  index = 8 * ( ps->stats[ STAT_MISC ] - 1 ) / MAXIMUM_BUILD_TIME;
+  index = 8 * ( ps->misc[ MISC_MISC ] - 1 ) / MAXIMUM_BUILD_TIME;
   if( index > 7 )
     index = 7;
   else if( index < 0 )
@@ -1212,7 +1211,7 @@ static float CG_ChargeProgress( qboolean chargeStamina )
     max = BG_Class( cg.snap->ps.stats[STAT_CLASS] )->chargeStaminaMax;
   } else
   {
-    rawProgress = (float)cg.predictedPlayerState.stats[ STAT_MISC ];
+    rawProgress = (float)cg.predictedPlayerState.misc[ MISC_MISC ];
     if( cg.snap->ps.weapon == WP_ALEVEL0 )
     {
       min = LEVEL0_POUNCE_TIME_MIN;
@@ -1373,7 +1372,7 @@ static void CG_DrawPlayerChargeBar( rectDef_t *rect, vec4_t ref_color,
 
   // Flash red for Lucifer Cannon warning
   if( cg.snap->ps.weapon == WP_LUCIFER_CANNON &&
-      cg.snap->ps.stats[ STAT_MISC ] >= LCANNON_CHARGE_TIME_WARN &&
+      cg.snap->ps.misc[ MISC_MISC ] >= LCANNON_CHARGE_TIME_WARN &&
       ( cg.time & 128 ) )
   {
     color[ 0 ] = 1.0f;
@@ -3033,7 +3032,7 @@ static void CG_ScanForCrosshairEntity( void )
       switch( weapon )
       {
         case WP_LUCIFER_CANNON:
-          if( cg.predictedPlayerState.stats[ STAT_MISC ] >= 0 )
+          if( cg.predictedPlayerState.misc[ MISC_MISC ] >= 0 )
             num = 1;
           break;
         default:
@@ -3042,7 +3041,7 @@ static void CG_ScanForCrosshairEntity( void )
     }
 
     if( weapon == WP_LUCIFER_CANNON && num == 1 )
-      speed = BG_GetLCannonPrimaryFireSpeed( cg.predictedPlayerState.stats[ STAT_MISC ] );
+      speed = BG_GetLCannonPrimaryFireSpeed( cg.predictedPlayerState.misc[ MISC_MISC ] );
     else
       speed = BG_Weapon( weapon )->impactPrediction[ num ].missileLaunchSpeed;
 

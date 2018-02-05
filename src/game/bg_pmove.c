@@ -1012,7 +1012,7 @@ static float PM_CmdScale( usercmd_t *cmd, qboolean zFlight )
   }
 
   if( pm->ps->weapon == WP_ALEVEL4 && pm->ps->pm_flags & PMF_CHARGE )
-    modifier *= 1.0f + ( pm->ps->stats[ STAT_MISC ] *
+    modifier *= 1.0f + ( pm->ps->misc[ MISC_MISC ] *
                          ( LEVEL4_TRAMPLE_SPEED - 1.0f ) /
                          LEVEL4_TRAMPLE_DURATION );					 
 
@@ -1130,7 +1130,7 @@ static void PM_CheckCharge( void )
     return;
   }
 
-  if( pm->ps->stats[ STAT_MISC ] > 0 )
+  if( pm->ps->misc[ MISC_MISC ] > 0 )
     pm->ps->pm_flags |= PMF_CHARGE;
   else
     pm->ps->pm_flags &= ~PMF_CHARGE;
@@ -1172,11 +1172,12 @@ static qboolean PM_CheckPounce( void )
 
   // Can't start a pounce
   if( pm->ps->weapon == WP_ALEVEL0 &&
-      pm->ps->stats[ STAT_MISC ] < LEVEL0_POUNCE_TIME_MIN )
+      pm->ps->misc[ MISC_MISC ] < LEVEL0_POUNCE_TIME_MIN )
     return qfalse;
-  else if( pm->ps->stats[ STAT_MISC ] < LEVEL3_POUNCE_TIME_MIN )
+  else if( pm->ps->misc[ MISC_MISC ] < LEVEL3_POUNCE_TIME_MIN )
     return qfalse;
   if( ( pm->ps->pm_flags & PMF_CHARGE ) ||
+      pm->ps->misc[ MISC_MISC ] < LEVEL3_POUNCE_TIME_MIN ||
       pm->ps->groundEntityNum == ENTITYNUM_NONE )
     return qfalse;
 
@@ -1186,13 +1187,13 @@ static qboolean PM_CheckPounce( void )
   pm->ps->pm_flags |= PMF_CHARGE;
   pm->ps->groundEntityNum = ENTITYNUM_NONE;
   if( pm->ps->weapon == WP_ALEVEL0 )
-    jumpMagnitude = pm->ps->stats[ STAT_MISC ] *
+    jumpMagnitude = pm->ps->misc[ MISC_MISC ] *
                     LEVEL0_POUNCE_JUMP_MAG / LEVEL0_POUNCE_TIME;
   else if( pm->ps->weapon == WP_ALEVEL3 )
-    jumpMagnitude = pm->ps->stats[ STAT_MISC ] *
+    jumpMagnitude = pm->ps->misc[ MISC_MISC ] *
                     LEVEL3_POUNCE_JUMP_MAG / LEVEL3_POUNCE_TIME;
   else
-    jumpMagnitude = pm->ps->stats[ STAT_MISC ] *
+    jumpMagnitude = pm->ps->misc[ MISC_MISC ] *
                     LEVEL3_POUNCE_JUMP_MAG_UPG / LEVEL3_POUNCE_TIME_UPG;
   VectorMA( pm->ps->velocity, jumpMagnitude, pml.forward, pm->ps->velocity );
   PM_AddEvent( EV_JUMP );
@@ -1217,8 +1218,8 @@ static qboolean PM_CheckPounce( void )
     pm->ps->pm_flags |= PMF_BACKWARDS_JUMP;
   }
 
-  pm->pmext->pouncePayload = pm->ps->stats[ STAT_MISC ];
-  pm->ps->stats[ STAT_MISC ] = 0;
+  pm->pmext->pouncePayload = pm->ps->misc[ MISC_MISC ];
+  pm->ps->misc[ MISC_MISC ] = 0;
 
   return qtrue;
 }
@@ -1248,7 +1249,7 @@ static qboolean PM_CheckAirPounce( void )
   // Can't start a pounce
   if( pm->ps->weapon == WP_ASPITFIRE )
   {
-    if( pm->ps->stats[ STAT_MISC ] < SPITFIRE_POUNCE_TIME_MIN)
+    if( pm->ps->misc[ MISC_MISC ] < SPITFIRE_POUNCE_TIME_MIN)
       return qfalse;
   }
 
@@ -1259,7 +1260,7 @@ static qboolean PM_CheckAirPounce( void )
   
   
   if( pm->ps->weapon == WP_ASPITFIRE )
-    jumpMagnitude = pm->ps->stats[ STAT_MISC ] * SPITFIRE_POUNCE_JUMP_MAG / SPITFIRE_POUNCE_TIME;
+    jumpMagnitude = pm->ps->misc[ MISC_MISC ] * SPITFIRE_POUNCE_JUMP_MAG / SPITFIRE_POUNCE_TIME;
   else jumpMagnitude = 0;
 
   VectorMA( pm->ps->velocity, jumpMagnitude, pml.forward, pm->ps->velocity ); 
@@ -1284,8 +1285,8 @@ static qboolean PM_CheckAirPounce( void )
       pm->ps->pm_flags |= PMF_BACKWARDS_JUMP;
   }
   
-  pm->pmext->pouncePayload = pm->ps->stats[ STAT_MISC ];
-  pm->ps->stats[ STAT_MISC ] = 0;
+  pm->pmext->pouncePayload = pm->ps->misc[ MISC_MISC ];
+  pm->ps->misc[ MISC_MISC ] = 0;
   if( BG_ClassHasAbility( pm->ps->stats[STAT_CLASS],  SCA_CHARGE_STAMINA ) )
     pm->ps->stats[ STAT_STAMINA ] -= pm->pmext->pouncePayload;
   return qtrue;
@@ -1406,7 +1407,7 @@ static qboolean PM_CheckWallJump( vec3_t wishDir, float wishSpeed )
   awaySpeed = intoLook * 0.75f * jumpMagnitude;
 
   // Store awayFactor for use in PM_AirMove for control reduction.
-  pm->ps->stats[ STAT_MISC ] = awayFactor * 100.0f;
+  pm->ps->misc[ MISC_MISC ] = awayFactor * 100.0f;
 
   // Set timer until the next jump.
   pm->ps->pm_flags |= PMF_TIME_WALLJUMP;
@@ -1537,7 +1538,7 @@ static qboolean PM_CheckJump( vec3_t customNormal )
   if( ( pm->ps->weapon == WP_ALEVEL0 ||
         pm->ps->weapon == WP_ALEVEL3 ||
         pm->ps->weapon == WP_ALEVEL3_UPG ) &&
-      pm->ps->stats[ STAT_MISC ] > 0 )
+      pm->ps->misc[ MISC_MISC ] > 0 )
   {
     // disable bunny hop
     pm->ps->pm_flags &= ~PMF_ALL_HOP_FLAGS;
@@ -1546,7 +1547,7 @@ static qboolean PM_CheckJump( vec3_t customNormal )
 
   //can't jump and charge at the same time
   if( ( pm->ps->weapon == WP_ALEVEL4 ) &&
-      pm->ps->stats[ STAT_MISC ] > 0 )
+      pm->ps->misc[ MISC_MISC ] > 0 )
   {
     // disable bunny hop
     pm->ps->pm_flags &= ~PMF_ALL_HOP_FLAGS;
@@ -2364,7 +2365,7 @@ static void PM_AirMove( void )
   // directly towards it.
   if( pm->ps->pm_flags & PMF_TIME_WALLJUMP )
   {
-    float awayFactor = pm->ps->stats[ STAT_MISC ] / 100.0f;
+    float awayFactor = pm->ps->misc[ MISC_MISC ] / 100.0f;
     controlFactor = ( float ) pm->ps->pm_time / WALLJUMP_TIME;
     controlFactor = pow( controlFactor, awayFactor * 6.0f );
   }
@@ -3971,7 +3972,7 @@ static void PM_BeginWeaponChange( int weapon )
 
   //special case to prevent storing a charged up lcannon
   if( pm->ps->weapon == WP_LUCIFER_CANNON )
-    pm->ps->stats[ STAT_MISC ] = 0;
+    pm->ps->misc[ MISC_MISC ] = 0;
 
   if( weapon == WP_LUCIFER_CANNON )
     pm->pmext->luciAmmoReduction = 0;
@@ -4119,14 +4120,14 @@ static void PM_Weapon( void )
           (pm->cmd.buttons & BUTTON_ATTACK2) : (pm->cmd.buttons & BUTTON_ATTACK) ) &&
         ( pm->ps->weapon != WP_ASPITFIRE ||
           pm->waterlevel <= 1 ) )
-      pm->ps->stats[ STAT_MISC ] += pml.msec;
+      pm->ps->misc[ MISC_MISC ] += pml.msec;
     else
-      pm->ps->stats[ STAT_MISC ] -= pml.msec;
+      pm->ps->misc[ MISC_MISC ] -= pml.msec;
 
-    if( pm->ps->stats[ STAT_MISC ] > max )
-      pm->ps->stats[ STAT_MISC ] = max;
-    else if( pm->ps->stats[ STAT_MISC ] < 0 )
-      pm->ps->stats[ STAT_MISC ] = 0;
+    if( pm->ps->misc[ MISC_MISC ] > max )
+      pm->ps->misc[ MISC_MISC ] = max;
+    else if( pm->ps->misc[ MISC_MISC ] < 0 )
+      pm->ps->misc[ MISC_MISC ] = 0;
   }
 
   // Trample charge mechanics
@@ -4136,7 +4137,7 @@ static void PM_Weapon( void )
     if( !( pm->ps->stats[ STAT_STATE ] & SS_CHARGING ) )
     {
       // Charge button held
-      if( pm->ps->stats[ STAT_MISC ] < LEVEL4_TRAMPLE_CHARGE_TRIGGER &&
+      if( pm->ps->misc[ MISC_MISC ] < LEVEL4_TRAMPLE_CHARGE_TRIGGER &&
           ( ( !pm->swapAttacks ?
                 (pm->cmd.buttons & BUTTON_ATTACK2) : (pm->cmd.buttons & BUTTON_ATTACK) ) ) )
       {
@@ -4155,53 +4156,53 @@ static void PM_Weapon( void )
 
           charge *= DotProduct( dir, vel );
 
-          pm->ps->stats[ STAT_MISC ] += charge;
+          pm->ps->misc[ MISC_MISC ] += charge;
         }
         else
-          pm->ps->stats[ STAT_MISC ] = 0;
+          pm->ps->misc[ MISC_MISC ] = 0;
       }
 
       // Charge button released
       else if( !( pm->ps->stats[ STAT_STATE ] & SS_CHARGING ) )
       {
-        if( pm->ps->stats[ STAT_MISC ] > LEVEL4_TRAMPLE_CHARGE_MIN )
+        if( pm->ps->misc[ MISC_MISC ] > LEVEL4_TRAMPLE_CHARGE_MIN )
         {
-          if( pm->ps->stats[ STAT_MISC ] > LEVEL4_TRAMPLE_CHARGE_MAX )
-            pm->ps->stats[ STAT_MISC ] = LEVEL4_TRAMPLE_CHARGE_MAX;
-          pm->ps->stats[ STAT_MISC ] = pm->ps->stats[ STAT_MISC ] *
+          if( pm->ps->misc[ MISC_MISC ] > LEVEL4_TRAMPLE_CHARGE_MAX )
+            pm->ps->misc[ MISC_MISC ] = LEVEL4_TRAMPLE_CHARGE_MAX;
+          pm->ps->misc[ MISC_MISC ] = pm->ps->misc[ MISC_MISC ] *
                                        LEVEL4_TRAMPLE_DURATION /
                                        LEVEL4_TRAMPLE_CHARGE_MAX;
           pm->ps->stats[ STAT_STATE ] |= SS_CHARGING;
           PM_AddEvent( EV_LEV4_TRAMPLE_START );
         }
         else
-          pm->ps->stats[ STAT_MISC ] -= pml.msec;
+          pm->ps->misc[ MISC_MISC ] -= pml.msec;
       }
     }
 
     // maul cancels trample
     else if( attack1 )
     {
-      pm->ps->stats[ STAT_MISC ] = 0;
+      pm->ps->misc[ MISC_MISC ] = 0;
     }
 
     // Discharging
     else
     {
-      if( pm->ps->stats[ STAT_MISC ] < LEVEL4_TRAMPLE_CHARGE_MIN )
-        pm->ps->stats[ STAT_MISC ] = 0;
+      if( pm->ps->misc[ MISC_MISC ] < LEVEL4_TRAMPLE_CHARGE_MIN )
+        pm->ps->misc[ MISC_MISC ] = 0;
       else
-        pm->ps->stats[ STAT_MISC ] -= pml.msec;
+        pm->ps->misc[ MISC_MISC ] -= pml.msec;
 
       // If the charger has stopped moving take a chunk of charge away
       if( VectorLength( pm->ps->velocity ) < 64.0f || pm->cmd.rightmove )
-        pm->ps->stats[ STAT_MISC ] -= LEVEL4_TRAMPLE_STOP_PENALTY * pml.msec;
+        pm->ps->misc[ MISC_MISC ] -= LEVEL4_TRAMPLE_STOP_PENALTY * pml.msec;
     }
 
     // Charge is over
-    if( pm->ps->stats[ STAT_MISC ] <= 0 || pm->cmd.forwardmove <= 0 )
+    if( pm->ps->misc[ MISC_MISC ] <= 0 || pm->cmd.forwardmove <= 0 )
     {
-      pm->ps->stats[ STAT_MISC ] = 0;
+      pm->ps->misc[ MISC_MISC ] = 0;
       if( pm->ps->stats[ STAT_STATE ] & SS_CHARGING )
       {
         pm->ps->weaponTime = 0;
@@ -4241,14 +4242,14 @@ static void PM_Weapon( void )
 
     if( ( !pm->swapAttacks ?
           (pm->cmd.buttons & BUTTON_ATTACK2) : (pm->cmd.buttons & BUTTON_ATTACK) ) )
-      pm->ps->stats[ STAT_MISC ] += (int)( chargeRate * pml.msec );
+      pm->ps->misc[ MISC_MISC ] += (int)( chargeRate * pml.msec );
     else
-      pm->ps->stats[ STAT_MISC ] -= pml.msec;
+      pm->ps->misc[ MISC_MISC ] -= pml.msec;
 
-    if( pm->ps->stats[ STAT_MISC ] > max )
-      pm->ps->stats[ STAT_MISC ] = max;
-    else if( pm->ps->stats[ STAT_MISC ] < 0 )
-      pm->ps->stats[ STAT_MISC ] = 0;
+    if( pm->ps->misc[ MISC_MISC ] > max )
+      pm->ps->misc[ MISC_MISC ] = max;
+    else if( pm->ps->misc[ MISC_MISC ] < 0 )
+      pm->ps->misc[ MISC_MISC ] = 0;
   }
 
   if( pm->ps->weapon == WP_LUCIFER_CANNON )
@@ -4261,13 +4262,13 @@ static void PM_Weapon( void )
         ( ( !pm->swapAttacks ?
               (pm->cmd.buttons & BUTTON_ATTACK) : (pm->cmd.buttons & BUTTON_ATTACK2) ) ) )
     {
-      if( ( pm->cmd.buttons & BUTTON_ATTACK2 ) && ( pm->ps->stats[ STAT_MISC ] > 0 ) )
+      if( ( pm->cmd.buttons & BUTTON_ATTACK2 ) && ( pm->ps->misc[ MISC_MISC ] > 0 ) )
       {
-        pm->ps->stats[ STAT_MISC ] -= pml.msec;
-        if( pm->ps->stats[ STAT_MISC ] < 0 )
-          pm->ps->stats[ STAT_MISC ] = 0;
+        pm->ps->misc[ MISC_MISC ] -= pml.msec;
+        if( pm->ps->misc[ MISC_MISC ] < 0 )
+          pm->ps->misc[ MISC_MISC ] = 0;
 
-        if( pm->ps->stats[ STAT_MISC ] > 0 )
+        if( pm->ps->misc[ MISC_MISC ] > 0 )
         {
           pm->pmext->luciAmmoReduction += LCANNON_CHARGE_AMMO_REDUCE * LCANNON_CHARGE_AMMO *
                                           ( ( float ) ( pml.msec ) ) / LCANNON_CHARGE_TIME_MAX;
@@ -4282,17 +4283,17 @@ static void PM_Weapon( void )
         }
       }
       else if( !( pm->cmd.buttons & BUTTON_ATTACK2 ) )
-        pm->ps->stats[ STAT_MISC ] += pml.msec;
-      if( pm->ps->stats[ STAT_MISC ] >= LCANNON_CHARGE_TIME_MAX )
-        pm->ps->stats[ STAT_MISC ] = LCANNON_CHARGE_TIME_MAX;
-      if( pm->ps->stats[ STAT_MISC ] > pm->ps->ammo * LCANNON_CHARGE_TIME_MAX /
+        pm->ps->misc[ MISC_MISC ] += pml.msec;
+      if( pm->ps->misc[ MISC_MISC ] >= LCANNON_CHARGE_TIME_MAX )
+        pm->ps->misc[ MISC_MISC ] = LCANNON_CHARGE_TIME_MAX;
+      if( pm->ps->misc[ MISC_MISC ] > pm->ps->ammo * LCANNON_CHARGE_TIME_MAX /
                                               LCANNON_CHARGE_AMMO )
-        pm->ps->stats[ STAT_MISC ] = pm->ps->ammo * LCANNON_CHARGE_TIME_MAX /
+        pm->ps->misc[ MISC_MISC ] = pm->ps->ammo * LCANNON_CHARGE_TIME_MAX /
                                             LCANNON_CHARGE_AMMO;
     }
 
     // Set overcharging flag so other players can hear the warning beep
-    if( pm->ps->stats[ STAT_MISC ] > LCANNON_CHARGE_TIME_WARN )
+    if( pm->ps->misc[ MISC_MISC ] > LCANNON_CHARGE_TIME_WARN )
       pm->ps->eFlags |= EF_WARN_CHARGE;
   }
 
@@ -4318,11 +4319,11 @@ static void PM_Weapon( void )
       if( ( ( !pm->swapAttacks ?
             (pm->cmd.buttons & BUTTON_ATTACK) : (pm->cmd.buttons & BUTTON_ATTACK2) ) ) )
       {
-        pm->ps->stats[ STAT_MISC ] += pml.msec;
-        if( pm->ps->stats[ STAT_MISC ] >= LIGHTNING_BOLT_CHARGE_TIME_MAX )
-          pm->ps->stats[ STAT_MISC ] = LIGHTNING_BOLT_CHARGE_TIME_MAX;
-        if( pm->ps->stats[ STAT_MISC ] > pm->ps->ammo * LIGHTNING_BOLT_CHARGE_TIME_MIN )
-          pm->ps->stats[ STAT_MISC ] = pm->ps->ammo * LIGHTNING_BOLT_CHARGE_TIME_MIN;
+        pm->ps->misc[ MISC_MISC ] += pml.msec;
+        if( pm->ps->misc[ MISC_MISC ] >= LIGHTNING_BOLT_CHARGE_TIME_MAX )
+          pm->ps->misc[ MISC_MISC ] = LIGHTNING_BOLT_CHARGE_TIME_MAX;
+        if( pm->ps->misc[ MISC_MISC ] > pm->ps->ammo * LIGHTNING_BOLT_CHARGE_TIME_MIN )
+          pm->ps->misc[ MISC_MISC ] = pm->ps->ammo * LIGHTNING_BOLT_CHARGE_TIME_MIN;
       }
     }
   }
@@ -4444,7 +4445,7 @@ static void PM_Weapon( void )
     {
       case WP_LIGHTNING:
         if( ( ( attack1 ||
-                pm->ps->stats[ STAT_MISC ] > 0 ) &&
+                pm->ps->misc[ MISC_MISC ] > 0 ) &&
               pm->pmext->burstRoundsToFire[ 1 ] <= 0 ) ||
             ( ( pm->ps->stats[ STAT_STATE ] & SS_CHARGING ) &&
               pm->pmext->burstRoundsToFire[ 1 ] <= 0 &&
@@ -4596,31 +4597,31 @@ static void PM_Weapon( void )
         attack3 = qfalse;
 
         // Can't fire secondary while primary is charging
-        if( attack1 || pm->ps->stats[ STAT_MISC ] > 0 )
+        if( attack1 || pm->ps->misc[ MISC_MISC ] > 0 )
           attack2 = qfalse;
 
-        if( ( attack1 || pm->ps->stats[ STAT_MISC ] == 0 ) && !attack2 )
+        if( ( attack1 || pm->ps->misc[ MISC_MISC ] == 0 ) && !attack2 )
         {
           pm->ps->weaponTime = 0;
 
           // Charging
-          if( pm->ps->stats[ STAT_MISC ] < LCANNON_CHARGE_TIME_MAX )
+          if( pm->ps->misc[ MISC_MISC ] < LCANNON_CHARGE_TIME_MAX )
           {
             pm->ps->weaponstate = WEAPON_READY;
             return;
           }
         }
 
-        if( pm->ps->stats[ STAT_MISC ] > LCANNON_CHARGE_TIME_MIN )
+        if( pm->ps->misc[ MISC_MISC ] > LCANNON_CHARGE_TIME_MIN )
         {
           // Fire primary attack
           attack1 = qtrue;
           attack2 = qfalse;
         }
-        else if( pm->ps->stats[ STAT_MISC ] > 0 )
+        else if( pm->ps->misc[ MISC_MISC ] > 0 )
         {
           // Not enough charge
-          pm->ps->stats[ STAT_MISC ] = 0;
+          pm->ps->misc[ MISC_MISC ] = 0;
           pm->ps->weaponTime = 0;
           pm->ps->weaponstate = WEAPON_READY;
           return;
@@ -4634,17 +4635,17 @@ static void PM_Weapon( void )
         }
         break;
 
-        if( pm->ps->stats[ STAT_MISC ] > LCANNON_CHARGE_TIME_MIN )
+        if( pm->ps->misc[ MISC_MISC ] > LCANNON_CHARGE_TIME_MIN )
         {
           // The lucifer cannon has overcharged
           // Fire primary attack
           attack1 = qtrue;
           attack2 = qfalse;
         }
-        else if( pm->ps->stats[ STAT_MISC ] > 0 )
+        else if( pm->ps->misc[ MISC_MISC ] > 0 )
         {
           // Not enough charge
-          pm->ps->stats[ STAT_MISC ] = 0;
+          pm->ps->misc[ MISC_MISC ] = 0;
           pm->ps->weaponTime = 0;
           pm->ps->weaponstate = WEAPON_READY;
           return;
@@ -4682,22 +4683,22 @@ static void PM_Weapon( void )
 
       case WP_LIGHTNING:
         // Can't fire secondary while primary is charging
-        if( attack1 || pm->ps->stats[ STAT_MISC ] > 0 )
+        if( attack1 || pm->ps->misc[ MISC_MISC ] > 0 )
           attack2 = qfalse;
 
-        if( ( pm->ps->stats[ STAT_MISC ] == 0 ||
+        if( ( pm->ps->misc[ MISC_MISC ] == 0 ||
               ( attack1 && 
                 !( pm->pmext->impactTriggerTraceChecked &&
                    ( pm->pmext->impactTriggerTrace.fraction < 1.0f ||
                      pm->pmext->impactTriggerTrace.allsolid ||
                      pm->pmext->impactTriggerTrace.startsolid ) ) &&
-                pm->ps->stats[ STAT_MISC ] < LIGHTNING_BOLT_CHARGE_TIME_MAX &&
-                pm->ps->stats[ STAT_MISC ] < pm->ps->ammo * LIGHTNING_BOLT_CHARGE_TIME_MIN ) ) &&
+                pm->ps->misc[ MISC_MISC ] < LIGHTNING_BOLT_CHARGE_TIME_MAX &&
+                pm->ps->misc[ MISC_MISC ] < pm->ps->ammo * LIGHTNING_BOLT_CHARGE_TIME_MIN ) ) &&
             !attack2 &&
             !(pm->ps->stats[ STAT_STATE ] & SS_CHARGING) )
         {
           // Charging
-          if( pm->ps->stats[ STAT_MISC ] < LIGHTNING_BOLT_CHARGE_TIME_MAX )
+          if( pm->ps->misc[ MISC_MISC ] < LIGHTNING_BOLT_CHARGE_TIME_MAX )
           {
             pm->ps->weaponstate = WEAPON_READY;
             return;
@@ -4720,7 +4721,7 @@ static void PM_Weapon( void )
             pm->ps->weaponTime += BG_Weapon( pm->ps->weapon )->burstDelay2;
           pm->ps->stats[ STAT_STATE ] &= ~SS_CHARGING;
         }
-        else if( pm->ps->stats[ STAT_MISC ] >= LIGHTNING_BOLT_CHARGE_TIME_MIN )
+        else if( pm->ps->misc[ MISC_MISC ] >= LIGHTNING_BOLT_CHARGE_TIME_MIN )
         {
           // Fire primary attack
           attack1 = qtrue;
@@ -4728,12 +4729,12 @@ static void PM_Weapon( void )
           pm->pmext->pulsatingBeamTime[ 0 ] = LIGHTNING_BOLT_BEAM_DURATION;
           if( pm->ps->pm_flags & PMF_PAUSE_BEAM )
             pm->ps->pm_flags &= ~PMF_PAUSE_BEAM;
-          pm->ps->stats[ STAT_MISC2 ] = pm->ps->stats[ STAT_MISC ];
+          pm->ps->stats[ STAT_MISC2 ] = pm->ps->misc[ MISC_MISC ];
         }
-        else if( pm->ps->stats[ STAT_MISC ] > 0 )
+        else if( pm->ps->misc[ MISC_MISC ] > 0 )
         {
           // Not enough charge
-          pm->ps->stats[ STAT_MISC ] = 0;
+          pm->ps->misc[ MISC_MISC ] = 0;
           pm->ps->weaponTime = 0;
           pm->ps->weaponstate = WEAPON_READY;
           return;
@@ -4985,10 +4986,10 @@ static void PM_Weapon( void )
   {
     // Special case for lcannon
     if( pm->ps->weapon == WP_LUCIFER_CANNON && attack1 && !attack2 )
-      pm->ps->ammo -= ( pm->ps->stats[ STAT_MISC ] * LCANNON_CHARGE_AMMO +
+      pm->ps->ammo -= ( pm->ps->misc[ MISC_MISC ] * LCANNON_CHARGE_AMMO +
                 LCANNON_CHARGE_TIME_MAX - 1 ) / LCANNON_CHARGE_TIME_MAX;
     else if( pm->ps->weapon == WP_LIGHTNING && attack1 && !attack2 )
-      pm->ps->ammo -= pm->ps->stats[ STAT_MISC ] / LIGHTNING_BOLT_CHARGE_TIME_MIN;
+      pm->ps->ammo -= pm->ps->misc[ MISC_MISC ] / LIGHTNING_BOLT_CHARGE_TIME_MIN;
     else
       pm->ps->ammo -= BG_AmmoUsage( pm->ps );
 

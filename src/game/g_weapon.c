@@ -837,7 +837,7 @@ void lightningBoltFire( gentity_t *ent )
 {
 	trace_t		*tr = &ent->client->pmext.impactTriggerTrace;
 	gentity_t	*traceEnt, *tent;
-  int       damage = ( LIGHTNING_BOLT_DPS * ent->client->ps.stats[ STAT_MISC ] ) / 1000;
+  int       damage = ( LIGHTNING_BOLT_DPS * ent->client->ps.misc[ MISC_MISC ] ) / 1000;
 
   // damage self if in contact with water
   if( ent->waterlevel )
@@ -983,17 +983,17 @@ LCChargeFire
 */
 void LCChargeFire( gentity_t *ent, qboolean secondary )
 {
-  if( secondary && ent->client->ps.stats[ STAT_MISC ] <= 0 )
+  if( secondary && ent->client->ps.misc[ MISC_MISC ] <= 0 )
     fire_luciferCannon( ent, muzzle, forward, LCANNON_SECONDARY_DAMAGE,
                             LCANNON_SECONDARY_RADIUS, LCANNON_SECONDARY_SPEED );
   else
     fire_luciferCannon( ent, muzzle, forward,
-                            ent->client->ps.stats[ STAT_MISC ] *
+                            ent->client->ps.misc[ MISC_MISC ] *
                             LCANNON_DAMAGE / LCANNON_CHARGE_TIME_MAX,
                             LCANNON_RADIUS,
-                            BG_GetLCannonPrimaryFireSpeed( ent->client->ps.stats[ STAT_MISC ] ));
+                            BG_GetLCannonPrimaryFireSpeed( ent->client->ps.misc[ MISC_MISC ] ));
 
-  ent->client->ps.stats[ STAT_MISC ] = 0;
+  ent->client->ps.misc[ MISC_MISC ] = 0;
 }
 
 /*
@@ -1112,7 +1112,7 @@ void CheckCkitRepair( gentity_t *ent )
   gentity_t   *traceEnt;
 
   if( ent->client->pmext.repairRepeatDelay > 0 ||
-      ent->client->ps.stats[ STAT_MISC ] > 0 )
+      ent->client->ps.misc[ MISC_MISC ] > 0 )
     return;
 
   BG_GetClientViewOrigin( &ent->client->ps, viewOrigin );
@@ -1227,7 +1227,7 @@ void buildFire( gentity_t *ent, dynMenu_t menu )
 
   if( buildable > BA_NONE )
   {
-    if( ent->client->ps.stats[ STAT_MISC ] > 0 &&
+    if( ent->client->ps.misc[ MISC_MISC ] > 0 &&
         ( ent->client->ps.weapon == WP_ABUILD ||
           ent->client->ps.weapon == WP_ABUILD2 ) )
     {
@@ -1241,7 +1241,7 @@ void buildFire( gentity_t *ent, dynMenu_t menu )
         ( ent->client->ps.weapon == WP_ABUILD ||
           ent->client->ps.weapon == WP_ABUILD2 ) )
       {
-        ent->client->ps.stats[ STAT_MISC ] +=
+        ent->client->ps.misc[ MISC_MISC ] +=
           BG_Buildable( buildable )->buildTime;
       }
 
@@ -1466,7 +1466,6 @@ void poisonCloud( gentity_t *ent )
       {
         target->client->ps.stats[ STAT_STATE ] |= SS_BOOSTED;
         target->client->boostedTime = ent->client->boostedTime;
-        target->touch = ABoosted_Touch;
       }
     }
   }
@@ -2104,7 +2103,7 @@ void G_ChargeAttack( gentity_t *ent, gentity_t *victim )
   int       i;
   vec3_t    forward;
 
-  if( ent->client->ps.stats[ STAT_MISC ] <= 0 ||
+  if( ent->client->ps.misc[ MISC_MISC ] <= 0 ||
       !( ent->client->ps.stats[ STAT_STATE ] & SS_CHARGING ) ||
       ent->client->ps.weaponTime )
     return;
@@ -2133,7 +2132,7 @@ void G_ChargeAttack( gentity_t *ent, gentity_t *victim )
 
   WideBloodSpurt( ent, victim, NULL );
 
-  damage = LEVEL4_TRAMPLE_DMG * ent->client->ps.stats[ STAT_MISC ] /
+  damage = LEVEL4_TRAMPLE_DMG * ent->client->ps.misc[ MISC_MISC ] /
            LEVEL4_TRAMPLE_DURATION;
 
   G_Damage( victim, ent, ent, forward, victim->r.currentOrigin, damage,
