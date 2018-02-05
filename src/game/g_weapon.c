@@ -1422,7 +1422,7 @@ void poisonCloud( gentity_t *ent )
   vec3_t    range = { LEVEL1_PCLOUD_RANGE, LEVEL1_PCLOUD_RANGE, LEVEL1_PCLOUD_RANGE };
   vec3_t    mins, maxs;
   int       i, num;
-  gentity_t *humanPlayer;
+  gentity_t *target;
   trace_t   tr;
 
   VectorAdd( ent->client->ps.origin, range, maxs );
@@ -1432,26 +1432,37 @@ void poisonCloud( gentity_t *ent )
   num = SV_AreaEntities( mins, maxs, entityList, MAX_GENTITIES );
   for( i = 0; i < num; i++ )
   {
-    humanPlayer = &g_entities[ entityList[ i ] ];
+    target = &g_entities[ entityList[ i ] ];
 
-    if( humanPlayer->client &&
-        humanPlayer->client->pers.teamSelection == TEAM_HUMANS &&
-        !BG_InventoryContainsUpgrade( UP_HELMET, humanPlayer->client->ps.stats ) &&
-        !BG_InventoryContainsUpgrade( UP_BATTLESUIT, humanPlayer->client->ps.stats ))
+    if( target->client )
     {
-      SV_Trace( &tr, muzzle, NULL, NULL, humanPlayer->r.currentOrigin,
-                  humanPlayer->s.number, CONTENTS_SOLID, TT_AABB );
+      if( target->client->pers.teamSelection == TEAM_HUMANS )
+      {
+        if( BG_InventoryContainsUpgrade( UP_HELMET, target->client->ps.stats ) ||
+            BG_InventoryContainsUpgrade( UP_BATTLESUIT, target->client->ps.stats ) )
+          continue;
 
-      //can't see target from here
-      if( tr.entityNum == ENTITYNUM_WORLD )
-        continue;
+        SV_Trace( &tr, muzzle, NULL, NULL, target->r.currentOrigin,
+                    target->s.number, CONTENTS_SOLID, TT_AABB );
 
-      humanPlayer->client->ps.eFlags |= EF_POISONCLOUDED;
-      humanPlayer->client->lastPoisonCloudedTime = level.time;
-      humanPlayer->client->lastPoisonCloudedClient = ent;
+        //can't see target from here
+        if( tr.entityNum == ENTITYNUM_WORLD )
+          continue;
 
-      SV_GameSendServerCommand( humanPlayer->client->ps.clientNum,
-                              "poisoncloud" );
+        target->client->ps.eFlags |= EF_POISONCLOUDED;
+        target->client->lastPoisonCloudedTime = level.time;
+        target->client->lastPoisonCloudedClient = ent;
+
+        SV_GameSendServerCommand( target->client->ps.clientNum,
+                                "poisoncloud" );
+      } else if( target->client->pers.teamSelection == TEAM_ALIENS &&
+                 ent->client &&
+                 ent->client->ps.stats[ STAT_STATE ] & SS_BOOSTED )
+      {
+        target->client->ps.stats[ STAT_STATE ] |= SS_BOOSTED;
+        target->client->boostedTime = ent->client->boostedTime;
+        target->touch = ABoosted_Touch;
+      }
     }
   }
   G_UnlaggedOff( );
