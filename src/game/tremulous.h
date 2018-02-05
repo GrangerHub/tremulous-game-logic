@@ -341,8 +341,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define BOOSTER_REGEN_MOD           (3.0f)
 #define BOOSTER_VALUE               ( 9 * LEVEL0_VALUE )
 #define BOOSTER_BAT_PWR             25000
-#define BOOST_TIME                  30000
-#define BOOST_WARN_TIME             15000
+#define BOOST_TIME                  45000
+#define BOOST_WARN_TIME             30000
 
 #define ACIDTUBE_BP                 8
 #define ACIDTUBE_BT                 15000
