@@ -806,10 +806,10 @@ void ClientTimerActions( gentity_t *ent, int msec )
          client->ps.weapon == WP_ALEVEL1_UPG ) )
     {
       if( ( ucmd->buttons & BUTTON_ATTACK ) ||
-          ( ( ucmd->buttons & BUTTON_ATTACK2 ) &&
-             BG_Weapon( client->ps.weapon )->hasAltMode ) ||
+          ( ucmd->buttons & BUTTON_ATTACK2 ) ||
           ent->pain_debounce_time > level.time ||
           ( ucmd->buttons & BUTTON_GESTURE ) ||
+          !client->ps.stats[ STAT_MISC ] ||
           !G_Overmind( ) )
       {
         client->timeToInvisibility = LEVEL1_INVISIBILITY_DELAY + level.time;

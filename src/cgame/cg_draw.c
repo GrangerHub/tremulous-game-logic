@@ -1218,6 +1218,16 @@ static float CG_ChargeProgress( qboolean chargeStamina )
       min = LEVEL0_POUNCE_TIME_MIN;
       max = LEVEL0_POUNCE_TIME;
     }
+    else if( cg.snap->ps.weapon == WP_ALEVEL1 )
+    {
+      min = 0;
+      max = LEVEL1_INVISIBILITY_TIME;
+    }
+    else if( cg.snap->ps.weapon == WP_ALEVEL1_UPG )
+    {
+      min = 0;
+      max = LEVEL1_UPG_INVISIBILITY_TIME;
+    }
     else if( cg.snap->ps.weapon == WP_ASPITFIRE )
     {
       min = SPITFIRE_POUNCE_TIME_MIN;

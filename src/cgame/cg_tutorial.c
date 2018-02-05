@@ -340,6 +340,12 @@ static void CG_AlienLevel1Text( char *text, playerState_t *ps )
       va( "Press %s to swipe\n",
         CG_KeyNameForCommand( "+attack" ) ) );
 
+        
+
+  Q_strcat( text, MAX_TUTORIAL_TEXT,
+      va( "Hold down %s to charge for invisibility\n",
+        CG_KeyNameForCommand( "+button5" ) ) );
+
   if( ps->stats[ STAT_CLASS ] == PCL_ALIEN_LEVEL1_UPG )
   {
     Q_strcat( text, MAX_TUTORIAL_TEXT,

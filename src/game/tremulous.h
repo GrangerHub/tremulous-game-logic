@@ -67,27 +67,31 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL0_POUNCE_SPEED_MOD     0.75f    // walking speed modifier for pounce charging
 #define LEVEL0_POUNCE_JUMP_MAG      600      // Dretch pounce jump power
 
-#define LEVEL1_CLAW_DMG             AWDM(32000)
-#define LEVEL1_CLAW_RANGE           96.0f
-#define LEVEL1_CLAW_U_RANGE         LEVEL1_CLAW_RANGE + 3.0f
-#define LEVEL1_CLAW_WIDTH           10.0f
-#define LEVEL1_CLAW_REPEAT          600
-#define LEVEL1_CLAW_U_REPEAT        500
-#define LEVEL1_CLAW_K_SCALE         1.0f
-#define LEVEL1_CLAW_U_K_SCALE       1.0f
-#define LEVEL1_GRAB_RANGE           LEVEL1_CLAW_RANGE
-#define LEVEL1_GRAB_U_RANGE         LEVEL1_GRAB_RANGE + 3.0f
-#define LEVEL1_GRAB_TIME            300
-#define LEVEL1_GRAB_U_TIME          300
-#define LEVEL1_PCLOUD_DMG           AWDM(4000)
-#define LEVEL1_PCLOUD_RANGE         120.0f
-#define LEVEL1_PCLOUD_REPEAT        2000
-#define LEVEL1_PCLOUD_TIME          10000
-#define LEVEL1_REGEN_MOD            (2.0f)
-#define LEVEL1_UPG_REGEN_MOD        (3.0f)
-#define LEVEL1_REGEN_SCOREINC       AVM(100) // score added for healing per 10s
-#define LEVEL1_UPG_REGEN_SCOREINC   AVM(200)
-#define LEVEL1_INVISIBILITY_DELAY   800
+#define LEVEL1_CLAW_DMG              AWDM(32000)
+#define LEVEL1_CLAW_RANGE            96.0f
+#define LEVEL1_CLAW_U_RANGE          LEVEL1_CLAW_RANGE + 3.0f
+#define LEVEL1_CLAW_WIDTH            10.0f
+#define LEVEL1_CLAW_REPEAT           600
+#define LEVEL1_CLAW_U_REPEAT         500
+#define LEVEL1_CLAW_K_SCALE          1.0f
+#define LEVEL1_CLAW_U_K_SCALE        1.0f
+#define LEVEL1_GRAB_RANGE            LEVEL1_CLAW_RANGE
+#define LEVEL1_GRAB_U_RANGE          LEVEL1_GRAB_RANGE + 3.0f
+#define LEVEL1_GRAB_TIME             300
+#define LEVEL1_GRAB_U_TIME           450
+#define LEVEL1_PCLOUD_DMG            AWDM(4000)
+#define LEVEL1_PCLOUD_RANGE          120.0f
+#define LEVEL1_PCLOUD_REPEAT         2000
+#define LEVEL1_PCLOUD_TIME           10000
+#define LEVEL1_REGEN_MOD             (2.0f)
+#define LEVEL1_UPG_REGEN_MOD         (3.0f)
+#define LEVEL1_REGEN_SCOREINC        AVM(100) // score added for healing per 10s
+#define LEVEL1_UPG_REGEN_SCOREINC    AVM(200)
+#define LEVEL1_INVISIBILITY_DELAY    800
+#define LEVEL1_CHARGE_RATE           4.0f
+#define LEVEL1_UPG_CHARGE_RATE       6.0f
+#define LEVEL1_INVISIBILITY_TIME     20000
+#define LEVEL1_UPG_INVISIBILITY_TIME 36000
 
 #define LEVEL2_CLAW_DMG             AWDM(50000)
 #define LEVEL2_CLAW_RANGE           85.0f
