@@ -3349,6 +3349,10 @@ static qboolean HMGTurret_CheckTarget( gentity_t *self, gentity_t *target,
   if( G_NoTarget( target ) )
     return qfalse;
 
+  if( target->s.eFlags & EF_INVISIBILE &&
+      target->s.weapon != WP_LUCIFER_CANNON )
+    return qfalse;
+
   if( !los_check )
     return qtrue;
 
