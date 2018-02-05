@@ -4353,10 +4353,15 @@ static void PM_Weapon( void )
     pm->pmext->repairRepeatDelay -= pml.msec;
   if( pm->pmext->repairRepeatDelay < 0 )
     pm->pmext->repairRepeatDelay = 0;
-  if( pm->pmext->gasTime > 0 )
-    pm->pmext->gasTime -= pml.msec;
-  if( pm->pmext->gasTime < 0 )
-    pm->pmext->gasTime = 0;
+
+  if( pm->ps->weapon == WP_ALEVEL1 ||
+      pm->ps->weapon == WP_ALEVEL1_UPG )
+  {
+    if( pm->ps->stats[ STAT_MISC3 ] > 0 )
+      pm->ps->stats[ STAT_MISC3 ] -= pml.msec;
+    if( pm->ps->stats[ STAT_MISC3 ] < 0 )
+      pm->ps->stats[ STAT_MISC3 ] = 0;
+  }
 
   // allways allow upgrades to be usable
   if( pm->cmd.weapon >= 32 &&
@@ -4417,11 +4422,11 @@ static void PM_Weapon( void )
   // release advanced basilisk gas ( better out than in )
   if( BG_Weapon( pm->ps->weapon )->hasAltMode &&
       ( pm->ps->weapon == WP_ALEVEL1_UPG ) &&
-      ( pm->pmext->gasTime <= 0 ) && attack2 )
+      ( pm->ps->stats[ STAT_MISC3 ] <= 0 ) && attack2 )
   {
     pm->ps->generic1 = WPM_SECONDARY;
     PM_AddEvent( EV_FIRE_WEAPON2 );
-    pm->pmext->gasTime += BG_Weapon( pm->ps->weapon )->repeatRate2;  // basi gas has an independent timer
+    pm->ps->stats[ STAT_MISC3 ] += BG_Weapon( pm->ps->weapon )->repeatRate2;  // basi gas has an independent timer
   }
 
   // check for out of ammo
