@@ -1533,6 +1533,33 @@ void AHive_Pain( gentity_t *self, gentity_t *attacker, int damage )
 
 //==================================================================================
 
+/*
+================
+ABoosted_Touch
+
+Called when an alien touches another boosted alien
+================
+*/
+void ABoosted_Touch( gentity_t *self, gentity_t *other, trace_t *trace )
+{
+  gclient_t *client = other->client;
+
+  if( !self->client || !( self->client->ps.stats[ STAT_STATE ] & SS_BOOSTED ) )
+  {
+    self->touch = 0;
+    return;
+  }
+
+  if( !client )
+    return;
+
+  if( client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
+    return;
+
+  client->ps.stats[ STAT_STATE ] |= SS_BOOSTED;
+  client->boostedTime = self->client->boostedTime;
+  other->touch = ABoosted_Touch;
+}
 
 /*
 ================
@@ -1556,6 +1583,7 @@ void ABooster_Touch( gentity_t *self, gentity_t *other, trace_t *trace )
 
   client->ps.stats[ STAT_STATE ] |= SS_BOOSTED;
   client->boostedTime = level.time;
+  other->touch = ABoosted_Touch;
 }
 
 //==================================================================================
