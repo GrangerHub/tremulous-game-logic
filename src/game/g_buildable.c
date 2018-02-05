@@ -4135,7 +4135,9 @@ void G_BuildableThink( gentity_t *ent, int msec )
           ALIEN_BMAXHEALTH_DECAY( regenRate ) < ent->s.constantLight )
         {
           ent->health += regenRate;
-          ent->s.constantLight -= ALIEN_BMAXHEALTH_DECAY( regenRate );
+          if( ALIEN_BMAXHEALTH_DECAY( regen ) <
+              ( ent->s.constantLight - regen ) )
+              ent->s.constantLight -= ALIEN_BMAXHEALTH_DECAY( regenRate );
         }
         else if( ent->buildableTeam == TEAM_HUMANS &&
           ( ent->lastDamageTime + HUMAN_REGEN_DAMAGE_TIME ) < level.time )
@@ -4149,7 +4151,9 @@ void G_BuildableThink( gentity_t *ent, int msec )
               HUMAN_BMAXHEALTH_DECAY( regen ) < ent->s.constantLight )
           {
             ent->health += regen;
-            ent->s.constantLight -= HUMAN_BMAXHEALTH_DECAY( regen );
+            if( HUMAN_BMAXHEALTH_DECAY( regen ) <
+                ( ent->s.constantLight - regen ) )
+              ent->s.constantLight -= HUMAN_BMAXHEALTH_DECAY( regen );
           }
         }
       }
