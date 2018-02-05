@@ -802,7 +802,6 @@ void ClientTimerActions( gentity_t *ent, int msec )
          client->ps.weapon == WP_ALEVEL1_UPG ) )
     {
       if( ( ucmd->buttons & BUTTON_ATTACK ) ||
-          ( client->ps.stats[ STAT_STATE ] & SS_GRABBING ) ||
           ( ( ucmd->buttons & BUTTON_ATTACK2 ) &&
              BG_Weapon( client->ps.weapon )->hasAltMode ) ||
           ent->pain_debounce_time > level.time ||
@@ -2555,11 +2554,6 @@ void ClientThink_real( gentity_t *ent )
         client->ps.generic1 = WPM_PRIMARY;
         G_AddEvent( ent, EV_FIRE_WEAPON, 0 );
       }
-      break;
-
-    case WP_ALEVEL1:
-    case WP_ALEVEL1_UPG:
-      CheckGrabAttack( ent );
       break;
 
     case WP_ALEVEL3:

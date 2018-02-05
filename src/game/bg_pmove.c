@@ -4540,19 +4540,6 @@ static void PM_Weapon( void )
         //venom is only autohit
         return;
 
-      case WP_ALEVEL1:
-      case WP_ALEVEL1_UPG:
-        // autoswipe while grabbing
-        if( pm->ps->stats[ STAT_STATE ] & SS_GRABBING )
-        {
-          attack1 = qtrue;
-        } else if( !attack1 && !attack2 && !attack3 )
-        {
-          pm->ps->weaponTime = 0;
-          pm->ps->weaponstate = WEAPON_READY;
-          return;
-        }
-        break;
       case WP_ALEVEL3:
       case WP_ALEVEL3_UPG:
         //pouncing has primary secondary AND autohit procedures

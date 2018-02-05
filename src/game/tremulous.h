@@ -777,7 +777,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MGTURRET_VALUE              ( 3 * ALIEN_CREDITS_PER_KILL / 2 )
 #define MGTURRET_BAT_PWR            25000
 #define MGTURRET_DCC_ANGULARSPEED   15
-#define MGTURRET_GRAB_ANGULARSPEED  5
+#define MGTURRET_GRAB_ANGULARSPEED  1
 
 #define TESLAGEN_BP                 10
 #define TESLAGEN_BT                 15000

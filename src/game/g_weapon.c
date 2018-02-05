@@ -1352,24 +1352,23 @@ CheckGrabAttack
 */
 void CheckGrabAttack( gentity_t *ent )
 {
-  trace_t   tr;
-  vec3_t    end, dir;
-  gentity_t *traceEnt;
+  trace_t     tr;
+  vec3_t      end, dir;
+  gentity_t   *traceEnt;
+  const float range = ent->client->ps.weapon == WP_ALEVEL1 ?
+                        LEVEL1_GRAB_RANGE : LEVEL1_GRAB_U_RANGE;
 
-  // reset autoswipping
-  ent->client->ps.stats[ STAT_STATE ] &= ~SS_GRABBING;
 
   // set aiming directions
   AngleVectors( ent->client->ps.viewangles, forward, right, up );
 
   BG_CalcMuzzlePointFromPS( &ent->client->ps, forward, right, up, muzzle );
 
-  if( ent->client->ps.weapon == WP_ALEVEL1 )
-    VectorMA( muzzle, LEVEL1_GRAB_RANGE, forward, end );
-  else if( ent->client->ps.weapon == WP_ALEVEL1_UPG )
-    VectorMA( muzzle, LEVEL1_GRAB_U_RANGE, forward, end );
+  VectorMA( muzzle, range, forward, end );
 
+  G_UnlaggedOn( ent->s.number, muzzle, range );
   SV_Trace( &tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT, TT_AABB );
+  G_UnlaggedOff();
   if( tr.surfaceFlags & SURF_NOIMPACT )
     return;
 
@@ -1397,9 +1396,6 @@ void CheckGrabAttack( gentity_t *ent )
 
     traceEnt->client->ps.stats[ STAT_STATE ] |= SS_GRABBED;
 
-    // for autoswipping grabbed clients
-    ent->client->ps.stats[ STAT_STATE ] |= SS_GRABBING;
-
     if( ent->client->ps.weapon == WP_ALEVEL1 )
       traceEnt->client->grabExpiryTime = level.time + LEVEL1_GRAB_TIME;
     else if( ent->client->ps.weapon == WP_ALEVEL1_UPG )
@@ -1412,9 +1408,6 @@ void CheckGrabAttack( gentity_t *ent )
 
       traceEnt->lev1Grabbed = qtrue;
       traceEnt->lev1GrabTime = level.time;
-
-      // for autoswipping grabbed rets
-      ent->client->ps.stats[ STAT_STATE ] |= SS_GRABBING;
   }
 }
 
@@ -2333,10 +2326,12 @@ void FireWeapon( gentity_t *ent )
     case WP_ALEVEL1:
       meleeAttack( ent, LEVEL1_CLAW_RANGE, LEVEL1_CLAW_WIDTH, LEVEL1_CLAW_WIDTH,
                    LEVEL1_CLAW_DMG, MOD_LEVEL1_CLAW );
+      CheckGrabAttack( ent );
       break;
     case WP_ALEVEL1_UPG:
       meleeAttack( ent, LEVEL1_CLAW_U_RANGE, LEVEL1_CLAW_WIDTH, LEVEL1_CLAW_WIDTH,
                    LEVEL1_CLAW_DMG, MOD_LEVEL1_CLAW );
+      CheckGrabAttack( ent );
       break;
     case WP_ALEVEL3:
       meleeAttack( ent, LEVEL3_CLAW_RANGE, LEVEL3_CLAW_WIDTH, LEVEL3_CLAW_WIDTH,
