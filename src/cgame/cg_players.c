@@ -2144,7 +2144,7 @@ void CG_Player( centity_t *cent )
         if( cg.time - cent->invisTime < 1000  )
           legs.customShader = cgs.media.invisFadeShader;
         else
-          legs.customShader = cgs.media.invisShader;
+          return;
       }
       else if( cg.time - cent->invisTime < 1000  )
         legs.customShader = cgs.media.invisFadeShader;
@@ -2209,7 +2209,7 @@ void CG_Player( centity_t *cent )
         if( cg.time - cent->invisTime < 1000  )
           legs.customShader = cgs.media.invisFadeShader;
         else
-          legs.customShader = cgs.media.invisShader;
+          return;
       }
       else if( cg.time - cent->invisTime < 1000  )
         legs.customShader = cgs.media.invisFadeShader;
@@ -2330,7 +2330,7 @@ void CG_Player( centity_t *cent )
         if( cg.time - cent->invisTime < 1000  )
           torso.customShader = cgs.media.invisFadeShader;
         else
-          torso.customShader = cgs.media.invisShader;
+          return;
       }
       else if( cg.time - cent->invisTime < 1000  )
         torso.customShader = cgs.media.invisFadeShader;
@@ -2398,7 +2398,7 @@ void CG_Player( centity_t *cent )
         if( cg.time - cent->invisTime < 1000  )
           head.customShader = cgs.media.invisFadeShader;
         else
-          head.customShader = cgs.media.invisShader;
+          return;
       }
       else if( cg.time - cent->invisTime < 1000  )
         head.customShader = cgs.media.invisFadeShader;
