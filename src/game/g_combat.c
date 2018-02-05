@@ -144,6 +144,7 @@ char *modNames[ ] =
   "MOD_TESLAGEN",
   "MOD_MGTURRET",
   "MOD_REACTOR",
+  "MOD_MEDISTAT",
 
   "MOD_ASPAWN",
   "MOD_ATUBE",

@@ -3251,6 +3251,17 @@ void HMedistat_Think( gentity_t *self )
 
       maxHealth = BG_Class( player->client->ps.stats[ STAT_CLASS ] )->health;
 
+      if( player->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
+          PM_Alive( player->client->ps.pm_type ) &&
+          ( level.time > player->pain_debounce_time ) )
+      {
+        G_Damage( player, self, self, NULL, NULL,
+                  ( BG_Class( player->client->ps.stats[ STAT_CLASS ] )->health / 20 ),
+                  (DAMAGE_NO_PROTECTION|DAMAGE_NO_LOCDAMAGE),
+                  MOD_MEDISTAT );
+        G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
+      }
+
       //remove poison from everyone, not just the healed player
       if(player->client->ps.stats[ STAT_STATE ] & SS_POISONED )
         player->client->ps.stats[ STAT_STATE ] &= ~SS_POISONED;
