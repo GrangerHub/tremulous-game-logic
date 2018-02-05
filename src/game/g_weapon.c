@@ -1407,7 +1407,10 @@ void CheckGrabAttack( gentity_t *ent )
       G_AddPredictableEvent( ent, EV_LEV1_GRAB, 0 );
 
       traceEnt->lev1Grabbed = qtrue;
-      traceEnt->lev1GrabTime = level.time;
+      if( ent->client->ps.weapon == WP_ALEVEL1 )
+        traceEnt->lev1GrabTime = level.time + LEVEL1_GRAB_TIME;
+      else if( ent->client->ps.weapon == WP_ALEVEL1_UPG )
+        traceEnt->lev1GrabTime = level.time + LEVEL1_GRAB_U_TIME;
   }
 }
 

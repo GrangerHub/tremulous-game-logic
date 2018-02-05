@@ -4228,7 +4228,8 @@ void G_BuildableThink( gentity_t *ent, int msec )
     }
   }
 
-  if( ent->lev1Grabbed && ent->lev1GrabTime + LEVEL1_GRAB_TIME < level.time )
+  if( ent->lev1Grabbed &&
+      ( ent->lev1GrabTime < level.time ) )
     ent->lev1Grabbed = qfalse;
 
   if( ent->clientSpawnTime > 0 )
