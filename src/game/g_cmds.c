@@ -446,6 +446,7 @@ static void Give_Class( gentity_t *ent, char *s )
   {
     ent->client->boostedTime = oldBoostTime;
     ent->client->ps.stats[ STAT_STATE ] |= SS_BOOSTED;
+    ent->touch = ABoosted_Touch;
   }
 }
 
@@ -577,6 +578,7 @@ void Cmd_Give_f( gentity_t *ent )
     {
       ent->client->ps.stats[ STAT_STATE ] |= SS_BOOSTED;
       ent->client->boostedTime = level.time;
+      ent->touch = ABoosted_Touch;
     }
   }
 
@@ -2409,6 +2411,7 @@ void Cmd_Class_f( gentity_t *ent )
           {
             ent->client->boostedTime = oldBoostTime;
             ent->client->ps.stats[ STAT_STATE ] |= SS_BOOSTED;
+            ent->touch = ABoosted_Touch;
           }
         }
         else

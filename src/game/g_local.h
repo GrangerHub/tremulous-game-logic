@@ -589,6 +589,7 @@ struct gclient_s
   int                 poisonImmunityTime;
   gentity_t           *lastPoisonClient;
   int                 lastPoisonCloudedTime;
+  gentity_t           *lastPoisonCloudedClient;
   int                 grabExpiryTime;
   int                 lastLockTime;
   int                 lastSlowTime;
@@ -1046,6 +1047,7 @@ void              AOvermind_Think( gentity_t *self );
 void              ABarricade_Think( gentity_t *self );
 void              AAcidTube_Think( gentity_t *self );
 void              AHive_Think( gentity_t *self );
+void              ABoosted_Touch( gentity_t *self, gentity_t *other, trace_t *trace );
 void              ATrapper_Think( gentity_t *self );
 void              HSpawn_Think( gentity_t *self );
 void              HRepeater_Think( gentity_t *self );

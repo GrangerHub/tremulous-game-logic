@@ -316,6 +316,10 @@ void ClientImpacts( gentity_t *ent, pmove_t *pm )
     // touch triggers
     if( other->touch )
       other->touch( other, ent, &trace );
+
+    // transfer poison
+    if( ent->touch == ABoosted_Touch )
+      ent->touch( ent, other, &trace );
   }
 }
 
@@ -962,6 +966,11 @@ void ClientTimerActions( gentity_t *ent, int msec )
   while( client->time1000 >= 1000 )
   {
     client->time1000 -= 1000;
+
+  //client is poison clouded
+  if( client->ps.eFlags & EF_POISONCLOUDED )
+    G_Damage( ent, client->lastPoisonCloudedClient, client->lastPoisonCloudedClient, NULL, NULL,
+              LEVEL1_PCLOUD_DMG, 0, MOD_LEVEL1_PCLOUD );
 
     //client is poisoned
     if( client->ps.stats[ STAT_STATE ] & SS_POISONED )
@@ -2280,7 +2289,10 @@ void ClientThink_real( gentity_t *ent )
   if( client->ps.stats[ STAT_STATE ] & SS_BOOSTED )
   {
     if( level.time - client->boostedTime >= BOOST_TIME )
+    {
       client->ps.stats[ STAT_STATE ] &= ~SS_BOOSTED;
+      ent->touch = 0;
+    }
     else if( level.time - client->boostedTime >= BOOST_WARN_TIME )
       client->ps.stats[ STAT_STATE ] |= SS_BOOSTEDWARNING;
   }

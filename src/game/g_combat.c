@@ -1178,6 +1178,7 @@ static qboolean G_MODHitIndication( meansOfDeath_t mod )
     case MOD_DROP:
     case MOD_FALLING:
     case MOD_TRIGGER_HURT:
+    case MOD_LEVEL1_PCLOUD:
     case MOD_POISON:
     case MOD_HSPAWN:
     case MOD_ASPAWN:
