@@ -1567,11 +1567,11 @@ void CG_AddViewWeapon( playerState_t *ps )
   VectorMA( hand.origin, ( cg_gun_z.value + fovOffset ), cg.refdef.viewaxis[ 2 ], hand.origin );
 
   // Lucifer Cannon vibration effect
-  if( weapon == WP_LUCIFER_CANNON && ps->stats[ STAT_MISC ] > 0 )
+  if( weapon == WP_LUCIFER_CANNON && ps->misc[ MISC_MISC ] > 0 )
   {
     float fraction;
 
-    fraction = (float)ps->stats[ STAT_MISC ] / LCANNON_CHARGE_TIME_MAX;
+    fraction = (float)ps->misc[ MISC_MISC ] / LCANNON_CHARGE_TIME_MAX;
     VectorMA( hand.origin, random( ) * fraction, cg.refdef.viewaxis[ 0 ],
               hand.origin );
     VectorMA( hand.origin, random( ) * fraction, cg.refdef.viewaxis[ 1 ],
@@ -1579,11 +1579,11 @@ void CG_AddViewWeapon( playerState_t *ps )
   }
 
   // Lighting Gun vibration effect
-  if( weapon == WP_LIGHTNING && ps->stats[ STAT_MISC ] > 0 )
+  if( weapon == WP_LIGHTNING && ps->misc[ MISC_MISC ] > 0 )
   {
     float fraction;
 
-    fraction = (float)ps->stats[ STAT_MISC ] / LIGHTNING_BOLT_CHARGE_TIME_MAX;
+    fraction = (float)ps->misc[ MISC_MISC ] / LIGHTNING_BOLT_CHARGE_TIME_MAX;
     VectorMA( hand.origin, random( ) * fraction, cg.refdef.viewaxis[ 0 ],
               hand.origin );
     VectorMA( hand.origin, random( ) * fraction, cg.refdef.viewaxis[ 1 ],

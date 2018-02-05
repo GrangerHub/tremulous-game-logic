@@ -4173,7 +4173,7 @@ int BG_LightningBoltRange( const entityState_t *es,
     Com_Assert( ps->weapon == WP_LIGHTNING && "BG_LightningBoltRange: Attempt to find the range for the wrong weapon" );
 
     if( currentRange )
-      charge = ps->stats[ STAT_MISC ];
+      charge = ps->misc[ MISC_MISC ];
     else
       charge = ps->stats[ STAT_MISC2 ];
 
@@ -4200,8 +4200,8 @@ void BG_CheckBoltImpactTrigger( pmove_t *pm,
                                 void (*UnlaggedOff)( void ) )
 {
   if( pm->ps->weapon == WP_LIGHTNING &&
-      pm->ps->stats[ STAT_MISC ] > LIGHTNING_BOLT_CHARGE_TIME_MIN &&
-      pm->ps->stats[ STAT_MISC ] - pm->ps->stats[ STAT_MISC3 ] > 50 )
+      pm->ps->misc[ MISC_MISC ] > LIGHTNING_BOLT_CHARGE_TIME_MIN &&
+      pm->ps->misc[ MISC_MISC ] - pm->ps->stats[ STAT_MISC3 ] > 50 )
   {
     vec3_t forward, right, up;
     vec3_t muzzle, end;
@@ -4220,7 +4220,7 @@ void BG_CheckBoltImpactTrigger( pmove_t *pm,
     if( UnlaggedOff )
       UnlaggedOff( );
 
-    pm->ps->stats[ STAT_MISC3 ] = pm->ps->stats[ STAT_MISC ];
+    pm->ps->stats[ STAT_MISC3 ] = pm->ps->misc[ MISC_MISC ];
     pm->pmext->impactTriggerTraceChecked = qtrue;
   } else
     pm->pmext->impactTriggerTraceChecked = qfalse;
@@ -4239,7 +4239,7 @@ void BG_ResetLightningBoltCharge( playerState_t *ps, pmoveExt_t *pmext )
     return;
 
   ps->stats[ STAT_MISC3 ] = 0;
-  ps->stats[ STAT_MISC ] = 0;
+  ps->misc[ MISC_MISC ] = 0;
   pmext->impactTriggerTraceChecked = qfalse;
 }
 
@@ -4331,11 +4331,11 @@ qboolean BG_PlayerCanChangeWeapon( playerState_t *ps, pmoveExt_t *pmext )
 {
   // Do not allow Lucifer Cannon "canceling" via weapon switch
   if( ps->weapon == WP_LUCIFER_CANNON &&
-      ps->stats[ STAT_MISC ] > LCANNON_CHARGE_TIME_MIN )
+      ps->misc[ MISC_MISC ] > LCANNON_CHARGE_TIME_MIN )
     return qfalse;
 
   if( ps->weapon == WP_LIGHTNING &&
-      ( ps->stats[ STAT_MISC ] > LIGHTNING_BOLT_CHARGE_TIME_MIN ||
+      ( ps->misc[ MISC_MISC ] > LIGHTNING_BOLT_CHARGE_TIME_MIN ||
         ( ps->stats[ STAT_STATE ] & SS_CHARGING ) ) )
     return qfalse;
 

@@ -448,7 +448,6 @@ static void Give_Class( gentity_t *ent, char *s )
   {
     ent->client->boostedTime = oldBoostTime;
     ent->client->ps.stats[ STAT_STATE ] |= SS_BOOSTED;
-    ent->touch = ABoosted_Touch;
   }
 }
 
@@ -556,7 +555,6 @@ void Cmd_Give_f( gentity_t *ent )
     {
       ent->client->ps.stats[ STAT_STATE ] |= SS_BOOSTED;
       ent->client->boostedTime = level.time;
-      ent->touch = ABoosted_Touch;
     }
   }
 
@@ -2302,7 +2300,7 @@ void Cmd_Class_f( gentity_t *ent )
       if( ent->client->sess.spectatorState == SPECTATOR_NOT &&
           ( currentClass == PCL_ALIEN_BUILDER0 ||
             currentClass == PCL_ALIEN_BUILDER0_UPG ) &&
-          ent->client->ps.stats[ STAT_MISC ] > 0 )
+          ent->client->ps.misc[ MISC_MISC ] > 0 )
       {
         G_TriggerMenu( ent->client->ps.clientNum, MN_A_EVOLVEBUILDTIMER );
         return;
@@ -2363,7 +2361,6 @@ void Cmd_Class_f( gentity_t *ent )
           {
             ent->client->boostedTime = oldBoostTime;
             ent->client->ps.stats[ STAT_STATE ] |= SS_BOOSTED;
-            ent->touch = ABoosted_Touch;
           }
         }
         else
@@ -2469,7 +2466,7 @@ void Cmd_Destroy_f( gentity_t *ent )
     if( IS_WARMUP || ( ent->client->pers.teamSelection == TEAM_HUMANS &&
           !G_FindPower( traceEnt, qtrue ) ) )
     {
-      if( ent->client->ps.stats[ STAT_MISC ] > 0 )
+      if( ent->client->ps.misc[ MISC_MISC ] > 0 )
       {
         G_AddEvent( ent, EV_BUILD_DELAY, ent->client->ps.clientNum );
         return;
@@ -2485,7 +2482,7 @@ void Cmd_Destroy_f( gentity_t *ent )
       }
       else
       {
-        if( ent->client->ps.stats[ STAT_MISC ] > 0 )
+        if( ent->client->ps.misc[ MISC_MISC ] > 0 )
         {
           G_AddEvent( ent, EV_BUILD_DELAY, ent->client->ps.clientNum );
           return;
@@ -2493,7 +2490,7 @@ void Cmd_Destroy_f( gentity_t *ent )
 
         if( !g_cheats.integer && !IS_WARMUP ) // add a bit to the build timer
         {
-            ent->client->ps.stats[ STAT_MISC ] +=
+            ent->client->ps.misc[ MISC_MISC ] +=
               BG_Buildable( traceEnt->s.modelindex )->buildTime / 4;
         }
         G_Damage( traceEnt, ent, ent, forward, tr.endpos,
@@ -2709,7 +2706,7 @@ void Cmd_Buy_f( gentity_t *ent )
     G_ForceWeaponChange( ent, weapon );
 
     //set build delay/pounce etc to 0
-    ent->client->ps.stats[ STAT_MISC ] = 0;
+    ent->client->ps.misc[ MISC_MISC ] = 0;
 
     //subtract from funds
     G_AddCreditToClient( ent->client, -(short)BG_TotalPriceForWeapon( weapon ),
@@ -2777,7 +2774,7 @@ void Cmd_Buy_f( gentity_t *ent )
         return;
 
       if( ent->client->ps.weapon == WP_LIGHTNING &&
-      ( ent->client->ps.stats[ STAT_MISC ] > LIGHTNING_BOLT_CHARGE_TIME_MIN ||
+      ( ent->client->ps.misc[ MISC_MISC ] > LIGHTNING_BOLT_CHARGE_TIME_MIN ||
         ( ent->client->ps.stats[ STAT_STATE ] & SS_CHARGING ) ) )
         return;
 
@@ -2882,7 +2879,7 @@ void Cmd_Sell_f( gentity_t *ent )
     if( BG_InventoryContainsWeapon( weapon, ent->client->ps.stats ) )
     {
       //guard against selling the HBUILD weapons exploit
-      if( weapon == WP_HBUILD && ent->client->ps.stats[ STAT_MISC ] > 0 )
+      if( weapon == WP_HBUILD && ent->client->ps.misc[ MISC_MISC ] > 0 )
       {
         G_TriggerMenu( ent->client->ps.clientNum, MN_H_ARMOURYBUILDTIMER );
         return;

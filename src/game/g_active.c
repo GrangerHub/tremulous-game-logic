@@ -305,10 +305,6 @@ void ClientImpacts( gentity_t *ent, pmove_t *pm )
     // touch triggers
     if( other->touch )
       other->touch( other, ent, &trace );
-
-    // transfer poison
-    if( ent->touch == ABoosted_Touch )
-      ent->touch( ent, other, &trace );
   }
 }
 
@@ -490,7 +486,7 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
 
     client->ps.speed = client->pers.flySpeed;
     client->ps.stats[ STAT_STAMINA ] = 0;
-    client->ps.stats[ STAT_MISC ] = 0;
+    client->ps.misc[ MISC_MISC ] = 0;
     client->ps.stats[ STAT_BUILDABLE ] = BA_NONE;
     client->ps.stats[ STAT_CLASS ] = PCL_NONE;
     client->ps.weapon = WP_NONE;
@@ -777,11 +773,11 @@ void ClientTimerActions( gentity_t *ent, int msec )
         client->ps.stats[ STAT_WEAPON ] == WP_HBUILD )
     {
         // Update build timer
-        if( client->ps.stats[ STAT_MISC ] > 0 )
-          client->ps.stats[ STAT_MISC ] -= 100;
+        if( client->ps.misc[ MISC_MISC ] > 0 )
+          client->ps.misc[ MISC_MISC ] -= 100;
 
-        if( client->ps.stats[ STAT_MISC ] < 0 )
-          client->ps.stats[ STAT_MISC ] = 0;
+        if( client->ps.misc[ MISC_MISC ] < 0 )
+          client->ps.misc[ MISC_MISC ] = 0;
     }
 
     switch( weapon )
@@ -804,7 +800,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
             client->ps.stats[ STAT_BUILDABLE ] &= ~SB_VALID_TOGGLEBIT;
 
           // Let the client know which buildables will be removed by building
-          for( i = 0; i < ( MAX_MISC - 4 ); i++ )
+          for( i = 0; i < ( MAX_MISC - 5 ); i++ )
           {
             if( i < level.numBuildablesForRemoval )
               client->ps.misc[ i ] = level.markedBuildables[ i ]->s.number;
@@ -814,7 +810,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
         }
         else
         {
-          for( i = 0; i < ( MAX_MISC - 4 ); i++ )
+          for( i = 0; i < ( MAX_MISC - 5 ); i++ )
             client->ps.misc[ i ] = 0;
         }
         break;
@@ -2152,10 +2148,7 @@ void ClientThink_real( gentity_t *ent )
   if( client->ps.stats[ STAT_STATE ] & SS_BOOSTED )
   {
     if( level.time - client->boostedTime >= BOOST_TIME )
-    {
       client->ps.stats[ STAT_STATE ] &= ~SS_BOOSTED;
-      ent->touch = 0;
-    }
     else if( level.time - client->boostedTime >= BOOST_WARN_TIME )
       client->ps.stats[ STAT_STATE ] |= SS_BOOSTEDWARNING;
   }
