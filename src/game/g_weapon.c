@@ -1268,7 +1268,9 @@ void poisonCloud( gentity_t *ent )
     humanPlayer = &g_entities[ entityList[ i ] ];
 
     if( humanPlayer->client &&
-        humanPlayer->client->pers.teamSelection == TEAM_HUMANS )
+        humanPlayer->client->pers.teamSelection == TEAM_HUMANS &&
+        !BG_InventoryContainsUpgrade( UP_HELMET, humanPlayer->client->ps.stats ) &&
+        !BG_InventoryContainsUpgrade( UP_BATTLESUIT, humanPlayer->client->ps.stats ))
     {
       SV_Trace( &tr, muzzle, NULL, NULL, humanPlayer->r.currentOrigin,
                   humanPlayer->s.number, CONTENTS_SOLID, TT_AABB );
@@ -1279,6 +1281,7 @@ void poisonCloud( gentity_t *ent )
 
       humanPlayer->client->ps.eFlags |= EF_POISONCLOUDED;
       humanPlayer->client->lastPoisonCloudedTime = level.time;
+      humanPlayer->client->lastPoisonCloudedClient = ent;
 
       SV_GameSendServerCommand( humanPlayer->client->ps.clientNum,
                               "poisoncloud" );

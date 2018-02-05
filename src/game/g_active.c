@@ -895,6 +895,11 @@ void ClientTimerActions( gentity_t *ent, int msec )
   {
     client->time1000 -= 1000;
 
+  //client is poison clouded
+  if( client->ps.eFlags & EF_POISONCLOUDED )
+    G_Damage( ent, client->lastPoisonCloudedClient, client->lastPoisonCloudedClient, NULL, NULL,
+              LEVEL1_PCLOUD_DMG, 0, MOD_LEVEL1_PCLOUD );
+
     //client is poisoned
     if( client->ps.stats[ STAT_STATE ] & SS_POISONED )
     {
