@@ -1464,7 +1464,8 @@ void poisonCloud( gentity_t *ent )
                  ent->client &&
                  !( ( ent->client->ps.stats[ STAT_STATE ] & SS_BOOSTED ) &&
                     target->client->boostedTime > ent->client->boostedTime ) &&
-                 ( target->r.contents & MASK_SHOT ) )
+                 ( target->r.contents & MASK_SHOT ) &&
+                 !( target->r.contents & CONTENTS_ASTRAL_NOCLIP ) )
       {
         target->client->ps.stats[ STAT_STATE ] |= SS_BOOSTED;
         target->client->boostedTime = ent->client->boostedTime;

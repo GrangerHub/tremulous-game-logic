@@ -1708,6 +1708,10 @@ void ABooster_Think( gentity_t *self )
     if( client->ps.stats[ STAT_TEAM ] != TEAM_ALIENS )
       continue;
 
+    if( !( player->r.contents & MASK_SHOT ) ||
+        ( player->r.contents & CONTENTS_ASTRAL_NOCLIP ) )
+      continue;
+
     if( Distance( client->ps.origin, self->r.currentOrigin ) > REGEN_BOOST_RANGE )
       continue;
 
@@ -3085,6 +3089,10 @@ void HReactor_Think( gentity_t *self )
       if( G_NoTarget( enemy ) )
         continue;
 
+      if( !( tent->r.contents & MASK_SHOT ) ||
+          ( tent->r.contents & CONTENTS_ASTRAL_NOCLIP ) )
+        continue;
+
       tent = G_TempEntity( enemy->s.pos.trBase, EV_TESLATRAIL );
       tent->s.misc = self->s.number; //src
       tent->s.clientNum = enemy->s.number; //dest
@@ -3264,7 +3272,8 @@ void HMedistat_Think( gentity_t *self )
       if( G_NoTarget( player ) )
         continue; // notarget cancels even beneficial effects?
 
-      if( !( player->r.contents & MASK_SHOT ) )
+      if( !( player->r.contents & MASK_SHOT ) ||
+          ( player->r.contents & CONTENTS_ASTRAL_NOCLIP ) )
         continue;
 
       if( player->s.eType == ET_BUILDABLE &&
@@ -3794,6 +3803,10 @@ void HTeslaGen_Think( gentity_t *self )
       self->enemy = &g_entities[ entityList[ i ] ];
 
       if( G_NoTarget( self->enemy ) )
+        continue;
+
+      if( !( self->enemy->r.contents & MASK_SHOT ) ||
+          ( self->enemy->r.contents & CONTENTS_ASTRAL_NOCLIP ) )
         continue;
 
       if( ( self->enemy->client &&
