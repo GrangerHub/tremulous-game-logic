@@ -3277,13 +3277,15 @@ void HMedistat_Think( gentity_t *self )
         continue;
 
       if( player->s.eType == ET_BUILDABLE &&
-          player->buildableTeam != TEAM_HUMANS )
+          player->buildableTeam != TEAM_HUMANS &&
+          player->mediStatAttackTime < level.time )
       {
         G_Damage( player, self, self, NULL, NULL,
-                  ( BG_Buildable( player->s.modelindex )->health / 20 ),
+                  HP2SU( 20 ),
                   (DAMAGE_NO_PROTECTION|DAMAGE_NO_LOCDAMAGE),
                   MOD_MEDISTAT );
         G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
+        player->mediStatAttackTime = level.time + 1000;
       }
 
       if( !player->client )
@@ -3293,13 +3295,14 @@ void HMedistat_Think( gentity_t *self )
 
       if( player->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
           PM_Alive( player->client->ps.pm_type ) &&
-          ( level.time > player->pain_debounce_time ) )
+          player->mediStatAttackTime < level.time )
       {
         G_Damage( player, self, self, NULL, NULL,
                   ( BG_Class( player->client->ps.stats[ STAT_CLASS ] )->health / 20 ),
                   (DAMAGE_NO_PROTECTION|DAMAGE_NO_LOCDAMAGE),
                   MOD_MEDISTAT );
         G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
+        player->mediStatAttackTime = level.time + 1000;
       }
 
       //remove poison from everyone, not just the healed player

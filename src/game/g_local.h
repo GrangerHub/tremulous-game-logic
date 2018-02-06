@@ -394,6 +394,8 @@ struct gentity_s
 
   gentity_t         *slimeZunge;
   gentity_t         *slimeTarget;
+
+  int               mediStatAttackTime;
 };
 
 typedef enum
