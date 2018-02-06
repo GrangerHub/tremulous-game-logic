@@ -3089,8 +3089,8 @@ void HReactor_Think( gentity_t *self )
       if( G_NoTarget( enemy ) )
         continue;
 
-      if( !( tent->r.contents & MASK_SHOT ) ||
-          ( tent->r.contents & CONTENTS_ASTRAL_NOCLIP ) )
+      if( !( enemy->r.contents & MASK_SHOT ) ||
+          ( enemy->r.contents & CONTENTS_ASTRAL_NOCLIP ) )
         continue;
 
       tent = G_TempEntity( enemy->s.pos.trBase, EV_TESLATRAIL );
