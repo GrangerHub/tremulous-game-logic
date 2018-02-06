@@ -1458,6 +1458,12 @@ void poisonCloud( gentity_t *ent )
         target->client->lastPoisonCloudedTime = level.time;
         target->client->lastPoisonCloudedClient = ent;
 
+        if( ent->client->ps.stats[ STAT_STATE ] & SS_BOOSTED )
+        {
+          G_Damage( target, ent, ent, NULL, NULL,
+                    LEVEL1_PCLOUD_DMG, 0, MOD_LEVEL1_PCLOUD );
+        }
+
         SV_GameSendServerCommand( target->client->ps.clientNum,
                                 "poisoncloud" );
       } else if( target->client->pers.teamSelection == TEAM_ALIENS &&
