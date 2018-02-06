@@ -997,15 +997,7 @@ static float PM_CmdScale( usercmd_t *cmd, qboolean zFlight )
       else
         modifier *= CREEP_MODIFIER;
     }
-    if( pm->ps->eFlags & EF_POISONCLOUDED )
-    {
-      if( BG_InventoryContainsUpgrade( UP_LIGHTARMOUR, pm->ps->stats ) ||
-          BG_InventoryContainsUpgrade( UP_BATTLESUIT, pm->ps->stats ) )
-        modifier *= PCLOUD_ARMOUR_MODIFIER;
-      else
-        modifier *= PCLOUD_MODIFIER;
-    }
-    else if( pm->ps->stats[ STAT_TEAM ] == TEAM_ALIENS )
+    if( pm->ps->stats[ STAT_TEAM ] == TEAM_ALIENS )
     {
       modifier *= MIX( 1.0f, ALIEN_WALL_MODIFIER, pml.wallSpeedFactor );
     }

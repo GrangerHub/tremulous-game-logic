@@ -1443,8 +1443,7 @@ void poisonCloud( gentity_t *ent )
     {
       if( target->client->pers.teamSelection == TEAM_HUMANS )
       {
-        if( BG_InventoryContainsUpgrade( UP_HELMET, target->client->ps.stats ) ||
-            BG_InventoryContainsUpgrade( UP_BATTLESUIT, target->client->ps.stats ) )
+        if( BG_InventoryContainsUpgrade( UP_BATTLESUIT, target->client->ps.stats ) )
           continue;
 
         SV_Trace( &tr, muzzle, NULL, NULL, target->r.currentOrigin,
@@ -1458,7 +1457,8 @@ void poisonCloud( gentity_t *ent )
         target->client->lastPoisonCloudedTime = level.time;
         target->client->lastPoisonCloudedClient = ent;
 
-        if( ent->client->ps.stats[ STAT_STATE ] & SS_BOOSTED )
+        if( !BG_InventoryContainsUpgrade( UP_HELMET, target->client->ps.stats ) &&
+            ent->client->ps.stats[ STAT_STATE ] & SS_BOOSTED )
         {
           G_Damage( target, ent, ent, NULL, NULL,
                     LEVEL1_PCLOUD_DMG, 0, MOD_LEVEL1_PCLOUD );
