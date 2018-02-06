@@ -1463,7 +1463,8 @@ void poisonCloud( gentity_t *ent )
       } else if( target->client->pers.teamSelection == TEAM_ALIENS &&
                  ent->client &&
                  !( ( ent->client->ps.stats[ STAT_STATE ] & SS_BOOSTED ) &&
-                    target->client->boostedTime > ent->client->boostedTime ) )
+                    target->client->boostedTime > ent->client->boostedTime ) &&
+                 ( target->r.contents & MASK_SHOT ) )
       {
         target->client->ps.stats[ STAT_STATE ] |= SS_BOOSTED;
         target->client->boostedTime = ent->client->boostedTime;

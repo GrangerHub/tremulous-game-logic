@@ -3264,6 +3264,19 @@ void HMedistat_Think( gentity_t *self )
       if( G_NoTarget( player ) )
         continue; // notarget cancels even beneficial effects?
 
+      if( !( player->r.contents & MASK_SHOT ) )
+        continue;
+
+      if( player->s.eType == ET_BUILDABLE &&
+          player->buildableTeam != TEAM_HUMANS )
+      {
+        G_Damage( player, self, self, NULL, NULL,
+                  ( BG_Buildable( player->s.modelindex )->health / 20 ),
+                  (DAMAGE_NO_PROTECTION|DAMAGE_NO_LOCDAMAGE),
+                  MOD_MEDISTAT );
+        G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
+      }
+
       if( !player->client )
         continue;
 
