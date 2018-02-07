@@ -809,11 +809,10 @@ void ClientTimerActions( gentity_t *ent, int msec )
           !G_Overmind( ) )
       {
         client->timeToInvisibility = LEVEL1_INVISIBILITY_DELAY + level.time;
-      } else if( ( client->ps.weapon == WP_ALEVEL1 ||
-               !( client->ps.stats[ STAT_STATE ] & SS_BOOSTED ) ) &&
-               ( ( aForward > 0 ) ||
-                 ( aRight > 0 ) ||
-                 ( ucmd->upmove > 0 ) ) )
+      } else if( ( client->ps.weapon == WP_ALEVEL1 ) &&
+                 ( ( aForward > 0 ) ||
+                   ( aRight > 0 ) ||
+                   ( ucmd->upmove > 0 ) ) )
         client->timeToInvisibility = LEVEL1_INVISIBILITY_DELAY + level.time;
 
       if( client->timeToInvisibility <= level.time )

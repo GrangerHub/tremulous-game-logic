@@ -341,8 +341,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define BOOSTER_REGEN_MOD           (3.0f)
 #define BOOSTER_VALUE               ( 9 * LEVEL0_VALUE )
 #define BOOSTER_BAT_PWR             25000
-#define BOOST_TIME                  45000
-#define BOOST_WARN_TIME             30000
+#define BOOST_TIME                  30000
+#define BOOST_WARN_TIME             15000
 
 #define ACIDTUBE_BP                 8
 #define ACIDTUBE_BT                 15000
@@ -671,7 +671,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define HELMET_PRICE                125
 #define HELMET_RANGE                1000.0f
 #define HELMET_POISON_PROTECTION    1000
-#define HELMET_PCLOUD_PROTECTION    1000
+#define HELMET_PCLOUD_PROTECTION    3500
 
 #define MEDKIT_PRICE                0
 
@@ -696,7 +696,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define BSUIT_PRICE                 1000
 #define BSUIT_PRICE_USED            200
 #define BSUIT_POISON_PROTECTION     3000
-#define BSUIT_PCLOUD_PROTECTION     3000000
+#define BSUIT_PCLOUD_PROTECTION     6000
 #define BSUIT_MAX_ARMOR             750000
 #define BSUIT_ARMOR_LOW             300000 // Value at which the armor indicator starts to flash
 
