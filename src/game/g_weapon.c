@@ -1360,6 +1360,8 @@ void CheckGrabAttack( gentity_t *ent )
   const float range = ent->client->ps.weapon == WP_ALEVEL1 ?
                         LEVEL1_GRAB_RANGE : LEVEL1_GRAB_U_RANGE;
 
+  if( ent->client->grabRepeatTime >= level.time )
+    return;
 
   // set aiming directions
   AngleVectors( ent->client->ps.viewangles, forward, right, up );
@@ -1399,9 +1401,15 @@ void CheckGrabAttack( gentity_t *ent )
     traceEnt->client->ps.stats[ STAT_STATE ] |= SS_GRABBED;
 
     if( ent->client->ps.weapon == WP_ALEVEL1 )
+    {
       traceEnt->client->grabExpiryTime = level.time + LEVEL1_GRAB_TIME;
+      ent->client->grabRepeatTime = level.time + LEVEL1_GRAB_REPEAT;
+    }
     else if( ent->client->ps.weapon == WP_ALEVEL1_UPG )
+    {
       traceEnt->client->grabExpiryTime = level.time + LEVEL1_GRAB_U_TIME;
+      ent->client->grabRepeatTime = level.time + LEVEL1_GRAB_U_REPEAT;
+    }
   }else if( traceEnt->s.eType == ET_BUILDABLE &&
       traceEnt->s.modelindex == BA_H_MGTURRET )
   {
@@ -1410,9 +1418,15 @@ void CheckGrabAttack( gentity_t *ent )
 
       traceEnt->lev1Grabbed = qtrue;
       if( ent->client->ps.weapon == WP_ALEVEL1 )
+      {
         traceEnt->lev1GrabTime = level.time + LEVEL1_GRAB_TIME;
+        ent->client->grabRepeatTime = level.time + LEVEL1_GRAB_REPEAT;
+      }
       else if( ent->client->ps.weapon == WP_ALEVEL1_UPG )
+      {
         traceEnt->lev1GrabTime = level.time + LEVEL1_GRAB_U_TIME;
+        ent->client->grabRepeatTime = level.time + LEVEL1_GRAB_U_REPEAT;
+      }
   }
 }
 
