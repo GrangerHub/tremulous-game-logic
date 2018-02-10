@@ -1465,7 +1465,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
         case MOD_MDRIVER:
         case MOD_LASGUN:
         case MOD_LCANNON:
-        case MOD_LCANNON_SPLASH:
         case MOD_FLAMER:
         case MOD_FLAMER_SPLASH:
         case MOD_LIGHTNING:
