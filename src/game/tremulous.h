@@ -313,7 +313,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define PCLOUD_ARMOUR_MODIFIER      0.75f
 
 #define ASPAWN_BP                   12
-#define ASPAWN_BT                   15000
+#define ASPAWN_BT                   7500
 #define ASPAWN_HEALTH               ABHM(250000)
 #define ASPAWN_REGEN                ABRM(8000)
 #define ASPAWN_SPLASHDAMAGE         ABDM(50000)
@@ -322,7 +322,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ASPAWN_VALUE                ( 3 * LEVEL0_VALUE )
 
 #define BARRICADE_BP                8
-#define BARRICADE_BT                20000
+#define BARRICADE_BT                10000
 #define BARRICADE_HEALTH            ABHM(300000)
 #define BARRICADE_REGEN             ABRM(14000)
 #define BARRICADE_SPLASHDAMAGE      ABDM(50000)
@@ -334,7 +334,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define BARRICADE_BAT_PWR           25000
 
 #define BOOSTER_BP                  12
-#define BOOSTER_BT                  15000
+#define BOOSTER_BT                  7500
 #define BOOSTER_HEALTH              ABHM(150000)
 #define BOOSTER_REGEN               ABRM(8000)
 #define BOOSTER_SPLASHDAMAGE        ABDM(50000)
@@ -347,7 +347,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define BOOST_WARN_TIME             15000
 
 #define ACIDTUBE_BP                 8
-#define ACIDTUBE_BT                 15000
+#define ACIDTUBE_BT                 7500
 #define ACIDTUBE_HEALTH             ABHM(125000)
 #define ACIDTUBE_REGEN              ABRM(10000)
 #define ACIDTUBE_SPLASHDAMAGE       ABDM(50000)
@@ -361,7 +361,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ACIDTUBE_BAT_PWR            25000
 
 #define HIVE_BP                     12
-#define HIVE_BT                     20000
+#define HIVE_BT                     10000
 #define HIVE_HEALTH                 ABHM(125000)
 #define HIVE_REGEN                  ABRM(10000)
 #define HIVE_SPLASHDAMAGE           ABDM(30000)
@@ -378,7 +378,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define HIVE_BAT_PWR                25000
 
 #define HOVEL_BP                     0
-#define HOVEL_BT                     15000
+#define HOVEL_BT                     7500
 #define HOVEL_HEALTH                 ABHM(375000)
 #define HOVEL_REGEN                  ABRM(20000)
 #define HOVEL_SPLASHDAMAGE           ABDM(20000)
@@ -388,7 +388,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define HOVEL_BAT_PWR                25000
 
 #define TRAPPER_BP                  8
-#define TRAPPER_BT                  12000
+#define TRAPPER_BT                  6000
 #define TRAPPER_HEALTH              ABHM(50000)
 #define TRAPPER_REGEN               ABRM(6000)
 #define TRAPPER_SPLASHDAMAGE        ABDM(15000)
@@ -406,7 +406,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LOCKBLOB_LIFETIME           15000
 
 #define SLIME_ZUNGE_BP              12
-#define SLIME_ZUNGE_BT              16000
+#define SLIME_ZUNGE_BT              8000
 #define SLIME_ZUNGE_HEALTH          ABHM(180000)
 #define SLIME_ZUNGE_REGEN           ABRM(12000)
 #define SLIME_ZUNGE_SPLASHDAMAGE    ABDM(15000)
@@ -420,7 +420,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define SLIME_ZUNGE_DOT             0.79f // max angle = acos( SLIME_ZUNGE )
 
 #define OVERMIND_BP                 10
-#define OVERMIND_BT                 20000
+#define OVERMIND_BT                 10000
 #define OVERMIND_HEALTH             ABHM(1000000)
 #define OVERMIND_REGEN              ABRM(6000)
 #define OVERMIND_SPLASHDAMAGE       ABDM(15000)
