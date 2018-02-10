@@ -1047,7 +1047,9 @@ trigger_heal_touch
 */
 void trigger_heal_touch( gentity_t *self, gentity_t *other, trace_t *trace )
 {
-  int max;
+  int   *maxHealth;
+  float maxHealthDecayRate;
+  int   maxHealthDecay;
 
   if( !other->client )
     return;
@@ -1060,12 +1062,29 @@ void trigger_heal_touch( gentity_t *self, gentity_t *other, trace_t *trace )
   else
     self->timestamp = level.time + FRAMETIME;
 
-  max = BG_Class( other->client->ps.stats[ STAT_CLASS ] )->health;
+  maxHealth = &other->client->maxHealth;
 
-  other->health += self->damage;
+  maxHealthDecayRate = BG_Class( other->client->ps.stats[ STAT_CLASS ] )->maxHealthDecayRate;
 
-  if( other->health > max )
-    other->health = max;
+  maxHealthDecay = (int)( maxHealthDecayRate * ( (float)self->damage ) );
+
+  if( other->health < *maxHealth &&
+      maxHealthDecay < *maxHealth )
+  {
+
+    // reduce the max health if decayed
+    if( maxHealthDecay &&
+        ( maxHealthDecay < ( *maxHealth - other->health ) ) )
+      *maxHealth -= maxHealthDecay;
+
+      other->health += self->damage;
+      other->client->pers.infoChangeTime = level.time;
+
+    if( other->health > *maxHealth )
+    {
+      other->health = *maxHealth;
+    }
+  }
 
   other->client->ps.misc[ MISC_HEALTH ] = other->health;
 }

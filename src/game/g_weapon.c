@@ -1139,10 +1139,11 @@ void CheckCkitRepair( gentity_t *ent )
       if( traceEnt->health < traceEnt->s.constantLight &&
           HUMAN_BMAXHEALTH_DECAY( HBUILD_HEALRATE ) < traceEnt->s.constantLight )
       {
-        traceEnt->health += HBUILD_HEALRATE;
         if( HUMAN_BMAXHEALTH_DECAY( HBUILD_HEALRATE ) <
-            ( ent->s.constantLight - HBUILD_HEALRATE ) )
+            ( traceEnt->s.constantLight - traceEnt->health ) )
           traceEnt->s.constantLight -= HUMAN_BMAXHEALTH_DECAY( HBUILD_HEALRATE );
+
+        traceEnt->health += HBUILD_HEALRATE;
 
         if( traceEnt->health >= traceEnt->s.constantLight )
         {

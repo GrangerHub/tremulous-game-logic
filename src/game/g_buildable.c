@@ -4215,10 +4215,11 @@ void G_BuildableThink( gentity_t *ent, int msec )
           if( regen &&
               HUMAN_BMAXHEALTH_DECAY( regen ) < ent->s.constantLight )
           {
-            ent->health += regen;
             if( HUMAN_BMAXHEALTH_DECAY( regen ) <
-                ( ent->s.constantLight - regen ) )
+                ( ent->s.constantLight - ent->health ) )
               ent->s.constantLight -= HUMAN_BMAXHEALTH_DECAY( regen );
+
+              ent->health += regen;
           }
         }
       }

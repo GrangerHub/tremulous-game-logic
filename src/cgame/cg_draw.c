@@ -913,7 +913,27 @@ static void CG_DrawPlayerClipsValue( rectDef_t *rect, vec4_t color )
 
 static void CG_DrawPlayerHealthValue( rectDef_t *rect, vec4_t color )
 {
-  int   health = SU2HP( cg.snap->ps.misc[ MISC_HEALTH ] );
+  int health = SU2HP( cg.snap->ps.misc[ MISC_HEALTH ] );
+  float  healthColorFraction = (float)cg.snap->ps.misc[ MISC_HEALTH ] / BG_Class( cg.snap->ps.stats[STAT_CLASS] )->health;
+  const buildStat_t *bs = &cgs.humanBuildStat;
+
+  if( health > 0 && healthColorFraction < 0.01f )
+    healthColorFraction = 0.01f;
+  else if( healthColorFraction < 0.0f )
+    healthColorFraction = 0.0f;
+  else if( healthColorFraction > 1.0f )
+    healthColorFraction = 1.0f;
+
+  if( healthColorFraction == 1.0f )
+    Vector4Copy( bs->healthLowColor, color );
+  else if( healthColorFraction >= 0.75f )
+    Vector4Copy( bs->healthGuardedColor, color );
+  else if( healthColorFraction >= 0.50f )
+    Vector4Copy( bs->healthElevatedColor, color );
+  else if( healthColorFraction >= 0.25f )
+    Vector4Copy( bs->healthHighColor, color );
+  else
+    Vector4Copy( bs->healthSevereColor, color );
 
   trap_R_SetColor( color );
   CG_DrawField( rect->x, rect->y, 4, rect->w / 4, rect->h,

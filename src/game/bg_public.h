@@ -1195,6 +1195,7 @@ typedef struct
   int       stages;
 
   int       health;
+  float     maxHealthDecayRate; // applied while healing
   float     fallDamage;
   float     regenRate;
 

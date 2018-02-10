@@ -1184,6 +1184,7 @@ static const classAttributes_t bg_classList[ ] =
     "",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
     HP2SU( 100 ),                                   //int     health;
+    0.0f,                                           //float   maxHealthDecayRate;
     0.0f,                                           //float   fallDamage;
     0.0f,                                           //float   regenRate;
     0,                                              //int     abilities;
@@ -1215,6 +1216,7 @@ static const classAttributes_t bg_classList[ ] =
       "slows victums. Additionally has the ability to crawl on walls.",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
     ABUILDER_HEALTH,                                //int     health;
+    0.0f,                                           //float   maxHealthDecayRate;
     0.2f,                                           //float   fallDamage;
     ABUILDER_REGEN,                                 //float   regenRate;
     SCA_TAKESFALLDAMAGE|SCA_FOVWARPS|
@@ -1248,6 +1250,7 @@ static const classAttributes_t bg_classList[ ] =
       "that slows victims and the ability to crawl on walls.",
     ( 1 << S2 )|( 1 << S3 ),                        //int     stages;
     ABUILDER_UPG_HEALTH,                            //int     health;
+    0.0f,                                           //float   maxHealthDecayRate;
     0.2f,                                           //float   fallDamage;
     ABUILDER_UPG_REGEN,                             //float   regenRate;
     SCA_TAKESFALLDAMAGE|SCA_FOVWARPS|
@@ -1280,6 +1283,7 @@ static const classAttributes_t bg_classList[ ] =
       "walls and ceilings.  Can also leap from surface to surface.",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
     LEVEL0_HEALTH,                                  //int     health;
+    0.0f,                                           //float   maxHealthDecayRate;
     0.0f,                                           //float   fallDamage;
     LEVEL0_REGEN,                                   //float   regenRate;
     SCA_WALLCLIMBER|SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,    //int     abilities;
@@ -1315,6 +1319,7 @@ static const classAttributes_t bg_classList[ ] =
       "remain undetected by radar and turrets.",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
     LEVEL1_HEALTH,                                  //int     health;
+    0.0f,                                           //float   maxHealthDecayRate;
     0.0f,                                           //float   fallDamage;
     LEVEL1_REGEN,                                   //float   regenRate;
     SCA_FOVWARPS|SCA_WALLCLIMBER|SCA_ALIENSENSE|SCA_REGEN,    //int     abilities;
@@ -1349,6 +1354,7 @@ static const classAttributes_t bg_classList[ ] =
       "rate of nearby aliens. Can remain invisible while moving.",
     ( 1 << S2 )|( 1 << S3 ),                        //int     stages;
     LEVEL1_UPG_HEALTH,                              //int     health;
+    0.0f,                                           //float   maxHealthDecayRate;
     0.0f,                                           //float   fallDamage;
     LEVEL1_UPG_REGEN,                               //float   regenRate;
     SCA_FOVWARPS|SCA_WALLCLIMBER|SCA_ALIENSENSE|SCA_REGEN,    //int     abilities;
@@ -1379,6 +1385,7 @@ static const classAttributes_t bg_classList[ ] =
       "allows the Marauder to gather great speed in enclosed areas.",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
     LEVEL2_HEALTH,                                  //int     health;
+    0.0f,                                           //float   maxHealthDecayRate;
     0.0f,                                           //float   fallDamage;
     LEVEL2_REGEN,                                   //float   regenRate;
     SCA_WALLJUMPER|SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,     //int     abilities;
@@ -1409,6 +1416,7 @@ static const classAttributes_t bg_classList[ ] =
       "with the addition of an area effect electric shock attack.",
     ( 1 << S2 )|( 1 << S3 ),                        //int     stages;
     LEVEL2_UPG_HEALTH,                              //int     health;
+    0.0f,                                           //float   maxHealthDecayRate;
     0.0f,                                           //float   fallDamage;
     LEVEL2_UPG_REGEN,                               //float   regenRate;
     SCA_WALLJUMPER|SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,     //int     abilities;
@@ -1439,6 +1447,7 @@ static const classAttributes_t bg_classList[ ] =
     "that can zap all nearby grounded enemies.",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages
     SPITFIRE_HEALTH,                                //int     health;
+    0.0f,                                           //float   maxHealthDecayRate;
     0.0f,                                           //float   fallDamage;
     SPITFIRE_REGEN,                                 //float   regenRate;
     (SCA_FOVWARPS|SCA_ALIENSENSE),                  //int     abilities;
@@ -1470,6 +1479,7 @@ static const classAttributes_t bg_classList[ ] =
       "locations inaccessible from the ground.",
     ( 1 << S2 )|( 1 << S3 ),                        //int     stages;
     LEVEL3_HEALTH,                                  //int     health;
+    0.0f,                                           //float   maxHealthDecayRate;
     0.0f,                                           //float   fallDamage;
     LEVEL3_REGEN,                                   //float   regenRate;
     SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,          //int     abilities;
@@ -1501,6 +1511,7 @@ static const classAttributes_t bg_classList[ ] =
       "from a distance.",
     ( 1 << S3 ),                                    //int     stages;
     LEVEL3_UPG_HEALTH,                              //int     health;
+    0.5f,                                           //float   maxHealthDecayRate;
     0.0f,                                           //float   fallDamage;
     LEVEL3_UPG_REGEN,                               //float   regenRate;
     SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,          //int     abilities;
@@ -1531,9 +1542,10 @@ static const classAttributes_t bg_classList[ ] =
       "also charge at enemy humans and structures, inflicting "
       "great damage. Any humans or their structures caught under "
       "a falling Tyrant will be crushed by its weight. It has a large "
-      "amount of health, but it can't heal.",
+      "amount of health, but its maximum health decays from healing.",
     ( 1 << S3 ),                                    //int     stages;
     LEVEL4_HEALTH,                                  //int     health;
+    0.75f,                                          //float   maxHealthDecayRate;
     0.0f,                                           //float   fallDamage;
     LEVEL4_REGEN,                                   //float   regenRate;
     SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,                    //int     abilities;
@@ -1563,6 +1575,7 @@ static const classAttributes_t bg_classList[ ] =
     "",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
     HP2SU( 100 ),                                   //int     health;
+    0.0f,                                           //float   maxHealthDecayRate;
     1.0f,                                           //float   fallDamage;
     0.0f,                                           //float   regenRate;
     SCA_TAKESFALLDAMAGE|SCA_CANUSELADDERS|SCA_STAMINA,          //int     abilities;
@@ -1592,6 +1605,7 @@ static const classAttributes_t bg_classList[ ] =
     "",
     ( 1 << S3 ),                                    //int     stages;
     HP2SU( 100 ),                                   //int     health;
+    0.0f,                                           //float   maxHealthDecayRate;
     1.0f,                                           //float   fallDamage;
     0.0f,                                           //float   regenRate;
     SCA_TAKESFALLDAMAGE|SCA_CANUSELADDERS|SCA_STAMINA,          //int     abilities;

@@ -2113,7 +2113,7 @@ void ClientThink_real( gentity_t *ent )
   gclient_t *client = ent->client;
   pmove_t   pm;
   vec3_t    up = { 0.0f, 0.0f, 1.0f };
-  const int maxHealth = BG_Class( client->ps.stats[ STAT_CLASS ] )->health;
+  int       *maxHealth = &client->maxHealth;
   int       oldEventSequence;
   int       msec;
   usercmd_t *ucmd;
@@ -2301,7 +2301,7 @@ void ClientThink_real( gentity_t *ent )
   {
     //if currently using a medkit or have no need for a medkit now
     if( client->ps.stats[ STAT_STATE ] & SS_HEALING_2X ||
-        ( client->ps.misc[ MISC_HEALTH ] == maxHealth &&
+        ( client->ps.misc[ MISC_HEALTH ] == *maxHealth &&
           !( client->ps.stats[ STAT_STATE ] & SS_POISONED ) ) )
     {
       BG_DeactivateUpgrade( UP_MEDKIT, client->ps.stats );
@@ -2334,8 +2334,8 @@ void ClientThink_real( gentity_t *ent )
       client->ps.stats[ STAT_STATE ] |= SS_HEALING_2X;
       client->lastMedKitTime = level.time;
       client->medKitHealthToRestore =
-        maxHealth - client->ps.misc[ MISC_HEALTH ];
-      client->medKitHealthToRestore = maxHealth - client->ps.misc[ MISC_HEALTH ];
+        *maxHealth - client->ps.misc[ MISC_HEALTH ];
+      client->medKitHealthToRestore = *maxHealth - client->ps.misc[ MISC_HEALTH ];
       client->medKitIncrementTime = level.time +
         ( MEDKIT_STARTUP_TIME / MEDKIT_STARTUP_SPEED );
 
@@ -2349,6 +2349,9 @@ void ClientThink_real( gentity_t *ent )
   {
     float regenRate =
         BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->regenRate;
+    float maxHealthDecayRate =
+        BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->maxHealthDecayRate;
+    int   maxHealthDecay;
 
     if( ent->health <= 0 || ent->nextRegenTime < 0 || regenRate == 0 )
       ent->nextRegenTime = -1; // no regen
@@ -2400,7 +2403,7 @@ void ClientThink_real( gentity_t *ent )
             didBoost = qtrue;
           }
 
-          if( didBoost && ent->health < maxHealth )
+          if( didBoost && ent->health < *maxHealth )
             boost->client->pers.hasHealed = qtrue;
         }
       }
@@ -2432,16 +2435,28 @@ void ClientThink_real( gentity_t *ent )
         ent->nextRegenTime += count * interval;
       }
 
-      if( ent->health < maxHealth )
+      maxHealthDecay = (int)( maxHealthDecayRate * ( (float)count ) );
+
+      if( ent->health < *maxHealth &&
+          maxHealthDecay < *maxHealth )
       {
+        // reduce the max health if decayed
+        if( maxHealthDecay &&
+            ( maxHealthDecay < ( *maxHealth - ent->health ) ) )
+          *maxHealth -= maxHealthDecay;
+
         ent->health += count;
         client->ps.misc[ MISC_HEALTH ] = ent->health;
         client->pers.infoChangeTime = level.time;
 
-        // if at max health, clear damage counters
-        if( ent->health >= maxHealth )
+        if( ent->health > *maxHealth )
         {
-          ent->health = client->ps.misc[ MISC_HEALTH ] = maxHealth;
+          ent->health = client->ps.misc[ MISC_HEALTH ] = *maxHealth;
+        }
+
+        // if at max health, clear damage counters
+        if( ent->health >= BG_Class( client->ps.stats[ STAT_CLASS ] )->health )
+        {
           for( i = 0; i < MAX_CLIENTS; i++ )
             ent->credits[ i ] = 0;
         }

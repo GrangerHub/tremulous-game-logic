@@ -602,6 +602,7 @@ struct gclient_s
   int                 nextMedKitRestoreStaminaTime;
   int                 medKitStaminaToRestore;
   int                 lastCreepSlowTime;    // time until creep can be removed
+  int                 maxHealth; // for clients with max health decay from healing
 
   qboolean            charging;
 
