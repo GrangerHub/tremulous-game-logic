@@ -1558,8 +1558,8 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   {
     const int oldHealth = ent->health;
 
-    //Alien classes don't don't have health regen start at full health
-    if( BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->regenRate )
+    //classes that have max health decay from healing start at full health
+    if( BG_Class( !ent->client->ps.stats[ STAT_CLASS ] )->maxHealthDecayRate )
       ent->health *= ent->client->pers.evolveHealthFraction;
 
     // ensure that evolving/devolving with low health doesn't kill

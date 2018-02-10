@@ -1511,7 +1511,7 @@ static const classAttributes_t bg_classList[ ] =
       "from a distance.",
     ( 1 << S3 ),                                    //int     stages;
     LEVEL3_UPG_HEALTH,                              //int     health;
-    0.5f,                                           //float   maxHealthDecayRate;
+    0.25f,                                          //float   maxHealthDecayRate;
     0.0f,                                           //float   fallDamage;
     LEVEL3_UPG_REGEN,                               //float   regenRate;
     SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,          //int     abilities;

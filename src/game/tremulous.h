@@ -265,7 +265,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL4_SPEED                1.2f
 #define LEVEL4_VALUE                AVM(8 * ALIEN_CREDITS_PER_KILL)
 #define LEVEL4_HEALTH               AHM(1100000)
-#define LEVEL4_REGEN                (25000)
+#define LEVEL4_REGEN                (15000)
 #define LEVEL4_COST                 15
 
 #define SPITFIRE_SPEED                1.3f
@@ -340,7 +340,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define BOOSTER_SPLASHDAMAGE        ABDM(50000)
 #define BOOSTER_SPLASHRADIUS        100
 #define BOOSTER_CREEPSIZE           120
-#define BOOSTER_REGEN_MOD           (3.0f)
+#define BOOSTER_REGEN_MOD           (2.75f)
 #define BOOSTER_VALUE               ( 9 * LEVEL0_VALUE )
 #define BOOSTER_BAT_PWR             25000
 #define BOOST_TIME                  30000
