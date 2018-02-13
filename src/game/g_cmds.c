@@ -435,13 +435,13 @@ static void Give_Class( gentity_t *ent, char *s )
   {
     int healthDiff;
 
-    healthDiff = ent->client->maxHealth -
+    healthDiff = ent->client->ps.misc[ MISC_MAX_HEALTH ] -
                  ent->client->ps.misc[ MISC_HEALTH ];
 
-    ent->client->maxHealth -= (int)( maxHealthDecayRate * (float)healthDiff );
+    ent->client->ps.misc[ MISC_MAX_HEALTH ] -= (int)( maxHealthDecayRate * (float)healthDiff );
 
     ent->client->pers.evolveMaxHealthFraction
-      = (float)ent->client->maxHealth
+      = (float)ent->client->ps.misc[ MISC_MAX_HEALTH ]
       / (float)BG_Class( currentClass )->health;
 
     if( ent->client->pers.evolveMaxHealthFraction < 0.0f )
@@ -2384,13 +2384,13 @@ void Cmd_Class_f( gentity_t *ent )
           {
             int healthDiff;
 
-            healthDiff = ent->client->maxHealth -
+            healthDiff = ent->client->ps.misc[ MISC_MAX_HEALTH ] -
                          ent->client->ps.misc[ MISC_HEALTH ];
 
-            ent->client->maxHealth -= (int)( maxHealthDecayRate * (float)healthDiff );
+            ent->client->ps.misc[ MISC_MAX_HEALTH ] -= (int)( maxHealthDecayRate * (float)healthDiff );
 
             ent->client->pers.evolveMaxHealthFraction
-              = (float)ent->client->maxHealth
+              = (float)ent->client->ps.misc[ MISC_MAX_HEALTH ]
               / (float)BG_Class( currentClass )->health;
 
             if( ent->client->pers.evolveMaxHealthFraction < 0.0f )

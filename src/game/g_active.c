@@ -852,7 +852,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
             client->ps.stats[ STAT_BUILDABLE ] &= ~SB_VALID_TOGGLEBIT;
 
           // Let the client know which buildables will be removed by building
-          for( i = 0; i < ( MAX_MISC - 5 ); i++ )
+          for( i = 0; i < ( MAX_MISC - 6 ); i++ )
           {
             if( i < level.numBuildablesForRemoval )
               client->ps.misc[ i ] = level.markedBuildables[ i ]->s.number;
@@ -862,7 +862,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
         }
         else
         {
-          for( i = 0; i < ( MAX_MISC - 5 ); i++ )
+          for( i = 0; i < ( MAX_MISC - 6 ); i++ )
             client->ps.misc[ i ] = 0;
         }
         break;
@@ -2113,7 +2113,7 @@ void ClientThink_real( gentity_t *ent )
   gclient_t *client = ent->client;
   pmove_t   pm;
   vec3_t    up = { 0.0f, 0.0f, 1.0f };
-  int       *maxHealth = &client->maxHealth;
+  int       *maxHealth = &client->ps.misc[ MISC_MAX_HEALTH ];
   int       oldEventSequence;
   int       msec;
   usercmd_t *ucmd;

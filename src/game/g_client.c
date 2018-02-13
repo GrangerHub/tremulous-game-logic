@@ -1550,7 +1550,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
 
   // health will count down towards max_health
   ent->health = client->ps.misc[ MISC_HEALTH ] = 
-                client->maxHealth =
+                client->ps.misc[ MISC_MAX_HEALTH ] =
                 BG_Class( client->ps.stats[ STAT_CLASS ] )->health; //* 1.25;
 
   //if evolving scale health
@@ -1563,8 +1563,8 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
       ent->health *= client->pers.evolveHealthFraction;
     else
     {
-      client->maxHealth *= client->pers.evolveMaxHealthFraction;
-      ent->health = client->maxHealth;
+      client->ps.misc[ MISC_MAX_HEALTH ] *= client->pers.evolveMaxHealthFraction;
+      ent->health = client->ps.misc[ MISC_MAX_HEALTH ];
     }
 
     // ensure that evolving/devolving with low health doesn't kill
