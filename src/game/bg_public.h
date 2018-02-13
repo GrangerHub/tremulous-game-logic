@@ -361,18 +361,19 @@ typedef enum
 
 // hack to fit extra data in the misc[] array
 #define MISC_HEALTH                    ( MAX_MISC - 1 )
-#define MISC_ARMOR                     ( MAX_MISC - 2 ) // health / armor limit, changable by handicap
+#define MISC_MAX_HEALTH                ( MAX_MISC - 2 ) // for max health decay
+#define MISC_ARMOR                     ( MAX_MISC - 3 )
 //Do not use MISC_SEED outside of PM_PSRandom(),
 //and don't use PM_PSRandom() outside of bg_pmove.c.
-#define MISC_SEED                      ( MAX_MISC - 3 ) // for predicted psudorandom things
+#define MISC_SEED                      ( MAX_MISC - 4 ) // for predicted psudorandom things
 
 // Additional flags only used by clients.  Copied over to otherEntityNum2 in
 // the entity state, but keep in mind that otherEntityNum2 can only hold
 // GENTITYNUM_BITS number of bits (current default is 10).
-#define MISC_CLIENT_FLAGS              ( MAX_MISC - 4 )
+#define MISC_CLIENT_FLAGS              ( MAX_MISC - 5 )
 
 // for uh...misc stuff (pounce, trample, lcannon)
-#define MISC_MISC                      ( MAX_MISC - 5 )
+#define MISC_MISC                      ( MAX_MISC - 6 )
 
 
 #define CLF_GIBBED             0x0000000001
