@@ -210,49 +210,49 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define ABUILDER_SPEED              0.9f
 #define ABUILDER_VALUE              AVM(((float)(ALIEN_CREDITS_PER_KILL)) / 2.0f)
-#define ABUILDER_HEALTH             AHM(50000)
+#define ABUILDER_HEALTH             AHM(75000)
 #define ABUILDER_REGEN              (0.04f * ABUILDER_HEALTH)
 #define ABUILDER_COST               0
 
 #define ABUILDER_UPG_SPEED          0.9f
 #define ABUILDER_UPG_VALUE          AVM(((float)(ALIEN_CREDITS_PER_KILL)) * 1.5f)
-#define ABUILDER_UPG_HEALTH         AHM(75000)
+#define ABUILDER_UPG_HEALTH         AHM(100000)
 #define ABUILDER_UPG_REGEN          (0.04f * ABUILDER_UPG_HEALTH)
 #define ABUILDER_UPG_COST           0
 
 #define LEVEL0_SPEED                1.4f
 #define LEVEL0_VALUE                AVM(ALIEN_CREDITS_PER_KILL)
-#define LEVEL0_HEALTH               AHM(30000)
+#define LEVEL0_HEALTH               AHM(38000)
 #define LEVEL0_REGEN                (0.05f * LEVEL0_HEALTH)
 #define LEVEL0_COST                 0
 
 #define LEVEL1_SPEED                1.25f
 #define LEVEL1_VALUE                AVM(1 * ALIEN_CREDITS_PER_KILL)
-#define LEVEL1_HEALTH               AHM(60000)
+#define LEVEL1_HEALTH               AHM(75000)
 #define LEVEL1_REGEN                (0.03f * LEVEL1_HEALTH)
 #define LEVEL1_COST                 1
 
 #define LEVEL1_UPG_SPEED            1.25f
 #define LEVEL1_UPG_VALUE            AVM(2 * ALIEN_CREDITS_PER_KILL)
-#define LEVEL1_UPG_HEALTH           AHM(80000)
+#define LEVEL1_UPG_HEALTH           AHM(100000)
 #define LEVEL1_UPG_REGEN            (0.03f * LEVEL1_UPG_HEALTH)
-#define LEVEL1_UPG_COST             2
+#define LEVEL1_UPG_COST             3
 
 #define LEVEL2_SPEED                1.35f
 #define LEVEL2_VALUE                AVM(2 * ALIEN_CREDITS_PER_KILL)
-#define LEVEL2_HEALTH               AHM(150000)
+#define LEVEL2_HEALTH               AHM(190000)
 #define LEVEL2_REGEN                (0.03f * LEVEL2_HEALTH)
 #define LEVEL2_COST                 2
 
 #define LEVEL2_UPG_SPEED            1.35f
 #define LEVEL2_UPG_VALUE            AVM(4 * ALIEN_CREDITS_PER_KILL)
-#define LEVEL2_UPG_HEALTH           AHM(175000)
+#define LEVEL2_UPG_HEALTH           AHM(220000)
 #define LEVEL2_UPG_REGEN            (0.03f * LEVEL2_UPG_HEALTH)
 #define LEVEL2_UPG_COST             4
 
 #define LEVEL3_SPEED                1.1f
 #define LEVEL3_VALUE                AVM(3 * ALIEN_CREDITS_PER_KILL)
-#define LEVEL3_HEALTH               AHM(200000)
+#define LEVEL3_HEALTH               AHM(275000)
 #define LEVEL3_REGEN                (0.03f * LEVEL3_HEALTH)
 #define LEVEL3_COST                 5
 
@@ -270,7 +270,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define SPITFIRE_SPEED                1.3f
 #define SPITFIRE_VALUE                AVM(3 * ALIEN_CREDITS_PER_KILL)
-#define SPITFIRE_HEALTH               AHM(125000)
+#define SPITFIRE_HEALTH               AHM(155000)
 #define SPITFIRE_REGEN                (0.03f * SPITFIRE_HEALTH)
 #define SPITFIRE_COST                 3
 

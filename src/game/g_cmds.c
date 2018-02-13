@@ -410,6 +410,8 @@ static void Give_Class( gentity_t *ent, char *s )
   vec3_t oldVel;
   int oldBoostTime = -1;
   int newClass = BG_ClassByName( s )->number;
+  const float maxHealthDecayRate = BG_Class( currentClass )->maxHealthDecayRate;
+
 
   if( newClass == PCL_NONE )
     return;
@@ -428,6 +430,26 @@ static void Give_Class( gentity_t *ent, char *s )
     ent->client->pers.evolveHealthFraction = 0.0f;
   else if( ent->client->pers.evolveHealthFraction > 1.0f )
     ent->client->pers.evolveHealthFraction = 1.0f;
+
+  if( maxHealthDecayRate )
+  {
+    int healthDiff;
+
+    healthDiff = ent->client->maxHealth -
+                 ent->client->ps.misc[ MISC_HEALTH ];
+
+    ent->client->maxHealth -= (int)( maxHealthDecayRate * (float)healthDiff );
+
+    ent->client->pers.evolveMaxHealthFraction
+      = (float)ent->client->maxHealth
+      / (float)BG_Class( currentClass )->health;
+
+    if( ent->client->pers.evolveMaxHealthFraction < 0.0f )
+      ent->client->pers.evolveMaxHealthFraction = 0.0f;
+    else if( ent->client->pers.evolveMaxHealthFraction > 1.0f )
+      ent->client->pers.evolveMaxHealthFraction = 1.0f;
+  }else 
+    ent->client->pers.evolveMaxHealthFraction = 1.0f;
 
   //remove credit
   //G_AddCreditToClient( ent->client, -cost, qtrue );
@@ -2336,6 +2358,8 @@ void Cmd_Class_f( gentity_t *ent )
       {
         if( cost >= 0 )
         {
+          const float maxHealthDecayRate = BG_Class( currentClass )->maxHealthDecayRate;
+
           //disable wallwalking
           if( ent->client->ps.eFlags & EF_WALLCLIMB )
           {
@@ -2355,6 +2379,33 @@ void Cmd_Class_f( gentity_t *ent )
             ent->client->pers.evolveHealthFraction = 0.0f;
           else if( ent->client->pers.evolveHealthFraction > 1.0f )
             ent->client->pers.evolveHealthFraction = 1.0f;
+
+          if( maxHealthDecayRate )
+          {
+            int healthDiff;
+
+            healthDiff = ent->client->maxHealth -
+                         ent->client->ps.misc[ MISC_HEALTH ];
+
+            ent->client->maxHealth -= (int)( maxHealthDecayRate * (float)healthDiff );
+
+            ent->client->pers.evolveMaxHealthFraction
+              = (float)ent->client->maxHealth
+              / (float)BG_Class( currentClass )->health;
+
+            if( ent->client->pers.evolveMaxHealthFraction < 0.0f )
+              ent->client->pers.evolveMaxHealthFraction = 0.0f;
+            else if( ent->client->pers.evolveMaxHealthFraction > 1.0f )
+              ent->client->pers.evolveMaxHealthFraction = 1.0f;
+
+            if( cost )
+            {
+              cost = (int)((float)cost * ent->client->pers.evolveMaxHealthFraction);
+              if( cost < 0 )
+                cost = 0;
+            }
+          } else
+            ent->client->pers.evolveMaxHealthFraction = 1.0f;
 
           ent->client->pers.evolveChargeStaminaFraction = 
                           (float)ent->client->ps.stats[ STAT_STAMINA ] /

@@ -1560,7 +1560,12 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
 
     //classes that have max health decay from healing start at full health
     if( BG_Class( !ent->client->ps.stats[ STAT_CLASS ] )->maxHealthDecayRate )
-      ent->health *= ent->client->pers.evolveHealthFraction;
+      ent->health *= client->pers.evolveHealthFraction;
+    else
+    {
+      client->maxHealth *= client->pers.evolveMaxHealthFraction;
+      ent->health = client->maxHealth;
+    }
 
     // ensure that evolving/devolving with low health doesn't kill
     if( ent->health < 1 && oldHealth > 0 )
