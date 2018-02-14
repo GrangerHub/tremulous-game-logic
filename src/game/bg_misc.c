@@ -1799,6 +1799,26 @@ qboolean BG_AlienCanEvolve( class_t class, int credits, int stage,
 }
 
 /*
+==============
+BG_EvolveScale
+
+While evolving, used for scaling health, damagement,
+movement, etc.
+==============
+*/
+float BG_EvolveScale( playerState_t *ps )
+{
+  if( ps->stats[ STAT_TEAM ] != TEAM_ALIENS )
+    return 1.0f;
+
+  if( !( ps->eFlags & EF_EVOLVING ) )
+    return 1.0f;
+
+  return 1 - ( ( (float)ps->stats[ STAT_MISC3 ] ) /
+               ( (float)ps->stats[ STAT_MISC2 ] ) );
+}
+
+/*
 ======================
 BG_ParseClassFile
 
@@ -4526,9 +4546,7 @@ void BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s,
   VectorCopy( ps->velocity, s->pos.trDelta );
 
   s->apos.trType = TR_INTERPOLATE;
-  if( ps->stats[ STAT_TEAM ] != TEAM_ALIENS ||
-      !( s->eFlags & EF_EVOLVING ) )
-    VectorCopy( ps->viewangles, s->apos.trBase );
+  VectorCopy( ps->viewangles, s->apos.trBase );
 
   if( snap )
     SnapVector( s->apos.trBase );
@@ -4641,9 +4659,7 @@ void BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s
   s->pos.trDuration = 50; // 1000 / sv_fps (default = 20)
 
   s->apos.trType = TR_INTERPOLATE;
-  if( ps->stats[ STAT_TEAM ] != TEAM_ALIENS ||
-      !( s->eFlags & EF_EVOLVING ) )
-    VectorCopy( ps->viewangles, s->apos.trBase );
+  VectorCopy( ps->viewangles, s->apos.trBase );
   if( snap )
     SnapVector( s->apos.trBase );
 

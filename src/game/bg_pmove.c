@@ -152,8 +152,7 @@ PM_StartLegsAnim
 */
 static void PM_StartLegsAnim( int anim )
 {
-  if( PM_Paralyzed( pm->ps->pm_type ) &&
-      pm->ps->pm_type != PM_EVOLVING )
+  if( PM_Paralyzed( pm->ps->pm_type ) )
     return;
 
   //legsTimer is clamped too tightly for nonsegmented models
@@ -1036,6 +1035,9 @@ static float PM_CmdScale( usercmd_t *cmd, qboolean zFlight )
   if( pm->ps->stats[ STAT_STATE ] & SS_BLOBLOCKED )
     modifier *= LOCKBLOB_SPEED_MOD;
 
+  //slow appropriatly while evolving
+  modifier *= BG_EvolveScale( pm->ps );
+
   if( pm->ps->pm_type == PM_GRABBED )
     modifier = 0.0f;
 
@@ -1187,6 +1189,10 @@ static qboolean PM_CheckPounce( void )
   else
     jumpMagnitude = pm->ps->misc[ MISC_MISC ] *
                     LEVEL3_POUNCE_JUMP_MAG_UPG / LEVEL3_POUNCE_TIME_UPG;
+
+  //scale due to evolving
+  jumpMagnitude = (int)( ((float) jumpMagnitude ) * BG_EvolveScale( pm->ps ) );
+
   VectorMA( pm->ps->velocity, jumpMagnitude, pml.forward, pm->ps->velocity );
   PM_AddEvent( EV_JUMP );
 
@@ -1254,6 +1260,9 @@ static qboolean PM_CheckAirPounce( void )
   if( pm->ps->weapon == WP_ASPITFIRE )
     jumpMagnitude = pm->ps->misc[ MISC_MISC ] * SPITFIRE_POUNCE_JUMP_MAG / SPITFIRE_POUNCE_TIME;
   else jumpMagnitude = 0;
+
+  //scale due to evolving
+  jumpMagnitude = (int)( ((float) jumpMagnitude ) * BG_EvolveScale( pm->ps ) );
 
   VectorMA( pm->ps->velocity, jumpMagnitude, pml.forward, pm->ps->velocity ); 
   PM_AddEvent( EV_AIRPOUNCE );
@@ -1393,6 +1402,8 @@ static qboolean PM_CheckWallJump( vec3_t wishDir, float wishSpeed )
 
   // Calculate the jump speed.
   jumpMagnitude = BG_Class( pm->ps->stats[ STAT_CLASS ] )->jumpMagnitude;
+  //scale due to evolving
+  jumpMagnitude = (int)( ((float) jumpMagnitude ) * BG_EvolveScale( pm->ps ) );
   upFactor = MIN( 1.0f, MAX( upLook, intoLook + 0.15f ) );
   awayFactor = MIN( 1.0f - upLook * upLook, intoLook );
   upSpeed = upFactor * 1.25f * jumpMagnitude;
@@ -1624,6 +1635,9 @@ static qboolean PM_CheckJump( vec3_t customNormal )
 			}
 			pm->ps->pm_time = pm_cliptime; //clip through walls with the same timer as walljump
 	  }
+
+  //scale due to evolving
+  jumpMagnitude = (int)( ((float) jumpMagnitude ) * BG_EvolveScale( pm->ps ) );
 
   pm->ps->persistant[PERS_JUMPTIME] = 0;
   pm->ps->pm_flags |= PMF_JUMPING;
@@ -4067,10 +4081,6 @@ static void PM_Weapon( void )
     return;
   }
 
-  // Player is evolving
-  if( pm->ps->pm_type == PM_EVOLVING )
-    return;
-
   // Charging for a pounce or canceling a pounce
   if( pm->ps->weapon == WP_ALEVEL0 ||
       pm->ps->weapon == WP_ALEVEL3 ||
@@ -5139,6 +5149,24 @@ static void PM_DropTimers( void )
         pm->pmext->pulsatingBeamTime[ i ] = 0;
     }
   }
+
+  // the jump timer increases
+  if( pm->ps->persistant[PERS_JUMPTIME] < 0 )
+    pm->ps->persistant[PERS_JUMPTIME] = 0;
+  else
+    pm->ps->persistant[PERS_JUMPTIME] += pml.msec;
+
+  if( pm->ps->stats[ STAT_TEAM ] == TEAM_ALIENS &&
+      pm->ps->eFlags & EF_EVOLVING )
+  {
+    if( pm->ps->stats[ STAT_MISC3 ] > 0 )
+    {
+      pm->ps->stats[ STAT_MISC3 ] -= pml.msec;
+
+      if( pm->ps->stats[ STAT_MISC3 ] < 0 )
+        pm->ps->stats[ STAT_MISC3 ] = 0;
+    }
+  }
 }
 
 
@@ -5577,8 +5605,7 @@ void PmoveSingle( pmove_t *pmove )
   // update the viewangles
   PM_UpdateViewAngles( pm->ps, &pm->cmd );
 
-  if( pm->ps->pm_type == PM_DEAD || pm->ps->pm_type == PM_GRABBED ||
-      pm->ps->pm_type == PM_EVOLVING )
+  if( pm->ps->pm_type == PM_DEAD || pm->ps->pm_type == PM_GRABBED )
     PM_DeadMove( );
 
 

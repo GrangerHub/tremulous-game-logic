@@ -309,7 +309,7 @@ void CG_OffsetThirdPersonView( void )
   }
 
   // get and rangecheck cg_thirdPersonRange
-  range = cg.predictedPlayerEntity.evolve ? 100 : cg_thirdPersonRange.value;
+  range = cg_thirdPersonRange.value;
   if( range > 150.0f ) range = 150.0f;
   if( range < 30.0f ) range = 30.0f;
 
@@ -1433,18 +1433,7 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 
   // decide on third person view
   cg.renderingThirdPerson = ( cg_thirdPerson.integer || ( cg.snap->ps.misc[ MISC_HEALTH ] <= 0 ) || 
-                            ( cg.chaseFollow && cg.snap->ps.pm_flags & PMF_FOLLOW ) ||
-                            ( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_ALIENS &&
-                              ( cg.predictedPlayerEntity.evolve ) ) );
-
-  // play the looped evolving sound
-  if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_ALIENS &&
-      ( cg.predictedPlayerEntity.evolve ) &&
-      cgs.media.alienLoopedEvolveSoundTime < cg.time )
-  {
-    trap_S_StartLocalSound( cgs.media.alienLoopedEvolveSound, CHAN_LOCAL_SOUND );
-    cgs.media.alienLoopedEvolveSoundTime = cg.time + 3500;
-  }
+                            ( cg.chaseFollow && cg.snap->ps.pm_flags & PMF_FOLLOW ) );
 
   // update speedometer
   CG_AddSpeed( );

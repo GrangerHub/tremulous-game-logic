@@ -1408,7 +1408,6 @@ typedef struct
 
   sfxHandle_t alienEvolveSound;
   sfxHandle_t alienLoopedEvolveSound;
-  int         alienLoopedEvolveSoundTime;
   qhandle_t   alienEvolveShader;
   qhandle_t   alienEvolveVisionShader;
 

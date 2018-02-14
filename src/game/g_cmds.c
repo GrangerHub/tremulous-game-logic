@@ -2299,7 +2299,7 @@ void Cmd_Class_f( gentity_t *ent )
     {
       int cost;
 
-      if( ent->client->evolveTime >= level.time )
+      if( ent->client->ps.stats[ STAT_MISC3 ] > 0 )
       {
         G_TriggerMenu( clientNum, MN_A_EVOLVING );
         return;
@@ -2407,19 +2407,22 @@ void Cmd_Class_f( gentity_t *ent )
           {
             int evolvePeriod = 1000;
 
-            if( !G_FindCreep( ent ) )
-              evolvePeriod += ( abs( BG_Class( newClass )->cost -
+            evolvePeriod += ( abs( BG_Class( newClass )->cost -
                                      BG_Class( currentClass )->cost ) *
-                                1500 );
+                              1500 );
 
             if( evolvePeriod > MAX_EVOLVE_PERIOD )
               evolvePeriod = MAX_EVOLVE_PERIOD;
 
             //Set evolving period
             ent->client->ps.eFlags |= EF_EVOLVING;
-            ent->client->evolveTime = level.time + evolvePeriod;
-            // save the angles for this frame
-            VectorCopy( ent->client->ps.viewangles, ent->client->evolveRestoreAngles );
+            ent->client->ps.stats[ STAT_MISC3 ] = evolvePeriod; // counts down, ends evolve when 0 is reached
+            ent->client->ps.stats[ STAT_MISC2 ] = evolvePeriod; // remains constant, used as a denominator for scaling
+
+            //set the evolve health regen
+            ent->client->pers.evolveHealthRegen = (int)( ( (float)ent->health ) * 0.9f );
+            ent->health -= ent->client->pers.evolveHealthRegen;
+            ent->client->ps.misc[ MISC_HEALTH ] = ent->health;
 
             //save the cost to be applied after evolving is completed
             ent->client->evolveCost = cost;

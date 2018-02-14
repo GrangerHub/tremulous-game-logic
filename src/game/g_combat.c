@@ -1513,6 +1513,11 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       attacker->client->ps.persistant[ PERS_HITS ]++;
   }
 
+  if( attacker->client )
+  {
+    modDamge = (int)( ( (float)modDamge ) * BG_EvolveScale( &attacker->client->ps ) );
+  }
+
   if( modDamge != 100 &&
       !(dflags & DAMAGE_INSTAGIB) )
   {
@@ -1715,7 +1720,11 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
     }
 
     targ->lastDamageTime = level.time;
-    targ->nextRegenTime = level.time + ALIEN_REGEN_DAMAGE_TIME;
+    if( !targ->client ||
+        !( targ->client->ps.eFlags & EF_EVOLVING ) ||
+        targ->client->pers.evolveHealthRegen <= 0 ||
+        targ->client->ps.stats[ STAT_MISC3 ] <= 0 )
+      targ->nextRegenTime = level.time + ALIEN_REGEN_DAMAGE_TIME;
     targ->nextHPReserveRegenTime = level.time + ALIEN_REGEN_DAMAGE_TIME;
 
     if( targ->health <= 0 ||

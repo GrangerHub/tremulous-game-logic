@@ -2233,7 +2233,15 @@ void CG_Player( centity_t *cent )
 
     if( ( cent->currentState.legsAnim & ~ANIM_TOGGLEBIT ) == NSPA_SWIM  && es->weapon == WP_ASPITFIRE )
     {
-      trap_S_AddLoopingSound( cent->currentState.number, cent->lerpOrigin, vec3_origin, cgs.media.flapSound );
+      trap_S_AddLoopingSound( cent->currentState.number, cent->lerpOrigin,
+                              vec3_origin, cgs.media.flapSound );
+    }
+
+    // play the looped evolving sound
+    if(  cent->evolve )
+    {
+      trap_S_AddLoopingSound( cent->currentState.number, cent->lerpOrigin,
+                              vec3_origin, cgs.media.alienLoopedEvolveSound );
     }
   }
 

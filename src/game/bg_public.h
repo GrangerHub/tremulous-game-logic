@@ -170,13 +170,12 @@ typedef enum
   PM_DEAD,          // no acceleration or turning, but free falling
   PM_FREEZE,        // stuck in place with no control
   PM_INTERMISSION,  // no movement or status bar
-  PM_SPITFIRE_FLY,   // physics for Spitfire
-  PM_EVOLVING
+  PM_SPITFIRE_FLY   // physics for Spitfire
 } pmtype_t;
 
 // pmtype_t categories
 #define PM_Paralyzed( x ) ( (x) == PM_DEAD || (x) == PM_FREEZE ||\
-                            (x) == PM_INTERMISSION || (x) == PM_EVOLVING )
+                            (x) == PM_INTERMISSION )
 #define PM_Alive( x )     ( (x) == PM_NORMAL || (x) == PM_JETPACK ||\
                             (x) == PM_GRABBED || (x) == PM_SPITFIRE_FLY )
 
@@ -1499,6 +1498,7 @@ qboolean                    BG_AlienCanEvolve( class_t class, int credits,
                                                int alienStage,
                                                int gameIsInWarmup,
                                                qboolean devMode );
+float                       BG_EvolveScale( playerState_t *ps );
 
 void                        BG_InitClassConfigs( void );
 
