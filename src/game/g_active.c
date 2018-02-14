@@ -1134,12 +1134,6 @@ void ClientEvents( gentity_t *ent, int oldEventSequence )
 
   for( i = oldEventSequence; i < client->ps.eventSequence; i++ )
   {
-    // Evolving players cannot fire weapon
-    if( client && client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
-        ( client->ps.eFlags & EF_EVOLVING ) &&
-        ( event == EV_FIRE_WEAPON || event == EV_FIRE_WEAPON2 || event == EV_FIRE_WEAPON3 ) )
-      continue;
-
     event = client->ps.events[ i & ( MAX_PS_EVENTS - 1 ) ];
 
     switch( event )
@@ -2356,6 +2350,7 @@ void ClientThink_real( gentity_t *ent )
   if( ( client->ps.eFlags & EF_EVOLVING ) &&
       client->pers.evolveHealthRegen > 0 &&
       ent->client->ps.stats[ STAT_MISC3 ] > 0 &&
+      client->pers.evolveHealthRegen > ent->client->ps.stats[ STAT_MISC3 ] &&
       ent->health > 0 &&
       level.surrenderTeam != client->pers.teamSelection &&
       ent->nextRegenTime >= 0 && ent->nextRegenTime < level.time )
