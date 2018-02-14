@@ -410,8 +410,6 @@ static void Give_Class( gentity_t *ent, char *s )
   vec3_t oldVel;
   int oldBoostTime = -1;
   int newClass = BG_ClassByName( s )->number;
-  const float maxHealthDecayRate = BG_Class( currentClass )->maxHealthDecayRate;
-
 
   if( newClass == PCL_NONE )
     return;
@@ -431,25 +429,7 @@ static void Give_Class( gentity_t *ent, char *s )
   else if( ent->client->pers.evolveHealthFraction > 1.0f )
     ent->client->pers.evolveHealthFraction = 1.0f;
 
-  if( maxHealthDecayRate )
-  {
-    int healthDiff;
-
-    healthDiff = ent->client->ps.misc[ MISC_MAX_HEALTH ] -
-                 ent->client->ps.misc[ MISC_HEALTH ];
-
-    ent->client->ps.misc[ MISC_MAX_HEALTH ] -= (int)( maxHealthDecayRate * (float)healthDiff );
-
-    ent->client->pers.evolveMaxHealthFraction
-      = (float)ent->client->ps.misc[ MISC_MAX_HEALTH ]
-      / (float)BG_Class( currentClass )->health;
-
-    if( ent->client->pers.evolveMaxHealthFraction < 0.0f )
-      ent->client->pers.evolveMaxHealthFraction = 0.0f;
-    else if( ent->client->pers.evolveMaxHealthFraction > 1.0f )
-      ent->client->pers.evolveMaxHealthFraction = 1.0f;
-  }else 
-    ent->client->pers.evolveMaxHealthFraction = 1.0f;
+  ent->client->pers.evolveMaxHealthFraction = 1.0f;
 
   //remove credit
   //G_AddCreditToClient( ent->client, -cost, qtrue );
@@ -2380,7 +2360,8 @@ void Cmd_Class_f( gentity_t *ent )
           else if( ent->client->pers.evolveHealthFraction > 1.0f )
             ent->client->pers.evolveHealthFraction = 1.0f;
 
-          if( maxHealthDecayRate )
+          if( maxHealthDecayRate &&
+              ( BG_Class( newClass )->cost - BG_Class( currentClass )->cost <= 0 ) )
           {
             int healthDiff;
 
@@ -2397,13 +2378,6 @@ void Cmd_Class_f( gentity_t *ent )
               ent->client->pers.evolveMaxHealthFraction = 0.0f;
             else if( ent->client->pers.evolveMaxHealthFraction > 1.0f )
               ent->client->pers.evolveMaxHealthFraction = 1.0f;
-
-            if( cost )
-            {
-              cost = (int)((float)cost * ent->client->pers.evolveMaxHealthFraction);
-              if( cost < 0 )
-                cost = 0;
-            }
           } else
             ent->client->pers.evolveMaxHealthFraction = 1.0f;
 
