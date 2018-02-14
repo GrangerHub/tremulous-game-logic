@@ -1129,6 +1129,21 @@ static void CG_CEntityPVSEnter( centity_t *cent )
     case ET_BUILDABLE:
       cent->lastBuildableHealth = es->misc;
       break;
+
+    case ET_PLAYER:
+      //ensure that invis players are fully invis when entering PVS
+      if( ( es->eFlags & EF_INVISIBILE ) &&
+          !cent->invis &&
+          es->weapon != WP_LUCIFER_CANNON &&
+          !cg.intermissionStarted &&
+          !( es->eFlags & EF_DEAD ) &&
+          !( es->eFlags & EF_INVINCIBLE ) &&
+          !( es->eFlags & EF_EVOLVING ) )
+        {
+          cent->invisTime = cg.time - 1000;
+          cent->invis = qtrue;
+        }
+      break;
   }
 
   //clear any particle systems from previous uses of this centity_t

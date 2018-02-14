@@ -2107,7 +2107,8 @@ void CG_Player( centity_t *cent )
   // check for invisibility transitions
   if( cent->invincible ||
       cent->evolve ||
-      cg.intermissionStarted )
+      cg.intermissionStarted ||
+      ( es->eFlags & EF_DEAD ) )
       cent->invis = qfalse;
   else if( es->eFlags & EF_INVISIBILE &&
       es->weapon != WP_LUCIFER_CANNON )
