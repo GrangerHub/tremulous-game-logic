@@ -1814,8 +1814,9 @@ float BG_EvolveScale( playerState_t *ps )
   if( !( ps->eFlags & EF_EVOLVING ) )
     return 1.0f;
 
-  return 1 - ( ( (float)ps->stats[ STAT_MISC3 ] ) /
-               ( (float)ps->stats[ STAT_MISC2 ] ) );
+  return MAX( 1 - ( ( (float)ps->stats[ STAT_MISC3 ] ) /
+                    ( (float)ps->stats[ STAT_MISC2 ] ) ),
+              0.20f );
 }
 
 /*

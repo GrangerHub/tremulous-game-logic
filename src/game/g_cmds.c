@@ -2339,6 +2339,7 @@ void Cmd_Class_f( gentity_t *ent )
         if( cost >= 0 )
         {
           const float maxHealthDecayRate = BG_Class( currentClass )->maxHealthDecayRate;
+          const int oldHealth = ent->client->ps.misc[ MISC_HEALTH ];
 
           //disable wallwalking
           if( ent->client->ps.eFlags & EF_WALLCLIMB )
@@ -2407,9 +2408,12 @@ void Cmd_Class_f( gentity_t *ent )
           {
             int evolvePeriod = 1000;
 
-            evolvePeriod += ( abs( BG_Class( newClass )->cost -
-                                     BG_Class( currentClass )->cost ) *
-                              1500 );
+            //set the evolve health regen
+            ent->client->pers.evolveHealthRegen = ent->health - oldHealth;
+            ent->health = oldHealth;
+            ent->client->ps.misc[ MISC_HEALTH ] = ent->health;
+
+            evolvePeriod += ( abs( ent->client->pers.evolveHealthRegen ) / 50 );
 
             if( evolvePeriod > MAX_EVOLVE_PERIOD )
               evolvePeriod = MAX_EVOLVE_PERIOD;
@@ -2418,11 +2422,6 @@ void Cmd_Class_f( gentity_t *ent )
             ent->client->ps.eFlags |= EF_EVOLVING;
             ent->client->ps.stats[ STAT_MISC3 ] = evolvePeriod; // counts down, ends evolve when 0 is reached
             ent->client->ps.stats[ STAT_MISC2 ] = evolvePeriod; // remains constant, used as a denominator for scaling
-
-            //set the evolve health regen
-            ent->client->pers.evolveHealthRegen = (int)( ( (float)ent->health ) * 0.9f );
-            ent->health -= ent->client->pers.evolveHealthRegen;
-            ent->client->ps.misc[ MISC_HEALTH ] = ent->health;
 
             //save the cost to be applied after evolving is completed
             ent->client->evolveCost = cost;

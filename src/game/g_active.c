@@ -54,6 +54,10 @@ void P_DamageFeedback( gentity_t *player )
   if( !PM_Alive( client->ps.pm_type ) )
     return;
 
+  if( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
+      ( client->ps.eFlags & EF_EVOLVING ) )
+    return;
+
   // total points of damage shot at the player this frame
   count = client->damage_blood + client->damage_armor;
   if( count == 0 )
@@ -86,7 +90,8 @@ void P_DamageFeedback( gentity_t *player )
   }
 
   // play an apropriate pain sound
-  if( ( level.time > player->pain_debounce_time ) && !( player->flags & FL_GODMODE ) )
+  if( ( level.time > player->pain_debounce_time ) &&
+      !( player->flags & FL_GODMODE ) )
   {
     player->pain_debounce_time = level.time + 700;
     G_AddEvent( player, EV_PAIN, BG_GetPainState( &client->ps ) );
@@ -2201,9 +2206,14 @@ void ClientThink_real( gentity_t *ent )
       if( level.surrenderTeam != client->pers.teamSelection )
       {
         //finish any remaining evolve health regen
-        ent->health += client->pers.evolveHealthRegen;
-        client->ps.misc[ MISC_HEALTH ] = ent->health;
-        client->pers.infoChangeTime = level.time;
+        if( client->pers.evolveHealthRegen > 0 ||
+            ( ent->health > client->pers.evolveHealthRegen &&
+              ent->health + client->pers.evolveHealthRegen >= client->ps.misc[ MISC_MAX_HEALTH ] ) )
+        {
+          ent->health += client->pers.evolveHealthRegen;
+          client->ps.misc[ MISC_HEALTH ] = ent->health;
+          client->pers.infoChangeTime = level.time;
+        }
         client->pers.evolveHealthRegen = 0;
 
         if( ent->health > *maxHealth )
@@ -2348,16 +2358,23 @@ void ClientThink_real( gentity_t *ent )
   }
 
   if( ( client->ps.eFlags & EF_EVOLVING ) &&
-      client->pers.evolveHealthRegen > 0 &&
+      client->pers.evolveHealthRegen != 0 &&
       ent->client->ps.stats[ STAT_MISC3 ] > 0 &&
-      client->pers.evolveHealthRegen > ent->client->ps.stats[ STAT_MISC3 ] &&
       ent->health > 0 &&
       level.surrenderTeam != client->pers.teamSelection &&
       ent->nextRegenTime >= 0 && ent->nextRegenTime < level.time )
   {
-    int regenRate = client->pers.evolveHealthRegen / ent->client->ps.stats[ STAT_MISC3 ];
-    int interval = 1 / regenRate;
+    int regenRate;
+    int interval;
     int count;
+    qboolean countDown = ( client->pers.evolveHealthRegen < 0 ); //happens if the previous class had more health than the current max health
+
+    regenRate = client->pers.evolveHealthRegen / ent->client->ps.stats[ STAT_MISC3 ];
+    //prevent division by 0
+    if( !regenRate )
+      regenRate = countDown ? -1 : 1;
+
+    interval = 1 / regenRate;
 
     if( !interval )
     {
@@ -2367,19 +2384,38 @@ void ClientThink_real( gentity_t *ent )
     } else
     {
       // if recovery interval is less than frametime, compensate
-      count = 1 + ( level.time - ent->nextRegenTime ) / interval;
+      count = ( countDown ? -1 : 1 ) + ( level.time - ent->nextRegenTime ) / interval;
       ent->nextRegenTime += count * interval;
     }
 
-    ent->health += count;
-    client->ps.misc[ MISC_HEALTH ] = ent->health;
-    client->pers.infoChangeTime = level.time;
-    client->pers.evolveHealthRegen -= count;
-
-    if( ent->health > *maxHealth )
+    // check for rounding errors
+    if( countDown )
     {
-      ent->health = client->ps.misc[ MISC_HEALTH ] = *maxHealth;
+      if( count < client->pers.evolveHealthRegen )
+        count = client->pers.evolveHealthRegen;
+    } else if( count > client->pers.evolveHealthRegen )
+      count = client->pers.evolveHealthRegen;
+
+    if( countDown &&
+        ent->health - count < *maxHealth )
+    {
+      //when evolve health is decreasing, it doesn't decrease to below the current max health
       client->pers.evolveHealthRegen = 0;
+      ent->nextRegenTime = level.time;
+    } else
+    {
+      // progress the evolve health change
+      ent->health += count;
+      client->ps.misc[ MISC_HEALTH ] = ent->health;
+      client->pers.infoChangeTime = level.time;
+      client->pers.evolveHealthRegen -= count;
+
+      if( !countDown &&
+          ent->health > *maxHealth )
+      {
+        ent->health = client->ps.misc[ MISC_HEALTH ] = *maxHealth;
+        client->pers.evolveHealthRegen = 0;
+      }
     }
   } else
   {

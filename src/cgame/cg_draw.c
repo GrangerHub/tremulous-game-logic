@@ -928,9 +928,9 @@ static void CG_DrawPlayerHealthValue( rectDef_t *rect, vec4_t color )
     Vector4Copy( bs->healthLowColor, color );
   else if( healthColorFraction >= 0.75f )
     Vector4Copy( bs->healthGuardedColor, color );
-  else if( healthColorFraction >= 0.50f )
+  else if( healthColorFraction >= 0.375f )
     Vector4Copy( bs->healthElevatedColor, color );
-  else if( healthColorFraction >= 0.25f )
+  else if( healthColorFraction >= 0.09375f )
     Vector4Copy( bs->healthHighColor, color );
   else
     Vector4Copy( bs->healthSevereColor, color );
@@ -4238,6 +4238,10 @@ static void CG_PainBlend( void )
 
   if( damage < 0 )
     damage = 0;
+
+  if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_ALIENS &&
+      ( cg.predictedPlayerState.eFlags & EF_EVOLVING ) )
+    return;
 
   damageAsFracOfMax = (float)damage / BG_Class( cg.snap->ps.stats[ STAT_CLASS ] )->health;
   cg.lastHealth = cg.snap->ps.misc[ MISC_HEALTH ];
