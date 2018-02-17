@@ -1616,7 +1616,7 @@ static const classAttributes_t bg_classList[ ] =
     1.0f,                                           //float   bobCycle;
     5.0f,                                           //float   landBob;
     100,                                            //int     steptime;
-    0.8f,                                           //float   speed;
+    0.9f,                                           //float   speed;
     10.0f,                                          //float   acceleration;
     1.0f,                                           //float   airAcceleration;
     6.0f,                                           //float   friction;
