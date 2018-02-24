@@ -134,6 +134,7 @@ enum
 #endif
 
 #define MAX_INTERMISSION_SOUND_SETS 1
+#define MAX_WARMUP_SOUNDS 2
 
 typedef enum
 {

@@ -920,17 +920,12 @@ static void CG_RegisterSounds( void )
     }
   }
 
-  //these defaults must be .wav so that the old clients can play them
-  cgs.media.intermissionDefaultSounds[ INTMSN_SND_WIN ] =
-          trap_S_RegisterSound( "sound/misc/intermission_default_win.wav", qfalse );
-  cgs.media.intermissionDefaultSounds[ INTMSN_SND_LOSS ] =
-          trap_S_RegisterSound( "sound/misc/intermission_default_loss.wav", qfalse );
-  cgs.media.intermissionDefaultSounds[ INTMSN_SND_EVAC ] =
-            trap_S_RegisterSound( "sound/misc/intermission_default_evac.wav", qfalse );
-  cgs.media.intermissionDefaultSounds[ INTMSN_SND_TIME ] =
-            trap_S_RegisterSound( "sound/misc/intermission_default_time.wav", qfalse );
-
-  cgs.media.warmupEndSound        = trap_S_RegisterSound( "sound/misc/warmup_end.wav", qfalse );
+  cgs.media.warmupEndSound[0]     = trap_S_RegisterSound( "sound/misc/warmup_end.wav", qfalse );
+  for( i = 1; i < MAX_WARMUP_SOUNDS; i++ )
+  {
+    cgs.media.warmupEndSound[i]     =
+            trap_S_RegisterSound( va( "sound/misc/warmup_end%i", i ), qfalse );
+  }
 
   cgs.media.talkSound             = trap_S_RegisterSound( "sound/misc/talk.wav", qfalse );
   cgs.media.alienTalkSound        = trap_S_RegisterSound( "sound/misc/alien_talk.wav", qfalse );
