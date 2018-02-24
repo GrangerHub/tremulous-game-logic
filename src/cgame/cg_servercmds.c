@@ -178,14 +178,23 @@ static void CG_ParseCountdown( void )
 {
   const char  *info;
   int         countdown;
+  int         index;
 
   info = CG_ConfigString( CS_COUNTDOWN );
+  sscanf( info, "%i %i",
+              &countdown,
+              &index);
 
-  countdown = atoi( info );
   cg.countdownTime = countdown;
 
   if( cgs.warmup && countdown )
-    trap_S_StartLocalSound( cgs.media.warmupEndSound, CHAN_LOCAL_SOUND );
+  {
+    sfxHandle_t sound = cgs.media.warmupEndSound[ index ];
+
+    if( !sound )
+      sound = cgs.media.warmupEndSound[0];
+    trap_S_StartLocalSound( sound, CHAN_LOCAL_SOUND );
+  }
 }
 
 /*
@@ -380,9 +389,6 @@ static void CG_PlayIntermissionSound( team_t team, intermissionSound_t soundType
 
   if( !sound )
     sound = cgs.media.intermissionCustomSounds[ team ][ soundType ][ 0 ];
-
-  if( !sound )
-    sound = cgs.media.intermissionDefaultSounds[ soundType ];
 
   if( !sound )
     return;

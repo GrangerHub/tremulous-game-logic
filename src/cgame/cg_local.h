@@ -1302,8 +1302,7 @@ typedef struct
   sfxHandle_t voteFailed;
 
   sfxHandle_t intermissionCustomSounds[ NUM_TEAMS ][ NUM_INTMSN_SNDS ][ MAX_INTERMISSION_SOUND_SETS ];
-  sfxHandle_t intermissionDefaultSounds[ NUM_INTMSN_SNDS ];
-  sfxHandle_t warmupEndSound;
+  sfxHandle_t warmupEndSound[MAX_WARMUP_SOUNDS];
 
   sfxHandle_t watrInSound;
   sfxHandle_t watrOutSound;
