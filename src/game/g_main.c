@@ -2397,8 +2397,10 @@ void G_LevelReady( void )
 
   if( g_doWarmupCountdown.integer && !level.countdownTime )
   {
+    int    index = rand( ) % MAX_WARMUP_SOUNDS; // randomly select an end of warmup sound set
+
     level.countdownTime = level.time + ( g_doWarmupCountdown.integer * 1000 );
-    SV_SetConfigstring( CS_COUNTDOWN, va( "%i", level.countdownTime ) );
+    SV_SetConfigstring( CS_COUNTDOWN, va( "%i %i", level.countdownTime, index ) );
     G_LogPrintf( "Countdown to the End of Warmup: %i\n", g_doWarmupCountdown.integer );
   }
 

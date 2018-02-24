@@ -133,8 +133,10 @@ static void SV_MapRestart_f( void ) {
 		delay = 0;
 	}
 	if( delay && !Cvar_VariableValue("g_doCountdown") ) {
+		int    index = rand( ) % MAX_WARMUP_SOUNDS; // randomly select an end of warmup sound set
+
 		sv.restartTime = sv.time + delay * 1000;
-		SV_SetConfigstring( CS_COUNTDOWN, va("%i", sv.restartTime) );
+		SV_SetConfigstring( CS_COUNTDOWN, va( "%i %i", sv.restartTime, index ) );
 		return;
 	}
 

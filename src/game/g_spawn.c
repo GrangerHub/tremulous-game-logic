@@ -561,6 +561,7 @@ Every map should have exactly one worldspawn.
 void SP_worldspawn( void )
 {
   char *s;
+  int    index = rand( ) % MAX_WARMUP_SOUNDS; // randomly select an end of warmup sound set
 
   G_SpawnString( "classname", "", &s );
 
@@ -625,7 +626,7 @@ void SP_worldspawn( void )
   } else
     level.countdownTime = 0;
 
-    SV_SetConfigstring( CS_COUNTDOWN, va( "%i", level.countdownTime ) );
+  SV_SetConfigstring( CS_COUNTDOWN, va( "%i %i", level.countdownTime, index ) );
 }
 
 
