@@ -2301,8 +2301,13 @@ void Cmd_Class_f( gentity_t *ent )
 
       if( ent->client->ps.stats[ STAT_MISC3 ] > 0 )
       {
-        G_TriggerMenu( clientNum, MN_A_EVOLVING );
-        return;
+        if( newClass == ent->client->evolvePreviousClass )
+          G_CancelEvolve( ent );
+        else
+        {
+          G_TriggerMenu( clientNum, MN_A_EVOLVING );
+          return;
+        }
       }
 
       //check that we have an overmind
@@ -2341,6 +2346,15 @@ void Cmd_Class_f( gentity_t *ent )
           const float maxHealthDecayRate = BG_Class( currentClass )->maxHealthDecayRate;
           const int oldHealth = ent->client->ps.misc[ MISC_HEALTH ];
 
+          // regain some of the evos when devolving
+          if( !cost )
+          {
+            cost = ( BG_Class( newClass )->cost * ALIEN_CREDITS_PER_KILL ) -
+                  ( BG_Class( currentClass )->cost * ALIEN_CREDITS_PER_KILL );
+            if( cost )
+              cost = (int)( ( (float)cost ) * 0.20f );
+          }
+
           //disable wallwalking
           if( ent->client->ps.eFlags & EF_WALLCLIMB )
           {
@@ -2353,7 +2367,7 @@ void Cmd_Class_f( gentity_t *ent )
             G_SetClientViewAngle( ent, newAngles );
           }
 
-          ent->client->pers.evolveHealthFraction = (float)ent->client->ps.misc[ MISC_HEALTH ] /
+          ent->client->pers.evolveHealthFraction = (float)oldHealth /
                                                    (float)BG_Class( currentClass )->health;
 
           if( ent->client->pers.evolveHealthFraction < 0.0f )
@@ -2361,13 +2375,22 @@ void Cmd_Class_f( gentity_t *ent )
           else if( ent->client->pers.evolveHealthFraction > 1.0f )
             ent->client->pers.evolveHealthFraction = 1.0f;
 
+          ent->client->pers.evolvePreviousMaxHealthFraction
+            = (float)ent->client->ps.misc[ MISC_MAX_HEALTH ]
+            / (float)BG_Class( currentClass )->health;
+
+          if( ent->client->pers.evolvePreviousMaxHealthFraction < 0.0f )
+            ent->client->pers.evolvePreviousMaxHealthFraction = 0.0f;
+          else if( ent->client->pers.evolvePreviousMaxHealthFraction > 1.0f )
+            ent->client->pers.evolvePreviousMaxHealthFraction = 1.0f;
+
           if( maxHealthDecayRate &&
-              ( BG_Class( newClass )->cost - BG_Class( currentClass )->cost <= 0 ) )
+              ( BG_Class( newClass )->health <= BG_Class( currentClass )->health ) )
           {
             int healthDiff;
 
             healthDiff = ent->client->ps.misc[ MISC_MAX_HEALTH ] -
-                         ent->client->ps.misc[ MISC_HEALTH ];
+                         oldHealth;
 
             ent->client->ps.misc[ MISC_MAX_HEALTH ] -= (int)( maxHealthDecayRate * (float)healthDiff );
 
@@ -2406,14 +2429,14 @@ void Cmd_Class_f( gentity_t *ent )
 
           if( !g_cheats.integer )
           {
-            int evolvePeriod = 1000;
+            int evolvePeriod = 4000;
 
             //set the evolve health regen
             ent->client->pers.evolveHealthRegen = ent->health - oldHealth;
             ent->health = oldHealth;
             ent->client->ps.misc[ MISC_HEALTH ] = ent->health;
 
-            evolvePeriod += ( abs( ent->client->pers.evolveHealthRegen ) / 50 );
+            evolvePeriod += ( abs( ent->client->pers.evolveHealthRegen ) / 25 );
 
             if( evolvePeriod > MAX_EVOLVE_PERIOD )
               evolvePeriod = MAX_EVOLVE_PERIOD;
@@ -2423,8 +2446,14 @@ void Cmd_Class_f( gentity_t *ent )
             ent->client->ps.stats[ STAT_MISC3 ] = evolvePeriod; // counts down, ends evolve when 0 is reached
             ent->client->ps.stats[ STAT_MISC2 ] = evolvePeriod; // remains constant, used as a denominator for scaling
 
-            //save the cost to be applied after evolving is completed
+            //store the 
             ent->client->evolveCost = cost;
+
+            //save the current class for canceling evolve
+            ent->client->evolvePreviousClass = currentClass;
+
+            //initialize the damage received while evolving
+            ent->client->pers.evolveDamage = 0;
           } else
           {
             //remove credit

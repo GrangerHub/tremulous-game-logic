@@ -5003,6 +5003,10 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   {
     //alien criteria
 
+    // evolving check
+    if( ent->client->ps.eFlags & EF_EVOLVING )
+      reason = IBE_EVOLVING;
+
     // Check there is an Overmind
     if( buildable != BA_A_OVERMIND )
     {
@@ -5373,6 +5377,7 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
       built->occupation.occupiedReset = AHovel_OccupiedReset;
       built->activation.menuMsgOvrd[ ACTMN_ACT_OCCUPIED ] = MN_A_HOVEL_OCCUPIED;
       built->activation.menuMsgOvrd[ ACTMN_ACT_NOEXIT ] = MN_A_HOVEL_BLOCKED;
+      built->activation.menuMsgOvrd[ ACTMN_A_EVOLVING ] = MN_A_HOVEL_EVOLVING;
       built->think = AHovel_Think;
       built->pain = AGeneric_Pain;
       break;
@@ -5572,6 +5577,10 @@ qboolean G_BuildIfValid( gentity_t *ent, buildable_t buildable )
 
     case IBE_NOOVERMIND:
       G_TriggerMenu( ent->client->ps.clientNum, MN_A_NOOVMND );
+      return qfalse;
+
+    case IBE_EVOLVING:
+      G_TriggerMenu( ent->client->ps.clientNum, MN_A_EVOLVING );
       return qfalse;
 
     case IBE_NOCREEP:

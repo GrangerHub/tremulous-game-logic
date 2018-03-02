@@ -1517,6 +1517,117 @@ static void G_UnlaggedDetectCollisions( gentity_t *ent )
 
 /*
 =====================
+G_CancelEvolve
+
+Cancels evolving
+=====================
+*/
+void G_CancelEvolve( gentity_t *ent )
+{
+  gclient_t *client = ent->client;
+  int       clientNum = client->ps.clientNum;
+  int       oldBoostTime = -1;
+  int       newHealth;
+  vec3_t    infestOrigin, oldVel;
+  class_t   previousClass = client->evolvePreviousClass;
+
+  Com_Assert( client && "G_CancelEvolve: Attempted to cancel evolve on a non-client" )
+
+  Com_Assert( previousClass > PCL_NONE &&
+              previousClass < PCL_NUM_CLASSES &&
+              "G_CancelEvolve: Invalid previous class" );
+
+  Com_Assert( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
+              client->ps.eFlags & EF_EVOLVING &&
+              "G_CancelEvolve: Client isn't evolving" );
+
+  // must be alive
+  if( ent->health <= 0 )
+    return;
+
+  newHealth = (int)( ent->client->pers.evolveHealthFraction *
+                     (float)BG_Class( previousClass )->health );
+  newHealth -= client->pers.evolveDamage;
+
+  // check that we have enough health to survive canceling evolve
+  if( newHealth <= 0 )
+  {
+    G_TriggerMenu( clientNum, MN_A_EVOLVE_CANCEL_HEALTH );
+    return;
+  }
+
+  //check that we have an overmind
+  if( !G_Overmind( ) &&
+      previousClass != PCL_ALIEN_BUILDER0 &&
+      previousClass != PCL_ALIEN_BUILDER0_UPG )
+  {
+    G_TriggerMenu( clientNum, MN_A_NOOVMND_EVOLVE );
+    return;
+  }
+
+  //check that the entity isn't occupying anything
+  if ( client->ps.eFlags & EF_OCCUPYING )
+  {
+    G_TriggerMenu( clientNum, MN_A_EVOLVE_CANCEL_NOEROOM );
+    return;
+  }
+
+  if( G_RoomForClassChange( ent, previousClass, infestOrigin ) )
+  {
+    //disable wallwalking
+    if( client->ps.eFlags & EF_WALLCLIMB )
+    {
+      vec3_t newAngles;
+
+      client->ps.eFlags &= ~EF_WALLCLIMB;
+      VectorCopy( client->ps.viewangles, newAngles );
+      newAngles[ PITCH ] = 0;
+      newAngles[ ROLL ] = 0;
+      G_SetClientViewAngle( ent, newAngles );
+    }
+
+    client->pers.evolveMaxHealthFraction =
+      client->pers.evolvePreviousMaxHealthFraction;
+
+    client->pers.evolveHealthRegen = 0;
+    client->evolveCost = 0;
+
+    client->pers.classSelection = previousClass;
+    ClientUserinfoChanged( clientNum, qfalse );
+    VectorCopy( infestOrigin, ent->s.pos.trBase );
+    VectorCopy( client->ps.velocity, oldVel );
+
+    if( ent->client->ps.stats[ STAT_STATE ] & SS_BOOSTED )
+      oldBoostTime = ent->client->boostedTime;
+
+    // end damage protection early
+    ent->dmgProtectionTime = 0;
+
+    ClientSpawn( ent, ent, ent->s.pos.trBase, ent->s.apos.trBase );
+
+    VectorCopy( oldVel, ent->client->ps.velocity );
+    if( oldBoostTime > 0 )
+    {
+      ent->client->boostedTime = oldBoostTime;
+      ent->client->ps.stats[ STAT_STATE ] |= SS_BOOSTED;
+    }
+  }
+  else
+  {
+    vec3_t playerNormal;
+
+    BG_GetClientNormal( &ent->client->ps, playerNormal );
+    //check that wallwalking isn't interfering
+    if( client->ps.eFlags & EF_WALLCLIMB &&
+        ( playerNormal[ 2 ] != 1.0f ) )
+      G_TriggerMenu( clientNum, MN_A_EVOLVEWALLWALK );
+    else
+      G_TriggerMenu( clientNum, MN_A_EVOLVE_CANCEL_NOEROOM );
+  }
+}
+
+/*
+=====================
 G_CanActivateEntity
 
 Determines if a given client can activate a given entity.
@@ -1679,6 +1790,14 @@ qboolean G_WillActivateEntity( gentity_t *actEnt, gentity_t *activator )
 {
   // set the general menu message for activation failure.
   G_OvrdActMenuMsg( activator, ACTMN_ACT_FAILED, MN_ACT_FAILED );
+
+  // evolving check
+  if( activator->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
+      ( activator->client->ps.eFlags & EF_EVOLVING ) )
+  {
+    G_OvrdActMenuMsg( activator, ACTMN_A_EVOLVING, MN_A_EVOLVING );
+    return qfalse;
+  }
 
   if ( ( actEnt->activation.flags & ACTF_POWERED ) &&
        !actEnt->powered )
@@ -2225,7 +2344,7 @@ void ClientThink_real( gentity_t *ent )
       G_AddPredictableEvent( ent, EV_ALIEN_EVOLVE,
                              DirToByte( up ) );
 
-      //remove credit
+      //apply any remaining evo difference
       G_AddCreditToClient( ent->client, -client->evolveCost, qtrue );
     }
     else
@@ -2357,6 +2476,51 @@ void ClientThink_real( gentity_t *ent )
     }
   }
 
+  // spend evos
+  if( ( client->ps.eFlags & EF_EVOLVING ) &&
+      ent->client->evolveCost > 0 &&
+      ent->client->ps.stats[ STAT_MISC3 ] > 0 &&
+      ent->health > 0 &&
+      level.surrenderTeam != client->pers.teamSelection &&
+      ent->nextEvoTime >= 0 && ent->nextEvoTime < level.time )
+  {
+    float costRate;
+    int interval;
+    int count;
+
+    costRate = ( (float)client->evolveCost ) /
+               ( (float)ent->client->ps.stats[ STAT_MISC3 ] );
+    //prevent division by 0
+    if( !costRate )
+      costRate = 1;
+
+    interval = 1 / costRate;
+
+    if( !interval )
+    {
+      // interval is less than one millisecond
+      count = (int)( ( (float)( level.time - ent->nextEvoTime - 1 ) ) * costRate );
+      ent->nextEvoTime = level.time + 1;
+    } else
+    {
+      // if recovery interval is less than frametime, compensate
+      count = 1 + ( level.time - ent->nextEvoTime ) / interval;
+      ent->nextEvoTime += count * interval;
+    }
+
+    // check for rounding errors
+    if( count > ent->client->evolveCost )
+      count = ent->client->evolveCost;
+
+    //spend evos
+    G_AddCreditToClient( client, -count, qtrue );
+    client->pers.infoChangeTime = level.time;
+    ent->client->evolveCost -= count;
+
+    if( ent->client->evolveCost < 0 )
+      ent->client->evolveCost = 0;
+  }
+
   if( ( client->ps.eFlags & EF_EVOLVING ) &&
       client->pers.evolveHealthRegen != 0 &&
       ent->client->ps.stats[ STAT_MISC3 ] > 0 &&
@@ -2364,12 +2528,13 @@ void ClientThink_real( gentity_t *ent )
       level.surrenderTeam != client->pers.teamSelection &&
       ent->nextRegenTime >= 0 && ent->nextRegenTime < level.time )
   {
-    int regenRate;
+    float regenRate;
     int interval;
     int count;
     qboolean countDown = ( client->pers.evolveHealthRegen < 0 ); //happens if the previous class had more health than the current max health
 
-    regenRate = client->pers.evolveHealthRegen / ent->client->ps.stats[ STAT_MISC3 ];
+    regenRate = ( (float)client->pers.evolveHealthRegen ) /
+                ( (float)ent->client->ps.stats[ STAT_MISC3 ] );
     //prevent division by 0
     if( !regenRate )
       regenRate = countDown ? -1 : 1;
@@ -2379,7 +2544,7 @@ void ClientThink_real( gentity_t *ent )
     if( !interval )
     {
       // interval is less than one millisecond
-      count = ( level.time - ent->nextRegenTime - 1 ) * regenRate;
+      count = (int)( ( (float)( level.time - ent->nextRegenTime - 1 ) ) * regenRate );
       ent->nextRegenTime = level.time + 1;
     } else
     {
@@ -2746,9 +2911,13 @@ void ClientThink_real( gentity_t *ent )
       G_ActivateEntity( actEnt, ent );
     else if( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
     {
-      if( BG_AlienCanEvolve( client->ps.stats[ STAT_CLASS ],
-                             client->pers.credit, g_alienStage.integer,
-                             IS_WARMUP, g_cheats.integer ) )
+      if( client->ps.eFlags & EF_EVOLVING )
+      {
+        G_CancelEvolve( ent );
+      }
+      else if( BG_AlienCanEvolve( client->ps.stats[ STAT_CLASS ],
+                                  client->pers.credit, g_alienStage.integer,
+                                  IS_WARMUP, g_cheats.integer ) )
       {
         //no nearby objects and alien - show class menu
         G_TriggerMenu( ent->client->ps.clientNum, MN_A_INFEST );

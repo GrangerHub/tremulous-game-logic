@@ -1366,7 +1366,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   int                 index;
   vec3_t              spawn_origin, spawn_angles;
   gclient_t           *client;
-  int                 i, u;
+  int                 i;
   clientPersistant_t  saved;
   clientSession_t     savedSess;
   qboolean            savedNoclip, savedCliprcontents;
@@ -1447,6 +1447,14 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
 
   // toggle the teleport bit so the client knows to not lerp
   flags = ( ent->client->ps.eFlags & EF_TELEPORT_BIT ) ^ EF_TELEPORT_BIT;
+
+  // account for evolve canceling
+  if( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
+      client->ps.eFlags & EF_EVOLVING &&
+      client->sess.spectatorState == SPECTATOR_NOT &&
+      ent->health > 0 )
+    flags |= EF_EVOLVING;
+
   G_UnlaggedClear( ent );
 
   // clear everything but the persistant data
@@ -1558,13 +1566,25 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   {
     const int oldHealth = ent->health;
 
-    //classes that have max health decay from healing start at full health
-    if( BG_Class( !ent->client->ps.stats[ STAT_CLASS ] )->maxHealthDecayRate )
+    if( !BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->maxHealthDecayRate )
+    {
       ent->health *= client->pers.evolveHealthFraction;
+    }
     else
     {
       client->ps.misc[ MISC_MAX_HEALTH ] *= client->pers.evolveMaxHealthFraction;
-      ent->health = client->ps.misc[ MISC_MAX_HEALTH ];
+      if( client->ps.eFlags & EF_EVOLVING )
+        ent->health *= client->pers.evolveHealthFraction;
+      else
+        ent->health = client->ps.misc[ MISC_MAX_HEALTH ];
+    }
+
+    // evolve is being canceled
+    if( ( client->ps.eFlags & EF_EVOLVING ) &&
+        client->pers.evolveDamage )
+    {
+      ent->health -= client->pers.evolveDamage;
+      client->pers.evolveDamage = 0;
     }
 
     // ensure that evolving/devolving with low health doesn't kill
@@ -1572,20 +1592,6 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
       ent->health = 1;
 
     client->ps.misc[ MISC_HEALTH ] = ent->health;
-  }
-
-  //clear the damage credits arrays
-  for( i = 0; i < MAX_CLIENTS; i++ )
-  {
-    ent->credits[ i ] = 0;
-    for( u = 0; u < UP_NUM_UPGRADES; u++ )
-      ent->creditsUpgrade[ u ][ i ] = 0;
-  }
-  for( i = 0; i < NUM_TEAMS; i++ )
-  {
-    ent->creditsDeffenses[ i ] = 0;
-    for( u = 0; u < UP_NUM_UPGRADES; u++ )
-      ent->creditsUpgradeDeffenses[ u ][ i ] = 0;
   }
 
   if( BG_ClassHasAbility( client->ps.stats[STAT_CLASS], SCA_STAMINA ) )
@@ -1673,6 +1679,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
 
   client->respawnTime = level.time;
   ent->nextRegenTime = level.time;
+  ent->nextEvoTime = level.time;
 
   client->inactivityTime = level.time + g_inactivity.integer * 1000;
   client->latched_buttons = 0;
@@ -1696,6 +1703,11 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   // initialize animations and other things
   client->ps.commandTime = level.time - 100;
   ent->client->pers.cmd.serverTime = level.time;
+  if( client->ps.eFlags & EF_EVOLVING )
+  {
+    // evolve is being canceled, so ensure that the evolve menu isn't immediately opened
+    client->buttons |= BUTTON_USE_EVOLVE;
+  }
   ClientThink( ent-g_entities );
 
   VectorCopy( ent->client->ps.viewangles, ent->r.currentAngles );

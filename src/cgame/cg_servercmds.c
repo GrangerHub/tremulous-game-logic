@@ -1095,6 +1095,12 @@ void CG_Menu( int menu, int arg )
       type      = DT_COMMAND;
       break;
 
+    case MN_A_HOVEL_EVOLVING:
+      longMsg   = "You can't enter the hovel while you are still evolving.";
+      shortMsg  = "You can't enter the hovel while evolving";
+      type      = DT_COMMAND;
+      break;
+
     case MN_A_HOVEL_EXIT:
       longMsg   = "The entrance to the Hovel is blocked. Find a more suitable location.";
       shortMsg  = "The entrance to the Hovel is blocked";
@@ -1115,6 +1121,13 @@ void CG_Menu( int menu, int arg )
       type      = DT_ARMOURYEVOLVE;
       break;
 
+    case MN_A_EVOLVE_CANCEL_NOEROOM:
+      longMsg   = "There is no room to cancel evolution here. Move away from "
+                  "walls or other nearby objects and try again.";
+      shortMsg  = "There is no room to cacnel evolution here";
+      type      = DT_ARMOURYEVOLVE;
+      break;
+
     case MN_A_NOOVMND_EVOLVE:
       longMsg   = "There is no Overmind. An Overmind must be built to allow "
                   "you to upgrade.";
@@ -1122,9 +1135,15 @@ void CG_Menu( int menu, int arg )
       type      = DT_ARMOURYEVOLVE;
       break;
 
+    case MN_A_EVOLVE_CANCEL_HEALTH:
+      longMsg   = "You don't have enough health to survive canceling evolution.";
+      shortMsg  = "Not enough health to cancel evolution";
+      type      = DT_ARMOURYEVOLVE;
+      break;
+
     case MN_A_EVOLVING:
-      longMsg   = "You are already evolving.";
-      shortMsg  = "You are already evolving";
+      longMsg   = "You can't do that while you are still evolving.";
+      shortMsg  = "You are still evolving";
       type      = DT_ARMOURYEVOLVE;
       break;
 

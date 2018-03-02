@@ -1700,6 +1700,12 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
         targ->creditsDeffenses[ attacker->buildableTeam ] += take;
     }
 
+    // track damage dealt while evolving
+    if( targ->client &&
+        targ->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
+        ( targ->client->ps.eFlags & EF_EVOLVING ) ) 
+      targ->client->pers.evolveDamage += take;
+
     if( !(dflags & DAMAGE_INSTAGIB) )
     {
       targ->health = targ->health - take;
@@ -1721,9 +1727,10 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
     targ->lastDamageTime = level.time;
     if( !targ->client ||
-        !( targ->client->ps.eFlags & EF_EVOLVING ) ||
-        targ->client->pers.evolveHealthRegen <= 0 ||
-        targ->client->ps.stats[ STAT_MISC3 ] <= 0 )
+        !( targ->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
+           targ->client->ps.eFlags & EF_EVOLVING &&
+           targ->client->pers.evolveHealthRegen &&
+           targ->client->ps.stats[ STAT_MISC3 ] > 0 ) )
       targ->nextRegenTime = level.time + ALIEN_REGEN_DAMAGE_TIME;
     targ->nextHPReserveRegenTime = level.time + ALIEN_REGEN_DAMAGE_TIME;
 

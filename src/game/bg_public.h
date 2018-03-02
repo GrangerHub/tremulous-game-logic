@@ -791,7 +791,9 @@ typedef enum
   MN_A_BUILD,
   MN_A_INFEST,
   MN_A_NOEROOM,
+  MN_A_EVOLVE_CANCEL_NOEROOM,
   MN_A_NOOVMND_EVOLVE,
+  MN_A_EVOLVE_CANCEL_HEALTH,
   MN_A_EVOLVING,
   MN_A_EVOLVEBUILDTIMER,
   MN_A_CANTEVOLVE,
@@ -803,6 +805,7 @@ typedef enum
   MN_A_HOVEL_OCCUPIED,
   MN_A_HOVEL_NOCLIP,
   MN_A_HOVEL_BLOCKED,
+  MN_A_HOVEL_EVOLVING,
   MN_A_HOVEL_EXIT,
 
   //shared build
@@ -874,6 +877,9 @@ typedef enum
                              // another entity
   ACTMN_ACT_NOOCCUPANTS,     // there are no target potential occupants
   ACTMN_ACT_NOEXIT,          // the activation entity can't be exited
+
+  // can't activate things while evolving
+  ACTMN_A_EVOLVING, // alien specific
 
   // this entitity must be powered to use
   ACTMN_H_NOTPOWERED,        // humans specific
