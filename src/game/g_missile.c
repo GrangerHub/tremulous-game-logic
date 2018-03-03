@@ -813,7 +813,7 @@ gentity_t *fire_portalGun( gentity_t *self, vec3_t start, vec3_t dir,
 
   bolt = G_Spawn( );
   bolt->classname = "portalgun";
-  bolt->pointAgainstWorld = qtrue;
+  bolt->pointAgainstWorld = qfalse;
 
   bolt->nextthink = level.time + 10000;
   bolt->think = G_ExplodeMissile;
