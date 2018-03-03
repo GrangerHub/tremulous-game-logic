@@ -4220,7 +4220,6 @@ static void PM_Weapon( void )
         {
           // Not enough charge
           pm->ps->misc[ MISC_MISC ] = 0;
-          pm->ps->weaponTime = 0;
           pm->ps->weaponstate = WEAPON_READY;
           return;
         }
