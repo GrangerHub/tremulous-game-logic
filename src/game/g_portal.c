@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define PORTAL_MINRANGE 20.0f
 #define PORTAL_MAXRANGE 100.0f
-#define PORTAL_OFFSET 4.0f
+#define PORTAL_OFFSET sqrt( (PORTALGUN_SIZE * PORTALGUN_SIZE) + (PORTALGUN_SIZE * PORTALGUN_SIZE) )
 
 /*
 ===============
@@ -210,6 +210,8 @@ void G_Portal_Create(gentity_t *ent, vec3_t origin, vec3_t normal, portal_t port
 {
 	gentity_t *portal;
 	vec3_t range = { PORTAL_MINRANGE, PORTAL_MINRANGE, PORTAL_MINRANGE };
+	vec3_t oldOrigin;
+	trace_t tr;
 
     if ( ent->health <= 0 || !ent->client || ent->client->ps.pm_type == PM_DEAD )
       return;
@@ -231,12 +233,16 @@ void G_Portal_Create(gentity_t *ent, vec3_t origin, vec3_t normal, portal_t port
   portal->health = PORTAL_HEALTH;
   portal->die = portal_die;
 	portal->pain = portal_pain;
-	VectorCopy(range, portal->r.maxs);
-	VectorScale(range, -1, portal->r.mins);
-	VectorMA(origin, PORTAL_OFFSET, normal, origin);
-	G_SetOrigin(portal, origin);
-	VectorCopy(normal, portal->s.origin2);
-	SV_LinkEntity(portal);
+	VectorCopy( range, portal->r.maxs );
+	VectorScale( range, -1, portal->r.mins) ;
+	VectorCopy( origin, oldOrigin );
+	VectorMA( origin, -PORTAL_OFFSET, normal, origin );
+	SV_Trace( &tr, oldOrigin, NULL, NULL, origin,
+                  ent->s.number, MASK_PLAYERSOLID, TT_AABB );
+	VectorCopy( tr.endpos, origin);
+	G_SetOrigin( portal, origin );
+	VectorCopy( normal, portal->s.origin2 );
+	SV_LinkEntity( portal );
 
 	// Attach it to the client
 	G_Portal_Clear( portalindex );
