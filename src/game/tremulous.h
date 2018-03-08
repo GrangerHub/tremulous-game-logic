@@ -504,8 +504,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define GRENADE_HEALTH              5
 #define GRENADE_REPEAT              0
 #define GRENADE_K_SCALE             1.0f
-#define GRENADE_DAMAGE              HWDM(200000)
-#define GRENADE_RANGE               192.0f
+#define GRENADE_DAMAGE              HWDM(100000)
+#define GRENADE_RANGE               400.0f
 #define GRENADE_SPEED               400.0f
 #define GRENADE_SIZE                3.0f        // missile bounding box
 #define GRENADE_LIFETIME            5000
@@ -620,12 +620,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define PORTAL_HEALTH               750000
 #define PORTALGUN_DAMAGE           HWDM(6000)
 
-#define LAUNCHER_PRICE               3200
+#define LAUNCHER_PRICE               1500
 #define LAUNCHER_AMMO                6
 #define LAUNCHER_MAXCLIPS            1
 #define LAUNCHER_ROUND_PRICE         GRENADE_PRICE
 #define LAUNCHER_REPEAT              1000
-#define LAUNCHER_K_SCALE             1.0f
+#define LAUNCHER_K_SCALE             2.0f
 #define LAUNCHER_RELOAD              2000
 #define LAUNCHER_DAMAGE              GRENADE_DAMAGE
 #define LAUNCHER_RADIUS              GRENADE_RANGE
