@@ -173,6 +173,8 @@ void G_GiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo )
 
   G_ForceWeaponChange( ent, ent->client->ps.weapon );
 
+  ent->client->ps.pm_flags |= PMF_WEAPON_FORCE_RELOAD;
+
   if( BG_Weapon( weapon )->usesEnergy )
     G_AddEvent( ent, EV_RPTUSE_SOUND, 0 );
 }

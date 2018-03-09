@@ -2814,8 +2814,16 @@ void Cmd_Buy_f( gentity_t *ent )
       return;
 
     ent->client->ps.stats[ STAT_WEAPON ] = weapon;
-    ent->client->ps.ammo = BG_Weapon( weapon )->maxAmmo;
-    ent->client->ps.clips = BG_Weapon( weapon )->maxClips;
+    if( BG_Weapon( weapon )->infiniteAmmo )
+    {
+      ent->client->ps.ammo = BG_Weapon( weapon )->maxAmmo;
+      ent->client->ps.clips = BG_Weapon( weapon )->maxClips;
+    } else
+    {
+      // the first clip is loaded automatically
+      ent->client->ps.ammo = 0;
+      ent->client->ps.clips = BG_Weapon( weapon )->maxClips + 1;
+    }
 
     if( BG_Weapon( weapon )->usesEnergy &&
         ( BG_InventoryContainsUpgrade( UP_BATTPACK, ent->client->ps.stats ) ||
@@ -2830,6 +2838,8 @@ void Cmd_Buy_f( gentity_t *ent )
       ent->client->ps.clips += ent->client->ps.clips + 1;
 
     G_ForceWeaponChange( ent, weapon );
+
+    ent->client->ps.pm_flags |= PMF_WEAPON_FORCE_RELOAD;
 
     //set build delay/pounce etc to 0
     ent->client->ps.misc[ MISC_MISC ] = 0;
@@ -2946,6 +2956,8 @@ void Cmd_Buy_f( gentity_t *ent )
           return;
 
          G_GiveClientMaxAmmo( ent, energyOnly );
+
+         ent->client->ps.pm_flags |= PMF_WEAPON_RELOAD;
       }
       else
       {

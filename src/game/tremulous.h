@@ -494,6 +494,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define PAINSAW_PRICE               100
 #define PAINSAW_REPEAT              75
+#define PAINSAW_RELOAD              1000
 #define PAINSAW_K_SCALE             1.0f
 #define PAINSAW_DAMAGE              HWDM(11000)
 #define PAINSAW_RANGE               64.0f
@@ -504,8 +505,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define GRENADE_HEALTH              5
 #define GRENADE_REPEAT              0
 #define GRENADE_K_SCALE             1.0f
-#define GRENADE_DAMAGE              HWDM(100000)
-#define GRENADE_RANGE               400.0f
+#define GRENADE_DAMAGE              HWDM(150000)
+#define GRENADE_RANGE               250.0f
 #define GRENADE_SPEED               400.0f
 #define GRENADE_SIZE                3.0f        // missile bounding box
 #define GRENADE_LIFETIME            5000
@@ -587,7 +588,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LCANNON_AMMO                90
 #define LCANNON_K_SCALE             1.0f
 #define LCANNON_REPEAT              500
-#define LCANNON_RELOAD              0
+#define LCANNON_RELOAD              2000
 #define LCANNON_DAMAGE              HWDM(265000)
 #define LCANNON_RADIUS              150      // primary splash damage radius
 #define LCANNON_SIZE                5        // missile bounding box radius
@@ -608,8 +609,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LCANNON_LIFETIME            10000
 
 #define PORTALGUN_PRICE             1250
-#define PORTALGUN_AMMO              40
-#define PORTALGUN_MAXCLIPS          1
+#define PORTALGUN_AMMO              0
+#define PORTALGUN_MAXCLIPS          0
 #define PORTALGUN_ROUND_PRICE       0
 #define PORTALGUN_REPEAT            200     // repeat period if a portal isn't created
 #define PORTAL_CREATED_REPEAT       1500    // repeat period if a portal is created
@@ -620,15 +621,15 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define PORTAL_HEALTH               750000
 #define PORTALGUN_DAMAGE           HWDM(6000)
 
-#define LAUNCHER_PRICE               1500
+#define LAUNCHER_PRICE               600
 #define LAUNCHER_AMMO                6
-#define LAUNCHER_MAXCLIPS            1
-#define LAUNCHER_ROUND_PRICE         GRENADE_PRICE
+#define LAUNCHER_MAXCLIPS            0
+#define LAUNCHER_ROUND_PRICE         400
 #define LAUNCHER_REPEAT              1000
-#define LAUNCHER_K_SCALE             2.0f
-#define LAUNCHER_RELOAD              2000
-#define LAUNCHER_DAMAGE              GRENADE_DAMAGE
-#define LAUNCHER_RADIUS              GRENADE_RANGE
+#define LAUNCHER_K_SCALE             1.0f
+#define LAUNCHER_RELOAD              3000
+#define LAUNCHER_DAMAGE              220
+#define LAUNCHER_RADIUS              175
 #define LAUNCHER_SPEED               1200
 
 #define LIGHTNING_PRICE                1000

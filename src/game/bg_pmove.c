@@ -3971,10 +3971,13 @@ static void PM_BeginWeaponChange( int weapon )
       return;
   }
 
-  // cancel a reload
-  pm->ps->pm_flags &= ~PMF_WEAPON_RELOAD;
-  if( pm->ps->weaponstate == WEAPON_RELOADING )
-    pm->ps->weaponTime = 0;
+  if( !( pm->ps->pm_flags & PMF_WEAPON_FORCE_RELOAD ) )
+  {
+    // cancel a reload
+    pm->ps->pm_flags &= ~PMF_WEAPON_RELOAD;
+    if( pm->ps->weaponstate == WEAPON_RELOADING )
+      pm->ps->weaponTime = 0;
+  }
 
   //special case to prevent storing a charged up lcannon
   if( pm->ps->weapon == WP_LUCIFER_CANNON )
@@ -3985,18 +3988,24 @@ static void PM_BeginWeaponChange( int weapon )
 
   BG_ResetLightningBoltCharge( pm->ps, pm->pmext);
 
-  pm->ps->weaponstate = WEAPON_DROPPING;
-  pm->ps->weaponTime += 200;
   pm->ps->persistant[ PERS_NEWWEAPON ] = weapon;
 
   //reset build weapon
   pm->ps->stats[ STAT_BUILDABLE ] = BA_NONE;
 
-  if( !( pm->ps->persistant[ PERS_STATE ] & PS_NONSEGMODEL ) )
+  if( pm->ps->weapon != weapon ||
+     !( pm->ps->pm_flags & PMF_WEAPON_FORCE_RELOAD ) )
   {
-    PM_StartTorsoAnim( TORSO_DROP );
-    PM_StartWeaponAnim( WANIM_DROP );
+    pm->ps->weaponstate = WEAPON_DROPPING;
+    pm->ps->weaponTime += 200;
+    
+    if( !( pm->ps->persistant[ PERS_STATE ] & PS_NONSEGMODEL ) )
+    {
+      PM_StartTorsoAnim( TORSO_DROP );
+      PM_StartWeaponAnim( WANIM_DROP );
+    }
   }
+
 }
 
 
@@ -4483,6 +4492,11 @@ static void PM_Weapon( void )
     pm->ps->weaponstate = WEAPON_READY;
     if( !( pm->ps->persistant[ PERS_STATE ] & PS_NONSEGMODEL ) )
     {
+      if( pm->ps->pm_flags & PMF_WEAPON_FORCE_RELOAD )
+      {
+        pm->ps->pm_flags |= PMF_WEAPON_RELOAD;
+        return;
+      }
       if( pm->ps->weapon == WP_BLASTER )
         PM_ContinueTorsoAnim( TORSO_STAND2 );
       else
@@ -4524,13 +4538,20 @@ static void PM_Weapon( void )
   //done reloading so give em some ammo
   if( pm->ps->weaponstate == WEAPON_RELOADING )
   {
-    pm->ps->clips--;
-    pm->ps->ammo = BG_Weapon( pm->ps->weapon )->maxAmmo;
+    if( ( pm->ps->clips > BG_Weapon( pm->ps->weapon )->maxClips ) ||
+        !( pm->ps->pm_flags & PMF_WEAPON_FORCE_RELOAD ) )
+    {
+      pm->ps->clips--;
+      pm->ps->ammo = BG_Weapon( pm->ps->weapon )->maxAmmo;
 
-    if( BG_Weapon( pm->ps->weapon )->usesEnergy &&
-        ( BG_InventoryContainsUpgrade( UP_BATTPACK, pm->ps->stats ) ||
-          BG_InventoryContainsUpgrade( UP_BATTLESUIT, pm->ps->stats ) ) )
-      pm->ps->ammo *= BATTPACK_MODIFIER;
+      if( BG_Weapon( pm->ps->weapon )->usesEnergy &&
+          ( BG_InventoryContainsUpgrade( UP_BATTPACK, pm->ps->stats ) ||
+            BG_InventoryContainsUpgrade( UP_BATTLESUIT, pm->ps->stats ) ) )
+        pm->ps->ammo *= BATTPACK_MODIFIER;
+    }
+
+    if( pm->ps->pm_flags & PMF_WEAPON_FORCE_RELOAD )
+      pm->ps->pm_flags &= ~PMF_WEAPON_FORCE_RELOAD;
 
     if( pm->ps->weapon == WP_LUCIFER_CANNON )
       pm->pmext->luciAmmoReduction = 0;
@@ -4551,12 +4572,13 @@ static void PM_Weapon( void )
         pm->ps->ammo < BG_Weapon( pm->ps->weapon )->ammoUsage2 ) || 
       ( ( BG_Weapon( pm->ps->weapon )->hasThirdMode && attack2 ) &&
         pm->ps->ammo < BG_Weapon( pm->ps->weapon )->ammoUsage3 ) ) &&
-      pm->ps->clips > 0 )
+      ( pm->ps->clips > 0  ) )
   {
     int i;
 
     if( pm->ps->weapon != WP_LIGHTNING ||
-        !( pm->ps->stats[ STAT_STATE ] & SS_CHARGING ) )
+        !( pm->ps->stats[ STAT_STATE ] & SS_CHARGING ) ||
+        ( pm->ps->pm_flags & PMF_WEAPON_FORCE_RELOAD ) )
     {
       pm->ps->pm_flags &= ~PMF_WEAPON_RELOAD;
       pm->ps->weaponstate = WEAPON_RELOADING;
@@ -4572,7 +4594,8 @@ static void PM_Weapon( void )
     //clear bursts
     for( i = 0; i < 3; i++ )
       pm->pmext->burstRoundsToFire[ i ] = 0;
-  }
+  } else if ( pm->ps->pm_flags & PMF_WEAPON_RELOAD )
+    pm->ps->pm_flags &= ~PMF_WEAPON_RELOAD;
 
   if( !pm->pmext->burstRoundsToFire[ 2 ] &&
       !pm->pmext->burstRoundsToFire[ 1 ] &&

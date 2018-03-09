@@ -2787,7 +2787,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       burstDelay1;
     0,                    //int       burstDelay2;
     0,                    //int       burstDelay3;
-    0,                    //int       reloadTime;
+    PAINSAW_RELOAD,       //int       reloadTime;
     PAINSAW_K_SCALE,      //float     knockbackScale;
     0.0f,                 //float     recoil1;
     0.0f,                 //float     recoil2;
@@ -3247,7 +3247,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
-    qfalse,               //qboolean  ammoPurchasable;
+    qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     GRENADE_REPEAT,       //int       repeatRate1;
