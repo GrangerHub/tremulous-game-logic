@@ -3306,7 +3306,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     LAUNCHER_ROUND_PRICE, //int       roundPrice;
-    qfalse,               //qboolean  ammoPurchasable;
+    qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     LAUNCHER_REPEAT,      //int       repeatRate1;
