@@ -48,6 +48,8 @@ float pm_spitfire_flyfriction = 3.5f;
 float pm_spitfire_flywalkfriction = 5.0f;
 float pm_spectatorfriction = 5.0f;
 
+float pm_recoilDecay = 8000.0f;
+
 //TODO: Marauder doesn't have a double jump since I removed it because it'll stack heavily when wall climbing.
 //It doesn't need it though, but may feel akward
 float cpm_pm_jump_z = 0.5; //CPM: 100/270 (normal jumpvel is 270, doublejump default 100) = 0.37037
@@ -5049,14 +5051,8 @@ static void PM_Weapon( void )
 
   if( recoil )
   {
-    //Recoil is reduced when crouching or when wearing a bsuit.
-    if( pm->ps->pm_flags & PMF_DUCKED ||
-        BG_InventoryContainsUpgrade( UP_BATTLESUIT, pm->ps->stats ) )
-      recoil /= 16;
-
-    pm->ps->delta_angles[ PITCH ] -= ANGLE2SHORT( ( ( PM_PSRandom( pm->ps ) * recoil ) - ( recoil / 4.0f ) ) * ( 30.0f / (float)addTime ) );
-    pm->ps->delta_angles[ YAW ] -= ANGLE2SHORT( ( ( PM_PSRandom( pm->ps ) * recoil ) - ( recoil / 2.0f ) ) * ( 30.0f / (float)addTime ) );
-
+    pm->ps->misc[ MISC_RECOIL_PITCH ] += ANGLE2SHORT( ( ( PM_PSRandom( pm->ps ) * recoil ) - ( recoil / 4.0f ) ) * ( 30.0f / (float)addTime ) );
+    pm->ps->misc[ MISC_RECOIL_PITCH ] += ANGLE2SHORT( ( ( PM_PSRandom( pm->ps ) * recoil ) - ( recoil / 2.0f ) ) * ( 30.0f / (float)addTime ) );
   }
 
   pm->ps->weaponTime += addTime;
@@ -5414,6 +5410,45 @@ void PM_CalculateAngularVelocity( playerState_t *ps, const usercmd_t *cmd )
 
 /*
 ================
+PM_ApplyRecoil
+
+Applies recoil
+================
+*/
+static void PM_ApplyRecoil( void )
+{
+  int   recoilP = pm->ps->misc[ MISC_RECOIL_PITCH ];
+  int   recoilY = pm->ps->misc[ MISC_RECOIL_YAW ];
+  const float recoilSpeed = sqrt( ( (float)recoilP * (float)recoilP ) + ( (float)recoilY * (float)recoilY ) );
+  float newRecoilSpeed;
+  float drop = recoilSpeed * pm_recoilDecay * pml.frametime;
+  const int delta_recoil_pitch = recoilP * pml.frametime;
+  const int delta_recoil_yaw = recoilY * pml.frametime;
+
+  if( !recoilSpeed )
+    return;
+
+  //decay the recoil
+  //Recoil is reduced furthr when crouching or when wearing a bsuit.
+  if( pm->ps->pm_flags & PMF_DUCKED ||
+      BG_InventoryContainsUpgrade( UP_BATTLESUIT, pm->ps->stats ) )
+    drop *= 512;
+  newRecoilSpeed = recoilSpeed - drop;
+  if( newRecoilSpeed < 0 )
+    newRecoilSpeed = 0;
+
+  newRecoilSpeed /= recoilSpeed;
+
+  pm->ps->misc[ MISC_RECOIL_PITCH ] *= newRecoilSpeed;
+  pm->ps->misc[ MISC_RECOIL_YAW ] *= newRecoilSpeed;
+
+  //apply the recoil
+  pm->ps->delta_angles[ PITCH ] -= delta_recoil_pitch;
+  pm->ps->delta_angles[ YAW ] -= delta_recoil_yaw;
+}
+
+/*
+================
 PmoveSingle
 
 ================
@@ -5516,6 +5551,9 @@ void PmoveSingle( pmove_t *pmove )
 
   AngleVectors( pm->ps->viewangles, pml.forward, pml.right, pml.up );
 
+  //apply recoil
+  PM_ApplyRecoil( );
+
   if( pm->cmd.upmove < 10 )
   {
     // not holding jump
@@ -5557,6 +5595,8 @@ void PmoveSingle( pmove_t *pmove )
     PM_CheckDuck( );
     PM_FlyMove( );
     PM_DropTimers( );
+    //apply recoil
+    PM_ApplyRecoil( );
     return;
   }
 
@@ -5579,6 +5619,8 @@ void PmoveSingle( pmove_t *pmove )
     PM_SetViewheight( );
     PM_Weapon( );
     PM_DropTimers( );
+    //apply recoil
+    PM_ApplyRecoil( );
     return;
   }
 
@@ -5594,6 +5636,9 @@ void PmoveSingle( pmove_t *pmove )
 
   // set mins, maxs, and viewheight
   PM_CheckDuck( );
+
+  //apply recoil
+  PM_ApplyRecoil( );
 
   PM_CheckLadder( );
 

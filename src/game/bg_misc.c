@@ -3380,7 +3380,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       burstDelay3;
     LIGHTNING_RELOAD,     //int       reloadTime;
     LIGHTNING_K_SCALE,    //float     knockbackScale;
-    0.5f,                 //float     recoil1;
+    0.2f,                 //float     recoil1;
     0.0f,                 //float     recoil2;
     0.0f,                 //float     recoil3;
     qtrue,                //qboolean  hasAltMode;
