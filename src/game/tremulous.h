@@ -319,7 +319,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ASPAWN_SPLASHDAMAGE         ABDM(50000)
 #define ASPAWN_SPLASHRADIUS         100
 #define ASPAWN_CREEPSIZE            120
-#define ASPAWN_VALUE                ( 2 * LEVEL0_VALUE )
+#define ASPAWN_VALUE                ( ( 3 * LEVEL0_VALUE ) / 2 )
 
 #define BARRICADE_BP                8
 #define BARRICADE_BT                10000
@@ -330,7 +330,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define BARRICADE_CREEPSIZE         120
 #define BARRICADE_SHRINKPROP        0.25f
 #define BARRICADE_SHRINKTIMEOUT     500
-#define BARRICADE_VALUE             ( 2 * LEVEL0_VALUE )
+#define BARRICADE_VALUE             ( ( 3 * LEVEL0_VALUE ) / 2 )
 #define BARRICADE_BAT_PWR           25000
 
 #define BOOSTER_BP                  12
@@ -341,7 +341,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define BOOSTER_SPLASHRADIUS        100
 #define BOOSTER_CREEPSIZE           120
 #define BOOSTER_REGEN_MOD           (2.75f)
-#define BOOSTER_VALUE               ( 6 * LEVEL0_VALUE )
+#define BOOSTER_VALUE               ( ( 9 * LEVEL0_VALUE ) / 2 )
 #define BOOSTER_BAT_PWR             25000
 #define BOOST_TIME                  30000
 #define BOOST_WARN_TIME             15000
@@ -357,7 +357,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ACIDTUBE_RANGE              300.0f
 #define ACIDTUBE_REPEAT             200
 #define ACIDTUBE_REPEAT_ANIM        2000
-#define ACIDTUBE_VALUE              ( LEVEL0_VALUE )
+#define ACIDTUBE_VALUE              ( ( 3 * LEVEL0_VALUE ) / 4 )
 #define ACIDTUBE_BAT_PWR            25000
 
 #define HIVE_BP                     12
@@ -374,7 +374,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define HIVE_DMG                    ABDM(80000)
 #define HIVE_SPEED                  320.0f
 #define HIVE_DIR_CHANGE_PERIOD      500
-#define HIVE_VALUE                  ( 2 * LEVEL0_VALUE )
+#define HIVE_VALUE                  ( ( 3 * LEVEL0_VALUE ) / 2 )
 #define HIVE_BAT_PWR                25000
 
 #define HOVEL_BP                     0
@@ -384,7 +384,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define HOVEL_SPLASHDAMAGE           ABDM(20000)
 #define HOVEL_SPLASHRADIUS           200
 #define HOVEL_CREEPSIZE              120
-#define HOVEL_VALUE                  ( 3 * LEVEL0_VALUE / 2 )
+#define HOVEL_VALUE                  ( ( 9 * LEVEL0_VALUE ) / 8 )
 #define HOVEL_BAT_PWR                25000
 
 #define TRAPPER_BP                  8
@@ -396,7 +396,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define TRAPPER_CREEPSIZE           30
 #define TRAPPER_RANGE               400
 #define TRAPPER_REPEAT              1000
-#define TRAPPER_VALUE               ( LEVEL0_VALUE )
+#define TRAPPER_VALUE               ( ( 3 * LEVEL0_VALUE ) / 4 )
 #define TRAPPER_BAT_PWR             25000
 #define LOCKBLOB_SPEED              650.0f
 #define LOCKBLOB_SPEED_MOD          0.1f
@@ -412,7 +412,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define SLIME_ZUNGE_SPLASHDAMAGE    ABDM(15000)
 #define SLIME_ZUNGE_SPLASHRADIUS    200
 #define SLIME_ZUNGE_CREEPSIZE       170
-#define SLIME_ZUNGE_VALUE           ( 3 * LEVEL0_VALUE )
+#define SLIME_ZUNGE_VALUE           ( ( 9 * LEVEL0_VALUE ) / 4 )
 #define SLIME_ZUNGE_BAT_PWR         25000
 #define SLIME_ZUNGE_DMGRADIUS       120
 #define SLIME_ZUNGE_REPEAT          300
@@ -428,7 +428,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define OVERMIND_CREEPSIZE          120
 #define OVERMIND_ATTACK_RANGE       150.0f
 #define OVERMIND_ATTACK_REPEAT      1000
-#define OVERMIND_VALUE              ( 9 * LEVEL0_VALUE )
+#define OVERMIND_VALUE              ( ( 27 * LEVEL0_VALUE ) / 4 )
 
 /*
  * ALIEN misc
@@ -742,14 +742,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define HSPAWN_HEALTH               HBHM(310000)
 #define HSPAWN_SPLASHDAMAGE         HBDM(50000)
 #define HSPAWN_SPLASHRADIUS         100
-#define HSPAWN_VALUE                ( 2 * ALIEN_CREDITS_PER_KILL )
+#define HSPAWN_VALUE                ( ( 3 * ALIEN_CREDITS_PER_KILL ) / 2 )
 
 #define HTELEPORTER_BP              10
 #define HTELEPORTER_BT              10000
 #define HTELEPORTER_HEALTH          HBHM(310000)
 #define HTELEPORTER_SPLASHDAMAGE    HBDM(50000)
 #define HTELEPORTER_SPLASHRADIUS    100
-#define HTELEPORTER_VALUE           ( 2 * ALIEN_CREDITS_PER_KILL )
+#define HTELEPORTER_VALUE           ( ( 3 * ALIEN_CREDITS_PER_KILL ) / 2 )
 #define HTELEPORTER_COOLDOWN_TIME   2000
 #define HTELEPORTER_BAT_PWR         30000  // amount of time teleporter's can remained powered without
                                            // an external power source
@@ -760,7 +760,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MEDISTAT_REPEAT             100
 #define MEDISTAT_SPLASHDAMAGE       HBDM(50000)
 #define MEDISTAT_SPLASHRADIUS       100
-#define MEDISTAT_VALUE              ( 2 * ALIEN_CREDITS_PER_KILL )
+#define MEDISTAT_VALUE              ( ( 3 * ALIEN_CREDITS_PER_KILL ) / 2 )
 #define MEDISTAT_BAT_PWR            25000
 
 #define MGTURRET_BP                 8
@@ -781,7 +781,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MGTURRET_SPINUP_TIME        4000 // time to increase the fire rate to full speed
 #define MGTURRET_SPINDOWN_TIME      10000 // time it takes a ret to spindown from full speed to complete stop
 #define MGTURRET_SPINUP_SKIPFIRE    600 // the initial shot skips below this spinup value
-#define MGTURRET_VALUE              ( ALIEN_CREDITS_PER_KILL )
+#define MGTURRET_VALUE              ( ( 3 * ALIEN_CREDITS_PER_KILL ) / 4 )
 #define MGTURRET_BAT_PWR            25000
 #define MGTURRET_DCC_ANGULARSPEED   15
 #define MGTURRET_GRAB_ANGULARSPEED  0
@@ -795,7 +795,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define TESLAGEN_K_SCALE            4.0f
 #define TESLAGEN_RANGE              250
 #define TESLAGEN_DMG                HBDM(6000)
-#define TESLAGEN_VALUE              ( ALIEN_CREDITS_PER_KILL )
+#define TESLAGEN_VALUE              ( ( 3 * ALIEN_CREDITS_PER_KILL ) / 4 )
 #define TESLAGEN_BAT_PWR            25000
 
 #define DC_BP                       8
@@ -806,7 +806,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define DC_ATTACK_PERIOD            10000 // how often to spam "under attack"
 #define DC_HEALRATE                 4000
 #define DC_RANGE                    10000
-#define DC_VALUE                    ( ALIEN_CREDITS_PER_KILL )
+#define DC_VALUE                    ( ( 3 * ALIEN_CREDITS_PER_KILL ) / 4 )
 #define DC_BAT_PWR                  25000
 
 #define ARMOURY_BP                  10
@@ -814,7 +814,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ARMOURY_HEALTH              HBHM(420000)
 #define ARMOURY_SPLASHDAMAGE        HBDM(50000)
 #define ARMOURY_SPLASHRADIUS        100
-#define ARMOURY_VALUE               ( 3 * ALIEN_CREDITS_PER_KILL )
+#define ARMOURY_VALUE               ( ( 9 * ALIEN_CREDITS_PER_KILL ) / 4 )
 #define ARMOURY_BAT_PWR             25000
 
 #define REACTOR_BP                  10
@@ -828,14 +828,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define REACTOR_ATTACK_DCC_REPEAT   1000
 #define REACTOR_ATTACK_DCC_RANGE    150.0f
 #define REACTOR_ATTACK_DCC_DAMAGE   HBDM(40000)
-#define REACTOR_VALUE               ( 4 * ALIEN_CREDITS_PER_KILL )
+#define REACTOR_VALUE               ( 3 * ALIEN_CREDITS_PER_KILL )
 
 #define REPEATER_BP                 4
 #define REPEATER_BT                 10000
 #define REPEATER_HEALTH             HBHM(250000)
 #define REPEATER_SPLASHDAMAGE       HBDM(50000)
 #define REPEATER_SPLASHRADIUS       100
-#define REPEATER_VALUE              ( 2 * ALIEN_CREDITS_PER_KILL )
+#define REPEATER_VALUE              ( ( 3 * ALIEN_CREDITS_PER_KILL ) / 2 )
 
 /*
  * HUMAN misc

@@ -166,15 +166,16 @@ Returns the total damage dealt.
 */
 float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
 {
-  float     value, totalDamage = 0;
-  int       i, maxHealth = 0;
-  int       alienCredits = 0, humanCredits = 0;
-  int       numTeamPlayers[ NUM_TEAMS ];
-  int       maxHealthReserve;
-  int       ( *credits )[ MAX_CLIENTS ], ( *creditsDeffenses )[ NUM_TEAMS ];
-  team_t    team;
-  gentity_t *player;
-  qboolean  damagedByEnemyPlayer = qfalse;
+  float          value, totalDamage = 0;
+  int            i, maxHealth = 0;
+  int            alienCredits = 0, humanCredits = 0;
+  int            numTeamPlayers[ NUM_TEAMS ];
+  int            maxHealthReserve;
+  int            ( *credits )[ MAX_CLIENTS ], ( *creditsDeffenses )[ NUM_TEAMS ];
+  team_t         team;
+  gentity_t      *player;
+  qboolean       damagedByEnemyPlayer = qfalse;
+  const qboolean isBuildable = ( self->s.eType == ET_BUILDABLE );
 
   if( destroyedUp != UP_NONE )
   {
@@ -238,7 +239,7 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
     else
       maxHealth = BG_Class( self->client->ps.stats[ STAT_CLASS ] )->health;
   }
-  else if( self->s.eType == ET_BUILDABLE )
+  else if( isBuildable )
   {
     value = BG_Buildable( self->s.modelindex )->value;
 
@@ -299,8 +300,8 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
       if( !( *credits )[ i ] || player->client->ps.stats[ STAT_TEAM ] == team )
         continue;
 
-      playersTeamDistributionEarnings = stageValue / ( 10 * numTeamPlayers[ playersTeam ] );
-      everyonesDistributionEarnings = ( stageValue * 5 ) / ( 10 * level.numPlayingClients );
+      playersTeamDistributionEarnings = ( stageValue * (  isBuildable ? 6 : 1 ) ) / ( 10 * numTeamPlayers[ playersTeam ] );
+      everyonesDistributionEarnings = ( stageValue * (  isBuildable ? 0 : 5 ) ) / ( 10 * level.numPlayingClients );
 
       // any remainders goes to the player that did the damage;
       playersPersonalEarnings = stageValue;
