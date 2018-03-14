@@ -48,7 +48,7 @@ float pm_spitfire_flyfriction = 3.5f;
 float pm_spitfire_flywalkfriction = 5.0f;
 float pm_spectatorfriction = 5.0f;
 
-float pm_recoilDecay = 8000.0f;
+float pm_recoilDecay = 500.0f;
 
 //TODO: Marauder doesn't have a double jump since I removed it because it'll stack heavily when wall climbing.
 //It doesn't need it though, but may feel akward
@@ -4515,6 +4515,10 @@ static void PM_Weapon( void )
   {
     int i;
 
+    //clear bursts
+    for( i = 0; i < 3; i++ )
+      pm->pmext->burstRoundsToFire[ i ] = 0;
+
     if( !( pm->ps->weapon == WP_LIGHTNING &&
         ( pm->ps->stats[ STAT_STATE ] & SS_CHARGING ) ) )
     {
@@ -4531,10 +4535,6 @@ static void PM_Weapon( void )
 
       return;
     }
-
-    //clear bursts
-    for( i = 0; i < 3; i++ )
-      pm->pmext->burstRoundsToFire[ i ] = 0;
   }
 
   //done reloading so give em some ammo
@@ -4578,6 +4578,10 @@ static void PM_Weapon( void )
   {
     int i;
 
+    //clear bursts
+    for( i = 0; i < 3; i++ )
+      pm->pmext->burstRoundsToFire[ i ] = 0;
+
     if( pm->ps->weapon != WP_LIGHTNING ||
         !( pm->ps->stats[ STAT_STATE ] & SS_CHARGING ) ||
         ( pm->ps->pm_flags & PMF_WEAPON_FORCE_RELOAD ) )
@@ -4592,10 +4596,6 @@ static void PM_Weapon( void )
       pm->ps->weaponTime += BG_Weapon( pm->ps->weapon )->reloadTime;
       return;
     }
-
-    //clear bursts
-    for( i = 0; i < 3; i++ )
-      pm->pmext->burstRoundsToFire[ i ] = 0;
   } else if ( pm->ps->pm_flags & PMF_WEAPON_RELOAD )
     pm->ps->pm_flags &= ~PMF_WEAPON_RELOAD;
 
@@ -4819,7 +4819,12 @@ static void PM_Weapon( void )
   {
     pm->ps->generic1 = WPM_TERTIARY;
     PM_AddEvent( EV_FIRE_WEAPON3 );
-    pm->pmext->burstRoundsToFire[ 2 ]--;
+    if( !attack3 )
+    {
+      //clear burst
+      pm->pmext->burstRoundsToFire[ 2 ] = 0;
+    } else
+      pm->pmext->burstRoundsToFire[ 2 ]--;
     if( pm->pmext->burstRoundsToFire[ 2 ] )
       addTime = BG_Weapon( pm->ps->weapon )->repeatRate3;
     else
@@ -4829,7 +4834,12 @@ static void PM_Weapon( void )
   {
     pm->ps->generic1 = WPM_SECONDARY;
     PM_AddEvent( EV_FIRE_WEAPON2 );
-    pm->pmext->burstRoundsToFire[ 1 ]--;
+    if( !attack2 )
+    {
+      //clear burst
+      pm->pmext->burstRoundsToFire[ 1 ] = 0;
+    } else
+      pm->pmext->burstRoundsToFire[ 1 ]--;
     if( pm->pmext->burstRoundsToFire[ 1 ] )
       addTime = BG_Weapon( pm->ps->weapon )->repeatRate2;
     else
@@ -4839,7 +4849,12 @@ static void PM_Weapon( void )
   {
     pm->ps->generic1 = WPM_PRIMARY;
     PM_AddEvent( EV_FIRE_WEAPON );
-    pm->pmext->burstRoundsToFire[ 0 ]--;
+    if( !attack1 )
+    {
+      //clear burst
+      pm->pmext->burstRoundsToFire[ 0 ] = 0;
+    } else
+      pm->pmext->burstRoundsToFire[ 0 ]--;
     if( pm->pmext->burstRoundsToFire[ 0 ] )
       addTime = BG_Weapon( pm->ps->weapon )->repeatRate1;
     else
@@ -5051,8 +5066,7 @@ static void PM_Weapon( void )
 
   if( recoil )
   {
-    pm->ps->misc[ MISC_RECOIL_PITCH ] += ANGLE2SHORT( ( ( PM_PSRandom( pm->ps ) * recoil ) - ( recoil / 4.0f ) ) * ( 30.0f / (float)addTime ) );
-    pm->ps->misc[ MISC_RECOIL_PITCH ] += ANGLE2SHORT( ( ( PM_PSRandom( pm->ps ) * recoil ) - ( recoil / 2.0f ) ) * ( 30.0f / (float)addTime ) );
+    pm->ps->misc[ MISC_RECOIL_PITCH ] += ANGLE2SHORT( recoil + ( 0.5 * ( ( PM_PSRandom( pm->ps ) * recoil ) - ( recoil / 4.0f ) ) ) );
   }
 
   pm->ps->weaponTime += addTime;

@@ -2723,10 +2723,10 @@ static const weaponAttributes_t bg_weapons[ ] =
     RIFLE_REPEAT2,        //int       repeatRate2;
     0,                    //int       repeatRate3;
     0,                    //int       burstRounds1;
-    0,                    //int       burstRounds2;
+    RIFLE_ALT_BURST_ROUNDS,//int       burstRounds2;
     0,                    //int       burstRounds3;
     0,                    //int       burstDelay1;
-    0,                    //int       burstDelay2;
+    RIFLE_ALT_BURST_DELAY,//int       burstDelay2;
     0,                    //int       burstDelay3;
     RIFLE_RELOAD,         //int       reloadTime;
     RIFLE_K_SCALE,        //float     knockbackScale;
@@ -3380,7 +3380,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       burstDelay3;
     LIGHTNING_RELOAD,     //int       reloadTime;
     LIGHTNING_K_SCALE,    //float     knockbackScale;
-    0.2f,                 //float     recoil1;
+    50.0f,                //float     recoil1;
     0.0f,                 //float     recoil2;
     0.0f,                 //float     recoil3;
     qtrue,                //qboolean  hasAltMode;
