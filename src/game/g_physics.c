@@ -188,7 +188,7 @@ void G_Physics( gentity_t *ent, int msec )
         // check to see if the old ground entity is no longer supporting this entity
         tr2.entityNum = tr.entityNum;
         while( ( ent->s.groundEntityNum != tr2.entityNum ) &&
-               ( tr.fraction != 1.0f ) )
+               ( tr2.fraction != 1.0f ) )
         {
           unlinkedEntNums[ numUnlinkedEntNums ] = tr2.entityNum;
           numUnlinkedEntNums++;
