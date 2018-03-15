@@ -462,16 +462,23 @@ SV_ClipToEntity
 
 ====================
 */
-void SV_ClipToEntity( trace_t *trace, const vec3_t start, const vec3_t mins,
-	                    const vec3_t maxs, const vec3_t end, int entityNum,
+void SV_ClipToEntity( trace_t *trace, const vec3_t start, vec3_t mins,
+	                    vec3_t maxs, const vec3_t end, int entityNum,
 											int contentmask, traceType_t type ) {
 	sharedEntity_t	*touch;
 	clipHandle_t	clipHandle;
 	float			*origin, *angles;
 
-	touch = SV_GentityNum( entityNum );
-
 	Com_Memset(trace, 0, sizeof(trace_t));
+
+	if( entityNum == ENTITYNUM_WORLD )
+	{
+		CM_BoxTrace( trace, start, end, mins, maxs, 0, contentmask, type );
+		trace->entityNum = trace->fraction != 1.0 ? ENTITYNUM_WORLD : ENTITYNUM_NONE;
+		return;
+	}
+
+	touch = SV_GentityNum( entityNum );
 
 	// EF_ASTRAL_NOCLIP flagged entities don't clip with ASTRALSOLID entities
 	if ( ( contentmask & EF_ASTRAL_NOCLIP ) & touch->s.eFlags ) {
