@@ -617,6 +617,7 @@ typedef enum
   BA_A_BOOSTER,
   BA_A_HIVE,
   BA_A_HOVEL,
+  BA_A_GRAPNEL,
 
   BA_H_SPAWN,
   BA_H_TELEPORTER,

@@ -138,8 +138,6 @@ void G_Physics( gentity_t *ent, int msec )
   vec3_t    origin;
   trace_t   tr;
   int     contents;
-  int     unlinkedClientNums[ MAX_CLIENTS ];
-  int     numUnlinkedClientNums = 0;
   int     i;
 
   // if groundentity has been set to ENTITYNUM_NONE, ent may have been pushed off an edge
@@ -175,18 +173,6 @@ void G_Physics( gentity_t *ent, int msec )
       SV_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin,
         ent->s.number, ent->clipmask, TT_AABB );
 
-      while( g_entities[ tr.entityNum ].client && ( tr.fraction != 1.0f ) )
-      {
-        unlinkedClientNums[ numUnlinkedClientNums ] = tr.entityNum;
-        numUnlinkedClientNums++;
-        SV_UnlinkEntity( &g_entities[ tr.entityNum ] );
-        SV_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin,
-          ent->s.number, ent->clipmask, TT_AABB );
-      }
-
-      for( i = 0; i < numUnlinkedClientNums; i++ )
-        SV_LinkEntity( &g_entities[ unlinkedClientNums[ i ] ] );
-
       if( tr.fraction == 1.0f )
       {
         if( ent->s.groundEntityNum != ENTITYNUM_NONE )
@@ -195,9 +181,31 @@ void G_Physics( gentity_t *ent, int msec )
       }
       else if( ent->s.groundEntityNum != tr.entityNum )
       {
-        G_RemoveBuildableFromStack( ent->s.groundEntityNum, ent->s.number );
-        ent->s.groundEntityNum = tr.entityNum;
-        G_AddBuildableToStack( ent->s.groundEntityNum, ent->s.number );
+        trace_t tr2;
+        int unlinkedEntNums[ MAX_GENTITIES ];
+        int numUnlinkedEntNums = 0;
+
+        // check to see if the old ground entity is no longer supporting this entity
+        tr2.entityNum = tr.entityNum;
+        while( ( ent->s.groundEntityNum != tr2.entityNum ) &&
+               ( tr.fraction != 1.0f ) )
+        {
+          unlinkedEntNums[ numUnlinkedEntNums ] = tr2.entityNum;
+          numUnlinkedEntNums++;
+          SV_UnlinkEntity( &g_entities[ tr2.entityNum ] );
+          SV_Trace( &tr2, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin,
+            ent->s.number, ent->clipmask, TT_AABB );
+        }
+
+        for( i = 0; i < numUnlinkedEntNums; i++ )
+          SV_LinkEntity( &g_entities[ unlinkedEntNums[ i ] ] );
+
+        if( ent->s.groundEntityNum != tr2.entityNum )
+        {
+          G_RemoveBuildableFromStack( ent->s.groundEntityNum, ent->s.number );
+          ent->s.groundEntityNum = tr.entityNum;
+          G_AddBuildableToStack( ent->s.groundEntityNum, ent->s.number );
+        }
       }
 
       ent->nextPhysicsTime = level.time + PHYSICS_TIME;

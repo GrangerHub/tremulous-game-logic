@@ -477,6 +477,48 @@ static const buildableAttributes_t bg_buildableList[ ] =
     HOVEL_BAT_PWR          //int       batteryPower;
   },
   {
+    BA_A_GRAPNEL,          //int       buildNum;
+    qtrue,                 //qboolean  enabled;
+    "grapnel",             //char      *buildName;
+    "Grapnel",             //char      *humanName;
+    "A passive structure that provides pivoted "
+    "support for other wall and ceiling buildables.",
+    "team_alien_grapnel",  //char      *entityName;
+    TR_GRAVITY,            //trType_t  traj;
+    0.0,                   //float     bounce;
+    GRAPNEL_BP,            //int       buildPoints;
+    ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
+    GRAPNEL_HEALTH,        //int       health;
+    GRAPNEL_REGEN,         //int       regenRate;
+    GRAPNEL_SPLASHDAMAGE,  //int       splashDamage;
+    GRAPNEL_SPLASHRADIUS,  //int       splashRadius;
+    MOD_ASPAWN,            //int       meansOfDeath;
+    TEAM_ALIENS,           //int       team;
+    ( 1 << WP_ABUILD )|( 1 << WP_ABUILD2 ), //weapon_t  buildWeapon;
+    BANIM_IDLE1,           //int       idleAnim;
+    150,                   //int       nextthink;
+    GRAPNEL_BT,            //int       buildTime;
+    qtrue,                 //qboolean  activationEnt;
+    0,                     //int       activationFlags;
+    0,                     //int       occupationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    MASK_PLAYERSOLID,      //int       activationContents;
+    CONTENTS_BODY,         //int       activationClipMask;
+    0,                     //int       turretRange;
+    0,                     //int       turretFireSpeed;
+    WP_NONE,               //weapon_t  turretProjType;
+    0.0f,                  //float     minNormal;
+    qtrue,                 //qboolean  invertNormal;
+    qtrue,                 //qboolean  creepTest;
+    GRAPNEL_CREEPSIZE,     //int       creepSize;
+    qfalse,                //qboolean  dccTest;
+    qfalse,                //qboolean  transparentTest;
+    qfalse,                //qboolean  uniqueTest;
+    GRAPNEL_VALUE,         //int       value;
+    qtrue,                 //qboolean  stackable;
+    GRAPNEL_BAT_PWR          //int       batteryPower;
+  },
+  {
     BA_H_SPAWN,            //int       number;
     qtrue,                 //qboolean  enabled;
     "telenode",            //char      *name;

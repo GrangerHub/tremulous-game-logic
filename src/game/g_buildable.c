@@ -4435,6 +4435,7 @@ static int G_CompareBuildablesForRemoval( const void *a, const void *b )
     BA_A_HOVEL,
     BA_A_SPAWN,
     BA_A_OVERMIND,
+    BA_A_GRAPNEL,
 
     BA_H_MGTURRET,
     BA_H_TESLAGEN,
@@ -5397,6 +5398,12 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
     case BA_A_OVERMIND:
       built->die = AGeneric_Die;
       built->think = AOvermind_Think;
+      built->pain = AGeneric_Pain;
+      break;
+
+    case BA_A_GRAPNEL:
+      built->die = AHovel_Die;
+      built->think = AGeneric_Think;
       built->pain = AGeneric_Pain;
       break;
 

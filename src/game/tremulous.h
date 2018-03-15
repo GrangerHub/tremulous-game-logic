@@ -387,6 +387,16 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define HOVEL_VALUE                  ( ( 9 * LEVEL0_VALUE ) / 8 )
 #define HOVEL_BAT_PWR                25000
 
+#define GRAPNEL_BP                  4
+#define GRAPNEL_BT                  6000
+#define GRAPNEL_HEALTH              ABHM(175000)
+#define GRAPNEL_REGEN               ABRM(20000)
+#define GRAPNEL_SPLASHDAMAGE        ABDM(20000)
+#define GRAPNEL_SPLASHRADIUS        100
+#define GRAPNEL_CREEPSIZE           30
+#define GRAPNEL_VALUE               ( LEVEL0_VALUE / 2 )
+#define GRAPNEL_BAT_PWR             25000
+
 #define TRAPPER_BP                  8
 #define TRAPPER_BT                  6000
 #define TRAPPER_HEALTH              ABHM(50000)
