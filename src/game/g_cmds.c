@@ -2950,7 +2950,7 @@ void Cmd_Buy_f( gentity_t *ent )
             ent->client->pmext.burstRoundsToFire[ 0 ] )
           return;
 
-        if( ent->client->ps.weapon == WP_LIGHTNING &&
+        if( ent->client->ps.stats[ STAT_WEAPON ] == WP_LIGHTNING &&
         ( ent->client->ps.misc[ MISC_MISC ] > LIGHTNING_BOLT_CHARGE_TIME_MIN ||
           ( ent->client->ps.stats[ STAT_STATE ] & SS_CHARGING ) ) )
           return;
@@ -2987,12 +2987,12 @@ void Cmd_Buy_f( gentity_t *ent )
           upgrade == UP_BATTLESUIT )
         G_GiveClientMaxAmmo( ent, qtrue );
 
-      if( !BG_Weapon( ent->client->ps.weapon )->usesEnergy &&
-          !BG_Weapon( ent->client->ps.weapon )->infiniteAmmo &&
-          BG_Weapon( ent->client->ps.weapon )->ammoPurchasable &&
-          !BG_Weapon( ent->client->ps.weapon )->roundPrice &&
+      if( !BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->usesEnergy &&
+          !BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->infiniteAmmo &&
+          BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->ammoPurchasable &&
+          !BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->roundPrice &&
           BG_InventoryContainsUpgrade( UP_BATTLESUIT, ent->client->ps.stats ) )
-        ent->client->ps.clips = ( 2 * BG_Weapon( ent->client->ps.weapon )->maxClips ) + 1;
+        ent->client->ps.clips = ( 2 * BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->maxClips ) + 1;
 
       //subtract from funds
       G_AddCreditToClient( ent->client, -(short)BG_Upgrade( upgrade )->price,
@@ -3142,13 +3142,13 @@ void Cmd_Sell_f( gentity_t *ent )
           upgrade == UP_BATTLESUIT )
         G_GiveClientMaxAmmo( ent, qtrue );
 
-      if( !BG_Weapon( ent->client->ps.weapon )->usesEnergy &&
-          !BG_Weapon( ent->client->ps.weapon )->infiniteAmmo &&
-          BG_Weapon( ent->client->ps.weapon )->ammoPurchasable &&
-          !BG_Weapon( ent->client->ps.weapon )->roundPrice &&
+      if( !BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->usesEnergy &&
+          !BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->infiniteAmmo &&
+          BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->ammoPurchasable &&
+          !BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->roundPrice &&
           upgrade == UP_BATTLESUIT &&
-          ent->client->ps.clips > BG_Weapon( ent->client->ps.weapon )->maxClips )
-        ent->client->ps.clips = BG_Weapon( ent->client->ps.weapon )->maxClips;
+          ent->client->ps.clips > BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->maxClips )
+        ent->client->ps.clips = BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->maxClips;
 
       //add to funds
       if( !IS_WARMUP && upgrade == UP_JETPACK && usedFuel )
@@ -3211,13 +3211,13 @@ void Cmd_Sell_f( gentity_t *ent )
             i == UP_BATTLESUIT )
           G_GiveClientMaxAmmo( ent, qtrue );
 
-        if( !BG_Weapon( ent->client->ps.weapon )->usesEnergy &&
-            !BG_Weapon( ent->client->ps.weapon )->infiniteAmmo &&
-            BG_Weapon( ent->client->ps.weapon )->ammoPurchasable &&
-            !BG_Weapon( ent->client->ps.weapon )->roundPrice &&
+        if( !BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->usesEnergy &&
+            !BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->infiniteAmmo &&
+            BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->ammoPurchasable &&
+            !BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->roundPrice &&
             upgrade == UP_BATTLESUIT &&
-            ent->client->ps.clips > BG_Weapon( ent->client->ps.weapon )->maxClips )
-          ent->client->ps.clips = BG_Weapon( ent->client->ps.weapon )->maxClips;
+            ent->client->ps.clips > BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->maxClips )
+          ent->client->ps.clips = BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->maxClips;
 
         if( IS_WARMUP )
           continue;
