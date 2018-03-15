@@ -471,6 +471,12 @@ void SV_ClipToEntity( trace_t *trace, const vec3_t start, const vec3_t mins, con
 
 	Com_Memset(trace, 0, sizeof(trace_t));
 
+	// EF_ASTRAL_NOCLIP flagged entities don't clip with ASTRALSOLID entities
+	if ( ( contentmask & EF_ASTRAL_NOCLIP ) & touch->s.eFlags ) {
+		trace->fraction = 1.0;
+		return;
+	}
+
 	// if it doesn't have any brushes of a type we
 	// are looking for, ignore it
 	if ( ! ( contentmask & touch->r.contents ) ) {
@@ -689,5 +695,3 @@ int SV_PointContents( const vec3_t p, int passEntityNum ) {
 
 	return contents;
 }
-
-
