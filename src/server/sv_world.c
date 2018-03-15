@@ -462,7 +462,9 @@ SV_ClipToEntity
 
 ====================
 */
-void SV_ClipToEntity( trace_t *trace, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int entityNum, int contentmask, traceType_t type ) {
+void SV_ClipToEntity( trace_t *trace, const vec3_t start, const vec3_t mins,
+	                    const vec3_t maxs, const vec3_t end, int entityNum,
+											int contentmask, traceType_t type ) {
 	sharedEntity_t	*touch;
 	clipHandle_t	clipHandle;
 	float			*origin, *angles;
