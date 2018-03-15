@@ -1623,6 +1623,9 @@ void      SV_GetUserinfo( int num, char *buffer, int bufferSize );
 void      SV_SetUserinfo( int num, const char *buffer );
 void      SV_GetServerinfo( char *buffer, int bufferSize );
 void      SV_SetBrushModel( gentity_t *ent, const char *name );
+void      SV_ClipToEntity( trace_t *trace, const vec3_t start, const vec3_t mins,
+                      const vec3_t maxs, const vec3_t end, int entityNum,
+                      int contentmask, traceType_t type );
 void      SV_Trace( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs,
                       const vec3_t end, int passEntityNum, int contentmask, traceType_t type );
 void      G_TraceWrapper( trace_t *results, const vec3_t start,
