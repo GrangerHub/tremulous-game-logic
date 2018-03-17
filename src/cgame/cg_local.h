@@ -1223,7 +1223,6 @@ typedef struct
 typedef enum
 {
   INTMSN_SND_WIN,
-  INTMSN_SND_LOSS,
   INTMSN_SND_EVAC,
   INTMSN_SND_TIME,
 
