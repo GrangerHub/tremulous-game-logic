@@ -1219,7 +1219,7 @@ void Blocked_Door( gentity_t *ent, gentity_t *other )
   }
 
   if( ent->damage )
-    G_Damage( other, ent, ent, NULL, NULL, ent->damage, 0, MOD_CRUSH );
+    G_Damage( other, ent, ent, NULL, NULL, HP2SU( ent->damage ), 0, MOD_CRUSH );
 
   if( ent->spawnflags & 4 )
     return;   // crushers don't reverse
