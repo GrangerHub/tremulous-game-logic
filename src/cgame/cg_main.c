@@ -907,9 +907,6 @@ static void CG_RegisterSounds( void )
         cgs.media.intermissionCustomSounds[ i ][ INTMSN_SND_WIN ][ j ] =
                 trap_S_RegisterSound( va( "sound/teams/%s/intermission_win%i",
                                           BG_Team( i )->name2, j ), qfalse );
-        cgs.media.intermissionCustomSounds[ i ][ INTMSN_SND_LOSS ][ j ] =
-                trap_S_RegisterSound( va( "sound/teams/%s/intermission_loss%i",
-                                          BG_Team( i )->name2, j ), qfalse );
       }
       cgs.media.intermissionCustomSounds[ i ][ INTMSN_SND_EVAC ][ j ] =
                 trap_S_RegisterSound( va( "sound/teams/%s/intermission_evac%i",

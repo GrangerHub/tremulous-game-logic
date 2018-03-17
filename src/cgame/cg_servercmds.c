@@ -548,11 +548,7 @@ static void CG_ConfigStringModified( void )
           strcpy( winner, va( "%s win.", BG_Team( winningTeam )->humanName ) );
           if( cg_intermissionMusic.integer )
           {
-            if( team == winningTeam ||
-                team == TEAM_NONE )
-              CG_PlayIntermissionSound( winningTeam, INTMSN_SND_WIN, index );
-            else
-              CG_PlayIntermissionSound( team, INTMSN_SND_LOSS, index );
+            CG_PlayIntermissionSound( winningTeam, INTMSN_SND_WIN, index );
           }
           break;
 
