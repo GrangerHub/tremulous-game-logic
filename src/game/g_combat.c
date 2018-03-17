@@ -1080,7 +1080,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   attacker->dmgProtectionTime = 0;
   attacker->targetProtectionTime = 0;
 
-  if(dflags & DAMAGE_INSTAGIB)
+  if( (dflags & DAMAGE_INSTAGIB) )
   {
     damage = targ->health;
     if( targ->s.eType == ET_PLAYER ||
@@ -1319,9 +1319,17 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
     targ->client->lasthurt_mod = mod;
     
     if( !(dflags & DAMAGE_INSTAGIB) )
-      take = (int)( take * G_CalcDamageModifier( point, targ, attacker,
+    {
+      float damageMod = G_CalcDamageModifier( point, targ, attacker,
                                                  client->ps.stats[ STAT_CLASS ],
-                                                 dflags ) + 0.5f );
+                                                 dflags ) + 0.5f;
+
+      if( modDamge >= 1.0 )
+      {
+        if( take < ( INT_MAX / damageMod ) )
+          take = (int)( take * damageMod );
+      }
+    }
 
     //if boosted poison every attack
     if( attacker->client && attacker->client->ps.stats[ STAT_STATE ] & SS_BOOSTED )
