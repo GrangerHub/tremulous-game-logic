@@ -539,18 +539,6 @@ void G_RemoveEntity( gentity_t *ent )
     ent->client->pers.humanItemSelection = weapon; // restore
     return;
   }
-  else if( ent->s.eType == ET_RANGE_MARKER )
-  {
-    for( e = &g_entities[ MAX_CLIENTS ]; e < &g_entities[ level.num_entities ]; ++e )
-    {
-      if( e->rangeMarker == ent )
-      {
-        // clear the buildable's reference to this range marker
-        e->rangeMarker = NULL;
-        break;
-      }
-    }
-  }
   else if( ent->s.eType == ET_BUILDABLE )
   {
     // the range marker (if any) goes away with the buildable

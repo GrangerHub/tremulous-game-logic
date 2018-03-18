@@ -310,7 +310,7 @@ struct gentity_s
 
   team_t            buildableTeam;      // buildable item team
   gentity_t         *parentNode;        // for creep and defence/spawn dependencies
-  gentity_t         *rangeMarker;
+  qboolean          rangeMarker;
   qboolean          active;             // for power repeater, but could be useful elsewhere
   qboolean          powered;            // for human buildables
   struct namelog_s  *builtBy;           // person who built this
