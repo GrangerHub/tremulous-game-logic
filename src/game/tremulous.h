@@ -387,7 +387,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define HOVEL_VALUE                  ( ( 9 * LEVEL0_VALUE ) / 8 )
 #define HOVEL_BAT_PWR                25000
 
-#define GRAPNEL_BP                  4
+#define GRAPNEL_BP                  2
 #define GRAPNEL_BT                  6000
 #define GRAPNEL_HEALTH              ABHM(175000)
 #define GRAPNEL_REGEN               ABRM(20000)
@@ -429,7 +429,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define SLIME_ZUNGE_RANGE           300
 #define SLIME_ZUNGE_DOT             0.79f // max angle = acos( SLIME_ZUNGE )
 
-#define OVERMIND_BP                 10
+#define OVERMIND_BP                 0
 #define OVERMIND_BT                 10000
 #define OVERMIND_HEALTH             ABHM(1000000)
 #define OVERMIND_REGEN              ABRM(6000)
@@ -829,7 +829,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ARMOURY_VALUE               ( ( 9 * ALIEN_CREDITS_PER_KILL ) / 4 )
 #define ARMOURY_BAT_PWR             25000
 
-#define REACTOR_BP                  10
+#define REACTOR_BP                  0
 #define REACTOR_BT                  20000
 #define REACTOR_HEALTH              HBHM(1000000)
 #define REACTOR_SPLASHDAMAGE        HBDM(200000)
