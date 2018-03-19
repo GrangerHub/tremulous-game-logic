@@ -613,12 +613,38 @@ typedef enum
   BA_NUM_BUILDABLES
 } buildable_t;
 
+//entity roles
+#define ROLE_SPAWN        0x00000001 // clients spawn from these
+#define ROLE_CORE         0x00000002 // plays a central role
+#define ROLE_POWER_SOURCE 0x00000004 // provides a power/creep source
+#define ROLE_PERVASIVE    0x00000008 // its principal effects pass through walls
+#define ROLE_SUPPORT      0x00000010 // provides support
+#define ROLE_OFFENSE      0x00000020 // actively attacks enemies
+#define ROLE_PASSIVE      0x00000040 // inanimate, for blocking and/or for
+                                     // structual support
+
 typedef enum
 {
   RMT_SPHERE,
   RMT_SPHERICAL_CONE_64,
   RMT_SPHERICAL_CONE_240
 } rangeMarkerType_t;
+
+typedef enum
+{
+  SHC_GREY,
+  SHC_DARK_BLUE,
+  SHC_LIGHT_BLUE,
+  SHC_GREEN_CYAN,
+  SHC_VIOLET,
+  SHC_YELLOW,
+  SHC_ORANGE,
+  SHC_LIGHT_GREEN,
+  SHC_DARK_GREEN,
+  SHC_RED,
+  SHC_PINK,
+  SHC_NUM_SHADER_COLORS
+} shaderColorEnum_t;
 
 // entityState_t->event values
 // entity events are for effects that take place relative
@@ -1296,6 +1322,14 @@ typedef struct
   int           value;
 
   qboolean      stackable;
+
+  rangeMarkerType_t rangeMarkerType;
+  float             rangeMarkerRange;
+  shaderColorEnum_t rangeMarkerColor;
+  qboolean          rangeMarkerUseNormal;
+  qboolean          rangeMarkerOriginAtTop;
+
+  int               role;
 } buildableAttributes_t;
 
 typedef struct
@@ -1492,7 +1526,6 @@ typedef enum
   ET_ITEM,
 
   ET_BUILDABLE,
-  ET_RANGE_MARKER,
 
   ET_LOCATION,
 

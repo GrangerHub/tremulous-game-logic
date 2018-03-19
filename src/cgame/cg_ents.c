@@ -1056,10 +1056,41 @@ void CG_RangeMarker( centity_t *cent )
   float range;
   vec3_t rgb;
 
+  //only display range markers for buildables on your team
+  if( BG_Buildable( cent->currentState.modelindex )->team != cg.predictedPlayerState.stats[ STAT_TEAM ] )
+    return;
+
+  //only display range markers if you are a builder
+  if( ( BG_GetPlayerWeapon( &cg.predictedPlayerState ) != WP_HBUILD ) &&
+      cg.predictedPlayerState.weapon != WP_ABUILD && cg.predictedPlayerState.weapon != WP_ABUILD2 )
+    return;
+
+  if( !( cg_buildableRangeMarkerMask.integer &
+         ( 1 << cent->currentState.modelindex ) ) )
+    return;
+
   if( CG_GetRangeMarkerPreferences( &drawS, &drawI, &drawF, &so, &lo, &th ) &&
       CG_GetBuildableRangeMarkerProperties( cent->currentState.modelindex, &rmType, &range, rgb ) )
   {
-    CG_DrawRangeMarker( rmType, cent->lerpOrigin, ( rmType > 0 ? cent->lerpAngles : NULL ),
+    vec3_t origin, angles;
+
+    if( BG_Buildable( cent->currentState.modelindex )->rangeMarkerOriginAtTop )
+    {
+      vec3_t mins, maxs;
+
+      BG_BuildableBoundingBox( cent->currentState.modelindex, mins, maxs );
+      VectorMA( cent->lerpOrigin, maxs[ 2 ],
+                cent->currentState.origin2, origin );
+    } else
+      VectorCopy( cent->lerpOrigin, origin );
+
+    if( BG_Buildable( cent->currentState.modelindex )->rangeMarkerUseNormal )
+    {
+      vectoangles( cent->currentState.origin2, angles );
+    } else
+      VectorCopy( cent->lerpAngles, angles );
+
+    CG_DrawRangeMarker( rmType, origin, ( rmType > 0 ? angles : NULL ),
                         range, drawS, drawI, drawF, rgb, so, lo, th );
   }
 }
@@ -1185,9 +1216,6 @@ static void CG_AddCEntity( centity_t *cent )
 
     case ET_BUILDABLE:
       CG_Buildable( cent );
-      break;
-
-    case ET_RANGE_MARKER:
       CG_RangeMarker( cent );
       break;
 
