@@ -691,7 +691,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     SHC_GREY,              //shaderColorEnum_t rangeMarkerColor;
     qfalse,                //qboolean          rangeMarkerUseNormal;
     qfalse,                //qboolean          rangeMarkerOriginAtTop;
-    (ROLE_SUPPORT)         //int               role;
+    (ROLE_SUPPORT|
+     ROLE_TRANSPORT)       //int               role;
   },
   {
     BA_H_MGTURRET,         //int       number;
