@@ -620,8 +620,7 @@ typedef enum
 #define ROLE_PERVASIVE    0x00000008 // its principal effects pass through walls
 #define ROLE_SUPPORT      0x00000010 // provides support
 #define ROLE_OFFENSE      0x00000020 // actively attacks enemies
-#define ROLE_PASSIVE      0x00000040 // inanimate, for blocking and/or for
-                                     // structual support
+#define ROLE_STRUCTUAL    0x00000040 // for structual support
 
 typedef enum
 {
