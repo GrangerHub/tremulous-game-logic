@@ -125,7 +125,16 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     ASPAWN_VALUE,          //int       value;
     qfalse,                //qboolean  stackable;
-    0                      //int       batteryPower;
+    0,                     //int       batteryPower;
+    RMT_SPHERE,            //rangeMarkerType_t rangeMarkerType;
+    CREEP_BASESIZE,        //float             rangeMarkerRange;
+    SHC_LIGHT_GREEN,       //shaderColorEnum_t rangeMarkerColor;
+    qfalse,                //qboolean          rangeMarkerUseNormal;
+    qfalse,                //qboolean          rangeMarkerOriginAtTop;
+    (ROLE_SPAWN|
+     ROLE_SUPPORT|
+     ROLE_POWER_SOURCE|
+     ROLE_PERVASIVE)       //int               role;
   },
   {
     BA_A_OVERMIND,         //int       number;
@@ -168,7 +177,16 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  uniqueTest;
     OVERMIND_VALUE,        //int       value;
     qtrue,                 //qboolean  stackable;
-    0                      //int       batteryPower;
+    0,                     //int       batteryPower;
+    RMT_SPHERE,            //rangeMarkerType_t rangeMarkerType;
+    CREEP_BASESIZE,        //float             rangeMarkerRange;
+    SHC_DARK_GREEN,        //shaderColorEnum_t rangeMarkerColor;
+    qfalse,                //qboolean          rangeMarkerUseNormal;
+    qfalse,                //qboolean          rangeMarkerOriginAtTop;
+    (ROLE_CORE|
+     ROLE_SUPPORT|
+     ROLE_POWER_SOURCE|
+     ROLE_PERVASIVE)       //int               role;
   },
   {
     BA_A_BARRICADE,        //int       number;
@@ -211,7 +229,13 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     BARRICADE_VALUE,       //int       value;
     qfalse,                //qboolean  stackable;
-    BARRICADE_BAT_PWR      //int       batteryPower;
+    BARRICADE_BAT_PWR,     //int       batteryPower;
+    RMT_SPHERE,            //rangeMarkerType_t rangeMarkerType;
+    0.0f,                  //float             rangeMarkerRange;
+    SHC_GREY,              //shaderColorEnum_t rangeMarkerColor;
+    qfalse,                //qboolean          rangeMarkerUseNormal;
+    qfalse,                //qboolean          rangeMarkerOriginAtTop;
+    (ROLE_SUPPORT)         //int               role;
   },
   {
     BA_A_ACIDTUBE,         //int       number;
@@ -254,7 +278,13 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     ACIDTUBE_VALUE,        //int       value;
     qfalse,                //qboolean  stackable;
-    ACIDTUBE_BAT_PWR       //int       batteryPower;
+    ACIDTUBE_BAT_PWR,      //int       batteryPower;
+    RMT_SPHERE,            //rangeMarkerType_t rangeMarkerType;
+    ACIDTUBE_RANGE,        //float             rangeMarkerRange;
+    SHC_RED,               //shaderColorEnum_t rangeMarkerColor;
+    qfalse,                //qboolean          rangeMarkerUseNormal;
+    qfalse,                //qboolean          rangeMarkerOriginAtTop;
+    (ROLE_OFFENSE)         //int               role;
   },
   {
     BA_A_TRAPPER,          //int       number;
@@ -297,7 +327,13 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     TRAPPER_VALUE,         //int       value;
     qfalse,                //qboolean  stackable;
-    TRAPPER_BAT_PWR        //int       batteryPower;
+    TRAPPER_BAT_PWR,       //int       batteryPower;
+    RMT_SPHERICAL_CONE_64, //rangeMarkerType_t rangeMarkerType;
+    TRAPPER_RANGE,         //float             rangeMarkerRange;
+    SHC_PINK,              //shaderColorEnum_t rangeMarkerColor;
+    qtrue,                 //qboolean          rangeMarkerUseNormal;
+    qfalse,                //qboolean          rangeMarkerOriginAtTop;
+    (ROLE_OFFENSE)         //int               role;
   },
   {
     BA_A_ZUNGE,            //int       buildNum;
@@ -340,7 +376,13 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
 	  SLIME_ZUNGE_VALUE,     //int       value;
     qfalse,                //qboolean  stackable;
-    SLIME_ZUNGE_BAT_PWR    //int       batteryPower;
+    SLIME_ZUNGE_BAT_PWR,    //int       batteryPower;
+    RMT_SPHERICAL_CONE_64, //rangeMarkerType_t rangeMarkerType;
+    SLIME_ZUNGE_RANGE,     //float             rangeMarkerRange;
+    SHC_PINK,              //shaderColorEnum_t rangeMarkerColor;
+    qtrue,                 //qboolean          rangeMarkerUseNormal;
+    qfalse,                //qboolean          rangeMarkerOriginAtTop;
+    (ROLE_OFFENSE)         //int               role;
   },
   {
     BA_A_BOOSTER,          //int       number;
@@ -384,7 +426,14 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     BOOSTER_VALUE,         //int       value;
     qfalse,                //qboolean  stackable;
-    BOOSTER_BAT_PWR        //int       batteryPower;
+    BOOSTER_BAT_PWR,       //int       batteryPower;
+    RMT_SPHERE,            //rangeMarkerType_t rangeMarkerType;
+    0.0f,                  //float             rangeMarkerRange;
+    SHC_GREY,              //shaderColorEnum_t rangeMarkerColor;
+    qfalse,                //qboolean          rangeMarkerUseNormal;
+    qfalse,                //qboolean          rangeMarkerOriginAtTop;
+    (ROLE_SUPPORT|
+     ROLE_PERVASIVE)       //int               role;
   },
   {
     BA_A_HIVE,             //int       number;
@@ -426,7 +475,13 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     HIVE_VALUE,            //int       value;
     qfalse,                //qboolean  stackable;
-    HIVE_BAT_PWR           //int       batteryPower;
+    HIVE_BAT_PWR,          //int       batteryPower;
+    RMT_SPHERE,            //rangeMarkerType_t rangeMarkerType;
+    HIVE_SENSE_RANGE,      //float             rangeMarkerRange;
+    SHC_YELLOW,            //shaderColorEnum_t rangeMarkerColor;
+    qfalse,                //qboolean          rangeMarkerUseNormal;
+    qtrue,                 //qboolean          rangeMarkerOriginAtTop;
+    (ROLE_OFFENSE)         //int               role;
   },
   {
     BA_A_HOVEL,            //int       buildNum;
@@ -474,7 +529,13 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  uniqueTest;
     HOVEL_VALUE,           //int       value;
     qfalse,                //qboolean  stackable;
-    HOVEL_BAT_PWR          //int       batteryPower;
+    HOVEL_BAT_PWR,         //int       batteryPower;
+    RMT_SPHERE,            //rangeMarkerType_t rangeMarkerType;
+    0.0f,                  //float             rangeMarkerRange;
+    SHC_GREY,              //shaderColorEnum_t rangeMarkerColor;
+    qfalse,                //qboolean          rangeMarkerUseNormal;
+    qfalse,                //qboolean          rangeMarkerOriginAtTop;
+    (ROLE_SUPPORT)         //int               role;
   },
   {
     BA_A_GRAPNEL,          //int       buildNum;
@@ -516,7 +577,14 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     GRAPNEL_VALUE,         //int       value;
     qtrue,                 //qboolean  stackable;
-    GRAPNEL_BAT_PWR          //int       batteryPower;
+    GRAPNEL_BAT_PWR,       //int       batteryPower;
+    RMT_SPHERE,            //rangeMarkerType_t rangeMarkerType;
+    0.0f,                  //float             rangeMarkerRange;
+    SHC_GREY,              //shaderColorEnum_t rangeMarkerColor;
+    qfalse,                //qboolean          rangeMarkerUseNormal;
+    qfalse,                //qboolean          rangeMarkerOriginAtTop;
+    (ROLE_SUPPORT|
+     ROLE_STRUCTUAL)       //int               role;
   },
   {
     BA_H_SPAWN,            //int       number;
@@ -559,7 +627,14 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     HSPAWN_VALUE,          //int       value;
     qfalse,                //qboolean  stackable;
-    0                      //int       batteryPower;
+    0,                     //int       batteryPower;
+    RMT_SPHERE,            //rangeMarkerType_t rangeMarkerType;
+    0.0f,                  //float             rangeMarkerRange;
+    SHC_GREY,              //shaderColorEnum_t rangeMarkerColor;
+    qfalse,                //qboolean          rangeMarkerUseNormal;
+    qfalse,                //qboolean          rangeMarkerOriginAtTop;
+    (ROLE_SPAWN|
+     ROLE_SUPPORT)         //int               role;
   },
   {
     BA_H_TELEPORTER,       //int       number;
@@ -610,7 +685,13 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     HTELEPORTER_VALUE,     //int       value;
     qfalse,                //qboolean  stackable;
-    HTELEPORTER_BAT_PWR    //int       batteryPower;
+    HTELEPORTER_BAT_PWR,    //int       batteryPower;
+    RMT_SPHERE,            //rangeMarkerType_t rangeMarkerType;
+    0.0f,                  //float             rangeMarkerRange;
+    SHC_GREY,              //shaderColorEnum_t rangeMarkerColor;
+    qfalse,                //qboolean          rangeMarkerUseNormal;
+    qfalse,                //qboolean          rangeMarkerOriginAtTop;
+    (ROLE_SUPPORT)         //int               role;
   },
   {
     BA_H_MGTURRET,         //int       number;
@@ -653,7 +734,13 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     MGTURRET_VALUE,        //int       value;
     qfalse,                //qboolean  stackable;
-    MGTURRET_BAT_PWR       //int       batteryPower;
+    MGTURRET_BAT_PWR,       //int       batteryPower;
+    RMT_SPHERICAL_CONE_240,//rangeMarkerType_t rangeMarkerType;
+    MGTURRET_RANGE,        //float             rangeMarkerRange;
+    SHC_ORANGE,            //shaderColorEnum_t rangeMarkerColor;
+    qtrue,                 //qboolean          rangeMarkerUseNormal;
+    qfalse,                //qboolean          rangeMarkerOriginAtTop;
+    (ROLE_OFFENSE)         //int               role;
   },
   {
     BA_H_TESLAGEN,         //int       number;
@@ -696,7 +783,13 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     TESLAGEN_VALUE,        //int       value;
     qfalse,                //qboolean  stackable;
-    TESLAGEN_BAT_PWR       //int       batteryPower;
+    TESLAGEN_BAT_PWR,       //int       batteryPower;
+    RMT_SPHERE,            //rangeMarkerType_t rangeMarkerType;
+    TESLAGEN_RANGE,        //float             rangeMarkerRange;
+    SHC_VIOLET,            //shaderColorEnum_t rangeMarkerColor;
+    qfalse,                //qboolean          rangeMarkerUseNormal;
+    qtrue,                 //qboolean          rangeMarkerOriginAtTop;
+    (ROLE_OFFENSE)         //int               role;
   },
   {
     BA_H_ARMOURY,          //int       number;
@@ -743,7 +836,13 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     ARMOURY_VALUE,         //int       value;
     qtrue,                 //qboolean  stackable;
-    ARMOURY_BAT_PWR        //int       batteryPower;
+    ARMOURY_BAT_PWR,        //int       batteryPower;
+    RMT_SPHERE,            //rangeMarkerType_t rangeMarkerType;
+    0.0f,                  //float             rangeMarkerRange;
+    SHC_GREY,              //shaderColorEnum_t rangeMarkerColor;
+    qfalse,                //qboolean          rangeMarkerUseNormal;
+    qfalse,                //qboolean          rangeMarkerOriginAtTop;
+    (ROLE_SUPPORT)         //int               role;
   },
   {
     BA_H_DCC,              //int       number;
@@ -786,7 +885,14 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  uniqueTest;
     DC_VALUE,              //int       value;
     qtrue,                 //qboolean  stackable;
-    DC_BAT_PWR             //int       batteryPower;
+    DC_BAT_PWR,            //int       batteryPower;
+    RMT_SPHERE,            //rangeMarkerType_t rangeMarkerType;
+    DC_RANGE,              //float             rangeMarkerRange;
+    SHC_GREEN_CYAN,        //shaderColorEnum_t rangeMarkerColor;
+    qfalse,                //qboolean          rangeMarkerUseNormal;
+    qfalse,                //qboolean          rangeMarkerOriginAtTop;
+    (ROLE_SUPPORT|
+     ROLE_PERVASIVE)       //int               role;
   },
   {
     BA_H_MEDISTAT,         //int       number;
@@ -830,7 +936,13 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     MEDISTAT_VALUE,        //int       value;
     qfalse,                //qboolean  stackable;
-    MEDISTAT_BAT_PWR       //int       batteryPower;
+    MEDISTAT_BAT_PWR,       //int       batteryPower;
+    RMT_SPHERE,            //rangeMarkerType_t rangeMarkerType;
+    0.0f,                  //float             rangeMarkerRange;
+    SHC_GREY,              //shaderColorEnum_t rangeMarkerColor;
+    qfalse,                //qboolean          rangeMarkerUseNormal;
+    qfalse,                //qboolean          rangeMarkerOriginAtTop;
+    (ROLE_SUPPORT)         //int               role;
   },
   {
     BA_H_REACTOR,          //int       number;
@@ -877,7 +989,16 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  uniqueTest;
     REACTOR_VALUE,         //int       value;
     qtrue,                 //qboolean  stackable;
-    0                      //int       batteryPower;
+    0,                     //int       batteryPower;
+    RMT_SPHERE,            //rangeMarkerType_t rangeMarkerType;
+    REACTOR_BASESIZE,      //float             rangeMarkerRange;
+    SHC_DARK_BLUE,         //shaderColorEnum_t rangeMarkerColor;
+    qfalse,                //qboolean          rangeMarkerUseNormal;
+    qfalse,                //qboolean          rangeMarkerOriginAtTop;
+    (ROLE_CORE|
+     ROLE_SUPPORT|
+     ROLE_POWER_SOURCE|
+     ROLE_PERVASIVE)       //int               role;
   },
   {
     BA_H_REPEATER,         //int       number;
@@ -924,7 +1045,15 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  uniqueTest;
     REPEATER_VALUE,        //int       value;
     qfalse,                //qboolean  stackable;
-    0                      //int       batteryPower;
+    0,                     //int       batteryPower;
+    RMT_SPHERE,            //rangeMarkerType_t rangeMarkerType;
+    REPEATER_BASESIZE,     //float             rangeMarkerRange;
+    SHC_LIGHT_BLUE,        //shaderColorEnum_t rangeMarkerColor;
+    qfalse,                //qboolean          rangeMarkerUseNormal;
+    qfalse,                //qboolean          rangeMarkerOriginAtTop;
+    (ROLE_SUPPORT|
+     ROLE_POWER_SOURCE|
+     ROLE_PERVASIVE)       //int               role;
   }
 };
 

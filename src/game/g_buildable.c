@@ -5193,33 +5193,13 @@ G_AddRangeMarkerForBuildable
 */
 static void G_AddRangeMarkerForBuildable( gentity_t *self )
 {
-  gentity_t *rm;
-
-  switch( self->s.modelindex )
+  if( BG_Buildable( self->s.modelindex )->rangeMarkerRange > 0.0f )
   {
-    case BA_A_SPAWN:
-    case BA_A_OVERMIND:
-    case BA_A_ACIDTUBE:
-    case BA_A_TRAPPER:
-    case BA_A_ZUNGE:
-    case BA_A_HIVE:
-    case BA_H_MGTURRET:
-    case BA_H_TESLAGEN:
-    case BA_H_DCC:
-    case BA_H_REACTOR:
-    case BA_H_REPEATER:
-      break;
-    default:
-      return;
-  }
+    self->rangeMarker = qtrue;
+    self->r.svFlags |= SVF_CLIENTMASK_INCLUSIVE;
+  } else
+    self->rangeMarker = qfalse;
 
-  rm = G_Spawn();
-  rm->classname = "buildablerangemarker";
-  rm->r.svFlags = SVF_BROADCAST | SVF_CLIENTMASK;
-  rm->s.eType = ET_RANGE_MARKER;
-  rm->s.modelindex = self->s.modelindex;
-
-  self->rangeMarker = rm;
 }
 
 /*
@@ -5231,8 +5211,8 @@ void G_RemoveRangeMarkerFrom( gentity_t *self )
 {
   if( self->rangeMarker )
   {
-    G_FreeEntity( self->rangeMarker );
-    self->rangeMarker = NULL;
+    self->rangeMarker = qfalse;
+    self->r.svFlags &= ~SVF_CLIENTMASK_INCLUSIVE;
   }
 }
 
@@ -6404,13 +6384,12 @@ void G_BuildLogRevert( int id )
 /*
 ================
 G_UpdateBuildableRangeMarkers
+
+Ensures that range markers for power sources can be seen through walls
 ================
 */
 void G_UpdateBuildableRangeMarkers( void )
 {
-  // is the entity 64-bit client-masking extension available?
-  qboolean maskingExtension = ( Cvar_VariableIntegerValue( "sv_gppExtension" ) >= 1 );
-
   gentity_t *e;
   for( e = &g_entities[ MAX_CLIENTS ]; e < &g_entities[ level.num_entities ]; ++e )
   {
@@ -6418,23 +6397,17 @@ void G_UpdateBuildableRangeMarkers( void )
     team_t bTeam;
     int i;
 
-    if( e->s.eType != ET_BUILDABLE || !e->rangeMarker )
+    if( e->s.eType != ET_BUILDABLE )
+      continue;
+
+    if( !e->rangeMarker )
       continue;
 
     bType = e->s.modelindex;
     bTeam = BG_Buildable( bType )->team;
 
-    e->rangeMarker->s.pos = e->s.pos;
-    if( bType == BA_A_HIVE || bType == BA_H_TESLAGEN )
-      VectorMA( e->s.pos.trBase, e->r.maxs[ 2 ], e->s.origin2, e->rangeMarker->s.pos.trBase );
-    else if( bType == BA_A_TRAPPER || bType == BA_H_MGTURRET )
-      vectoangles( e->s.origin2, e->rangeMarker->s.apos.trBase );
-
-    e->rangeMarker->r.singleClient = 0;
-    e->rangeMarker->r.hack.generic1 = 0;
-
-    // remove any previously added NOCLIENT flags from the hack below
-    e->rangeMarker->r.svFlags &= ~SVF_NOCLIENT;
+    e->r.singleClient = 0;
+    e->r.hack.generic1 = 0;
 
     for( i = 0; i < level.maxclients; ++i )
     {
@@ -6446,46 +6419,23 @@ void G_UpdateBuildableRangeMarkers( void )
       if( client->pers.connected != CON_CONNECTED )
         continue;
 
-      if( i >= 32 && !maskingExtension )
-      {
-        // resort to not sending range markers at all
-        if( !Cvar_VariableIntegerValue( "g_rangeMarkerWarningGiven" ) )
-        {
-          SV_GameSendServerCommand( -1, "print \"" S_COLOR_YELLOW "WARNING: There is no "
-            "support for entity 64-bit client-masking on this server. Please update "
-            "your server executable. Until then, range markers will not be displayed "
-            "while there are clients with client numbers above 31 in the game.\n\"" );
-          Cvar_SetSafe( "g_rangeMarkerWarningGiven", "1" );
-        }
-
-        for( e = &g_entities[ MAX_CLIENTS ]; e < &g_entities[ level.num_entities ]; ++e )
-        {
-          if( e->s.eType == ET_BUILDABLE && e->rangeMarker )
-            e->rangeMarker->r.svFlags |= SVF_NOCLIENT;
-        }
-
-        return;
-      }
-
       team = client->pers.teamSelection;
-      weaponDisplays = ( BG_InventoryContainsWeapon( WP_HBUILD, client->ps.stats ) ||
+      weaponDisplays = ( ( BG_GetPlayerWeapon( &client->ps ) == WP_HBUILD ) ||
             client->ps.weapon == WP_ABUILD || client->ps.weapon == WP_ABUILD2 );
-      wantsToSee = !!( client->pers.buildableRangeMarkerMask & ( 1 << bType ) );
+      wantsToSee = ( client->pers.buildableRangeMarkerMask & ( 1 << bType ) );
 
-      if( ( ( team == bTeam ||
-              ( IS_WARMUP &&
-                g_warmupBlockEnemyBuilding.integer &&
-                ( bType == BA_A_SPAWN || bType == BA_H_REACTOR ||
-                  bType == BA_H_REPEATER || bType == BA_A_OVERMIND ) ) ) &&
-          weaponDisplays ) && wantsToSee )
+      if( ( team == bTeam ) &&
+          weaponDisplays && 
+          wantsToSee &&
+          (BG_Buildable( bType )->role & ROLE_PERVASIVE) )
       {
         if( i >= 32 )
-          e->rangeMarker->r.hack.generic1 |= 1 << ( i - 32 );
+          e->r.hack.generic1 |= 1 << ( i - 32 );
         else
-          e->rangeMarker->r.singleClient |= 1 << i;
+          e->r.singleClient |= 1 << i;
       }
     }
 
-    SV_LinkEntity( e->rangeMarker );
+    SV_LinkEntity( e );
   }
 }

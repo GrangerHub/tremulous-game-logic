@@ -404,29 +404,12 @@ qboolean CG_GetBuildableRangeMarkerProperties( buildable_t bType, rangeMarkerTyp
 {
   shaderColorEnum_t shc;
 
-  switch( bType )
-  {
-    case BA_A_SPAWN:    *range = CREEP_BASESIZE;    shc = SHC_LIGHT_GREEN; break;
-    case BA_A_OVERMIND: *range = CREEP_BASESIZE;    shc = SHC_DARK_GREEN;  break;
-    case BA_A_ACIDTUBE: *range = ACIDTUBE_RANGE;    shc = SHC_RED;         break;
-    case BA_A_TRAPPER:  *range = TRAPPER_RANGE;     shc = SHC_PINK;        break;
-    case BA_A_ZUNGE:    *range = SLIME_ZUNGE_RANGE; shc = SHC_PINK;        break;
-    case BA_A_HIVE:     *range = HIVE_SENSE_RANGE;  shc = SHC_YELLOW;      break;
-    case BA_H_MGTURRET: *range = MGTURRET_RANGE;    shc = SHC_ORANGE;      break;
-    case BA_H_TESLAGEN: *range = TESLAGEN_RANGE;    shc = SHC_VIOLET;      break;
-    case BA_H_DCC:      *range = DC_RANGE;          shc = SHC_GREEN_CYAN;  break;
-    case BA_H_REACTOR:  *range = REACTOR_BASESIZE;  shc = SHC_DARK_BLUE;   break;
-    case BA_H_REPEATER: *range = REPEATER_BASESIZE; shc = SHC_LIGHT_BLUE;  break;
-    default: return qfalse;
-  }
+  if( BG_Buildable( bType )->rangeMarkerRange <= 0.0f )
+    return qfalse;
 
-  if( bType == BA_A_TRAPPER ||
-      bType == BA_A_ZUNGE )
-    *rmType = RMT_SPHERICAL_CONE_64;
-  else if( bType == BA_H_MGTURRET )
-    *rmType = RMT_SPHERICAL_CONE_240;
-  else
-    *rmType = RMT_SPHERE;
+  *rmType = BG_Buildable( bType )->rangeMarkerType;
+  *range = BG_Buildable( bType )->rangeMarkerRange;
+  shc = BG_Buildable( bType )->rangeMarkerColor;
 
   VectorCopy( cg_shaderColors[ shc ], rgb );
 

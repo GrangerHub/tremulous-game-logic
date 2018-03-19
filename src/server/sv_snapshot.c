@@ -347,8 +347,8 @@ static void SV_AddEntitiesVisibleFromPoint( vec3_t origin, clientSnapshot_t *fra
 				continue;
 			}
 		}
-		// entities can be flagged to be sent to a given mask of clients
-		if ( ent->r.svFlags & SVF_CLIENTMASK ) {
+		// entities can be flagged to be sent only to a given mask of clients
+		if ( ent->r.svFlags & SVF_CLIENTMASK_EXCLUSIVE ) {
 			if ( frame->ps.clientNum >= 32 ) {
 				if ( ~ent->r.hack.generic1 & ( 1 << ( frame->ps.clientNum - 32 ) ) )
 					continue;
@@ -369,6 +369,22 @@ static void SV_AddEntitiesVisibleFromPoint( vec3_t origin, clientSnapshot_t *fra
 		if ( ent->r.svFlags & SVF_BROADCAST ) {
 			SV_AddEntToSnapshot( svEnt, ent, eNums );
 			continue;
+		}
+
+		// entities can be flagged to be sent always to a given mask of clients,
+		// while still can be sent to other clients
+		if ( ent->r.svFlags & SVF_CLIENTMASK_INCLUSIVE ) {
+			if ( frame->ps.clientNum >= 32 ) {
+				if ( ent->r.hack.generic1 & ( 1 << ( frame->ps.clientNum - 32 ) ) ) {
+					SV_AddEntToSnapshot( svEnt, ent, eNums );
+					continue;
+				}
+			} else {
+				if ( ent->r.singleClient & ( 1 << frame->ps.clientNum ) ){
+					SV_AddEntToSnapshot( svEnt, ent, eNums );
+					continue;
+				}
+			}
 		}
 
 		// ignore if not touching a PV leaf

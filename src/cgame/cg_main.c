@@ -211,6 +211,7 @@ vmCvar_t  cg_rangeMarkerLineOpacity;
 vmCvar_t  cg_rangeMarkerLineThickness;
 vmCvar_t  cg_rangeMarkerForBlueprint;
 vmCvar_t  cg_rangeMarkerBuildableTypes;
+vmCvar_t  cg_buildableRangeMarkerMask;
 vmCvar_t  cg_binaryShaderScreenScale;
 
 vmCvar_t  cg_spectatorWallhack;
@@ -364,7 +365,7 @@ static cvarTable_t cvarTable[ ] =
   { &cg_rangeMarkerLineThickness, "cg_rangeMarkerLineThickness", "4.0", CVAR_ARCHIVE },
   { &cg_rangeMarkerForBlueprint, "cg_rangeMarkerForBlueprint", "1", CVAR_ARCHIVE },
   { &cg_rangeMarkerBuildableTypes, "cg_rangeMarkerBuildableTypes", "support", CVAR_ARCHIVE },
-  { NULL, "cg_buildableRangeMarkerMask", "", CVAR_USERINFO },
+  { &cg_buildableRangeMarkerMask, "cg_buildableRangeMarkerMask", "", CVAR_USERINFO|CVAR_ROM },
   { &cg_binaryShaderScreenScale, "cg_binaryShaderScreenScale", "1.0", CVAR_ARCHIVE },
 
   { &cg_spectatorWallhack, "cg_spectatorWallhack", "0", CVAR_ARCHIVE },
@@ -530,6 +531,8 @@ void CG_UpdateBuildableRangeMarkerMask( void )
 
     for(;;)
     {
+      buildable_t b;
+
       q = strchr( p, ',' );
       if( q )
         *q = '\0';
@@ -545,27 +548,42 @@ void CG_UpdateBuildableRangeMarkerMask( void )
       }
       else if( !Q_stricmp( p, "all" ) )
       {
-        brmMask |= ( 1 << BA_A_OVERMIND ) | ( 1 << BA_A_SPAWN ) |
-                   ( 1 << BA_A_ACIDTUBE ) | ( 1 << BA_A_TRAPPER ) | ( 1 << BA_A_HIVE ) |
-                   ( 1 << BA_H_REACTOR ) | ( 1 << BA_H_REPEATER ) | ( 1 << BA_H_DCC ) |
-                   ( 1 << BA_H_MGTURRET ) | ( 1 << BA_H_TESLAGEN );
+        for( b = BA_NONE + 1; b < BA_NUM_BUILDABLES; b++ )
+        {
+          if( BG_Buildable( b )->rangeMarkerRange <= 0 )
+            continue;
+
+          brmMask |= ( 1 << b );
+        }
       }
       else
       {
         char *pp;
-        int only;
+        int only = 0;
 
         if( !Q_stricmpn( p, "alien", 5 ) )
         {
           pp = p + 5;
-          only = ( 1 << BA_A_OVERMIND ) | ( 1 << BA_A_SPAWN ) |
-                 ( 1 << BA_A_ACIDTUBE ) | ( 1 << BA_A_TRAPPER ) | ( 1 << BA_A_HIVE );
+          for( b = BA_NONE + 1; b < BA_NUM_BUILDABLES; b++ )
+          {
+            if( BG_Buildable( b )->rangeMarkerRange <= 0 )
+              continue;
+
+            if( BG_Buildable( b )->team == TEAM_ALIENS )
+              only |= ( 1 << b );
+          }
         }
         else if( !Q_stricmpn( p, "human", 5 ) )
         {
           pp = p + 5;
-          only = ( 1 << BA_H_REACTOR ) | ( 1 << BA_H_REPEATER ) | ( 1 << BA_H_DCC ) |
-                 ( 1 << BA_H_MGTURRET ) | ( 1 << BA_H_TESLAGEN );
+          for( b = BA_NONE + 1; b < BA_NUM_BUILDABLES; b++ )
+          {
+            if( BG_Buildable( b )->rangeMarkerRange <= 0 )
+              continue;
+
+            if( BG_Buildable( b )->team == TEAM_HUMANS )
+              only |= ( 1 << b );
+          }
         }
         else
         {
@@ -579,13 +597,27 @@ void CG_UpdateBuildableRangeMarkerMask( void )
         }
         else if( !Q_stricmp( pp, "support" ) )
         {
-          brmMask |= only & ( ( 1 << BA_A_OVERMIND ) | ( 1 << BA_A_SPAWN ) |
-                              ( 1 << BA_H_REACTOR ) | ( 1 << BA_H_REPEATER ) | ( 1 << BA_H_DCC ) );
+          int role = 0;
+
+          for( b = BA_NONE + 1; b < BA_NUM_BUILDABLES; b++ )
+          {
+            if( BG_Buildable( b )->role & ROLE_SUPPORT )
+              role |= ( 1 << b );
+          }
+
+          brmMask |= only & role;
         }
         else if( !Q_stricmp( pp, "offensive" ) )
         {
-          brmMask |= only & ( ( 1 << BA_A_ACIDTUBE ) | ( 1 << BA_A_TRAPPER ) | ( 1 << BA_A_HIVE ) |
-                              ( 1 << BA_H_MGTURRET ) | ( 1 << BA_H_TESLAGEN ) );
+          int role = 0;
+
+          for( b = BA_NONE + 1; b < BA_NUM_BUILDABLES; b++ )
+          {
+            if( BG_Buildable( b )->role & ROLE_OFFENSE )
+              role |= ( 1 << b );
+          }
+
+          brmMask |= only & role;
         }
         else
           Com_Printf( S_COLOR_YELLOW "WARNING: unknown buildable or group: %s\n", p );
@@ -2276,6 +2308,7 @@ static char *CG_VoIPString( void )
 
 const vec3_t cg_shaderColors[ SHC_NUM_SHADER_COLORS ] =
 {
+  { 0.313f, 0.313f, 0.313f },  // grey
   { 0.0f,   0.0f,   0.75f  }, // dark blue
   { 0.3f,   0.35f,  0.625f }, // light blue
   { 0.0f,   0.625f, 0.563f }, // green-cyan
@@ -2285,8 +2318,7 @@ const vec3_t cg_shaderColors[ SHC_NUM_SHADER_COLORS ] =
   { 0.375f, 0.625f, 0.375f }, // light green
   { 0.0f,   0.438f, 0.0f   }, // dark green
   { 1.0f,   0.0f,   0.0f   }, // red
-  { 0.625f, 0.375f, 0.4f   }, // pink
-  { 0.313f, 0.313f, 0.313f }  // grey
+  { 0.625f, 0.375f, 0.4f   }  // pink
 };
 
 /*

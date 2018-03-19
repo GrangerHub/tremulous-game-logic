@@ -1590,22 +1590,6 @@ typedef struct
   void (*function)( int argNum );
 } consoleCommandCompletions_t;
 
-typedef enum
-{
-  SHC_DARK_BLUE,
-  SHC_LIGHT_BLUE,
-  SHC_GREEN_CYAN,
-  SHC_VIOLET,
-  SHC_YELLOW,
-  SHC_ORANGE,
-  SHC_LIGHT_GREEN,
-  SHC_DARK_GREEN,
-  SHC_RED,
-  SHC_PINK,
-  SHC_GREY,
-  SHC_NUM_SHADER_COLORS
-} shaderColorEnum_t;
-
 //==============================================================================
 
 extern  cgs_t     cgs;
@@ -1722,6 +1706,7 @@ extern  vmCvar_t    cg_rangeMarkerLineOpacity;
 extern  vmCvar_t    cg_rangeMarkerLineThickness;
 extern  vmCvar_t    cg_rangeMarkerForBlueprint;
 extern  vmCvar_t    cg_rangeMarkerBuildableTypes;
+extern  vmCvar_t    cg_buildableRangeMarkerMask;
 extern  vmCvar_t    cg_binaryShaderScreenScale;
 
 extern  vmCvar_t    cg_spectatorWallhack;
