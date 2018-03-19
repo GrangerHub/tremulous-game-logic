@@ -616,6 +616,7 @@ typedef enum
 #define ROLE_SUPPORT      0x00000010 // provides support
 #define ROLE_OFFENSE      0x00000020 // actively attacks enemies
 #define ROLE_STRUCTUAL    0x00000040 // for structual support
+#define ROLE_TRANSPORT    0x00000080 // Used for remote transportation
 
 typedef enum
 {
