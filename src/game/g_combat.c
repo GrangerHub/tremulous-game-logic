@@ -1313,12 +1313,12 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
     {
       float damageMod = G_CalcDamageModifier( point, targ, attacker,
                                                  client->ps.stats[ STAT_CLASS ],
-                                                 dflags ) + 0.5f;
+                                                 dflags );
 
       if( modDamge >= 1.0 )
       {
-        if( take < ( INT_MAX / damageMod ) )
-          take = (int)( take * damageMod );
+        if( take < ( ( INT_MAX - 1 ) / damageMod ) )
+          take = (int)( ( take * damageMod ) + 0.5f );
       }
     }
 
