@@ -523,7 +523,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define GRENADE_SPEED               400.0f
 #define GRENADE_SIZE                3.0f        // missile bounding box
 #define GRENADE_LIFETIME            5000
-#define GRENADE_SPLASH_BATTLESUIT   0.50f // reduction of damage fraction for
+#define GRENADE_SPLASH_BATTLESUIT   0.75f // reduction of damage fraction for
                                           //grenade nade splash on battlesuits
 
 #define SHOTGUN_PRICE               175
@@ -714,7 +714,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define BSUIT_POISON_PROTECTION     3000
 #define BSUIT_PCLOUD_PROTECTION     6000
 #define BSUIT_MAX_ARMOR             750000
-#define BSUIT_ARMOR_LOW             300000 // Value at which the armor indicator starts to flash
+#define BSUIT_ARMOR_LOW             250000 // Value at which the armor indicator starts to flash
 
 #define MEDKIT_POISON_IMMUNITY_TIME 0
 #define MEDKIT_STARTUP_TIME         4000
