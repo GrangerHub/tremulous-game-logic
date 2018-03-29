@@ -27,6 +27,41 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../qcommon/q_shared.h"
 #include "bg_public.h"
 
+/*
+============
+BG_HP2SU
+
+Convert health point into health subunits
+============
+*/
+int BG_HP2SU( int healthPoints )
+{
+  if( healthPoints < ( INT_MAX / HEALTH_POINT_SUBUNIT_FACTOR ) )
+    return healthPoints * HEALTH_POINT_SUBUNIT_FACTOR;
+
+  // prevent integer overflow
+  return INT_MAX;
+}
+
+/*
+============
+BG_SU2HP
+
+Convert health subunits to health points
+============
+*/
+int BG_SU2HP( int healthSubUnits )
+{
+  int healthPoints = healthSubUnits / HEALTH_POINT_SUBUNIT_FACTOR;
+
+  // only let healthPoints = 0 if healthSubUnits is 0
+  if( !healthPoints &&
+      healthSubUnits )
+    return 1;
+
+  return healthPoints;
+}
+
 #ifdef Q3_VM
   #define FS_FOpenFileByMode trap_FS_FOpenFile
   #define FS_Read2 trap_FS_Read
@@ -1356,7 +1391,7 @@ static const classAttributes_t bg_classList[ ] =
     "spectator",                                    //char    *name;
     "",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
-    HP2SU( 100 ),                                   //int     health;
+    100000,                                         //int     health;
     0.0f,                                           //float   maxHealthDecayRate;
     0.0f,                                           //float   fallDamage;
     0.0f,                                           //float   regenRate;
@@ -1747,7 +1782,7 @@ static const classAttributes_t bg_classList[ ] =
     "human_base",                                   //char    *name;
     "",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
-    HP2SU( 100 ),                                   //int     health;
+    100000,                                         //int     health;
     0.0f,                                           //float   maxHealthDecayRate;
     1.0f,                                           //float   fallDamage;
     0.0f,                                           //float   regenRate;
@@ -1777,7 +1812,7 @@ static const classAttributes_t bg_classList[ ] =
     "human_bsuit",                                  //char    *name;
     "",
     ( 1 << S3 ),                                    //int     stages;
-    HP2SU( 100 ),                                   //int     health;
+    100000,                                   //int     health;
     0.0f,                                           //float   maxHealthDecayRate;
     1.0f,                                           //float   fallDamage;
     0.0f,                                           //float   regenRate;

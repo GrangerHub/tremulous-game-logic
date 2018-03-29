@@ -914,7 +914,7 @@ static void CG_DrawPlayerClipsValue( rectDef_t *rect, vec4_t color )
 
 static void CG_DrawPlayerHealthValue( rectDef_t *rect, vec4_t color )
 {
-  int health = SU2HP( cg.snap->ps.misc[ MISC_HEALTH ] );
+  int health = BG_SU2HP( cg.snap->ps.misc[ MISC_HEALTH ] );
   float  healthColorFraction = (float)cg.snap->ps.misc[ MISC_HEALTH ] / BG_Class( cg.snap->ps.stats[STAT_CLASS] )->health;
   const buildStat_t *bs = &cgs.humanBuildStat;
 
@@ -970,7 +970,7 @@ static void CG_DrawPlayerHealthCross( rectDef_t *rect, vec4_t ref_color )
   // Pick the alpha value
   Vector4Copy( ref_color, color );
   if( cg.snap->ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
-      SU2HP( cg.snap->ps.misc[ MISC_HEALTH ] ) < 10  )
+      BG_SU2HP( cg.snap->ps.misc[ MISC_HEALTH ] ) < 10  )
   {
     color[ 0 ] = 1.0f;
     color[ 1 ] = color[ 2 ] = 0.0f;
@@ -1216,7 +1216,7 @@ static void CG_DrawArmorValue( rectDef_t *rect, vec4_t color )
 
   trap_R_SetColor( color );
   CG_DrawField( rect->x, rect->y, 4, rect->w / 4,rect->h,
-                SU2HP( cg.predictedPlayerState.misc[ MISC_ARMOR ] ) );
+                BG_SU2HP( cg.predictedPlayerState.misc[ MISC_ARMOR ] ) );
   trap_R_SetColor( NULL );
 }
 
@@ -1662,7 +1662,7 @@ float CG_GetValue( int ownerDraw )
         return ps->clips;
       break;
     case CG_PLAYER_HEALTH:
-      return ( SU2HP( ps->misc[ MISC_HEALTH ] ) );
+      return ( BG_SU2HP( ps->misc[ MISC_HEALTH ] ) );
       break;
     default:
       break;
@@ -2272,7 +2272,7 @@ static void CG_DrawTeamOverlay( rectDef_t *rect, float scale, vec4_t color )
 
       s = va( " [^%c%3d^7] ^7%s",
               CG_GetColorCharForHealth( displayClients[ i ] ),
-              SU2HP( ci->health ),
+              BG_SU2HP( ci->health ),
               CG_ConfigString( CS_LOCATIONS + ci->location ) );
     }
 
@@ -3255,7 +3255,7 @@ static void CG_DrawCrosshairNames( rectDef_t *rect, float scale, int textStyle )
   {
     name = va( "%s ^7[^%c%d^7]", name,
                CG_GetColorCharForHealth( cg.crosshairClientNum ),
-               SU2HP( cgs.clientinfo[ cg.crosshairClientNum ].health ) );
+               BG_SU2HP( cgs.clientinfo[ cg.crosshairClientNum ].health ) );
   }
 
   if( cg.snap->ps.stats[ STAT_TEAM ] == TEAM_NONE )

@@ -100,7 +100,7 @@ static void CG_ParseTeamInfo( void )
     }
 
     cgs.clientinfo[ client ].location       = atoi( CG_Argv( ++i ) );
-    cgs.clientinfo[ client ].health         = HP2SU( atoi( CG_Argv( ++i ) ) );
+    cgs.clientinfo[ client ].health         = BG_HP2SU( atoi( CG_Argv( ++i ) ) );
     cgs.clientinfo[ client ].curWeaponClass = atoi( CG_Argv( ++i ) );
     if( cg.snap->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
       cgs.clientinfo[ client ].upgrade      = atoi( CG_Argv( ++i ) );

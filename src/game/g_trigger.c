@@ -447,7 +447,7 @@ void SP_trigger_hurt( gentity_t *self )
   if( self->damage <= 0 )
     self->damage = 5;
 
-  self->damage = HP2SU( self->damage );
+  self->damage = BG_HP2SU( self->damage );
 
   G_SetContents( self, CONTENTS_TRIGGER );
 
@@ -1105,7 +1105,7 @@ void SP_trigger_heal( gentity_t *self )
     Com_Printf( S_COLOR_YELLOW "WARNING: trigger_heal with negative damage key\n" );
   }
 
-  self->damage = HP2SU( self->damage );
+  self->damage = BG_HP2SU( self->damage );
 
   self->touch = trigger_heal_touch;
   self->use = trigger_heal_use;

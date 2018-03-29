@@ -731,7 +731,7 @@ static void CG_BuildableParticleEffects( centity_t *cent )
   entityState_t   *es = &cent->currentState;
   team_t          team = BG_Buildable( es->modelindex )->team;
   int             health = es->misc;
-  float           healthFrac = (float)health / SU2HP( BG_Buildable( es->modelindex )->health );
+  float           healthFrac = (float)health / BG_SU2HP( BG_Buildable( es->modelindex )->health );
 
   if( !( es->eFlags & EF_B_SPAWNED ) )
     return;
@@ -973,7 +973,7 @@ static void CG_BuildableStatusDisplay( centity_t *cent )
 
   // don't display health bars and icons when the buildable has
   // full health, is powered, is unmarked, and is not in the crosshair
-  if( ( es->misc < SU2HP( es->constantLight ) ) ||
+  if( ( es->misc < BG_SU2HP( es->constantLight ) ) ||
       !( es->eFlags & EF_B_POWERED ) ||
        ( es->eFlags & EF_B_MARKED ) ||
       ( es->number == cg.crosshairBuildable &&
@@ -1062,8 +1062,8 @@ static void CG_BuildableStatusDisplay( centity_t *cent )
   }
 
   health = es->misc;
-  healthScale = (float)health / SU2HP( es->constantLight );
-  healthColorFraction = (float)health / SU2HP( BG_Buildable( es->modelindex )->health );
+  healthScale = (float)health / BG_SU2HP( es->constantLight );
+  healthColorFraction = (float)health / BG_SU2HP( BG_Buildable( es->modelindex )->health );
 
   if( health > 0 && healthScale < 0.01f )
     healthScale = 0.01f;
@@ -1189,7 +1189,7 @@ static void CG_BuildableStatusDisplay( centity_t *cent )
       int healthMax;
       int healthPoints;
 
-      healthMax = SU2HP( es->constantLight );
+      healthMax = BG_SU2HP( es->constantLight );
       healthPoints = (int)( healthScale * healthMax );
       if( health > 0 && healthPoints < 1 )
         healthPoints = 1;

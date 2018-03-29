@@ -27,8 +27,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // health and damage are specified in this file as subunits of
 // health and damage points for better finetuning.
 #define HEALTH_POINT_SUBUNIT_FACTOR     1000 // health and damage points are made up of this many sub-units.
-#define HP2SU( healthPoints )           ( healthPoints < ( INT_MAX / HEALTH_POINT_SUBUNIT_FACTOR ) ? ( healthPoints * HEALTH_POINT_SUBUNIT_FACTOR ) : INT_MAX )
-#define SU2HP( healthSubUnits )         ( ( !( healthSubUnits / HEALTH_POINT_SUBUNIT_FACTOR ) && healthSubUnits > 0 ) ? 1 : ( healthSubUnits / HEALTH_POINT_SUBUNIT_FACTOR ) )
+
 /*
  * ALIEN weapons
  *

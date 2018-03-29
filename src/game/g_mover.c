@@ -1220,7 +1220,7 @@ void Blocked_Door( gentity_t *ent, gentity_t *other )
   }
 
   if( ent->damage )
-    G_Damage( other, ent, ent, NULL, NULL, HP2SU( ent->damage ), 0, MOD_CRUSH );
+    G_Damage( other, ent, ent, NULL, NULL, BG_HP2SU( ent->damage ), 0, MOD_CRUSH );
 
   if( ent->spawnflags & 4 )
     return;   // crushers don't reverse
@@ -1362,7 +1362,7 @@ void SP_func_door( gentity_t *ent )
   // default damage of 2 points
   G_SpawnInt( "dmg", "2", &ent->damage );
 
-  ent->damage = HP2SU( ent->damage);
+  ent->damage = BG_HP2SU( ent->damage);
 
   // first position at start
   VectorCopy( ent->r.currentOrigin, ent->pos1 );
@@ -1508,7 +1508,7 @@ void SP_func_door_rotating( gentity_t *ent )
 
   ent->nextthink = level.time + FRAMETIME;
 
-  ent->damage = HP2SU( ent->damage );
+  ent->damage = BG_HP2SU( ent->damage );
 
   G_SpawnInt( "health", "0", &health );
   if( health )
@@ -1788,7 +1788,7 @@ void SP_func_plat( gentity_t *ent )
   G_SpawnFloat( "wait", "1", &ent->wait );
   G_SpawnFloat( "lip", "8", &lip );
 
-  ent->damage = HP2SU( ent->damage);
+  ent->damage = BG_HP2SU( ent->damage);
 
   ent->wait = 1000;
 
@@ -2215,7 +2215,7 @@ void SP_func_train( gentity_t *self )
   if( self->spawnflags & TRAIN_BLOCK_STOPS )
     self->damage = 0;
   else if( !self->damage )
-    self->damage = HP2SU( 2 );
+    self->damage = BG_HP2SU( 2 );
 
   if( !self->speed )
     self->speed = 100;
@@ -2304,7 +2304,7 @@ void SP_func_rotating( gentity_t *ent )
     ent->s.apos.trDelta[ 1 ] = ent->speed;
 
   if( !ent->damage )
-    ent->damage = HP2SU( 2 );
+    ent->damage = BG_HP2SU( 2 );
 
   SV_SetBrushModel( ent, ent->model );
   VectorCopy( ent->r.currentOrigin, savedOrigin );
@@ -2346,7 +2346,7 @@ void SP_func_bobbing( gentity_t *ent )
   G_SpawnInt( "dmg", "2", &ent->damage );
   G_SpawnFloat( "phase", "0", &phase );
 
-  ent->damage = HP2SU( ent->damage);
+  ent->damage = BG_HP2SU( ent->damage);
 
   SV_SetBrushModel( ent, ent->model );
   VectorCopy( ent->r.currentOrigin, savedOrigin );
@@ -2399,7 +2399,7 @@ void SP_func_pendulum( gentity_t *ent )
   G_SpawnInt( "dmg", "2", &ent->damage );
   G_SpawnFloat( "phase", "0", &phase );
 
-  ent->damage = HP2SU( ent->damage);
+  ent->damage = BG_HP2SU( ent->damage);
 
   SV_SetBrushModel( ent, ent->model );
 
