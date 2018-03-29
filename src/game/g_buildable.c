@@ -2838,7 +2838,7 @@ void HMedistat_Think( gentity_t *self )
 
       if( player->health < maxHealth )
       {
-        player->health += HP2SU( 1 );
+        player->health += BG_HP2SU( 1 );
         if( player->health > maxHealth )
           player->health = maxHealth;
         client->ps.misc[ MISC_HEALTH ] = player->health;
@@ -3614,7 +3614,7 @@ void G_BuildableThink( gentity_t *ent, int msec )
       }
       else if( groundEnt->client )
         G_Damage( groundEnt, ent, &g_entities[ ent->dropperNum ], NULL, NULL,
-            HP2SU( 20 ), DAMAGE_NO_PROTECTION, meansOD );
+            BG_HP2SU( 20 ), DAMAGE_NO_PROTECTION, meansOD );
 
       if( ent->damageDroppedBuildable )
         G_Damage( ent, ent, &g_entities[ ent->dropperNum ], NULL, NULL,
@@ -3635,7 +3635,7 @@ void G_BuildableThink( gentity_t *ent, int msec )
   ent->dcc = ( ent->buildableTeam != TEAM_HUMANS ) ? 0 : G_FindDCC( ent );
 
   // Set health
-  ent->s.misc = MAX( SU2HP( ent->health ), 0 );
+  ent->s.misc = MAX( BG_SU2HP( ent->health ), 0 );
 
   // Set flags
   ent->s.eFlags &= ~( EF_B_POWERED | EF_B_SPAWNED | EF_B_MARKED );
@@ -4752,7 +4752,7 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
     VectorScale( normal, -50.0f, built->s.pos.trDelta );
   }
 
-  built->s.misc = MAX( SU2HP( built->health ), 0 );
+  built->s.misc = MAX( BG_SU2HP( built->health ), 0 );
 
   if( BG_Buildable( buildable )->team == TEAM_ALIENS )
   {

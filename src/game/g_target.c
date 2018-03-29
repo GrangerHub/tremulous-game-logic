@@ -496,7 +496,7 @@ void SP_target_hurt( gentity_t *self )
   if( !self->damage )
     self->damage = 5;
 
-  self->damage = HP2SU( self->damage );
+  self->damage = BG_HP2SU( self->damage );
 
   self->use = target_hurt_use;
 }

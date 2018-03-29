@@ -120,9 +120,11 @@ void G_namelog_update_name( gclient_t *client )
 void G_namelog_restore( gclient_t *client )
 {
   namelog_t *n = client->pers.namelog;
+  const int score = n->score;
+  const int credits = n->credits;
 
   G_ChangeTeam( g_entities + n->slot, n->team );
-  client->ps.persistant[ PERS_SCORE ] = n->score;
+  client->ps.persistant[ PERS_SCORE ] = n->score = score;
   client->ps.persistant[ PERS_CREDIT ] = 0;
-  G_AddCreditToClient( client, n->credits, qfalse );
+  G_AddCreditToClient( client, ( n->credits = credits ), qfalse );
 }
