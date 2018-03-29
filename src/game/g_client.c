@@ -1699,6 +1699,7 @@ Q_EXPORT void ClientDisconnect( int clientNum )
   if( !ent->client || ent->client->pers.connected == CON_DISCONNECTED )
     return;
 
+  G_namelog_update_score( ent->client );
   G_LeaveTeam( ent );
   G_namelog_disconnect( ent->client );
   G_Vote( ent, TEAM_NONE, qfalse );
