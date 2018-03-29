@@ -40,8 +40,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // second version that must match between game and cgame
 #define GAME_VERSION            "base"
 
+int BG_HP2SU( int healthPoints );
+int BG_SU2HP( int healthSubUnits );
+
 #define DEFAULT_GRAVITY         800
-#define GIB_HEALTH              HP2SU( -125 )
+#define GIB_HEALTH              ( BG_HP2SU( -125 ) )
 
 #define VOTE_TIME               30000 // 30 seconds before vote times out
 

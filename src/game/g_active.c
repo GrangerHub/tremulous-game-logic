@@ -49,8 +49,8 @@ void P_DamageFeedback( gentity_t *player )
   if( count == 0 )
     return;   // didn't take any damage
 
-  if( SU2HP( count ) )
-    count = SU2HP( count );
+  if( BG_SU2HP( count ) )
+    count = BG_SU2HP( count );
   else
     count = 1;
 
@@ -128,9 +128,9 @@ void P_WorldEffects( gentity_t *ent )
       if( ent->health > 0 )
       {
         // take more damage the longer underwater
-        ent->damage += HP2SU( 2 );
-        if( ent->damage > HP2SU( 15 ) )
-          ent->damage = HP2SU( 15 );
+        ent->damage += BG_HP2SU( 2 );
+        if( ent->damage > BG_HP2SU( 15 ) )
+          ent->damage = BG_HP2SU( 15 );
 
         // play a gurp sound instead of a normal pain sound
         if( ent->health <= ent->damage )
@@ -151,7 +151,7 @@ void P_WorldEffects( gentity_t *ent )
   else
   {
     ent->client->airOutTime = level.time + 12000;
-    ent->damage = HP2SU( 2 );
+    ent->damage = BG_HP2SU( 2 );
   }
 
   //
@@ -166,13 +166,13 @@ void P_WorldEffects( gentity_t *ent )
       if( ent->watertype & CONTENTS_LAVA )
       {
         G_Damage( ent, NULL, NULL, NULL, NULL,
-          HP2SU( 30 ) * waterlevel, 0, MOD_LAVA );
+          BG_HP2SU( 30 ) * waterlevel, 0, MOD_LAVA );
       }
 
       if( ent->watertype & CONTENTS_SLIME )
       {
         G_Damage( ent, NULL, NULL, NULL, NULL,
-          HP2SU( 10 ) * waterlevel, 0, MOD_SLIME );
+          BG_HP2SU( 10 ) * waterlevel, 0, MOD_SLIME );
       }
     }
   }
@@ -831,10 +831,10 @@ void ClientTimerActions( gentity_t *ent, int msec )
             ent->client->medKitHealthToRestore &&
             ent->client->ps.pm_type != PM_DEAD )
         {
-          ent->client->medKitHealthToRestore -= HP2SU( 1 );
+          ent->client->medKitHealthToRestore -= BG_HP2SU( 1 );
           if( ent->client->medKitHealthToRestore < 0 )
             ent->client->medKitHealthToRestore = 0;
-          ent->health += HP2SU( 1 );
+          ent->health += BG_HP2SU( 1 );
           if( ent->health > maxHealth )
             ent->health = maxHealth;
           ent->client->ps.misc[ MISC_HEALTH ] = ent->health;
@@ -852,10 +852,10 @@ void ClientTimerActions( gentity_t *ent, int msec )
           //partial increase
           if( level.time > client->medKitIncrementTime )
           {
-            ent->client->medKitHealthToRestore -= HP2SU( 1 );
+            ent->client->medKitHealthToRestore -= BG_HP2SU( 1 );
             if( ent->client->medKitHealthToRestore < 0 )
               ent->client->medKitHealthToRestore = 0;
-            ent->health += HP2SU( 1 );
+            ent->health += BG_HP2SU( 1 );
             if( ent->health > maxHealth )
               ent->health = maxHealth;
             ent->client->ps.misc[ MISC_HEALTH ] = ent->health;

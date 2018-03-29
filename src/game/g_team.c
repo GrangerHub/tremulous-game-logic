@@ -253,6 +253,8 @@ void G_ChangeTeam( gentity_t *ent, team_t newTeam )
     (int)( ent - g_entities ), BG_Team( newTeam )->name2, ent->client->pers.netname );
 
   G_namelog_update_score( ent->client );
+  // refresh the teamoverlay
+  ent->client->pers.teamInfo = 0;
   TeamplayInfoMessage( ent );
 }
 
@@ -347,7 +349,7 @@ void TeamplayInfoMessage( gentity_t *ent )
       continue;
 
     // only update if changed since last time
-    if( cl->pers.infoChangeTime <= ent->client->pers.teamInfo )
+    if( cl->pers.infoChangeTime <= ent->client->pers.teamInfo  )
       continue;
 
     if( cl->sess.spectatorState != SPECTATOR_NOT )
@@ -380,7 +382,7 @@ void TeamplayInfoMessage( gentity_t *ent )
 
     Com_sprintf( entry, sizeof( entry ), format, i,
       cl->pers.location,
-      SU2HP( cl->ps.misc[ MISC_HEALTH ] ),
+      BG_SU2HP( cl->ps.misc[ MISC_HEALTH ] ),
       curWeaponClass,
       upgrade );
 

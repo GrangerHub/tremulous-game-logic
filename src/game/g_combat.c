@@ -1127,7 +1127,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   else
     VectorNormalize( dir );
 
-  knockback = SU2HP( damage );
+  knockback = BG_SU2HP( damage );
 
   if( inflictor->s.weapon != WP_NONE )
   {
@@ -1217,7 +1217,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
         VectorSubtract( targ->r.currentOrigin, attacker->r.currentOrigin, dir );
         VectorNormalizeFast( dir );
-        VectorScale( dir, ( SU2HP( damage ) * 10.0f ), push );
+        VectorScale( dir, ( BG_SU2HP( damage ) * 10.0f ), push );
         push[2] = 64.0f;
         VectorAdd( targ->client->ps.velocity, push, targ->client->ps.velocity );
         return;
@@ -1381,11 +1381,11 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       if( client )
         targ->flags |= FL_NO_KNOCKBACK;
 
-      if( targ->health < HP2SU( -999 ) )
+      if( targ->health < BG_HP2SU( -999 ) )
       {
-        targ->health = HP2SU( -999 );
+        targ->health = BG_HP2SU( -999 );
         if( targ->client )
-          targ->client->ps.misc[ MISC_HEALTH ] = HP2SU( -999 );
+          targ->client->ps.misc[ MISC_HEALTH ] = BG_HP2SU( -999 );
       }
 
       targ->enemy = attacker;
@@ -1688,7 +1688,7 @@ qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage,
       continue;
 
     shake = damage * 10 / Distance( origin, ent->r.currentOrigin );
-    ent->client->ps.stats[ STAT_SHAKE ] += SU2HP( (int) shake );
+    ent->client->ps.stats[ STAT_SHAKE ] += BG_SU2HP( (int) shake );
   }
 
   return hitClient;
