@@ -1244,7 +1244,7 @@ static int G_StageBuildPointMaxForTeam( team_t team )
   {
     case TEAM_ALIENS:
       baseBP = g_alienBuildPoints.value;
-      switch ( g_alienStage.integer )
+      switch ( IS_WARMUP ? g_alienMaxStage.integer : g_alienStage.integer )
       {
         case S1:
           mod = g_alienBuildPointsStageMod0.value;
@@ -1266,7 +1266,7 @@ static int G_StageBuildPointMaxForTeam( team_t team )
 
     case TEAM_HUMANS:
       baseBP = g_humanBuildPoints.value;
-      switch ( g_humanStage.integer )
+      switch ( IS_WARMUP ? g_alienMaxStage.integer : g_humanStage.integer )
       {
         case S1:
           mod = g_humanBuildPointsStageMod0.value;
