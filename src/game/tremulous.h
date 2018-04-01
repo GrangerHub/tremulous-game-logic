@@ -517,7 +517,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define GRENADE_HEALTH              5
 #define GRENADE_REPEAT              0
 #define GRENADE_K_SCALE             1.0f
-#define GRENADE_DAMAGE              HWDM(150000)
+#define GRENADE_DAMAGE              HWDM(250000)
 #define GRENADE_RANGE               250.0f
 #define GRENADE_SPEED               400.0f
 #define GRENADE_SIZE                3.0f        // missile bounding box
