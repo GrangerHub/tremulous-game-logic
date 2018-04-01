@@ -807,8 +807,8 @@ void ClientTimerActions( gentity_t *ent, int msec )
     if( ( client->ps.weapon == WP_ALEVEL1 || 
          client->ps.weapon == WP_ALEVEL1_UPG ) )
     {
-      if( ( ucmd->buttons & BUTTON_ATTACK ) ||
-          ( ucmd->buttons & BUTTON_ATTACK2 ) ||
+      if( ( ucmd->buttons &
+            ( !client->pers.swapAttacks ? BUTTON_ATTACK : BUTTON_ATTACK2 ) ) ||
           ent->pain_debounce_time > level.time ||
           ( TEAM_ALIENS != client->pers.teamSelection &&
             ( client->ps.eFlags & EF_EVOLVING ) ) ||
@@ -817,7 +817,9 @@ void ClientTimerActions( gentity_t *ent, int msec )
           !G_Overmind( ) )
       {
         client->timeToInvisibility = LEVEL1_INVISIBILITY_DELAY + level.time;
-      } else if( ( client->ps.weapon == WP_ALEVEL1 ) &&
+      } else if( ( ( client->ps.weapon == WP_ALEVEL1 ) ||
+                   ( ucmd->buttons &
+                     ( !client->pers.swapAttacks ? BUTTON_ATTACK2 : BUTTON_ATTACK ) ) ) &&
                  ( ( aForward > 0 ) ||
                    ( aRight > 0 ) ||
                    ( ucmd->upmove > 0 ) ) )

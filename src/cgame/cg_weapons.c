@@ -1168,6 +1168,7 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
   weaponMode_t  weaponMode;
   weaponInfo_t  *weapon;
   qboolean      noGunModel;
+  qboolean      noDraw = qfalse; // don't draw the model
   qboolean      firing;
   clientInfo_t  *ci = &cgs.clientinfo[ cent->currentState.clientNum ];
 
@@ -1273,7 +1274,7 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
         if( cg.time - cent->invisTime < 1000  )
           gun.customShader = cgs.media.invisFadeShader;
         else
-          gun.customShader = cgs.media.invisShader;
+          noDraw = qtrue;
       }
       else if( cg.time - cent->invisTime < 1000  )
         gun.customShader = cgs.media.invisFadeShader;
@@ -1311,7 +1312,7 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
         if( cg.time - cent->invisTime < 1000  )
           gun.customShader = cgs.media.invisFadeShader;
         else
-          gun.customShader = cgs.media.invisShader;
+          noDraw = qtrue;
       }
       else if( cg.time - cent->invisTime < 1000  )
         gun.customShader = cgs.media.invisFadeShader;
@@ -1364,7 +1365,12 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
     {
       gun.renderfx |= RF_DEPTHHACK;
     }
+
+    if( !noDraw )
+  {
     trap_R_AddRefEntityToScene( &gun );
+  } else
+    noDraw = qfalse;
 
     if( !ps )
     {
@@ -1395,7 +1401,7 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
         if( cg.time - cent->invisTime < 1000  )
           barrel.customShader = cgs.media.invisFadeShader;
         else
-          barrel.customShader = cgs.media.invisShader;
+          noDraw = qtrue;
       }
       else if( cg.time - cent->invisTime < 1000  )
         barrel.customShader = cgs.media.invisFadeShader;
@@ -1429,7 +1435,12 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
       {
         barrel.renderfx |= RF_DEPTHHACK;
       }
-      trap_R_AddRefEntityToScene( &barrel );
+
+      if( !noDraw )
+      {
+        trap_R_AddRefEntityToScene( &barrel );
+      } else
+        noDraw = qfalse;
     }
   }
 

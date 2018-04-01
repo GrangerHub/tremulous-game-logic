@@ -1935,6 +1935,7 @@ CG_Player
 void CG_Player( centity_t *cent )
 {
   clientInfo_t  *ci;
+  qboolean      noDraw = qfalse; // don't draw the model
 
   // NOTE: legs is used for nonsegmented models
   //       this helps reduce code to be changed
@@ -2146,7 +2147,7 @@ void CG_Player( centity_t *cent )
         if( cg.time - cent->invisTime < 1000  )
           legs.customShader = cgs.media.invisFadeShader;
         else
-          return;
+          noDraw = qtrue;
       }
       else if( cg.time - cent->invisTime < 1000  )
         legs.customShader = cgs.media.invisFadeShader;
@@ -2211,7 +2212,7 @@ void CG_Player( centity_t *cent )
         if( cg.time - cent->invisTime < 1000  )
           legs.customShader = cgs.media.invisFadeShader;
         else
-          return;
+          noDraw = qtrue;
       }
       else if( cg.time - cent->invisTime < 1000  )
         legs.customShader = cgs.media.invisFadeShader;
@@ -2301,7 +2302,12 @@ void CG_Player( centity_t *cent )
   {
     legs.renderfx |= RF_DEPTHHACK;
   }
-  trap_R_AddRefEntityToScene( &legs );
+
+  if( !noDraw )
+  {
+    trap_R_AddRefEntityToScene( &legs );
+  } else
+    noDraw = qfalse;
 
   // if the model failed, allow the default nullmodel to be displayed
   if( !legs.hModel )
@@ -2340,7 +2346,7 @@ void CG_Player( centity_t *cent )
         if( cg.time - cent->invisTime < 1000  )
           torso.customShader = cgs.media.invisFadeShader;
         else
-          return;
+          noDraw = qtrue;
       }
       else if( cg.time - cent->invisTime < 1000  )
         torso.customShader = cgs.media.invisFadeShader;
@@ -2375,7 +2381,11 @@ void CG_Player( centity_t *cent )
     {
       torso.renderfx |= RF_DEPTHHACK;
     }
-    trap_R_AddRefEntityToScene( &torso );
+    if( !noDraw )
+    {
+      trap_R_AddRefEntityToScene( &torso );
+    } else
+      noDraw = qfalse;
 
     //
     // add the head
@@ -2408,7 +2418,7 @@ void CG_Player( centity_t *cent )
         if( cg.time - cent->invisTime < 1000  )
           head.customShader = cgs.media.invisFadeShader;
         else
-          return;
+          noDraw = qtrue;
       }
       else if( cg.time - cent->invisTime < 1000  )
         head.customShader = cgs.media.invisFadeShader;
@@ -2443,7 +2453,12 @@ void CG_Player( centity_t *cent )
     {
       head.renderfx |= RF_DEPTHHACK;
     }
-    trap_R_AddRefEntityToScene( &head );
+
+    if( !noDraw )
+    {
+      trap_R_AddRefEntityToScene( &head );
+    } else
+      noDraw = qfalse;
 
     // if this player has been hit with poison cloud, add an effect PS
     if( ( es->eFlags & EF_POISONCLOUDED ) &&
