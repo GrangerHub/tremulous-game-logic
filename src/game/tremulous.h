@@ -140,7 +140,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL3_BOUNCEBALL_LIFETIME  3000
 
 #define LEVEL4_CLAW_DMG             AWDM(100000)
-#define LEVEL4_CLAW_RANGE           100.0f
+#define LEVEL4_CLAW_RANGE           75.0f
 #define LEVEL4_CLAW_WIDTH           20.0f
 #define LEVEL4_CLAW_HEIGHT          20.0f
 #define LEVEL4_CLAW_REPEAT          750
@@ -264,9 +264,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define LEVEL4_SPEED                1.2f
 #define LEVEL4_VALUE                AVM(8 * ALIEN_CREDITS_PER_KILL)
-#define LEVEL4_HEALTH               AHM(800000)
+#define LEVEL4_HEALTH               AHM(700000)
 #define LEVEL4_REGEN                (15000)
-#define LEVEL4_COST                 12
+#define LEVEL4_COST                 10
 
 #define SPITFIRE_SPEED                1.3f
 #define SPITFIRE_VALUE                AVM(3 * ALIEN_CREDITS_PER_KILL)

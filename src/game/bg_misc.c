@@ -1753,7 +1753,7 @@ static const classAttributes_t bg_classList[ ] =
       "amount of health, but its maximum health decays from healing.",
     ( 1 << S3 ),                                    //int     stages;
     LEVEL4_HEALTH,                                  //int     health;
-    0.75f,                                          //float   maxHealthDecayRate;
+    0.85f,                                          //float   maxHealthDecayRate;
     0.0f,                                           //float   fallDamage;
     LEVEL4_REGEN,                                   //float   regenRate;
     SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,                    //int     abilities;
