@@ -127,6 +127,7 @@ vmCvar_t  cg_drawChargeBar;
 vmCvar_t  cg_drawCrosshair;
 vmCvar_t  cg_drawCrosshairNames;
 vmCvar_t  cg_crosshairSize;
+vmCvar_t  cg_lanternLight;
 vmCvar_t  cg_draw2D;
 vmCvar_t  cg_animSpeed;
 vmCvar_t  cg_debugAnim;
@@ -277,6 +278,7 @@ static cvarTable_t cvarTable[ ] =
   { &cg_viewsize, "cg_viewsize", "100", CVAR_ARCHIVE },
   { &cg_stereoSeparation, "cg_stereoSeparation", "0.4", CVAR_ARCHIVE  },
   { &cg_shadows, "cg_shadows", "1", CVAR_ARCHIVE  },
+  { &cg_lanternLight, "cg_lanternLight", "0", CVAR_ARCHIVE },
   { &cg_draw2D, "cg_draw2D", "1", CVAR_ARCHIVE  },
   { &cg_drawTimer, "cg_drawTimer", "1", CVAR_ARCHIVE  },
   { &cg_drawClock, "cg_drawClock", "0", CVAR_ARCHIVE  },
