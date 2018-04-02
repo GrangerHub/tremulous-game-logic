@@ -129,6 +129,11 @@ vmCvar_t  cg_drawCrosshairNames;
 vmCvar_t  cg_crosshairSize;
 vmCvar_t  cg_drawCrosshairImpactPredictor;
 vmCvar_t  cg_lanternLight;
+vmCvar_t  cg_lanternLightIntensity;
+vmCvar_t  cg_lanternLightRange;
+vmCvar_t  cg_lanternLightYaw;
+vmCvar_t  cg_lanternLightPitch;
+vmCvar_t  cg_lanternLightClip;
 vmCvar_t  cg_draw2D;
 vmCvar_t  cg_animSpeed;
 vmCvar_t  cg_debugAnim;
@@ -281,6 +286,11 @@ static cvarTable_t cvarTable[ ] =
   { &cg_stereoSeparation, "cg_stereoSeparation", "0.4", CVAR_ARCHIVE  },
   { &cg_shadows, "cg_shadows", "1", CVAR_ARCHIVE  },
   { &cg_lanternLight, "cg_lanternLight", "0", CVAR_ARCHIVE },
+  { &cg_lanternLightIntensity, "cg_lanternLightIntensity", "400.0", CVAR_ARCHIVE },
+  { &cg_lanternLightRange, "cg_lanternLightRange", "100", CVAR_ARCHIVE },
+  { &cg_lanternLightYaw, "cg_lanternLightYaw", "0", CVAR_ARCHIVE },
+  { &cg_lanternLightPitch, "cg_lanternLightPitch", "45", CVAR_ARCHIVE },
+  { &cg_lanternLightClip, "cg_lanternLightClip", "1", CVAR_ARCHIVE },
   { &cg_draw2D, "cg_draw2D", "1", CVAR_ARCHIVE  },
   { &cg_drawTimer, "cg_drawTimer", "1", CVAR_ARCHIVE  },
   { &cg_drawClock, "cg_drawClock", "0", CVAR_ARCHIVE  },

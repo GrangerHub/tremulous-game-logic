@@ -4440,11 +4440,64 @@ void CG_DrawActive( stereoFrame_t stereoView )
 
   CG_DrawBinaryShadersFinalPhases( );
 
-  //emmit lantern light
+  //emit lantern light
   if( cg_lanternLight.integer )
-    trap_R_AddLightToScene( cg.refdef.vieworg,
-                            cg_lanternLight.integer,
+  {
+    classConfig_t *classConfig;
+    vec3_t        lanternOrigin;
+    vec3_t        lanternAngles;
+    vec3_t        forward, right, up;
+
+    if( cg_lanternLightPitch.value ||
+        cg_lanternLightYaw.value )
+    {
+      lanternAngles[ PITCH ] = cg_lanternLightPitch.value;
+      lanternAngles[ YAW ] = cg_lanternLightYaw.value;
+      lanternAngles[ ROLL ] = 0;
+
+      AnglesSubtract( lanternAngles, cg.refdefViewAngles,
+                      lanternAngles );
+    } else
+    {
+      VectorCopy( cg.refdefViewAngles, lanternAngles );
+    }
+
+    AngleVectors( lanternAngles, forward, right, up );
+
+    classConfig = BG_ClassConfig( cg.snap->ps.stats[ STAT_CLASS ] );
+    VectorMA( cg.refdef.vieworg, classConfig->shoulderOffsets[ 0 ], forward, lanternOrigin );
+    VectorMA( cg.refdef.vieworg, classConfig->shoulderOffsets[ 1 ], right, lanternOrigin );
+    VectorMA( cg.refdef.vieworg, classConfig->shoulderOffsets[ 2 ], up, lanternOrigin );
+
+    VectorMA( lanternOrigin, -( cg_lanternLightRange.value ), forward, lanternOrigin );
+
+    //prevent the lantern light from clipping through solid objects
+    if( cg_lanternLightClip.integer )
+    {
+      trace_t trace;
+
+      CG_Trace( &trace, cg.refdef.vieworg, vec3_origin, vec3_origin,
+                lanternOrigin, cg.predictedPlayerState.clientNum, MASK_SOLID );
+
+      if( trace.fraction != 1.0f )
+      {
+        //slide the lantern light up the wall
+        VectorMA( trace.endpos,
+                  sqrt( 1 - ( trace.fraction * trace.fraction ) ) * cg_lanternLightRange.value,
+                  up, lanternOrigin);
+
+        // Try another trace to this position, because a tunnel may have the ceiling
+        // close enogh that this is poking out.
+        CG_Trace( &trace, cg.refdef.vieworg, vec3_origin, vec3_origin,
+                  lanternOrigin, cg.predictedPlayerState.clientNum, MASK_SOLID );
+        VectorCopy( trace.endpos, lanternOrigin );
+      }
+    }
+
+    trap_R_AddLightToScene( lanternOrigin,
+                            cg_lanternLightIntensity.value,
                             1.0f, 1.0f, 1.0f );
+  }
 
   // draw 3D view
   trap_R_RenderScene( &cg.refdef );
