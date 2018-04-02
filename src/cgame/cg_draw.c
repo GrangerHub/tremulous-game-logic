@@ -4163,9 +4163,13 @@ void CG_DrawActive( stereoFrame_t stereoView )
     if( cg_lanternLightClip.integer )
     {
       trace_t trace;
+      const   vec3_t mins = { -10, -10, -10 };
+      const   vec3_t maxs = { 10, 10, 10 };
 
-      CG_Trace( &trace, cg.refdef.vieworg, vec3_origin, vec3_origin,
-                lanternOrigin, cg.predictedPlayerState.clientNum, MASK_SOLID );
+      CG_CapTrace( &trace, cg.refdef.vieworg, mins, maxs,
+                   lanternOrigin,
+                   cg.predictedPlayerState.clientNum,
+                   MASK_DEADSOLID );
 
       if( trace.fraction != 1.0f )
       {
@@ -4176,8 +4180,10 @@ void CG_DrawActive( stereoFrame_t stereoView )
 
         // Try another trace to this position, because a tunnel may have the ceiling
         // close enogh that this is poking out.
-        CG_Trace( &trace, cg.refdef.vieworg, vec3_origin, vec3_origin,
-                  lanternOrigin, cg.predictedPlayerState.clientNum, MASK_SOLID );
+        CG_CapTrace( &trace, cg.refdef.vieworg, mins, maxs,
+                     lanternOrigin,
+                     cg.predictedPlayerState.clientNum,
+                     MASK_DEADSOLID );
         VectorCopy( trace.endpos, lanternOrigin );
       }
     }
