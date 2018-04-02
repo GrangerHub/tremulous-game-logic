@@ -4001,6 +4001,12 @@ void CG_DrawActive( stereoFrame_t stereoView )
 
   CG_DrawBinaryShadersFinalPhases( );
 
+  //emmit lantern light
+  if( cg_lanternLight.integer )
+    trap_R_AddLightToScene( cg.refdef.vieworg,
+                            cg_lanternLight.integer,
+                            1.0f, 1.0f, 1.0f );
+
   // draw 3D view
   trap_R_RenderScene( &cg.refdef );
 
