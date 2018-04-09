@@ -803,7 +803,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
                      BG_Class( client->ps.stats[STAT_CLASS] )->chargeStaminaMax;
     }
 
-    //check if the client should go invisible
+    //check if the client should become invisible
     if( ( client->ps.weapon == WP_ALEVEL1 || 
          client->ps.weapon == WP_ALEVEL1_UPG ) )
     {
@@ -823,9 +823,10 @@ void ClientTimerActions( gentity_t *ent, int msec )
         } else if( ( ( client->ps.weapon == WP_ALEVEL1 ) ||
                      ( ucmd->buttons &
                        ( !client->pers.swapAttacks ? BUTTON_ATTACK2 : BUTTON_ATTACK ) ) ) &&
-                   ( ( aForward > 0 ) ||
-                     ( aRight > 0 ) ||
-                     ( ucmd->upmove > 0 ) ) )
+                   ( !( client->buttons & BUTTON_WALKING ) &&
+                     ( ( aForward > 0 ) ||
+                       ( aRight > 0 ) ||
+                       ( ucmd->upmove > 0 ) ) ) )
           client->timeToInvisibility = LEVEL1_INVISIBILITY_DELAY + level.time;
       }
 
