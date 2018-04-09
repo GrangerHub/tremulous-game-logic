@@ -4063,6 +4063,95 @@ static void PM_TorsoAnimation( void )
   }
 }
 
+static void PM_StartAttackAnimation( qboolean attack1,
+                                     qboolean attack2,
+                                     qboolean attack3 )
+{
+  if( !( pm->ps->persistant[ PERS_STATE ] & PS_NONSEGMODEL ) )
+  {
+    //FIXME: this should be an option in the client weapon.cfg
+    switch( pm->ps->weapon )
+    {
+      case WP_FLAMER:
+        if( pm->ps->weaponstate == WEAPON_READY )
+        {
+          PM_StartTorsoAnim( TORSO_ATTACK );
+          PM_StartWeaponAnim( WANIM_ATTACK1 );
+        }
+        break;
+
+      case WP_BLASTER:
+        PM_StartTorsoAnim( TORSO_ATTACK2 );
+        PM_StartWeaponAnim( WANIM_ATTACK1 );
+        break;
+
+      default:
+        PM_StartTorsoAnim( TORSO_ATTACK );
+        PM_StartWeaponAnim( WANIM_ATTACK1 );
+        break;
+    }
+  }
+  else
+  {
+    int num = rand( );
+
+    //FIXME: it would be nice to have these hard coded policies in
+    //       weapon.cfg
+    switch( pm->ps->weapon )
+    {
+      case WP_ALEVEL1_UPG:
+      case WP_ALEVEL1:
+        if( attack1 )
+        {
+          num /= RAND_MAX / 6 + 1;
+          PM_ForceLegsAnim( NSPA_ATTACK1 );
+          PM_StartWeaponAnim( WANIM_ATTACK1 + num );
+        }
+        break;
+
+      case WP_ALEVEL2_UPG:
+        if( attack2 )
+        {
+          PM_ForceLegsAnim( NSPA_ATTACK2 );
+          PM_StartWeaponAnim( WANIM_ATTACK7 );
+        }
+      case WP_ALEVEL2:
+        if( attack1 )
+        {
+          num /= RAND_MAX / 6 + 1;
+          PM_ForceLegsAnim( NSPA_ATTACK1 );
+          PM_StartWeaponAnim( WANIM_ATTACK1 + num );
+        }
+        break;
+
+      case WP_ALEVEL4:
+        num /= RAND_MAX / 3 + 1;
+        PM_ForceLegsAnim( NSPA_ATTACK1 + num );
+        PM_StartWeaponAnim( WANIM_ATTACK1 + num );
+        break;
+
+      default:
+        if( attack1 )
+        {
+          PM_ForceLegsAnim( NSPA_ATTACK1 );
+          PM_StartWeaponAnim( WANIM_ATTACK1 );
+        }
+        else if( attack2 )
+        {
+          PM_ForceLegsAnim( NSPA_ATTACK2 );
+          PM_StartWeaponAnim( WANIM_ATTACK2 );
+        }
+        else if( attack3 )
+        {
+          PM_ForceLegsAnim( NSPA_ATTACK3 );
+          PM_StartWeaponAnim( WANIM_ATTACK3 );
+        }
+        break;
+    }
+
+    pm->ps->torsoTimer = TIMER_ATTACK;
+  }
+}
 
 /*
 ==============
@@ -4441,6 +4530,8 @@ static void PM_Weapon( void )
     pm->ps->generic1 = WPM_SECONDARY;
     PM_AddEvent( EV_FIRE_WEAPON2 );
     pm->ps->stats[ STAT_WEAPONTIME2 ] += BG_Weapon( pm->ps->weapon )->repeatRate2;  // basi gas has an independent timer
+    PM_StartAttackAnimation( attack1, attack2, attack3 );
+    pm->ps->weaponstate = WEAPON_FIRING;
   }
 
   // check for out of ammo
@@ -4610,6 +4701,19 @@ static void PM_Weapon( void )
       case WP_ALEVEL0:
         //venom is only autohit
         return;
+
+      case WP_ALEVEL1_UPG:
+        if( !attack1 && !attack3 &&
+            ( pm->ps->stats[ STAT_WEAPONTIME2 ] > 0 ) )
+          return;
+        if( !attack1 )
+        {
+          // Idle
+          pm->ps->weaponTime = 0;
+          pm->ps->weaponstate = WEAPON_READY;
+          return;
+        }
+        break;
 
       case WP_ALEVEL3:
       case WP_ALEVEL3_UPG:
@@ -4940,90 +5044,7 @@ static void PM_Weapon( void )
     }
   }
 
-  if( !( pm->ps->persistant[ PERS_STATE ] & PS_NONSEGMODEL ) )
-  {
-    //FIXME: this should be an option in the client weapon.cfg
-    switch( pm->ps->weapon )
-    {
-      case WP_FLAMER:
-        if( pm->ps->weaponstate == WEAPON_READY )
-        {
-          PM_StartTorsoAnim( TORSO_ATTACK );
-          PM_StartWeaponAnim( WANIM_ATTACK1 );
-        }
-        break;
-
-      case WP_BLASTER:
-        PM_StartTorsoAnim( TORSO_ATTACK2 );
-        PM_StartWeaponAnim( WANIM_ATTACK1 );
-        break;
-
-      default:
-        PM_StartTorsoAnim( TORSO_ATTACK );
-        PM_StartWeaponAnim( WANIM_ATTACK1 );
-        break;
-    }
-  }
-  else
-  {
-    int num = rand( );
-
-    //FIXME: it would be nice to have these hard coded policies in
-    //       weapon.cfg
-    switch( pm->ps->weapon )
-    {
-      case WP_ALEVEL1_UPG:
-      case WP_ALEVEL1:
-        if( attack1 )
-        {
-          num /= RAND_MAX / 6 + 1;
-          PM_ForceLegsAnim( NSPA_ATTACK1 );
-          PM_StartWeaponAnim( WANIM_ATTACK1 + num );
-        }
-        break;
-
-      case WP_ALEVEL2_UPG:
-        if( attack2 )
-        {
-          PM_ForceLegsAnim( NSPA_ATTACK2 );
-          PM_StartWeaponAnim( WANIM_ATTACK7 );
-        }
-      case WP_ALEVEL2:
-        if( attack1 )
-        {
-          num /= RAND_MAX / 6 + 1;
-          PM_ForceLegsAnim( NSPA_ATTACK1 );
-          PM_StartWeaponAnim( WANIM_ATTACK1 + num );
-        }
-        break;
-
-      case WP_ALEVEL4:
-        num /= RAND_MAX / 3 + 1;
-        PM_ForceLegsAnim( NSPA_ATTACK1 + num );
-        PM_StartWeaponAnim( WANIM_ATTACK1 + num );
-        break;
-
-      default:
-        if( attack1 )
-        {
-          PM_ForceLegsAnim( NSPA_ATTACK1 );
-          PM_StartWeaponAnim( WANIM_ATTACK1 );
-        }
-        else if( attack2 )
-        {
-          PM_ForceLegsAnim( NSPA_ATTACK2 );
-          PM_StartWeaponAnim( WANIM_ATTACK2 );
-        }
-        else if( attack3 )
-        {
-          PM_ForceLegsAnim( NSPA_ATTACK3 );
-          PM_StartWeaponAnim( WANIM_ATTACK3 );
-        }
-        break;
-    }
-
-    pm->ps->torsoTimer = TIMER_ATTACK;
-  }
+  PM_StartAttackAnimation( attack1, attack2, attack3 );
 
   pm->ps->weaponstate = WEAPON_FIRING;
 
