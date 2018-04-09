@@ -803,27 +803,31 @@ void ClientTimerActions( gentity_t *ent, int msec )
                      BG_Class( client->ps.stats[STAT_CLASS] )->chargeStaminaMax;
     }
 
-    //client is not moving or is boosted
+    //check if the client should go invisible
     if( ( client->ps.weapon == WP_ALEVEL1 || 
          client->ps.weapon == WP_ALEVEL1_UPG ) )
     {
-      if( ( ucmd->buttons &
-            ( !client->pers.swapAttacks ? BUTTON_ATTACK : BUTTON_ATTACK2 ) ) ||
-          ent->pain_debounce_time > level.time ||
-          ( TEAM_ALIENS != client->pers.teamSelection &&
-            ( client->ps.eFlags & EF_EVOLVING ) ) ||
-          ( ucmd->buttons & BUTTON_GESTURE ) ||
-          !client->ps.misc[ MISC_MISC ] ||
-          !G_Overmind( ) )
+      if( ent->pain_debounce_time > level.time )
+        client->timeToInvisibility = LEVEL1_INVISIBILITY_PAIN_DELAY + level.time;
+      else if( client->timeToInvisibility <= level.time )
       {
-        client->timeToInvisibility = LEVEL1_INVISIBILITY_DELAY + level.time;
-      } else if( ( ( client->ps.weapon == WP_ALEVEL1 ) ||
-                   ( ucmd->buttons &
-                     ( !client->pers.swapAttacks ? BUTTON_ATTACK2 : BUTTON_ATTACK ) ) ) &&
-                 ( ( aForward > 0 ) ||
-                   ( aRight > 0 ) ||
-                   ( ucmd->upmove > 0 ) ) )
-        client->timeToInvisibility = LEVEL1_INVISIBILITY_DELAY + level.time;
+        if( ( ucmd->buttons &
+              ( !client->pers.swapAttacks ? BUTTON_ATTACK : BUTTON_ATTACK2 ) ) ||
+            ( TEAM_ALIENS != client->pers.teamSelection &&
+              ( client->ps.eFlags & EF_EVOLVING ) ) ||
+            ( ucmd->buttons & BUTTON_GESTURE ) ||
+            !client->ps.misc[ MISC_MISC ] ||
+            !G_Overmind( ) )
+        {
+          client->timeToInvisibility = LEVEL1_INVISIBILITY_DELAY + level.time;
+        } else if( ( ( client->ps.weapon == WP_ALEVEL1 ) ||
+                     ( ucmd->buttons &
+                       ( !client->pers.swapAttacks ? BUTTON_ATTACK2 : BUTTON_ATTACK ) ) ) &&
+                   ( ( aForward > 0 ) ||
+                     ( aRight > 0 ) ||
+                     ( ucmd->upmove > 0 ) ) )
+          client->timeToInvisibility = LEVEL1_INVISIBILITY_DELAY + level.time;
+      }
 
       if( client->timeToInvisibility <= level.time )
         client->ps.eFlags |= EF_INVISIBILE;
