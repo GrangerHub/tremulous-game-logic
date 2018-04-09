@@ -489,18 +489,18 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define BLASTER_SIZE                5
 #define BLASTER_LIFETIME            10000
 
-#define RIFLE_CLIPSIZE              36
-#define RIFLE_MAXCLIPS              6
-#define RIFLE_REPEAT                125
+#define RIFLE_CLIPSIZE              48
+#define RIFLE_MAXCLIPS              5
+#define RIFLE_REPEAT                100
 #define RIFLE_K_SCALE               0.5f
-#define RIFLE_RECOIL                64.0f
+#define RIFLE_RECOIL                48.0f
 #define RIFLE_RELOAD                2000
 #define RIFLE_PRICE                 0
 #define RIFLE_SPREAD                0
-#define RIFLE_DMG                   HWDM(5500)
-#define RIFLE_REPEAT2               75
+#define RIFLE_DMG                   HWDM(4400)
+#define RIFLE_REPEAT2               50
 #define RIFLE_SPREAD2               0
-#define RIFLE_DMG2                  HWDM(5500)
+#define RIFLE_DMG2                  HWDM(4400)
 #define RIFLE_ALT_BURST_ROUNDS      4
 #define RIFLE_ALT_BURST_DELAY       200
 
