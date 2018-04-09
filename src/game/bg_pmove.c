@@ -5437,17 +5437,13 @@ static void PM_ApplyRecoil( void )
   const float recoilSpeed = sqrt( ( (float)recoilP * (float)recoilP ) + ( (float)recoilY * (float)recoilY ) );
   float newRecoilSpeed;
   float drop = recoilSpeed * pm_recoilDecay * pml.frametime;
-  const int delta_recoil_pitch = recoilP * pml.frametime;
-  const int delta_recoil_yaw = recoilY * pml.frametime;
+  int delta_recoil_pitch = recoilP * pml.frametime;
+  int delta_recoil_yaw = recoilY * pml.frametime;
 
   if( !recoilSpeed )
     return;
 
   //decay the recoil
-  //Recoil is reduced furthr when crouching or when wearing a bsuit.
-  if( pm->ps->pm_flags & PMF_DUCKED ||
-      BG_InventoryContainsUpgrade( UP_BATTLESUIT, pm->ps->stats ) )
-    drop *= 512;
   newRecoilSpeed = recoilSpeed - drop;
   if( newRecoilSpeed < 0 )
     newRecoilSpeed = 0;
@@ -5456,6 +5452,14 @@ static void PM_ApplyRecoil( void )
 
   pm->ps->misc[ MISC_RECOIL_PITCH ] *= newRecoilSpeed;
   pm->ps->misc[ MISC_RECOIL_YAW ] *= newRecoilSpeed;
+
+  //Recoil is reduced while crouching or while wearing a bsuit.
+  if( pm->ps->pm_flags & PMF_DUCKED ||
+      BG_InventoryContainsUpgrade( UP_BATTLESUIT, pm->ps->stats ) )
+  {
+    delta_recoil_pitch /= 8;
+    delta_recoil_yaw /= 8;
+  }
 
   //apply the recoil
   pm->ps->delta_angles[ PITCH ] -= delta_recoil_pitch;
