@@ -1319,7 +1319,7 @@ Q_EXPORT void ClientBegin( int clientNum )
   client->ps.eFlags = flags;
 
   // communicate the client's ready status
-  client->ps.stats[ STAT_READY ] = client->sess.readyToPlay;
+  client->ps.stats[ STAT_READY ] = ent->client->sess.readyToPlay ? 1 : 0;
 
   // locate ent at a spawn point
   ClientSpawn( ent, NULL, NULL, NULL );
@@ -1551,7 +1551,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
 
   ent->client->ps.stats[ STAT_CLASS ] = ent->client->pers.classSelection;
   ent->client->ps.stats[ STAT_TEAM ] = ent->client->pers.teamSelection;
-  ent->client->ps.stats[ STAT_READY ] = 0;
+  ent->client->ps.stats[ STAT_READY ] = ent->client->sess.readyToPlay ? 1 : 0;
 
   ent->client->ps.stats[ STAT_BUILDABLE ] = BA_NONE;
   ent->client->ps.stats[ STAT_STATE ] = 0;
