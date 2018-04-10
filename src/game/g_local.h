@@ -421,6 +421,13 @@ typedef struct
   clientList_t      ignoreList;
 } clientSession_t;
 
+// for sending private messages to your previous recipients
+typedef struct prevRecipients_s
+{
+  int  id[ ( MAX_CLIENTS * 2 ) ];
+  int  count;
+} prevRecipients_t;
+
 // namelog
 #define MAX_NAMELOG_NAMES 5
 #define MAX_NAMELOG_ADDRS 5
@@ -447,6 +454,8 @@ typedef struct namelog_s
   int               score;
   int               credits;
   team_t            team;
+
+  prevRecipients_t  prevRecipients;
 
   int               id;
 } namelog_t;
@@ -903,6 +912,9 @@ typedef struct
   int               playerModelCount;
 
   namelog_t         *namelogs;
+
+  // for use by the server console
+  prevRecipients_t  prevRecipients;
 
   buildLog_t        buildLog[ MAX_BUILDLOG ];
   int               buildId;
