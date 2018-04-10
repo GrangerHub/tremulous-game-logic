@@ -1515,7 +1515,9 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       attacker->client->ps.persistant[ PERS_HITS ]++;
   }
 
-  if( attacker->client )
+  if( attacker->client &&
+      attacker->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
+      ( attacker->client->ps.eFlags & EF_EVOLVING ) )
   {
     modDamge = (int)( ( (float)modDamge ) * BG_EvolveScale( &attacker->client->ps ) );
   }

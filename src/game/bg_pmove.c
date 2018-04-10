@@ -1039,7 +1039,9 @@ static float PM_CmdScale( usercmd_t *cmd, qboolean zFlight )
     modifier *= LOCKBLOB_SPEED_MOD;
 
   //slow appropriatly while evolving
-  modifier *= BG_EvolveScale( pm->ps );
+  if( ( pm->ps->stats[ STAT_TEAM ] == TEAM_ALIENS ) && 
+      ( pm->ps->eFlags & EF_EVOLVING ) )
+    modifier *= BG_EvolveScale( pm->ps );
 
   if( pm->ps->pm_type == PM_GRABBED )
     modifier = 0.0f;
@@ -1194,7 +1196,9 @@ static qboolean PM_CheckPounce( void )
                     LEVEL3_POUNCE_JUMP_MAG_UPG / LEVEL3_POUNCE_TIME_UPG;
 
   //scale due to evolving
-  jumpMagnitude = (int)( ((float) jumpMagnitude ) * BG_EvolveScale( pm->ps ) );
+  if( ( pm->ps->stats[ STAT_TEAM ] == TEAM_ALIENS ) && 
+      ( pm->ps->eFlags & EF_EVOLVING ) )
+    jumpMagnitude = (int)( ((float) jumpMagnitude ) * BG_EvolveScale( pm->ps ) );
 
   VectorMA( pm->ps->velocity, jumpMagnitude, pml.forward, pm->ps->velocity );
   PM_AddEvent( EV_JUMP );
@@ -1265,7 +1269,9 @@ static qboolean PM_CheckAirPounce( void )
   else jumpMagnitude = 0;
 
   //scale due to evolving
-  jumpMagnitude = (int)( ((float) jumpMagnitude ) * BG_EvolveScale( pm->ps ) );
+  if( ( pm->ps->stats[ STAT_TEAM ] == TEAM_ALIENS ) && 
+      ( pm->ps->eFlags & EF_EVOLVING ) )
+    jumpMagnitude = (int)( ((float) jumpMagnitude ) * BG_EvolveScale( pm->ps ) );
 
   VectorMA( pm->ps->velocity, jumpMagnitude, pml.forward, pm->ps->velocity ); 
   PM_AddEvent( EV_AIRPOUNCE );
@@ -1406,7 +1412,9 @@ static qboolean PM_CheckWallJump( vec3_t wishDir, float wishSpeed )
   // Calculate the jump speed.
   jumpMagnitude = BG_Class( pm->ps->stats[ STAT_CLASS ] )->jumpMagnitude;
   //scale due to evolving
-  jumpMagnitude = (int)( ((float) jumpMagnitude ) * BG_EvolveScale( pm->ps ) );
+  if( ( pm->ps->stats[ STAT_TEAM ] == TEAM_ALIENS ) && 
+      ( pm->ps->eFlags & EF_EVOLVING ) )
+    jumpMagnitude = (int)( ((float) jumpMagnitude ) * BG_EvolveScale( pm->ps ) );
   upFactor = MIN( 1.0f, MAX( upLook, intoLook + 0.15f ) );
   awayFactor = MIN( 1.0f - upLook * upLook, intoLook );
   upSpeed = upFactor * 1.25f * jumpMagnitude;
@@ -1640,7 +1648,9 @@ static qboolean PM_CheckJump( vec3_t customNormal )
 	  }
 
   //scale due to evolving
-  jumpMagnitude = (int)( ((float) jumpMagnitude ) * BG_EvolveScale( pm->ps ) );
+  if( ( pm->ps->stats[ STAT_TEAM ] == TEAM_ALIENS ) && 
+      ( pm->ps->eFlags & EF_EVOLVING ) )
+    jumpMagnitude = (int)( ((float) jumpMagnitude ) * BG_EvolveScale( pm->ps ) );
 
   pm->ps->persistant[PERS_JUMPTIME] = 0;
   pm->ps->pm_flags |= PMF_JUMPING;
