@@ -5478,8 +5478,8 @@ static void PM_ApplyRecoil( void )
   if( pm->ps->pm_flags & PMF_DUCKED ||
       BG_InventoryContainsUpgrade( UP_BATTLESUIT, pm->ps->stats ) )
   {
-    delta_recoil_pitch /= 8;
-    delta_recoil_yaw /= 8;
+    delta_recoil_pitch /= 4;
+    delta_recoil_yaw /= 4;
   }
 
   //apply the recoil
