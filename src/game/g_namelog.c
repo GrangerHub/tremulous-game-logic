@@ -52,6 +52,7 @@ void G_namelog_connect( gclient_t *client )
     n = BG_Alloc0( sizeof( namelog_t ) );
     strcpy( n->guid, client->pers.guid );
     n->guidless = client->pers.guidless;
+    n->prevRecipients.count = 0;
     if( p )
     {
       p->next = n;

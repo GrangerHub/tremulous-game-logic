@@ -4164,8 +4164,10 @@ commands_t cmds[ ] = {
   { "mt", CMD_MESSAGE|CMD_INTERMISSION, Cmd_PrivateMessage_f },
   { "noclip", CMD_CHEAT_TEAM, Cmd_Noclip_f },
   { "notarget", CMD_CHEAT|CMD_TEAM|CMD_ALIVE, Cmd_Notarget_f },
+  { "r", CMD_MESSAGE|CMD_INTERMISSION, Cmd_PrivateMessage_f },
   { "ready", CMD_MESSAGE|CMD_TEAM, Cmd_Ready_f },
   { "reload", CMD_TEAM|CMD_ALIVE, Cmd_Reload_f },
+  { "rt", CMD_MESSAGE|CMD_INTERMISSION, Cmd_PrivateMessage_f },
   { "say", CMD_MESSAGE|CMD_INTERMISSION, Cmd_Say_f },
   { "say_area", CMD_MESSAGE|CMD_TEAM|CMD_ALIVE, Cmd_SayArea_f },
   { "say_team", CMD_MESSAGE|CMD_INTERMISSION, Cmd_Say_f },
@@ -4357,10 +4359,14 @@ void Cmd_PrivateMessage_f( gentity_t *ent )
   char text[ MAX_STRING_CHARS ];
   char *msg;
   char color;
-  int i, pcount;
+  int i;
   int count = 0;
   qboolean teamonly = qfalse;
+  qboolean sendToprevRecipients = qfalse;
+  prevRecipients_t *prevRecipients = NULL;
   char recipients[ MAX_STRING_CHARS ] = "";
+  char disconnectedRecipients[ MAX_STRING_CHARS ] = "";
+  int disconnectedRecipientsCount = 0;
 
   if( !g_privateMessages.integer && ent )
   {
@@ -4369,30 +4375,95 @@ void Cmd_PrivateMessage_f( gentity_t *ent )
   }
 
   Cmd_ArgvBuffer( 0, cmd, sizeof( cmd ) );
-  if( Cmd_Argc( ) < 3 )
+  if( !Q_stricmp( cmd, "r" ) ||
+      !Q_stricmp( cmd, "rt" ) )
   {
-    ADMP( va( "usage: %s [name|slot#] [message]\n", cmd ) );
-    return;
+    if( Cmd_Argc( ) < 2 )
+    {
+      ADMP( va( "usage: %s [message]\n", cmd ) );
+      return;
+    }
+
+    sendToprevRecipients = qtrue;
+    msg = ConcatArgs( 1 );
+  }
+  else
+  {
+    if( Cmd_Argc( ) < 3 )
+    {
+      ADMP( va( "usage: %s [name|slot#] [message]\n", cmd ) );
+      return;
+    }
+
+    Cmd_ArgvBuffer( 1, name, sizeof( name ) );
+    msg = ConcatArgs( 2 );
   }
 
-  if( !Q_stricmp( cmd, "mt" ) )
-    teamonly = qtrue;
+  if( ent )
+  {
+    prevRecipients = &ent->client->pers.namelog->prevRecipients;
+  } else
+    prevRecipients = &level.prevRecipients;
 
-  Cmd_ArgvBuffer( 1, name, sizeof( name ) );
-  msg = ConcatArgs( 2 );
-  pcount = G_ClientNumbersFromString( name, pids, MAX_CLIENTS );
+  if( !Q_stricmp( cmd, "mt" ) ||
+      !Q_stricmp( cmd, "rt" ) )
+    teamonly = qtrue;
 
   G_CensorString( text, msg, sizeof( text ), ent );
 
   // send the message
-  for( i = 0; i < pcount; i++ )
+  if( sendToprevRecipients )
   {
-    if( G_SayTo( ent, &g_entities[ pids[ i ] ],
-        teamonly ? SAY_TPRIVMSG : SAY_PRIVMSG, text ) )
+    for( i = 0; i < prevRecipients->count; i++ )
     {
-      count++;
-      Q_strcat( recipients, sizeof( recipients ), va( "%s" S_COLOR_WHITE ", ",
-        level.clients[ pids[ i ] ].pers.netname ) );
+      int slot;
+      namelog_t *n;
+
+      //find the matching namelog
+      for( n = level.namelogs; n; n = n->next )
+      {
+        if( n->id == prevRecipients->id[i] )
+          break;
+      }
+
+      if( n )
+      {
+        slot = n->slot;
+        if( slot < 0 )
+        {
+          disconnectedRecipientsCount++;
+          Q_strcat( disconnectedRecipients, sizeof( disconnectedRecipients ), va( "%s" S_COLOR_WHITE ", ",
+            n->name[ n->nameOffset ] ) );
+        } else if( G_SayTo( ent, &g_entities[ slot ],
+                            teamonly ? SAY_TPRIVMSG : SAY_PRIVMSG, text ) )
+        {
+          count++;
+          Q_strcat( recipients, sizeof( recipients ), va( "%s" S_COLOR_WHITE ", ",
+            level.clients[ slot ].pers.netname ) );
+        }
+      }
+    }
+  }
+  else
+  {
+    int pcount = G_ClientNumbersFromString( name, pids,
+                                            MAX_CLIENTS );
+
+    // reset the previous recipient list
+    prevRecipients->count = 0;
+
+    for( i = 0; i < pcount; i++ )
+    {
+      if( G_SayTo( ent, &g_entities[ pids[ i ] ],
+          teamonly ? SAY_TPRIVMSG : SAY_PRIVMSG, text ) )
+      {
+        count++;
+        Q_strcat( recipients, sizeof( recipients ), va( "%s" S_COLOR_WHITE ", ",
+          level.clients[ pids[ i ] ].pers.netname ) );
+
+        prevRecipients->id[prevRecipients->count] = level.clients[ pids[ i ] ].pers.namelog->id;
+        prevRecipients->count++;
+      }
     }
   }
 
@@ -4400,8 +4471,24 @@ void Cmd_PrivateMessage_f( gentity_t *ent )
   color = teamonly ? COLOR_CYAN : COLOR_YELLOW;
 
   if( !count )
-    ADMP( va( "^3No player matching ^7\'%s^7\' ^3to send message to.\n",
-      name ) );
+  {
+    if( sendToprevRecipients )
+    {
+      ADMP( va( "^%c%s: No connected %s on your previous recipients list.\n" ,
+                color, cmd, teamonly ? "players" : "teammates" ) );
+      if( disconnectedRecipientsCount )
+      {
+        // remove trailing ", "
+        disconnectedRecipients[ strlen( disconnectedRecipients ) - 2 ] = '\0';
+        ADMP( va( "^%c%i disconnected previous recipient%s: " S_COLOR_WHITE "%s\n", color,
+          disconnectedRecipientsCount,
+          disconnectedRecipientsCount == 1 ? "" : "s", disconnectedRecipients ) );
+      }
+    }
+    else
+      ADMP( va( "^3No player matching ^7\'%s^7\' ^3to send message to.\n",
+                name ) );
+  }
   else
   {
     ADMP( va( "^%cPrivate message: ^7%s\n", color, text ) );
@@ -4409,13 +4496,21 @@ void Cmd_PrivateMessage_f( gentity_t *ent )
     recipients[ strlen( recipients ) - 2 ] = '\0';
     ADMP( va( "^%csent to %i player%s: " S_COLOR_WHITE "%s\n", color, count,
       count == 1 ? "" : "s", recipients ) );
+    if( disconnectedRecipientsCount )
+    {
+      // remove trailing ", "
+      disconnectedRecipients[ strlen( disconnectedRecipients ) - 2 ] = '\0';
+      ADMP( va( "^%c%i disconnected previous recipient%s: " S_COLOR_WHITE "%s\n", color,
+        disconnectedRecipientsCount,
+        disconnectedRecipientsCount == 1 ? "" : "s", disconnectedRecipients ) );
+    }
 
     if( g_logPrivateMessages.integer )
-      G_LogPrintf( "%s: %d \"%s" S_COLOR_WHITE "\" \"%s\": ^%c%s\n",
+      G_LogPrintf( "%s: %d \"%s" S_COLOR_WHITE "\" \"%s" S_COLOR_WHITE "\": ^%c%s\n",
         ( teamonly ) ? "TPrivMsg" : "PrivMsg",
         (int)( ( ent ) ? ent - g_entities : -1 ),
         ( ent ) ? ent->client->pers.netname : "console",
-        name, color, msg );
+        recipients, color, msg );
   }
 }
 
