@@ -2415,6 +2415,13 @@ void Cmd_Class_f( gentity_t *ent )
           else if( ent->client->pers.evolveChargeStaminaFraction > 1.0f )
             ent->client->pers.evolveChargeStaminaFraction = 1.0f;
 
+          //save the barbs
+          if( ent->client->ps.weapon == WP_ALEVEL3_UPG )
+          {
+            ent->client->pers.barbs = ent->client->ps.ammo;
+            ent->client->pers.barbRegenTime = ent->timestamp;
+          }
+
           ent->client->pers.classSelection = newClass;
           ClientUserinfoChanged( clientNum, qfalse );
           VectorCopy( infestOrigin, ent->s.pos.trBase );
@@ -2427,6 +2434,13 @@ void Cmd_Class_f( gentity_t *ent )
           ent->dmgProtectionTime = 0;
 
           ClientSpawn( ent, ent, ent->s.pos.trBase, ent->s.apos.trBase );
+
+          //restore the barbs
+          if( ent->client->ps.weapon == WP_ALEVEL3_UPG )
+          {
+            ent->client->ps.ammo = ent->client->pers.barbs;
+            ent->timestamp = ent->client->pers.barbRegenTime;
+          }
 
           if( !g_cheats.integer )
           {

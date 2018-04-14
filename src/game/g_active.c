@@ -1097,7 +1097,20 @@ void ClientTimerActions( gentity_t *ent, int msec )
     }
     else
       ent->timestamp = level.time;
-   }
+  } else
+  {
+    // regen the barb while evolved to a different class
+    if( client->pers.barbs < BG_Weapon( WP_ALEVEL3_UPG )->maxAmmo )
+    {
+      if( client->pers.barbRegenTime + LEVEL3_BOUNCEBALL_REGEN < level.time )
+      {
+        client->pers.barbs++;
+        client->pers.barbRegenTime = level.time;
+      }
+    }
+    else
+      client->pers.barbRegenTime = level.time;
+  }
 }
 
 /*
@@ -1600,6 +1613,13 @@ void G_CancelEvolve( gentity_t *ent )
     client->pers.evolveHealthRegen = 0;
     client->evolveCost = 0;
 
+    //save the barbs
+    if( ent->client->ps.weapon == WP_ALEVEL3_UPG )
+    {
+      ent->client->pers.barbs = ent->client->ps.ammo;
+      ent->client->pers.barbRegenTime = ent->timestamp;
+    }
+
     client->pers.classSelection = previousClass;
     ClientUserinfoChanged( clientNum, qfalse );
     VectorCopy( infestOrigin, ent->s.pos.trBase );
@@ -1612,6 +1632,13 @@ void G_CancelEvolve( gentity_t *ent )
     ent->dmgProtectionTime = 0;
 
     ClientSpawn( ent, ent, ent->s.pos.trBase, ent->s.apos.trBase );
+
+    //restore the barbs
+    if( ent->client->ps.weapon == WP_ALEVEL3_UPG )
+    {
+      ent->client->ps.ammo = ent->client->pers.barbs;
+      ent->timestamp = ent->client->pers.barbRegenTime;
+    }
 
     VectorCopy( oldVel, ent->client->ps.velocity );
     if( oldBoostTime > 0 )

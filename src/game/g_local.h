@@ -524,6 +524,9 @@ typedef struct
   char                voice[ MAX_VOICE_NAME_LEN ];
   qboolean            useUnlagged;
 
+  int                 barbs;
+  int                 barbRegenTime;
+
   // level.time when teamoverlay info changed so we know to tell other players
   int                 infoChangeTime;
 } clientPersistant_t;

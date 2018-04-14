@@ -1443,6 +1443,10 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
         ent->dmgProtectionTime = level.time + HUMAN_SPAWN_PROTECTION_TIME;
         ent->targetProtectionTime = level.time + HUMAN_SPAWN_PROTECTION_TIME;
       }
+
+      // reset the barbs
+      ent->client->pers.barbs = BG_Weapon( WP_ALEVEL3_UPG )->maxAmmo;
+      ent->client->pers.barbRegenTime = level.time;
     }
   }
 
