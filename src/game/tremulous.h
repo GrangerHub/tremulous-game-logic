@@ -650,7 +650,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LIGHTNING_MAXCLIPS             0
 #define LIGHTNING_RELOAD               750
 #define LIGHTNING_K_SCALE              0.0f
-#define LIGHTNING_BOLT_DPS             HWDM(27500)
+#define LIGHTNING_BOLT_DPS             HWDM(35000)
 #define LIGHTNING_BOLT_CHARGE_TIME_MIN 150
 #define LIGHTNING_BOLT_CHARGE_TIME_MAX 1250
 #define LIGHTNING_BOLT_BEAM_DURATION   350
