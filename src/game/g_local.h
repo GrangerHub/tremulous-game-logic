@@ -1147,9 +1147,9 @@ void      G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 void      G_SelectiveDamage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_t dir,
                              vec3_t point, int damage, int dflags, int mod, int team );
 qboolean  G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage, float radius,
-                          gentity_t *ignore, int mod );
+                          gentity_t *ignore, int mod, qboolean knockback );
 qboolean  G_SelectiveRadiusDamage( vec3_t origin, gentity_t *attacker, float damage, float radius,
-                                   gentity_t *ignore, int mod, int team );
+                                   gentity_t *ignore, int mod, int team, qboolean knockback );
 void      G_Knockback( gentity_t *targ, vec3_t dir, int knockback );
 qboolean  G_TakesDamage( gentity_t *ent );
 float     G_RewardAttackers( gentity_t *self );
