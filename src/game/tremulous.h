@@ -355,7 +355,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ACIDTUBE_SPLASHRADIUS       300
 #define ACIDTUBE_CREEPSIZE          120
 #define ACIDTUBE_DAMAGE             ABDM(6000)
-#define ACIDTUBE_RANGE              300.0f
+#define ACIDTUBE_RANGE              375.0f
 #define ACIDTUBE_REPEAT             200
 #define ACIDTUBE_REPEAT_ANIM        2000
 #define ACIDTUBE_VALUE              ( ( 3 * LEVEL0_VALUE ) / 4 )
