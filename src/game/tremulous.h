@@ -164,14 +164,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define SPITFIRE_ZAP_REPEAT             1250
 #define SPITFIRE_ZAP_K_SCALE            1.0f
 #define SPITFIRE_ZAP_RANGE              300.0f
-#define SPITFIRE_ZAP_DMG                AWDM(20000)
+#define SPITFIRE_ZAP_DMG                AWDM(28000)
 #define SPITFIRE_ZAP_TIME               150
 #define SPITFIRE_ASCEND_REPEAT          400
 #define SPITFIRE_ASCEND_MAG             800.0f
 #define SPITFIRE_POUNCE_JUMP_MAG        2250
 #define SPITFIRE_POUNCE_REPEAT          250
 #define SPITFIRE_POUNCE_TIME            1200
-#define SPITFIRE_POUNCE_TIME_MIN        250 
+#define SPITFIRE_POUNCE_TIME_MIN        250
 #define SPITFIRE_POUNCE_DMG             AWDM(60000)
 #define SPITFIRE_POUNCE_RANGE           48.0f
 #define SPITFIRE_POUNCE_WIDTH           14.0f
@@ -185,7 +185,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define SPITFIRE_GLIDE_ANGLE            15.0f //optimal angle of attack
 #define SPITFIRE_GLIDE_MOD              1000
 #define SPITFIRE_GLIDE_ACCEL            3.8f
-#define SPITFIRE_HOVER_BOB              0.003f //for view bobbing from hovering
+#define SPITFIRE_HOVER_BOB              0.001f //for view bobbing from hovering
 
 /*
  * ALIEN classes
@@ -271,7 +271,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define SPITFIRE_SPEED                1.3f
 #define SPITFIRE_VALUE                AVM(3 * ALIEN_CREDITS_PER_KILL)
-#define SPITFIRE_HEALTH               AHM(155000)
+#define SPITFIRE_HEALTH               AHM(175000)
 #define SPITFIRE_REGEN                (0.03f * SPITFIRE_HEALTH)
 #define SPITFIRE_COST                 3
 

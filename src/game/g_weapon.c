@@ -1723,12 +1723,6 @@ static void G_DamageSpitfireZapTarget( void *data, void *user_data )
   vec3_t dir;
   int damage = SPITFIRE_ZAP_DMG;;
 
-  // apply half damage to targets niether grounded nor that contact water
-  if( target->targetEnt->s.groundEntityNum == ENTITYNUM_NONE &&
-      !( target->targetEnt->client && target->targetEnt->client->pmext.ladder ) &&
-      target->targetEnt->waterlevel < 1 )
-    damage /= 2;
-    
   VectorSubtract( target->targetEnt->r.currentOrigin,
                   zap->creator->r.currentOrigin, dir );
   G_Damage( target->targetEnt, zap->creator, zap->creator, dir,
