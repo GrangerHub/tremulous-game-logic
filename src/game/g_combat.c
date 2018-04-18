@@ -1897,6 +1897,10 @@ qboolean G_SelectiveRadiusDamage( vec3_t origin, gentity_t *attacker, float dama
       continue;
 
     points = damage * ( 1.0 - dist / radius );
+    // don't let the damage be less than half of one health point unit
+    points = MAX( points, ( BG_HP2SU( 1 ) / 2 ) );
+    // ensure that damage is always done when in range
+    points = MAX( points, 1 );
 
     if( CanDamage( ent, origin ) &&
         ( ( ent->client && ent->client->ps.stats[ STAT_TEAM ] != team ) ||
@@ -2027,6 +2031,10 @@ qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage,
       continue;
 
     points = damage * ( 1.0 - dist / radius );
+    // don't let the damage be less than half of one health point unit
+    points = MAX( points, ( BG_HP2SU( 1 ) / 2 ) );
+    // ensure that damage is always done when in range
+    points = MAX( points, 1 );
 
     if( CanDamage( ent, origin ) )
     {
