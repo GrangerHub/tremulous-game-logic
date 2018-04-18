@@ -1841,7 +1841,8 @@ G_SelectiveRadiusDamage
 ============
 */
 qboolean G_SelectiveRadiusDamage( vec3_t origin, gentity_t *attacker, float damage,
-                                  float radius, gentity_t *ignore, int mod, int team )
+                                  float radius, gentity_t *ignore, int mod, int team,
+                                  qboolean knockback )
 {
   float     points, dist;
   gentity_t *ent;
@@ -1907,6 +1908,11 @@ qboolean G_SelectiveRadiusDamage( vec3_t origin, gentity_t *attacker, float dama
           ( ent->s.eType == ET_BUILDABLE && ent->buildableTeam != team ) ||
           ( mod == MOD_REACTOR && ent->s.eType == ET_TELEPORTAL ) ) )
     {
+      int dflags = (DAMAGE_RADIUS|DAMAGE_NO_LOCDAMAGE);
+  
+      if( !knockback )
+        dflags |= DAMAGE_NO_KNOCKBACK;
+
       VectorSubtract( ent->r.currentOrigin, origin, dir );
       // push the center of mass higher than the origin so players
       // get knocked into the air more
@@ -1914,7 +1920,7 @@ qboolean G_SelectiveRadiusDamage( vec3_t origin, gentity_t *attacker, float dama
       hitClient = qtrue;
       G_Damage( ent, NULL, attacker, dir, origin,
                 (int)points ? (int)points : 1,
-                DAMAGE_RADIUS|DAMAGE_NO_LOCDAMAGE, mod );
+                dflags, mod );
     }
   }
 
@@ -1970,7 +1976,7 @@ G_RadiusDamage
 ============
 */
 qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage,
-                         float radius, gentity_t *ignore, int mod )
+                         float radius, gentity_t *ignore, int mod, qboolean knockback )
 {
   float     points, dist, shake;
   gentity_t *ent;
@@ -2038,6 +2044,11 @@ qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage,
 
     if( CanDamage( ent, origin ) )
     {
+      int dflags = (DAMAGE_RADIUS|DAMAGE_NO_LOCDAMAGE);
+  
+      if( !knockback )
+        dflags |= DAMAGE_NO_KNOCKBACK;
+
       VectorSubtract( ent->r.currentOrigin, origin, dir );
       // push the center of mass higher than the origin so players
       // get knocked into the air more
@@ -2045,7 +2056,7 @@ qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage,
       hitClient = qtrue;
       G_Damage( ent, NULL, attacker, dir, origin,
                 (int)points ? (int)points : 1,
-                DAMAGE_RADIUS|DAMAGE_NO_LOCDAMAGE, mod );
+                dflags, mod );
     }
   }
 
