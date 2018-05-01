@@ -197,7 +197,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
 
-#define MAX_EVOLVE_PERIOD           15000 // maximum time in ms that evolving requires.
+#define MAX_EVOLVE_PERIOD           10000 // maximum time in ms that evolving requires.
 
 #define ALIEN_HLTH_MODIFIER         1.0f
 #define AHM(h)                      ((int)((float)h*ALIEN_HLTH_MODIFIER))

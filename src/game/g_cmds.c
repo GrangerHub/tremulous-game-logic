@@ -2451,7 +2451,7 @@ void Cmd_Class_f( gentity_t *ent )
             ent->health = oldHealth;
             ent->client->ps.misc[ MISC_HEALTH ] = ent->health;
 
-            evolvePeriod += ( abs( ent->client->pers.evolveHealthRegen ) / 25 );
+            evolvePeriod += ( abs( ent->client->pers.evolveHealthRegen * 3 ) / 100 );
 
             if( evolvePeriod > MAX_EVOLVE_PERIOD )
               evolvePeriod = MAX_EVOLVE_PERIOD;
