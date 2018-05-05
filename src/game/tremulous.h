@@ -291,7 +291,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
 
-#define ALIEN_BHLTH_MODIFIER        1.75f
+#define ALIEN_BHLTH_MODIFIER        1.0f
 #define ABHM(h)                     ((int)((float)h*ALIEN_BHLTH_MODIFIER))
 #define ALIEN_BDMG_MODIFIER         1.0f
 #define ABDM(d)                     ((int)((float)d*ALIEN_BDMG_MODIFIER))
@@ -432,7 +432,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define OVERMIND_BP                 0
 #define OVERMIND_BT                 10000
-#define OVERMIND_HEALTH             ABHM(1000000)
+#define OVERMIND_HEALTH             ABHM(1337000)
 #define OVERMIND_REGEN              ABRM(6000)
 #define OVERMIND_SPLASHDAMAGE       ABDM(15000)
 #define OVERMIND_SPLASHRADIUS       300
@@ -736,7 +736,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
 
-#define HUMAN_BHLTH_MODIFIER        1.75f
+#define HUMAN_BHLTH_MODIFIER        1.25f
 #define HBHM(h)                     ((int)((float)h*HUMAN_BHLTH_MODIFIER))
 #define HUMAN_BDMG_MODIFIER         1.0f
 #define HBDM(d)                     ((int)((float)d*ALIEN_WDMG_MODIFIER))
