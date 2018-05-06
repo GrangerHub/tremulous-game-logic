@@ -3724,6 +3724,8 @@ void HMGTurret_Think( gentity_t *self )
                         ( ( ( MGTURRET_REPEAT_START - MGTURRET_REPEAT ) *
                              self->turretSpinupTime ) / MGTURRET_SPINUP_TIME );
     }
+
+    self->timestamp += rand() / ( RAND_MAX / MGTURRET_REPEAT );
   }
 
   // Not firing or haven't spun up yet
