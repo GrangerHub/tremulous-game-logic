@@ -785,7 +785,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MGTURRET_ACCURACY_TO_FIRE   10
 #define MGTURRET_VERTICALCAP        45  // +/- maximum pitch
 #define MGTURRET_REPEAT             140  // repeat after full spin up
-#define MGTURRET_REPEAT_START       500 // the repeat at the start of spinup
+#define MGTURRET_REPEAT_START       300 // the repeat at the start of spinup
 #define MGTURRET_NEXTTHINK          50
 #define MGTURRET_K_SCALE            1.0f
 #define MGTURRET_RANGE              500.0f
@@ -793,7 +793,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MGTURRET_DMG                HBDM(5500)
 #define MGTURRET_SPINUP_TIME        3500 // time to increase the fire rate to full speed
 #define MGTURRET_SPINDOWN_TIME      10000 // time it takes a ret to spindown from full speed to complete stop
-#define MGTURRET_SPINUP_SKIPFIRE    600 // the initial shot skips below this spinup value
+#define MGTURRET_SPINUP_SKIPFIRE    400 // the initial shot skips below this spinup value
 #define MGTURRET_VALUE              ( ( 3 * ALIEN_CREDITS_PER_KILL ) / 4 )
 #define MGTURRET_BAT_PWR            25000
 #define MGTURRET_DCC_ANGULARSPEED   18
