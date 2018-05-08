@@ -400,7 +400,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define TRAPPER_BP                  8
 #define TRAPPER_BT                  6000
-#define TRAPPER_HEALTH              ABHM(50000)
+#define TRAPPER_HEALTH              ABHM(75000)
 #define TRAPPER_REGEN               ABRM(6000)
 #define TRAPPER_SPLASHDAMAGE        ABDM(15000)
 #define TRAPPER_SPLASHRADIUS        100
@@ -418,7 +418,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define SLIME_ZUNGE_BP              12
 #define SLIME_ZUNGE_BT              8000
-#define SLIME_ZUNGE_HEALTH          ABHM(180000)
+#define SLIME_ZUNGE_HEALTH          ABHM(250000)
 #define SLIME_ZUNGE_REGEN           ABRM(12000)
 #define SLIME_ZUNGE_SPLASHDAMAGE    ABDM(15000)
 #define SLIME_ZUNGE_SPLASHRADIUS    200
@@ -776,28 +776,29 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MEDISTAT_VALUE              ( ( 3 * ALIEN_CREDITS_PER_KILL ) / 2 )
 #define MEDISTAT_BAT_PWR            25000
 
-#define MGTURRET_BP                 8
-#define MGTURRET_BT                 10000
-#define MGTURRET_HEALTH             HBHM(190000)
-#define MGTURRET_SPLASHDAMAGE       HBDM(100000)
-#define MGTURRET_SPLASHRADIUS       100
-#define MGTURRET_ANGULARSPEED       14
-#define MGTURRET_ACCURACY_TO_FIRE   10
-#define MGTURRET_VERTICALCAP        45  // +/- maximum pitch
-#define MGTURRET_REPEAT             140  // repeat after full spin up
-#define MGTURRET_REPEAT_START       300 // the repeat at the start of spinup
-#define MGTURRET_NEXTTHINK          50
-#define MGTURRET_K_SCALE            1.0f
-#define MGTURRET_RANGE              500.0f
-#define MGTURRET_SPREAD             200
-#define MGTURRET_DMG                HBDM(5500)
-#define MGTURRET_SPINUP_TIME        3500 // time to increase the fire rate to full speed
-#define MGTURRET_SPINDOWN_TIME      4000 // time it takes a ret to spindown from full speed to complete stop
-#define MGTURRET_SPINUP_SKIPFIRE    400 // the initial shot skips below this spinup value
-#define MGTURRET_VALUE              ( ( 3 * ALIEN_CREDITS_PER_KILL ) / 4 )
-#define MGTURRET_BAT_PWR            25000
-#define MGTURRET_DCC_ANGULARSPEED   18
-#define MGTURRET_GRAB_ANGULARSPEED  0
+#define MGTURRET_BP                  8
+#define MGTURRET_BT                  10000
+#define MGTURRET_HEALTH              HBHM(240000)
+#define MGTURRET_SPLASHDAMAGE        HBDM(100000)
+#define MGTURRET_SPLASHRADIUS        100
+#define MGTURRET_ANGULARSPEED        11
+#define MGTURRET_ANGULARYAWSPEED_MOD 6
+#define MGTURRET_ACCURACY_TO_FIRE    10
+#define MGTURRET_VERTICALCAP         45  // +/- maximum pitch
+#define MGTURRET_REPEAT              140  // repeat after full spin up
+#define MGTURRET_REPEAT_START        300 // the repeat at the start of spinup
+#define MGTURRET_NEXTTHINK           50
+#define MGTURRET_K_SCALE             1.0f
+#define MGTURRET_RANGE               500.0f
+#define MGTURRET_SPREAD              200
+#define MGTURRET_DMG                 HBDM(4400)
+#define MGTURRET_SPINUP_TIME         3800 // time to increase the fire rate to full speed
+#define MGTURRET_SPINDOWN_TIME       3800 // time it takes a ret to spindown from full speed to complete stop
+#define MGTURRET_SPINUP_SKIPFIRE     400 // the initial shot skips below this spinup value
+#define MGTURRET_VALUE               ( ( 3 * ALIEN_CREDITS_PER_KILL ) / 4 )
+#define MGTURRET_BAT_PWR             25000
+#define MGTURRET_DCC_ANGULARSPEED    16
+#define MGTURRET_GRAB_ANGULARSPEED   0
 
 #define TESLAGEN_BP                 10
 #define TESLAGEN_BT                 15000
