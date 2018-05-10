@@ -1781,56 +1781,125 @@ Returns qtrue if the inflictor can directly damage the target.  Used for
 explosions and melee attacks.
 ============
 */
-qboolean CanDamage( gentity_t *targ, vec3_t origin )
+qboolean CanDamage( gentity_t *targ, vec3_t origin,
+                    vec3_t mins, vec3_t maxs )
 {
+  vec3_t  source;
   vec3_t  dest;
   trace_t tr;
   vec3_t  midpoint;
+  int     i = 0; // for checking different source points
 
   // use the midpoint of the bounds instead of the origin, because
   // bmodels may have their origin is 0,0,0
   VectorAdd( targ->r.absmin, targ->r.absmax, midpoint );
   VectorScale( midpoint, 0.5, midpoint );
 
-  VectorCopy( midpoint, dest );
-  SV_Trace( &tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE,
-    MASK_SOLID, TT_AABB );
-  if( tr.fraction == 1.0  || tr.entityNum == targ->s.number )
-    return qtrue;
+  do
+  {
+    //check from the different source points
+    VectorCopy( origin, source );
+    switch ( i )
+    {
+      case 0:
+        //check from the origin
+        break;
 
-  // this should probably check in the plane of projection,
-  // rather than in world coordinate, and also include Z
-  VectorCopy( midpoint, dest );
-  dest[ 0 ] += 15.0;
-  dest[ 1 ] += 15.0;
-  SV_Trace( &tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE,
-    MASK_SOLID, TT_AABB );
-  if( tr.fraction == 1.0 )
-    return qtrue;
+      case 1:
+        source[2] += maxs[2];
+        source[1] += maxs[1];
+        source[0] += maxs[0];
+        break;
 
-  VectorCopy( midpoint, dest );
-  dest[ 0 ] += 15.0;
-  dest[ 1 ] -= 15.0;
-  SV_Trace( &tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE,
-    MASK_SOLID, TT_AABB );
-  if( tr.fraction == 1.0 )
-    return qtrue;
+      case 2:
+        source[2] += maxs[2];
+        source[1] += mins[1];
+        source[0] += maxs[0];
+        break;
 
-  VectorCopy( midpoint, dest );
-  dest[ 0 ] -= 15.0;
-  dest[ 1 ] += 15.0;
-  SV_Trace( &tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE,
-    MASK_SOLID, TT_AABB );
-  if( tr.fraction == 1.0 )
-    return qtrue;
+      case 3:
+        source[2] += maxs[2];
+        source[1] += maxs[1];
+        source[0] += mins[0];
+        break;
 
-  VectorCopy( midpoint, dest );
-  dest[ 0 ] -= 15.0;
-  dest[ 1 ] -= 15.0;
-  SV_Trace( &tr, origin, vec3_origin, vec3_origin, dest, ENTITYNUM_NONE,
-    MASK_SOLID, TT_AABB );
-  if( tr.fraction == 1.0 )
-    return qtrue;
+      case 4:
+        source[2] += maxs[2];
+        source[1] += mins[1];
+        source[0] += mins[0];
+        break;
+
+      case 5:
+        source[2] += mins[2];
+        source[1] += maxs[1];
+        source[0] += maxs[0];
+        break;
+
+      case 6:
+        source[2] += mins[2];
+        source[1] += mins[1];
+        source[0] += maxs[0];
+        break;
+
+      case 7:
+        source[2] += mins[2];
+        source[1] += maxs[1];
+        source[0] += mins[0];
+        break;
+
+      case 8:
+        source[2] += mins[2];
+        source[1] += mins[1];
+        source[0] += mins[0];
+        break;
+    }
+
+    VectorCopy( midpoint, dest );
+    SV_Trace( &tr, source, NULL, NULL, dest, ENTITYNUM_NONE,
+      MASK_SOLID, TT_AABB );
+    if( tr.fraction == 1.0  || tr.entityNum == targ->s.number )
+      return qtrue;
+
+    // this should probably check in the plane of projection,
+    // rather than in world coordinate, and also include Z
+    VectorCopy( midpoint, dest );
+    dest[ 0 ] += 15.0;
+    dest[ 1 ] += 15.0;
+    SV_Trace( &tr, source, NULL, NULL, dest, ENTITYNUM_NONE,
+      MASK_SOLID, TT_AABB );
+    if( tr.fraction == 1.0 )
+      return qtrue;
+
+    VectorCopy( midpoint, dest );
+    dest[ 0 ] += 15.0;
+    dest[ 1 ] -= 15.0;
+    SV_Trace( &tr, source, NULL, NULL, dest, ENTITYNUM_NONE,
+      MASK_SOLID, TT_AABB );
+    if( tr.fraction == 1.0 )
+      return qtrue;
+
+    VectorCopy( midpoint, dest );
+    dest[ 0 ] -= 15.0;
+    dest[ 1 ] += 15.0;
+    SV_Trace( &tr, source, NULL, NULL, dest, ENTITYNUM_NONE,
+      MASK_SOLID, TT_AABB );
+    if( tr.fraction == 1.0 )
+      return qtrue;
+
+    VectorCopy( midpoint, dest );
+    dest[ 0 ] -= 15.0;
+    dest[ 1 ] -= 15.0;
+    SV_Trace( &tr, source, NULL, NULL, dest, ENTITYNUM_NONE,
+      MASK_SOLID, TT_AABB );
+    if( tr.fraction == 1.0 )
+      return qtrue;
+
+    // only check the origin if mins or maxs are NULL
+    if( !mins || !maxs )
+      break;
+
+    i++;
+  } while( i < 9 );
 
   return qfalse;
 }
@@ -1840,7 +1909,8 @@ qboolean CanDamage( gentity_t *targ, vec3_t origin )
 G_SelectiveRadiusDamage
 ============
 */
-qboolean G_SelectiveRadiusDamage( vec3_t origin, gentity_t *attacker, float damage,
+qboolean G_SelectiveRadiusDamage( vec3_t origin, vec3_t originMins, vec3_t originMaxs,
+                                  gentity_t *attacker, float damage,
                                   float radius, gentity_t *ignore, int mod, int team,
                                   qboolean knockback )
 {
@@ -1903,10 +1973,10 @@ qboolean G_SelectiveRadiusDamage( vec3_t origin, gentity_t *attacker, float dama
     // ensure that damage is always done when in range
     points = MAX( points, 1 );
 
-    if( CanDamage( ent, origin ) &&
-        ( ( ent->client && ent->client->ps.stats[ STAT_TEAM ] != team ) ||
+    if( ( ( ent->client && ent->client->ps.stats[ STAT_TEAM ] != team ) ||
           ( ent->s.eType == ET_BUILDABLE && ent->buildableTeam != team ) ||
-          ( mod == MOD_REACTOR && ent->s.eType == ET_TELEPORTAL ) ) )
+          ( mod == MOD_REACTOR && ent->s.eType == ET_TELEPORTAL ) ) &&
+        CanDamage( ent, origin, originMins, originMaxs ) )
     {
       int dflags = (DAMAGE_RADIUS|DAMAGE_NO_LOCDAMAGE);
   
@@ -1975,7 +2045,8 @@ void G_Knockback( gentity_t *targ, vec3_t dir, int knockback )
 G_RadiusDamage
 ============
 */
-qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage,
+qboolean G_RadiusDamage( vec3_t origin, vec3_t originMins, vec3_t originMaxs,
+                         gentity_t *attacker, float damage,
                          float radius, gentity_t *ignore, int mod, qboolean knockback )
 {
   float     points, dist, shake;
@@ -2042,7 +2113,7 @@ qboolean G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage,
     // ensure that damage is always done when in range
     points = MAX( points, 1 );
 
-    if( CanDamage( ent, origin ) )
+    if( CanDamage( ent, origin, originMins, originMaxs ) )
     {
       int dflags = (DAMAGE_RADIUS|DAMAGE_NO_LOCDAMAGE);
   

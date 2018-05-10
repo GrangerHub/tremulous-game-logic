@@ -91,7 +91,8 @@ void G_ExplodeMissile( gentity_t *ent )
 
   // splash damage
   if( ent->splashDamage )
-    G_RadiusDamage( ent->r.currentOrigin, ent->parent, ent->splashDamage,
+    G_RadiusDamage( ent->r.currentOrigin, ent->r.mins,
+                    ent->r.maxs, ent->parent, ent->splashDamage,
                     ent->splashRadius, ent, ent->splashMethodOfDeath, qtrue );
 
   SV_LinkEntity( ent );
@@ -240,7 +241,8 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace )
   // splash damage (doesn't apply to person directly hit)
   if( ent->splashDamage ||
       !strcmp( ent->classname, "lightningEMP" ) )
-    G_RadiusDamage( trace->endpos, ent->parent, ent->splashDamage, ent->splashRadius,
+    G_RadiusDamage( trace->endpos, NULL, NULL,
+                    ent->parent, ent->splashDamage, ent->splashRadius,
                     other, ent->splashMethodOfDeath, qtrue );
 
   SV_LinkEntity( ent );
