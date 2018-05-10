@@ -1413,78 +1413,31 @@ explosions and melee attacks.
 qboolean CanDamage( gentity_t *targ, vec3_t origin,
                     vec3_t mins, vec3_t maxs )
 {
-  vec3_t  source;
-  vec3_t  dest;
-  trace_t tr;
-  vec3_t  midpoint;
-  int     i = 0; // for checking different source points
+  vec3_t         dest;
+  trace_t        tr;
+  vec3_t         midpoint;
+  bboxPoint_t    sourcePoint;
+
+  Com_Assert( targ &&
+              "CanDamage: targ is NULL" );
+  Com_Assert( origin &&
+              "CanDamage: origin is NULL" );
 
   // use the midpoint of the bounds instead of the origin, because
   // bmodels may have their origin is 0,0,0
   VectorAdd( targ->r.absmin, targ->r.absmax, midpoint );
   VectorScale( midpoint, 0.5, midpoint );
 
+  sourcePoint.num = 0;
+
   do
   {
     //check from the different source points
-    VectorCopy( origin, source );
-    switch ( i )
-    {
-      case 0:
-        //check from the origin
-        break;
-
-      case 1:
-        source[2] += maxs[2];
-        source[1] += maxs[1];
-        source[0] += maxs[0];
-        break;
-
-      case 2:
-        source[2] += maxs[2];
-        source[1] += mins[1];
-        source[0] += maxs[0];
-        break;
-
-      case 3:
-        source[2] += maxs[2];
-        source[1] += maxs[1];
-        source[0] += mins[0];
-        break;
-
-      case 4:
-        source[2] += maxs[2];
-        source[1] += mins[1];
-        source[0] += mins[0];
-        break;
-
-      case 5:
-        source[2] += mins[2];
-        source[1] += maxs[1];
-        source[0] += maxs[0];
-        break;
-
-      case 6:
-        source[2] += mins[2];
-        source[1] += mins[1];
-        source[0] += maxs[0];
-        break;
-
-      case 7:
-        source[2] += mins[2];
-        source[1] += maxs[1];
-        source[0] += mins[0];
-        break;
-
-      case 8:
-        source[2] += mins[2];
-        source[1] += mins[1];
-        source[0] += mins[0];
-        break;
-    }
+    BG_EvaluateBBOXPoint( &sourcePoint, origin,
+                     mins, maxs );
 
     VectorCopy( midpoint, dest );
-    SV_Trace( &tr, source, NULL, NULL, dest, ENTITYNUM_NONE,
+    SV_Trace( &tr, sourcePoint.point, NULL, NULL, dest, ENTITYNUM_NONE,
       MASK_SOLID, TT_AABB );
     if( tr.fraction == 1.0  || tr.entityNum == targ->s.number )
       return qtrue;
@@ -1494,7 +1447,7 @@ qboolean CanDamage( gentity_t *targ, vec3_t origin,
     VectorCopy( midpoint, dest );
     dest[ 0 ] += 15.0;
     dest[ 1 ] += 15.0;
-    SV_Trace( &tr, source, NULL, NULL, dest, ENTITYNUM_NONE,
+    SV_Trace( &tr, sourcePoint.point, NULL, NULL, dest, ENTITYNUM_NONE,
       MASK_SOLID, TT_AABB );
     if( tr.fraction == 1.0 )
       return qtrue;
@@ -1502,7 +1455,7 @@ qboolean CanDamage( gentity_t *targ, vec3_t origin,
     VectorCopy( midpoint, dest );
     dest[ 0 ] += 15.0;
     dest[ 1 ] -= 15.0;
-    SV_Trace( &tr, source, NULL, NULL, dest, ENTITYNUM_NONE,
+    SV_Trace( &tr, sourcePoint.point, NULL, NULL, dest, ENTITYNUM_NONE,
       MASK_SOLID, TT_AABB );
     if( tr.fraction == 1.0 )
       return qtrue;
@@ -1510,7 +1463,7 @@ qboolean CanDamage( gentity_t *targ, vec3_t origin,
     VectorCopy( midpoint, dest );
     dest[ 0 ] -= 15.0;
     dest[ 1 ] += 15.0;
-    SV_Trace( &tr, source, NULL, NULL, dest, ENTITYNUM_NONE,
+    SV_Trace( &tr, sourcePoint.point, NULL, NULL, dest, ENTITYNUM_NONE,
       MASK_SOLID, TT_AABB );
     if( tr.fraction == 1.0 )
       return qtrue;
@@ -1518,17 +1471,17 @@ qboolean CanDamage( gentity_t *targ, vec3_t origin,
     VectorCopy( midpoint, dest );
     dest[ 0 ] -= 15.0;
     dest[ 1 ] -= 15.0;
-    SV_Trace( &tr, source, NULL, NULL, dest, ENTITYNUM_NONE,
+    SV_Trace( &tr, sourcePoint.point, NULL, NULL, dest, ENTITYNUM_NONE,
       MASK_SOLID, TT_AABB );
     if( tr.fraction == 1.0 )
       return qtrue;
 
-    // only check the origin if mins or maxs are NULL
+    // check only the origin if mins or maxs are NULL
     if( !mins || !maxs )
       break;
 
-    i++;
-  } while( i < 9 );
+    sourcePoint.num++;
+  } while( sourcePoint.num < NUM_BBOX_POINTS );
 
   return qfalse;
 }

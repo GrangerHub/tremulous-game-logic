@@ -1296,6 +1296,7 @@ typedef struct
 
   int           turretRange;
   int           turretFireSpeed;
+  qboolean      turretTrackOnlyOrigin;
   weapon_t      turretProjType;
 
   float         minNormal;
@@ -1633,6 +1634,38 @@ voiceTrack_t *BG_VoiceTrackFind( voiceTrack_t *head, team_t team,
 int BG_LoadEmoticons( emoticon_t *emoticons, int num );
 
 const teamAttributes_t *BG_Team( team_t team );
+
+typedef enum
+{
+  BBXP_ORIGIN = 0,
+
+  BBXP_MIDFACE1,
+  BBXP_MIDFACE2,
+  BBXP_MIDFACE3,
+  BBXP_MIDFACE4,
+  BBXP_MIDFACE5,
+  BBXP_MIDFACE6,
+
+  BBXP_VERTEX1,
+  BBXP_VERTEX2,
+  BBXP_VERTEX3,
+  BBXP_VERTEX4,
+  BBXP_VERTEX5,
+  BBXP_VERTEX6,
+  BBXP_VERTEX7,
+  BBXP_VERTEX8,
+
+  NUM_BBOX_POINTS
+} bboxPointNum_t;
+
+typedef struct bboxPoint_s
+{
+  bboxPointNum_t num;
+  vec3_t         point;
+} bboxPoint_t;
+
+void BG_EvaluateBBOXPoint( bboxPoint_t *bboxPoint, vec3_t origin,
+                      vec3_t mins, vec3_t maxs );
 
 typedef struct
 {
