@@ -1134,14 +1134,17 @@ void        G_SetExpiration( gentity_t *ent, expire_t index, int expiration );
 //
 // g_combat.c
 //
-qboolean  CanDamage( gentity_t *targ, vec3_t origin );
+qboolean  CanDamage( gentity_t *targ, vec3_t origin,
+                     vec3_t mins, vec3_t maxs );
 void      G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
                     vec3_t dir, vec3_t point, int damage, int dflags, int mod );
 void      G_SelectiveDamage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_t dir,
                              vec3_t point, int damage, int dflags, int mod, int team );
-qboolean  G_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage, float radius,
+qboolean  G_RadiusDamage( vec3_t origin, vec3_t originMins, vec3_t originMaxs,
+                          gentity_t *attacker, float damage, float radius,
                           gentity_t *ignore, int mod, qboolean knockback );
-qboolean  G_SelectiveRadiusDamage( vec3_t origin, gentity_t *attacker, float damage, float radius,
+qboolean  G_SelectiveRadiusDamage( vec3_t origin, vec3_t originMins, vec3_t originMaxs,
+                                   gentity_t *attacker, float damage, float radius,
                                    gentity_t *ignore, int mod, int team, qboolean knockback );
 void      G_Knockback( gentity_t *targ, vec3_t dir, int knockback );
 qboolean  G_TakesDamage( gentity_t *ent );
