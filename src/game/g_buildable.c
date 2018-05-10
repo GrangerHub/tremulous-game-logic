@@ -924,7 +924,8 @@ void AGeneric_Blast( gentity_t *self )
   VectorCopy( self->s.origin2, dir );
 
   //do a bit of radius damage
-  G_SelectiveRadiusDamage( self->s.pos.trBase, g_entities + self->killedBy, self->splashDamage,
+  G_SelectiveRadiusDamage( self->s.pos.trBase, self->r.mins, self->r.maxs,
+                           g_entities + self->killedBy, self->splashDamage,
                            self->splashRadius, self, self->splashMethodOfDeath,
                            TEAM_ALIENS, qtrue );
 
@@ -1138,9 +1139,11 @@ void AOvermind_Think( gentity_t *self )
       enemy = &g_entities[ entityList[ i ] ];
 
       if( enemy->client && enemy->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
-          G_SelectiveRadiusDamage( self->s.pos.trBase, self, self->splashDamage,
-                                   self->splashRadius, self, MOD_OVERMIND,
-                                   TEAM_ALIENS, qtrue ) )
+          G_SelectiveRadiusDamage( self->s.pos.trBase,
+                                   self->r.mins, self->r.maxs,
+                                   self, self->splashDamage,
+                                   self->splashRadius, self,
+                                   MOD_OVERMIND, TEAM_ALIENS, qtrue ) )
       {
         self->timestamp = level.time;
         G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
@@ -1401,13 +1404,13 @@ void AAcidTube_Think( gentity_t *self )
       if( G_NoTarget( enemy ) )
         continue;
 
-      if( !G_Visible( self, enemy, CONTENTS_SOLID ) )
-        continue;
-
       if( enemy->client && enemy->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
       {
-        if( !G_SelectiveRadiusDamage( self->s.pos.trBase, self, ACIDTUBE_DAMAGE,
-                                 ACIDTUBE_RANGE, self, MOD_ATUBE, TEAM_ALIENS, qfalse ) )
+        if( !G_SelectiveRadiusDamage( self->s.pos.trBase,
+                                      self->r.mins, self->r.maxs,
+                                      self, ACIDTUBE_DAMAGE,
+                                      ACIDTUBE_RANGE, self,
+                                      MOD_ATUBE, TEAM_ALIENS, qfalse ) )
           return;
 
         // start the attack animation
@@ -1906,8 +1909,12 @@ void AHovel_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   if( mod != MOD_DECONSTRUCT )
   {
     //do a bit of radius damage
-    G_SelectiveRadiusDamage( self->s.pos.trBase, self, self->splashDamage,
-      self->splashRadius, self, self->splashMethodOfDeath, TEAM_ALIENS, qtrue );
+    G_SelectiveRadiusDamage( self->s.pos.trBase,
+                             self->r.mins, self->r.maxs,
+                             self, self->splashDamage,
+                             self->splashRadius, self,
+                             self->splashMethodOfDeath,
+                             TEAM_ALIENS, qtrue );
 
     //pretty events and item cleanup
     self->s.eFlags |= EF_NODRAW; //don't draw the model once its destroyed
@@ -2260,8 +2267,9 @@ void HSpawn_Blast( gentity_t *self )
   self->timestamp = level.time;
 
   //do some radius damage
-  G_RadiusDamage( self->s.pos.trBase, g_entities + self->killedBy, self->splashDamage,
-    self->splashRadius, self, self->splashMethodOfDeath, qtrue );
+  G_RadiusDamage( self->s.pos.trBase, self->r.mins, self->r.maxs,
+                  g_entities + self->killedBy, self->splashDamage,
+                  self->splashRadius, self, self->splashMethodOfDeath, qtrue );
 
   // begin freeing build points
   G_QueueBuildPoints( self );
@@ -2582,13 +2590,15 @@ void HReactor_Think( gentity_t *self )
     {
       self->timestamp = level.time;
       if( self->dcc )
-        G_SelectiveRadiusDamage( self->s.pos.trBase, self,
-                                 REACTOR_ATTACK_DCC_DAMAGE,
+        G_SelectiveRadiusDamage( self->s.pos.trBase,
+                                 self->r.mins, self->r.maxs,
+                                 self, REACTOR_ATTACK_DCC_DAMAGE,
                                  REACTOR_ATTACK_DCC_RANGE, self,
                                  MOD_REACTOR, TEAM_HUMANS, qtrue );
       else
-        G_SelectiveRadiusDamage( self->s.pos.trBase, self,
-                                 REACTOR_ATTACK_DAMAGE,
+        G_SelectiveRadiusDamage( self->s.pos.trBase,
+                                 self->r.mins, self->r.maxs,
+                                 self, REACTOR_ATTACK_DAMAGE,
                                  REACTOR_ATTACK_RANGE, self,
                                  MOD_REACTOR, TEAM_HUMANS, qtrue );
     }
