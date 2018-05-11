@@ -303,6 +303,7 @@ struct gentity_s
 
   gentity_t         *chain;
   gentity_t         *enemy;
+  bboxPointNum_t    trackedEnemyPointNum; // for tracking specific enemy points
   gentity_t         *activator;
   gentity_t         *teamchain;   // next entity in team
   gentity_t         *teammaster;  // master of the team
