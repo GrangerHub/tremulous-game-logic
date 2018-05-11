@@ -4934,18 +4934,46 @@ BG_EvaluateBBOXPoint
 ============
 */
 void BG_EvaluateBBOXPoint( bboxPoint_t *bboxPoint, vec3_t origin,
-                      vec3_t mins, vec3_t maxs )
+                      const vec3_t minsIn, const vec3_t maxsIn )
 {
+  vec3_t      mins, maxs;
+  const float inset = 1.0f;
+  int         i;
+
   Com_Assert( bboxPoint &&
               "BG_EvaluateBBOXPoint: bboxPoint is NULL" );
   Com_Assert( origin &&
               "BG_EvaluateBBOXPoint: origin is NULL" );
+  Com_Assert( minsIn[ 0 ] <= maxsIn[ 0 ] &&
+              "BG_EvaluateBBOXPoint: minsIn[ 0 ] exceeds maxsIn[ 0 ]" );
+  Com_Assert( minsIn[ 1 ] <= maxsIn[ 1 ] &&
+              "BG_EvaluateBBOXPoint: minsIn[ 1 ] exceeds maxsIn[ 1 ]" );
+  Com_Assert( minsIn[ 2 ] <= maxsIn[ 2 ] &&
+              "BG_EvaluateBBOXPoint: minsIn[ 2 ] exceeds maxsIn[ 2 ]" );
 
   VectorCopy( origin, bboxPoint->point );
 
   // return the origin if either the mins or maxs is NULL
-  if( !mins || !maxs )
+  if( !minsIn || !maxsIn )
     return;
+
+  VectorCopy( minsIn, mins );
+  VectorCopy( maxsIn, maxs );
+
+  //inset the points into the bbox
+  for( i = 0; i < 3; i++ )
+  {
+    //ensure that the mins and maxs don't pass each other
+    if( ( mins[ i ] + inset ) < ( maxs[ i ] - inset ) )
+    {
+      maxs[ i ] -= inset;
+      mins[ i ] += inset;
+    } else
+    {
+      //set the min and max values for the given axis equal to their mid point
+      maxs[ i ] = mins[ i ] = ( ( maxs[ i ] + mins[ i ] ) / 2 );
+    }
+  }
 
   switch ( bboxPoint->num )
   {

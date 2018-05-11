@@ -1665,7 +1665,7 @@ typedef struct bboxPoint_s
 } bboxPoint_t;
 
 void BG_EvaluateBBOXPoint( bboxPoint_t *bboxPoint, vec3_t origin,
-                      vec3_t mins, vec3_t maxs );
+                           const vec3_t minsIn, const vec3_t maxsIn );
 
 typedef struct
 {
