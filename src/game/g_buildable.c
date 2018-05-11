@@ -3474,6 +3474,11 @@ static qboolean HMGTurret_TargetPointIsVisible( gentity_t *self,
   Com_Assert( targetPoint &&
               "HMGTurret_TargetPointIsVisible: targetPoint is NULL" );
 
+  //check that the point is within the angular range
+  if( DotProduct( self->s.origin2, targetPoint->direction ) <
+      -sin( DEG2RAD( MGTURRET_VERTICALCAP ) ) )
+    return qfalse;
+
   VectorMA( self->s.pos.trBase, MGTURRET_RANGE, targetPoint->direction, end );
   SV_Trace( &tr, self->s.pos.trBase, NULL, NULL, end,
               self->s.number, MASK_SHOT, TT_AABB );
@@ -3554,6 +3559,10 @@ static qboolean HMGTurret_FindTrackPoint( gentity_t *self,
   for( i = 0; i < NUM_BBOX_POINTS; i++ )
   {
     targetPoint_t *targetPoint = &targetPoints[ i ];
+
+    //only check the origin the centers of the faces
+    if( targetPoint->bboxPoint.num > BBXP_MIDFACE6 )
+      continue;
 
     if( HMGTurret_TargetPointIsVisible( self, target, targetPoint ) )
     {
