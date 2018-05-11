@@ -2872,7 +2872,145 @@ void HMedistat_Think( gentity_t *self )
 //==================================================================================
 
 
+typedef struct targetPoint_s
+{
+  bboxPoint_t bboxPoint;
+  vec3_t      direction;
+  float       distance;
+} targetPoint_t;
 
+static int HMGTurret_ComparTargetpoints( const void *a, const void *b )
+{
+  targetPoint_t *pointA = (targetPoint_t *)a;
+  targetPoint_t *pointB = (targetPoint_t *)b;
+
+  Com_Assert( pointA &&
+              "HMGTurret_ComparTargetpoints: pointA is NULL" );
+  Com_Assert( pointB &&
+              "HMGTurret_ComparTargetpoints: pointB is NULL" );
+
+  //the origin gets the highest precedence
+  if( pointA->bboxPoint.num == BBXP_ORIGIN )
+    return -1;
+  else if( pointB->bboxPoint.num == BBXP_ORIGIN )
+    return 1;
+
+  //faces have higher precedence than verticies
+  if( pointA->bboxPoint.num < BBXP_VERTEX1 &&
+      pointB->bboxPoint.num >= BBXP_VERTEX1 )
+    return -1;
+  else if( pointB->bboxPoint.num < BBXP_VERTEX1 &&
+            pointA->bboxPoint.num >= BBXP_VERTEX1 )
+    return 1;
+
+  return( pointA->distance - pointB->distance );
+}
+
+static qboolean HMGTurret_TargetPointIsVisible( gentity_t *self,
+                                                gentity_t *target,
+                                                targetPoint_t *targetPoint )
+{
+  trace_t       tr;
+  vec3_t        end;
+
+  Com_Assert( self &&
+              "HMGTurret_TargetPointIsVisible: self is NULL" );
+  Com_Assert( target &&
+              "HMGTurret_TargetPointIsVisible: target is NULL" );
+  Com_Assert( targetPoint &&
+              "HMGTurret_TargetPointIsVisible: targetPoint is NULL" );
+
+  VectorMA( self->s.pos.trBase, MGTURRET_RANGE, targetPoint->direction, end );
+  SV_Trace( &tr, self->s.pos.trBase, NULL, NULL, end,
+              self->s.number, MASK_SHOT, TT_AABB );
+
+  return ( tr.entityNum == target - g_entities );
+
+}
+
+static qboolean HMGTurret_FindTrackPoint( gentity_t *self,
+                                          gentity_t *target,
+                                          bboxPoint_t *trackPoint )
+{
+  targetPoint_t targetPoints[ NUM_BBOX_POINTS ];
+  vec3_t        forward;
+  int           i;
+
+  Com_Assert( self &&
+              "HMGTurret_FindTrackPoint: self is NULL" );
+  Com_Assert( target &&
+              "HMGTurret_FindTrackPoint: target is NULL" );
+  Com_Assert( trackPoint &&
+              "HMGTurret_FindTrackPoint: trackPoint is NULL" );
+
+  AngleVectors( self->s.angles2, forward, NULL, NULL );
+
+  //evaluate the target points
+  for( i = 0; i < NUM_BBOX_POINTS; i++ )
+  {
+    vec3_t        projection;
+    targetPoint_t *targetPoint = &targetPoints[ i ];
+
+    // find the point
+    targetPoint->bboxPoint.num = i;
+    BG_EvaluateBBOXPoint( &targetPoint->bboxPoint,
+                          target->s.pos.trBase,
+                          target->r.mins, target->r.maxs);
+
+    // find the direction and projected distance to the point
+    VectorSubtract( targetPoint->bboxPoint.point,
+                    self->s.pos.trBase,
+                    targetPoint->direction );
+    ProjectPointOnPlane( projection,
+                         targetPoint->direction,
+                         forward );
+    targetPoint->distance = VectorNormalize( projection );
+    VectorNormalize( targetPoint->direction );
+
+    if( targetPoint->bboxPoint.num == BBXP_ORIGIN &&
+        BG_Buildable( self->s.modelindex )->turretTrackOnlyOrigin )
+    {
+      //only need to check the origin in this case
+      break;
+    }
+  }
+
+  // check if only the origin needs to be tracked
+  if( BG_Buildable( self->s.modelindex )->turretTrackOnlyOrigin )
+  {
+    targetPoint_t *targetPoint = &targetPoints[ BBXP_ORIGIN ];
+
+    Com_Assert( targetPoint->bboxPoint.num == BBXP_ORIGIN &&
+                "HMGTurret_FindTrackPoint: target point bboxPointNum mismatch with origin" );
+
+    if( HMGTurret_TargetPointIsVisible( self, target, targetPoint ) )
+    {
+      VectorCopy( targetPoint->bboxPoint.point, trackPoint->point );
+      trackPoint->num = targetPoint->bboxPoint.num;
+      return qtrue;
+    } else
+      return qfalse;
+  }
+
+  //sort the target points based on priority and the projected distance
+  qsort( targetPoints, NUM_BBOX_POINTS, sizeof( targetPoints[ 0 ] ),
+         HMGTurret_ComparTargetpoints );
+
+  // check the bbox points for visibility
+  for( i = 0; i < NUM_BBOX_POINTS; i++ )
+  {
+    targetPoint_t *targetPoint = &targetPoints[ i ];
+
+    if( HMGTurret_TargetPointIsVisible( self, target, targetPoint ) )
+    {
+      VectorCopy( targetPoint->bboxPoint.point, trackPoint->point );
+      trackPoint->num = targetPoint->bboxPoint.num;
+      return qtrue;
+    }
+  }
+
+  return qfalse;
+}
 
 /*
 ================
@@ -2884,8 +3022,10 @@ Used by HMGTurret_Think to check enemies for validity
 static qboolean HMGTurret_CheckTarget( gentity_t *self, gentity_t *target,
                                        qboolean los_check )
 {
-  trace_t   tr;
-  vec3_t    dir, end;
+  bboxPoint_t trackPoint;
+
+  Com_Assert( self &&
+              "HMGTurret_CheckTarget: self is NULL" );
 
   if( !target || target->health <= 0 || !target->client ||
       target->client->pers.teamSelection != TEAM_ALIENS )
@@ -2895,15 +3035,19 @@ static qboolean HMGTurret_CheckTarget( gentity_t *self, gentity_t *target,
     return qfalse;
 
   if( !los_check )
+  {
+    self->trackedEnemyPointNum = BBXP_ORIGIN;
     return qtrue;
+  }
 
   // Accept target if we can line-trace to it
-  VectorSubtract( target->s.pos.trBase, self->s.pos.trBase, dir );
-  VectorNormalize( dir );
-  VectorMA( self->s.pos.trBase, MGTURRET_RANGE, dir, end );
-  SV_Trace( &tr, self->s.pos.trBase, NULL, NULL, end,
-              self->s.number, MASK_SHOT, TT_AABB );
-  return tr.entityNum == target - g_entities;
+  if( HMGTurret_FindTrackPoint( self,  target, &trackPoint ) )
+  {
+    self->trackedEnemyPointNum = trackPoint.num;
+    return qtrue;
+  }
+
+  return qfalse;
 }
 
 
@@ -2919,7 +3063,22 @@ static qboolean HMGTurret_TrackEnemy( gentity_t *self )
   vec3_t  dirToTarget, dttAdjusted, angleToTarget, angularDiff, xNormal;
   vec3_t  refNormal = { 0.0f, 0.0f, 1.0f };
   float   temp, rotAngle;
+  bboxPoint_t trackPoint;
   float   angularSpeed;
+
+  Com_Assert( self &&
+              "HMGTurret_TrackEnemy: self is NULL" );
+  Com_Assert( self->enemy &&
+              "HMGTurret_TrackEnemy: enemy is NULL" );
+
+  if( BG_Buildable( self->s.modelindex )->turretTrackOnlyOrigin )
+    trackPoint.num = BBXP_ORIGIN;
+  else
+    trackPoint.num = self->trackedEnemyPointNum;
+  BG_EvaluateBBOXPoint( &trackPoint, 
+                        self->enemy->s.pos.trBase,
+                        self->enemy->r.mins,
+                        self->enemy->r.maxs );
 
   // Move slow if no dcc or grabbed
   if( G_IsDCCBuilt( ) && self->lev1Grabbed )
@@ -2939,8 +3098,7 @@ static qboolean HMGTurret_TrackEnemy( gentity_t *self )
     angularSpeed = MGTURRET_ANGULARSPEED;
   }
 
-
-  VectorSubtract( self->enemy->s.pos.trBase, self->s.pos.trBase, dirToTarget );
+  VectorSubtract( trackPoint.point, self->s.pos.trBase, dirToTarget );
   VectorNormalize( dirToTarget );
 
   CrossProduct( self->s.origin2, refNormal, xNormal );
@@ -2982,10 +3140,31 @@ static qboolean HMGTurret_TrackEnemy( gentity_t *self )
   vectoangles( dirToTarget, self->turretAim );
 
   //fire if target is within accuracy
-  return ( fabs( angularDiff[ YAW ] ) - MGTURRET_ANGULARSPEED <=
+  if( ( fabs( angularDiff[ YAW ] ) - MGTURRET_ANGULARSPEED <=
            MGTURRET_ACCURACY_TO_FIRE ) &&
-         ( fabs( angularDiff[ PITCH ] ) - MGTURRET_ANGULARSPEED <=
-           MGTURRET_ACCURACY_TO_FIRE );
+      ( fabs( angularDiff[ PITCH ] ) - MGTURRET_ANGULARSPEED <=
+           MGTURRET_ACCURACY_TO_FIRE ) )
+  {
+    return qtrue;
+  }
+  else if( !BG_Buildable( self->s.modelindex )->turretTrackOnlyOrigin &&
+           self->active )
+  {
+    vec3_t  forward;
+    vec3_t  end;
+    trace_t tr;
+
+    // check to see if the enemy is still in the line of fire
+    AngleVectors( self->s.angles2, forward, NULL, NULL );
+    VectorNormalize( forward );
+    VectorMA( self->s.pos.trBase, MGTURRET_RANGE, forward, end );
+    SV_Trace( &tr, self->s.pos.trBase, NULL, NULL, end,
+                self->s.number, MASK_SHOT, TT_AABB );
+
+    return ( tr.entityNum == self->enemy - g_entities );
+  }
+
+  return qfalse;
 }
 
 
@@ -2998,12 +3177,15 @@ Used by HMGTurret_Think to locate enemy gentities
 */
 static void HMGTurret_FindEnemy( gentity_t *self )
 {
-  int       entityList[ MAX_GENTITIES ];
-  vec3_t    range;
-  vec3_t    mins, maxs;
-  int       i, num;
-  gentity_t *target;
-  int       start;
+  int         entityList[ MAX_GENTITIES ];
+  vec3_t      range;
+  vec3_t      mins, maxs;
+  int         i, num;
+  gentity_t   *target;
+  int         start;
+
+  Com_Assert( self &&
+              "HMGTurret_FindEnemy: self is NULL" );
 
   self->enemy = NULL;
 
@@ -3045,6 +3227,9 @@ enum {
 static qboolean HMGTurret_State( gentity_t *self, int state )
 {
   float angle;
+
+  Com_Assert( self &&
+              "HMGTurret_State: self is NULL" );
 
   if( self->waterlevel == state )
     return qfalse;

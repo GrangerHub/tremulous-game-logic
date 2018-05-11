@@ -151,6 +151,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
+    qfalse,                //qboolean  turretTrackOnlyOrigin;
     WP_NONE,               //weapon_t  turretProjType;
     0.5f,                  //float     minNormal;
     qtrue,                 //qboolean  invertNormal;
@@ -202,6 +203,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
+    qfalse,                //qboolean  turretTrackOnlyOrigin;
     WP_NONE,               //weapon_t  turretProjType;
     0.0f,                 //float     minNormal;
     qtrue,                 //qboolean  invertNormal;
@@ -253,6 +255,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
+    qfalse,                //qboolean  turretTrackOnlyOrigin;
     WP_NONE,               //weapon_t  turretProjType;
     0.707f,                //float     minNormal;
     qfalse,                //qboolean  invertNormal;
@@ -301,6 +304,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
+    qfalse,                //qboolean  turretTrackOnlyOrigin;
     WP_NONE,               //weapon_t  turretProjType;
     0.0f,                  //float     minNormal;
     qtrue,                 //qboolean  invertNormal;
@@ -349,6 +353,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     CONTENTS_BODY,         //int       activationClipMask;
     TRAPPER_RANGE,         //int       turretRange;
     TRAPPER_REPEAT,        //int       turretFireSpeed;
+    qfalse,                //qboolean  turretTrackOnlyOrigin;
     WP_LOCKBLOB_LAUNCHER,  //weapon_t  turretProjType;
     0.0f,                  //float     minNormal;
     qtrue,                 //qboolean  invertNormal;
@@ -398,6 +403,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
+    qfalse,                //qboolean  turretTrackOnlyOrigin;
     WP_NONE,               //weapon_t  turretProjType;
     0.707f,                //float     minNormal;
     qfalse,                //qboolean  invertNormal;
@@ -446,6 +452,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
+    qfalse,                //qboolean  turretTrackOnlyOrigin;
     WP_HIVE,               //weapon_t  turretProjType;
     0.0f,                  //float     minNormal;
     qtrue,                 //qboolean  invertNormal;
@@ -499,6 +506,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     CONTENTS_ASTRAL_NOCLIP,//int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
+    qfalse,                //qboolean  turretTrackOnlyOrigin;
     WP_NONE,               //weapon_t  turretProjType;
     0.95f,                 //float     minNormal;
     qfalse,                //qboolean  invertNormal;
@@ -547,6 +555,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
+    qfalse,                //qboolean  turretTrackOnlyOrigin;
     WP_NONE,               //weapon_t  turretProjType;
     0.95f,                 //float     minNormal;
     qfalse,                //qboolean  invertNormal;
@@ -596,6 +605,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     CONTENTS_BODY,         //int       activationClipMask;
     MGTURRET_RANGE,        //int       turretRange;
     MGTURRET_REPEAT,       //int       turretFireSpeed;
+    qtrue,                 //qboolean  turretTrackOnlyOrigin;
     WP_MGTURRET,           //weapon_t  turretProjType;
     0.95f,                 //float     minNormal;
     qfalse,                //qboolean  invertNormal;
@@ -644,6 +654,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     CONTENTS_BODY,         //int       activationClipMask;
     TESLAGEN_RANGE,        //int       turretRange;
     TESLAGEN_REPEAT,       //int       turretFireSpeed;
+    qfalse,                //qboolean  turretTrackOnlyOrigin;
     WP_TESLAGEN,           //weapon_t  turretProjType;
     0.95f,                 //float     minNormal;
     qfalse,                //qboolean  invertNormal;
@@ -696,6 +707,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
+    qfalse,                //qboolean  turretTrackOnlyOrigin;
     WP_NONE,               //weapon_t  turretProjType;
     0.95f,                 //float     minNormal;
     qfalse,                //qboolean  invertNormal;
@@ -744,6 +756,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
+    qfalse,                //qboolean  turretTrackOnlyOrigin;
     WP_NONE,               //weapon_t  turretProjType;
     0.5f,                  //float     minNormal;
     qfalse,                //qboolean  invertNormal;
@@ -794,6 +807,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
+    qfalse,                //qboolean  turretTrackOnlyOrigin;
     WP_NONE,               //weapon_t  turretProjType;
     0.95f,                 //float     minNormal;
     qfalse,                //qboolean  invertNormal;
@@ -846,6 +860,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
+    qfalse,                //qboolean  turretTrackOnlyOrigin;
     WP_NONE,               //weapon_t  turretProjType;
     0.95f,                 //float     minNormal;
     qfalse,                //qboolean  invertNormal;
@@ -901,6 +916,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     CONTENTS_BODY,         //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
+    qfalse,                //qboolean  turretTrackOnlyOrigin;
     WP_NONE,               //weapon_t  turretProjType;
     0.95f,                 //float     minNormal;
     qfalse,                //qboolean  invertNormal;
@@ -4989,6 +5005,123 @@ const teamAttributes_t *BG_Team( team_t team )
 {
   return ( team < NUM_TEAMS ) ?
     &bg_teamList[ team ] : &nullTeam;
+}
+
+/*
+============
+BG_EvaluateBBOXPoint
+============
+*/
+void BG_EvaluateBBOXPoint( bboxPoint_t *bboxPoint, vec3_t origin,
+                      vec3_t mins, vec3_t maxs )
+{
+  Com_Assert( bboxPoint &&
+              "BG_EvaluateBBOXPoint: bboxPoint is NULL" );
+  Com_Assert( origin &&
+              "BG_EvaluateBBOXPoint: origin is NULL" );
+
+  VectorCopy( origin, bboxPoint->point );
+
+  // return the origin if either the mins or maxs is NULL
+  if( !mins || !maxs )
+    return;
+
+  switch ( bboxPoint->num )
+  {
+    case BBXP_ORIGIN:
+      //return the origin
+      break;
+
+    case BBXP_MIDFACE1:
+      bboxPoint->point[2] += maxs[2];
+      bboxPoint->point[1] += ( mins[1] + maxs[1] ) / 2;
+      bboxPoint->point[0] += ( mins[0] + maxs[0] ) / 2;
+      break;
+
+    case BBXP_MIDFACE2:
+      bboxPoint->point[2] += ( mins[2] + maxs[2] ) / 2;
+      bboxPoint->point[1] += maxs[1];
+      bboxPoint->point[0] += ( mins[0] + maxs[0] ) / 2;
+      break;
+
+    case BBXP_MIDFACE3:
+      bboxPoint->point[2] += ( mins[2] + maxs[2] ) / 2;
+      bboxPoint->point[1] += mins[1];
+      bboxPoint->point[0] += ( mins[0] + maxs[0] ) / 2;
+      break;
+
+    case BBXP_MIDFACE4:
+      bboxPoint->point[2] += ( mins[2] + maxs[2] ) / 2;
+      bboxPoint->point[1] += ( mins[1] + maxs[1] ) / 2;
+      bboxPoint->point[0] += maxs[0];
+      break;
+
+    case BBXP_MIDFACE5:
+      bboxPoint->point[2] += ( mins[2] + maxs[2] ) / 2;
+      bboxPoint->point[1] += ( mins[1] + maxs[1] ) / 2;
+      bboxPoint->point[0] += mins[0];
+      break;
+
+    case BBXP_MIDFACE6:
+      bboxPoint->point[2] += mins[2];
+      bboxPoint->point[1] += ( mins[1] + maxs[1] ) / 2;
+      bboxPoint->point[0] += ( mins[0] + maxs[0] ) / 2;
+      break;
+
+    case BBXP_VERTEX1:
+      bboxPoint->point[2] += maxs[2];
+      bboxPoint->point[1] += maxs[1];
+      bboxPoint->point[0] += maxs[0];
+      break;
+
+    case BBXP_VERTEX2:
+      bboxPoint->point[2] += maxs[2];
+      bboxPoint->point[1] += mins[1];
+      bboxPoint->point[0] += maxs[0];
+      break;
+
+    case BBXP_VERTEX3:
+      bboxPoint->point[2] += maxs[2];
+      bboxPoint->point[1] += maxs[1];
+      bboxPoint->point[0] += mins[0];
+      break;
+
+    case BBXP_VERTEX4:
+      bboxPoint->point[2] += maxs[2];
+      bboxPoint->point[1] += mins[1];
+      bboxPoint->point[0] += mins[0];
+      break;
+
+    case BBXP_VERTEX5:
+      bboxPoint->point[2] += mins[2];
+      bboxPoint->point[1] += maxs[1];
+      bboxPoint->point[0] += maxs[0];
+      break;
+
+    case BBXP_VERTEX6:
+      bboxPoint->point[2] += mins[2];
+      bboxPoint->point[1] += mins[1];
+      bboxPoint->point[0] += maxs[0];
+      break;
+
+    case BBXP_VERTEX7:
+      bboxPoint->point[2] += mins[2];
+      bboxPoint->point[1] += maxs[1];
+      bboxPoint->point[0] += mins[0];
+      break;
+
+    case BBXP_VERTEX8:
+      bboxPoint->point[2] += mins[2];
+      bboxPoint->point[1] += mins[1];
+      bboxPoint->point[0] += mins[0];
+      break;
+
+    default:
+      Com_Error( ERR_DROP,
+                 "BG_EvaluateBBOXPoint: unknown bboxPointNum: %i",
+                 bboxPoint->num );
+      break;
+  }
 }
 
 int cmdcmp( const void *a, const void *b )
