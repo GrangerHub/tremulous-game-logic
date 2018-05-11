@@ -790,7 +790,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MGTURRET_NEXTTHINK           50
 #define MGTURRET_K_SCALE             1.0f
 #define MGTURRET_RANGE               500.0f
-#define MGTURRET_SPREAD              200
+#define MGTURRET_SPREAD              0
 #define MGTURRET_DMG                 HBDM(4400)
 #define MGTURRET_SPINUP_TIME         3800 // time to increase the fire rate to full speed
 #define MGTURRET_SPINDOWN_TIME       3800 // time it takes a ret to spindown from full speed to complete stop
