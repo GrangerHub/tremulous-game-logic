@@ -5023,18 +5023,19 @@ void BG_EvaluateBBOXPoint( bboxPoint_t *bboxPoint, vec3_t origin,
               "BG_EvaluateBBOXPoint: bboxPoint is NULL" );
   Com_Assert( origin &&
               "BG_EvaluateBBOXPoint: origin is NULL" );
-  Com_Assert( minsIn[ 0 ] <= maxsIn[ 0 ] &&
-              "BG_EvaluateBBOXPoint: minsIn[ 0 ] exceeds maxsIn[ 0 ]" );
-  Com_Assert( minsIn[ 1 ] <= maxsIn[ 1 ] &&
-              "BG_EvaluateBBOXPoint: minsIn[ 1 ] exceeds maxsIn[ 1 ]" );
-  Com_Assert( minsIn[ 2 ] <= maxsIn[ 2 ] &&
-              "BG_EvaluateBBOXPoint: minsIn[ 2 ] exceeds maxsIn[ 2 ]" );
 
   VectorCopy( origin, bboxPoint->point );
 
   // return the origin if either the mins or maxs is NULL
   if( !minsIn || !maxsIn )
     return;
+
+  Com_Assert( minsIn[ 0 ] <= maxsIn[ 0 ] &&
+    "BG_EvaluateBBOXPoint: minsIn[ 0 ] exceeds maxsIn[ 0 ]" );
+  Com_Assert( minsIn[ 1 ] <= maxsIn[ 1 ] &&
+    "BG_EvaluateBBOXPoint: minsIn[ 1 ] exceeds maxsIn[ 1 ]" );
+  Com_Assert( minsIn[ 2 ] <= maxsIn[ 2 ] &&
+    "BG_EvaluateBBOXPoint: minsIn[ 2 ] exceeds maxsIn[ 2 ]" );
 
   VectorCopy( minsIn, mins );
   VectorCopy( maxsIn, maxs );
