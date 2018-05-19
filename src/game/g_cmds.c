@@ -2444,14 +2444,14 @@ void Cmd_Class_f( gentity_t *ent )
 
           if( !g_cheats.integer )
           {
-            int evolvePeriod = 4000;
+            int evolvePeriod = 1000;
 
             //set the evolve health regen
             ent->client->pers.evolveHealthRegen = ent->health - oldHealth;
             ent->health = oldHealth;
             ent->client->ps.misc[ MISC_HEALTH ] = ent->health;
 
-            evolvePeriod += ( abs( ent->client->pers.evolveHealthRegen * 3 ) / 100 );
+            evolvePeriod += ( abs( ent->client->pers.evolveHealthRegen ) / 200 );
 
             if( evolvePeriod > MAX_EVOLVE_PERIOD )
               evolvePeriod = MAX_EVOLVE_PERIOD;
