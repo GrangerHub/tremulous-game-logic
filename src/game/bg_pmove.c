@@ -1421,7 +1421,7 @@ static qboolean PM_CheckWallJump( vec3_t wishDir, float wishSpeed )
   awaySpeed = intoLook * 0.75f * jumpMagnitude;
 
   // Store awayFactor for use in PM_AirMove for control reduction.
-  pm->ps->misc[ MISC_MISC ] = awayFactor * 100.0f;
+  pm->ps->stats[ STAT_STAMINA ] = awayFactor * 100.0f;
 
   // Set timer until the next jump.
   pm->ps->pm_flags |= PMF_TIME_WALLJUMP;
@@ -2384,7 +2384,7 @@ static void PM_AirMove( void )
   // directly towards it.
   if( pm->ps->pm_flags & PMF_TIME_WALLJUMP )
   {
-    float awayFactor = pm->ps->misc[ MISC_MISC ] / 100.0f;
+    float awayFactor = pm->ps->stats[ STAT_STAMINA ] / 100.0f;
     controlFactor = ( float ) pm->ps->pm_time / WALLJUMP_TIME;
     controlFactor = pow( controlFactor, awayFactor * 6.0f );
   }
