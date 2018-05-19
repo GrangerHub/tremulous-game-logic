@@ -4746,6 +4746,13 @@ static void PM_Weapon( void )
         }
         break;
 
+      case WP_ALEVEL2:
+        // kamikaze attack is handeled seperately
+        attack2 = qfalse;
+        if( !attack1 )
+          return;
+        break;
+
       case WP_ALEVEL3:
       case WP_ALEVEL3_UPG:
         //pouncing has primary secondary AND autohit procedures
