@@ -195,6 +195,15 @@ static void CG_Obituary( entityState_t *ent )
           message = "squished himself";
         break;
 
+      case MOD_LEVEL2_EXPLOSION:
+      if( gender == GENDER_FEMALE )
+        message = "took one for her team";
+      else if( gender == GENDER_NEUTER )
+        message = "took one for its team";
+      else
+        message = "took one for his team";
+      break;
+
       case MOD_LEVEL3_BOUNCEBALL:
         if( gender == GENDER_FEMALE )
           message = "sniped herself";
@@ -327,6 +336,12 @@ static void CG_Obituary( entityState_t *ent )
             BG_ClassConfig( PCL_ALIEN_LEVEL2 )->humanName );
         message2 = className;
         break;
+      case MOD_LEVEL2_EXPLOSION:
+      message = "was caught in the blast radius of";
+      Com_sprintf( className, 64, "'s exploding %s",
+          BG_ClassConfig( PCL_ALIEN_LEVEL2 )->humanName );
+      message2 = className;
+      break;
       case MOD_LEVEL2_ZAP:
         message = "was zapped by";
         Com_sprintf( className, 64, "'s %s",
@@ -1030,6 +1045,11 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
 
     case EV_GIB_SPITFIRE_WINGS:
       CG_GibSpitfireWings( position, es->origin2 );
+      break;
+
+    case EV_EXPLODE_MARAUDER:
+      ByteToDir( es->eventParm, dir );
+      CG_AlienBuildableExplosion( position, dir );
       break;
 
     case EV_STOPLOOPINGSOUND:

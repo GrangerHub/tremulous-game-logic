@@ -1253,6 +1253,11 @@ static float CG_ChargeProgress( qboolean chargeStamina )
       min = SPITFIRE_POUNCE_TIME_MIN;
       max = SPITFIRE_POUNCE_TIME;
     }
+    else if( cg.snap->ps.weapon == WP_ALEVEL2 )
+    {
+      min = LEVEL2_EXPLODE_CHARGE_TIME_MIN;
+      max = LEVEL2_EXPLODE_CHARGE_TIME;
+    }
     else if( cg.snap->ps.weapon == WP_ALEVEL3 )
     {
       min = LEVEL3_POUNCE_TIME_MIN;
@@ -1398,6 +1403,16 @@ static void CG_DrawPlayerChargeBar( rectDef_t *rect, vec4_t ref_color,
   {
     color[ 0 ] = 1.0f;
     color[ 1 ] = 0.0f;
+    color[ 2 ] = 0.0f;
+  }
+
+  // Flash green for marauder explosion warning
+  if( cg.snap->ps.weapon == WP_ALEVEL2 &&
+      cg.snap->ps.misc[ MISC_MISC ] >= LEVEL2_EXPLODE_CHARGE_TIME_WARNING &&
+      ( cg.time & 128 ) )
+  {
+    color[ 0 ] = 0.0f;
+    color[ 1 ] = 1.0f;
     color[ 2 ] = 0.0f;
   }
 

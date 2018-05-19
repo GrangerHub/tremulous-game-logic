@@ -261,6 +261,16 @@ void CG_CheckLocalSounds( playerState_t *ps, playerState_t *ops )
       CG_PainEvent( &cg.predictedPlayerEntity, BG_GetPainState( ps ) );
   }
 
+  //Give pain feedback to warn about marauder explosion charge
+  if( cg.predictedPlayerState.weapon == WP_ALEVEL2 &&
+      cg.predictedPlayerState.misc[ MISC_MISC ] > LEVEL2_EXPLODE_CHARGE_TIME_WARNING &&
+      ps->misc[ MISC_HEALTH ] > 0 &&
+      cg.time > cg.pain_debounce_time )
+  {
+    CG_PainEvent( &cg.predictedPlayerEntity, BG_GetPainState( ps ) );
+    cg.pain_debounce_time = cg.time + 700;
+  }
+
   if( ( BG_UpgradeIsActive( UP_JETPACK, ps->stats ) || 
         ( cg.predictedPlayerEntity.jetPackJumpTime + 1000 > cg.time && 
           cg.predictedPlayerEntity.jetPackJumpTime + 250 < cg.time ) ) && 

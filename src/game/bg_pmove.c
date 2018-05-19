@@ -4192,6 +4192,27 @@ static void PM_Weapon( void )
     return;
   }
 
+  // check for marauder self-destruction
+  if( pm->ps->weapon == WP_ALEVEL2 )
+  {
+    int max = LEVEL2_EXPLODE_CHARGE_TIME;
+
+    if( ( !pm->swapAttacks ?
+          (pm->cmd.buttons & BUTTON_ATTACK2) : (pm->cmd.buttons & BUTTON_ATTACK) ) )
+      pm->ps->misc[ MISC_MISC ] += pml.msec;
+    else
+      pm->ps->misc[ MISC_MISC ] -= pml.msec;
+
+    if( pm->ps->misc[ MISC_MISC ] > max )
+    {
+      pm->ps->misc[ MISC_MISC ] = max;
+      BG_ExplodeMarauder( pm->ps, pm->pmext );
+      return;
+    }
+    else if( pm->ps->misc[ MISC_MISC ] < 0 )
+      pm->ps->misc[ MISC_MISC ] = 0;
+  }
+
   // Charging for a pounce or canceling a pounce
   if( pm->ps->weapon == WP_ALEVEL0 ||
       pm->ps->weapon == WP_ALEVEL3 ||
@@ -5778,6 +5799,9 @@ void PmoveSingle( pmove_t *pmove )
 
   // weapons
   PM_Weapon( );
+
+  if( pm->pmext->explosionMod > 0.000f )
+    return;
 
   // torso animation
   PM_TorsoAnimation( );

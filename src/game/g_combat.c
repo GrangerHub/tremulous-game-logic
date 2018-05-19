@@ -476,7 +476,8 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   int       i;
   char      *killerName, *obit;
 
-  if( self->client->ps.pm_type == PM_DEAD )
+  if( self->client->ps.pm_type == PM_DEAD &&
+      meansOfDeath != MOD_LEVEL2_EXPLOSION )
     return;
 
   if( level.intermissiontime )
@@ -597,10 +598,31 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   // g_forcerespawn may force spawning at some later time
   self->client->respawnTime = level.time + 1700;
 
-  // clear misc
-  memset( self->client->ps.misc, 0, sizeof( self->client->ps.misc ) );
+  if( ( meansOfDeath == MOD_LEVEL2_EXPLOSION ) ||
+      BG_ExplodeMarauder( &self->client->ps,
+                          &self->client->pmext ) )
+  {
+    float  explosionMod = self->client->pmext.explosionMod;
 
-  if( self->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
+    if( self->client->ps.eFlags & EF_EVOLVING )
+      explosionMod *= BG_EvolveScale( &self->client->ps );
+
+    // do splash damage
+    G_SelectiveRadiusDamage( self->client->ps.origin,
+                             self->r.mins, self->r.maxs,
+                             self,
+                             ( (int)( explosionMod * ( (float)LEVEL2_EXPLODE_CHARGE_DMG ) ) ),
+                             ( (int)( explosionMod * LEVEL2_EXPLODE_CHARGE_RANGE ) ),
+                             self, MOD_LEVEL2_EXPLOSION,
+                             TEAM_ALIENS, qtrue );
+
+    //cleanup the player entity
+    self->takedamage = qfalse;
+    G_SetContents( self, 0 );
+    self->die = NULL;
+    return;
+  }
+  else if( self->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
   {
     if ( self->health <= GIB_HEALTH )
     {
@@ -617,7 +639,9 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
     G_SetContents( self, 0 );
     self->die = NULL;
   }
-  
+
+  // clear misc
+  memset( self->client->ps.misc, 0, sizeof( self->client->ps.misc ) );
 
   {
     // normal death

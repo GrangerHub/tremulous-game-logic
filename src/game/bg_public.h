@@ -240,6 +240,7 @@ typedef struct
   vec3_t   previousUpdateAngles;
   vec3_t   angularVelocity;
   float    luciAmmoReduction;
+  float    explosionMod; // set when a player self-destructs, represents the explosion intensity
 } pmoveExt_t;
 
 #define MAXTOUCH  32
@@ -289,6 +290,8 @@ typedef struct pmove_s
   int           swapAttacks;
   float         wallJumperMinFactor;
 } pmove_t;
+
+qboolean BG_ExplodeMarauder( playerState_t *ps, pmoveExt_t *pmext );
 
 // if a full pmove isn't done on the client, you can just update the angles
 void PM_UpdateViewAngles( playerState_t *ps, const usercmd_t *cmd );
@@ -764,6 +767,7 @@ typedef enum
   EV_GIB_PLAYER,
   EV_GIB_BSUIT,
   EV_GIB_SPITFIRE_WINGS,
+  EV_EXPLODE_MARAUDER,
 
   EV_BUILD_FIRE,
   EV_BUILD_CONSTRUCT,
@@ -1187,6 +1191,7 @@ typedef enum
   MOD_LEVEL3_POUNCE,
   MOD_LEVEL3_BOUNCEBALL,
   MOD_LEVEL2_CLAW,
+  MOD_LEVEL2_EXPLOSION,
   MOD_LEVEL2_ZAP,
   MOD_LEVEL4_CLAW,
   MOD_LEVEL4_TRAMPLE,

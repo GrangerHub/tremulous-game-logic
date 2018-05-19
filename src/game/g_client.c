@@ -617,7 +617,10 @@ void respawn( gentity_t *ent )
 {
   int i;
 
-  SpawnCorpse( ent );
+  if( ent->client->pmext.explosionMod <= 0.000f )
+    SpawnCorpse( ent );
+  else
+    ent->client->pmext.explosionMod = 0.000f;
 
   // Clients can't respawn - they must go through the class cmd
   ent->client->pers.classSelection = PCL_NONE;
@@ -1522,6 +1525,8 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   ent->watertype = 0;
   ent->flags &= FL_GODMODE | FL_NOTARGET;
   ent->noTelefrag = qfalse;
+
+  ent->client->pmext.explosionMod = 0.000f;
 
   // calculate each client's acceleration
   ent->evaluateAcceleration = qtrue;

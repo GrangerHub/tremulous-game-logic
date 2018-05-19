@@ -2990,6 +2990,19 @@ void ClientThink_real( gentity_t *ent )
 
     ent->suicideTime = 0;
   }
+
+  // check for marauder self-destruction
+  if( ent->client->pmext.explosionMod > 0.000f )
+  {
+    // reset any acitvation entities the player might be occupying
+    if( client->ps.eFlags & EF_OCCUPYING )
+      G_ResetOccupation( ent->occupation.occupied, ent );
+
+    ent->client->ps.misc[ MISC_HEALTH ] = ent->health = 0;
+    player_die( ent, ent, ent, 100000, MOD_LEVEL2_EXPLOSION );
+
+    ent->suicideTime = 0;
+  }
 }
 
 /*
@@ -3103,6 +3116,11 @@ void ClientEndFrame( gentity_t *ent )
 
   // burn from lava, etc
   P_WorldEffects( ent );
+
+  //Give pain feedback to warn about marauder explosion charge
+  if( ent->client->ps.weapon == WP_ALEVEL2 &&
+      ent->client->ps.misc[ MISC_MISC ] > LEVEL2_EXPLODE_CHARGE_TIME_WARNING )
+    ent->client->damage_blood += ent->health;
 
   // apply all the damage taken this frame
   P_DamageFeedback( ent );

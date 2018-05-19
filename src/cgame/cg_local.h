@@ -1192,6 +1192,7 @@ typedef struct
   particleSystem_t  *poisonCloudPS;
   particleSystem_t  *poisonCloudedPS;
 
+  int           pain_debounce_time;
   float         painBlendValue;
   float         painBlendTarget;
   float         healBlendValue;

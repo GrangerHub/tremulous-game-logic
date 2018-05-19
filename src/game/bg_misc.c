@@ -1609,7 +1609,8 @@ static const classAttributes_t bg_classList[ ] =
     qtrue,                                          //qboolean enabled;
     "level2",                                       //char    *name;
     "Has a melee attack and the ability to jump off walls. This "
-      "allows the Marauder to gather great speed in enclosed areas.",
+      "allows the Marauder to gather great speed in enclosed areas."
+      "The basic marauder also has a secondary charged kamikaze attack.",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
     LEVEL2_HEALTH,                                  //int     health;
     0.15f,                                          //float   maxHealthDecayRate;
@@ -1639,8 +1640,9 @@ static const classAttributes_t bg_classList[ ] =
     PCL_ALIEN_LEVEL2_UPG,                           //int     number;
     qtrue,                                          //qboolean enabled;
     "level2upg",                                    //char    *name;
-    "The Advanced Marauder has all the abilities of the basic Marauder "
-      "with the addition of an area effect electric shock attack.",
+    "The Advanced Marauder has the claw and wall jump abilities "
+      "like the basic Marauder with the addition of an area effect "
+      "electric shock attack.",
     ( 1 << S2 )|( 1 << S3 ),                        //int     stages;
     LEVEL2_UPG_HEALTH,                              //int     health;
     0.25f,                                          //float   maxHealthDecayRate;
@@ -4654,6 +4656,7 @@ char *eventnames[ ] =
   "EV_GIB_PLAYER",
   "EV_GIB_BSUIT",
   "EV_GIB_SPITFIRE_WINGS",
+  "EV_EXPLODE_MARAUDER",
 
   "EV_BUILD_FIRE",
   "EV_BUILD_CONSTRUCT",
@@ -4847,7 +4850,10 @@ void BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s,
 
   s->otherEntityNum2 = ps->misc[ MISC_CLIENT_FLAGS ];
 
-  s->constantLight = ps->stats[ STAT_MISC2 ];
+  if( ps->weapon == WP_ALEVEL2 )
+    s->constantLight = ps->misc[ MISC_MISC ];
+  else
+    s->constantLight = ps->stats[ STAT_MISC2 ];
 }
 
 
@@ -4959,7 +4965,54 @@ void BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s
 
   s->otherEntityNum = ps->otherEntityNum;
 
-  s->constantLight = ps->stats[ STAT_MISC2 ];
+  if( ps->weapon == WP_ALEVEL2 )
+    s->constantLight = ps->misc[ MISC_MISC ];
+  else
+    s->constantLight = ps->stats[ STAT_MISC2 ];
+}
+
+/*
+==================
+BG_ExplodeMarauder
+==================
+*/
+qboolean BG_ExplodeMarauder( playerState_t *ps, pmoveExt_t *pmext )
+{
+  vec3_t    dir;
+
+  if( ps->weapon != WP_ALEVEL2 )
+    return qfalse;
+
+  if( pmext->explosionMod > 0.000f )
+    return qfalse;
+
+  if( ps->misc[ MISC_MISC ] <=
+      LEVEL2_EXPLODE_CHARGE_TIME_MIN )
+    return qfalse;
+
+  AngleVectors( ps->viewangles, NULL, NULL, dir );
+
+  //send explosion event
+  BG_AddPredictableEventToPlayerstate( EV_EXPLODE_MARAUDER, DirToByte( dir ), ps );
+
+  // set the explosion intensity
+  if( ps->misc[ MISC_MISC ] >= LEVEL2_EXPLODE_CHARGE_TIME )
+  {
+    pmext->explosionMod = 1.0f;
+  } else
+  {
+    pmext->explosionMod = ( (float)ps->misc[ MISC_MISC ] ) /
+                          ( (float)LEVEL2_EXPLODE_CHARGE_TIME );
+    if( pmext->explosionMod <= 0.000f )
+      pmext->explosionMod = 0.001f;
+  }
+
+  //cleanup the playerstate
+  ps->misc[ MISC_MISC ] = 0;
+  ps->eFlags |= EF_NODRAW;
+  ps->pm_type = PM_DEAD;
+
+  return qtrue;
 }
 
 /*
@@ -5925,6 +5978,10 @@ pain_t BG_GetPainState( playerState_t *ps )
 {
   int maxHealth = BG_Class( ps->stats[ STAT_CLASS ] )->health;
   int health = ps->misc[ MISC_HEALTH ];
+
+  if( ps->weapon == WP_ALEVEL2 &&
+      ps->misc[ MISC_MISC ] >= LEVEL2_EXPLODE_CHARGE_TIME_WARNING )
+    return PAIN_25;
 
   if( BG_InventoryContainsUpgrade( UP_BATTLESUIT, ps->stats ) )
   {

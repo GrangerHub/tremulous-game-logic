@@ -113,6 +113,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL2_AREAZAP_TIME         1000
 #define LEVEL2_AREAZAP_MAX_TARGETS  5
 #define LEVEL2_WALLJUMP_MAXSPEED    1000.0f
+#define LEVEL2_EXPLODE_CHARGE_TIME  4500 // msec for full marauder explosion
+#define LEVEL2_EXPLODE_CHARGE_TIME_MIN 500 // msec before which explosion cancels
+#define LEVEL2_EXPLODE_CHARGE_TIME_WARNING 3000
+#define LEVEL2_EXPLODE_CHARGE_DMG   AWDM(125000) // damage at max charge
+#define LEVEL2_EXPLODE_CHARGE_RANGE 200.0f // splash radius at max charge
+#define LEVEL2_EXPLODE_CHARGE_SHAKE 1.25f
 
 #define LEVEL3_CLAW_DMG             AWDM(80000)
 #define LEVEL3_CLAW_RANGE           96.0f
