@@ -121,6 +121,7 @@ char *modNames[ ] =
   "MOD_TARGET_LASER",
   "MOD_TRIGGER_HURT",
   "MOD_SUFFOCATION",
+  "MOD_SELFDESTRUCT",
 
   "MOD_ABUILDER_CLAW",
   "MOD_LEVEL0_BITE",
@@ -130,6 +131,7 @@ char *modNames[ ] =
   "MOD_LEVEL3_POUNCE",
   "MOD_LEVEL3_BOUNCEBALL",
   "MOD_LEVEL2_CLAW",
+  "MOD_LEVEL2_EXPLOSION",
   "MOD_LEVEL2_ZAP",
   "MOD_LEVEL4_CLAW",
   "MOD_LEVEL4_TRAMPLE",
@@ -471,13 +473,14 @@ player_die
 void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath )
 {
   gentity_t *ent;
+  int       savedClientFlags;
   int       anim;
   int       killer;
   int       i;
   char      *killerName, *obit;
 
   if( self->client->ps.pm_type == PM_DEAD &&
-      meansOfDeath != MOD_LEVEL2_EXPLOSION )
+      meansOfDeath != MOD_SELFDESTRUCT )
     return;
 
   if( level.intermissiontime )
@@ -598,7 +601,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   // g_forcerespawn may force spawning at some later time
   self->client->respawnTime = level.time + 1700;
 
-  if( ( meansOfDeath == MOD_LEVEL2_EXPLOSION ) ||
+  if( ( meansOfDeath == MOD_SELFDESTRUCT ) ||
       BG_ExplodeMarauder( &self->client->ps,
                           &self->client->pmext ) )
   {
@@ -640,8 +643,13 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
     self->die = NULL;
   }
 
+  // save client flags
+  savedClientFlags = self->client->ps.misc[ MISC_CLIENT_FLAGS ];
+
   // clear misc
   memset( self->client->ps.misc, 0, sizeof( self->client->ps.misc ) );
+
+  self->client->ps.misc[ MISC_CLIENT_FLAGS ] = savedClientFlags;
 
   {
     // normal death
@@ -1240,6 +1248,7 @@ static qboolean G_MODSpawnProtected( meansOfDeath_t mod )
     case MOD_TARGET_LASER:
     case MOD_TRIGGER_HURT:
     case MOD_SUFFOCATION:
+    case MOD_SELFDESTRUCT:
       return qfalse;
     default:
       return qtrue;

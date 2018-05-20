@@ -195,14 +195,14 @@ static void CG_Obituary( entityState_t *ent )
           message = "squished himself";
         break;
 
-      case MOD_LEVEL2_EXPLOSION:
-      if( gender == GENDER_FEMALE )
-        message = "took one for her team";
-      else if( gender == GENDER_NEUTER )
-        message = "took one for its team";
-      else
-        message = "took one for his team";
-      break;
+      case MOD_SELFDESTRUCT:
+        if( gender == GENDER_FEMALE )
+          message = "took one for her team";
+        else if( gender == GENDER_NEUTER )
+          message = "took one for its team";
+        else
+          message = "took one for his team";
+        break;
 
       case MOD_LEVEL3_BOUNCEBALL:
         if( gender == GENDER_FEMALE )

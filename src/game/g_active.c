@@ -2999,7 +2999,7 @@ void ClientThink_real( gentity_t *ent )
       G_ResetOccupation( ent->occupation.occupied, ent );
 
     ent->client->ps.misc[ MISC_HEALTH ] = ent->health = 0;
-    player_die( ent, ent, ent, 100000, MOD_LEVEL2_EXPLOSION );
+    player_die( ent, ent, ent, 100000, MOD_SELFDESTRUCT );
 
     ent->suicideTime = 0;
   }
