@@ -383,10 +383,12 @@ typedef enum
 
 // for uh...misc stuff (pounce, trample, lcannon)
 #define MISC_MISC                      ( MAX_MISC - 6 )
+// for uh...other misc stuff (evolve cool down)
+#define MISC_MISC2                     ( MAX_MISC - 7 )
 
 // for gradually applying recoil
-#define MISC_RECOIL_PITCH              ( MAX_MISC - 7 )
-#define MISC_RECOIL_YAW                ( MAX_MISC - 8 )
+#define MISC_RECOIL_PITCH              ( MAX_MISC - 8 )
+#define MISC_RECOIL_YAW                ( MAX_MISC - 9 )
 
 #define CLF_GIBBED             0x0000000001
 
