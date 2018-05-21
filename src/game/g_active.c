@@ -786,21 +786,6 @@ void ClientTimerActions( gentity_t *ent, int msec )
               client->medKitStaminaToRestore = 0;
           }
       }
-    } else if( BG_ClassHasAbility( client->ps.stats[STAT_CLASS],
-                                   SCA_CHARGE_STAMINA ) )
-    {
-      if( client->ps.stats[ STAT_STAMINA ] < 0 )
-        client->ps.stats[ STAT_STAMINA ] = 0;
-
-      if( client->ps.stats[ STAT_STAMINA ] <
-                    BG_Class( client->ps.stats[STAT_CLASS] )->chargeStaminaMax )
-        client->ps.stats[ STAT_STAMINA ] +=
-                 BG_Class( client->ps.stats[STAT_CLASS] )->chargeStaminaRestore;
-
-      if(  client->ps.stats[ STAT_STAMINA ] >
-                    BG_Class( client->ps.stats[STAT_CLASS] )->chargeStaminaMax )
-        client->ps.stats[ STAT_STAMINA ] =
-                     BG_Class( client->ps.stats[STAT_CLASS] )->chargeStaminaMax;
     }
 
     //check if the client should become invisible
@@ -1538,131 +1523,6 @@ static void G_UnlaggedDetectCollisions( gentity_t *ent )
 
 /*
 =====================
-G_CancelEvolve
-
-Cancels evolving
-=====================
-*/
-void G_CancelEvolve( gentity_t *ent )
-{
-  gclient_t *client = ent->client;
-  int       clientNum = client->ps.clientNum;
-  int       oldBoostTime = -1;
-  int       newHealth;
-  vec3_t    infestOrigin, oldVel;
-  class_t   previousClass = client->evolvePreviousClass;
-
-  Com_Assert( client && "G_CancelEvolve: Attempted to cancel evolve on a non-client" )
-
-  Com_Assert( previousClass > PCL_NONE &&
-              previousClass < PCL_NUM_CLASSES &&
-              "G_CancelEvolve: Invalid previous class" );
-
-  Com_Assert( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
-              client->ps.eFlags & EF_EVOLVING &&
-              "G_CancelEvolve: Client isn't evolving" );
-
-  // must be alive
-  if( ent->health <= 0 )
-    return;
-
-  newHealth = (int)( ent->client->pers.evolveHealthFraction *
-                     (float)BG_Class( previousClass )->health );
-  newHealth -= client->pers.evolveDamage;
-
-  // check that we have enough health to survive canceling evolve
-  if( newHealth <= 0 )
-  {
-    G_TriggerMenu( clientNum, MN_A_EVOLVE_CANCEL_HEALTH );
-    return;
-  }
-
-  //check that we have an overmind
-  if( !G_Overmind( ) &&
-      previousClass != PCL_ALIEN_BUILDER0 &&
-      previousClass != PCL_ALIEN_BUILDER0_UPG )
-  {
-    G_TriggerMenu( clientNum, MN_A_NOOVMND_EVOLVE );
-    return;
-  }
-
-  //check that the entity isn't occupying anything
-  if ( client->ps.eFlags & EF_OCCUPYING )
-  {
-    G_TriggerMenu( clientNum, MN_A_EVOLVE_CANCEL_NOEROOM );
-    return;
-  }
-
-  if( G_RoomForClassChange( ent, previousClass, infestOrigin ) )
-  {
-    //disable wallwalking
-    if( client->ps.eFlags & EF_WALLCLIMB )
-    {
-      vec3_t newAngles;
-
-      client->ps.eFlags &= ~EF_WALLCLIMB;
-      VectorCopy( client->ps.viewangles, newAngles );
-      newAngles[ PITCH ] = 0;
-      newAngles[ ROLL ] = 0;
-      G_SetClientViewAngle( ent, newAngles );
-    }
-
-    client->pers.evolveMaxHealthFraction =
-      client->pers.evolvePreviousMaxHealthFraction;
-
-    client->pers.evolveHealthRegen = 0;
-    client->evolveCost = 0;
-
-    //save the barbs
-    if( ent->client->ps.weapon == WP_ALEVEL3_UPG )
-    {
-      ent->client->pers.barbs = ent->client->ps.ammo;
-      ent->client->pers.barbRegenTime = ent->timestamp;
-    }
-
-    client->pers.classSelection = previousClass;
-    ClientUserinfoChanged( clientNum, qfalse );
-    VectorCopy( infestOrigin, ent->s.pos.trBase );
-    VectorCopy( client->ps.velocity, oldVel );
-
-    if( ent->client->ps.stats[ STAT_STATE ] & SS_BOOSTED )
-      oldBoostTime = ent->client->boostedTime;
-
-    // end damage protection early
-    ent->dmgProtectionTime = 0;
-
-    ClientSpawn( ent, ent, ent->s.pos.trBase, ent->s.apos.trBase );
-
-    //restore the barbs
-    if( ent->client->ps.weapon == WP_ALEVEL3_UPG )
-    {
-      ent->client->ps.ammo = ent->client->pers.barbs;
-      ent->timestamp = ent->client->pers.barbRegenTime;
-    }
-
-    VectorCopy( oldVel, ent->client->ps.velocity );
-    if( oldBoostTime > 0 )
-    {
-      ent->client->boostedTime = oldBoostTime;
-      ent->client->ps.stats[ STAT_STATE ] |= SS_BOOSTED;
-    }
-  }
-  else
-  {
-    vec3_t playerNormal;
-
-    BG_GetClientNormal( &ent->client->ps, playerNormal );
-    //check that wallwalking isn't interfering
-    if( client->ps.eFlags & EF_WALLCLIMB &&
-        ( playerNormal[ 2 ] != 1.0f ) )
-      G_TriggerMenu( clientNum, MN_A_EVOLVEWALLWALK );
-    else
-      G_TriggerMenu( clientNum, MN_A_EVOLVE_CANCEL_NOEROOM );
-  }
-}
-
-/*
-=====================
 G_CanActivateEntity
 
 Determines if a given client can activate a given entity.
@@ -1825,14 +1685,6 @@ qboolean G_WillActivateEntity( gentity_t *actEnt, gentity_t *activator )
 {
   // set the general menu message for activation failure.
   G_OvrdActMenuMsg( activator, ACTMN_ACT_FAILED, MN_ACT_FAILED );
-
-  // evolving check
-  if( activator->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
-      ( activator->client->ps.eFlags & EF_EVOLVING ) )
-  {
-    G_OvrdActMenuMsg( activator, ACTMN_A_EVOLVING, MN_A_EVOLVING );
-    return qfalse;
-  }
 
   if ( ( actEnt->activation.flags & ACTF_POWERED ) &&
        !actEnt->powered )
@@ -2401,7 +2253,8 @@ void ClientThink_real( gentity_t *ent )
 
   if( client->noclip )
     client->ps.pm_type = PM_NOCLIP;
-  else if( client->ps.misc[ MISC_HEALTH ] <= 0 )
+  else if( client->ps.misc[ MISC_HEALTH ] <= 0 ||
+           (client->ps.eFlags & EF_DEAD) )
   {
     client->ps.pm_type = PM_DEAD;
 
@@ -2627,7 +2480,7 @@ void ClientThink_real( gentity_t *ent )
           BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->regenRate;
       float maxHealthDecayRate =
           BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->maxHealthDecayRate;
-      int   maxHealthDecay;
+      int   maxHealthDecay = 0;
 
       if( ent->health <= 0 || ent->nextRegenTime < 0 || regenRate == 0 )
         ent->nextRegenTime = -1; // no regen
@@ -2711,7 +2564,9 @@ void ClientThink_real( gentity_t *ent )
           ent->nextRegenTime += count * interval;
         }
 
-        maxHealthDecay = (int)( maxHealthDecayRate * ( (float)count ) );
+        if( 0.30 < ( ( (float)*maxHealth ) /
+                     ( (float)BG_Class( client->ps.stats[ STAT_CLASS ] )->health ) ) )
+          maxHealthDecay = (int)( maxHealthDecayRate * ( (float)count ) );
 
         if( ent->health < *maxHealth &&
             maxHealthDecay < *maxHealth )
@@ -2946,13 +2801,9 @@ void ClientThink_real( gentity_t *ent )
       G_ActivateEntity( actEnt, ent );
     else if( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
     {
-      if( client->ps.eFlags & EF_EVOLVING )
-      {
-        G_CancelEvolve( ent );
-      }
-      else if( BG_AlienCanEvolve( client->ps.stats[ STAT_CLASS ],
-                                  client->pers.credit, g_alienStage.integer,
-                                  IS_WARMUP, g_cheats.integer ) )
+      if( BG_AlienCanEvolve( client->ps.stats[ STAT_CLASS ],
+                             client->pers.credit, g_alienStage.integer,
+                             IS_WARMUP, g_cheats.integer ) )
       {
         //no nearby objects and alien - show class menu
         G_TriggerMenu( ent->client->ps.clientNum, MN_A_INFEST );

@@ -231,7 +231,25 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
   if( self->client )
   {
     if( destroyedUp == UP_NONE )
+    {
+      const float maxHealthDecayRate = BG_Class( self->client->ps.stats[ STAT_CLASS ] )->maxHealthDecayRate;
       value = BG_GetValueOfPlayer( &self->client->ps );
+
+      // value from evolving based on max health decay
+      if( self->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
+          self->client->ps.eFlags & EF_EVOLVING &&
+          maxHealthDecayRate )
+      {
+        const int initialClassHealth = BG_Class( self->client->ps.stats[ STAT_CLASS ] )->health;
+        int   decayedHealth =  initialClassHealth -
+                              self->client->ps.misc[ MISC_MAX_HEALTH ];
+        const int healthDiff = self->client->ps.misc[ MISC_MAX_HEALTH ] - 
+                               self->client->ps.misc[ MISC_HEALTH ];
+
+        decayedHealth -= (int)( healthDiff * maxHealthDecayRate );
+        value *= ( (float)decayedHealth ) / ( (float) initialClassHealth );
+      }
+    }
     else
       value = BG_Upgrade( destroyedUp )->price;
 
@@ -1548,11 +1566,12 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       attacker->client->ps.persistant[ PERS_HITS ]++;
   }
 
+  // deal scaled up damage during evolving
   if( attacker->client &&
       attacker->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
       ( attacker->client->ps.eFlags & EF_EVOLVING ) )
   {
-    modDamge = (int)( ( (float)modDamge ) * BG_EvolveScale( &attacker->client->ps ) );
+    modDamge = (int)( ( (float)modDamge ) / BG_EvolveScale( &attacker->client->ps ) );
   }
 
   if( modDamge != 100 &&
@@ -1744,12 +1763,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       else if( attacker->s.eType == ET_BUILDABLE )
         targ->creditsDeffenses[ attacker->buildableTeam ] += take;
     }
-
-    // track damage dealt while evolving
-    if( targ->client &&
-        targ->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
-        ( targ->client->ps.eFlags & EF_EVOLVING ) ) 
-      targ->client->pers.evolveDamage += take;
 
     if( !(dflags & DAMAGE_INSTAGIB) )
     {

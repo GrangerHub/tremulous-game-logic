@@ -1297,8 +1297,6 @@ static qboolean PM_CheckAirPounce( void )
   
   pm->pmext->pouncePayload = pm->ps->misc[ MISC_MISC ];
   pm->ps->misc[ MISC_MISC ] = 0;
-  if( BG_ClassHasAbility( pm->ps->stats[STAT_CLASS],  SCA_CHARGE_STAMINA ) )
-    pm->ps->stats[ STAT_STAMINA ] -= pm->pmext->pouncePayload;
   return qtrue;
 }
 
@@ -4244,12 +4242,6 @@ static void PM_Weapon( void )
         break;
     }
 
-    if( BG_ClassHasAbility( pm->ps->stats[STAT_CLASS], SCA_CHARGE_STAMINA ) )
-    {
-      if( max > pm->ps->stats[STAT_STAMINA] )
-        max = pm->ps->stats[STAT_STAMINA];
-    }
-
     if( ( !pm->swapAttacks ?
           (pm->cmd.buttons & BUTTON_ATTACK2) : (pm->cmd.buttons & BUTTON_ATTACK) ) &&
         ( pm->ps->weapon != WP_ASPITFIRE ||
@@ -5257,6 +5249,61 @@ static void PM_DropTimers( void )
 
       if( pm->ps->stats[ STAT_MISC3 ] < 0 )
         pm->ps->stats[ STAT_MISC3 ] = 0;
+    }
+  }
+
+  //drop the evolve cool down decay timer
+  if( pm->ps->stats[ STAT_TEAM ] == TEAM_ALIENS )
+  {
+    int decayTimer = BG_GetEvolveCoolDownDecayTimer( pm->ps );
+    int coolDown = BG_GetEvolveCoolDown( pm->ps );
+
+    if( decayTimer > pml.msec )
+    {
+      decayTimer -= pml.msec;
+
+      if( decayTimer < 0 )
+        decayTimer = 0;
+
+      BG_SetEvolveCoolDownDecayTimer( pm->ps, decayTimer );
+    } else if( coolDown )
+    {
+      const float decayRate = ( 1.0f / ( (float)EVOLVE_COOL_DOWN_DECAY_RATE ) );
+      int         interval;
+      int         decay;
+
+      Com_Assert( decayRate > 0 &&
+                  "PM_DropTimers: evolve cool down decay rate must be greater than 0" );
+
+      interval = 1 / decayRate;
+
+      if( !interval )
+      {
+        // interval is less than one millisecond
+        decay = (int)( ( (float)( pml.msec - decayTimer + 1 ) ) * decayRate );
+        decayTimer = 1;
+      } else
+      {
+        // if recovery interval is less than frametime, compensate
+        decay = 1 + ( pml.msec - decayTimer ) / interval;
+        decayTimer += decay * interval;
+      }
+
+      // check for rounding errors
+      if( decay > coolDown )
+        decay = coolDown;
+
+      //decay the cool down
+      coolDown -= decay;
+
+      if( coolDown <= 0 )
+      {
+        coolDown = 0;
+        decayTimer = 0;
+      }
+
+      BG_SetEvolveCoolDown( pm->ps, coolDown );
+      BG_SetEvolveCoolDownDecayTimer( pm->ps, decayTimer );
     }
   }
 }

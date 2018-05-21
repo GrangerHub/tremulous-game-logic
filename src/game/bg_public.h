@@ -310,7 +310,7 @@ typedef enum
   STAT_CLASS,     // player class (for aliens AND humans)
   STAT_TEAM,      // player team
   STAT_READY,     // player ready state
-  STAT_STAMINA,   // stamina for SCA_STAMINA or SCA_CHARGE_STAMINA
+  STAT_STAMINA,   // stamina for SCA_STAMINA
   STAT_STATE,     // client states e.g. wall climbing
   STAT_MISC2,     // for more misc stuff, copied into constantLight of the entity state.
   STAT_MISC3,     // for even more misc stuff.
@@ -333,7 +333,6 @@ typedef enum
 #define SCA_STAMINA             0x00000080
 #define SCA_REGEN               0x00000100 // XXX kinda wasted- keeps alien class on human team from never dieing when team admits defeat.
 #define SCA_CANHOVEL            0x00000200
-#define SCA_CHARGE_STAMINA      0x00000400 // limits MISC_MISC use. can't be used with SCA_STAMINA
 
 #define SS_WALLCLIMBING         0x00000001
 #define SS_CREEPSLOWED          0x00000002
@@ -1559,6 +1558,12 @@ qboolean                    BG_AlienCanEvolve( class_t class, int credits,
                                                int gameIsInWarmup,
                                                qboolean devMode );
 float                       BG_EvolveScale( playerState_t *ps );
+int                         BG_GetEvolveCoolDownDecayTimer( playerState_t *ps );
+int                         BG_GetEvolveCoolDown( playerState_t *ps );
+void                        BG_SetEvolveCoolDownDecayTimer( playerState_t *ps,
+                                                            int decayTime );
+void                        BG_SetEvolveCoolDown( playerState_t *ps,
+                                                  int coolDown );
 
 void                        BG_InitClassConfigs( void );
 

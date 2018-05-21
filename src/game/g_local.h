@@ -483,10 +483,7 @@ typedef struct
   class_t             classSelection;     // player class (copied to ent->client->ps.stats[ STAT_CLASS ] once spawned)
   float               evolveHealthFraction;
   float               evolveMaxHealthFraction;
-  float               evolvePreviousMaxHealthFraction; // for canceling evolve
-  float               evolveChargeStaminaFraction;
   int                 evolveHealthRegen;
-  int                 evolveDamage; // for canceling evolve
   weapon_t            humanItemSelection; // humans have a starting item
   team_t              teamSelection;      // player team (copied to ps.stats[ STAT_TEAM ])
 
@@ -647,8 +644,6 @@ struct gclient_s
   int                 buildFireTime;
 
   int                 evolveCost; //amount of evos to deduct
-  //for canceling evolve
-  class_t             evolvePreviousClass;
 
   int                 timeToInvisibility; //for the invisible basilisk
 };
@@ -1116,8 +1111,6 @@ void              G_RemoveRangeMarkerFrom( gentity_t *self );
 void              G_UpdateBuildableRangeMarkers( void );
 qboolean          AHovel_Blocked( gentity_t *hovel, gentity_t *player, qboolean provideExit );
 void              G_PositionHovelsBuilder( gentity_t *self );
-
-void              G_CancelEvolve( gentity_t *ent );
 
 // activation entities functions
 qboolean          G_CanActivateEntity( gclient_t *client, gentity_t *ent );

@@ -203,7 +203,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
 
-#define MAX_EVOLVE_PERIOD           5000 // maximum time in ms that evolving requires.
+#define MAX_EVOLVE_PERIOD           20000 // maximum time in ms that evolving requires.
+#define EVOLVE_COOL_DOWN_DECAY_RATE 10.0f // ms needed to expire for every 1 ms decrease of the evolve cool down
 
 #define ALIEN_HLTH_MODIFIER         1.0f
 #define AHM(h)                      ((int)((float)h*ALIEN_HLTH_MODIFIER))

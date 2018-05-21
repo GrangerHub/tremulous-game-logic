@@ -2045,7 +2045,63 @@ float BG_EvolveScale( playerState_t *ps )
 
   return MAX( 1.0f - ( ( (float)ps->stats[ STAT_MISC3 ] ) /
                      ( (float)ps->stats[ STAT_MISC2 ] ) ),
-              0.30f );
+              0.50f );
+}
+
+/*
+==============
+BG_GetEvolveCoolDownDecayTimer
+==============
+*/
+int BG_GetEvolveCoolDownDecayTimer( playerState_t *ps )
+{
+  return ( ( ps->misc[ MISC_MISC2 ] ) & 127 );
+}
+
+/*
+==============
+BG_GetEvolveCoolDown
+==============
+*/
+int BG_GetEvolveCoolDown( playerState_t *ps )
+{
+  return ( ( ps->misc[ MISC_MISC2 ]  >> 7 ) & 65535 );
+}
+
+/*
+==============
+BG_SetEvolveCoolDownDecayTimer
+==============
+*/
+void BG_SetEvolveCoolDownDecayTimer( playerState_t *ps,
+                                     int decayTime )
+{
+  int coolDown = BG_GetEvolveCoolDown( ps );
+
+  if( decayTime < 0 )
+    decayTime = 0;
+  else if( decayTime > 127 )
+    decayTime = 127;
+
+  ps->misc[ MISC_MISC2 ] = (coolDown<<7)|(decayTime);
+}
+
+/*
+==============
+BG_SetEvolveCoolDown
+==============
+*/
+void BG_SetEvolveCoolDown( playerState_t *ps,
+                                     int coolDown )
+{
+  int         decayTime = BG_GetEvolveCoolDownDecayTimer( ps );
+
+  if( coolDown < 0 )
+    coolDown = 0;
+  else if( coolDown > 65535 )
+    coolDown = 65535;
+
+  ps->misc[ MISC_MISC2 ] = (coolDown<<7)|(decayTime);
 }
 
 /*
@@ -5011,7 +5067,7 @@ qboolean BG_ExplodeMarauder( playerState_t *ps, pmoveExt_t *pmext )
 
   //cleanup the playerstate
   ps->misc[ MISC_MISC ] = 0;
-  ps->eFlags |= EF_NODRAW;
+  ps->eFlags |= (EF_NODRAW|EF_DEAD);
   ps->pm_type = PM_DEAD;
 
   return qtrue;

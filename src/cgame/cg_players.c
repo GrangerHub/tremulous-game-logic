@@ -1968,6 +1968,71 @@ void CG_Player( centity_t *cent )
   if( !ci->infoValid )
     return;
 
+  if( ( es->eFlags & EF_INVINCIBLE ) &&
+      !cg.intermissionStarted &&
+      !( es->eFlags & EF_DEAD ) )
+  {
+    if( !cent->invincible )
+    {
+      cent->invincibleTime = cg.time;
+      cent->invincible = qtrue;
+    }
+  }
+  else
+  {
+    if( cent->invincible )
+    {
+      cent->invincibleTime = cg.time;
+      cent->invincible = qfalse;
+    }
+  }
+
+  if( !cent->invincible &&
+      ci->team == TEAM_ALIENS &&
+      ( es->eFlags & EF_EVOLVING ) &&
+      !( es->eFlags & EF_DEAD ) &&
+      !cg.intermissionStarted )
+  {
+    if( !cent->evolve )
+    {
+      cent->evolveTime = cg.time;
+      cent->evolve = qtrue;
+    }
+  }
+  else
+  {
+    if( cent->evolve )
+    {
+      cent->evolveTime = cg.time;
+      cent->evolve = qfalse;
+    }
+  }
+
+  // check for invisibility transitions
+  if( cent->invincible ||
+      cent->evolve ||
+      cg.intermissionStarted ||
+      ( es->eFlags & EF_DEAD ) )
+      cent->invis = qfalse;
+  else if( es->eFlags & EF_INVISIBILE &&
+      es->weapon != WP_LUCIFER_CANNON &&
+      !( es->eFlags & EF_DEAD ) )
+  {
+    if( !cent->invis )
+    {
+      cent->invisTime = cg.time;
+      cent->invis = qtrue;
+    }
+  }
+  else
+  {
+    if( cent->invis )
+    {
+      cent->invisTime = cg.time;
+      cent->invis = qfalse;
+    }
+  }
+
   //don't draw
   if( es->eFlags & EF_NODRAW )
     return;
@@ -2087,69 +2152,6 @@ void CG_Player( centity_t *cent )
     renderfx |= RF_SHADOW_PLANE;
 
   renderfx |= RF_LIGHTING_ORIGIN;     // use the same origin for all
-
-  if( ( es->eFlags & EF_INVINCIBLE ) &&
-      !cg.intermissionStarted &&
-      !( es->eFlags & EF_DEAD ) )
-  {
-    if( !cent->invincible )
-    {
-      cent->invincibleTime = cg.time;
-      cent->invincible = qtrue;
-    }
-  }
-  else
-  {
-    if( cent->invincible )
-    {
-      cent->invincibleTime = cg.time;
-      cent->invincible = qfalse;
-    }
-  }
-
-  if( !cent->invincible &&
-      ci->team == TEAM_ALIENS &&
-      ( es->eFlags & EF_EVOLVING ) &&
-      !cg.intermissionStarted )
-  {
-    if( !cent->evolve )
-    {
-      cent->evolveTime = cg.time;
-      cent->evolve = qtrue;
-    }
-  }
-  else
-  {
-    if( cent->evolve )
-    {
-      cent->evolveTime = cg.time;
-      cent->evolve = qfalse;
-    }
-  }
-
-  // check for invisibility transitions
-  if( cent->invincible ||
-      cent->evolve ||
-      cg.intermissionStarted ||
-      ( es->eFlags & EF_DEAD ) )
-      cent->invis = qfalse;
-  else if( es->eFlags & EF_INVISIBILE &&
-      es->weapon != WP_LUCIFER_CANNON )
-  {
-    if( !cent->invis )
-    {
-      cent->invisTime = cg.time;
-      cent->invis = qtrue;
-    }
-  }
-  else
-  {
-    if( cent->invis )
-    {
-      cent->invisTime = cg.time;
-      cent->invis = qfalse;
-    }
-  }
 
   //
   // add the legs

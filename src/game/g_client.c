@@ -1375,6 +1375,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   clientSession_t     savedSess;
   qboolean            savedNoclip, savedCliprcontents;
   int                 persistant[ MAX_PERSISTANT ];
+  int                 miscMisc2;
   int                 flags;
   int                 savedPing;
   int                 teamLocal;
@@ -1456,13 +1457,6 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   // toggle the teleport bit so the client knows to not lerp
   flags = ( ent->client->ps.eFlags & EF_TELEPORT_BIT ) ^ EF_TELEPORT_BIT;
 
-  // account for evolve canceling
-  if( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
-      client->ps.eFlags & EF_EVOLVING &&
-      client->sess.spectatorState == SPECTATOR_NOT &&
-      ent->health > 0 )
-    flags |= EF_EVOLVING;
-
   G_UnlaggedClear( ent );
 
   // clear everything but the persistant data
@@ -1475,6 +1469,9 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
 
   for( i = 0; i < MAX_PERSISTANT; i++ )
     persistant[ i ] = client->ps.persistant[ i ];
+
+  if( client->pers.teamSelection == TEAM_ALIENS )
+    miscMisc2 = client->ps.misc[ MISC_MISC2 ];
 
   eventSequence = client->ps.eventSequence;
   memset( client, 0, sizeof( *client ) );
@@ -1576,6 +1573,10 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   {
     const int oldHealth = ent->health;
 
+    // restore evolve cool down
+    if( client->pers.teamSelection == TEAM_ALIENS )
+      client->ps.misc[ MISC_MISC2 ] = miscMisc2;
+
     if( !BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->maxHealthDecayRate )
     {
       ent->health *= client->pers.evolveHealthFraction;
@@ -1583,18 +1584,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
     else
     {
       client->ps.misc[ MISC_MAX_HEALTH ] *= client->pers.evolveMaxHealthFraction;
-      if( client->ps.eFlags & EF_EVOLVING )
-        ent->health *= client->pers.evolveHealthFraction;
-      else
-        ent->health = client->ps.misc[ MISC_MAX_HEALTH ];
-    }
-
-    // evolve is being canceled
-    if( ( client->ps.eFlags & EF_EVOLVING ) &&
-        client->pers.evolveDamage )
-    {
-      ent->health -= client->pers.evolveDamage;
-      client->pers.evolveDamage = 0;
+      ent->health = client->ps.misc[ MISC_MAX_HEALTH ];
     }
 
     // ensure that evolving/devolving with low health doesn't kill
@@ -1610,11 +1600,6 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   {
     client->ps.stats[ STAT_STAMINA ] =
                      BG_Class( client->ps.stats[STAT_CLASS] )->chargeStaminaMax;
-
-    // if evolving scale charge stamina
-    if( ent == spawn )
-      client->ps.stats[ STAT_STAMINA ] *=
-                                  ent->client->pers.evolveChargeStaminaFraction;
   }
 
   G_SetOrigin( ent, spawn_origin );
@@ -1713,11 +1698,6 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   // initialize animations and other things
   client->ps.commandTime = level.time - 100;
   ent->client->pers.cmd.serverTime = level.time;
-  if( client->ps.eFlags & EF_EVOLVING )
-  {
-    // evolve is being canceled, so ensure that the evolve menu isn't immediately opened
-    client->buttons |= BUTTON_USE_EVOLVE;
-  }
   ClientThink( ent-g_entities );
 
   VectorCopy( ent->client->ps.viewangles, ent->r.currentAngles );

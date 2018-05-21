@@ -1227,9 +1227,9 @@ static float CG_ChargeProgress( qboolean chargeStamina )
 
   if( chargeStamina )
   {
-    rawProgress = (float)cg.predictedPlayerState.stats[ STAT_STAMINA ];
+    rawProgress = (float) BG_GetEvolveCoolDown( &cg.predictedPlayerState );
     min = 0;
-    max = BG_Class( cg.snap->ps.stats[STAT_CLASS] )->chargeStaminaMax;
+    max = ( MAX_EVOLVE_PERIOD < 65535 ? MAX_EVOLVE_PERIOD : 65535 );
   } else
   {
     rawProgress = (float)cg.predictedPlayerState.misc[ MISC_MISC ];
@@ -1317,8 +1317,7 @@ static void CG_DrawPlayerChargeBarBG( rectDef_t *rect, vec4_t ref_color,
 
   if( chargeStamina )
   {
-    if( !BG_ClassHasAbility( cg.snap->ps.stats[STAT_CLASS],
-                             SCA_CHARGE_STAMINA ) )
+    if( cg.snap->ps.stats[ STAT_TEAM ] != TEAM_ALIENS )
       return;
 
     meterAlpha = &cg.chargeStaminaMeterAlpha;
@@ -1359,13 +1358,12 @@ static void CG_DrawPlayerChargeBar( rectDef_t *rect, vec4_t ref_color,
   progress = CG_ChargeProgress( chargeStamina );
   if( chargeStamina )
   {
-    if( !BG_ClassHasAbility( cg.snap->ps.stats[STAT_CLASS],
-                             SCA_CHARGE_STAMINA ) )
+    if( cg.snap->ps.stats[ STAT_TEAM ] != TEAM_ALIENS )
       return;
 
     meterAlpha = &cg.chargeStaminaMeterAlpha;
     meterValue = &cg.chargeStaminaMeterValue;
-    if( progress >= 1.0f )
+    if( progress <= 0.0f )
       fadeMeter = qtrue;
   } else
   {
@@ -1407,7 +1405,8 @@ static void CG_DrawPlayerChargeBar( rectDef_t *rect, vec4_t ref_color,
   }
 
   // Flash green for marauder explosion warning
-  if( cg.snap->ps.weapon == WP_ALEVEL2 &&
+  if( !chargeStamina &&
+      cg.snap->ps.weapon == WP_ALEVEL2 &&
       cg.snap->ps.misc[ MISC_MISC ] >= LEVEL2_EXPLODE_CHARGE_TIME_WARNING &&
       ( cg.time & 128 ) )
   {

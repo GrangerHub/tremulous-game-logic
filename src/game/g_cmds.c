@@ -2302,13 +2302,8 @@ void Cmd_Class_f( gentity_t *ent )
 
       if( ent->client->ps.stats[ STAT_MISC3 ] > 0 )
       {
-        if( newClass == ent->client->evolvePreviousClass )
-          G_CancelEvolve( ent );
-        else
-        {
-          G_TriggerMenu( clientNum, MN_A_EVOLVING );
-          return;
-        }
+        G_TriggerMenu( clientNum, MN_A_EVOLVING );
+        return;
       }
 
       //check that we have an overmind
@@ -2344,7 +2339,6 @@ void Cmd_Class_f( gentity_t *ent )
       {
         if( cost >= 0 )
         {
-          const float maxHealthDecayRate = BG_Class( currentClass )->maxHealthDecayRate;
           const int oldHealth = ent->client->ps.misc[ MISC_HEALTH ];
 
           // regain some of the evos when devolving
@@ -2376,44 +2370,7 @@ void Cmd_Class_f( gentity_t *ent )
           else if( ent->client->pers.evolveHealthFraction > 1.0f )
             ent->client->pers.evolveHealthFraction = 1.0f;
 
-          ent->client->pers.evolvePreviousMaxHealthFraction
-            = (float)ent->client->ps.misc[ MISC_MAX_HEALTH ]
-            / (float)BG_Class( currentClass )->health;
-
-          if( ent->client->pers.evolvePreviousMaxHealthFraction < 0.0f )
-            ent->client->pers.evolvePreviousMaxHealthFraction = 0.0f;
-          else if( ent->client->pers.evolvePreviousMaxHealthFraction > 1.0f )
-            ent->client->pers.evolvePreviousMaxHealthFraction = 1.0f;
-
-          if( maxHealthDecayRate &&
-              ( BG_Class( newClass )->health <= BG_Class( currentClass )->health ) )
-          {
-            int healthDiff;
-
-            healthDiff = ent->client->ps.misc[ MISC_MAX_HEALTH ] -
-                         oldHealth;
-
-            ent->client->ps.misc[ MISC_MAX_HEALTH ] -= (int)( maxHealthDecayRate * (float)healthDiff );
-
-            ent->client->pers.evolveMaxHealthFraction
-              = (float)ent->client->ps.misc[ MISC_MAX_HEALTH ]
-              / (float)BG_Class( currentClass )->health;
-
-            if( ent->client->pers.evolveMaxHealthFraction < 0.0f )
-              ent->client->pers.evolveMaxHealthFraction = 0.0f;
-            else if( ent->client->pers.evolveMaxHealthFraction > 1.0f )
-              ent->client->pers.evolveMaxHealthFraction = 1.0f;
-          } else
-            ent->client->pers.evolveMaxHealthFraction = 1.0f;
-
-          ent->client->pers.evolveChargeStaminaFraction = 
-                          (float)ent->client->ps.stats[ STAT_STAMINA ] /
-                          (float)BG_Class( currentClass )->chargeStaminaMax;
-
-          if( ent->client->pers.evolveChargeStaminaFraction < 0.0f )
-            ent->client->pers.evolveChargeStaminaFraction = 0.0f;
-          else if( ent->client->pers.evolveChargeStaminaFraction > 1.0f )
-            ent->client->pers.evolveChargeStaminaFraction = 1.0f;
+          ent->client->pers.evolveMaxHealthFraction = 1.0f;
 
           //save the barbs
           if( ent->client->ps.weapon == WP_ALEVEL3_UPG )
@@ -2433,6 +2390,16 @@ void Cmd_Class_f( gentity_t *ent )
           // end damage protection early
           ent->dmgProtectionTime = 0;
 
+          // reward the attackers with the
+          // total value proportional to the max health decay
+          if( BG_Class( currentClass )->maxHealthDecayRate )
+          {
+            // set the evolve flag temporarily
+            ent->client->ps.eFlags |= EF_EVOLVING;
+            G_RewardAttackers( ent, UP_NONE );
+            ent->client->ps.eFlags &= ~EF_EVOLVING;
+          }
+
           ClientSpawn( ent, ent, ent->s.pos.trBase, ent->s.apos.trBase );
 
           //restore the barbs
@@ -2451,10 +2418,18 @@ void Cmd_Class_f( gentity_t *ent )
             ent->health = oldHealth;
             ent->client->ps.misc[ MISC_HEALTH ] = ent->health;
 
+            //factor in the health difference
             evolvePeriod += ( abs( ent->client->pers.evolveHealthRegen ) / 200 );
+
+            //add any remaining evolve cool down
+            evolvePeriod += BG_GetEvolveCoolDown( &ent->client->ps );
 
             if( evolvePeriod > MAX_EVOLVE_PERIOD )
               evolvePeriod = MAX_EVOLVE_PERIOD;
+
+            BG_SetEvolveCoolDown( &ent->client->ps, evolvePeriod );
+            BG_SetEvolveCoolDownDecayTimer( &ent->client->ps,
+                                            EVOLVE_COOL_DOWN_DECAY_RATE );
 
             //Set evolving period
             ent->client->ps.eFlags |= EF_EVOLVING;
@@ -2463,12 +2438,6 @@ void Cmd_Class_f( gentity_t *ent )
 
             //store the 
             ent->client->evolveCost = cost;
-
-            //save the current class for canceling evolve
-            ent->client->evolvePreviousClass = currentClass;
-
-            //initialize the damage received while evolving
-            ent->client->pers.evolveDamage = 0;
           } else
           {
             //remove credit

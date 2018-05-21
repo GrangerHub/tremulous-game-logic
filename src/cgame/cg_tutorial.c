@@ -1054,13 +1054,7 @@ const char *CG_TutorialText( void )
         }
       } else if( ps->stats[ STAT_TEAM ] == TEAM_ALIENS )
       {
-        if( ps->eFlags & EF_EVOLVING )
-        {
-          Q_strcat( text, MAX_TUTORIAL_TEXT,
-              va( "Press %s to cancel evolving\n",
-                CG_KeyNameForCommand( "+button7" ) ) );
-        }
-        else if( BG_AlienCanEvolve( ps->stats[ STAT_CLASS ],
+        if( BG_AlienCanEvolve( ps->stats[ STAT_CLASS ],
                                ps->persistant[ PERS_CREDIT ],
                                cgs.alienStage,
                                cgs.warmup, cgs.devMode ) )
