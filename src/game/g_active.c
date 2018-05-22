@@ -2449,27 +2449,11 @@ void ClientThink_real( gentity_t *ent )
     } else if( count > client->pers.evolveHealthRegen )
       count = client->pers.evolveHealthRegen;
 
-    if( countDown &&
-        ent->health - count < *maxHealth )
-    {
-      //when evolve health is decreasing, it doesn't decrease to below the current max health
-      client->pers.evolveHealthRegen = 0;
-      ent->nextRegenTime = level.time;
-    } else
-    {
-      // progress the evolve health change
-      ent->health += count;
-      client->ps.misc[ MISC_HEALTH ] = ent->health;
-      client->pers.infoChangeTime = level.time;
-      client->pers.evolveHealthRegen -= count;
-
-      if( !countDown &&
-          ent->health > *maxHealth )
-      {
-        ent->health = client->ps.misc[ MISC_HEALTH ] = *maxHealth;
-        client->pers.evolveHealthRegen = 0;
-      }
-    }
+    // progress the evolve health change
+    ent->health += count;
+    client->ps.misc[ MISC_HEALTH ] = ent->health;
+    client->pers.infoChangeTime = level.time;
+    client->pers.evolveHealthRegen -= count;
   } else
   {
     // Replenish alien health

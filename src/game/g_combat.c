@@ -235,19 +235,28 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
       const float maxHealthDecayRate = BG_Class( self->client->ps.stats[ STAT_CLASS ] )->maxHealthDecayRate;
       value = BG_GetValueOfPlayer( &self->client->ps );
 
-      // value from evolving based on max health decay
+      // value while evolving
       if( self->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
-          self->client->ps.eFlags & EF_EVOLVING &&
-          maxHealthDecayRate )
+          self->client->ps.eFlags & EF_EVOLVING )
       {
-        const int initialClassHealth = BG_Class( self->client->ps.stats[ STAT_CLASS ] )->health;
-        int   decayedHealth =  initialClassHealth -
-                              self->client->ps.misc[ MISC_MAX_HEALTH ];
-        const int healthDiff = self->client->ps.misc[ MISC_MAX_HEALTH ] - 
-                               self->client->ps.misc[ MISC_HEALTH ];
+        const int classHealth = BG_Class( self->client->ps.stats[ STAT_CLASS ] )->health;
+        if( !self->client->ps.stats[ STAT_MISC2 ] )
+        {
+          //disperse income for damage done before evolve
+          int   decayedHealth = classHealth -
+                                self->client->ps.misc[ MISC_MAX_HEALTH ];
+          const int healthDiff = self->client->ps.misc[ MISC_MAX_HEALTH ] - 
+                                 self->client->ps.misc[ MISC_HEALTH ];
 
-        decayedHealth -= (int)( healthDiff * maxHealthDecayRate );
-        value *= ( (float)decayedHealth ) / ( (float) initialClassHealth );
+          decayedHealth -= (int)( healthDiff * ( maxHealthDecayRate ? maxHealthDecayRate : 1 ) );
+
+          value *= ( (float)decayedHealth ) / ( (float) classHealth );
+        } else
+        {
+          //disperse income for death during evolving based on the current progress
+          value *= 1.0f - ( ( (float)self->client->ps.stats[ STAT_MISC3 ] ) /
+                            ( (float)self->client->ps.stats[ STAT_MISC2 ] ) );
+        }
       }
     }
     else
@@ -1766,7 +1775,24 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
     if( !(dflags & DAMAGE_INSTAGIB) )
     {
+      const int currentHealthBeforeDamage = targ->health;
+
       targ->health = targ->health - take;
+
+      //adjust health scaling for evolving
+      if( targ->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
+          (targ->client->ps.eFlags & EF_EVOLVING) &&
+          targ->client->ps.stats[ STAT_MISC2 ] )
+      {
+        int projectedHealth = currentHealthBeforeDamage +
+                              targ->client->pers.evolveHealthRegen;
+        const float damageScaleMod = ( (float)projectedHealth ) /
+                                     ( (float)BG_Class( targ->client->ps.stats[ STAT_CLASS ] )->health );
+
+        projectedHealth -= ( (int)( damageScaleMod * ( (float)take ) ) );
+
+        targ->client->pers.evolveHealthRegen = projectedHealth - targ->health;
+      }
     }
     else
     {

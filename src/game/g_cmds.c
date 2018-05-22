@@ -2436,7 +2436,7 @@ void Cmd_Class_f( gentity_t *ent )
             ent->client->ps.stats[ STAT_MISC3 ] = evolvePeriod; // counts down, ends evolve when 0 is reached
             ent->client->ps.stats[ STAT_MISC2 ] = evolvePeriod; // remains constant, used as a denominator for scaling
 
-            //store the 
+            //store the cost
             ent->client->evolveCost = cost;
           } else
           {
