@@ -1563,6 +1563,9 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   ent->client->ps.stats[ STAT_STATE ] = 0;
   VectorSet( ent->client->ps.grapplePoint, 0.0f, 0.0f, 1.0f );
 
+  //reset bonus value
+  ent->bonusValue = 0;
+
   // health will count down towards max_health
   ent->health = client->ps.misc[ MISC_HEALTH ] = 
                 client->ps.misc[ MISC_MAX_HEALTH ] =

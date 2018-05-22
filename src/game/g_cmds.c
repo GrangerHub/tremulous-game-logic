@@ -490,8 +490,11 @@ static void Give_Upgrade( gentity_t *ent, char *s )
   for( i = 0; i < MAX_CLIENTS; i++ )
     ent->creditsUpgrade[ u ][ i ] = 0;
 
-  for( i = 0; i < NUM_TEAMS; i++ )
-    ent->creditsUpgradeDeffenses[ u ][ i ] = 0;
+  for( i = 0; i < MAX_GENTITIES; i++ )
+  {
+    ent->creditsUpgradeDeffenses[ u ][ i ].credits = 0;
+    G_Entity_id_set( &ent->creditsUpgradeDeffenses[ u ][ i ].id, &g_entities[ i ] );
+  }
 
 }
 
@@ -630,8 +633,11 @@ void Cmd_Give_f( gentity_t *ent )
       for( i = 0; i < MAX_CLIENTS; i++ )
         ent->creditsUpgrade[ UP_BATTLESUIT ][ i ] = 0;
 
-      for( i = 0; i < NUM_TEAMS; i++ )
-        ent->creditsUpgradeDeffenses[ UP_BATTLESUIT ][ i ] = 0;
+      for( i = 0; i < MAX_GENTITIES; i++ )
+      {
+        ent->creditsUpgradeDeffenses[ UP_BATTLESUIT ][ i ].credits = 0;
+        G_Entity_id_set( &ent->creditsUpgradeDeffenses[ UP_BATTLESUIT ][ i ].id, &g_entities[ i ] );
+      }
     }
   }
 }
@@ -2340,6 +2346,23 @@ void Cmd_Class_f( gentity_t *ent )
         if( cost >= 0 )
         {
           const int oldHealth = ent->client->ps.misc[ MISC_HEALTH ];
+          float     valueMod;
+          int       bonusValue = ent->bonusValue;
+          int       creditsSaved[ MAX_CLIENTS ]; // human credits for each client
+          credits_t creditsDeffensesSaved[ MAX_GENTITIES ];
+          int       i;
+
+          for( i = 0; i < MAX_CLIENTS; i++ )
+          {
+            creditsSaved[ i ] = ent->credits[ i ];
+          }
+
+          for( i = 0; i < MAX_GENTITIES; i++ )
+          {
+            creditsDeffensesSaved[i].credits = ent->creditsDeffenses[i].credits;
+            creditsDeffensesSaved[i].id.id = ent->creditsDeffenses[i].id.id;
+            creditsDeffensesSaved[i].id.ptr = ent->creditsDeffenses[i].id.ptr;
+          }
 
           // regain some of the evos when devolving
           if( !cost )
@@ -2347,7 +2370,7 @@ void Cmd_Class_f( gentity_t *ent )
             cost = ( BG_Class( newClass )->cost * ALIEN_CREDITS_PER_KILL ) -
                   ( BG_Class( currentClass )->cost * ALIEN_CREDITS_PER_KILL );
             if( cost )
-              cost = (int)( ( (float)cost ) * 0.20f );
+              cost = (int)( ( (float)cost ) * 0.0625f );
           }
 
           //disable wallwalking
@@ -2390,17 +2413,40 @@ void Cmd_Class_f( gentity_t *ent )
           // end damage protection early
           ent->dmgProtectionTime = 0;
 
-          // reward the attackers with the
-          // total value proportional to the max health decay
-          if( BG_Class( currentClass )->maxHealthDecayRate )
+          // calculate the bonus health to be save for after the evolve
           {
-            // set the evolve flag temporarily
-            ent->client->ps.eFlags |= EF_EVOLVING;
-            G_RewardAttackers( ent, UP_NONE );
-            ent->client->ps.eFlags &= ~EF_EVOLVING;
+            const int classHealth = BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->health;
+            int   decayedHealth = classHealth -
+                                  ent->client->ps.misc[ MISC_MAX_HEALTH ];
+            const int healthDiff = ent->client->ps.misc[ MISC_MAX_HEALTH ] - 
+                                   ent->client->ps.misc[ MISC_HEALTH ];
+
+            decayedHealth -= (int)( healthDiff * ( BG_Class( currentClass )->maxHealthDecayRate ? BG_Class( currentClass )->maxHealthDecayRate : 1 ) );
+
+            valueMod = ( (float)decayedHealth ) / ( (float) classHealth );
+
+            bonusValue += (int)(BG_GetValueOfPlayer( &ent->client->ps ) * valueMod );
           }
 
           ClientSpawn( ent, ent, ent->s.pos.trBase, ent->s.apos.trBase );
+
+          ent->bonusValue = bonusValue;
+
+          for( i = 0; i < MAX_CLIENTS; i++ )
+          {
+            ent->credits[ i ] = ceil( creditsSaved[ i ] * valueMod );
+          }
+
+          for( i = 0; i < MAX_GENTITIES; i++ )
+          {
+            if( creditsDeffensesSaved[i].credits )
+              ent->creditsDeffenses[i].credits = (int)ceil( ( (float)creditsDeffensesSaved[i].credits ) * valueMod );
+            else
+              ent->creditsDeffenses[i].credits = 0;
+
+            ent->creditsDeffenses[i].id.id = creditsDeffensesSaved[i].id.id;
+            ent->creditsDeffenses[i].id.ptr = creditsDeffensesSaved[i].id.ptr;
+          }
 
           //restore the barbs
           if( ent->client->ps.weapon == WP_ALEVEL3_UPG )
@@ -2986,8 +3032,12 @@ void Cmd_Buy_f( gentity_t *ent )
     //initialize damage credits
     for( i = 0; i < MAX_CLIENTS; i++ )
       ent->creditsUpgrade[ upgrade ][ i ] = 0;
-    for( i = 0; i < NUM_TEAMS; i++ )
-      ent->creditsUpgradeDeffenses[ upgrade ][ i ] = 0;
+
+    for( i = 0; i < MAX_GENTITIES; i++ )
+    {
+      ent->creditsUpgradeDeffenses[ upgrade ][ i ].credits = 0;
+      G_Entity_id_set( &ent->creditsUpgradeDeffenses[ upgrade ][ i ].id, &g_entities[ i ] );
+    }
   }
   else
   {

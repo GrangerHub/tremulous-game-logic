@@ -159,6 +159,145 @@ char *modNames[ ] =
   "MOD_SLAP"
 };
 
+typedef struct rewardBuildableData_s
+{
+  gentity_t *self;
+  gentity_t *enemyPlayer;
+  qboolean  damagedByEnemyPlayer;
+  int       *alienCredits;
+  int       *humanCredits;
+  int       (*numTeamPlayers)[ NUM_TEAMS ];
+  int       totalDamage;
+  int       maxHealth;
+  int       value;
+} rewardBuildableData_t;
+
+/*
+==================
+G_RewardAttackers
+
+give credits from damage by defense buildables and empty the array
+==================
+*/
+static void RewardBuildableAttackers( void *data, void *user_data )
+{
+  credits_t             *credits = (credits_t *)data;
+  rewardBuildableData_t *rewardBuildableData = (rewardBuildableData_t *)user_data;
+  gentity_t             *buildable = G_Entity_id_get( &credits->id );
+  gentity_t             *self = rewardBuildableData->self;
+  gentity_t             *player = rewardBuildableData->enemyPlayer;
+  qboolean              damagedByEnemyPlayer = rewardBuildableData->damagedByEnemyPlayer;
+  team_t                buildableTeam;
+  int                   *alienCredits = rewardBuildableData->alienCredits;
+  int                   *humanCredits = rewardBuildableData->humanCredits;
+  int                   totalDamage = rewardBuildableData->totalDamage;
+  int                   maxHealth = rewardBuildableData->maxHealth;
+  int                   value = rewardBuildableData->value;
+  int                   (*numTeamPlayers)[ NUM_TEAMS ];
+  int                   dBValue = value * credits->credits / totalDamage;
+  int                   buildablesTeamDistributionEarnings;
+  int                   j;
+
+  numTeamPlayers = rewardBuildableData->numTeamPlayers;
+
+  Com_Assert( buildable &&
+              "RewardBuildableAttackers: buildable is NULL" );
+  Com_Assert( buildable->s.number >= 0 &&
+              buildable->s.number < MAX_GENTITIES &&
+              "RewardBuildableAttackers: buildable number is invalid" );
+  Com_Assert( buildable == &g_entities[ buildable->s.number ] &&
+              "RewardBuildableAttackers: buildable is not in the gentities[] array" );
+  Com_Assert( buildable->inuse &&
+              "RewardBuildableAttackers: buildable is not in use" );
+  Com_Assert( buildable->s.eType == ET_BUILDABLE &&
+              "RewardBuildableAttackers: buildable is not really a buildable" );
+  Com_Assert( self &&
+              "RewardBuildableAttackers: self is NULL" );
+  Com_Assert( self->s.number >= 0 &&
+              self->s.number < MAX_GENTITIES &&
+              "RewardBuildableAttackers: self number is invalid" );
+  Com_Assert( self == &g_entities[ self->s.number ] &&
+              "RewardBuildableAttackers: self is not in the gentities[] array" );
+  Com_Assert( self->inuse &&
+              "RewardBuildableAttackers: self is not in use" );
+  Com_Assert( alienCredits &&
+              "RewardBuildableAttackers: alienCredits is NULL" );
+  Com_Assert( alienCredits >= 0 &&
+              "RewardBuildableAttackers: alienCredits is negative" );
+  Com_Assert( humanCredits &&
+              "RewardBuildableAttackers: humanCredits is NULL" );
+  Com_Assert( humanCredits >= 0 &&
+              "RewardBuildableAttackers: humanCredits is negative" );
+  Com_Assert( numTeamPlayers &&
+              "RewardBuildableAttackers: numTeamPlayers is NULL" );
+  Com_Assert( totalDamage >= 0 &&
+              "RewardBuildableAttackers: totalDamage is negative" );
+  Com_Assert( maxHealth >= 0 &&
+              "RewardBuildableAttackers: maxHealth is negative" );
+  Com_Assert( value >= 0 &&
+              "RewardBuildableAttackers: value is negative" );
+  Com_Assert( ( !damagedByEnemyPlayer ||
+                player) &&
+              "RewardBuildableAttackers: player is NULL" );
+  Com_Assert( ( !damagedByEnemyPlayer ||
+                ( player->s.number >= 0 &&
+                  player->s.number < MAX_CLIENTS ) ) &&
+              "RewardBuildableAttackers: player number is invalid" );
+  Com_Assert( ( !damagedByEnemyPlayer ||
+                ( player == &g_entities[ player->s.number ] ) ) &&
+              "RewardBuildableAttackers: player is not in the gentities[] array" );
+  Com_Assert( ( !damagedByEnemyPlayer ||
+                player->inuse ) &&
+              "RewardBuildableAttackers: player is not in use" );
+
+  buildableTeam = buildable->buildableTeam;
+
+  Com_Assert( buildableTeam >= 0 &&
+              buildableTeam < NUM_TEAMS &&
+              "RewardBuildableAttackers: buildableTeam is invalid" );
+
+  if( totalDamage < maxHealth )
+    dBValue *= totalDamage / maxHealth;
+
+  if( (*numTeamPlayers)[ buildableTeam ] )
+    buildablesTeamDistributionEarnings = ( dBValue * 2 ) / ( 5 * (*numTeamPlayers)[ buildableTeam ] );
+  else
+    buildablesTeamDistributionEarnings = 0;
+
+  buildable->bonusValue += ( dBValue * 2 ) / ( 5 );
+
+  // add to the builder's score
+  if( buildable->builtBy &&
+      buildable->builtBy->slot >= 0 &&
+      g_entities[ buildable->builtBy->slot ].client->pers.connected == CON_CONNECTED &&
+      buildableTeam == g_entities[ buildable->builtBy->slot ].client->ps.stats[ STAT_TEAM ] )
+    AddScore( &g_entities[ buildable->builtBy->slot ], dBValue );
+
+  for( j = 0; j < level.maxclients; j++ )
+  {
+    if( level.clients[ j ].pers.connected == CON_CONNECTED &&
+        level.clients[ j ].pers.teamSelection != TEAM_NONE )
+    {
+      //distribute the team specific earnings
+      if( level.clients[ j ].pers.teamSelection == buildableTeam )
+        G_AddCreditToClient( &level.clients[ j ], buildablesTeamDistributionEarnings, qtrue );
+    }
+  }
+
+  // The value from killed players that have been damaged by another player counts towards stage advancement
+  if( ( !IS_WARMUP ) && ( self->client ) &&
+      damagedByEnemyPlayer )
+  {
+    // add to stage counters
+    if( player->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
+      *alienCredits += dBValue;
+    else if( player->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
+      *humanCredits += dBValue;
+  }
+
+  credits->credits = 0;
+}
+
 /*
 ==================
 G_RewardAttackers
@@ -169,16 +308,18 @@ Returns the total damage dealt.
 */
 float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
 {
-  float          value, totalDamage = 0;
-  int            i, maxHealth = 0;
-  int            alienCredits = 0, humanCredits = 0;
-  int            numTeamPlayers[ NUM_TEAMS ];
-  int            maxHealthReserve;
-  int            ( *credits )[ MAX_CLIENTS ], ( *creditsDeffenses )[ NUM_TEAMS ];
-  team_t         team;
-  gentity_t      *player;
-  qboolean       damagedByEnemyPlayer = qfalse;
-  const qboolean isBuildable = ( self->s.eType == ET_BUILDABLE );
+  float                 value, totalDamage = 0;
+  int                   i, maxHealth = 0;
+  int                   alienCredits = 0, humanCredits = 0;
+  int                   numTeamPlayers[ NUM_TEAMS ];
+  int                   ( *credits )[ MAX_CLIENTS ];
+  credits_t             ( *creditsDeffenses )[ MAX_GENTITIES ];
+  team_t                team;
+  gentity_t             *enemyPlayer = NULL;
+  qboolean              damagedByEnemyPlayer = qfalse;
+  const qboolean        isBuildable = ( self->s.eType == ET_BUILDABLE );
+  bgqueue_t             enemyBuildables = BG_QUEUE_INIT;
+  rewardBuildableData_t rewardBuildableData;
 
   if( destroyedUp != UP_NONE )
   {
@@ -194,7 +335,11 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
   // Total up all the damage done by non-teammates
   for( i = 0; i < level.maxclients; i++ )
   {
-    player = g_entities + i;
+    gentity_t *player = g_entities + i;
+
+    // no damage from this player
+    if( !( *credits )[ i ] )
+      continue;
 
     // don't count players that are no longer playing
     if( player->client->pers.connected != CON_CONNECTED ||
@@ -209,19 +354,36 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
     {
       totalDamage += (float)( *credits )[ i ];
       damagedByEnemyPlayer = qtrue;
+      enemyPlayer = player;
     }
   }
 
-  // add damage done by enemy buildables to the total
-  for( i = 0; i < NUM_TEAMS; i++ )
+  // add damage done by enemy buildables to the total and
+  // add those buildables to the enemy buildable list
+  for( i = MAX_CLIENTS; i < level.num_entities; i++ )
   {
-    if( ( self->client &&
-          self->client->ps.stats[ STAT_TEAM ] == i ) || 
-        i == self->buildableTeam ||
-        !( *creditsDeffenses )[ i ] )
+    gentity_t *buildable = &g_entities[ i ];
+
+    if( !( *creditsDeffenses )[ i ].credits )
       continue;
 
-    totalDamage += ( *creditsDeffenses )[ i ];
+    // no longer the same entity that damaged this entity
+    if( G_Entity_id_get( &( *creditsDeffenses )[ i ].id ) != buildable )
+    {
+      ( *creditsDeffenses )[ i ].credits = 0;
+      continue;
+    }
+
+    if( buildable->s.eType != ET_BUILDABLE ||
+        ( self->client &&
+          self->client->ps.stats[ STAT_TEAM ] == buildable->buildableTeam ) || 
+        buildable->buildableTeam == self->buildableTeam )
+    {
+      continue;
+    }
+
+    totalDamage += ( *creditsDeffenses )[ i ].credits;
+    BG_Queue_Push_Head( &enemyBuildables, &( *creditsDeffenses )[ i ] );
   }
 
   if( totalDamage <= 0.0f )
@@ -232,31 +394,15 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
   {
     if( destroyedUp == UP_NONE )
     {
-      const float maxHealthDecayRate = BG_Class( self->client->ps.stats[ STAT_CLASS ] )->maxHealthDecayRate;
       value = BG_GetValueOfPlayer( &self->client->ps );
 
       // value while evolving
       if( self->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
           self->client->ps.eFlags & EF_EVOLVING )
       {
-        const int classHealth = BG_Class( self->client->ps.stats[ STAT_CLASS ] )->health;
-        if( !self->client->ps.stats[ STAT_MISC2 ] )
-        {
-          //disperse income for damage done before evolve
-          int   decayedHealth = classHealth -
-                                self->client->ps.misc[ MISC_MAX_HEALTH ];
-          const int healthDiff = self->client->ps.misc[ MISC_MAX_HEALTH ] - 
-                                 self->client->ps.misc[ MISC_HEALTH ];
-
-          decayedHealth -= (int)( healthDiff * ( maxHealthDecayRate ? maxHealthDecayRate : 1 ) );
-
-          value *= ( (float)decayedHealth ) / ( (float) classHealth );
-        } else
-        {
-          //disperse income for death during evolving based on the current progress
-          value *= 1.0f - ( ( (float)self->client->ps.stats[ STAT_MISC3 ] ) /
-                            ( (float)self->client->ps.stats[ STAT_MISC2 ] ) );
-        }
+        //disperse income for death during evolving based on the current progress
+        value *= 1.0f - ( ( (float)self->client->ps.stats[ STAT_MISC3 ] ) /
+                          ( (float)self->client->ps.stats[ STAT_MISC2 ] ) );
       }
     }
     else
@@ -305,6 +451,9 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
   else
     return totalDamage;
 
+  if( destroyedUp == UP_NONE )
+    value += self->bonusValue;
+
   numTeamPlayers[ TEAM_ALIENS ] = level.numAlienClients;
   numTeamPlayers[ TEAM_HUMANS ] = level.numHumanClients;
 
@@ -314,15 +463,14 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
     int stageValue = value * ( *credits )[ i ] / totalDamage;
     int j;
     team_t playersTeam;
-
-    player = g_entities + i;
+    gentity_t *player = g_entities + i;
     playersTeam = player->client->pers.teamSelection;
 
     if( playersTeam != team )
     {
       int playersTeamDistributionEarnings;
-      int everyonesDistributionEarnings;
       int playersPersonalEarnings;
+      int bonusValue;
 
       if( totalDamage < maxHealth )
         stageValue *= totalDamage / maxHealth;
@@ -330,18 +478,18 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
       if( !( *credits )[ i ] || player->client->ps.stats[ STAT_TEAM ] == team )
         continue;
 
-      playersTeamDistributionEarnings = ( stageValue * (  isBuildable ? 6 : 1 ) ) / ( 10 * numTeamPlayers[ playersTeam ] );
-      everyonesDistributionEarnings = ( stageValue * (  isBuildable ? 0 : 5 ) ) / ( 10 * level.numPlayingClients );
+      playersTeamDistributionEarnings = ( stageValue * (  isBuildable ? 4 : 3 ) ) / ( 10 * numTeamPlayers[ playersTeam ] );
+      bonusValue = ( stageValue * (  isBuildable ? 2 : 3 ) ) / ( 10 );
 
       // any remainders goes to the player that did the damage;
       playersPersonalEarnings = stageValue;
       playersPersonalEarnings -= playersTeamDistributionEarnings * numTeamPlayers[ playersTeam ];
-      playersPersonalEarnings -= everyonesDistributionEarnings * level.numPlayingClients;
+      playersPersonalEarnings -= bonusValue;
+
 
       AddScore( player, stageValue );
 
-      maxHealthReserve = (int)( ALIEN_HP_RESERVE_MAX *
-                                BG_Class( player->client->ps.stats[ STAT_CLASS ] )->health );
+      player->bonusValue += bonusValue;
 
       for( j = 0; j < level.maxclients; j++ )
       {
@@ -351,9 +499,6 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
           //distribute the team specific earnings
           if( level.clients[ j ].pers.teamSelection == playersTeam )
             G_AddCreditToClient( &level.clients[ j ], playersTeamDistributionEarnings, qtrue );
-
-          //distribute the earnings common to everyone playing
-          G_AddCreditToClient( &level.clients[ j ], everyonesDistributionEarnings, qtrue );
         }
       }
 
@@ -373,57 +518,20 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
     ( *credits )[ i ] = 0;
   }
 
-  // give credits from damage by defense buildables  and empty the array
-  for( i = 0; i < NUM_TEAMS; i++ )
-  {
-    int dBValue = value * ( *creditsDeffenses )[ i ] / totalDamage;
-    int buildablesTeamDistributionEarnings;
-    int everyonesDistributionEarnings;
-    int j;
+  rewardBuildableData.self = self;
+  rewardBuildableData.enemyPlayer = enemyPlayer;
+  rewardBuildableData.damagedByEnemyPlayer = damagedByEnemyPlayer;
+  rewardBuildableData.alienCredits = &alienCredits;
+  rewardBuildableData.humanCredits= &humanCredits;
+  rewardBuildableData.numTeamPlayers = numTeamPlayers;
+  rewardBuildableData.totalDamage = totalDamage;
+  rewardBuildableData.maxHealth = maxHealth;
+  rewardBuildableData.value = value;
 
-    if( ( self->client &&
-          self->client->ps.stats[ STAT_TEAM ] == i ) || 
-        i == self->buildableTeam ||
-        i == TEAM_NONE ||
-        !( *creditsDeffenses )[ i ] )
-      continue;
+  BG_Queue_Foreach( &enemyBuildables, RewardBuildableAttackers,
+                    &rewardBuildableData );
+  BG_Queue_Clear( &enemyBuildables );
 
-    if( totalDamage < maxHealth )
-      dBValue *= totalDamage / maxHealth;
-
-    if( numTeamPlayers[ i ] )
-      buildablesTeamDistributionEarnings = ( dBValue * 2 ) / ( 10 * numTeamPlayers[ i ] );
-    else
-      buildablesTeamDistributionEarnings = 0;
-    everyonesDistributionEarnings = ( dBValue * 8 ) / ( 10 * level.numPlayingClients );
-
-    for( j = 0; j < level.maxclients; j++ )
-    {
-      if( level.clients[ j ].pers.connected == CON_CONNECTED &&
-          level.clients[ j ].pers.teamSelection != TEAM_NONE )
-      {
-        //distribute the team specific earnings
-        if( level.clients[ j ].pers.teamSelection == i )
-          G_AddCreditToClient( &level.clients[ j ], buildablesTeamDistributionEarnings, qtrue );
-
-        //distribute the earnings common to everyone playing
-        G_AddCreditToClient( &level.clients[ j ], everyonesDistributionEarnings, qtrue );
-      }
-    }
-
-    // The value from killed players that have been damaged by another player counts towards stage advancement
-    if( ( !IS_WARMUP ) && ( self->client ) &&
-        damagedByEnemyPlayer )
-    {
-      // add to stage counters
-      if( player->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
-        alienCredits += dBValue;
-      else if( player->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
-        humanCredits += dBValue;
-    }
-
-    ( *creditsDeffenses )[ i ] = 0;
-  }
 
   if( alienCredits )
   {
@@ -1679,7 +1787,16 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
         if( attacker->client )
           targ->creditsUpgrade[ UP_BATTLESUIT ][ attacker->client->ps.clientNum ] += take;
         else if( attacker->s.eType == ET_BUILDABLE )
-          targ->creditsUpgradeDeffenses[ UP_BATTLESUIT ][ attacker->buildableTeam ] += take;
+        {
+          if( G_Entity_id_get( &targ->creditsUpgradeDeffenses[ UP_BATTLESUIT ][ attacker->s.number ].id ) == attacker )
+          {
+            targ->creditsUpgradeDeffenses[ UP_BATTLESUIT ][ attacker->s.number ].credits += take;
+          } else
+          {
+            G_Entity_id_set( &targ->creditsUpgradeDeffenses[ UP_BATTLESUIT ][ attacker->s.number ].id, attacker );
+            targ->creditsUpgradeDeffenses[ UP_BATTLESUIT ][ attacker->s.number ].credits = take;
+          }
+        }
       }
 
       targ->client->ps.misc[ MISC_ARMOR ] -= take;
@@ -1770,7 +1887,16 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       if( attacker->client )
         targ->credits[ attacker->client->ps.clientNum ] += take;
       else if( attacker->s.eType == ET_BUILDABLE )
-        targ->creditsDeffenses[ attacker->buildableTeam ] += take;
+      {
+        if( G_Entity_id_get( &targ->creditsDeffenses[ attacker->s.number ].id ) == attacker )
+        {
+          targ->creditsDeffenses[ attacker->s.number ].credits += take;
+        } else
+        {
+          G_Entity_id_set( &targ->creditsDeffenses[ attacker->s.number ].id, attacker );
+          targ->creditsDeffenses[ attacker->s.number ].credits = take;
+        }
+      }
     }
 
     if( !(dflags & DAMAGE_INSTAGIB) )

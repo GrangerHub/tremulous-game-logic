@@ -108,6 +108,12 @@ typedef struct{
   gentity_t   *ptr;
 } gentity_id;
 
+typedef struct credits_s
+{
+  int        credits;
+  gentity_id id;
+} credits_t;
+
 //============================================================================
 
 struct gentity_s
@@ -357,8 +363,9 @@ struct gentity_s
   int               credits[ MAX_CLIENTS ]; // human credits for each client
   int               creditsUpgrade[ UP_NUM_UPGRADES ][ MAX_CLIENTS ]; // human breakable upgrade credits for each client
   int               killedBy;                   // clientNum of killer
-  int               creditsDeffenses[ NUM_TEAMS ];  // credits for damage done by an enemy defensive buildables.
-  int               creditsUpgradeDeffenses[ UP_NUM_UPGRADES ][ NUM_TEAMS ]; // breakable upgrade credits for damage done by an enemy defensive buildables.
+  credits_t         creditsDeffenses[ MAX_GENTITIES ];  // credits for damage done by an enemy defensive buildables.
+  credits_t         creditsUpgradeDeffenses[ UP_NUM_UPGRADES ][ MAX_GENTITIES ]; // breakable upgrade credits for damage done by an enemy defensive buildables.
+  int               bonusValue; // additional value this entity is worth (due to its effectiveness/etc since it last spawned)
 
   vec3_t            turretAim;          // aim vector for turrets
   vec3_t            turretAimRate;      // track turn speed for norfenturrets

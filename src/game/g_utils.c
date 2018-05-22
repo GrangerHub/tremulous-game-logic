@@ -1217,8 +1217,12 @@ void G_Entity_id_init(gentity_t *ptr){
 void G_Entity_id_set(gentity_id *id,gentity_t *target){
   Com_Assert(id);
   Com_Assert(target);
-  id->id = target->id;
-  id->ptr = target;
+  if( target->inuse )
+  {
+    id->id = target->id;
+    id->ptr = target;
+  } else
+    id->ptr = NULL;
 }
 
 gentity_t *G_Entity_id_get(gentity_id *id){

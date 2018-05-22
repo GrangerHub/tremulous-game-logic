@@ -5501,8 +5501,11 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
 
   for( i = 0; i < MAX_CLIENTS; i++ )
     built->credits[ i ] = 0;
-  for( i = 0; i < NUM_TEAMS; i++ )
-    built->creditsDeffenses[ i ] = 0;
+  for( i = 0; i < MAX_GENTITIES; i++ )
+  {
+    built->creditsDeffenses[ i ].credits = 0;
+    G_Entity_id_set( &built->creditsDeffenses[ i ].id, &g_entities[ i ] );
+  }
 
   if( buildable == BA_H_TELEPORTER )
     G_AddTeleporter( built );
