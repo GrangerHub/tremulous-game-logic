@@ -1780,7 +1780,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       targ->health = targ->health - take;
 
       //adjust health scaling for evolving
-      if( targ->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
+      if( targ->client &&
+          targ->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
           (targ->client->ps.eFlags & EF_EVOLVING) &&
           targ->client->ps.stats[ STAT_MISC2 ] )
       {
