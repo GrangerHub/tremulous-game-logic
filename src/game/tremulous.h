@@ -789,23 +789,23 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MGTURRET_HEALTH              HBHM(240000)
 #define MGTURRET_SPLASHDAMAGE        HBDM(100000)
 #define MGTURRET_SPLASHRADIUS        100
-#define MGTURRET_ANGULARSPEED        10
+#define MGTURRET_ANGULARSPEED        12
 #define MGTURRET_ANGULARYAWSPEED_MOD 6
 #define MGTURRET_ACCURACY_TO_FIRE    10
 #define MGTURRET_VERTICALCAP         45  // +/- maximum pitch
 #define MGTURRET_REPEAT              150  // repeat after full spin up
-#define MGTURRET_REPEAT_START        400 // the repeat at the start of spinup
+#define MGTURRET_REPEAT_START        350 // the repeat at the start of spinup
 #define MGTURRET_NEXTTHINK           50
 #define MGTURRET_K_SCALE             1.0f
-#define MGTURRET_RANGE               450.0f
+#define MGTURRET_RANGE               475.0f
 #define MGTURRET_SPREAD              0
 #define MGTURRET_DMG                 HBDM(4400)
-#define MGTURRET_SPINUP_TIME         4500 // time to increase the fire rate to full speed
-#define MGTURRET_SPINDOWN_TIME       4500 // time it takes a ret to spindown from full speed to complete stop
-#define MGTURRET_SPINUP_SKIPFIRE     500 // the initial shot skips below this spinup value
+#define MGTURRET_SPINUP_TIME         4000 // time to increase the fire rate to full speed
+#define MGTURRET_SPINDOWN_TIME       4000 // time it takes a ret to spindown from full speed to complete stop
+#define MGTURRET_SPINUP_SKIPFIRE     400 // the initial shot skips below this spinup value
 #define MGTURRET_VALUE               ( ALIEN_CREDITS_PER_KILL )
 #define MGTURRET_BAT_PWR             25000
-#define MGTURRET_DCC_ANGULARSPEED    15
+#define MGTURRET_DCC_ANGULARSPEED    16
 #define MGTURRET_GRAB_ANGULARSPEED   0
 
 #define TESLAGEN_BP                 10
