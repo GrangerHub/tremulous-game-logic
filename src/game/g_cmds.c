@@ -2457,7 +2457,7 @@ void Cmd_Class_f( gentity_t *ent )
 
           if( !g_cheats.integer )
           {
-            int evolvePeriod = 1000;
+            int evolvePeriod = MIN_EVOLVE_PERIOD;
 
             //set the evolve health regen
             ent->client->pers.evolveHealthRegen = ent->health - oldHealth;
