@@ -62,7 +62,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL0_POUNCE_RANGE         48.0f
 #define LEVEL0_POUNCE_WIDTH         14.0f
 #define LEVEL0_POUNCE_TIME          600      // msec for full Dretch pounce
-#define LEVEL0_POUNCE_TIME_MIN      200      // msec before which pounce cancels  
+#define LEVEL0_POUNCE_TIME_MIN      200      // msec before which pounce cancels
 #define LEVEL0_POUNCE_REPEAT        320      // msec before a new pounce starts
 #define LEVEL0_POUNCE_SPEED_MOD     0.75f    // walking speed modifier for pounce charging
 #define LEVEL0_POUNCE_JUMP_MAG      600      // Dretch pounce jump power
@@ -122,7 +122,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define LEVEL3_CLAW_DMG             AWDM(80000)
 #define LEVEL3_CLAW_RANGE           96.0f
-#define LEVEL3_CLAW_UPG_RANGE       LEVEL3_CLAW_RANGE // + 3.0f          
+#define LEVEL3_CLAW_UPG_RANGE       LEVEL3_CLAW_RANGE // + 3.0f
 #define LEVEL3_CLAW_WIDTH           16.0f
 #define LEVEL3_CLAW_REPEAT          700
 #define LEVEL3_CLAW_K_SCALE         1.0f
@@ -134,7 +134,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL3_POUNCE_WIDTH         16.0f
 #define LEVEL3_POUNCE_TIME          700      // msec for full Dragoon pounce
 #define LEVEL3_POUNCE_TIME_UPG      700      // msec for full Adv. Dragoon pounce
-#define LEVEL3_POUNCE_TIME_MIN      200      // msec before which pounce cancels  
+#define LEVEL3_POUNCE_TIME_MIN      200      // msec before which pounce cancels
 #define LEVEL3_POUNCE_REPEAT        400      // msec before a new pounce starts
 #define LEVEL3_POUNCE_SPEED_MOD     0.75f    // walking speed modifier for pounce charging
 #define LEVEL3_POUNCE_JUMP_MAG      700      // Dragoon pounce jump power
@@ -789,23 +789,23 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MGTURRET_HEALTH              HBHM(240000)
 #define MGTURRET_SPLASHDAMAGE        HBDM(100000)
 #define MGTURRET_SPLASHRADIUS        100
-#define MGTURRET_ANGULARSPEED        11
+#define MGTURRET_ANGULARSPEED        10
 #define MGTURRET_ANGULARYAWSPEED_MOD 6
 #define MGTURRET_ACCURACY_TO_FIRE    10
 #define MGTURRET_VERTICALCAP         45  // +/- maximum pitch
-#define MGTURRET_REPEAT              140  // repeat after full spin up
-#define MGTURRET_REPEAT_START        300 // the repeat at the start of spinup
+#define MGTURRET_REPEAT              150  // repeat after full spin up
+#define MGTURRET_REPEAT_START        400 // the repeat at the start of spinup
 #define MGTURRET_NEXTTHINK           50
 #define MGTURRET_K_SCALE             1.0f
-#define MGTURRET_RANGE               500.0f
+#define MGTURRET_RANGE               450.0f
 #define MGTURRET_SPREAD              0
 #define MGTURRET_DMG                 HBDM(4400)
-#define MGTURRET_SPINUP_TIME         3800 // time to increase the fire rate to full speed
-#define MGTURRET_SPINDOWN_TIME       3800 // time it takes a ret to spindown from full speed to complete stop
-#define MGTURRET_SPINUP_SKIPFIRE     400 // the initial shot skips below this spinup value
+#define MGTURRET_SPINUP_TIME         4500 // time to increase the fire rate to full speed
+#define MGTURRET_SPINDOWN_TIME       4500 // time it takes a ret to spindown from full speed to complete stop
+#define MGTURRET_SPINUP_SKIPFIRE     500 // the initial shot skips below this spinup value
 #define MGTURRET_VALUE               ( ALIEN_CREDITS_PER_KILL )
 #define MGTURRET_BAT_PWR             25000
-#define MGTURRET_DCC_ANGULARSPEED    16
+#define MGTURRET_DCC_ANGULARSPEED    15
 #define MGTURRET_GRAB_ANGULARSPEED   0
 
 #define TESLAGEN_BP                 10
@@ -937,5 +937,5 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define DAMAGE_FRACTION_FOR_KILL    0.5f //how much damage players (versus structures) need to
                                          //do to increment the stage kill counters
-                                         
+
 #define MAXIMUM_BUILD_TIME          20000 // used for pie timer
