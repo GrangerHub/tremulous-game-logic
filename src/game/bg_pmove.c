@@ -1778,7 +1778,8 @@ static qboolean PM_CheckWaterJump( void )
   if( pm->waterlevel != 2 )
     return qfalse;
 
-  if( pm->ps->eFlags & EF_WALLCLIMB )
+  if( pm->cmd.upmove < 10 )
+    // not holding jump
     return qfalse;
 
   VectorCopy( pm->mins, mins );
