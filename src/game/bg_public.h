@@ -48,7 +48,6 @@ int BG_SU2HP( int healthSubUnits );
 
 #define VOTE_TIME               30000 // 30 seconds before vote times out
 
-#define MINS_Z                  -24
 #define DEFAULT_VIEWHEIGHT      26
 #define CROUCH_VIEWHEIGHT       12
 #define DEAD_VIEWHEIGHT         4 // height from ground

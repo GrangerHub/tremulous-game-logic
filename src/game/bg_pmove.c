@@ -1575,76 +1575,66 @@ PM_CheckWaterJump
 */
 static qboolean PM_CheckWaterJump( void )
 {
-  static float MAX_COAST_HEIGHT = 60.0f;
-  static float MAX_COAST_DISTANCE = 100.0f;
-
-  trace_t trace;
-  vec3_t  wallTraceMins;
-  vec3_t  wallTraceEnd;
-  vec3_t  landTraceStart;
-  vec3_t  landTraceEnd;
+  vec3_t  start, spot;
   vec3_t  flatforward;
-  float   jumpMagnitude;
-  float   swimLevel;
+  vec3_t  mins, maxs;
+  trace_t trace;
 
   if( pm->ps->pm_time )
     return qfalse;
 
-  // Check if we are at the surface.
-  if( !( pm->waterlevel == 2 || pm->waterlevel == 1 ) )
+  // check for water jump
+  if( pm->waterlevel != 2 )
     return qfalse;
 
-  // Project the look direction onto the horizontal plane.
+  if( pm->ps->eFlags & EF_WALLCLIMB )
+    return qfalse;
+
+  VectorCopy( pm->mins, mins );
+  VectorCopy( pm->maxs, maxs );
+
+  //flatten the mins and maxs
+  maxs[2] = mins[2] = 0;
+
+  //inset the mins and maxs
+  maxs[0] -= 1;
+  mins[0] += 1;
+  if( maxs[0] <= mins[0] )
+    maxs[0] = mins[0] = ( pm->maxs[0] + pm->mins[0] ) / 2;
+  maxs[1] -= 1;
+  mins[1] += 1;
+  if( maxs[1] <= mins[1] )
+    maxs[1] = mins[1] = ( pm->maxs[1] + pm->mins[1] ) / 2;
+
   flatforward[ 0 ] = pml.forward[ 0 ];
   flatforward[ 1 ] = pml.forward[ 1 ];
   flatforward[ 2 ] = 0;
   VectorNormalize( flatforward );
 
-  // Find the wall.
-  VectorCopy( pm->mins, wallTraceMins );
-  wallTraceMins[ 2 ] = MAX( -8.0f, pm->mins[ 2 ] );
-  VectorMA( pm->ps->origin, 20.0f, flatforward, wallTraceEnd );
-  pm->trace( &trace, pm->ps->origin, wallTraceMins, pm->maxs,
-             wallTraceEnd, pm->ps->clientNum, pm->tracemask );
+  VectorCopy( pm->ps->origin, start );
 
-  // Check if we found the wall.
-  if( trace.fraction >= 1.0f )
+  start[ 2 ] += 4;
+
+  VectorMA( start, 2.0f, flatforward, spot );
+
+  pm->trace( &trace, start, mins, maxs, spot, pm->ps->clientNum,
+             MASK_PLAYERSOLID );
+
+  if( trace.fraction >= 1.0f  )
     return qfalse;
 
-  // Calcualte how much of the player is below the water when swimming.
-  swimLevel = -pm->mins[ 2 ];
+  start[ 2 ] += 16;
+  spot[ 2 ] += 16;
 
-  // Start checking if there's land to jump out to. First check how far we can
-  // go up, within a limit.
-  VectorCopy( pm->ps->origin, landTraceEnd );
-  landTraceEnd[ 2 ] += MAX_COAST_HEIGHT + swimLevel;
-  pm->trace( &trace, pm->ps->origin, pm->mins, pm->maxs,
-             landTraceEnd, pm->ps->clientNum, pm->tracemask );
+  pm->trace( &trace, start, mins, maxs, spot, pm->ps->clientNum,
+             MASK_PLAYERSOLID );
 
-  // Check how far we can go forward.
-  VectorCopy( trace.endpos, landTraceStart );
-  VectorMA( landTraceStart, MAX_COAST_DISTANCE, flatforward, landTraceEnd ); 
-  pm->trace( &trace, landTraceStart, pm->mins, pm->maxs,
-             landTraceEnd, pm->ps->clientNum, pm->tracemask );
-
-  // We couldn't go forward even a little bit.
-  if( Distance( landTraceStart, trace.endpos ) < 0.25f )
+  if( trace.fraction < 1.0f  )
     return qfalse;
 
-  // Now check if there's some land below the position we ended up with.
-  VectorCopy( trace.endpos, landTraceEnd );
-  landTraceEnd[ 2 ] -= MAX_COAST_HEIGHT;
-  pm->trace( &trace, trace.endpos, pm->mins, pm->maxs,
-             landTraceEnd, pm->ps->clientNum, pm->tracemask );
-
-  // Return if there's no land to jump out to.
-  if( trace.fraction >= 1.0f )
-    return qfalse;
-
-  // Jump out of water.
-  jumpMagnitude = BG_Class( pm->ps->stats[ STAT_CLASS ] )->jumpMagnitude;
-  VectorScale( flatforward, 150.0f, pm->ps->velocity );
-  pm->ps->velocity[ 2 ] = MAX( 450.0f, jumpMagnitude );
+  // jump out of water
+  VectorScale( pml.forward, 200, pm->ps->velocity );
+  pm->ps->velocity[ 2 ] = 350;
 
   pm->ps->pm_flags |= PMF_TIME_WATERJUMP;
   pm->ps->pm_time = 2000;
@@ -2152,12 +2142,6 @@ static void PM_WalkMove( void )
     return;
   }
 
-  if( PM_CheckWaterJump() )
-  {
-    PM_WaterJumpMove( );
-    return;
-  }
-
   if( PM_CheckJump( NULL ) || PM_CheckPounce( ) )
   {
     // jumped away
@@ -2305,7 +2289,6 @@ static void PM_LadderMove( void )
   PM_SlideMove( qfalse );
 }
 
-
 /*
 =============
 PM_CheckLadder
@@ -2315,24 +2298,135 @@ Check to see if the player is on a ladder or not
 */
 static void PM_CheckLadder( void )
 {
-  vec3_t  forward, end;
-  trace_t trace;
+  vec3_t   flatforward, end, mins, maxs;
+  trace_t  trace, bboxTouchTrace;
+  qboolean waterClimb = qfalse;
 
-  //test if class can use ladders
-  if( !BG_ClassHasAbility( pm->ps->stats[ STAT_CLASS ], SCA_CANUSELADDERS ) )
+  //find the "flat forward" that is horizontal with the map
+  VectorCopy( pml.forward, flatforward );
+  flatforward[ 2 ] = 0.0f;
+  VectorNormalize( flatforward );
+
+  VectorMA( pm->ps->origin, 2.0f, flatforward, end );
+
+  // inset the mins and maxs
+  VectorCopy( pm->mins, mins);
+  VectorCopy( pm->maxs, maxs);
+  maxs[0] -= 1;
+  mins[0] += 1;
+  if( maxs[0] <= mins[0] )
+    maxs[0] = mins[0] = ( pm->maxs[0] + pm->mins[0] ) / 2;
+  maxs[1] -= 1;
+  mins[1] += 1;
+  if( maxs[1] <= mins[1] )
+    maxs[1] = mins[1] = ( pm->maxs[1] + pm->mins[1] ) / 2;
+  maxs[2] -= 1;
+  mins[2] += 1;
+  if( maxs[2] <= mins[2] )
+    maxs[2] = mins[2] = ( pm->maxs[2] + pm->mins[2] ) / 2;
+
+  // trace to check for touching a potential ladder surface
+  pm->trace( &bboxTouchTrace, pm->ps->origin, mins, maxs, end,
+             pm->ps->clientNum, MASK_PLAYERSOLID );
+
+  if( bboxTouchTrace.fraction >= 1 &&
+      !bboxTouchTrace.startsolid &&
+      !bboxTouchTrace.allsolid )
   {
+    // no solid surface in front of the player
     pml.ladder = qfalse;
     return;
   }
 
-  VectorCopy( pml.forward, forward );
-  forward[ 2 ] = 0.0f;
+  if( pm->waterlevel >= 1 &&
+      pm->waterlevel < 3 &&
+      !(pm->ps->eFlags & EF_WALLCLIMB) &&
+      !PM_PredictStepMove( ) )
+  {
+    vec3_t start;
 
-  VectorMA( pm->ps->origin, 1.0f, forward, end );
+    //for climbing out of water
 
-  pm->trace( &trace, pm->ps->origin, pm->mins, pm->maxs, end, pm->ps->clientNum, MASK_PLAYERSOLID );
+    if( PM_CheckWaterJump( ) )
+    {
+      PM_WaterJumpMove();
+      pml.ladder = qfalse;
+      return;
+    }
 
-  if( ( trace.fraction < 1.0f ) && ( trace.surfaceFlags & SURF_LADDER ) )
+    VectorCopy( pm->ps->origin, start );
+
+    start[2] += pm->ps->viewheight;
+
+    //make the mins and maxs a bit larger than the next traces
+    mins[2] = -0.5f;
+    maxs[2] = 0.5f;
+    mins[1] += -0.5f;
+    maxs[1] += 0.5f;
+    mins[0] += -0.5f;
+    maxs[0] += 0.5f;
+
+    VectorMA( start, 2.0f, flatforward, end );
+
+    pm->trace( &trace, start, mins, maxs, end, pm->ps->clientNum,
+               MASK_PLAYERSOLID );
+
+    if( trace.fraction >= 1.0f &&
+        !trace.startsolid &&
+        !trace.allsolid )
+    {
+      vec3_t bboxBottom;
+      vec3_t dryTraceStart, dryTraceEnd;
+      float  waterLevelDistance;
+      float  drySurfaceDistance;
+
+      VectorCopy( trace.endpos, dryTraceStart );
+      VectorCopy( dryTraceStart, dryTraceEnd );
+      dryTraceEnd[2] += pm->mins[2] - pm->ps->viewheight;
+
+      //flatten and shrink the mins and maxs to the origin
+      maxs[2] = mins[2] = 0;
+      mins[1] += 0.5f;
+      maxs[1] += -0.5f;
+      mins[0] += 0.5f;
+      maxs[0] += -0.5f;
+
+      //find how far below the viewheight the dry surface is
+      pm->trace( &trace, dryTraceStart, mins, maxs, dryTraceEnd,
+                 pm->ps->clientNum, MASK_PLAYERSOLID );
+
+      if( trace.startsolid || trace.allsolid )
+        drySurfaceDistance = 0;
+      else
+        drySurfaceDistance = trace.fraction * ( ( (float)pm->ps->viewheight ) - pm->mins[ 2 ] );
+
+      //find the bottom of the player's bbox
+      VectorCopy( pm->ps->origin, bboxBottom );
+      bboxBottom[2] += pm->mins[2];
+
+      // find how far below the viewheight the water level is
+      pm->trace( &trace, start, mins, maxs, bboxBottom, pm->ps->clientNum,
+                 MASK_WATER );
+
+      Com_Assert( ( trace.fraction < 1.0f || trace.startsolid || trace.allsolid ) &&
+                  "PM_CheckLadder: Player is not in liquid" );
+
+      waterLevelDistance = trace.fraction * ( ( (float)pm->ps->viewheight ) - pm->mins[ 2 ] );
+
+      if( STEPSIZE >= ( waterLevelDistance - drySurfaceDistance ) )
+        waterClimb = qtrue;
+    }
+  }
+  else if( !BG_ClassHasAbility( pm->ps->stats[ STAT_CLASS ], SCA_CANUSELADDERS ) )
+  {
+    //class can't use ladders
+    pml.ladder = qfalse;
+    return;
+  }
+
+  if( ( bboxTouchTrace.surfaceFlags & SURF_LADDER ) ||
+        ( waterClimb && !(bboxTouchTrace.surfaceFlags & (SURF_SLICK|SURF_SKY)) &&
+          ( bboxTouchTrace.plane.normal[ 2 ] < MIN_WALK_NORMAL ) ) )
     pml.ladder = qtrue;
   else
     pml.ladder = qfalse;
@@ -3161,6 +3255,7 @@ PM_SetWaterLevel  FIXME: avoid this twice?  certainly if not moving
 static void PM_SetWaterLevel( void )
 {
   vec3_t  point;
+  float   mins_z = pm->mins[2];
   int     cont;
   int     sample1;
   int     sample2;
@@ -3173,17 +3268,17 @@ static void PM_SetWaterLevel( void )
 
   point[ 0 ] = pm->ps->origin[ 0 ];
   point[ 1 ] = pm->ps->origin[ 1 ];
-  point[ 2 ] = pm->ps->origin[ 2 ] + MINS_Z + 1;
+  point[ 2 ] = pm->ps->origin[ 2 ] + mins_z + 1;
   cont = pm->pointcontents( point, pm->ps->clientNum );
 
   if( cont & MASK_WATER )
   {
-    sample2 = pm->ps->viewheight - MINS_Z;
+    sample2 = pm->ps->viewheight - mins_z;
     sample1 = sample2 / 2;
 
     pm->watertype = cont;
     pm->waterlevel = 1;
-    point[ 2 ] = pm->ps->origin[ 2 ] + MINS_Z + sample1;
+    point[ 2 ] = pm->ps->origin[ 2 ] + mins_z + sample1;
     cont = pm->pointcontents( point, pm->ps->clientNum );
 
     if( cont & MASK_WATER )
@@ -3192,7 +3287,7 @@ static void PM_SetWaterLevel( void )
       pm->ps->pm_flags &= ~PMF_ALL_HOP_FLAGS;
 
       pm->waterlevel = 2;
-      point[ 2 ] = pm->ps->origin[ 2 ] + MINS_Z + sample2;
+      point[ 2 ] = pm->ps->origin[ 2 ] + mins_z + sample2;
       cont = pm->pointcontents( point, pm->ps->clientNum );
 
       if( cont & MASK_WATER )
@@ -4984,12 +5079,12 @@ void PmoveSingle( pmove_t *pmove )
   if( pm->ps->pm_type == PM_INTERMISSION )
     return;   // no movement at all
 
+  // set mins, maxs, and viewheight
+  PM_CheckDuck( );
+
   // set watertype, and waterlevel
   PM_SetWaterLevel( );
   pml.previous_waterlevel = pmove->waterlevel;
-
-  // set mins, maxs, and viewheight
-  PM_CheckDuck( );
 
   PM_CheckLadder( );
 
@@ -5012,10 +5107,10 @@ void PmoveSingle( pmove_t *pmove )
     PM_JetPackMove( );
   else if( pm->ps->pm_flags & PMF_TIME_WATERJUMP )
     PM_WaterJumpMove( );
-  else if( pm->waterlevel > 1 )
-    PM_WaterMove( );
   else if( pml.ladder )
     PM_LadderMove( );
+  else if( pm->waterlevel > 1 )
+    PM_WaterMove( );
   else if( pml.walking )
   {
     if( BG_ClassHasAbility( pm->ps->stats[ STAT_CLASS ], SCA_WALLCLIMBER ) &&
