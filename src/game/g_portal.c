@@ -231,7 +231,8 @@ void G_Portal_Create(gentity_t *ent, vec3_t origin, vec3_t normal, portal_t port
 		portal->s.generic1 = WPM_SECONDARY;
 	portal->s.frame = 3;
 	portal->takedamage = qtrue;
-  portal->health = PORTAL_HEALTH;
+	G_ChangeHealth( portal, portal, PORTAL_HEALTH,
+                  HLTHF_SET_TO_CHANGE );
   portal->die = portal_die;
 	portal->pain = portal_pain;
 	VectorCopy( range, portal->r.maxs );

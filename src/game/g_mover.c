@@ -1680,7 +1680,7 @@ void Touch_Plat( gentity_t *ent, gentity_t *other, trace_t *trace )
   if( ent->spawnflags & 1 )
     return;
 
-  if( !other->client || other->client->ps.misc[ MISC_HEALTH ] <= 0 )
+  if( !other->client || other->health <= 0 )
     return;
 
   // delay return-to-pos1 by one second

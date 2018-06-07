@@ -293,6 +293,8 @@ struct gentity_s
 
   int               health;
   int               lastHealth; // currently only used for overmind
+  int               healthReserve; // used for finite/restricted health sources like the biokit and medistat
+  int               damageFromEnemies; // total damage received from enemies, can't exceed max health.
 
   qboolean          takedamage;
   int               dmgProtectionTime; // momentarily protection against damage
@@ -313,6 +315,9 @@ struct gentity_s
   gentity_t         *activator;
   gentity_t         *teamchain;   // next entity in team
   gentity_t         *teammaster;  // master of the team
+
+  gentity_id        enemies[ 10 ]; // for multiple enemies
+  int               numEnemies;
 
   int               watertype;
   int               waterlevel;
@@ -365,7 +370,7 @@ struct gentity_s
   int               killedBy;                   // clientNum of killer
   credits_t         creditsDeffenses[ MAX_GENTITIES ];  // credits for damage done by an enemy defensive buildables.
   credits_t         creditsUpgradeDeffenses[ UP_NUM_UPGRADES ][ MAX_GENTITIES ]; // breakable upgrade credits for damage done by an enemy defensive buildables.
-  int               bonusValue; // additional value this entity is worth (due to its effectiveness/etc since it last spawned)
+  unsigned int      bonusValue; // additional value this entity is worth (due to its effectiveness/etc since it last spawned)
 
   vec3_t            turretAim;          // aim vector for turrets
   vec3_t            turretAimRate;      // track turn speed for norfenturrets
@@ -1206,6 +1211,9 @@ void        G_SetExpiration( gentity_t *ent, expire_t index, int expiration );
 //
 // g_combat.c
 //
+void      G_IncreaseBonusValue( unsigned int *bonusValue, int diff );
+int       G_ChangeHealth( gentity_t *targ, gentity_t *changer,
+                          int change, int healthFlags );
 qboolean  CanDamage( gentity_t *targ, vec3_t origin,
                      vec3_t mins, vec3_t maxs );
 void      G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
@@ -1233,6 +1241,19 @@ void      G_InitDamageLocations( void );
 #define DAMAGE_NO_PROTECTION  0x00000008  // kills everything except godmode
 #define DAMAGE_NO_LOCDAMAGE   0x00000010  // do not apply locational damage
 #define DAMAGE_INSTAGIB       0x00000020  // instally kill the target
+
+// health flags
+#define HLTHF_INITIAL_MAX_CAP      0x00000001 // don't heal above the initial max health value
+#define HLTHF_USE_TARG_RESERVE     0x00000002 // use the target's health reserve
+#define HLTHF_REQ_TARG_RESERVE     0x00000004 // require the target's health reserve
+#define HLTHF_USE_CHANGER_RESERVE  0x00000008 // use the health changer's health reserve
+#define HLTHF_REQ_CHANGER_RESERVE  0x00000010 // require the health changer's health reserve
+#define HLTHF_RESERVES_CAP         0x00000020 // don't heal without using the health reserve
+#define HLTHF_NO_DECAY             0x00000040 // don't decay the max health
+#define HLTHF_IGNORE_MAX           0x00000080 // ignore the current max health
+#define HLTHF_EVOLVE_INCREASE      0x00000100 // can increase while evolving
+#define HLTHF_IGNORE_ENEMY_DMG     0x00000200 // ignore enemy damage counter
+#define HLTHF_SET_TO_CHANGE        0x00000400 // set health equal to the change
 
 //
 // g_missile.c

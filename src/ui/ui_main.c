@@ -2609,6 +2609,9 @@ static void UI_LoadHumanArmourySells( void )
 
   for( i = UP_NONE + 1; i < UP_NUM_UPGRADES; i++ )
   {
+    if( !BG_Upgrade( i )->sellable )
+      continue;
+
     if( uiInfo.upgrades & ( 1 << i ) )
     {
       uiInfo.humanArmourySellList[ j ].text = BG_Upgrade( i )->humanName;

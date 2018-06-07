@@ -589,6 +589,7 @@ typedef enum
   UP_LIGHTARMOUR,
   UP_HELMET,
   UP_MEDKIT,
+  UP_BIOKIT,
   UP_BATTPACK,
   UP_JETPACK,
   UP_BATTLESUIT,
@@ -1245,6 +1246,7 @@ typedef struct
 
   int       health;
   float     maxHealthDecayRate; // applied while healing
+  int       minHealth; // the minimum health the max health can decay to
   float     fallDamage;
   float     regenRate;
 
@@ -1334,6 +1336,8 @@ typedef struct
   int           stages;
 
   int           health;
+  float         maxHealthDecayRate; // applied while healing
+  int           minHealth; // the minimum health the max health can decay to
   int           regenRate;
 
   int           splashDamage;
@@ -1479,6 +1483,7 @@ typedef struct
   char      *icon;
 
   qboolean  purchasable;
+  qboolean  sellable;
   qboolean  usable;
 
   team_t    team;

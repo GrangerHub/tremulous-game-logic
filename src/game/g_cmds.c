@@ -422,7 +422,7 @@ static void Give_Class( gentity_t *ent, char *s )
   }
 
   ent->client->pers.evolveHealthFraction
-      = (float)ent->client->ps.misc[ MISC_HEALTH ]
+      = (float)ent->health
       / (float)BG_Class( currentClass )->health;
 
   if( ent->client->pers.evolveHealthFraction < 0.0f )
@@ -532,7 +532,11 @@ void Cmd_Give_f( gentity_t *ent )
 
   if( give_all || Q_stricmp( name, "health" ) == 0 )
   {
-    ent->health = BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->health;
+    ent->client->ps.misc[ MISC_MAX_HEALTH ] = BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->health;
+    G_ChangeHealth( ent, ent,
+                    ent->client->ps.misc[ MISC_MAX_HEALTH ],
+                    (HLTHF_SET_TO_CHANGE|
+                     HLTHF_EVOLVE_INCREASE) );
     BG_AddUpgradeToInventory( UP_MEDKIT, ent->client->ps.stats );
   }
 
@@ -743,7 +747,9 @@ void Cmd_Kill_f( gentity_t *ent )
     if( ent->client->ps.eFlags & EF_OCCUPYING )
       G_ResetOccupation( ent->occupation.occupied, ent );
 
-    ent->client->ps.misc[ MISC_HEALTH ] = ent->health = 0;
+    G_ChangeHealth( ent, ent, 0,
+                    (HLTHF_SET_TO_CHANGE|
+                     HLTHF_EVOLVE_INCREASE) );
     player_die( ent, ent, ent, 100000, MOD_SUICIDE );
   }
   else
@@ -2345,12 +2351,12 @@ void Cmd_Class_f( gentity_t *ent )
       {
         if( cost >= 0 )
         {
-          const int oldHealth = ent->client->ps.misc[ MISC_HEALTH ];
-          float     valueMod;
-          int       bonusValue = ent->bonusValue;
-          int       creditsSaved[ MAX_CLIENTS ]; // human credits for each client
-          credits_t creditsDeffensesSaved[ MAX_GENTITIES ];
-          int       i;
+          const int    oldHealth = ent->health;
+          float        valueMod;
+          unsigned int bonusValue = ent->bonusValue;
+          int          creditsSaved[ MAX_CLIENTS ]; // human credits for each client
+          credits_t    creditsDeffensesSaved[ MAX_GENTITIES ];
+          int          i;
 
           for( i = 0; i < MAX_CLIENTS; i++ )
           {
@@ -2419,13 +2425,15 @@ void Cmd_Class_f( gentity_t *ent )
             int   decayedHealth = classHealth -
                                   ent->client->ps.misc[ MISC_MAX_HEALTH ];
             const int healthDiff = ent->client->ps.misc[ MISC_MAX_HEALTH ] - 
-                                   ent->client->ps.misc[ MISC_HEALTH ];
+                                   ent->health;
 
             decayedHealth -= (int)( healthDiff * ( BG_Class( currentClass )->maxHealthDecayRate ? BG_Class( currentClass )->maxHealthDecayRate : 1 ) );
 
             valueMod = ( (float)decayedHealth ) / ( (float) classHealth );
 
-            bonusValue += (int)(BG_GetValueOfPlayer( &ent->client->ps ) * valueMod );
+            G_IncreaseBonusValue( &bonusValue,
+                                  (int)( BG_GetValueOfPlayer( &ent->client->ps ) *
+                                         valueMod ) );
           }
 
           ClientSpawn( ent, ent, ent->s.pos.trBase, ent->s.apos.trBase );
@@ -2461,8 +2469,10 @@ void Cmd_Class_f( gentity_t *ent )
 
             //set the evolve health regen
             ent->client->pers.evolveHealthRegen = ent->health - oldHealth;
-            ent->health = oldHealth;
-            ent->client->ps.misc[ MISC_HEALTH ] = ent->health;
+            G_ChangeHealth( ent, ent, oldHealth,
+                            (HLTHF_SET_TO_CHANGE|
+                             HLTHF_EVOLVE_INCREASE|
+                             HLTHF_IGNORE_MAX) );
 
             //factor in the health difference
             evolvePeriod += ( abs( ent->client->pers.evolveHealthRegen ) / 200 );
@@ -3008,6 +3018,11 @@ void Cmd_Buy_f( gentity_t *ent )
         }
         else if( upgrade == UP_JETPACK )
          ent->client->ps.stats[ STAT_FUEL ] = JETPACK_FUEL_FULL;
+        else if( upgrade == UP_BIOKIT )
+        {
+          ent->client->ps.misc[ MISC_MAX_HEALTH ] = BIOKIT_MAX_HEALTH;
+          ent->healthReserve = BIOKIT_HEALTH_RESERVE;
+        }
 
         //add to inventory
         BG_AddUpgradeToInventory( upgrade, ent->client->ps.stats );
@@ -3144,7 +3159,8 @@ void Cmd_Sell_f( gentity_t *ent )
   else if( upgrade != UP_NONE )
   {
     //are we /allowed/ to sell this?
-    if( !BG_Upgrade( upgrade )->purchasable )
+    if( !BG_Upgrade( upgrade )->purchasable ||
+        !BG_Upgrade( upgrade )->sellable )
     {
       SV_GameSendServerCommand( ent-g_entities, "print \"You can't sell this item\n\"" );
       return;
@@ -3194,6 +3210,18 @@ void Cmd_Sell_f( gentity_t *ent )
         G_AddCreditToClient( ent->client,
                             (short)( BG_Upgrade( upgrade )->price - costToFull ),
                             qfalse );
+      } else if( upgrade == UP_BIOKIT )
+      {
+        short value = (short)( BG_Upgrade( upgrade )->price *
+                               ( ( (float)(ent->healthReserve) ) /
+                                 ( (float)(BIOKIT_HEALTH_RESERVE) ) ) );
+        ent->client->ps.misc[ MISC_MAX_HEALTH ] =
+              BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->health;
+        G_ChangeHealth( ent, ent, ent->health,
+                        (HLTHF_SET_TO_CHANGE|
+                         HLTHF_INITIAL_MAX_CAP) );
+        ent->healthReserve = 0;
+        G_AddCreditToClient( ent->client, value, qfalse );
       } else if( upgrade == UP_BATTLESUIT )
       {
         if( !IS_WARMUP &&
@@ -4594,7 +4622,7 @@ Q_EXPORT void ClientCommand( int clientNum )
   }
 
   if( command->cmdFlags & CMD_ALIVE &&
-    ( ent->client->ps.misc[ MISC_HEALTH ] <= 0 ||
+    ( ent->health <= 0 ||
       ent->client->sess.spectatorState != SPECTATOR_NOT ) )
   {
     G_TriggerMenu( clientNum, MN_CMD_ALIVE );

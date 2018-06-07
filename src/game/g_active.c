@@ -351,7 +351,7 @@ void  G_TouchTriggers( gentity_t *ent )
     return;
 
   // dead clients don't activate triggers!
-  if( ent->client->ps.misc[ MISC_HEALTH ] <= 0 )
+  if( ent->health <= 0 )
     return;
 
   BG_ClassBoundingBox( ent->client->ps.stats[ STAT_CLASS ],
@@ -885,11 +885,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
           ent->client->medKitHealthToRestore -= BG_HP2SU( 1 );
           if( ent->client->medKitHealthToRestore < 0 )
             ent->client->medKitHealthToRestore = 0;
-          ent->health += BG_HP2SU( 1 );
-          if( ent->health > maxHealth )
-            ent->health = maxHealth;
-          ent->client->ps.misc[ MISC_HEALTH ] = ent->health;
-          client->pers.infoChangeTime = level.time;
+          G_ChangeHealth( ent, ent, BG_HP2SU( 1 ), HLTHF_INITIAL_MAX_CAP );
         }
         else
           ent->client->ps.stats[ STAT_STATE ] &= ~SS_HEALING_2X;
@@ -906,11 +902,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
             ent->client->medKitHealthToRestore -= BG_HP2SU( 1 );
             if( ent->client->medKitHealthToRestore < 0 )
               ent->client->medKitHealthToRestore = 0;
-            ent->health += BG_HP2SU( 1 );
-            if( ent->health > maxHealth )
-              ent->health = maxHealth;
-            ent->client->ps.misc[ MISC_HEALTH ] = ent->health;
-            client->pers.infoChangeTime = level.time;
+            G_ChangeHealth( ent, ent, BG_HP2SU( 1 ), HLTHF_INITIAL_MAX_CAP );
 
             client->medKitIncrementTime = level.time +
               ( remainingStartupTime / MEDKIT_STARTUP_SPEED );
@@ -957,6 +949,15 @@ void ClientTimerActions( gentity_t *ent, int msec )
     if( ent->client->ps.stats[ STAT_SHAKE ] < 0 )
       ent->client->ps.stats[ STAT_SHAKE ] = 0;
 
+  //biokit health regen
+  if( BG_InventoryContainsUpgrade( UP_BIOKIT, ent->client->ps.stats ) &&
+      ent->nextRegenTime < level.time )
+  {
+    if( G_ChangeHealth( ent, ent, BG_HP2SU( 1 ),
+                        (HLTHF_USE_TARG_RESERVE|
+                         HLTHF_REQ_TARG_RESERVE) ) )
+      ent->nextRegenTime = level.time + BIOKIT_REGEN_REPEAT;
+  }
 
   while( client->time1000 >= 1000 )
   {
@@ -972,6 +973,10 @@ void ClientTimerActions( gentity_t *ent, int msec )
 
       if( BG_InventoryContainsUpgrade( UP_LIGHTARMOUR, client->ps.stats ) )
         damage -= LIGHTARMOUR_POISON_PROTECTION;
+
+      if( BG_InventoryContainsUpgrade( UP_BIOKIT, client->ps.stats ) &&
+          ent->healthReserve > 0 )
+        damage *= BIOKIT_POISON_MODIFIER;
 
       G_Damage( ent, client->lastPoisonClient, client->lastPoisonClient, NULL,
         0, damage, 0, MOD_POISON );
@@ -2203,29 +2208,20 @@ void ClientThink_real( gentity_t *ent )
   if( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
       ( client->ps.eFlags & EF_EVOLVING ) &&
       ( client->ps.stats[ STAT_MISC3 ] <= 0 ||
-        client->ps.misc[ MISC_HEALTH ] <= 0 ) )
+        ent->health <= 0 ) )
   {
     // evolution has completed
     client->ps.eFlags &= ~EF_EVOLVING;
-    if( client->ps.misc[ MISC_HEALTH ] > 0 )
+    if( ent->health > 0 )
     {
       if( level.surrenderTeam != client->pers.teamSelection )
       {
         //finish any remaining evolve health regen
-        if( client->pers.evolveHealthRegen > 0 ||
-            ( ent->health > client->pers.evolveHealthRegen &&
-              ent->health + client->pers.evolveHealthRegen >= client->ps.misc[ MISC_MAX_HEALTH ] ) )
-        {
-          ent->health += client->pers.evolveHealthRegen;
-          client->ps.misc[ MISC_HEALTH ] = ent->health;
-          client->pers.infoChangeTime = level.time;
-        }
+        G_ChangeHealth( ent, ent, client->pers.evolveHealthRegen,
+                        (HLTHF_EVOLVE_INCREASE|
+                         HLTHF_NO_DECAY|
+                         HLTHF_IGNORE_ENEMY_DMG) );
         client->pers.evolveHealthRegen = 0;
-
-        if( ent->health > *maxHealth )
-        {
-          ent->health = client->ps.misc[ MISC_HEALTH ] = *maxHealth;
-        }
       }
 
       G_AddPredictableEvent( ent, EV_ALIEN_EVOLVE,
@@ -2238,7 +2234,7 @@ void ClientThink_real( gentity_t *ent )
       client->ps.stats[ STAT_MISC3 ] = 0;
   }
 
-  if( client->ps.misc[ MISC_HEALTH ] > 0 &&
+  if( ent->health > 0 &&
       ( !G_TakesDamage( ent ) ||
         ( ent->flags & FL_GODMODE ) ||
         !ent->r.contents ) )
@@ -2253,7 +2249,7 @@ void ClientThink_real( gentity_t *ent )
 
   if( client->noclip )
     client->ps.pm_type = PM_NOCLIP;
-  else if( client->ps.misc[ MISC_HEALTH ] <= 0 ||
+  else if( ent->health <= 0 ||
            (client->ps.eFlags & EF_DEAD) )
   {
     client->ps.pm_type = PM_DEAD;
@@ -2322,12 +2318,12 @@ void ClientThink_real( gentity_t *ent )
   {
     //if currently using a medkit or have no need for a medkit now
     if( client->ps.stats[ STAT_STATE ] & SS_HEALING_2X ||
-        ( client->ps.misc[ MISC_HEALTH ] == *maxHealth &&
+        ( ent->health == *maxHealth &&
           !( client->ps.stats[ STAT_STATE ] & SS_POISONED ) ) )
     {
       BG_DeactivateUpgrade( UP_MEDKIT, client->ps.stats );
     }
-    else if( client->ps.misc[ MISC_HEALTH ] > 0 )
+    else if( ent->health > 0 )
     {
       //remove anti toxin
       BG_DeactivateUpgrade( UP_MEDKIT, client->ps.stats );
@@ -2355,8 +2351,8 @@ void ClientThink_real( gentity_t *ent )
       client->ps.stats[ STAT_STATE ] |= SS_HEALING_2X;
       client->lastMedKitTime = level.time;
       client->medKitHealthToRestore =
-        *maxHealth - client->ps.misc[ MISC_HEALTH ];
-      client->medKitHealthToRestore = *maxHealth - client->ps.misc[ MISC_HEALTH ];
+        *maxHealth - ent->health;
+      client->medKitHealthToRestore = *maxHealth - ent->health;
       client->medKitIncrementTime = level.time +
         ( MEDKIT_STARTUP_TIME / MEDKIT_STARTUP_SPEED );
 
@@ -2450,9 +2446,11 @@ void ClientThink_real( gentity_t *ent )
       count = client->pers.evolveHealthRegen;
 
     // progress the evolve health change
-    ent->health += count;
-    client->ps.misc[ MISC_HEALTH ] = ent->health;
-    client->pers.infoChangeTime = level.time;
+    G_ChangeHealth( ent, ent, count,
+                    (HLTHF_EVOLVE_INCREASE|
+                     HLTHF_NO_DECAY|
+                     HLTHF_IGNORE_MAX|
+                     HLTHF_IGNORE_ENEMY_DMG) );
     client->pers.evolveHealthRegen -= count;
   } else
   {
@@ -2462,9 +2460,6 @@ void ClientThink_real( gentity_t *ent )
     {
       float regenRate =
           BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->regenRate;
-      float maxHealthDecayRate =
-          BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->maxHealthDecayRate;
-      int   maxHealthDecay = 0;
 
       if( ent->health <= 0 || ent->nextRegenTime < 0 || regenRate == 0 )
         ent->nextRegenTime = -1; // no regen
@@ -2548,34 +2543,7 @@ void ClientThink_real( gentity_t *ent )
           ent->nextRegenTime += count * interval;
         }
 
-        if( 0.30 < ( ( (float)*maxHealth ) /
-                     ( (float)BG_Class( client->ps.stats[ STAT_CLASS ] )->health ) ) )
-          maxHealthDecay = (int)( maxHealthDecayRate * ( (float)count ) );
-
-        if( ent->health < *maxHealth &&
-            maxHealthDecay < *maxHealth )
-        {
-          // reduce the max health if decayed
-          if( maxHealthDecay &&
-              ( maxHealthDecay < ( *maxHealth - ent->health ) ) )
-            *maxHealth -= maxHealthDecay;
-
-          ent->health += count;
-          client->ps.misc[ MISC_HEALTH ] = ent->health;
-          client->pers.infoChangeTime = level.time;
-
-          if( ent->health > *maxHealth )
-          {
-            ent->health = client->ps.misc[ MISC_HEALTH ] = *maxHealth;
-          }
-
-          // if at max health, clear damage counters
-          if( ent->health >= BG_Class( client->ps.stats[ STAT_CLASS ] )->health )
-          {
-            for( i = 0; i < MAX_CLIENTS; i++ )
-              ent->credits[ i ] = 0;
-          }
-        }
+        G_ChangeHealth( ent, ent, count, 0 );
       }
     }
   }
@@ -2762,7 +2730,7 @@ void ClientThink_real( gentity_t *ent )
     ent->eventTime = level.time;
 
   // Don't think anymore if dead
-  if( client->ps.misc[ MISC_HEALTH ] <= 0 )
+  if( ent->health <= 0 )
     return;
 
   // swap and latch button actions
@@ -2773,7 +2741,7 @@ void ClientThink_real( gentity_t *ent )
   // interactions with activation entities
   G_FindActivationEnt( ent );
   if( ( client->buttons & BUTTON_USE_EVOLVE ) && !( client->oldbuttons & BUTTON_USE_EVOLVE ) &&
-       client->ps.misc[ MISC_HEALTH ] > 0 )
+       ent->health > 0 )
   {
     gentity_t *actEnt;
 
@@ -2820,7 +2788,9 @@ void ClientThink_real( gentity_t *ent )
     if( client->ps.eFlags & EF_OCCUPYING )
       G_ResetOccupation( ent->occupation.occupied, ent );
 
-    ent->client->ps.misc[ MISC_HEALTH ] = ent->health = 0;
+    G_ChangeHealth( ent, ent, 0,
+                    (HLTHF_SET_TO_CHANGE|
+                     HLTHF_EVOLVE_INCREASE) );
     player_die( ent, ent, ent, 100000, MOD_SUICIDE );
 
     ent->suicideTime = 0;
@@ -2833,7 +2803,9 @@ void ClientThink_real( gentity_t *ent )
     if( client->ps.eFlags & EF_OCCUPYING )
       G_ResetOccupation( ent->occupation.occupied, ent );
 
-    ent->client->ps.misc[ MISC_HEALTH ] = ent->health = 0;
+      G_ChangeHealth( ent, ent, 0,
+                      (HLTHF_SET_TO_CHANGE|
+                       HLTHF_EVOLVE_INCREASE) );
     player_die( ent, ent, ent, 100000, MOD_SELFDESTRUCT );
 
     ent->suicideTime = 0;
@@ -2967,7 +2939,7 @@ void ClientEndFrame( gentity_t *ent )
     ent->s.eFlags &= ~EF_CONNECTION;
 
   // respawn if dead
-  if( ent->client->ps.misc[ MISC_HEALTH ] <= 0 && level.time >= ent->client->respawnTime )
+  if( ent->health <= 0 && level.time >= ent->client->respawnTime )
     respawn( ent );
 
   G_SetClientSound( ent );

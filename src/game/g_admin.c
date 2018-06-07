@@ -4022,8 +4022,7 @@ qboolean G_admin_slap( gentity_t *ent )
           ( ent ) ? ent->client->pers.netname : "console",
           ( *reason ) ? reason : "No reason specified" ) );
 
-  vic->health -= 25;
-  vic->client->ps.misc[ MISC_HEALTH ] = vic->health;
+  G_ChangeHealth( vic, vic, -BG_HP2SU( 25 ), 0 );
   vic->lastDamageTime = level.time;
   if( vic->health <= 1 )
   {

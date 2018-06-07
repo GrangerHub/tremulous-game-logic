@@ -591,7 +591,8 @@ gentity_t *launch_grenade( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->splashMethodOfDeath = MOD_GRENADE;
   G_SetClipmask( bolt, MASK_SHOT );
   bolt->takedamage = qtrue;
-  bolt->health = GRENADE_HEALTH;
+  G_ChangeHealth( bolt, bolt, GRENADE_HEALTH,
+                  HLTHF_SET_TO_CHANGE );
   bolt->die = grenade_die;
   bolt->target_ent = NULL;
   bolt->r.mins[ 0 ] = bolt->r.mins[ 1 ] = bolt->r.mins[ 2 ] = -GRENADE_SIZE;
@@ -697,7 +698,8 @@ gentity_t *launch_grenade3( gentity_t *self, vec3_t start, vec3_t dir,
   bolt->splashMethodOfDeath = MOD_GRENADE_LAUNCHER;
   G_SetClipmask( bolt, MASK_SHOT );
   bolt->takedamage = qtrue;
-  bolt->health = GRENADE_HEALTH;
+  G_ChangeHealth( bolt, bolt, GRENADE_HEALTH,
+                  HLTHF_SET_TO_CHANGE );
   bolt->die = grenade_die;
   bolt->target_ent = NULL;
   bolt->r.mins[0] = bolt->r.mins[1] = bolt->r.mins[2] = -GRENADE_SIZE;
@@ -774,7 +776,8 @@ gentity_t *fire_lightningBall( gentity_t *self, qboolean EMP,
     bolt->splashDamage = LIGHTNING_BALL_SPLASH_DMG;
     bolt->s.pos.trType = TR_HALF_GRAVITY;
     bolt->takedamage = qtrue;
-    bolt->health = 1;
+    G_ChangeHealth( bolt, bolt, 1,
+                    HLTHF_SET_TO_CHANGE );
     bolt->die = lightningBall_die;
     bolt->methodOfDeath = MOD_LIGHTNING;
     bolt->splashMethodOfDeath = MOD_LIGHTNING;

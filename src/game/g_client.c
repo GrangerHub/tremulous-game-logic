@@ -150,8 +150,7 @@ qboolean SpotWouldTelefrag( gentity_t *spot )
   for( i = 0; i < num; i++ )
   {
     hit = &g_entities[ touch[ i ] ];
-    //if ( hit->client && hit->client->ps.misc[ MISC_HEALTH ] > 0 ) {
-    if( hit->client )
+    if ( hit->client && hit->health > 0 )
       return qtrue;
   }
 
@@ -506,7 +505,11 @@ static void SpawnCorpse( gentity_t *ent )
   body->think      = BodySink;    // Ok, so body sinks
   body->nextthink  = level.time + 20000; // after 20seconds
 
-  body->health     = ent->health;
+  G_ChangeHealth( body, ent, ent->health,
+                  (HLTHF_SET_TO_CHANGE|
+                   HLTHF_EVOLVE_INCREASE|
+                   HLTHF_NO_DECAY|
+                   HLTHF_IGNORE_ENEMY_DMG) );
 
   body->takedamage = ent->takedamage;
   body->die = ent->die;
@@ -1566,10 +1569,13 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   //reset bonus value
   ent->bonusValue = 0;
 
-  // health will count down towards max_health
-  ent->health = client->ps.misc[ MISC_HEALTH ] = 
-                client->ps.misc[ MISC_MAX_HEALTH ] =
-                BG_Class( client->ps.stats[ STAT_CLASS ] )->health; //* 1.25;
+  client->ps.misc[ MISC_MAX_HEALTH ] =
+        BG_Class( client->ps.stats[ STAT_CLASS ] )->health;
+  G_ChangeHealth( ent, ent, client->ps.misc[ MISC_MAX_HEALTH ],
+                  (HLTHF_SET_TO_CHANGE|
+                   HLTHF_EVOLVE_INCREASE) );
+
+  ent->healthReserve = 0;
 
   //if evolving scale health
   if( ent == spawn )
@@ -1582,19 +1588,31 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
 
     if( !BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->maxHealthDecayRate )
     {
-      ent->health *= client->pers.evolveHealthFraction;
+        G_ChangeHealth( ent, ent,
+                        ( ent->health * client->pers.evolveHealthFraction ),
+                        (HLTHF_SET_TO_CHANGE|
+                         HLTHF_EVOLVE_INCREASE|
+                         HLTHF_NO_DECAY|
+                         HLTHF_IGNORE_ENEMY_DMG) );
     }
     else
     {
       client->ps.misc[ MISC_MAX_HEALTH ] *= client->pers.evolveMaxHealthFraction;
-      ent->health = client->ps.misc[ MISC_MAX_HEALTH ];
+        G_ChangeHealth( ent, ent,
+                        client->ps.misc[ MISC_MAX_HEALTH ],
+                        (HLTHF_SET_TO_CHANGE|
+                         HLTHF_EVOLVE_INCREASE|
+                         HLTHF_NO_DECAY|
+                         HLTHF_IGNORE_ENEMY_DMG) );
     }
 
     // ensure that evolving/devolving with low health doesn't kill
     if( ent->health < 1 && oldHealth > 0 )
-      ent->health = 1;
-
-    client->ps.misc[ MISC_HEALTH ] = ent->health;
+      G_ChangeHealth( ent, ent, 1,
+                      (HLTHF_SET_TO_CHANGE|
+                       HLTHF_EVOLVE_INCREASE|
+                       HLTHF_NO_DECAY|
+                       HLTHF_IGNORE_ENEMY_DMG) );
   }
 
   if( BG_ClassHasAbility( client->ps.stats[STAT_CLASS], SCA_STAMINA ) )

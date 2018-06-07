@@ -1139,18 +1139,12 @@ void CheckCkitRepair( gentity_t *ent )
 
     if( traceEnt->spawned )
     {
-      if( traceEnt->health < traceEnt->s.constantLight &&
-          HUMAN_BMAXHEALTH_DECAY( HBUILD_HEALRATE ) < traceEnt->s.constantLight )
+      if( traceEnt->health < traceEnt->s.constantLight )
       {
-        if( HUMAN_BMAXHEALTH_DECAY( HBUILD_HEALRATE ) <
-            ( traceEnt->s.constantLight - traceEnt->health ) )
-          traceEnt->s.constantLight -= HUMAN_BMAXHEALTH_DECAY( HBUILD_HEALRATE );
-
-        traceEnt->health += HBUILD_HEALRATE;
+        G_ChangeHealth( traceEnt, ent, HBUILD_HEALRATE, 0 );
 
         if( traceEnt->health >= traceEnt->s.constantLight )
         {
-          traceEnt->health = traceEnt->s.constantLight;
           G_AddEvent( ent, EV_BUILD_REPAIRED, 0 );
         } else
           G_AddEvent( ent, EV_BUILD_REPAIR, 0 );
@@ -1168,13 +1162,12 @@ void CheckCkitRepair( gentity_t *ent )
       int healRate = (int)( ceil( (float)( traceEnt->s.constantLight ) / ( ( (float)buildTime ) / ( (float)repeatRate ) ) ) );
 
       traceEnt->buildProgress -= repeatRate;
-      traceEnt->health += healRate;
+      G_ChangeHealth( traceEnt, ent, healRate, 0 );
       if( traceEnt->buildProgress <= 0 )
       {
         traceEnt->buildProgress = 0;
         if( traceEnt->health >= traceEnt->s.constantLight )
         {
-          traceEnt->health = traceEnt->s.constantLight;
           G_AddEvent( ent, EV_BUILD_REPAIRED, 0 );
         } else
             G_AddEvent( ent, EV_BUILD_REPAIR, 0 );
@@ -1390,7 +1383,7 @@ void CheckGrabAttack( gentity_t *ent )
     if( traceEnt->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
       return;
 
-    if( traceEnt->client->ps.misc[ MISC_HEALTH ] <= 0 )
+    if( traceEnt->health <= 0 )
       return;
 
     if( !( traceEnt->client->ps.stats[ STAT_STATE ] & SS_GRABBED ) )

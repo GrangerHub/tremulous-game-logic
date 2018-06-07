@@ -3217,9 +3217,19 @@ Die function for Human Medistation
 void HMedistat_Die( gentity_t *self, gentity_t *inflictor,
                     gentity_t *attacker, int damage, int mod )
 {
-  //clear target's healing flag
-  if( self->enemy && self->enemy->client )
-    self->enemy->client->ps.stats[ STAT_STATE ] &= ~SS_HEALING_ACTIVE;
+  gentity_t *player;
+  int       i;
+
+  //clear targets' healing flag
+  for( i = 0; i < self->numEnemies; i++ )
+  {
+    player = G_Entity_id_get( &self->enemies[i] );
+
+    if( !player )
+      continue;
+
+    player->client->ps.stats[ STAT_STATE ] &= ~SS_HEALING_ACTIVE;
+  }
 
   HSpawn_Die( self, inflictor, attacker, damage, mod );
 }
@@ -3237,18 +3247,29 @@ void HMedistat_Think( gentity_t *self )
   vec3_t    mins, maxs;
   int       i, num;
   gentity_t *player;
-  qboolean  occupied = qfalse;
+  int       nextThink = BG_Buildable( self->s.modelindex )->nextthink;
 
-  self->nextthink = level.time + BG_Buildable( self->s.modelindex )->nextthink;
+  // out of health reserve
+  if( self->healthReserve <= 0 )
+    nextThink *= 4;
+
+  self->nextthink = level.time + nextThink;
 
   G_SuffocateTrappedEntities( self );
 
   self->powered = G_FindPower( self, qfalse );
   G_IdlePowerState( self );
 
-  //clear target's healing flag
-  if( self->enemy && self->enemy->client )
-    self->enemy->client->ps.stats[ STAT_STATE ] &= ~SS_HEALING_ACTIVE;
+  //clear targets' healing flag
+  for( i = 0; i < self->numEnemies; i++ )
+  {
+    player = G_Entity_id_get( &self->enemies[i] );
+
+    if( !player )
+      continue;
+
+    player->client->ps.stats[ STAT_STATE ] &= ~SS_HEALING_ACTIVE;
+  }
 
   //make sure we have power
   if( !self->powered )
@@ -3263,6 +3284,13 @@ void HMedistat_Think( gentity_t *self )
     return;
   }
 
+  // regen health reserve
+  if( self->healthReserve < MEDISTAT_HEALTH_RESERVE )
+    self->healthReserve += ( BG_HP2SU( 1 ) / 8 );
+
+  if( self->healthReserve > MEDISTAT_HEALTH_RESERVE )
+    self->healthReserve = MEDISTAT_HEALTH_RESERVE;
+
   if( self->spawned )
   {
     VectorAdd( self->r.currentOrigin, self->r.maxs, maxs );
@@ -3275,15 +3303,17 @@ void HMedistat_Think( gentity_t *self )
     if( self->active )
       G_SetIdleBuildableAnim( self, BANIM_IDLE2 );
 
-    //check if a previous occupier is still here
+    //check for targets
+    self->numEnemies = 0;
     num = SV_AreaEntities( mins, maxs, entityList, MAX_GENTITIES );
     for( i = 0; i < num; i++ )
     {
       player = &g_entities[ entityList[ i ] ];
       int maxHealth;
 
-      if( G_NoTarget( player ) )
-        continue; // notarget cancels even beneficial effects?
+      if( !OnSameTeam( player, self ) &&
+          G_NoTarget( player ) )
+        continue;
 
       if( !( player->r.contents & MASK_SHOT ) ||
           ( player->r.contents & CONTENTS_ASTRAL_NOCLIP ) )
@@ -3299,6 +3329,8 @@ void HMedistat_Think( gentity_t *self )
                   MOD_MEDISTAT );
         G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
         player->mediStatAttackTime = level.time + 1000;
+
+        continue;
       }
 
       if( !player->client )
@@ -3316,106 +3348,61 @@ void HMedistat_Think( gentity_t *self )
                   MOD_MEDISTAT );
         G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
         player->mediStatAttackTime = level.time + 1000;
+
+        continue;
       }
 
       //remove poison from everyone, not just the healed player
       if(player->client->ps.stats[ STAT_STATE ] & SS_POISONED )
         player->client->ps.stats[ STAT_STATE ] &= ~SS_POISONED;
 
-      //give a medkit to all fully healed human players
-      if( player->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
-          PM_Alive( player->client->ps.pm_type ) &&
-          player->health >= maxHealth &&
-          !BG_InventoryContainsUpgrade( UP_MEDKIT, player->client->ps.stats ) )
-        BG_AddUpgradeToInventory( UP_MEDKIT, player->client->ps.stats );
+      // reached the max number of players that can be healed
+      if( self->numEnemies >= 10 )
+        continue;
 
-      if( self->enemy == player &&
-          player->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
-          player->health < maxHealth &&
+      if( player->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
+          ( ( player->health < maxHealth &&
+              player->health < player->client->ps.misc[ MISC_MAX_HEALTH ] ) ||
+            player->client->ps.stats[ STAT_STAMINA ] < STAMINA_MAX ) &&
           PM_Alive( player->client->ps.pm_type ) )
       {
-        occupied = qtrue;
+        gclient_t *client = player->client;
+
         player->client->ps.stats[ STAT_STATE ] |= SS_HEALING_ACTIVE;
-      }
-    }
 
-    if( !occupied )
-    {
-      self->enemy = NULL;
+        G_Entity_id_set( &self->enemies[self->numEnemies], player);
+        self->numEnemies++;
 
-      //look for something to heal
-      for( i = 0; i < num; i++ )
-      {
-        player = &g_entities[ entityList[ i ] ];
+        if( client->ps.stats[ STAT_STAMINA ] <  STAMINA_MAX )
+          client->ps.stats[ STAT_STAMINA ] += STAMINA_MEDISTAT_RESTORE;
 
-        if( G_NoTarget( player ) )
-          continue; // notarget cancels even beneficial effects?
+        if( client->ps.stats[ STAT_STAMINA ] > STAMINA_MAX )
+          client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
 
-        if( !player->client )
-          continue;
-
-        if( player->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
+        if( player->health < maxHealth &&
+            player->health < player->client->ps.misc[ MISC_MAX_HEALTH ] )
         {
-          const int maxHealth = BG_Class( player->client->ps.stats[ STAT_CLASS ] )->health;
+          G_ChangeHealth( player, self, BG_HP2SU( 1 ),
+                          (HLTHF_INITIAL_MAX_CAP|
+                           HLTHF_USE_CHANGER_RESERVE) );
+        }
 
-          if( ( player->health < maxHealth ||
-                player->client->ps.stats[ STAT_STAMINA ] < STAMINA_MAX ) &&
-              PM_Alive( player->client->ps.pm_type ) )
-          {
-            self->enemy = player;
-
-            //start the heal anim
-            if( !self->active )
-            {
-              G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
-              self->active = qtrue;
-              player->client->ps.stats[ STAT_STATE ] |= SS_HEALING_ACTIVE;
-            }
-          }
-
-          if( player->health >= maxHealth &&
-              !BG_InventoryContainsUpgrade( UP_MEDKIT, player->client->ps.stats ) )
-            BG_AddUpgradeToInventory( UP_MEDKIT, player->client->ps.stats );
+        //start the heal anim
+        if( !self->active )
+        {
+          G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
+          self->active = qtrue;
         }
       }
     }
 
     //nothing left to heal so go back to idling
-    if( !self->enemy && self->active )
+    if( !self->numEnemies && self->active )
     {
       G_SetBuildableAnim( self, BANIM_CONSTRUCT2, qtrue );
       G_SetIdleBuildableAnim( self, BANIM_IDLE1 );
 
       self->active = qfalse;
-    }
-    else if( self->enemy && self->enemy->client ) //heal!
-    {
-      gentity_t *player = self->enemy;
-      gclient_t *client = player->client;
-      const int maxHealth = BG_Class( client->ps.stats[ STAT_CLASS ] )->health;
-
-      if( client->ps.stats[ STAT_STAMINA ] <  STAMINA_MAX )
-        client->ps.stats[ STAT_STAMINA ] += STAMINA_MEDISTAT_RESTORE;
-
-      if( client->ps.stats[ STAT_STAMINA ] > STAMINA_MAX )
-        client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
-
-      if( player->health < maxHealth )
-      {
-        player->health += BG_HP2SU( 1 );
-        if( player->health > maxHealth )
-          player->health = maxHealth;
-        client->ps.misc[ MISC_HEALTH ] = player->health;
-        client->pers.infoChangeTime = level.time;
-      }
-
-      //if they're completely healed and have full stamina, give them a medkit
-      if( player->health >= maxHealth &&
-          player->client->ps.stats[ STAT_STAMINA ] >= STAMINA_MAX )
-      {
-        if( !BG_InventoryContainsUpgrade( UP_MEDKIT, self->enemy->client->ps.stats ) )
-          BG_AddUpgradeToInventory( UP_MEDKIT, self->enemy->client->ps.stats );
-      }
     }
   }
 }
@@ -4402,20 +4389,17 @@ void G_BuildableThink( gentity_t *ent, int msec )
 
         if( ent->buildableTeam == TEAM_HUMANS && ent->dcc )
           healthIncrement *= 2;
-          
-        ent->health += healthIncrement;
+
+        G_ChangeHealth( ent, ent, healthIncrement,
+                        HLTHF_NO_DECAY );
       } else
       {
         int regen = 0;
 
         if( ent->buildableTeam == TEAM_ALIENS && regenRate &&
-          ( ent->lastDamageTime + ALIEN_REGEN_DAMAGE_TIME ) < level.time &&
-          ALIEN_BMAXHEALTH_DECAY( regenRate ) < ent->s.constantLight )
+          ( ent->lastDamageTime + ALIEN_REGEN_DAMAGE_TIME ) < level.time )
         {
-          ent->health += regenRate;
-          if( ALIEN_BMAXHEALTH_DECAY( regen ) <
-              ( ent->s.constantLight - regen ) )
-              ent->s.constantLight -= ALIEN_BMAXHEALTH_DECAY( regenRate );
+          G_ChangeHealth( ent, ent, regenRate, 0 );
         }
         else if( ent->buildableTeam == TEAM_HUMANS &&
           ( ent->lastDamageTime + HUMAN_REGEN_DAMAGE_TIME ) < level.time )
@@ -4425,21 +4409,13 @@ void G_BuildableThink( gentity_t *ent, int msec )
           else if( ent->powered )
             regen = (int)( ceil( (float)( DC_HEALRATE ) / 10.0f ) );
 
-          if( regen &&
-              HUMAN_BMAXHEALTH_DECAY( regen ) < ent->s.constantLight )
+          if( regen )
           {
-            if( HUMAN_BMAXHEALTH_DECAY( regen ) <
-                ( ent->s.constantLight - ent->health ) )
-              ent->s.constantLight -= HUMAN_BMAXHEALTH_DECAY( regen );
-
-              ent->health += regen;
+              G_ChangeHealth( ent, ent, regen, 0 );
           }
         }
       }
     }
-
-    if( ent->health >= ent->s.constantLight )
-      ent->health = ent->s.constantLight;
 
 
     // check if a buildable was spotted by an enemy player
@@ -5474,9 +5450,14 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
   built->s.constantLight = BG_Buildable( buildable )->health;
 
   if( built->buildableTeam == TEAM_HUMANS )
-    built->health = built->s.constantLight / 10;
+    G_ChangeHealth( built, built,
+                    ( built->s.constantLight / 10 ),
+                    HLTHF_SET_TO_CHANGE );
   else
-    built->health = 1;
+    G_ChangeHealth( built, built, 1,
+                    HLTHF_SET_TO_CHANGE );
+
+  built->healthReserve = 0;
 
   built->splashDamage = BG_Buildable( buildable )->splashDamage;
   built->splashRadius = BG_Buildable( buildable )->splashRadius;
@@ -5520,7 +5501,8 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
   // build instantly in cheat mode
   if( builder->client && ( g_cheats.integer || IS_WARMUP ) )
   {
-    built->health = built->s.constantLight;
+    G_ChangeHealth( built, built, built->s.constantLight,
+                    HLTHF_SET_TO_CHANGE );
     built->buildTime = built->s.time =
       level.time - BG_Buildable( buildable )->buildTime;
     built->buildProgress = 0;
@@ -5885,7 +5867,9 @@ static gentity_t *G_FinishSpawningBuildable( gentity_t *ent, qboolean force )
   built->takedamage = qtrue;
   built->spawned = qtrue; //map entities are already spawned
   level.numUnspawnedBuildables[ built->buildableTeam ]--;
-  built->health = BG_Buildable( buildable )->health;
+  G_ChangeHealth( built, built,
+                  BG_Buildable( buildable )->health,
+                  HLTHF_SET_TO_CHANGE );
   built->s.eFlags |= EF_B_SPAWNED;
 
   // drop towards normal surface

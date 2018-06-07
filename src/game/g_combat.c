@@ -159,6 +159,57 @@ char *modNames[ ] =
   "MOD_SLAP"
 };
 
+/*
+==================
+G_IncreaseBonusValue
+
+Safely increase the bonusValue
+==================
+*/
+void  G_IncreaseBonusValue( unsigned int *bonusValue, int diff )
+{
+  if( diff <= 0 )
+    return;
+
+  Com_Assert( bonusValue &&
+              "G_IncreaseBonusValue: NULL bonusValue" );
+
+  if( *bonusValue == INT_MAX )
+    return;
+
+  if( INT_MAX - diff > *bonusValue )
+    *bonusValue += diff;
+  else
+    *bonusValue = INT_MAX;
+}
+
+/*
+==================
+G_IncreaseDamageCredits
+
+Safely increase the damage credits
+==================
+*/
+static void  G_IncreaseDamageCredits( int *credits, int diff )
+{
+  if( diff <= 0 )
+    return;
+
+  Com_Assert( credits &&
+              "G_IncreaseDamageCredits: NULL bonusValue" );
+
+  if( *credits == INT_MAX )
+    return;
+
+  if( INT_MAX - diff > *credits )
+    *credits += diff;
+  else
+    *credits = INT_MAX;
+
+  if( *credits < 0 )
+    *credits = 0;
+}
+
 typedef struct rewardBuildableData_s
 {
   gentity_t *self;
@@ -194,7 +245,8 @@ static void RewardBuildableAttackers( void *data, void *user_data )
   int                   maxHealth = rewardBuildableData->maxHealth;
   int                   value = rewardBuildableData->value;
   int                   (*numTeamPlayers)[ NUM_TEAMS ];
-  int                   dBValue = value * credits->credits / totalDamage;
+  float                 damageFraction = ( (float)credits->credits ) / ( (float)totalDamage );
+  int                   dBValue = value * damageFraction;
   int                   buildablesTeamDistributionEarnings;
   int                   j;
 
@@ -257,14 +309,14 @@ static void RewardBuildableAttackers( void *data, void *user_data )
               "RewardBuildableAttackers: buildableTeam is invalid" );
 
   if( totalDamage < maxHealth )
-    dBValue *= totalDamage / maxHealth;
+    dBValue = (int)( ( (float)dBValue ) * ( ( (float)totalDamage ) / ( (float)maxHealth ) ) );
 
   if( (*numTeamPlayers)[ buildableTeam ] )
-    buildablesTeamDistributionEarnings = ( dBValue * 2 ) / ( 5 * (*numTeamPlayers)[ buildableTeam ] );
+    buildablesTeamDistributionEarnings = (int)( ( (float)dBValue ) * ( 2.0f / ( 5.0f * (float)(*numTeamPlayers)[ buildableTeam ] ) ) );
   else
     buildablesTeamDistributionEarnings = 0;
 
-  buildable->bonusValue += ( dBValue * 2 ) / ( 5 );
+  G_IncreaseBonusValue( &buildable->bonusValue, ( ( (float)dBValue * 0.80f ) ) );
 
   // add to the builder's score
   if( buildable->builtBy &&
@@ -290,9 +342,9 @@ static void RewardBuildableAttackers( void *data, void *user_data )
   {
     // add to stage counters
     if( player->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
-      *alienCredits += dBValue;
+      G_IncreaseDamageCredits( alienCredits, dBValue);
     else if( player->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
-      *humanCredits += dBValue;
+      G_IncreaseDamageCredits( humanCredits, dBValue);
   }
 
   credits->credits = 0;
@@ -349,8 +401,7 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
       continue;
     }
 
-    if( !OnSameTeam( self, player ) || 
-        self->buildableTeam != player->client->ps.stats[ STAT_TEAM ] )
+    if( !OnSameTeam( self, player ) )
     {
       totalDamage += (float)( *credits )[ i ];
       damagedByEnemyPlayer = qtrue;
@@ -382,8 +433,15 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
       continue;
     }
 
-    totalDamage += ( *creditsDeffenses )[ i ].credits;
     BG_Queue_Push_Head( &enemyBuildables, &( *creditsDeffenses )[ i ] );
+
+    if( totalDamage == INT_MAX )
+      continue;
+
+    if( INT_MAX - ( *creditsDeffenses )[ i ].credits > totalDamage )
+      totalDamage += ( *creditsDeffenses )[ i ].credits;
+    else
+      totalDamage = INT_MAX;
   }
 
   if( totalDamage <= 0.0f )
@@ -434,25 +492,19 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
     team = self->buildableTeam;
     maxHealth = BG_Buildable( self->s.modelindex )->health;
     // account for repaired damage
-    switch ( team )
-    {
-      case TEAM_ALIENS:
-        maxHealth += ( maxHealth - self->s.constantLight ) * ( 1000 / ALIEN_BMAXHEALTH_DECAY( 1000 ) );
-        break;
-
-      case TEAM_HUMANS:
-        maxHealth += ( maxHealth - self->s.constantLight ) * ( 1000 / HUMAN_BMAXHEALTH_DECAY( 1000 ) );
-        break;
-
-      default:
-        break;
-    }
+    maxHealth += (int)( (float)( maxHealth - self->s.constantLight ) *
+                        BG_Buildable( self->s.modelindex )->maxHealthDecayRate );
   }
   else
     return totalDamage;
 
   if( destroyedUp == UP_NONE )
-    value += self->bonusValue;
+  {
+    if( INT_MAX - value > self->bonusValue )
+      value += self->bonusValue;
+    else
+      value = INT_MAX;
+  }
 
   numTeamPlayers[ TEAM_ALIENS ] = level.numAlienClients;
   numTeamPlayers[ TEAM_HUMANS ] = level.numHumanClients;
@@ -460,7 +512,7 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
   // Give credits and empty the array
   for( i = 0; i < level.maxclients; i++ )
   {
-    int stageValue = value * ( *credits )[ i ] / totalDamage;
+    int stageValue = (int)( (float)value * ( ( (float)( *credits )[ i ] ) / ( (float)totalDamage) ) );
     int j;
     team_t playersTeam;
     gentity_t *player = g_entities + i;
@@ -468,9 +520,9 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
 
     if( playersTeam != team )
     {
-      int playersTeamDistributionEarnings;
-      int playersPersonalEarnings;
-      int bonusValue;
+      int          playersTeamDistributionEarnings;
+      int          playersPersonalEarnings;
+      unsigned int bonusValue;
 
       if( totalDamage < maxHealth )
         stageValue *= totalDamage / maxHealth;
@@ -489,7 +541,7 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
 
       AddScore( player, stageValue );
 
-      player->bonusValue += bonusValue;
+      G_IncreaseBonusValue( &player->bonusValue, bonusValue );
 
       for( j = 0; j < level.maxclients; j++ )
       {
@@ -510,9 +562,9 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
       {
         // add to stage counters
         if( player->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
-          alienCredits += stageValue;
+          G_IncreaseDamageCredits( &alienCredits, stageValue );
         else if( player->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
-          humanCredits += stageValue;
+          G_IncreaseDamageCredits( &humanCredits, stageValue );
       }
     }
     ( *credits )[ i ] = 0;
@@ -625,6 +677,8 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
   self->client->ps.pm_type = PM_DEAD;
   self->suicideTime = 0;
+
+  self->healthReserve = 0;
 
   if( attacker )
   {
@@ -1336,6 +1390,265 @@ dflags    these flags are used to control how T_Damage works
 
 /*
 ============
+G_ChangeHealth
+
+Increases or decreases the target entity's health.
+returns the applied change in health
+============
+*/
+int G_ChangeHealth( gentity_t *targ, gentity_t *changer,
+                     int change, int healthFlags )
+{
+  int   *maxHealth = NULL;
+  int   initialMaxHealth = 0;
+  int   minHealth = 0;
+  float maxHealthDecayRate = 0.0f;
+  int   targReserveChange = 0;
+  int   changerReserveChange = 0;
+  int   oldHealth = targ->health;
+
+  Com_Assert( targ &&
+              "G_ChangeHealth: NULL targ" );
+  Com_Assert( changer &&
+              "G_ChangeHealth: NULL inflictor" );
+
+  if( targ->client )
+  {
+    const class_t class = targ->client->ps.stats[ STAT_CLASS ];
+
+    maxHealth = &targ->client->ps.misc[ MISC_MAX_HEALTH ];
+    initialMaxHealth = BG_Class( class )->health;
+    minHealth = BG_Class( class )->minHealth;
+    maxHealthDecayRate = BG_Class( class )->maxHealthDecayRate;
+  } else if( targ->s.eType == ET_BUILDABLE )
+  {
+    const buildable_t buildable = targ->s.modelindex;
+
+    maxHealth = &targ->s.constantLight;
+    initialMaxHealth = BG_Buildable( buildable )->health;
+    minHealth = BG_Buildable( buildable )->minHealth;
+    maxHealthDecayRate = BG_Buildable( buildable )->maxHealthDecayRate;
+  }
+
+  if( healthFlags & HLTHF_IGNORE_MAX )
+    maxHealth = NULL;
+
+  // set the health equal to the change, but let the function
+  // continue for sanity checks
+  if( healthFlags & HLTHF_SET_TO_CHANGE )
+  {
+    targ->health = change;
+    change = 0;
+  }
+
+  if( change < 0 )
+  {
+    // track total damage done by enemies
+    if( !(healthFlags & HLTHF_IGNORE_ENEMY_DMG) &&
+        !OnSameTeam( changer, targ ) &&
+        maxHealth )
+    {
+      if( *maxHealth <
+          ( targ->damageFromEnemies - change ) )
+      {
+        targ->damageFromEnemies = *maxHealth;
+      } else
+      {
+        targ->damageFromEnemies -= change;
+      }
+    }
+
+    // decrease the health
+    if( ( INT_MIN - change ) > targ->health )
+      targ->health = INT_MIN;
+    else
+      targ->health += change;
+
+    // send the health to the clients
+    if( targ->client )
+    {
+      targ->client->ps.misc[ MISC_HEALTH ] = targ->health;
+      targ->client->pers.infoChangeTime = level.time;
+    }
+
+    return targ->health - oldHealth;
+  }
+
+  // attempting to increase the target entity's
+  // health, and/or perform sanity checks on its health
+
+  //prevent integer overflow
+  if( targ->health == INT_MAX )
+    return targ->health - oldHealth;
+  else if( targ->health > INT_MAX )
+  {
+    targ->health = INT_MAX;
+    change = 0;
+  } else if( ( INT_MAX - change ) < targ->health )
+    change = INT_MAX - targ->health;
+
+  // check for evolving
+  if( !(healthFlags & HLTHF_EVOLVE_INCREASE) &&
+      targ->client &&
+      targ->client->pers.teamSelection == TEAM_ALIENS &&
+      (targ->s.eFlags & EF_EVOLVING) )
+    return targ->health - oldHealth;
+
+  if( (healthFlags & HLTHF_REQ_TARG_RESERVE) &&
+      targ->healthReserve <= 0 )
+    change = 0;
+  else if( (healthFlags & HLTHF_REQ_CHANGER_RESERVE) &&
+      changer->healthReserve <= 0 )
+    change = 0;
+
+  // check if the initial max health can be exceeded
+  if( (healthFlags & HLTHF_INITIAL_MAX_CAP) &&
+      change > ( initialMaxHealth - targ->health ) )
+  {
+    if( ( change + targ->health ) > initialMaxHealth )
+      change = initialMaxHealth - targ->health;
+
+    if( change < 0 )
+      change = 0;
+  }
+
+  // don't let the change heal past the max health
+  if( maxHealth &&
+      change > ( *maxHealth - targ->health ) )
+  {
+    change = ( *maxHealth - targ->health );
+
+    if( change < 0 )
+      change = 0;
+  }
+
+  // check the target's health reserve
+  if( (healthFlags & HLTHF_USE_TARG_RESERVE) &&
+       change &&
+      targ->healthReserve > 0 &&
+      ( !(healthFlags & HLTHF_IGNORE_ENEMY_DMG) &&
+        targ->damageFromEnemies > 0 ) )
+  {
+    targReserveChange = change;
+
+    // only reduce the reserve from healing enemy damage
+    if( !(healthFlags & HLTHF_IGNORE_ENEMY_DMG) &&
+        targReserveChange > targ->damageFromEnemies )
+      targReserveChange = targ->damageFromEnemies;
+
+    // reduce the reserve
+    targ->healthReserve -= targReserveChange;
+    if( targ->healthReserve < 0 )
+      targ->healthReserve = 0;
+
+    if( !(healthFlags & HLTHF_IGNORE_ENEMY_DMG) )
+    {
+      // reduce the damageFromEnemies total counter
+      targ->damageFromEnemies -= targReserveChange;
+      if( targ->damageFromEnemies < 0 )
+        targ->damageFromEnemies = 0;
+    }
+
+    change -= targReserveChange;
+  }
+
+  // check the changer's health reserve
+  if( (healthFlags & HLTHF_USE_CHANGER_RESERVE) &&
+      change &&
+      targ->health < initialMaxHealth &&
+      targ->health < *maxHealth &&
+      changer->healthReserve > 0 &&
+      ( !(healthFlags & HLTHF_IGNORE_ENEMY_DMG) &&
+        targ->damageFromEnemies > 0 ) )
+  {
+    changerReserveChange = change;
+
+    // only decrease the reserve from healing enemy damage
+    if( !(healthFlags & HLTHF_IGNORE_ENEMY_DMG) &&
+        changerReserveChange > targ->damageFromEnemies )
+      changerReserveChange = targ->damageFromEnemies;
+
+    // reduce the reserve
+    changer->healthReserve -= changerReserveChange;
+    if( changer->healthReserve < 0 )
+      changer->healthReserve = 0;
+
+    if( !(healthFlags & HLTHF_IGNORE_ENEMY_DMG) )
+    {
+      // reduce the damageFromEnemies total counter
+      targ->damageFromEnemies -= changerReserveChange;
+      if( targ->damageFromEnemies < 0 )
+        targ->damageFromEnemies = 0;
+    }
+
+    change -= changerReserveChange;
+  }
+
+  // check if healing is allowed without using the reserves
+  if( healthFlags & HLTHF_RESERVES_CAP )
+    change = 0;
+
+  //check for max health decay
+  if( maxHealth &&
+      !(healthFlags & HLTHF_NO_DECAY) &&
+      change &&
+      maxHealthDecayRate &&
+      ( !(healthFlags & HLTHF_IGNORE_ENEMY_DMG) &&
+        targ->damageFromEnemies > 0 ) &&
+      minHealth < *maxHealth )
+  {
+    int decayableChange = ( !(healthFlags & HLTHF_IGNORE_ENEMY_DMG) &&
+                            ( change > targ->damageFromEnemies ) ) ?
+                          targ->damageFromEnemies : change;
+    int maxHealthDecay = (int)( maxHealthDecayRate *
+                                ( (float)decayableChange ) );
+
+    // don't decay below the currently regained health
+    if( maxHealthDecay > ( *maxHealth -
+                           ( targ->health + targReserveChange +
+                             changerReserveChange ) ) )
+      maxHealthDecay = 0;
+
+    if( maxHealthDecay )
+    {
+      *maxHealth -= maxHealthDecay;
+
+      if( *maxHealth < minHealth )
+        *maxHealth = minHealth;
+    }
+  }
+
+  // increase the health
+  targ->health += ( change + targReserveChange + changerReserveChange );
+
+  if( !(healthFlags & HLTHF_IGNORE_ENEMY_DMG) )
+  {
+    // decrease the damage from enemies
+    targ->damageFromEnemies -= change;
+    if( targ->damageFromEnemies < 0 )
+      targ->damageFromEnemies = 0;
+  }
+
+  if( maxHealth &&
+      targ->health > *maxHealth )
+  {
+    // don't exceed the maxHealth;
+    targ->health = *maxHealth;
+    targ->damageFromEnemies = 0;
+  }
+
+  // send the health to the clients
+  if( targ->client )
+  {
+    targ->client->ps.misc[ MISC_HEALTH ] = targ->health;
+    targ->client->pers.infoChangeTime = level.time;
+  }
+
+  return targ->health - oldHealth;
+}
+
+/*
+============
 G_MODHitDetection
 
 Determines if a means of death would result in hit indication
@@ -1579,7 +1892,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
     // if TF_NO_FRIENDLY_FIRE is set, don't do damage to the target
     // if the attacker was on the same team
-    if( targ != attacker && OnSameTeam( targ, attacker ) )
+    if( targ->client && targ != attacker &&
+        OnSameTeam( targ, attacker ) )
     {
       // don't do friendly fire on movement attacks
       if( mod == MOD_LEVEL4_TRAMPLE || mod == MOD_LEVEL3_POUNCE ||
@@ -1675,20 +1989,26 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       && targ->s.eType != ET_GENERAL
       && G_MODHitIndication( mod ) )
   {
-    if( OnSameTeam( targ, attacker ) ||
-        ( targ->s.eType == ET_BUILDABLE &&
-          attacker->client->pers.teamSelection == targ->buildableTeam ) )
+    if( OnSameTeam( targ, attacker ) )
       attacker->client->ps.persistant[ PERS_HITS ]--;
     else
       attacker->client->ps.persistant[ PERS_HITS ]++;
   }
 
-  // deal scaled up damage during evolving
+  // give scaled down damage during evolving
   if( attacker->client &&
       attacker->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
       ( attacker->client->ps.eFlags & EF_EVOLVING ) )
   {
-    modDamge = (int)( ( (float)modDamge ) / BG_EvolveScale( &attacker->client->ps ) );
+    modDamge = (int)( ( (float)modDamge ) * BG_EvolveScale( &attacker->client->ps ) );
+  }
+
+  // receive scaled up damage during evolving
+  if( targ->client &&
+      targ->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
+      ( targ->client->ps.eFlags & EF_EVOLVING ) )
+  {
+    modDamge = (int)( ( (float)modDamge ) / BG_EvolveScale( &targ->client->ps ) );
   }
 
   if( modDamge != 100 &&
@@ -1790,11 +2110,13 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
         {
           if( G_Entity_id_get( &targ->creditsUpgradeDeffenses[ UP_BATTLESUIT ][ attacker->s.number ].id ) == attacker )
           {
-            targ->creditsUpgradeDeffenses[ UP_BATTLESUIT ][ attacker->s.number ].credits += take;
+            G_IncreaseDamageCredits( &targ->creditsUpgradeDeffenses[ UP_BATTLESUIT ][ attacker->s.number ].credits,
+                                     take );
           } else
           {
             G_Entity_id_set( &targ->creditsUpgradeDeffenses[ UP_BATTLESUIT ][ attacker->s.number ].id, attacker );
-            targ->creditsUpgradeDeffenses[ UP_BATTLESUIT ][ attacker->s.number ].credits = take;
+            G_IncreaseDamageCredits( &targ->creditsUpgradeDeffenses[ UP_BATTLESUIT ][ attacker->s.number ].credits,
+                                     take );
           }
         }
       }
@@ -1885,16 +2207,21 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
     if( attacker != targ )
     {
       if( attacker->client )
-        targ->credits[ attacker->client->ps.clientNum ] += take;
+      {
+        G_IncreaseDamageCredits( &targ->credits[ attacker->client->ps.clientNum ],
+                                 take );
+      }
       else if( attacker->s.eType == ET_BUILDABLE )
       {
         if( G_Entity_id_get( &targ->creditsDeffenses[ attacker->s.number ].id ) == attacker )
         {
-          targ->creditsDeffenses[ attacker->s.number ].credits += take;
+          G_IncreaseDamageCredits( &targ->creditsDeffenses[ attacker->s.number ].credits,
+                                   take );
         } else
         {
           G_Entity_id_set( &targ->creditsDeffenses[ attacker->s.number ].id, attacker );
-          targ->creditsDeffenses[ attacker->s.number ].credits = take;
+          G_IncreaseDamageCredits( &targ->creditsDeffenses[ attacker->s.number ].credits,
+                                   take );
         }
       }
     }
@@ -1904,6 +2231,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       const int currentHealthBeforeDamage = targ->health;
 
       targ->health = targ->health - take;
+      G_ChangeHealth( targ, attacker, ( - take ), 0 );
 
       //adjust health scaling for evolving
       if( targ->client &&
@@ -1925,15 +2253,13 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
     {
       if( targ->s.eType == ET_PLAYER ||
           targ->s.eType == ET_CORPSE )
-        targ->health = GIB_HEALTH;
+        G_ChangeHealth( targ, attacker, GIB_HEALTH,
+                        (HLTHF_SET_TO_CHANGE|
+                         HLTHF_EVOLVE_INCREASE) );
       else
-        targ->health = 0;
-    }
-
-    if( targ->client )
-    {
-      targ->client->ps.misc[ MISC_HEALTH ] = targ->health;
-      targ->client->pers.infoChangeTime = level.time;
+      G_ChangeHealth( targ, attacker, 0,
+                      (HLTHF_SET_TO_CHANGE|
+                       HLTHF_EVOLVE_INCREASE) );
     }
 
     targ->lastDamageTime = level.time;
@@ -1953,9 +2279,9 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
       if( targ->health < BG_HP2SU( -999 ) )
       {
-        targ->health = BG_HP2SU( -999 );
-        if( targ->client )
-          targ->client->ps.misc[ MISC_HEALTH ] = BG_HP2SU( -999 );
+        G_ChangeHealth( targ, attacker, BG_HP2SU( -999 ),
+                        (HLTHF_SET_TO_CHANGE|
+                         HLTHF_EVOLVE_INCREASE) );
       }
 
       targ->enemy = attacker;

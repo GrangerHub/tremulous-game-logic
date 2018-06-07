@@ -134,6 +134,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     ASPAWN_BP,             //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     ASPAWN_HEALTH,         //int       health;
+    0.5f,                  //float     maxHealthDecayRate;
+    0,                     //int       minHealth;
     ASPAWN_REGEN,          //int       regenRate;
     ASPAWN_SPLASHDAMAGE,   //int       splashDamage;
     ASPAWN_SPLASHRADIUS,   //int       splashRadius;
@@ -187,6 +189,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     OVERMIND_BP,           //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     OVERMIND_HEALTH,       //int       health;
+    0.5f,                  //float     maxHealthDecayRate;
+    0,                     //int       minHealth;
     OVERMIND_REGEN,        //int       regenRate;
     OVERMIND_SPLASHDAMAGE, //int       splashDamage;
     OVERMIND_SPLASHRADIUS, //int       splashRadius;
@@ -240,6 +244,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BARRICADE_BP,          //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     BARRICADE_HEALTH,      //int       health;
+    0.5f,                  //float     maxHealthDecayRate;
+    0,                     //int       minHealth;
     BARRICADE_REGEN,       //int       regenRate;
     BARRICADE_SPLASHDAMAGE, //int      splashDamage;
     BARRICADE_SPLASHRADIUS, //int      splashRadius;
@@ -290,6 +296,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     ACIDTUBE_BP,           //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     ACIDTUBE_HEALTH,       //int       health;
+    0.5f,                  //float     maxHealthDecayRate;
+    0,                     //int       minHealth;
     ACIDTUBE_REGEN,        //int       regenRate;
     ACIDTUBE_SPLASHDAMAGE, //int       splashDamage;
     ACIDTUBE_SPLASHRADIUS, //int       splashRadius;
@@ -340,6 +348,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     TRAPPER_BP,            //int       buildPoints;
     ( 1 << S2 )|( 1 << S3 ), //int     stages; //NEEDS ADV BUILDER SO S2 AND UP
     TRAPPER_HEALTH,        //int       health;
+    0.5f,                  //float     maxHealthDecayRate;
+    0,                     //int       minHealth;
     TRAPPER_REGEN,         //int       regenRate;
     TRAPPER_SPLASHDAMAGE,  //int       splashDamage;
     TRAPPER_SPLASHRADIUS,  //int       splashRadius;
@@ -390,6 +400,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     SLIME_ZUNGE_BP,        //int       buildPoints;
     ( 1 << S3 ),           //int       stages;
     SLIME_ZUNGE_HEALTH,    //int       health;
+    0.5f,                  //float     maxHealthDecayRate;
+    0,                     //int       minHealth;
     SLIME_ZUNGE_REGEN,     //int       regenRate;
     SLIME_ZUNGE_SPLASHDAMAGE, //int    splashDamage;
     SLIME_ZUNGE_SPLASHRADIUS, //int    splashRadius;
@@ -441,6 +453,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BOOSTER_BP,            //int       buildPoints;
     ( 1 << S2 )|( 1 << S3 ), //int     stages;
     BOOSTER_HEALTH,        //int       health;
+    0.5f,                  //float     maxHealthDecayRate;
+    0,                     //int       minHealth;
     BOOSTER_REGEN,         //int       regenRate;
     BOOSTER_SPLASHDAMAGE,  //int       splashDamage;
     BOOSTER_SPLASHRADIUS,  //int       splashRadius;
@@ -491,6 +505,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     HIVE_BP,               //int       buildPoints;
     ( 1 << S2 )|( 1 << S3 ),           //int       stages;
     HIVE_HEALTH,           //int       health;
+    0.5f,                  //float     maxHealthDecayRate;
+    0,                     //int       minHealth;
     HIVE_REGEN,            //int       regenRate;
     HIVE_SPLASHDAMAGE,     //int       splashDamage;
     HIVE_SPLASHRADIUS,     //int       splashRadius;
@@ -539,6 +555,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     HOVEL_BP,              //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),           //int  stages
     HOVEL_HEALTH,          //int       health;
+    0.5f,                  //float     maxHealthDecayRate;
+    0,                     //int       minHealth;
     HOVEL_REGEN,           //int       regenRate;
     HOVEL_SPLASHDAMAGE,    //int       splashDamage;
     HOVEL_SPLASHRADIUS,    //int       splashRadius;
@@ -595,6 +613,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     GRAPNEL_BP,            //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     GRAPNEL_HEALTH,        //int       health;
+    0.5f,                  //float     maxHealthDecayRate;
+    0,                     //int       minHealth;
     GRAPNEL_REGEN,         //int       regenRate;
     GRAPNEL_SPLASHDAMAGE,  //int       splashDamage;
     GRAPNEL_SPLASHRADIUS,  //int       splashRadius;
@@ -646,6 +666,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     HSPAWN_BP,             //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     HSPAWN_HEALTH,         //int       health;
+    0.5f,                  //float     maxHealthDecayRate;
+    0,                     //int       minHealth;
     0,                     //int       regenRate;
     HSPAWN_SPLASHDAMAGE,   //int       splashDamage;
     HSPAWN_SPLASHRADIUS,   //int       splashRadius;
@@ -697,6 +719,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     HTELEPORTER_BP,        //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     HTELEPORTER_HEALTH,    //int       health;
+    0.5f,                  //float     maxHealthDecayRate;
+    0,                     //int       minHealth;
     0,                     //int       regenRate;
     HTELEPORTER_SPLASHDAMAGE, //int       splashDamage;
     HTELEPORTER_SPLASHRADIUS, //int       splashRadius;
@@ -756,6 +780,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     MGTURRET_BP,           //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     MGTURRET_HEALTH,       //int       health;
+    0.5f,                  //float     maxHealthDecayRate;
+    0,                     //int       minHealth;
     0,                     //int       regenRate;
     MGTURRET_SPLASHDAMAGE, //int       splashDamage;
     MGTURRET_SPLASHRADIUS, //int       splashRadius;
@@ -806,6 +832,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     TESLAGEN_BP,           //int       buildPoints;
     ( 1 << S3 ),           //int       stages;
     TESLAGEN_HEALTH,       //int       health;
+    0.5f,                  //float     maxHealthDecayRate;
+    0,                     //int       minHealth;
     0,                     //int       regenRate;
     TESLAGEN_SPLASHDAMAGE, //int       splashDamage;
     TESLAGEN_SPLASHRADIUS, //int       splashRadius;
@@ -856,6 +884,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     ARMOURY_BP,            //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     ARMOURY_HEALTH,        //int       health;
+    0.5f,                  //float     maxHealthDecayRate;
+    0,                     //int       minHealth;
     0,                     //int       regenRate;
     ARMOURY_SPLASHDAMAGE,  //int       splashDamage;
     ARMOURY_SPLASHRADIUS,  //int       splashRadius;
@@ -910,6 +940,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     DC_BP,                 //int       buildPoints;
     ( 1 << S2 )|( 1 << S3 ), //int     stages;
     DC_HEALTH,             //int       health;
+    0.5f,                  //float     maxHealthDecayRate;
+    0,                     //int       minHealth;
     0,                     //int       regenRate;
     DC_SPLASHDAMAGE,       //int       splashDamage;
     DC_SPLASHRADIUS,       //int       splashRadius;
@@ -962,6 +994,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     MEDISTAT_BP,           //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     MEDISTAT_HEALTH,       //int       health;
+    0.5f,                  //float     maxHealthDecayRate;
+    0,                     //int       minHealth;
     0,                     //int       regenRate;
     MEDISTAT_SPLASHDAMAGE, //int       splashDamage;
     MEDISTAT_SPLASHRADIUS, //int       splashRadius;
@@ -1012,6 +1046,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     REACTOR_BP,            //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     REACTOR_HEALTH,        //int       health;
+    0.5f,                  //float     maxHealthDecayRate;
+    0,                     //int       minHealth;
     0,                     //int       regenRate;
     REACTOR_SPLASHDAMAGE,  //int       splashDamage;
     REACTOR_SPLASHRADIUS,  //int       splashRadius;
@@ -1069,6 +1105,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     REPEATER_BP,           //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     REPEATER_HEALTH,       //int       health;
+    0.5f,                  //float     maxHealthDecayRate;
+    0,                     //int       minHealth;
     0,                     //int       regenRate;
     REPEATER_SPLASHDAMAGE, //int       splashDamage;
     REPEATER_SPLASHRADIUS, //int       splashRadius;
@@ -1412,6 +1450,7 @@ static const classAttributes_t bg_classList[ ] =
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
     100000,                                         //int     health;
     0.0f,                                           //float   maxHealthDecayRate;
+    0,                                              //int     minHealth;
     0.0f,                                           //float   fallDamage;
     0.0f,                                           //float   regenRate;
     0,                                              //int     abilities;
@@ -1444,6 +1483,7 @@ static const classAttributes_t bg_classList[ ] =
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
     ABUILDER_HEALTH,                                //int     health;
     0.1f,                                           //float   maxHealthDecayRate;
+    ABUILDER_MIN_HEALTH,                            //int     minHealth;
     0.2f,                                           //float   fallDamage;
     ABUILDER_REGEN,                                 //float   regenRate;
     SCA_TAKESFALLDAMAGE|SCA_FOVWARPS|
@@ -1478,6 +1518,7 @@ static const classAttributes_t bg_classList[ ] =
     ( 1 << S2 )|( 1 << S3 ),                        //int     stages;
     ABUILDER_UPG_HEALTH,                            //int     health;
     0.1f,                                           //float   maxHealthDecayRate;
+    ABUILDER_UPG_MIN_HEALTH,                        //int     minHealth;
     0.2f,                                           //float   fallDamage;
     ABUILDER_UPG_REGEN,                             //float   regenRate;
     SCA_TAKESFALLDAMAGE|SCA_FOVWARPS|
@@ -1511,6 +1552,7 @@ static const classAttributes_t bg_classList[ ] =
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
     LEVEL0_HEALTH,                                  //int     health;
     0.1f,                                           //float   maxHealthDecayRate;
+    LEVEL0_MIN_HEALTH,                              //int     minHealth;
     0.0f,                                           //float   fallDamage;
     LEVEL0_REGEN,                                   //float   regenRate;
     SCA_WALLCLIMBER|SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,    //int     abilities;
@@ -1547,6 +1589,7 @@ static const classAttributes_t bg_classList[ ] =
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
     LEVEL1_HEALTH,                                  //int     health;
     0.1f,                                           //float   maxHealthDecayRate;
+    LEVEL1_MIN_HEALTH,                              //int     minHealth;
     0.0f,                                           //float   fallDamage;
     LEVEL1_REGEN,                                   //float   regenRate;
     SCA_FOVWARPS|SCA_WALLCLIMBER|SCA_ALIENSENSE|SCA_REGEN,    //int     abilities;
@@ -1582,6 +1625,7 @@ static const classAttributes_t bg_classList[ ] =
     ( 1 << S2 )|( 1 << S3 ),                        //int     stages;
     LEVEL1_UPG_HEALTH,                              //int     health;
     0.1f,                                           //float   maxHealthDecayRate;
+    LEVEL1_UPG_MIN_HEALTH,                          //int     minHealth;
     0.0f,                                           //float   fallDamage;
     LEVEL1_UPG_REGEN,                               //float   regenRate;
     SCA_FOVWARPS|SCA_WALLCLIMBER|SCA_ALIENSENSE|SCA_REGEN,    //int     abilities;
@@ -1614,6 +1658,7 @@ static const classAttributes_t bg_classList[ ] =
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
     LEVEL2_HEALTH,                                  //int     health;
     0.15f,                                          //float   maxHealthDecayRate;
+    LEVEL2_MIN_HEALTH,                              //int     minHealth;
     0.0f,                                           //float   fallDamage;
     LEVEL2_REGEN,                                   //float   regenRate;
     SCA_WALLJUMPER|SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,     //int     abilities;
@@ -1646,6 +1691,7 @@ static const classAttributes_t bg_classList[ ] =
     ( 1 << S2 )|( 1 << S3 ),                        //int     stages;
     LEVEL2_UPG_HEALTH,                              //int     health;
     0.25f,                                          //float   maxHealthDecayRate;
+    LEVEL2_UPG_MIN_HEALTH,                          //int     minHealth;
     0.0f,                                           //float   fallDamage;
     LEVEL2_UPG_REGEN,                               //float   regenRate;
     SCA_WALLJUMPER|SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,     //int     abilities;
@@ -1677,6 +1723,7 @@ static const classAttributes_t bg_classList[ ] =
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages
     SPITFIRE_HEALTH,                                //int     health;
     0.25f,                                          //float   maxHealthDecayRate;
+    SPITFIRE_MIN_HEALTH,                            //int     minHealth;
     0.0f,                                           //float   fallDamage;
     SPITFIRE_REGEN,                                 //float   regenRate;
     (SCA_FOVWARPS|SCA_ALIENSENSE),                  //int     abilities;
@@ -1709,6 +1756,7 @@ static const classAttributes_t bg_classList[ ] =
     ( 1 << S2 )|( 1 << S3 ),                        //int     stages;
     LEVEL3_HEALTH,                                  //int     health;
     0.25f,                                          //float   maxHealthDecayRate;
+    LEVEL3_MIN_HEALTH,                              //int     minHealth;
     0.0f,                                           //float   fallDamage;
     LEVEL3_REGEN,                                   //float   regenRate;
     SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,          //int     abilities;
@@ -1741,6 +1789,7 @@ static const classAttributes_t bg_classList[ ] =
     ( 1 << S3 ),                                    //int     stages;
     LEVEL3_UPG_HEALTH,                              //int     health;
     0.25f,                                          //float   maxHealthDecayRate;
+    LEVEL3_MIN_HEALTH,                              //int     minHealth;
     0.0f,                                           //float   fallDamage;
     LEVEL3_UPG_REGEN,                               //float   regenRate;
     SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,          //int     abilities;
@@ -1775,6 +1824,7 @@ static const classAttributes_t bg_classList[ ] =
     ( 1 << S3 ),                                    //int     stages;
     LEVEL4_HEALTH,                                  //int     health;
     0.85f,                                          //float   maxHealthDecayRate;
+    LEVEL4_MIN_HEALTH,                              //int     minHealth;
     0.0f,                                           //float   fallDamage;
     LEVEL4_REGEN,                                   //float   regenRate;
     SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,                    //int     abilities;
@@ -1805,6 +1855,7 @@ static const classAttributes_t bg_classList[ ] =
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
     100000,                                         //int     health;
     0.0f,                                           //float   maxHealthDecayRate;
+    0,                                              //int     minHealth;
     1.0f,                                           //float   fallDamage;
     0.0f,                                           //float   regenRate;
     SCA_TAKESFALLDAMAGE|SCA_CANUSELADDERS|SCA_STAMINA,          //int     abilities;
@@ -1835,6 +1886,7 @@ static const classAttributes_t bg_classList[ ] =
     ( 1 << S3 ),                                    //int     stages;
     100000,                                   //int     health;
     0.0f,                                           //float   maxHealthDecayRate;
+    0,                                              //int     minHealth;
     1.0f,                                           //float   fallDamage;
     0.0f,                                           //float   regenRate;
     SCA_TAKESFALLDAMAGE|SCA_CANUSELADDERS|SCA_STAMINA,          //int     abilities;
@@ -4256,6 +4308,7 @@ static const upgradeAttributes_t bg_upgrades[ ] =
       "attacks.",
     "icons/iconu_larmour",
     qtrue,                  //qboolean  purchasable;
+    qtrue,                  //qboolean  sellable;
     qfalse,                 //qboolean  usable;
     TEAM_HUMANS             //team_t    team;
   },
@@ -4270,6 +4323,7 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     "The helmet provides protection to your head.",
     "icons/iconu_helmet",
     qtrue,                  //qboolean  purchasable;
+    qtrue,                  //qboolean  sellable;
     qfalse,                 //qboolean  usable;
     TEAM_HUMANS             //team_t    team;
   },
@@ -4281,11 +4335,29 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     SLOT_NONE,              //int   slots;
     "medkit",               //char  *name;
     "Medkit",               //char  *humanName;
-    "",
+    "A one time use medical kit that cures poison, "
+    "restores health, and restores stamina.",
     "icons/iconu_atoxin",
-    qfalse,                 //qboolean  purchasable;
+    qtrue,                  //qboolean  purchasable;
+    qfalse,                 //qboolean  sellable;
     qtrue,                  //qboolean  usable;
     TEAM_HUMANS             //team_t    team;
+  },
+  {
+    UP_BIOKIT,              //int   upgradeNum;
+    qtrue,                  //qboolean enabled;
+    BIOKIT_PRICE,           //int   price;
+    ( 1 << S2 )|( 1 << S2 )|( 1 << S3 ),//int  stages
+    SLOT_NONE,              //int   slots;
+    "biokit",               //char  *upgradeName;
+    "Biokit",               //char  *humanName;
+    "A biological implant utilizing nanotech that enhances "
+    " the user's health.",
+    "icons/iconu_biokit",
+    qtrue,                  //qboolean purchasable
+    qtrue,                  //qboolean  sellable;
+    qfalse,                 //qboolean usable
+    TEAM_HUMANS             //team_t  team;
   },
   {
     UP_BATTPACK,            //int   number;
@@ -4299,6 +4371,7 @@ static const upgradeAttributes_t bg_upgrades[ ] =
       "times the normal energy capacity for energy weapons.",
     "icons/iconu_battpack",
     qtrue,                  //qboolean  purchasable;
+    qtrue,                  //qboolean  sellable;
     qfalse,                 //qboolean  usable;
     TEAM_HUMANS             //team_t    team;
   },
@@ -4315,6 +4388,7 @@ static const upgradeAttributes_t bg_upgrades[ ] =
       "to reach spots.",
     "icons/iconu_jetpack",
     qtrue,                  //qboolean  purchasable;
+    qtrue,                  //qboolean  sellable;
     qfalse,                  //qboolean  usable;
     TEAM_HUMANS             //team_t    team;
   },
@@ -4333,6 +4407,7 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     "with a greater degree of confidence.",
     "icons/iconu_bsuit",
     qtrue,                  //qboolean  purchasable;
+    qtrue,                  //qboolean  sellable;
     qfalse,                 //qboolean  usable;
     TEAM_HUMANS             //team_t    team;
   },
@@ -4348,6 +4423,7 @@ static const upgradeAttributes_t bg_upgrades[ ] =
       "alien structures. Has a five second timer.",
     0,
     qtrue,                  //qboolean  purchasable;
+    qtrue,                  //qboolean  sellable;
     qtrue,                  //qboolean  usable;
     TEAM_HUMANS             //team_t    team;
   },
@@ -4362,6 +4438,7 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     "Ammunition for the currently held weapon.",
     0,
     qtrue,                  //qboolean  purchasable;
+    qfalse,                 //qboolean  sellable;
     qfalse,                 //qboolean  usable;
     TEAM_HUMANS             //team_t    team;
   },
@@ -4376,6 +4453,7 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     "Refuels the jet pack",
     0,
     qtrue,                  //qboolean  purchasable;
+    qfalse,                 //qboolean  sellable;
     qfalse,                 //qboolean  usable;
     TEAM_HUMANS             //team_t    team;
   }

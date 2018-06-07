@@ -1155,14 +1155,15 @@ static qboolean PM_CheckPounce( void )
   {
     pm->ps->pm_flags &= ~PMF_CHARGE;
     if( pm->ps->weapon == WP_ALEVEL0 )
-      pm->ps->weaponTime += LEVEL0_POUNCE_REPEAT;
+      pm->ps->stats[ STAT_WEAPONTIME2 ] += LEVEL0_POUNCE_REPEAT; // don't interfere with dretch bite
     else
       pm->ps->weaponTime += LEVEL3_POUNCE_REPEAT;
     return qfalse;
   }
 
   // We're building up for a pounce
-  if( ( !pm->swapAttacks ?
+  if( pm->ps->groundEntityNum != ENTITYNUM_NONE &&
+      ( !pm->swapAttacks ?
         (pm->cmd.buttons & BUTTON_ATTACK2) : (pm->cmd.buttons & BUTTON_ATTACK) ) )
   {
     pm->ps->pm_flags &= ~PMF_CHARGE;
@@ -1178,6 +1179,13 @@ static qboolean PM_CheckPounce( void )
   if( ( pm->ps->pm_flags & PMF_CHARGE ) ||
       pm->ps->misc[ MISC_MISC ] < LEVEL3_POUNCE_TIME_MIN ||
       pm->ps->groundEntityNum == ENTITYNUM_NONE )
+    return qfalse;
+  // cooling down from the pounce repeat
+  if( pm->ps->weapon == WP_ALEVEL0 )
+  {
+    if( pm->ps->stats[ STAT_WEAPONTIME2 ] )
+      return qfalse;
+  } else if( pm->ps->weaponTime )
     return qfalse;
 
   // Give the player forward velocity and simulate a jump
@@ -4336,18 +4344,25 @@ static void PM_Weapon( void )
         break;
     }
 
-    if( ( !pm->swapAttacks ?
-          (pm->cmd.buttons & BUTTON_ATTACK2) : (pm->cmd.buttons & BUTTON_ATTACK) ) &&
-        ( pm->ps->weapon != WP_ASPITFIRE ||
-          pm->waterlevel <= 1 ) )
-      pm->ps->misc[ MISC_MISC ] += pml.msec;
+    if( pm->ps->weapon != WP_ASPITFIRE &&
+        ( pm->ps->pm_flags & PMF_CHARGE ) &&
+        pm->ps->groundEntityNum == ENTITYNUM_NONE )
+      pm->ps->misc[ MISC_MISC ] = 0; // cancel charging while off the ground
     else
-      pm->ps->misc[ MISC_MISC ] -= pml.msec;
+    {
+      if( ( !pm->swapAttacks ?
+            (pm->cmd.buttons & BUTTON_ATTACK2) : (pm->cmd.buttons & BUTTON_ATTACK) ) &&
+          ( pm->ps->weapon != WP_ASPITFIRE ||
+            pm->waterlevel <= 1 ) )
+        pm->ps->misc[ MISC_MISC ] += pml.msec;
+      else
+        pm->ps->misc[ MISC_MISC ] -= pml.msec;
 
-    if( pm->ps->misc[ MISC_MISC ] > max )
-      pm->ps->misc[ MISC_MISC ] = max;
-    else if( pm->ps->misc[ MISC_MISC ] < 0 )
-      pm->ps->misc[ MISC_MISC ] = 0;
+      if( pm->ps->misc[ MISC_MISC ] > max )
+        pm->ps->misc[ MISC_MISC ] = max;
+      else if( pm->ps->misc[ MISC_MISC ] < 0 )
+        pm->ps->misc[ MISC_MISC ] = 0;
+    }
   }
 
   // Trample charge mechanics
@@ -4574,14 +4589,11 @@ static void PM_Weapon( void )
   if( pm->pmext->repairRepeatDelay < 0 )
     pm->pmext->repairRepeatDelay = 0;
 
-  if( pm->ps->weapon == WP_ALEVEL1 ||
-      pm->ps->weapon == WP_ALEVEL1_UPG )
-  {
-    if( pm->ps->stats[ STAT_WEAPONTIME2 ] > 0 )
-      pm->ps->stats[ STAT_WEAPONTIME2 ] -= pml.msec;
-    if( pm->ps->stats[ STAT_WEAPONTIME2 ] < 0 )
-      pm->ps->stats[ STAT_WEAPONTIME2 ] = 0;
-  }
+  // pump the secondary weapon timer
+  if( pm->ps->stats[ STAT_WEAPONTIME2 ] > 0 )
+    pm->ps->stats[ STAT_WEAPONTIME2 ] -= pml.msec;
+  if( pm->ps->stats[ STAT_WEAPONTIME2 ] < 0 )
+    pm->ps->stats[ STAT_WEAPONTIME2 ] = 0;
 
   // allways allow upgrades to be usable
   if( pm->cmd.weapon >= 32 &&

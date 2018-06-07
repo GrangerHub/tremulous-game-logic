@@ -61,9 +61,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL0_BITE_K_SCALE         1.0f
 #define LEVEL0_POUNCE_RANGE         48.0f
 #define LEVEL0_POUNCE_WIDTH         14.0f
-#define LEVEL0_POUNCE_TIME          600      // msec for full Dretch pounce
-#define LEVEL0_POUNCE_TIME_MIN      200      // msec before which pounce cancels
-#define LEVEL0_POUNCE_REPEAT        320      // msec before a new pounce starts
+#define LEVEL0_POUNCE_TIME          1500      // msec for full Dretch pounce
+#define LEVEL0_POUNCE_TIME_MIN      400      // msec before which pounce cancels
+#define LEVEL0_POUNCE_REPEAT        500      // msec before a new pounce starts
 #define LEVEL0_POUNCE_SPEED_MOD     0.75f    // walking speed modifier for pounce charging
 #define LEVEL0_POUNCE_JUMP_MAG      600      // Dretch pounce jump power
 
@@ -132,10 +132,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL3_POUNCE_RANGE         72.0f
 #define LEVEL3_POUNCE_UPG_RANGE     LEVEL3_POUNCE_RANGE + 3.0f
 #define LEVEL3_POUNCE_WIDTH         16.0f
-#define LEVEL3_POUNCE_TIME          700      // msec for full Dragoon pounce
-#define LEVEL3_POUNCE_TIME_UPG      700      // msec for full Adv. Dragoon pounce
-#define LEVEL3_POUNCE_TIME_MIN      200      // msec before which pounce cancels
-#define LEVEL3_POUNCE_REPEAT        400      // msec before a new pounce starts
+#define LEVEL3_POUNCE_TIME          1750      // msec for full Dragoon pounce
+#define LEVEL3_POUNCE_TIME_UPG      1250      // msec for full Adv. Dragoon pounce
+#define LEVEL3_POUNCE_TIME_MIN      400      // msec before which pounce cancels
+#define LEVEL3_POUNCE_REPEAT        500      // msec before a new pounce starts
 #define LEVEL3_POUNCE_SPEED_MOD     0.75f    // walking speed modifier for pounce charging
 #define LEVEL3_POUNCE_JUMP_MAG      700      // Dragoon pounce jump power
 #define LEVEL3_POUNCE_JUMP_MAG_UPG  800      // Adv. Dragoon pounce jump power
@@ -175,9 +175,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define SPITFIRE_ASCEND_REPEAT          400
 #define SPITFIRE_ASCEND_MAG             800.0f
 #define SPITFIRE_POUNCE_JUMP_MAG        2250
-#define SPITFIRE_POUNCE_REPEAT          250
-#define SPITFIRE_POUNCE_TIME            1200
-#define SPITFIRE_POUNCE_TIME_MIN        250
+#define SPITFIRE_POUNCE_REPEAT          450
+#define SPITFIRE_POUNCE_TIME            1500
+#define SPITFIRE_POUNCE_TIME_MIN        500
 #define SPITFIRE_POUNCE_DMG             AWDM(60000)
 #define SPITFIRE_POUNCE_RANGE           48.0f
 #define SPITFIRE_POUNCE_WIDTH           14.0f
@@ -220,66 +220,77 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ABUILDER_SPEED              0.9f
 #define ABUILDER_VALUE              AVM(((float)(ALIEN_CREDITS_PER_KILL)) / 2.0f)
 #define ABUILDER_HEALTH             AHM(75000)
+#define ABUILDER_MIN_HEALTH         (0.3f * ABUILDER_HEALTH)
 #define ABUILDER_REGEN              (0.04f * ABUILDER_HEALTH)
 #define ABUILDER_COST               0
 
 #define ABUILDER_UPG_SPEED          0.9f
 #define ABUILDER_UPG_VALUE          AVM(((float)(ALIEN_CREDITS_PER_KILL)) * 1.5f)
 #define ABUILDER_UPG_HEALTH         AHM(100000)
+#define ABUILDER_UPG_MIN_HEALTH     (0.3f * ABUILDER_UPG_HEALTH)
 #define ABUILDER_UPG_REGEN          (0.04f * ABUILDER_UPG_HEALTH)
 #define ABUILDER_UPG_COST           0
 
 #define LEVEL0_SPEED                1.4f
 #define LEVEL0_VALUE                AVM(ALIEN_CREDITS_PER_KILL)
 #define LEVEL0_HEALTH               AHM(38000)
+#define LEVEL0_MIN_HEALTH           (0.3f * LEVEL0_HEALTH)
 #define LEVEL0_REGEN                (0.05f * LEVEL0_HEALTH)
 #define LEVEL0_COST                 0
 
 #define LEVEL1_SPEED                1.25f
 #define LEVEL1_VALUE                AVM(1 * ALIEN_CREDITS_PER_KILL)
 #define LEVEL1_HEALTH               AHM(75000)
+#define LEVEL1_MIN_HEALTH           (0.3f * LEVEL1_HEALTH)
 #define LEVEL1_REGEN                (0.03f * LEVEL1_HEALTH)
 #define LEVEL1_COST                 1
 
 #define LEVEL1_UPG_SPEED            1.25f
 #define LEVEL1_UPG_VALUE            AVM(2 * ALIEN_CREDITS_PER_KILL)
 #define LEVEL1_UPG_HEALTH           AHM(100000)
+#define LEVEL1_UPG_MIN_HEALTH       (0.3f * LEVEL1_UPG_HEALTH)
 #define LEVEL1_UPG_REGEN            (0.03f * LEVEL1_UPG_HEALTH)
 #define LEVEL1_UPG_COST             3
 
 #define LEVEL2_SPEED                1.35f
 #define LEVEL2_VALUE                AVM(2 * ALIEN_CREDITS_PER_KILL)
 #define LEVEL2_HEALTH               AHM(190000)
+#define LEVEL2_MIN_HEALTH           (0.3f * LEVEL2_HEALTH)
 #define LEVEL2_REGEN                (0.03f * LEVEL2_HEALTH)
 #define LEVEL2_COST                 2
 
 #define LEVEL2_UPG_SPEED            1.35f
 #define LEVEL2_UPG_VALUE            AVM(4 * ALIEN_CREDITS_PER_KILL)
 #define LEVEL2_UPG_HEALTH           AHM(220000)
+#define LEVEL2_UPG_MIN_HEALTH       (0.3f * LEVEL2_UPG_HEALTH)
 #define LEVEL2_UPG_REGEN            (0.03f * LEVEL2_UPG_HEALTH)
 #define LEVEL2_UPG_COST             4
 
 #define LEVEL3_SPEED                1.1f
 #define LEVEL3_VALUE                AVM(3 * ALIEN_CREDITS_PER_KILL)
 #define LEVEL3_HEALTH               AHM(275000)
+#define LEVEL3_MIN_HEALTH           (0.3f * LEVEL3_HEALTH)
 #define LEVEL3_REGEN                (0.03f * LEVEL3_HEALTH)
 #define LEVEL3_COST                 5
 
 #define LEVEL3_UPG_SPEED            1.1f
 #define LEVEL3_UPG_VALUE            AVM(5 * ALIEN_CREDITS_PER_KILL)
 #define LEVEL3_UPG_HEALTH           AHM(400000)
+#define LEVEL3_UPG_MIN_HEALTH       (0.3f * LEVEL3_UPG_HEALTH)
 #define LEVEL3_UPG_REGEN            (10000)
 #define LEVEL3_UPG_COST             7
 
 #define LEVEL4_SPEED                1.2f
 #define LEVEL4_VALUE                AVM(8 * ALIEN_CREDITS_PER_KILL)
 #define LEVEL4_HEALTH               AHM(700000)
+#define LEVEL4_MIN_HEALTH           (0.3f * LEVEL4_HEALTH)
 #define LEVEL4_REGEN                (15000)
 #define LEVEL4_COST                 10
 
 #define SPITFIRE_SPEED                1.3f
 #define SPITFIRE_VALUE                AVM(3 * ALIEN_CREDITS_PER_KILL)
 #define SPITFIRE_HEALTH               AHM(165000)
+#define SPITFIRE_MIN_HEALTH           (0.3f * SPITFIRE_HEALTH)
 #define SPITFIRE_REGEN                (0.03f * SPITFIRE_HEALTH)
 #define SPITFIRE_COST                 3
 
@@ -295,7 +306,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  * CREEP_BASESIZE - the maximum distance a buildable can be from an egg/overmind
  * ALIEN_BHLTH_MODIFIER - overall health modifier for coarse tuning
  * ALIEN_BDMG_MODIFIER  - overall damage modifier for coarse tuning
- * ALIEN_BMAXHEALTH_DECAY - the amount the max health is reduced by from repair
  *
  */
 
@@ -306,8 +316,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define ALIEN_BREGEN_MODIFIER       (1.0f)
 #define ABRM(r)                     ((int)((float)r*ALIEN_BREGEN_MODIFIER))
-
-#define ALIEN_BMAXHEALTH_DECAY( h )  ( h / 2 )
 
 #define CREEP_BASESIZE              700
 #define CREEP_TIMEOUT               1000
@@ -697,7 +705,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define HELMET_POISON_PROTECTION    1000
 #define HELMET_PCLOUD_PROTECTION    3500
 
-#define MEDKIT_PRICE                0
+#define MEDKIT_PRICE                30
+
+#define BIOKIT_PRICE                250
+#define BIOKIT_REGEN_REPEAT         500 // msec to regen 1 hp
+#define BIOKIT_POISON_MODIFIER      0.3f
+#define BIOKIT_MAX_HEALTH           150000 // initial max health when purchased
+#define BIOKIT_HEALTH_RESERVE       150000 // initial health reserve when purcased
 
 #define BATTPACK_PRICE              150
 #define BATTPACK_MODIFIER           1.5f //modifier for extra energy storage available
@@ -740,7 +754,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  * REPEATER_BASESIZE - the maximum distance a buildable can be from a repeater
  * HUMAN_BHLTH_MODIFIER - overall health modifier for coarse tuning
  * HUMAN_BDMG_MODIFIER  - overall damage modifier for coarse tuning
- * ALIEN_BMAXHEALTH_DECAY - the amount the max health is reduced by from repair
  *
  */
 
@@ -751,8 +764,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define HUMAN_BREGEN_MODIFIER       (1.0f)
 #define HBRM(r)                     ((int)((float)r*HUMAN_BREGEN_MODIFIER))
-
-#define HUMAN_BMAXHEALTH_DECAY(h)  ( h / 2 )
 
 #define REACTOR_BASESIZE            1000
 #define REPEATER_BASESIZE           500
@@ -783,6 +794,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MEDISTAT_SPLASHRADIUS       100
 #define MEDISTAT_VALUE              ( ALIEN_CREDITS_PER_KILL )
 #define MEDISTAT_BAT_PWR            25000
+#define MEDISTAT_HEALTH_RESERVE     200000
 
 #define MGTURRET_BP                  8
 #define MGTURRET_BT                  10000

@@ -72,13 +72,47 @@ OnSameTeam
 */
 qboolean OnSameTeam( gentity_t *ent1, gentity_t *ent2 )
 {
-  if( !ent1->client || !ent2->client )
-    return qfalse;
+  team_t ent1Team, ent2Team;
 
-  if( ent1->client->pers.teamSelection == ent2->client->pers.teamSelection )
+  // entities are on the same team as themselves
+  if( ent1 == ent2 )
     return qtrue;
 
-  return qfalse;
+  // find the team of ent1
+  if( ent1->client )
+  {
+    ent1Team = ent1->client->pers.teamSelection;
+  } else
+  {
+    switch ( ent1->s.eType )
+    {
+      case ET_BUILDABLE:
+        ent1Team = BG_Buildable( ent1->s.modelindex )->team;
+        break;
+
+      default:
+        return qfalse;
+    }
+  }
+
+  // find the team of ent2
+  if( ent2->client )
+  {
+    ent2Team = ent2->client->pers.teamSelection;
+  } else
+  {
+    switch ( ent2->s.eType )
+    {
+      case ET_BUILDABLE:
+        ent2Team = BG_Buildable( ent2->s.modelindex )->team;
+        break;
+
+      default:
+        return qfalse;
+    }
+  }
+
+  return ( ent1Team == ent2Team );
 }
 
 /*
@@ -388,7 +422,7 @@ void TeamplayInfoMessage( gentity_t *ent )
 
     Com_sprintf( entry, sizeof( entry ), format, i,
       cl->pers.location,
-      BG_SU2HP( cl->ps.misc[ MISC_HEALTH ] ),
+      BG_SU2HP( player->health ),
       curWeaponClass,
       upgrade );
 
