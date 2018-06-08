@@ -2230,7 +2230,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
     {
       const int currentHealthBeforeDamage = targ->health;
 
-      targ->health = targ->health - take;
       G_ChangeHealth( targ, attacker, ( - take ), 0 );
 
       //adjust health scaling for evolving
