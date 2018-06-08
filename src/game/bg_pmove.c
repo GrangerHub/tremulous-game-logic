@@ -1157,7 +1157,11 @@ static qboolean PM_CheckPounce( void )
     if( pm->ps->weapon == WP_ALEVEL0 )
       pm->ps->stats[ STAT_WEAPONTIME2 ] += LEVEL0_POUNCE_REPEAT; // don't interfere with dretch bite
     else
+    {
+      pm->ps->stats[ STAT_WEAPONTIME2 ] += LEVEL3_POUNCE_REPEAT;
+      // don't allow chomp imediately after a pounce
       pm->ps->weaponTime += LEVEL3_POUNCE_REPEAT;
+    }
     return qfalse;
   }
 
@@ -1181,11 +1185,7 @@ static qboolean PM_CheckPounce( void )
       pm->ps->groundEntityNum == ENTITYNUM_NONE )
     return qfalse;
   // cooling down from the pounce repeat
-  if( pm->ps->weapon == WP_ALEVEL0 )
-  {
-    if( pm->ps->stats[ STAT_WEAPONTIME2 ] )
-      return qfalse;
-  } else if( pm->ps->weaponTime )
+  if( pm->ps->stats[ STAT_WEAPONTIME2 ] )
     return qfalse;
 
   // Give the player forward velocity and simulate a jump
@@ -1554,11 +1554,13 @@ static qboolean PM_CheckJump( vec3_t customNormal )
   if( BG_Class( pm->ps->stats[ STAT_CLASS ] )->jumpMagnitude == 0.0f )
     return qfalse;
 
-  //can't jump and pounce at the same time
+  //can't jump and pounce at the same time, and
+  // can't jump imediately after a pounce
   if( ( pm->ps->weapon == WP_ALEVEL0 ||
         pm->ps->weapon == WP_ALEVEL3 ||
         pm->ps->weapon == WP_ALEVEL3_UPG ) &&
-      pm->ps->misc[ MISC_MISC ] > 0 )
+      ( pm->ps->misc[ MISC_MISC ] > 0 ||
+        pm->ps->stats[ STAT_WEAPONTIME2 ] > 0 ) )
   {
     // disable bunny hop
     pm->ps->pm_flags &= ~PMF_ALL_HOP_FLAGS;
@@ -1702,7 +1704,7 @@ static qboolean PM_CheckJump( vec3_t customNormal )
     }
     else
     {
-      maxHoppingSpeed *= 1.75f;
+      maxHoppingSpeed *= 1.25f;
       maxKickFraction = 0.4f;
       minKickFraction = 0.2f;
     }
@@ -2451,7 +2453,7 @@ static void PM_ClimbMove( void )
     return;
   }
 
-  if( PM_CheckJump( NULL ) || PM_CheckPounce( ) || PM_CheckAirPounce( ) )
+  if( PM_CheckPounce( ) || PM_CheckJump( NULL ) || PM_CheckAirPounce( ) )
   {
     // jumped away
     if( pm->waterlevel > 1 )
@@ -2563,7 +2565,7 @@ static void PM_WalkMove( void )
     return;
   }
 
-  if( PM_CheckJump( NULL ) || PM_CheckPounce( ) || PM_CheckAirPounce( ) )
+  if( PM_CheckPounce( ) || PM_CheckJump( NULL ) || PM_CheckAirPounce( ) )
   {
     // jumped away
     if( pm->waterlevel > 1 )
