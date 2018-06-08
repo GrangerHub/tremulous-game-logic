@@ -4347,9 +4347,8 @@ static void PM_Weapon( void )
     }
 
     if( pm->ps->weapon != WP_ASPITFIRE &&
-        ( pm->ps->pm_flags & PMF_CHARGE ) &&
-        pm->ps->groundEntityNum == ENTITYNUM_NONE )
-      pm->ps->misc[ MISC_MISC ] = 0; // cancel charging while off the ground
+        ( pm->ps->pm_flags & PMF_CHARGE ) )
+      pm->ps->misc[ MISC_MISC ] = 0; // don't charge while in the middle of a pounce
     else
     {
       if( ( !pm->swapAttacks ?

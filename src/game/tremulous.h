@@ -62,10 +62,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL0_POUNCE_RANGE         48.0f
 #define LEVEL0_POUNCE_WIDTH         14.0f
 #define LEVEL0_POUNCE_TIME          1000      // msec for full Dretch pounce
-#define LEVEL0_POUNCE_TIME_MIN      500      // msec before which pounce cancels
-#define LEVEL0_POUNCE_REPEAT        500      // msec before a new pounce starts
-#define LEVEL0_POUNCE_SPEED_MOD     0.75f    // walking speed modifier for pounce charging
-#define LEVEL0_POUNCE_JUMP_MAG      600      // Dretch pounce jump power
+#define LEVEL0_POUNCE_TIME_MIN      150      // msec before which pounce cancels
+#define LEVEL0_POUNCE_REPEAT        150      // msec before a new pounce starts
+#define LEVEL0_POUNCE_SPEED_MOD     1.00f    // walking speed modifier for pounce charging
+#define LEVEL0_POUNCE_JUMP_MAG      450      // Dretch pounce jump power
 
 #define LEVEL1_CLAW_DMG                AWDM(32000)
 #define LEVEL1_CLAW_RANGE              96.0f
@@ -134,9 +134,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL3_POUNCE_WIDTH         16.0f
 #define LEVEL3_POUNCE_TIME          1200      // msec for full Dragoon pounce
 #define LEVEL3_POUNCE_TIME_UPG      1000      // msec for full Adv. Dragoon pounce
-#define LEVEL3_POUNCE_TIME_MIN      500      // msec before which pounce cancels
-#define LEVEL3_POUNCE_REPEAT        500      // msec before a new pounce starts
-#define LEVEL3_POUNCE_SPEED_MOD     0.75f    // walking speed modifier for pounce charging
+#define LEVEL3_POUNCE_TIME_MIN      150      // msec before which pounce cancels
+#define LEVEL3_POUNCE_REPEAT        150      // msec before a new pounce starts
+#define LEVEL3_POUNCE_SPEED_MOD     1.00f    // walking speed modifier for pounce charging
 #define LEVEL3_POUNCE_JUMP_MAG      700      // Dragoon pounce jump power
 #define LEVEL3_POUNCE_JUMP_MAG_UPG  800      // Adv. Dragoon pounce jump power
 #define LEVEL3_BOUNCEBALL_DMG       AWDM(110000)
@@ -510,14 +510,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define RIFLE_MAXCLIPS              5
 #define RIFLE_REPEAT                100
 #define RIFLE_K_SCALE               0.5f
-#define RIFLE_RECOIL                24.0f
+#define RIFLE_RECOIL                20.0f
 #define RIFLE_RELOAD                2000
 #define RIFLE_PRICE                 0
 #define RIFLE_SPREAD                0
-#define RIFLE_DMG                   HWDM(4400)
+#define RIFLE_DMG                   HWDM(5500)
 #define RIFLE_REPEAT2               50
 #define RIFLE_SPREAD2               0
-#define RIFLE_DMG2                  HWDM(4400)
+#define RIFLE_DMG2                  HWDM(5500)
 #define RIFLE_ALT_BURST_ROUNDS      4
 #define RIFLE_ALT_BURST_DELAY       200
 
