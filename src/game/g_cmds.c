@@ -3021,6 +3021,9 @@ void Cmd_Buy_f( gentity_t *ent )
         else if( upgrade == UP_BIOKIT )
         {
           ent->client->ps.misc[ MISC_MAX_HEALTH ] = BIOKIT_MAX_HEALTH;
+          G_ChangeHealth( ent, ent, BIOKIT_MAX_HEALTH,
+                          (HLTHF_SET_TO_CHANGE) );
+
           ent->healthReserve = BIOKIT_HEALTH_RESERVE;
         }
 
