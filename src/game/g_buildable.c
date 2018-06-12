@@ -4072,10 +4072,7 @@ static int G_QueueValue( gentity_t *self )
   if( !self->spawned )
   {
     double  totalBuildTime = ( double ) BG_Buildable( self->s.modelindex )->buildTime;
-    if( self->buildableTeam == TEAM_HUMANS )
       spawnProgress = ( double ) ( totalBuildTime - self->buildProgress );
-    else
-      spawnProgress = ( double ) ( level.time - self->buildTime );
 
     spawnProgress = spawnProgress / totalBuildTime;
   } else
@@ -4345,13 +4342,11 @@ void G_BuildableThink( gentity_t *ent, int msec )
   //toggle spawned flag for buildables
   if( !ent->spawned && ent->health > 0 && !level.pausedTime )
   {
-    if( ( ent->buildableTeam != TEAM_HUMANS &&
-          ent->buildTime + buildTime < level.time ) ||
-        ( ent->buildableTeam == TEAM_HUMANS &&
-          ( ent->buildProgress <= 0 ||
-            ent->health >= ent->s.constantLight ) ) )
+    if( ( ent->buildProgress <= 0 ||
+          ent->health >= ent->s.constantLight ) )
     {
       ent->spawned = qtrue;
+      ent->buildProgress = 0;
       level.numUnspawnedBuildables[ ent->buildableTeam ]--;
       if( ent->s.modelindex == BA_A_OVERMIND )
       {
@@ -4376,43 +4371,43 @@ void G_BuildableThink( gentity_t *ent, int msec )
 
     if( !ent->spawned && ent->buildProgress >= 0 )
     {
-        ent->buildProgress -= 1000.0f /
-                              (float)( ( ent->dcc ? 0.5 : 1 ) *
-                                       level.numUnspawnedBuildables[ TEAM_HUMANS ] );
-    }
+      int progressIncrement = 1000.0f /
+                              (float)( level.numUnspawnedBuildables[ ent->buildableTeam ] );
 
-    if( ent->health > 0 && ent->health < ent->s.constantLight )
-    {
-      if( !ent->spawned )
+      if( ent->buildableTeam == TEAM_HUMANS && ent->dcc )
+        progressIncrement *= 2;
+
+      ent->buildProgress -= progressIncrement;
+
+      if( ent->health > 0 && ent->health < ent->s.constantLight )
       {
-        int healthIncrement = (int)( ceil( (float)( ent->s.constantLight ) / (float)( buildTime * 0.001f ) ) );
-
-        if( ent->buildableTeam == TEAM_HUMANS && ent->dcc )
-          healthIncrement *= 2;
+        int healthIncrement = (int)( ceil( (float)( ent->s.constantLight ) *
+                                           ( ( (float)( progressIncrement ) ) /
+                                             ( (float)buildTime )  ) ) );
 
         G_ChangeHealth( ent, ent, healthIncrement,
                         HLTHF_NO_DECAY );
-      } else
+      }
+    } else if( ent->health > 0 && ent->health < ent->s.constantLight )
+    {
+      int regen = 0;
+
+      if( ent->buildableTeam == TEAM_ALIENS && regenRate &&
+        ( ent->lastDamageTime + ALIEN_REGEN_DAMAGE_TIME ) < level.time )
       {
-        int regen = 0;
+        G_ChangeHealth( ent, ent, regenRate, 0 );
+      }
+      else if( ent->buildableTeam == TEAM_HUMANS &&
+        ( ent->lastDamageTime + HUMAN_REGEN_DAMAGE_TIME ) < level.time )
+      {
+        if( ent->dcc )
+          regen = DC_HEALRATE;
+        else if( ent->powered )
+          regen = (int)( ceil( (float)( DC_HEALRATE ) / 10.0f ) );
 
-        if( ent->buildableTeam == TEAM_ALIENS && regenRate &&
-          ( ent->lastDamageTime + ALIEN_REGEN_DAMAGE_TIME ) < level.time )
+        if( regen )
         {
-          G_ChangeHealth( ent, ent, regenRate, 0 );
-        }
-        else if( ent->buildableTeam == TEAM_HUMANS &&
-          ( ent->lastDamageTime + HUMAN_REGEN_DAMAGE_TIME ) < level.time )
-        {
-          if( ent->dcc )
-            regen = DC_HEALRATE;
-          else if( ent->powered )
-            regen = (int)( ceil( (float)( DC_HEALRATE ) / 10.0f ) );
-
-          if( regen )
-          {
-              G_ChangeHealth( ent, ent, regen, 0 );
-          }
+            G_ChangeHealth( ent, ent, regen, 0 );
         }
       }
     }

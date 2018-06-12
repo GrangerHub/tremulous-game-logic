@@ -1234,14 +1234,6 @@ void buildFire( gentity_t *ent, dynMenu_t menu )
 
     if( G_BuildIfValid( ent, buildable ) )
     {
-      if( !g_cheats.integer && !IS_WARMUP &&
-        ( ent->client->ps.weapon == WP_ABUILD ||
-          ent->client->ps.weapon == WP_ABUILD2 ) )
-      {
-        ent->client->ps.misc[ MISC_MISC ] +=
-          BG_Buildable( buildable )->buildTime;
-      }
-
       // send ckit build effects
       if( ent->client->ps.weapon == WP_HBUILD &&
           ent->client->built )
