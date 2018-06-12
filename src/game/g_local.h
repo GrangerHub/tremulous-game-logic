@@ -370,7 +370,7 @@ struct gentity_s
   int               killedBy;                   // clientNum of killer
   credits_t         creditsDeffenses[ MAX_GENTITIES ];  // credits for damage done by an enemy defensive buildables.
   credits_t         creditsUpgradeDeffenses[ UP_NUM_UPGRADES ][ MAX_GENTITIES ]; // breakable upgrade credits for damage done by an enemy defensive buildables.
-  unsigned int      bonusValue; // additional value this entity is worth (due to its effectiveness/etc since it last spawned)
+  int      bonusValue; // additional value this entity is worth (due to its effectiveness/etc since it last spawned)
 
   vec3_t            turretAim;          // aim vector for turrets
   vec3_t            turretAimRate;      // track turn speed for norfenturrets
@@ -1211,7 +1211,7 @@ void        G_SetExpiration( gentity_t *ent, expire_t index, int expiration );
 //
 // g_combat.c
 //
-void      G_IncreaseBonusValue( unsigned int *bonusValue, int diff );
+void      G_IncreaseBonusValue( int *bonusValue, int diff );
 int       G_ChangeHealth( gentity_t *targ, gentity_t *changer,
                           int change, int healthFlags );
 qboolean  CanDamage( gentity_t *targ, vec3_t origin,

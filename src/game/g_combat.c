@@ -166,7 +166,7 @@ G_IncreaseBonusValue
 Safely increase the bonusValue
 ==================
 */
-void  G_IncreaseBonusValue( unsigned int *bonusValue, int diff )
+void  G_IncreaseBonusValue( int *bonusValue, int diff )
 {
   if( diff <= 0 )
     return;
@@ -181,6 +181,9 @@ void  G_IncreaseBonusValue( unsigned int *bonusValue, int diff )
     *bonusValue += diff;
   else
     *bonusValue = INT_MAX;
+
+  if( *bonusValue < 0 )
+    *bonusValue = 0;
 }
 
 /*
@@ -196,7 +199,7 @@ static void  G_IncreaseDamageCredits( int *credits, int diff )
     return;
 
   Com_Assert( credits &&
-              "G_IncreaseDamageCredits: NULL bonusValue" );
+              "G_IncreaseDamageCredits: NULL credits" );
 
   if( *credits == INT_MAX )
     return;
@@ -218,9 +221,9 @@ typedef struct rewardBuildableData_s
   int       *alienCredits;
   int       *humanCredits;
   int       (*numTeamPlayers)[ NUM_TEAMS ];
-  int       totalDamage;
+  float     totalDamage;
   int       maxHealth;
-  int       value;
+  float     value;
 } rewardBuildableData_t;
 
 /*
@@ -241,9 +244,9 @@ static void RewardBuildableAttackers( void *data, void *user_data )
   team_t                buildableTeam;
   int                   *alienCredits = rewardBuildableData->alienCredits;
   int                   *humanCredits = rewardBuildableData->humanCredits;
-  int                   totalDamage = rewardBuildableData->totalDamage;
+  float                 totalDamage = rewardBuildableData->totalDamage;
   int                   maxHealth = rewardBuildableData->maxHealth;
-  int                   value = rewardBuildableData->value;
+  float                 value = rewardBuildableData->value;
   int                   (*numTeamPlayers)[ NUM_TEAMS ];
   float                 damageFraction = ( (float)credits->credits ) / ( (float)totalDamage );
   int                   dBValue = value * damageFraction;
@@ -309,7 +312,7 @@ static void RewardBuildableAttackers( void *data, void *user_data )
               "RewardBuildableAttackers: buildableTeam is invalid" );
 
   if( totalDamage < maxHealth )
-    dBValue = (int)( ( (float)dBValue ) * ( ( (float)totalDamage ) / ( (float)maxHealth ) ) );
+    dBValue = (int)( ( (float)dBValue ) * ( ( totalDamage ) / ( (float)maxHealth ) ) );
 
   if( (*numTeamPlayers)[ buildableTeam ] )
     buildablesTeamDistributionEarnings = (int)( ( (float)dBValue ) * ( 2.0f / ( 5.0f * (float)(*numTeamPlayers)[ buildableTeam ] ) ) );
@@ -435,13 +438,7 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
 
     BG_Queue_Push_Head( &enemyBuildables, &( *creditsDeffenses )[ i ] );
 
-    if( totalDamage == INT_MAX )
-      continue;
-
-    if( INT_MAX - ( *creditsDeffenses )[ i ].credits > totalDamage )
-      totalDamage += ( *creditsDeffenses )[ i ].credits;
-    else
-      totalDamage = INT_MAX;
+    totalDamage += ( *creditsDeffenses )[ i ].credits;
   }
 
   if( totalDamage <= 0.0f )
@@ -500,10 +497,7 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
 
   if( destroyedUp == UP_NONE )
   {
-    if( INT_MAX - value > self->bonusValue )
-      value += self->bonusValue;
-    else
-      value = INT_MAX;
+    value += self->bonusValue;
   }
 
   numTeamPlayers[ TEAM_ALIENS ] = level.numAlienClients;
@@ -512,7 +506,7 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
   // Give credits and empty the array
   for( i = 0; i < level.maxclients; i++ )
   {
-    int stageValue = (int)( (float)value * ( ( (float)( *credits )[ i ] ) / ( (float)totalDamage) ) );
+    int stageValue = (int)( (float)value * ( ( (float)( *credits )[ i ] ) / ( totalDamage ) ) );
     int j;
     team_t playersTeam;
     gentity_t *player = g_entities + i;
@@ -522,7 +516,7 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
     {
       int          playersTeamDistributionEarnings;
       int          playersPersonalEarnings;
-      unsigned int bonusValue;
+      int bonusValue;
 
       if( totalDamage < maxHealth )
         stageValue *= totalDamage / maxHealth;
