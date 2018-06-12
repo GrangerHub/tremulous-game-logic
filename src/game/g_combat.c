@@ -498,6 +498,10 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
   if( destroyedUp == UP_NONE )
   {
     value += self->bonusValue;
+    if( value > INT_MAX )
+      value = INT_MAX;
+    else if( value < 0 )
+      value = 0;
   }
 
   numTeamPlayers[ TEAM_ALIENS ] = level.numAlienClients;
