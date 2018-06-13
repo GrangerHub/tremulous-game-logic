@@ -2307,10 +2307,14 @@ qboolean ASlimeZunge_CheckTarget( gentity_t *slime, gentity_t *target )
   if( VectorLength( distance ) > SLIME_ZUNGE_RANGE ) // is the target within range?
     return qfalse;
 
-  //only allow a narrow field of "vision"
-  VectorNormalize( distance ); //is now direction of target
-  if( DotProduct( distance, slime->s.origin2 ) <= SLIME_ZUNGE_DOT )
-    return qfalse;
+  if( !slime->slimeTarget ||
+      slime->slimeTarget != target )
+  {
+    //only allow a narrow field of "vision" if this slime isn't currently grabbing the target
+    VectorNormalize( distance ); //is now direction of target
+    if( DotProduct( distance, slime->s.origin2 ) <= SLIME_ZUNGE_DOT )
+      return qfalse;
+  }
 
   return qtrue;
 }
