@@ -1084,10 +1084,10 @@ BUILD GUN
 ================
 G_SetBuildableLinkState
 
-Links or unlinks all the buildable entities
+Links or unlinks all the undamaged spawned buildable entities
 ================
 */
-static void G_SetUndamagedBuildableLinkState( qboolean link )
+static void G_SetUndamagedSpawnedBuildableLinkState( qboolean link )
 {
   int       i;
   gentity_t *ent;
@@ -1097,9 +1097,9 @@ static void G_SetUndamagedBuildableLinkState( qboolean link )
     if( ent->s.eType != ET_BUILDABLE )
       continue;
 
-    if( ent->health < BG_Buildable( ent->s.modelindex )->health )
+    if( ent->spawned && 
+        ent->health < ent->s.constantLight )
       continue;
-    
 
     if( link )
       SV_LinkEntity( ent );
@@ -1125,10 +1125,10 @@ void CheckCkitRepair( gentity_t *ent )
             forward, end );
 
   G_SetPlayersLinkState( qfalse, ent );
-  G_SetUndamagedBuildableLinkState( qfalse );
+  G_SetUndamagedSpawnedBuildableLinkState( qfalse );
   SV_Trace( &tr, viewOrigin, NULL, NULL, end, ent->s.number, MASK_PLAYERSOLID, TT_AABB );
   traceEnt = &g_entities[ tr.entityNum ];
-  G_SetUndamagedBuildableLinkState( qtrue );
+  G_SetUndamagedSpawnedBuildableLinkState( qtrue );
   G_SetPlayersLinkState( qtrue, ent );
 
   if( tr.fraction < 1.0f && traceEnt->health > 0 &&
@@ -1154,30 +1154,6 @@ void CheckCkitRepair( gentity_t *ent )
       }
 
       tent->s.generic1 = WPM_SECONDARY;
-    } else
-    {
-      // progress the contruction of an unspawned buildable
-      int buildTime = BG_Buildable( traceEnt->s.modelindex )->buildTime;
-      int repeatRate = BG_Weapon( ent->client->ps.weapon )->repeatRate1;
-      int healRate = (int)( ceil( (float)( traceEnt->s.constantLight ) / ( ( (float)buildTime ) / ( (float)repeatRate ) ) ) );
-
-      traceEnt->buildProgress -= repeatRate;
-      G_ChangeHealth( traceEnt, ent, healRate, 0 );
-      if( traceEnt->buildProgress <= 0 )
-      {
-        traceEnt->buildProgress = 0;
-        if( traceEnt->health >= traceEnt->s.constantLight )
-        {
-          G_AddEvent( ent, EV_BUILD_REPAIRED, 0 );
-        } else
-            G_AddEvent( ent, EV_BUILD_REPAIR, 0 );
-      } else
-          G_AddEvent( ent, EV_BUILD_REPAIR, 0 );
-
-      ent->client->pmext.repairRepeatDelay += repeatRate;
-
-      tent->s.generic1 = WPM_PRIMARY;
-      sendEffects = qtrue;
     }
 
     if( sendEffects )
