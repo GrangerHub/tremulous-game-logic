@@ -3343,7 +3343,7 @@ void HMedistat_Think( gentity_t *self )
           player->mediStatAttackTime < level.time )
       {
         G_Damage( player, self, self, NULL, NULL,
-                  ( BG_Class( player->client->ps.stats[ STAT_CLASS ] )->health / 20 ),
+                  BG_HP2SU( 20 ),
                   (DAMAGE_NO_PROTECTION|DAMAGE_NO_LOCDAMAGE),
                   MOD_MEDISTAT );
         G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
