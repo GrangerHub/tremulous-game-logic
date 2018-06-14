@@ -1614,7 +1614,7 @@ static void G_FindSpitfireZapTarget( zap_t *zap )
 
       // only target enemies that are in a line of sight and within range
       SV_Trace( &tr, zap->creator->r.currentOrigin, NULL, NULL, enemy->r.currentOrigin,
-                zap->creator->s.number, MASK_SHOT, TT_AABB );
+                zap->creator->s.number, MASK_SOLID, TT_AABB );
       if( ( tr.fraction < 1.0f &&
             tr.entityNum != enemy->s.number ) ||
           (distance = Distance( zap->creator->r.currentOrigin, tr.endpos )) >
