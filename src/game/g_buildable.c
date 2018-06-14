@@ -6527,7 +6527,7 @@ void G_BuildLogRevert( int id )
               G_LogPrintf( "revert: remove %d %s\n",
                            (int)( ent - g_entities ),
                            BG_Buildable( ent->s.modelindex )->name );
-            if( ent->buildableTeam == TEAM_HUMANS && !ent->spawned )
+            if( !ent->spawned )
                 level.numUnspawnedBuildables[ ent->buildableTeam ]--;
             if( ent->s.modelindex == BA_H_TELEPORTER )
               G_RemoveTeleporter( ent );

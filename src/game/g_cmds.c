@@ -2353,7 +2353,7 @@ void Cmd_Class_f( gentity_t *ent )
         {
           const int    oldHealth = ent->health;
           float        valueMod;
-          unsigned int bonusValue = ent->bonusValue;
+          int          bonusValue = ent->bonusValue;
           int          creditsSaved[ MAX_CLIENTS ]; // human credits for each client
           credits_t    creditsDeffensesSaved[ MAX_GENTITIES ];
           int          i;

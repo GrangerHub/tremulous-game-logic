@@ -2283,6 +2283,10 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
                          HLTHF_EVOLVE_INCREASE) );
       }
 
+      if( targ->s.eType == ET_BUILDABLE &&
+          !targ->spawned )
+          level.numUnspawnedBuildables[ targ->buildableTeam ]--;
+
       targ->enemy = attacker;
       targ->die( targ, inflictor, attacker, take, mod );
       if( ( targ->activation.flags & ACTF_OCCUPY ) &&
