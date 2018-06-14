@@ -1478,16 +1478,15 @@ static const classAttributes_t bg_classList[ ] =
     qtrue,                                          //qboolean enabled;
     "builder",                                      //char    *name;
     "Responsible for building and maintaining all the alien structures. "
-      "Has a weak melee slash attack, as well as a spit attack that "
-      "slows victums. Additionally has the ability to crawl on walls.",
+      "Has a weak melee slash attack.",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
     ABUILDER_HEALTH,                                //int     health;
-    0.1f,                                           //float   maxHealthDecayRate;
+    0.0f,                                           //float   maxHealthDecayRate;
     ABUILDER_MIN_HEALTH,                            //int     minHealth;
     0.2f,                                           //float   fallDamage;
     ABUILDER_REGEN,                                 //float   regenRate;
     SCA_TAKESFALLDAMAGE|SCA_FOVWARPS|
-    SCA_WALLCLIMBER|SCA_ALIENSENSE|
+    SCA_ALIENSENSE|
     SCA_REGEN|SCA_CANHOVEL,                         //int    abilities;
     WP_ABUILD,                                      //weapon_t startWeapon;
     120.0f,                                         //float   buildDist;
@@ -1510,14 +1509,15 @@ static const classAttributes_t bg_classList[ ] =
   },
   {
     PCL_ALIEN_BUILDER0_UPG,                         //int     number;
-    qfalse,                                         //qboolean enabled;
+    qtrue,                                          //qboolean enabled;
     "builderupg",                                   //char    *name;
-    "Similar to the base Granger, except that in addition to "
+    "A battle hardened upgrade to the base Granger. This Granger "
+      "is the very definition of cute but deadly! In addition to "
       "being able to build structures it has a spit attack "
       "that slows victims and the ability to crawl on walls.",
-    ( 1 << S2 )|( 1 << S3 ),                        //int     stages;
+    ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
     ABUILDER_UPG_HEALTH,                            //int     health;
-    0.1f,                                           //float   maxHealthDecayRate;
+    0.0f,                                           //float   maxHealthDecayRate;
     ABUILDER_UPG_MIN_HEALTH,                        //int     minHealth;
     0.2f,                                           //float   fallDamage;
     ABUILDER_UPG_REGEN,                             //float   regenRate;
@@ -1536,7 +1536,7 @@ static const classAttributes_t bg_classList[ ] =
     1.0f,                                           //float   airAcceleration;
     6.0f,                                           //float   friction;
     100.0f,                                         //float   stopSpeed;
-    270.0f,                                         //float   jumpMagnitude;
+    337.5f,                                         //float   jumpMagnitude;
     1.0f,                                           //float   knockbackScale;
     CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
@@ -1551,7 +1551,7 @@ static const classAttributes_t bg_classList[ ] =
       "walls and ceilings.  Can also leap from surface to surface.",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
     LEVEL0_HEALTH,                                  //int     health;
-    0.1f,                                           //float   maxHealthDecayRate;
+    0.0f,                                           //float   maxHealthDecayRate;
     LEVEL0_MIN_HEALTH,                              //int     minHealth;
     0.0f,                                           //float   fallDamage;
     LEVEL0_REGEN,                                   //float   regenRate;
@@ -1588,7 +1588,7 @@ static const classAttributes_t bg_classList[ ] =
       "remain undetected by radar and turrets.",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
     LEVEL1_HEALTH,                                  //int     health;
-    0.1f,                                           //float   maxHealthDecayRate;
+    0.0f,                                           //float   maxHealthDecayRate;
     LEVEL1_MIN_HEALTH,                              //int     minHealth;
     0.0f,                                           //float   fallDamage;
     LEVEL1_REGEN,                                   //float   regenRate;
@@ -1624,7 +1624,7 @@ static const classAttributes_t bg_classList[ ] =
       "rate of nearby aliens. Can remain invisible while moving.",
     ( 1 << S2 )|( 1 << S3 ),                        //int     stages;
     LEVEL1_UPG_HEALTH,                              //int     health;
-    0.1f,                                           //float   maxHealthDecayRate;
+    0.0f,                                           //float   maxHealthDecayRate;
     LEVEL1_UPG_MIN_HEALTH,                          //int     minHealth;
     0.0f,                                           //float   fallDamage;
     LEVEL1_UPG_REGEN,                               //float   regenRate;
@@ -4007,7 +4007,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0.0f,                 //float     recoil2;
     0.0f,                 //float     recoil3;
     qtrue,                //qboolean  hasAltMode;
-    qtrue,                //qboolean  hasThirdMode;
+    qfalse,               //qboolean  hasThirdMode;
     qfalse,               //qboolean  canZoom;
     90.0f,                //float     zoomFov;
     qtrue,                //qboolean  purchasable;
