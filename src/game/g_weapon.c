@@ -1594,6 +1594,11 @@ static void G_FindSpitfireZapTarget( zap_t *zap )
           enemy->s.eType == ET_TELEPORTAL ) )
     {
       zapTarget_t *zapTarget;
+      float range = SPITFIRE_ZAP_RANGE;
+
+      if( zap->creator && zap->creator->client &&
+          zap->creator->client->ps.weapon == WP_ALEVEL2 )
+        range = LEVEL2_EXPLODE_CHARGE_ZAP_RADIUS;
 
       // only target entities that can take damage
       if( !G_TakesDamage( enemy ) )
@@ -1682,7 +1687,15 @@ static void G_DamageSpitfireZapTarget( void *data, void *user_data )
   zapTarget_t *target = (zapTarget_t *)data;
   zap_t *zap = (zap_t *)user_data;
   vec3_t dir;
-  int damage = SPITFIRE_ZAP_DMG;;
+  meansOfDeath_t mod = MOD_SPITFIRE_ZAP;
+  int damage = SPITFIRE_ZAP_DMG;
+
+  if( zap->creator && zap->creator->client &&
+      zap->creator->client->ps.weapon == WP_ALEVEL2 )
+  {
+    mod = MOD_LEVEL2_ZAP;
+    damage = LEVEL2_EXPLODE_CHARGE_ZAP_DMG;
+  }
 
   // apply 3/4 damage to targets niether grounded nor that contact water
   if( target->targetEnt->s.groundEntityNum == ENTITYNUM_NONE &&
@@ -1695,7 +1708,7 @@ static void G_DamageSpitfireZapTarget( void *data, void *user_data )
   G_Damage( target->targetEnt, zap->creator, zap->creator, dir,
             target->targetEnt->r.currentOrigin,
             damage / BG_Queue_Get_Length( &zap->targetQueue ),
-            DAMAGE_NO_KNOCKBACK | DAMAGE_NO_LOCDAMAGE, MOD_SPITFIRE_ZAP );
+            DAMAGE_NO_KNOCKBACK | DAMAGE_NO_LOCDAMAGE, mod );
 }
 
 /*
@@ -1985,6 +1998,16 @@ SpitfireZap
 ===============
 */
 void SpitfireZap( gentity_t *self )
+{
+  G_CreateNewSpitfireZap( self );
+}
+
+/*
+===============
+MarauderExplosionZap
+===============
+*/
+void MarauderExplosionZap( gentity_t *self )
 {
   G_CreateNewSpitfireZap( self );
 }

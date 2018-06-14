@@ -380,7 +380,7 @@ static void CG_AlienLevel2Text( char *text, playerState_t *ps )
   if( ps->stats[ STAT_CLASS ] == PCL_ALIEN_LEVEL2 )
   {
     Q_strcat( text, MAX_TUTORIAL_TEXT,
-        va( "Hold %s to charge up for a kamikaze explosion\n",
+        va( "Hold %s to charge up for a kamikaze zap explosion\n",
           CG_KeyNameForCommand( "+button5" ) ) );
   }
   else if( ps->stats[ STAT_CLASS ] == PCL_ALIEN_LEVEL2_UPG )

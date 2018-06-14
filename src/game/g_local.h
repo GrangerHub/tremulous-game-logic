@@ -1342,6 +1342,7 @@ bglist_t  *G_FindZapLinkFromEffectChannel( const gentity_t *effectChannel );
 void      G_UpdateZaps( int msec );
 void      G_ClearPlayerZapEffects( gentity_t *player );
 void      SpitfireZap( gentity_t *self );
+void      MarauderExplosionZap( gentity_t *self );
 
 
 //

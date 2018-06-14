@@ -1654,7 +1654,8 @@ static const classAttributes_t bg_classList[ ] =
     "level2",                                       //char    *name;
     "Has a melee attack and the ability to jump off walls. This "
       "allows the Marauder to gather great speed in enclosed areas."
-      "The basic marauder also has a secondary charged kamikaze attack.",
+      "The basic marauder also has an under developed secondary charged "
+      "exlposion zap attack that results in self fatality.",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
     LEVEL2_HEALTH,                                  //int     health;
     0.15f,                                          //float   maxHealthDecayRate;
@@ -1686,8 +1687,8 @@ static const classAttributes_t bg_classList[ ] =
     qtrue,                                          //qboolean enabled;
     "level2upg",                                    //char    *name;
     "The Advanced Marauder has the claw and wall jump abilities "
-      "like the basic Marauder with the addition of an area effect "
-      "electric shock attack.",
+      "like the basic Marauder with the addition of a fully developed "
+      "area effect electric shock attack.",
     ( 1 << S2 )|( 1 << S3 ),                        //int     stages;
     LEVEL2_UPG_HEALTH,                              //int     health;
     0.25f,                                          //float   maxHealthDecayRate;
@@ -6114,10 +6115,6 @@ pain_t BG_GetPainState( playerState_t *ps )
 {
   int maxHealth = BG_Class( ps->stats[ STAT_CLASS ] )->health;
   int health = ps->misc[ MISC_HEALTH ];
-
-  if( ps->weapon == WP_ALEVEL2 &&
-      ps->misc[ MISC_MISC ] >= LEVEL2_EXPLODE_CHARGE_TIME_WARNING )
-    return PAIN_25;
 
   if( BG_InventoryContainsUpgrade( UP_BATTLESUIT, ps->stats ) )
   {

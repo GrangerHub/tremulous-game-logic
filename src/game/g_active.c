@@ -982,6 +982,23 @@ void ClientTimerActions( gentity_t *ent, int msec )
         0, damage, 0, MOD_POISON );
     }
 
+    //self damage the kamikaze marauder
+    if( client->ps.weapon == WP_ALEVEL2 &&
+        client->ps.misc[ MISC_MISC ] >= LEVEL2_EXPLODE_CHARGE_TIME_WARNING )
+    {
+      int damage = LEVEL2_EXPLODE_CHARGE_SELF_DMG;
+
+      if( client->ps.misc[ MISC_MISC ] < LEVEL2_EXPLODE_CHARGE_TIME )
+      {
+        damage = (int)( ( (float)damage ) *
+                        ( ( (float)client->ps.misc[ MISC_MISC ] ) /
+                          ( (float)LEVEL2_EXPLODE_CHARGE_TIME ) ) );
+      }
+
+      G_Damage( ent, ent, ent, NULL,
+        0, damage, 0, MOD_SELFDESTRUCT );
+    }
+
     // turn off life support when a team admits defeat
     if( ( client->ps.stats[ STAT_TEAM ] == level.surrenderTeam ) ||
         ( level.lifeSupportTimer[ client->ps.stats[ STAT_TEAM ] ] < level.time ) )
@@ -2795,21 +2812,6 @@ void ClientThink_real( gentity_t *ent )
 
     ent->suicideTime = 0;
   }
-
-  // check for marauder self-destruction
-  if( ent->client->pmext.explosionMod > 0.000f )
-  {
-    // reset any acitvation entities the player might be occupying
-    if( client->ps.eFlags & EF_OCCUPYING )
-      G_ResetOccupation( ent->occupation.occupied, ent );
-
-      G_ChangeHealth( ent, ent, 0,
-                      (HLTHF_SET_TO_CHANGE|
-                       HLTHF_EVOLVE_INCREASE) );
-    player_die( ent, ent, ent, 100000, MOD_SELFDESTRUCT );
-
-    ent->suicideTime = 0;
-  }
 }
 
 /*
@@ -2923,11 +2925,6 @@ void ClientEndFrame( gentity_t *ent )
 
   // burn from lava, etc
   P_WorldEffects( ent );
-
-  //Give pain feedback to warn about marauder explosion charge
-  if( ent->client->ps.weapon == WP_ALEVEL2 &&
-      ent->client->ps.misc[ MISC_MISC ] > LEVEL2_EXPLODE_CHARGE_TIME_WARNING )
-    ent->client->damage_blood += ent->health;
 
   // apply all the damage taken this frame
   P_DamageFeedback( ent );

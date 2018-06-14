@@ -788,8 +788,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   // g_forcerespawn may force spawning at some later time
   self->client->respawnTime = level.time + 1700;
 
-  if( ( meansOfDeath == MOD_SELFDESTRUCT ) ||
-      BG_ExplodeMarauder( &self->client->ps,
+  if( BG_ExplodeMarauder( &self->client->ps,
                           &self->client->pmext ) )
   {
     float  explosionMod = self->client->pmext.explosionMod;
@@ -797,14 +796,17 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
     if( self->client->ps.eFlags & EF_EVOLVING )
       explosionMod *= BG_EvolveScale( &self->client->ps );
 
-    // do splash damage
+    // do some splash damage
     G_SelectiveRadiusDamage( self->client->ps.origin,
                              self->r.mins, self->r.maxs,
                              self,
-                             ( (int)( explosionMod * ( (float)LEVEL2_EXPLODE_CHARGE_DMG ) ) ),
-                             ( (int)( explosionMod * LEVEL2_EXPLODE_CHARGE_RANGE ) ),
+                             ( (int)( explosionMod * ( (float)LEVEL2_EXPLODE_CHARGE_SPLASH_DMG ) ) ),
+                             ( (int)( explosionMod * LEVEL2_EXPLODE_CHARGE_SPLASH_RADIUS ) ),
                              self, MOD_LEVEL2_EXPLOSION,
                              TEAM_ALIENS, qtrue );
+
+    // create the explosion zap
+    MarauderExplosionZap( self );
 
     //cleanup the player entity
     self->takedamage = qfalse;

@@ -4308,7 +4308,6 @@ static void PM_Weapon( void )
     if( pm->ps->misc[ MISC_MISC ] > max )
     {
       pm->ps->misc[ MISC_MISC ] = max;
-      BG_ExplodeMarauder( pm->ps, pm->pmext );
       return;
     }
     else if( pm->ps->misc[ MISC_MISC ] < 0 )
