@@ -127,6 +127,8 @@ struct gentity_s
 
   int               id; // Set on spawn and cleared on free, disconnect, or death.
 
+  gentity_id        idAtLastDeath; // Used to ensure that entities don't die twice without respawning
+
   struct gclient_s  *client;        // NULL if not a client
 
   qboolean          inuse;

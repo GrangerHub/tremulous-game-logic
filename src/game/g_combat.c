@@ -1734,6 +1734,9 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   if( !attacker )
     attacker = &g_entities[ ENTITYNUM_WORLD ];
 
+  if( targ == G_Entity_id_get( &targ->idAtLastDeath ) )
+    return;
+
   // end damage and target protection early
   attacker->dmgProtectionTime = 0;
   attacker->targetProtectionTime = 0;
@@ -2288,6 +2291,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
           level.numUnspawnedBuildables[ targ->buildableTeam ]--;
 
       targ->enemy = attacker;
+      G_Entity_id_set( &targ->idAtLastDeath, targ );
       targ->die( targ, inflictor, attacker, take, mod );
       if( ( targ->activation.flags & ACTF_OCCUPY ) &&
           ( targ->flags & FL_OCCUPIED ) &&
