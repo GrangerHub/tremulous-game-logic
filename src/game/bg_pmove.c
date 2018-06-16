@@ -2024,7 +2024,6 @@ static void PM_WaterMove( void )
   if( wishspeed > pm->ps->speed * pm_swimScale )
     wishspeed = pm->ps->speed * pm_swimScale;
 
-  PM_WallCoast( wishdir, WALLCOAST_3D );
   PM_Accelerate( wishdir, wishspeed, pm_wateraccelerate );
 
   // make sure we can go up slopes easily under water
@@ -2091,7 +2090,6 @@ static void PM_JetPackMove( void )
   VectorCopy( wishvel, wishdir );
   wishspeed = VectorNormalize( wishdir );
 
-  PM_WallCoast( wishdir, WALLCOAST_3D );
   PM_Accelerate( wishdir, wishspeed, pm_flyaccelerate );
 
   PM_StepSlideMove( qfalse, qfalse );
@@ -2255,7 +2253,6 @@ static void PM_SpitfireFlyMove( void )
 
   if( !isgliding || scale )
   {
-    PM_WallCoast( wishdir, WALLCOAST_3D );
     PM_Accelerate( wishdir, wishspeed, accel );
   }
 
@@ -2344,7 +2341,6 @@ static void PM_FlyMove( void )
   VectorCopy( wishvel, wishdir );
   wishspeed = VectorNormalize( wishdir );
 
-  PM_WallCoast( wishdir, WALLCOAST_3D );
   PM_Accelerate( wishdir, wishspeed, pm_flyaccelerate );
 
   PM_StepSlideMove( qfalse, qfalse );
@@ -2381,8 +2377,6 @@ static void PM_AirMove( void )
   }
   else
     controlFactor = 1.0f;
-
-  PM_WallCoast( wishdir, WALLCOAST_GROUNDED );
 
   // Give marauders more air control. Let them redirect their momentum in the
   // air and increase their acceleration when they accelerate against their
@@ -2630,7 +2624,6 @@ static void PM_WalkMove( void )
   else
     accelerate = BG_Class( pm->ps->stats[ STAT_CLASS ] )->acceleration;
 
-  PM_WallCoast( wishdir, WALLCOAST_GROUNDED );
   PM_Accelerate( wishdir, wishspeed, accelerate );
 
   //Com_Printf("velocity = %1.1f %1.1f %1.1f\n", pm->ps->velocity[0], pm->ps->velocity[1], pm->ps->velocity[2]);
