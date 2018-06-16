@@ -2034,6 +2034,7 @@ qboolean CheckPounceAttack( gentity_t *ent, trace_t *trace,
   vec3_t    impactDir;
   vec3_t    impactEntVelocity;
   vec3_t    relativeVelocity;
+  vec3_t    impactNormal;
   float     impactSpeed;
   float     speedmod;
   float     deflectionMod;
@@ -2102,7 +2103,17 @@ qboolean CheckPounceAttack( gentity_t *ent, trace_t *trace,
       return qfalse;
   }
 
-  deflectionMod = -DotProduct( trace->plane.normal, impactDir );
+  if( impactEnt->client ||
+      impactEnt->s.eType == ET_BUILDABLE )
+  {
+    VectorSubtract( ent->r.currentOrigin, impactEnt->r.currentOrigin,
+                    impactNormal);
+    VectorNormalize( impactNormal );
+  }
+  else
+    VectorCopy( trace->plane.normal, impactNormal );
+
+  deflectionMod = -DotProduct( impactNormal, impactDir );
 
   // ensure that the impact entity is in the direction of travel
   if( deflectionMod <= 0 )
