@@ -103,9 +103,6 @@ void PM_AddTouchEnt( trace_t *trace, const vec3_t impactVelocity )
   if( !pm->ClientImpacts )
     return;
 
-  if( trace->entityNum == ENTITYNUM_WORLD )
-    return;
-
   // see if it is already added
   if( pm->touchents[ trace->entityNum ] )
     return;

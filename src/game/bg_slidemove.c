@@ -119,10 +119,7 @@ qboolean  PM_SlideMove( qboolean gravity )
     if( trace.fraction == 1 )
        break;   // moved the entire distance
 
-    if( trace.contents & CONTENTS_TELEPORTER )
-      VectorCopy( primal_velocity, impactVelocity );
-    else
-      VectorCopy( pm->ps->origin, impactVelocity );
+    VectorCopy( primal_velocity, impactVelocity );
 
     // save entity for contact
     PM_AddTouchEnt( &trace, impactVelocity );

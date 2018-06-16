@@ -309,6 +309,27 @@ void ClientImpacts( pmove_t *pm, trace_t *trace,
     G_CrushAttack( ent, other );
   }
 
+  // pounce impacts
+  switch( ent->client->ps.weapon )
+  {
+    case WP_ALEVEL3:
+    case WP_ALEVEL3_UPG:
+    case WP_ASPITFIRE:
+      if( !CheckPounceAttack( ent, trace, impactVelocity ) )
+      {
+        ent->client->ps.weaponstate = WEAPON_READY;
+      }
+      else
+      {
+        ent->client->ps.generic1 = WPM_SECONDARY;
+        G_AddEvent( ent, EV_FIRE_WEAPON2, 0 );
+      }
+      break;
+
+    default:
+      break;
+  }
+
   // shove players
   if( ent->client && other->client )
     ClientShove( ent, other );
@@ -2664,31 +2685,6 @@ void ClientThink_real( gentity_t *ent )
       {
         client->ps.generic1 = WPM_PRIMARY;
         G_AddEvent( ent, EV_FIRE_WEAPON, 0 );
-      }
-      break;
-
-    case WP_ALEVEL3:
-    case WP_ALEVEL3_UPG:
-      if( !CheckPounceAttack( ent ) )
-      {
-        client->ps.weaponstate = WEAPON_READY;
-      }
-      else
-      {
-        client->ps.generic1 = WPM_SECONDARY;
-        G_AddEvent( ent, EV_FIRE_WEAPON2, 0 );
-      }
-      break;
-	 
-	case WP_ASPITFIRE:
-      if( !CheckPounceAttack( ent ) )
-      {
-        client->ps.weaponstate = WEAPON_READY;
-      }
-      else
-      {
-        client->ps.generic1 = WPM_SECONDARY;
-        G_AddEvent( ent, EV_FIRE_WEAPON2, 0 );
       }
       break;
 

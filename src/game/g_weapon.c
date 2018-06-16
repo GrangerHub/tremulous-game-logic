@@ -2027,65 +2027,134 @@ LEVEL3
 CheckPounceAttack
 ===============
 */
-qboolean CheckPounceAttack( gentity_t *ent )
+qboolean CheckPounceAttack( gentity_t *ent, trace_t *trace,
+                            const vec3_t impactVelocity )
 {
-  trace_t tr;
-  gentity_t *traceEnt;
-  int damage, timeMax, pounceRange, pounceWidth, payload;
+  gentity_t *impactEnt = &g_entities[ trace->entityNum ];
+  vec3_t    impactDir;
+  vec3_t    impactEntVelocity;
+  vec3_t    relativeVelocity;
+  float     impactSpeed;
+  float     speedmod;
+  float     deflectionMod;
+  float     maxJumpMag;
+  float     payloadMod = 0.5f;
+  int       maxDamage;
+  int       repeat;
+  int       maxPounceTime;
+  int       damage;
+  qboolean  usePayload = qfalse;
 
-  if( ent->client->pmext.pouncePayload <= 0 )
+  if( trace->entityNum == ENTITYNUM_NONE )
     return qfalse;
 
-  // In case the goon lands on his target, he gets one shot after landing
-  payload = ent->client->pmext.pouncePayload;
-  if( !( ent->client->ps.pm_flags & PMF_CHARGE ) )
-    ent->client->pmext.pouncePayload = 0;
+  if( ent->client->pounceEntHitTime[ impactEnt->s.number ] >= level.time )
+    return qfalse;
 
-  // Calculate muzzle point
-  AngleVectors( ent->client->ps.viewangles, forward, right, up );
-  BG_CalcMuzzlePointFromPS( &ent->client->ps, forward, right, up, muzzle );
-
-  // Trace from muzzle to see what we hit
-  if( ent->client->ps.weapon == WP_ASPITFIRE)
+  switch ( ent->client->ps.weapon )
   {
-      pounceRange = SPITFIRE_POUNCE_RANGE;
-      pounceWidth = SPITFIRE_POUNCE_WIDTH;
+    case WP_ALEVEL3:
+      maxJumpMag = LEVEL3_POUNCE_JUMP_MAG;
+      maxDamage = LEVEL3_POUNCE_DMG;
+      repeat = LEVEL3_POUNCE_REPEAT;
+      maxPounceTime = LEVEL3_POUNCE_TIME;
+      break;
+
+    case WP_ALEVEL3_UPG:
+      maxJumpMag = LEVEL3_POUNCE_JUMP_MAG_UPG;
+      maxDamage = LEVEL3_POUNCE_DMG;
+      repeat = LEVEL3_POUNCE_REPEAT;
+      maxPounceTime = LEVEL3_POUNCE_TIME_UPG;
+      break;
+
+    case WP_ASPITFIRE:
+      maxJumpMag = SPITFIRE_POUNCE_JUMP_MAG;
+      maxDamage = SPITFIRE_POUNCE_DMG;
+      repeat = SPITFIRE_POUNCE_REPEAT;
+      maxPounceTime = SPITFIRE_POUNCE_TIME;
+      break;
+
+    default:
+      return qfalse;
   }
-  else
+
+  if( !( ent->client->ps.pm_flags & PMF_CHARGE ) )
   {
-      pounceRange = ent->client->ps.weapon == WP_ALEVEL3 ? LEVEL3_POUNCE_RANGE : LEVEL3_POUNCE_UPG_RANGE;
-      pounceWidth = LEVEL3_POUNCE_WIDTH;
-  }  //LEVEL3_POUNCE_UPG_RANGE;
-  G_WideTrace( &tr, ent, pounceRange, pounceWidth,
-               LEVEL3_POUNCE_WIDTH, &traceEnt );
-  if( traceEnt == NULL )
+    ent->client->pmext.pouncePayloadTime = -1;
+    ent->client->pmext.pouncePayload = 0;
+  }
+
+  if( trace->entityNum == ENTITYNUM_WORLD )
+  {
+    ent->client->pmext.pouncePayloadTime = -1;
+    ent->client->pmext.pouncePayload = 0;
     return qfalse;
+  }
+
+  VectorCopy( impactVelocity, impactDir );
+  impactSpeed = VectorNormalize( impactDir );
+
+  if( impactSpeed <= ( ent->client->ps.speed * 1.25 ) )
+  {
+    if( impactEnt->s.number == ent->client->ps.groundEntityNum )
+      usePayload = qtrue;
+    else
+      return qfalse;
+  }
+
+  deflectionMod = -DotProduct( trace->plane.normal, impactDir );
+
+  // ensure that the impact entity is in the direction of travel
+  if( deflectionMod <= 0 )
+  {
+    if( impactEnt->s.number == ent->client->ps.groundEntityNum )
+      usePayload = qtrue;
+    else
+      return qfalse;
+  }
+
+  payloadMod *= ( (float)ent->client->pmext.pouncePayload ) /
+                ( (float)maxPounceTime );
+
+  if( !usePayload )
+  {
+    if( impactEnt->client )
+      VectorCopy( impactEnt->client->ps.velocity, impactEntVelocity);
+    else
+      VectorCopy( impactEnt->s.pos.trDelta, impactEntVelocity);
+
+    // determine relativeVelocity
+    VectorSubtract( impactVelocity, impactEntVelocity, relativeVelocity );
+    speedmod = VectorLength( relativeVelocity );
+    speedmod = speedmod / maxJumpMag;
+
+    damage = maxDamage * deflectionMod * speedmod;
+  } else
+  {
+    damage = maxDamage * payloadMod;
+  }
 
   // Send blood impact
-  if( G_TakesDamage( traceEnt ) )
-    WideBloodSpurt( ent, traceEnt, &tr );
-
-  if( !G_TakesDamage( traceEnt ) )
+  if( damage > 0 &&
+      G_TakesDamage( impactEnt ) )
+    WideBloodSpurt( ent, impactEnt, trace );
+  else
     return qfalse;
 
   // Deal damage
   if( ent->client->ps.weapon == WP_ASPITFIRE)
   {
-    timeMax = SPITFIRE_POUNCE_TIME;
-    damage = payload * SPITFIRE_POUNCE_DMG / timeMax;
-    ent->client->pmext.pouncePayload = 0;
-    ent->client->pmext.pouncePayloadTime = -1;
-    G_Damage( traceEnt, ent, ent, forward, tr.endpos, damage,
+    G_Damage( impactEnt, ent, ent, forward, trace->endpos, damage,
 	      DAMAGE_NO_LOCDAMAGE, MOD_SPITFIRE_POUNCE );
   }
   else
   {
-    timeMax = ent->client->ps.weapon == WP_ALEVEL3 ? LEVEL3_POUNCE_TIME : LEVEL3_POUNCE_TIME_UPG;
-    damage = payload * LEVEL3_POUNCE_DMG / timeMax;
-    ent->client->pmext.pouncePayload = 0;
-    G_Damage( traceEnt, ent, ent, forward, tr.endpos, damage,
+    G_Damage( impactEnt, ent, ent, forward, trace->endpos, damage,
 	      DAMAGE_NO_LOCDAMAGE, MOD_LEVEL3_POUNCE );
   }
+  ent->client->pmext.pouncePayload = 0;
+  ent->client->pmext.pouncePayloadTime = -1;
+  ent->client->pounceEntHitTime[ impactEnt->s.number ] = level.time + repeat;
   return qtrue;
 }
 

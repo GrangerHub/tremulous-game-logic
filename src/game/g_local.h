@@ -648,6 +648,8 @@ struct gclient_s
   int                 trampleBuildablesHitPos;
   int                 trampleBuildablesHit[ MAX_TRAMPLE_BUILDABLES_TRACKED ];
 
+  int                 pounceEntHitTime[ MAX_GENTITIES ];
+
   int                 lastCrushTime;        // Tyrant crush
 
   int                 portalTime;
@@ -1333,7 +1335,8 @@ void      G_GiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo );
 void      SnapVectorTowards( vec3_t v, vec3_t to );
 qboolean  CheckVenomAttack( gentity_t *ent );
 void      CheckGrabAttack( gentity_t *ent );
-qboolean  CheckPounceAttack( gentity_t *ent );
+qboolean  CheckPounceAttack( gentity_t *ent, trace_t *trace,
+                             const vec3_t impactVelocity );
 void      CheckCkitRepair( gentity_t *ent );
 void      G_ChargeAttack( gentity_t *ent, gentity_t *victim );
 void      G_CrushAttack( gentity_t *ent, gentity_t *victim );

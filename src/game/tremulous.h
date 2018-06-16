@@ -66,7 +66,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL0_POUNCE_TIME_MIN      150      // msec before which pounce cancels
 #define LEVEL0_POUNCE_REPEAT        150      // msec before a new pounce starts
 #define LEVEL0_POUNCE_SPEED_MOD     1.00f    // walking speed modifier for pounce charging
-#define LEVEL0_POUNCE_JUMP_MAG      450      // Dretch pounce jump power
+#define LEVEL0_POUNCE_JUMP_MAG      600      // Dretch pounce jump power
 
 #define LEVEL1_CLAW_DMG                AWDM(32000)
 #define LEVEL1_CLAW_RANGE              96.0f
@@ -131,7 +131,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL3_CLAW_REPEAT          700
 #define LEVEL3_CLAW_K_SCALE         1.0f
 #define LEVEL3_CLAW_U_REPEAT        600
-#define LEVEL3_CLAW_U_K_SCALE       1.0f
+#define LEVEL3_CLAW_U_K_SCALE       0.64f
 #define LEVEL3_POUNCE_DMG           AWDM(80000)
 #define LEVEL3_POUNCE_RANGE         72.0f
 #define LEVEL3_POUNCE_UPG_RANGE     LEVEL3_POUNCE_RANGE + 3.0f
@@ -141,8 +141,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL3_POUNCE_TIME_MIN      150      // msec before which pounce cancels
 #define LEVEL3_POUNCE_REPEAT        150      // msec before a new pounce starts
 #define LEVEL3_POUNCE_SPEED_MOD     1.00f    // walking speed modifier for pounce charging
-#define LEVEL3_POUNCE_JUMP_MAG      700      // Dragoon pounce jump power
-#define LEVEL3_POUNCE_JUMP_MAG_UPG  800      // Adv. Dragoon pounce jump power
+#define LEVEL3_POUNCE_JUMP_MAG      875      // Dragoon pounce jump power
+#define LEVEL3_POUNCE_JUMP_MAG_UPG  1000     // Adv. Dragoon pounce jump power
 #define LEVEL3_BOUNCEBALL_DMG       AWDM(110000)
 #define LEVEL3_BOUNCEBALL_REPEAT    1000
 #define LEVEL3_BOUNCEBALL_SPEED     1000.0f
@@ -182,7 +182,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define SPITFIRE_POUNCE_REPEAT          450
 #define SPITFIRE_POUNCE_TIME            1500
 #define SPITFIRE_POUNCE_TIME_MIN        500
-#define SPITFIRE_POUNCE_DMG             AWDM(60000)
+#define SPITFIRE_POUNCE_DMG             AWDM(70000)
 #define SPITFIRE_POUNCE_RANGE           48.0f
 #define SPITFIRE_POUNCE_WIDTH           14.0f
 #define SPITFIRE_POUNCE_SPEED_MOD       0.95f
