@@ -60,6 +60,7 @@ qboolean  PM_SlideMove( qboolean gravity )
   float   into;
   vec3_t  endVelocity;
   vec3_t  endClipVelocity;
+  vec3_t  impactVelocity;
 
   numbumps = 4;
 
@@ -118,8 +119,13 @@ qboolean  PM_SlideMove( qboolean gravity )
     if( trace.fraction == 1 )
        break;   // moved the entire distance
 
+    if( trace.contents & CONTENTS_TELEPORTER )
+      VectorCopy( primal_velocity, impactVelocity );
+    else
+      VectorCopy( pm->ps->origin, impactVelocity );
+
     // save entity for contact
-    PM_AddTouchEnt( trace.entityNum );
+    PM_AddTouchEnt( &trace, impactVelocity );
 
     time_left -= time_left * trace.fraction;
 

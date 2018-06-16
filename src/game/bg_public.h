@@ -243,7 +243,8 @@ typedef struct
 } pmoveExt_t;
 
 #define MAXTOUCH  32
-typedef struct pmove_s
+typedef struct pmove_s pmove_t;
+struct pmove_s
 {
   // state (in / out)
   playerState_t *ps;
@@ -258,8 +259,9 @@ typedef struct pmove_s
   int           framecount;
 
   // results (out)
-  int           numtouch;
-  int           touchents[ MAXTOUCH ];
+  qboolean      touchents[ MAX_GENTITIES ];
+  void (*ClientImpacts)( pmove_t *pm, trace_t *trace,
+                         const vec3_t impactVelocity );
 
   vec3_t        mins, maxs;     // bounding box size
 
@@ -288,7 +290,7 @@ typedef struct pmove_s
 
   int           swapAttacks;
   float         wallJumperMinFactor;
-} pmove_t;
+};
 
 qboolean BG_ExplodeMarauder( playerState_t *ps, pmoveExt_t *pmext );
 

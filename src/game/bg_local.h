@@ -79,7 +79,7 @@ extern  float pm_spectatorfriction;
 extern  int   c_pmove;
 
 void PM_ClipVelocity( vec3_t in, vec3_t normal, vec3_t out );
-void PM_AddTouchEnt( int entityNum );
+void PM_AddTouchEnt( trace_t *trace, const vec3_t impactVelocity );
 void PM_AddEvent( int newEvent );
 
 qboolean  PM_SlideMove( qboolean gravity );
