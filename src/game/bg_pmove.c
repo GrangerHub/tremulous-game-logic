@@ -68,26 +68,21 @@ void PM_AddEvent( int newEvent )
 PM_AddTouchEnt
 ===============
 */
-void PM_AddTouchEnt( int entityNum )
+void PM_AddTouchEnt( trace_t *trace, const vec3_t impactVelocity )
 {
-  int   i;
-
-  if( entityNum == ENTITYNUM_WORLD )
+  if( !pm->ClientImpacts )
     return;
 
-  if( pm->numtouch == MAXTOUCH )
+  if( trace->entityNum == ENTITYNUM_WORLD )
     return;
 
   // see if it is already added
-  for( i = 0 ; i < pm->numtouch ; i++ )
-  {
-    if( pm->touchents[ i ] == entityNum )
-      return;
-  }
+  if( pm->touchents[ trace->entityNum ] )
+    return;
 
   // add it
-  pm->touchents[ pm->numtouch ] = entityNum;
-  pm->numtouch++;
+  pm->touchents[ trace->entityNum ] = qtrue;
+  pm->ClientImpacts( pm, trace, impactVelocity );
 }
 
 /*
@@ -2769,6 +2764,7 @@ static void PM_GroundClimbTrace( void )
   vec3_t      refNormal = { 0.0f, 0.0f, 1.0f };
   vec3_t      ceilingNormal = { 0.0f, 0.0f, -1.0f };
   vec3_t      toAngles, surfAngles;
+  vec3_t      impactVelocity;
   trace_t     trace;
   int         i;
   const float eps = 0.000001f;
@@ -3048,7 +3044,8 @@ static void PM_GroundClimbTrace( void )
   // don't reset the z velocity for slopes
 //  pm->ps->velocity[2] = 0;
 
-  PM_AddTouchEnt( trace.entityNum );
+  VectorCopy( pm->ps->velocity, impactVelocity );
+  PM_AddTouchEnt( &trace, impactVelocity );
 }
 
 /*
@@ -3060,6 +3057,7 @@ static void PM_GroundTrace( void )
 {
   vec3_t      point;
   vec3_t      refNormal = { 0.0f, 0.0f, 1.0f };
+  vec3_t      impactVelocity;
   trace_t     trace;
 
   if( BG_ClassHasAbility( pm->ps->stats[ STAT_CLASS ], SCA_WALLCLIMBER ) )
@@ -3243,7 +3241,8 @@ static void PM_GroundTrace( void )
   // don't reset the z velocity for slopes
 //  pm->ps->velocity[2] = 0;
 
-  PM_AddTouchEnt( trace.entityNum );
+  VectorCopy( pm->ps->velocity, impactVelocity );
+  PM_AddTouchEnt( &trace, impactVelocity );
 }
 
 
@@ -4907,7 +4906,6 @@ void PmoveSingle( pmove_t *pmove )
   c_pmove++;
 
   // clear results
-  pm->numtouch = 0;
   pm->watertype = 0;
   pm->waterlevel = 0;
 

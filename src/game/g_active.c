@@ -272,41 +272,34 @@ static void ClientShove( gentity_t *ent, gentity_t *victim )
 ClientImpacts
 ==============
 */
-void ClientImpacts( gentity_t *ent, pmove_t *pm )
+void ClientImpacts( pmove_t *pm, trace_t *trace,
+                    const vec3_t impactVelocity )
 {
-  int       i;
-  trace_t   trace;
-  gentity_t *other;
+  gentity_t *other = &g_entities[ trace->entityNum ];
+  gentity_t *ent = &g_entities[ pm->ps->clientNum ];
 
-  // clear a fake trace struct for touch function
-  memset( &trace, 0, sizeof( trace ) );
 
-  for( i = 0; i < pm->numtouch; i++ )
+  // see G_UnlaggedDetectCollisions(), this is the inverse of that.
+  // if our movement is blocked by another player's real position,
+  // don't use the unlagged position for them because they are
+  // blocking or server-side Pmove() from reaching it
+  if( other->client && other->client->unlaggedCalc.used )
+    other->client->unlaggedCalc.used = qfalse;
+
+  // tyrant impact attacks
+  if( ent->client->ps.weapon == WP_ALEVEL4 )
   {
-    other = &g_entities[ pm->touchents[ i ] ];
-
-    // see G_UnlaggedDetectCollisions(), this is the inverse of that.
-    // if our movement is blocked by another player's real position,
-    // don't use the unlagged position for them because they are
-    // blocking or server-side Pmove() from reaching it
-    if( other->client && other->client->unlaggedCalc.used )
-      other->client->unlaggedCalc.used = qfalse;
-
-    // tyrant impact attacks
-    if( ent->client->ps.weapon == WP_ALEVEL4 )
-    {
-      G_ChargeAttack( ent, other );
-      G_CrushAttack( ent, other );
-    }
-
-    // shove players
-    if( ent->client && other->client )
-      ClientShove( ent, other );
-
-    // touch triggers
-    if( other->touch )
-      other->touch( other, ent, &trace );
+    G_ChargeAttack( ent, other );
+    G_CrushAttack( ent, other );
   }
+
+  // shove players
+  if( ent->client && other->client )
+    ClientShove( ent, other );
+
+  // touch triggers
+  if( other->touch )
+    other->touch( other, ent, trace );
 }
 
 /*
@@ -2377,6 +2370,9 @@ void ClientThink_real( gentity_t *ent )
 
   VectorCopy( client->ps.origin, client->oldOrigin );
 
+  // touch other objects
+  pm.ClientImpacts = ClientImpacts;
+
   for( i = 0; i < PORTAL_NUM; i++ )
     pm.humanPortalCreateTime[ i ] = level.humanPortals.createTime[ i ];
 
@@ -2469,9 +2465,6 @@ void ClientThink_real( gentity_t *ent )
 
   ent->waterlevel = pm.waterlevel;
   ent->watertype = pm.watertype;
-
-  // touch other objects
-  ClientImpacts( ent, &pm );
 
   // execute client events
   ClientEvents( ent, oldEventSequence );
