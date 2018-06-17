@@ -113,6 +113,7 @@ vmCvar_t  g_overflowFunds;
 vmCvar_t  g_allowBuildableStacking;
 vmCvar_t  g_alienBuildPoints;
 vmCvar_t  g_alienBuildPointsReserve;
+vmCvar_t  g_alienBuildPointsReserveVampireMod;
 vmCvar_t  g_alienBuildPointsStageMod0;
 vmCvar_t  g_alienBuildPointsStageMod1;
 vmCvar_t  g_alienBuildPointsStageMod2;
@@ -120,6 +121,7 @@ vmCvar_t  g_alienBuildQueueTime;
 vmCvar_t  g_humanBlackout;
 vmCvar_t  g_humanBuildPoints;
 vmCvar_t  g_humanBuildPointsReserve;
+vmCvar_t  g_humanBuildPointsReserveVampireMod;
 vmCvar_t  g_humanBuildPointsStageMod0;
 vmCvar_t  g_humanBuildPointsStageMod1;
 vmCvar_t  g_humanBuildPointsStageMod2;
@@ -205,6 +207,8 @@ static char cv_humanBuildPoints[ MAX_CVAR_VALUE_STRING ];
 static char cv_alienBuildPoints[ MAX_CVAR_VALUE_STRING ];
 static char cv_humanBuildPointsReserve[ MAX_CVAR_VALUE_STRING ];
 static char cv_alienBuildPointsReserve[ MAX_CVAR_VALUE_STRING ];
+static char cv_humanBuildPointsReserveVampireMod[ MAX_CVAR_VALUE_STRING ];
+static char cv_alienBuildPointsReserveVampireMod[ MAX_CVAR_VALUE_STRING ];
 
 static cvarTable_t   gameCvarTable[ ] =
 {
@@ -308,6 +312,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_allowBuildableStacking, "g_allowBuildableStacking", "1", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qfalse},
   { &g_alienBuildPoints, "g_alienBuildPoints", DEFAULT_ALIEN_BUILDPOINTS, 0, 0, qfalse, cv_alienBuildPoints },
   { &g_alienBuildPointsReserve, "g_alienBuildPointsReserve", DEFAULT_ALIEN_BUILDPOINTS_RESERVE, 0, 0, qfalse, cv_alienBuildPointsReserve },
+  { &g_alienBuildPointsReserveVampireMod, "g_alienBuildPointsReserveVampireMod", "0.0", 0, 0, qfalse, cv_alienBuildPointsReserveVampireMod },
   { &g_alienBuildPointsStageMod0, "g_alienBuildPointsStageMod0", "0.75", 0, 0, qfalse },
   { &g_alienBuildPointsStageMod1, "g_alienBuildPointsStageMod1", "1.0", 0, 0, qfalse },
   { &g_alienBuildPointsStageMod2, "g_alienBuildPointsStageMod2", "1.25", 0, 0, qfalse },
@@ -315,6 +320,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_humanBlackout, "g_humanBlackout", "1", CVAR_SERVERINFO, 0, qfalse  },
   { &g_humanBuildPoints, "g_humanBuildPoints", DEFAULT_HUMAN_BUILDPOINTS, 0, 0, qfalse, cv_humanBuildPoints },
   { &g_humanBuildPointsReserve, "g_humanBuildPointsReserve", DEFAULT_HUMAN_BUILDPOINTS_RESERVE, 0, 0, qfalse, cv_humanBuildPointsReserve },
+  { &g_humanBuildPointsReserveVampireMod, "g_humanBuildPointsReserveVampireMod", "0.0", 0, 0, qfalse, cv_humanBuildPointsReserveVampireMod },
   { &g_humanBuildPointsStageMod0, "g_humanBuildPointsStageMod0", "0.75", 0, 0, qfalse },
   { &g_humanBuildPointsStageMod1, "g_humanBuildPointsStageMod1", "1.0", 0, 0, qfalse },
   { &g_humanBuildPointsStageMod2, "g_humanBuildPointsStageMod2", "1.25", 0, 0, qfalse },
@@ -579,6 +585,8 @@ void G_MapConfigs( const char *mapname )
   Cvar_SetSafe( "g_mapConfigsLoaded", "1" );
 }
 
+static int G_StageBuildPointReserveMaxForTeam( team_t team );
+
 /*
 ============
 G_InitGame
@@ -709,9 +717,9 @@ Q_EXPORT void G_InitGame( int levelTime, int randomSeed, int restart )
   G_LoadCensors( );
 
   // initialize the build points reserves
-  level.alienBuildPointsReserve = g_alienBuildPointsReserve.integer;
+  level.alienBuildPointsReserve = G_StageBuildPointReserveMaxForTeam( TEAM_ALIENS );
   level.alienBuildPointsReserveLost = 0;
-  level.humanBuildPointsReserve = g_humanBuildPointsReserve.integer;
+  level.humanBuildPointsReserve = G_StageBuildPointReserveMaxForTeam( TEAM_HUMANS );
   level.humanBuildPointsReserveLost = 0;
 
   // initialize all entities for this game
@@ -1296,6 +1304,72 @@ static int G_StageBuildPointMaxForTeam( team_t team )
 
 /*
 ============
+G_StageBuildPointReserveMaxForTeam
+
+Returns the max build point reserve for a given team's stage.
+============
+*/
+static int G_StageBuildPointReserveMaxForTeam( team_t team )
+{
+  float mod;
+  float baseBPReserve;
+
+  switch ( team )
+  {
+    case TEAM_ALIENS:
+      baseBPReserve = g_alienBuildPointsReserve.integer;
+      switch ( IS_WARMUP ? g_alienMaxStage.integer : g_alienStage.integer )
+      {
+        case S1:
+          mod = g_alienBuildPointsStageMod0.value;
+          break;
+
+        case S2:
+          mod = g_alienBuildPointsStageMod1.value;
+          break;
+
+        case S3:
+          mod = g_alienBuildPointsStageMod2.value;
+          break;
+
+        default:
+          mod = g_alienBuildPointsStageMod2.value;
+          break;
+      }
+      break;
+
+    case TEAM_HUMANS:
+      baseBPReserve = g_humanBuildPointsReserve.integer;
+      switch ( IS_WARMUP ? g_alienMaxStage.integer : g_humanStage.integer )
+      {
+        case S1:
+          mod = g_humanBuildPointsStageMod0.value;
+          break;
+
+        case S2:
+          mod = g_humanBuildPointsStageMod1.value;
+          break;
+
+        case S3:
+          mod = g_humanBuildPointsStageMod2.value;
+          break;
+
+        default:
+          mod = g_humanBuildPointsStageMod2.value;
+          break;
+      }
+      break;
+
+    default:
+      Com_Error( ERR_FATAL, "G_StageBuildPointReserveMaxForTeam: Team# %d is not accounted for", team);
+      return 0;
+  }
+
+  return (int)( mod * baseBPReserve );
+}
+
+/*
+============
 G_CalculateBuildPoints
 
 Recalculate the quantity of building points available to the teams
@@ -1316,9 +1390,6 @@ void G_CalculateBuildPoints( void )
     level.alienNextQueueTime += G_NextQueueTime( level.alienBuildPointQueue,
                                                G_StageBuildPointMaxForTeam( TEAM_ALIENS ),
                                                g_alienBuildQueueTime.integer );
-
-    level.alienBuildPointsReserve = g_alienBuildPointsReserve.integer -
-                                    level.alienBuildPointsReserveLost;
   }
 
 
@@ -1332,12 +1403,9 @@ void G_CalculateBuildPoints( void )
     level.humanNextQueueTime += G_NextQueueTime( level.humanBuildPointQueue,
                                                G_StageBuildPointMaxForTeam( TEAM_HUMANS ),
                                                g_humanBuildQueueTime.integer );
-
-    level.humanBuildPointsReserve = g_humanBuildPointsReserve.integer -
-                                    level.humanBuildPointsReserveLost;
   }
 
-  
+
 
   // Sudden Death checks (not applicable in warmup)
   if( !IS_WARMUP && G_TimeTilSuddenDeath( ) <= 0 && level.suddenDeathWarning < TW_PASSED )
@@ -1374,7 +1442,11 @@ void G_CalculateBuildPoints( void )
   }
 
   level.humanBuildPoints = G_StageBuildPointMaxForTeam( TEAM_HUMANS ) - level.humanBuildPointQueue;
+  level.humanBuildPointsReserve = G_StageBuildPointReserveMaxForTeam( TEAM_HUMANS ) -
+                                  level.humanBuildPointsReserveLost;
   level.alienBuildPoints = G_StageBuildPointMaxForTeam( TEAM_ALIENS ) - level.alienBuildPointQueue;
+  level.alienBuildPointsReserve = G_StageBuildPointReserveMaxForTeam( TEAM_ALIENS ) -
+                                  level.alienBuildPointsReserveLost;
 
   // Iterate through entities
   for( i = MAX_CLIENTS; i < level.num_entities; i++ )

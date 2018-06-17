@@ -4113,6 +4113,11 @@ void G_QueueBuildPoints( gentity_t *self )
         level.alienNextQueueTime = level.time + g_alienBuildQueueTime.integer;
 
       level.alienBuildPointQueue += queuePoints;
+
+      // vampire the reserve
+      if( g_humanBuildPointsReserveVampireMod.value > 0.0 )
+        level.humanBuildPointsReserveLost -= (int)( ( (float)queuePoints ) *
+                                                    g_humanBuildPointsReserveVampireMod.value );
       break;
 
     case TEAM_HUMANS:
@@ -4120,6 +4125,11 @@ void G_QueueBuildPoints( gentity_t *self )
           level.humanNextQueueTime = level.time + g_humanBuildQueueTime.integer;
 
       level.humanBuildPointQueue += queuePoints;
+
+      // vampire the reserve
+      if( g_alienBuildPointsReserveVampireMod.value > 0.0 )
+        level.alienBuildPointsReserveLost -= (int)( ( (float)queuePoints ) *
+                                                    g_alienBuildPointsReserveVampireMod.value );
       break;
 
   }
@@ -4378,6 +4388,9 @@ void G_BuildableThink( gentity_t *ent, int msec )
     {
       int progressIncrement = 1000.0f /
                               (float)( level.numUnspawnedBuildables[ ent->buildableTeam ] );
+
+      if( progressIncrement < 1 )
+        progressIncrement = 1;
 
       if( ent->buildableTeam == TEAM_HUMANS && ent->dcc )
         progressIncrement *= 2;
