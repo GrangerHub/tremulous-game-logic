@@ -4373,7 +4373,8 @@ void G_BuildableThink( gentity_t *ent, int msec )
 
     ent->s.eFlags &= ~EF_SCAN_SPOTTED;
 
-    if( !ent->spawned && ent->buildProgress >= 0 )
+    if( !ent->spawned && ent->health > 0 &&
+        ent->buildProgress >= 0 )
     {
       int progressIncrement = 1000.0f /
                               (float)( level.numUnspawnedBuildables[ ent->buildableTeam ] );
@@ -4382,6 +4383,8 @@ void G_BuildableThink( gentity_t *ent, int msec )
         progressIncrement *= 2;
 
       ent->buildProgress -= progressIncrement;
+      if( ent->buildProgress < 0 )
+        ent->buildProgress = 0;
 
       if( ent->health > 0 && ent->health < ent->s.constantLight )
       {
