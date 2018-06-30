@@ -132,17 +132,17 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL3_CLAW_K_SCALE         1.0f
 #define LEVEL3_CLAW_U_REPEAT        600
 #define LEVEL3_CLAW_U_K_SCALE       0.64f
-#define LEVEL3_POUNCE_DMG           AWDM(80000)
+#define LEVEL3_POUNCE_DMG           AWDM(160000)
 #define LEVEL3_POUNCE_RANGE         72.0f
 #define LEVEL3_POUNCE_UPG_RANGE     LEVEL3_POUNCE_RANGE + 3.0f
 #define LEVEL3_POUNCE_WIDTH         16.0f
-#define LEVEL3_POUNCE_TIME          1200      // msec for full Dragoon pounce
-#define LEVEL3_POUNCE_TIME_UPG      1000      // msec for full Adv. Dragoon pounce
+#define LEVEL3_POUNCE_TIME          2400      // msec for full Dragoon pounce
+#define LEVEL3_POUNCE_TIME_UPG      2000      // msec for full Adv. Dragoon pounce
 #define LEVEL3_POUNCE_TIME_MIN      150      // msec before which pounce cancels
 #define LEVEL3_POUNCE_REPEAT        150      // msec before a new pounce starts
 #define LEVEL3_POUNCE_SPEED_MOD     1.00f    // walking speed modifier for pounce charging
-#define LEVEL3_POUNCE_JUMP_MAG      875      // Dragoon pounce jump power
-#define LEVEL3_POUNCE_JUMP_MAG_UPG  1000     // Adv. Dragoon pounce jump power
+#define LEVEL3_POUNCE_JUMP_MAG      1725     // Dragoon pounce jump power
+#define LEVEL3_POUNCE_JUMP_MAG_UPG  2000     // Adv. Dragoon pounce jump power
 #define LEVEL3_BOUNCEBALL_DMG       AWDM(110000)
 #define LEVEL3_BOUNCEBALL_REPEAT    1000
 #define LEVEL3_BOUNCEBALL_SPEED     1000.0f
