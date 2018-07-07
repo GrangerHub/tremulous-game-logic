@@ -341,6 +341,8 @@ void  G_TouchTriggers( gentity_t *ent )
   if( ent->client->ps.misc[ MISC_HEALTH ] <= 0 )
     return;
 
+  ent->activation.usable_map_trigger = ENTITYNUM_NONE;
+
   BG_ClassBoundingBox( ent->client->ps.stats[ STAT_CLASS ],
                        pmins, pmaxs, NULL, NULL, NULL );
 
@@ -1212,7 +1214,11 @@ static void G_FindActivationEnt( gentity_t *ent )
 
   traceEnt = &g_entities[ trace.entityNum ];
 
-  if( G_CanActivateEntity( client, traceEnt ) )
+  if( ent->activation.usable_map_trigger != ENTITYNUM_NONE ) {
+    client->ps.persistant[ PERS_ACT_ENT ] = ent->activation.usable_map_trigger;
+    ent->occupation.occupied = &g_entities[ent->activation.usable_map_trigger];
+  }
+  else if( G_CanActivateEntity( client, traceEnt ) )
   {
     client->ps.persistant[ PERS_ACT_ENT ] = traceEnt->s.number;
     ent->occupation.occupied = traceEnt;
@@ -2274,8 +2280,11 @@ void ClientThink_real( gentity_t *ent )
 
     if( client->ps.eFlags & EF_OCCUPYING )
       G_UnoccupyEnt( actEnt, ent, ent, qfalse );
-    else if( client->ps.persistant[ PERS_ACT_ENT ] != ENTITYNUM_NONE )
-      G_ActivateEntity( actEnt, ent );
+    else if( client->ps.persistant[ PERS_ACT_ENT ] != ENTITYNUM_NONE ) {
+      if(client->ps.persistant[ PERS_ACT_ENT ] != ent->activation.usable_map_trigger) {
+        G_ActivateEntity( actEnt, ent );
+      }
+    }
     else if( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
     {
       if( BG_AlienCanEvolve( client->ps.stats[ STAT_CLASS ],

@@ -586,15 +586,16 @@ Force player to class.
 */
 void Use_Target_force_class(gentity_t *ent, gentity_t *other, gentity_t *activator) {
   vec3_t infestOrigin;
-  int clientNum, i;
+  int     clientNum;
+  class_t class;
 
-  i = BG_ClassByName( ent->inventory )->number;
+  class = BG_ClassByName( ent->inventory )->number;
 
   if( activator && activator->client &&
       activator->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
-      (G_RoomForClassChange(activator, i, infestOrigin)) &&
-      (activator->client->ps.stats[STAT_CLASS] != i)) {
-    if(i == PCL_NONE) {
+      (G_RoomForClassChange(activator, class, infestOrigin)) &&
+      (activator->client->ps.stats[STAT_CLASS] != class)) {
+    if(class == PCL_NONE) {
       SV_GameSendServerCommand(-1 , "print \"Unknown class (target_force_class)\n\"");
       return;
     }
@@ -605,17 +606,7 @@ void Use_Target_force_class(gentity_t *ent, gentity_t *other, gentity_t *activat
     activator->client->pers.evolveHealthFraction = (float)activator->client->ps.misc[ MISC_HEALTH ] /
                                                    (float)BG_Class( activator->client->pers.classSelection )->health;
 
-    if( activator->client->pers.evolveHealthFraction < 0.0f )
-      activator->client->pers.evolveHealthFraction = 0.0f;
-    else if( activator->client->pers.evolveHealthFraction > 1.0f )
-      activator->client->pers.evolveHealthFraction = 1.0f;
-
-    activator->client->pers.classSelection = i;
-    activator->client->ps.stats[ STAT_CLASS ] = i;
-    ClientUserinfoChanged( clientNum, qfalse );
-
-    VectorCopy( infestOrigin, activator->s.pos.trBase );
-    ClientSpawn( activator, activator, activator->s.pos.trBase, activator->s.apos.trBase );
+    G_Evolve( activator, class, 0, infestOrigin );
 
     ent->activator = activator;
     G_UseTargets( ent, ent->activator );
@@ -634,16 +625,14 @@ Force player to use a weapon.
 ===============
 */
 void Use_Target_force_weapon(gentity_t *ent, gentity_t *other, gentity_t *activator) {
-  int i, j;
+  int i;
   qboolean change = qfalse;
-  vec3_t newOrigin;
 
   if(
     activator && activator->client &&
     activator->client->ps.stats[STAT_TEAM] == TEAM_HUMANS) {
     if(other->TargetGate && (other->TargetGate & RESET_BIT)) {
-      activator->client->ps.stats[STAT_WEAPON] = WP_NONE;
-      G_ForceWeaponChange(activator, WP_NONE);
+      G_TakeItemAfterCheck(activator, "weapon", qtrue);
     }
 
     if(other->TargetGate && (other->TargetGate & SIGN_BIT)) {
@@ -651,10 +640,7 @@ void Use_Target_force_weapon(gentity_t *ent, gentity_t *other, gentity_t *activa
         if(
           BG_InventoryContainsWeapon(
             ent->wTriggers[i], activator->client->ps.stats)) {
-          activator->client->ps.stats[STAT_WEAPON] = WP_NONE;
-          if(ent->wTriggers[i] == activator->client->ps.weapon) {
-            G_ForceWeaponChange(activator, WP_NONE);
-          }
+          G_TakeItemAfterCheck(activator, BG_Weapon(ent->wTriggers[i])->name, qtrue);
         }
       }
 
@@ -662,19 +648,7 @@ void Use_Target_force_weapon(gentity_t *ent, gentity_t *other, gentity_t *activa
         if(
           BG_InventoryContainsUpgrade(
             ent->uTriggers[i], activator->client->ps.stats)) {
-          if(ent->uTriggers[i] == UP_BATTLESUIT) {
-            if(G_RoomForClassChange( activator, PCL_HUMAN, newOrigin)) {
-              VectorCopy(newOrigin, activator->client->ps.origin);
-              ent->client->ps.stats[STAT_CLASS] = PCL_HUMAN;
-              ent->client->pers.classSelection = PCL_HUMAN;
-              ent->client->ps.eFlags ^= EF_TELEPORT_BIT;
-              BG_RemoveUpgradeFromInventory(
-                ent->uTriggers[i], activator->client->ps.stats);
-            }
-          } else {
-            BG_RemoveUpgradeFromInventory(
-              ent->uTriggers[i], activator->client->ps.stats);
-          }
+          G_TakeItemAfterCheck(activator, BG_Upgrade(ent->uTriggers[i])->name, qtrue);
         }
       }
     }
@@ -686,31 +660,9 @@ void Use_Target_force_weapon(gentity_t *ent, gentity_t *other, gentity_t *activa
             ent->wTriggers[i], activator->client->ps.stats)) {
           continue;
         } else {
-          for(j = WP_NONE + 1; j < WP_NUM_WEAPONS; j++) {
-            if(
-              j != WP_BLASTER &&
-              BG_InventoryContainsWeapon(j, activator->client->ps.stats)) {
-              activator->client->ps.stats[STAT_WEAPON] = WP_NONE;
-              if(j == activator->client->ps.weapon) {
-                G_ForceWeaponChange(activator, WP_NONE);
-              }
-            }
+          if(G_GiveItemAfterCheck(activator, BG_Weapon(ent->wTriggers[i])->name, qtrue)) {
+            change = qtrue;
           }
-
-          // note you can't carry more than one weapon anymore ?
-          activator->client->ps.stats[STAT_WEAPON] = ent->wTriggers[i];
-          activator->client->ps.ammo = BG_Weapon(ent->wTriggers[i])->maxAmmo;
-          activator->client->ps.clips = BG_Weapon(ent->wTriggers[i])->maxClips;
-
-          if(
-            BG_Weapon( ent->wTriggers[i])->usesEnergy &
-              BG_InventoryContainsUpgrade(
-                UP_BATTPACK, activator->client->ps.stats)) {
-            activator->client->ps.ammo *= BATTPACK_MODIFIER;
-          }
-
-          G_ForceWeaponChange(activator, ent->wTriggers[i]);
-          change = qtrue;
         }
       }
 
@@ -721,66 +673,12 @@ void Use_Target_force_weapon(gentity_t *ent, gentity_t *other, gentity_t *activa
               continue;
         }
 
-        if(ent->uTriggers[ i ] == UP_AMMO) {
-          if( BG_Weapon(activator->client->ps.weapon )->usesEnergy) {
-            G_GiveClientMaxAmmo(activator, qtrue);
-          } else {
-            G_GiveClientMaxAmmo(activator, qfalse);
-          }
-
-          continue;
-        } else if(
-          ent->uTriggers[i] == UP_BATTPACK || ent->uTriggers[i] == UP_JETPACK ||
-          ent->uTriggers[i] == UP_LIGHTARMOUR || ent->uTriggers[i] == UP_HELMET) {
-          if( BG_InventoryContainsUpgrade(UP_BATTLESUIT, activator->client->ps.stats)) {
-            if(G_RoomForClassChange(activator, PCL_HUMAN, newOrigin)) {
-              VectorCopy( newOrigin, activator->client->ps.origin );
-              activator->client->ps.stats[ STAT_CLASS ] = PCL_HUMAN;
-              activator->client->pers.classSelection = PCL_HUMAN;
-              activator->client->ps.eFlags ^= EF_TELEPORT_BIT;
-              BG_RemoveUpgradeFromInventory( UP_BATTLESUIT, activator->client->ps.stats );
-              goto equip1;
-            }
-          } else {
-            equip1:
-
-            if(ent->uTriggers[i] == UP_BATTPACK) {
-              BG_RemoveUpgradeFromInventory(
-                UP_JETPACK, activator->client->ps.stats);
-              G_GiveClientMaxAmmo(activator, qtrue);
-            }
-
-            if(ent->uTriggers[i] == UP_JETPACK) {
-              BG_RemoveUpgradeFromInventory(
-                UP_BATTPACK, activator->client->ps.stats);
-            }
-
-            BG_AddUpgradeToInventory(
-              ent->uTriggers[i], activator->client->ps.stats);
-          }
+        if(G_GiveItemAfterCheck(activator, BG_Upgrade(ent->uTriggers[i])->name, qtrue)) {
+          change = qtrue;
         }
-        else if(ent->uTriggers[i] == UP_BATTLESUIT) {
-          if(G_RoomForClassChange(activator, PCL_HUMAN_BSUIT, newOrigin)) {
-            VectorCopy(newOrigin, activator->client->ps.origin);
-            activator->client->ps.stats[STAT_CLASS] = PCL_HUMAN_BSUIT;
-            activator->client->pers.classSelection = PCL_HUMAN_BSUIT;
-            activator->client->ps.eFlags ^= EF_TELEPORT_BIT;
-            BG_RemoveUpgradeFromInventory(UP_BATTPACK, activator->client->ps.stats);
-            BG_RemoveUpgradeFromInventory(UP_JETPACK, activator->client->ps.stats);
-            BG_RemoveUpgradeFromInventory(UP_LIGHTARMOUR, activator->client->ps.stats);
-            BG_RemoveUpgradeFromInventory(UP_HELMET, activator->client->ps.stats);
-            BG_AddUpgradeToInventory(UP_BATTLESUIT, activator->client->ps.stats);
-          }
-        }
-        else {
-          BG_AddUpgradeToInventory(ent->uTriggers[i], activator->client->ps.stats);
-        }
-
-        change = qtrue;
       }
     }
     if(change) {
-      ClientUserinfoChanged( activator->client->ps.clientNum, qfalse );
       ent->activator = activator;
       G_UseTargets( ent, ent->activator );
     }

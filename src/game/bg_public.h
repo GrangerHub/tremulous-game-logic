@@ -104,7 +104,7 @@ enum
   CS_VOTE_CAST         = CS_VOTE_STRING + NUM_TEAMS,
   CS_VOTE_ACTIVE          = CS_VOTE_CAST + NUM_TEAMS,
   CS_VOTE_CALLER      = CS_VOTE_ACTIVE + NUM_TEAMS,
-  
+
   CS_GAME_VERSION     = CS_VOTE_CALLER + NUM_TEAMS,
   CS_LEVEL_START_TIME,      // so the timer only shows the current level
   CS_INTERMISSION,          // when 1, fraglimit/timelimit has been hit and intermission will start in a second or two
@@ -215,7 +215,7 @@ typedef enum
 #define PMF_HOPPED          0x020000 // a hop has occurred
 #define PMF_BUNNY_HOPPING   0x040000 // bunny hopping is enabled
 #define PMF_JUMPING         0x080000 // a jump has occurred but has not landed yet
-#define PMF_PAUSE_BEAM      0x100000 //for special cases of when continous beam wepons are not being fired 
+#define PMF_PAUSE_BEAM      0x100000 //for special cases of when continous beam wepons are not being fired
 
 
 #define PMF_ALL_TIMES (PMF_TIME_WATERJUMP|PMF_TIME_LAND|PMF_TIME_KNOCKBACK|PMF_TIME_WALLJUMP)
@@ -463,7 +463,7 @@ activation.flags
 #define  ACTF_OCCUPY               0x0080 // When clients activate this
                                           // activation entity, they occupy the
                                           // entity and can't activate any other
-                                          // entity while occupying.  Nor can 
+                                          // entity while occupying.  Nor can
                                           // another player not occupying a given
                                           // occupiable activation entity
                                           // activate that entity while it is
@@ -1222,7 +1222,10 @@ typedef struct
 
   int       children[ 3 ];
   int       cost;
+  qboolean  warmupFree;
   int       value;
+
+  team_t    team;
 } classAttributes_t;
 
 typedef struct
@@ -1299,9 +1302,9 @@ typedef struct
   int           nextthink;
   int           buildTime;
   qboolean      activationEnt;
-  int           activationFlags; // contains bit flags representing various 
+  int           activationFlags; // contains bit flags representing various
                                  //abilities of a given activation entity
-  int           occupationFlags; // contains bit flags representing various 
+  int           occupationFlags; // contains bit flags representing various
                                  //abilities of a given occupation entity
   pmtype_t			activationPm_type; // changes client's pm_type of an occupant
   int           activationContents; // changes the contents of an occupant
@@ -1321,7 +1324,7 @@ typedef struct
   qboolean      dccTest;
   qboolean      transparentTest;
   qboolean      uniqueTest;
-  
+
   int           value;
 
   qboolean      stackable;
@@ -1379,6 +1382,7 @@ typedef struct
 
   qboolean  enabled;
   int       price; // doesn't include the price for ammo
+  qboolean  warmupFree;
   int       stages;
 
   int       slots;
@@ -1430,6 +1434,7 @@ typedef struct
 
   qboolean  enabled;
   int       price;
+  qboolean  warmupFree;
   int       stages;
 
   int       slots;
@@ -1528,7 +1533,8 @@ qboolean                    BG_WeaponAllowedInStage( weapon_t weapon,
                                                      stage_t stage,
                                                      int gameIsInWarmup );
 int                         BG_AmmoUsage( playerState_t *ps );
-int                         BG_TotalPriceForWeapon( weapon_t weapon );
+int                         BG_TotalPriceForWeapon( weapon_t weapon,
+                                                    int gameIsInWarmup );
 
 typedef struct splatterData_s
 {

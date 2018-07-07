@@ -93,11 +93,25 @@ void Use_Multi( gentity_t *ent, gentity_t *other, gentity_t *activator )
 }
 
 void Touch_Multi(gentity_t *self, gentity_t *other, trace_t *trace) {
+  const int use_evolve = self->GateState & BUTTON_USE_EVOLVE;
+  int       GateState = self->GateState & ~BUTTON_USE_EVOLVE;
+
+  if(
+    other->client && self->GateState != -1 &&
+    use_evolve) {
+    other->activation.usable_map_trigger = self->s.number;
+  }
+
   g_trigger_success = qfalse;
   if(
     !(
       other->client &&
-      ((other->client->buttons & self->GateState) || (self->GateState == -1))) &&
+      (
+        (self->GateState == -1) ||
+        (other->client->buttons & GateState) ||
+        (
+          (other->client->buttons & use_evolve) &&
+          !(other->client->ps.eFlags & EF_OCCUPYING)))) &&
     other->s.eType != ET_BUILDABLE) {
     return;
   }

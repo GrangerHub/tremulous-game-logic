@@ -1215,7 +1215,9 @@ static const classAttributes_t bg_classList[ ] =
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_NONE, PCL_NONE, PCL_NONE },               //int     children[ 3 ];
     0,                                              //int     cost;
+    qtrue,                                          //qboolean warmupFree;
     0,                                              //int     value;
+    TEAM_NONE                                       //team_t  team;
   },
   {
     PCL_ALIEN_BUILDER0,                             //int     number;
@@ -1246,7 +1248,9 @@ static const classAttributes_t bg_classList[ ] =
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_ALIEN_BUILDER0_UPG, PCL_ALIEN_LEVEL0, PCL_NONE }, //int  children[ 3 ];
     ABUILDER_COST,                                  //int     cost;
+    qtrue,                                          //qboolean warmupFree;
     ABUILDER_VALUE,                                 //int     value;
+    TEAM_ALIENS                                     //team_t  team;
   },
   {
     PCL_ALIEN_BUILDER0_UPG,                         //int     number;
@@ -1278,7 +1282,9 @@ static const classAttributes_t bg_classList[ ] =
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_ALIEN_LEVEL0, PCL_NONE, PCL_NONE },       //int     children[ 3 ];
     ABUILDER_UPG_COST,                              //int     cost;
+    qtrue,                                          //qboolean warmupFree;
     ABUILDER_UPG_VALUE,                             //int     value;
+    TEAM_ALIENS                                     //team_t  team;
   },
   {
     PCL_ALIEN_LEVEL0,                               //int     number;
@@ -1309,7 +1315,9 @@ static const classAttributes_t bg_classList[ ] =
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_ALIEN_LEVEL1, PCL_NONE, PCL_NONE },       //int     children[ 3 ];
     LEVEL0_COST,                                    //int     cost;
+    qtrue,                                          //qboolean warmupFree;
     LEVEL0_VALUE,                                   //int     value;
+    TEAM_ALIENS                                     //team_t  team;
   },
   {
     PCL_ALIEN_LEVEL1,                               //int     number;
@@ -1342,7 +1350,9 @@ static const classAttributes_t bg_classList[ ] =
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_ALIEN_LEVEL2, PCL_ALIEN_LEVEL1_UPG, PCL_NONE }, //int  children[ 3 ];
     LEVEL1_COST,                                    //int     cost;
+    qtrue,                                          //qboolean warmupFree;
     LEVEL1_VALUE,                                   //int     value;
+    TEAM_ALIENS                                     //team_t  team;
   },
   {
     PCL_ALIEN_LEVEL1_UPG,                           //int     number;
@@ -1375,7 +1385,9 @@ static const classAttributes_t bg_classList[ ] =
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_ALIEN_LEVEL2, PCL_NONE, PCL_NONE },       //int     children[ 3 ];
     LEVEL1_UPG_COST,                                //int     cost;
+    qtrue,                                          //qboolean warmupFree;
     LEVEL1_UPG_VALUE,                               //int     value;
+    TEAM_ALIENS                                     //team_t  team;
   },
   {
     PCL_ALIEN_LEVEL2,                               //int     number;
@@ -1406,7 +1418,9 @@ static const classAttributes_t bg_classList[ ] =
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_ALIEN_LEVEL3, PCL_ALIEN_LEVEL2_UPG, PCL_NONE }, //int  children[ 3 ];
     LEVEL2_COST,                                    //int     cost;
+    qtrue,                                          //qboolean warmupFree;
     LEVEL2_VALUE,                                   //int     value;
+    TEAM_ALIENS                                     //team_t  team;
   },
   {
     PCL_ALIEN_LEVEL2_UPG,                           //int     number;
@@ -1437,7 +1451,9 @@ static const classAttributes_t bg_classList[ ] =
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_ALIEN_LEVEL3, PCL_NONE, PCL_NONE },       //int     children[ 3 ];
     LEVEL2_UPG_COST,                                //int     cost;
+    qtrue,                                          //qboolean warmupFree;
     LEVEL2_UPG_VALUE,                               //int     value;
+    TEAM_ALIENS                                     //team_t  team;
   },
   {
     PCL_ALIEN_LEVEL3,                               //int     number;
@@ -1469,7 +1485,9 @@ static const classAttributes_t bg_classList[ ] =
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_ALIEN_LEVEL4, PCL_ALIEN_LEVEL3_UPG, PCL_NONE }, //int  children[ 3 ];
     LEVEL3_COST,                                    //int     cost;
+    qtrue,                                          //qboolean warmupFree;
     LEVEL3_VALUE,                                   //int     value;
+    TEAM_ALIENS                                     //team_t  team;
   },
   {
     PCL_ALIEN_LEVEL3_UPG,                           //int     number;
@@ -1501,7 +1519,9 @@ static const classAttributes_t bg_classList[ ] =
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_ALIEN_LEVEL4, PCL_NONE, PCL_NONE },       //int     children[ 3 ];
     LEVEL3_UPG_COST,                                //int     cost;
+    qfalse,                                         //qboolean warmupFree;
     LEVEL3_UPG_VALUE,                               //int     value;
+    TEAM_ALIENS                                     //team_t  team;
   },
   {
     PCL_ALIEN_LEVEL4,                               //int     number;
@@ -1534,7 +1554,9 @@ static const classAttributes_t bg_classList[ ] =
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_NONE, PCL_NONE, PCL_NONE },               //int     children[ 3 ];
     LEVEL4_COST,                                    //int     cost;
+    qfalse,                                         //qboolean warmupFree;
     LEVEL4_VALUE,                                   //int     value;
+    TEAM_ALIENS                                     //team_t  team;
   },
   {
     PCL_HUMAN,                                      //int     number;
@@ -1564,7 +1586,9 @@ static const classAttributes_t bg_classList[ ] =
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_NONE, PCL_NONE, PCL_NONE },               //int     children[ 3 ];
     0,                                              //int     cost;
+    qtrue,                                          //qboolean warmupFree;
     ALIEN_CREDITS_PER_KILL,                         //int     value;
+    TEAM_HUMANS                                     //team_t  team;
   },
   {
     PCL_HUMAN_BSUIT,                                //int     number;
@@ -1594,7 +1618,9 @@ static const classAttributes_t bg_classList[ ] =
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
     { PCL_NONE, PCL_NONE, PCL_NONE },               //int     children[ 3 ];
     0,                                              //int     cost;
+    qtrue,                                          //qboolean warmupFree;
     ALIEN_CREDITS_PER_KILL,                         //int     value;
+    TEAM_HUMANS                                     //team_t  team;
   }
 };
 
@@ -1701,22 +1727,22 @@ qboolean BG_ClassHasAbility( class_t class, int ability )
 
 /*
 ==============
-BG_ClassCanEvolveFromTo
+_BG_ClassCanEvolveFromTo
 ==============
 */
-int BG_ClassCanEvolveFromTo( class_t fclass,
-                             class_t tclass,
-                             int credits, int stage,
-                             int cost,
-                             int gameIsInWarmup,
-                             qboolean devMode )
+int _BG_ClassCanEvolveFromTo( class_t fclass,
+                              class_t tclass,
+                              int credits, int stage,
+                              int cost,
+                              int gameIsInWarmup,
+                              qboolean devMode )
 {
   int i, j, best, value;
+  qboolean warmupFree = gameIsInWarmup && BG_Class(tclass)->warmupFree;
 
-  if( gameIsInWarmup )
+  if(warmupFree) {
     credits = ALIEN_MAX_CREDITS;
-
-
+  }
 
   if( credits < cost || fclass == PCL_NONE || tclass == PCL_NONE ||
       fclass == tclass )
@@ -1741,19 +1767,42 @@ int BG_ClassCanEvolveFromTo( class_t fclass,
       if( thruClass == tclass )
         value = cost + evolveCost;
       else
-        value = BG_ClassCanEvolveFromTo( thruClass, tclass, credits, stage,
-                                         cost + evolveCost,
-                                         gameIsInWarmup, devMode );
+        value = _BG_ClassCanEvolveFromTo( thruClass, tclass, credits, stage,
+                                          cost + evolveCost,
+                                          gameIsInWarmup, devMode );
 
       if( value >= 0 && value < best )
         best = value;
     }
 
-    return best <= credits ? (gameIsInWarmup ? 0 : best) : -1;
+    return best <= credits ? (warmupFree ? 0 : best) : -1;
   }
 
   Com_Printf( S_COLOR_YELLOW "WARNING: fallthrough in BG_ClassCanEvolveFromTo\n" );
   return -1;
+}
+
+/*
+==============
+BG_ClassCanEvolveFromTo
+==============
+*/
+int BG_ClassCanEvolveFromTo(
+  class_t fclass, class_t tclass, int credits, int stage, int cost,
+  int gameIsInWarmup, qboolean devMode) {
+  int value;
+
+  value = _BG_ClassCanEvolveFromTo(
+    fclass, tclass, credits, stage, cost, gameIsInWarmup, devMode);
+
+  if(
+    gameIsInWarmup && value >= 0 && fclass != PCL_ALIEN_BUILDER0 &&
+    !BG_Class(tclass)->warmupFree) {
+    value = _BG_ClassCanEvolveFromTo(
+      PCL_ALIEN_BUILDER0, tclass, credits, stage, cost, gameIsInWarmup, devMode);
+  }
+
+  return value;
 }
 
 /*
@@ -1774,11 +1823,32 @@ qboolean BG_AlienCanEvolve( class_t class, int credits, int stage,
     for( j = 0; j < 3; j++ )
     {
       tclass = bg_classList[ i ].children[ j ];
-      if( tclass != PCL_NONE && BG_ClassAllowedInStage( tclass, stage, gameIsInWarmup ) &&
-          BG_ClassIsAllowed( tclass, devMode ) &&
-          (gameIsInWarmup || credits >= BG_Class( tclass )->cost * ALIEN_CREDITS_PER_KILL ) )
-        return qtrue;
-    }
+      if(tclass == PCL_NONE) {
+        continue;
+      }
+
+      if( BG_ClassAllowedInStage( tclass, stage, gameIsInWarmup ) &&
+          BG_ClassIsAllowed( tclass, devMode ) ) {
+        if(
+          gameIsInWarmup && class != PCL_ALIEN_BUILDER0 &&
+          !BG_Class(tclass)->warmupFree) {
+          int value;
+
+          value = _BG_ClassCanEvolveFromTo(
+            PCL_ALIEN_BUILDER0, tclass, credits, stage, 0, gameIsInWarmup, devMode);
+
+          if(value < 0) {
+            continue;
+          } else {
+            return qtrue;
+          }
+        }
+
+        if(gameIsInWarmup || credits >= BG_Class(tclass)->cost * ALIEN_CREDITS_PER_KILL) {
+          return qtrue;
+        }
+      }
+  }
 
     return qfalse;
   }
@@ -2102,6 +2172,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     WP_ALEVEL0,           //int       number;
     qtrue,                //qboolean enabled;
     0,                    //int       price;
+    qtrue,                //qboolean  warmupFree;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
     "level0",             //char      *name;
@@ -2174,6 +2245,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     WP_ALEVEL1,           //int       number;
     qtrue,                //qboolean enabled;
     0,                    //int       price;
+    qtrue,               //qboolean  warmupFree;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
     "level1",             //char      *name;
@@ -2246,6 +2318,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     WP_ALEVEL1_UPG,       //int       number;
     qtrue,                //qboolean enabled;
     0,                    //int       price;
+    qtrue,               //qboolean  warmupFree;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
     "level1upg",          //char      *name;
@@ -2318,6 +2391,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     WP_ALEVEL2,           //int       number;
     qtrue,                //qboolean enabled;
     0,                    //int       price;
+    qtrue,               //qboolean  warmupFree;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
     "level2",             //char      *name;
@@ -2390,6 +2464,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     WP_ALEVEL2_UPG,       //int       number;
     qtrue,                //qboolean enabled;
     0,                    //int       price;
+    qtrue,               //qboolean  warmupFree;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
     "level2upg",          //char      *name;
@@ -2462,6 +2537,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     WP_ALEVEL3,           //int       number;
     qtrue,                //qboolean enabled;
     0,                    //int       price;
+    qtrue,               //qboolean  warmupFree;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
     "level3",             //char      *name;
@@ -2534,6 +2610,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     WP_ALEVEL3_UPG,       //int       number;
     qtrue,                //qboolean enabled;
     0,                    //int       price;
+    qtrue,               //qboolean  warmupFree;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
     "level3upg",          //char      *name;
@@ -2606,6 +2683,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     WP_ALEVEL4,           //int       number;
     qtrue,                //qboolean enabled;
     0,                    //int       price;
+    qtrue,               //qboolean  warmupFree;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
     "level4",             //char      *name;
@@ -2678,6 +2756,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     WP_BLASTER,           //int       number;
     qtrue,                //qboolean enabled;
     0,                    //int       price;
+    qtrue,               //qboolean  warmupFree;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     0,                    //int       slots;
     "blaster",            //char      *name;
@@ -2750,6 +2829,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     WP_MACHINEGUN,        //int       number;
     qtrue,                //qboolean enabled;
     RIFLE_PRICE,          //int       price;
+    qtrue,               //qboolean  warmupFree;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
     "rifle",              //char      *name;
@@ -2823,6 +2903,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     WP_PAIN_SAW,          //int       number;
     qtrue,                //qboolean enabled;
     PAINSAW_PRICE,        //int       price;
+    qtrue,               //qboolean  warmupFree;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
     "psaw",               //char      *name;
@@ -2897,6 +2978,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     WP_SHOTGUN,           //int       number;
     qtrue,                //qboolean enabled;
     SHOTGUN_PRICE,        //int       price;
+    qtrue,               //qboolean  warmupFree;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
     "shotgun",            //char      *name;
@@ -2971,6 +3053,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     WP_LAS_GUN,           //int       number;
     qtrue,                //qboolean enabled;
     LASGUN_PRICE,         //int       price;
+    qtrue,               //qboolean  warmupFree;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
     "lgun",               //char      *name;
@@ -3044,6 +3127,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     WP_MASS_DRIVER,       //int       number;
     qtrue,                //qboolean enabled;
     MDRIVER_PRICE,        //int       price;
+    qtrue,               //qboolean  warmupFree;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
     "mdriver",            //char      *name;
@@ -3118,6 +3202,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     WP_CHAINGUN,          //int       number;
     qtrue,                //qboolean enabled;
     CHAINGUN_PRICE,       //int       price;
+    qfalse,               //qboolean  warmupFree;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
     "chaingun",           //char      *name;
@@ -3192,6 +3277,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     WP_FLAMER,            //int       number;
     qtrue,                //qboolean enabled;
     FLAMER_PRICE,         //int       price;
+    qtrue,               //qboolean  warmupFree;
     ( 1 << S2 )|( 1 << S3 ), //int    stages;
     SLOT_WEAPON,          //int       slots;
     "flamer",             //char      *name;
@@ -3266,6 +3352,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     WP_PULSE_RIFLE,       //int       number;
     qtrue,                //qboolean enabled;
     PRIFLE_PRICE,         //int       price;
+    qtrue,               //qboolean  warmupFree;
     ( 1 << S2 )|( 1 << S3 ), //int    stages;
     SLOT_WEAPON,          //int       slots;
     "prifle",             //char      *name;
@@ -3338,6 +3425,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     WP_LUCIFER_CANNON,    //int       number;
     qtrue,                //qboolean enabled;
     LCANNON_PRICE,        //int       price;
+    qfalse,               //qboolean  warmupFree;
     ( 1 << S3 ),          //int       stages;
     SLOT_WEAPON,          //int       slots;
     "lcannon",            //char      *name;
@@ -3412,6 +3500,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     WP_GRENADE,           //int       number;
     qtrue,                //qboolean enabled;
     GRENADE_PRICE,        //int       price;
+    qfalse,               //qboolean  warmupFree;
     ( 1 << S2 )|( 1 << S3 ), //int    stages;
     SLOT_NONE,            //int       slots;
     "grenade",            //char      *name;
@@ -3484,6 +3573,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     WP_FRAGNADE,          //int       number;
     qfalse,               //qboolean enabled;
     FRAGNADE_PRICE,       //int       price;
+    qfalse,               //qboolean  warmupFree;
     ( 1 << S2 )|( 1 << S3 ), //int    stages;
     SLOT_NONE,            //int       slots;
     "fragnade",           //char      *name;
@@ -3556,6 +3646,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     WP_LAUNCHER,          //int       number;
     qfalse,               //qboolean  enabled;
     LAUNCHER_PRICE,       //int       price;
+    qfalse,               //qboolean  warmupFree;
     ( 1 << S3 ),          //int       stages;
     SLOT_WEAPON,          //int       slots;
     "grenade_launcher",   //char      *name;
@@ -3630,6 +3721,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     WP_LIGHTNING,         //int       number;
     qfalse,               //qboolean  enabled;
     LIGHTNING_PRICE,      //int       price;
+    qfalse,               //qboolean  warmupFree;
     ( 1 << S3 ),          //int       stages;
     SLOT_WEAPON,          //int       slots;
     "lightning",          //char      *name;
@@ -3705,6 +3797,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     WP_LOCKBLOB_LAUNCHER, //int       number;
     qtrue,                //qboolean enabled;
     0,                    //int       price;
+    qtrue,               //qboolean  warmupFree;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
     "lockblob",           //char      *name;
@@ -3777,6 +3870,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     WP_HIVE,              //int       number;
     qtrue,                //qboolean enabled;
     0,                    //int       price;
+    qtrue,               //qboolean  warmupFree;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
     "hive",               //char      *name;
@@ -3849,6 +3943,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     WP_TESLAGEN,          //int       number;
     qtrue,                //qboolean enabled;
     0,                    //int       price;
+    qtrue,               //qboolean  warmupFree;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
     "teslagen",           //char      *name;
@@ -3921,6 +4016,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     WP_MGTURRET,          //int       number;
     qtrue,                //qboolean enabled;
     0,                    //int       price;
+    qtrue,               //qboolean  warmupFree;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
     "mgturret",           //char      *name;
@@ -3993,6 +4089,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     WP_ABUILD,            //int       number;
     qtrue,                //qboolean enabled;
     0,                    //int       price;
+    qtrue,               //qboolean  warmupFree;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
     "abuild",             //char      *name;
@@ -4065,6 +4162,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     WP_ABUILD2,           //int       number;
     qtrue,                //qboolean enabled;
     0,                    //int       price;
+    qtrue,               //qboolean  warmupFree;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
     "abuildupg",          //char      *name;
@@ -4137,6 +4235,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     WP_HBUILD,            //int       number;
     qtrue,                //qboolean enabled;
     HBUILD_PRICE,         //int       price;
+    qtrue,               //qboolean  warmupFree;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_WEAPON,          //int       slots;
     "ckit",               //char      *name;
@@ -4211,6 +4310,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     WP_PORTAL_GUN,        //int       weaponNum;
     qfalse,                //qboolean enabled;
     PORTALGUN_PRICE,      //int       price;
+    qfalse,               //qboolean  warmupFree;
     ( 1 << S3 ),          //int       stages
     SLOT_WEAPON,          //int       slots;
     "portalgun",          //char      *weaponName;
@@ -4363,8 +4463,11 @@ BG_TotalPriceForWeapon
 Returns the base price of a weapon plus the cost of full ammo (if ammo isn't free)
 ==============
 */
-int BG_TotalPriceForWeapon( weapon_t weapon  )
+int BG_TotalPriceForWeapon( weapon_t weapon , int gameIsInWarmup )
 {
+  if( gameIsInWarmup && BG_Weapon( weapon )->warmupFree )
+    return 0;
+
   if( !BG_Weapon( weapon )->roundPrice || BG_Weapon( weapon )->usesEnergy )
     return BG_Weapon( weapon )->price;
 
@@ -4648,6 +4751,7 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     UP_LIGHTARMOUR,         //int   number;
     qtrue,                  //qboolean enabled;
     LIGHTARMOUR_PRICE,      //int   price;
+    qtrue,                  //qboolean warmupFree;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_TORSO|SLOT_ARMS|SLOT_LEGS, //int   slots;
     "larmour",              //char  *name;
@@ -4663,6 +4767,7 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     UP_HELMET,              //int   number;
     qtrue,                  //qboolean enabled;
     HELMET_PRICE,           //int   price;
+    qtrue,                  //qboolean warmupFree;
     ( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_HEAD,              //int   slots;
     "helmet",               //char  *name;
@@ -4679,6 +4784,7 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     UP_MEDKIT,              //int   number;
     qtrue,                  //qboolean enabled;
     MEDKIT_PRICE,           //int   price;
+    qtrue,                  //qboolean warmupFree;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_NONE,              //int   slots;
     "medkit",               //char  *name;
@@ -4693,6 +4799,7 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     UP_BATTPACK,            //int   number;
     qtrue,                  //qboolean enabled;
     BATTPACK_PRICE,         //int   price;
+    qtrue,                  //qboolean warmupFree;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_BACKPACK,          //int   slots;
     "battpack",             //char  *name;
@@ -4708,6 +4815,7 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     UP_JETPACK,             //int   number;
     qtrue,                  //qboolean enabled;
     JETPACK_PRICE,          //int   price;
+    qfalse,                 //qboolean warmupFree;
     ( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_BACKPACK,          //int   slots;
     "jetpack",              //char  *name;
@@ -4724,6 +4832,7 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     UP_BATTLESUIT,          //int   number;
     qtrue,                  //qboolean enabled;
     BSUIT_PRICE,            //int   price;
+    qfalse,                 //qboolean warmupFree;
     ( 1 << S3 ),            //int   stages;
     SLOT_HEAD|SLOT_TORSO|SLOT_ARMS|SLOT_LEGS|SLOT_BACKPACK, //int  slots;
     "bsuit",                //char  *name;
@@ -4740,6 +4849,7 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     UP_GRENADE,             //int   number;
     qtrue,                  //qboolean enabled;
     GRENADE_PRICE,          //int   price;
+    qfalse,                 //qboolean warmupFree;
     ( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_NONE,              //int   slots;
     "gren",                 //char  *name;
@@ -4755,6 +4865,7 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     UP_FRAGNADE,            //int   number;
     qfalse,                 //qboolean enabled;
     FRAGNADE_PRICE,         //int   price;
+    qfalse,                 //qboolean warmupFree;
     ( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_NONE,              //int   slots;
     "frag",                 //char  *name;
@@ -4772,6 +4883,7 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     UP_AMMO,                //int   number;
     qtrue,                  //qboolean enabled;
     0,                      //int   price;
+    qfalse,                 //qboolean warmupFree;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_NONE,              //int   slots;
     "ammo",                 //char  *name;
@@ -5394,7 +5506,7 @@ qboolean BG_WeaponIsFull( weapon_t weapon, int stats[ ], int ammo, int clips )
   maxAmmo = BG_Weapon( weapon )->maxAmmo;
   maxClips = BG_Weapon( weapon )->maxClips;
 
-  if( BG_InventoryContainsUpgrade( UP_BATTPACK, stats ) )
+  if( BG_Weapon(weapon)->usesEnergy && BG_InventoryContainsUpgrade( UP_BATTPACK, stats ) )
     maxAmmo = (int)( (float)maxAmmo * BATTPACK_MODIFIER );
 
   return ( maxAmmo == ammo ) && ( maxClips == clips );

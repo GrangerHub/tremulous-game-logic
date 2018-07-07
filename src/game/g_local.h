@@ -209,6 +209,8 @@ struct gentity_s
     int       flags; // Contains bit flags representing various abilities of a
                      // given activation entity.
 
+    int       usable_map_trigger;
+
     dynMenu_t menuMsg; // Message sent to the activator when an activation
                        // fails.  Can be used in (*willActivate)().
 
@@ -929,6 +931,61 @@ char      *G_NewString( const char *string );
 //
 // g_cmds.c
 //
+int      G_CheckEvolve( gentity_t *ent, class_t newClass,
+                        vec3_t infestOrigin, qboolean give );
+void     G_Evolve( gentity_t *ent, class_t newClass,
+                   int cost, vec3_t infestOrigin );
+qboolean G_EvolveAfterCheck( gentity_t *ent, class_t newClass, qboolean give );
+
+typedef enum
+{
+  ERR_SELL_NONE,
+  ERR_SELL_SPECIFY,
+  ERR_SELL_OCCUPY,
+  ERR_SELL_NO_ARM,
+  ERR_SELL_NO_CHANGE_ALLOWED_NOW,
+  ERR_Sell_NOT_PURCHASABLE,
+  ERR_SELL_NOT_ITEM_HELD,
+  ERR_SELL_ARMOURYBUILDTIMER,
+  ERR_SELL_NOROOMBSUITOFF,
+  ERR_SELL_UNKNOWNITEM
+} sellErr_t;
+
+sellErr_t G_CanSell( gentity_t *ent, const char *itemName, int *value, qboolean force );
+void G_TakeItem( gentity_t *ent, const char *itemName, const int value );
+int G_CanAutoSell( gentity_t *ent, const char *itemToBuyName,
+                        weapon_t *weaponToSell, int *upgradesToSell,
+                        int *values, int numValues, sellErr_t *autoSellErrors, qboolean force );
+qboolean G_TakeItemAfterCheck(gentity_t *ent, const char *itemName, qboolean force);
+
+typedef enum
+{
+  ERR_BUY_NONE,
+  ERR_BUY_SPECIFY,
+  ERR_BUY_OCCUPY,
+  ERR_BUY_NO_ENERGY_AMMO,
+  ERR_BUY_NO_ARM,
+  ERR_BUY_ITEM_HELD,
+  ERR_BUY_ALIEN_ITEM,
+  ERR_BUY_NOT_PURCHASABLE,
+  ERR_BUY_NOT_ALLOWED,
+  ERR_BUY_NO_FUNDS,
+  ERR_BUY_NO_SLOTS,
+  ERR_BUY_NO_CHANGE_ALLOWED_NOW,
+  ERR_BUY_UNEXPLODEDGRENADE,
+  ERR_BUY_BURST_UNFINISHED,
+  ERR_BUY_CHARGING_LIGHTNING,
+  ERR_BUY_NO_MORE_AMMO,
+  ERR_BUY_NOROOMBSUITON,
+  ERR_BUY_UNKNOWNITEM
+} buyErr_t;
+
+buyErr_t G_CanBuy( gentity_t *ent, const char *itemName, int *price,
+                   qboolean *energyOnly, const int slotsFreeFromAutoSell,
+                   const int fundsFromAutoSell, qboolean force );
+void G_GiveItem( gentity_t *ent, const char *itemName, const int price,
+                 const qboolean energyOnly, qboolean force );
+qboolean G_GiveItemAfterCheck(gentity_t *ent, const char *itemName, qboolean force);
 
 #define DECOLOR_OFF '\16'
 #define DECOLOR_ON  '\17'
@@ -1265,6 +1322,8 @@ void      G_PackEntityNumbers( entityState_t *es, int creatorNum,
 
 void      Blow_up( gentity_t *ent );
 void      G_ForceWeaponChange( gentity_t *ent, weapon_t weapon );
+qboolean  G_CanGiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo,
+                                  int *rounds, int *clips, int *price );
 void      G_GiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo );
 void      SnapVectorTowards( vec3_t v, vec3_t to );
 void      G_SplatterFire( gentity_t *inflicter, gentity_t *attacker,
