@@ -1079,9 +1079,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   if( !attacker )
     attacker = &g_entities[ ENTITYNUM_WORLD ];
 
-  if( targ == G_Entity_id_get( &targ->idAtLastDeath ) )
-    return;
-
   // end damage and target protection early
   attacker->dmgProtectionTime = 0;
   attacker->targetProtectionTime = 0;
@@ -1352,6 +1349,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   // do the damage
   if( take || (dflags & DAMAGE_INSTAGIB) )
   {
+    int deathHealth;
+
     if( !(dflags & DAMAGE_INSTAGIB) )
     {
       targ->health = targ->health - take;
@@ -1378,8 +1377,15 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
     if( attacker->client && attacker != targ )
       targ->credits[ attacker->client->ps.clientNum ] += take;
 
-    if( targ->health <= 0 ||
-        (dflags & DAMAGE_INSTAGIB) )
+    if ( targ->s.eType == ET_CORPSE ) {
+      deathHealth = GIB_HEALTH;
+    } else {
+      deathHealth = 0;
+    }
+
+    if( ( targ->health <= deathHealth ||
+          (dflags & DAMAGE_INSTAGIB) ) &&
+        targ != G_Entity_id_get( &targ->idAtLastDeath ) )
     {
       if( client )
         targ->flags |= FL_NO_KNOCKBACK;
