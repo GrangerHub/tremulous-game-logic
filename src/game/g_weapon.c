@@ -451,61 +451,128 @@ void bulletFire( gentity_t *ent, float spread, int damage, int mod )
 /*
 ======================================================================
 
-SHOTGUN
+SPLATTER
 
 ======================================================================
 */
 
-// this should match CG_ShotgunPattern
-void ShotgunPattern( vec3_t origin, vec3_t origin2, int seed, gentity_t *ent )
+typedef struct gSplatterData_s
 {
-  int        i;
-  float      r, u;
-  vec3_t    end;
-  vec3_t    forward, right, up;
-  trace_t    tr;
-  gentity_t  *traceEnt;
+  meansOfDeath_t mod;
+  gentity_t      *inflicter;
+  gentity_t      *attacker;
+} gSplatterData_t;
 
-  // derive the right and up vectors from the forward vector, because
-  // the client won't have any other information
-  VectorNormalize2( origin2, forward );
-  PerpendicularVector( right, forward );
-  CrossProduct( forward, right, up );
+/*
+==============
+CG_SplatterMarks
+==============
+*/
+static void G_Splatter( splatterData_t *data ) {
+  gSplatterData_t *gData = (gSplatterData_t *)data->user_data;
+  const int modeIndex = data->weaponMode - 1;
 
-  // generate the "random" spread pattern
-  for( i = 0; i < SHOTGUN_PELLETS; i++ )
-  {
-    r = Q_crandom( &seed ) * SHOTGUN_SPREAD * 16;
-    u = Q_crandom( &seed ) * SHOTGUN_SPREAD * 16;
-    VectorMA( origin, SHOTGUN_RANGE, forward, end );
-    VectorMA( end, r, right, end );
-    VectorMA( end, u, up, end );
+  Com_Assert( modeIndex >= 0 &&
+              modeIndex < 3 &&
+              "G_Splatter: invalid weaponMode" );
+  Com_Assert( data &&
+              "G_Splatter: data is NULL" );
+  Com_Assert( data->tr &&
+              "G_Splatter: tr is NULL" );
+  Com_Assert( gData &&
+              "G_Splatter: gData is NULL" );
 
-    SV_Trace( &tr, origin, NULL, NULL, end, ent->s.number, MASK_SHOT, TT_AABB );
-    traceEnt = &g_entities[ tr.entityNum ];
+  if( !( data->tr->surfaceFlags & SURF_NOIMPACT ) ) {
+    gentity_t *traceEnt = &g_entities[ data->tr->entityNum ];
 
-    // send bullet impact
-    if( !( tr.surfaceFlags & SURF_NOIMPACT ) )
+    if( G_TakesDamage( traceEnt ) )
     {
-      if( G_TakesDamage( traceEnt ) )
-        G_Damage( traceEnt, ent, ent, forward, tr.endpos,  SHOTGUN_DMG, 0, MOD_SHOTGUN );
+      weapon_t weapon = data->weapon;
+      vec3_t   kbDir;
+      float    dmg_falloff = BG_Weapon( weapon )->splatter[modeIndex].impactDamageFalloff;
+      float    dmg_cap = BG_Weapon( weapon )->splatter[modeIndex].impactDamageCap;
+      int      damage = BG_Weapon( weapon )->splatter[modeIndex].impactDamage;
+
+      if( dmg_falloff ) {
+        float distance = Distance( data->origin, data->tr->endpos );
+
+        damage = (int)ceil( ( (float)damage ) *
+                            ( 1 - ( distance / dmg_falloff ) ) );
+        damage = MIN( damage, dmg_cap);
+
+        if( damage <= 0 ) {
+          damage = 1;
+        }
+      } else
+        damage = SHOTGUN_DMG;
+
+      VectorSubtract( data->tr->endpos, data->origin, kbDir );
+      G_Damage( traceEnt, gData->inflicter, gData->attacker, kbDir, data->tr->endpos,
+                damage,
+                0, gData->mod );
     }
   }
 }
 
+/*
+==============
+G_SplatterFire
+==============
+*/
+void G_SplatterFire( gentity_t *inflicter, gentity_t *attacker,
+                     vec3_t origin, vec3_t dir,
+                     weapon_t weapon, weaponMode_t weaponMode, meansOfDeath_t mod ) {
+  splatterData_t  data;
+  gSplatterData_t gData;
+  const int modeIndex = weaponMode - 1;
+  gentity_t       *tent;
 
+  Com_Assert( modeIndex >= 0 &&
+              modeIndex < 3 &&
+              "BG_SplatterPattern: invalid weaponMode" );
+
+  if( BG_Weapon( weapon )->splatter[ modeIndex ].number <= 0 )
+    return;
+
+  Com_Assert( inflicter &&
+              "G_SplatterFire: inflicter is NULL" );
+  Com_Assert( attacker &&
+              "G_SplatterFire: attacker is NULL" );
+  Com_Assert( origin &&
+              "G_SplatterFire: origin is NULL" );
+  Com_Assert( dir &&
+              "G_SplatterFire: dir is NULL" );
+
+  // send splatter
+  tent = G_TempEntity( origin, EV_SPLATTER );
+  VectorNormalize2( dir, tent->s.origin2 );
+  VectorCopy( tent->s.pos.trBase, data.origin );
+  tent->s.eventParm = rand() / ( RAND_MAX / 0x100 + 1 );    // seed for spread pattern
+  tent->s.otherEntityNum = inflicter->s.number;
+  data.weapon = tent->s.angles2[0] = weapon;
+  data.weaponMode = tent->s.angles2[1] = weaponMode;
+  gData.inflicter = inflicter;
+  gData.attacker = attacker;
+  gData.mod = mod;
+  data.user_data = &gData;
+
+  BG_SplatterPattern( tent->s.origin2, tent->s.eventParm, tent->s.otherEntityNum,
+                      &data, G_Splatter, G_TraceWrapper );
+}
+
+/*
+======================================================================
+
+SHOTGUN
+
+======================================================================
+*/
 void shotgunFire( gentity_t *ent )
 {
-  gentity_t    *tent;
-
-  // send shotgun blast
-  tent = G_TempEntity( muzzle, EV_SHOTGUN );
-  VectorScale( forward, 4096, tent->s.origin2 );
-  SnapVector( tent->s.origin2 );
-  tent->s.eventParm = rand() / ( RAND_MAX / 0x100 + 1 );    // seed for spread pattern
-  tent->s.otherEntityNum = ent->s.number;
   G_UnlaggedOn( ent->s.number, muzzle, SHOTGUN_RANGE );
-  ShotgunPattern( tent->s.pos.trBase, tent->s.origin2, tent->s.eventParm, ent );
+  G_SplatterFire( ent, ent,
+                       muzzle, forward,
+                       ent->s.weapon, ent->s.generic1, MOD_SHOTGUN );
   G_UnlaggedOff();
 }
 
@@ -649,6 +716,19 @@ GRENADE
 void throwGrenade( gentity_t *ent )
 {
   launch_grenade( ent, muzzle, forward );
+}
+
+/*
+======================================================================
+
+FRAGMENTATION GRENADE
+
+======================================================================
+*/
+
+void throwFragnade( gentity_t *ent )
+{
+  launch_fragnade( ent, muzzle, forward );
 }
 
 /*
@@ -1913,6 +1993,9 @@ void FireWeapon( gentity_t *ent )
       break;
     case WP_GRENADE:
       throwGrenade( ent );
+      break;
+    case WP_FRAGNADE:
+      throwFragnade( ent );
       break;
     case WP_LAUNCHER:
       launcherFire(ent, qtrue);

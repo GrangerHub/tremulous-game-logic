@@ -83,6 +83,9 @@ void G_ExplodeMissile( gentity_t *ent )
 
   ent->s.eType = ET_GENERAL;
 
+  G_SplatterFire( ent, ent, ent->s.pos.trBase, dir, ent->s.weapon,
+                  ent->s.generic1, ent->splashMethodOfDeath );
+
   if( ent->s.weapon != WP_LOCKBLOB_LAUNCHER &&
       ent->s.weapon != WP_FLAMER )
     G_AddEvent( ent, EV_MISSILE_MISS, DirToByte( dir ) );
@@ -96,6 +99,21 @@ void G_ExplodeMissile( gentity_t *ent )
                     ent->splashRadius, ent, ent->splashMethodOfDeath, qtrue );
 
   SV_LinkEntity( ent );
+}
+
+/*
+================
+G_KickUpMissile
+
+================
+*/
+void G_KickUpMissile( gentity_t *ent )
+{
+  ent->s.pos.trDelta[2] = 350.0f;
+  ent->s.pos.trType = TR_GRAVITY;
+  ent->s.pos.trTime = level.time;
+  ent->think = G_ExplodeMissile;
+  ent->nextthink = level.time + 650;
 }
 
 void AHive_ReturnToHive( gentity_t *self );
@@ -677,6 +695,52 @@ gentity_t *launch_grenade3( gentity_t *self, vec3_t start, vec3_t dir,
   VectorCopy( start, bolt->s.pos.trBase );
   VectorScale( dir, LAUNCHER_SPEED, bolt->s.pos.trDelta );
   SnapVector( bolt->s.pos.trDelta ); // save net bandwidth
+
+  VectorCopy( start, bolt->r.currentOrigin );
+
+  return bolt;
+}
+//=============================================================================
+
+/*
+=================
+launch_grenade
+
+=================
+*/
+gentity_t *launch_fragnade( gentity_t *self, vec3_t start, vec3_t dir )
+{
+  gentity_t *bolt;
+
+  VectorNormalize( dir );
+
+  bolt = G_Spawn( );
+  bolt->classname = "grenade";
+  bolt->pointAgainstWorld = qfalse;
+  bolt->nextthink = level.time + 1500;
+  bolt->think = G_KickUpMissile;
+  bolt->s.eType = ET_MISSILE;
+  bolt->s.weapon = WP_FRAGNADE;
+  bolt->flags |= FL_BOUNCE_HALF;
+  bolt->s.generic1 = WPM_PRIMARY; //weaponMode
+  bolt->r.ownerNum = self->s.number;
+  bolt->parent = self;
+  bolt->damage = FRAGNADE_BLAST_DAMAGE;
+  bolt->splashDamage = FRAGNADE_BLAST_DAMAGE;
+  bolt->splashRadius = FRAGNADE_BLAST_RANGE;
+  bolt->methodOfDeath = MOD_FRAGNADE;
+  bolt->splashMethodOfDeath = MOD_FRAGNADE;
+  G_SetClipmask( bolt, MASK_SHOT );
+  bolt->target_ent = NULL;
+  bolt->r.mins[ 0 ] = bolt->r.mins[ 1 ] = bolt->r.mins[ 2 ] = -3.0f;
+  bolt->r.maxs[ 0 ] = bolt->r.maxs[ 1 ] = bolt->r.maxs[ 2 ] = 3.0f;
+  bolt->s.time = level.time;
+
+  bolt->s.pos.trType = TR_GRAVITY;
+  bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;   // move a bit on the very first frame
+  VectorCopy( start, bolt->s.pos.trBase );
+  VectorScale( dir, GRENADE_SPEED, bolt->s.pos.trDelta );
+  SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
 
   VectorCopy( start, bolt->r.currentOrigin );
 

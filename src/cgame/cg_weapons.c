@@ -64,6 +64,8 @@ void CG_RegisterUpgrade( int upgradeNum )
   //la la la la la, i'm not listening!
   if( upgradeNum == UP_GRENADE )
     upgradeInfo->upgradeIcon = cg_weapons[ WP_GRENADE ].weaponIcon;
+  else if( upgradeNum == UP_FRAGNADE )
+    upgradeInfo->upgradeIcon = cg_weapons[ WP_FRAGNADE ].weaponIcon;
   else if( ( icon = BG_Upgrade( upgradeNum )->icon ) )
     upgradeInfo->upgradeIcon = trap_R_RegisterShader( icon );
 }
@@ -2377,72 +2379,47 @@ void CG_Bullet( vec3_t end, int sourceEntityNum, vec3_t normal, qboolean flesh, 
 /*
 ============================================================================
 
-SHOTGUN TRACING
+SPLATTER
 
 ============================================================================
 */
 
 /*
-================
-CG_ShotgunPattern
-
-Perform the same traces the server did to locate the
-hit splashes
-================
+==============
+CG_SplatterMarks
+==============
 */
-static void CG_ShotgunPattern( vec3_t origin, vec3_t origin2, int seed, int otherEntNum )
-{
-  int       i;
-  float     r, u;
-  vec3_t    end;
-  vec3_t    forward, right, up;
-  trace_t   tr;
-
-  // derive the right and up vectors from the forward vector, because
-  // the client won't have any other information
-  VectorNormalize2( origin2, forward );
-  PerpendicularVector( right, forward );
-  CrossProduct( forward, right, up );
-
-  // generate the "random" spread pattern
-  for( i = 0; i < SHOTGUN_PELLETS; i++ )
+static void CG_SplatterMarks( splatterData_t *data ) {
+  if( !( data->tr->surfaceFlags & SURF_NOIMPACT ) )
   {
-    r = Q_crandom( &seed ) * SHOTGUN_SPREAD * 16;
-    u = Q_crandom( &seed ) * SHOTGUN_SPREAD * 16;
-    VectorMA( origin, 8192 * 16, forward, end );
-    VectorMA( end, r, right, end );
-    VectorMA( end, u, up, end );
-
-    CG_Trace( &tr, origin, NULL, NULL, end, otherEntNum, MASK_SHOT );
-
-    if( !( tr.surfaceFlags & SURF_NOIMPACT ) )
-    {
-      if( cg_entities[ tr.entityNum ].currentState.eType == ET_PLAYER ||
-          cg_entities[ tr.entityNum ].currentState.eType == ET_BUILDABLE )
-        CG_MissileHitEntity( WP_SHOTGUN, WPM_PRIMARY, tr.endpos, tr.plane.normal, tr.entityNum, 0 );
-      else if( tr.surfaceFlags & SURF_METALSTEPS )
-        CG_MissileHitWall( WP_SHOTGUN, WPM_PRIMARY, 0, tr.endpos, tr.plane.normal, IMPACTSOUND_METAL, 0 );
-      else
-        CG_MissileHitWall( WP_SHOTGUN, WPM_PRIMARY, 0, tr.endpos, tr.plane.normal, IMPACTSOUND_DEFAULT, 0 );
-    }
+    if( cg_entities[ data->tr->entityNum ].currentState.eType == ET_PLAYER ||
+        cg_entities[ data->tr->entityNum ].currentState.eType == ET_BUILDABLE )
+      CG_MissileHitEntity( WP_SHOTGUN, WPM_PRIMARY, data->tr->endpos,
+                           data->tr->plane.normal, data->tr->entityNum, 0 );
+    else if( data->tr->surfaceFlags & SURF_METALSTEPS )
+      CG_MissileHitWall( WP_SHOTGUN, WPM_PRIMARY, 0, data->tr->endpos,
+                         data->tr->plane.normal, IMPACTSOUND_METAL, 0 );
+    else
+      CG_MissileHitWall( WP_SHOTGUN, WPM_PRIMARY, 0, data->tr->endpos,
+                         data->tr->plane.normal, IMPACTSOUND_DEFAULT, 0 );
   }
 }
 
 /*
 ==============
-CG_ShotgunFire
+CG_Splatter
 ==============
 */
-void CG_ShotgunFire( entityState_t *es )
+void CG_Splatter( entityState_t *es )
 {
-  vec3_t  v;
+  splatterData_t data;
 
-  VectorSubtract( es->origin2, es->pos.trBase, v );
-  VectorNormalize( v );
-  VectorScale( v, 32, v );
-  VectorAdd( es->pos.trBase, v, v );
+  VectorCopy( es->pos.trBase, data.origin );
+  data.weapon = es->angles2[0];
+  data.weaponMode = es->angles2[1];
 
-  CG_ShotgunPattern( es->pos.trBase, es->origin2, es->eventParm, es->otherEntityNum );
+  BG_SplatterPattern( es->origin2, es->eventParm, es->otherEntityNum, &data,
+                      CG_SplatterMarks, CG_Trace );
 }
 
 /*
