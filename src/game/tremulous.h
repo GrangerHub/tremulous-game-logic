@@ -64,7 +64,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL0_POUNCE_WIDTH         14.0f
 #define LEVEL0_POUNCE_TIME          1000      // msec for full Dretch pounce
 #define LEVEL0_POUNCE_TIME_MIN      150      // msec before which pounce cancels
-#define LEVEL0_POUNCE_REPEAT        150      // msec before a new pounce starts
+#define LEVEL0_POUNCE_REPEAT        500      // msec before a new pounce starts
 #define LEVEL0_POUNCE_SPEED_MOD     1.00f    // walking speed modifier for pounce charging
 #define LEVEL0_POUNCE_JUMP_MAG      600      // Dretch pounce jump power
 
@@ -139,7 +139,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL3_POUNCE_TIME          2400      // msec for full Dragoon pounce
 #define LEVEL3_POUNCE_TIME_UPG      2000      // msec for full Adv. Dragoon pounce
 #define LEVEL3_POUNCE_TIME_MIN      150      // msec before which pounce cancels
-#define LEVEL3_POUNCE_REPEAT        150      // msec before a new pounce starts
+#define LEVEL3_POUNCE_REPEAT        700      // msec before a new pounce starts
 #define LEVEL3_POUNCE_SPEED_MOD     1.00f    // walking speed modifier for pounce charging
 #define LEVEL3_POUNCE_JUMP_MAG      1725     // Dragoon pounce jump power
 #define LEVEL3_POUNCE_JUMP_MAG_UPG  2000     // Adv. Dragoon pounce jump power

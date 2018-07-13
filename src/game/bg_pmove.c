@@ -1151,8 +1151,6 @@ static qboolean PM_CheckPounce( void )
     else
     {
       pm->ps->stats[ STAT_WEAPONTIME2 ] += LEVEL3_POUNCE_REPEAT;
-      // don't allow chomp imediately after a pounce
-      pm->ps->weaponTime += LEVEL3_POUNCE_REPEAT;
     }
     return qfalse;
   }
@@ -4354,24 +4352,18 @@ static void PM_Weapon( void )
         break;
     }
 
-    if( pm->ps->weapon != WP_ASPITFIRE &&
-        ( pm->ps->pm_flags & PMF_CHARGE ) )
-      pm->ps->misc[ MISC_MISC ] = 0; // don't charge while in the middle of a pounce
+    if( ( !pm->swapAttacks ?
+          (pm->cmd.buttons & BUTTON_ATTACK2) : (pm->cmd.buttons & BUTTON_ATTACK) ) &&
+        ( pm->ps->weapon != WP_ASPITFIRE ||
+          pm->waterlevel <= 1 ) )
+      pm->ps->misc[ MISC_MISC ] += pml.msec;
     else
-    {
-      if( ( !pm->swapAttacks ?
-            (pm->cmd.buttons & BUTTON_ATTACK2) : (pm->cmd.buttons & BUTTON_ATTACK) ) &&
-          ( pm->ps->weapon != WP_ASPITFIRE ||
-            pm->waterlevel <= 1 ) )
-        pm->ps->misc[ MISC_MISC ] += pml.msec;
-      else
-        pm->ps->misc[ MISC_MISC ] -= pml.msec;
+      pm->ps->misc[ MISC_MISC ] -= pml.msec;
 
-      if( pm->ps->misc[ MISC_MISC ] > max )
-        pm->ps->misc[ MISC_MISC ] = max;
-      else if( pm->ps->misc[ MISC_MISC ] < 0 )
-        pm->ps->misc[ MISC_MISC ] = 0;
-    }
+    if( pm->ps->misc[ MISC_MISC ] > max )
+      pm->ps->misc[ MISC_MISC ] = max;
+    else if( pm->ps->misc[ MISC_MISC ] < 0 )
+      pm->ps->misc[ MISC_MISC ] = 0;
   }
 
   // Trample charge mechanics
@@ -4571,13 +4563,6 @@ static void PM_Weapon( void )
       }
     }
   }
-
-  // no bite during pounce
-  if( ( pm->ps->weapon == WP_ALEVEL3 || pm->ps->weapon == WP_ALEVEL3_UPG )
-      && ( ( ( !pm->swapAttacks ?
-            (pm->cmd.buttons & BUTTON_ATTACK) : (pm->cmd.buttons & BUTTON_ATTACK2) ) ) )
-      && ( pm->ps->pm_flags & PMF_CHARGE ) )
-    return;
 
   // pump weapon delays (repeat times etc)
   if( pm->ps->weapon == WP_PORTAL_GUN  )
