@@ -176,6 +176,15 @@ static void CG_Obituary( entityState_t *ent )
           message = "blew himself up";
         break;
 
+      case MOD_FRAGNADE:
+        if( gender == GENDER_FEMALE )
+          message = "shredded herself ";
+        else if( gender == GENDER_NEUTER )
+          message = "shredded itself";
+        else
+          message = "shredded himself";
+        break;
+
       case MOD_LIGHTNING:
       case MOD_LIGHTNING_EMP:
         if( gender == GENDER_FEMALE )
@@ -301,6 +310,9 @@ static void CG_Obituary( entityState_t *ent )
         message = "couldn't escape";
         message2 = "'s grenade";
         break;
+      case MOD_FRAGNADE:
+        message = "was shredded by";
+        message2 = "'s frag grenade";
       case MOD_GRENADE_LAUNCHER:
         message = "was pulverized by";
         message2 = "'s launched grenade";
@@ -982,8 +994,8 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       CG_Bullet( es->pos.trBase, es->otherEntityNum, dir, qtrue, es->eventParm );
       break;
 
-    case EV_SHOTGUN:
-      CG_ShotgunFire( es );
+    case EV_SPLATTER:
+      CG_Splatter( es );
       break;
 
     case EV_MASS_DRIVER:

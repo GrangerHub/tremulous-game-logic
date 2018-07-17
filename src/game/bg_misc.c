@@ -2523,6 +2523,32 @@ static const weaponAttributes_t bg_weapons[ ] =
         0                   //int       missileLaunchSpeed;
       }
     },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      }
+    },
     TEAM_ALIENS           //team_t    team;
   },
   {
@@ -2578,6 +2604,32 @@ static const weaponAttributes_t bg_weapons[ ] =
         0,                  //int       missileLifeTime;
         0,                  //int       missileSize;
         0                   //int       missileLaunchSpeed;
+      }
+    },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
       }
     },
     TEAM_ALIENS           //team_t    team;
@@ -2637,6 +2689,32 @@ static const weaponAttributes_t bg_weapons[ ] =
         0                   //int       missileLaunchSpeed;
       }
     },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      }
+    },
     TEAM_ALIENS           //team_t    team;
   },
   {
@@ -2692,6 +2770,32 @@ static const weaponAttributes_t bg_weapons[ ] =
         0,                  //int       missileLifeTime;
         0,                  //int       missileSize;
         0                   //int       missileLaunchSpeed;
+      }
+    },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
       }
     },
     TEAM_ALIENS           //team_t    team;
@@ -2751,6 +2855,32 @@ static const weaponAttributes_t bg_weapons[ ] =
         0                   //int       missileLaunchSpeed;
       }
     },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      }
+    },
     TEAM_ALIENS           //team_t    team;
   },
   {
@@ -2806,6 +2936,32 @@ static const weaponAttributes_t bg_weapons[ ] =
         0,                  //int       missileLifeTime;
         0,                  //int       missileSize;
         0                   //int       missileLaunchSpeed;
+      }
+    },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
       }
     },
     TEAM_ALIENS           //team_t    team;
@@ -2865,6 +3021,32 @@ static const weaponAttributes_t bg_weapons[ ] =
         0                   //int       missileLaunchSpeed;
       }
     },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      }
+    },
     TEAM_ALIENS           //team_t    team;
   },
   {
@@ -2920,6 +3102,32 @@ static const weaponAttributes_t bg_weapons[ ] =
         0,                  //int       missileLifeTime;
         0,                  //int       missileSize;
         0                   //int       missileLaunchSpeed;
+      }
+    },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
       }
     },
     TEAM_ALIENS           //team_t    team;
@@ -2979,6 +3187,32 @@ static const weaponAttributes_t bg_weapons[ ] =
         0                   //int       missileLaunchSpeed;
       }
     },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      }
+    },
     TEAM_ALIENS           //team_t    team;
   },
   {
@@ -3034,6 +3268,32 @@ static const weaponAttributes_t bg_weapons[ ] =
         0,                  //int       missileLifeTime;
         0,                  //int       missileSize;
         0                   //int       missileLaunchSpeed;
+      }
+    },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
       }
     },
     TEAM_HUMANS           //team_t    team;
@@ -3094,6 +3354,32 @@ static const weaponAttributes_t bg_weapons[ ] =
         0                   //int       missileLaunchSpeed;
       }
     },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      }
+    },
     TEAM_HUMANS           //team_t    team;
   },
   {
@@ -3151,6 +3437,32 @@ static const weaponAttributes_t bg_weapons[ ] =
         0,                  //int       missileLifeTime;
         0,                  //int       missileSize;
         0                   //int       missileLaunchSpeed;
+      }
+    },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
       }
     },
     TEAM_HUMANS           //team_t    team;
@@ -3214,6 +3526,32 @@ static const weaponAttributes_t bg_weapons[ ] =
         0                   //int       missileLaunchSpeed;
       }
     },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        SHOTGUN_PELLETS,  //unsigned int number;
+        SHOTGUN_SPREAD,   //float        spread;
+        SHOTGUN_DMG,      //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        SHOTGUN_RANGE,    //float        range;
+      },
+      {                   //struct    splatter[1]
+        SHOTGUN_PELLETS,  //unsigned int number;
+        SHOTGUN_CHOKE_SPREAD, //float        spread;
+        SHOTGUN_CHOKE_DMG, //int          impactDamage;
+        SHOTGUN_CHOKE_DMG_FALLOFF, //float        impactDamageFalloff;
+        SHOTGUN_CHOKE_DMG_CAP, //int          impactDamageCap;
+        SHOTGUN_CHOKE_DMG_FALLOFF, //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      }
+    },
     TEAM_HUMANS           //team_t    team;
   },
   {
@@ -3270,6 +3608,32 @@ static const weaponAttributes_t bg_weapons[ ] =
         0,                  //int       missileLifeTime;
         0,                  //int       missileSize;
         0                   //int       missileLaunchSpeed;
+      }
+    },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
       }
     },
     TEAM_HUMANS           //team_t    team;
@@ -3329,6 +3693,32 @@ static const weaponAttributes_t bg_weapons[ ] =
         0,                  //int       missileLifeTime;
         0,                  //int       missileSize;
         0                   //int       missileLaunchSpeed;
+      }
+    },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
       }
     },
     TEAM_HUMANS           //team_t    team;
@@ -3391,6 +3781,32 @@ static const weaponAttributes_t bg_weapons[ ] =
         0                   //int       missileLaunchSpeed;
       }
     },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      }
+    },
     TEAM_HUMANS           //team_t    team;
   },
   {
@@ -3450,6 +3866,32 @@ static const weaponAttributes_t bg_weapons[ ] =
         0                   //int       missileLaunchSpeed;
       }
     },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      }
+    },
     TEAM_HUMANS           //team_t    team;
   },
   {
@@ -3505,6 +3947,32 @@ static const weaponAttributes_t bg_weapons[ ] =
         0,                  //int       missileLifeTime;
         0,                  //int       missileSize;
         0                   //int       missileLaunchSpeed;
+      }
+    },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
       }
     },
     TEAM_HUMANS           //team_t    team;
@@ -3568,6 +4036,32 @@ static const weaponAttributes_t bg_weapons[ ] =
         LCANNON_SPEED_MIN   //int       missileLaunchSpeed;
       }
     },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      }
+    },
     TEAM_HUMANS           //team_t    team;
   },
   {
@@ -3623,6 +4117,115 @@ static const weaponAttributes_t bg_weapons[ ] =
         0,                  //int       missileLifeTime;
         0,                  //int       missileSize;
         0                   //int       missileLaunchSpeed;
+      }
+    },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      }
+    },
+    TEAM_HUMANS           //team_t    team;
+  },
+  {
+    WP_FRAGNADE,          //int       number;
+    qtrue,                //qboolean enabled;
+    FRAGNADE_PRICE,       //int       price;
+    ( 1 << S2 )|( 1 << S3 ), //int    stages;
+    SLOT_NONE,            //int       slots;
+    "fragnade",           //char      *name;
+    "Fragmentation Grenade", //char      *humanName;
+    "",
+    1,                    //int       maxAmmo;
+    0,                    //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
+    0,                    //int       roundPrice;
+    qtrue,                //qboolean  ammoPurchasable;
+    qfalse,               //int       infiniteAmmo;
+    qfalse,               //int       usesEnergy;
+    FRAGNADE_REPEAT,      //int       repeatRate1;
+    0,                    //int       repeatRate2;
+    0,                    //int       repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
+    0,                    //int       reloadTime;
+    FRAGNADE_K_SCALE,      //float     knockbackScale;
+    0.0f,                 //float     recoil1;
+    0.0f,                 //float     recoil2;
+    0.0f,                 //float     recoil3;
+    qfalse,               //qboolean  hasAltMode;
+    qfalse,               //qboolean  hasThirdMode;
+    qfalse,               //qboolean  canZoom;
+    90.0f,                //float     zoomFov;
+    qfalse,               //qboolean  purchasable;
+    qfalse,               //qboolean  longRanged;
+    qtrue,                //qboolean  relativeMissileSpeed;
+    {
+      {                     //impactPrediction_t impactPrediction[0];
+        WPM_NONE,           //weaponMode_t  weaponMode;
+        TR_GRAVITY,         //trType_t      trType;
+        FRAGNADE_LIFETIME,   //int       missileLifeTime;
+        FRAGNADE_SIZE,       //int       missileSize;
+        FRAGNADE_SPEED       //int       missileLaunchSpeed;
+      },
+      {                     //impactPrediction_t impactPrediction[1];
+        WPM_NONE,           //weaponMode_t  weaponMode;
+        TR_STATIONARY,      //trType_t      trType;
+        0,                  //int       missileLifeTime;
+        0,                  //int       missileSize;
+        0                   //int       missileLaunchSpeed;
+      }
+    },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        FRAGNADE_FRAGMENTS, //unsigned int number;
+        FRAGNADE_SPREAD, //float        spread;
+        FRAGNADE_FRAGMENT_DMG, //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        FRAGNADE_RANGE, //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
       }
     },
     TEAM_HUMANS           //team_t    team;
@@ -3682,6 +4285,32 @@ static const weaponAttributes_t bg_weapons[ ] =
         0,                  //int       missileLifeTime;
         0,                  //int       missileSize;
         0                   //int       missileLaunchSpeed;
+      }
+    },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
       }
     },
     TEAM_HUMANS           //team_t    team;
@@ -3744,6 +4373,32 @@ static const weaponAttributes_t bg_weapons[ ] =
         0                   //int       missileLaunchSpeed;
       }
     },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      }
+    },
     TEAM_HUMANS           //team_t    team;
   },
   {
@@ -3799,6 +4454,32 @@ static const weaponAttributes_t bg_weapons[ ] =
         0,                  //int       missileLifeTime;
         0,                  //int       missileSize;
         0                   //int       missileLaunchSpeed;
+      }
+    },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
       }
     },
     TEAM_ALIENS           //team_t    team;
@@ -3858,6 +4539,32 @@ static const weaponAttributes_t bg_weapons[ ] =
         0                   //int       missileLaunchSpeed;
       }
     },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      }
+    },
     TEAM_ALIENS           //team_t    team;
   },
   {
@@ -3913,6 +4620,32 @@ static const weaponAttributes_t bg_weapons[ ] =
         0,                  //int       missileLifeTime;
         0,                  //int       missileSize;
         0                   //int       missileLaunchSpeed;
+      }
+    },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
       }
     },
     TEAM_HUMANS           //team_t    team;
@@ -3972,6 +4705,32 @@ static const weaponAttributes_t bg_weapons[ ] =
         0                   //int       missileLaunchSpeed;
       }
     },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      }
+    },
     TEAM_HUMANS           //team_t    team;
   },
   {
@@ -4029,6 +4788,32 @@ static const weaponAttributes_t bg_weapons[ ] =
         0                   //int       missileLaunchSpeed;
       }
     },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      }
+    },
     TEAM_ALIENS           //team_t    team;
   },
   {
@@ -4084,6 +4869,32 @@ static const weaponAttributes_t bg_weapons[ ] =
         0,                  //int       missileLifeTime;
         0,                  //int       missileSize;
         0                   //int       missileLaunchSpeed;
+      }
+    },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
       }
     },
     TEAM_ALIENS           //team_t    team;
@@ -4145,6 +4956,32 @@ static const weaponAttributes_t bg_weapons[ ] =
         0                   //int       missileLaunchSpeed;
       }
     },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      }
+    },
     TEAM_HUMANS           //team_t    team;
   },
   {
@@ -4201,6 +5038,32 @@ static const weaponAttributes_t bg_weapons[ ] =
         0,                  //int       missileLifeTime;
         0,                  //int       missileSize;
         0                   //int       missileLaunchSpeed;
+      }
+    },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
       }
     },
     TEAM_HUMANS           //team_t    team;
@@ -4291,6 +5154,90 @@ int BG_TotalPriceForWeapon( weapon_t weapon  )
   return ( BG_Weapon( weapon )->roundPrice * BG_Weapon( weapon )->maxAmmo *
            ( BG_Weapon( weapon )->maxClips + 1 ) ) + BG_Weapon( weapon )->price;
 
+}
+
+//TODO: redo all of the angles, vectors, and math code, and look into quaternions!
+/*
+==============
+BG_SplatterPattern
+
+For the shotgun, frag nade, acidtubes, flamer, etc...
+==============
+*/
+void BG_SplatterPattern( vec3_t origin2, int seed, int passEntNum,
+                         splatterData_t *data, void (*func)( splatterData_t *data ),
+                         void (*trace)( trace_t *, const vec3_t,
+                                        const vec3_t, const vec3_t,
+                                        const vec3_t, int, int ) ) {
+  int       i;
+  const int modeIndex = data->weaponMode - 1;
+  weapon_t weapon = data->weapon;
+  const int splatter_num = BG_Weapon( weapon )->splatter[modeIndex].number;
+  const float spread = BG_Weapon( weapon )->splatter[modeIndex].spread;
+  const float range = BG_Weapon( weapon )->splatter[modeIndex].range;
+  vec3_t    origin, forward, cross;
+  const vec3_t    up_absolute = { 0.0f, 0.0f, 1.0f };
+  float  rotation_angle, cross_length, dot;
+  trace_t   tr;
+
+  Com_Assert( modeIndex >= 0 &&
+              modeIndex < 3 &&
+              "BG_SplatterPattern: invalid weaponMode" );
+  Com_Assert( trace &&
+              "BG_SplatterPattern: trace is NULL" );
+  Com_Assert( func &&
+              "BG_Weapon( weapon )->splatter[modeIndex].spread: func is NULL" );
+  Com_Assert( spread >= 0 &&
+              spread <= 180 &&
+              "BG_SplatterPattern: spread is out of range"  );
+
+  VectorCopy( data->origin, origin );
+
+  VectorCopy( origin2, forward );
+  CrossProduct( up_absolute, forward, cross );
+  cross_length = VectorLength( cross );
+  dot = DotProduct( up_absolute, forward );
+
+  if( cross_length > 0 ) {
+    VectorNormalize( cross );
+    rotation_angle = RAD2DEG( atan2( cross_length, dot) );
+  } else if( dot > 0.0f ) {
+    rotation_angle = 0;
+  } else {
+    rotation_angle = 180;
+  }
+
+
+  // generate the "random" spread pattern
+  for( i = 0; i < splatter_num; i++ ) {
+    vec3_t splatter_angles, dir, temp, end;
+
+    //find the splatter angles
+    splatter_angles[PITCH] =  Q_random( &seed ) * spread;
+    AngleNormalize180( splatter_angles[PITCH] );
+    splatter_angles[PITCH] -= 90; //the spread angle is in relation to pointing straight up
+    splatter_angles[YAW] = Q_random( &seed ) * 360;
+    AngleNormalize360( splatter_angles[YAW] );
+    splatter_angles[ROLL] = 0;
+
+    //get the new dir vector
+    AngleVectors( splatter_angles, temp, NULL, NULL );
+    VectorNormalize( temp );
+
+    if( cross_length > 0 ) {
+      RotatePointAroundVector( dir, cross, temp, rotation_angle );
+    } else if( dot > 0.0f ){
+      VectorCopy( temp, dir );
+    } else {
+      VectorScale( temp, -1.0f, dir );
+    }
+
+    VectorMA( origin, range, dir, end );
+
+    trace( &tr, origin, NULL, NULL, end, passEntNum, MASK_SHOT );
+    data->tr = &tr;
+    func( data );
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -4422,6 +5369,24 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     "Grenade",              //char  *humanName;
     "A small incendinary device ideal for damaging tightly packed "
       "alien structures. Has a five second timer.",
+    0,
+    qtrue,                  //qboolean  purchasable;
+    qtrue,                  //qboolean  sellable;
+    qtrue,                  //qboolean  usable;
+    TEAM_HUMANS             //team_t    team;
+  },
+  {
+    UP_FRAGNADE,            //int   number;
+    qtrue,                  //qboolean enabled;
+    FRAGNADE_PRICE,         //int   price;
+    ( 1 << S2 )|( 1 << S3 ), //int  stages;
+    SLOT_NONE,              //int   slots;
+    "frag",                 //char  *name;
+    "Fragmentation Grenade", //char  *humanName;
+    "A grenade with a heavy shell that, upon detonation, shatters "
+      "into hundreds of high speed devestating fragments. Included is a "
+      "built in gyroscope that kicks the grenade up to an optimal height before "
+      "exploding. This grenade is most effective against larger targets.",
     0,
     qtrue,                  //qboolean  purchasable;
     qtrue,                  //qboolean  sellable;
@@ -4768,7 +5733,7 @@ char *eventnames[ ] =
   "EV_BULLET_HIT_FLESH",
   "EV_BULLET_HIT_WALL",
 
-  "EV_SHOTGUN",
+  "EV_SPLATTER",
   "EV_MASS_DRIVER",
 
   "EV_MISSILE_HIT",

@@ -1281,6 +1281,7 @@ gentity_t *launch_grenade( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *launch_grenade2( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *launch_grenade3( gentity_t *self, vec3_t start, vec3_t dir,
                             qboolean impact );
+gentity_t *launch_fragnade( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *fire_lightningBall( gentity_t *self, qboolean primary,
                                vec3_t start, vec3_t dir );
 
@@ -1335,6 +1336,9 @@ void      Blow_up( gentity_t *ent );
 void      G_ForceWeaponChange( gentity_t *ent, weapon_t weapon );
 void      G_GiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo );
 void      SnapVectorTowards( vec3_t v, vec3_t to );
+void      G_SplatterFire( gentity_t *inflicter, gentity_t *attacker,
+                          vec3_t origin, vec3_t dir,
+                          weapon_t weapon, weaponMode_t weaponMode, meansOfDeath_t mod );
 qboolean  CheckVenomAttack( gentity_t *ent );
 void      CheckGrabAttack( gentity_t *ent );
 qboolean  CheckPounceAttack( gentity_t *ent, trace_t *trace,

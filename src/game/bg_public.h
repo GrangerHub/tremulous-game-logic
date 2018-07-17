@@ -566,6 +566,7 @@ typedef enum
   WP_PULSE_RIFLE,
   WP_LUCIFER_CANNON,
   WP_GRENADE,
+  WP_FRAGNADE,
   WP_LAUNCHER,
   WP_LIGHTNING,
 
@@ -596,6 +597,7 @@ typedef enum
   UP_JETPACK,
   UP_BATTLESUIT,
   UP_GRENADE,
+  UP_FRAGNADE,
 
   UP_AMMO,
   UP_JETFUEL,
@@ -747,7 +749,7 @@ typedef enum
   EV_BULLET_HIT_FLESH,
   EV_BULLET_HIT_WALL,
 
-  EV_SHOTGUN,
+  EV_SPLATTER,
   EV_MASS_DRIVER,
 
   EV_MISSILE_HIT,
@@ -1171,6 +1173,7 @@ typedef enum
   MOD_FLAMER,
   MOD_FLAMER_SPLASH,
   MOD_GRENADE,
+  MOD_FRAGNADE,
   MOD_GRENADE_LAUNCHER,
   MOD_LIGHTNING,
   MOD_LIGHTNING_EMP,
@@ -1464,6 +1467,17 @@ typedef struct
   qboolean            relativeMissileSpeed;
   impactPrediction_t  impactPrediction[2];
 
+  struct splatter_s
+  {
+    unsigned int number;
+    float        spread;
+    int          impactDamage;
+    float        impactDamageFalloff; //damage drops towards 0 as this distance
+                                      //is approached, disabled if set to 0
+    int          impactDamageCap; //only applies if fallof is enabled
+    float        range;
+  } splatter[3];
+
   team_t    team;
 } weaponAttributes_t;
 
@@ -1580,6 +1594,20 @@ qboolean                    BG_WeaponAllowedInStage( weapon_t weapon,
                                                      int gameIsInWarmup );
 int                         BG_AmmoUsage( playerState_t *ps );
 int                         BG_TotalPriceForWeapon( weapon_t weapon );
+
+typedef struct splatterData_s
+{
+  weapon_t     weapon;
+  weaponMode_t weaponMode;
+  vec3_t       origin;
+  trace_t      *tr;
+  void         *user_data;
+} splatterData_t;
+void BG_SplatterPattern( vec3_t origin2, int seed, int passEntNum,
+                         splatterData_t *data, void (*func)( splatterData_t *data ),
+                         void (*trace)( trace_t *, const vec3_t,
+                                        const vec3_t, const vec3_t,
+                                        const vec3_t, int, int ) );
 
 const upgradeAttributes_t   *BG_UpgradeByName( const char *name );
 const upgradeAttributes_t   *BG_Upgrade( upgrade_t upgrade );

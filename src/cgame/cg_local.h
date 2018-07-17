@@ -62,7 +62,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MAX_STEP_CHANGE     32
 
 #define MAX_VERTS_ON_POLY   10
-#define MAX_MARK_POLYS      256
+#define MAX_MARK_POLYS      2048
 
 #define STAT_MINUS          10  // num frame for '-' stats digit
 
@@ -1970,7 +1970,7 @@ void        CG_MissileHitEntity( weapon_t weaponNum, weaponMode_t weaponMode,
                                  vec3_t origin, vec3_t dir, int entityNum, int charge );
 void        CG_MassDriverFire( entityState_t *es );
 void        CG_Bullet( vec3_t origin, int sourceEntityNum, vec3_t normal, qboolean flesh, int fleshEntityNum );
-void        CG_ShotgunFire( entityState_t *es );
+void        CG_Splatter( entityState_t *es );
 void        CG_BuildFire( entityState_t *es );
 
 void        CG_AddViewWeapon (playerState_t *ps);
