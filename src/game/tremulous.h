@@ -557,7 +557,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define FRAGNADE_BLAST_RANGE         0.0f
 #define FRAGNADE_SPEED               400.0f
 #define FRAGNADE_SIZE                3.0f        // missile bounding box
-#define FRAGNADE_LIFETIME            1500
+#define FRAGNADE_LIFETIME            2000
 
 #define SHOTGUN_PRICE               175
 #define SHOTGUN_SHELLS              10
