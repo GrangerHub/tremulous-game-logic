@@ -778,6 +778,9 @@ gentity_t *launch_fragnade( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;   // move a bit on the very first frame
   VectorCopy( start, bolt->s.pos.trBase );
   VectorScale( dir, FRAGNADE_SPEED, bolt->s.pos.trDelta );
+  if( self->client )
+    BG_ModifyMissleLaunchVelocity( self->s.pos.trDelta, self->client->ps.speed, bolt->s.pos.trDelta,
+                                   BG_Weapon( bolt->s.weapon )->relativeMissileSpeed );
   SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
 
   VectorCopy( start, bolt->r.currentOrigin );
