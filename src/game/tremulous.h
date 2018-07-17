@@ -417,10 +417,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define FRAGNADE_PRICE               250
 #define FRAGNADE_REPEAT              0
 #define FRAGNADE_K_SCALE             1.0f
-#define FRAGNADE_FRAGMENTS           360
-#define FRAGNADE_SPREAD              180
+#define FRAGNADE_FRAGMENTS           200
+#define FRAGNADE_SPREAD              45
 #define FRAGNADE_RANGE               1000
-#define FRAGNADE_FRAGMENT_DMG        HWDM(37000)
+#define FRAGNADE_FRAGMENT_DMG        HWDM(60000)
 #define FRAGNADE_BLAST_DAMAGE        (FRAGNADE_FRAGMENT_DMG * FRAGNADE_FRAGMENTS)
 #define FRAGNADE_BLAST_RANGE         0.0f
 #define FRAGNADE_SPEED               400.0f

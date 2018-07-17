@@ -2178,6 +2178,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     {                     //struct    splatter
       {                   //struct    splatter[0]
         0,                //unsigned int number;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2185,7 +2186,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2193,7 +2195,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2240,7 +2243,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //qboolean  longRanged;
     {                     //struct    splatter
       {                   //struct    splatter[0]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2248,7 +2252,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2256,7 +2261,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2303,7 +2309,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     qtrue,                //qboolean  longRanged;
     {                     //struct    splatter
       {                   //struct    splatter[0]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2311,7 +2318,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2319,7 +2327,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2366,7 +2375,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //qboolean  longRanged;
     {                     //struct    splatter
       {                   //struct    splatter[0]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2374,7 +2384,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2382,7 +2393,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2429,7 +2441,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //qboolean  longRanged;
     {                     //struct    splatter
       {                   //struct    splatter[0]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2437,7 +2450,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2445,7 +2459,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2492,7 +2507,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //qboolean  longRanged;
     {                     //struct    splatter
       {                   //struct    splatter[0]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2500,7 +2516,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2508,7 +2525,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2555,7 +2573,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     qtrue,                //qboolean  longRanged;
     {                     //struct    splatter
       {                   //struct    splatter[0]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2563,7 +2582,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2571,7 +2591,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2618,7 +2639,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //qboolean  longRanged;
     {                     //struct    splatter
       {                   //struct    splatter[0]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2626,7 +2648,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2634,7 +2657,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2681,7 +2705,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     qtrue,                //qboolean  longRanged;
     {                     //struct    splatter
       {                   //struct    splatter[0]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2689,7 +2714,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2697,7 +2723,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2745,7 +2772,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     qtrue,                //qboolean  longRanged;
     {                     //struct    splatter
       {                   //struct    splatter[0]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2753,7 +2781,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2761,7 +2790,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2810,7 +2840,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //qboolean  longRanged;
     {                     //struct    splatter
       {                   //struct    splatter[0]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2818,7 +2849,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2826,7 +2858,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2875,7 +2908,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     qtrue,                //qboolean  longRanged;
     {                     //struct    splatter
       {                   //struct    splatter[0]
-        SHOTGUN_PELLETS,  //unsigned int number;
+        SHOTGUN_PELLETS,  //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         SHOTGUN_SPREAD,   //float        spread;
         SHOTGUN_DMG,      //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2883,7 +2917,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         SHOTGUN_RANGE,    //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0.0f,             //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2891,7 +2926,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0,                //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2939,7 +2975,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     qtrue,                //qboolean  longRanged;
     {                     //struct    splatter
       {                   //struct    splatter[0]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2947,7 +2984,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2955,7 +2993,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3004,7 +3043,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     qtrue,                //qboolean  longRanged;
     {                     //struct    splatter
       {                   //struct    splatter[0]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3012,7 +3052,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3020,7 +3061,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3069,7 +3111,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     qtrue,                //qboolean  longRanged;
     {                     //struct    splatter
       {                   //struct    splatter[0]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3077,7 +3120,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3085,7 +3129,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3134,7 +3179,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     qtrue,                //qboolean  longRanged;
     {                     //struct    splatter
       {                   //struct    splatter[0]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3142,7 +3188,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3150,7 +3197,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3197,7 +3245,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     qtrue,                //qboolean  longRanged;
     {                     //struct    splatter
       {                   //struct    splatter[0]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3205,7 +3254,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3213,7 +3263,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3264,7 +3315,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     qtrue,                //qboolean  longRanged;
     {                     //struct    splatter
       {                   //struct    splatter[0]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3272,7 +3324,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3280,7 +3333,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3327,7 +3381,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //
     {                     //struct    splatter
       {                   //struct    splatter[0]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3335,7 +3390,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3343,7 +3399,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3390,7 +3447,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //qboolean  longRanged;
     {                     //struct    splatter
       {                   //struct    splatter[0]
-        FRAGNADE_FRAGMENTS, //unsigned int number;
+        FRAGNADE_FRAGMENTS, //unsigned int number;;
+        SPLATP_MIRRORED_INVERSE_SPHERICAL_CONE, //splatterPattern_t pattern;
         FRAGNADE_SPREAD, //float        spread;
         FRAGNADE_FRAGMENT_DMG, //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3398,7 +3456,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         FRAGNADE_RANGE, //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3406,7 +3465,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3455,7 +3515,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     qtrue,                //qboolean  longRanged;
     {                     //struct    splatter
       {                   //struct    splatter[0]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3463,7 +3524,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3471,7 +3533,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3521,7 +3584,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     qtrue,                //qboolean  longRanged;
     {                     //struct    splatter
       {                   //struct    splatter[0]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3529,7 +3593,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3537,7 +3602,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3584,7 +3650,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //qboolean  longRanged;
     {                     //struct    splatter
       {                   //struct    splatter[0]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3592,7 +3659,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3600,7 +3668,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3647,7 +3716,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //qboolean  longRanged;
     {                     //struct    splatter
       {                   //struct    splatter[0]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3655,7 +3725,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3663,7 +3734,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3710,7 +3782,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //qboolean  longRanged;
     {                     //struct    splatter
       {                   //struct    splatter[0]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3718,7 +3791,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3726,7 +3800,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3773,7 +3848,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //qboolean  longRanged;
     {                     //struct    splatter
       {                   //struct    splatter[0]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3781,7 +3857,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3789,7 +3866,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3836,7 +3914,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //qboolean  longRanged;
     {                     //struct    splatter
       {                   //struct    splatter[0]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3844,7 +3923,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3852,7 +3932,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3899,7 +3980,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //qboolean  longRanged;
     {                     //struct    splatter
       {                   //struct    splatter[0]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3907,7 +3989,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3915,7 +3998,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3964,7 +4048,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //qboolean  longRanged;
     {                     //struct    splatter
       {                   //struct    splatter[0]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3972,7 +4057,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3980,7 +4066,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -4028,7 +4115,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     qtrue,                //qboolean  longRanged;
     {                     //struct    splatter
       {                   //struct    splatter[0]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -4036,7 +4124,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -4044,7 +4133,8 @@ static const weaponAttributes_t bg_weapons[ ] =
         0.0f,             //float        range;
       },
       {                   //struct    splatter[1]
-        0,                //unsigned int number;
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -4148,6 +4238,45 @@ int BG_TotalPriceForWeapon( weapon_t weapon  )
 }
 
 //TODO: redo all of the angles, vectors, and math code, and look into quaternions!
+
+/*
+==============
+BG_SplatterSphericalCone
+==============
+*/
+static void BG_SplatterSphericalCone( int *seed, float spread, vec3_t out ) {
+  vec3_t splatter_angles;
+
+  splatter_angles[PITCH] =  Q_random( seed ) * spread;
+  AngleNormalize180( splatter_angles[PITCH] );
+  splatter_angles[PITCH] -= 90; //the spread angle is in relation to pointing straight up
+  splatter_angles[YAW] = Q_random( seed ) * 360;
+  AngleNormalize360( splatter_angles[YAW] );
+  splatter_angles[ROLL] = 0;
+
+  AngleVectors( splatter_angles, out, NULL, NULL );
+  VectorNormalize( out );
+}
+
+/*
+==============
+BG_SplatterMirroredInverseSphericalCone
+==============
+*/
+static void BG_SplatterMirroredInverseSphericalCone( int *seed, float spread, vec3_t out ) {
+  vec3_t splatter_angles;
+
+  splatter_angles[PITCH] =  Q_random( seed ) * spread;
+  AngleNormalize180( splatter_angles[PITCH] );
+  splatter_angles[PITCH] -= ( spread * 0.5f ); //the spread angle is centered at the horizontal
+  splatter_angles[YAW] = Q_random( seed ) * 360;
+  AngleNormalize360( splatter_angles[YAW] );
+  splatter_angles[ROLL] = 0;
+
+  AngleVectors( splatter_angles, out, NULL, NULL );
+  VectorNormalize( out );
+}
+
 /*
 ==============
 BG_SplatterPattern
@@ -4164,12 +4293,14 @@ void BG_SplatterPattern( vec3_t origin2, int seed, int passEntNum,
   const int modeIndex = data->weaponMode - 1;
   weapon_t weapon = data->weapon;
   const int splatter_num = BG_Weapon( weapon )->splatter[modeIndex].number;
+  const splatterPattern_t pattern_type = BG_Weapon( weapon )->splatter[modeIndex].pattern;
   const float spread = BG_Weapon( weapon )->splatter[modeIndex].spread;
   const float range = BG_Weapon( weapon )->splatter[modeIndex].range;
   vec3_t    origin, forward, cross;
   const vec3_t    up_absolute = { 0.0f, 0.0f, 1.0f };
   float  rotation_angle, cross_length, dot;
   trace_t   tr;
+  void (*pattern)( int *seed, float spread, vec3_t out ) = NULL;
 
   Com_Assert( modeIndex >= 0 &&
               modeIndex < 3 &&
@@ -4184,6 +4315,21 @@ void BG_SplatterPattern( vec3_t origin2, int seed, int passEntNum,
 
   VectorCopy( data->origin, origin );
 
+  //select the pattern type
+  switch ( pattern_type ) {
+    case SPLATP_SPHERICAL_CONE:
+      pattern = BG_SplatterSphericalCone;
+      break;
+
+    case SPLATP_MIRRORED_INVERSE_SPHERICAL_CONE:
+      pattern = BG_SplatterMirroredInverseSphericalCone;
+      break;
+  }
+
+  Com_Assert( pattern &&
+              "BG_SplatterPattern: pattern not selected" );
+
+  //prepare for rotation to the facing direction
   VectorCopy( origin2, forward );
   CrossProduct( up_absolute, forward, cross );
   cross_length = VectorLength( cross );
@@ -4198,23 +4344,14 @@ void BG_SplatterPattern( vec3_t origin2, int seed, int passEntNum,
     rotation_angle = 180;
   }
 
-
-  // generate the "random" spread pattern
+  // generate the pattern
   for( i = 0; i < splatter_num; i++ ) {
-    vec3_t splatter_angles, dir, temp, end;
+    vec3_t dir, temp, end;
 
-    //find the splatter angles
-    splatter_angles[PITCH] =  Q_random( &seed ) * spread;
-    AngleNormalize180( splatter_angles[PITCH] );
-    splatter_angles[PITCH] -= 90; //the spread angle is in relation to pointing straight up
-    splatter_angles[YAW] = Q_random( &seed ) * 360;
-    AngleNormalize360( splatter_angles[YAW] );
-    splatter_angles[ROLL] = 0;
+    //get the next pattern vector
+    pattern( &seed, spread, temp );
 
-    //get the new dir vector
-    AngleVectors( splatter_angles, temp, NULL, NULL );
-    VectorNormalize( temp );
-
+    //rotate toward the facing direction
     if( cross_length > 0 ) {
       RotatePointAroundVector( dir, cross, temp, rotation_angle );
     } else if( dot > 0.0f ){
