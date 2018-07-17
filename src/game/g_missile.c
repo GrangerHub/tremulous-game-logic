@@ -83,7 +83,7 @@ void G_ExplodeMissile( gentity_t *ent )
 
   ent->s.eType = ET_GENERAL;
 
-  G_SplatterFire( ent, ent, ent->s.pos.trBase, dir, ent->s.weapon,
+  G_SplatterFire( ent, ent->parent, ent->s.pos.trBase, dir, ent->s.weapon,
                   ent->s.generic1, ent->splashMethodOfDeath );
 
   if( ent->s.weapon != WP_LOCKBLOB_LAUNCHER &&
