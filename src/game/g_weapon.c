@@ -517,8 +517,7 @@ static void G_Splatter( splatterData_t *data ) {
         if( damage <= 0 ) {
           damage = 1;
         }
-      } else
-        damage = SHOTGUN_DMG;
+      }
 
       VectorSubtract( data->tr->endpos, data->origin, kbDir );
       G_Damage( traceEnt, gData->inflicter, gData->attacker, kbDir, data->tr->endpos,
