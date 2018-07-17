@@ -313,6 +313,7 @@ static void CG_Obituary( entityState_t *ent )
       case MOD_FRAGNADE:
         message = "was shredded by";
         message2 = "'s frag grenade";
+        break;
       case MOD_GRENADE_LAUNCHER:
         message = "was pulverized by";
         message2 = "'s launched grenade";
