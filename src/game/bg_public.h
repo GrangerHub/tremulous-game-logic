@@ -1338,6 +1338,12 @@ typedef struct
   float     zOffset;
 } buildableConfig_t;
 
+typedef enum
+{
+  SPLATP_SPHERICAL_CONE,
+  SPLATP_MIRRORED_INVERSE_SPHERICAL_CONE
+} splatterPattern_t;
+
 // weapon record
 typedef struct
 {
@@ -1386,13 +1392,14 @@ typedef struct
 
   struct splatter_s
   {
-    unsigned int number;
-    float        spread;
-    int          impactDamage;
-    float        impactDamageFalloff; //damage drops towards 0 as this distance
-                                      //is approached, disabled if set to 0
-    int          impactDamageCap; //only applies if fallof is enabled
-    float        range;
+    unsigned int      number;
+    splatterPattern_t pattern;
+    float             spread;
+    int               impactDamage;
+    float             impactDamageFalloff; //damage drops towards 0 as this distance
+                                           //is approached, disabled if set to 0
+    int               impactDamageCap; //only applies if fallof is enabled
+    float             range;
   } splatter[3];
 
   team_t    team;
