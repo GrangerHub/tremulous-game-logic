@@ -1344,6 +1344,27 @@ typedef enum
   SPLATP_MIRRORED_INVERSE_SPHERICAL_CONE
 } splatterPattern_t;
 
+typedef enum
+{
+  SPLATD_RANDOM,
+  SPLATD_UNIFORM,
+  SPLATD_UNIFORM_ALTERNATING
+} splatterDistribution_t;
+
+typedef struct splatterAttributes_s
+{
+  unsigned int           number;
+  splatterPattern_t      pattern;
+  splatterDistribution_t distribution;
+  unsigned int           pitchLayers; //doesn't apply to SPLATD_RANDOM
+  float                  spread;
+  int                    impactDamage;
+  float                  impactDamageFalloff; //damage drops towards 0 as this distance
+                                         //is approached, disabled if set to 0
+  int                    impactDamageCap; //only applies if fallof is enabled
+  float                  range;
+} splatterAttributes_t;
+
 // weapon record
 typedef struct
 {
@@ -1390,17 +1411,7 @@ typedef struct
   qboolean  purchasable;
   qboolean  longRanged;
 
-  struct splatter_s
-  {
-    unsigned int      number;
-    splatterPattern_t pattern;
-    float             spread;
-    int               impactDamage;
-    float             impactDamageFalloff; //damage drops towards 0 as this distance
-                                           //is approached, disabled if set to 0
-    int               impactDamageCap; //only applies if fallof is enabled
-    float             range;
-  } splatter[3];
+  splatterAttributes_t splatter[3];
 
   team_t    team;
 } weaponAttributes_t;

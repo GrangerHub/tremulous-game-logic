@@ -238,9 +238,14 @@ Maximum/minimum of two ints
 #define Q_stricmp_exact( s1, s2 ) Q_stricmpn( s1, s2, min( strlen( s1 ), strlen( s2 )))
 
 // angle indexes
-#define	PITCH				0		// up / down
-#define	YAW					1		// left / right
-#define	ROLL				2		// fall over
+typedef enum
+{
+  PITCH = 0,	// up / down
+  YAW = 1,		// left / right
+  ROLL = 2,		// fall over
+
+  NUM_ANGLE_INDICIES
+} angleIndex_t;
 
 // the game guarantees that no string from the network will ever
 // exceed MAX_STRING_CHARS

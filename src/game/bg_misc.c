@@ -2122,6 +2122,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[0]
         0,                //unsigned int number;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2131,6 +2133,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2140,6 +2144,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2188,6 +2194,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[0]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2197,6 +2205,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2206,6 +2216,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2254,6 +2266,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[0]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2263,6 +2277,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2272,6 +2288,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2320,6 +2338,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[0]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2329,6 +2349,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2338,6 +2360,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2386,6 +2410,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[0]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2395,6 +2421,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2404,6 +2432,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2452,6 +2482,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[0]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2461,6 +2493,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2470,6 +2504,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2518,6 +2554,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[0]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2527,6 +2565,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2536,6 +2576,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2584,6 +2626,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[0]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2593,6 +2637,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2602,6 +2648,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2650,6 +2698,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[0]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2659,6 +2709,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2668,6 +2720,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2717,6 +2771,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[0]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2726,6 +2782,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2735,6 +2793,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2785,6 +2845,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[0]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2794,6 +2856,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2803,6 +2867,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2853,6 +2919,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[0]
         SHOTGUN_PELLETS,  //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         SHOTGUN_SPREAD,   //float        spread;
         SHOTGUN_DMG,      //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2862,6 +2930,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0.0f,             //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2871,6 +2941,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2920,6 +2992,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[0]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2929,6 +3003,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2938,6 +3014,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2988,6 +3066,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[0]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -2997,6 +3077,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3006,6 +3088,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3056,6 +3140,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[0]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3065,6 +3151,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3074,6 +3162,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3124,6 +3214,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[0]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3133,6 +3225,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3142,6 +3236,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3190,6 +3286,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[0]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3199,6 +3297,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3208,6 +3308,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3258,6 +3360,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[0]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3267,6 +3371,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3276,6 +3382,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3324,6 +3432,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[0]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3333,6 +3443,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3342,6 +3454,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3390,6 +3504,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[0]
         FRAGNADE_FRAGMENTS, //unsigned int number;;
         SPLATP_MIRRORED_INVERSE_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_UNIFORM_ALTERNATING, //splatterDistribution_t distribution;
+        FRAGNADE_PITCH_LAYERS, //unsigned int           pitchLayers;
         FRAGNADE_SPREAD, //float        spread;
         FRAGNADE_FRAGMENT_DMG, //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3399,6 +3515,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3408,6 +3526,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3458,6 +3578,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[0]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3467,6 +3589,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3476,6 +3600,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3527,6 +3653,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[0]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3536,6 +3664,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3545,6 +3675,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3593,6 +3725,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[0]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3602,6 +3736,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3611,6 +3747,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3659,6 +3797,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[0]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3668,6 +3808,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3677,6 +3819,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3725,6 +3869,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[0]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3734,6 +3880,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3743,6 +3891,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3791,6 +3941,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[0]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3800,6 +3952,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3809,6 +3963,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3857,6 +4013,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[0]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3866,6 +4024,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3875,6 +4035,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3923,6 +4085,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[0]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3932,6 +4096,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3941,6 +4107,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -3991,6 +4159,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[0]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -4000,6 +4170,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -4009,6 +4181,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -4058,6 +4232,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[0]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -4067,6 +4243,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -4076,6 +4254,8 @@ static const weaponAttributes_t bg_weapons[ ] =
       {                   //struct    splatter[1]
         0,                //unsigned int number;;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
         0,                //float        spread;
         0,                //int          impactDamage;
         0.0f,             //float        impactDamageFalloff;
@@ -4180,18 +4360,115 @@ int BG_TotalPriceForWeapon( weapon_t weapon  )
 
 //TODO: redo all of the angles, vectors, and math code, and look into quaternions!
 
+typedef struct splatterPatternData_s
+{
+  const splatterAttributes_t *splatter;
+  int seed;
+  const int *fragment_num;
+
+  float (*distribution)( struct splatterPatternData_s *data, angleIndex_t angle_index );
+  void (*pattern)( struct splatterPatternData_s *data, vec3_t out );
+} splatterPatternData_t;
+
+/*
+==============
+BG_SplatterRandom
+==============
+*/
+static float BG_SplatterRandom( splatterPatternData_t *data, angleIndex_t angle_index ) {
+  Com_Assert( data &&
+              "BG_SplatterRandom: data is NULL" );
+
+  return Q_random( &data->seed );
+}
+
+/*
+==============
+BG_SplatterUniform
+==============
+*/
+static float BG_SplatterUniform( splatterPatternData_t *data, angleIndex_t angle_index ) {
+  const int yaw_layers = data->splatter->number / data->splatter->pitchLayers;
+
+  Com_Assert( data &&
+              "BG_SplatterUniform: data is NULL" );
+  Com_Assert( data->fragment_num &&
+              "BG_SplatterUniform: data->fragment_num is NULL" );
+
+  if( angle_index == YAW ) {
+    const int yaw_layer_num = *data->fragment_num % yaw_layers;
+    float yaw_position = ( ( data->seed & 0xffff ) / (float)0x10000 ); // start the overall pattern at a random YAW
+
+    yaw_position += ( (float)yaw_layer_num ) / ( (float)( yaw_layers ) );
+    return yaw_position - ( (int)yaw_position );
+  }
+
+  //at this point angle_index must be PITCH
+  Com_Assert( ( angle_index == PITCH ) &&
+    "BG_SplatterUniform: angle_index is invalid" );
+
+  {
+    const int pitch_layer_num = *data->fragment_num / yaw_layers;
+
+    return ( (float)pitch_layer_num ) / ( (float)data->splatter->pitchLayers - 1 );
+  }
+}
+
+/*
+==============
+BG_SplatterUniformAlternating
+==============
+*/
+static float BG_SplatterUniformAlternating( splatterPatternData_t *data, angleIndex_t angle_index ) {
+  const int yaw_layers = data->splatter->number / data->splatter->pitchLayers;
+
+  Com_Assert( data &&
+              "BG_SplatterUniform: data is NULL" );
+  Com_Assert( data->fragment_num &&
+              "BG_SplatterUniform: data->fragment_num is NULL" );
+
+  if( angle_index == YAW ) {
+    const int pitch_layer_num = *data->fragment_num / yaw_layers;
+    const int yaw_layer_num = *data->fragment_num % yaw_layers;
+    float yaw_position = ( ( data->seed & 0xffff ) / (float)0x10000 ); // start the overall pattern at a random YAW
+
+    //alternate by a half yaw position between pitch layers
+    yaw_position += 0.5 * ( ( (float)pitch_layer_num ) / ( (float)yaw_layers ) );
+
+    yaw_position += ( (float)yaw_layer_num ) / ( (float)( yaw_layers - 1 ) );
+    return yaw_position - ( (int)yaw_position );
+  }
+
+  //at this point angle_index must be PITCH
+  Com_Assert( ( angle_index == PITCH ) &&
+    "BG_SplatterUniform: angle_index is invalid" );
+
+  {
+    const int pitch_layer_num = *data->fragment_num / yaw_layers;
+
+    return ( (float)pitch_layer_num ) / ( (float)( data->splatter->pitchLayers - 1 ) );
+  }
+}
+
 /*
 ==============
 BG_SplatterSphericalCone
 ==============
 */
-static void BG_SplatterSphericalCone( int *seed, float spread, vec3_t out ) {
+static void BG_SplatterSphericalCone( splatterPatternData_t *data, vec3_t out ) {
   vec3_t splatter_angles;
 
-  splatter_angles[PITCH] =  Q_random( seed ) * spread;
+  Com_Assert( data &&
+              "BG_SplatterSphericalCone: data is NULL" );
+  Com_Assert( data->distribution &&
+              "BG_SplatterSphericalCone: distribution function is NULL" );
+  Com_Assert( out &&
+              "BG_SplatterSphericalCone: out is NULL" );
+
+  splatter_angles[PITCH] =  data->distribution( data, PITCH ) * data->splatter->spread;
   AngleNormalize180( splatter_angles[PITCH] );
   splatter_angles[PITCH] -= 90; //the spread angle is in relation to pointing straight up
-  splatter_angles[YAW] = Q_random( seed ) * 360;
+  splatter_angles[YAW] = data->distribution( data, YAW ) * 360;
   AngleNormalize360( splatter_angles[YAW] );
   splatter_angles[ROLL] = 0;
 
@@ -4204,13 +4481,20 @@ static void BG_SplatterSphericalCone( int *seed, float spread, vec3_t out ) {
 BG_SplatterMirroredInverseSphericalCone
 ==============
 */
-static void BG_SplatterMirroredInverseSphericalCone( int *seed, float spread, vec3_t out ) {
+static void BG_SplatterMirroredInverseSphericalCone( splatterPatternData_t *data, vec3_t out ) {
   vec3_t splatter_angles;
 
-  splatter_angles[PITCH] =  Q_random( seed ) * spread;
+  Com_Assert( data &&
+              "BG_SplatterSphericalCone: data is NULL" );
+  Com_Assert( data->distribution &&
+              "BG_SplatterSphericalCone: distribution function is NULL" );
+  Com_Assert( out &&
+              "BG_SplatterSphericalCone: out is NULL" );
+
+  splatter_angles[PITCH] =  data->distribution( data, PITCH ) * data->splatter->spread;
   AngleNormalize180( splatter_angles[PITCH] );
-  splatter_angles[PITCH] -= ( spread * 0.5f ); //the spread angle is centered at the horizontal
-  splatter_angles[YAW] = Q_random( seed ) * 360;
+  splatter_angles[PITCH] -= ( data->splatter->spread * 0.5f ); //the spread angle is centered at the horizontal
+  splatter_angles[YAW] = data->distribution( data, YAW ) * 360;
   AngleNormalize360( splatter_angles[YAW] );
   splatter_angles[ROLL] = 0;
 
@@ -4230,18 +4514,17 @@ void BG_SplatterPattern( vec3_t origin2, int seed, int passEntNum,
                          void (*trace)( trace_t *, const vec3_t,
                                         const vec3_t, const vec3_t,
                                         const vec3_t, int, int ) ) {
-  int       i;
+  int i;
   const int modeIndex = data->weaponMode - 1;
   weapon_t weapon = data->weapon;
-  const int splatter_num = BG_Weapon( weapon )->splatter[modeIndex].number;
-  const splatterPattern_t pattern_type = BG_Weapon( weapon )->splatter[modeIndex].pattern;
-  const float spread = BG_Weapon( weapon )->splatter[modeIndex].spread;
-  const float range = BG_Weapon( weapon )->splatter[modeIndex].range;
   vec3_t    origin, forward, cross;
   const vec3_t    up_absolute = { 0.0f, 0.0f, 1.0f };
   float  rotation_angle, cross_length, dot;
   trace_t   tr;
-  void (*pattern)( int *seed, float spread, vec3_t out ) = NULL;
+  splatterPatternData_t splatterData;
+
+  memset( &splatterData, 0, sizeof( splatterData ) );
+  splatterData.splatter = &BG_Weapon( weapon )->splatter[modeIndex];
 
   Com_Assert( modeIndex >= 0 &&
               modeIndex < 3 &&
@@ -4249,26 +4532,56 @@ void BG_SplatterPattern( vec3_t origin2, int seed, int passEntNum,
   Com_Assert( trace &&
               "BG_SplatterPattern: trace is NULL" );
   Com_Assert( func &&
-              "BG_Weapon( weapon )->splatter[modeIndex].spread: func is NULL" );
-  Com_Assert( spread >= 0 &&
-              spread <= 180 &&
+              "BG_SplatterPattern: func is NULL" );
+  Com_Assert( splatterData.splatter &&
+              "BG_SplatterPattern: splatterData.splatter is NULL" );
+  Com_Assert( splatterData.splatter->spread >= 0 &&
+              splatterData.splatter->spread <= 180 &&
               "BG_SplatterPattern: spread is out of range"  );
+  Com_Assert( ( splatterData.distribution == SPLATD_RANDOM ||
+                splatterData.splatter->pitchLayers > 0 ) &&
+              "BG_SplatterPattern: pitch layers must be greater than 0" );
+  Com_Assert( ( splatterData.distribution == SPLATD_RANDOM ||
+                splatterData.splatter->pitchLayers < splatterData.splatter->number ) &&
+              "BG_SplatterPattern: pitch layers must be less than the total number of fragments" );
+  Com_Assert( ( splatterData.distribution == SPLATD_RANDOM ||
+                !( splatterData.splatter->number % splatterData.splatter->pitchLayers ) ) &&
+              "BG_SplatterPattern: pitch layers must be a factor of the number of fragments for even yaw layers" );
+
+  splatterData.seed = seed;
 
   VectorCopy( data->origin, origin );
 
   //select the pattern type
-  switch ( pattern_type ) {
+  switch ( splatterData.splatter->pattern ) {
     case SPLATP_SPHERICAL_CONE:
-      pattern = BG_SplatterSphericalCone;
+    splatterData.pattern = BG_SplatterSphericalCone;
       break;
 
     case SPLATP_MIRRORED_INVERSE_SPHERICAL_CONE:
-      pattern = BG_SplatterMirroredInverseSphericalCone;
+      splatterData.pattern = BG_SplatterMirroredInverseSphericalCone;
       break;
   }
 
-  Com_Assert( pattern &&
-              "BG_SplatterPattern: pattern not selected" );
+  Com_Assert( splatterData.pattern &&
+              "BG_SplatterPattern: pattern function not selected" );
+
+  switch( splatterData.splatter->distribution ) {
+    case SPLATD_RANDOM:
+      splatterData.distribution = BG_SplatterRandom;
+      break;
+
+    case SPLATD_UNIFORM:
+      splatterData.distribution = BG_SplatterUniform;
+      break;
+
+    case SPLATD_UNIFORM_ALTERNATING:
+      splatterData.distribution = BG_SplatterUniformAlternating;
+      break;
+  }
+
+  Com_Assert( splatterData.distribution &&
+              "BG_SplatterPattern: distribution function not selected" );
 
   //prepare for rotation to the facing direction
   VectorCopy( origin2, forward );
@@ -4286,11 +4599,13 @@ void BG_SplatterPattern( vec3_t origin2, int seed, int passEntNum,
   }
 
   // generate the pattern
-  for( i = 0; i < splatter_num; i++ ) {
+  for( i = 0; i < splatterData.splatter->number; i++ ) {
     vec3_t dir, temp, end;
 
+    splatterData.fragment_num = &i;
+
     //get the next pattern vector
-    pattern( &seed, spread, temp );
+    splatterData.pattern( &splatterData, temp );
 
     //rotate toward the facing direction
     if( cross_length > 0 ) {
@@ -4301,8 +4616,9 @@ void BG_SplatterPattern( vec3_t origin2, int seed, int passEntNum,
       VectorScale( temp, -1.0f, dir );
     }
 
-    VectorMA( origin, range, dir, end );
+    VectorMA( origin, splatterData.splatter->range, dir, end );
 
+    //apply the impact
     trace( &tr, origin, NULL, NULL, end, passEntNum, MASK_SHOT );
     data->tr = &tr;
     func( data );
