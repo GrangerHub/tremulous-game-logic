@@ -190,30 +190,27 @@ G_PuntBlocker
 Move spawn blockers
 ===============
 */
-static void G_PuntBlocker( gentity_t *self, gentity_t *blocker )
-{
+static void G_PuntBlocker( gentity_t *self, gentity_t *blocker ) {
   vec3_t     nudge;
   gentity_t  *tempEnt = blocker;
   gentity_t  *blockers[ MAX_GENTITIES ], *ignoredEnts[ MAX_GENTITIES ];
+  qboolean   damageSpawn = qfalse;
   int        i, numBlockers = 0, numIgnoredEnts = 0;
 
-  if( !g_antiSpawnBlock.integer )
+  if( !g_antiSpawnBlock.integer ) {
     return;
+  }
 
-  if( self->attemptSpawnTime < level.time )
-  {
+  if( self->attemptSpawnTime < level.time ) {
     self->spawnBlockTime = 0;
     return;
   }
 
-  while( tempEnt )
-  {
-    if( tempEnt->client )
-    {
+  while( tempEnt ) {
+    if( tempEnt->client ) {
       blockers[ numBlockers ] = tempEnt;
       numBlockers++;
-    } else
-    {
+    } else {
       ignoredEnts[ numIgnoredEnts ] = tempEnt;
       numIgnoredEnts++;
     }
@@ -224,32 +221,26 @@ static void G_PuntBlocker( gentity_t *self, gentity_t *blocker )
                                  self->s.origin2, self->s.modelindex, NULL );
   }
 
-  for( i = 0; i < numBlockers; i++ )
-  {
+  for( i = 0; i < numBlockers; i++ ) {
     SV_LinkEntity( blockers[ i ] );
   }
 
-  for( i = 0; i < numIgnoredEnts; i++ )
-  {
+  for( i = 0; i < numIgnoredEnts; i++ ) {
     SV_LinkEntity( ignoredEnts[ i ] );
   }
 
   if( numBlockers <= 0 )
     return;
 
-  if( self )
-  {
-    if( !self->spawnBlockTime )
-    {
+  if( self ) {
+    if( !self->spawnBlockTime ) {
       // begin timer
       self->spawnBlockTime = level.time;
       return;
     }
-    else if( level.time - self->spawnBlockTime > 5000 )
-    {
+    else if( level.time - self->spawnBlockTime > 5000 ) {
       // still blocked, get rid of them
-      for( i = 0; i < numBlockers; i++ )
-      {
+      for( i = 0; i < numBlockers; i++ ) {
         if( self->buildableTeam == blockers[i]->client->ps.stats[ STAT_TEAM ] )
           G_Damage( blockers[ i ], NULL, NULL, NULL, NULL, 0, DAMAGE_INSTAGIB,
                     MOD_TRIGGER_HURT );
@@ -260,19 +251,16 @@ static void G_PuntBlocker( gentity_t *self, gentity_t *blocker )
     }
   }
 
-  for( i = 0; i < numBlockers; i++ )
-  {
+  for( i = 0; i < numBlockers; i++ ) {
     // punt blockers that are on the same team as the buildable
-    if( self->buildableTeam == blockers[i]->client->ps.stats[ STAT_TEAM ] )
-    {
+    if( self->buildableTeam == blockers[i]->client->ps.stats[ STAT_TEAM ] ) {
       nudge[ 0 ] = crandom() * 250.0f;
       nudge[ 1 ] = crandom() * 250.0f;
       nudge[ 2 ] = 100.0f;
 
       VectorAdd( blockers[ i ]->client->ps.velocity, nudge,
                  blockers[ i ]->client->ps.velocity );
-      if( G_Expired( blocker, EXP_SPAWN_BLOCK ) )
-      {
+      if( G_Expired( blocker, EXP_SPAWN_BLOCK ) ) {
         if( self->s.modelindex == BA_H_TELEPORTER )
           SV_GameSendServerCommand( blockers[ i ] - g_entities,
                                     va( "cp \"Don't block teleporters!\" %d",
@@ -284,14 +272,18 @@ static void G_PuntBlocker( gentity_t *self, gentity_t *blocker )
 
         G_SetExpiration( blocker, EXP_SPAWN_BLOCK, 1000 );
       }
-    } else if( blockers[ i ]->noTriggerHurtDmgTime <= level.time )
-    {
-      // damage enemy blockers
-      G_Damage( blockers[ i ], NULL, NULL, NULL, NULL, BG_HP2SU( 10 ), 0,
-                MOD_TRIGGER_HURT );
-
-      blockers[ i ]->noTriggerHurtDmgTime = level.time + 1000;
+    } else {
+      // damage the spawn
+      damageSpawn = qtrue;
     }
+  }
+
+  if( damageSpawn &&
+      self->noTriggerHurtDmgTime <= level.time ) {
+    G_Damage( self, NULL, NULL, NULL, NULL, BG_HP2SU( 30 ), 0,
+              MOD_TRIGGER_HURT );
+
+    self->noTriggerHurtDmgTime = level.time + 1000;
   }
 }
 
@@ -2823,9 +2815,16 @@ qboolean HTeleporter_Activate( gentity_t *self, gentity_t *activator )
       self->occupation.other->attemptSpawnTime = level.time + 1000;
       if( G_Expired( activator, EXP_TELEPORTER_ALERTS ) )
       {
-        SV_GameSendServerCommand( activator - g_entities,
-                                va( "cp \"^3Removing a blocker! Please stand by for teleportation!\" %d",
-                                CP_TELEPORT ) );
+        if( OnSameTeam( activator, self->teleportation.blocker ) ) {
+          SV_GameSendServerCommand( activator - g_entities,
+                                  va( "cp \"^3Removing a blocker! Please stand by for teleportation!\" %d",
+                                  CP_TELEPORT ) );
+        } else {
+          SV_GameSendServerCommand( activator - g_entities,
+                                  va( "cp \"^3Destination is blocked by alien entity, and is self destructing!\" %d",
+                                  CP_TELEPORT ) );
+        }
+
         G_SetExpiration( activator, EXP_TELEPORTER_ALERTS, 1000 );
       }
       return qtrue;
