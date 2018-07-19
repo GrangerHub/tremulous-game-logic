@@ -982,6 +982,57 @@ void ClientTimerActions( gentity_t *ent, int msec )
       }
     }
 
+    //armor generation
+    if( ( ent->client->ps.misc[ MISC_CLIENT_FLAGS ] & CLF_ARMOR_GENERATE ) &&
+        ent->lastDamageTime + HUMAN_DAMAGE_HEAL_DELAY_TIME < level.time ) {
+      int remainingStartupTime = MEDKIT_STARTUP_TIME - ( level.time - client->lastArmorGenTime );
+
+      if( remainingStartupTime < 0 ) {
+        if( ent->client->ps.misc[ MISC_ARMOR ] < BSUIT_MAX_ARMOR &&
+            ent->client->armorToGen &&
+            ent->client->ps.pm_type != PM_DEAD ) {
+          int increment = BG_HP2SU( 8 );
+
+          if( increment > ent->client->armorToGen ) {
+            increment = ent->client->armorToGen;
+          }
+          ent->client->armorToGen -= increment;
+          if( ent->client->armorToGen < 0 ) {
+            ent->client->armorToGen = 0;
+          }
+
+          ent->client->ps.misc[ MISC_ARMOR ] += increment;
+          if( ent->client->ps.misc[ MISC_ARMOR ] > BSUIT_MAX_ARMOR ) {
+            ent->client->ps.misc[ MISC_ARMOR ] = BSUIT_MAX_ARMOR;
+          }
+        } else {
+          ent->client->ps.misc[ MISC_CLIENT_FLAGS ] &= ~CLF_ARMOR_GENERATE;
+          ent->client->armorToGen = 0;
+          ent->client->armorGenIncrementTime = 0;
+        }
+      } else {
+        if( ent->client->ps.misc[ MISC_ARMOR ] < BSUIT_MAX_ARMOR &&
+            ent->client->armorToGen &&
+            ent->client->ps.pm_type != PM_DEAD ) {
+          //partial increase
+          if( level.time > client->armorGenIncrementTime ) {
+            ent->client->armorToGen -= BG_HP2SU( 1 );
+            if( ent->client->armorToGen < 0 ) {
+              ent->client->armorToGen = 0;
+            }
+            ent->client->ps.misc[ MISC_ARMOR ] += BG_HP2SU( 1 );
+
+            client->armorGenIncrementTime = level.time +
+              ( remainingStartupTime / MEDKIT_STARTUP_SPEED );
+          }
+        } else {
+          ent->client->ps.misc[ MISC_CLIENT_FLAGS ] &= ~CLF_ARMOR_GENERATE;
+          ent->client->armorToGen = 0;
+          ent->client->armorGenIncrementTime = 0;
+        }
+      }
+    }
+
     // jet fuel
     if( BG_InventoryContainsUpgrade( UP_JETPACK, ent->client->ps.stats ) )
     {

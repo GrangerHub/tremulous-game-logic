@@ -2159,6 +2159,10 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
         tent = G_TempEntity( targ->client->ps.origin, EV_GIB_BSUIT );
         BG_GetClientNormal( &targ->client->ps, tent->s.origin2 );
         targ->client->ps.misc[ MISC_ARMOR ] = 0;
+        targ->client->ps.misc[ MISC_CLIENT_FLAGS ] &= ~CLF_ARMOR_GENERATE;
+        targ->client->lastArmorGenTime = 0;
+        targ->client->armorToGen = 0;
+        targ->client->armorGenIncrementTime = 0;
 
         // Give income for destroying the battlesuit
         G_RewardAttackers( targ, UP_BATTLESUIT );
@@ -2187,6 +2191,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
           targ->lastDamageTime = level.time;
           targ->client->lastMedKitTime += HUMAN_DAMAGE_HEAL_DELAY_TIME;
           targ->client->lastBioKitTime += HUMAN_DAMAGE_HEAL_DELAY_TIME;
+          targ->client->lastArmorGenTime += HUMAN_DAMAGE_HEAL_DELAY_TIME;
 
           if( targ->pain )
             targ->pain( targ, attacker, take );
@@ -2198,6 +2203,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
         targ->lastDamageTime = level.time;
         targ->client->lastMedKitTime += HUMAN_DAMAGE_HEAL_DELAY_TIME;
         targ->client->lastBioKitTime += HUMAN_DAMAGE_HEAL_DELAY_TIME;
+        targ->client->lastArmorGenTime += HUMAN_DAMAGE_HEAL_DELAY_TIME;
 
         //update ClientInfo
         ClientUserinfoChanged( targ->client->ps.clientNum, qfalse );
@@ -2272,6 +2278,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
     if( targ->client ) {
       targ->client->lastMedKitTime += HUMAN_DAMAGE_HEAL_DELAY_TIME;
       targ->client->lastBioKitTime += HUMAN_DAMAGE_HEAL_DELAY_TIME;
+      targ->client->lastArmorGenTime += HUMAN_DAMAGE_HEAL_DELAY_TIME;
     }
     if( !targ->client ||
         !( targ->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&

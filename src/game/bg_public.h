@@ -402,6 +402,7 @@ typedef enum
 #define MISC_RECOIL_YAW                ( MAX_MISC - 9 )
 
 #define CLF_GIBBED             0x0000000001
+#define CLF_ARMOR_GENERATE     0x0000000002
 
 #define PS_WALLCLIMBINGFOLLOW   0x00000001
 #define PS_WALLCLIMBINGTOGGLE   0x00000002

@@ -3014,7 +3014,12 @@ void Cmd_Buy_f( gentity_t *ent )
           ent->client->ps.stats[ STAT_CLASS ] = PCL_HUMAN_BSUIT;
           ent->client->pers.classSelection = PCL_HUMAN_BSUIT;
           ent->client->ps.eFlags ^= EF_TELEPORT_BIT;
-          ent->client->ps.misc[ MISC_ARMOR ] = BSUIT_MAX_ARMOR;
+          ent->client->ps.misc[ MISC_ARMOR ] = BG_HP2SU( 1 );
+          ent->client->ps.misc[ MISC_CLIENT_FLAGS ] |= CLF_ARMOR_GENERATE;
+          ent->client->lastArmorGenTime = level.time;
+          ent->client->armorToGen = BSUIT_MAX_ARMOR - ent->client->ps.misc[ MISC_ARMOR ];
+          ent->client->armorGenIncrementTime = level.time +
+            ( MEDKIT_STARTUP_TIME / MEDKIT_STARTUP_SPEED );
         }
         else if( upgrade == UP_JETPACK )
          ent->client->ps.stats[ STAT_FUEL ] = JETPACK_FUEL_FULL;
@@ -3245,6 +3250,10 @@ void Cmd_Sell_f( gentity_t *ent )
                                qfalse );
 
         ent->client->ps.misc[ MISC_ARMOR ] = 0;
+        ent->client->ps.misc[ MISC_CLIENT_FLAGS ] &= ~CLF_ARMOR_GENERATE;
+        ent->client->lastArmorGenTime = 0;
+        ent->client->armorToGen = 0;
+        ent->client->armorGenIncrementTime = 0;
       } else
         G_AddCreditToClient( ent->client, (short)BG_Upgrade( upgrade )->price,
                              qfalse );

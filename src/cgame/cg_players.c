@@ -1988,6 +1988,23 @@ void CG_Player( centity_t *cent )
   }
 
   if( !cent->invincible &&
+      ci->team == TEAM_HUMANS &&
+      ( held & ( 1 << UP_BATTLESUIT ) ) &&
+      ( cent->currentState.otherEntityNum2 & CLF_ARMOR_GENERATE ) &&
+      !cg.intermissionStarted &&
+      !( es->eFlags & EF_DEAD ) ) {
+    if( !cent->armorGen ) {
+      cent->armorGenTime = cg.time;
+      cent->armorGen = qtrue;
+    }
+  } else {
+    if( cent->armorGen ) {
+      cent->armorGenTime = cg.time;
+      cent->armorGen = qfalse;
+    }
+  }
+
+  if( !cent->invincible &&
       ci->team == TEAM_ALIENS &&
       ( es->eFlags & EF_EVOLVING ) &&
       !( es->eFlags & EF_DEAD ) &&
@@ -2011,6 +2028,7 @@ void CG_Player( centity_t *cent )
   // check for invisibility transitions
   if( cent->invincible ||
       cent->evolve ||
+      cent->armorGen ||
       cg.intermissionStarted ||
       ( es->eFlags & EF_DEAD ) )
       cent->invis = qfalse;
@@ -2200,6 +2218,10 @@ void CG_Player( centity_t *cent )
         legs.customShader = cgs.media.humanInvincibleShader;
       else if( ci->team == TEAM_ALIENS )
         legs.customShader = cgs.media.alienInvincibleShader;
+    } else if( cent->armorGen ) {
+      legs.customShader = cgs.media.humanSpawningShader;
+      trap_S_AddLoopingSound( cent->currentState.number, cent->lerpOrigin,
+                              vec3_origin, cgs.media.humanBuildablePrebuild );
     } else if( ci->team == TEAM_HUMANS &&
                ( es->eFlags & EF_WEAK_ARMOR ) )
     {
@@ -2248,8 +2270,11 @@ void CG_Player( centity_t *cent )
     {
       legs.shaderTime = ( cent->invisTime + 500.0 ) / 1000.0;
       legs.customShader = cgs.media.invisFadeShader;
-    }
-    else if( ci->team == TEAM_HUMANS &&
+    } else if( cent->armorGen ) {
+      legs.customShader = cgs.media.humanSpawningShader;
+      trap_S_AddLoopingSound( cent->currentState.number, cent->lerpOrigin,
+                              vec3_origin, cgs.media.humanBuildablePrebuild );
+    } else if( ci->team == TEAM_HUMANS &&
                ( es->eFlags & EF_WEAK_ARMOR ) )
     {
       if( held & ( 1 << UP_BATTLESUIT ) )
@@ -2382,6 +2407,8 @@ void CG_Player( centity_t *cent )
     {
       torso.shaderTime = ( cent->invisTime + 500.0 ) / 1000.0;
       torso.customShader = cgs.media.invisFadeShader;
+    } else if( cent->armorGen ) {
+      torso.customShader = cgs.media.humanSpawningShader;
     } else if( ci->team == TEAM_HUMANS &&
                ( es->eFlags & EF_WEAK_ARMOR ) )
     {
@@ -2454,6 +2481,8 @@ void CG_Player( centity_t *cent )
     {
       head.shaderTime = ( cent->invisTime + 500.0 ) / 1000.0;
       head.customShader = cgs.media.invisFadeShader;
+    } else if( cent->armorGen ) {
+      head.customShader = cgs.media.humanSpawningShader;
     } else if( ci->team == TEAM_HUMANS &&
                ( es->eFlags & EF_WEAK_ARMOR ) )
     {

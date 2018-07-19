@@ -715,6 +715,9 @@ typedef struct centity_s
   int                   invisTime;
   qboolean              invis;
 
+  int                   armorGenTime;
+  qboolean              armorGen;
+
   qboolean              valid;
   qboolean              oldValid;
   struct centity_s      *nextLocation;
