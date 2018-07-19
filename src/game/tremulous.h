@@ -922,6 +922,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define HUMAN_LIFE_SUPPORT_TIME     150000 //amount of time humans can survive without any telenodes/reactor
 
+#define HUMAN_DAMAGE_HEAL_DELAY_TIME 2000 //msec since damage that healing starts again
+
 #define HUMAN_MAX_CREDITS           ALIEN_MAX_CREDITS
 #define HUMAN_TK_SUICIDE_PENALTY    150
 

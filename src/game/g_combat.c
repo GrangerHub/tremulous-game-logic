@@ -2185,6 +2185,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
         else
         {
           targ->lastDamageTime = level.time;
+          targ->client->lastMedKitTime += HUMAN_DAMAGE_HEAL_DELAY_TIME;
+          targ->client->lastBioKitTime += HUMAN_DAMAGE_HEAL_DELAY_TIME;
 
           if( targ->pain )
             targ->pain( targ, attacker, take );
@@ -2194,6 +2196,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       } else
       {
         targ->lastDamageTime = level.time;
+        targ->client->lastMedKitTime += HUMAN_DAMAGE_HEAL_DELAY_TIME;
+        targ->client->lastBioKitTime += HUMAN_DAMAGE_HEAL_DELAY_TIME;
 
         //update ClientInfo
         ClientUserinfoChanged( targ->client->ps.clientNum, qfalse );
@@ -2265,6 +2269,10 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
     }
 
     targ->lastDamageTime = level.time;
+    if( targ->client ) {
+      targ->client->lastMedKitTime += HUMAN_DAMAGE_HEAL_DELAY_TIME;
+      targ->client->lastBioKitTime += HUMAN_DAMAGE_HEAL_DELAY_TIME;
+    }
     if( !targ->client ||
         !( targ->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
            targ->client->ps.eFlags & EF_EVOLVING &&

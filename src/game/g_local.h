@@ -630,6 +630,9 @@ struct gclient_s
   int                 medKitIncrementTime;
   int                 nextMedKitRestoreStaminaTime;
   int                 medKitStaminaToRestore;
+  int                 lastBioKitTime;
+  int                 bioKitHealthToRestore;
+  int                 bioKitIncrementTime;
   int                 lastCreepSlowTime;    // time until creep can be removed
   qboolean            charging;
 

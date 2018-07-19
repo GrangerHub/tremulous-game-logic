@@ -3021,10 +3021,14 @@ void Cmd_Buy_f( gentity_t *ent )
         else if( upgrade == UP_BIOKIT )
         {
           ent->client->ps.misc[ MISC_MAX_HEALTH ] = BIOKIT_MAX_HEALTH;
-          G_ChangeHealth( ent, ent, BIOKIT_MAX_HEALTH,
-                          (HLTHF_SET_TO_CHANGE) );
+
+          ent->client->lastBioKitTime = level.time;
+          ent->client->bioKitHealthToRestore = BIOKIT_MAX_HEALTH - ent->health;
+          ent->client->bioKitIncrementTime = level.time +
+            ( MEDKIT_STARTUP_TIME / MEDKIT_STARTUP_SPEED );
 
           ent->healthReserve = BIOKIT_HEALTH_RESERVE;
+          G_AddEvent( ent, EV_MEDKIT_USED, 0 );
         }
 
         //add to inventory
@@ -3223,6 +3227,8 @@ void Cmd_Sell_f( gentity_t *ent )
         G_ChangeHealth( ent, ent, ent->health,
                         (HLTHF_SET_TO_CHANGE|
                          HLTHF_INITIAL_MAX_CAP) );
+        ent->client->bioKitHealthToRestore = 0;
+        ent->client->bioKitIncrementTime = 0;
         ent->healthReserve = 0;
         G_AddCreditToClient( ent->client, value, qfalse );
       } else if( upgrade == UP_BATTLESUIT )

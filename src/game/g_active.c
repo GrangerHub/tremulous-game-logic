@@ -886,7 +886,8 @@ void ClientTimerActions( gentity_t *ent, int msec )
     }
 
     if( ent->client->pers.teamSelection == TEAM_HUMANS &&
-        ( client->ps.stats[ STAT_STATE ] & SS_HEALING_2X ) )
+        ( client->ps.stats[ STAT_STATE ] & SS_HEALING_2X ) &&
+        ent->lastDamageTime + HUMAN_DAMAGE_HEAL_DELAY_TIME < level.time )
     {
       int remainingStartupTime = MEDKIT_STARTUP_TIME - ( level.time - client->lastMedKitTime );
 
@@ -927,6 +928,60 @@ void ClientTimerActions( gentity_t *ent, int msec )
       }
     }
 
+    //biokit health regen
+    if( BG_InventoryContainsUpgrade( UP_BIOKIT, ent->client->ps.stats ) ) {
+      if( ent->client->bioKitHealthToRestore > 0 &&
+          ent->lastDamageTime + HUMAN_DAMAGE_HEAL_DELAY_TIME < level.time ) {
+        int remainingStartupTime = MEDKIT_STARTUP_TIME - ( level.time - client->lastBioKitTime );
+
+        if( remainingStartupTime < 0 ) {
+          if( ent->health < ent->client->ps.misc[ MISC_MAX_HEALTH ] &&
+              ent->client->bioKitHealthToRestore &&
+              ent->client->ps.pm_type != PM_DEAD ) {
+            ent->client->bioKitHealthToRestore -= BG_HP2SU( 1 );
+            if( ent->client->bioKitHealthToRestore < 0 ) {
+              ent->client->bioKitHealthToRestore = 0;
+            }
+            G_ChangeHealth( ent, ent, BG_HP2SU( 1 ),
+                                (HLTHF_USE_TARG_RESERVE|
+                                 HLTHF_REQ_TARG_RESERVE) );
+          } else {
+            ent->client->bioKitHealthToRestore = 0;
+            ent->client->bioKitIncrementTime = 0;
+          }
+        }
+        else
+        {
+          if( ent->health < ent->client->ps.misc[ MISC_MAX_HEALTH ] &&
+              ent->client->bioKitHealthToRestore &&
+              ent->client->ps.pm_type != PM_DEAD ) {
+            //partial increase
+            if( level.time > client->bioKitIncrementTime ) {
+              ent->client->bioKitHealthToRestore -= BG_HP2SU( 1 );
+              if( ent->client->bioKitHealthToRestore < 0 ) {
+                ent->client->bioKitHealthToRestore = 0;
+              }
+              G_ChangeHealth( ent, ent, BG_HP2SU( 1 ),
+                                  (HLTHF_USE_TARG_RESERVE|
+                                   HLTHF_REQ_TARG_RESERVE) );
+
+              client->bioKitIncrementTime = level.time +
+                ( remainingStartupTime / MEDKIT_STARTUP_SPEED );
+            }
+          }  else {
+            ent->client->bioKitHealthToRestore = 0;
+            ent->client->bioKitIncrementTime = 0;
+          }
+        }
+      } else if( ent->nextRegenTime < level.time ) {
+        if( G_ChangeHealth( ent, ent, BG_HP2SU( 1 ),
+                            (HLTHF_USE_TARG_RESERVE|
+                             HLTHF_REQ_TARG_RESERVE) ) ) {
+          ent->nextRegenTime = level.time + BIOKIT_REGEN_REPEAT;
+        }
+      }
+    }
+
     // jet fuel
     if( BG_InventoryContainsUpgrade( UP_JETPACK, ent->client->ps.stats ) )
     {
@@ -962,16 +1017,6 @@ void ClientTimerActions( gentity_t *ent, int msec )
     ent->client->ps.stats[ STAT_SHAKE ] *= 0.77f;
     if( ent->client->ps.stats[ STAT_SHAKE ] < 0 )
       ent->client->ps.stats[ STAT_SHAKE ] = 0;
-
-  //biokit health regen
-  if( BG_InventoryContainsUpgrade( UP_BIOKIT, ent->client->ps.stats ) &&
-      ent->nextRegenTime < level.time )
-  {
-    if( G_ChangeHealth( ent, ent, BG_HP2SU( 1 ),
-                        (HLTHF_USE_TARG_RESERVE|
-                         HLTHF_REQ_TARG_RESERVE) ) )
-      ent->nextRegenTime = level.time + BIOKIT_REGEN_REPEAT;
-  }
 
   while( client->time1000 >= 1000 )
   {
@@ -2381,8 +2426,6 @@ void ClientThink_real( gentity_t *ent )
 
       client->ps.stats[ STAT_STATE ] |= SS_HEALING_2X;
       client->lastMedKitTime = level.time;
-      client->medKitHealthToRestore =
-        *maxHealth - ent->health;
       client->medKitHealthToRestore = *maxHealth - ent->health;
       client->medKitIncrementTime = level.time +
         ( MEDKIT_STARTUP_TIME / MEDKIT_STARTUP_SPEED );

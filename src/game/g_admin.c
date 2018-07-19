@@ -4024,6 +4024,8 @@ qboolean G_admin_slap( gentity_t *ent )
 
   G_ChangeHealth( vic, vic, -BG_HP2SU( 25 ), 0 );
   vic->lastDamageTime = level.time;
+  vic->client->lastMedKitTime += HUMAN_DAMAGE_HEAL_DELAY_TIME;
+  vic->client->lastBioKitTime += HUMAN_DAMAGE_HEAL_DELAY_TIME;
   if( vic->health <= 1 )
   {
     vic->flags |= FL_NO_KNOCKBACK;
