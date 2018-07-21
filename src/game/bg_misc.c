@@ -244,7 +244,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BARRICADE_BP,          //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     BARRICADE_HEALTH,      //int       health;
-    0.5f,                  //float     maxHealthDecayRate;
+    0.75f,                 //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     BARRICADE_REGEN,       //int       regenRate;
     BARRICADE_SPLASHDAMAGE, //int      splashDamage;

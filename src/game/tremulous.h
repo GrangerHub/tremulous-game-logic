@@ -334,7 +334,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define PCLOUD_ARMOUR_MODIFIER      0.75f
 
 #define ASPAWN_BP                   12
-#define ASPAWN_BT                   7500
+#define ASPAWN_BT                   15000
 #define ASPAWN_HEALTH               ABHM(250000)
 #define ASPAWN_REGEN                ABRM(8000)
 #define ASPAWN_SPLASHDAMAGE         ABDM(50000)
@@ -343,8 +343,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ASPAWN_VALUE                ( LEVEL0_VALUE )
 
 #define BARRICADE_BP                8
-#define BARRICADE_BT                10000
-#define BARRICADE_HEALTH            ABHM(600000)
+#define BARRICADE_BT                15000
+#define BARRICADE_HEALTH            ABHM(1000000)
 #define BARRICADE_REGEN             ABRM(14000)
 #define BARRICADE_SPLASHDAMAGE      ABDM(50000)
 #define BARRICADE_SPLASHRADIUS      100
@@ -451,8 +451,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define SLIME_ZUNGE_DOT             0.79f // max angle = acos( SLIME_ZUNGE )
 
 #define OVERMIND_BP                 0
-#define OVERMIND_BT                 10000
-#define OVERMIND_HEALTH             ABHM(2250000)
+#define OVERMIND_BT                 20000
+#define OVERMIND_HEALTH             ABHM(3000000)
 #define OVERMIND_REGEN              ABRM(6000)
 #define OVERMIND_SPLASHDAMAGE       ABDM(15000)
 #define OVERMIND_SPLASHRADIUS       300
