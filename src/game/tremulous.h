@@ -344,7 +344,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define BARRICADE_BP                8
 #define BARRICADE_BT                10000
-#define BARRICADE_HEALTH            ABHM(300000)
+#define BARRICADE_HEALTH            ABHM(600000)
 #define BARRICADE_REGEN             ABRM(14000)
 #define BARRICADE_SPLASHDAMAGE      ABDM(50000)
 #define BARRICADE_SPLASHRADIUS      100
@@ -452,7 +452,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define OVERMIND_BP                 0
 #define OVERMIND_BT                 10000
-#define OVERMIND_HEALTH             ABHM(1337000)
+#define OVERMIND_HEALTH             ABHM(2250000)
 #define OVERMIND_REGEN              ABRM(6000)
 #define OVERMIND_SPLASHDAMAGE       ABDM(15000)
 #define OVERMIND_SPLASHRADIUS       300
@@ -553,7 +553,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define FRAGNADE_PITCH_LAYERS        5
 #define FRAGNADE_SPREAD              45
 #define FRAGNADE_RANGE               1000
-#define FRAGNADE_FRAGMENT_DMG        HWDM(80000)
+#define FRAGNADE_FRAGMENT_DMG        HWDM(100000)
 #define FRAGNADE_BLAST_DAMAGE        (FRAGNADE_FRAGMENT_DMG * FRAGNADE_FRAGMENTS)
 #define FRAGNADE_BLAST_RANGE         0.0f
 #define FRAGNADE_SPEED               400.0f
