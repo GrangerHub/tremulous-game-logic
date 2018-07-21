@@ -5846,7 +5846,7 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     "frag",                 //char  *name;
     "Fragmentation Grenade", //char  *humanName;
     "A grenade with a heavy shell that, upon detonation, shatters "
-      "into hundreds of high speed devestating fragments. Included is a "
+      "into a large number of high speed devestating fragments. Included is a "
       "built in gyroscope that kicks the grenade up to an optimal height before "
       "exploding. This grenade is most effective against larger targets.",
     0,

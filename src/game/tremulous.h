@@ -546,10 +546,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define GRENADE_SPLASH_BATTLESUIT   0.75f // reduction of damage fraction for
                                           //grenade nade splash on battlesuits
 
-#define FRAGNADE_PRICE               250
+#define FRAGNADE_PRICE               300
 #define FRAGNADE_REPEAT              0
 #define FRAGNADE_K_SCALE             1.0f
-#define FRAGNADE_FRAGMENTS           150
+#define FRAGNADE_FRAGMENTS           100
 #define FRAGNADE_PITCH_LAYERS        5
 #define FRAGNADE_SPREAD              45
 #define FRAGNADE_RANGE               1000
