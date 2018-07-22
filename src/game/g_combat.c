@@ -2012,6 +2012,22 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
     modDamge = (int)( ( (float)modDamge ) / BG_EvolveScale( &targ->client->ps ) );
   }
 
+  if( targ->s.eType == ET_BUILDABLE &&
+      ( BG_Buildable( targ->s.modelindex )->ballisticDmgMod != 1.0 ) ) {
+    switch( mod ) {
+      case MOD_SHOTGUN:
+      case MOD_MACHINEGUN:
+      case MOD_CHAINGUN:
+      case MOD_FRAGNADE:
+      case MOD_LEVEL3_BOUNCEBALL:
+        modDamge = (int)( ( (float)modDamge ) * BG_Buildable( targ->s.modelindex )->ballisticDmgMod );
+        break;
+
+      default:
+        break;
+    }
+  }
+
   if( modDamge != 100 &&
       !(dflags & DAMAGE_INSTAGIB) )
   {

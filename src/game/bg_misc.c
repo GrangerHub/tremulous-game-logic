@@ -137,6 +137,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     0.5f,                  //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     ASPAWN_REGEN,          //int       regenRate;
+    1.0f,                  //float     ballisticDmgMod;
     ASPAWN_SPLASHDAMAGE,   //int       splashDamage;
     ASPAWN_SPLASHRADIUS,   //int       splashRadius;
     MOD_ASPAWN,            //int       meansOfDeath;
@@ -192,6 +193,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     0.5f,                  //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     OVERMIND_REGEN,        //int       regenRate;
+    0.15f,                 //float     ballisticDmgMod;
     OVERMIND_SPLASHDAMAGE, //int       splashDamage;
     OVERMIND_SPLASHRADIUS, //int       splashRadius;
     MOD_ASPAWN,            //int       meansOfDeath;
@@ -247,6 +249,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     0.75f,                 //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     BARRICADE_REGEN,       //int       regenRate;
+    0.15f,                 //float     ballisticDmgMod;
     BARRICADE_SPLASHDAMAGE, //int      splashDamage;
     BARRICADE_SPLASHRADIUS, //int      splashRadius;
     MOD_ASPAWN,            //int       meansOfDeath;
@@ -299,6 +302,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     0.5f,                  //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     ACIDTUBE_REGEN,        //int       regenRate;
+    1.0f,                  //float     ballisticDmgMod;
     ACIDTUBE_SPLASHDAMAGE, //int       splashDamage;
     ACIDTUBE_SPLASHRADIUS, //int       splashRadius;
     MOD_ASPAWN,            //int       meansOfDeath;
@@ -351,6 +355,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     0.5f,                  //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     TRAPPER_REGEN,         //int       regenRate;
+    1.0f,                  //float     ballisticDmgMod;
     TRAPPER_SPLASHDAMAGE,  //int       splashDamage;
     TRAPPER_SPLASHRADIUS,  //int       splashRadius;
     MOD_ASPAWN,            //int       meansOfDeath;
@@ -403,6 +408,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     0.5f,                  //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     SLIME_ZUNGE_REGEN,     //int       regenRate;
+    1.0f,                  //float     ballisticDmgMod;
     SLIME_ZUNGE_SPLASHDAMAGE, //int    splashDamage;
     SLIME_ZUNGE_SPLASHRADIUS, //int    splashRadius;
     MOD_ASPAWN,            //int       meansOfDeath;
@@ -456,6 +462,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     0.5f,                  //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     BOOSTER_REGEN,         //int       regenRate;
+    1.0f,                  //float     ballisticDmgMod;
     BOOSTER_SPLASHDAMAGE,  //int       splashDamage;
     BOOSTER_SPLASHRADIUS,  //int       splashRadius;
     MOD_ASPAWN,            //int       meansOfDeath;
@@ -508,6 +515,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     0.5f,                  //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     HIVE_REGEN,            //int       regenRate;
+    1.0f,                  //float     ballisticDmgMod;
     HIVE_SPLASHDAMAGE,     //int       splashDamage;
     HIVE_SPLASHRADIUS,     //int       splashRadius;
     MOD_ASPAWN,            //int       meansOfDeath;
@@ -558,6 +566,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     0.5f,                  //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     HOVEL_REGEN,           //int       regenRate;
+    1.0f,                  //float     ballisticDmgMod;
     HOVEL_SPLASHDAMAGE,    //int       splashDamage;
     HOVEL_SPLASHRADIUS,    //int       splashRadius;
     MOD_ASPAWN,            //int       meansOfDeath;
@@ -616,6 +625,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     0.5f,                  //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     GRAPNEL_REGEN,         //int       regenRate;
+    1.0f,                  //float     ballisticDmgMod;
     GRAPNEL_SPLASHDAMAGE,  //int       splashDamage;
     GRAPNEL_SPLASHRADIUS,  //int       splashRadius;
     MOD_ASPAWN,            //int       meansOfDeath;
@@ -669,6 +679,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     0.5f,                  //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     0,                     //int       regenRate;
+    1.0f,                  //float     ballisticDmgMod;
     HSPAWN_SPLASHDAMAGE,   //int       splashDamage;
     HSPAWN_SPLASHRADIUS,   //int       splashRadius;
     MOD_HSPAWN,            //int       meansOfDeath;
@@ -722,6 +733,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     0.5f,                  //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     0,                     //int       regenRate;
+    1.0f,                  //float     ballisticDmgMod;
     HTELEPORTER_SPLASHDAMAGE, //int       splashDamage;
     HTELEPORTER_SPLASHRADIUS, //int       splashRadius;
     MOD_HSPAWN,            //int       meansOfDeath;
@@ -783,6 +795,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     0.5f,                  //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     0,                     //int       regenRate;
+    1.0f,                  //float     ballisticDmgMod;
     MGTURRET_SPLASHDAMAGE, //int       splashDamage;
     MGTURRET_SPLASHRADIUS, //int       splashRadius;
     MOD_HSPAWN,            //int       meansOfDeath;
@@ -835,6 +848,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     0.5f,                  //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     0,                     //int       regenRate;
+    1.0f,                  //float     ballisticDmgMod;
     TESLAGEN_SPLASHDAMAGE, //int       splashDamage;
     TESLAGEN_SPLASHRADIUS, //int       splashRadius;
     MOD_HSPAWN,            //int       meansOfDeath;
@@ -887,6 +901,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     0.5f,                  //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     0,                     //int       regenRate;
+    1.0f,                  //float     ballisticDmgMod;
     ARMOURY_SPLASHDAMAGE,  //int       splashDamage;
     ARMOURY_SPLASHRADIUS,  //int       splashRadius;
     MOD_HSPAWN,            //int       meansOfDeath;
@@ -943,6 +958,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     0.5f,                  //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     0,                     //int       regenRate;
+    1.0f,                  //float     ballisticDmgMod;
     DC_SPLASHDAMAGE,       //int       splashDamage;
     DC_SPLASHRADIUS,       //int       splashRadius;
     MOD_HSPAWN,            //int       meansOfDeath;
@@ -997,6 +1013,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     0.5f,                  //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     0,                     //int       regenRate;
+    1.0f,                  //float     ballisticDmgMod;
     MEDISTAT_SPLASHDAMAGE, //int       splashDamage;
     MEDISTAT_SPLASHRADIUS, //int       splashRadius;
     MOD_HSPAWN,            //int       meansOfDeath;
@@ -1049,6 +1066,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     0.5f,                  //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     0,                     //int       regenRate;
+    1.0f,                  //float     ballisticDmgMod;
     REACTOR_SPLASHDAMAGE,  //int       splashDamage;
     REACTOR_SPLASHRADIUS,  //int       splashRadius;
     MOD_HSPAWN,            //int       meansOfDeath;
@@ -1108,6 +1126,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     0.5f,                  //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     0,                     //int       regenRate;
+    1.0f,                  //float     ballisticDmgMod;
     REPEATER_SPLASHDAMAGE, //int       splashDamage;
     REPEATER_SPLASHRADIUS, //int       splashRadius;
     MOD_HSPAWN,            //int       meansOfDeath;

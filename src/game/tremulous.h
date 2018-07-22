@@ -342,9 +342,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ASPAWN_CREEPSIZE            120
 #define ASPAWN_VALUE                ( LEVEL0_VALUE )
 
-#define BARRICADE_BP                8
+#define BARRICADE_BP                10
 #define BARRICADE_BT                15000
-#define BARRICADE_HEALTH            ABHM(1000000)
+#define BARRICADE_HEALTH            ABHM(675000)
 #define BARRICADE_REGEN             ABRM(14000)
 #define BARRICADE_SPLASHDAMAGE      ABDM(50000)
 #define BARRICADE_SPLASHRADIUS      100
@@ -410,8 +410,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define GRAPNEL_BP                  2
 #define GRAPNEL_BT                  6000
-#define GRAPNEL_HEALTH              ABHM(175000)
-#define GRAPNEL_REGEN               ABRM(20000)
+#define GRAPNEL_HEALTH              ABHM(325000)
+#define GRAPNEL_REGEN               ABRM(0)
 #define GRAPNEL_SPLASHDAMAGE        ABDM(20000)
 #define GRAPNEL_SPLASHRADIUS        100
 #define GRAPNEL_CREEPSIZE           30
@@ -451,8 +451,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define SLIME_ZUNGE_DOT             0.79f // max angle = acos( SLIME_ZUNGE )
 
 #define OVERMIND_BP                 0
-#define OVERMIND_BT                 20000
-#define OVERMIND_HEALTH             ABHM(3000000)
+#define OVERMIND_BT                 25000
+#define OVERMIND_HEALTH             ABHM(2000000)
 #define OVERMIND_REGEN              ABRM(6000)
 #define OVERMIND_SPLASHDAMAGE       ABDM(15000)
 #define OVERMIND_SPLASHRADIUS       300
@@ -546,14 +546,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define GRENADE_SPLASH_BATTLESUIT   0.75f // reduction of damage fraction for
                                           //grenade nade splash on battlesuits
 
-#define FRAGNADE_PRICE               300
+#define FRAGNADE_PRICE               350
 #define FRAGNADE_REPEAT              0
 #define FRAGNADE_K_SCALE             1.0f
-#define FRAGNADE_FRAGMENTS           100
+#define FRAGNADE_FRAGMENTS           75
 #define FRAGNADE_PITCH_LAYERS        5
 #define FRAGNADE_SPREAD              45
 #define FRAGNADE_RANGE               1000
-#define FRAGNADE_FRAGMENT_DMG        HWDM(100000)
+#define FRAGNADE_FRAGMENT_DMG        HWDM(140000)
 #define FRAGNADE_BLAST_DAMAGE        (FRAGNADE_FRAGMENT_DMG * FRAGNADE_FRAGMENTS)
 #define FRAGNADE_BLAST_RANGE         0.0f
 #define FRAGNADE_SPEED               400.0f

@@ -1346,6 +1346,8 @@ typedef struct
   int           minHealth; // the minimum health the max health can decay to
   int           regenRate;
 
+  float         ballisticDmgMod; // modification of damage from bullets/pellets/fragments
+
   int           splashDamage;
   int           splashRadius;
 
