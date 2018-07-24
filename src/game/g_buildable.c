@@ -1099,19 +1099,26 @@ void AGeneric_CreepCheck( gentity_t *self )
 {
   gentity_t *spawn;
 
+  Com_Assert( self &&
+              "AGeneric_CreepCheck: self is NULL" );
+
+  if( !BG_Buildable( self->s.modelindex )->creepTest ) {
+    return;
+  }
+
   spawn = self->parentNode;
-  if( !G_FindCreep( self ) )
-  {
+  if( !G_FindCreep( self ) ) {
     // don't use killedBy for spawns that were already freed (such as by deconning)
     if( spawn && spawn->inuse &&
-        ( spawn->s.modelindex == BA_A_SPAWN ||
-          spawn->s.modelindex == BA_A_OVERMIND ) &&
+        ( BG_Buildable( spawn->s.modelindex )->role & ROLE_POWER_SOURCE ) &&
         ( Distance( self->r.currentOrigin,
-                    spawn->r.currentOrigin ) <= CREEP_BASESIZE ) )
+                    spawn->r.currentOrigin ) <= BG_Buildable( spawn->s.modelindex )->rangeMarkerRange ) ) {
       G_Damage( self, NULL, g_entities + spawn->killedBy, NULL, NULL,
                 0, DAMAGE_INSTAGIB, MOD_NOCREEP );
-    else
+    }
+    else {
       G_Damage( self, NULL, NULL, NULL, NULL, 0, DAMAGE_INSTAGIB, MOD_NOCREEP );
+    }
     return;
   }
   G_CreepSlow( self );
