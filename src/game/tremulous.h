@@ -322,6 +322,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ABRM(r)                     ((int)((float)r*ALIEN_BREGEN_MODIFIER))
 
 #define CREEP_BASESIZE              700
+#define CREEP_GRAPNEL_BASESIZE      ( CREEP_BASESIZE / 2 )
 #define CREEP_TIMEOUT               1000
 #define CREEP_MODIFIER              0.5f
 #define CREEP_ARMOUR_MODIFIER       0.75f
@@ -333,7 +334,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define PCLOUD_MODIFIER             0.5f
 #define PCLOUD_ARMOUR_MODIFIER      0.75f
 
-#define ASPAWN_BP                   12
+#define ASPAWN_BP                   15
 #define ASPAWN_BT                   15000
 #define ASPAWN_HEALTH               ABHM(250000)
 #define ASPAWN_REGEN                ABRM(8000)

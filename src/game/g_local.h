@@ -46,18 +46,19 @@ typedef struct gclient_s gclient_t;
 --------------------------------------------------------------------------------
 gentity->flags
 */
-#define FL_GODMODE          0x00000010
-#define FL_NOTARGET         0x00000020
-#define FL_TEAMSLAVE        0x00000400  // not the first on the team
-#define FL_NO_KNOCKBACK     0x00000800
-#define FL_DROPPED_ITEM     0x00001000
-#define FL_NO_BOTS          0x00002000  // spawn point not for bot use
-#define FL_NO_HUMANS        0x00004000  // spawn point just for bots
-#define FL_FORCE_GESTURE    0x00008000  // spawn point just for bots
-#define FL_BOUNCE           0x00010000  // for missiles
-#define FL_BOUNCE_HALF      0x00020000  // for missiles
-#define FL_NO_BOUNCE_SOUND  0x00040000  // for missiles
-#define FL_OCCUPIED         0x00080000  // for occupiable entities
+#define FL_GODMODE            0x00000010
+#define FL_NOTARGET           0x00000020
+#define FL_TEAMSLAVE          0x00000400  // not the first on the team
+#define FL_NO_KNOCKBACK       0x00000800
+#define FL_DROPPED_ITEM       0x00001000
+#define FL_NO_BOTS            0x00002000  // spawn point not for bot use
+#define FL_NO_HUMANS          0x00004000  // spawn point just for bots
+#define FL_FORCE_GESTURE      0x00008000  // spawn point just for bots
+#define FL_BOUNCE             0x00010000  // for missiles
+#define FL_BOUNCE_HALF        0x00020000  // for missiles
+#define FL_NO_BOUNCE_SOUND    0x00040000  // for missiles
+#define FL_OCCUPIED           0x00080000  // for occupiable entities
+#define FL_GRAPNEL_HLTH_BOOST 0x00100000
 
 /*
 --------------------------------------------------------------------------------
@@ -1102,6 +1103,7 @@ void              HTeslaGen_Think( gentity_t *self );
 void              G_BuildableThink( gentity_t *ent, int msec );
 qboolean          G_BuildableRange( vec3_t origin, float r, buildable_t buildable );
 void              G_ClearDeconMarks( void );
+void              G_GrapnelHealthBoost( gentity_t *self );
 itemBuildError_t  G_CanBuild( gentity_t *ent, buildable_t buildable, int distance,
                               vec3_t origin, vec3_t normal, int *groundEntNum );
 qboolean          G_BuildIfValid( gentity_t *ent, buildable_t buildable );

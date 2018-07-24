@@ -646,7 +646,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     WP_NONE,               //weapon_t  turretProjType;
     0.0f,                  //float     minNormal;
     qtrue,                 //qboolean  invertNormal;
-    qtrue,                 //qboolean  creepTest;
+    qfalse,                 //qboolean  creepTest;
     GRAPNEL_CREEPSIZE,     //int       creepSize;
     qfalse,                //qboolean  dccTest;
     qfalse,                //qboolean  transparentTest;
@@ -655,12 +655,13 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  stackable;
     GRAPNEL_BAT_PWR,       //int       batteryPower;
     RMT_SPHERE,            //rangeMarkerType_t rangeMarkerType;
-    0.0f,                  //float             rangeMarkerRange;
-    SHC_GREY,              //shaderColorEnum_t rangeMarkerColor;
+    CREEP_GRAPNEL_BASESIZE, //float             rangeMarkerRange;
+    SHC_LIGHT_GREEN,       //shaderColorEnum_t rangeMarkerColor;
     qfalse,                //qboolean          rangeMarkerUseNormal;
     qfalse,                //qboolean          rangeMarkerOriginAtTop;
     (ROLE_SUPPORT|
-     ROLE_STRUCTUAL)       //int               role;
+     ROLE_STRUCTUAL|
+     ROLE_POWER_SOURCE)    //int               role;
   },
   {
     BA_H_SPAWN,            //int       number;

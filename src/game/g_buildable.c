@@ -726,8 +726,7 @@ G_FindCreep
 attempt to find creep for self, return qtrue if successful
 ================
 */
-qboolean G_FindCreep( gentity_t *self )
-{
+qboolean G_FindCreep( gentity_t *self ) {
   int       i;
   gentity_t *ent;
   gentity_t *closestSpawn = NULL;
@@ -736,54 +735,64 @@ qboolean G_FindCreep( gentity_t *self )
   vec3_t    temp_v;
 
   //don't check for creep if flying through the air
-  if( !self->client && self->s.groundEntityNum == ENTITYNUM_NONE )
+  if( !self->client && self->s.groundEntityNum == ENTITYNUM_NONE ) {
     return qtrue;
+  }
 
   //if self does not have a parentNode or its parentNode is invalid, then find a new one
   if( self->client || self->parentNode == NULL || !self->parentNode->inuse ||
       self->parentNode->health <= 0 ||
       ( Distance( self->r.currentOrigin,
-                  self->parentNode->r.currentOrigin ) > CREEP_BASESIZE ) )
-  {
-    for( i = MAX_CLIENTS, ent = g_entities + i; i < level.num_entities; i++, ent++ )
-    {
-      if( ent->s.eType != ET_BUILDABLE )
+                  self->parentNode->r.currentOrigin ) >
+                    BG_Buildable( self->parentNode->s.modelindex )->rangeMarkerRange ) ) {
+    for( i = MAX_CLIENTS, ent = g_entities + i; i < level.num_entities; i++, ent++ ) {
+      if( ent->s.eType != ET_BUILDABLE ) {
         continue;
+      }
 
-      if( ( ent->s.modelindex == BA_A_SPAWN ||
-            ent->s.modelindex == BA_A_OVERMIND ) &&
-          ent->spawned && ent->health > 0 )
-      {
+      if( (BG_Buildable( ent->s.modelindex )->role & ROLE_POWER_SOURCE) &&
+          BG_Buildable( ent->s.modelindex )->team == TEAM_ALIENS &&
+          ent->spawned && ent->health > 0 ) {
         VectorSubtract( self->r.currentOrigin, ent->r.currentOrigin, temp_v );
         distance = VectorLength( temp_v );
-        if( distance < minDistance )
-        {
+
+        if( distance > BG_Buildable( ent->s.modelindex )->rangeMarkerRange ) {
+          continue;
+        }
+
+        if( !( BG_Buildable( ent->s.modelindex )->role &  ROLE_PERVASIVE ) &&
+            !G_Visible( self, ent, MASK_DEADSOLID ) ) {
+          continue;
+        }
+
+        if( distance < minDistance ) {
           closestSpawn = ent;
           minDistance = distance;
         }
       }
     }
 
-    if( minDistance <= CREEP_BASESIZE )
-    {
-      if( !self->client )
-      {
+    if( closestSpawn ) {
+      if( !self->client ) {
         self->parentNode = closestSpawn;
         self->creepReserve = level.time + ALIEN_CREEP_RESERVE;
       }
+
       return qtrue;
     }
-    else
-    {
-      if( self->client )
+    else {
+      if( self->client ) {
         return qfalse;
-      else
+      }
+      else {
         return self->creepReserve >= level.time;
+      }
     }
   }
 
-  if( self->client )
+  if( self->client ) {
     return qfalse;
+  }
 
   //if we haven't returned by now then we must already have a valid parent
   self->creepReserve = level.time + ALIEN_CREEP_RESERVE;
@@ -797,15 +806,14 @@ G_IsCreepHere
 simple wrapper to G_FindCreep to check if a location has creep
 ================
 */
-static qboolean G_IsCreepHere( vec3_t origin )
-{
+static qboolean G_IsCreepHere( vec3_t origin ) {
   gentity_t dummy;
 
   memset( &dummy, 0, sizeof( gentity_t ) );
 
   dummy.parentNode = NULL;
   dummy.s.modelindex = BA_NONE;
-  VectorCopy( origin, dummy.r.currentOrigin );
+  G_SetOrigin( &dummy, origin );
 
   return G_FindCreep( &dummy );
 }
@@ -5421,6 +5429,69 @@ void G_RemoveRangeMarkerFrom( gentity_t *self )
 
 /*
 ================
+G_GrapnelHealthBoost
+
+Give alien buildables attached to grapnels additional additional health
+================
+*/
+void G_GrapnelHealthBoost( gentity_t *self ) {
+  Com_Assert( self &&
+               "G_GrapnelHealthBoost: self is NULL" );
+
+  if( self->s.eType != ET_BUILDABLE ) {
+    return;
+  }
+
+  if( BG_Buildable( self->s.modelindex )->team != TEAM_ALIENS ) {
+    return;
+  }
+
+  //don't change the health if dead
+  if( self->health <= 0 ) {
+    return;
+  }
+
+  if( self->flags & FL_GRAPNEL_HLTH_BOOST ) {
+    //check if still attached to a live grapnel
+    if( self->s.groundEntityNum == ENTITYNUM_NONE ||
+        g_entities[ self->s.groundEntityNum ].health <= 0 ||
+        g_entities[ self->s.groundEntityNum ].s.eType != ET_BUILDABLE ||
+        g_entities[ self->s.groundEntityNum ].s.modelindex != BA_A_GRAPNEL ) {
+      //remove the health boost
+      self->s.constantLight /= 1.5f;
+      G_ChangeHealth( self, self, (int)( self->health / 1.5f ),
+                      HLTHF_SET_TO_CHANGE );
+      self->flags &= ~FL_GRAPNEL_HLTH_BOOST;
+      return;
+    }
+  } else {
+    //check if now attached to a grapnel
+    if( self->s.groundEntityNum == ENTITYNUM_NONE ) {
+      return;
+    }
+
+    if( g_entities[ self->s.groundEntityNum ].health <= 0 ) {
+      return;
+    }
+
+    if( g_entities[ self->s.groundEntityNum ].s.eType != ET_BUILDABLE ) {
+      return;
+    }
+
+    if( g_entities[ self->s.groundEntityNum ].s.modelindex != BA_A_GRAPNEL ) {
+      return;
+    }
+
+    //newly attached to a grapnel, so give a health boost
+    self->s.constantLight *= 1.5f;
+    G_ChangeHealth( self, self, (int)( self->health * 1.5f ),
+                    HLTHF_SET_TO_CHANGE );
+    self->flags |= FL_GRAPNEL_HLTH_BOOST;
+  }
+}
+
+/*
+================
 G_Build
 
 Spawns a buildable
@@ -5694,6 +5765,8 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
     // gently nudge the buildable onto the surface :)
     VectorScale( normal, -50.0f, built->s.pos.trDelta );
   }
+
+  G_GrapnelHealthBoost( built );
 
   built->s.misc = MAX( BG_SU2HP( built->health ), 0 );
 

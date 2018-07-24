@@ -80,18 +80,18 @@ G_CheckGround
 
 ================
 */
-static void G_CheckGround( gentity_t *ent )
-{
+static void G_CheckGround( gentity_t *ent ) {
   vec3_t    origin;
   trace_t   tr;
 
-  if( ent->s.groundEntityNum != ENTITYNUM_NONE )
-  {
-    if( G_GroundIsValid( ent, &g_entities[ ent->s.groundEntityNum ] ) )
+  if( ent->s.groundEntityNum != ENTITYNUM_NONE ) {
+    if( G_GroundIsValid( ent, &g_entities[ ent->s.groundEntityNum ] ) ) {
       return;
+    }
 
-    if( ent->s.eType == ET_BUILDABLE )
+    if( ent->s.eType == ET_BUILDABLE ) {
       G_RemoveBuildableFromStack( ent->s.groundEntityNum, ent->s.number );
+    }
   }
 
   VectorCopy( ent->r.currentOrigin, origin );
@@ -101,14 +101,17 @@ static void G_CheckGround( gentity_t *ent )
   SV_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin,
     ent->s.number, ent->clipmask, TT_AABB );
 
-  if( G_GroundIsValid( ent, &g_entities[ tr.entityNum ] ) )
-  {
+  if( G_GroundIsValid( ent, &g_entities[ tr.entityNum ] ) ) {
     ent->s.groundEntityNum = tr.entityNum;
     VectorCopy( tr.plane.normal, ent->s.origin2 );
-    if( ent->s.eType == ET_BUILDABLE )
+    if( ent->s.eType == ET_BUILDABLE ) {
       G_AddBuildableToStack( ent->s.groundEntityNum, ent->s.number );
-  } else
+    }
+  } else {
     ent->s.groundEntityNum = ENTITYNUM_NONE;
+  }
+
+  G_GrapnelHealthBoost( ent );
 }
 
 /*
