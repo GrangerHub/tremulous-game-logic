@@ -160,7 +160,8 @@ static void G_Bounce( gentity_t *ent, trace_t *trace ) {
         }
 
       if( G_TakesDamage( &g_entities[trace->entityNum] ) &&
-      ( BG_Buildable( g_entities[trace->entityNum].s.modelindex )->team == TEAM_HUMANS ||
+      ( g_entities[trace->entityNum].s.eType != ET_BUILDABLE ||
+        BG_Buildable( g_entities[trace->entityNum].s.modelindex )->team == TEAM_HUMANS ||
         BG_Buildable( g_entities[trace->entityNum].s.modelindex )->regenRate ) ) {
         G_Damage( &g_entities[trace->entityNum], NULL,
                   &g_entities[ ent->dropperNum ], NULL, NULL, bounceDamage,
