@@ -120,8 +120,7 @@ G_Bounce
 
 ================
 */
-static void G_Bounce( gentity_t *ent, trace_t *trace )
-{
+static void G_Bounce( gentity_t *ent, trace_t *trace ) {
   vec3_t    velocity;
   float     dot;
   int       hitTime;
@@ -137,28 +136,32 @@ static void G_Bounce( gentity_t *ent, trace_t *trace )
   dot = DotProduct( velocity, normal );
   VectorMA( velocity, -2*dot, normal, ent->s.pos.trDelta );
 
-  if( ent->s.eType == ET_BUILDABLE )
-  {
+  if( ent->s.eType == ET_BUILDABLE ) {
     minNormal = BG_Buildable( ent->s.modelindex )->minNormal;
     invert = BG_Buildable( ent->s.modelindex )->invertNormal;
   }
-  else
+  else {
     minNormal = 0.707f;
+  }
 
   // cut the velocity to keep from bouncing forever
   if( normal[ 2 ] >= minNormal ||
-      ( invert && normal[ 2 ] <= -minNormal ) )
-  {
+      ( invert && normal[ 2 ] <= -minNormal ) ) {
     // do some damage with buildables that bounce
     if( ent->s.eType == ET_BUILDABLE &&
-        VectorLength( ent->s.pos.trDelta ) > 20 )
-    {
+        VectorLength( ent->s.pos.trDelta ) > 20 ) {
       int bounceDamage = (VectorLength( ent->s.pos.trDelta ) / 300 ) *
                        ( BG_Buildable( ent->s.modelindex )->health / 10 + 1 );
-      G_Damage( ent, NULL, &g_entities[ ent->dropperNum ], NULL,
-                NULL, bounceDamage, DAMAGE_NO_PROTECTION, MOD_FALLING );
-      if( G_TakesDamage( &g_entities[trace->entityNum] ) )
-      {
+
+      if( ( BG_Buildable( ent->s.modelindex )->team == TEAM_HUMANS ||
+        BG_Buildable( ent->s.modelindex )->regenRate ) ) {
+          G_Damage( ent, NULL, &g_entities[ ent->dropperNum ], NULL,
+                    NULL, bounceDamage, DAMAGE_NO_PROTECTION, MOD_FALLING );
+        }
+
+      if( G_TakesDamage( &g_entities[trace->entityNum] ) &&
+      ( BG_Buildable( g_entities[trace->entityNum].s.modelindex )->team == TEAM_HUMANS ||
+        BG_Buildable( g_entities[trace->entityNum].s.modelindex )->regenRate ) ) {
         G_Damage( &g_entities[trace->entityNum], NULL,
                   &g_entities[ ent->dropperNum ], NULL, NULL, bounceDamage,
                   DAMAGE_NO_PROTECTION, MOD_CRUSH );
@@ -167,16 +170,14 @@ static void G_Bounce( gentity_t *ent, trace_t *trace )
 
     VectorScale( ent->s.pos.trDelta, ent->physicsBounce, ent->s.pos.trDelta );
   }
-  else
+  else {
     VectorScale( ent->s.pos.trDelta, 0.3f, ent->s.pos.trDelta );
+  }
 
-  if( VectorLength( ent->s.pos.trDelta ) < 10 )
-  {
-    if( ent->s.eType == ET_BUILDABLE )
-    {
+  if( VectorLength( ent->s.pos.trDelta ) < 10 ) {
+    if( ent->s.eType == ET_BUILDABLE ) {
       // check if a buildable should be damaged at its new location
-      if( !IS_WARMUP && g_allowBuildableStacking.integer )
-      {
+      if( !IS_WARMUP && g_allowBuildableStacking.integer ) {
         int contents = SV_PointContents( ent->r.currentOrigin, -1 );
         int surfaceFlags = trace->surfaceFlags;
 
@@ -185,23 +186,23 @@ static void G_Bounce( gentity_t *ent, trace_t *trace )
             ( ent->buildableTeam == TEAM_ALIENS &&
               ( trace->surfaceFlags & SURF_NOALIENBUILD || contents & CONTENTS_NOALIENBUILD ) ) ||
             ( ent->buildableTeam == TEAM_HUMANS &&
-              ( trace->surfaceFlags & SURF_NOHUMANBUILD || contents & CONTENTS_NOHUMANBUILD ) ) )
-          ent->damageDroppedBuildable = qtrue;
-        else
+              ( trace->surfaceFlags & SURF_NOHUMANBUILD || contents & CONTENTS_NOHUMANBUILD ) ) ) {
+                ent->damageDroppedBuildable = qtrue;
+              }
+        else {
           ent->damageDroppedBuildable = qfalse;
+        }
       }
 
       if( normal[ 2 ] >= minNormal ||
-          ( invert && normal[ 2 ] <= -minNormal ) )
-      {
+          ( invert && normal[ 2 ] <= -minNormal ) ) {
         G_SetOrigin( ent, trace->endpos );
         VectorCopy( normal, ent->s.origin2 );
         G_CheckGround( ent );
         VectorSet( ent->s.pos.trDelta, 0.0f, 0.0f, 0.0f );
         return;
       }
-    } else
-    {
+    } else {
       G_SetOrigin( ent, trace->endpos );
       VectorCopy( normal, ent->s.origin2 );
       G_CheckGround( ent );
