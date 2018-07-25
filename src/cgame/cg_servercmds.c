@@ -795,6 +795,12 @@ void CG_Menu( int menu, int arg )
       type      = DT_BUILD;
       break;
 
+    case MN_B_REPAIR_TO_DECON:
+      longMsg  = "Human structures must have full health to be deconstructed. "
+                 "Repair this structure first.";
+      shortMsg = "You must repair this structure before it can be deconstructed.";
+      break;
+
     // FIXME: MN_H_ and MN_A_?
     case MN_B_LASTSPAWN:
       longMsg   = "This action would remove your team's last spawn point, "

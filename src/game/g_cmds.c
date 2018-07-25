@@ -2534,8 +2534,7 @@ void Cmd_Class_f( gentity_t *ent )
 Cmd_Destroy_f
 =================
 */
-void Cmd_Destroy_f( gentity_t *ent )
-{
+void Cmd_Destroy_f( gentity_t *ent ) {
   vec3_t      viewOrigin, forward, end;
   trace_t     tr;
   gentity_t   *traceEnt;
@@ -2543,15 +2542,15 @@ void Cmd_Destroy_f( gentity_t *ent )
   qboolean    deconstruct = qtrue;
   qboolean    lastSpawn = qfalse;
 
-  if( ent->client->pers.namelog->denyBuild )
-  {
+  if( ent->client->pers.namelog->denyBuild ) {
     G_TriggerMenu( ent->client->ps.clientNum, MN_B_REVOKED );
     return;
   }
 
   Cmd_ArgvBuffer( 0, cmd, sizeof( cmd ) );
-  if( Q_stricmp( cmd, "destroy" ) == 0 )
+  if( Q_stricmp( cmd, "destroy" ) == 0 ) {
     deconstruct = qfalse;
+  }
 
   BG_GetClientViewOrigin( &ent->client->ps, viewOrigin );
   AngleVectors( ent->client->ps.viewangles, forward, NULL, NULL );
@@ -2559,83 +2558,78 @@ void Cmd_Destroy_f( gentity_t *ent )
 
   SV_Trace( &tr, viewOrigin, NULL, NULL, end, ent->s.number, MASK_PLAYERSOLID,
     TT_AABB);
-  if ( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING )
+  if ( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING ) {
     traceEnt = &g_entities[ ent->client->ps.persistant[ PERS_ACT_ENT ] ];
-  else
-  traceEnt = &g_entities[ tr.entityNum ];
+  }
+  else {
+    traceEnt = &g_entities[ tr.entityNum ];
+  }
 
   if( ( tr.fraction < 1.0f ||
         ( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING ) ) &&
       ( traceEnt->s.eType == ET_BUILDABLE ) &&
       ( traceEnt->buildableTeam == ent->client->pers.teamSelection ) &&
       ( ( ent->client->ps.weapon >= WP_ABUILD ) &&
-        ( ent->client->ps.weapon <= WP_HBUILD ) ) )
-  {
-    // Always let the builder prevent the explosion
-    if( traceEnt->health <= 0 )
-    {
-      G_QueueBuildPoints( traceEnt );
-      G_RewardAttackers( traceEnt, UP_NONE );
-      G_FreeEntity( traceEnt );
+        ( ent->client->ps.weapon <= WP_HBUILD ) ) ) {
+    if( ent->client->pers.teamSelection == TEAM_HUMANS &&
+        traceEnt->health < traceEnt->s.constantLight ) {
+      G_TriggerMenu( ent->client->ps.clientNum, MN_B_REPAIR_TO_DECON );
+      return;
+    }
+
+    // don't let the builder prevent the explosion
+    if( traceEnt->health <= 0 ) {
       return;
     }
 
     // Prevent destruction of the last spawn
     if( ent->client->pers.teamSelection == TEAM_ALIENS &&
-        traceEnt->s.modelindex == BA_A_SPAWN )
-    {
-      if( level.numAlienSpawns <= 1 )
+        traceEnt->s.modelindex == BA_A_SPAWN ) {
+      if( level.numAlienSpawns <= 1 ) {
         lastSpawn = qtrue;
+      }
     }
     else if( ent->client->pers.teamSelection == TEAM_HUMANS &&
-             traceEnt->s.modelindex == BA_H_SPAWN )
-    {
-      if( level.numHumanSpawns <= 1 )
+             traceEnt->s.modelindex == BA_H_SPAWN ) {
+      if( level.numHumanSpawns <= 1 ) {
         lastSpawn = qtrue;
+      }
     }
 
-    if( lastSpawn && !g_cheats.integer )
-    {
+    if( lastSpawn && !g_cheats.integer ) {
       G_TriggerMenu( ent->client->ps.clientNum, MN_B_LASTSPAWN );
       return;
     }
 
     // Don't allow destruction of buildables that cannot be rebuilt
-    if( !IS_WARMUP && G_TimeTilSuddenDeath( ) <= 0 )
-    {
+    if( !IS_WARMUP && G_TimeTilSuddenDeath( ) <= 0 ) {
       G_TriggerMenu( ent->client->ps.clientNum, MN_B_SUDDENDEATH );
       return;
     }
 
     if( IS_WARMUP || ( ent->client->pers.teamSelection == TEAM_HUMANS &&
-          !G_FindPower( traceEnt, qtrue ) ) )
-    {
-      if( ent->client->ps.misc[ MISC_MISC ] > 0 )
-      {
+          !G_FindPower( traceEnt, qtrue ) ) ) {
+      if( ent->client->ps.misc[ MISC_MISC ] > 0 ) {
         G_AddEvent( ent, EV_BUILD_DELAY, ent->client->ps.clientNum );
         return;
       }
     }
 
-    if( traceEnt->health > 0 )
-    {
-      if( !deconstruct )
-      {
+    if( traceEnt->health > 0 ) {
+      if( !deconstruct ) {
         G_Damage( traceEnt, ent, ent, forward, tr.endpos,
                   0, DAMAGE_INSTAGIB, MOD_SUICIDE );
       }
-      else
-      {
-        if( ent->client->ps.misc[ MISC_MISC ] > 0 )
-        {
+      else {
+        if( ent->client->ps.misc[ MISC_MISC ] > 0 ) {
           G_AddEvent( ent, EV_BUILD_DELAY, ent->client->ps.clientNum );
           return;
         }
 
-        if( !g_cheats.integer && !IS_WARMUP ) // add a bit to the build timer
-        {
-            ent->client->ps.misc[ MISC_MISC ] +=
-              BG_Buildable( traceEnt->s.modelindex )->buildTime / 4;
+        if( !g_cheats.integer && !IS_WARMUP ) {
+          // add a bit to the build timer
+          ent->client->ps.misc[ MISC_MISC ] +=
+            BG_Buildable( traceEnt->s.modelindex )->buildTime / 4;
         }
         G_Damage( traceEnt, ent, ent, forward, tr.endpos,
                   0, DAMAGE_INSTAGIB, MOD_DECONSTRUCT );

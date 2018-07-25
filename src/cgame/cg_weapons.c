@@ -2085,12 +2085,26 @@ Caused by an EV_FIRE_WEAPON event
 */
 void CG_FireWeapon( centity_t *cent, weaponMode_t weaponMode )
 {
+  centity_t         *wcent;
   entityState_t     *es;
   int               c;
   weaponInfo_t      *wi;
   weapon_t          weaponNum;
 
-  es = &cent->currentState;
+  //check of the event is from a temporary event entity
+  if( cent->currentState.eType >= ET_EVENTS ) {
+    //check that the firing entity is still valid
+    if( !cg_entities[ cent->currentState.otherEntityNum ].valid ||
+        cg_entities[ cent->currentState.otherEntityNum ].currentState.weapon != cent->currentState.weapon ) {
+      wcent = cent;
+    }
+
+    wcent = &cg_entities[ cent->currentState.otherEntityNum ];
+  } else {
+    wcent = cent;
+  }
+
+  es = &wcent->currentState;
 
   weaponNum = es->weapon;
 
@@ -2110,19 +2124,19 @@ void CG_FireWeapon( centity_t *cent, weaponMode_t weaponMode )
 
   // mark the entity as muzzle flashing, so when it is added it will
   // append the flash to the weapon model
-  cent->muzzleFlashTime = cg.time;
+  wcent->muzzleFlashTime = cg.time;
 
   if( wi->wim[ weaponMode ].muzzleParticleSystem )
   {
-    if( !CG_IsParticleSystemValid( &cent->muzzlePS ) ||
-        !CG_IsParticleSystemInfinite( cent->muzzlePS ) )
-      cent->muzzlePsTrigger = qtrue;
+    if( !CG_IsParticleSystemValid( &wcent->muzzlePS ) ||
+        !CG_IsParticleSystemInfinite( wcent->muzzlePS ) )
+      wcent->muzzlePsTrigger = qtrue;
   }
   
 
 	// lightning gun only does this this on initial press
 	if ( weaponNum == WP_LIGHTNING &&
-       cent->pe.lightningFiring )
+       wcent->pe.lightningFiring )
     return;
 
   // play a sound

@@ -791,15 +791,15 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define HSPAWN_BP                   10
 #define HSPAWN_BT                   10000
 #define HSPAWN_HEALTH               HBHM(310000)
-#define HSPAWN_SPLASHDAMAGE         HBDM(50000)
-#define HSPAWN_SPLASHRADIUS         100
+#define HSPAWN_SPLASHDAMAGE         HBDM(0)
+#define HSPAWN_SPLASHRADIUS         0
 #define HSPAWN_VALUE                ( ALIEN_CREDITS_PER_KILL )
 
 #define HTELEPORTER_BP              10
 #define HTELEPORTER_BT              10000
 #define HTELEPORTER_HEALTH          HBHM(310000)
-#define HTELEPORTER_SPLASHDAMAGE    HBDM(50000)
-#define HTELEPORTER_SPLASHRADIUS    100
+#define HTELEPORTER_SPLASHDAMAGE    HBDM(0)
+#define HTELEPORTER_SPLASHRADIUS    0
 #define HTELEPORTER_VALUE           ( ALIEN_CREDITS_PER_KILL )
 #define HTELEPORTER_COOLDOWN_TIME   2000
 #define HTELEPORTER_BAT_PWR         30000  // amount of time teleporter's can remained powered without
@@ -809,8 +809,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MEDISTAT_BT                 10000
 #define MEDISTAT_HEALTH             HBHM(190000)
 #define MEDISTAT_REPEAT             100
-#define MEDISTAT_SPLASHDAMAGE       HBDM(50000)
-#define MEDISTAT_SPLASHRADIUS       100
+#define MEDISTAT_SPLASHDAMAGE       HBDM(0)
+#define MEDISTAT_SPLASHRADIUS       0
 #define MEDISTAT_VALUE              ( ALIEN_CREDITS_PER_KILL )
 #define MEDISTAT_BAT_PWR            25000
 #define MEDISTAT_HEALTH_RESERVE     200000
@@ -818,8 +818,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MGTURRET_BP                  8
 #define MGTURRET_BT                  10000
 #define MGTURRET_HEALTH              HBHM(240000)
-#define MGTURRET_SPLASHDAMAGE        HBDM(100000)
-#define MGTURRET_SPLASHRADIUS        100
+#define MGTURRET_SPLASHDAMAGE        HBDM(0)
+#define MGTURRET_SPLASHRADIUS        0
 #define MGTURRET_ANGULARSPEED        12
 #define MGTURRET_ANGULARYAWSPEED_MOD 6
 #define MGTURRET_ACCURACY_TO_FIRE    10
@@ -842,8 +842,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define TESLAGEN_BP                 10
 #define TESLAGEN_BT                 15000
 #define TESLAGEN_HEALTH             HBHM(220000)
-#define TESLAGEN_SPLASHDAMAGE       HBDM(50000)
-#define TESLAGEN_SPLASHRADIUS       100
+#define TESLAGEN_SPLASHDAMAGE       HBDM(0)
+#define TESLAGEN_SPLASHRADIUS       0
 #define TESLAGEN_REPEAT             250
 #define TESLAGEN_K_SCALE            4.0f
 #define TESLAGEN_RANGE              250
@@ -854,8 +854,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define DC_BP                       8
 #define DC_BT                       10000
 #define DC_HEALTH                   HBHM(190000)
-#define DC_SPLASHDAMAGE             HBDM(50000)
-#define DC_SPLASHRADIUS             100
+#define DC_SPLASHDAMAGE             HBDM(0)
+#define DC_SPLASHRADIUS             0
 #define DC_ATTACK_PERIOD            10000 // how often to spam "under attack"
 #define DC_HEALRATE                 4000
 #define DC_RANGE                    10000
@@ -873,8 +873,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define REACTOR_BP                  0
 #define REACTOR_BT                  20000
 #define REACTOR_HEALTH              HBHM(1000000)
-#define REACTOR_SPLASHDAMAGE        HBDM(200000)
-#define REACTOR_SPLASHRADIUS        300
+#define REACTOR_SPLASHDAMAGE        HBDM(500000)
+#define REACTOR_SPLASHRADIUS        500
 #define REACTOR_ATTACK_RANGE        100.0f
 #define REACTOR_ATTACK_REPEAT       1000
 #define REACTOR_ATTACK_DAMAGE       HBDM(40000)
@@ -886,8 +886,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define REPEATER_BP                 4
 #define REPEATER_BT                 10000
 #define REPEATER_HEALTH             HBHM(250000)
-#define REPEATER_SPLASHDAMAGE       HBDM(50000)
-#define REPEATER_SPLASHRADIUS       100
+#define REPEATER_SPLASHDAMAGE       HBDM(150000)
+#define REPEATER_SPLASHRADIUS       200
 #define REPEATER_VALUE              ( ALIEN_CREDITS_PER_KILL )
 
 /*

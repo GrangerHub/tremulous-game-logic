@@ -31,6 +31,30 @@ G_SetBuildableAnim
 Triggers an animation client side
 ================
 */
+static void G_SendBuildableFireEvent( gentity_t *self, entity_event_t event ) {
+  gentity_t *tent;
+
+  Com_Assert( self &&
+              "G_SendBuildableFireEvent: self is NULL");
+  Com_Assert( ( event == EV_FIRE_WEAPON ||
+                event == EV_FIRE_WEAPON2 ||
+                event == EV_FIRE_WEAPON3 ) &&
+                "G_SendBuildableFireEvent: event isn't a fire event" );
+
+  tent = G_TempEntity( self->r.currentOrigin, EV_FIRE_WEAPON );
+  tent->s.otherEntityNum = self->s.number;
+  tent->s.pos = self->s.pos;
+  tent->s.apos = self->s.apos;
+  tent->s.weapon = self->s.weapon;
+}
+
+/*
+================
+G_SetBuildableAnim
+
+Triggers an animation client side
+================
+*/
 void G_SetBuildableAnim( gentity_t *ent, buildableAnimNumber_t anim, qboolean force )
 {
   int localAnim = anim | ( ent->s.legsAnim & ANIM_TOGGLEBIT );
@@ -835,6 +859,9 @@ static void G_CreepSlow( gentity_t *self )
   buildable_t buildable = self->s.modelindex;
   float       creepSize = (float)BG_Buildable( buildable )->creepSize;
 
+  //disable creep slow
+  return;
+
   VectorSet( range, creepSize, creepSize, creepSize );
 
   VectorAdd( self->r.currentOrigin, range, maxs );
@@ -1059,8 +1086,7 @@ Called when an Alien buildable is killed and enters a brief dead state prior to
 exploding.
 ================
 */
-void AGeneric_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod )
-{
+void AGeneric_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod ) {
   G_SetBuildableAnim( self, BANIM_DESTROY1, qtrue );
   G_SetIdleBuildableAnim( self, BANIM_DESTROYED );
 
@@ -1071,15 +1097,12 @@ void AGeneric_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, i
   self->powered = qfalse;
   self->methodOfDeath = mod;
 
-  if( self->spawned )
-  {
+  if( ( BG_Buildable( self->s.modelindex )->role & ROLE_CORE ) ||
+      ( BG_Buildable( self->s.modelindex )->ballisticDmgMod < 1.0 ) ) {
     self->nextthink = level.time + ALIEN_CREEP_BLAST_DELAY;
-    if( self->s.modelindex == BA_A_OVERMIND &&
-        self->methodOfDeath != MOD_DECONSTRUCT )
-      G_BroadcastEvent( EV_OVERMIND_DYING, 0 );
-  }
-  else
+  } else {
     self->nextthink = level.time; //blast immediately
+  }
 
   G_RemoveBuildableFromStack( self->s.groundEntityNum, self->s.number );
   G_SetBuildableDropper( self->s.number, attacker->s.number );
@@ -1245,8 +1268,7 @@ void AOvermind_Think( gentity_t *self )
 {
   int    i;
 
-  if( self->spawned && ( self->health > 0 ) )
-  {
+  if( self->spawned && ( self->health > 0 ) ) {
     vec3_t    range = { OVERMIND_ATTACK_RANGE, OVERMIND_ATTACK_RANGE, OVERMIND_ATTACK_RANGE };
     vec3_t    mins, maxs;
     int       entityList[ MAX_GENTITIES ];
@@ -1257,8 +1279,7 @@ void AOvermind_Think( gentity_t *self )
     VectorSubtract( self->s.pos.trBase, range, mins );
     //do some damage
     num = SV_AreaEntities( mins, maxs, entityList, MAX_GENTITIES );
-    for( i = 0; i < num; i++ )
-    {
+    for( i = 0; i < num; i++ ) {
       enemy = &g_entities[ entityList[ i ] ];
 
       if( ( ( enemy->client &&
@@ -1269,58 +1290,63 @@ void AOvermind_Think( gentity_t *self )
                                    self->r.mins, self->r.maxs,
                                    self, self->splashDamage,
                                    self->splashRadius, self,
-                                   MOD_OVERMIND, TEAM_ALIENS, qtrue ) )
-      {
+                                   MOD_OVERMIND, TEAM_ALIENS, qtrue ) ) {
         self->timestamp = level.time;
         G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
       }
     }
 
     // just in case an egg finishes building after we tell overmind to stfu
-    if( level.numAlienSpawns > 0 )
+    if( level.numAlienSpawns > 0 ) {
       level.overmindMuted = qfalse;
+    }
 
     // shut up during intermission
-    if( level.intermissiontime )
+    if( level.intermissiontime ) {
       level.overmindMuted = qtrue;
+    }
 
     //low on spawns
     if( !level.overmindMuted && level.numAlienSpawns <= 0 &&
-        level.time > self->overmindSpawnsTimer )
-    {
+        level.time > self->overmindSpawnsTimer ) {
       qboolean haveBuilder = qfalse;
       gentity_t *builder;
 
       self->overmindSpawnsTimer = level.time + OVERMIND_SPAWNS_PERIOD;
       G_BroadcastEvent( EV_OVERMIND_SPAWNS, 0 );
 
-      for( i = 0; i < level.numConnectedClients; i++ )
-      {
+      for( i = 0; i < level.numConnectedClients; i++ ) {
         builder = &g_entities[ level.sortedClients[ i ] ];
         if( builder->health > 0 &&
           ( builder->client->pers.classSelection == PCL_ALIEN_BUILDER0 ||
-            builder->client->pers.classSelection == PCL_ALIEN_BUILDER0_UPG ) )
-        {
+            builder->client->pers.classSelection == PCL_ALIEN_BUILDER0_UPG ) ) {
           haveBuilder = qtrue;
           break;
         }
       }
       // aliens now know they have no eggs, but they're screwed, so stfu
-      if( !haveBuilder || G_TimeTilSuddenDeath( ) <= 0 )
+      if( !haveBuilder || G_TimeTilSuddenDeath( ) <= 0 ) {
         level.overmindMuted = qtrue;
+      }
+    }
+
+    //overmind dying
+    if( self->health < ( OVERMIND_HEALTH / 10.0f ) && level.time > self->overmindDyingTimer ) {
+      self->overmindDyingTimer = level.time + OVERMIND_DYING_PERIOD;
+      G_BroadcastEvent( EV_OVERMIND_DYING, 0 );
     }
 
     //overmind under attack
-    if( self->health < self->lastHealth && level.time > self->overmindAttackTimer )
-    {
+    if( self->health < self->lastHealth && level.time > self->overmindAttackTimer ) {
       self->overmindAttackTimer = level.time + OVERMIND_ATTACK_PERIOD;
       G_BroadcastEvent( EV_OVERMIND_ATTACK, 0 );
     }
 
     self->lastHealth = self->health;
   }
-  else
+  else {
     self->overmindSpawnsTimer = level.time + OVERMIND_SPAWNS_PERIOD;
+  }
 
   G_CreepSlow( self );
 
@@ -2618,8 +2644,7 @@ HSpawn_die
 Called when a human spawn dies
 ================
 */
-void HSpawn_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod )
-{
+void HSpawn_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod ) {
   G_SetBuildableAnim( self, BANIM_DESTROY1, qtrue );
   G_SetIdleBuildableAnim( self, BANIM_DESTROYED );
 
@@ -2629,13 +2654,14 @@ void HSpawn_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   self->s.eFlags &= ~EF_FIRING; //prevent any firing effects
   self->methodOfDeath = mod;
 
-  if( self->spawned )
-  {
+  if( self->spawned ) {
     self->think = HSpawn_Blast;
-    self->nextthink = level.time + HUMAN_DETONATION_DELAY;
-  }
-  else
-  {
+    if( BG_Buildable( self->s.modelindex )->splashDamage ) {
+      self->nextthink = level.time + HUMAN_DETONATION_DELAY;
+    } else {
+      self->nextthink = level.time; //blast immediately
+    }
+  } else {
     self->think = HSpawn_Disappear;
     self->nextthink = level.time; //blast immediately
   }
@@ -2643,8 +2669,9 @@ void HSpawn_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   G_RemoveBuildableFromStack( self->s.groundEntityNum, self->s.number );
   G_SetBuildableDropper( self->s.number, attacker->s.number );
 
-  if( self->s.modelindex == BA_H_TELEPORTER )
+  if( self->s.modelindex == BA_H_TELEPORTER ) {
     G_RemoveTeleporter( self );
+  }
 
   G_RemoveRangeMarkerFrom( self );
   G_LogDestruction( self, attacker, mod );
@@ -2946,8 +2973,7 @@ HRepeater_Die
 Called when a repeater dies
 ================
 */
-static void HRepeater_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod )
-{
+static void HRepeater_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod ) {
   G_SetBuildableAnim( self, BANIM_DESTROY1, qtrue );
   G_SetIdleBuildableAnim( self, BANIM_DESTROYED );
 
@@ -2957,13 +2983,14 @@ static void HRepeater_Die( gentity_t *self, gentity_t *inflictor, gentity_t *att
   self->s.eFlags &= ~EF_FIRING; //prevent any firing effects
   self->methodOfDeath = mod;
 
-  if( self->spawned )
-  {
+  if( self->spawned ) {
     self->think = HSpawn_Blast;
-    self->nextthink = level.time + HUMAN_DETONATION_DELAY;
-  }
-  else
-  {
+    if( BG_Buildable( self->s.modelindex )->splashDamage ) {
+      self->nextthink = level.time + HUMAN_DETONATION_DELAY;
+    } else {
+      self->nextthink = level.time; //blast immediately
+    }
+  }   else {
     self->think = HSpawn_Disappear;
     self->nextthink = level.time; //blast immediately
   }
@@ -2974,8 +3001,7 @@ static void HRepeater_Die( gentity_t *self, gentity_t *inflictor, gentity_t *att
   G_RemoveRangeMarkerFrom( self );
   G_LogDestruction( self, attacker, mod );
 
-  if( self->usesBuildPointZone )
-  {
+  if( self->usesBuildPointZone ) {
     buildPointZone_t *zone = &level.buildPointZones[self->buildPointZone];
 
     zone->active = qfalse;
@@ -3960,7 +3986,7 @@ void HMGTurret_Think( gentity_t *self )
                     ( MGTURRET_REPEAT_START - MGTURRET_REPEAT ) -
                     ( ( ( MGTURRET_REPEAT_START - MGTURRET_REPEAT ) *
                          self->turretSpinupTime ) / MGTURRET_SPINUP_TIME );
-  G_AddEvent( self, EV_FIRE_WEAPON, 0 );
+  G_SendBuildableFireEvent( self, EV_FIRE_WEAPON );
   G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
 }
 
@@ -4040,7 +4066,7 @@ void HTeslaGen_Think( gentity_t *self )
 
     if( self->s.eFlags & EF_FIRING )
     {
-      G_AddEvent( self, EV_FIRE_WEAPON, 0 );
+      G_SendBuildableFireEvent( self, EV_FIRE_WEAPON );
 
       //doesn't really need an anim
       //G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
