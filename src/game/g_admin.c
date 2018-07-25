@@ -3071,7 +3071,7 @@ qboolean G_admin_allready( gentity_t *ent )
 
       //change the client's ready status
       cl->sess.readyToPlay = qtrue;
-      cl->ps.stats[ STAT_READY ] = cl->sess.readyToPlay ? 1 : 0;
+      cl->ps.stats[ STAT_FLAGS ] |= SFL_READY;
     }
 
     AP( va( "print \"^3allready: ^7%s ^7decided to end pre-game warmup early\n\"",

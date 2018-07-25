@@ -794,7 +794,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
             client->ps.stats[ STAT_BUILDABLE ] &= ~SB_VALID_TOGGLEBIT;
 
           // Let the client know which buildables will be removed by building
-          for( i = 0; i < ( MAX_MISC - 9 ); i++ )
+          for( i = 0; i < ( MAX_MISC - 8 ); i++ )
           {
             if( i < level.numBuildablesForRemoval )
               client->ps.misc[ i ] = level.markedBuildables[ i ]->s.number;
@@ -804,7 +804,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
         }
         else
         {
-          for( i = 0; i < ( MAX_MISC - 9 ); i++ )
+          for( i = 0; i < ( MAX_MISC - 8 ); i++ )
             client->ps.misc[ i ] = 0;
         }
         break;
@@ -2634,6 +2634,9 @@ void SpectatorClientEndFrame( gentity_t *ent )
   gclient_t *cl;
   int       clientNum;
   int       score, ping;
+
+  //hax to ensure that changes in the misc array are broadcasted
+  ent->client->ps.stats[ STAT_FLAGS ] ^= SFL_REFRESH_MISC;
 
   // if we are doing a chase cam or a remote view, grab the latest info
   if( ent->client->sess.spectatorState == SPECTATOR_FOLLOW )

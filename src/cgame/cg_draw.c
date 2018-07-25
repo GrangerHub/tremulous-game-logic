@@ -2957,7 +2957,7 @@ static void CG_DrawWarmup( int ownerDraw, rectDef_t *rect, float textScale, int 
       if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_NONE )
         return;
       Com_sprintf( warmupText, sizeof( warmupText ), "( You Are %sReady )",
-          cg.predictedPlayerState.stats[ STAT_READY ] ? "" : "Not " );
+          (cg.predictedPlayerState.stats[ STAT_FLAGS ] & SFL_READY ) ? "" : "Not " );
       break;
     case CG_WARMUP_ALIENS_READY_HDR:
       Com_sprintf( warmupText, sizeof( warmupText ), "Aliens" );
