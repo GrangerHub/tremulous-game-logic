@@ -284,10 +284,10 @@ void GibEntity( gentity_t *self )
   //set the gibbed flag
   if( self->client )
   {
-    self->client->ps.misc[ MISC_CLIENT_FLAGS ] |= CLF_GIBBED;
+    self->client->ps.stats[ STAT_FLAGS ] |= SFL_GIBBED;
   } else
   {
-    self->s.otherEntityNum2 |= CLF_GIBBED;
+    self->s.otherEntityNum2 |= SFL_GIBBED;
   }
 
   self->die = NULL;

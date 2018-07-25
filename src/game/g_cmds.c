@@ -2002,7 +2002,11 @@ void Cmd_Ready_f( gentity_t *ent )
 
   // update client readiness
   ent->client->sess.readyToPlay = !ent->client->sess.readyToPlay;
-  ent->client->ps.stats[ STAT_READY ] = ent->client->sess.readyToPlay ? 1 : 0;
+  if( ent->client->sess.readyToPlay ) {
+    ent->client->ps.stats[ STAT_FLAGS ] |= SFL_READY;
+  } else {
+    ent->client->ps.stats[ STAT_FLAGS ] &= ~SFL_READY;
+  }
 
   // let people see when player changes their ready status
   SV_GameSendServerCommand( -1, va( "print \"^7Warmup: %s %sready^7.\n",

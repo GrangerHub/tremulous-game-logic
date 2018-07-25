@@ -301,7 +301,12 @@ typedef enum
   STAT_WEAPON,    // current primary weapon
   STAT_CLASS,     // player class (for aliens AND humans)
   STAT_TEAM,      // player team
-  STAT_READY,     // player ready state
+  
+  // Additional flags only used by clients.  Copied over to otherEntityNum2 in
+  // the entity state, but keep in mind that otherEntityNum2 can only hold
+  // GENTITYNUM_BITS number of bits (current default is 10).
+  STAT_FLAGS,
+  
   STAT_STAMINA,   // stamina for SCA_STAMINA or SCA_CHARGE_STAMINA
   STAT_STATE,     // client states e.g. wall climbing
   STAT_MISC2,     // for more misc stuff, copied into constantLight of the entity state.
@@ -341,6 +346,10 @@ typedef enum
 
 #define SB_VALID_TOGGLEBIT      0x00002000
 
+#define SFL_READY               0x00000001 // player ready state
+#define SFL_REFRESH_MISC        0x00000002 // hax to ensure the misc changes are broadcasted
+#define SFL_GIBBED              0x00000004
+
 // player_state->persistant[] indexes
 // these fields are the only part of player_state that isn't
 // cleared on respawn
@@ -373,21 +382,14 @@ typedef enum
 //and don't use PM_PSRandom() outside of bg_pmove.c.
 #define MISC_SEED                      ( MAX_MISC - 4 ) // for predicted psudorandom things
 
-// Additional flags only used by clients.  Copied over to otherEntityNum2 in
-// the entity state, but keep in mind that otherEntityNum2 can only hold
-// GENTITYNUM_BITS number of bits (current default is 10).
-#define MISC_CLIENT_FLAGS              ( MAX_MISC - 5 )
-
 // for uh...misc stuff (pounce, trample, lcannon)
-#define MISC_MISC                      ( MAX_MISC - 6 )
+#define MISC_MISC                      ( MAX_MISC - 5 )
 // for uh...other misc stuff (evolve cool down)
-#define MISC_MISC2                     ( MAX_MISC - 7 )
+#define MISC_MISC2                     ( MAX_MISC - 6 )
 
 // for gradually applying recoil
-#define MISC_RECOIL_PITCH              ( MAX_MISC - 8 )
-#define MISC_RECOIL_YAW                ( MAX_MISC - 9 )
-
-#define CLF_GIBBED             0x0000000001
+#define MISC_RECOIL_PITCH              ( MAX_MISC - 7 )
+#define MISC_RECOIL_YAW                ( MAX_MISC - 8 )
 
 #define PS_WALLCLIMBINGFOLLOW   0x00000001
 #define PS_WALLCLIMBINGTOGGLE   0x00000002

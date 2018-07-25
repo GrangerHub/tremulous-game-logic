@@ -901,7 +901,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
     case EV_DEATH2:
     case EV_DEATH3:
       if( !cg_blood.integer ||
-          !( es->otherEntityNum2 & CLF_GIBBED ) )
+          !( es->otherEntityNum2 & SFL_GIBBED ) )
         trap_S_StartSound( NULL, es->number, CHAN_VOICE,
                            CG_CustomSound( es->number,
                                            va( "*death%i.wav",
