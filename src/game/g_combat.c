@@ -628,10 +628,10 @@ void GibEntity( gentity_t *self )
   //set the gibbed flag
   if( self->client )
   {
-    self->client->ps.misc[ MISC_CLIENT_FLAGS ] |= CLF_GIBBED;
+    self->client->ps.stats[ STAT_FLAGS ] |= SFL_GIBBED;
   } else
   {
-    self->s.otherEntityNum2 |= CLF_GIBBED;
+    self->s.otherEntityNum2 |= SFL_GIBBED;
   }
 
   self->die = NULL;
@@ -834,12 +834,12 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   }
 
   // save client flags
-  savedClientFlags = self->client->ps.misc[ MISC_CLIENT_FLAGS ];
+  savedClientFlags = self->client->ps.stats[ STAT_FLAGS ];
 
   // clear misc
   memset( self->client->ps.misc, 0, sizeof( self->client->ps.misc ) );
 
-  self->client->ps.misc[ MISC_CLIENT_FLAGS ] = savedClientFlags;
+  self->client->ps.stats[ STAT_FLAGS ] = savedClientFlags;
 
   {
     // normal death
@@ -2175,7 +2175,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
         tent = G_TempEntity( targ->client->ps.origin, EV_GIB_BSUIT );
         BG_GetClientNormal( &targ->client->ps, tent->s.origin2 );
         targ->client->ps.misc[ MISC_ARMOR ] = 0;
-        targ->client->ps.misc[ MISC_CLIENT_FLAGS ] &= ~CLF_ARMOR_GENERATE;
+        targ->client->ps.stats[ STAT_FLAGS ] &= ~SFL_ARMOR_GENERATE;
         targ->client->lastArmorGenTime = 0;
         targ->client->armorToGen = 0;
         targ->client->armorGenIncrementTime = 0;

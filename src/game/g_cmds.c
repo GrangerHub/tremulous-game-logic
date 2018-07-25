@@ -2069,7 +2069,11 @@ void Cmd_Ready_f( gentity_t *ent )
 
   // update client readiness
   ent->client->sess.readyToPlay = !ent->client->sess.readyToPlay;
-  ent->client->ps.stats[ STAT_READY ] = ent->client->sess.readyToPlay ? 1 : 0;
+  if( ent->client->sess.readyToPlay ) {
+    ent->client->ps.stats[ STAT_FLAGS ] |= SFL_READY;
+  } else {
+    ent->client->ps.stats[ STAT_FLAGS ] &= ~SFL_READY;
+  }
 
   // let people see when player changes their ready status
   SV_GameSendServerCommand( -1, va( "print \"^7Warmup: %s %sready^7.\n",
@@ -3009,7 +3013,7 @@ void Cmd_Buy_f( gentity_t *ent )
           ent->client->pers.classSelection = PCL_HUMAN_BSUIT;
           ent->client->ps.eFlags ^= EF_TELEPORT_BIT;
           ent->client->ps.misc[ MISC_ARMOR ] = BG_HP2SU( 1 );
-          ent->client->ps.misc[ MISC_CLIENT_FLAGS ] |= CLF_ARMOR_GENERATE;
+          ent->client->ps.stats[ STAT_FLAGS ] |= SFL_ARMOR_GENERATE;
           ent->client->lastArmorGenTime = level.time;
           ent->client->armorToGen = BSUIT_MAX_ARMOR - ent->client->ps.misc[ MISC_ARMOR ];
           ent->client->armorGenIncrementTime = level.time +
@@ -3244,7 +3248,7 @@ void Cmd_Sell_f( gentity_t *ent )
                                qfalse );
 
         ent->client->ps.misc[ MISC_ARMOR ] = 0;
-        ent->client->ps.misc[ MISC_CLIENT_FLAGS ] &= ~CLF_ARMOR_GENERATE;
+        ent->client->ps.stats[ STAT_FLAGS ] &= ~SFL_ARMOR_GENERATE;
         ent->client->lastArmorGenTime = 0;
         ent->client->armorToGen = 0;
         ent->client->armorGenIncrementTime = 0;

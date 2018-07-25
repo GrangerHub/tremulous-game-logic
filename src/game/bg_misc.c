@@ -6430,7 +6430,7 @@ void BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s,
 
   s->otherEntityNum = ps->otherEntityNum;
 
-  s->otherEntityNum2 = ps->misc[ MISC_CLIENT_FLAGS ];
+  s->otherEntityNum2 = ps->stats[ STAT_FLAGS ];
 
   if( ps->weapon == WP_ALEVEL2 )
     s->constantLight = ps->misc[ MISC_MISC ];
@@ -6547,7 +6547,7 @@ void BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s
 
   s->otherEntityNum = ps->otherEntityNum;
 
-  s->otherEntityNum2 = ps->misc[ MISC_CLIENT_FLAGS ];
+  s->otherEntityNum2 = ps->stats[ STAT_FLAGS ];
 
   if( ps->weapon == WP_ALEVEL2 )
     s->constantLight = ps->misc[ MISC_MISC ];

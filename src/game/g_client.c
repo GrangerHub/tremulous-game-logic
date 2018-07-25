@@ -482,7 +482,7 @@ static void SpawnCorpse( gentity_t *ent )
   VectorCopy( ent->s.apos.trBase, body->s.apos.trBase );
   VectorCopy( ent->s.apos.trBase, body->r.currentAngles );
   body->s.eFlags = EF_DEAD;
-  body->s.otherEntityNum2 = ent->client->ps.misc[ MISC_CLIENT_FLAGS ] & CLF_GIBBED;
+  body->s.otherEntityNum2 = ent->client->ps.stats[ STAT_FLAGS ] & SFL_GIBBED;
   body->s.eType = ET_CORPSE;
   body->timestamp = level.time;
   body->s.event = 0;
@@ -1325,7 +1325,11 @@ Q_EXPORT void ClientBegin( int clientNum )
   client->ps.eFlags = flags;
 
   // communicate the client's ready status
-  client->ps.stats[ STAT_READY ] = ent->client->sess.readyToPlay ? 1 : 0;
+  if( client->sess.readyToPlay ) {
+    client->ps.stats[ STAT_FLAGS ] |= SFL_READY;
+  } else {
+    client->ps.stats[ STAT_FLAGS ] &= ~SFL_READY;
+  }
 
   // locate ent at a spawn point
   ClientSpawn( ent, NULL, NULL, NULL );
@@ -1560,7 +1564,12 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
 
   ent->client->ps.stats[ STAT_CLASS ] = ent->client->pers.classSelection;
   ent->client->ps.stats[ STAT_TEAM ] = ent->client->pers.teamSelection;
-  ent->client->ps.stats[ STAT_READY ] = ent->client->sess.readyToPlay ? 1 : 0;
+  if( client->sess.readyToPlay ) {
+    client->ps.stats[ STAT_FLAGS ] |= SFL_READY;
+  } else {
+    client->ps.stats[ STAT_FLAGS ] &= ~SFL_READY;
+  }
+
 
   ent->client->ps.stats[ STAT_BUILDABLE ] = BA_NONE;
   ent->client->ps.stats[ STAT_STATE ] = 0;

@@ -866,7 +866,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
             client->ps.stats[ STAT_BUILDABLE ] &= ~SB_VALID_TOGGLEBIT;
 
           // Let the client know which buildables will be removed by building
-          for( i = 0; i < ( MAX_MISC - 9 ); i++ )
+          for( i = 0; i < ( MAX_MISC - 8 ); i++ )
           {
             if( i < level.numBuildablesForRemoval )
               client->ps.misc[ i ] = level.markedBuildables[ i ]->s.number;
@@ -876,7 +876,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
         }
         else
         {
-          for( i = 0; i < ( MAX_MISC - 9 ); i++ )
+          for( i = 0; i < ( MAX_MISC - 8 ); i++ )
             client->ps.misc[ i ] = 0;
         }
         break;
@@ -983,7 +983,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
     }
 
     //armor generation
-    if( ( ent->client->ps.misc[ MISC_CLIENT_FLAGS ] & CLF_ARMOR_GENERATE ) &&
+    if( ( ent->client->ps.stats[ STAT_FLAGS ] & SFL_ARMOR_GENERATE ) &&
         ent->lastDamageTime + HUMAN_DAMAGE_HEAL_DELAY_TIME < level.time ) {
       int remainingStartupTime = MEDKIT_STARTUP_TIME - ( level.time - client->lastArmorGenTime );
 
@@ -1006,7 +1006,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
             ent->client->ps.misc[ MISC_ARMOR ] = BSUIT_MAX_ARMOR;
           }
         } else {
-          ent->client->ps.misc[ MISC_CLIENT_FLAGS ] &= ~CLF_ARMOR_GENERATE;
+          ent->client->ps.stats[ STAT_FLAGS ] &= ~SFL_ARMOR_GENERATE;
           ent->client->armorToGen = 0;
           ent->client->armorGenIncrementTime = 0;
         }
@@ -1026,7 +1026,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
               ( remainingStartupTime / MEDKIT_STARTUP_SPEED );
           }
         } else {
-          ent->client->ps.misc[ MISC_CLIENT_FLAGS ] &= ~CLF_ARMOR_GENERATE;
+          ent->client->ps.stats[ STAT_FLAGS ] &= ~SFL_ARMOR_GENERATE;
           ent->client->armorToGen = 0;
           ent->client->armorGenIncrementTime = 0;
         }
@@ -2970,6 +2970,9 @@ void SpectatorClientEndFrame( gentity_t *ent )
   gclient_t *cl;
   int       clientNum;
   int       score, ping;
+
+  //hax to ensure that changes in the misc array are broadcasted
+  ent->client->ps.stats[ STAT_FLAGS ] ^= SFL_REFRESH_MISC;
 
   // if we are doing a chase cam or a remote view, grab the latest info
   if( ent->client->sess.spectatorState == SPECTATOR_FOLLOW )

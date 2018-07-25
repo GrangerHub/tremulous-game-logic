@@ -1990,7 +1990,7 @@ void CG_Player( centity_t *cent )
   if( !cent->invincible &&
       ci->team == TEAM_HUMANS &&
       ( held & ( 1 << UP_BATTLESUIT ) ) &&
-      ( cent->currentState.otherEntityNum2 & CLF_ARMOR_GENERATE ) &&
+      ( cent->currentState.otherEntityNum2 & SFL_ARMOR_GENERATE ) &&
       !cg.intermissionStarted &&
       !( es->eFlags & EF_DEAD ) ) {
     if( !cent->armorGen ) {

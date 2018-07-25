@@ -1246,7 +1246,7 @@ static void CG_AddCEntity( centity_t *cent )
   if( cg_blood.integer &&
       ( cent->currentState.eType == ET_PLAYER ||
         cent->currentState.eType == ET_CORPSE ) &&
-      ( cent->currentState.otherEntityNum2 & CLF_GIBBED ) )
+      ( cent->currentState.otherEntityNum2 & SFL_GIBBED ) )
     cent->currentState.eType = ET_INVISIBLE;
 
   // add automatic effects
