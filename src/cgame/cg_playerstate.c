@@ -251,11 +251,11 @@ void CG_CheckLocalSounds( playerState_t *ps, playerState_t *ops )
     return;
 
   // health changes of more than -1 should make pain sounds
-  if( ( ps->misc[ MISC_HEALTH ] < ops->misc[ MISC_HEALTH ] ||
+  if( ( ( ps->misc[ MISC_HEALTH ] < ops->misc[ MISC_HEALTH ] &&
+        !( ( ps->misc[ MISC_HEALTH ] == BG_Class( ps->stats[ STAT_CLASS ] )->health ) &&
+        !BG_InventoryContainsUpgrade( UP_BIOKIT, ps->stats ) ) ) ||
       ( ps->misc[ MISC_ARMOR ] < ops->misc[ MISC_ARMOR ] &&
-        BG_InventoryContainsUpgrade( UP_BATTLESUIT, ps->stats ) ) ) &&
-      !( ( ps->misc[ MISC_HEALTH ] == BG_Class( ps->stats[ STAT_CLASS ] )->health ) &&
-         !BG_InventoryContainsUpgrade( UP_BIOKIT, ps->stats ) ) )
+        BG_InventoryContainsUpgrade( UP_BATTLESUIT, ps->stats ) ) ) )
   {
     if( !( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_ALIENS &&
             ( cg.predictedPlayerState.eFlags & EF_EVOLVING ) ) &&
