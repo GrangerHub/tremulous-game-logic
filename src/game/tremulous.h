@@ -601,12 +601,12 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define CHAINGUN_REPEAT             80
 #define CHAINGUN_K_SCALE            1.0f
 #define CHAINGUN_RECOIL             32.0f
-#define CHAINGUN_SPREAD             0
-#define CHAINGUN_DMG                HWDM(5500)
+#define CHAINGUN_SPREAD             900
+#define CHAINGUN_DMG                HWDM(7500)
 #define CHAINGUN_RELOAD             2000
 #define CHAINGUN_REPEAT2            150
-#define CHAINGUN_SPREAD2            0
-#define CHAINGUN_DMG2               HWDM(5500)
+#define CHAINGUN_SPREAD2            600
+#define CHAINGUN_DMG2               HWDM(7500)
 
 #define FLAMER_PRICE                450
 #define FLAMER_GAS                  200
