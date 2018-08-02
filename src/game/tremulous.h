@@ -44,7 +44,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ABUILDER_BUILD_REPEAT       500
 #define ABUILDER_CLAW_DMG           AWDM(20000)
 #define ABUILDER_UPG_CLAW_DMG       AWDM(60000)
-#define ABUILDER_CLAW_RANGE         64.0f
+#define ABUILDER_CLAW_RANGE         60.0f
 #define ABUILDER_CLAW_WIDTH         4.0f
 #define ABUILDER_CLAW_REPEAT        1000
 #define ABUILDER_CLAW_K_SCALE       1.0f
@@ -56,7 +56,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ABUILDER_BLOB_LIFETIME      15000
 
 #define LEVEL0_BITE_DMG             AWDM(48000)
-#define LEVEL0_BITE_RANGE           64.0f
+#define LEVEL0_BITE_RANGE           60.0f
 #define LEVEL0_BITE_WIDTH           6.0f
 #define LEVEL0_BITE_REPEAT          500
 #define LEVEL0_BITE_K_SCALE         1.0f
@@ -69,7 +69,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL0_POUNCE_JUMP_MAG      600      // Dretch pounce jump power
 
 #define LEVEL1_CLAW_DMG                AWDM(32000)
-#define LEVEL1_CLAW_RANGE              96.0f
+#define LEVEL1_CLAW_RANGE              90.0f
 #define LEVEL1_CLAW_U_RANGE            LEVEL1_CLAW_RANGE + 3.0f
 #define LEVEL1_CLAW_WIDTH              10.0f
 #define LEVEL1_CLAW_REPEAT             600
@@ -98,7 +98,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL1_UPG_INVISIBILITY_TIME   36000
 
 #define LEVEL2_CLAW_DMG             AWDM(50000)
-#define LEVEL2_CLAW_RANGE           85.0f
+#define LEVEL2_CLAW_RANGE           80.0f
 #define LEVEL2_CLAW_U_RANGE         LEVEL2_CLAW_RANGE + 2.0f
 #define LEVEL2_CLAW_WIDTH           17.0f
 #define LEVEL2_CLAW_REPEAT          500
@@ -106,7 +106,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL2_CLAW_U_REPEAT        400
 #define LEVEL2_CLAW_U_K_SCALE       1.0f
 #define LEVEL2_AREAZAP_DMG          AWDM(60000)
-#define LEVEL2_AREAZAP_RANGE        200.0f
+#define LEVEL2_AREAZAP_RANGE        220.0f
 #define LEVEL2_AREAZAP_CHAIN_RANGE  150.0f
 #define LEVEL2_AREAZAP_CHAIN_FALLOFF 8.0f
 #define LEVEL2_AREAZAP_WIDTH        15.0f
@@ -125,7 +125,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL2_EXPLODE_CHARGE_SHAKE 1.25f
 
 #define LEVEL3_CLAW_DMG             AWDM(80000)
-#define LEVEL3_CLAW_RANGE           96.0f
+#define LEVEL3_CLAW_RANGE           90.0f
 #define LEVEL3_CLAW_UPG_RANGE       LEVEL3_CLAW_RANGE // + 3.0f
 #define LEVEL3_CLAW_WIDTH           16.0f
 #define LEVEL3_CLAW_REPEAT          700
@@ -151,7 +151,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL3_BOUNCEBALL_LIFETIME  3000
 
 #define LEVEL4_CLAW_DMG             AWDM(100000)
-#define LEVEL4_CLAW_RANGE           75.0f
+#define LEVEL4_CLAW_RANGE           96.0f
 #define LEVEL4_CLAW_WIDTH           20.0f
 #define LEVEL4_CLAW_HEIGHT          20.0f
 #define LEVEL4_CLAW_REPEAT          750
