@@ -1539,7 +1539,7 @@ static const classAttributes_t bg_classList[ ] =
     ABUILDER_UPG_HEALTH,                            //int     health;
     0.0f,                                           //float   maxHealthDecayRate;
     ABUILDER_UPG_MIN_HEALTH,                        //int     minHealth;
-    0.2f,                                           //float   fallDamage;
+    0.0f,                                           //float   fallDamage;
     ABUILDER_UPG_REGEN,                             //float   regenRate;
     SCA_TAKESFALLDAMAGE|SCA_FOVWARPS|
     SCA_WALLCLIMBER|SCA_ALIENSENSE|
