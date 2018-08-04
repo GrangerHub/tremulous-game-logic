@@ -296,6 +296,13 @@ qboolean G_MoverPush( gentity_t *pusher, vec3_t move, vec3_t amove, gentity_t **
         !check->physicsObject )
       continue;
 
+      if( check->health <= 0 &&
+          check->r.contents == 0 &&
+          (check->s.eFlags & EF_NODRAW) ) {
+        //this buildable has already gibbed
+        continue;
+      }
+
     // if the entity is standing on the pusher, it will definitely be moved
     if( check->s.groundEntityNum != pusher->s.number )
     {
