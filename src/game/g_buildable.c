@@ -1073,8 +1073,7 @@ void AGeneric_Blast( gentity_t *self )
   self->think = AGeneric_CreepRecede;
   self->nextthink = level.time + 500;
 
-  self->r.contents = 0;    //stop collisions...
-  G_BackupUnoccupyContents( self );
+  G_SetContents( self, 0);    //stop collisions...
   SV_LinkEntity( self ); //...requires a relink
 }
 
@@ -4924,6 +4923,10 @@ static itemBuildError_t G_SufficientBPAvailable( buildable_t     buildable,
       if( ent->s.eType != ET_BUILDABLE )
         continue;
 
+      if( !ent->inuse ) {
+        continue;
+      }
+
       if( G_BuildablesIntersect( buildable, origin, ent->s.modelindex, ent->r.currentOrigin ) )
         return IBE_NOROOM;
     }
@@ -4939,6 +4942,17 @@ static itemBuildError_t G_SufficientBPAvailable( buildable_t     buildable,
   {
     if( ent->s.eType != ET_BUILDABLE )
       continue;
+
+    if( !ent->inuse ) {
+      continue;
+    }
+
+    if( ent->health <= 0 &&
+        ent->r.contents == 0 &&
+        (ent->s.eFlags & EF_NODRAW) ) {
+      //this buildable has already exploded
+      continue;
+    }
 
     collision = G_BuildablesIntersect( buildable, origin, ent->s.modelindex, ent->r.currentOrigin );
 
@@ -4981,8 +4995,6 @@ static itemBuildError_t G_SufficientBPAvailable( buildable_t     buildable,
     else
       repeaterInRange = qfalse;
 
-    if( !ent->inuse )
-      continue;
 
     if( ent->health <= 0 )
       continue;
@@ -5118,35 +5130,44 @@ G_SetBuildableLinkState
 Links or unlinks all the buildable entities
 ================
 */
-static void G_SetBuildableLinkState( qboolean link )
-{
+static void G_SetBuildableLinkState( qboolean link ) {
   int       i;
   gentity_t *ent;
 
-  for ( i = 1, ent = g_entities + i; i < level.num_entities; i++, ent++ )
-  {
-    if( ent->s.eType != ET_BUILDABLE )
+  for ( i = 1, ent = g_entities + i; i < level.num_entities; i++, ent++ ) {
+    if( ent->s.eType != ET_BUILDABLE ) {
       continue;
+    }
 
-    if( link )
+    if( !ent->inuse ) {
+      continue;
+    }
+
+    if( link ) {
       SV_LinkEntity( ent );
-    else
+    }
+    else {
       SV_UnlinkEntity( ent );
+    }
   }
 }
 
-static void G_SetBuildableMarkedLinkState( qboolean link )
-{
+static void G_SetBuildableMarkedLinkState( qboolean link ) {
   int       i;
   gentity_t *ent;
 
-  for ( i = 1, ent = g_entities + i; i < level.num_entities; i++, ent++ )
-  {
-    if( ent->s.eType != ET_BUILDABLE )
+  for ( i = 1, ent = g_entities + i; i < level.num_entities; i++, ent++ ) {
+    if( ent->s.eType != ET_BUILDABLE ) {
       continue;
+    }
 
-    if( !( ent->deconstruct ) )
+    if( !ent->inuse ) {
       continue;
+    }
+
+    if( !( ent->deconstruct ) ) {
+      continue;
+    }
 
     if( link )
       SV_LinkEntity( ent );
