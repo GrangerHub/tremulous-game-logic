@@ -4231,7 +4231,7 @@ static itemBuildError_t G_SufficientBPAvailable( buildable_t     buildable,
     if( ent->health <= 0 &&
         ent->r.contents == 0 &&
         (ent->s.eFlags & EF_NODRAW) ) {
-      //this buildable has already exploded
+      //this buildable has already gibbed
       continue;
     }
 
