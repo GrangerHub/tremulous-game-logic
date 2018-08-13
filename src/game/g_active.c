@@ -2089,15 +2089,18 @@ void ClientThink_real( gentity_t *ent )
   // calculate where ent is currently seeing all the other active clients
   G_UnlaggedCalc( ent->client->unlaggedTime, ent );
 
-  if( client->ps.misc[ MISC_HEALTH ] > 0 &&
-      ( !G_TakesDamage( ent ) ||
-        ( ent->flags & FL_GODMODE ) ||
-        !ent->r.contents ) )
+  if(
+    client->ps.misc[ MISC_HEALTH ] > 0 &&
+    (
+      !G_TakesDamage( ent ) ||
+      (g_damageProtection.integer && ent->dmgProtectionTime > level.time) ||
+      ( ent->flags & FL_GODMODE ) ||
+      !ent->r.contents ) )
     client->ps.eFlags |= EF_INVINCIBLE;
   else if( client->ps.eFlags & EF_INVINCIBLE )
   {
     if( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
-      G_AddPredictableEvent( ent, EV_ALIEN_EVOLVE,
+      G_AddPredictableEvent( ent, EV_ALIEN_SPAWN_PROTECTION_ENDED,
                              DirToByte( up ) );
     client->ps.eFlags &= ~EF_INVINCIBLE;
   }
