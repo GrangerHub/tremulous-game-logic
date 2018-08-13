@@ -2332,17 +2332,14 @@ void ClientThink_real( gentity_t *ent )
   // calculate where ent is currently seeing all the other active clients
   G_UnlaggedCalc( ent->client->unlaggedTime, ent );
 
-  if( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
-      ( client->ps.eFlags & EF_EVOLVING ) &&
-      ( client->ps.stats[ STAT_MISC3 ] <= 0 ||
-        ent->health <= 0 ) )
-  {
+  if(
+    client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
+    (client->ps.eFlags & EF_EVOLVING ) &&
+    (client->ps.stats[ STAT_MISC3 ] <= 0 || ent->health <= 0)) {
     // evolution has completed
     client->ps.eFlags &= ~EF_EVOLVING;
-    if( ent->health > 0 )
-    {
-      if( level.surrenderTeam != client->pers.teamSelection )
-      {
+    if(ent->health > 0) {
+      if(level.surrenderTeam != client->pers.teamSelection) {
         //finish any remaining evolve health regen
         G_ChangeHealth( ent, ent, client->pers.evolveHealthRegen,
                         (HLTHF_EVOLVE_INCREASE|
@@ -2351,26 +2348,31 @@ void ClientThink_real( gentity_t *ent )
         client->pers.evolveHealthRegen = 0;
       }
 
-      G_AddPredictableEvent( ent, EV_ALIEN_EVOLVE,
-                             DirToByte( up ) );
+      G_AddPredictableEvent(ent, EV_ALIEN_EVOLVE, DirToByte( up ) );
 
       //apply any remaining evo difference
-      G_AddCreditToClient( ent->client, -client->evolveCost, qtrue );
+      G_AddCreditToClient(ent->client, -client->evolveCost, qtrue);
     }
-    else
+    else {
       client->ps.stats[ STAT_MISC3 ] = 0;
+    }
   }
 
-  if( ent->health > 0 &&
-      ( !G_TakesDamage( ent ) ||
-        ( ent->flags & FL_GODMODE ) ||
-        !ent->r.contents ) )
+  if(
+    ent->health > 0 &&
+    (
+      !G_TakesDamage( ent ) ||
+      (g_damageProtection.integer && ent->dmgProtectionTime > level.time) ||
+      (ent->flags & FL_GODMODE) ||
+      !ent->r.contents ) ) {
     client->ps.eFlags |= EF_INVINCIBLE;
-  else if( client->ps.eFlags & EF_INVINCIBLE )
+  }
+    
+  else if(client->ps.eFlags & EF_INVINCIBLE)
   {
-    if( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
-      G_AddPredictableEvent( ent, EV_ALIEN_EVOLVE,
-                             DirToByte( up ) );
+    if(client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS) {
+      G_AddPredictableEvent(ent, EV_ALIEN_SPAWN_PROTECTION_ENDED, DirToByte(up));
+    }
     client->ps.eFlags &= ~EF_INVINCIBLE;
   }
 

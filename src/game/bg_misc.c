@@ -396,9 +396,8 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  enabled;
     "slime_zunge",         //char      *name;
     "Slime Zunge",         //char      *humanName;
-	  "Used for passive and active base defense.\n"
-	  "Has the ability to slow down human players.\n"
-	  "Nearby Humans get *sucked* in and take damage.\n",
+	  "Used for passive and active base defense."
+	  "Nearby Humans get *sucked* in and take damage.",
     "team_alien_slime_zunge", //char   *entityName;
     TR_GRAVITY,            //trType_t  traj;
     0.1,                   //float     bounce;
@@ -6253,6 +6252,7 @@ char *eventnames[ ] =
 
   "EV_MEDKIT_USED",
 
+  "EV_ALIEN_SPAWN_PROTECTION_ENDED",
   "EV_ALIEN_EVOLVE",
   "EV_ALIEN_EVOLVE_FAILED",
 
