@@ -978,6 +978,24 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       }
       break;
 
+    case EV_ALIEN_SPAWN_PROTECTION_ENDED:
+      trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.alienEvolveSound );
+      {
+        particleSystem_t *ps = CG_SpawnNewParticleSystem( cgs.media.alienEvolvePS );
+
+        if( CG_IsParticleSystemValid( &ps ) )
+        {
+          CG_SetAttachmentCent( &ps->attachment, cent );
+          CG_AttachToCent( &ps->attachment );
+        }
+      }
+
+      if( es->number == cg.clientNum )
+      {
+        CG_ResetPainBlend( );
+      }
+      break;
+
     case EV_ALIEN_EVOLVE:
       trap_S_StartSound( NULL, es->number, CHAN_BODY, cgs.media.alienEvolveSound );
       {
