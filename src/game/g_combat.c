@@ -39,10 +39,6 @@ Determines if an entity can be damaged
 */
 qboolean G_TakesDamage( gentity_t *ent )
 {
-  if( g_damageProtection.integer &&
-      ent->dmgProtectionTime > level.time )
-   return qfalse;
-
    return ent->takedamage;
 }
 
@@ -1723,9 +1719,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
   // Can't deal damage sometimes
   if( !targ->takedamage ||
-      ( !G_TakesDamage( targ ) &&
-        attacker && attacker->s.number != ENTITYNUM_WORLD &&
-        G_MODSpawnProtected( mod )  ) ||
       level.intermissionQueued )
     return;
 
@@ -1739,24 +1732,33 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   attacker->dmgProtectionTime = 0;
   attacker->targetProtectionTime = 0;
 
-  if( (dflags & DAMAGE_INSTAGIB) )
-  {
-    damage = targ->health;
-    if( targ->s.eType == ET_PLAYER ||
-        targ->s.eType == ET_CORPSE )
-    {
-      if( targ->health > GIB_HEALTH )
+  if((dflags & DAMAGE_INSTAGIB)) {
+    if(targ->s.eType == ET_PLAYER || targ->s.eType == ET_CORPSE) {
+      if( targ->health > GIB_HEALTH ) {
         damage = targ->health - GIB_HEALTH;
-      else
+      }
+      else {
         damage = 1;
-    } else if( targ->health > 0 )
+      }
+    } else if( targ->health > 0 ) {
       damage = targ->health;
-    else
+    }
+    else {
       damage = 1;
+    }
 
-    if( targ->client &&
-        targ->client->ps.misc[ MISC_ARMOR ] > 0 )
+    if(targ->client && targ->client->ps.misc[ MISC_ARMOR ] > 0) {
       damage += targ->client->ps.misc[ MISC_ARMOR ];
+    }
+  } else if( 
+    g_damageProtection.integer &&
+    targ->dmgProtectionTime > level.time &&
+    attacker && attacker->s.number != ENTITYNUM_WORLD &&
+    G_MODSpawnProtected( mod )) {
+    damage = (int)(0.3f * (float)damage);
+    if( damage < 1 ) {
+      damage = 1;
+    }
   }
 
   // shootable doors / buttons don't actually have any health
@@ -2465,11 +2467,7 @@ qboolean G_SelectiveRadiusDamage( vec3_t origin, vec3_t originMins, vec3_t origi
     if( ent == ignore )
       continue;
 
-    if( !ent->takedamage ||
-        ( !G_TakesDamage( ent ) &&
-          attacker && attacker->s.number != ENTITYNUM_WORLD &&
-          mod != MOD_TRIGGER_HURT && mod != MOD_FALLING &&
-          mod != MOD_TELEFRAG  ) )
+    if(!ent->takedamage)
     continue;
 
     if( G_NoTarget( ent ) )
@@ -2600,11 +2598,7 @@ qboolean G_RadiusDamage( vec3_t origin, vec3_t originMins, vec3_t originMaxs,
     if( ent == ignore )
       continue;
 
-      if( !ent->takedamage ||
-          ( !G_TakesDamage( ent ) &&
-            attacker && attacker->s.number != ENTITYNUM_WORLD &&
-            mod != MOD_TRIGGER_HURT && mod != MOD_FALLING &&
-            mod != MOD_TELEFRAG  ) )
+      if(!ent->takedamage)
       continue;
 
     if( ent->client && ( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING ) )
