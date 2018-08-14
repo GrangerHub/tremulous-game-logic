@@ -2405,7 +2405,7 @@ static void PM_CheckLadder( void )
                  MASK_WATER );
 
       Com_Assert( ( trace.fraction < 1.0f || trace.startsolid || trace.allsolid ) &&
-                  "PM_CheckLadder: Player is not in liquid" );
+                  "PM_CheckLadder" );
 
       waterLevelDistance = trace.fraction * ( ( (float)pm->ps->viewheight ) - pm->mins[ 2 ] );
 
