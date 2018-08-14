@@ -224,10 +224,9 @@ static ID_INLINE const bgMemoryClass_t *BG_MemClassNumFromChunkSize( size_t size
 {
   size_t low = 0, high = ( NUMBER_OF_MEMORY_CLASSES -1 ), middle;
 
-  assertMemSize( ( size ) > 0 && "size must be greater than 0.", size,
+  assertMemSize( ( size ) > 0, size,
                  calledFile, calledLine );
-  assertMemSize( ( size ) <= memClassesSortedChunkSize[ high ]->chunkSize &&
-                 "size exceeds maximum chunk size for BG_Alloc", size,
+  assertMemSize( ( size ) <= memClassesSortedChunkSize[ high ]->chunkSize, size,
                  calledFile, calledLine );
 
   while( low < high )
@@ -257,8 +256,8 @@ static ID_INLINE const bgMemoryClass_t *BG_MemClassNumFromAdress( void *ptr, cha
   int             passes = 0;
 
   assertMemChunk( ((uint8_t *)ptr >= memClassesSortedBufferAddress[ low ]->bufferStart &&
-                  (uint8_t *)ptr <= memClassesSortedBufferAddress[ high ]->bufferEnd &&
-                  "BG_MemClassNumFromAdress: out of bounds."), ptr, calledFile, calledLine );
+                  (uint8_t *)ptr <= memClassesSortedBufferAddress[ high ]->bufferEnd),
+                  ptr, calledFile, calledLine );
 
   while( low < high )
   {
@@ -496,10 +495,10 @@ void *_BG_StackPoolAlloc( size_t size, char *calledFile, int calledLine )
 
   size = (size & ~((size_t)0xF)) + (size_t)16;
   assertMemStack( (size > 0),
-                  "BG_StackPoolAlloc: size must be greater than 0",
+                  "BG_StackPoolAlloc",
                   calledFile, calledLine );
   assertMemStack( ( stack_pool_ptr + size <= stack_pool + STACK_POOL_SIZE ),
-                  "BG_StackPoolAlloc: out of memory", calledFile, calledLine );
+                  "BG_StackPoolAlloc", calledFile, calledLine );
 
   stack_pool_ptr += size;
 
@@ -523,20 +522,20 @@ void _BG_StackPoolFree( void *ptr, char *calledFile, int calledLine )
   size = *(size_t *)stack_pool_ptr;
   assertMemStackChunk( ( (uint8_t *)ptr >= stack_pool &&
                          (uint8_t *)ptr < stack_pool + STACK_POOL_SIZE ),
-                       "BG_StackPoolFree: out of bounds.", ptr, size, calledFile, calledLine );
+                       "BG_StackPoolFree", ptr, size, calledFile, calledLine );
   assertMemStackChunk( ( size > 0 ),
-                       "BG_StackPoolFree: size must be greater than 0",
+                       "BG_StackPoolFree",
                        ptr, size, calledFile, calledLine );
  assertMemStackChunk( ( (size) % 16 == 0 ),
-                      "BG_StackPoolFree: size must be 16 bit alligned",
+                      "BG_StackPoolFree",
                       ptr, size, calledFile, calledLine );
   assertMemStackChunk( ( stack_pool_ptr >= stack_pool + size ),
-                       "BG_StackPoolFree: underflow", ptr, size, calledFile, calledLine );
+                       "BG_StackPoolFree", ptr, size, calledFile, calledLine );
 
   stack_pool_ptr -= size;
 
   assertMemStackChunk( ( stack_pool_ptr == ptr ),
-                       "BG_StackPoolFree: Freed chunk was not at the stack head",
+                       "BG_StackPoolFree",
                        ptr, size, calledFile, calledLine );
 }
 
