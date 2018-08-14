@@ -2420,9 +2420,6 @@ void Cmd_Class_f( gentity_t *ent )
           if( ent->client->ps.stats[ STAT_STATE ] & SS_BOOSTED )
             oldBoostTime = ent->client->boostedTime;
 
-          // end damage protection early
-          ent->dmgProtectionTime = 0;
-
           // calculate the bonus health to be save for after the evolve
           {
             const int classHealth = BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->health;
@@ -3070,10 +3067,6 @@ void Cmd_Buy_f( gentity_t *ent )
     return;
   }
 
-  // end damage and target protection early
-  ent->dmgProtectionTime = 0;
-  ent->targetProtectionTime = 0;
-
   //update ClientInfo
   ClientUserinfoChanged( ent->client->ps.clientNum, qfalse );
   ent->client->pers.infoChangeTime = level.time;
@@ -3329,10 +3322,6 @@ void Cmd_Sell_f( gentity_t *ent )
     G_TriggerMenu( ent->client->ps.clientNum, MN_H_UNKNOWNITEM );
     return;
   }
-
-  // end damage and target protection early
-  ent->dmgProtectionTime = 0;
-  ent->targetProtectionTime = 0;
 
   //update ClientInfo
   ClientUserinfoChanged( ent->client->ps.clientNum, qfalse );
