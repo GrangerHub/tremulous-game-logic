@@ -67,21 +67,18 @@ gentity->flags
 // movers are things like doors, plats, buttons, etc
 typedef enum
 {
-  MOVER_POS1,
-  MOVER_POS2,
-  MOVER_1TO2,
-  MOVER_2TO1,
-
-  ROTATOR_POS1,
-  ROTATOR_POS2,
-  ROTATOR_1TO2,
-  ROTATOR_2TO1,
-
-  MODEL_POS1,
-  MODEL_POS2,
-  MODEL_1TO2,
-  MODEL_2TO1
+  MS_POS1,
+  MS_POS2,
+  MS_1TO2,
+  MS_2TO1
 } moverState_t;
+
+typedef enum mover_type_s
+{
+  MM_LINEAR,
+  MM_ROTATION,
+  MM_MODEL
+} mover_motion_t;
 
 /*
 --------------------------------------------------------------------------------
@@ -159,6 +156,7 @@ struct gentity_s
 
   // movers
   moverState_t      moverState;
+  mover_motion_t    moverMotionType;
   int               soundPos1;
   int               sound1to2;
   int               sound2to1;
