@@ -1104,15 +1104,16 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   }
 
   // shootable doors / buttons don't actually have any health
-  if( targ->s.eType == ET_MOVER )
-  {
-    if( targ->use && ( targ->moverState == MOVER_POS1 ||
-                       targ->moverState == ROTATOR_POS1 ) )
+  if(targ->s.eType == ET_MOVER) {
+    if(
+      targ->use && targ->moverState == MS_POS1 &&
+      targ->moverMotionType != MM_MODEL)
       targ->use( targ, inflictor, attacker );
 
     return;
-  } else if ( targ->s.eType == ET_MISSILE &&
-              !strcmp( targ->classname, "lightningBall" ) )
+  } else if(
+    targ->s.eType == ET_MISSILE &&
+    !strcmp( targ->classname, "lightningBall" ) )
   {
     //special case for detonating lightning balls
     if( mod == MOD_LIGHTNING_EMP )
