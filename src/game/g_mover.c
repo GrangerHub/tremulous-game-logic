@@ -125,7 +125,7 @@ qboolean G_TryPushingEntity( gentity_t *check, gentity_t *pusher, vec3_t move, v
   vec3_t    org, org2, move2;
   gentity_t *block;
 
-  // EF_MOVER_STOP will just stop when contacting another entity
+  // EF_MS_STOP will just stop when contacting another entity
   // instead of pushing it, but entities can still ride on top of it
   if( ( pusher->s.eFlags & EF_MOVER_STOP ) &&
       check->s.groundEntityNum != pusher->s.number )
@@ -477,8 +477,7 @@ Pos1 is "at rest", pos2 is "activated"
 SetMoverState
 ===============
 */
-void SetMoverState( gentity_t *ent, moverState_t moverState, int time )
-{
+void SetMoverState(gentity_t *ent, moverState_t moverState, int time) {
   vec3_t delta;
   float  f;
 
@@ -487,75 +486,72 @@ void SetMoverState( gentity_t *ent, moverState_t moverState, int time )
   ent->s.pos.trTime = time;
   ent->s.apos.trTime = time;
 
-  switch( moverState )
-  {
-    case MOVER_POS1:
-      VectorCopy( ent->pos1, ent->s.pos.trBase );
-      ent->s.pos.trType = TR_STATIONARY;
+  switch(ent->moverMotionType) {
+    case MM_LINEAR:
+      switch(moverState) {
+        case MS_POS1:
+          VectorCopy( ent->pos1, ent->s.pos.trBase );
+          ent->s.pos.trType = TR_STATIONARY;
+          break;
+
+        case MS_POS2:
+          VectorCopy( ent->pos2, ent->s.pos.trBase );
+          ent->s.pos.trType = TR_STATIONARY;
+          break;
+
+        case MS_1TO2:
+          VectorCopy( ent->pos1, ent->s.pos.trBase );
+          VectorSubtract( ent->pos2, ent->pos1, delta );
+          f = 1000.0 / ent->s.pos.trDuration;
+          VectorScale( delta, f, ent->s.pos.trDelta );
+          ent->s.pos.trType = TR_LINEAR_STOP;
+          break;
+
+        case MS_2TO1:
+          VectorCopy( ent->pos2, ent->s.pos.trBase );
+          VectorSubtract( ent->pos1, ent->pos2, delta );
+          f = 1000.0 / ent->s.pos.trDuration;
+          VectorScale( delta, f, ent->s.pos.trDelta );
+          ent->s.pos.trType = TR_LINEAR_STOP;
+          break;
+      }
+      BG_EvaluateTrajectory( &ent->s.pos, level.time, ent->r.currentOrigin );
       break;
 
-    case MOVER_POS2:
-      VectorCopy( ent->pos2, ent->s.pos.trBase );
-      ent->s.pos.trType = TR_STATIONARY;
+    case MM_ROTATION:
+      switch(moverState) {
+        case MS_POS1:
+          VectorCopy( ent->pos1, ent->s.apos.trBase );
+          ent->s.apos.trType = TR_STATIONARY;
+          break;
+
+        case MS_POS2:
+          VectorCopy( ent->pos2, ent->s.apos.trBase );
+          ent->s.apos.trType = TR_STATIONARY;
+          break;
+
+        case MS_1TO2:
+          VectorCopy( ent->pos1, ent->s.apos.trBase );
+          VectorSubtract( ent->pos2, ent->pos1, delta );
+          f = 1000.0 / ent->s.apos.trDuration;
+          VectorScale( delta, f, ent->s.apos.trDelta );
+          ent->s.apos.trType = TR_LINEAR_STOP;
+          break;
+
+        case MS_2TO1:
+          VectorCopy( ent->pos2, ent->s.apos.trBase );
+          VectorSubtract( ent->pos1, ent->pos2, delta );
+          f = 1000.0 / ent->s.apos.trDuration;
+          VectorScale( delta, f, ent->s.apos.trDelta );
+          ent->s.apos.trType = TR_LINEAR_STOP;
+          break;
+      }
+      BG_EvaluateTrajectory( &ent->s.apos, level.time, ent->r.currentAngles );
       break;
 
-    case MOVER_1TO2:
-      VectorCopy( ent->pos1, ent->s.pos.trBase );
-      VectorSubtract( ent->pos2, ent->pos1, delta );
-      f = 1000.0 / ent->s.pos.trDuration;
-      VectorScale( delta, f, ent->s.pos.trDelta );
-      ent->s.pos.trType = TR_LINEAR_STOP;
-      break;
-
-    case MOVER_2TO1:
-      VectorCopy( ent->pos2, ent->s.pos.trBase );
-      VectorSubtract( ent->pos1, ent->pos2, delta );
-      f = 1000.0 / ent->s.pos.trDuration;
-      VectorScale( delta, f, ent->s.pos.trDelta );
-      ent->s.pos.trType = TR_LINEAR_STOP;
-      break;
-
-    case ROTATOR_POS1:
-      VectorCopy( ent->pos1, ent->s.apos.trBase );
-      ent->s.apos.trType = TR_STATIONARY;
-      break;
-
-    case ROTATOR_POS2:
-      VectorCopy( ent->pos2, ent->s.apos.trBase );
-      ent->s.apos.trType = TR_STATIONARY;
-      break;
-
-    case ROTATOR_1TO2:
-      VectorCopy( ent->pos1, ent->s.apos.trBase );
-      VectorSubtract( ent->pos2, ent->pos1, delta );
-      f = 1000.0 / ent->s.apos.trDuration;
-      VectorScale( delta, f, ent->s.apos.trDelta );
-      ent->s.apos.trType = TR_LINEAR_STOP;
-      break;
-
-    case ROTATOR_2TO1:
-      VectorCopy( ent->pos2, ent->s.apos.trBase );
-      VectorSubtract( ent->pos1, ent->pos2, delta );
-      f = 1000.0 / ent->s.apos.trDuration;
-      VectorScale( delta, f, ent->s.apos.trDelta );
-      ent->s.apos.trType = TR_LINEAR_STOP;
-      break;
-
-    case MODEL_POS1:
-      break;
-
-    case MODEL_POS2:
-      break;
-
-    default:
+    case MM_MODEL:
       break;
   }
-
-  if( moverState >= MOVER_POS1 && moverState <= MOVER_2TO1 )
-    BG_EvaluateTrajectory( &ent->s.pos, level.time, ent->r.currentOrigin );
-
-  if( moverState >= ROTATOR_POS1 && moverState <= ROTATOR_2TO1 )
-    BG_EvaluateTrajectory( &ent->s.apos, level.time, ent->r.currentAngles );
 
   SV_LinkEntity( ent );
 }
@@ -567,12 +563,12 @@ MatchTeam
 All entities in a mover team will move from pos1 to pos2
 ================
 */
-void MatchTeam( gentity_t *teamLeader, int moverState, int time )
-{
+void MatchTeam(gentity_t *teamLeader, moverState_t moverState, int time) {
   gentity_t   *slave;
 
-  for( slave = teamLeader; slave; slave = slave->teamchain )
-    SetMoverState( slave, moverState, time );
+  for(slave = teamLeader; slave; slave = slave->teamchain) {
+    SetMoverState(slave, moverState, time);
+  }
 }
 
 
@@ -594,28 +590,28 @@ gentity_t *MasterOf( gentity_t *ent )
 ================
 GetMoverTeamState
 
-Returns a MOVER_* value representing the phase (either one
+Returns a moverState value representing the phase (either one
  of pos1, 1to2, pos2, or 2to1) of a mover team as a whole.
 ================
 */
-moverState_t GetMoverTeamState( gentity_t *ent )
-{
+moverState_t GetMoverTeamState(gentity_t *ent) {
   qboolean pos1 = qfalse;
 
-  for( ent = MasterOf( ent ); ent; ent = ent->teamchain )
-  {
-    if( ent->moverState == MOVER_POS1 || ent->moverState == ROTATOR_POS1 )
+  for(ent = MasterOf( ent ); ent; ent = ent->teamchain) {
+    if(ent->moverState == MS_POS1) {
       pos1 = qtrue;
-    else if( ent->moverState == MOVER_1TO2 || ent->moverState == ROTATOR_1TO2 )
-      return MOVER_1TO2;
-    else if( ent->moverState == MOVER_2TO1 || ent->moverState == ROTATOR_2TO1 )
-      return MOVER_2TO1;
+    } else if(ent->moverState == MS_1TO2) {
+      return MS_1TO2;
+    } else if(ent->moverState == MS_2TO1) {
+      return MS_2TO1;
+    }
   }
 
-  if( pos1 )
-    return MOVER_POS1;
-  else
-    return MOVER_POS2;
+  if(pos1) {
+    return MS_POS1;
+  } else {
+    return MS_POS2;
+  }
 }
 
 
@@ -631,7 +627,7 @@ void Use_BinaryMover( gentity_t *ent, gentity_t *other, gentity_t *activator );
 
 void ReturnToPos1orApos1( gentity_t *ent )
 {
-  if( GetMoverTeamState( ent ) != MOVER_POS2 )
+  if( GetMoverTeamState( ent ) != MS_POS2 )
     return; // not every mover in the team has reached its endpoint yet
 
   Use_BinaryMover( ent, ent, ent->activator );
@@ -653,7 +649,7 @@ void Think_ClosedModelDoor( gentity_t *ent )
   if( ent->teammaster == ent || !ent->teammaster )
     SV_AdjustAreaPortalState( ent, qfalse );
 
-  ent->moverState = MODEL_POS1;
+  ent->moverState = MS_POS1;
 }
 
 
@@ -708,7 +704,7 @@ void Think_CloseModelDoor( gentity_t *ent )
   if( ent->sound2to1 )
     G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound2to1 );
 
-  ent->moverState = MODEL_2TO1;
+  ent->moverState = MS_2TO1;
 
   ent->think = Think_ClosedModelDoor;
   ent->nextthink = level.time + ent->speed;
@@ -732,7 +728,7 @@ void Think_OpenModelDoor( gentity_t *ent )
   if( ent->soundPos2 )
     G_AddEvent( ent, EV_GENERAL_SOUND, ent->soundPos2 );
 
-  ent->moverState = MODEL_POS2;
+  ent->moverState = MS_POS2;
 
   // return to pos1 after a delay
   ent->think = Think_CloseModelDoor;
@@ -758,10 +754,9 @@ void Reached_BinaryMover( gentity_t *ent )
   // stop the looping sound
   ent->s.loopSound = 0;
 
-  if( ent->moverState == MOVER_1TO2 )
-  {
+  if( ent->moverState == MS_1TO2 ) {
     // reached pos2
-    SetMoverState( ent, MOVER_POS2, level.time );
+    SetMoverState( ent, MS_POS2, level.time );
 
     // play sound
     if( ent->soundPos2 )
@@ -777,42 +772,10 @@ void Reached_BinaryMover( gentity_t *ent )
 
     G_UseTargets( ent, ent->activator );
   }
-  else if( ent->moverState == MOVER_2TO1 )
+  else if( ent->moverState == MS_2TO1 )
   {
     // reached pos1
-    SetMoverState( ent, MOVER_POS1, level.time );
-
-    // play sound
-    if( ent->soundPos1 )
-      G_AddEvent( ent, EV_GENERAL_SOUND, ent->soundPos1 );
-
-    // close areaportals
-    if( ent->teammaster == ent || !ent->teammaster )
-      SV_AdjustAreaPortalState( ent, qfalse );
-  }
-  else if( ent->moverState == ROTATOR_1TO2 )
-  {
-    // reached pos2
-    SetMoverState( ent, ROTATOR_POS2, level.time );
-
-    // play sound
-    if( ent->soundPos2 )
-      G_AddEvent( ent, EV_GENERAL_SOUND, ent->soundPos2 );
-
-    // return to apos1 after a delay
-    master->think = ReturnToPos1orApos1;
-    master->nextthink = MAX( master->nextthink, level.time + ent->wait );
-
-    // fire targets
-    if( !ent->activator )
-      ent->activator = ent;
-
-    G_UseTargets( ent, ent->activator );
-  }
-  else if( ent->moverState == ROTATOR_2TO1 )
-  {
-    // reached pos1
-    SetMoverState( ent, ROTATOR_POS1, level.time );
+    SetMoverState( ent, MS_POS1, level.time );
 
     // play sound
     if( ent->soundPos1 )
@@ -832,7 +795,7 @@ void Reached_BinaryMover( gentity_t *ent )
 Use_BinaryMover
 ================
 */
-void Use_BinaryMover( gentity_t *ent, gentity_t *other, gentity_t *activator )
+void Use_BinaryMover(gentity_t *ent, gentity_t *other, gentity_t *activator)
 {
   int   total;
   int   partial;
@@ -857,173 +820,183 @@ void Use_BinaryMover( gentity_t *ent, gentity_t *other, gentity_t *activator )
 
   for( ent = master; ent; ent = ent->teamchain )
   {
-  //ind
-  if( ent->moverState == MOVER_POS1 )
-  {
-    // start moving 50 msec later, becase if this was player
-    // triggered, level.time hasn't been advanced yet
-    SetMoverState( ent, MOVER_1TO2, level.time + 50 );
+    //ind
+    switch (ent->moverMotionType) {
+      case MM_LINEAR:
+        if( ent->moverState == MS_POS1 )
+        {
+          // start moving 50 msec later, becase if this was player
+          // triggered, level.time hasn't been advanced yet
+          SetMoverState( ent, MS_1TO2, level.time + 50 );
 
-    // starting sound
-    if( ent->sound1to2 )
-      G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound1to2 );
+          // starting sound
+          if( ent->sound1to2 )
+            G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound1to2 );
 
-    // looping sound
-    ent->s.loopSound = ent->soundLoop;
+          // looping sound
+          ent->s.loopSound = ent->soundLoop;
 
-    // open areaportal
-    if( ent->teammaster == ent || !ent->teammaster )
-      SV_AdjustAreaPortalState( ent, qtrue );
-  }
-  else if( ent->moverState == MOVER_POS2 &&
-           !( teamState == MOVER_1TO2 || other == master ) )
-  {
-    // if all the way up, just delay before coming down
-    master->think = ReturnToPos1orApos1;
-    master->nextthink = MAX( master->nextthink, level.time + ent->wait );
-  }
-  else if( ent->moverState == MOVER_POS2 &&
-           ( teamState == MOVER_1TO2 || other == master ) )
-  {
-    // start moving 50 msec later, becase if this was player
-    // triggered, level.time hasn't been advanced yet
-    SetMoverState( ent, MOVER_2TO1, level.time + 50 );
+          // open areaportal
+          if( ent->teammaster == ent || !ent->teammaster )
+            SV_AdjustAreaPortalState( ent, qtrue );
+        }
+        else if( ent->moverState == MS_POS2 &&
+                 !( teamState == MS_1TO2 || other == master ) )
+        {
+          // if all the way up, just delay before coming down
+          master->think = ReturnToPos1orApos1;
+          master->nextthink = MAX( master->nextthink, level.time + ent->wait );
+        }
+        else if( ent->moverState == MS_POS2 &&
+                 ( teamState == MS_1TO2 || other == master ) )
+        {
+          // start moving 50 msec later, becase if this was player
+          // triggered, level.time hasn't been advanced yet
+          SetMoverState( ent, MS_2TO1, level.time + 50 );
 
-    // starting sound
-    if( ent->sound2to1 )
-      G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound2to1 );
+          // starting sound
+          if( ent->sound2to1 )
+            G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound2to1 );
 
-    // looping sound
-    ent->s.loopSound = ent->soundLoop;
+          // looping sound
+          ent->s.loopSound = ent->soundLoop;
 
-    // open areaportal
-    if( ent->teammaster == ent || !ent->teammaster )
-      SV_AdjustAreaPortalState( ent, qtrue );
-  }
-  else if( ent->moverState == MOVER_2TO1 )
-  {
-    // only partway down before reversing
-    total = ent->s.pos.trDuration;
-    partial = level.time - ent->s.pos.trTime;
+          // open areaportal
+          if( ent->teammaster == ent || !ent->teammaster )
+            SV_AdjustAreaPortalState( ent, qtrue );
+        }
+        else if( ent->moverState == MS_2TO1 )
+        {
+          // only partway down before reversing
+          total = ent->s.pos.trDuration;
+          partial = level.time - ent->s.pos.trTime;
 
-    if( partial > total )
-      partial = total;
+          if( partial > total )
+            partial = total;
 
-    SetMoverState( ent, MOVER_1TO2, level.time - ( total - partial ) );
+          SetMoverState( ent, MS_1TO2, level.time - ( total - partial ) );
 
-    if( ent->sound1to2 )
-      G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound1to2 );
-  }
-  else if( ent->moverState == MOVER_1TO2 )
-  {
-    // only partway up before reversing
-    total = ent->s.pos.trDuration;
-    partial = level.time - ent->s.pos.trTime;
+          if( ent->sound1to2 )
+            G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound1to2 );
+        }
+        else if( ent->moverState == MS_1TO2 )
+        {
+          // only partway up before reversing
+          total = ent->s.pos.trDuration;
+          partial = level.time - ent->s.pos.trTime;
 
-    if( partial > total )
-      partial = total;
+          if( partial > total )
+            partial = total;
 
-    SetMoverState( ent, MOVER_2TO1, level.time - ( total - partial ) );
+          SetMoverState( ent, MS_2TO1, level.time - ( total - partial ) );
 
-    if( ent->sound2to1 )
-      G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound2to1 );
-  }
-  else if( ent->moverState == ROTATOR_POS1 )
-  {
-    // start moving 50 msec later, becase if this was player
-    // triggered, level.time hasn't been advanced yet
-    SetMoverState( ent, ROTATOR_1TO2, level.time + 50 );
+          if( ent->sound2to1 )
+            G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound2to1 );
+        }
+        break;
 
-    // starting sound
-    if( ent->sound1to2 )
-      G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound1to2 );
+      case MM_ROTATION:
+        if( ent->moverState == MS_POS1 )
+        {
+          // start moving 50 msec later, becase if this was player
+          // triggered, level.time hasn't been advanced yet
+          SetMoverState( ent, MS_1TO2, level.time + 50 );
 
-    // looping sound
-    ent->s.loopSound = ent->soundLoop;
+          // starting sound
+          if( ent->sound1to2 )
+            G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound1to2 );
 
-    // open areaportal
-    if( ent->teammaster == ent || !ent->teammaster )
-      SV_AdjustAreaPortalState( ent, qtrue );
-  }
-  else if( ent->moverState == ROTATOR_POS2 &&
-           !( teamState == MOVER_1TO2 || other == master ) )
-  {
-    // if all the way up, just delay before coming down
-    master->think = ReturnToPos1orApos1;
-    master->nextthink = MAX( master->nextthink, level.time + ent->wait );
-  }
-  else if( ent->moverState == ROTATOR_POS2 &&
-           ( teamState == MOVER_1TO2 || other == master ) )
-  {
-    // start moving 50 msec later, becase if this was player
-    // triggered, level.time hasn't been advanced yet
-    SetMoverState( ent, ROTATOR_2TO1, level.time + 50 );
+          // looping sound
+          ent->s.loopSound = ent->soundLoop;
 
-    // starting sound
-    if( ent->sound2to1 )
-      G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound2to1 );
+          // open areaportal
+          if( ent->teammaster == ent || !ent->teammaster )
+            SV_AdjustAreaPortalState( ent, qtrue );
+        }
+        else if( ent->moverState == MS_POS2 &&
+                 !( teamState == MS_1TO2 || other == master ) )
+        {
+          // if all the way up, just delay before coming down
+          master->think = ReturnToPos1orApos1;
+          master->nextthink = MAX( master->nextthink, level.time + ent->wait );
+        }
+        else if( ent->moverState == MS_POS2 &&
+                 ( teamState == MS_1TO2 || other == master ) )
+        {
+          // start moving 50 msec later, becase if this was player
+          // triggered, level.time hasn't been advanced yet
+          SetMoverState( ent, MS_2TO1, level.time + 50 );
 
-    // looping sound
-    ent->s.loopSound = ent->soundLoop;
+          // starting sound
+          if( ent->sound2to1 )
+            G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound2to1 );
 
-    // open areaportal
-    if( ent->teammaster == ent || !ent->teammaster )
-      SV_AdjustAreaPortalState( ent, qtrue );
-  }
-  else if( ent->moverState == ROTATOR_2TO1 )
-  {
-    // only partway down before reversing
-    total = ent->s.apos.trDuration;
-    partial = level.time - ent->s.apos.trTime;
+          // looping sound
+          ent->s.loopSound = ent->soundLoop;
 
-    if( partial > total )
-      partial = total;
+          // open areaportal
+          if( ent->teammaster == ent || !ent->teammaster )
+            SV_AdjustAreaPortalState( ent, qtrue );
+        }
+        else if( ent->moverState == MS_2TO1 )
+        {
+          // only partway down before reversing
+          total = ent->s.apos.trDuration;
+          partial = level.time - ent->s.apos.trTime;
 
-    SetMoverState( ent, ROTATOR_1TO2, level.time - ( total - partial ) );
+          if( partial > total )
+            partial = total;
 
-    if( ent->sound1to2 )
-      G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound1to2 );
-  }
-  else if( ent->moverState == ROTATOR_1TO2 )
-  {
-    // only partway up before reversing
-    total = ent->s.apos.trDuration;
-    partial = level.time - ent->s.apos.trTime;
+          SetMoverState( ent, MS_1TO2, level.time - ( total - partial ) );
 
-    if( partial > total )
-      partial = total;
+          if( ent->sound1to2 )
+            G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound1to2 );
+        }
+        else if( ent->moverState == MS_1TO2 )
+        {
+          // only partway up before reversing
+          total = ent->s.apos.trDuration;
+          partial = level.time - ent->s.apos.trTime;
 
-    SetMoverState( ent, ROTATOR_2TO1, level.time - ( total - partial ) );
+          if( partial > total )
+            partial = total;
 
-    if( ent->sound2to1 )
-      G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound2to1 );
-  }
-  else if( ent->moverState == MODEL_POS1 )
-  {
-    //toggle door state
-    ent->s.legsAnim = qtrue;
+          SetMoverState( ent, MS_2TO1, level.time - ( total - partial ) );
 
-    ent->think = Think_OpenModelDoor;
-    ent->nextthink = level.time + ent->speed;
+          if( ent->sound2to1 )
+            G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound2to1 );
+        }
+        break;
 
-    // starting sound
-    if( ent->sound1to2 )
-      G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound1to2 );
+      case MM_MODEL:
+        if( ent->moverState == MS_POS1 )
+        {
+          //toggle door state
+          ent->s.legsAnim = qtrue;
 
-    // looping sound
-    ent->s.loopSound = ent->soundLoop;
+          ent->think = Think_OpenModelDoor;
+          ent->nextthink = level.time + ent->speed;
 
-    // open areaportal
-    if( ent->teammaster == ent || !ent->teammaster )
-      SV_AdjustAreaPortalState( ent, qtrue );
+          // starting sound
+          if( ent->sound1to2 )
+            G_AddEvent( ent, EV_GENERAL_SOUND, ent->sound1to2 );
 
-    ent->moverState = MODEL_1TO2;
-  }
-  else if( ent->moverState == MODEL_POS2 )
-  {
-    // if all the way up, just delay before coming down
-    ent->nextthink = level.time + ent->wait;
-  }
+          // looping sound
+          ent->s.loopSound = ent->soundLoop;
+
+          // open areaportal
+          if( ent->teammaster == ent || !ent->teammaster )
+            SV_AdjustAreaPortalState( ent, qtrue );
+
+          ent->moverState = MS_1TO2;
+        }
+        else if( ent->moverState == MS_POS2 )
+        {
+          // if all the way up, just delay before coming down
+          ent->nextthink = level.time + ent->wait;
+        }
+        break;
+    }
   //outd
   }
 }
@@ -1091,7 +1064,8 @@ void InitMover( gentity_t *ent )
   if( G_SpawnString( "team", "", &team ) )
     ent->team = G_CopyString( team );
 
-  ent->moverState = MOVER_POS1;
+  ent->moverState = MS_POS1;
+  ent->moverMotionType = MM_LINEAR;
   ent->s.eType = ET_MOVER;
   VectorCopy( ent->pos1, ent->r.currentOrigin );
   SV_LinkEntity( ent );
@@ -1178,7 +1152,8 @@ void InitRotator( gentity_t *ent )
   if( G_SpawnString( "team", "", &team ) )
     ent->team = G_CopyString( team );
 
-  ent->moverState = ROTATOR_POS1;
+  ent->moverState = MS_POS1;
+  ent->moverMotionType = MM_ROTATION;
   ent->s.eType = ET_MOVER;
   VectorCopy( ent->pos1, ent->r.currentAngles );
   SV_LinkEntity( ent );
@@ -1251,7 +1226,7 @@ void Touch_DoorTrigger( gentity_t *ent, gentity_t *other, trace_t *trace )
 
   teamState = GetMoverTeamState( ent->parent );
 
-  if( teamState != MOVER_1TO2 )
+  if( teamState != MS_1TO2 )
     Use_BinaryMover( ent->parent, ent, other );
 }
 
@@ -1311,7 +1286,7 @@ void Think_SpawnNewDoorTrigger( gentity_t *ent )
   other->count = best;
   SV_LinkEntity( other );
 
-  if( ent->moverState < MODEL_POS1 )
+  if( ent->moverState < MS_POS1 )
     Think_MatchTeam( ent );
 }
 
@@ -1633,7 +1608,8 @@ void SP_func_door_model( gentity_t *ent )
 
   ent->use = Use_BinaryMover;
 
-  ent->moverState = MODEL_POS1;
+  ent->moverState = MS_POS1;
+  ent->moverMotionType = MM_MODEL;
   ent->s.eType = ET_MODELDOOR;
   ent->s.pos.trType = TR_STATIONARY;
   ent->s.pos.trTime = 0;
@@ -1691,7 +1667,7 @@ void Touch_Plat( gentity_t *ent, gentity_t *other, trace_t *trace )
     return;
 
   // delay return-to-pos1 by one second
-  if( ent->moverState == MOVER_POS2 )
+  if( ent->moverState == MS_POS2 )
     ent->nextthink = level.time + 1000;
 }
 
@@ -1707,7 +1683,7 @@ void Touch_PlatCenterTrigger( gentity_t *ent, gentity_t *other, trace_t *trace )
   if( !other->client )
     return;
 
-  if( ent->parent->moverState == MOVER_POS1 )
+  if( ent->parent->moverState == MS_POS1 )
     Use_BinaryMover( ent->parent, ent, other );
 }
 
@@ -1845,7 +1821,7 @@ void Touch_Button( gentity_t *ent, gentity_t *other, trace_t *trace )
   if( !other->client )
     return;
 
-  if( ent->moverState == MOVER_POS1 )
+  if( ent->moverState == MS_POS1 )
     Use_BinaryMover( ent, other, other );
 }
 
@@ -2005,7 +1981,7 @@ void Reached_Train( gentity_t *ent )
   ent->s.loopSound = next->soundLoop;
 
   // start it going
-  SetMoverState( ent, MOVER_1TO2, level.time );
+  SetMoverState( ent, MS_1TO2, level.time );
 
   if( ent->spawnflags & TRAIN_START_OFF )
   {
@@ -2035,7 +2011,7 @@ void Start_Train( gentity_t *ent, gentity_t *other, gentity_t *activator )
   //unlikely to be right on a path_corner
   VectorSubtract( ent->pos2, ent->pos1, move );
   ent->s.pos.trDuration = VectorLength( move ) * 1000 / ent->lastSpeed;
-  SetMoverState( ent, MOVER_1TO2, level.time );
+  SetMoverState( ent, MS_1TO2, level.time );
 
   ent->spawnflags &= ~TRAIN_START_OFF;
 }
@@ -2052,7 +2028,7 @@ void Stop_Train( gentity_t *ent, gentity_t *other, gentity_t *activator )
   //get current origin
   BG_EvaluateTrajectory( &ent->s.pos, level.time, origin );
   VectorCopy( origin, ent->pos1 );
-  SetMoverState( ent, MOVER_POS1, level.time );
+  SetMoverState( ent, MS_POS1, level.time );
 
   ent->spawnflags |= TRAIN_START_OFF;
 }
