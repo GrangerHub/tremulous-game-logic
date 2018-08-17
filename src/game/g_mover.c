@@ -119,11 +119,17 @@ G_TryPushingEntity
 Returns qfalse if the move is blocked
 ==================
 */
-qboolean G_TryPushingEntity( gentity_t *check, gentity_t *pusher, vec3_t move, vec3_t amove )
-{
+qboolean G_TryPushingEntity(
+  gentity_t *check,
+  gentity_t *pusher,
+  bgqueue_t *obstacles,
+  vec3_t    move,
+  vec3_t    amove) {
   vec3_t    matrix[ 3 ], transpose[ 3 ];
   vec3_t    org, org2, move2;
   gentity_t *block;
+  gentity_t *obstacle_block = NULL;
+  int       i;
 
   // EF_MS_STOP will just stop when contacting another entity
   // instead of pushing it, but entities can still ride on top of it
@@ -172,25 +178,45 @@ qboolean G_TryPushingEntity( gentity_t *check, gentity_t *pusher, vec3_t move, v
   {
     VectorAdd( check->client->ps.origin, move, check->client->ps.origin );
     VectorAdd( check->client->ps.origin, move2, check->client->ps.origin );
+    VectorCopy(check->client->ps.origin, check->r.currentOrigin);
     // make sure the client's view rotates when on a rotating mover
     check->client->ps.delta_angles[ YAW ] += ANGLE2SHORT( amove[ YAW ] );
+  } else {
+    VectorCopy(check->s.pos.trBase, check->r.currentOrigin);
   }
+  SV_LinkEntity( check );
 
   // may have pushed them off an edge
   if( check->s.groundEntityNum != pusher->s.number )
     check->s.groundEntityNum = ENTITYNUM_NONE;
 
+  if( check->client && check->health <= 0 ) {
+    return qtrue;
+  }
+
+  for(i = 0; &pushed[i] < pushed_p; i++) {
+    SV_UnlinkEntity(pushed[i].ent);
+  }
   block = G_TestEntityPosition( check );
+
+  //try moving blocking clients
+  while(
+    block &&
+    block->client) {
+    if( !G_TryPushingEntity(block, pusher, obstacles, move, amove) ) {
+      obstacle_block = block;
+      break;
+    }
+
+    block = G_TestEntityPosition( check );
+  }
+  for(i = 0; &pushed[i] < pushed_p; i++) {
+    SV_LinkEntity(pushed[i].ent);
+  }
 
   if( !block )
   {
     // pushed ok
-    if( check->client )
-      VectorCopy( check->client->ps.origin, check->r.currentOrigin );
-    else
-      VectorCopy( check->s.pos.trBase, check->r.currentOrigin );
-
-    SV_LinkEntity( check );
     return qtrue;
   }
 
@@ -198,6 +224,8 @@ qboolean G_TryPushingEntity( gentity_t *check, gentity_t *pusher, vec3_t move, v
   // this is only relevent for riding entities, not pushed
   // Sliding trapdoors can cause this.
   VectorCopy( ( pushed_p - 1 )->origin, check->s.pos.trBase );
+  VectorCopy( ( pushed_p - 1 )->origin, check->r.currentOrigin );
+  SV_LinkEntity( check );
 
   if( check->client )
     VectorCopy( ( pushed_p - 1 )->origin, check->client->ps.origin );
@@ -213,9 +241,21 @@ qboolean G_TryPushingEntity( gentity_t *check, gentity_t *pusher, vec3_t move, v
   }
 
   // blocked
+  if( obstacle_block && obstacle_block->client ) {
+    BG_Queue_Push_Head( obstacles, obstacle_block);
+  }
   return qfalse;
 }
 
+void G_Insta_Gib_Obstacles( void *data, void *user_data ) {
+  gentity_t *obstacle = (gentity_t *)data;
+  gentity_t *pusher = (gentity_t *)user_data;
+
+  Com_Assert(obstacle && "G_Insta_Gib_Obstacles: obstacle is NULL");
+  Com_Assert(pusher && "G_Insta_Gib_Obstacles: pusher is NULL");
+
+  G_Damage(obstacle, pusher, pusher, NULL, NULL, 0, DAMAGE_INSTAGIB, MOD_CRUSH);
+}
 
 /*
 ============
@@ -226,7 +266,8 @@ otherwise riders would continue to slide.
 If qfalse is returned, *obstacle will be the blocking entity
 ============
 */
-qboolean G_MoverPush( gentity_t *pusher, vec3_t move, vec3_t amove, gentity_t **obstacle )
+qboolean G_MoverPush(
+  gentity_t *pusher, vec3_t move, vec3_t amove, bgqueue_t *obstacles)
 {
   int       i, e;
   gentity_t *check;
@@ -235,8 +276,6 @@ qboolean G_MoverPush( gentity_t *pusher, vec3_t move, vec3_t amove, gentity_t **
   int       entityList[ MAX_GENTITIES ];
   int       listedEntities;
   vec3_t    totalMins, totalMaxs;
-
-  *obstacle = NULL;
 
 
   // mins/maxs are the bounds at the destination
@@ -322,21 +361,21 @@ qboolean G_MoverPush( gentity_t *pusher, vec3_t move, vec3_t amove, gentity_t **
     }
 
     // the entity needs to be pushed
-    if( G_TryPushingEntity( check, pusher, move, amove ) )
+    if( G_TryPushingEntity( check, pusher, obstacles, move, amove ) )
       continue;
 
     // the move was blocked an entity
 
+    // save off the obstacle so we can call the block function (crush, etc)
+    BG_Queue_Push_Head(obstacles, check);
+
     // bobbing entities are instant-kill and never get blocked
     if( pusher->s.pos.trType == TR_SINE || pusher->s.apos.trType == TR_SINE )
     {
-      G_Damage( check, pusher, pusher, NULL, NULL, 0, DAMAGE_INSTAGIB, MOD_CRUSH );
+      BG_Queue_Foreach(obstacles, G_Insta_Gib_Obstacles, pusher);
+      BG_Queue_Clear(obstacles);
       continue;
     }
-
-
-    // save off the obstacle so we can call the block function (crush, etc)
-    *obstacle = check;
 
     // move back any entities we already moved
     // go backwards, so if the same entity was pushed
@@ -361,6 +400,16 @@ qboolean G_MoverPush( gentity_t *pusher, vec3_t move, vec3_t amove, gentity_t **
   return qtrue;
 }
 
+void G_Foreach_Blocked(void *data, void *user_data) {
+  gentity_t *block = (gentity_t *)data;
+  gentity_t  *pusher = (gentity_t *)user_data;
+
+  Com_Assert(block && "G_Foreach_Blocked: block is NULL");
+  Com_Assert(pusher && "G_Foreach_Blocked: pusher is NULL");
+  Com_Assert(pusher->blocked && "G_Foreach_Blocked: pusher->blocked is NULL");
+
+  pusher->blocked(pusher, block);
+}
 
 /*
 =================
@@ -370,10 +419,9 @@ G_MoverTeam
 void G_MoverTeam( gentity_t *ent )
 {
   vec3_t    move, amove;
-  gentity_t *part, *obstacle;
+  gentity_t *part;
   vec3_t    origin, angles;
-
-  obstacle = NULL;
+  bgqueue_t obstacles = BG_QUEUE_INIT;
 
   // make sure all team slaves can move before commiting
   // any moves or calling any think functions
@@ -392,7 +440,7 @@ void G_MoverTeam( gentity_t *ent )
     BG_EvaluateTrajectory( &part->s.apos, level.time, angles );
     VectorSubtract( origin, part->r.currentOrigin, move );
     VectorSubtract( angles, part->r.currentAngles, amove );
-    if( !G_MoverPush( part, move, amove, &obstacle ) )
+    if( !G_MoverPush( part, move, amove, &obstacles ) )
       break;  // move was blocked
   }
 
@@ -415,8 +463,11 @@ void G_MoverTeam( gentity_t *ent )
     }
 
     // if the pusher has a "blocked" function, call it
-    if( ent->blocked )
-      ent->blocked( ent, obstacle );
+    if(ent->blocked) {
+      BG_Queue_Foreach(&obstacles, G_Foreach_Blocked, ent);
+    }
+
+    BG_Queue_Clear(&obstacles);
 
     return;
   }
