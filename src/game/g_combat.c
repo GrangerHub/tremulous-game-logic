@@ -1409,6 +1409,13 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
           ( targ->flags & FL_OCCUPIED ) &&
           targ->occupation.occupant && targ->occupation.occupant->client )
         G_UnoccupyEnt( targ, targ->occupation.occupant, targ->occupation.occupant, qtrue );
+
+      if(
+        targ->s.eType == ET_BUILDABLE &&
+        targ->nextthink == level.time) {
+        G_BuildableThink( targ, 0 );
+        G_RunThink(targ);
+      }
       return;
     }
     else if( targ->pain )

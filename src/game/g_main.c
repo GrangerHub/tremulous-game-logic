@@ -2918,6 +2918,7 @@ Q_EXPORT void G_RunFrame( int levelTime )
   //
   // go through all allocated objects
   //
+  G_ResetPusherNum( );
   ent = &g_entities[ 0 ];
 
   for( i = 0; i < level.num_entities; i++, ent++ )

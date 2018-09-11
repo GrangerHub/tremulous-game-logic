@@ -103,7 +103,9 @@ qboolean  PM_SlideMove( qboolean gravity )
     // see if we can make it there
     pm->trace( &trace, pm->ps->origin, pm->mins, pm->maxs, end, pm->ps->clientNum, pm->tracemask );
 
-    if( trace.allsolid )
+    if( trace.allsolid &&
+        ( trace.plane.normal[2] > 0 ||
+          pm->ps->velocity[ 2 ] > 0 ) )
     {
       // entity is completely trapped in another solid
       pm->ps->velocity[ 2 ] = 0;  // don't build up falling damage, but allow sideways acceleration
@@ -122,7 +124,7 @@ qboolean  PM_SlideMove( qboolean gravity )
     if( trace.contents & CONTENTS_TELEPORTER )
       VectorCopy( primal_velocity, impactVelocity );
     else
-      VectorCopy( pm->ps->origin, impactVelocity );
+      VectorCopy( pm->ps->velocity, impactVelocity );
 
     // save entity for contact
     PM_AddTouchEnt( &trace, impactVelocity );

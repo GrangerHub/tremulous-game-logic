@@ -6301,6 +6301,45 @@ const teamAttributes_t *BG_Team( team_t team )
 }
 
 /*
+================
+BG_CreateRotationMatrix
+================
+*/
+void BG_CreateRotationMatrix(vec3_t angles, vec3_t matrix[3]) {
+  AngleVectors(angles, matrix[0], matrix[1], matrix[2]);
+  VectorInverse(matrix[1]);
+}
+
+/*
+================
+BG_TransposeMatrix
+================
+*/
+void BG_TransposeMatrix(vec3_t matrix[ 3 ], vec3_t transpose[ 3 ]) {
+  int i, j;
+
+  for(i = 0; i < 3; i++) {
+    for(j = 0; j < 3; j++) {
+      transpose[i][j] = matrix[j][i];
+    }
+  }
+}
+
+/*
+================
+BG_RotatePoint
+================
+*/
+void BG_RotatePoint(vec3_t point, vec3_t matrix[3]) {
+  vec3_t tvec;
+
+  VectorCopy( point, tvec );
+  point[0] = DotProduct(matrix[0], tvec);
+  point[1] = DotProduct(matrix[1], tvec);
+  point[2] = DotProduct(matrix[2], tvec);
+}
+
+/*
 ============
 BG_EvaluateBBOXPoint
 ============

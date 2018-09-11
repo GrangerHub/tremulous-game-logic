@@ -26,6 +26,96 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 /*
 ================
+G_GroundEntIsValid
+
+================
+*/
+static qboolean G_GroundIsValid( gentity_t *ent, gentity_t *testEnt )
+{
+  vec3_t    origin;
+  trace_t   tr;
+
+  if( testEnt->s.number == ENTITYNUM_NONE )
+    return qfalse;
+
+  if( ent->s.number == testEnt->s.groundEntityNum )
+    return qfalse;
+
+  VectorCopy( ent->r.currentOrigin, origin );
+
+  VectorMA( origin, -1.0f, ent->s.origin2, origin );
+
+  SV_ClipToEntity( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs,
+                   origin, testEnt->s.number, ent->clipmask, TT_AABB );
+
+  if( tr.fraction == 1.0f )
+    return qfalse;
+
+  if( ent->s.eType == ET_BUILDABLE )
+  {
+    float minNormal = BG_Buildable( ent->s.modelindex )->minNormal;
+    qboolean invert = BG_Buildable( ent->s.modelindex )->invertNormal;
+
+    if( !( tr.plane.normal[ 2 ] >= minNormal ||
+           ( invert && tr.plane.normal[ 2 ] <= -minNormal ) ) )
+      return qfalse;
+  }
+
+  if( testEnt->s.number == ENTITYNUM_WORLD )
+    return qtrue;
+
+  if( testEnt->s.eType == ET_MOVER )
+    return qtrue;
+
+  if( testEnt->s.eType == ET_PLAYER )
+    return qtrue;
+
+  return G_GroundIsValid( testEnt,
+                          &g_entities[ testEnt->s.groundEntityNum ] );
+}
+
+/*
+================
+G_CheckGround
+
+================
+*/
+static void G_CheckGround( gentity_t *ent ) {
+  vec3_t    origin;
+  trace_t   tr;
+
+  if( ent->s.groundEntityNum != ENTITYNUM_NONE ) {
+    if( G_GroundIsValid( ent, &g_entities[ ent->s.groundEntityNum ] ) ) {
+      return;
+    }
+
+    if( ent->s.eType == ET_BUILDABLE ) {
+      G_RemoveBuildableFromStack( ent->s.groundEntityNum, ent->s.number );
+    }
+  }
+
+  VectorCopy( ent->r.currentOrigin, origin );
+
+  VectorMA( origin, -1.0f, ent->s.origin2, origin );
+
+  SV_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin,
+    ent->s.number, ent->clipmask, TT_AABB );
+
+  if( G_GroundIsValid( ent, &g_entities[ tr.entityNum ] ) ) {
+    ent->s.groundEntityNum = tr.entityNum;
+    VectorCopy( tr.plane.normal, ent->s.origin2 );
+    if( ent->s.eType == ET_BUILDABLE ) {
+      G_AddBuildableToStack( ent->s.groundEntityNum, ent->s.number );
+    }
+  } else {
+    ent->s.groundEntityNum = ENTITYNUM_NONE;
+  }
+}
+
+
+
+/*
+================
 G_Bounce
 
 ================
@@ -105,17 +195,16 @@ static void G_Bounce( gentity_t *ent, trace_t *trace )
           ( invert && normal[ 2 ] <= -minNormal ) )
       {
         G_SetOrigin( ent, trace->endpos );
-        ent->s.groundEntityNum = trace->entityNum;
-        G_AddBuildableToStack( ent->s.groundEntityNum, ent->s.number );
         VectorCopy( normal, ent->s.origin2 );
+        G_CheckGround( ent );
         VectorSet( ent->s.pos.trDelta, 0.0f, 0.0f, 0.0f );
         return;
       }
     } else
     {
       G_SetOrigin( ent, trace->endpos );
-      ent->s.groundEntityNum = trace->entityNum;
       VectorCopy( normal, ent->s.origin2 );
+      G_CheckGround( ent );
       VectorSet( ent->s.pos.trDelta, 0.0f, 0.0f, 0.0f );
       return;
     }
@@ -139,9 +228,6 @@ void G_Physics( gentity_t *ent, int msec )
   vec3_t    origin;
   trace_t   tr;
   int     contents;
-  int     unlinkedClientNums[ MAX_CLIENTS ];
-  int     numUnlinkedClientNums = 0;
-  int     i;
 
   // if groundentity has been set to ENTITYNUM_NONE, ent may have been pushed off an edge
   if( ent->s.groundEntityNum == ENTITYNUM_NONE )
@@ -169,37 +255,7 @@ void G_Physics( gentity_t *ent, int msec )
     //check floor infrequently
     if( ent->nextPhysicsTime < level.time )
     {
-      VectorCopy( ent->r.currentOrigin, origin );
-
-      VectorMA( origin, -2.0f, ent->s.origin2, origin );
-
-      SV_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin,
-        ent->s.number, ent->clipmask, TT_AABB );
-
-      while( g_entities[ tr.entityNum ].client && ( tr.fraction != 1.0f ) )
-      {
-        unlinkedClientNums[ numUnlinkedClientNums ] = tr.entityNum;
-        numUnlinkedClientNums++;
-        SV_UnlinkEntity( &g_entities[ tr.entityNum ] );
-        SV_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin,
-          ent->s.number, ent->clipmask, TT_AABB );
-      }
-
-      for( i = 0; i < numUnlinkedClientNums; i++ )
-        SV_LinkEntity( &g_entities[ unlinkedClientNums[ i ] ] );
-
-      if( tr.fraction == 1.0f )
-      {
-        if( ent->s.groundEntityNum != ENTITYNUM_NONE )
-          G_RemoveBuildableFromStack( ent->s.groundEntityNum, ent->s.number );
-        ent->s.groundEntityNum = ENTITYNUM_NONE;
-      }
-      else if( ent->s.groundEntityNum != tr.entityNum )
-      {
-        G_RemoveBuildableFromStack( ent->s.groundEntityNum, ent->s.number );
-        ent->s.groundEntityNum = tr.entityNum;
-        G_AddBuildableToStack( ent->s.groundEntityNum, ent->s.number );
-      }
+      G_CheckGround( ent );
 
       ent->nextPhysicsTime = level.time + PHYSICS_TIME;
     }
