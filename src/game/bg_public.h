@@ -1703,6 +1703,11 @@ int BG_LoadEmoticons( emoticon_t *emoticons, int num );
 
 const teamAttributes_t *BG_Team( team_t team );
 
+//for movers
+void BG_CreateRotationMatrix( vec3_t angles, vec3_t matrix[ 3 ] );
+void BG_TransposeMatrix( vec3_t matrix[ 3 ], vec3_t transpose[ 3 ] );
+void BG_RotatePoint( vec3_t point, vec3_t matrix[ 3 ] );
+
 typedef enum
 {
   BBXP_ORIGIN = 0,

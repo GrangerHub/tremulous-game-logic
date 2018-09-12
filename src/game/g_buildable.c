@@ -960,7 +960,13 @@ void AGeneric_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, i
   self->powered = qfalse;
   self->methodOfDeath = mod;
 
-  if( self->spawned )
+  if(
+    self->spawned &&
+    !(
+      inflictor->s.eType == ET_MOVER &&
+      (
+        inflictor->s.pos.trType == TR_SINE ||
+        inflictor->s.apos.trType == TR_SINE)))
     self->nextthink = level.time + 5000;
   else
     self->nextthink = level.time; //blast immediately
@@ -2322,7 +2328,15 @@ void HSpawn_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   if( self->spawned )
   {
     self->think = HSpawn_Blast;
-    self->nextthink = level.time + HUMAN_DETONATION_DELAY;
+    if(
+      inflictor->s.eType == ET_MOVER &&
+      (
+        inflictor->s.pos.trType == TR_SINE ||
+        inflictor->s.apos.trType == TR_SINE)) {
+      self->nextthink = level.time; //blast immediately
+    } else {
+      self->nextthink = level.time + HUMAN_DETONATION_DELAY;
+    }
   }
   else
   {
@@ -2420,7 +2434,15 @@ static void HRepeater_Die( gentity_t *self, gentity_t *inflictor, gentity_t *att
   if( self->spawned )
   {
     self->think = HSpawn_Blast;
-    self->nextthink = level.time + HUMAN_DETONATION_DELAY;
+    if(
+      inflictor->s.eType == ET_MOVER &&
+      (
+        inflictor->s.pos.trType == TR_SINE ||
+        inflictor->s.apos.trType == TR_SINE)) {
+      self->nextthink = level.time; //blast immediately
+    } else {
+      self->nextthink = level.time + HUMAN_DETONATION_DELAY;
+    }
   }
   else
   {

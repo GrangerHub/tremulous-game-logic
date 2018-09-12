@@ -558,11 +558,12 @@ to ease the jerk.
 */
 void CG_PredictPlayerState( void )
 {
-  int     cmdNum, current, i;
+  int           cmdNum, current, i;
   playerState_t oldPlayerState;
-  usercmd_t oldestCmd;
-  usercmd_t latestCmd;
-  int stateIndex = 0, predictCmd = 0;
+  usercmd_t     oldestCmd;
+  usercmd_t     latestCmd;
+  int           stateIndex = 0, predictCmd = 0;
+  float         delta_yaw;
 
   cg.hyperspace = qfalse; // will be set if touching a trigger_teleport
 
@@ -788,14 +789,19 @@ void CG_PredictPlayerState( void )
       else
       {
         vec3_t  adjusted;
-        CG_AdjustPositionForMover( cg.predictedPlayerState.origin,
-          cg.predictedPlayerState.groundEntityNum, cg.physicsTime, cg.oldTime, adjusted );
+
+        delta_yaw = CG_AdjustPositionForMover(
+                      cg.predictedPlayerState.origin,
+                      CG_Get_Pusher_Num(cg.predictedPlayerState.clientNum),
+                      cg.physicsTime, cg.oldTime, adjusted);
 
         if( cg_showmiss.integer )
         {
           if( !VectorCompare( oldPlayerState.origin, adjusted ) )
             CG_Printf("prediction error\n");
         }
+
+        oldPlayerState.delta_angles[YAW] += ANGLE2SHORT(delta_yaw);
 
         VectorSubtract( oldPlayerState.origin, adjusted, delta );
         len = VectorLength( delta );
@@ -906,9 +912,11 @@ void CG_PredictPlayerState( void )
   }
 
   // adjust for the movement of the groundentity
-  CG_AdjustPositionForMover( cg.predictedPlayerState.origin,
-    cg.predictedPlayerState.groundEntityNum,
-    cg.physicsTime, cg.time, cg.predictedPlayerState.origin );
+  delta_yaw = CG_AdjustPositionForMover(
+                cg.predictedPlayerState.origin,
+                CG_Get_Pusher_Num(cg.predictedPlayerState.clientNum),
+                cg.physicsTime, cg.time, cg.predictedPlayerState.origin);
+  cg.predictedPlayerState.delta_angles[YAW] += ANGLE2SHORT(delta_yaw);
 
 
   // fire events and other transition triggered things

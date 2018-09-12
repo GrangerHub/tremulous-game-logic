@@ -1895,7 +1895,8 @@ void        CG_DrawBoundingBox( vec3_t origin, vec3_t mins, vec3_t maxs );
 void        CG_SetEntitySoundPosition( centity_t *cent );
 void        CG_AddPacketEntities( void );
 void        CG_Beam( centity_t *cent );
-void        CG_AdjustPositionForMover( const vec3_t in, int moverNum, int fromTime, int toTime, vec3_t out );
+int         CG_Get_Pusher_Num(int ent_num);
+float       CG_AdjustPositionForMover( const vec3_t in, int moverNum, int fromTime, int toTime, vec3_t out );
 
 void        CG_PositionEntityOnTag( refEntity_t *entity, const refEntity_t *parent,
                                     qhandle_t parentModel, char *tagName );
