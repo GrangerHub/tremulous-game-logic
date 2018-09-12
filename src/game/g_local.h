@@ -80,6 +80,39 @@ typedef enum mover_type_s
   MM_MODEL
 } mover_motion_t;
 
+typedef enum mover_block_s
+{
+  MBLCK_NONE = 0, //not blocked
+  MBLCK_INDIRECT, //entity has collided with movable entity class that is
+                  //blocked either directly or indirectly.
+  MBLCK_DIRECT //collided with an entity class this entity can’t move.
+} mover_block_t;
+
+typedef enum mover_push_s
+{
+  MPUSH_NONE = 0,
+  MPUSH_RIDE, //groud entity is either a mover or something moved by a mover
+  MPUSH_RIDING_STACK_HIT, //hit by a stack that was not hit by a prime mover
+  MPUSH_PRIME_MOVER_HIT, //hit by a prime mover or by a stack hit by a prime mover
+} mover_push_t;
+
+typedef struct mover_data_s
+{
+  qboolean      checked_for_push;
+  qboolean      check_for_direct_block;
+  mover_block_t blocked; //block status for entity
+  mover_push_t  push_type[MAX_GENTITIES]; //indicates the push type of all other entities pushing this entity
+  mover_push_t  push_type_inflicted[MAX_GENTITIES]; //indicates the push type inflicted onto other entities
+
+  //origin/angles at the start of the move
+  vec3_t        start_origin;
+  vec3_t        start_angles;
+
+  //mins/maxs at the potential destination
+  vec3_t        dest_mins;
+  vec3_t        dest_maxs;
+} mover_data_t;
+
 /*
 --------------------------------------------------------------------------------
 To create a new expiration timer, add a new member to the expire_t enum below.
@@ -167,6 +200,7 @@ struct gentity_s
   vec3_t            pos1, pos2;
   float             rotatorAngle;
   gentity_t         *clipBrush;     // clipping brush for model doors
+  mover_data_t      mover_data; // used by entities moved directly and indirectly by movers
 
   char              *message;
 
@@ -1209,6 +1243,7 @@ void        G_CloseMenus( int clientNum );
 
 qboolean    G_Visible( gentity_t *ent1, gentity_t *ent2, int contents );
 gentity_t   *G_ClosestEnt( vec3_t origin, gentity_t **entities, int numEntities );
+int          G_Get_Foundation_Ent_Num(gentity_t *ent);
 
 void        G_Entity_id_init(gentity_t *ptr);
 void        G_Entity_id_set(gentity_id *id,gentity_t *target);
@@ -1294,6 +1329,7 @@ gentity_t *fire_lightningBall( gentity_t *self, qboolean primary,
 //
 // g_mover.c
 //
+void G_ResetPusherNum(void);
 void G_RunMover( gentity_t *ent );
 void Touch_DoorTrigger( gentity_t *ent, gentity_t *other, trace_t *trace );
 void manualTriggerSpectator( gentity_t *trigger, gentity_t *player );

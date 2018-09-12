@@ -898,6 +898,34 @@ static void CG_Lev2ZapChain( centity_t *cent )
 }
 
 /*
+============
+CG_Get_Pusher_Num
+============
+*/
+int CG_Get_Pusher_Num(int ent_num) {
+  int pusher_num;
+  entityType_t eType;
+
+  Com_Assert(ent_num >= 0 && ent_num < MAX_GENTITIES);
+
+  if(ent_num == cg.predictedPlayerState.clientNum) {
+    pusher_num = cg.predictedPlayerState.otherEntityNum;
+    eType = ET_PLAYER;
+  } else {
+    pusher_num = cg_entities[ent_num].currentState.otherEntityNum;
+    eType = cg_entities[ent_num].currentState.eType;
+  }
+
+  if(
+    eType != ET_ITEM && eType != ET_BUILDABLE &&
+    eType != ET_CORPSE && eType != ET_PLAYER) {
+    return ENTITYNUM_NONE;
+  }
+
+  return pusher_num;
+}
+
+/*
 =========================
 CG_SpitfireZap
 =========================
@@ -939,39 +967,56 @@ static void CG_SpitfireZap( centity_t *cent )
 CG_AdjustPositionForMover
 
 Also called by client movement prediction code
+Returns any change for the YAW of delta_angles for the local playerState
 =========================
 */
-void CG_AdjustPositionForMover( const vec3_t in, int moverNum, int fromTime, int toTime, vec3_t out )
-{
-  centity_t *cent;
-  vec3_t    oldOrigin, origin, deltaOrigin;
-  vec3_t    oldAngles, angles;
+float CG_AdjustPositionForMover(
+  const vec3_t pos_in,
+  int          moverNum,
+  int          fromTime,
+  int          toTime,
+  vec3_t       pos_out) {
+  centity_t    *cent;
+  vec3_t       oldOrigin, origin;
+  vec3_t       oldAngles, angles;
+  vec3_t       org, org2, move, move2, amove;
+  vec3_t       matrix[3], transpose[3];
 
-  if( moverNum <= 0 || moverNum >= ENTITYNUM_MAX_NORMAL )
-  {
-    VectorCopy( in, out );
-    return;
+  if(moverNum <= 0 || moverNum >= ENTITYNUM_MAX_NORMAL) {
+    VectorCopy( pos_in, pos_out );
+    return 0.0f;
   }
 
-  cent = &cg_entities[ moverNum ];
+  cent = &cg_entities[moverNum];
 
-  if( cent->currentState.eType != ET_MOVER )
-  {
-    VectorCopy( in, out );
-    return;
+  if(cent->currentState.eType != ET_MOVER) {
+    VectorCopy(pos_in, pos_out);
+    return 0.0f;
   }
 
-  BG_EvaluateTrajectory( &cent->currentState.pos, fromTime, oldOrigin );
-  BG_EvaluateTrajectory( &cent->currentState.apos, fromTime, oldAngles );
+  BG_EvaluateTrajectory(&cent->currentState.pos, fromTime, oldOrigin);
+  BG_EvaluateTrajectory(&cent->currentState.apos, fromTime, oldAngles);
 
-  BG_EvaluateTrajectory( &cent->currentState.pos, toTime, origin );
-  BG_EvaluateTrajectory( &cent->currentState.apos, toTime, angles );
+  BG_EvaluateTrajectory(&cent->currentState.pos, toTime, origin);
+  BG_EvaluateTrajectory(&cent->currentState.apos, toTime, angles);
 
-  VectorSubtract( origin, oldOrigin, deltaOrigin );
+  VectorSubtract(origin, oldOrigin, move);
+  VectorSubtract(angles, oldAngles, amove);
 
-  VectorAdd( in, deltaOrigin, out );
+  // figure movement due to the pusher's amove
+  BG_CreateRotationMatrix(amove, transpose);
+  BG_TransposeMatrix(transpose, matrix);
 
-  // FIXME: origin change when on a rotating object
+  VectorSubtract(pos_in, oldOrigin, org);
+
+  VectorCopy(org, org2);
+  BG_RotatePoint(org2, matrix);
+  VectorSubtract(org2, org, move2);
+  // add movement
+  VectorAdd(pos_in, move, pos_out);
+  VectorAdd(pos_out, move2, pos_out);
+
+  return amove[ YAW ];
 }
 
 
@@ -1018,6 +1063,7 @@ CG_CalcEntityLerpPositions
 */
 static void CG_CalcEntityLerpPositions( centity_t *cent )
 {
+  float  delta_yaw;
   // this will be set to how far forward projectiles will be extrapolated
   int timeshift = 0;
 
@@ -1078,10 +1124,11 @@ static void CG_CalcEntityLerpPositions( centity_t *cent )
 
   // adjust for riding a mover if it wasn't rolled into the predicted
   // player state
-  if( cent != &cg.predictedPlayerEntity )
-  {
-    CG_AdjustPositionForMover( cent->lerpOrigin, cent->currentState.groundEntityNum,
-                               cg.snap->serverTime, cg.time, cent->lerpOrigin );
+  if(cent != &cg.predictedPlayerEntity) {
+    delta_yaw = CG_AdjustPositionForMover(
+                  cent->lerpOrigin, CG_Get_Pusher_Num(cent->currentState.number),
+                  cg.snap->serverTime, cg.time, cent->lerpOrigin);
+    cent->lerpAngles[YAW] += delta_yaw;
   }
 }
 

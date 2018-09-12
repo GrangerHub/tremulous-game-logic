@@ -3092,32 +3092,32 @@ static void PM_CrashLand( void )
 PM_CorrectAllSolid
 =============
 */
-static int PM_CorrectAllSolid( trace_t *trace )
-{
+static int PM_CorrectAllSolid(trace_t *trace) {
   int       i, j, k;
   vec3_t    point;
 
-  if( pm->debugLevel )
+  if(pm->debugLevel) {
     Com_Printf("%i:allsolid\n", c_pmove);
+  }
 
   // jitter around
-  for( i = -1; i <= 1; i++ )
-  {
-    for( j = -1; j <= 1; j++ )
-    {
-      for( k = -1; k <= 1; k++ )
-      {
+  for(i = -1; i <= 1; i++) {
+    for(j = -1; j <= 1; j++) {
+      for(k = -1; k <= 1; k++) {
         VectorCopy( pm->ps->origin, point );
-        point[ 0 ] += (float)i;
-        point[ 1 ] += (float)j;
-        point[ 2 ] += (float)k;
+        point[0] += (float)i;
+        point[1] += (float)j;
+        point[2] += (float)k;
         pm->trace( trace, point, pm->mins, pm->maxs, point, pm->ps->clientNum, pm->tracemask );
 
-        if( !trace->allsolid )
-        {
-          point[ 0 ] = pm->ps->origin[ 0 ];
-          point[ 1 ] = pm->ps->origin[ 1 ];
-          point[ 2 ] = pm->ps->origin[ 2 ] - 0.25;
+        if( pm->debugLevel ) {
+          Com_Printf("%i:trace->allsolid is %d\n", c_pmove, trace->allsolid);
+        }
+
+        if(!trace->allsolid) {
+          point[0] = pm->ps->origin[0];
+          point[1] = pm->ps->origin[1];
+          point[2] = pm->ps->origin[2] - 0.25;
 
           pm->trace( trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum, pm->tracemask );
           pml.groundTrace = *trace;

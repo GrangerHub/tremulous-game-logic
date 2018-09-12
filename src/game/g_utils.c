@@ -988,6 +988,42 @@ gentity_t *G_ClosestEnt( vec3_t origin, gentity_t **entities, int numEntities )
 }
 
 /*
+================
+G_Get_Foundation_Ent_Num
+
+Recursively determines if an entity is ultimately
+supported by the world, a mover, or has no foundational support
+================
+*/
+int G_Get_Foundation_Ent_Num(gentity_t *ent) {
+  int groundEntityNum;
+
+  Com_Assert(ent && "G_Get_Foundation_Ent_Num: ent is NULL");
+
+  if(!ent->inuse) {
+    return ENTITYNUM_NONE;
+  }
+
+  if(ent->client) {
+    groundEntityNum = ent->client->ps.groundEntityNum;
+  } else {
+    groundEntityNum = ent->s.groundEntityNum;
+  }
+
+  //check to see if the ground entity is a foundation entitity
+  if(
+    groundEntityNum == ENTITYNUM_WORLD ||
+    groundEntityNum == ENTITYNUM_NONE ||
+    groundEntityNum < 0 || groundEntityNum >= MAX_GENTITIES ||
+    g_entities[groundEntityNum].s.eType == ET_MOVER ) {
+    return groundEntityNum;
+  }
+
+  //check the ground entity to see if it is on a foundation entity
+  return G_Get_Foundation_Ent_Num(&g_entities[groundEntityNum]);
+}
+
+/*
 ===============
 G_TriggerMenu
 

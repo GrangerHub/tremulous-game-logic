@@ -1096,8 +1096,16 @@ void AGeneric_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, i
   self->powered = qfalse;
   self->methodOfDeath = mod;
 
-  if( ( BG_Buildable( self->s.modelindex )->role & ROLE_CORE ) ||
-      ( BG_Buildable( self->s.modelindex )->ballisticDmgMod < 1.0 ) ) {
+  if(
+    self->spawned &&
+    !(
+      inflictor->s.eType == ET_MOVER &&
+      (
+        inflictor->s.pos.trType == TR_SINE ||
+        inflictor->s.apos.trType == TR_SINE)) &&
+    (
+      (BG_Buildable( self->s.modelindex )->role & ROLE_CORE) ||
+      (BG_Buildable( self->s.modelindex )->ballisticDmgMod < 1.0))) {
     self->nextthink = level.time + ALIEN_CREEP_BLAST_DELAY;
   } else {
     self->nextthink = level.time; //blast immediately
@@ -2655,10 +2663,16 @@ void HSpawn_Die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
   if( self->spawned ) {
     self->think = HSpawn_Blast;
-    if( BG_Buildable( self->s.modelindex )->splashDamage ) {
-      self->nextthink = level.time + HUMAN_DETONATION_DELAY;
-    } else {
+    if( 
+      !BG_Buildable( self->s.modelindex )->splashDamage ||
+      (
+        inflictor->s.eType == ET_MOVER &&
+        (
+          inflictor->s.pos.trType == TR_SINE ||
+          inflictor->s.apos.trType == TR_SINE))) {
       self->nextthink = level.time; //blast immediately
+    } else {
+      self->nextthink = level.time + HUMAN_DETONATION_DELAY;
     }
   } else {
     self->think = HSpawn_Disappear;
@@ -2984,12 +2998,18 @@ static void HRepeater_Die( gentity_t *self, gentity_t *inflictor, gentity_t *att
 
   if( self->spawned ) {
     self->think = HSpawn_Blast;
-    if( BG_Buildable( self->s.modelindex )->splashDamage ) {
-      self->nextthink = level.time + HUMAN_DETONATION_DELAY;
-    } else {
+    if(
+      !BG_Buildable( self->s.modelindex )->splashDamage ||
+      (
+        inflictor->s.eType == ET_MOVER &&
+        (
+          inflictor->s.pos.trType == TR_SINE ||
+          inflictor->s.apos.trType == TR_SINE))) {
       self->nextthink = level.time; //blast immediately
+    } else {
+      self->nextthink = level.time + HUMAN_DETONATION_DELAY;
     }
-  }   else {
+  } else {
     self->think = HSpawn_Disappear;
     self->nextthink = level.time; //blast immediately
   }
