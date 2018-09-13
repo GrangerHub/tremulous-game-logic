@@ -196,6 +196,7 @@ static void G_WideTraceSolid( trace_t *tr, gentity_t *ent, float range,
 {
   vec3_t    mins, maxs;
   vec3_t    end;
+  trace_t   tr2;
 
   VectorSet( mins, -width, -width, -height );
   VectorSet( maxs, width, width, height );
@@ -211,17 +212,22 @@ static void G_WideTraceSolid( trace_t *tr, gentity_t *ent, float range,
 
   // Trace against entities and the world
   SV_Trace( tr, muzzle, mins, maxs, end, ent->s.number, MASK_SHOT, TT_AABB );
-
-  //
   if( tr->entityNum != ENTITYNUM_NONE )
     *target = &g_entities[ tr->entityNum ];
+
+  if(tr->startsolid) {
+    //check for collision against the world
+    SV_Trace( &tr2, muzzle, mins, maxs, muzzle, ent->s.number, MASK_SOLID, TT_AABB );
+    if( tr2.entityNum != ENTITYNUM_NONE )
+      *target = &g_entities[ tr->entityNum ];
+  }
 
   G_UnlaggedOff( );
 }
 
 /*
 ================
-G_WideTraceSolid
+G_WideTraceSolidSeries
 
 Uses a series of enlarging traces starting with a line trace.
 ================
