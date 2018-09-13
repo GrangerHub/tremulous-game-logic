@@ -237,6 +237,7 @@ vmCvar_t  cg_sprintToggle;
 vmCvar_t  cg_unlagged;
 vmCvar_t  cg_swapAttacks;
 vmCvar_t  cg_wallJumperMinFactor;
+vmCvar_t  cg_marauderMinJumpFactor;
 
 vmCvar_t  cg_debugVoices;
 
@@ -352,6 +353,7 @@ static cvarTable_t cvarTable[ ] =
   { NULL, "cg_flySpeed", "600", CVAR_ARCHIVE|CVAR_USERINFO },
   { &cg_swapAttacks, "cg_swapAttacks", "0", CVAR_ARCHIVE|CVAR_USERINFO },
   { &cg_wallJumperMinFactor, "cg_wallJumperMinFactor", "0.3", CVAR_ARCHIVE|CVAR_USERINFO },
+  { &cg_marauderMinJumpFactor, "cg_marauderMinJumpFactor", "0.70", CVAR_ARCHIVE|CVAR_USERINFO },
   { &cg_depthSortParticles, "cg_depthSortParticles", "1", CVAR_ARCHIVE },
   { &cg_bounceParticles, "cg_bounceParticles", "1", CVAR_ARCHIVE },
   { &cg_consoleLatency, "cg_consoleLatency", "3000", CVAR_ARCHIVE },
@@ -643,18 +645,29 @@ void CG_UpdateBuildableRangeMarkerMask( void )
 CG_UpdatePMoveCvars
 ====================
 */
-static void CG_UpdatePMoveCvars( void )
-{
-  static int modificationCount = -1;
+static void CG_UpdatePMoveCvars(void) {
+  static int wallJumperModCount = -1;
+  static int marauderJumpModCount = -1;
 
-  if( cg_wallJumperMinFactor.modificationCount != modificationCount )
-  {
-    if( cg_wallJumperMinFactor.value > 1.0f )
-      trap_Cvar_Set( "cg_wallJumperMinFactor", "1.0" );
-    else if( cg_wallJumperMinFactor.value < 0.0f )
-      trap_Cvar_Set( "cg_wallJumperMinFactor", "0.0" );
+  if(cg_wallJumperMinFactor.modificationCount != wallJumperModCount) {
+    if(cg_wallJumperMinFactor.value > 1.0f) {
+      trap_Cvar_Set("cg_wallJumperMinFactor", "1.0");
+    }
+    else if(cg_wallJumperMinFactor.value < 0.0f) {
+      trap_Cvar_Set("cg_wallJumperMinFactor", "0.0");
+    }
 
-    modificationCount = cg_wallJumperMinFactor.modificationCount;
+    wallJumperModCount = cg_wallJumperMinFactor.modificationCount;
+  }
+
+  if(cg_marauderMinJumpFactor.modificationCount != marauderJumpModCount) {
+    if(cg_marauderMinJumpFactor.value > 1.0f) {
+      trap_Cvar_Set("cg_marauderMinJumpFactor", "1.0");
+    } else if(cg_marauderMinJumpFactor.value < 0.0f) {
+      trap_Cvar_Set("cg_marauderMinJumpFactor", "0.0");
+    }
+
+    marauderJumpModCount = cg_marauderMinJumpFactor.modificationCount;
   }
 }
 
