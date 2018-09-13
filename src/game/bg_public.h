@@ -293,6 +293,7 @@ struct pmove_s
 
   int           swapAttacks;
   float         wallJumperMinFactor;
+  float         marauderMinJumpFactor;
 };
 
 qboolean BG_ExplodeMarauder( playerState_t *ps, pmoveExt_t *pmext );

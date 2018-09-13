@@ -1648,8 +1648,9 @@ static qboolean PM_CheckJump( vec3_t customNormal )
 
   //scale due to evolving
   if( ( pm->ps->stats[ STAT_TEAM ] == TEAM_ALIENS ) && 
-      ( pm->ps->eFlags & EF_EVOLVING ) )
-    jumpMagnitude = (int)( ((float) jumpMagnitude ) * BG_EvolveScale( pm->ps ) );
+      ( pm->ps->eFlags & EF_EVOLVING ) ) {
+    jumpMagnitude = jumpMagnitude * BG_EvolveScale( pm->ps );
+  }
 
   pm->ps->persistant[PERS_JUMPTIME] = 0;
   pm->ps->pm_flags |= PMF_JUMPING;
@@ -1663,6 +1664,16 @@ static qboolean PM_CheckJump( vec3_t customNormal )
 
   if( pm->ps->velocity[ 2 ] < 0 )
     pm->ps->velocity[ 2 ] = 0;
+
+  if(PM_IsMarauder()) {
+    float upFactor;
+    float minFactor = MIN(1.0f, MAX(0.0f, pm->marauderMinJumpFactor));
+    float upLook = MAX(0.1f, DotProduct(upNormal, pml.forward));
+
+    upFactor = minFactor + ((1.0f - minFactor) * upLook);
+
+    jumpMagnitude *= upFactor;
+  }
 
   VectorMA( pm->ps->velocity, jumpMagnitude, normal, pm->ps->velocity );
 
