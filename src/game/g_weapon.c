@@ -191,9 +191,8 @@ G_WideTraceSolid
 Trace a bounding box against entities and the world
 ================
 */
-static void G_WideTraceSolid( trace_t *tr, gentity_t *ent, float range,
-                              float width, float height, gentity_t **target )
-{
+static void G_WideTraceSolid(trace_t *tr, gentity_t *ent, float range,
+                             float width, float height, gentity_t **target) {
   vec3_t    mins, maxs;
   vec3_t    end;
   trace_t   tr2;
@@ -203,23 +202,26 @@ static void G_WideTraceSolid( trace_t *tr, gentity_t *ent, float range,
 
   *target = NULL;
 
-  if( !ent->client )
+  if(!ent->client) {
     return;
+  }
 
-  G_UnlaggedOn( ent->s.number, muzzle, range + width );
+  G_UnlaggedOn(ent->s.number, muzzle, range + width);
 
-  VectorMA( muzzle, range, forward, end );
+  VectorMA(muzzle, range, forward, end);
 
   // Trace against entities and the world
-  SV_Trace( tr, muzzle, mins, maxs, end, ent->s.number, MASK_SHOT, TT_AABB );
-  if( tr->entityNum != ENTITYNUM_NONE )
+  SV_Trace(tr, muzzle, mins, maxs, end, ent->s.number, MASK_SHOT, TT_AABB);
+  if(tr->entityNum != ENTITYNUM_NONE) {
     *target = &g_entities[ tr->entityNum ];
+  }
 
   if(tr->startsolid) {
     //check for collision against the world
     SV_Trace( &tr2, muzzle, mins, maxs, muzzle, ent->s.number, MASK_SOLID, TT_AABB );
-    if( tr2.entityNum != ENTITYNUM_NONE )
+    if(tr2.entityNum != ENTITYNUM_NONE) {
       *target = &g_entities[ tr->entityNum ];
+    }
   }
 
   G_UnlaggedOff( );
