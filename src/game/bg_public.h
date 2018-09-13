@@ -284,6 +284,7 @@ struct pmove_s
 
   int           swapAttacks;
   float         wallJumperMinFactor;
+  float         marauderMinJumpFactor;
 };
 
 // if a full pmove isn't done on the client, you can just update the angles

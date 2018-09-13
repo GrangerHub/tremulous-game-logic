@@ -1467,6 +1467,16 @@ static qboolean PM_CheckJump( vec3_t customNormal )
 
   jumpMagnitude = BG_Class( pm->ps->stats[ STAT_CLASS ] )->jumpMagnitude;
 
+  if(PM_IsMarauder()) {
+    float upFactor;
+    float minFactor = MIN(1.0f, MAX(0.0f, pm->marauderMinJumpFactor));
+    float upLook = MAX(0.1f, DotProduct(upNormal, pml.forward));
+
+    upFactor = minFactor + ((1.0f - minFactor) * upLook);
+
+    jumpMagnitude *= upFactor;
+  }
+
   VectorMA( pm->ps->velocity, jumpMagnitude, normal, pm->ps->velocity );
 
   if( pm->cmd.forwardmove > 0 )

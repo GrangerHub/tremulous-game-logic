@@ -485,6 +485,7 @@ typedef struct
   float               flySpeed;           // for spectator/noclip moves
   int                 swapAttacks;
   float               wallJumperMinFactor;
+  float               marauderMinJumpFactor;
   int                 buildableRangeMarkerMask;
 
   class_t             classSelection;     // player class (copied to ent->client->ps.stats[ STAT_CLASS ] once spawned)
