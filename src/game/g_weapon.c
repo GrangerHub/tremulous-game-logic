@@ -200,14 +200,13 @@ void G_BounceProjectile( vec3_t start, vec3_t impact, vec3_t dir, vec3_t endout 
 
 /*
 ================
-G_WideTrace
+G_WideTraceSolid
 
-Trace a bounding box against entities, but not the world
-Also check there is a line of sight between the start and end point
+Trace a bounding box against entities and the world
 ================
 */
-static void G_WideTrace( trace_t *tr, gentity_t *ent, float range,
-                         float width, float height, gentity_t **target )
+static void G_WideTraceSolid( trace_t *tr, gentity_t *ent, float range,
+                              float width, float height, gentity_t **target )
 {
   vec3_t    mins, maxs;
   vec3_t    end;
@@ -224,22 +223,39 @@ static void G_WideTrace( trace_t *tr, gentity_t *ent, float range,
 
   VectorMA( muzzle, range, forward, end );
 
-  // Trace against entities
-  SV_Trace( tr, muzzle, mins, maxs, end, ent->s.number, CONTENTS_BODY | CONTENTS_CORPSE, TT_AABB );
-  if( tr->entityNum != ENTITYNUM_NONE )
-    *target = &g_entities[ tr->entityNum ];
-
-  // Set range to the trace length plus the width, so that the end of the
-  // LOS trace is close to the exterior of the target's bounding box
-  range = Distance( muzzle, tr->endpos ) + width;
-  VectorMA( muzzle, range, forward, end );
-
-  // Trace for line of sight against the world
-  SV_Trace( tr, muzzle, NULL, NULL, end, ent->s.number, CONTENTS_SOLID, TT_AABB );
+  // Trace against entities and the world
+  SV_Trace( tr, muzzle, mins, maxs, end, ent->s.number, MASK_SHOT, TT_AABB );
   if( tr->entityNum != ENTITYNUM_NONE )
     *target = &g_entities[ tr->entityNum ];
 
   G_UnlaggedOff( );
+}
+
+/*
+================
+G_WideTraceSolid
+
+Uses a series of enlarging traces starting with a line trace.
+================
+*/
+static void G_WideTraceSolidSeries(trace_t *tr, gentity_t *ent, float range,
+                                    float width, float height, gentity_t **target) {
+  int n;
+  float widthAdjusted, heightAdjusted;
+
+  for(n = 0; n < 5; ++n) {
+    widthAdjusted = (width * (float)(n)) / 5.00f;
+    heightAdjusted = (height * (float)(n)) / 5.00f;
+
+    G_WideTraceSolid(tr, ent, range, widthAdjusted, heightAdjusted, target);
+    if(
+      tr->startsolid ||
+      (*target != NULL && G_TakesDamage(*target))) {
+      return;
+    }
+  }
+
+  G_WideTraceSolid(tr, ent, range, width, height, target);
 }
 
 /*
@@ -368,24 +384,8 @@ void meleeAttack( gentity_t *ent, float range, float width, float height,
 {
   trace_t   tr;
   gentity_t *traceEnt;
-  int n;
-  float widthAdjusted, heightAdjusted;
 
-  for( n = 0; n < 5; ++n )
-  {
-    widthAdjusted = ( width * (float)( n ) ) / 5.00f;
-    heightAdjusted = ( height * (float)( n ) ) / 5.00f;
-
-    G_WideTrace( &tr, ent, range, widthAdjusted, heightAdjusted, &traceEnt );
-    if( traceEnt != NULL && G_TakesDamage( traceEnt ) )
-    {
-      WideBloodSpurt( ent, traceEnt, &tr );
-      G_Damage( traceEnt, ent, ent, forward, tr.endpos, damage, DAMAGE_NO_KNOCKBACK, mod );
-      return;
-    }
-  }
-
-  G_WideTrace( &tr, ent, range, width, height, &traceEnt );
+  G_WideTraceSolidSeries( &tr, ent, range, width, height, &traceEnt );
   if( traceEnt == NULL || !G_TakesDamage( traceEnt ) )
     return;
 
@@ -999,7 +999,7 @@ void painSawFire( gentity_t *ent )
   vec3_t    temp;
   gentity_t *tent, *traceEnt;
 
-  G_WideTrace( &tr, ent, PAINSAW_RANGE, PAINSAW_WIDTH, PAINSAW_HEIGHT,
+  G_WideTraceSolidSeries( &tr, ent, PAINSAW_RANGE, PAINSAW_WIDTH, PAINSAW_HEIGHT,
                &traceEnt );
   if( !traceEnt || !G_TakesDamage( traceEnt ) )
     return;
@@ -1322,8 +1322,8 @@ qboolean CheckVenomAttack( gentity_t *ent )
   AngleVectors( ent->client->ps.viewangles, forward, right, up );
   BG_CalcMuzzlePointFromPS( &ent->client->ps, forward, right, up, muzzle );
 
-  G_WideTrace( &tr, ent, LEVEL0_BITE_RANGE, LEVEL0_BITE_WIDTH,
-               LEVEL0_BITE_WIDTH, &traceEnt );
+  G_WideTraceSolidSeries( &tr, ent, LEVEL0_BITE_RANGE, LEVEL0_BITE_WIDTH,
+                          LEVEL0_BITE_WIDTH, &traceEnt );
 
   if( traceEnt == NULL )
     return qfalse;
@@ -2032,8 +2032,8 @@ void areaLev2ZapFire( gentity_t *ent )
   trace_t   tr;
   gentity_t *traceEnt;
 
-  G_WideTrace( &tr, ent, LEVEL2_AREAZAP_RANGE, LEVEL2_AREAZAP_WIDTH,
-               LEVEL2_AREAZAP_WIDTH, &traceEnt );
+  G_WideTraceSolidSeries( &tr, ent, LEVEL2_AREAZAP_RANGE, LEVEL2_AREAZAP_WIDTH,
+                          LEVEL2_AREAZAP_WIDTH, &traceEnt );
 
   if( traceEnt == NULL )
     return;
