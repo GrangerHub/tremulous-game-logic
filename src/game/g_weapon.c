@@ -220,7 +220,7 @@ static void G_WideTraceSolid(trace_t *tr, gentity_t *ent, float range,
     //check for collision against the world
     SV_Trace( &tr2, muzzle, mins, maxs, muzzle, ent->s.number, MASK_SOLID, TT_AABB );
     if(tr2.entityNum != ENTITYNUM_NONE) {
-      *target = &g_entities[ tr->entityNum ];
+      *target = &g_entities[ tr2.entityNum ];
     }
   }
 
