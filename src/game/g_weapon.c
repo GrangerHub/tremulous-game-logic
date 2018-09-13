@@ -1003,35 +1003,42 @@ PAIN SAW
 ======================================================================
 */
 
-void painSawFire( gentity_t *ent )
-{
+void painSawFire( gentity_t *ent) {
   trace_t   tr;
   vec3_t    temp;
   gentity_t *tent, *traceEnt;
 
-  G_WideTraceSolid( &tr, ent, PAINSAW_RANGE, PAINSAW_WIDTH, PAINSAW_HEIGHT,
-               &traceEnt );
-  if( !traceEnt || !G_TakesDamage( traceEnt ) )
+  G_WideTraceSolid(
+    &tr, ent, PAINSAW_RANGE, PAINSAW_WIDTH, PAINSAW_HEIGHT, &traceEnt);
+
+  if(!traceEnt)
     return;
 
   // hack to line up particle system with weapon model
   tr.endpos[ 2 ] -= 5.0f;
 
-  // send blood impact
-  if( traceEnt->s.eType == ET_PLAYER || traceEnt->s.eType == ET_BUILDABLE )
-  {
-      BloodSpurt( ent, traceEnt, &tr );
-  }
-  else
-  {
-    VectorCopy( tr.endpos, temp );
-    tent = G_TempEntity( temp, EV_MISSILE_MISS );
-    tent->s.eventParm = DirToByte( tr.plane.normal );
-    tent->s.weapon = ent->s.weapon;
-    tent->s.generic1 = ent->s.generic1; //weaponMode
+  if(G_TakesDamage(traceEnt)) {
+    // send blood impact
+    if(traceEnt->s.eType == ET_PLAYER || traceEnt->s.eType == ET_BUILDABLE) {
+        BloodSpurt(ent, traceEnt, &tr);
+    } else {
+      VectorCopy(tr.endpos, temp);
+      tent = G_TempEntity(temp, EV_MISSILE_MISS);
+      tent->s.eventParm = DirToByte(tr.plane.normal);
+      tent->s.weapon = ent->s.weapon;
+      tent->s.generic1 = ent->s.generic1; //weaponMode
+    }
+
+    G_Damage(
+      traceEnt, ent, ent, forward, tr.endpos, PAINSAW_DAMAGE,
+      DAMAGE_NO_KNOCKBACK, MOD_PAINSAW);
   }
 
-  G_Damage( traceEnt, ent, ent, forward, tr.endpos, PAINSAW_DAMAGE, DAMAGE_NO_KNOCKBACK, MOD_PAINSAW );
+  VectorCopy(tr.endpos, temp);
+  tent = G_TempEntity(temp, EV_MISSILE_MISS);
+  tent->s.eventParm = DirToByte(tr.plane.normal);
+  tent->s.weapon = ent->s.weapon;
+  tent->s.generic1 = ent->s.generic1; //weaponMode
 }
 
 /*

@@ -702,6 +702,7 @@ desired movement direction is not perfectly parallel with the wall. The
 `groundNormal` parameter is only used for ambiguity resolution.
 ==============
 */
+/*
 static void PM_WallCoast( vec3_t wishDir, wallcoast_t grounded )
 {
   // How directly can the player need to look at the wall before slowing down.
@@ -832,7 +833,7 @@ static void PM_WallCoast( vec3_t wishDir, wallcoast_t grounded )
   // Set the new desired direction.
   VectorCopy( result, wishDir );
 }
-
+*/
 
 /*
 ==============
@@ -4064,6 +4065,42 @@ static void PM_WaterEvents( void )
     PM_AddEvent( EV_WATER_CLEAR );
 }
 
+/*
+===============
+PM_Pain_Saw_Pull
+===============
+*/
+static void PM_Pain_Saw_Pull( void ) {
+  const float width = PAINSAW_WIDTH;
+  const float height = PAINSAW_HEIGHT;
+  const float range = PAINSAW_RANGE;
+  vec3_t      muzzle, forward, right, up, end;
+  vec3_t      mins, maxs;
+  trace_t     trace;
+
+  AngleVectors( pm->ps->viewangles, forward, right, up );
+  BG_CalcMuzzlePointFromPS(pm->ps, forward, right, up, muzzle);
+
+  VectorMA(muzzle, range, forward, end);
+
+  VectorSet( mins, -width, -width, -height );
+  VectorSet( maxs, width, width, height );
+
+  if(pm->unlagged_on) {
+    pm->unlagged_on(pm->ps->clientNum, muzzle, range + width);
+  }
+
+  //check for impact
+  pm->trace( &trace, muzzle, mins, maxs, end, pm->ps->clientNum, MASK_SHOT );
+  if(trace.fraction < 1.0f || trace.startsolid) {
+    //pull towards direction of impact
+    VectorMA(pm->ps->velocity, PAINSAW_PULL, forward, pm->ps->velocity);
+  }
+
+  if(pm->unlagged_off) {
+    pm->unlagged_off( );
+  }
+}
 
 /*
 ===============
@@ -4858,6 +4895,17 @@ static void PM_Weapon( void )
         // pounce is autohit
         if( !attack1 && !attack2 )
           return;
+        break;
+
+      case WP_PAIN_SAW:
+        if(attack1){
+          //check for pain saw pull
+          PM_Pain_Saw_Pull( );
+        } else if(!attack1 && !attack2 && !attack3) {
+          pm->ps->weaponTime = 0;
+          pm->ps->weaponstate = WEAPON_READY;
+          return;
+        }
         break;
 
       case WP_LUCIFER_CANNON:

@@ -534,6 +534,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define PAINSAW_RANGE               64.0f
 #define PAINSAW_WIDTH               0.0f
 #define PAINSAW_HEIGHT              8.0f
+#define PAINSAW_PULL                128.0f
 
 #define GRENADE_PRICE               150
 #define GRENADE_HEALTH              5
