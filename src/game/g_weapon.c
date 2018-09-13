@@ -929,7 +929,7 @@ void painSawFire( gentity_t *ent )
   vec3_t    temp;
   gentity_t *tent, *traceEnt;
 
-  G_WideTraceSolidSeries( &tr, ent, PAINSAW_RANGE, PAINSAW_WIDTH, PAINSAW_HEIGHT,
+  G_WideTraceSolid( &tr, ent, PAINSAW_RANGE, PAINSAW_WIDTH, PAINSAW_HEIGHT,
                &traceEnt );
   if( !traceEnt || !G_TakesDamage( traceEnt ) )
     return;
