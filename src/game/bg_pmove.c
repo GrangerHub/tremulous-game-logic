@@ -4909,10 +4909,12 @@ static void PM_Weapon( void )
         break;
 
       case WP_PAIN_SAW:
+        attack2 = attack3 = qfalse;
+
         if(attack1){
           //check for pain saw pull
           PM_Pain_Saw_Pull( );
-        } else if(!attack1 && !attack2 && !attack3) {
+        } else if(!attack1) {
           pm->ps->weaponTime = 0;
           pm->ps->weaponstate = WEAPON_READY;
           return;
