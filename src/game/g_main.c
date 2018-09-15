@@ -747,6 +747,8 @@ Q_EXPORT void G_InitGame( int levelTime, int randomSeed, int restart )
   SV_LocateGameData( level.gentities, level.num_entities, sizeof( gentity_t ),
     &level.clients[ 0 ].ps, sizeof( level.clients[ 0 ] ) );
 
+  G_Init_Unlagged( );
+
   level.emoticonCount = BG_LoadEmoticons( level.emoticons, MAX_EMOTICONS );
 
   SV_SetConfigstring( CS_INTERMISSION, "0" );
@@ -3179,7 +3181,7 @@ Q_EXPORT void G_RunFrame( int levelTime )
       ClientEndFrame( ent );
   }
 
-  // save position information for all active clients
+  // save position information for all active clients and other shootable entities
   G_UnlaggedStore( );
 
   G_CountSpawns( );

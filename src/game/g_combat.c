@@ -1232,10 +1232,7 @@ static float G_CalcDamageModifier( vec3_t point, gentity_t *targ, gentity_t *att
     return GetNonLocDamageModifier( targ, class );
 
   // Get the point location relative to the floor under the target
-  if( g_unlagged.integer && targ->client && targ->client->unlaggedCalc.used )
-    VectorCopy( targ->client->unlaggedCalc.origin, targOrigin );
-  else
-    VectorCopy( targ->r.currentOrigin, targOrigin );
+  G_GetUnlaggedOrigin(targ, targOrigin);
 
   BG_GetClientNormal( &targ->client->ps, normal );
   VectorMA( targOrigin, targ->r.mins[ 2 ], normal, floor );

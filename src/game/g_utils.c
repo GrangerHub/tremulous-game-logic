@@ -426,6 +426,7 @@ gentity_t *G_Spawn( void )
       // reuse this slot
       G_InitGentity( e );
       G_Entity_id_init( e );
+      G_UnlaggedClear( e );
       return e;
     }
 
@@ -450,6 +451,7 @@ gentity_t *G_Spawn( void )
 
   G_InitGentity( e );
   G_Entity_id_init( e );
+  G_UnlaggedClear( e );
   return e;
 }
 

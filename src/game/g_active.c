@@ -24,6 +24,26 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "g_local.h"
 
+typedef struct unlagged_s {
+  gentity_id   id;
+  trajectory_t pos;
+  trajectory_t apos;
+  vec3_t       angles;
+  vec3_t       origin;
+  vec3_t       mins;
+  vec3_t       maxs;
+  qboolean     used;
+} unlagged_t;
+
+typedef struct unlagged_data_s
+{
+  unlagged_t          unlaggedHist[ MAX_UNLAGGED_MARKERS ];
+  unlagged_t          unlaggedBackup;
+  unlagged_t          unlaggedCalc;
+} unlagged_data_t;
+
+static unlagged_data_t unlagged_data[ENTITYNUM_MAX_NORMAL];
+
 /*
 ===============
 G_DamageFeedback
@@ -299,8 +319,8 @@ void ClientImpacts( pmove_t *pm, trace_t *trace,
   // if our movement is blocked by another player's real position,
   // don't use the unlagged position for them because they are
   // blocking or server-side Pmove() from reaching it
-  if( other->client && other->client->unlaggedCalc.used )
-    other->client->unlaggedCalc.used = qfalse;
+  if( other->client )
+    unlagged_data[other->s.number].unlaggedCalc.used = qfalse;
 
   // tyrant impact attacks
   if( ent->client->ps.weapon == WP_ALEVEL4 )
@@ -1370,39 +1390,64 @@ void SendPendingPredictableEvents( playerState_t *ps )
 
 /*
 ==============
+ G_Init_Unlagged
+==============
+*/
+void G_Init_Unlagged(void) {
+  int i;
+
+  for(i = 0; i < ENTITYNUM_MAX_NORMAL; i++) {
+    memset(&unlagged_data[i], 0, sizeof(unlagged_data[i]));
+  }
+}
+
+/*
+==============
  G_UnlaggedStore
 
- Called on every server frame.  Stores position data for the client at that
- into client->unlaggedHist[] and the time into level.unlaggedTimes[].
+ Called on every server frame.  Stores position data for the entity at that
+ into unlagged_data[].unlaggedHist[] and the time into level.unlaggedTimes[].
  This data is used by G_UnlaggedCalc()
 ==============
 */
-void G_UnlaggedStore( void )
-{
+void G_UnlaggedStore(void) {
   int i = 0;
   gentity_t *ent;
   unlagged_t *save;
 
-  if( !g_unlagged.integer )
+  if(!g_unlagged.integer) {
     return;
+  }
+
   level.unlaggedIndex++;
-  if( level.unlaggedIndex >= MAX_UNLAGGED_MARKERS )
+
+  if(level.unlaggedIndex >= MAX_UNLAGGED_MARKERS) {
     level.unlaggedIndex = 0;
+  }
 
-  level.unlaggedTimes[ level.unlaggedIndex ] = level.time;
-
-  for( i = 0; i < level.maxclients; i++ )
-  {
-    ent = &g_entities[ i ];
-    save = &ent->client->unlaggedHist[ level.unlaggedIndex ];
+  level.unlaggedTimes[level.unlaggedIndex] = level.time;
+  for(i = 0; i < ENTITYNUM_MAX_NORMAL; i++) {
+    ent = &g_entities[i];
+    save = &unlagged_data[i].unlaggedHist[level.unlaggedIndex];
     save->used = qfalse;
-    if( !ent->r.linked || !( ent->r.contents & CONTENTS_BODY ) )
+
+    if(!ent->r.linked || !(ent->r.contents & MASK_SHOT)) {
       continue;
-    if( ent->client->pers.connected != CON_CONNECTED )
+    }
+
+    if(
+      ent->client &&
+      (i >= level.maxclients || ent->client->pers.connected != CON_CONNECTED)) {
       continue;
-    VectorCopy( ent->r.mins, save->mins );
-    VectorCopy( ent->r.maxs, save->maxs );
-    VectorCopy( ent->s.pos.trBase, save->origin );
+    }
+
+    G_Entity_id_set(&save->id, ent);
+    VectorCopy(ent->r.mins, save->mins);
+    VectorCopy(ent->r.maxs, save->maxs);
+    VectorCopy(ent->r.currentOrigin, save->origin);
+    VectorCopy(ent->r.currentAngles, save->angles);
+    save->pos = ent->s.pos;
+    save->apos = ent->s.apos;
     save->used = qtrue;
   }
 }
@@ -1411,28 +1456,28 @@ void G_UnlaggedStore( void )
 ==============
  G_UnlaggedClear
 
- Mark all unlaggedHist[] markers for this client invalid.  Useful for
+ Mark all unlaggedHist[] markers for this entitiy invalid.  Useful for
  preventing teleporting and death.
 ==============
 */
-void G_UnlaggedClear( gentity_t *ent )
-{
+void G_UnlaggedClear(gentity_t *ent) {
   int i;
 
-  for( i = 0; i < MAX_UNLAGGED_MARKERS; i++ )
-    ent->client->unlaggedHist[ i ].used = qfalse;
+  Com_Assert(ent && "G_UnlaggedClear: ent is NULL")
+
+  for(i = 0; i < MAX_UNLAGGED_MARKERS; i++)
+    unlagged_data[ent->s.number].unlaggedHist[i].used = qfalse;
 }
 
 /*
 ==============
  G_UnlaggedCalc
 
- Loops through all active clients and calculates their predicted position
- for time then stores it in client->unlaggedCalc
+ Loops through all the unlagged_data for all entitties and calculates their
+ predicted position for time then stores it in client->unlaggedCalc
 ==============
 */
-void G_UnlaggedCalc( int time, gentity_t *rewindEnt )
-{
+void G_UnlaggedCalc(int time, gentity_t *rewindEnt) {
   int i = 0;
   gentity_t *ent;
   int startIndex;
@@ -1440,68 +1485,140 @@ void G_UnlaggedCalc( int time, gentity_t *rewindEnt )
   int frameMsec;
   float lerp;
 
-  if( !g_unlagged.integer )
+  Com_Assert(rewindEnt && "G_UnlaggedCalc: rewindEnt is NULL");
+
+  if(!g_unlagged.integer) {
     return;
+  }
 
   // clear any calculated values from a previous run
-  for( i = 0; i < level.maxclients; i++ )
-  {
-    ent = &g_entities[ i ];
-    ent->client->unlaggedCalc.used = qfalse;
+  for(i = 0; i < ENTITYNUM_MAX_NORMAL; i++) {
+    unlagged_data[i].unlaggedCalc.used = qfalse;
   }
 
   // client is on the current frame, no need for unlagged
-  if( level.unlaggedTimes[ level.unlaggedIndex ] <= time )
+  if(level.unlaggedTimes[level.unlaggedIndex] <= time) {
     return;
+  }
 
   startIndex = level.unlaggedIndex;
-  for( i = 1; i < MAX_UNLAGGED_MARKERS; i++ )
-  {
+  for(i = 1; i < MAX_UNLAGGED_MARKERS; i++) {
     stopIndex = startIndex;
-    if( --startIndex < 0 )
+
+    if(--startIndex < 0) {
       startIndex = MAX_UNLAGGED_MARKERS - 1;
-    if( level.unlaggedTimes[ startIndex ] <= time )
+    }
+
+    if(level.unlaggedTimes[startIndex] <= time) {
       break;
+    }
   }
-  if( i == MAX_UNLAGGED_MARKERS )
-  {
+
+  if(i == MAX_UNLAGGED_MARKERS) {
     // if we searched all markers and the oldest one still isn't old enough
     // just use the oldest marker with no lerping
     lerp = 0.0f;
-  }
-  else
-  {
+  } else {
     // lerp between two markers
-    frameMsec = level.unlaggedTimes[ stopIndex ] - level.unlaggedTimes[ startIndex ];
-    lerp = ( float )( time - level.unlaggedTimes[ startIndex ] ) / ( float )frameMsec;
+    frameMsec = level.unlaggedTimes[stopIndex] - level.unlaggedTimes[startIndex];
+    lerp = (float)(time - level.unlaggedTimes[startIndex]) / (float)frameMsec;
   }
 
-  for( i = 0; i < level.maxclients; i++ )
-  {
-    ent = &g_entities[ i ];
-    if( ent == rewindEnt )
+  for(i = 0; i < ENTITYNUM_MAX_NORMAL; i++) {
+    unlagged_data_t *unlagged_data_for_ent = &unlagged_data[i];
+
+    ent = &g_entities[i];
+
+    if(ent == rewindEnt) {
       continue;
-    if( !ent->r.linked || !( ent->r.contents & CONTENTS_BODY ) )
+    }
+
+    if(!ent->r.linked || !(ent->r.contents & MASK_SHOT)) {
       continue;
-    if( ent->client->pers.connected != CON_CONNECTED )
+    }
+
+    if(
+      ent->client &&
+      (i >= level.maxclients || ent->client->pers.connected != CON_CONNECTED)) {
       continue;
-    if( !ent->client->unlaggedHist[ startIndex ].used )
+    }
+
+    if(!unlagged_data_for_ent->unlaggedHist[startIndex].used) {
       continue;
-    if( !ent->client->unlaggedHist[ stopIndex ].used )
+    }
+
+    if(!G_Entity_id_get(&unlagged_data_for_ent->unlaggedHist[startIndex].id)) {
       continue;
+    }
+
+    if(!unlagged_data_for_ent->unlaggedHist[ stopIndex ].used) {
+      continue;
+    }
+
+    if(!G_Entity_id_get(&unlagged_data_for_ent->unlaggedHist[stopIndex].id)) {
+      continue;
+    }
+
+    G_Entity_id_set(&unlagged_data_for_ent->unlaggedCalc.id, ent);
 
     // between two unlagged markers
-    VectorLerp2( lerp, ent->client->unlaggedHist[ startIndex ].mins,
-      ent->client->unlaggedHist[ stopIndex ].mins,
-      ent->client->unlaggedCalc.mins );
-    VectorLerp2( lerp, ent->client->unlaggedHist[ startIndex ].maxs,
-      ent->client->unlaggedHist[ stopIndex ].maxs,
-      ent->client->unlaggedCalc.maxs );
-    VectorLerp2( lerp, ent->client->unlaggedHist[ startIndex ].origin,
-      ent->client->unlaggedHist[ stopIndex ].origin,
-      ent->client->unlaggedCalc.origin );
+    VectorLerp2( lerp, unlagged_data_for_ent->unlaggedHist[ startIndex ].mins,
+      unlagged_data_for_ent->unlaggedHist[ stopIndex ].mins,
+      unlagged_data_for_ent->unlaggedCalc.mins );
+    VectorLerp2( lerp, unlagged_data_for_ent->unlaggedHist[ startIndex ].maxs,
+      unlagged_data_for_ent->unlaggedHist[ stopIndex ].maxs,
+      unlagged_data_for_ent->unlaggedCalc.maxs );
 
-    ent->client->unlaggedCalc.used = qtrue;
+    //determine if origins and angles should be lerped, prediced, or copied
+    if( stopIndex != startIndex) {
+      vec3_t predicted_origin;
+      vec3_t predicted_angles;
+
+      //check for inaccurate origin prediction
+      BG_EvaluateTrajectory(
+        &unlagged_data_for_ent->unlaggedHist[ startIndex ].pos,
+        level.unlaggedTimes[stopIndex], predicted_origin);
+
+      if(
+        !VectorCompare(
+          predicted_origin,
+          unlagged_data_for_ent->unlaggedHist[ stopIndex ].origin)) {
+        VectorLerp2( lerp, unlagged_data_for_ent->unlaggedHist[ startIndex ].origin,
+          unlagged_data_for_ent->unlaggedHist[ stopIndex ].origin,
+          unlagged_data_for_ent->unlaggedCalc.origin );
+      } else {
+        BG_EvaluateTrajectory(
+          &unlagged_data_for_ent->unlaggedHist[ startIndex ].pos,
+          time, unlagged_data_for_ent->unlaggedCalc.origin );
+      }
+
+      //check for inaccurate angles prediction
+      BG_EvaluateTrajectory(
+        &unlagged_data_for_ent->unlaggedHist[ startIndex ].apos,
+        level.unlaggedTimes[stopIndex], predicted_angles);
+
+      if(
+        !VectorCompare(
+          predicted_origin,
+          unlagged_data_for_ent->unlaggedHist[ stopIndex ].angles)) {
+        VectorLerp2( lerp, unlagged_data_for_ent->unlaggedHist[ startIndex ].angles,
+          unlagged_data_for_ent->unlaggedHist[ stopIndex ].angles,
+          unlagged_data_for_ent->unlaggedCalc.angles );
+      } else {
+        BG_EvaluateTrajectory(
+          &unlagged_data_for_ent->unlaggedHist[ startIndex ].apos,
+          time, unlagged_data_for_ent->unlaggedCalc.angles );
+      }
+    } else {
+      VectorCopy(
+        unlagged_data_for_ent->unlaggedHist[ startIndex ].origin,
+        unlagged_data_for_ent->unlaggedCalc.origin );
+      VectorCopy(
+        unlagged_data_for_ent->unlaggedHist[ startIndex ].angles,
+        unlagged_data_for_ent->unlaggedCalc.angles );
+    }
+
+    unlagged_data_for_ent->unlaggedCalc.used = qtrue;
   }
 }
 
@@ -1509,27 +1626,30 @@ void G_UnlaggedCalc( int time, gentity_t *rewindEnt )
 ==============
  G_UnlaggedOff
 
- Reverses the changes made to all active clients by G_UnlaggedOn()
+ Reverses all changes made to any entities by G_UnlaggedOn()
 ==============
 */
-void G_UnlaggedOff( void )
-{
+void G_UnlaggedOff(void) {
   int i = 0;
-  gentity_t *ent;
 
-  if( !g_unlagged.integer )
+  if(!g_unlagged.integer) {
     return;
+  }
 
-  for( i = 0; i < level.maxclients; i++ )
-  {
-    ent = &g_entities[ i ];
-    if( !ent->client->unlaggedBackup.used )
+  for(i = 0; i < ENTITYNUM_MAX_NORMAL; i++) {
+    unlagged_data_t *unlagged_data_for_ent = &unlagged_data[i];
+    gentity_t *ent = &g_entities[ i ];
+
+    if(!unlagged_data_for_ent->unlaggedBackup.used) {
       continue;
-    VectorCopy( ent->client->unlaggedBackup.mins, ent->r.mins );
-    VectorCopy( ent->client->unlaggedBackup.maxs, ent->r.maxs );
-    VectorCopy( ent->client->unlaggedBackup.origin, ent->r.currentOrigin );
-    ent->client->unlaggedBackup.used = qfalse;
-    SV_LinkEntity( ent );
+    }
+
+    VectorCopy(unlagged_data_for_ent->unlaggedBackup.mins, ent->r.mins);
+    VectorCopy(unlagged_data_for_ent->unlaggedBackup.maxs, ent->r.maxs);
+    VectorCopy(unlagged_data_for_ent->unlaggedBackup.origin, ent->r.currentOrigin);
+    VectorCopy(unlagged_data_for_ent->unlaggedBackup.angles, ent->r.currentAngles);
+    unlagged_data_for_ent->unlaggedBackup.used = qfalse;
+    SV_LinkEntity(ent);
   }
 }
 
@@ -1547,56 +1667,73 @@ void G_UnlaggedOff( void )
 ==============
 */
 
-void G_UnlaggedOn( int attackerNum, vec3_t muzzle, float range )
-{
-  int i = 0;
-  gentity_t *ent, *attacker;
-  unlagged_t *calc;
+void G_UnlaggedOn(int attackerNum, vec3_t muzzle, float range) {
+  int       i;
+  gentity_t *attacker;
 
-  if( !g_unlagged.integer )
+  if(!g_unlagged.integer) {
     return;
+  }
 
-  attacker = &g_entities[ attackerNum ];
+  attacker = &g_entities[attackerNum];
 
-  if( !attacker->client->pers.useUnlagged )
+  if(!attacker->client->pers.useUnlagged) {
     return;
+  }
 
-  for( i = 0; i < level.maxclients; i++ )
-  {
-    ent = &g_entities[ i ];
-    calc = &ent->client->unlaggedCalc;
+  for(i = 0; i < ENTITYNUM_MAX_NORMAL; i++) {
+    unlagged_data_t *unlagged_data_for_ent = &unlagged_data[i];
+    gentity_t *ent = &g_entities[i];
+    unlagged_t *calc = &unlagged_data_for_ent->unlaggedCalc;
 
-    if( !calc->used )
+    if(!calc->used) {
       continue;
-    if( ent->client->unlaggedBackup.used )
+    }
+
+    if(unlagged_data_for_ent->unlaggedBackup.used) {
       continue;
-    if( !ent->r.linked || !( ent->r.contents & CONTENTS_BODY ) )
+    }
+
+    if(!ent->r.linked || !(ent->r.contents & MASK_SHOT)) {
       continue;
-    if( VectorCompare( ent->r.currentOrigin, calc->origin ) )
+    }
+
+    if(!G_Entity_id_get(&calc->id)) {
       continue;
-    if( muzzle )
+    }
+
+    if(VectorCompare(ent->r.currentOrigin, calc->origin) &&
+       VectorCompare(ent->r.currentAngles, calc->angles)) {
+      continue;
+    }
+
+    if(muzzle)
     {
-      float r1 = Distance( calc->origin, calc->maxs );
-      float r2 = Distance( calc->origin, calc->mins );
-      float maxRadius = ( r1 > r2 ) ? r1 : r2;
+      float r1 = Distance(calc->origin, calc->maxs);
+      float r2 = Distance(calc->origin, calc->mins);
+      float maxRadius = (r1 > r2) ? r1 : r2;
 
-      if( Distance( muzzle, calc->origin ) > range + maxRadius )
+      if(Distance(muzzle, calc->origin) > range + maxRadius) {
         continue;
+      }
     }
 
     // create a backup of the real positions
-    VectorCopy( ent->r.mins, ent->client->unlaggedBackup.mins );
-    VectorCopy( ent->r.maxs, ent->client->unlaggedBackup.maxs );
-    VectorCopy( ent->r.currentOrigin, ent->client->unlaggedBackup.origin );
-    ent->client->unlaggedBackup.used = qtrue;
+    VectorCopy(ent->r.mins, unlagged_data_for_ent->unlaggedBackup.mins);
+    VectorCopy(ent->r.maxs, unlagged_data_for_ent->unlaggedBackup.maxs);
+    VectorCopy(ent->r.currentOrigin, unlagged_data_for_ent->unlaggedBackup.origin);
+    VectorCopy(ent->r.currentAngles, unlagged_data_for_ent->unlaggedBackup.angles);
+    unlagged_data_for_ent->unlaggedBackup.used = qtrue;
 
     // move the client to the calculated unlagged position
-    VectorCopy( calc->mins, ent->r.mins );
-    VectorCopy( calc->maxs, ent->r.maxs );
-    VectorCopy( calc->origin, ent->r.currentOrigin );
-    SV_LinkEntity( ent );
+    VectorCopy(calc->mins, ent->r.mins);
+    VectorCopy(calc->maxs, ent->r.maxs);
+    VectorCopy(calc->origin, ent->r.currentOrigin);
+    VectorCopy(calc->angles, ent->r.currentAngles);
+    SV_LinkEntity(ent);
   }
 }
+
 /*
 ==============
  G_UnlaggedDetectCollisions
@@ -1616,44 +1753,71 @@ void G_UnlaggedOn( int attackerNum, vec3_t muzzle, float range )
  be up against player Y when the Pmove() is run on the server with the
  same cmd.
 
+ This does not apply to collisions with other entities with fully predictable
+ trajectories.
+
  NOTE: this must be called after Pmove() and G_UnlaggedCalc()
 ==============
 */
-static void G_UnlaggedDetectCollisions( gentity_t *ent )
-{
+static void G_UnlaggedDetectCollisions(gentity_t *ent) {
   unlagged_t *calc;
   trace_t tr;
   float r1, r2;
   float range;
 
-  if( !g_unlagged.integer )
-    return;
+  Com_Assert(ent && "G_UnlaggedDetectCollisions: ent is NULL");
 
-  if( !ent->client->pers.useUnlagged )
+  if(!g_unlagged.integer) {
     return;
+  }
 
-  calc = &ent->client->unlaggedCalc;
+  if(!ent->client->pers.useUnlagged) {
+    return;
+  }
+
+  calc = &unlagged_data[ent->s.number].unlaggedCalc;
 
   // if the client isn't moving, this is not necessary
-  if( VectorCompare( ent->client->oldOrigin, ent->client->ps.origin ) )
+  if( VectorCompare(ent->client->oldOrigin, ent->client->ps.origin)) {
     return;
+  }
 
-  range = Distance( ent->client->oldOrigin, ent->client->ps.origin );
+  range = Distance(ent->client->oldOrigin, ent->client->ps.origin);
 
   // increase the range by the player's largest possible radius since it's
   // the players bounding box that collides, not their origin
-  r1 = Distance( calc->origin, calc->mins );
-  r2 = Distance( calc->origin, calc->maxs );
-  range += ( r1 > r2 ) ? r1 : r2;
+  r1 = Distance(calc->origin, calc->mins);
+  r2 = Distance(calc->origin, calc->maxs);
+  range += (r1 > r2) ? r1 : r2;
 
-  G_UnlaggedOn( ent->s.number, ent->client->oldOrigin, range );
+  G_UnlaggedOn(ent->s.number, ent->client->oldOrigin, range);
 
   SV_Trace(&tr, ent->client->oldOrigin, ent->r.mins, ent->r.maxs,
-    ent->client->ps.origin, ent->s.number,  MASK_PLAYERSOLID, TT_AABB );
-  if( tr.entityNum >= 0 && tr.entityNum < MAX_CLIENTS )
-    g_entities[ tr.entityNum ].client->unlaggedCalc.used = qfalse;
+    ent->client->ps.origin, ent->s.number,  MASK_PLAYERSOLID, TT_AABB);
+
+  if(tr.entityNum >= 0 && tr.entityNum < MAX_CLIENTS) {
+    unlagged_data[ tr.entityNum ].unlaggedCalc.used = qfalse;
+  }
 
   G_UnlaggedOff( );
+}
+
+/*
+==============
+ G_GetUnlaggedOrigin
+
+ Outputs the unlagged origin for an entity when applicable, otherwsie outputs
+ the entity's currentOrigin
+==============
+*/
+void G_GetUnlaggedOrigin(gentity_t *ent, vec3_t origin) {
+  Com_Assert(ent && "G_GetUnlaggedOrigin: ent");
+
+  if( g_unlagged.integer && unlagged_data[ent->s.number].unlaggedCalc.used ) {
+    VectorCopy( unlagged_data[ent->s.number].unlaggedCalc.origin, origin );
+  } else {
+    VectorCopy( ent->r.currentOrigin, origin );
+  }
 }
 
 /*
@@ -2258,6 +2422,7 @@ void ClientThink_real( gentity_t *ent )
   int       *maxHealth = &client->ps.misc[ MISC_MAX_HEALTH ];
   int       oldEventSequence;
   int       msec;
+  int       unlaggedTime;
   usercmd_t *ucmd;
   int       i;
 
@@ -2288,7 +2453,7 @@ void ClientThink_real( gentity_t *ent )
   if( msec > 200 )
     msec = 200;
 
-  client->unlaggedTime = ucmd->serverTime;
+  unlaggedTime = ucmd->serverTime;
 
   if( pmove_msec.integer < 8 )
     Cvar_SetSafe( "pmove_msec", "8" );
@@ -2333,7 +2498,7 @@ void ClientThink_real( gentity_t *ent )
     return;
 
   // calculate where ent is currently seeing all the other active clients
-  G_UnlaggedCalc( ent->client->unlaggedTime, ent );
+  G_UnlaggedCalc( unlaggedTime, ent );
 
   if(
     client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
