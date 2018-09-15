@@ -530,12 +530,6 @@ typedef struct
 } clientPersistant_t;
 
 #define MAX_UNLAGGED_MARKERS 256
-typedef struct unlagged_s {
-  vec3_t      origin;
-  vec3_t      mins;
-  vec3_t      maxs;
-  qboolean    used;
-} unlagged_t;
 
 #define MAX_TRAMPLE_BUILDABLES_TRACKED 20
 // this structure is cleared on each ClientSpawn(),
@@ -621,11 +615,6 @@ struct gclient_s
   int                 firedBallLightningNum;
 
   int                 lastFlameBall;        // s.number of the last flame ball fired
-
-  unlagged_t          unlaggedHist[ MAX_UNLAGGED_MARKERS ];
-  unlagged_t          unlaggedBackup;
-  unlagged_t          unlaggedCalc;
-  int                 unlaggedTime;
 
   float               voiceEnthusiasm;
   char                lastVoiceCmd[ MAX_VOICE_CMD_LEN ];
@@ -1357,11 +1346,13 @@ void ClientCommand( int clientNum );
 // g_active.c
 //
 void VoterInactivityTimer( gentity_t *ent );
+void G_Init_Unlagged(void);
 void G_UnlaggedStore( void );
 void G_UnlaggedClear( gentity_t *ent );
 void G_UnlaggedCalc( int time, gentity_t *skipEnt );
 void G_UnlaggedOn( int attackerNum, vec3_t muzzle, float range );
 void G_UnlaggedOff( void );
+void G_GetUnlaggedOrigin(gentity_t *ent, vec3_t origin);
 void ClientThink( int clientNum );
 void ClientEndFrame( gentity_t *ent );
 void G_RunClient( gentity_t *ent );
