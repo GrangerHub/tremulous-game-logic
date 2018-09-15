@@ -142,7 +142,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     ASPAWN_SPLASHRADIUS,   //int       splashRadius;
     MOD_ASPAWN,            //int       meansOfDeath;
     TEAM_ALIENS,           //int       team;
-    ( 1 << WP_ABUILD )|( 1 << WP_ABUILD2 ), //weapon_t  buildWeapon;
+    ( 1 << WP_ABUILD ),    //weapon_t  buildWeapon;
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     ASPAWN_BT,             //int       buildTime;
@@ -482,7 +482,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     WP_NONE,               //weapon_t  turretProjType;
     0.707f,                //float     minNormal;
     qtrue,                //qboolean  invertNormal;
-    qtrue,                 //qboolean  creepTest;
+    qfalse,                 //qboolean  creepTest;
     BOOSTER_CREEPSIZE,     //int       creepSize;
     qfalse,                //qboolean  dccTest;
     qtrue,                 //qboolean  transparentTest;
@@ -491,12 +491,13 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  stackable;
     BOOSTER_BAT_PWR,       //int       batteryPower;
     RMT_SPHERE,            //rangeMarkerType_t rangeMarkerType;
-    0.0f,                  //float             rangeMarkerRange;
-    SHC_GREY,              //shaderColorEnum_t rangeMarkerColor;
+    CREEP_BASESIZE,        //float             rangeMarkerRange;
+    SHC_LIGHT_GREEN,       //shaderColorEnum_t rangeMarkerColor;
     qfalse,                //qboolean          rangeMarkerUseNormal;
     qfalse,                //qboolean          rangeMarkerOriginAtTop;
     (ROLE_SUPPORT|
-     ROLE_PERVASIVE)       //int               role;
+     ROLE_PERVASIVE|
+     ROLE_POWER_SOURCE)       //int               role;
   },
   {
     BA_A_HIVE,             //int       number;
@@ -1497,7 +1498,7 @@ static const classAttributes_t bg_classList[ ] =
     qtrue,                                          //qboolean enabled;
     "builder",                                      //char    *name;
     "Responsible for building and maintaining all the alien structures. "
-      "Has a weak melee slash attack.",
+      "Has a weak melee slash attack. No other alien can evolve into this basic granger.",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
     ABUILDER_HEALTH,                                //int     health;
     0.0f,                                           //float   maxHealthDecayRate;
@@ -1505,7 +1506,7 @@ static const classAttributes_t bg_classList[ ] =
     0.2f,                                           //float   fallDamage;
     ABUILDER_REGEN,                                 //float   regenRate;
     SCA_TAKESFALLDAMAGE|SCA_FOVWARPS|
-    SCA_ALIENSENSE|
+    SCA_WALLCLIMBER|SCA_ALIENSENSE|
     SCA_REGEN|SCA_CANHOVEL,                         //int    abilities;
     WP_ABUILD,                                      //weapon_t startWeapon;
     120.0f,                                         //float   buildDist;
@@ -1533,7 +1534,7 @@ static const classAttributes_t bg_classList[ ] =
     "A battle hardened upgrade to the base Granger. This Granger "
       "is the very definition of cute but deadly! In addition to "
       "being able to build structures it has a spit attack "
-      "that slows victims and the ability to crawl on walls.",
+      "that slows victims. Lacks the reproductive ability to build eggs.",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
     ABUILDER_UPG_HEALTH,                            //int     health;
     0.0f,                                           //float   maxHealthDecayRate;
@@ -2046,7 +2047,8 @@ int BG_ClassCanEvolveFromTo( class_t fclass,
       tclass == PCL_HUMAN ||
       tclass == PCL_HUMAN_BSUIT ||
       !BG_ClassIsAllowed( tclass, devMode ) ||
-      !BG_ClassAllowedInStage( tclass, stage, gameIsInWarmup ) )
+      !BG_ClassAllowedInStage( tclass, stage, gameIsInWarmup ) ||
+      tclass == PCL_ALIEN_BUILDER0 )
     return -1;
 
   if( gameIsInWarmup )
