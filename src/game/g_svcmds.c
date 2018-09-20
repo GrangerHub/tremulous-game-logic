@@ -563,6 +563,13 @@ static void Svcmd_G_AdvanceMapRotation_f( void )
   G_AdvanceMapRotation( 0 );
 }
 
+static void Svcmd_G_MemoryInfo( void ) {
+  BG_MemoryInfo( );
+
+  //local custom allocators
+  G_Unlagged_Memory_Info( );
+}
+
 struct svcmd
 {
   char     *cmd;
@@ -580,7 +587,7 @@ struct svcmd
   { "evacuation", qfalse, Svcmd_Evacuation_f },
   { "extend", qfalse, Svcmd_Extend_f },
   { "forceTeam", qfalse, Svcmd_ForceTeam_f },
-  { "game_memory", qfalse, BG_MemoryInfo },
+  { "game_memory", qfalse, Svcmd_G_MemoryInfo },
   { "humanWin", qfalse, Svcmd_TeamWin_f },
   { "layoutLoad", qfalse, Svcmd_LayoutLoad_f },
   { "layoutSave", qfalse, Svcmd_LayoutSave_f },

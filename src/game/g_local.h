@@ -79,39 +79,6 @@ typedef enum mover_type_s
   MM_MODEL
 } mover_motion_t;
 
-typedef enum mover_block_s
-{
-  MBLCK_NONE = 0, //not blocked
-  MBLCK_INDIRECT, //entity has collided with movable entity class that is
-                  //blocked either directly or indirectly.
-  MBLCK_DIRECT //collided with an entity class this entity can’t move.
-} mover_block_t;
-
-typedef enum mover_push_s
-{
-  MPUSH_NONE = 0,
-  MPUSH_RIDE, //groud entity is either a mover or something moved by a mover
-  MPUSH_RIDING_STACK_HIT, //hit by a stack that was not hit by a prime mover
-  MPUSH_PRIME_MOVER_HIT, //hit by a prime mover or by a stack hit by a prime mover
-} mover_push_t;
-
-typedef struct mover_data_s
-{
-  qboolean      checked_for_push;
-  qboolean      check_for_direct_block;
-  mover_block_t blocked; //block status for entity
-  mover_push_t  push_type[MAX_GENTITIES]; //indicates the push type of all other entities pushing this entity
-  mover_push_t  push_type_inflicted[MAX_GENTITIES]; //indicates the push type inflicted onto other entities
-
-  //origin/angles at the start of the move
-  vec3_t        start_origin;
-  vec3_t        start_angles;
-
-  //mins/maxs at the potential destination
-  vec3_t        dest_mins;
-  vec3_t        dest_maxs;
-} mover_data_t;
-
 /*
 --------------------------------------------------------------------------------
 To create a new expiration timer, add a new member to the expire_t enum below.
@@ -192,7 +159,6 @@ struct gentity_s
   vec3_t            pos1, pos2;
   float             rotatorAngle;
   gentity_t         *clipBrush;     // clipping brush for model doors
-  mover_data_t      mover_data; // used by entities moved directly and indirectly by movers
 
   char              *message;
 
@@ -528,8 +494,6 @@ typedef struct
   // level.time when teamoverlay info changed so we know to tell other players
   int                 infoChangeTime;
 } clientPersistant_t;
-
-#define MAX_UNLAGGED_MARKERS 256
 
 #define MAX_TRAMPLE_BUILDABLES_TRACKED 20
 // this structure is cleared on each ClientSpawn(),
@@ -869,9 +833,6 @@ typedef struct
   qboolean          alienTeamLocked;
   qboolean          humanTeamLocked;
   int               pausedTime;
-
-  int unlaggedIndex;
-  int unlaggedTimes[ MAX_UNLAGGED_MARKERS ];
 
   char              layout[ MAX_QPATH ];
 
@@ -1346,16 +1307,27 @@ void ClientCommand( int clientNum );
 // g_active.c
 //
 void VoterInactivityTimer( gentity_t *ent );
+void ClientThink( int clientNum );
+void ClientEndFrame( gentity_t *ent );
+void G_RunClient( gentity_t *ent );
+
+//
+// g_unlagged.c
+//
 void G_Init_Unlagged(void);
+void G_Unlagged_Memory_Info( void );
+void G_Unlagged_Prepare_Store(void);
+void G_Unlagged_Link_To_Store_Data(gentity_t *ent, qboolean dims, qboolean pos, qboolean apos);
 void G_UnlaggedStore( void );
 void G_UnlaggedClear( gentity_t *ent );
 void G_UnlaggedCalc( int time, gentity_t *skipEnt );
 void G_UnlaggedOn( int attackerNum, vec3_t muzzle, float range );
 void G_UnlaggedOff( void );
+void G_UnlaggedDetectCollisions(gentity_t *ent);
 void G_GetUnlaggedOrigin(gentity_t *ent, vec3_t origin);
-void ClientThink( int clientNum );
-void ClientEndFrame( gentity_t *ent );
-void G_RunClient( gentity_t *ent );
+void G_GetUnlaggedAngles(gentity_t *ent, vec3_t angles);
+void G_GetUnlaggedDimensions(gentity_t *ent, vec3_t mins, vec3_t maxs);
+void G_DisableUnlaggedCalc(gentity_t *ent);
 
 //
 // g_team.c

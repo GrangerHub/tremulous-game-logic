@@ -2302,6 +2302,7 @@ GOBJ_ = \
   $(B)/game/bg_list.o \
   $(B)/game/bg_queue.o \
   $(B)/game/g_active.o \
+  $(B)/game/g_unlagged.o \
   $(B)/game/g_client.o \
   $(B)/game/g_cmds.o \
   $(B)/game/g_combat.o \
