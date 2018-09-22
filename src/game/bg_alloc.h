@@ -123,6 +123,7 @@ macro wrappers.
         memoryInfo_##kind(); \
         Com_Printf("^3Memory Chunk Address: (^6%p^3)\n", ( chunkAddress ) ); \
         BG_MemFuncCalledFrom( calledFile, calledLine ); \
+        assert(expr); \
         Com_Error( ERR_DROP, "%s:%d: Assertion `%s' failed", \
                    __FILE__, __LINE__, #expr ); \
       }
@@ -158,6 +159,7 @@ custom allocator by all files that include said header.
 ======================
 */
 #define allocator_protos(name) \
+  static int unused_memory_chunks_##name(void); \
   static void memoryInfo_##name(void); \
   static void initPool_##name(char *calledFile, int calledLine); \
   static void *alloc_##name(char *calledFile, int calledLine); \
@@ -193,6 +195,9 @@ inremented towards the end of unused_##name[].
   static uint8_t buffer_##name[(count) * (((size_t)(size) & ~((size_t)0xF)) + (size_t)16)] __attribute__ ((aligned (16))); \
   static uint8_t *unused_##name[(count)]; \
   static uint8_t **stack_##name; \
+  static int unused_memory_chunks_##name(void) { \
+    return ((int)(stack_##name - unused_##name)+1); \
+  } \
   static void memoryInfo_##name(void){ \
     Com_Printf("^5---------------------------------------------^7\n"); \
     Com_Printf("^3Memory Info for Allocator ( ^6" #name "^3 )^7\n"); \
@@ -211,7 +216,7 @@ inremented towards the end of unused_##name[].
     Com_Printf("^3Size of Chunks: ^6%i bytes^7\n", (int)(((size_t)(size) & ~((size_t)0xF)) + (size_t)16)); \
     Com_Printf("^3Total Number of Chunks: ^6%i^7\n", (int)(count)); \
     Com_Printf("^3Number of Unused Chunks: ^6%i^7\n", \
-               (int)(stack_##name - unused_##name)+1); \
+               unused_memory_chunks_##name( )); \
     Com_Printf("^3Number of Used Chunks: ^6%i^7\n", \
                (int)(&unused_##name[(count)-1] - stack_##name)); \
     Com_Printf("^3Memory Pool Address Range: from (^60x%p^3) to (^60x%p^3)^7\n", \

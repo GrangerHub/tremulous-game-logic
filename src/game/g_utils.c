@@ -426,7 +426,6 @@ gentity_t *G_Spawn( void )
       // reuse this slot
       G_InitGentity( e );
       G_Entity_id_init( e );
-      G_UnlaggedClear( e );
       return e;
     }
 
@@ -451,7 +450,6 @@ gentity_t *G_Spawn( void )
 
   G_InitGentity( e );
   G_Entity_id_init( e );
-  G_UnlaggedClear( e );
   return e;
 }
 
@@ -504,6 +502,7 @@ void G_FreeEntity( gentity_t *ent )
   if( ent->neverFree )
     return;
 
+  G_UnlaggedClear( ent );
   memset( ent, 0, sizeof( *ent ) );
   ent->classname = "freent";
   ent->freetime = level.time;
@@ -901,7 +900,7 @@ void G_SetOrigin( gentity_t *ent, const vec3_t origin )
 {
   VectorCopy( origin, ent->s.pos.trBase );
   ent->s.pos.trType = TR_STATIONARY;
-  ent->s.pos.trTime = 0;
+  ent->s.pos.trTime = level.time;
   ent->s.pos.trDuration = 0;
   VectorClear( ent->s.pos.trDelta );
 
@@ -1254,8 +1253,8 @@ void G_Entity_id_init(gentity_t *ptr){
 
 void G_Entity_id_set(gentity_id *id,gentity_t *target){
   Com_Assert(id);
-  Com_Assert(target);
-  if( target->inuse )
+
+  if( target && target->inuse )
   {
     id->id = target->id;
     id->ptr = target;

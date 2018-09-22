@@ -1313,8 +1313,9 @@ Q_EXPORT void ClientBegin( int clientNum )
   if( client->pers.connected != CON_CONNECTING )
     return;
 
-  if( ent->r.linked )
+  if( ent->r.linked ) {
     SV_UnlinkEntity( ent );
+  }
 
   G_InitGentity( ent );
   ent->touch = 0;
@@ -1530,10 +1531,11 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   ent->takedamage = qtrue;
   ent->classname = "player";
   G_SetContents( ent, CONTENTS_BODY);
-  if( client->pers.teamSelection == TEAM_NONE )
+  if( client->pers.teamSelection == TEAM_NONE ) {
     G_SetClipmask( ent, MASK_ASTRALSOLID );
-  else
+  } else {
     G_SetClipmask( ent, MASK_PLAYERSOLID );
+  }
   ent->die = player_die;
   ent->waterlevel = 0;
   ent->watertype = 0;
@@ -1697,13 +1699,13 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   SV_GetUsercmd( client - level.clients, &ent->client->pers.cmd );
   G_SetClientViewAngle( ent, spawn_angles );
 
-  if( client->sess.spectatorState == SPECTATOR_NOT )
-  {
+  if( client->sess.spectatorState == SPECTATOR_NOT ) {
     SV_LinkEntity( ent );
 
     // force the base weapon up
-    if( client->pers.teamSelection == TEAM_HUMANS )
+    if( client->pers.teamSelection == TEAM_HUMANS ) {
       G_ForceWeaponChange( ent, weapon );
+    }
 
     client->ps.weaponstate = WEAPON_READY;
   }

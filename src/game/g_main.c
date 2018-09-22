@@ -2857,8 +2857,7 @@ void G_EndVote( team_t team, qboolean cancel )
 CheckCvars
 ==================
 */
-void CheckCvars( void )
-{
+void CheckCvars(void) {
   static int lastPasswordModCount         = -1;
   static int lastMarkDeconModCount        = -1;
   static int lastSDTimeModCount           = -1;
@@ -2867,45 +2866,43 @@ void CheckCvars( void )
   static int lastExtendTimeLimit          =  0;
   static int lastHumanStaminaModeModCount = -1;
   static int lastCheatsModCount           = -1;
+  static int lastUnlaggedModCount         = -1;
 
-  if( g_password.modificationCount != lastPasswordModCount )
-  {
+  if(g_password.modificationCount != lastPasswordModCount) {
     lastPasswordModCount = g_password.modificationCount;
 
-    if( *g_password.string && Q_stricmp( g_password.string, "none" ) )
-      Cvar_SetSafe( "g_needpass", "1" );
-    else
-      Cvar_SetSafe( "g_needpass", "0" );
+    if(*g_password.string && Q_stricmp(g_password.string, "none")) {
+      Cvar_SetSafe("g_needpass", "1");
+    }
+    else {
+      Cvar_SetSafe("g_needpass", "0");
+    }
   }
 
   // Unmark any structures for deconstruction when
   // the server setting is changed
-  if( g_markDeconstruct.modificationCount != lastMarkDeconModCount )
-  {
+  if(g_markDeconstruct.modificationCount != lastMarkDeconModCount) {
     lastMarkDeconModCount = g_markDeconstruct.modificationCount;
     G_ClearDeconMarks( );
   }
 
   // If we change g_suddenDeathTime during a map, we need to update
   // when sd will begin
-  if( g_suddenDeathTime.modificationCount != lastSDTimeModCount )
-  {
+  if(g_suddenDeathTime.modificationCount != lastSDTimeModCount) {
     lastSDTimeModCount = g_suddenDeathTime.modificationCount;
     level.suddenDeathBeginTime = g_suddenDeathTime.integer * 60000;
   }
 
   // If the number of zones changes, we need a new array
-  if( g_humanRepeaterMaxZones.integer != lastNumZones )
-  {
+  if(g_humanRepeaterMaxZones.integer != lastNumZones) {
     buildPointZone_t  *newZones;
-    size_t            newsize = g_humanRepeaterMaxZones.integer * sizeof( buildPointZone_t );
-    size_t            oldsize = lastNumZones * sizeof( buildPointZone_t );
+    size_t            newsize = g_humanRepeaterMaxZones.integer * sizeof(buildPointZone_t);
+    size_t            oldsize = lastNumZones * sizeof(buildPointZone_t);
 
-    newZones = BG_Alloc0( newsize );
-    if( level.buildPointZones )
-    {
-      Com_Memcpy( newZones, level.buildPointZones, MIN( oldsize, newsize ) );
-      BG_Free( level.buildPointZones );
+    newZones = BG_Alloc0(newsize);
+    if(level.buildPointZones) {
+      Com_Memcpy(newZones, level.buildPointZones, MIN(oldsize, newsize));
+      BG_Free(level.buildPointZones);
     }
 
     level.buildPointZones = newZones;
@@ -2913,46 +2910,49 @@ void CheckCvars( void )
   }
 
   // adjust settings related to time limit extensions
-  if( level.timeLimitInitialized )
-  {
+  if(level.timeLimitInitialized) {
     lastTimeLimitModCount = g_timelimit.modificationCount;
     level.timeLimitInitialized = qfalse;
   }
 
-  if( g_timelimit.modificationCount != lastTimeLimitModCount )
-  {
-    if( g_timelimit.integer < 0 )
-      Cvar_SetSafe( "timelimit" , "0" );
+  if(g_timelimit.modificationCount != lastTimeLimitModCount) {
+    if(g_timelimit.integer < 0)
+      Cvar_SetSafe("timelimit" , "0");
 
     level.extendTimeLimit = 0;
     lastExtendTimeLimit = 0;
     level.extendVoteCount = 0;
     level.matchBaseTimeLimit = g_timelimit.integer;
     lastTimeLimitModCount = g_timelimit.modificationCount;
-  } else if( level.extendTimeLimit != lastExtendTimeLimit )
-  {
-    Cvar_SetSafe( "timelimit", va( "%d", ( level.matchBaseTimeLimit +
-                                            level.extendTimeLimit ) ) );
+  } else if(level.extendTimeLimit != lastExtendTimeLimit) {
+    Cvar_SetSafe("timelimit", va("%d", (level.matchBaseTimeLimit +
+                                        level.extendTimeLimit)));
     lastExtendTimeLimit = level.extendTimeLimit;
     lastTimeLimitModCount = g_timelimit.modificationCount;
 
     // reset the time limit warnings
-    if( level.time - level.startTime < ( g_timelimit.integer - 5 ) * 60000 )
+    if(level.time - level.startTime < (g_timelimit.integer - 5) * 60000) {
       level.timelimitWarning = TW_NOT;
-    else if( level.time - level.startTime < ( g_timelimit.integer - 1 ) * 60000 )
+    }
+    else if(level.time - level.startTime < (g_timelimit.integer - 1) * 60000) {
       level.timelimitWarning = TW_IMMINENT;
+    }
   }
 
-  if( g_humanStaminaMode.modificationCount != lastHumanStaminaModeModCount )
-  {
+  if(g_humanStaminaMode.modificationCount != lastHumanStaminaModeModCount) {
     lastHumanStaminaModeModCount = g_humanStaminaMode.modificationCount;
-    SV_SetConfigstring( CS_HUMAN_STAMINA_MODE,
-                          va( "%i", g_humanStaminaMode.integer ) );
+    SV_SetConfigstring(CS_HUMAN_STAMINA_MODE, va("%i", g_humanStaminaMode.integer));
   }
 
-  if( g_cheats.modificationCount != lastCheatsModCount )
-  {
-    SV_SetConfigstring( CS_DEVMODE, va( "%i", g_cheats.integer ) );
+  if(g_cheats.modificationCount != lastCheatsModCount) {
+    SV_SetConfigstring(CS_DEVMODE, va("%i", g_cheats.integer));
+  }
+
+  if(g_unlagged.modificationCount != lastUnlaggedModCount) {
+    lastUnlaggedModCount = g_unlagged.modificationCount;
+    if(g_unlagged.integer) {
+      G_Init_Unlagged( );
+    }
   }
 
   level.frameMsec = Sys_Milliseconds( );
@@ -3090,6 +3090,7 @@ Q_EXPORT void G_RunFrame( int levelTime )
   //
   // go through all allocated objects
   //
+  G_Unlagged_Prepare_Store( );
   G_ResetPusherNum( );
   ent = &g_entities[ 0 ];
 
@@ -3148,24 +3149,32 @@ Q_EXPORT void G_RunFrame( int levelTime )
     if( ent->s.eType == ET_BUILDABLE )
     {
       G_BuildableThink( ent, msec );
+      G_Unlagged_Link_To_Store_Data(
+        ent,
+        (ent->s.modelindex == BA_A_BARRICADE),
+        qtrue,
+        qfalse);
       continue;
     }
 
     if( ent->s.eType == ET_CORPSE || ent->physicsObject )
     {
       G_Physics( ent, msec );
+      G_Unlagged_Link_To_Store_Data(ent, qfalse, qtrue, qfalse);
       continue;
     }
 
     if( ent->s.eType == ET_MOVER )
     {
       G_RunMover( ent );
+      G_Unlagged_Link_To_Store_Data(ent, qfalse, qtrue, qtrue);
       continue;
     }
 
     if( i < MAX_CLIENTS )
     {
       G_RunClient( ent );
+      G_Unlagged_Link_To_Store_Data(ent, qtrue, qtrue, qfalse);
       continue;
     }
 
