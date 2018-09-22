@@ -3153,6 +3153,7 @@ Q_EXPORT void G_RunFrame( int levelTime )
         ent,
         (ent->s.modelindex == BA_A_BARRICADE),
         qtrue,
+        qfalse,
         qfalse);
       continue;
     }
@@ -3160,21 +3161,23 @@ Q_EXPORT void G_RunFrame( int levelTime )
     if( ent->s.eType == ET_CORPSE || ent->physicsObject )
     {
       G_Physics( ent, msec );
-      G_Unlagged_Link_To_Store_Data(ent, qfalse, qtrue, qfalse);
+      G_Unlagged_Link_To_Store_Data(ent, qfalse, qtrue, qfalse, qfalse);
       continue;
     }
 
     if( ent->s.eType == ET_MOVER )
     {
       G_RunMover( ent );
-      G_Unlagged_Link_To_Store_Data(ent, qfalse, qtrue, qtrue);
+      G_Unlagged_Link_To_Store_Data(ent, qfalse, qtrue, qtrue, qfalse);
       continue;
     }
 
     if( i < MAX_CLIENTS )
     {
       G_RunClient( ent );
-      G_Unlagged_Link_To_Store_Data(ent, qtrue, qtrue, qfalse);
+      if(ent->client->pers.connected == CON_CONNECTED) {
+        G_Unlagged_Link_To_Store_Data(ent, qtrue, qfalse, qfalse, qtrue);
+      }
       continue;
     }
 
