@@ -1325,7 +1325,7 @@ void G_RunClient( gentity_t *ent );
 void G_Init_Unlagged(void);
 void G_Unlagged_Memory_Info( void );
 void G_Unlagged_Prepare_Store(void);
-void G_Unlagged_Link_To_Store_Data(gentity_t *ent, qboolean dims, qboolean pos, qboolean apos);
+void G_Unlagged_Link_To_Store_Data(gentity_t *ent, qboolean dims, qboolean pos, qboolean apos, qboolean origin);
 void G_UnlaggedStore( void );
 void G_UnlaggedClear( gentity_t *ent );
 void G_UnlaggedCalc( int time, gentity_t *skipEnt );

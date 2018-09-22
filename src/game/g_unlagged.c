@@ -54,6 +54,7 @@ void G_Unlagged_Memory_Info( void ) {
 typedef struct unlagged_history_frame_s {
   trajectory_t       *pos;
   trajectory_t       *apos;
+  vec3_t             origin;
   vec3_t             mins;
   vec3_t             maxs;
 } unlagged_history_frame_t;
@@ -61,6 +62,7 @@ typedef struct unlagged_history_frame_s {
 static struct frame_usage_s {
   qboolean frame[ENTITYNUM_MAX_NORMAL];
   qboolean dims[ENTITYNUM_MAX_NORMAL];
+  qboolean origin[ENTITYNUM_MAX_NORMAL];
 } frame_usage[MAX_UNLAGGED_HISTORY_WHEEL_FRAMES];
 
 typedef struct unlagged_latest_hist_data_s {
@@ -84,6 +86,7 @@ typedef struct unlagged_s {
 
 typedef struct unlagged_data_s {
   qboolean                     data_stored;
+  qboolean                     use_origin;
   unlagged_history_frame_t     history_wheel[MAX_UNLAGGED_HISTORY_WHEEL_FRAMES];
   unlagged_latest_hist_traj_t  latest_saved_pos;
   unlagged_latest_hist_traj_t  latest_saved_apos;
@@ -96,6 +99,7 @@ static unlagged_data_t *unlagged_data_head;
 static int             history_wheel_times[MAX_UNLAGGED_HISTORY_WHEEL_FRAMES];
 static int             current_history_frame;
 static bgqueue_t       dims_store_list = BG_QUEUE_INIT;
+static bgqueue_t       origin_store_list = BG_QUEUE_INIT;
 static bgqueue_t       pos_store_list = BG_QUEUE_INIT;
 static bgqueue_t       apos_store_list = BG_QUEUE_INIT;
 
@@ -113,6 +117,7 @@ void G_Init_Unlagged(void) {
   memset(&unlagged_data, 0, sizeof(unlagged_data));
   memset(frame_usage, 0, sizeof(unlagged_data));
   BG_Queue_Clear(&dims_store_list);
+  BG_Queue_Clear(&origin_store_list);
   BG_Queue_Clear(&pos_store_list);
   BG_Queue_Clear(&apos_store_list);
 }
@@ -130,6 +135,7 @@ void G_Unlagged_Prepare_Store(void) {
   }
 
   BG_Queue_Clear(&dims_store_list);
+  BG_Queue_Clear(&origin_store_list);
   BG_Queue_Clear(&pos_store_list);
   BG_Queue_Clear(&apos_store_list);
 }
@@ -146,7 +152,8 @@ void G_Unlagged_Link_To_Store_Data(
   gentity_t *ent,
   qboolean dims,
   qboolean pos,
-  qboolean apos) {
+  qboolean apos,
+  qboolean origin) {
   Com_Assert(ent && "G_Unlagged_Link_To_Store_Data: ent is NULL")
 
   if(!g_unlagged.integer) {
@@ -172,6 +179,10 @@ void G_Unlagged_Link_To_Store_Data(
   if(apos) {
     BG_Queue_Push_Head(&apos_store_list, ent);
   }
+
+  if(origin) {
+    BG_Queue_Push_Head(&origin_store_list, ent);
+  }
 }
 
 /*
@@ -192,6 +203,26 @@ static void G_Unlagged_Store_Dimensions(void *data, void *user_data) {
   frame_usage[current_history_frame].frame[ent->s.number] = qtrue;
   frame_usage[current_history_frame].dims[ent->s.number] = qtrue;
   unlagged_data[ent->s.number].data_stored = qtrue;
+}
+
+/*
+==============
+ G_Unlagged_Store_Origin
+==============
+*/
+static void G_Unlagged_Store_Origin(void *data, void *user_data) {
+  gentity_t                *ent = (gentity_t *)data;
+  unlagged_history_frame_t *save;
+
+  Com_Assert(ent && "G_Unlagged_Store_Origin: ent is NULL");
+
+  save = &unlagged_data[ent->s.number].history_wheel[current_history_frame];
+
+  VectorCopy(ent->r.currentOrigin, save->origin);
+  frame_usage[current_history_frame].frame[ent->s.number] = qtrue;
+  frame_usage[current_history_frame].origin[ent->s.number] = qtrue;
+  unlagged_data[ent->s.number].data_stored = qtrue;
+  unlagged_data[ent->s.number].use_origin = qtrue;
 }
 
 /*
@@ -343,6 +374,7 @@ void G_UnlaggedStore( void ) {
     sizeof(frame_usage[current_history_frame]));
 
   BG_Queue_Foreach(&dims_store_list, G_Unlagged_Store_Dimensions, NULL);
+  BG_Queue_Foreach(&origin_store_list, G_Unlagged_Store_Origin, NULL);
   BG_Queue_Foreach(&pos_store_list, G_Unlagged_Store_pos, NULL);
   BG_Queue_Foreach(&apos_store_list, G_Unlagged_Store_apos, NULL);
 }
@@ -363,6 +395,7 @@ void G_UnlaggedClear(gentity_t *ent) {
 
     for(i = 0; i < MAX_UNLAGGED_HISTORY_WHEEL_FRAMES; i++) {
       frame_usage[i].frame[ent->s.number] = qfalse;
+      frame_usage[i].origin[ent->s.number] = qfalse;
       frame_usage[i].dims[ent->s.number] = qfalse;
     }
 
@@ -371,6 +404,7 @@ void G_UnlaggedClear(gentity_t *ent) {
 
     unlagged_data[ent->s.number].calc.used = qfalse;
     unlagged_data[ent->s.number].data_stored = qfalse;
+    unlagged_data[ent->s.number].use_origin = qfalse;
   }
 }
 
@@ -474,6 +508,7 @@ void G_UnlaggedCalc(int time, gentity_t *rewindEnt) {
         continue;
       }
     }
+
     if(frame_usage[startIndex].frame[i]) {
       start_index_frame_used = qtrue;
     }
@@ -482,7 +517,7 @@ void G_UnlaggedCalc(int time, gentity_t *rewindEnt) {
       stop_index_frame_used = qtrue;
     }
 
-    //for calculating the origin
+    //for calculating the pos
     if(
       unlagged_data_for_ent->latest_saved_pos.used &&
       unlagged_data_for_ent->latest_saved_pos.traj ) {
@@ -517,7 +552,7 @@ void G_UnlaggedCalc(int time, gentity_t *rewindEnt) {
       }
     }
 
-    //for calculating the angles
+    //for calculating the apos
     if(
       unlagged_data_for_ent->latest_saved_apos.used &&
       unlagged_data_for_ent->latest_saved_apos.traj) {
@@ -595,27 +630,55 @@ void G_UnlaggedCalc(int time, gentity_t *rewindEnt) {
     }
 
     //calculate the origin
-    if(start_pos) {
-      Com_Assert(stop_pos && "G_UnlaggedCalc:stop_pos is NULL");
-
+    if(start_index_frame_used &&
+      frame_usage[startIndex].origin[i]) {
       unlagged_data_for_ent->calc.use_origin = qtrue;
 
-      if(
-        start_pos->trTime == stop_pos->trTime &&
-        start_pos->trType == stop_pos->trType) {
-        int used_time = (time > start_pos->trTime) ? time : start_pos->trTime;
-
-        BG_EvaluateTrajectory(start_pos, used_time, unlagged_data_for_ent->calc.origin);
+      if(stop_index_frame_used) {
+        // between two unlagged markers
+        VectorLerp2( lerp, unlagged_data_for_ent->history_wheel[ startIndex ].origin,
+          unlagged_data_for_ent->history_wheel[ stopIndex ].origin,
+          unlagged_data_for_ent->calc.origin );
       } else {
-        vec3_t start_origin, stop_origin;
-
-        //lerp
-        BG_EvaluateTrajectory(start_pos, history_wheel_times[startIndex], start_origin);
-        BG_EvaluateTrajectory(stop_pos, history_wheel_times[stopIndex], stop_origin);
-        VectorLerp2( lerp, start_origin, stop_origin, unlagged_data_for_ent->calc.origin );
+        VectorCopy(
+          unlagged_data_for_ent->history_wheel[ startIndex ].origin,
+          unlagged_data_for_ent->calc.origin);
       }
+    } else if(stop_index_frame_used && frame_usage[stopIndex].origin[i]) {
+      unlagged_data_for_ent->calc.use_origin = qtrue;
+
+      VectorCopy(
+        unlagged_data_for_ent->history_wheel[ stopIndex ].origin,
+        unlagged_data_for_ent->calc.origin);
     } else {
       unlagged_data_for_ent->calc.use_origin = qfalse;
+    }
+
+
+    if(!unlagged_data_for_ent->calc.use_origin) {
+      //calculate the pos
+      if(start_pos) {
+        Com_Assert(stop_pos && "G_UnlaggedCalc:stop_pos is NULL");
+
+        unlagged_data_for_ent->calc.use_origin = qtrue;
+
+        if(
+          start_pos->trTime == stop_pos->trTime &&
+          start_pos->trType == stop_pos->trType) {
+          int used_time = (time > start_pos->trTime) ? time : start_pos->trTime;
+
+          BG_EvaluateTrajectory(start_pos, used_time, unlagged_data_for_ent->calc.origin);
+        } else {
+          vec3_t start_origin, stop_origin;
+
+          //lerp
+          BG_EvaluateTrajectory(start_pos, history_wheel_times[startIndex], start_origin);
+          BG_EvaluateTrajectory(stop_pos, history_wheel_times[stopIndex], stop_origin);
+          VectorLerp2( lerp, start_origin, stop_origin, unlagged_data_for_ent->calc.origin );
+        }
+      } else {
+        unlagged_data_for_ent->calc.use_origin = qfalse;
+      }
     }
 
     //calculate the angles
@@ -761,7 +824,7 @@ void G_UnlaggedOn(int attackerNum, vec3_t muzzle, float range) {
 
       //change to the unlagged dimentions
       VectorCopy(calc->mins, ent->r.mins);
-      VectorCopy(calc->maxs, ent->r.mins);
+      VectorCopy(calc->maxs, ent->r.maxs);
     }
 
     if(calc->use_origin) {
