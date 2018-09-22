@@ -217,6 +217,7 @@ static qboolean G_SaveTrajectory(
     //only save if the trajectory changed from the last valid saved trajectory
     if(
       traj->trTime != current_traj->trTime ||
+      ent->client ||
       !latest_saved_traj->used) {
       if(*latest_saved_traj->latest_frame_traj_pointer != traj) {
         free_unlagged_trajectory(traj, __FILE__, __LINE__);
