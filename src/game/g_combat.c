@@ -827,9 +827,10 @@ G_CalcDamageModifier
 */
 static float G_CalcDamageModifier( vec3_t point, gentity_t *targ, gentity_t *attacker, int class, int dflags )
 {
-  vec3_t  targOrigin, bulletPath, bulletAngle, pMINUSfloor, floor, normal;
-  float   clientHeight, hitRelative, hitRatio, modifier;
-  int     hitRotation, i;
+  vec3_t targOrigin, bulletPath, bulletAngle, pMINUSfloor, floor, normal;
+  vec3_t mins, maxs;
+  float  clientHeight, hitRelative, hitRatio, modifier;
+  int    hitRotation, i;
 
   if( point == NULL )
     return 1.0f;
@@ -841,12 +842,14 @@ static float G_CalcDamageModifier( vec3_t point, gentity_t *targ, gentity_t *att
   // Get the point location relative to the floor under the target
   G_GetUnlaggedOrigin(targ, targOrigin);
 
+  G_GetUnlaggedDimensions(targ, mins, maxs);
+
   BG_GetClientNormal( &targ->client->ps, normal );
-  VectorMA( targOrigin, targ->r.mins[ 2 ], normal, floor );
+  VectorMA( targOrigin, mins[ 2 ], normal, floor );
   VectorSubtract( point, floor, pMINUSfloor );
 
   // Get the proportion of the target height where the hit landed
-  clientHeight = targ->r.maxs[ 2 ] - targ->r.mins[ 2 ];
+  clientHeight = maxs[ 2 ] - mins[ 2 ];
 
   if( !clientHeight )
     clientHeight = 1.0f;

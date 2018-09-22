@@ -24,7 +24,42 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "g_local.h"
 
+typedef enum mover_block_s
+{
+  MBLCK_NONE = 0, //not blocked
+  MBLCK_INDIRECT, //entity has collided with movable entity class that is
+                  //blocked either directly or indirectly.
+  MBLCK_DIRECT //collided with an entity class this entity can’t move.
+} mover_block_t;
 
+typedef enum mover_push_s {
+  MPUSH_NONE = 0,
+  MPUSH_RIDE, //groud entity is either a mover or something moved by a mover
+  MPUSH_RIDING_STACK_HIT, //hit by a stack that was not hit by a prime mover
+  MPUSH_PRIME_MOVER_HIT, //hit by a prime mover or by a stack hit by a prime mover
+} mover_push_t;
+
+typedef struct mover_data_s {
+  qboolean      checked_for_push;
+  qboolean      check_for_direct_block;
+  mover_block_t blocked; //block status for entity
+
+  //origin/angles at the start of the move
+  vec3_t        start_origin;
+  vec3_t        start_angles;
+
+  //mins/maxs at the potential destination
+  vec3_t        dest_mins;
+  vec3_t        dest_maxs;
+} mover_data_t;
+
+typedef struct pushes_s {
+  mover_data_t mover_data[MAX_GENTITIES];
+  //first index is the pusher, second is the pushee
+  mover_push_t type[MAX_GENTITIES][MAX_GENTITIES]; 
+} pushes_t;
+
+static pushes_t pushes;
 
 /*
 ===============================================================================
@@ -131,12 +166,11 @@ static qboolean G_Set_Push_Type(
   Com_Assert(ent && "G_Set_Push_Type: ent is NULL");
   Com_Assert(pusher && "G_Set_Push_Type: pusher is NULL")
 
-  if(push_type <= ent->mover_data.push_type[pusher->s.number]) {
+  if(push_type <= pushes.type[pusher->s.number][ent->s.number]) {
     return qfalse;
   }
 
-  ent->mover_data.push_type[pusher->s.number] = push_type;
-  pusher->mover_data.push_type_inflicted[ent->s.number] = push_type;
+  pushes.type[pusher->s.number][ent->s.number] = push_type;
   return qtrue;
 }
 
@@ -285,7 +319,6 @@ static qboolean G_Pushable_Area_Ents_For_Move(
   gentity_t   *ent,
   push_data_t *push_data,
   bgqueue_t   *ent_list) {
-  mover_data_t *mover_data;
   qboolean    check_for_direct_block = qfalse;
   int         ent_array[MAX_GENTITIES];
   int         i, num;
@@ -294,15 +327,13 @@ static qboolean G_Pushable_Area_Ents_For_Move(
   Com_Assert(push_data && "G_Pushable_Area_Ents_For_Move: push_data is NULL");
   Com_Assert(ent_list && "G_Pushable_Area_Ents_For_Move: ent_list is NULL");
 
-  mover_data = &ent->mover_data;
-
   // mins/maxs are the bounds at the destination
-  VectorCopy(ent->r.absmin, mover_data->dest_mins);
-  VectorCopy(ent->r.absmax, mover_data->dest_maxs);
+  VectorCopy(ent->r.absmin, pushes.mover_data[ent->s.number].dest_mins);
+  VectorCopy(ent->r.absmax, pushes.mover_data[ent->s.number].dest_maxs);
 
   num = SV_AreaEntities(
-          mover_data->dest_mins,
-          mover_data->dest_maxs,
+          pushes.mover_data[ent->s.number].dest_mins,
+          pushes.mover_data[ent->s.number].dest_maxs,
           ent_array,
           MAX_GENTITIES);
   for(i = 0; i < num; i++) {
@@ -314,7 +345,7 @@ static qboolean G_Pushable_Area_Ents_For_Move(
     }
 
     //don't push back an ent that pushed this ent
-    if(mover_data->push_type[pushable->s.number] > MPUSH_NONE) {
+    if(pushes.type[pushable->s.number][ent->s.number] > MPUSH_NONE) {
       continue;
     }
 
@@ -410,7 +441,7 @@ static void G_Find_Mover_Pushes(void *data, void *user_data ) {
       (push_data->pusher->s.eFlags & EF_MOVER_STOP) &&
       G_Get_Foundation_Ent_Num(check) != push_data->pusher->s.number) {
       G_Set_Push_Type(check, push_data->carrier, push_data->push_type);
-      check->mover_data.check_for_direct_block = qtrue;
+      pushes.mover_data[check->s.number].check_for_direct_block = qtrue;
       return;
     }
 
@@ -422,7 +453,7 @@ static void G_Find_Mover_Pushes(void *data, void *user_data ) {
     if(!G_Set_Push_Type(check, push_data->carrier, push_data->push_type)) {
       return;
     }
-    check->mover_data.checked_for_push = qtrue;
+    pushes.mover_data[check->s.number].checked_for_push = qtrue;
 
     //move the entity
     G_Push_Ent(check, push_data);
@@ -432,7 +463,7 @@ static void G_Find_Mover_Pushes(void *data, void *user_data ) {
   if(
     G_Pushable_Area_Ents_For_Move(check, push_data, &pushable_ents) &&
     check->s.eType != ET_MOVER) {
-    check->mover_data.check_for_direct_block = qtrue;
+    pushes.mover_data[check->s.number].check_for_direct_block = qtrue;
   }
 
   //check any and all collided pushable entities
@@ -460,7 +491,8 @@ static void G_Find_Mover_Pushes(void *data, void *user_data ) {
     }
 
     //don't check riders that have already been checked
-    if(rider->mover_data.push_type[check->s.number]) {
+    
+    if(pushes.type[check->s.number][rider->s.number] > MPUSH_NONE) {
       continue;
     }
 
@@ -470,7 +502,7 @@ static void G_Find_Mover_Pushes(void *data, void *user_data ) {
     }
 
     //entities that pushed check are not riders
-    if(check->mover_data.push_type[rider->s.number] > MPUSH_NONE) {
+    if(pushes.type[rider->s.number][check->s.number] > MPUSH_NONE) {
       continue;
     }
 
@@ -521,7 +553,7 @@ static qboolean G_All_Collisions_Are_Cleared(gentity_t *ent) {
   Com_Assert(ent && "G_All_Collisions_Are_Cleared: ent is NULL");
 
   for(i = 0; i < ENTITYNUM_MAX_NORMAL; i++) {
-    if(ent->mover_data.push_type[i] != MPUSH_NONE) {
+    if(pushes.type[i][ent->s.number] != MPUSH_NONE) {
       return qfalse;
     }
   }
@@ -545,21 +577,21 @@ static void G_Clear_Riding_Stack_Collisions(gentity_t *ent) {
     return;
   }
 
-  ent->mover_data.checked_for_push = qfalse;
-  ent->mover_data.check_for_direct_block = qfalse;
+  pushes.mover_data[ent->s.number].checked_for_push = qfalse;
+  pushes.mover_data[ent->s.number].check_for_direct_block = qfalse;
 
   for(i = 0; i < ENTITYNUM_MAX_NORMAL; i++) {
     gentity_t *stack_rider = &g_entities[i];
 
     if(
-      ent->mover_data.push_type_inflicted[i] != MPUSH_RIDING_STACK_HIT ||
-      ent->mover_data.push_type_inflicted[i] != MPUSH_RIDE) {
+      pushes.type[ent->s.number][i] != MPUSH_RIDING_STACK_HIT ||
+      pushes.type[ent->s.number][i] != MPUSH_RIDE) {
       continue;
     }
 
     //clear the collision
-    ent->mover_data.push_type_inflicted[i] = MPUSH_NONE;
-    stack_rider->mover_data.push_type[ent->s.number] = MPUSH_NONE;
+    pushes.type[ent->s.number][i] = MPUSH_NONE;
+    pushes.type[ent->s.number][stack_rider->s.number] = MPUSH_NONE;
     G_Clear_Riding_Stack_Collisions(stack_rider);
   }
 }
@@ -579,13 +611,13 @@ static void G_Clear_Rider_Collisions(gentity_t *ent) {
   for(i = 0; i < ENTITYNUM_MAX_NORMAL; i++) {
     gentity_t *rider = &g_entities[i];
 
-    if(ent->mover_data.push_type_inflicted[i] != MPUSH_RIDE) {
+    if(pushes.type[ent->s.number][i] != MPUSH_RIDE) {
       continue;
     }
 
     //clear the collision
-    ent->mover_data.push_type_inflicted[i] = MPUSH_NONE;
-    rider->mover_data.push_type[ent->s.number] = MPUSH_NONE;
+    pushes.type[ent->s.number][i] = MPUSH_NONE;
+    pushes.type[ent->s.number][rider->s.number] = MPUSH_NONE;
     G_Clear_Riding_Stack_Collisions(rider);
   }
 }
@@ -601,13 +633,13 @@ static void G_Block_Stack(gentity_t *ent) {
   int i;
   Com_Assert(ent && "G_Block_Stack: ent is NULL");
 
-  if(ent->mover_data.blocked == MBLCK_NONE) {
-    ent->mover_data.blocked = MBLCK_INDIRECT;
+  if(pushes.mover_data[ent->s.number].blocked == MBLCK_NONE) {
+    pushes.mover_data[ent->s.number].blocked = MBLCK_INDIRECT;
 
     G_Clear_Rider_Collisions(ent);
 
     for(i = 0; i < MAX_GENTITIES; i++) {
-      if(ent->mover_data.push_type[i] != MPUSH_RIDING_STACK_HIT) {
+      if(pushes.type[i][ent->s.number] != MPUSH_RIDING_STACK_HIT) {
         continue;
       }
 
@@ -624,14 +656,11 @@ G_Ent_Is_Directly_Blocked
 static qboolean G_Entity_Is_Directly_Blocked(
   gentity_t    *ent,
   push_data_t  *push_data) {
-  mover_data_t *mover_data;
   int           ent_array[MAX_GENTITIES];
   int           i, num;
 
   Com_Assert(ent && "G_Entity_Is_Directly_Blocked: ent is NULL");
   Com_Assert(push_data && "G_Entity_Is_Directly_Blocked: push_data is NULL");
-
-  mover_data = &ent->mover_data;
 
   //check if there is collision against the world
   if(G_TestEntAgainstOtherEnt(ent, ENTITYNUM_WORLD)) {
@@ -639,8 +668,8 @@ static qboolean G_Entity_Is_Directly_Blocked(
   }
 
   num = SV_AreaEntities(
-          mover_data->dest_mins,
-          mover_data->dest_maxs,
+          pushes.mover_data[ent->s.number].dest_mins,
+          pushes.mover_data[ent->s.number].dest_maxs,
           ent_array,
           MAX_GENTITIES);
   for(i = 0; i < num; i++) {
@@ -712,7 +741,7 @@ static qboolean G_Find_Mover_Blockage(
       return qtrue;
     }
 
-    if(check->mover_data.checked_for_push) {
+    if(pushes.mover_data[check->s.number].checked_for_push) {
       G_Push_Ent(check, push_data);
     }
   }
@@ -721,15 +750,15 @@ static qboolean G_Find_Mover_Blockage(
   for(i = 0; i < MAX_GENTITIES; i++) {
     check = &g_entities[i];
 
-    if(!check->mover_data.check_for_direct_block) {
+    if(!pushes.mover_data[check->s.number].check_for_direct_block) {
       continue;
     }
 
     if(G_Entity_Is_Directly_Blocked(check, push_data)) {
-      check->mover_data.blocked = MBLCK_DIRECT;
+      pushes.mover_data[check->s.number].blocked = MBLCK_DIRECT;
     }
 
-    check->mover_data.check_for_direct_block = qfalse;
+    pushes.mover_data[check->s.number].check_for_direct_block = qfalse;
   }
 
   //propogate from direct blocking through collisions
@@ -738,18 +767,18 @@ static qboolean G_Find_Mover_Blockage(
 
     check = &g_entities[i];
 
-    if(check->mover_data.blocked != MBLCK_DIRECT) {
+    if(pushes.mover_data[check->s.number].blocked != MBLCK_DIRECT) {
       continue;
     }
 
     G_Clear_Rider_Collisions(check);
 
     for(j = 0; j < MAX_GENTITIES; j++) {
-      if(check->mover_data.push_type[j] < MPUSH_RIDING_STACK_HIT) {
+      if(pushes.type[j][check->s.number] < MPUSH_RIDING_STACK_HIT) {
         continue;
       }
 
-      if(check->mover_data.push_type[j] == MPUSH_PRIME_MOVER_HIT) {
+      if(pushes.type[j][check->s.number] == MPUSH_PRIME_MOVER_HIT) {
         // bobbing entities are instant-kill and never get blocked
         if(
           push_data->pusher->s.pos.trType == TR_SINE ||
@@ -817,18 +846,18 @@ static void G_Push_Unblocked_Ents(push_data_t *push_data) {
   for(i = 0; i < MAX_GENTITIES; i++) {
     check = &g_entities[i];
 
-    if(!check->mover_data.checked_for_push) {
+    if(!pushes.mover_data[check->s.number].checked_for_push) {
       continue;
     }
 
     //don't push blocked stacks that are riding
-    if(check->mover_data.blocked != MBLCK_NONE) {
+    if(pushes.mover_data[check->s.number].blocked != MBLCK_NONE) {
       if(
         check->s.groundEntityNum != ENTITYNUM_NONE &&
         (
           check->s.groundEntityNum == push_data->pusher->s.number ||
-          check->mover_data.push_type[check->s.groundEntityNum] == MPUSH_NONE ||
-          g_entities[check->s.groundEntityNum].mover_data.blocked != MBLCK_NONE)) {
+          pushes.type[check->s.groundEntityNum][check->s.number] == MPUSH_NONE ||
+          pushes.mover_data[check->s.groundEntityNum].blocked != MBLCK_NONE)) {
         //blocked entities slide
         check->s.groundEntityNum = ENTITYNUM_NONE;
       }
@@ -843,8 +872,8 @@ static void G_Push_Unblocked_Ents(push_data_t *push_data) {
       check->s.groundEntityNum != ENTITYNUM_NONE &&
       check->s.groundEntityNum != push_data->pusher->s.number &&
       (
-        !g_entities[check->s.groundEntityNum].mover_data.checked_for_push ||
-        g_entities[check->s.groundEntityNum].mover_data.blocked != MBLCK_NONE)) {
+        !pushes.mover_data[check->s.groundEntityNum].checked_for_push ||
+        pushes.mover_data[check->s.groundEntityNum].blocked != MBLCK_NONE)) {
       check->s.groundEntityNum = ENTITYNUM_NONE;
     }
 
@@ -874,26 +903,18 @@ static qboolean G_TryPushingEntities(
   Com_Assert(obstacles && "G_TryPushingEntities: obstacles is NULL");
 
   //initialize this prime pusher of the move
+  memset(&pushes, 0, sizeof(pushes_t));
+  for( i = 0; i < MAX_GENTITIES; i++ ) {
+    VectorCopy(g_entities[i].r.currentOrigin, pushes.mover_data[i].start_origin);
+    VectorCopy(g_entities[i].r.currentAngles, pushes.mover_data[i].start_angles);
+  }
   push_data.pusher = push_data.carrier = pusher;
   push_data.push_type = MPUSH_PRIME_MOVER_HIT;
   VectorCopy(start_origin, push_data.start_origin);
-  VectorCopy(start_origin, push_data.pusher->mover_data.start_origin);
-  VectorCopy(start_angles, push_data.pusher->mover_data.start_angles);
+  VectorCopy(start_origin, pushes.mover_data[push_data.pusher->s.number].start_origin);
+  VectorCopy(start_angles, pushes.mover_data[push_data.pusher->s.number].start_angles);
   VectorCopy(move, push_data.move);
   VectorCopy(amove, push_data.amove);
-  for( i = 0; i < MAX_GENTITIES; i++ ) {
-    gentity_t *ent = &g_entities[i];
-
-    ent->mover_data.blocked = MBLCK_NONE;
-    ent->mover_data.check_for_direct_block = qfalse;
-    ent->mover_data.checked_for_push = qfalse;
-    memset( ent->mover_data.push_type, 0, sizeof(ent->mover_data.push_type) );
-    memset( ent->mover_data.push_type_inflicted, 0, sizeof(ent->mover_data.push_type_inflicted) );
-    VectorCopy(ent->r.currentOrigin, ent->mover_data.start_origin);
-    VectorCopy(ent->r.currentAngles, ent->mover_data.start_angles);
-    VectorClear(ent->mover_data.dest_mins);
-    VectorClear(ent->mover_data.dest_maxs);
-  }
 
   //Recursively find all push collisions
   G_Find_Mover_Pushes(check, &push_data);
@@ -2256,11 +2277,11 @@ void SP_func_door_model( gentity_t *ent )
   ent->moverMotionType = MM_MODEL;
   ent->s.eType = ET_MODELDOOR;
   ent->s.pos.trType = TR_STATIONARY;
-  ent->s.pos.trTime = 0;
+  ent->s.pos.trTime = level.time;
   ent->s.pos.trDuration = 0;
   VectorClear( ent->s.pos.trDelta );
   ent->s.apos.trType = TR_STATIONARY;
-  ent->s.apos.trTime = 0;
+  ent->s.apos.trTime = level.time;
   ent->s.apos.trDuration = 0;
   VectorClear( ent->s.apos.trDelta );
 
