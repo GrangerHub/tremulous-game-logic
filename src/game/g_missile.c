@@ -109,8 +109,14 @@ G_KickUpMissile
 */
 void G_KickUpMissile( gentity_t *ent )
 {
-  ent->s.pos.trDelta[2] = 350.0f;
+  vec3_t velocity, origin;
+
+  BG_EvaluateTrajectory(&ent->s.pos, level.time, origin);
+  BG_EvaluateTrajectoryDelta( &ent->s.pos, level.time, velocity );
+  velocity[2] = 350.0f;
+  VectorCopy( velocity, ent->s.pos.trDelta);
   ent->s.pos.trType = TR_GRAVITY;
+  VectorCopy( origin, ent->s.pos.trBase );
   ent->s.pos.trTime = level.time;
   ent->think = G_ExplodeMissile;
   ent->nextthink = level.time + 650;
