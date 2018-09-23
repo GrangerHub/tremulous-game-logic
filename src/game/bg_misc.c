@@ -2048,7 +2048,7 @@ int BG_ClassCanEvolveFromTo( class_t fclass,
       tclass == PCL_HUMAN_BSUIT ||
       !BG_ClassIsAllowed( tclass, devMode ) ||
       !BG_ClassAllowedInStage( tclass, stage, gameIsInWarmup ) ||
-      tclass == PCL_ALIEN_BUILDER0 )
+      (tclass == PCL_ALIEN_BUILDER0 && !(gameIsInWarmup)) )
     return -1;
 
   if( gameIsInWarmup )
