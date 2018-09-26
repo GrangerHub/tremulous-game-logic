@@ -2297,12 +2297,16 @@ Q_EXPORT void ClientThink( int clientNum )
 }
 
 
-void G_RunClient( gentity_t *ent )
+void G_RunClient(gentity_t *ent)
 {
-  if( level.fight && ( ( g_doWarmup.integer && !g_doCountdown.integer ) ||
-      level.countdownTime <= ( level.time + 1000 ) ) )
-  {
+  if(
+    ent->client->pers.fight &&
+    ((g_doWarmup.integer) ||
+      (level.countdownTime > 0 &&
+        level.countdownTime <= ( level.time + 1000)))) {
     G_AddPredictableEvent( ent, EV_FIGHT, 0 );
+
+    ent->client->pers.fight = qfalse;
   }
 
   if( !g_synchronousClients.integer )

@@ -65,6 +65,7 @@ vmCvar_t  g_warmupBuildableRespawnTime;
 vmCvar_t  g_warmupDefensiveBuildableRespawnTime;
 vmCvar_t  g_warmupBlockEnemyBuilding;
 vmCvar_t  g_warmupFriendlyBuildableFire;
+vmCvar_t  g_nextMapStartedMatchWhenEmptyTeams;
 
 vmCvar_t  g_damageProtection;
 vmCvar_t  g_targetProtection;
@@ -72,6 +73,7 @@ vmCvar_t  g_targetProtection;
 vmCvar_t  g_humanStaminaMode;
 vmCvar_t  g_friendlyFire;
 vmCvar_t  g_friendlyBuildableFire;
+vmCvar_t  g_friendlyFireLastSpawnProtection;
 vmCvar_t  g_dretchPunt;
 vmCvar_t  g_password;
 vmCvar_t  g_needpass;
@@ -153,6 +155,7 @@ vmCvar_t  g_voiceChats;
 
 vmCvar_t  g_shove;
 vmCvar_t  g_antiSpawnBlock;
+vmCvar_t  g_lastSpawnFFProtection;
 
 vmCvar_t  g_mapConfigs;
 vmCvar_t  g_sayAreaRange;
@@ -226,6 +229,8 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_warmupFriendlyBuildableFire,
     "g_warmupFriendlyBuildableFire", "1", CVAR_SERVERINFO | CVAR_ARCHIVE, 0,
     qtrue },
+  { &g_nextMapStartedMatchWhenEmptyTeams,
+    "g_nextMapStartedMatchWhenEmptyTeams", "180", CVAR_ARCHIVE, 0, qtrue },
 
   { &g_damageProtection, "g_damageProtection", "1", CVAR_ARCHIVE, 0, qtrue },
     { &g_targetProtection, "g_targetProtection", "1", CVAR_ARCHIVE, 0, qtrue },
@@ -248,7 +253,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_basetimelimit, "g_basetimelimit", "0", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_NORESTART, 0, qtrue },
   { &g_extendVotesPercent, "g_extendVotesPercent", "50", CVAR_ARCHIVE, 0, qfalse },
   { &g_extendVotesTime, "g_extendVotesTime", "10", CVAR_ARCHIVE, 0, qfalse },
-  { &g_extendVotesCount, "g_extendVotesCount", "3", CVAR_ARCHIVE, 0, qfalse },
+  { &g_extendVotesCount, "g_extendVotesCount", "5", CVAR_ARCHIVE, 0, qfalse },
   { &g_suddenDeathTime, "g_suddenDeathTime", "0", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_NORESTART, 0, qtrue },
 
   { &g_synchronousClients, "g_synchronousClients", "0", CVAR_SYSTEMINFO, 0, qfalse  },
@@ -256,6 +261,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_humanStaminaMode, "g_humanStaminaMode", "1", CVAR_ARCHIVE, 0, qtrue  },
   { &g_friendlyFire, "g_friendlyFire", "75", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qtrue  },
   { &g_friendlyBuildableFire, "g_friendlyBuildableFire", "100", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qtrue  },
+  { &g_friendlyFireLastSpawnProtection, "g_friendlyFireLastSpawnProtection", "1", CVAR_ARCHIVE, 0, qtrue },
   { &g_dretchPunt, "g_dretchPunt", "1", CVAR_ARCHIVE, 0, qtrue  },
 
   { &g_teamForceBalance, "g_teamForceBalance", "0", CVAR_ARCHIVE, 0, qtrue },
@@ -578,6 +584,10 @@ Q_EXPORT void G_InitGame( int levelTime, int randomSeed, int restart )
   Com_Printf( "------- Game Initialization -------\n" );
   Com_Printf( "gamename: %s\n", GAME_VERSION );
 
+  for(i = 0; i < MAX_GENTITIES; i++) {
+    BG_Link_entityState(&g_entities[i].s, i);
+  }
+
   // Dynamic memory
   BG_InitMemory( );
 
@@ -780,8 +790,10 @@ Q_EXPORT void G_InitGame( int levelTime, int randomSeed, int restart )
     level.voteType[ i ] = VOID_VOTE;
   }
 
-  if( !IS_WARMUP )
+  if(!IS_WARMUP) {
     level.fight = qtrue;
+    level.nextmap_when_empty_teams = level.time + (g_nextMapStartedMatchWhenEmptyTeams.integer * 1000);
+  }
 }
 
 /*
@@ -2065,6 +2077,11 @@ void CheckExitRules( void )
     return;
   }
 
+  //don't exit if warmup is ending
+  if(IS_WARMUP && level.countdownTime) {
+    return;
+  }
+
   if( level.intermissionQueued )
   {
     if( level.time - level.intermissionQueued >= INTERMISSION_DELAY_TIME )
@@ -2076,10 +2093,53 @@ void CheckExitRules( void )
     return;
   }
 
+  if(
+    g_doWarmup.integer &&
+    !g_warmup.integer &&
+    g_nextMapStartedMatchWhenEmptyTeams.integer > 0) {
+    if(level.numAlienClients || level.numHumanClients) {
+      level.nextmap_when_empty_teams = level.time + (g_nextMapStartedMatchWhenEmptyTeams.integer * 1000);
+    } else {
+      int i;
+
+      for(i = 0; i < level.maxclients; i++) {
+        gclient_t *client = &g_clients[i];
+
+        if(client->pers.connected == CON_CONNECTING) {
+          level.nextmap_when_empty_teams = level.time + (g_nextMapStartedMatchWhenEmptyTeams.integer * 1000);
+          break;
+        } else if(client->pers.connected != CON_CONNECTED) {
+          continue;
+        }
+
+        if(client->pers.voterInactivityTime >= level.time) {
+          const int prev_time = level.nextmap_when_empty_teams;
+
+          level.nextmap_when_empty_teams = level.time + (g_nextMapStartedMatchWhenEmptyTeams.integer * 1000);
+          if((level.nextmap_when_empty_teams - VOTE_TIME) > prev_time) {
+            level.nextmap_when_empty_teams -= VOTE_TIME;
+          }
+          break;
+        }
+      }
+
+      if(level.nextmap_when_empty_teams < level.time) {
+        level.lastWin = TEAM_NONE;
+        SV_GameSendServerCommand( -1, "print \"Teams empty\n\"" );
+        SV_SetConfigstring( CS_WINNER, va( "%i %i %i",
+                                           MATCHOUTCOME_TIME,
+                                           index,
+                                           TEAM_NONE ) );
+        LogExit( "Teams empty." );
+        return;
+      }
+    }
+  }
+
   if( g_timelimit.integer )
   {
     if( level.time - level.startTime >= g_timelimit.integer * 60000 )
-    { 
+    {
       level.lastWin = TEAM_NONE;
       SV_GameSendServerCommand( -1, "print \"Timelimit hit\n\"" );
       SV_SetConfigstring( CS_WINNER, va( "%i %i %i",
@@ -2093,7 +2153,7 @@ void CheckExitRules( void )
           level.timelimitWarning < TW_IMMINENT )
     {
       SV_GameSendServerCommand( -1,
-                             va( "cp \"5 minutes remaining!\" %d",
+                             va( "cp \"^35 minutes remaining!^7\" %d",
                                   CP_TIME_LIMIT ) );
       level.timelimitWarning = TW_IMMINENT;
     }
@@ -2101,7 +2161,7 @@ void CheckExitRules( void )
           level.timelimitWarning < TW_PASSED )
     {
       SV_GameSendServerCommand( -1,
-                              va( "cp \"1 minute remaining!\" %d",
+                              va( "cp \"^11 minute remaining!^7\" %d",
                                   CP_TIME_LIMIT ) );
       level.timelimitWarning = TW_PASSED;
     }
@@ -2111,7 +2171,7 @@ void CheckExitRules( void )
       ( !level.uncondAlienWin &&
         ( level.time > level.startTime + 1000 ) &&
         ( level.numAlienSpawns == 0 ) &&
-        ( level.numAlienClientsAlive == 0 ) &&
+        ( ( level.numAlienClientsAlive == 0 ) || IS_WARMUP ) &&
         !( g_restartingFlags.integer & RESTART_WARMUP_RESET ) ) )
   {
     // We do not want any team to win in warmup
@@ -2131,7 +2191,7 @@ void CheckExitRules( void )
   else if( level.uncondAlienWin ||
            ( ( level.time > level.startTime + 1000 ) &&
              ( level.numHumanSpawns == 0 ) &&
-             ( level.numHumanClientsAlive == 0 ) &&
+             ( ( level.numHumanClientsAlive == 0 ) || IS_WARMUP ) &&
              !( g_restartingFlags.integer & RESTART_WARMUP_RESET ) ) )
   {
     // We do not want any team to win in warmup
@@ -2279,14 +2339,39 @@ void G_LevelReady( void )
   int       i, numAliens = 0, numHumans = 0;
   float     percentAliens, percentHumans, threshold;
   qboolean  startGame;
+  clientList_t readyMasks;
 
   // do not proceed if not in warmup
-  if( !g_warmup.integer )
+  if( !IS_WARMUP )
     return;
+
+  // do not proceed if intermission started
+  if( level.intermissiontime ) {
+    return;
+  }
 
   // the map is still resetting
   if( g_restartingFlags.integer & RESTART_WARMUP_RESET )
     return;
+
+  Com_Memset(&readyMasks, 0, sizeof(readyMasks));
+  for(i = 0; i < g_maxclients.integer; i++) {
+    gclient_t *cl = level.clients + i;
+
+    if(cl->pers.connected != CON_CONNECTED) {
+      continue;
+    }
+
+    if(cl->ps.stats[STAT_TEAM] == TEAM_NONE) {
+      continue;
+    }
+
+    if(cl->sess.readyToPlay ) {
+      Com_ClientListAdd(&readyMasks, i);
+    }
+  }
+
+  SV_SetConfigstring( CS_CLIENTS_READY, Com_ClientListString( &readyMasks ) );
 
   if( !level.countdownTime )
   {
@@ -2697,15 +2782,26 @@ void CheckCvars(void) {
   static int lastHumanStaminaModeModCount = -1;
   static int lastCheatsModCount           = -1;
   static int lastUnlaggedModCount         = -1;
+  static int lastDoWarmupModCount         = 0;
+
+  if(g_doWarmup.modificationCount != lastDoWarmupModCount) {
+    lastDoWarmupModCount = g_doWarmup.modificationCount;
+    if(g_warmup.integer && !g_doWarmup.integer) {
+      //restart with warmup disabled
+      G_LevelRestart(qtrue);
+    }
+  }
 
   if(g_password.modificationCount != lastPasswordModCount) {
     lastPasswordModCount = g_password.modificationCount;
 
     if(*g_password.string && Q_stricmp(g_password.string, "none")) {
       Cvar_SetSafe("g_needpass", "1");
+      Cvar_Update(&g_needpass);
     }
     else {
       Cvar_SetSafe("g_needpass", "0");
+      Cvar_Update(&g_needpass);
     }
   }
 
@@ -2746,18 +2842,15 @@ void CheckCvars(void) {
   }
 
   if(g_timelimit.modificationCount != lastTimeLimitModCount) {
-    if(g_timelimit.integer < 0)
-      Cvar_SetSafe("timelimit" , "0");
+    if(g_timelimit.integer < 0) {
+      Cvar_SetSafe("timelimit", "0");
+      Cvar_Update(&g_timelimit);
+    }
 
     level.extendTimeLimit = 0;
     lastExtendTimeLimit = 0;
     level.extendVoteCount = 0;
     level.matchBaseTimeLimit = g_timelimit.integer;
-    lastTimeLimitModCount = g_timelimit.modificationCount;
-  } else if(level.extendTimeLimit != lastExtendTimeLimit) {
-    Cvar_SetSafe("timelimit", va("%d", (level.matchBaseTimeLimit +
-                                        level.extendTimeLimit)));
-    lastExtendTimeLimit = level.extendTimeLimit;
     lastTimeLimitModCount = g_timelimit.modificationCount;
 
     // reset the time limit warnings
@@ -2765,6 +2858,21 @@ void CheckCvars(void) {
       level.timelimitWarning = TW_NOT;
     }
     else if(level.time - level.startTime < (g_timelimit.integer - 1) * 60000) {
+      level.timelimitWarning = TW_IMMINENT;
+    }
+  } else if(level.extendTimeLimit != lastExtendTimeLimit) {
+    const int timelimit = level.matchBaseTimeLimit + level.extendTimeLimit;
+
+    Cvar_SetSafe("timelimit", va("%d", (timelimit)));
+    Cvar_Update(&g_timelimit);
+    lastExtendTimeLimit = level.extendTimeLimit;
+    lastTimeLimitModCount = g_timelimit.modificationCount;
+
+    // reset the time limit warnings
+    if(level.time - level.startTime < ((timelimit) - 5) * 60000) {
+      level.timelimitWarning = TW_NOT;
+    }
+    else if(level.time - level.startTime < (timelimit - 1) * 60000) {
       level.timelimitWarning = TW_IMMINENT;
     }
   }
@@ -3038,9 +3146,31 @@ Q_EXPORT void G_RunFrame( int levelTime )
     G_CalculateAvgPlayers( );
     G_UpdateZaps( msec );
   }
-  if( level.fight && ( ( g_doWarmup.integer && !g_doCountdown.integer ) ||
-      level.countdownTime <= ( level.time + 1000 ) ) )
-    level.fight = qfalse;
+
+  //get all of the clients ready for the fight announcement
+  if(level.fight) {
+    if(!g_restartingFlags.integer) {
+      if(level.countdownTime > 0) {
+        if(level.countdownTime <= (level.time + 1000)) {
+          for(i = 0; i < level.maxclients; i++) {
+            gentity_t *ent = &g_entities[i];
+
+            if(ent->client->pers.connected == CON_CONNECTED ||
+               ent->client->pers.connected == CON_CONNECTING) {
+              ent->client->pers.fight = qtrue;
+            }
+          }
+
+          level.fight = qfalse;
+        }
+      } else {
+        level.fight = 0;
+      }
+    }
+  } else {
+    level.fight = 0;
+  }
+
   G_UpdateBuildableRangeMarkers( );
 
   // check for warmup timeout
