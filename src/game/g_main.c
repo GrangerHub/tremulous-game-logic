@@ -669,9 +669,6 @@ Q_EXPORT void G_InitGame( int levelTime, int randomSeed, int restart )
   level.extendVoteCount = 0;
   level.timeLimitInitialized = qtrue;
 
-  level.lifeSupportTimer[ TEAM_HUMANS ] = level.time + HUMAN_LIFE_SUPPORT_TIME;
-  level.lifeSupportTimer[ TEAM_ALIENS ] = level.time + ALIEN_HIVEMIND_LINK_TIME;
-
   level.snd_fry = G_SoundIndex( "sound/misc/fry.wav" ); // FIXME standing in lava / slime
 
   if( g_logFile.string[ 0 ] )
@@ -1610,58 +1607,6 @@ void G_CalculateStages( void )
         ( IS_WARMUP ? S3 : g_humanStage.integer ),
         ( IS_WARMUP ? 99999 : g_humanCredits.integer ),
         ( IS_WARMUP ? 0 : level.humanNextStageThreshold ) ) );
-}
-
-/*
-============
-G_CheckLifeSupport
-
-Players have a limited amount of time they can survive without their overmind/reactor and spawns
-============
-*/
-static void G_CheckLifeSupport( void )
-{
-  if( G_Overmind( ) || ( level.numAlienSpawns > 0 ) || ( level.surrenderTeam == TEAM_ALIENS ) )
-    level.lifeSupportTimer[ TEAM_ALIENS ] = level.time +
-                                            ( IS_WARMUP ? 10000 : ALIEN_HIVEMIND_LINK_TIME );
-  else
-  {
-    if( level.lifeSupportAlertTime[ TEAM_ALIENS ] < level.time )
-    {
-      if( level.lifeSupportTimer[ TEAM_ALIENS ] > level.time )
-        G_TeamCommand( TEAM_ALIENS,
-                       va( "cp \"Hivemind Link will Break in %d Seconds!\nBuild an Overmind!\" %d",
-                           ( level.lifeSupportTimer[ TEAM_ALIENS ] - level.time ) / 1000,
-                           CP_LIFE_SUPPORT ) );
-      else
-        G_TeamCommand( TEAM_ALIENS,
-                       va( "cp \"Hivemind Link Broken\" %d",
-                           CP_LIFE_SUPPORT ) );
-
-      level.lifeSupportAlertTime[ TEAM_ALIENS ] = level.time + 1000.0f;
-    }
-  }
-
-  if( G_Reactor( ) || ( level.numHumanSpawns > 0 )  || ( level.surrenderTeam == TEAM_HUMANS ) )
-    level.lifeSupportTimer[ TEAM_HUMANS ] = level.time + ( IS_WARMUP ? 10000 : HUMAN_LIFE_SUPPORT_TIME );
-  else
-  {
-    if( level.lifeSupportAlertTime[ TEAM_HUMANS ] < level.time )
-    {
-      if( level.lifeSupportTimer[ TEAM_HUMANS ] > level.time )
-      G_TeamCommand( TEAM_HUMANS, va( "cp \"Life Support will Terminate in %d Seconds!\nBuild a Reactor!\" %d",
-                     ( level.lifeSupportTimer[ TEAM_HUMANS ] - level.time ) / 1000,
-                     CP_LIFE_SUPPORT ) );
-      else
-        G_TeamCommand( TEAM_HUMANS,
-                       va( "cp \"Life Support Terminated\" %d",
-                           CP_LIFE_SUPPORT ) );
-
-      level.lifeSupportAlertTime[ TEAM_HUMANS ] = level.time + 1000.0f;
-    }
-  }
-
-  return;
 }
 
 /*
@@ -3315,7 +3260,6 @@ Q_EXPORT void G_RunFrame( int levelTime )
     G_SpawnClients( TEAM_ALIENS );
     G_SpawnClients( TEAM_HUMANS );
     G_UpdateZaps( msec );
-    G_CheckLifeSupport( );
   }
 
   //get all of the clients ready for the fight announcement

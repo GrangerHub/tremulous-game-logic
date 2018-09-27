@@ -1113,8 +1113,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
     }
 
     // turn off life support when a team admits defeat
-    if( ( client->ps.stats[ STAT_TEAM ] == level.surrenderTeam ) ||
-        ( level.lifeSupportTimer[ client->ps.stats[ STAT_TEAM ] ] < level.time ) )
+    if( client->ps.stats[ STAT_TEAM ] == level.surrenderTeam )
     {
       int dmg = maxHealth / 20;
       if ( BG_ClassHasAbility(client->ps.stats[STAT_CLASS], SCA_REGEN) )
