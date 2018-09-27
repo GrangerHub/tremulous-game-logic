@@ -1075,6 +1075,36 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   attacker->dmgProtectionTime = 0;
   attacker->targetProtectionTime = 0;
 
+  if(
+    g_friendlyFireLastSpawnProtection.integer &&
+    targ->s.eType == ET_BUILDABLE) {
+    if(BG_Buildable(targ->s.modelindex)->role & ROLE_SPAWN) {
+      //don't allow teammates to deal damage to their last spawn
+      switch (targ->buildableTeam) {
+        case TEAM_ALIENS:
+          if(
+            level.numAlienSpawns <= 1 &&
+            attacker->client &&
+            attacker->client->pers.teamSelection == TEAM_ALIENS) {
+            return;
+          }
+          break;
+
+        case TEAM_HUMANS:
+          if(
+            level.numHumanSpawns <= 1 &&
+            attacker->client &&
+            attacker->client->pers.teamSelection == TEAM_HUMANS) {
+            return;
+          }
+          break;
+
+        default:
+          break;
+      }
+    }
+  }
+
   if((dflags & DAMAGE_INSTAGIB)) {
     damage = targ->health;
     if(targ->s.eType == ET_PLAYER || targ->s.eType == ET_CORPSE) {
@@ -1415,6 +1445,11 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       targ->enemy = attacker;
       G_Entity_id_set( &targ->idAtLastDeath, targ );
       targ->die( targ, inflictor, attacker, take, mod );
+      if(
+        targ->s.eType == ET_BUILDABLE &&
+        BG_Buildable(targ->s.modelindex)->role & ROLE_SPAWN) {
+        G_CountSpawns( );
+      }
       if( ( targ->activation.flags & ACTF_OCCUPY ) &&
           ( targ->flags & FL_OCCUPIED ) &&
           targ->occupation.occupant && targ->occupation.occupant->client )

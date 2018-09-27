@@ -3758,37 +3758,38 @@ static qboolean CG_DrawQueue( void )
 CG_Draw
 =================
 */
-static void CG_DrawCountdown( void )
-{
+static void CG_DrawCountdown(void) {
   int    sec = 0;
   int    w;
   int    h;
   float  size = 0.5f;
-  char   text[ MAX_STRING_CHARS ] = "";
+  char   text[MAX_STRING_CHARS] = "";
 
-  if( !cg.countdownTime )
-  {
+  if(!cg.countdownTime) {
     return;
   }
 
-  if( cgs.warmup )
-    Q_strncpyz( text, "^3Warmup is Ending:^7", sizeof( text ) );
-  else
-    Q_strncpyz( text, "Countdown to Battle:", sizeof( text ) );
+  sec = (cg.countdownTime - cg.time) / 1000;
 
-  sec = ( cg.countdownTime - cg.time ) / 1000;
+  if(cgs.warmup) {
+    Q_strncpyz(text, "^3Warmup is Ending:^7", sizeof(text));
+  }
+  else if(sec > 0) {
+    Q_strncpyz(text, "Countdown to Battle:", sizeof(text));
+  }
 
-  if( sec < 0 )
+  if(sec < 0) {
     return;
+  }
 
-  w = UI_Text_Width( text, size );
-  h = UI_Text_Height( text, size );
-  UI_Text_Paint( 320 - w / 2, 200, size, colorWhite, text, 0, 0, ITEM_TEXTSTYLE_SHADOWED );
+  w = UI_Text_Width(text, size);
+  h = UI_Text_Height(text, size);
+  UI_Text_Paint(320 - w / 2, 200, size, colorWhite, text, 0, 0, ITEM_TEXTSTYLE_SHADOWED);
 
-  Com_sprintf( text, sizeof( text ), "%s", ( sec || cgs.warmup ) ? va( "%d", sec ) : "DESTROY THE ENEMY!" );    
+  Com_sprintf(text, sizeof(text), "%s", (sec || cgs.warmup) ? va("%d", sec) : "DESTROY THE ENEMY!");    
 
-  w = UI_Text_Width( text, size );
-  UI_Text_Paint( 320 - w / 2, 200 + 1.5f * h, size, colorWhite, text, 0, 0, ITEM_TEXTSTYLE_SHADOWED );
+  w = UI_Text_Width(text, size);
+  UI_Text_Paint(320 - w / 2, 200 + 1.5f * h, size, colorWhite, text, 0, 0, ITEM_TEXTSTYLE_SHADOWED);
 }
 
 //==================================================================================

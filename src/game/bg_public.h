@@ -1704,6 +1704,9 @@ int BG_LoadEmoticons( emoticon_t *emoticons, int num );
 
 const teamAttributes_t *BG_Team( team_t team );
 
+entityState_t *BG_EntityState(int ent_num);
+void BG_Link_entityState(entityState_t *es, int ent_num);
+
 //for movers
 void BG_CreateRotationMatrix( vec3_t angles, vec3_t matrix[ 3 ] );
 void BG_TransposeMatrix( vec3_t matrix[ 3 ], vec3_t transpose[ 3 ] );
