@@ -1884,7 +1884,7 @@ static const char *CG_FeederItemText( int feederID, int index, int column, qhand
   info = CG_InfoFromScoreIndex( index, team, &scoreIndex );
   sp = &cg.scores[ scoreIndex ];
 
-  if( cg.intermissionStarted && CG_ClientIsReady( sp->client ) )
+  if( (cg.intermissionStarted || cgs.warmup ) && CG_ClientIsReady( sp->client ) )
     showIcons = qfalse;
   else if( cg.snap->ps.pm_type == PM_SPECTATOR ||
            cg.snap->ps.pm_type == PM_NOCLIP ||
@@ -1931,7 +1931,7 @@ static const char *CG_FeederItemText( int feederID, int index, int column, qhand
         break;
 
       case 2:
-        if( cg.intermissionStarted && CG_ClientIsReady( sp->client ) )
+        if( (cg.intermissionStarted || cgs.warmup) && CG_ClientIsReady( sp->client ) )
           return "Ready";
         break;
 
@@ -2155,6 +2155,7 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum )
 {
   const char  *s;
   int          team;
+  int          i;
 
   // clear everything
   memset( &cgs, 0, sizeof( cgs ) );
@@ -2175,6 +2176,10 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum )
   cgs.media.whiteShader     = trap_R_RegisterShader( "white" );
   cgs.media.charsetShader   = trap_R_RegisterShader( "gfx/2d/bigchars" );
   cgs.media.outlineShader   = trap_R_RegisterShader( "outline" );
+
+  for(i = 0; i < MAX_GENTITIES; i++) {
+    BG_Link_entityState(&cg_entities[i].currentState, i);
+  }
 
   // load overrides
   BG_InitClassConfigs( );

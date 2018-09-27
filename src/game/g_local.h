@@ -512,6 +512,9 @@ typedef struct
   // used to save persistant[] values while in SPECTATOR_FOLLOW mode
   int                 credit;
 
+  //start of match "fight sound"
+  qboolean fight;
+
   // voting state
   int                 voted;
   int                 vote;
@@ -827,6 +830,7 @@ typedef struct
                                                   // kills during this delay
   int               intermissiontime;             // time the intermission was started
   char              *changemap;
+  int               nextmap_when_empty_teams;
   qboolean          readyToExit;                  // at least one client wants to exit
   int               exitTime;
   vec3_t            intermission_origin;          // also used for spectator spawns
@@ -1388,6 +1392,7 @@ void MoveClientToIntermission( gentity_t *client );
 void G_MapConfigs( const char *mapname );
 void CalculateRanks( void );
 void FindIntermissionPoint( void );
+void G_CountSpawns( void );
 void G_RunThink( gentity_t *ent );
 void G_AdminMessage( gentity_t *ent, const char *string );
 void QDECL G_LogPrintf( const char *fmt, ... ) __attribute__ ((format (printf, 1, 2)));
@@ -1536,6 +1541,7 @@ extern  vmCvar_t  g_warmupBuildableRespawnTime;
 extern  vmCvar_t  g_warmupDefensiveBuildableRespawnTime;
 extern  vmCvar_t  g_warmupBlockEnemyBuilding;
 extern  vmCvar_t  g_warmupFriendlyBuildableFire;
+extern  vmCvar_t  g_nextMapStartedMatchWhenEmptyTeams;
 
 extern  vmCvar_t   g_damageProtection;
 extern  vmCvar_t   g_targetProtection;
@@ -1545,6 +1551,7 @@ extern  vmCvar_t   g_targetProtection;
 extern  vmCvar_t  g_humanStaminaMode; // when set to 0, human stamina doesn't drain
 extern  vmCvar_t  g_friendlyFire;
 extern  vmCvar_t  g_friendlyBuildableFire;
+extern  vmCvar_t  g_friendlyFireLastSpawnProtection;
 extern  vmCvar_t  g_dretchPunt;
 extern  vmCvar_t  g_logPrivateMessages;
 extern  vmCvar_t  g_password;
