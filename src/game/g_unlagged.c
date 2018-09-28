@@ -115,7 +115,7 @@ void G_Init_Unlagged(void) {
   unlagged_data_head = NULL;
   memset(&history_wheel_times, 0, sizeof(history_wheel_times));
   memset(&unlagged_data, 0, sizeof(unlagged_data));
-  memset(frame_usage, 0, sizeof(unlagged_data));
+  memset(frame_usage, 0, sizeof(frame_usage));
   BG_Queue_Clear(&dims_store_list);
   BG_Queue_Clear(&origin_store_list);
   BG_Queue_Clear(&pos_store_list);
