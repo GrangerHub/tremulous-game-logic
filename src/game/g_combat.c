@@ -2516,6 +2516,10 @@ qboolean G_SelectiveRadiusDamage( vec3_t origin, vec3_t originMins, vec3_t origi
     if( G_NoTarget( ent ) )
       continue;
 
+    if(ent->r.contents & CONTENTS_ASTRAL_NOCLIP) {
+      continue;
+    }
+
     // find the distance from the edge of the bounding box
     for( i = 0 ; i < 3 ; i++ )
     {
