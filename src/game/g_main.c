@@ -2268,7 +2268,7 @@ void CheckExitRules( void )
           level.timelimitWarning < TW_IMMINENT )
     {
       SV_GameSendServerCommand( -1,
-                             va( "cp \"^35 minutes remaining!^7\" %d",
+                             va( "cp \"^75 minutes remaining!\" %d",
                                   CP_TIME_LIMIT ) );
       level.timelimitWarning = TW_IMMINENT;
     }
@@ -2276,7 +2276,7 @@ void CheckExitRules( void )
           level.timelimitWarning < TW_PASSED )
     {
       SV_GameSendServerCommand( -1,
-                              va( "cp \"^11 minute remaining!^7\" %d",
+                              va( "cp \"^71 minute remaining!\" %d",
                                   CP_TIME_LIMIT ) );
       level.timelimitWarning = TW_PASSED;
     }
