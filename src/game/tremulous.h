@@ -147,7 +147,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL3_BOUNCEBALL_REPEAT    1000
 #define LEVEL3_BOUNCEBALL_SPEED     1000.0f
 #define LEVEL3_BOUNCEBALL_RADIUS    0
-#define LEVEL3_BOUNCEBALL_REGEN     9001    // msec until new barb
+#define LEVEL3_BOUNCEBALL_REGEN     6000    // msec until new barb
 #define LEVEL3_BOUNCEBALL_LIFETIME  3000
 
 #define LEVEL4_CLAW_DMG             AWDM(100000)
@@ -910,7 +910,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define STAMINA_RUN_RESTORE         7
 #define STAMINA_MEDISTAT_RESTORE    30 // stacked on STOP or WALK
 #define STAMINA_SPRINT_TAKE         6
-#define STAMINA_JUMP_TAKE           264
+#define STAMINA_JUMP_TAKE           128
 #define STAMINA_JUMP_RESTORE_DELAY  1000 // amount of time after a jump before stamina can be restored off of the ground
 #define STAMINA_DODGE_TAKE          250
 #define STAMINA_MAX                 1000
