@@ -26,8 +26,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  * PLAYMAP POOL
  */
 
+#include "g_public.h"
+
 #define MAX_PLAYMAP_POOL_ENTRIES 128
-#define MAX_PLAYMAP_QUEUE_ENTRIES 128
 #define PLAYMAP_INACTIVE 0
 
 #define MAX_PLAYMAP_MAPNAME 32
@@ -106,19 +107,6 @@ typedef struct playMapFlagDesc_s
 
 #define FREE_IF_NOT_NULL(x)  { if( ( x ) ) { BG_Free( x ); x = NULL; } }
 
-// individual playmap entry in the queue
-typedef struct playMap_s
-{
-  char *mapName;
-  char *layout;
-
-  char *clientName;
-
-  int flags;
-  //playMapFlag_t plusFlags[ PLAYMAP_NUM_FLAGS ];
-  //playMapFlag_t minusFlags[ PLAYMAP_NUM_FLAGS ];
-} playMap_t;
-
 // playmap queue/playlist
 typedef struct playMapQueue_s
 {
@@ -147,8 +135,6 @@ typedef enum playMapErrorCode_s
   PLAYMAP_ERROR_MAP_NOT_FOUND,
   PLAYMAP_ERROR_LAYOUT_NOT_FOUND,
   PLAYMAP_ERROR_MAP_NOT_IN_POOL,
-  PLAYMAP_ERROR_NO_QUEUE_CONFIG,
-  PLAYMAP_ERROR_QUEUE_CONFIG_UNREADABLE,
   PLAYMAP_ERROR_MAP_NOT_IN_QUEUE,
   PLAYMAP_ERROR_MAP_ALREADY_IN_QUEUE,
   PLAYMAP_ERROR_USER_ALREADY_IN_QUEUE,
@@ -194,7 +180,7 @@ int G_GetPlayMapQueueLength( void );
 qboolean G_PlayMapQueueIsFull( void );
 playMapFlag_t G_ParsePlayMapFlag( gentity_t *ent, char *flag );
 playMapError_t G_PlayMapEnqueue( char *mapName, char *layout, char *clientName, char *flags, gentity_t *ent );
-playMap_t *G_PopFromPlayMapQueue( void );
+qboolean G_PopFromPlayMapQueue( playMap_t *playMap );
 playMapError_t G_RemoveFromPlayMapQueue( int index );
 int G_GetPlayMapQueueIndexByMapName( char *mapName );
 int G_GetPlayMapQueueIndexByClient( char *clientName );
