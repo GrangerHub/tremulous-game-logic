@@ -27,6 +27,57 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 char alternateInfos[2][2][BIG_INFO_STRING];
 
+static playMap_t playMap[MAX_PLAYMAP_QUEUE_ENTRIES];
+/*
+===============
+SV_PlayMap_Save_Queue_Entry
+
+Used by the PlayMap system to save a queue entry
+===============
+*/
+void SV_PlayMap_Save_Queue_Entry( playMap_t pm, int index ) {
+	assert(
+		index >= 0 &&
+		index < MAX_PLAYMAP_QUEUE_ENTRIES &&
+		"SV_PlayMap_Save_Queue_For_Index: invalid index");
+
+	playMap[index] = pm;
+}
+
+/*
+===============
+SV_PlayMap_Clear_Saved_Queue
+
+Clears the saved PlayMap queue, when the server inits, and before the queue is saved
+===============
+*/
+void SV_PlayMap_Clear_Saved_Queue( int default_flags ) {
+	int index;
+
+	for(index = 0; index < MAX_PLAYMAP_QUEUE_ENTRIES; index++) {
+		playMap[index].clientName[0] = '\0';
+		playMap[index].layout[0] = '\0';
+		playMap[index].mapName[0] = '\0';
+		playMap[index].flags = default_flags;
+	}
+}
+
+/*
+===============
+SV_PlayMap_Save_Queue_Entry
+
+Used by the PlayMap system to get a saved queue entry
+===============
+*/
+playMap_t SV_PlayMap_Get_Queue_Entry( int index ) {
+	assert(
+		index >= 0 &&
+		index < MAX_PLAYMAP_QUEUE_ENTRIES &&
+		"SV_PlayMap_Save_Queue_For_Index: invalid index");
+
+	return playMap[index];
+}
+
 /*
 ===============
 SV_SendConfigstring
@@ -691,6 +742,8 @@ void SV_Init (void)
 	int index;
 
 	SV_AddOperatorCommands ();
+
+	SV_PlayMap_Clear_Saved_Queue(0);
 
 	// serverinfo vars
 	Cvar_Get ("timelimit", "0", CVAR_SERVERINFO);

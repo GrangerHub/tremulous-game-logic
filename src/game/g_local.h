@@ -1537,7 +1537,6 @@ extern  vmCvar_t  g_adminMaxBan;
 
 extern	vmCvar_t  g_playMapEnable;
 extern  vmCvar_t  g_playMapPoolConfig;
-extern  vmCvar_t  g_playMapQueueConfig;
 
 extern  vmCvar_t  g_privateMessages;
 extern  vmCvar_t  g_specChat;
@@ -1571,6 +1570,9 @@ void      SV_LocateGameData( gentity_t *gEnts, int numGEntities, int sizeofGEnti
 void      SV_GameDropClient( int clientNum, const char *reason );
 void      SV_GameSendServerCommand( int clientNum, const char *text );
 void      SV_SendClientGameState2( int clientNum );
+void      SV_PlayMap_Save_Queue_Entry( playMap_t pm, int index );
+void      SV_PlayMap_Clear_Saved_Queue( int default_flags );
+playMap_t SV_PlayMap_Get_Queue_Entry( int index );
 void      SV_SetConfigstring( int num, const char *string );
 void      SV_GetConfigstring( int num, char *buffer, int bufferSize );
 void      SV_SetConfigstringRestrictions( int num, const clientList_t *clientList );
