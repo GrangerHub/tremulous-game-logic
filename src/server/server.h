@@ -328,16 +328,20 @@ int SV_RateMsec(client_t *client);
 //
 // sv_init.c
 //
-void SV_SetConfigstring( int index, const char *val );
-void SV_GetConfigstring( int index, char *buffer, int bufferSize );
-void SV_SetConfigstringRestrictions(int index, const clientList_t* clientList);
-void SV_UpdateConfigstrings( client_t *client );
+void      SV_PlayMap_Save_Queue_Entry( playMap_t pm, int index );
+void      SV_PlayMap_Clear_Saved_Queue( int default_flags );
+playMap_t SV_PlayMap_Get_Queue_Entry( int index );
 
-void SV_SetUserinfo( int index, const char *val );
-void SV_GetUserinfo( int index, char *buffer, int bufferSize );
+void      SV_SetConfigstring( int index, const char *val );
+void      SV_GetConfigstring( int index, char *buffer, int bufferSize );
+void      SV_SetConfigstringRestrictions(int index, const clientList_t* clientList);
+void      SV_UpdateConfigstrings( client_t *client );
 
-void SV_ChangeMaxClients( void );
-void SV_SpawnServer( char *server, qboolean killBots );
+void      SV_SetUserinfo( int index, const char *val );
+void      SV_GetUserinfo( int index, char *buffer, int bufferSize );
+
+void      SV_ChangeMaxClients( void );
+void      SV_SpawnServer( char *server, qboolean killBots );
 
 
 

@@ -24,6 +24,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 // g_public.h -- game module information visible to server
 
+#ifndef __G_PUBLIC_H
+#define __G_PUBLIC_H
+
 #define GAME_API_VERSION  9
 
 // entity->svFlags
@@ -109,3 +112,20 @@ typedef enum {
 } dbArray_t;
 
 #define DATABASE_DATA_MAX 4096
+
+//playmap
+#define MAX_PLAYMAP_QUEUE_ENTRIES 128
+// individual playmap entry in the queue
+typedef struct playMap_s
+{
+  char mapName[MAX_QPATH+1];
+  char layout[MAX_QPATH+1];
+
+  char clientName[MAX_NAME_LENGTH+1];
+
+  int flags;
+  //playMapFlag_t plusFlags[ PLAYMAP_NUM_FLAGS ];
+  //playMapFlag_t minusFlags[ PLAYMAP_NUM_FLAGS ];
+} playMap_t;
+
+#endif	// __G_PUBLIC_H
