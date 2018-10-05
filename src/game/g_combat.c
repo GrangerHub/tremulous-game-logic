@@ -1909,7 +1909,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   }
 
   // check for godmode
-  if( targ->flags & FL_GODMODE )
+  if( (targ->flags & FL_GODMODE) && !(dflags & DAMAGE_GODLESS) )
     return;
 
   // don't do friendly fire on movement attacks
@@ -2149,6 +2149,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
     // Battlesuit absorbs the damage
     if( targ->client &&
+        !(dflags & DAMAGE_NO_ARMOR) &&
         BG_InventoryContainsUpgrade( UP_BATTLESUIT, targ->client->ps.stats ) &&
         mod != MOD_POISON &&
         mod != MOD_WATER )
