@@ -1159,6 +1159,7 @@ void      G_InitDamageLocations( void );
 #define DAMAGE_NO_PROTECTION  0x00000008  // kills everything except godmode
 #define DAMAGE_NO_LOCDAMAGE   0x00000010  // do not apply locational damage
 #define DAMAGE_INSTAGIB       0x00000020  // instally kill the target
+#define DAMAGE_GODLESS        0x00000040  // godmode doesn't protect
 
 //
 // g_missile.c

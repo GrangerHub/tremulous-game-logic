@@ -4007,6 +4007,14 @@ qboolean G_admin_slap( gentity_t *ent )
     return qfalse;
   }
 
+  if(vic->health <= 0) {
+    ADMP( 
+      va(
+        "^3slap: ^7%s^7 has passed on from too much abuse, no use in beating a dead hourse.\n",
+        vic->client->pers.netname));
+    return qfalse;
+  }
+
   // knockback in a random direction
   dir[0] = crandom();
   dir[1] = crandom();
@@ -4022,19 +4030,15 @@ qboolean G_admin_slap( gentity_t *ent )
           ( ent ) ? ent->client->pers.netname : "console",
           ( *reason ) ? reason : "No reason specified" ) );
 
-  vic->health -= 25;
-  vic->client->ps.misc[ MISC_HEALTH ] = vic->health;
-  vic->lastDamageTime = level.time;
-  if( vic->health <= 1 )
-  {
-    vic->flags |= FL_NO_KNOCKBACK;
-    vic->enemy = ent;
-    vic->die( vic, ent, ent, 25, MOD_SLAP );
-  }
-  else if( vic->pain )
-  {
-    vic->pain( vic, ent, 2 );
-  }
+  G_Damage(
+    vic,
+    NULL,
+    NULL,
+    dir,
+    vic->r.currentOrigin,
+    BG_HP2SU(24),
+    DAMAGE_NO_KNOCKBACK|DAMAGE_NO_PROTECTION|DAMAGE_GODLESS|DAMAGE_NO_LOCDAMAGE|DAMAGE_NO_ARMOR,
+    MOD_SLAP);
 
   return qtrue;
 }
