@@ -179,7 +179,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define LEVEL1_SPEED                1.25f
 #define LEVEL1_VALUE                AVM(270)
-#define LEVEL1_HEALTH               AHM(60000)
+#define LEVEL1_HEALTH               AHM(75000)
 #define LEVEL1_REGEN                (0.03f * LEVEL1_HEALTH)
 #define LEVEL1_COST                 1
 
