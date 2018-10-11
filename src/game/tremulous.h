@@ -414,17 +414,17 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define GRENADE_RANGE               192.0f
 #define GRENADE_SPEED               400.0f
 
-#define FRAGNADE_PRICE               250
-#define FRAGNADE_REPEAT              0
-#define FRAGNADE_K_SCALE             1.0f
-#define FRAGNADE_FRAGMENTS           150
-#define FRAGNADE_PITCH_LAYERS        5
-#define FRAGNADE_SPREAD              45
-#define FRAGNADE_RANGE               1000
-#define FRAGNADE_FRAGMENT_DMG        HWDM(80000)
-#define FRAGNADE_BLAST_DAMAGE        (FRAGNADE_FRAGMENT_DMG * FRAGNADE_FRAGMENTS)
-#define FRAGNADE_BLAST_RANGE         0.0f
-#define FRAGNADE_SPEED               400.0f
+#define FRAGNADE_PRICE              250
+#define FRAGNADE_REPEAT             0
+#define FRAGNADE_K_SCALE            1.0f
+#define FRAGNADE_FRAGMENTS          150
+#define FRAGNADE_PITCH_LAYERS       5
+#define FRAGNADE_SPREAD             45
+#define FRAGNADE_RANGE              1000
+#define FRAGNADE_FRAGMENT_DMG       HWDM(80000)
+#define FRAGNADE_BLAST_DAMAGE       (FRAGNADE_FRAGMENT_DMG * FRAGNADE_FRAGMENTS)
+#define FRAGNADE_BLAST_RANGE        0.0f
+#define FRAGNADE_SPEED              400.0f
 
 #define SHOTGUN_PRICE               150
 #define SHOTGUN_SHELLS              8
@@ -515,16 +515,16 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define PORTAL_LIFETIME             120000   // max time a portal can exist
 #define PORTAL_HEALTH               500000
 
-#define LAUNCHER_PRICE               1600
-#define LAUNCHER_AMMO                6
-#define LAUNCHER_MAXCLIPS            0
-#define LAUNCHER_ROUND_PRICE         GRENADE_PRICE
-#define LAUNCHER_REPEAT              2000
-#define LAUNCHER_K_SCALE             1.0f
-#define LAUNCHER_RELOAD              2000
-#define LAUNCHER_DAMAGE              GRENADE_DAMAGE
-#define LAUNCHER_RADIUS              GRENADE_RANGE
-#define LAUNCHER_SPEED               1200
+#define LAUNCHER_PRICE              1600
+#define LAUNCHER_AMMO               6
+#define LAUNCHER_MAXCLIPS           0
+#define LAUNCHER_ROUND_PRICE        GRENADE_PRICE
+#define LAUNCHER_REPEAT             2000
+#define LAUNCHER_K_SCALE            1.0f
+#define LAUNCHER_RELOAD             2000
+#define LAUNCHER_DAMAGE             GRENADE_DAMAGE
+#define LAUNCHER_RADIUS             GRENADE_RANGE
+#define LAUNCHER_SPEED              1200
 
 #define LIGHTNING_PRICE                1000
 #define LIGHTNING_AMMO                 660
