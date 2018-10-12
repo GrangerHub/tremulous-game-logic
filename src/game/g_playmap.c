@@ -1108,8 +1108,6 @@ caller.
 */
 qboolean G_PopFromPlayMapQueue( playMap_t *playMap )
 {
-  G_ValidatePlayMapQueue( );
-
   if( PLAYMAP_QUEUE_IS_EMPTY )
     return qfalse;
 
@@ -1311,9 +1309,14 @@ G_PlayMapActive
 Test if playmap rotation is currently active
 ===============
 */
-qboolean G_PlayMapActive( void )
-{
-  return ( g_playMapEnable.integer != PLAYMAP_INACTIVE && G_GetPlayMapQueueLength() > 0 );
+qboolean G_PlayMapActive( void ) {
+  if(g_playMapEnable.integer == PLAYMAP_INACTIVE) {
+    return qfalse;
+  }
+
+  G_ValidatePlayMapQueue( );
+
+  return (G_GetPlayMapQueueLength() > 0);
 }
 
 /*
