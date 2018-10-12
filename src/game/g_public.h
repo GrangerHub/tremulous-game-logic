@@ -118,12 +118,13 @@ typedef enum {
 // individual playmap entry in the queue
 typedef struct playMap_s
 {
-  char mapName[MAX_QPATH+1];
-  char layout[MAX_QPATH+1];
+  char     mapName[MAX_QPATH+1];
+  char     layout[MAX_QPATH+1];
 
-  char clientName[MAX_NAME_LENGTH+1];
+  qboolean console;
+  char     guid[ 33 ];
 
-  int flags;
+  int      flags;
   //playMapFlag_t plusFlags[ PLAYMAP_NUM_FLAGS ];
   //playMapFlag_t minusFlags[ PLAYMAP_NUM_FLAGS ];
 } playMap_t;

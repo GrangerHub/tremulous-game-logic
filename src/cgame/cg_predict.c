@@ -822,7 +822,7 @@ void CG_PredictPlayerState( void )
             CG_Printf("prediction error\n");
         }
 
-        oldPlayerState.delta_angles[YAW] += ANGLE2SHORT(delta_yaw);
+        oldPlayerState.viewangles[YAW] += delta_yaw;
 
         VectorSubtract( oldPlayerState.origin, adjusted, delta );
         len = VectorLength( delta );
@@ -937,7 +937,7 @@ void CG_PredictPlayerState( void )
                 cg.predictedPlayerState.origin,
                 CG_Get_Pusher_Num(cg.predictedPlayerState.clientNum),
                 cg.physicsTime, cg.time, cg.predictedPlayerState.origin);
-  cg.predictedPlayerState.delta_angles[YAW] += ANGLE2SHORT(delta_yaw);
+  cg.predictedPlayerState.viewangles[YAW] += delta_yaw;
 
 
   // fire events and other transition triggered things

@@ -140,6 +140,7 @@ typedef enum playMapErrorCode_s
   PLAYMAP_ERROR_USER_ALREADY_IN_QUEUE,
   PLAYMAP_ERROR_MAP_QUEUE_EMPTY,
   PLAYMAP_ERROR_MAP_QUEUE_FULL,
+  PLAYMAP_ERROR_USER_GUIDLESS,
 
   // an unknown error
   PLAYMAP_ERROR_UNKNOWN,
@@ -172,18 +173,19 @@ int G_FindInMapPool( char *mapName );
 void G_SortPlayMapPool( void );
 int G_GetPlayMapPoolLength( void );
 void G_PrintPlayMapPool( gentity_t *ent, int page, qboolean isJson );
+qboolean G_Get_Net_Name_From_GUID(const char *guid, char *name, size_t size_of_name);
 void G_InitPlayMapQueue( void );
 playMapError_t G_SavePlayMapQueue( void );
 playMapError_t G_ReloadPlayMapQueue( void );
-gclient_t *G_FindClientByName(gentity_t *from, const char *netname);
+gclient_t *G_FindClientByGUID(const char *guid);
 int G_GetPlayMapQueueLength( void );
 qboolean G_PlayMapQueueIsFull( void );
 playMapFlag_t G_ParsePlayMapFlag( gentity_t *ent, char *flag );
-playMapError_t G_PlayMapEnqueue( char *mapName, char *layout, char *clientName, char *flags, gentity_t *ent );
+playMapError_t G_PlayMapEnqueue( char *mapName, char *layout, qboolean console, const char *guid, char *flags, gentity_t *ent );
 qboolean G_PopFromPlayMapQueue( playMap_t *playMap );
 playMapError_t G_RemoveFromPlayMapQueue( int index );
 int G_GetPlayMapQueueIndexByMapName( char *mapName );
-int G_GetPlayMapQueueIndexByClient( char *clientName );
+int G_GetPlayMapQueueIndexByClient( const char *guid, qboolean console );
 void G_PrintPlayMapQueue( gentity_t *ent );
 qboolean G_PlayMapActive( void );
 void G_NextPlayMap( void );

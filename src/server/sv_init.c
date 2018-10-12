@@ -55,7 +55,8 @@ void SV_PlayMap_Clear_Saved_Queue( int default_flags ) {
 	int index;
 
 	for(index = 0; index < MAX_PLAYMAP_QUEUE_ENTRIES; index++) {
-		playMap[index].clientName[0] = '\0';
+		playMap[index].console = qfalse;
+		playMap[index].guid[0] = '\0';
 		playMap[index].layout[0] = '\0';
 		playMap[index].mapName[0] = '\0';
 		playMap[index].flags = default_flags;
