@@ -3808,7 +3808,8 @@ qboolean G_admin_playmap( gentity_t *ent )
 				cmd, map, layout, flags ) );
 
   playMapError = G_PlayMapEnqueue( map, layout,
-				   ent ? ent->client->pers.netname : "console",
+				   ent ? qfalse : qtrue,
+           (!ent || ent->client->pers.guidless) ? "\0" : ent->client->pers.guid,
 				   flags, ent );
   if (playMapError.errorCode == PLAYMAP_ERROR_NONE)
   {
@@ -3817,8 +3818,12 @@ qboolean G_admin_playmap( gentity_t *ent )
 				" added map " S_COLOR_CYAN "%s" S_COLOR_WHITE
 				" to playlist\n\"",
 				ent ? ent->client->pers.netname : "console", map ) );
-  } else
-    ADMP( va( "%s\n", playMapError.errorMessage ) );
+  } else{
+    ADMP( va( S_COLOR_YELLOW "playmap" S_COLOR_WHITE ": %s\n", playMapError.errorMessage ) );
+    admincmd = G_admin_cmd( "playmap" );
+    ADMP( va( S_COLOR_YELLOW "\nusage: " S_COLOR_WHITE "%s %s\n",
+	      admincmd->keyword, admincmd->syntax ) );
+  }
 
   return qtrue;
 }
