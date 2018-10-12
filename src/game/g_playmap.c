@@ -107,6 +107,10 @@ static const playMapError_t playMapError[ ] =
     "the map queue is full"
   },
   {
+    PLAYMAP_ERROR_USER_GUIDLESS,         /* errorCode */
+    "your client is missing a GUID, you can download an updated client with a GUID from ^5www.grangerhub.com^7"
+  },
+  {
     PLAYMAP_ERROR_UNKNOWN,               /* errorCode */
     "an unknown error has occured"
   }
@@ -592,6 +596,20 @@ void G_PrintPlayMapPool( gentity_t *ent, int page, qboolean isJson )
 // current map queue
 static playMapQueue_t playMapQueue;
 
+qboolean G_Get_Net_Name_From_GUID(const char *guid, char *name, size_t size_of_name) {
+  namelog_t *n;
+
+  //search through the namelogs
+  for(n = level.namelogs; n; n = n->next) {
+    if(!Q_stricmp(guid, n->guid)) {
+      Q_strncpyz(name, n->name[n->nameOffset], size_of_name);
+      return qtrue;
+    }
+  }
+
+  return qfalse;
+}
+
 /*
 ================
 G_InitPlayMapQueue
@@ -613,7 +631,8 @@ void G_InitPlayMapQueue( void )
     // set all values/pointers to NULL
     playMapQueue.playMap[ i ].mapName[0] = '\0';
     playMapQueue.playMap[ i ].layout[0] = '\0';
-    playMapQueue.playMap[ i ].clientName[0] = '\0';
+    playMapQueue.playMap[ i ].console = qfalse;
+    playMapQueue.playMap[ i ].guid[0] = '\0';
     playMapQueue.playMap[ i ].flags  = 0;
   }
 }
@@ -635,7 +654,8 @@ playMapError_t G_ClearPlayMapQueue( void )
       playMapQueue.playMap[ PLAYMAP_QUEUE_ADD(playMapQueue.head, i) ];
 
     playMap.mapName[0] = '\0';
-    playMap.clientName[0] = '\0';
+    playMapQueue.playMap[ i ].console = qfalse;
+    playMapQueue.playMap[ i ].guid[0] = '\0';
     playMap.layout[0] = '\0';
   }
 
@@ -667,15 +687,18 @@ playMapError_t G_ValidatePlayMapQueue( void )
         playMapQueue.playMap[ PLAYMAP_QUEUE_ADD( playMapQueue.head, i ) ];
 
       // Check if client is still connected
-      if ( Q_stricmp_exact( playMap.clientName, "console" ) &&
-     ! G_FindClientByName( NULL, playMap.clientName ) )
+      if ( !playMap.console &&
+     !G_FindClientByGUID( playMap.guid ) )
         {
+          char name[MAX_NAME_LENGTH + 1];
+
           SV_GameSendServerCommand( -1,
                                   va( "print \"Removing playlist entry #%d for "
                                       S_COLOR_CYAN "%s" S_COLOR_WHITE
                                       " because player %s" S_COLOR_WHITE
                                       " has left\n\"",
-                                      i + 1, playMap.mapName, playMap.clientName ) );
+                                      i + 1, playMap.mapName, 
+                                      (G_Get_Net_Name_From_GUID(playMap.guid, name, sizeof(name)) ? name : "")));
 
           G_RemoveFromPlayMapQueue( i );
           i--; // because queue elements are now shifted
@@ -743,11 +766,13 @@ playMapError_t G_ReloadPlayMapQueue( void )
 
     if( g_debugPlayMap.integer > 0 ) {
       Com_Printf( va( "PLAYMAP: map=%s\n"
-                      "       client=%s\n"
+                      "       console=%s\n"
+                      "       guid=%s\n"
                       "       layout=%s\n"
                       "       flags=%s\n",
                       savedEntry.mapName,
-                      savedEntry.clientName,
+                      savedEntry.console ? "qtrue" : "qfalse",
+                      savedEntry.guid,
                       savedEntry.layout,
                       flagString ) );
     }
@@ -755,7 +780,8 @@ playMapError_t G_ReloadPlayMapQueue( void )
     G_PlayMapEnqueue(
       savedEntry.mapName,
       savedEntry.layout,
-      savedEntry.clientName,
+      savedEntry.console,
+      savedEntry.guid,
       flagString, NULL );
 
     FREE_IF_NOT_NULL(flagString);
@@ -769,28 +795,27 @@ playMapError_t G_ReloadPlayMapQueue( void )
 
 /*
 ================
-G_FindClientByName
+G_FindClientByGUID
 
 Find client from given netname.
 TODO: May need to be in g_utils.c. Also, no longer used here.
 ================
 */
 
-gclient_t *G_FindClientByName(gentity_t *from, const char *netname)
-{
-  // Copied from g_utils.c:G_Find()
-  if( !from )
-    from = g_entities;
-  else
-    from++;
+gclient_t *G_FindClientByGUID(const char *guid) {
+  gclient_t *client;
+  int i;
 
-  for( ; from < &g_entities[ level.num_entities ]; from++ )
-  {
-    if( !from->inuse || !from->client )
+  Com_Assert(guid && "G_FindClientByGUID: guid is NULL");
+
+  for(i = 0; i < level.maxclients; i++ ) {
+    client = &level.clients[i];
+
+    if( client->pers.connected == CON_DISCONNECTED )
       continue;
 
-    if( !Q_stricmp( from->client->pers.netname, netname ) )
-      return from->client;
+    if( !Q_stricmp( client->pers.guid, guid ) )
+      return client;
   }
 
   return NULL;
@@ -820,10 +845,17 @@ queue).
 */
 
 playMapError_t G_PlayMapEnqueue( char *mapName, char *layout,
-                                 char *clientName, char *flags, gentity_t *ent )
+                                 qboolean console, const char *guid,
+                                 char *flags, gentity_t *ent )
 {
   int         i;
   playMap_t   playMap;
+
+  if(!console) {
+    if(!guid || guid[0] == '\0') {
+      return G_PlayMapErrorByCode( PLAYMAP_ERROR_USER_GUIDLESS );
+    }
+  }
 
   if( G_FindInMapPool( mapName ) < 0 )
     return G_PlayMapErrorByCode( PLAYMAP_ERROR_MAP_NOT_IN_POOL );
@@ -831,17 +863,17 @@ playMapError_t G_PlayMapEnqueue( char *mapName, char *layout,
   if( PLAYMAP_QUEUE_IS_FULL )
     return G_PlayMapErrorByCode( PLAYMAP_ERROR_MAP_QUEUE_FULL );
 
+  // check if map has already been queued by someone else
+  if( G_GetPlayMapQueueIndexByMapName( mapName ) >= 0 )
+    return G_PlayMapErrorByCode( PLAYMAP_ERROR_MAP_ALREADY_IN_QUEUE );
+
   // check if user already has a map queued
-  if( ( i = G_GetPlayMapQueueIndexByClient( clientName ) ) >= 0 )
+  if( ( i = G_GetPlayMapQueueIndexByClient( guid, console ) ) >= 0 )
     {
       ADMP( va( "%s\n",
                 G_PlayMapErrorByCode( PLAYMAP_ERROR_USER_ALREADY_IN_QUEUE ).errorMessage) );
       G_RemoveFromPlayMapQueue( i );
     }
-
-  // check if map has already been queued by someone else
-  if( G_GetPlayMapQueueIndexByMapName( mapName ) >= 0 )
-    return G_PlayMapErrorByCode( PLAYMAP_ERROR_MAP_ALREADY_IN_QUEUE );
 
   // copy mapName
   Q_strncpyz(playMap.mapName, mapName, sizeof(playMap.mapName));
@@ -854,12 +886,13 @@ playMapError_t G_PlayMapEnqueue( char *mapName, char *layout,
     playMap.layout[0] = '\0';
   }
 
-  // copy clientName
-  if( clientName && *clientName ) {
-    Q_strncpyz(playMap.clientName, clientName, sizeof(playMap.clientName));
+  // copy client info
+  playMap.console = console;
+  if( !console && *guid ) {
+    Q_strncpyz(playMap.guid, guid, sizeof(playMap.guid));
   }
   else {
-    playMap.clientName[0] = '\0';
+    playMap.guid[0] = '\0';
   }
 
   playMap.flags = G_ParsePlayMapFlagTokens( ent, flags );
@@ -1075,6 +1108,7 @@ caller.
 */
 qboolean G_PopFromPlayMapQueue( playMap_t *playMap )
 {
+  G_ValidatePlayMapQueue( );
 
   if( PLAYMAP_QUEUE_IS_EMPTY )
     return qfalse;
@@ -1089,15 +1123,17 @@ qboolean G_PopFromPlayMapQueue( playMap_t *playMap )
     playMapQueue.playMap[ playMapQueue.head ].layout,
     sizeof(playMap->layout));
   Q_strncpyz(
-    playMap->clientName,
-    playMapQueue.playMap[ playMapQueue.head ].clientName,
-    sizeof(playMap->clientName));
+    playMap->guid,
+    playMapQueue.playMap[ playMapQueue.head ].guid,
+    sizeof(playMap->guid));
   playMap->flags = playMapQueue.playMap[ playMapQueue.head ].flags;
+  playMap->console = playMapQueue.playMap[ playMapQueue.head ].console;
 
   // reset the playmap in the head of the queue to null values
   playMapQueue.playMap[ playMapQueue.head ].mapName[0] = '\0';
   playMapQueue.playMap[ playMapQueue.head ].layout[0] = '\0';
-  playMapQueue.playMap[ playMapQueue.head ].clientName[0] = '\0';
+  playMapQueue.playMap[ playMapQueue.head ].guid[0] = '\0';
+  playMapQueue.playMap[ playMapQueue.head ].console = qfalse;
   playMapQueue.playMap[ playMapQueue.head ].flags = G_DefaultPlayMapFlags( );
 
   // advance the head of the queue in the array (shorten queue by one)
@@ -1154,7 +1190,8 @@ playMapError_t G_RemoveFromPlayMapQueue( int index )
 
     // Clear strings in the last one
     playMapQueue.playMap[ playMapQueue.tail ].mapName[0] = '\0';
-    playMapQueue.playMap[ playMapQueue.tail ].clientName[0] = '\0';
+    playMapQueue.playMap[ playMapQueue.tail ].guid[0] = '\0';
+    playMapQueue.playMap[ playMapQueue.tail ].console = 0;
     playMapQueue.playMap[ playMapQueue.tail ].layout[0] = '\0';
   }
 
@@ -1200,15 +1237,22 @@ G_GetPlayMapQueueIndexByClient
 Get the index of the map in the queue from the client that requested it.
 ================
 */
-int G_GetPlayMapQueueIndexByClient( char *clientName )
-{
+int G_GetPlayMapQueueIndexByClient(const char *guid, qboolean console) {
   int i;
 
-  for( i = 0; i < G_GetPlayMapQueueLength(); i++ )
-  {
-    if( Q_stricmp( playMapQueue.playMap[ PLAYMAP_QUEUE_ADD(playMapQueue.head, i)
-                                         ].clientName, clientName ) == 0 )
+  for(i = 0; i < G_GetPlayMapQueueLength(); i++) {
+    if(console) {
+      if(playMapQueue.playMap[PLAYMAP_QUEUE_ADD(playMapQueue.head, i)].console) {
+        return i;
+      }
+
+      continue;
+    }
+
+    if(Q_stricmp(playMapQueue.playMap[PLAYMAP_QUEUE_ADD(playMapQueue.head, i)
+                                         ].guid, guid) == 0 ) {
       return i;
+    }
   }
 
   // client's map was not found in the queue
@@ -1226,7 +1270,8 @@ void G_PrintPlayMapQueue( gentity_t *ent )
 {
   int       i, len;
   playMap_t *playMap;
-  char       *flagString;
+  char      *flagString;
+  char      name[MAX_NAME_LENGTH + 1];
 
   ADMBP_begin(); // begin buffer
 
@@ -1250,7 +1295,9 @@ void G_PrintPlayMapQueue( gentity_t *ent )
     ADMBP( va( S_COLOR_YELLOW "%2d." S_COLOR_WHITE " "
                S_COLOR_CYAN "%-10s" S_COLOR_WHITE
                " %-10s " S_COLOR_RED "%s" S_COLOR_WHITE "\n", i + 1,
-               playMap->mapName, playMap->clientName, flagString ) );
+               playMap->mapName,
+               !playMap->console ? (G_Get_Net_Name_From_GUID(playMap->guid, name, sizeof(name)) ? name : "") : "console",
+               flagString ) );
     BG_Free( flagString );
   }
 
