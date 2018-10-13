@@ -492,6 +492,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LCANNON_CHARGE_TIME_MIN     100
 #define LCANNON_CHARGE_TIME_WARN    2000
 #define LCANNON_CHARGE_AMMO         10       // ammo cost of a full charge shot
+#define LCANNON_CHARGE_AMMO_REDUCE  0.0f
 
 #define PORTALGUN_PRICE             700
 #define PORTALGUN_AMMO              40
