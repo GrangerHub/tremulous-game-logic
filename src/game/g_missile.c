@@ -427,7 +427,7 @@ gentity_t *fire_blaster( gentity_t *self, vec3_t start, vec3_t dir )
 
   bolt = G_Spawn();
   bolt->classname = "blaster";
-  bolt->pointAgainstWorld = qtrue;
+  bolt->pointAgainstWorld = qfalse;
   bolt->nextthink = level.time + BLASTER_LIFETIME;
   bolt->think = G_ExplodeMissile;
   bolt->s.eType = ET_MISSILE;
@@ -476,7 +476,7 @@ gentity_t *fire_pulseRifle( gentity_t *self, vec3_t start, vec3_t dir )
 
   bolt = G_Spawn();
   bolt->classname = "pulse";
-  bolt->pointAgainstWorld = qtrue;
+  bolt->pointAgainstWorld = qfalse;
   bolt->nextthink = level.time + PRIFLE_LIFETIME;
   bolt->think = G_ExplodeMissile;
   bolt->s.eType = ET_MISSILE;
