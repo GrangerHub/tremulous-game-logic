@@ -4159,7 +4159,7 @@ commands_t cmds[ ] = {
   { "follow", CMD_SPEC, Cmd_Follow_f },
   { "follownext", CMD_SPEC, Cmd_FollowCycle_f },
   { "followprev", CMD_SPEC, Cmd_FollowCycle_f },
-  { "give", CMD_CHEAT|CMD_TEAM, Cmd_Give_f },
+  { "give", CMD_CHEAT|CMD_TEAM|CMD_ALIVE, Cmd_Give_f },
   { "god", CMD_CHEAT, Cmd_God_f },
   { "ignore", 0, Cmd_Ignore_f },
   { "itemact", CMD_HUMAN|CMD_ALIVE, Cmd_ActivateItem_f },
