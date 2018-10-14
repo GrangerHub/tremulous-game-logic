@@ -1865,7 +1865,7 @@ void Blocked_Door(gentity_t *ent, gentity_t *other) {
   if(
     ent->damage &&
     (other->s.eType != ET_BUILDABLE || other->health > 0)) {
-    G_Damage( other, ent, ent, NULL, NULL, BG_HP2SU( ent->damage ), 0, MOD_CRUSH );
+    G_Damage( other, ent, ent, NULL, NULL, ent->damage, 0, MOD_CRUSH );
   }
 
   if(ent->spawnflags & 4) {
