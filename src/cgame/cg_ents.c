@@ -893,12 +893,57 @@ static void CG_Lev2ZapChain( centity_t *cent )
 }
 
 /*
+================
+CG_Get_Foundation_Ent_Num
+
+Recursively determines if an entity is ultimately
+supported by the world, a mover, or has no foundational support
+================
+*/
+static int CG_Get_Foundation_Ent_Num(int ent_num) {
+  int groundEntityNum;
+  centity_t *cent;
+
+  Com_Assert(ent_num >= 0 && ent_num < MAX_GENTITIES);
+
+  cent = &cg_entities[ent_num];
+
+  if(!cent->valid &&
+    ent_num != cg.predictedPlayerState.clientNum) {
+    return ENTITYNUM_NONE;
+  }
+
+  if(ent_num == cg.predictedPlayerState.clientNum) {
+    groundEntityNum = cg.predictedPlayerState.groundEntityNum;
+  } else {
+    groundEntityNum = cent->currentState.groundEntityNum;
+  }
+
+  if(groundEntityNum == ENTITYNUM_NONE) {
+    return ENTITYNUM_NONE;
+  }
+
+  //check to see if the ground entity is a foundation entitity
+  if(
+    groundEntityNum == ENTITYNUM_WORLD ||
+    cg_entities[groundEntityNum].currentState.eType == ET_MOVER ) {
+    return groundEntityNum;
+  } else if(cg_entities[groundEntityNum].currentState.otherEntityNum != ENTITYNUM_NONE) {
+    return cg_entities[groundEntityNum].currentState.otherEntityNum;
+  }
+
+  //check the ground entity to see if it is on a foundation entity
+  return CG_Get_Foundation_Ent_Num(groundEntityNum);
+}
+
+/*
 ============
 CG_Get_Pusher_Num
 ============
 */
 int CG_Get_Pusher_Num(int ent_num) {
-  int pusher_num;
+  int          pusher_num;
+  int          foundation_ent_num;
   entityType_t eType;
 
   Com_Assert(ent_num >= 0 && ent_num < MAX_GENTITIES);
@@ -911,13 +956,15 @@ int CG_Get_Pusher_Num(int ent_num) {
     eType = cg_entities[ent_num].currentState.eType;
   }
 
+  foundation_ent_num = CG_Get_Foundation_Ent_Num(ent_num);
+
   if(
     eType != ET_ITEM && eType != ET_BUILDABLE &&
     eType != ET_CORPSE && eType != ET_PLAYER) {
     return ENTITYNUM_NONE;
   }
 
-  return pusher_num;
+  return (pusher_num == ENTITYNUM_NONE ? foundation_ent_num : pusher_num);
 }
 
 /*
@@ -940,7 +987,7 @@ float CG_AdjustPositionForMover(
   vec3_t       org, org2, move, move2, amove;
   vec3_t       matrix[3], transpose[3];
 
-  if(moverNum <= 0 || moverNum >= ENTITYNUM_MAX_NORMAL) {
+  if(moverNum < 0 || moverNum >= ENTITYNUM_MAX_NORMAL) {
     VectorCopy( pos_in, pos_out );
     return 0.0f;
   }
