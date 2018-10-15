@@ -143,6 +143,7 @@ static void CG_ClipMoveToEntities ( const vec3_t start, const vec3_t mins,
     }
     else
     {
+      int pusher_num = CG_Get_Pusher_Num(cent->currentState.number);
       // encoded bbox
       x = ( ent->solid & 255 );
       zd = ( ( ent->solid >> 8 ) & 255 );
@@ -158,7 +159,17 @@ static void CG_ClipMoveToEntities ( const vec3_t start, const vec3_t mins,
 
       cmodel = trap_CM_TempBoxModel( bmins, bmaxs );
       VectorCopy( vec3_origin, angles );
-      VectorCopy( cent->lerpOrigin, origin );
+      if(
+        pusher_num != ENTITYNUM_NONE &&
+        cg_entities[pusher_num].currentState.eType == ET_MOVER ){
+        //this entity is being moved in the same mover stack as the local player
+        BG_EvaluateTrajectory( &cent->currentState.pos, cg.physicsTime, origin );
+        CG_AdjustPositionForMover(
+                      origin, CG_Get_Pusher_Num(cent->currentState.number),
+                      cg.snap->serverTime, cg.physicsTime, origin);
+      } else {
+        VectorCopy( cent->lerpOrigin, origin );
+      }
     }
 
 
