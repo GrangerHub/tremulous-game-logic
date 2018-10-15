@@ -48,9 +48,9 @@ typedef struct mover_data_s {
   vec3_t        start_origin;
   vec3_t        start_angles;
 
-  //mins/maxs at the potential destination
-  vec3_t        dest_mins;
-  vec3_t        dest_maxs;
+  //mins/maxs for the entire move
+  vec3_t        total_mins;
+  vec3_t        total_maxs;
 } mover_data_t;
 
 typedef struct pushes_s {
@@ -255,14 +255,43 @@ typedef struct push_data_s
 
 /*
 ==================
+G_Move_From_amove
+==================
+*/
+static void G_Move_From_amove(
+  const gentity_t *check,
+  const push_data_t *push_data,
+  vec3_t move) {
+  vec3_t       matrix[ 3 ], transpose[ 3 ];
+  vec3_t       org, org2;
+
+  Com_Assert(check && "G_Move_From_amove: check is NULL");
+  Com_Assert(push_data && "G_Move_From_amove:push_data is NULL");
+
+  BG_CreateRotationMatrix(push_data->amove, transpose);
+  BG_TransposeMatrix(transpose, matrix);
+
+  if(check->client) {
+    VectorSubtract(check->client->ps.origin, push_data->pusher->r.currentOrigin, org);
+  }
+  else {
+      VectorSubtract(check->s.pos.trBase, push_data->pusher->r.currentOrigin, org);
+  }
+
+  VectorCopy(org, org2);
+  BG_RotatePoint(org2, matrix);
+  VectorSubtract(org2, org, move);
+}
+
+/*
+==================
 G_Push_Ent
 ==================
 */
 static void  G_Push_Ent(void *data, void *user_data) {
   gentity_t   *check = (gentity_t *)data;
   push_data_t *push_data = (push_data_t *)user_data;
-  vec3_t       matrix[ 3 ], transpose[ 3 ];
-  vec3_t       org, org2, move2;
+  vec3_t       move2;
 
   Com_Assert(push_data && "G_Push_Ent: push_data is NULL");
   Com_Assert(check && "G_Push_Ent: check is NUll");
@@ -280,19 +309,7 @@ static void  G_Push_Ent(void *data, void *user_data) {
 
   // try moving the contacted entity
   // figure movement due to the pusher's amove
-  BG_CreateRotationMatrix(push_data->amove, transpose);
-  BG_TransposeMatrix(transpose, matrix);
-
-  if(check->client) {
-    VectorSubtract(check->client->ps.origin, push_data->pusher->r.currentOrigin, org);
-  }
-  else {
-      VectorSubtract(check->s.pos.trBase, push_data->pusher->r.currentOrigin, org);
-  }
-
-  VectorCopy(org, org2);
-  BG_RotatePoint(org2, matrix);
-  VectorSubtract(org2, org, move2);
+  G_Move_From_amove(check, push_data, move2);
   // add movement
   VectorAdd(check->s.pos.trBase, push_data->move, check->s.pos.trBase);
   VectorAdd(check->s.pos.trBase, move2, check->s.pos.trBase);
@@ -313,12 +330,16 @@ static void  G_Push_Ent(void *data, void *user_data) {
 /*
 ============
 G_Pushable_Area_Ents_For_Move
+
+If rough_check is false, collisions are further tested with a trace
 ============
 */
 static qboolean G_Pushable_Area_Ents_For_Move(
   gentity_t   *ent,
   push_data_t *push_data,
-  bgqueue_t   *ent_list) {
+  bgqueue_t   *ent_list,
+  qboolean    rough_check) {
+  vec3_t      total_move;
   qboolean    check_for_direct_block = qfalse;
   int         ent_array[MAX_GENTITIES];
   int         i, num;
@@ -327,13 +348,45 @@ static qboolean G_Pushable_Area_Ents_For_Move(
   Com_Assert(push_data && "G_Pushable_Area_Ents_For_Move: push_data is NULL");
   Com_Assert(ent_list && "G_Pushable_Area_Ents_For_Move: ent_list is NULL");
 
-  // mins/maxs are the bounds at the destination
-  VectorCopy(ent->r.absmin, pushes.mover_data[ent->s.number].dest_mins);
-  VectorCopy(ent->r.absmax, pushes.mover_data[ent->s.number].dest_maxs);
+  // total_mins / total_maxs are the bounds for the entire move
+  if(
+    ent->r.currentAngles[0] ||
+    ent->r.currentAngles[1] ||
+    ent->r.currentAngles[2] ||
+    push_data->amove[0] ||
+    push_data->amove[1] ||
+    push_data->amove[2]) {
+    vec3_t  move2;
+    float   radius;
+
+    if(ent->s.number == push_data->pusher->s.number) {
+      VectorCopy(push_data->move, total_move);
+    } else {
+      G_Move_From_amove(ent, push_data, move2);
+      VectorAdd(push_data->move, move2, total_move);
+    }
+
+    radius = RadiusFromBounds(ent->r.mins, ent->r.maxs) + 1;
+
+    for(i = 0 ; i < 3 ; i++) {
+      pushes.mover_data[ent->s.number].total_mins[i] = ent->r.currentOrigin[i] - radius;
+      pushes.mover_data[ent->s.number].total_maxs[i] = ent->r.currentOrigin[i] + radius;
+    }
+  } else {
+    VectorCopy(push_data->move, total_move);
+    VectorCopy( ent->r.absmin, pushes.mover_data[ent->s.number].total_mins );
+    VectorCopy( ent->r.absmax, pushes.mover_data[ent->s.number].total_maxs );
+  }
+  for(i = 0; i < 3; i++) {
+    if(total_move[i] > 0)
+      pushes.mover_data[ent->s.number].total_maxs[i] += total_move[i];
+    else
+      pushes.mover_data[ent->s.number].total_mins[i] += total_move[i];
+  }
 
   num = SV_AreaEntities(
-          pushes.mover_data[ent->s.number].dest_mins,
-          pushes.mover_data[ent->s.number].dest_maxs,
+          pushes.mover_data[ent->s.number].total_mins,
+          pushes.mover_data[ent->s.number].total_maxs,
           ent_array,
           MAX_GENTITIES);
   for(i = 0; i < num; i++) {
@@ -344,8 +397,12 @@ static qboolean G_Pushable_Area_Ents_For_Move(
       continue;
     }
 
-    //don't push back an ent that pushed this ent
-    if(pushes.type[pushable->s.number][ent->s.number] > MPUSH_NONE) {
+    //Don't push back an ent that pushed this ent.
+    //Don't do this check for the original pusher, especially since
+    //pushes.type might not be initialized for the rough_check.
+    if(
+      ent->s.number != push_data->pusher->s.number &&
+      pushes.type[pushable->s.number][ent->s.number] > MPUSH_NONE) {
       continue;
     }
 
@@ -381,8 +438,12 @@ static qboolean G_Pushable_Area_Ents_For_Move(
       continue;
     }
 
-    if(G_TestEntAgainstOtherEnt(pushable, ent->s.number)) {
+    if(rough_check || G_TestEntAgainstOtherEnt(pushable, ent->s.number)) {
       BG_Queue_Push_Head(ent_list, pushable);
+      //only need to find one pushable entity for the roughcheck
+      if(rough_check) {
+        return qfalse;
+      }
     }
   }
 
@@ -461,7 +522,7 @@ static void G_Find_Mover_Pushes(void *data, void *user_data ) {
 
   //find all collided pushable entities
   if(
-    G_Pushable_Area_Ents_For_Move(check, push_data, &pushable_ents) &&
+    G_Pushable_Area_Ents_For_Move(check, push_data, &pushable_ents, qfalse) &&
     check->s.eType != ET_MOVER) {
     pushes.mover_data[check->s.number].check_for_direct_block = qtrue;
   }
@@ -668,8 +729,8 @@ static qboolean G_Entity_Is_Directly_Blocked(
   }
 
   num = SV_AreaEntities(
-          pushes.mover_data[ent->s.number].dest_mins,
-          pushes.mover_data[ent->s.number].dest_maxs,
+          pushes.mover_data[ent->s.number].total_mins,
+          pushes.mover_data[ent->s.number].total_maxs,
           ent_array,
           MAX_GENTITIES);
   for(i = 0; i < num; i++) {
@@ -896,6 +957,8 @@ static qboolean G_TryPushingEntities(
   vec3_t       amove,
   bgqueue_t    *obstacles) {
   push_data_t  push_data;
+  bgqueue_t    pushable_ents = BG_QUEUE_INIT;
+  qboolean     rider_in_range = qfalse;
   int          i;
 
   Com_Assert(check && "G_TryPushingEntities: check is NULL");
@@ -903,18 +966,49 @@ static qboolean G_TryPushingEntities(
   Com_Assert(obstacles && "G_TryPushingEntities: obstacles is NULL");
 
   //initialize this prime pusher of the move
+  push_data.pusher = push_data.carrier = pusher;
+  push_data.push_type = MPUSH_PRIME_MOVER_HIT;
+  VectorCopy(start_origin, push_data.start_origin);
+  VectorCopy(move, push_data.move);
+  VectorCopy(amove, push_data.amove);
+  //check if there are any pushable entities the range of the mover, if not the
+  //expensive memset of the pushes structure for initialization can be avoided
+  //entirely.
+  for(i = 0; i < ENTITYNUM_MAX_NORMAL; i++) {
+    gentity_t *rider = &g_entities[i];
+
+    if(rider->s.groundEntityNum != check->s.number) {
+      continue;
+    }
+
+    //don't check self as a rider
+    if(rider->s.number == check->s.number) {
+      continue;
+    }
+
+    if(!G_Ent_Is_Pushable_By_Pusher(rider, check)) {
+      continue;
+    }
+
+    rider_in_range = qtrue;
+  }
+  if(!rider_in_range) {
+    G_Pushable_Area_Ents_For_Move(check, &push_data, &pushable_ents, qtrue);
+    if(!pushable_ents.length) {
+      //nothing to move
+      return qtrue;
+    }
+    BG_Queue_Clear(&pushable_ents);
+  }
+
+  //finish initializing for the move
   memset(&pushes, 0, sizeof(pushes_t));
   for( i = 0; i < MAX_GENTITIES; i++ ) {
     VectorCopy(g_entities[i].r.currentOrigin, pushes.mover_data[i].start_origin);
     VectorCopy(g_entities[i].r.currentAngles, pushes.mover_data[i].start_angles);
   }
-  push_data.pusher = push_data.carrier = pusher;
-  push_data.push_type = MPUSH_PRIME_MOVER_HIT;
-  VectorCopy(start_origin, push_data.start_origin);
   VectorCopy(start_origin, pushes.mover_data[push_data.pusher->s.number].start_origin);
   VectorCopy(start_angles, pushes.mover_data[push_data.pusher->s.number].start_angles);
-  VectorCopy(move, push_data.move);
-  VectorCopy(amove, push_data.amove);
 
   //Recursively find all push collisions
   G_Find_Mover_Pushes(check, &push_data);
