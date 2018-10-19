@@ -298,8 +298,18 @@ void ClientImpacts( pmove_t *pm, trace_t *trace,
     ClientShove( ent, other );
 
   // touch triggers
-  if( other->touch )
-    other->touch( other, ent, trace );
+  if( other->touch ) {
+    if(g_debugAMP.integer) {
+      char *s = va(
+        "touched by #%i (%s^7)",
+        (int)(ent-g_entities),
+        ent->client->pers.netname);
+      G_LoggedActivation(other, ent, NULL, trace, s, LOG_ACT_TOUCH);
+    }
+    else {
+      other->touch(other, ent, trace);
+    }
+  }
 }
 
 /*
@@ -366,8 +376,18 @@ void  G_TouchTriggers( gentity_t *ent )
 
     memset( &trace, 0, sizeof( trace ) );
 
-    if( hit->touch )
-      hit->touch( hit, ent, &trace );
+    if( hit->touch ) {
+      if( g_debugAMP.integer )
+      {
+        char *s = va(
+          "triggered by #%i (%s^7)",
+          (int)(ent-g_entities),
+          ent->client->pers.netname);
+        G_LoggedActivation(hit, ent, NULL, &trace, s, LOG_ACT_TOUCH);
+      }
+      else
+        hit->touch( hit, ent, &trace );
+    }
   }
 }
 
@@ -1344,27 +1364,49 @@ qboolean G_WillActivateEntity( gentity_t *actEnt, gentity_t *activator )
 
 /*
 =====================
+_G_LoggedActivateEnt
+
+A wrapper for optionally logging activation details
+=====================
+*/
+static qboolean _G_LoggedActivateEnt(gentity_t *actEnt, gentity_t *activator) {
+  if( g_debugAMP.integer ) {
+    char *s;
+    s = va(
+      "activated by #%i (%s^7)", 
+      (int)( activator-g_entities ),
+      activator->client->pers.netname);
+    return G_LoggedActivation(
+      actEnt, activator, activator, NULL, s, LOG_ACT_ACTIVATE);
+  }
+
+  return actEnt->activation.activate( actEnt, activator);
+}
+
+/*
+=====================
 G_ActivateEntity
 
 This is a general wrapper for activation.(*activate)()
 =====================
 */
-void G_ActivateEntity( gentity_t *actEnt, gentity_t *activator )
-{
-  if( !activator->client )
+void G_ActivateEntity(gentity_t *actEnt, gentity_t *activator) {
+  if(!activator->client) {
     return;
+  }
 
-  if( G_WillActivateEntity( actEnt, activator ) )
-  {
-    if( actEnt->activation.activate( actEnt, activator ) &&
-        ( actEnt->activation.flags & ACTF_OCCUPY ) )
-    {
+  if(G_WillActivateEntity(actEnt, activator)) {
+    if(
+      _G_LoggedActivateEnt(actEnt, activator) &&
+      (actEnt->activation.flags & ACTF_OCCUPY)) {
       //occupy the activation entity
-      G_OccupyEnt( actEnt );
+      G_OccupyEnt(actEnt);
     }
-  } else if( activator->activation.menuMsg )
-    G_TriggerMenu( activator->client->ps.clientNum,
-                   activator->activation.menuMsg );
+  } else if(activator->activation.menuMsg) {
+    G_TriggerMenu(
+      activator->client->ps.clientNum,
+      activator->activation.menuMsg);
+  }
 }
 
 /*
@@ -1649,12 +1691,12 @@ void G_OccupantThink( gentity_t *occupant )
                G_TriggerMenu( occupant->client->ps.clientNum,
                               occupant->activation.menuMsg );
             }
-            else if( !occupied->activation.activate( occupied, occupant ) )
+            else if(!_G_LoggedActivateEnt(occupied, occupant))
               G_UnoccupyEnt( occupied, occupant, occupant, qtrue );
           } else if( G_CanActivateEntity( occupant->client, occupied ) &&
                      G_WillActivateEntity( occupied, occupant ) )
           {
-            if ( occupied->activation.activate( occupied, occupant ) )
+            if(_G_LoggedActivateEnt(occupied, occupant))
             {
               //occupy the activation entity
               G_OccupyEnt( occupied );

@@ -224,7 +224,7 @@ float G_RewardAttackers( gentity_t *self )
         G_AddCreditToClient( player->client, stageValue, qtrue );
 
         // add to stage counters
-        if( !IS_WARMUP )
+        if( !IS_WARMUP && !g_AMPStageLock.integer )
         {
           if( player->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
             alienCredits += stageValue;
@@ -1057,18 +1057,35 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
          vec3_t dir, vec3_t point, int damage, int dflags, int mod )
 {
   gclient_t *client;
-  int     take;
-  int     modDamge = 100;
-  int     asave = 0;
-  int     knockback;
+  int       take;
+  int       modDamge = 100;
+  int       asave = 0;
+  int       knockback;
+  int       k;
+  weapon_t  weapon = WP_NONE;
+  upgrade_t upgrade = UP_NONE;
+  class_t   class = PCL_NONE;
 
   // Can't deal damage sometimes
   if( !targ->takedamage ||
       level.intermissionQueued )
     return;
 
-  if( !inflictor )
+  if( inflictor ) {
+    upgrade = BG_UpgradeByName( inflictor->classname )->number;
+    weapon = BG_WeaponByName( inflictor->classname )->number;
+  } else {
     inflictor = &g_entities[ ENTITYNUM_WORLD ];
+
+    if( attacker && attacker->client ) {
+      if( attacker->client->pers.teamSelection == TEAM_HUMANS ) {
+        weapon = attacker->client->ps.weapon;
+      }
+      if( attacker->client->pers.teamSelection == TEAM_ALIENS ) {
+        class = attacker->client->ps.stats[ STAT_CLASS ];
+      }
+    }
+  }
 
   if( !attacker )
     attacker = &g_entities[ ENTITYNUM_WORLD ];
@@ -1135,11 +1152,48 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
   // shootable doors / buttons don't actually have any health
   if(targ->s.eType == ET_MOVER) {
+    for( k = 0; targ->wTriggers[ k ]; ++k ) {
+      if( targ->wTriggers[ k ] == weapon ) {
+        return;
+      }
+    }
+
+    for( k = 0; targ->uTriggers[ k ]; ++k ) {
+      if( targ->uTriggers[ k ] == upgrade ) {
+        return;
+      }
+    }
+
+    for( k = 0; targ->cTriggers[ k ]; ++k ) {
+      if( targ->cTriggers[ k ] == class ) {
+        return;
+      }
+    }
+
+    targ->health -= damage;
+    if( targ->health > 0 ) {
+      return;
+    }
+
     if(
       targ->use && targ->moverState == MS_POS1 &&
-      targ->moverMotionType != MM_MODEL)
-      targ->use( targ, inflictor, attacker );
+      targ->moverMotionType != MM_MODEL) {
+      if(g_debugAMP.integer) {
+        char *s;
+        if(attacker) {
+          s = va("damaged by #%i (%s^7)", (int)(attacker-g_entities),
+                  attacker < g_entities + level.maxclients ? attacker->client->pers.netname : attacker->classname );
+        } else {
+          s = "damaged";
+        }
+        G_LoggedActivation(targ, inflictor, attacker, NULL, s, LOG_ACT_USE);
+      } else {
+        targ->use(targ, inflictor, attacker);
+      }
+    }
 
+    // FIXME
+    targ->health = 1; // 1 hp hack to allow dretches to bite movers after their first use
     return;
   } else if(
     targ->s.eType == ET_MISSILE &&

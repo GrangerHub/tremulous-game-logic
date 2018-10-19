@@ -59,6 +59,14 @@ gentity->flags
 #define FL_NO_BOUNCE_SOUND  0x00040000  // for missiles
 #define FL_OCCUPIED         0x00080000  // for occupiable entities
 
+#define  VALUE_MASK       0x0001FFFF
+#define  SIGN_BIT         0x00020000
+#define  TEAM_BIT         0x00040000
+#define  LOCKSTAGE_BIT    0x00080000
+#define  AMP_TRIGGER      0x20000000
+#define  RESET_AFTER_USE  0x40000000
+#define  RESET_BIT        0x80000000
+
 /*
 --------------------------------------------------------------------------------
 */
@@ -167,7 +175,9 @@ struct gentity_s
   int               expireTimes[ NUM_EXPIRE_TYPES ]; // used by G_Expired()
 
   char              *target;
+  char              *multitarget[ MAX_TARGETS ];
   char              *targetname;
+  char              *multitargetname[ MAX_TARGETNAMES ];
   char              *team;
   char              *targetShaderName;
   char              *targetShaderNewName;
@@ -205,7 +215,7 @@ struct gentity_s
     dynMenu_t menuMsgOvrd[ MAX_ACTMN ]; // Used to override the general
                                         // activation menu messages.
 
-    // If qture is returned, an occupiable activation entity would then be
+    // If qtrue is returned, an occupiable activation entity would then be
     // occupied.
     qboolean  (*activate)( gentity_t *self, gentity_t *activator );
 
@@ -367,6 +377,20 @@ struct gentity_s
 
   int               buildPointZone;                 // index for zone
   int               usesBuildPointZone;             // does it use a zone?
+
+  // AMP variables
+  int               hurt;
+  char              *Cvar_Val;
+  char              *sign;
+  char              *inventory;
+  int               AMPintVAR[ 4 ];
+  qboolean          TrigOnlyRise;
+  int               TargetGate;
+  int               ResetValue;
+  int               Charge;
+  int               GateState;
+  qboolean          MasterPower;
+  int               PowerRadius;
 
   bglist_t          *zapLink;  // For ET_LEV2_ZAP_CHAIN
 };
@@ -909,6 +933,7 @@ char      *G_NewString( const char *string );
 #define DECOLOR_OFF '\16'
 #define DECOLOR_ON  '\17'
 
+qboolean  G_RoomForClassChange( gentity_t *ent, class_t class, vec3_t newOrigin );
 void      G_StopFollowing( gentity_t *ent );
 void      G_StopFromFollowing( gentity_t *ent );
 void      G_FollowLockView( gentity_t *ent );
@@ -1112,6 +1137,16 @@ void        G_CloseMenus( int clientNum );
 
 qboolean    G_Visible( gentity_t *ent1, gentity_t *ent2, int contents );
 gentity_t   *G_ClosestEnt( vec3_t origin, gentity_t **entities, int numEntities );
+
+typedef enum {
+  LOG_ACT_TOUCH,
+  LOG_ACT_ACTIVATE,
+  LOG_ACT_USE
+} logged_activation_t;
+qboolean    G_LoggedActivation(
+  gentity_t *self, gentity_t *other, gentity_t *activator, trace_t *trace,
+  const char *source, logged_activation_t act_type );
+
 int          G_Get_Foundation_Ent_Num(gentity_t *ent);
 
 void        G_Entity_id_init(gentity_t *ptr);
@@ -1191,6 +1226,7 @@ void manualTriggerSpectator( gentity_t *trigger, gentity_t *player );
 //
 // g_trigger.c
 //
+extern qboolean g_trigger_success;
 void trigger_teleporter_touch( gentity_t *self, gentity_t *other, trace_t *trace );
 void G_Checktrigger_stages( team_t team, stage_t stage );
 
@@ -1470,6 +1506,9 @@ extern  vmCvar_t  g_teamForceBalance;
 extern  vmCvar_t  g_smoothClients;
 extern  vmCvar_t  pmove_fixed;
 extern  vmCvar_t  pmove_msec;
+
+extern  vmCvar_t  g_AMPStageLock;
+extern  vmCvar_t  g_debugAMP;
 
 extern  vmCvar_t  g_allowShare;
 extern  vmCvar_t  g_overflowFunds;

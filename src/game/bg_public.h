@@ -48,6 +48,9 @@ int BG_SU2HP( int healthSubUnits );
 
 #define VOTE_TIME               30000 // 30 seconds before vote times out
 
+#define MAX_TARGETS             4 // warning: if you change these, then also change
+#define MAX_TARGETNAMES         4 //          g_spawn.c to actually spawn extras
+
 #define DEFAULT_VIEWHEIGHT      26
 #define CROUCH_VIEWHEIGHT       12
 #define DEAD_VIEWHEIGHT         4 // height from ground
