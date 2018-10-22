@@ -951,7 +951,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
       client->voiceEnthusiasm = 0.0f;
 
     client->pers.secondsAlive++;
-    if( !IS_WARMUP && g_freeFundPeriod.integer > 0 &&
+    if( g_freeFundPeriod.integer > 0 &&
         client->pers.secondsAlive % g_freeFundPeriod.integer == 0 )
     {
       // Give clients some credit periodically

@@ -2776,7 +2776,7 @@ sellErr_t G_CanSell(gentity_t *ent, const char *itemName, int *value, qboolean f
 
   if( weapon != WP_NONE )
   {
-    if( IS_WARMUP && BG_Weapon( weapon )->warmupFree )
+    if( force || (IS_WARMUP && BG_Weapon( weapon )->warmupFree) )
     {
       *value = 0;
     } else
@@ -2816,7 +2816,7 @@ sellErr_t G_CanSell(gentity_t *ent, const char *itemName, int *value, qboolean f
   }
   else if( upgrade != UP_NONE )
   {
-    if( IS_WARMUP && BG_Upgrade( upgrade )->warmupFree )
+    if( force || (IS_WARMUP && BG_Upgrade( upgrade )->warmupFree) )
       *value = 0;
     else
       *value = BG_Upgrade( upgrade )->price;
@@ -3222,8 +3222,8 @@ buyErr_t G_CanBuy( gentity_t *ent, const char *itemName, int *price,
 
   if( weapon != WP_NONE )
   {
-    if(force) {
-      price = 0;
+    if((IS_WARMUP && BG_Upgrade( upgrade )->warmupFree) || force) {
+      *price = 0;
     } else {
       *price = BG_TotalPriceForWeapon( weapon, IS_WARMUP );
     }
@@ -3517,8 +3517,9 @@ qboolean G_GiveItemAfterCheck(gentity_t *ent, const char *itemName, qboolean for
 
    for( i = 0; i < ARRAY_LEN( fundsFromAutoSell ); i++ )
    {
-     if( autoSellErrors[i] )
-       G_SellErrHandling( ent, autoSellErrors[i] );
+     if( autoSellErrors[i] != ERR_SELL_NONE ) {
+        G_SellErrHandling( ent, autoSellErrors[i] );
+     }
 
      totafundsFromAutoSell += fundsFromAutoSell[ i ];
    }
