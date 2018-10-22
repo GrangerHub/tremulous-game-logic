@@ -59,6 +59,14 @@ gentity->flags
 #define FL_NO_BOUNCE_SOUND  0x00040000  // for missiles
 #define FL_OCCUPIED         0x00080000  // for occupiable entities
 
+#define  VALUE_MASK       0x0001FFFF
+#define  SIGN_BIT         0x00020000
+#define  TEAM_BIT         0x00040000
+#define  LOCKSTAGE_BIT    0x00080000
+#define  AMP_TRIGGER      0x20000000
+#define  RESET_AFTER_USE  0x40000000
+#define  RESET_BIT        0x80000000
+
 /*
 --------------------------------------------------------------------------------
 */
@@ -167,7 +175,9 @@ struct gentity_s
   int               expireTimes[ NUM_EXPIRE_TYPES ]; // used by G_Expired()
 
   char              *target;
+  char              *multitarget[ MAX_TARGETS ];
   char              *targetname;
+  char              *multitargetname[ MAX_TARGETNAMES ];
   char              *team;
   char              *targetShaderName;
   char              *targetShaderNewName;
@@ -199,13 +209,15 @@ struct gentity_s
     int       flags; // Contains bit flags representing various abilities of a
                      // given activation entity.
 
+    int       usable_map_trigger;
+
     dynMenu_t menuMsg; // Message sent to the activator when an activation
                        // fails.  Can be used in (*willActivate)().
 
     dynMenu_t menuMsgOvrd[ MAX_ACTMN ]; // Used to override the general
                                         // activation menu messages.
 
-    // If qture is returned, an occupiable activation entity would then be
+    // If qtrue is returned, an occupiable activation entity would then be
     // occupied.
     qboolean  (*activate)( gentity_t *self, gentity_t *activator );
 
@@ -370,6 +382,20 @@ struct gentity_s
 
   int               buildPointZone;                 // index for zone
   int               usesBuildPointZone;             // does it use a zone?
+
+  // AMP variables
+  int               hurt;
+  char              *Cvar_Val;
+  char              *sign;
+  char              *inventory;
+  int               AMPintVAR[ 4 ];
+  qboolean          TrigOnlyRise;
+  int               TargetGate;
+  int               ResetValue;
+  int               Charge;
+  int               GateState;
+  qboolean          MasterPower;
+  int               PowerRadius;
 
   bglist_t          *zapLink;  // For ET_LEV2_ZAP_CHAIN
 };
@@ -906,10 +932,66 @@ char      *G_NewString( const char *string );
 //
 // g_cmds.c
 //
+int      G_CheckEvolve( gentity_t *ent, class_t newClass,
+                        vec3_t infestOrigin, qboolean give );
+void     G_Evolve( gentity_t *ent, class_t newClass,
+                   int cost, vec3_t infestOrigin );
+qboolean G_EvolveAfterCheck( gentity_t *ent, class_t newClass, qboolean give );
+
+typedef enum
+{
+  ERR_SELL_NONE,
+  ERR_SELL_SPECIFY,
+  ERR_SELL_OCCUPY,
+  ERR_SELL_NO_ARM,
+  ERR_SELL_NO_CHANGE_ALLOWED_NOW,
+  ERR_Sell_NOT_PURCHASABLE,
+  ERR_SELL_NOT_ITEM_HELD,
+  ERR_SELL_ARMOURYBUILDTIMER,
+  ERR_SELL_NOROOMBSUITOFF,
+  ERR_SELL_UNKNOWNITEM
+} sellErr_t;
+
+sellErr_t G_CanSell( gentity_t *ent, const char *itemName, int *value, qboolean force );
+void G_TakeItem( gentity_t *ent, const char *itemName, const int value );
+int G_CanAutoSell( gentity_t *ent, const char *itemToBuyName,
+                        weapon_t *weaponToSell, int *upgradesToSell,
+                        int *values, int numValues, sellErr_t *autoSellErrors, qboolean force );
+qboolean G_TakeItemAfterCheck(gentity_t *ent, const char *itemName, qboolean force);
+
+typedef enum
+{
+  ERR_BUY_NONE,
+  ERR_BUY_SPECIFY,
+  ERR_BUY_OCCUPY,
+  ERR_BUY_NO_ENERGY_AMMO,
+  ERR_BUY_NO_ARM,
+  ERR_BUY_ITEM_HELD,
+  ERR_BUY_ALIEN_ITEM,
+  ERR_BUY_NOT_PURCHASABLE,
+  ERR_BUY_NOT_ALLOWED,
+  ERR_BUY_NO_FUNDS,
+  ERR_BUY_NO_SLOTS,
+  ERR_BUY_NO_CHANGE_ALLOWED_NOW,
+  ERR_BUY_UNEXPLODEDGRENADE,
+  ERR_BUY_BURST_UNFINISHED,
+  ERR_BUY_CHARGING_LIGHTNING,
+  ERR_BUY_NO_MORE_AMMO,
+  ERR_BUY_NOROOMBSUITON,
+  ERR_BUY_UNKNOWNITEM
+} buyErr_t;
+
+buyErr_t G_CanBuy( gentity_t *ent, const char *itemName, int *price,
+                   qboolean *energyOnly, const int slotsFreeFromAutoSell,
+                   const int fundsFromAutoSell, qboolean force );
+void G_GiveItem( gentity_t *ent, const char *itemName, const int price,
+                 const qboolean energyOnly, qboolean force );
+qboolean G_GiveItemAfterCheck(gentity_t *ent, const char *itemName, qboolean force);
 
 #define DECOLOR_OFF '\16'
 #define DECOLOR_ON  '\17'
 
+qboolean  G_RoomForClassChange( gentity_t *ent, class_t class, vec3_t newOrigin );
 void      G_StopFollowing( gentity_t *ent );
 void      G_StopFromFollowing( gentity_t *ent );
 void      G_FollowLockView( gentity_t *ent );
@@ -1119,6 +1201,16 @@ void        G_CloseMenus( int clientNum );
 
 qboolean    G_Visible( gentity_t *ent1, gentity_t *ent2, int contents );
 gentity_t   *G_ClosestEnt( vec3_t origin, gentity_t **entities, int numEntities );
+
+typedef enum {
+  LOG_ACT_TOUCH,
+  LOG_ACT_ACTIVATE,
+  LOG_ACT_USE
+} logged_activation_t;
+qboolean    G_LoggedActivation(
+  gentity_t *self, gentity_t *other, gentity_t *activator, trace_t *trace,
+  const char *source, logged_activation_t act_type );
+
 int          G_Get_Foundation_Ent_Num(gentity_t *ent);
 
 void        G_Entity_id_init(gentity_t *ptr);
@@ -1198,6 +1290,7 @@ void manualTriggerSpectator( gentity_t *trigger, gentity_t *player );
 //
 // g_trigger.c
 //
+extern qboolean g_trigger_success;
 void trigger_teleporter_touch( gentity_t *self, gentity_t *other, trace_t *trace );
 void G_Checktrigger_stages( team_t team, stage_t stage );
 
@@ -1236,6 +1329,8 @@ void      G_PackEntityNumbers( entityState_t *es, int creatorNum,
 
 void      Blow_up( gentity_t *ent );
 void      G_ForceWeaponChange( gentity_t *ent, weapon_t weapon );
+qboolean  G_CanGiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo,
+                                  int *rounds, int *clips, int *price );
 void      G_GiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo );
 void      SnapVectorTowards( vec3_t v, vec3_t to );
 void      G_SplatterFire( gentity_t *inflicter, gentity_t *attacker,
@@ -1478,6 +1573,9 @@ extern  vmCvar_t  g_teamForceBalance;
 extern  vmCvar_t  g_smoothClients;
 extern  vmCvar_t  pmove_fixed;
 extern  vmCvar_t  pmove_msec;
+
+extern  vmCvar_t  g_AMPStageLock;
+extern  vmCvar_t  g_debugAMP;
 
 extern  vmCvar_t  g_allowShare;
 extern  vmCvar_t  g_overflowFunds;

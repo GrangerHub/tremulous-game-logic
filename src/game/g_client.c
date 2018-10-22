@@ -92,7 +92,7 @@ void G_AddCreditToClient( gclient_t *client, short credit, qboolean cap )
   if( !client )
     return;
 
-  if( IS_WARMUP )
+  if( !credit )
     return;
 
   if( cap && credit > 0 )
@@ -1586,7 +1586,8 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
 
   //give aliens some spawn velocity
   if( client->sess.spectatorState == SPECTATOR_NOT &&
-      client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
+      ( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS ||
+        BG_Class( client->pers.classSelection )->team == TEAM_ALIENS ) )
   {
     if( spawn == NULL )
     {

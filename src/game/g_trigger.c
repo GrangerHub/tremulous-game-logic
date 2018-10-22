@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "g_local.h"
 
+qboolean g_trigger_success;
 
 void InitTrigger( gentity_t *self )
 {
@@ -82,6 +83,7 @@ void multi_trigger( gentity_t *ent, gentity_t *activator )
   }
 
   G_UseTargets( ent, ent->activator );
+  g_trigger_success = qtrue;
   trigger_check_wait( ent );
 }
 
@@ -90,10 +92,29 @@ void Use_Multi( gentity_t *ent, gentity_t *other, gentity_t *activator )
   multi_trigger( ent, activator );
 }
 
-void Touch_Multi( gentity_t *self, gentity_t *other, trace_t *trace )
-{
-  if( !other->client && other->s.eType != ET_BUILDABLE )
+void Touch_Multi(gentity_t *self, gentity_t *other, trace_t *trace) {
+  const int use_evolve = self->GateState & BUTTON_USE_EVOLVE;
+  int       GateState = self->GateState & ~BUTTON_USE_EVOLVE;
+
+  if(
+    other->client && self->GateState != -1 &&
+    use_evolve) {
+    other->activation.usable_map_trigger = self->s.number;
+  }
+
+  g_trigger_success = qfalse;
+  if(
+    !(
+      other->client &&
+      (
+        (self->GateState == -1) ||
+        (other->client->buttons & GateState) ||
+        (
+          (other->client->buttons & use_evolve) &&
+          !(other->client->ps.eFlags & EF_OCCUPYING)))) &&
+    other->s.eType != ET_BUILDABLE) {
     return;
+  }
 
   multi_trigger( self, other );
 }
@@ -109,6 +130,7 @@ void SP_trigger_multiple( gentity_t *ent )
 {
   G_SpawnFloat( "wait", "0.5", &ent->wait );
   G_SpawnFloat( "random", "0", &ent->random );
+  G_SpawnInt( "buttonmask", "-1", &ent->GateState );
 
   if( ent->random >= ent->wait && ent->wait >= 0 )
   {
@@ -158,10 +180,13 @@ trigger_push
 ==============================================================================
 */
 
-void trigger_push_touch( gentity_t *self, gentity_t *other, trace_t *trace )
-{
-  if( !other->client )
+void trigger_push_touch(gentity_t *self, gentity_t *other, trace_t *trace) {
+  g_trigger_success = qfalse;
+  if(!other->client) {
     return;
+  }
+
+  g_trigger_success = qtrue;
 }
 
 
@@ -297,6 +322,7 @@ void trigger_teleporter_touch( gentity_t *self, gentity_t *other, trace_t *trace
 {
   gentity_t *dest;
 
+  g_trigger_success = qfalse;
   if( self->s.eFlags & EF_NODRAW )
     return;
 
@@ -321,6 +347,7 @@ void trigger_teleporter_touch( gentity_t *self, gentity_t *other, trace_t *trace
   }
 
   TeleportPlayer( other, dest->r.currentOrigin, dest->r.currentAngles, self->speed );
+  g_trigger_success = qtrue;
 }
 
 /*
@@ -400,6 +427,7 @@ void hurt_touch( gentity_t *self, gentity_t *other, trace_t *trace )
   int       dflags;
   gentity_t *attacker;
 
+  g_trigger_success = qfalse;
   if( !other->takedamage )
     return;
 
@@ -434,6 +462,7 @@ void hurt_touch( gentity_t *self, gentity_t *other, trace_t *trace )
     attacker = self;
 
   G_Damage( other, self, attacker, NULL, NULL, self->damage, dflags, MOD_TRIGGER_HURT );
+  g_trigger_success = qfalse;
 }
 
 void SP_trigger_hurt( gentity_t *self )
@@ -533,20 +562,26 @@ G_Checktrigger_stages
 Called when stages change
 ===============
 */
-void G_Checktrigger_stages( team_t team, stage_t stage )
-{
+void G_Checktrigger_stages(team_t team, stage_t stage) {
   int i;
   gentity_t *ent;
 
-  for( i = 1, ent = g_entities + i ; i < level.num_entities ; i++, ent++ )
-  {
-    if( !ent->inuse )
+  for(i = 1, ent = g_entities + i ; i < level.num_entities ; i++, ent++) {
+    if(!ent->inuse) {
       continue;
+    }
 
-    if( !Q_stricmp( ent->classname, "trigger_stage" ) )
-    {
-      if( team == ent->stageTeam && stage == ent->stageStage )
-        ent->use( ent, ent, ent );
+    if(!Q_stricmp( ent->classname, "trigger_stage")) {
+      if(team == ent->stageTeam && stage == ent->stageStage) {
+        if(g_debugAMP.integer) {
+          char *s = va("%s staged up", BG_Team(level.lastWin)->humanName);
+          s[0] = tolower(s[0]);
+          G_LoggedActivation(ent, ent, ent, NULL, s, LOG_ACT_USE);
+        }
+        else {
+          ent->use(ent, ent, ent);
+        }
+      }
     }
   }
 }
@@ -661,11 +696,13 @@ trigger_buildable_touch
 */
 void trigger_buildable_touch( gentity_t *ent, gentity_t *other, trace_t *trace )
 {
+  g_trigger_success = qfalse;
   //only triggered by buildables
   if( other->s.eType != ET_BUILDABLE )
     return;
 
   trigger_buildable_trigger( ent, other );
+  g_trigger_success = qtrue;
 }
 
 /*
@@ -791,11 +828,13 @@ trigger_class_touch
 */
 void trigger_class_touch( gentity_t *ent, gentity_t *other, trace_t *trace )
 {
+  g_trigger_success = qfalse;
   //only triggered by clients
   if( !other->client )
     return;
 
   trigger_class_trigger( ent, other );
+  g_trigger_success = qtrue;
 }
 
 /*
@@ -926,11 +965,13 @@ trigger_equipment_touch
 */
 void trigger_equipment_touch( gentity_t *ent, gentity_t *other, trace_t *trace )
 {
+  g_trigger_success = qfalse;
   //only triggered by clients
   if( !other->client )
     return;
 
   trigger_equipment_trigger( ent, other );
+  g_trigger_success = qtrue;
 }
 
 /*
@@ -989,11 +1030,13 @@ trigger_gravity_touch
 */
 void trigger_gravity_touch( gentity_t *ent, gentity_t *other, trace_t *trace )
 {
+  g_trigger_success = qfalse;
   //only triggered by clients
   if( !other->client )
     return;
 
   other->client->ps.gravity = ent->triggerGravity;
+  g_trigger_success = qtrue;
 }
 
 /*
@@ -1049,6 +1092,7 @@ void trigger_heal_touch( gentity_t *self, gentity_t *other, trace_t *trace )
 {
   int max;
 
+  g_trigger_success = qfalse;
   if( !other->client )
     return;
 
@@ -1068,6 +1112,7 @@ void trigger_heal_touch( gentity_t *self, gentity_t *other, trace_t *trace )
     other->health = max;
 
   other->client->ps.misc[ MISC_HEALTH ] = other->health;
+  g_trigger_success = qtrue;
 }
 
 /*
@@ -1110,6 +1155,7 @@ void trigger_ammo_touch( gentity_t *self, gentity_t *other, trace_t *trace )
   int maxClips, maxAmmo;
   weapon_t weapon;
 
+  g_trigger_success = qfalse;
   if( !other->client )
     return;
 
@@ -1149,6 +1195,8 @@ void trigger_ammo_touch( gentity_t *self, gentity_t *other, trace_t *trace )
   }
   else
     other->client->ps.ammo += self->damage;
+
+  g_trigger_success = qtrue;
 }
 
 /*

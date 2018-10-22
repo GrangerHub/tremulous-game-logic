@@ -112,6 +112,9 @@ vmCvar_t  g_maxNameChanges;
 vmCvar_t  g_allowShare;
 vmCvar_t  g_overflowFunds;
 
+vmCvar_t  g_AMPStageLock;
+vmCvar_t  g_debugAMP;
+
 vmCvar_t  g_allowBuildableStacking;
 vmCvar_t  g_alienBuildPoints;
 vmCvar_t  g_alienBuildQueueTime;
@@ -300,6 +303,9 @@ static cvarTable_t   gameCvarTable[ ] =
   { &pmove_fixed, "pmove_fixed", "0", CVAR_SYSTEMINFO, 0, qfalse},
   { &pmove_msec, "pmove_msec", "8", CVAR_SYSTEMINFO, 0, qfalse},
 
+  { &g_AMPStageLock, "g_AMPStageLock", "0", 0, 0, qfalse },
+  { &g_debugAMP, "g_debugAMP", "0", 0, 0, qfalse },
+
   { &g_allowBuildableStacking, "g_allowBuildableStacking", "0", CVAR_ARCHIVE | CVAR_SERVERINFO, 0, qfalse},
   { &g_alienBuildPoints, "g_alienBuildPoints", DEFAULT_ALIEN_BUILDPOINTS, 0, 0, qfalse, cv_alienBuildPoints },
   { &g_alienBuildQueueTime, "g_alienBuildQueueTime", DEFAULT_ALIEN_QUEUE_TIME, CVAR_ARCHIVE, 0, qfalse  },
@@ -460,8 +466,8 @@ void G_FindTeams( void )
         // make sure that targets only point at the master
         if( e2->targetname )
         {
-          e->targetname = e2->targetname;
-          e2->targetname = NULL;
+          e->multitargetname[ 0 ] = e->targetname = e2->targetname;
+          e2->multitargetname[ 0 ] = e2->targetname = NULL;
         }
       }
     }
@@ -1860,15 +1866,21 @@ void LogExit( const char *string )
 
   }
 
-  for( i = 1, ent = g_entities + i ; i < level.num_entities ; i++, ent++ )
-  {
-    if( !ent->inuse )
+  for(i = 1, ent = g_entities + i ; i < level.num_entities ; i++, ent++) {
+    if(!ent->inuse) {
       continue;
+    }
 
-    if( !Q_stricmp( ent->classname, "trigger_win" ) )
-    {
-      if( level.lastWin == ent->stageTeam )
-        ent->use( ent, ent, ent );
+    if(!Q_stricmp(ent->classname, "trigger_win")) {
+      if(level.lastWin == ent->stageTeam) {
+        if(g_debugAMP.integer) {
+          char *s = va("%s win", BG_Team(level.lastWin)->humanName);
+          s[0] = tolower(s[0]);
+          G_LoggedActivation(ent, ent, ent, NULL, s, LOG_ACT_USE);
+        } else {
+          ent->use(ent, ent, ent);
+        }
+      }
     }
   }
 }
