@@ -1674,7 +1674,8 @@ static void UI_DrawInfoPane( menuItem_t *item, rectDef_t *rect, float text_x, fl
       break;
 
     case INFOTYPE_CLASS:
-      value = ( BG_ClassCanEvolveFromTo( class, item->v.pclass, credits,
+      value = ( BG_ClassCanEvolveFromTo( class,
+                                         item->v.pclass, credits,
                                          UI_GetCurrentAlienStage(), 0,
                                          UI_GameIsInWarmup( ),
                                          UI_DevModeIsOn( ) ) +
@@ -1697,7 +1698,7 @@ static void UI_DrawInfoPane( menuItem_t *item, rectDef_t *rect, float text_x, fl
       break;
 
     case INFOTYPE_WEAPON:
-      value = BG_TotalPriceForWeapon( item->v.weapon );
+      value = BG_TotalPriceForWeapon( item->v.weapon, UI_GameIsInWarmup() );
 
       if( value == 0 )
       {
@@ -1716,7 +1717,9 @@ static void UI_DrawInfoPane( menuItem_t *item, rectDef_t *rect, float text_x, fl
       break;
 
     case INFOTYPE_UPGRADE:
-      if( item->v.upgrade == UP_AMMO )
+      if( UI_GameIsInWarmup() && BG_Upgrade( item->v.upgrade )->warmupFree )
+        value = 0;
+      else if( item->v.upgrade == UP_AMMO )
       {
         int i;
 
@@ -1726,7 +1729,10 @@ static void UI_DrawInfoPane( menuItem_t *item, rectDef_t *rect, float text_x, fl
             break;
         }
 
-        value = BG_Weapon( i )->roundPrice;
+        if( UI_GameIsInWarmup() && BG_Upgrade( item->v.upgrade )->warmupFree )
+          value = 0;
+        else
+          value = BG_Weapon( i )->roundPrice;
       } else
         value = BG_Upgrade( item->v.upgrade )->price;
 
@@ -2472,7 +2478,6 @@ static void UI_LoadHumanArmouryBuys( void )
         BG_Weapon( i )->purchasable &&
         BG_WeaponAllowedInStage( i, stage, UI_GameIsInWarmup( ) ) &&
         BG_WeaponIsAllowed( i, UI_DevModeIsOn( ) ) &&
-        !( BG_Weapon( i )->slots & slots ) &&
         !( uiInfo.weapons & ( 1 << i ) ) )
     {
       uiInfo.humanArmouryBuyList[ j ].text = BG_Weapon( i )->humanName;
@@ -2493,7 +2498,6 @@ static void UI_LoadHumanArmouryBuys( void )
         BG_Upgrade( i )->purchasable &&
         BG_UpgradeAllowedInStage( i, stage, UI_GameIsInWarmup( ) ) &&
         BG_UpgradeIsAllowed( i, UI_DevModeIsOn( ) ) &&
-        !( BG_Upgrade( i )->slots & slots ) &&
         !( uiInfo.upgrades & ( 1 << i ) ) )
     {
       // only display the option to buy ammo when the held weapon can buy it.
@@ -2599,7 +2603,8 @@ static void UI_LoadAlienUpgrades( void )
 
   for( i = PCL_NONE + 1; i < PCL_NUM_CLASSES; i++ )
   {
-    if( BG_ClassCanEvolveFromTo( class, i, credits, stage, 0,
+    if( BG_ClassCanEvolveFromTo( class,
+                                 i, credits, stage, 0,
                                  UI_GameIsInWarmup( ),
                                  UI_DevModeIsOn( ) ) >= 0 )
     {

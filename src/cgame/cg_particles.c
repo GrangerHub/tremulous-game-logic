@@ -113,6 +113,7 @@ static void CG_DestroyParticle( particle_t *p, vec3_t impactNormal )
 
       CG_SetAttachmentPoint( &ps->attachment, p->origin );
       CG_AttachToPoint( &ps->attachment );
+      ps->destructionPS = qtrue;
     }
   }
 
@@ -251,8 +252,12 @@ static particle_t *CG_SpawnNewParticle( baseParticle_t *bp, particleEjector_t *p
         case PMT_NORMAL:
           if( !ps->normalValid )
           {
-            CG_Printf( S_COLOR_RED "ERROR: a particle with velocityType "
-                "normal has no normal\n" );
+            if(!ps->destructionPS || cg_debugParticles.integer >= 1) {
+              CG_Printf(
+                S_COLOR_RED "ERROR: a particle with velocityType "
+                "normal has no normal\n");
+            }
+
             return NULL;
           }
 
@@ -488,6 +493,7 @@ particleSystem_t *CG_SpawnNewParticleSystem( qhandle_t psHandle )
 
       ps->valid = qtrue;
       ps->lazyRemove = qfalse;
+      ps->destructionPS = qfalse;
 
       // use "up" as an arbitrary (non-null) "last" normal
       VectorSet( ps->lastNormal, 0, 0, 1 );
