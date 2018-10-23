@@ -351,6 +351,14 @@ qboolean G_FindPower( gentity_t *self, qboolean searchUnspawned )
   // Iterate through entities
   for( i = MAX_CLIENTS, ent = g_entities + i; i < level.num_entities; i++, ent++ )
   {
+    if(
+      !strcmp(ent->classname, "target_power") && ent->powered &&
+      (int)Distance(self->s.origin, ent->s.origin) <= ent->PowerRadius &&
+      (ent->MasterPower || G_Reactor( ) != NULL)) {
+      self->parentNode = ent;
+      return qtrue;
+    }
+
     if( ent->s.eType != ET_BUILDABLE )
       continue;
 
@@ -596,6 +604,13 @@ gentity_t *G_InPowerZone( gentity_t *self )
 
   for( i = MAX_CLIENTS, ent = g_entities + i; i < level.num_entities; i++, ent++ )
   {
+    if(
+      !strcmp(ent->classname, "target_power") && ent->powered &&
+      (int)Distance(self->s.origin, ent->s.origin) <= ent->PowerRadius &&
+      (ent->MasterPower || G_Reactor() != NULL)) {
+      return ent;
+    }
+
     if( ent->s.eType != ET_BUILDABLE )
       continue;
 
@@ -770,6 +785,17 @@ qboolean G_FindCreep( gentity_t *self ) {
                   self->parentNode->r.currentOrigin ) >
                     BG_Buildable( self->parentNode->s.modelindex )->rangeMarkerRange ) ) {
     for( i = MAX_CLIENTS, ent = g_entities + i; i < level.num_entities; i++, ent++ ) {
+      if(
+        !strcmp(ent->classname, "target_creep") && ent->powered &&
+        (int)Distance(self->s.origin, ent->s.origin) <= ent->PowerRadius &&
+        (ent->MasterPower || G_Overmind() != NULL)) {
+        if(!self->client) {
+          self->parentNode = ent;
+        }
+
+        return qtrue;
+      }
+
       if( ent->s.eType != ET_BUILDABLE ) {
         continue;
       }
@@ -1507,6 +1533,8 @@ void ABarricade_Touch( gentity_t *self, gentity_t *other, trace_t *trace )
   gclient_t *client = other->client;
   int client_z, min_z;
 
+  g_trigger_success = qfalse;
+
   if( !client || client->pers.teamSelection != TEAM_ALIENS )
     return;
 
@@ -1518,6 +1546,7 @@ void ABarricade_Touch( gentity_t *self, gentity_t *other, trace_t *trace )
   if( client_z < min_z )
     return;
   ABarricade_Shrink( self, qtrue );
+  g_trigger_success = qtrue;
 }
 
 //==================================================================================
@@ -1704,6 +1733,8 @@ void ABooster_Touch( gentity_t *self, gentity_t *other, trace_t *trace )
 {
   gclient_t *client = other->client;
 
+  g_trigger_success = qfalse;
+  
   if( !self->spawned || !self->powered || self->health <= 0 )
     return;
 
@@ -1715,13 +1746,14 @@ void ABooster_Touch( gentity_t *self, gentity_t *other, trace_t *trace )
 
   client->ps.stats[ STAT_STATE ] |= SS_BOOSTED;
   client->boostedTime = level.time;
+  g_trigger_success = qtrue;
 }
 
 /*
 ================
 ABooster_Think
 
-Called when an alien touches a booster
+Boosts aliens that are in range and line of sight
 ================
 */
 void ABooster_Think( gentity_t *self )
@@ -4266,8 +4298,15 @@ void G_BuildableTouchTriggers( gentity_t *ent )
 
     memset( &trace, 0, sizeof( trace ) );
 
-    if( hit->touch )
-      hit->touch( hit, ent, &trace );
+    if(hit->touch) {
+      if(g_debugAMP.integer) {
+        char *s = va("touched by #%i (a %s)", (int)( ent-g_entities),
+                      BG_Buildable(ent->s.modelindex )->humanName);
+        G_LoggedActivation(hit, ent, NULL, &trace, s, LOG_ACT_TOUCH);
+      } else {
+        hit->touch(hit, ent, &trace);
+      }
+    }
   }
 }
 
@@ -5276,13 +5315,23 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   if( !( normal[ 2 ] >= minNormal || ( invert && normal[ 2 ] <= -minNormal ) ) )
     reason = IBE_NORMAL;
 
-  if( tr1.entityNum != ENTITYNUM_WORLD &&
-      ( ( IS_WARMUP && g_warmupBuildableRespawning.integer ) ||
+  if(
+    (
+      tr1.entityNum != ENTITYNUM_WORLD &&
+      (
+        ( IS_WARMUP && g_warmupBuildableRespawning.integer ) ||
         !g_allowBuildableStacking.integer ||
-        ( g_entities[ *groundEntNum ].s.eType == ET_BUILDABLE &&
+        (
+          g_entities[ *groundEntNum ].s.eType == ET_BUILDABLE &&
           !BG_Buildable( g_entities[ *groundEntNum ].s.modelindex )->stackable ) ||
-        g_entities[ *groundEntNum ].client ) )
+      g_entities[ *groundEntNum ].client )) ||
+    (
+      g_entities[ tr1.entityNum ].classname &&
+      (
+        !strcmp( g_entities[ tr1.entityNum ].classname, "func_destructable" ) ||
+        !strcmp( g_entities[ tr1.entityNum ].classname, "func_spawn")))) {
     reason = IBE_NORMAL;
+  }
 
   contents = SV_PointContents( entity_origin, -1 );
 

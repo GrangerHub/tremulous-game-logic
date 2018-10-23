@@ -75,31 +75,42 @@ void G_ForceWeaponChange( gentity_t *ent, weapon_t weapon )
 
 /*
 =================
-G_GiveClientMaxAmmo
+G_CanGiveClientMaxAmmo
 =================
 */
-void G_GiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo )
+qboolean G_CanGiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo,
+                                 int *rounds, int *clips, int *price )
 {
-  int maxAmmo;
-  int maxClips;
   weapon_t weapon = ent->client->ps.stats[ STAT_WEAPON ];
+  int maxAmmo = BG_Weapon( weapon )->maxAmmo;
+  int maxClips = BG_Weapon( weapon )->maxClips;
+  int roundDiff;
+  int clipDiff = BG_Weapon( weapon )->maxClips - ent->client->ps.clips;
   int roundPrice = BG_Weapon( weapon )->roundPrice;
 
+  Com_Assert( rounds &&
+              "G_CanGiveClientMaxAmmo: rounds is NULL" );
+  Com_Assert( clips &&
+              "G_CanGiveClientMaxAmmo: clips is NULL" );
+  Com_Assert( price &&
+              "G_CanGiveClientMaxAmmo: price is NULL" );
+
+  *price = 0;
+  *rounds = 0;
+  *clips = 0;
+
   if( BG_Weapon( weapon )->infiniteAmmo )
-    return;
+    return qfalse;
 
   if( !BG_Weapon( weapon )->ammoPurchasable )
-    return;
+    return qfalse;
 
   if( buyingEnergyAmmo && !BG_Weapon( weapon )->usesEnergy )
-    return;
+    return qfalse;
 
   if( BG_WeaponIsFull( weapon, ent->client->ps.stats, ent->client->ps.ammo,
                        ent->client->ps.clips ) )
-    return;
-
-  maxAmmo = BG_Weapon( weapon )->maxAmmo;
-  maxClips = BG_Weapon( weapon )->maxClips;
+    return qfalse;
 
   // Apply battery pack modifier
   if( BG_Weapon( weapon )->usesEnergy &&
@@ -115,13 +126,14 @@ void G_GiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo )
         BG_Weapon( weapon )->ammoPurchasable &&
         !BG_Weapon( weapon )->roundPrice &&
         BG_InventoryContainsUpgrade( UP_BATTLESUIT, ent->client->ps.stats ) )
-      maxClips += maxClips + 1;
+      maxClips += maxClips;
+
+  roundDiff = maxAmmo - ent->client->ps.ammo;
 
   // charge for ammo when applicable
-  if(  !IS_WARMUP && roundPrice && !BG_Weapon( weapon )->usesEnergy )
+  if(  !( IS_WARMUP && BG_Weapon( weapon )->warmupFree ) &&
+       roundPrice && !BG_Weapon( weapon )->usesEnergy )
   {
-    int roundDiff = maxAmmo - ent->client->ps.ammo;
-    int clipDiff = maxClips - ent->client->ps.clips;
     int clipPrice = roundPrice * maxClips;
     int numAffordableRounds, numAffordableClips;
 
@@ -130,47 +142,70 @@ void G_GiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo )
       SV_GameSendServerCommand( ent-g_entities,
                               va( "print \"You can't afford to buy more ammo for this %s\n\"",
                                   BG_Weapon( weapon )->humanName ) );
-      return;
+      return qfalse;
     }
 
     // buy ammo rounds thatcan be afforded
     numAffordableRounds = ent->client->pers.credit / roundPrice;
     if( numAffordableRounds < roundDiff )
-    {
-      G_AddCreditToClient( ent->client,
-                           -(short)( numAffordableRounds * roundPrice ),
-                           qfalse );
-      ent->client->ps.ammo += numAffordableRounds;
-    } else
-    {
-      G_AddCreditToClient( ent->client,
-                           -(short)(roundDiff * roundPrice ),
-                           qfalse );
-      ent->client->ps.ammo = maxAmmo;
-    }
+      *rounds = numAffordableRounds;
+    else
+      *rounds =  roundDiff;
+
+    *price = ( *rounds ) * roundPrice;
 
     // buy ammo clips that can be afforded
     if( clipPrice && ( numAffordableClips = ent->client->pers.credit / clipPrice ) )
     {
       if( numAffordableClips < clipDiff )
-      {
-        G_AddCreditToClient( ent->client,
-                             -(short)(numAffordableClips * clipPrice ),
-                             qfalse );
-        ent->client->ps.clips += numAffordableClips;
-      } else
-      {
-        G_AddCreditToClient( ent->client,
-                             -(short)(clipDiff * clipPrice ),
-                             qfalse );
-        ent->client->ps.clips = maxClips;
-      }
+        *clips = numAffordableClips;
+      else
+        *clips = clipDiff;
+
+      *price += (  ( *clips ) * clipPrice );
     }
   } else
   {
-    ent->client->ps.ammo = maxAmmo;
-    ent->client->ps.clips = maxClips;
+    *price = 0;
+    *rounds =  roundDiff;
+    *clips = clipDiff;
   }
+
+  return qtrue;
+}
+
+/*
+=================
+G_GiveClientMaxAmmo
+=================
+*/
+void G_GiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo )
+{
+  weapon_t weapon = ent->client->ps.stats[ STAT_WEAPON ];
+  int rounds, clips, price;
+  int maxAmmo = BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->maxAmmo;
+
+  if( !G_CanGiveClientMaxAmmo( ent, buyingEnergyAmmo,
+                               &rounds, &clips, &price ) )
+    return;
+
+  G_AddCreditToClient( ent->client, -(short)( price ), qfalse );
+
+  ent->client->ps.ammo += rounds;
+
+  // Apply battery pack modifier
+  if( BG_Weapon( weapon )->usesEnergy &&
+      ( BG_InventoryContainsUpgrade( UP_BATTPACK, ent->client->ps.stats ) ||
+        BG_InventoryContainsUpgrade( UP_BATTLESUIT, ent->client->ps.stats ) ) ) {
+    maxAmmo *= BATTPACK_MODIFIER;
+  }
+
+  if( ent->client->ps.ammo > maxAmmo )
+    ent->client->ps.ammo = maxAmmo;
+
+  ent->client->ps.clips += clips;
+  if( ent->client->ps.clips > BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->maxClips )
+    ent->client->ps.clips = BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->maxClips;
 
   G_ForceWeaponChange( ent, ent->client->ps.weapon );
 

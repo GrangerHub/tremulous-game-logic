@@ -1747,10 +1747,14 @@ void Use_BinaryMover(gentity_t *ent, gentity_t *other, gentity_t *activator)
 
           ent->moverState = MS_1TO2;
         }
-        else if( ent->moverState == MS_POS2 )
-        {
-          // if all the way up, just delay before coming down
-          ent->nextthink = level.time + ent->wait;
+        else if( ent->moverState == MS_POS2 ) {
+          // we can trigger the door down, even if it is all the way up and planning to stay there.
+          // we check if it was triggered by the trigger and not the player
+          if( ent->targetname && other && !other->client && ( other->TargetGate & AMP_TRIGGER ) ) {
+            MatchTeam( ent, MS_2TO1, level.time + 50 );
+          } else {
+            ent->nextthink = level.time + ent->wait;
+          }
         }
         break;
     }
@@ -1979,14 +1983,17 @@ void Touch_DoorTrigger( gentity_t *ent, gentity_t *other, trace_t *trace )
 {
   moverState_t teamState;
 
+  g_trigger_success = qfalse;
   //buildables don't trigger movers
   if( other->s.eType == ET_BUILDABLE )
     return;
 
   teamState = GetMoverTeamState( ent->parent );
 
-  if( teamState != MS_1TO2 )
+  if( teamState != MS_1TO2 ) {
     Use_BinaryMover( ent->parent, ent, other );
+    g_trigger_success = qtrue;
+  }
 }
 
 
@@ -2418,6 +2425,7 @@ Don't allow to descend if a player is on it and is alive
 */
 void Touch_Plat( gentity_t *ent, gentity_t *other, trace_t *trace )
 {
+  g_trigger_success = qfalse;
   // DONT_WAIT
   if( ent->spawnflags & 1 )
     return;
@@ -2426,8 +2434,10 @@ void Touch_Plat( gentity_t *ent, gentity_t *other, trace_t *trace )
     return;
 
   // delay return-to-pos1 by one second
-  if( ent->moverState == MS_POS2 )
+  if( ent->moverState == MS_POS2 ) {
     ent->nextthink = level.time + 1000;
+    g_trigger_success = qtrue;
+  }
 }
 
 /*
@@ -2439,11 +2449,14 @@ If the plat is at the bottom position, start it going up
 */
 void Touch_PlatCenterTrigger( gentity_t *ent, gentity_t *other, trace_t *trace )
 {
+  g_trigger_success = qfalse;
   if( !other->client )
     return;
 
-  if( ent->parent->moverState == MS_POS1 )
+  if( ent->parent->moverState == MS_POS1 ) {
     Use_BinaryMover( ent->parent, ent, other );
+    g_trigger_success = qtrue;
+  }
 }
 
 
@@ -2577,11 +2590,14 @@ Touch_Button
 */
 void Touch_Button( gentity_t *ent, gentity_t *other, trace_t *trace )
 {
+  g_trigger_success = qfalse;
   if( !other->client )
     return;
 
-  if( ent->moverState == MS_POS1 )
+  if( ent->moverState == MS_POS1 ) {
+    g_trigger_success = qtrue;
     Use_BinaryMover( ent, other, other );
+  }
 }
 
 
@@ -3164,4 +3180,148 @@ void SP_func_pendulum( gentity_t *ent )
   ent->s.apos.trTime = ent->s.apos.trDuration * phase;
   ent->s.apos.trType = TR_SINE;
   ent->s.apos.trDelta[ 2 ] = speed;
+}
+
+/*
+===============================================================================
+
+Func_spawn. A something which appears when triggered.
+
+===============================================================================
+*/
+void func_spawn_think(gentity_t *ent) {
+  ent->touch = NULL;
+  ent->think = NULL;
+}
+
+void Touch_func_spawn(gentity_t *self, gentity_t *other, trace_t *trace) {
+  g_trigger_success = qfalse;
+
+  if(!other->client && other->s.eType != ET_BUILDABLE) {
+    return;
+  }
+
+  G_Damage(
+    other, self, self, NULL, NULL, 0,
+    DAMAGE_NO_PROTECTION|DAMAGE_INSTAGIB|DAMAGE_NO_ARMOR, MOD_TRIGGER_HURT);
+  g_trigger_success = qtrue;
+}
+
+
+void Use_func_spawn(gentity_t *ent, gentity_t *other, gentity_t *activator) {
+  ent->activator = activator;
+  G_UseTargets( ent, ent->activator );
+
+  if(ent->r.linked) {
+    //trap_SetBrushModel( ent, NULL );
+    SV_UnlinkEntity(ent);
+  } else {
+    SV_LinkEntity(ent);
+    if(!(ent->spawnflags & 2)) {
+      ent->touch = Touch_func_spawn;
+      ent->think = func_spawn_think;
+      ent->nextthink = level.time + 200;
+    }
+  }
+}
+
+void SP_func_spawn(gentity_t *ent) {
+  char *s;
+
+  G_SpawnString( "model", "", &s);
+
+  VectorCopy( ent->s.pos.trBase, ent->pos1 );
+  ent->moverState = MS_POS1;
+  ent->moverMotionType = MM_LINEAR;
+  ent->s.eType = ET_MOVER;
+  VectorCopy( ent->pos1, ent->r.currentOrigin );
+  ent->s.pos.trType = TR_STATIONARY;
+
+  if (!s || !strstr( s, ".md3" )) {
+    SV_SetBrushModel( ent, ent->model );
+  } else {
+    ent->s.modelindex = G_ModelIndex(s);
+  }
+
+  ent->use = Use_func_spawn;
+
+  if( ( ent->spawnflags & 1 ) ) {
+    SV_LinkEntity( ent );
+  } else {
+    SV_UnlinkEntity( ent );
+  }
+}
+
+/*
++===============================================================================
++
++Func_destructable. A dummy brush which can be destroyed. Triggers its target upon destruction.
++
++===============================================================================
++*/
+
+void Use_func_destructable(gentity_t *ent, gentity_t *other, gentity_t *activator) {
+  vec3_t  origin;
+  int     splashDamage, splashRadius;
+
+  if(ent->r.linked) {
+    VectorCopy( ent->pos1, origin);
+    splashDamage = ent->splashDamage;
+    splashRadius = ent->splashRadius;
+
+    //SV_SetBrushModel( ent, NULL );
+    ent->activator = activator;
+    if(!other->target) {
+      G_UseTargets( ent, ent->activator );
+    }
+    SV_UnlinkEntity( ent );
+
+    //G_FreeEntity(ent);
+    G_RadiusDamage( origin, ent->r.mins, ent->r.maxs, ent, splashDamage,
+                    splashRadius, ent, MOD_TRIGGER_HURT , qtrue);
+  } else {
+    ent->health = ent->ResetValue;
+    SV_LinkEntity( ent );
+    ent->touch = Touch_func_spawn;
+    ent->think = func_spawn_think;
+    ent->nextthink = level.time + 200;
+  }
+}
+
+void SP_func_destructable(gentity_t *ent) {
+  char *s;
+  char *buffer;
+
+  G_SpawnString( "equipment", "", &buffer );
+  BG_ParseCSVEquipmentList( buffer, ent->wTriggers, WP_NUM_WEAPONS,
+                            ent->uTriggers, UP_NUM_UPGRADES );
+  G_SpawnString( "classes", "", &buffer );
+  BG_ParseCSVClassList( buffer, ent->cTriggers, PCL_NUM_CLASSES );
+
+  G_SpawnInt( "damage", "0", &ent->splashDamage );
+  G_SpawnInt( "radius", "0", &ent->splashRadius );
+  G_SpawnInt( "health", "100", &ent->ResetValue );
+  G_SpawnString( "model", "", &s);
+  ent->splashDamage = BG_HP2SU(ent->splashDamage);
+  ent->ResetValue = BG_HP2SU(ent->ResetValue);
+  ent->health = ent->ResetValue;
+
+  if(!s || !strstr( s, ".md3" )) {
+    SV_SetBrushModel(ent, ent->model);
+  } else {
+    ent->s.modelindex = G_ModelIndex(s);
+  }
+
+  VectorCopy(ent->s.pos.trBase, ent->pos1);
+  ent->takedamage = qtrue;
+
+  ent->use = Use_func_destructable;
+  ent->moverState = MS_POS1;
+  ent->moverMotionType = MM_LINEAR;
+  ent->s.eType = ET_MOVER;
+  VectorCopy(ent->pos1, ent->r.currentOrigin);
+
+  SV_LinkEntity(ent);
+
+  ent->s.pos.trType = TR_STATIONARY;
 }

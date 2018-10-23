@@ -4837,7 +4837,7 @@ static void PM_Weapon( void )
         pm->ps->ammo < BG_Weapon( pm->ps->weapon )->ammoUsage2 ) || 
       ( ( BG_Weapon( pm->ps->weapon )->hasThirdMode && attack2 ) &&
         pm->ps->ammo < BG_Weapon( pm->ps->weapon )->ammoUsage3 ) ) &&
-      ( pm->ps->clips > 0  ) )
+      ( pm->ps->clips > 0 ||  ( pm->ps->pm_flags & PMF_WEAPON_RELOAD ) ) )
   {
     int i;
 

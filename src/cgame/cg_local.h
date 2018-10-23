@@ -357,6 +357,7 @@ typedef struct particleSystem_s
   qboolean              valid;
   qboolean              lazyRemove; //mark this system for later removal
 
+  qboolean              destructionPS; //this system was spawned from destruction
   //for PMT_NORMAL
   qboolean              normalValid;
   vec3_t                normal;

@@ -226,6 +226,181 @@ gentity_t *G_PickTarget( char *targetname )
   return choice[ rand( ) / ( RAND_MAX / num_choices + 1 ) ];
 }
 
+typedef struct loggedActivation_s {
+  int entityNum;
+  const char *classname;
+  const char *targetname;
+  int TargetGate;
+  int GateStateBefore;
+  int GateStateAfter;
+  char *source;
+  struct loggedActivation_s *parent;
+  struct loggedActivation_s *children;
+  struct loggedActivation_s *next;
+} loggedActivation_t;
+
+static loggedActivation_t *G_MakeLA(gentity_t *self) {
+  loggedActivation_t *la = BG_Alloc(sizeof(loggedActivation_t));
+
+  la->entityNum = (int)(self-g_entities);
+  la->classname = self->classname;
+  la->targetname = self->targetname;
+  la->TargetGate = self->TargetGate;
+  la->GateStateBefore = self->GateState;
+  la->source = NULL;
+  la->parent = NULL;
+  la->children = NULL;
+  la->next = NULL;
+  return la;
+}
+
+static loggedActivation_t *leafLA;
+
+static char laTimeStamp[32];
+static char laTimeSpace[32];
+static char *laTimePfx;
+
+static void G_PrepareTimePrefix(void) {
+  int time = level.time - level.startTime;
+
+  Com_sprintf( laTimeStamp, sizeof(laTimeStamp), "%i:%02i.%03i",
+               time / 1000 / 60, (time / 1000) % 60, time % 1000 );
+  memset(laTimeSpace, ' ', strlen(laTimeStamp));
+  laTimeSpace[ strlen(laTimeStamp)] = '\0';
+  laTimePfx = laTimeStamp;
+}
+
+qboolean doPrintLa = qtrue;
+#define LA_DOWN '|'
+#define LA_BEND '\''
+#define LA_RIGHT '-'
+
+static void G_PrintLA(loggedActivation_t *la) {
+  static char laPfx[2048] = "";
+  static size_t laPfxLen = 0;
+
+  while(la != NULL) {
+    loggedActivation_t *del;
+
+    if(la->parent != NULL && la->next == NULL) {
+      laPfx[ laPfxLen - 2 ] = LA_BEND;
+    }
+
+    if(doPrintLa) {
+      Com_Printf( "%s %s#%i (%s) %s |%i| %i->%i%s\n", laTimePfx, laPfx,
+                la->entityNum, la->classname, la->targetname ? va( "[%s]", la->targetname ) : "][",
+                la->TargetGate, la->GateStateBefore, la->GateStateAfter,
+                la->source ? va( " {%s}", la->source ) : "" );
+    }
+    laTimePfx = laTimeSpace;
+
+    if(la->parent != NULL) {
+      if(la->next == NULL) {
+        laPfx[laPfxLen - 2] = ' ';
+      }
+      laPfx[laPfxLen - 1] = ' ';
+    }
+    laPfx[laPfxLen++] = LA_DOWN;
+    laPfx[laPfxLen++] = LA_RIGHT;
+    laPfx[laPfxLen] = '\0';
+
+    G_PrintLA(la->children);
+
+    laPfxLen -= 2;
+    laPfx[ laPfxLen ] = '\0';
+    if(la->parent != NULL)
+      laPfx[ laPfxLen - 1 ] = la->next == NULL ? ' ' : LA_RIGHT;
+
+    del = la;
+    la = la->next;
+    if(del->source != NULL)
+      BG_Free(del->source);
+    BG_Free(del);
+  }
+}
+
+qboolean G_LoggedActivation(
+  gentity_t *self, 
+  gentity_t *other,
+  gentity_t *activator,
+  trace_t *trace,
+  const char *source,
+  logged_activation_t act_type) {
+  loggedActivation_t *la;
+
+  qboolean top;
+  qboolean occupy = qfalse;
+
+  la = G_MakeLA(self);
+  la->source = G_CopyString(source);
+
+  top = leafLA == NULL;
+  if(!top) {
+    la->parent = leafLA;
+    leafLA->children = la;
+  }
+
+  leafLA = la;
+
+  switch (act_type) {
+    case LOG_ACT_TOUCH:
+      Com_Assert(trace && "G_LoggedActivation: trace is NULL");
+      self->touch( self, other, trace );
+      break;
+
+    case LOG_ACT_ACTIVATE:
+      occupy = self->activation.activate(self,activator);
+      break;
+
+    case LOG_ACT_USE:
+      self->use(self, other, activator);
+      break;
+  }
+
+  leafLA->GateStateAfter = self->GateState;
+
+  if(top) {
+    G_PrepareTimePrefix( );
+    doPrintLa = trace == NULL || g_trigger_success;
+    G_PrintLA(leafLA);
+
+    leafLA = NULL;
+  } else {
+    leafLA = leafLA->parent;
+  }
+
+  return occupy;
+}
+
+static void G_LoggedMultiUse(
+  gentity_t *self,
+  gentity_t *other,
+  gentity_t *activator,
+  qboolean subsequent) {
+  loggedActivation_t *la;
+
+  la = G_MakeLA( self );
+
+  if(subsequent) {
+    leafLA->next = la;
+    la->parent = leafLA->parent;
+  } else {
+    leafLA->children = la;
+    la->parent = leafLA;
+  }
+
+  leafLA = la;
+
+  self->use(self, other, activator);
+
+  leafLA->GateStateAfter = self->GateState;
+}
+
+static void G_LoggedMultiUsesEnd(qboolean subsequent) {
+  if(subsequent) {
+    leafLA = leafLA->parent;
+  }
+}
 
 /*
 ==============================
@@ -238,35 +413,62 @@ match (string)self.target and call their .use function
 
 ==============================
 */
-void G_UseTargets( gentity_t *ent, gentity_t *activator )
-{
+void G_UseTargets(gentity_t *ent, gentity_t *activator) {
   gentity_t   *t;
+  int i, j;
+  qboolean top = qfalse;
+  qboolean subsequent = qfalse;
 
-  if( ent->targetShaderName && ent->targetShaderNewName )
-  {
+  if(ent->targetShaderName && ent->targetShaderNewName) {
     float f = level.time * 0.001;
-    AddRemap( ent->targetShaderName, ent->targetShaderNewName, f );
-    SV_SetConfigstring( CS_SHADERSTATE, BuildShaderStateConfig( ) );
+    AddRemap(ent->targetShaderName, ent->targetShaderNewName, f);
+    SV_SetConfigstring(CS_SHADERSTATE, BuildShaderStateConfig( ));
   }
 
-  if( !ent->target )
-    return;
+  if(g_debugAMP.integer) {
+    top = leafLA == NULL;
+    if(top) {
+      leafLA = G_MakeLA(ent);
+      leafLA->source = G_CopyString("generic");
+    }
+  }
 
-  t = NULL;
-  while( ( t = G_Find( t, FOFS( targetname ), ent->target ) ) != NULL )
-  {
-    if( t == ent )
-      Com_Printf( "WARNING: Entity used itself.\n" );
-    else
-    {
-      if( t->use )
-        t->use( t, ent, activator );
+  for( i = 0; i < MAX_TARGETS; i++ ) {
+    if( !ent->multitarget[ i ] ) {
+      continue;
     }
 
-    if( !ent->inuse )
-    {
-      Com_Printf( "entity was removed while using targets\n" );
-      return;
+    for(j = 0; j < MAX_TARGETNAMES; j++) {
+      t = NULL;
+      while((t = G_Find(t, FOFS(multitargetname[j]), ent->multitarget[i])) != NULL) {
+        if(t->use) {
+          if(g_debugAMP.integer) {
+            G_LoggedMultiUse(t, ent, activator, subsequent);
+            subsequent = qtrue;
+          } else {
+            t->use(t, ent, activator);
+          }
+        }
+
+        if(!ent->inuse) {
+          Com_Printf("entity was removed while using targets\n");
+          break;
+        }
+      }
+    }
+  }
+
+  if(g_debugAMP.integer) {
+    G_LoggedMultiUsesEnd(subsequent);
+
+    if(top) {
+      leafLA->GateStateAfter = ent->GateState;
+
+      G_PrepareTimePrefix( );
+      doPrintLa = qtrue;
+      G_PrintLA(leafLA);
+
+      leafLA = NULL;
     }
   }
 }

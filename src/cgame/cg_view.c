@@ -869,7 +869,7 @@ Fixed fov at intermissions, otherwise account for fov variable and zooms.
 #define BASE_FOV_Y      73.739792f // atan2( 3, 4 / tan( 90 ) )
 #define MAX_FOV_Y       120.0f
 #define MAX_FOV_WARP_Y  127.5f
-#define MAX_FOV_OFFSET  20
+#define MAX_FOV_OFFSET  30
 
 static int CG_CalcFov( void )
 {
@@ -1028,7 +1028,7 @@ static int CG_CalcFov( void )
   if( !cg.zoomed )
     cg.zoomSensitivity = 1.0f;
   else
-    cg.zoomSensitivity = cg.refdef.fov_y / 75.0f;
+    cg.zoomSensitivity = ( cg.refdef.fov_y + fov_Offset ) / 75.0f;
 
   return inwater;
 }

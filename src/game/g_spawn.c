@@ -118,10 +118,13 @@ field_t fields[ ] =
   {"angles", FOFS(s.apos.trBase), F_VECTOR},
   {"animation", FOFS(animation), F_VECTOR4},
   {"bounce", FOFS(physicsBounce), F_FLOAT},
+  {"class", FOFS(inventory), F_STRING},
   {"classname", FOFS(classname), F_STRING},
   {"count", FOFS(count), F_INT},
+  {"cvar", FOFS(Cvar_Val), F_STRING},
   {"dmg", FOFS(damage), F_INT},
   {"health", FOFS(health), F_INT},
+  {"inventory", FOFS(inventory), F_STRING},
   {"message", FOFS(message), F_STRING},
   {"model", FOFS(model), F_STRING},
   {"model2", FOFS(model2), F_STRING},
@@ -129,13 +132,21 @@ field_t fields[ ] =
   {"radius", FOFS(pos2), F_VECTOR},
   {"random", FOFS(random), F_FLOAT},
   {"rotatorAngle", FOFS(rotatorAngle), F_FLOAT},
+  {"sign", FOFS(sign), F_STRING},
   {"spawnflags", FOFS(spawnflags), F_INT},
   {"speed", FOFS(speed), F_FLOAT},
   {"target", FOFS(target), F_STRING},
+  {"target2", FOFS(multitarget[ 1 ]), F_STRING},
+  {"target3", FOFS(multitarget[ 2 ]), F_STRING},
+  {"target4", FOFS(multitarget[ 3 ]), F_STRING},
   {"targetname", FOFS(targetname), F_STRING},
+  {"targetname2", FOFS(multitargetname[ 1 ]), F_STRING},
+  {"targetname3", FOFS(multitargetname[ 2 ]), F_STRING},
+  {"targetname4", FOFS(multitargetname[ 3 ]), F_STRING},
   {"targetShaderName", FOFS(targetShaderName), F_STRING},
   {"targetShaderNewName", FOFS(targetShaderNewName), F_STRING},
-  {"wait", FOFS(wait), F_FLOAT}
+  {"wait", FOFS(wait), F_FLOAT},
+  {"weapon", FOFS(inventory), F_STRING}
 };
 
 
@@ -163,6 +174,9 @@ void SP_func_door_rotating( gentity_t *ent );
 void SP_func_door_model( gentity_t *ent );
 void SP_func_train( gentity_t *ent );
 void SP_func_timer( gentity_t *self);
+
+void SP_func_destructable( gentity_t *self );
+void SP_func_spawn( gentity_t *self );
 
 void SP_trigger_always( gentity_t *ent );
 void SP_trigger_multiple( gentity_t *ent );
@@ -193,6 +207,22 @@ void SP_target_alien_win( gentity_t *ent );
 void SP_target_human_win( gentity_t *ent );
 void SP_target_hurt( gentity_t *ent );
 
+void SP_target_and( gentity_t *ent );
+void SP_target_or( gentity_t *ent );
+void SP_target_xor( gentity_t *ent );
+void SP_target_count( gentity_t *ent );
+void SP_target_stgctrl( gentity_t *ent );
+void SP_target_if( gentity_t *ent );
+void SP_target_fund( gentity_t *ent );
+void SP_target_force_weapon( gentity_t *ent );
+void SP_target_force_class( gentity_t *ent );
+void SP_target_force_win( gentity_t *ent );
+void SP_target_bpctrl( gentity_t *ent );
+void SP_target_class( gentity_t *ent );
+void SP_target_equipment( gentity_t *ent );
+void SP_target_power( gentity_t *ent );
+void SP_target_creep( gentity_t *ent );
+
 void SP_light( gentity_t *self );
 void SP_info_null( gentity_t *self );
 void SP_info_notnull( gentity_t *self );
@@ -211,6 +241,7 @@ spawn_t spawns[ ] =
 {
   { "func_bobbing",             SP_func_bobbing },
   { "func_button",              SP_func_button },
+  { "func_destructable",        SP_func_destructable },
   { "func_door",                SP_func_door },
   { "func_door_model",          SP_func_door_model },
   { "func_door_rotating",       SP_func_door_rotating },
@@ -218,6 +249,7 @@ spawn_t spawns[ ] =
   { "func_pendulum",            SP_func_pendulum },
   { "func_plat",                SP_func_plat },
   { "func_rotating",            SP_func_rotating },
+  { "func_spawn",               SP_func_spawn },
   { "func_static",              SP_func_static },
   { "func_timer",               SP_func_timer },      // rename trigger_timer?
   { "func_train",               SP_func_train },
@@ -244,19 +276,34 @@ spawn_t spawns[ ] =
   // targets perform no action by themselves, but must be triggered
   // by another entity
   { "target_alien_win",         SP_target_alien_win },
+  { "target_and",               SP_target_and },
+  { "target_bpctrl",            SP_target_bpctrl },
+  { "target_class",             SP_target_class },
+  { "target_count",             SP_target_count },
+  { "target_creep",             SP_target_creep },
   { "target_delay",             SP_target_delay },
+  { "target_equipment",         SP_target_equipment },
+  { "target_force_class",       SP_target_force_class },
+  { "target_force_weapon",      SP_target_force_weapon },
+  { "target_force_win",         SP_target_force_win },
+  { "target_fund",              SP_target_fund },
   { "target_human_win",         SP_target_human_win },
   { "target_hurt",              SP_target_hurt },
+  { "target_if",                SP_target_if },
   { "target_kill",              SP_target_kill },
   { "target_location",          SP_target_location },
+  { "target_or",                SP_target_or },
   { "target_position",          SP_target_position },
+  { "target_power",             SP_target_power },
   { "target_print",             SP_target_print },
   { "target_push",              SP_target_push },
   { "target_relay",             SP_target_relay },
   { "target_rumble",            SP_target_rumble },
   { "target_score",             SP_target_score },
   { "target_speaker",           SP_target_speaker },
+  { "target_stgctrl",           SP_target_stgctrl },
   { "target_teleporter",        SP_target_teleporter },
+  { "target_xor",               SP_target_xor },
 
   // Triggers are brush objects that cause an effect when contacted
   // by a living player, usually involving firing targets.
@@ -464,6 +511,10 @@ void G_SpawnGEntityFromSpawnVars( void )
 
   VectorCopy( ent->s.pos.trBase, ent->r.currentOrigin );
   VectorCopy( ent->s.apos.trBase, ent->r.currentAngles );
+
+  G_SpawnInt( "gate", "255", &ent->TargetGate );
+  ent->multitarget[ 0 ] = ent->target;
+  ent->multitargetname[ 0 ] = ent->targetname;
 
   // if we didn't get a classname, don't bother spawning anything
   if( !G_CallSpawn( ent ) )

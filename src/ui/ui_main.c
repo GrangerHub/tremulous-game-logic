@@ -1720,7 +1720,7 @@ static void UI_DrawInfoPane( menuItem_t *item, rectDef_t *rect, float text_x, fl
       break;
 
     case INFOTYPE_WEAPON:
-      value = BG_TotalPriceForWeapon( item->v.weapon );
+      value = BG_TotalPriceForWeapon( item->v.weapon, UI_GameIsInWarmup() );
 
       if( value == 0 )
       {
@@ -1739,7 +1739,9 @@ static void UI_DrawInfoPane( menuItem_t *item, rectDef_t *rect, float text_x, fl
       break;
 
     case INFOTYPE_UPGRADE:
-      if( item->v.upgrade == UP_AMMO )
+      if( UI_GameIsInWarmup() && BG_Upgrade( item->v.upgrade )->warmupFree )
+        value = 0;
+      else if( item->v.upgrade == UP_AMMO )
       {
         int i;
 
@@ -2537,7 +2539,6 @@ static void UI_LoadHumanArmouryBuys( void )
         BG_Weapon( i )->purchasable &&
         BG_WeaponAllowedInStage( i, stage, UI_GameIsInWarmup( ) ) &&
         BG_WeaponIsAllowed( i, UI_DevModeIsOn( ) ) &&
-        !( BG_Weapon( i )->slots & slots ) &&
         !( uiInfo.weapons & ( 1 << i ) ) )
     {
       uiInfo.humanArmouryBuyList[ j ].text = BG_Weapon( i )->humanName;
@@ -2558,7 +2559,6 @@ static void UI_LoadHumanArmouryBuys( void )
         BG_Upgrade( i )->purchasable &&
         BG_UpgradeAllowedInStage( i, stage, UI_GameIsInWarmup( ) ) &&
         BG_UpgradeIsAllowed( i, UI_DevModeIsOn( ) ) &&
-        !( BG_Upgrade( i )->slots & slots ) &&
         !( uiInfo.upgrades & ( 1 << i ) ) &&
         !( i == UP_JETFUEL && !(uiInfo.upgrades & ( 1 << UP_JETPACK ) ) ) )
     {

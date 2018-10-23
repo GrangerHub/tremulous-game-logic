@@ -403,99 +403,139 @@ char *ConcatArgsPrintable( int start )
   return line;
 }
 
-static void Give_Class( gentity_t *ent, char *s )
-{
-  class_t currentClass = ent->client->pers.classSelection;
-  int clientNum = ent->client - level.clients;
-  vec3_t infestOrigin;
-  vec3_t oldVel;
-  int oldBoostTime = -1;
+// Change class- this allows you to be any alien class on TEAM_HUMAN and the
+// otherway round.
+static qboolean Give_Class( gentity_t *ent, char *s ) {
   int newClass = BG_ClassByName( s )->number;
 
-  if( newClass == PCL_NONE )
-    return;
-
-  if( !G_RoomForClassChange( ent, newClass, infestOrigin ) )
-  {
-    ADMP("give: not enough room to evolve\n");
-    return;
+  if( newClass == PCL_NONE ) {
+    ADMP( va( "^3give: ^7class %s not found\n", s ) );
+    return qfalse;
   }
 
-  ent->client->pers.evolveHealthFraction
-      = (float)ent->health
-      / (float)BG_Class( currentClass )->health;
-
-  if( ent->client->pers.evolveHealthFraction < 0.0f )
-    ent->client->pers.evolveHealthFraction = 0.0f;
-  else if( ent->client->pers.evolveHealthFraction > 1.0f )
-    ent->client->pers.evolveHealthFraction = 1.0f;
-
-  ent->client->pers.evolveMaxHealthFraction = 1.0f;
-
-  //remove credit
-  //G_AddCreditToClient( ent->client, -cost, qtrue );
-  ent->client->pers.classSelection = newClass;
-  ClientUserinfoChanged( clientNum, qfalse );
-  VectorCopy( infestOrigin, ent->s.pos.trBase );
-  VectorCopy( ent->client->ps.velocity, oldVel );
-
-  if( ent->client->ps.stats[ STAT_STATE ] & SS_BOOSTED )
-    oldBoostTime = ent->client->boostedTime;
-
-  ClientSpawn( ent, ent, ent->s.pos.trBase, ent->s.apos.trBase );
-
-  VectorCopy( oldVel, ent->client->ps.velocity );
-  if( oldBoostTime > 0 )
-  {
-    ent->client->boostedTime = oldBoostTime;
-    ent->client->ps.stats[ STAT_STATE ] |= SS_BOOSTED;
+  if( !G_EvolveAfterCheck( ent, newClass, qtrue ) ) {
+    ADMP( va( "^3give: ^7failed to give class %s\n", s ) );
+    return qfalse;
   }
+
+  return qtrue;
 }
 
-static void Give_Gun( gentity_t *ent, char *s )
-{
+static qboolean Give_Gun( gentity_t *ent, char *s ) {
   int w = BG_WeaponByName( s )->number;
 
-  if ( w == WP_NONE )
-    return;
-
-  ent->client->ps.stats[ STAT_WEAPON ] = w;
-  ent->client->ps.ammo = BG_Weapon( w )->maxAmmo;
-  ent->client->ps.clips = BG_Weapon( w )->maxClips;
-  G_ForceWeaponChange( ent, w );
-
-  if( BG_Weapon( w )->usesEnergy &&
-      ( BG_InventoryContainsUpgrade( UP_BATTPACK, ent->client->ps.stats ) ||
-        BG_InventoryContainsUpgrade( UP_BATTLESUIT, ent->client->ps.stats ) ) )
-    ent->client->ps.ammo = (int)( (float)ent->client->ps.ammo * BATTPACK_MODIFIER );
-
-  if( !BG_Weapon( w )->usesEnergy &&
-      !BG_Weapon( w )->infiniteAmmo &&
-      BG_Weapon( w )->ammoPurchasable &&
-      !BG_Weapon( w )->roundPrice &&
-      BG_InventoryContainsUpgrade( UP_BATTLESUIT, ent->client->ps.stats ) )
-    ent->client->ps.clips += ent->client->ps.clips + 1;
-}
-
-static void Give_Upgrade( gentity_t *ent, char *s )
-{
-  int i;
-  int u = BG_UpgradeByName( s )->number;
-
-  BG_AddUpgradeToInventory( u, ent->client->ps.stats );
-
-  if( u == UP_BATTLESUIT )
-    ent->client->ps.misc[ MISC_ARMOR ] = BSUIT_MAX_ARMOR;
-
-  for( i = 0; i < MAX_CLIENTS; i++ )
-    ent->creditsUpgrade[ u ][ i ] = 0;
-
-  for( i = 0; i < MAX_GENTITIES; i++ )
-  {
-    ent->creditsUpgradeDeffenses[ u ][ i ].credits = 0;
-    G_Entity_id_set( &ent->creditsUpgradeDeffenses[ u ][ i ].id, &g_entities[ i ] );
+  if ( w == WP_NONE ) {
+    ADMP( va( "^3give: ^7weapon %s not found\n", s ) );
+    return qfalse;
   }
 
+  G_GiveItem( ent, s, 0, BG_Weapon( w )->usesEnergy, qfalse );
+  return qtrue;
+}
+
+static qboolean Give_Upgrade( gentity_t *ent, char *s ) {
+    int u = BG_UpgradeByName( s )->number;
+
+    if( u == UP_NONE ) {
+      ADMP( va( "^3give: ^7upgrade %s not found\n", s ) );
+      return qfalse;
+    }
+
+    G_GiveItem( ent, s, 0, BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->usesEnergy, qfalse );
+
+    return qtrue;
+}
+
+static void Give_Health(gentity_t *ent) {
+  ent->client->bioKitHealthToRestore = 0;
+  ent->client->bioKitIncrementTime = 0;
+  ent->healthReserve = BIOKIT_HEALTH_RESERVE;
+
+  if(BG_InventoryContainsUpgrade(UP_BIOKIT, ent->client->ps.stats)) {
+    ent->client->ps.misc[ MISC_MAX_HEALTH ] = BIOKIT_MAX_HEALTH;
+    G_ChangeHealth( ent, ent, ent->client->ps.misc[ MISC_MAX_HEALTH ],
+                        (HLTHF_SET_TO_CHANGE) );
+  } else {
+    ent->client->ps.misc[MISC_MAX_HEALTH] =
+          BG_Class(ent->client->ps.stats[STAT_CLASS])->health;
+
+    if(BG_Class(ent->client->ps.stats[STAT_CLASS])->team == TEAM_ALIENS) {
+      G_ChangeHealth( ent, ent, ent->client->ps.misc[ MISC_MAX_HEALTH ],
+                      (HLTHF_SET_TO_CHANGE|
+                       HLTHF_EVOLVE_INCREASE) );
+    } else  {
+      G_ChangeHealth( ent, ent, ent->client->ps.misc[ MISC_MAX_HEALTH ],
+                          (HLTHF_SET_TO_CHANGE|
+                           HLTHF_INITIAL_MAX_CAP) );
+    }
+  }
+
+  BG_AddUpgradeToInventory( UP_MEDKIT, ent->client->ps.stats );
+}
+
+static void Give_Armor(gentity_t *ent) {
+  int i;
+  if(!BG_InventoryContainsUpgrade(UP_BATTLESUIT, ent->client->ps.stats)) {
+    return;
+  }
+
+  ent->client->ps.misc[MISC_ARMOR] = BSUIT_MAX_ARMOR;
+  ent->client->ps.stats[ STAT_FLAGS ] &= ~SFL_ARMOR_GENERATE;
+  ent->client->lastArmorGenTime = 0;
+  ent->client->armorToGen = 0;
+  ent->client->armorGenIncrementTime = 0;
+
+  //initialize damage credits
+  for(i = 0; i < MAX_CLIENTS; i++) {
+    ent->creditsUpgrade[UP_BATTLESUIT][i] = 0;
+  }
+
+  for(i = 0; i < MAX_GENTITIES; i++) {
+    ent->creditsUpgradeDeffenses[UP_BATTLESUIT][i].credits = 0;
+    G_Entity_id_set( &ent->creditsUpgradeDeffenses[UP_BATTLESUIT][i].id, &g_entities[i]);
+  }
+}
+
+static void Give_Funds( gentity_t *ent, char *s ) {
+  float credits;
+
+  if( Cmd_Argc( ) < 3 ) {
+    credits = 30000.0f;
+  } else {
+    credits = atof( s + 6 ) *
+      ( ent->client->pers.teamSelection ==
+        TEAM_ALIENS ? ALIEN_CREDITS_PER_KILL : 1.0f );
+
+    // clamp credits manually, as G_AddCreditToClient() expects a short int
+    if( credits > SHRT_MAX ) {
+      credits = 30000.0f;
+    } else if( credits < SHRT_MIN ) {
+      credits = -30000.0f;
+    }
+  }
+
+  G_AddCreditToClient( ent->client, (short)credits, qtrue );
+}
+
+static void Give_Stamina( gentity_t *ent ) {
+  ent->client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
+}
+
+static void Give_Ammo( gentity_t *ent ) {
+  gclient_t *client = ent->client;
+
+  if( client->ps.weapon != WP_ALEVEL3_UPG &&
+      BG_Weapon( client->ps.weapon )->infiniteAmmo ) {
+    return;
+  }
+
+  client->ps.ammo = BG_Weapon( client->ps.weapon )->maxAmmo;
+  client->ps.clips = BG_Weapon( client->ps.weapon )->maxClips;
+
+  if( BG_Weapon( client->ps.weapon )->usesEnergy &&
+      BG_InventoryContainsUpgrade( UP_BATTPACK, client->ps.stats ) ) {
+    client->ps.ammo = (int)( (float)client->ps.ammo * BATTPACK_MODIFIER );
+  }
 }
 
 /*
@@ -505,144 +545,125 @@ Cmd_Give_f
 Give items to a client
 ==================
 */
-void Cmd_Give_f( gentity_t *ent )
-{
+void Cmd_Give_f( gentity_t *ent ) {
   char      *name;
-  qboolean  give_all = qfalse;
+  char      classes[ MAX_STRING_CHARS ];
+  char      weapons[ MAX_STRING_CHARS ];
+  char      upgrades[ MAX_STRING_CHARS ];
+  class_t   classNum;
+  weapon_t  weaponNum;
+  upgrade_t upgradeNum;
 
-  if( Cmd_Argc( ) < 2 )
-  {
+  memset( classes, 0, sizeof(classes) );
+  memset( weapons, 0, sizeof(weapons) );
+  memset( upgrades, 0, sizeof(upgrades) );
+
+  for( classNum = (PCL_NONE + 1); classNum < PCL_NUM_CLASSES; classNum++ ) {
+    Q_strcat( classes, sizeof(classes), va( "  ^3%s\n", BG_Class( classNum )->name ) );
+  }
+
+  for( weaponNum = (WP_NONE + 1); weaponNum < WP_NUM_WEAPONS; weaponNum++ ) {
+    Q_strcat( weapons, sizeof(weapons), va( "  ^5%s\n", BG_Weapon( weaponNum )->name ) );
+  }
+
+  for( upgradeNum = (UP_NONE + 1); upgradeNum < UP_NUM_UPGRADES; upgradeNum++ ) {
+    Q_strcat( upgrades, sizeof(upgrades), va( "  ^2%s\n", BG_Upgrade( upgradeNum )->name ) );
+  }
+
+  if( Cmd_Argc( ) < 2 ) {
     // FIXME I am hideous :#(
     ADMP( "^3give: ^7usage: give [what]\n\nNormal\n\n"
-          "  health\n  funds <amount>\n  stamina\n  poison\n  gas\n  ammo\n armor\n"
-          "\n^3Classes\n\n"
-          "  level0\n  level1\n  level1upg\n  level2\n  level2upg\n  level3\n  level3upg\n  level4\n  builder\n  builderupg\n"
-          "  human_base\n  human_bsuit\n  "
-          "\n^5Weapons\n\n"
-          "  blaster\n  rifle\n  psaw\n  shotgun\n  lgun\n  mdriver\n  chaingun\n  flamer\n  prifle\n  grenade\n  lockblob\n"
-          "  hive\n  teslagen\n  mgturret\n  abuild\n  abuildupg\n  portalgun\n  proximity\n  smokecan\n  "
-          "\n^2Upgrades\n\n"
-          "  larmour\n  helmet\n  medkit\n  battpak\n  jetpack\n  bsuit\n  gren\n  prox\n  smoke\n" );
+          "  health\n  armor\n  funds <amount>\n  stamina\n  poison\n  gas\n  ammo\n"
+          "  class <class name>\n  weapon <weapon name>\n  upgrade <upgrade name>\n" );
+
+    ADMP( va( "\n^3Classes\n\n%s", classes ) );
+    ADMP( va( "\n^5Weapons\n\n%s", weapons ) );
+    ADMP( va( "\n^2Upgrades\n\n%s^7", upgrades ) );
     return;
   }
 
   name = ConcatArgs( 1 );
-  if( Q_stricmp( name, "all" ) == 0 )
-    give_all = qtrue;
-
-  if( give_all || Q_stricmp( name, "health" ) == 0 )
-  {
-    ent->client->ps.misc[ MISC_MAX_HEALTH ] = BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->health;
-    G_ChangeHealth( ent, ent,
-                    ent->client->ps.misc[ MISC_MAX_HEALTH ],
-                    (HLTHF_SET_TO_CHANGE|
-                     HLTHF_EVOLVE_INCREASE) );
-    BG_AddUpgradeToInventory( UP_MEDKIT, ent->client->ps.stats );
-  }
-
-  if( give_all || Q_stricmpn( name, "funds", 5 ) == 0 )
-  {
-    float credits;
-
-    if( give_all || Cmd_Argc( ) < 3 )
-      credits = 30000.0f;
-    else
-    {
-      credits = atof( name + 6 ) *
-        ( ent->client->pers.teamSelection ==
-          TEAM_ALIENS ? ALIEN_CREDITS_PER_KILL : 1.0f );
-
-      // clamp credits manually, as G_AddCreditToClient() expects a short int
-      if( credits > SHRT_MAX )
-        credits = 30000.0f;
-      else if( credits < SHRT_MIN )
-        credits = -30000.0f;
-    }
-
-    G_AddCreditToClient( ent->client, (short)credits, qtrue );
-  }
-
-  if( give_all || Q_stricmp( name, "stamina" ) == 0 )
-    ent->client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
-
-  // Adding guns
-  Give_Gun(ent, name);
-
-  // Adding upgrades
-  Give_Upgrade(ent, name);
-
-  // Change class- this allows you to be any alien class on TEAM_HUMAN and the
-  // otherway round.
-  Give_Class(ent, name);
-
-  if( Q_stricmp( name, "poison" ) == 0 )
-  {
-    if( ent->client->pers.teamSelection == TEAM_HUMANS )
-    {
+  if( Q_stricmp( name, "all" ) == 0 ) {
+    Give_Health( ent );
+    Give_Armor( ent );
+    Give_Funds( ent, name );
+    Give_Stamina( ent );
+    Give_Ammo( ent );
+  } else if( Q_stricmp( name, "health" ) == 0 ) {
+    Give_Health( ent );
+  } else if( Q_stricmp( name, "armor" ) == 0 ) {
+    Give_Armor( ent );
+  } else if( Q_stricmpn( name, "funds", 5 ) == 0 ) {
+    Give_Funds( ent, name );
+  } else if( Q_stricmp( name, "stamina" ) == 0 ) {
+    Give_Stamina( ent );
+  } else if( Q_stricmp( name, "ammo" ) == 0 ) {
+    Give_Ammo( ent );
+  } else if( Q_stricmp( name, "poison" ) == 0 ) {
+    if( ent->client->pers.teamSelection == TEAM_HUMANS ) {
       ent->client->ps.stats[ STAT_STATE ] |= SS_POISONED;
       ent->client->lastPoisonTime = level.time;
       ent->client->lastPoisonClient = ent;
-    }
-    else
-    {
+    } else {
       ent->client->ps.stats[ STAT_STATE ] |= SS_BOOSTED;
       ent->client->boostedTime = level.time;
     }
-  }
-
-  if( Q_stricmp( name, "gas" ) == 0 )
-  {
+  } else if( Q_stricmp( name, "gas" ) == 0 ) {
     ent->client->ps.eFlags |= EF_POISONCLOUDED;
     ent->client->lastPoisonCloudedTime = level.time;
     SV_GameSendServerCommand( ent->client->ps.clientNum, "poisoncloud" );
-  }
+  } else if( Q_stricmpn( name, "class", 5 ) == 0 ) {
+    char *className;
 
-  if( give_all || Q_stricmp( name, "ammo" ) == 0 )
-  {
-    gclient_t *client = ent->client;
-
-    if( client->ps.weapon != WP_ALEVEL3_UPG &&
-        BG_Weapon( client->ps.weapon )->infiniteAmmo )
-      return;
-
-    client->ps.ammo = BG_Weapon( client->ps.weapon )->maxAmmo;
-    client->ps.clips = BG_Weapon( client->ps.weapon )->maxClips;
-
-    if( BG_Weapon( client->ps.weapon )->usesEnergy &&
-        ( BG_InventoryContainsUpgrade( UP_BATTPACK, client->ps.stats ) ||
-          BG_InventoryContainsUpgrade( UP_BATTLESUIT, client->ps.stats ) ) )
-      client->ps.ammo = (int)( (float)client->ps.ammo * BATTPACK_MODIFIER );
-
-    if( !BG_Weapon( client->ps.weapon )->usesEnergy &&
-        !BG_Weapon( client->ps.weapon )->infiniteAmmo &&
-        BG_Weapon( client->ps.weapon )->ammoPurchasable &&
-        !BG_Weapon( client->ps.weapon )->roundPrice &&
-        BG_InventoryContainsUpgrade( UP_BATTLESUIT, client->ps.stats ) )
-      client->ps.clips += client->ps.clips + 1;
-  }
-
-  if( give_all || Q_stricmp( name, "fuel" ) == 0 )
-  {
-    if( BG_InventoryContainsUpgrade( UP_JETPACK, ent->client->ps.stats ) )
-      ent->client->ps.stats[ STAT_FUEL ] = JETPACK_FUEL_FULL;
-  }
-
-  if( give_all || Q_stricmp( name, "armor" ) == 0 )
-  {
-    if( BG_InventoryContainsUpgrade( UP_BATTLESUIT, ent->client->ps.stats ) )
-    {
-      int i;
-
-      ent->client->ps.misc[ MISC_ARMOR ] = BSUIT_MAX_ARMOR;
-      for( i = 0; i < MAX_CLIENTS; i++ )
-        ent->creditsUpgrade[ UP_BATTLESUIT ][ i ] = 0;
-
-      for( i = 0; i < MAX_GENTITIES; i++ )
-      {
-        ent->creditsUpgradeDeffenses[ UP_BATTLESUIT ][ i ].credits = 0;
-        G_Entity_id_set( &ent->creditsUpgradeDeffenses[ UP_BATTLESUIT ][ i ].id, &g_entities[ i ] );
-      }
+    if( Cmd_Argc( ) < 3 ) {
+        ADMP( "^3give: ^7usage: give class <class name>\n\n" );
+        ADMP( va( "\n^3Classes\n\n%s", classes ) );
+        return;
     }
+
+    className = name + 6;
+
+    if( !Give_Class( ent, className ) ) {
+      ADMP( "^3give: ^7usage: give class <class name>\n\n" );
+      ADMP( va( "\n^3Classes\n\n%s", classes ) );
+    }
+  } else if( Q_stricmpn( name, "weapon", 6 ) == 0 ) {
+    char *weaponName;
+
+    if( Cmd_Argc( ) < 3 ) {
+        ADMP( "^3give: ^7usage: give weapon <weapon name>\n\n" );
+        ADMP( va( "\n^5Weapons\n\n%s", weapons ) );
+        return;
+    }
+
+    weaponName = name + 7;
+
+    if( !Give_Gun( ent, weaponName ) ) {
+      ADMP( "^3give: ^7usage: give weapon <weapon name>\n\n" );
+      ADMP( va( "\n^5Weapons\n\n%s", weapons ) );
+    }
+  } else if( Q_stricmpn( name, "upgrade", 7 ) == 0 ) {
+    char *upgradeName;
+
+    if( Cmd_Argc( ) < 3 ) {
+        ADMP( "^3give: ^7usage: give upgrade <upgrade name>\n\n" );
+        ADMP( va( "\n^2Upgrades\n\n%s^7", upgrades ) );
+        return;
+    }
+
+    upgradeName = name + 8;
+
+    if( !Give_Upgrade( ent, upgradeName ) ) {
+      ADMP( "^3give: ^7usage: give upgrade <upgrade name>\n\n" );
+      ADMP( va( "\n^2Upgrades\n\n%s^7", upgrades ) );
+    }
+
+    return;
+  } else {
+    //for shorthand use
+    Give_Class( ent, name );
+    Give_Gun( ent, name );
+    Give_Upgrade( ent, name );
   }
 }
 
@@ -2228,6 +2249,332 @@ qboolean G_RoomForClassChange( gentity_t *ent, class_t class,
 
 /*
 =================
+G_CheckEvolve
+
+Checks to see if evolving to a given
+class is allowed for a given entity.
+Returns the cost of evolving if evolving is allowed and
+        evaluates infestOrigin.
+Returns a negative int is evolving is not allowed.
+=================
+*/
+int G_CheckEvolve( gentity_t *ent, class_t newClass,
+                  vec3_t infestOrigin, qboolean give )
+{
+  int       clientNum;
+  int       cost = -1;
+  class_t   currentClass;
+
+  Com_Assert( ent->client &&
+              "G_CheckEvolve: Attempted to check a non-client entity for evolving" );
+
+  clientNum = ent->client - level.clients;
+
+  currentClass = ent->client->pers.classSelection;
+
+  if( ent->client->sess.spectatorState != SPECTATOR_NOT )
+    return -1;
+
+  if( ent->health <= 0 )
+    return -1;
+
+  if( ent->client->pers.teamSelection == TEAM_ALIENS ||
+      ( give && BG_Class( newClass )->team == TEAM_ALIENS ) )
+  {
+    if( newClass <= PCL_NONE ||
+        newClass >= PCL_NUM_CLASSES )
+    {
+      G_TriggerMenu( ent->client->ps.clientNum, MN_A_UNKNOWNCLASS );
+      return -1;
+    }
+
+    //if we are not currently spectating, we are attempting evolution
+    if( ent->client->pers.classSelection != PCL_NONE )
+    {
+      if( ent->client->ps.stats[ STAT_MISC3 ] > 0 )
+      {
+        G_TriggerMenu( clientNum, MN_A_EVOLVING );
+        return -1;
+      }
+
+      //check that we have an overmind
+      if( !give && !G_Overmind( ) &&
+          newClass != PCL_ALIEN_BUILDER0 &&
+          newClass != PCL_ALIEN_BUILDER0_UPG )
+      {
+        G_TriggerMenu( clientNum, MN_A_NOOVMND_EVOLVE );
+        return -1;
+      }
+
+      if ( ent->client->ps.eFlags & EF_OCCUPYING )
+      {
+        G_TriggerMenu( clientNum, MN_A_NOEROOM );
+        return -1;
+      }
+
+      if( ent->client->sess.spectatorState == SPECTATOR_NOT &&
+          !give &&
+          ( currentClass == PCL_ALIEN_BUILDER0 ||
+            currentClass == PCL_ALIEN_BUILDER0_UPG ) &&
+          ent->client->ps.misc[ MISC_MISC ] > 0 )
+      {
+        G_TriggerMenu( ent->client->ps.clientNum, MN_A_EVOLVEBUILDTIMER );
+        return -1;
+      }
+
+      if( give )
+        cost = 0;
+      else
+      {
+        cost = BG_ClassCanEvolveFromTo(
+          currentClass, newClass, ent->client->pers.credit, g_alienStage.integer,
+          IS_WARMUP, g_cheats.integer );
+      }
+
+      if( G_RoomForClassChange( ent, newClass, infestOrigin ) )
+      {
+        if( cost < 0 )
+        {
+          G_TriggerMenuArgs( clientNum, MN_A_CANTEVOLVE, newClass );
+          return -1;
+        }
+      }
+      else
+      {
+        vec3_t playerNormal;
+
+        BG_GetClientNormal( &ent->client->ps, playerNormal );
+        //check that wallwalking isn't interfering
+        if( ent->client->ps.eFlags & EF_WALLCLIMB &&
+            ( playerNormal[ 2 ] != 1.0f ) )
+        {
+          G_TriggerMenu( clientNum, MN_A_EVOLVEWALLWALK );
+          return -1;
+        }
+        else
+        {
+          G_TriggerMenu( clientNum, MN_A_NOEROOM );
+          return -1;
+        }
+      }
+    }
+  }
+  else if( ent->client->pers.teamSelection == TEAM_HUMANS ||
+      ( give && BG_Class( newClass )->team == TEAM_HUMANS ) )
+  {
+    if( give )
+      cost = 0;
+    else
+    {
+      G_TriggerMenu( clientNum, MN_H_DEADTOCLASS );
+      return -1;
+    }
+  }
+
+  return cost;
+}
+
+/*
+=================
+G_Evolve
+
+Evolves a given client entity to a given new class,
+given also the cost and infestOrigin.
+=================
+*/
+void G_Evolve( gentity_t *ent, class_t newClass,
+               int cost, vec3_t infestOrigin )
+{
+  class_t   currentClass;
+  int       clientNum;
+  vec3_t    oldVel;
+  int       oldBoostTime = -1;
+  const int oldHealth = ent->health;
+  float     valueMod;
+  int       bonusValue = ent->bonusValue;
+  int       creditsSaved[ MAX_CLIENTS ]; // human credits for each client
+  credits_t creditsDeffensesSaved[ MAX_GENTITIES ];
+  int       i;
+
+  Com_Assert( ent->client &&
+              "G_Evolve: Attempted to evolve a non-client entity" );
+
+  clientNum = ent->client - level.clients;
+
+  currentClass = ent->client->pers.classSelection;
+
+  for( i = 0; i < MAX_CLIENTS; i++ )
+  {
+    creditsSaved[ i ] = ent->credits[ i ];
+  }
+
+  for( i = 0; i < MAX_GENTITIES; i++ )
+  {
+    creditsDeffensesSaved[i].credits = ent->creditsDeffenses[i].credits;
+    creditsDeffensesSaved[i].id.id = ent->creditsDeffenses[i].id.id;
+    creditsDeffensesSaved[i].id.ptr = ent->creditsDeffenses[i].id.ptr;
+  }
+
+  // regain some of the evos when devolving
+  if( !cost && !(IS_WARMUP && BG_Class(newClass)->warmupFree) )
+  {
+    cost = ( BG_Class( newClass )->cost * ALIEN_CREDITS_PER_KILL ) -
+          ( BG_Class( currentClass )->cost * ALIEN_CREDITS_PER_KILL );
+    if( cost )
+      cost = (int)( ( (float)cost ) * 0.0625f );
+  }
+
+  //disable wallwalking
+  if( ent->client->ps.eFlags & EF_WALLCLIMB )
+  {
+    vec3_t newAngles;
+
+    ent->client->ps.eFlags &= ~EF_WALLCLIMB;
+    VectorCopy( ent->client->ps.viewangles, newAngles );
+    newAngles[ PITCH ] = 0;
+    newAngles[ ROLL ] = 0;
+    G_SetClientViewAngle( ent, newAngles );
+  }
+
+  ent->client->pers.evolveHealthFraction = (float)oldHealth /
+                                           (float)BG_Class( currentClass )->health;
+
+  if( ent->client->pers.evolveHealthFraction < 0.0f )
+    ent->client->pers.evolveHealthFraction = 0.0f;
+  else if( ent->client->pers.evolveHealthFraction > 1.0f )
+    ent->client->pers.evolveHealthFraction = 1.0f;
+
+  ent->client->pers.evolveMaxHealthFraction = 1.0f;
+
+  //save the barbs
+  if( ent->client->ps.weapon == WP_ALEVEL3_UPG )
+  {
+    ent->client->pers.barbs = ent->client->ps.ammo;
+    ent->client->pers.barbRegenTime = ent->timestamp;
+  }
+
+  ent->client->pers.classSelection = newClass;
+  ClientUserinfoChanged( clientNum, qfalse );
+  VectorCopy( infestOrigin, ent->s.pos.trBase );
+  VectorCopy( ent->client->ps.velocity, oldVel );
+
+  if( ent->client->ps.stats[ STAT_STATE ] & SS_BOOSTED )
+    oldBoostTime = ent->client->boostedTime;
+
+  // calculate the bonus health to be save for after the evolve
+  {
+    const int classHealth = BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->health;
+    int   decayedHealth = classHealth -
+                          ent->client->ps.misc[ MISC_MAX_HEALTH ];
+    const int healthDiff = ent->client->ps.misc[ MISC_MAX_HEALTH ] - 
+                           ent->health;
+
+    decayedHealth -= (int)( healthDiff * ( BG_Class( currentClass )->maxHealthDecayRate ? BG_Class( currentClass )->maxHealthDecayRate : 1 ) );
+
+    valueMod = ( (float)decayedHealth ) / ( (float) classHealth );
+
+    G_IncreaseBonusValue( &bonusValue,
+                          (int)( BG_GetValueOfPlayer( &ent->client->ps ) *
+                                 valueMod ) );
+  }
+
+  ClientSpawn( ent, ent, ent->s.pos.trBase, ent->s.apos.trBase );
+
+  ent->bonusValue = bonusValue;
+
+  for( i = 0; i < MAX_CLIENTS; i++ )
+  {
+    ent->credits[ i ] = ceil( creditsSaved[ i ] * valueMod );
+  }
+
+  for( i = 0; i < MAX_GENTITIES; i++ )
+  {
+    if( creditsDeffensesSaved[i].credits )
+      ent->creditsDeffenses[i].credits = (int)ceil( ( (float)creditsDeffensesSaved[i].credits ) * valueMod );
+    else
+      ent->creditsDeffenses[i].credits = 0;
+
+    ent->creditsDeffenses[i].id.id = creditsDeffensesSaved[i].id.id;
+    ent->creditsDeffenses[i].id.ptr = creditsDeffensesSaved[i].id.ptr;
+  }
+
+  //restore the barbs
+  if( ent->client->ps.weapon == WP_ALEVEL3_UPG )
+  {
+    ent->client->ps.ammo = ent->client->pers.barbs;
+    ent->timestamp = ent->client->pers.barbRegenTime;
+  }
+
+  if( !g_cheats.integer )
+  {
+    int evolvePeriod = MIN_EVOLVE_PERIOD;
+
+    //set the evolve health regen
+    ent->client->pers.evolveHealthRegen = ent->health - oldHealth;
+    G_ChangeHealth( ent, ent, oldHealth,
+                    (HLTHF_SET_TO_CHANGE|
+                     HLTHF_EVOLVE_INCREASE|
+                     HLTHF_IGNORE_MAX) );
+
+    //factor in the health difference
+    evolvePeriod += ( abs( ent->client->pers.evolveHealthRegen ) / 200 );
+
+    //add any remaining evolve cool down
+    evolvePeriod += BG_GetEvolveCoolDown( &ent->client->ps );
+
+    if( evolvePeriod > MAX_EVOLVE_PERIOD )
+      evolvePeriod = MAX_EVOLVE_PERIOD;
+
+    BG_SetEvolveCoolDown( &ent->client->ps, evolvePeriod );
+    BG_SetEvolveCoolDownDecayTimer( &ent->client->ps,
+                                    EVOLVE_COOL_DOWN_DECAY_RATE );
+
+    //Set evolving period
+    ent->client->ps.eFlags |= EF_EVOLVING;
+    ent->client->ps.stats[ STAT_MISC3 ] = evolvePeriod; // counts down, ends evolve when 0 is reached
+    ent->client->ps.stats[ STAT_MISC2 ] = evolvePeriod; // remains constant, used as a denominator for scaling
+
+    //store the cost
+    ent->client->evolveCost = cost;
+  } else
+  {
+    //remove credit
+    G_AddCreditToClient( ent->client, -cost, qtrue );
+  }
+
+  VectorCopy( oldVel, ent->client->ps.velocity );
+  if( oldBoostTime > 0 )
+  {
+    ent->client->boostedTime = oldBoostTime;
+    ent->client->ps.stats[ STAT_STATE ] |= SS_BOOSTED;
+  }
+}
+
+/*
+=================
+G_EvolveAfterCheck
+
+Executes G_CheckEvolve(), and uses its results for
+G_Evolve()
+=================
+*/
+qboolean G_EvolveAfterCheck( gentity_t *ent, class_t newClass, qboolean give )
+{
+  int cost;
+  vec3_t    infestOrigin;
+
+  cost = G_CheckEvolve( ent, newClass, infestOrigin, give );
+
+  if( cost >= 0 ) {
+    G_Evolve( ent, newClass, cost, infestOrigin );
+    return qtrue;
+  } else {
+    return qfalse;
+  }
+}
+
+/*
+=================
 Cmd_Class_f
 =================
 */
@@ -2235,11 +2582,7 @@ void Cmd_Class_f( gentity_t *ent )
 {
   char      s[ MAX_TOKEN_CHARS ];
   int       clientNum;
-  vec3_t    infestOrigin;
-  class_t   currentClass = ent->client->pers.classSelection;
   class_t   newClass;
-  int       oldBoostTime = -1;
-  vec3_t    oldVel;
 
   clientNum = ent->client - level.clients;
   Cmd_ArgvBuffer( 1, s, sizeof( s ) );
@@ -2300,233 +2643,7 @@ void Cmd_Class_f( gentity_t *ent )
     return;
   }
 
-  if( ent->health <= 0 )
-    return;
-
-  if( ent->client->pers.teamSelection == TEAM_ALIENS )
-  {
-    if( newClass == PCL_NONE )
-    {
-      G_TriggerMenu( ent->client->ps.clientNum, MN_A_UNKNOWNCLASS );
-      return;
-    }
-
-    //if we are not currently spectating, we are attempting evolution
-    if( ent->client->pers.classSelection != PCL_NONE )
-    {
-      int cost;
-
-      if( ent->client->ps.stats[ STAT_MISC3 ] > 0 )
-      {
-        G_TriggerMenu( clientNum, MN_A_EVOLVING );
-        return;
-      }
-
-      //check that we have an overmind
-      if( !G_Overmind( ) &&
-          newClass != PCL_ALIEN_BUILDER0 &&
-          newClass != PCL_ALIEN_BUILDER0_UPG )
-      {
-        G_TriggerMenu( clientNum, MN_A_NOOVMND_EVOLVE );
-        return;
-      }
-
-      if ( ent->client->ps.eFlags & EF_OCCUPYING )
-      {
-        G_TriggerMenu( clientNum, MN_A_NOEROOM );
-        return;
-      }
-
-      if( ent->client->sess.spectatorState == SPECTATOR_NOT &&
-          ( currentClass == PCL_ALIEN_BUILDER0 ||
-            currentClass == PCL_ALIEN_BUILDER0_UPG ) &&
-          ent->client->ps.misc[ MISC_MISC ] > 0 )
-      {
-        G_TriggerMenu( ent->client->ps.clientNum, MN_A_EVOLVEBUILDTIMER );
-        return;
-      }
-
-      cost = BG_ClassCanEvolveFromTo( currentClass, newClass,
-                                      ent->client->pers.credit,
-                                      g_alienStage.integer,
-                                      IS_WARMUP, g_cheats.integer );
-
-      if( G_RoomForClassChange( ent, newClass, infestOrigin ) )
-      {
-        if( cost >= 0 )
-        {
-          const int    oldHealth = ent->health;
-          float        valueMod;
-          int          bonusValue = ent->bonusValue;
-          int          creditsSaved[ MAX_CLIENTS ]; // human credits for each client
-          credits_t    creditsDeffensesSaved[ MAX_GENTITIES ];
-          int          i;
-
-          for( i = 0; i < MAX_CLIENTS; i++ )
-          {
-            creditsSaved[ i ] = ent->credits[ i ];
-          }
-
-          for( i = 0; i < MAX_GENTITIES; i++ )
-          {
-            creditsDeffensesSaved[i].credits = ent->creditsDeffenses[i].credits;
-            creditsDeffensesSaved[i].id.id = ent->creditsDeffenses[i].id.id;
-            creditsDeffensesSaved[i].id.ptr = ent->creditsDeffenses[i].id.ptr;
-          }
-
-          // regain some of the evos when devolving
-          if( !cost )
-          {
-            cost = ( BG_Class( newClass )->cost * ALIEN_CREDITS_PER_KILL ) -
-                  ( BG_Class( currentClass )->cost * ALIEN_CREDITS_PER_KILL );
-            if( cost )
-              cost = (int)( ( (float)cost ) * 0.0625f );
-          }
-
-          //disable wallwalking
-          if( ent->client->ps.eFlags & EF_WALLCLIMB )
-          {
-            vec3_t newAngles;
-
-            ent->client->ps.eFlags &= ~EF_WALLCLIMB;
-            VectorCopy( ent->client->ps.viewangles, newAngles );
-            newAngles[ PITCH ] = 0;
-            newAngles[ ROLL ] = 0;
-            G_SetClientViewAngle( ent, newAngles );
-          }
-
-          ent->client->pers.evolveHealthFraction = (float)oldHealth /
-                                                   (float)BG_Class( currentClass )->health;
-
-          if( ent->client->pers.evolveHealthFraction < 0.0f )
-            ent->client->pers.evolveHealthFraction = 0.0f;
-          else if( ent->client->pers.evolveHealthFraction > 1.0f )
-            ent->client->pers.evolveHealthFraction = 1.0f;
-
-          ent->client->pers.evolveMaxHealthFraction = 1.0f;
-
-          //save the barbs
-          if( ent->client->ps.weapon == WP_ALEVEL3_UPG )
-          {
-            ent->client->pers.barbs = ent->client->ps.ammo;
-            ent->client->pers.barbRegenTime = ent->timestamp;
-          }
-
-          ent->client->pers.classSelection = newClass;
-          ClientUserinfoChanged( clientNum, qfalse );
-          VectorCopy( infestOrigin, ent->s.pos.trBase );
-          VectorCopy( ent->client->ps.velocity, oldVel );
-
-          if( ent->client->ps.stats[ STAT_STATE ] & SS_BOOSTED )
-            oldBoostTime = ent->client->boostedTime;
-
-          // calculate the bonus health to be save for after the evolve
-          {
-            const int classHealth = BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->health;
-            int   decayedHealth = classHealth -
-                                  ent->client->ps.misc[ MISC_MAX_HEALTH ];
-            const int healthDiff = ent->client->ps.misc[ MISC_MAX_HEALTH ] - 
-                                   ent->health;
-
-            decayedHealth -= (int)( healthDiff * ( BG_Class( currentClass )->maxHealthDecayRate ? BG_Class( currentClass )->maxHealthDecayRate : 1 ) );
-
-            valueMod = ( (float)decayedHealth ) / ( (float) classHealth );
-
-            G_IncreaseBonusValue( &bonusValue,
-                                  (int)( BG_GetValueOfPlayer( &ent->client->ps ) *
-                                         valueMod ) );
-          }
-
-          ClientSpawn( ent, ent, ent->s.pos.trBase, ent->s.apos.trBase );
-
-          ent->bonusValue = bonusValue;
-
-          for( i = 0; i < MAX_CLIENTS; i++ )
-          {
-            ent->credits[ i ] = ceil( creditsSaved[ i ] * valueMod );
-          }
-
-          for( i = 0; i < MAX_GENTITIES; i++ )
-          {
-            if( creditsDeffensesSaved[i].credits )
-              ent->creditsDeffenses[i].credits = (int)ceil( ( (float)creditsDeffensesSaved[i].credits ) * valueMod );
-            else
-              ent->creditsDeffenses[i].credits = 0;
-
-            ent->creditsDeffenses[i].id.id = creditsDeffensesSaved[i].id.id;
-            ent->creditsDeffenses[i].id.ptr = creditsDeffensesSaved[i].id.ptr;
-          }
-
-          //restore the barbs
-          if( ent->client->ps.weapon == WP_ALEVEL3_UPG )
-          {
-            ent->client->ps.ammo = ent->client->pers.barbs;
-            ent->timestamp = ent->client->pers.barbRegenTime;
-          }
-
-          if( !g_cheats.integer )
-          {
-            int evolvePeriod = MIN_EVOLVE_PERIOD;
-
-            //set the evolve health regen
-            ent->client->pers.evolveHealthRegen = ent->health - oldHealth;
-            G_ChangeHealth( ent, ent, oldHealth,
-                            (HLTHF_SET_TO_CHANGE|
-                             HLTHF_EVOLVE_INCREASE|
-                             HLTHF_IGNORE_MAX) );
-
-            //factor in the health difference
-            evolvePeriod += ( abs( ent->client->pers.evolveHealthRegen ) / 200 );
-
-            //add any remaining evolve cool down
-            evolvePeriod += BG_GetEvolveCoolDown( &ent->client->ps );
-
-            if( evolvePeriod > MAX_EVOLVE_PERIOD )
-              evolvePeriod = MAX_EVOLVE_PERIOD;
-
-            BG_SetEvolveCoolDown( &ent->client->ps, evolvePeriod );
-            BG_SetEvolveCoolDownDecayTimer( &ent->client->ps,
-                                            EVOLVE_COOL_DOWN_DECAY_RATE );
-
-            //Set evolving period
-            ent->client->ps.eFlags |= EF_EVOLVING;
-            ent->client->ps.stats[ STAT_MISC3 ] = evolvePeriod; // counts down, ends evolve when 0 is reached
-            ent->client->ps.stats[ STAT_MISC2 ] = evolvePeriod; // remains constant, used as a denominator for scaling
-
-            //store the cost
-            ent->client->evolveCost = cost;
-          } else
-          {
-            //remove credit
-            G_AddCreditToClient( ent->client, -cost, qtrue );
-          }
-
-          VectorCopy( oldVel, ent->client->ps.velocity );
-          if( oldBoostTime > 0 )
-          {
-            ent->client->boostedTime = oldBoostTime;
-            ent->client->ps.stats[ STAT_STATE ] |= SS_BOOSTED;
-          }
-        }
-        else
-          G_TriggerMenuArgs( clientNum, MN_A_CANTEVOLVE, newClass );
-      }
-      else
-      {
-        vec3_t playerNormal;
-
-        BG_GetClientNormal( &ent->client->ps, playerNormal );
-        //check that wallwalking isn't interfering
-        if( ent->client->ps.eFlags & EF_WALLCLIMB &&
-            ( playerNormal[ 2 ] != 1.0f ) )
-          G_TriggerMenu( clientNum, MN_A_EVOLVEWALLWALK );
-        else
-          G_TriggerMenu( clientNum, MN_A_NOEROOM );
-      }
-    }
-  }
-  else if( ent->client->pers.teamSelection == TEAM_HUMANS )
-    G_TriggerMenu( clientNum, MN_H_DEADTOCLASS );
+  G_EvolveAfterCheck( ent, newClass, qfalse );
 }
 
 
@@ -2759,95 +2876,826 @@ void Cmd_ToggleItem_f( gentity_t *ent )
 
 /*
 =================
-Cmd_Buy_f
+G_CanSell
 =================
 */
-void Cmd_Buy_f( gentity_t *ent )
+sellErr_t G_CanSell(gentity_t *ent, const char *itemName, int *value, qboolean force)
 {
-  char s[ MAX_TOKEN_CHARS ];
+  const int usedFuel = JETPACK_FUEL_FULL -
+                          ent->client->ps.stats[ STAT_FUEL ];
+  int       i;
   weapon_t  weapon;
   upgrade_t upgrade;
-  qboolean  energyOnly;
+  
 
-  if( ent->client->ps.eFlags & EF_OCCUPYING )
-  {
-    SV_GameSendServerCommand( ent-g_entities, "print \"You can't buy while occupying another structure\n\"" );
-    return;
+  Com_Assert( ent &&
+              "G_CanSell: ent is NULL" );
+  Com_Assert( value &&
+              "G_CanSell: value is NULL" );
+
+  *value = 0;
+
+  if( !itemName )
+    return ERR_SELL_SPECIFY;
+
+  if(!force) {
+    if( ent->client->ps.eFlags & EF_OCCUPYING )
+      return ERR_SELL_OCCUPY;
+
+    //no armoury nearby
+    if( !G_BuildableRange( ent->client->ps.origin, 100, BA_H_ARMOURY ) )
+      return ERR_SELL_NO_ARM;
   }
 
-  Cmd_ArgvBuffer( 1, s, sizeof( s ) );
+  if( !Q_stricmpn( itemName, "weapon", 6 ) )
+    weapon = ent->client->ps.stats[ STAT_WEAPON ];
+  else
+    weapon = BG_WeaponByName( itemName )->number;
 
-  weapon = BG_WeaponByName( s )->number;
-  upgrade = BG_UpgradeByName( s )->number;
+  upgrade = BG_UpgradeByName( itemName )->number;
+
+  if( weapon != WP_NONE )
+  {
+    if( force || (IS_WARMUP && BG_Weapon( weapon )->warmupFree) )
+    {
+      *value = 0;
+    } else
+    {
+      *value = BG_Weapon( weapon )->price;
+      if( BG_Weapon( weapon )->roundPrice && !BG_Weapon( weapon )->usesEnergy &&
+          ( BG_Weapon( weapon )->ammoPurchasable ||
+            ( ent->client->ps.ammo == BG_Weapon( weapon )->maxAmmo &&
+              ent->client->ps.clips == BG_Weapon( weapon )->maxClips ) ) )
+      {
+        int totalAmmo = ent->client->ps.ammo +
+                        ( ent->client->ps.clips *
+                          BG_Weapon( weapon )->maxAmmo );
+
+        *value += ( totalAmmo * BG_Weapon( weapon )->roundPrice);
+      }
+    }
+
+    if(!force) {
+      if( !BG_PlayerCanChangeWeapon( &ent->client->ps, &ent->client->pmext ) )
+        return ERR_SELL_NO_CHANGE_ALLOWED_NOW;
+
+      //are we /allowed/ to sell this?
+      if( !BG_Weapon( weapon )->purchasable )
+        return ERR_Sell_NOT_PURCHASABLE;
+    }
+
+    //remove weapon if carried
+    if( BG_InventoryContainsWeapon( weapon, ent->client->ps.stats ) )
+    {
+      //guard against selling the HBUILD weapons exploit
+      if( !force && weapon == WP_HBUILD && ent->client->ps.misc[ MISC_MISC ] > 0 ) {
+        return ERR_SELL_ARMOURYBUILDTIMER;
+      }
+    } else
+      return ERR_SELL_NOT_ITEM_HELD;
+  }
+  else if( upgrade != UP_NONE )
+  {
+    if( force || (IS_WARMUP && BG_Upgrade( upgrade )->warmupFree) )
+      *value = 0;
+    else {
+      if( upgrade == UP_BIOKIT ) {
+        *value = (short)( BG_Upgrade( upgrade )->price *
+                           ( ( (float)(ent->healthReserve) ) /
+                             ( (float)(BIOKIT_HEALTH_RESERVE) ) ) );
+      } else if( upgrade == UP_BATTLESUIT &&
+        ent->client->ps.misc[ MISC_ARMOR ] < BSUIT_MAX_ARMOR ) {
+        *value = BSUIT_PRICE_USED;
+      } else {
+        *value = BG_Upgrade( upgrade )->price;
+      }
+
+      if(upgrade == UP_JETPACK && usedFuel) {
+        *value -= ( usedFuel * JETPACK_FULL_FUEL_PRICE ) /
+                               JETPACK_FUEL_FULL;
+      }
+    }
+
+    //are we /allowed/ to sell this?
+    if(
+      (!BG_Upgrade(upgrade)->purchasable || !BG_Upgrade(upgrade)->sellable) &&
+      !force) {
+        return ERR_Sell_NOT_PURCHASABLE;
+      }
+
+    //remove upgrade if carried
+    if( BG_InventoryContainsUpgrade( upgrade, ent->client->ps.stats ) )
+    {
+      // shouldn't really need to test for this, but just to be safe
+      if( upgrade == UP_BATTLESUIT )
+      {
+        vec3_t newOrigin;
+
+        if( !G_RoomForClassChange( ent, PCL_HUMAN, newOrigin ) )
+          return ERR_SELL_NOROOMBSUITOFF;
+      }
+    } else
+      return ERR_SELL_NOT_ITEM_HELD;
+  }
+  else if( !Q_stricmp( itemName, "upgrades" ) )
+  {
+    for( i = UP_NONE + 1; i < UP_NUM_UPGRADES; i++ )
+    {
+      //remove upgrade if carried
+      if(
+        BG_InventoryContainsUpgrade(i, ent->client->ps.stats) &&
+        ((BG_Upgrade(i)->purchasable && BG_Upgrade(i)->sellable) || force))
+      {
+        // shouldn't really need to test for this, but just to be safe
+        if( i == UP_BATTLESUIT )
+        {
+          vec3_t newOrigin;
+
+          if( !G_RoomForClassChange( ent, PCL_HUMAN, newOrigin ) )
+            continue;
+        }
+
+        if(!force && !(IS_WARMUP && BG_Upgrade(upgrade)->warmupFree)) {
+          if( i == UP_BIOKIT ) {
+            *value += (short)( BG_Upgrade( i )->price *
+                               ( ( (float)(ent->healthReserve) ) /
+                                 ( (float)(BIOKIT_HEALTH_RESERVE) ) ) );
+          } else if( i == UP_BATTLESUIT ) {
+            *value += BSUIT_PRICE_USED;
+          } else {
+            *value += BG_Upgrade( i )->price;
+          }
+
+          if(i == UP_JETPACK && usedFuel) {
+            *value -= ( usedFuel * JETPACK_FULL_FUEL_PRICE ) /
+                                   JETPACK_FUEL_FULL;
+          }
+        }
+      }
+    }
+  }
+  else
+    return ERR_SELL_UNKNOWNITEM;
+
+  return ERR_SELL_NONE;
+}
+
+/*
+=================
+G_SellErrHandling
+=================
+*/
+void G_SellErrHandling( gentity_t *ent, const sellErr_t error )
+{
+  switch ( error )
+  {
+    case ERR_SELL_SPECIFY:
+      SV_GameSendServerCommand( ent-g_entities, "print \"Specify an item to sell\n\"" );
+      break;
+
+    case ERR_SELL_OCCUPY:
+      SV_GameSendServerCommand( ent-g_entities, "print \"You can't sell while occupying another structure\n\"" );
+      break;
+
+    case ERR_SELL_NO_ARM:
+      G_TriggerMenu( ent->client->ps.clientNum, MN_H_NOARMOURYHERE );
+      break;
+
+    case ERR_SELL_NO_CHANGE_ALLOWED_NOW:
+      break;
+
+    case ERR_Sell_NOT_PURCHASABLE:
+      SV_GameSendServerCommand( ent-g_entities, "print \"This item has a no return policy at this establishment\n\"" );
+      break;
+
+    case ERR_SELL_NOT_ITEM_HELD:
+      break;
+
+    case ERR_SELL_ARMOURYBUILDTIMER:
+      G_TriggerMenu( ent->client->ps.clientNum, MN_H_ARMOURYBUILDTIMER );
+      break;
+
+    case ERR_SELL_NOROOMBSUITOFF:
+      G_TriggerMenu( ent->client->ps.clientNum, MN_H_NOROOMBSUITOFF );
+      break;
+
+    case ERR_SELL_UNKNOWNITEM:
+      G_TriggerMenu( ent->client->ps.clientNum, MN_H_UNKNOWNITEM );
+      break;
+
+    default:
+      break;
+  }
+}
+
+/*
+=================
+G_TakeItem
+=================
+*/
+void G_TakeItem( gentity_t *ent, const char *itemName, const int value )
+{
+  int       i;
+  weapon_t  weapon;
+  upgrade_t upgrade;
+
+  Com_Assert( ent &&
+              "G_TakeItem: ent is NULL" );
+  Com_Assert( itemName &&
+              "G_TakeItem: itemName is NULL" );
+
+  if( !Q_stricmpn( itemName, "weapon", 6 ) )
+    weapon = ent->client->ps.stats[ STAT_WEAPON ];
+  else
+    weapon = BG_WeaponByName( itemName )->number;
+
+  upgrade = BG_UpgradeByName( itemName )->number;
+
+  if( weapon != WP_NONE )
+  {
+    weapon_t selected = BG_GetPlayerWeapon( &ent->client->ps );
+
+      ent->client->ps.stats[ STAT_WEAPON ] = WP_NONE;
+      // Cancel ghost buildables
+      ent->client->ps.stats[ STAT_BUILDABLE ] = BA_NONE;
+
+      //add to funds
+      G_AddCreditToClient( ent->client, (short)value, qfalse );
+
+    //if we have this weapon selected, force a new selection
+    if( weapon == selected )
+      G_ForceWeaponChange( ent, WP_NONE );
+  }
+  else if( upgrade != UP_NONE )
+  {
+      if( upgrade == UP_BATTLESUIT )
+      {
+        vec3_t newOrigin;
+
+        G_RoomForClassChange( ent, PCL_HUMAN_BSUIT, newOrigin );
+        VectorCopy( newOrigin, ent->client->ps.origin );
+        ent->client->ps.stats[ STAT_CLASS ] = PCL_HUMAN;
+        ent->client->pers.classSelection = PCL_HUMAN;
+        ent->client->ps.eFlags ^= EF_TELEPORT_BIT;
+
+        if(ent->client->ps.pm_flags & PMF_WEAPON_RELOAD) {
+          if(ent->client->ps.clips > BG_Weapon(ent->client->ps.stats[STAT_WEAPON])->maxClips + 1)
+            ent->client->ps.clips = BG_Weapon(ent->client->ps.stats[STAT_WEAPON])->maxClips + 1;
+        } else {
+          if(ent->client->ps.clips > BG_Weapon(ent->client->ps.stats[STAT_WEAPON])->maxClips)
+            ent->client->ps.clips = BG_Weapon(ent->client->ps.stats[STAT_WEAPON])->maxClips;
+        }
+
+        if(ent->client->ps.misc[MISC_ARMOR] < BSUIT_MAX_ARMOR) {
+          // Give credits for the damaged part of the battlesuit
+          G_RewardAttackers(ent, UP_BATTLESUIT);
+        }
+
+        ent->client->ps.misc[ MISC_ARMOR ] = 0;
+        ent->client->ps.stats[ STAT_FLAGS ] &= ~SFL_ARMOR_GENERATE;
+        ent->client->lastArmorGenTime = 0;
+        ent->client->armorToGen = 0;
+        ent->client->armorGenIncrementTime = 0;
+      } else if( upgrade == UP_BIOKIT )
+      {
+        ent->client->ps.misc[ MISC_MAX_HEALTH ] =
+              BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->health;
+        G_ChangeHealth( ent, ent, ent->health,
+                        (HLTHF_SET_TO_CHANGE|
+                         HLTHF_INITIAL_MAX_CAP) );
+        ent->client->bioKitHealthToRestore = 0;
+        ent->client->bioKitIncrementTime = 0;
+        ent->healthReserve = 0;
+      }
+
+      //remove from inventory
+      BG_RemoveUpgradeFromInventory( upgrade, ent->client->ps.stats );
+
+      if( upgrade == UP_BATTPACK ||
+          upgrade == UP_BATTLESUIT )
+        G_GiveClientMaxAmmo( ent, qtrue );
+
+      //add to funds
+      G_AddCreditToClient( ent->client, (short)value, qfalse );
+  }
+  else if( !Q_stricmp( itemName, "upgrades" ) )
+  {
+    for( i = UP_NONE + 1; i < UP_NUM_UPGRADES; i++ )
+    {
+      if( i == UP_BATTLESUIT )
+      {
+        vec3_t newOrigin;
+
+        G_RoomForClassChange( ent, PCL_HUMAN_BSUIT, newOrigin );
+        VectorCopy( newOrigin, ent->client->ps.origin );
+        ent->client->ps.stats[ STAT_CLASS ] = PCL_HUMAN;
+        ent->client->pers.classSelection = PCL_HUMAN;
+        ent->client->ps.eFlags ^= EF_TELEPORT_BIT;
+
+        if(ent->client->ps.pm_flags & PMF_WEAPON_RELOAD) {
+          if(ent->client->ps.clips > BG_Weapon(ent->client->ps.stats[STAT_WEAPON])->maxClips + 1)
+            ent->client->ps.clips = BG_Weapon(ent->client->ps.stats[STAT_WEAPON])->maxClips + 1;
+        } else {
+          if(ent->client->ps.clips > BG_Weapon(ent->client->ps.stats[STAT_WEAPON])->maxClips)
+            ent->client->ps.clips = BG_Weapon(ent->client->ps.stats[STAT_WEAPON])->maxClips;
+        }
+
+        if(ent->client->ps.misc[MISC_ARMOR] < BSUIT_MAX_ARMOR) {
+          // Give credits for the damaged part of the battlesuit
+          G_RewardAttackers(ent, UP_BATTLESUIT);
+        }
+
+        ent->client->ps.misc[ MISC_ARMOR ] = 0;
+        ent->client->ps.stats[ STAT_FLAGS ] &= ~SFL_ARMOR_GENERATE;
+        ent->client->lastArmorGenTime = 0;
+        ent->client->armorToGen = 0;
+        ent->client->armorGenIncrementTime = 0;
+      } else if( i == UP_BIOKIT )
+      {
+        ent->client->ps.misc[ MISC_MAX_HEALTH ] =
+              BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->health;
+        G_ChangeHealth( ent, ent, ent->health,
+                        (HLTHF_SET_TO_CHANGE|
+                         HLTHF_INITIAL_MAX_CAP) );
+        ent->client->bioKitHealthToRestore = 0;
+        ent->client->bioKitIncrementTime = 0;
+        ent->healthReserve = 0;
+      }
+
+      BG_RemoveUpgradeFromInventory( i, ent->client->ps.stats );
+
+      if( i == UP_BATTPACK || i == UP_BATTLESUIT )
+        G_GiveClientMaxAmmo( ent, qtrue );
+
+      //add to funds
+      G_AddCreditToClient( ent->client, (short)value, qfalse );
+    }
+  }
+
+  //update ClientInfo
+  ClientUserinfoChanged( ent->client->ps.clientNum, qfalse );
+  ent->client->pers.infoChangeTime = level.time;
+}
+
+/*
+=================
+G_TakeItemAfterCheck
+=================
+*/
+qboolean G_TakeItemAfterCheck(gentity_t *ent, const char *itemName, qboolean force)
+{
+  int  value;
+  sellErr_t sellErr;
+
+  sellErr = G_CanSell( ent, itemName, &value, force );
+
+  if( sellErr != ERR_SELL_NONE )
+  {
+    G_SellErrHandling( ent, sellErr );
+    return qfalse;
+  }
+
+  G_TakeItem( ent, itemName, value );
+  return qtrue;
+}
+
+/*
+=================
+Cmd_Sell_f
+=================
+*/
+void Cmd_Sell_f( gentity_t *ent )
+{
+    char s[ MAX_TOKEN_CHARS ];
+
+    Cmd_ArgvBuffer( 1, s, sizeof( s ) );
+
+    G_TakeItemAfterCheck(ent, s, qfalse);
+}
+
+/*
+=================
+G_CanAutoSell
+
+For automatically selling items that are
+taking up slots for another item that will
+be bought
+=================
+*/
+int G_CanAutoSell( gentity_t *ent, const char *itemToBuyName,
+                        weapon_t *weaponToSell, int *upgradesToSell,
+                        int *values, int numValues, sellErr_t *autoSellErrors, qboolean force )
+{
+  int       i;
+  int       currentValue[numValues];
+  int       slotsToCheck = 0;
+  int       slotsCanFree = 0;
+  int       upgradesToSellTemp = 0;
+  weapon_t  weaponToSellTemp = WP_NONE;
+  weapon_t  weaponToBuy;
+  upgrade_t upgradeToBuy;
+
+  Com_Assert( ent &&
+              "G_CanAutoSell: ent is NULL" );
+  Com_Assert( ent->client &&
+              "G_CanAutoSell: ent->client is NULL" );
+  Com_Assert( weaponToSell &&
+              "G_CanAutoSell: weaponToSell is NULL" );
+  Com_Assert( upgradesToSell &&
+              "G_CanAutoSell: upgradesToSell is NULL" );
+  Com_Assert( values &&
+              "G_CanAutoSell: values is NULL" );
+  Com_Assert( numValues == ( UP_NUM_UPGRADES + 1 ) &&
+              "G_CanAutoSell: numValues is invalid" );
+  Com_Assert( autoSellErrors &&
+              "G_CanAutoSell: autoSellErrors is NULL" );
+
+  *weaponToSell = WP_NONE;
+  *upgradesToSell = 0;
+  for( i = 0; i < numValues; i++ )
+  {
+    currentValue[i] = values[i] = 0;
+    autoSellErrors[i] = ERR_SELL_NONE;
+  }
+
+  if( !itemToBuyName )
+    return 0;
+
+  weaponToBuy = BG_WeaponByName( itemToBuyName )->number;
+  upgradeToBuy = BG_UpgradeByName( itemToBuyName )->number;
+
+  //check if any slots need to be freed
+  if( weaponToBuy != WP_NONE )
+    slotsToCheck = BG_Weapon( weaponToBuy )->slots;
+  else if( upgradeToBuy )
+    slotsToCheck = BG_Upgrade( upgradeToBuy )->slots;
+
+  slotsToCheck &= BG_SlotsForInventory( ent->client->ps.stats );
+
+  //nothing to do
+  if( !slotsToCheck )
+    return qfalse;
+
+  if( slotsToCheck & BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->slots )
+  {
+    int value;
+
+    autoSellErrors[ UP_NUM_UPGRADES ] = G_CanSell( ent,
+                                                   BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->name,
+                                                   &value, force );
+
+    if( autoSellErrors[ UP_NUM_UPGRADES ] == ERR_SELL_NONE )
+    {
+      weaponToSellTemp = ent->client->ps.stats[ STAT_WEAPON ];
+      currentValue[UP_NUM_UPGRADES] += value;
+      slotsCanFree |= BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->slots;
+      slotsToCheck &= ~BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->slots;
+    } else
+      return 0;
+  }
+
+  if( slotsToCheck )
+  {
+    int u;
+
+    for( u = ( UP_NONE + 1 ); u < UP_NUM_UPGRADES; u++ )
+    {
+      int value;
+
+      if( !BG_InventoryContainsUpgrade( u, &ent->client->ps.stats ) )
+        continue;
+
+      //check if this upgrade is blocking
+      if( !( slotsToCheck & BG_Upgrade( u )->slots ) )
+        continue;
+
+      autoSellErrors[ u ] = G_CanSell( ent,
+                                       BG_Upgrade( u )->name,
+                                       &value, force );
+
+      if( autoSellErrors[ u ] == ERR_SELL_NONE )
+      {
+        upgradesToSellTemp |= ( 1 << u );
+        currentValue[u] += value;
+        slotsCanFree |= BG_Upgrade( u )->slots;
+        slotsToCheck &= ~BG_Upgrade( u )->slots;
+      } else
+        return 0;
+        
+
+      //no remaining blocked slots
+      if( !slotsToCheck )
+        break;
+    }
+  }
+
+  //check if all blocked slots necessary for the purchase can be freed
+  if( slotsToCheck )
+    return 0;
+
+  //set the output values
+  *weaponToSell = weaponToSellTemp;
+  *upgradesToSell = upgradesToSellTemp;
+  for( i = 0; i < numValues; i++ )
+  {
+    values[i] = currentValue[i];
+  }
+
+  return slotsCanFree;
+}
+
+/*
+=================
+G_CanBuy
+=================
+*/
+buyErr_t G_CanBuy( gentity_t *ent, const char *itemName, int *price,
+                   qboolean *energyOnly, const int slotsFreeFromAutoSell,
+                   const int fundsFromAutoSell, qboolean force )
+{
+  weapon_t  weapon;
+  upgrade_t upgrade;
+
+  Com_Assert( ent &&
+              "G_CanBuy: ent is NULL" );
+  Com_Assert( price &&
+              "G_CanBuy: price is NULL" );
+  Com_Assert( energyOnly &&
+              "G_CanBuy: energyOnly is NULL" );
+
+  *price = -1;
+
+  if( !itemName )
+    return ERR_BUY_SPECIFY;
+
+  if( (ent->client->ps.eFlags & EF_OCCUPYING) && !force )
+    return ERR_BUY_OCCUPY;
+
+  weapon = BG_WeaponByName( itemName )->number;
+  upgrade = BG_UpgradeByName( itemName )->number;
 
   // Only give energy from reactors or repeaters
-  if( G_BuildableRange( ent->client->ps.origin, 100, BA_H_ARMOURY ) )
-    energyOnly = qfalse;
+  if( G_BuildableRange( ent->client->ps.origin, 100, BA_H_ARMOURY ) || force )
+    *energyOnly = qfalse;
   else if( upgrade == UP_AMMO &&
            BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->usesEnergy &&
            ( G_BuildableRange( ent->client->ps.origin, 100, BA_H_REACTOR ) ||
              G_BuildableRange( ent->client->ps.origin, 100, BA_H_REPEATER ) ) )
-    energyOnly = qtrue;
+    *energyOnly = qtrue;
   else
   {
     if( upgrade == UP_AMMO &&
         BG_Weapon( ent->client->ps.weapon )->usesEnergy )
-      G_TriggerMenu( ent->client->ps.clientNum, MN_H_NOENERGYAMMOHERE );
+      return ERR_BUY_NO_ENERGY_AMMO;
     else
-      G_TriggerMenu( ent->client->ps.clientNum, MN_H_NOARMOURYHERE );
-    return;
+      return ERR_BUY_NO_ARM;
   }
 
   if( weapon != WP_NONE )
   {
+    if((IS_WARMUP && BG_Upgrade( upgrade )->warmupFree) || force) {
+      *price = 0;
+    } else {
+      *price = BG_TotalPriceForWeapon( weapon, IS_WARMUP );
+    }
+
     //already got this?
     if( BG_InventoryContainsWeapon( weapon, ent->client->ps.stats ) )
-    {
-      G_TriggerMenu( ent->client->ps.clientNum, MN_H_ITEMHELD );
-      return;
-    }
+      return ERR_BUY_ITEM_HELD;
 
     // Only humans can buy stuff
     if( BG_Weapon( weapon )->team != TEAM_HUMANS )
-    {
-      SV_GameSendServerCommand( ent-g_entities, "print \"You can't buy alien items\n\"" );
-      return;
-    }
+      return ERR_BUY_ALIEN_ITEM;
 
-    //are we /allowed/ to buy this?
-    if( !BG_Weapon( weapon )->purchasable )
-    {
-      SV_GameSendServerCommand( ent-g_entities, "print \"You can't buy this item\n\"" );
-      return;
-    }
+    if(!force) {
+      //are we /allowed/ to buy this?
+      if( !BG_Weapon( weapon )->purchasable )
+        return ERR_BUY_NOT_PURCHASABLE;
 
-    //are we /allowed/ to buy this?
-    if( !BG_WeaponAllowedInStage( weapon, g_humanStage.integer, IS_WARMUP ) ||
-                                  !BG_WeaponIsAllowed( weapon, g_cheats.integer ) )
-    {
-      SV_GameSendServerCommand( ent-g_entities, "print \"You can't buy this item\n\"" );
-      return;
-    }
+      //are we /allowed/ to buy this?
+      if( !BG_WeaponAllowedInStage( weapon, g_humanStage.integer, IS_WARMUP ) ||
+                                    !BG_WeaponIsAllowed( weapon, g_cheats.integer ) )
+        return ERR_BUY_NOT_ALLOWED;
 
-    //can afford this?
-    if( !IS_WARMUP && ( BG_TotalPriceForWeapon( weapon ) >
-                        (short)ent->client->pers.credit ) )
-    {
-      G_TriggerMenu( ent->client->ps.clientNum, MN_H_NOFUNDS );
-      return;
+      //can afford this?
+      if( *price > (short)ent->client->pers.credit )
+        return ERR_BUY_NO_FUNDS;
+
+      // In some instances, weapons can't be changed
+      if( !BG_PlayerCanChangeWeapon( &ent->client->ps, &ent->client->pmext ) )
+        return ERR_BUY_NO_CHANGE_ALLOWED_NOW;
     }
 
     //have space to carry this?
-    if( BG_Weapon( weapon )->slots & BG_SlotsForInventory( ent->client->ps.stats ) )
-    {
-      G_TriggerMenu( ent->client->ps.clientNum, MN_H_NOSLOTS );
-      return;
+    if( BG_Weapon( weapon )->slots & ( BG_SlotsForInventory( ent->client->ps.stats ) & ~slotsFreeFromAutoSell ) )
+      return ERR_BUY_NO_SLOTS;
+  }
+  else if( upgrade != UP_NONE )
+  {
+    // Only humans can buy stuff
+    if( BG_Upgrade( upgrade )->team != TEAM_HUMANS )
+      return ERR_BUY_ALIEN_ITEM;
+
+    if( (IS_WARMUP && BG_Upgrade( upgrade )->warmupFree) || force )
+      *price = 0;
+    else
+      *price = BG_Upgrade( upgrade )->price;
+
+    // If buying grenades, do not allow if player still has unexploded grenades
+    // (basenade protection)
+    if( upgrade == UP_GRENADE && G_PlayerHasUnexplodedGrenades( ent ) && !force )
+      return ERR_BUY_UNEXPLODEDGRENADE;
+
+    //already got this?
+    if( BG_InventoryContainsUpgrade( upgrade, ent->client->ps.stats ) )
+      return ERR_BUY_ITEM_HELD;
+
+    //can afford this?
+    if( *price > (short)ent->client->pers.credit && !force )
+      return ERR_BUY_NO_FUNDS;
+
+    //have space to carry this?
+    if( BG_Upgrade( upgrade )->slots & ( BG_SlotsForInventory( ent->client->ps.stats ) & ~slotsFreeFromAutoSell ) )
+      return ERR_BUY_NO_SLOTS;
+
+    if(!force) {
+      //are we /allowed/ to buy this?
+      if( !BG_Upgrade( upgrade )->purchasable )
+        return ERR_BUY_NOT_PURCHASABLE;
+
+      //are we /allowed/ to buy this?
+      if( !BG_UpgradeAllowedInStage( upgrade, g_humanStage.integer, IS_WARMUP ) ||
+                                     !BG_UpgradeIsAllowed( upgrade, g_cheats.integer ) )
+        return ERR_BUY_NOT_ALLOWED;
     }
 
-    // In some instances, weapons can't be changed
-    if( !BG_PlayerCanChangeWeapon( &ent->client->ps, &ent->client->pmext ) )
-      return;
+    if( upgrade == UP_JETFUEL )
+    {
+      // refuel the jet pack
+      if( BG_InventoryContainsUpgrade( UP_JETPACK, ent->client->ps.stats ) &&
+          ent->client->ps.stats[ STAT_FUEL ] < JETPACK_FUEL_FULL )
+      {
+        const int usedFuel = JETPACK_FUEL_FULL -
+                                ent->client->ps.stats[ STAT_FUEL ];
+        const int costToFull = ( usedFuel * JETPACK_FULL_FUEL_PRICE ) /
+                               JETPACK_FUEL_FULL;
+        const int affordableFuel = ( ent->client->pers.credit * JETPACK_FUEL_FULL ) /
+                                   JETPACK_FULL_FUEL_PRICE;
 
+        if( (IS_WARMUP && BG_Upgrade(UP_JETFUEL)->warmupFree) || force )
+        {
+          *price = 0;
+        }
+        else if( costToFull <= ent->client->pers.credit )
+        {
+          *price = costToFull;
+        }
+        else if( affordableFuel > 0 )
+        {
+          *price = (short)ent->client->pers.credit;
+        }
+        else
+          return ERR_BUY_NO_FUNDS;
+      }
+    }
+    else
+    {
+      if( upgrade == UP_AMMO )
+      {
+        int rounds, clips, ammoPrice;
+
+        //bursts must complete
+        if( ent->client->pmext.burstRoundsToFire[ 2 ] ||
+            ent->client->pmext.burstRoundsToFire[ 1 ] ||
+            ent->client->pmext.burstRoundsToFire[ 0 ] )
+          return ERR_BUY_BURST_UNFINISHED;
+
+        if( ent->client->ps.weapon == WP_LIGHTNING &&
+        ( ent->client->ps.misc[ MISC_MISC ] > LIGHTNING_BOLT_CHARGE_TIME_MIN ||
+          ( ent->client->ps.stats[ STAT_STATE ] & SS_CHARGING ) ) )
+          return ERR_BUY_CHARGING_LIGHTNING;
+
+        if( !G_CanGiveClientMaxAmmo( ent, *energyOnly,
+                                     &rounds, &clips, &ammoPrice ) )
+          return ERR_BUY_NO_MORE_AMMO;
+      }
+      else
+      {
+        if( upgrade == UP_BATTLESUIT )
+        {
+          vec3_t newOrigin;
+
+          if( !G_RoomForClassChange( ent, PCL_HUMAN_BSUIT, newOrigin ) )
+            return ERR_BUY_NOROOMBSUITON;
+        }
+      }
+    }
+  }
+  else
+    return ERR_BUY_UNKNOWNITEM;
+
+  return ERR_BUY_NONE;
+}
+
+/*
+=================
+G_BuyErrHandling
+=================
+*/
+static void G_BuyErrHandling( gentity_t *ent, const buyErr_t error )
+{
+  switch ( error )
+  {
+    case ERR_BUY_SPECIFY:
+      SV_GameSendServerCommand( ent-g_entities, "print \"Specify an item to purchase\n\"" );
+      break;
+
+    case ERR_BUY_OCCUPY:
+      SV_GameSendServerCommand( ent-g_entities, "print \"You can't buy while occupying another structure\n\"" );
+      break;
+
+    case ERR_BUY_NO_ENERGY_AMMO:
+      G_TriggerMenu( ent->client->ps.clientNum, MN_H_NOENERGYAMMOHERE );
+      break;
+
+    case ERR_BUY_NO_ARM:
+      G_TriggerMenu( ent->client->ps.clientNum, MN_H_NOARMOURYHERE );
+      break;
+
+    case ERR_BUY_ITEM_HELD:
+      G_TriggerMenu( ent->client->ps.clientNum, MN_H_ITEMHELD );
+      break;
+
+    case ERR_BUY_ALIEN_ITEM:
+      SV_GameSendServerCommand( ent-g_entities, "print \"You can't buy alien items\n\"" );
+      break;
+
+    case ERR_BUY_NOT_PURCHASABLE:
+      SV_GameSendServerCommand( ent-g_entities, "print \"You can't buy this item\n\"" );
+      break;
+
+    case ERR_BUY_NOT_ALLOWED:
+      SV_GameSendServerCommand( ent-g_entities, "print \"You can't buy this item\n\"" );
+      break;
+
+    case ERR_BUY_NO_FUNDS:
+      G_TriggerMenu( ent->client->ps.clientNum, MN_H_NOFUNDS );
+      break;
+
+    case ERR_BUY_NO_SLOTS:
+      G_TriggerMenu( ent->client->ps.clientNum, MN_H_NOSLOTS );
+      break;
+
+    case ERR_BUY_NO_CHANGE_ALLOWED_NOW:
+      break;
+
+    case ERR_BUY_UNEXPLODEDGRENADE:
+      G_TriggerMenu( ent->client->ps.clientNum, MN_H_UNEXPLODEDGRENADE );
+      break;
+
+    case ERR_BUY_BURST_UNFINISHED:
+      break;
+
+    case ERR_BUY_CHARGING_LIGHTNING:
+      break;
+
+    case ERR_BUY_NO_MORE_AMMO:
+      break;
+
+    case ERR_BUY_NOROOMBSUITON:
+      G_TriggerMenu( ent->client->ps.clientNum, MN_H_NOROOMBSUITON );
+      break;
+
+    case ERR_BUY_UNKNOWNITEM:
+      G_TriggerMenu( ent->client->ps.clientNum, MN_H_UNKNOWNITEM );
+      break;
+
+    default:
+      break;
+  }
+}
+
+/*
+=================
+G_GiveItem
+=================
+*/
+void G_GiveItem( gentity_t *ent, const char *itemName, const int price,
+                 const qboolean energyOnly, qboolean force )
+{
+  weapon_t  weapon;
+  upgrade_t upgrade;
+
+  Com_Assert( ent &&
+              "G_GiveItem: ent is NULL" );
+  Com_Assert( itemName &&
+              "G_GiveItem: itemName is NULL" );
+
+  weapon = BG_WeaponByName( itemName )->number;
+  upgrade = BG_UpgradeByName( itemName )->number;
+
+  if( weapon != WP_NONE )
+  {
     ent->client->ps.stats[ STAT_WEAPON ] = weapon;
     if( BG_Weapon( weapon )->infiniteAmmo )
     {
@@ -2870,7 +3718,7 @@ void Cmd_Buy_f( gentity_t *ent )
         BG_Weapon( weapon )->ammoPurchasable &&
         !BG_Weapon( weapon )->roundPrice &&
         BG_InventoryContainsUpgrade( UP_BATTLESUIT, ent->client->ps.stats ) )
-      ent->client->ps.clips += ent->client->ps.clips + 1;
+      ent->client->ps.clips *= 2;
 
     G_ForceWeaponChange( ent, weapon );
 
@@ -2880,119 +3728,42 @@ void Cmd_Buy_f( gentity_t *ent )
     ent->client->ps.misc[ MISC_MISC ] = 0;
 
     //subtract from funds
-    G_AddCreditToClient( ent->client, -(short)BG_TotalPriceForWeapon( weapon ),
+    G_AddCreditToClient( ent->client, -(short)price,
                          qfalse );
   }
   else if( upgrade != UP_NONE )
   {
     int i;
 
-    // If buying grenades, do not allow if player still has unexploded grenades
-    // (basenade protection)
-    if( upgrade == UP_GRENADE && G_PlayerHasUnexplodedGrenades( ent ) )
-    {
-      G_TriggerMenu( ent->client->ps.clientNum, MN_H_UNEXPLODEDGRENADE );
-      return;
-    }
-
-    //already got this?
-    if( BG_InventoryContainsUpgrade( upgrade, ent->client->ps.stats ) )
-    {
-      G_TriggerMenu( ent->client->ps.clientNum, MN_H_ITEMHELD );
-      return;
-    }
-
-    //can afford this?
-    if( !IS_WARMUP && ( BG_Upgrade( upgrade )->price > (short)ent->client->pers.credit ) )
-    {
-      G_TriggerMenu( ent->client->ps.clientNum, MN_H_NOFUNDS );
-      return;
-    }
-
-    //have space to carry this?
-    if( BG_Upgrade( upgrade )->slots & BG_SlotsForInventory( ent->client->ps.stats ) )
-    {
-      G_TriggerMenu( ent->client->ps.clientNum, MN_H_NOSLOTS );
-      return;
-    }
-
-    // Only humans can buy stuff
-    if( BG_Upgrade( upgrade )->team != TEAM_HUMANS )
-    {
-      SV_GameSendServerCommand( ent-g_entities, "print \"You can't buy alien items\n\"" );
-      return;
-    }
-
-    //are we /allowed/ to buy this?
-    if( !BG_Upgrade( upgrade )->purchasable )
-    {
-      SV_GameSendServerCommand( ent-g_entities, "print \"You can't buy this item\n\"" );
-      return;
-    }
-
-    //are we /allowed/ to buy this?
-    if( !BG_UpgradeAllowedInStage( upgrade, g_humanStage.integer, IS_WARMUP ) ||
-                                   !BG_UpgradeIsAllowed( upgrade, g_cheats.integer ) )
-    {
-      SV_GameSendServerCommand( ent-g_entities, "print \"You can't buy this item\n\"" );
-      return;
-    }
-
     if( upgrade == UP_JETFUEL )
     {
-      // refuel the jet pack
-      if( BG_InventoryContainsUpgrade( UP_JETPACK, ent->client->ps.stats ) &&
-          ent->client->ps.stats[ STAT_FUEL ] < JETPACK_FUEL_FULL )
-      {
-        const int usedFuel = JETPACK_FUEL_FULL -
-                                ent->client->ps.stats[ STAT_FUEL ];
-        const int costToFull = ( usedFuel * JETPACK_FULL_FUEL_PRICE ) /
-                               JETPACK_FUEL_FULL;
-        const int affordableFuel = ( ent->client->pers.credit * JETPACK_FUEL_FULL ) /
-                                   JETPACK_FULL_FUEL_PRICE;
+      const int usedFuel = JETPACK_FUEL_FULL -
+                              ent->client->ps.stats[ STAT_FUEL ];
+      const int costToFull = ( usedFuel * JETPACK_FULL_FUEL_PRICE ) /
+                             JETPACK_FUEL_FULL;
+      const int affordableFuel = ( ent->client->pers.credit * JETPACK_FUEL_FULL ) /
+                                 JETPACK_FULL_FUEL_PRICE;
 
-        if( IS_WARMUP )
-        {
-          G_AddEvent( ent, EV_JETPACK_REFUEL, 0);
-          ent->client->ps.stats[ STAT_FUEL ] = JETPACK_FUEL_FULL;
-        }
-        else if( costToFull <= ent->client->pers.credit )
-        {
-          G_AddEvent( ent, EV_JETPACK_REFUEL, 0);
-          ent->client->ps.stats[ STAT_FUEL ] = JETPACK_FUEL_FULL;
-          //subtract from funds
-          G_AddCreditToClient( ent->client, -(short)costToFull, qfalse );
-        }
-        else if( affordableFuel > 0 )
-        {
-          G_AddEvent( ent, EV_JETPACK_REFUEL, 0);
-          ent->client->ps.stats[ STAT_FUEL ] += affordableFuel;
-          //subtract from funds
-          G_AddCreditToClient( ent->client, -(short)ent->client->pers.credit,
-                               qfalse );
-        }
-        else
-          G_TriggerMenu( ent->client->ps.clientNum, MN_H_NOFUNDS );
+      if(
+        (costToFull <= ent->client->pers.credit) ||
+        (IS_WARMUP && BG_Upgrade(UP_JETFUEL)->warmupFree) || force )
+      {
+        G_AddEvent( ent, EV_JETPACK_REFUEL, 0);
+        ent->client->ps.stats[ STAT_FUEL ] = JETPACK_FUEL_FULL;
+      }
+      else
+      {
+        G_AddEvent( ent, EV_JETPACK_REFUEL, 0);
+        ent->client->ps.stats[ STAT_FUEL ] += affordableFuel;
       }
     }
     else
     {
       if( upgrade == UP_AMMO )
       {
-        //bursts must complete
-        if( ent->client->pmext.burstRoundsToFire[ 2 ] ||
-            ent->client->pmext.burstRoundsToFire[ 1 ] ||
-            ent->client->pmext.burstRoundsToFire[ 0 ] )
-          return;
+        G_GiveClientMaxAmmo( ent, energyOnly );
 
-        if( ent->client->ps.stats[ STAT_WEAPON ] == WP_LIGHTNING &&
-        ( ent->client->ps.misc[ MISC_MISC ] > LIGHTNING_BOLT_CHARGE_TIME_MIN ||
-          ( ent->client->ps.stats[ STAT_STATE ] & SS_CHARGING ) ) )
-          return;
-
-         G_GiveClientMaxAmmo( ent, energyOnly );
-
-         ent->client->ps.pm_flags |= PMF_WEAPON_RELOAD;
+        ent->client->ps.pm_flags |= PMF_WEAPON_RELOAD;
       }
       else
       {
@@ -3000,21 +3771,26 @@ void Cmd_Buy_f( gentity_t *ent )
         {
           vec3_t newOrigin;
 
-          if( !G_RoomForClassChange( ent, PCL_HUMAN_BSUIT, newOrigin ) )
-          {
-            G_TriggerMenu( ent->client->ps.clientNum, MN_H_NOROOMBSUITON );
-            return;
-          }
+          G_RoomForClassChange( ent, PCL_HUMAN_BSUIT, newOrigin );
           VectorCopy( newOrigin, ent->client->ps.origin );
           ent->client->ps.stats[ STAT_CLASS ] = PCL_HUMAN_BSUIT;
           ent->client->pers.classSelection = PCL_HUMAN_BSUIT;
           ent->client->ps.eFlags ^= EF_TELEPORT_BIT;
-          ent->client->ps.misc[ MISC_ARMOR ] = BG_HP2SU( 1 );
-          ent->client->ps.stats[ STAT_FLAGS ] |= SFL_ARMOR_GENERATE;
-          ent->client->lastArmorGenTime = level.time;
-          ent->client->armorToGen = BSUIT_MAX_ARMOR - ent->client->ps.misc[ MISC_ARMOR ];
-          ent->client->armorGenIncrementTime = level.time +
-            ( MEDKIT_STARTUP_TIME / MEDKIT_STARTUP_SPEED );
+
+          if(force) {
+            ent->client->ps.misc[ MISC_ARMOR ] = BSUIT_MAX_ARMOR;
+            ent->client->ps.stats[ STAT_FLAGS ] &= ~SFL_ARMOR_GENERATE;
+            ent->client->lastArmorGenTime = 0;
+            ent->client->armorToGen = 0;
+            ent->client->armorGenIncrementTime = 0;
+          } else {
+            ent->client->ps.misc[ MISC_ARMOR ] = BG_HP2SU( 1 );
+            ent->client->ps.stats[ STAT_FLAGS ] |= SFL_ARMOR_GENERATE;
+            ent->client->lastArmorGenTime = level.time;
+            ent->client->armorToGen = BSUIT_MAX_ARMOR - ent->client->ps.misc[ MISC_ARMOR ];
+            ent->client->armorGenIncrementTime = level.time +
+              ( MEDKIT_STARTUP_TIME / MEDKIT_STARTUP_SPEED );
+          }
         }
         else if( upgrade == UP_JETPACK )
          ent->client->ps.stats[ STAT_FUEL ] = JETPACK_FUEL_FULL;
@@ -3034,22 +3810,25 @@ void Cmd_Buy_f( gentity_t *ent )
         //add to inventory
         BG_AddUpgradeToInventory( upgrade, ent->client->ps.stats );
       }
+    }
 
-      if( upgrade == UP_BATTPACK ||
-          upgrade == UP_BATTLESUIT )
-        G_GiveClientMaxAmmo( ent, qtrue );
+    if( upgrade == UP_BATTPACK ||
+        upgrade == UP_BATTLESUIT )
+      G_GiveClientMaxAmmo( ent, qtrue );
 
-      if( !BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->usesEnergy &&
+    if( !BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->usesEnergy &&
           !BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->infiniteAmmo &&
           BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->ammoPurchasable &&
           !BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->roundPrice &&
-          BG_InventoryContainsUpgrade( UP_BATTLESUIT, ent->client->ps.stats ) )
-        ent->client->ps.clips = ( 2 * BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->maxClips ) + 1;
-
-      //subtract from funds
-      G_AddCreditToClient( ent->client, -(short)BG_Upgrade( upgrade )->price,
-                           qfalse );
+          BG_InventoryContainsUpgrade( UP_BATTLESUIT, ent->client->ps.stats ) ) {
+      ent->client->ps.clips = ( 2 * BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->maxClips ) + 1;
+      if(ent->client->ps.pm_flags & PMF_WEAPON_RELOAD) {
+        ent->client->ps.clips += 1;
+      }
     }
+
+    //subtract from funds
+    G_AddCreditToClient( ent->client, -(short)price, qfalse );
 
     //initialize damage credits
     for( i = 0; i < MAX_CLIENTS; i++ )
@@ -3061,271 +3840,83 @@ void Cmd_Buy_f( gentity_t *ent )
       G_Entity_id_set( &ent->creditsUpgradeDeffenses[ upgrade ][ i ].id, &g_entities[ i ] );
     }
   }
-  else
-  {
-    G_TriggerMenu( ent->client->ps.clientNum, MN_H_UNKNOWNITEM );
-    return;
-  }
 
   //update ClientInfo
   ClientUserinfoChanged( ent->client->ps.clientNum, qfalse );
   ent->client->pers.infoChangeTime = level.time;
 }
 
+/*
+=================
+G_GiveItemAfterCheck
+=================
+*/
+qboolean G_GiveItemAfterCheck(gentity_t *ent, const char *itemName, qboolean force) {
+  int  price;
+  int  slotsFreeFromAutoSell, upgradesToAutoSell;
+  int  fundsFromAutoSell[UP_NUM_UPGRADES + 1];
+  int  totafundsFromAutoSell = 0;
+  int  i;
+  weapon_t weaponToAutoSell;
+  sellErr_t autoSellErrors[UP_NUM_UPGRADES + 1];
+  buyErr_t buyErr;
+  qboolean  energyOnly = qfalse;
+
+   //attempt to automatically sell the current weapon
+   slotsFreeFromAutoSell = G_CanAutoSell( ent, itemName, &weaponToAutoSell,
+                                          &upgradesToAutoSell, fundsFromAutoSell,
+                                          ARRAY_LEN( fundsFromAutoSell ),
+                                          autoSellErrors, force );
+
+   for( i = 0; i < ARRAY_LEN( fundsFromAutoSell ); i++ )
+   {
+     if( autoSellErrors[i] != ERR_SELL_NONE ) {
+        G_SellErrHandling( ent, autoSellErrors[i] );
+     }
+
+     totafundsFromAutoSell += fundsFromAutoSell[ i ];
+   }
+
+   buyErr = G_CanBuy( ent, itemName, &price, &energyOnly, slotsFreeFromAutoSell,
+                      totafundsFromAutoSell, force );
+
+   if( buyErr != ERR_BUY_NONE )
+   {
+     G_BuyErrHandling( ent, buyErr );
+     return qfalse;
+   }
+
+   if( weaponToAutoSell != WP_NONE )
+     G_TakeItem( ent, BG_Weapon( weaponToAutoSell )->name,
+                 fundsFromAutoSell[ UP_NUM_UPGRADES ] );
+
+   if( upgradesToAutoSell )
+   {
+     for( i = 0; i < UP_NUM_UPGRADES; i++ )
+     {
+       if( !( upgradesToAutoSell & ( 1 << i ) ) )
+         continue;
+
+       G_TakeItem( ent, BG_Upgrade( i )->name, fundsFromAutoSell[ i ] );
+     }
+   }
+
+   G_GiveItem( ent, itemName, price, energyOnly, qfalse );
+   return qtrue;
+}
 
 /*
 =================
-Cmd_Sell_f
+Cmd_Buy_f
 =================
 */
-void Cmd_Sell_f( gentity_t *ent )
+void Cmd_Buy_f( gentity_t *ent )
 {
-  char      s[ MAX_TOKEN_CHARS ];
-  const int usedFuel = JETPACK_FUEL_FULL -
-                          ent->client->ps.stats[ STAT_FUEL ];
-  int       i;
-  weapon_t  weapon;
-  upgrade_t upgrade;
-
-  if( ent->client->ps.eFlags & EF_OCCUPYING )
-  {
-    SV_GameSendServerCommand( ent-g_entities, "print \"You can't sell while occupying another structure\n\"" );
-    return;
-  }
+  char s[ MAX_TOKEN_CHARS ];
 
   Cmd_ArgvBuffer( 1, s, sizeof( s ) );
 
-  //no armoury nearby
-  if( !G_BuildableRange( ent->client->ps.origin, 100, BA_H_ARMOURY ) )
-  {
-    G_TriggerMenu( ent->client->ps.clientNum, MN_H_NOARMOURYHERE );
-    return;
-  }
-
-  if( !Q_stricmpn( s, "weapon", 6 ) )
-    weapon = ent->client->ps.stats[ STAT_WEAPON ];
-  else
-    weapon = BG_WeaponByName( s )->number;
-
-  upgrade = BG_UpgradeByName( s )->number;
-
-  if( weapon != WP_NONE )
-  {
-    weapon_t selected = BG_GetPlayerWeapon( &ent->client->ps );
-
-    if( !BG_PlayerCanChangeWeapon( &ent->client->ps, &ent->client->pmext ) )
-      return;
-
-    //are we /allowed/ to sell this?
-    if( !BG_Weapon( weapon )->purchasable )
-    {
-      SV_GameSendServerCommand( ent-g_entities, "print \"You can't sell this weapon\n\"" );
-      return;
-    }
-
-    //remove weapon if carried
-    if( BG_InventoryContainsWeapon( weapon, ent->client->ps.stats ) )
-    {
-      //guard against selling the HBUILD weapons exploit
-      if( weapon == WP_HBUILD && ent->client->ps.misc[ MISC_MISC ] > 0 )
-      {
-        G_TriggerMenu( ent->client->ps.clientNum, MN_H_ARMOURYBUILDTIMER );
-        return;
-      }
-
-      ent->client->ps.stats[ STAT_WEAPON ] = WP_NONE;
-      // Cancel ghost buildables
-      ent->client->ps.stats[ STAT_BUILDABLE ] = BA_NONE;
-
-      //add to funds
-      G_AddCreditToClient( ent->client, (short)BG_Weapon( weapon )->price, qfalse );
-      if( BG_Weapon( weapon )->roundPrice && !BG_Weapon( weapon )->usesEnergy &&
-          ( BG_Weapon( weapon )->ammoPurchasable ||
-            ( ent->client->ps.ammo == BG_Weapon( weapon )->maxAmmo &&
-              ent->client->ps.clips == BG_Weapon( weapon )->maxClips ) ) )
-      {
-        int totalAmmo = ent->client->ps.ammo +
-                        ( ent->client->ps.clips *
-                          BG_Weapon( weapon )->maxAmmo );
-
-        G_AddCreditToClient( ent->client,
-                             (short)( totalAmmo *
-                                      BG_Weapon( weapon )->roundPrice),
-                             qfalse );
-      }
-    }
-
-    //if we have this weapon selected, force a new selection
-    if( weapon == selected )
-      G_ForceWeaponChange( ent, WP_NONE );
-  }
-  else if( upgrade != UP_NONE )
-  {
-    //are we /allowed/ to sell this?
-    if( !BG_Upgrade( upgrade )->purchasable ||
-        !BG_Upgrade( upgrade )->sellable )
-    {
-      SV_GameSendServerCommand( ent-g_entities, "print \"You can't sell this item\n\"" );
-      return;
-    }
-    //remove upgrade if carried
-    if( BG_InventoryContainsUpgrade( upgrade, ent->client->ps.stats ) )
-    {
-
-      // shouldn't really need to test for this, but just to be safe
-      if( upgrade == UP_BATTLESUIT )
-      {
-        vec3_t newOrigin;
-
-        if( !G_RoomForClassChange( ent, PCL_HUMAN, newOrigin ) )
-        {
-          G_TriggerMenu( ent->client->ps.clientNum, MN_H_NOROOMBSUITOFF );
-          return;
-        }
-        VectorCopy( newOrigin, ent->client->ps.origin );
-        ent->client->ps.stats[ STAT_CLASS ] = PCL_HUMAN;
-        ent->client->pers.classSelection = PCL_HUMAN;
-        ent->client->ps.eFlags ^= EF_TELEPORT_BIT;
-      }
-
-      //Remove from inventory
-      BG_RemoveUpgradeFromInventory( upgrade, ent->client->ps.stats );
-
-      if( upgrade == UP_BATTPACK ||
-          upgrade == UP_BATTLESUIT )
-        G_GiveClientMaxAmmo( ent, qtrue );
-
-      if( !BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->usesEnergy &&
-          !BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->infiniteAmmo &&
-          BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->ammoPurchasable &&
-          !BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->roundPrice &&
-          upgrade == UP_BATTLESUIT &&
-          ent->client->ps.clips > BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->maxClips )
-        ent->client->ps.clips = BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->maxClips;
-
-      //add to funds
-      if( !IS_WARMUP && upgrade == UP_JETPACK && usedFuel )
-      {
-        const int costToFull = ( usedFuel * JETPACK_FULL_FUEL_PRICE ) /
-                               JETPACK_FUEL_FULL;
-
-        // reduce the amount of credits returned from selling a jet that isn't full
-        G_AddCreditToClient( ent->client,
-                            (short)( BG_Upgrade( upgrade )->price - costToFull ),
-                            qfalse );
-      } else if( upgrade == UP_BIOKIT )
-      {
-        short value = (short)( BG_Upgrade( upgrade )->price *
-                               ( ( (float)(ent->healthReserve) ) /
-                                 ( (float)(BIOKIT_HEALTH_RESERVE) ) ) );
-        ent->client->ps.misc[ MISC_MAX_HEALTH ] =
-              BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->health;
-        G_ChangeHealth( ent, ent, ent->health,
-                        (HLTHF_SET_TO_CHANGE|
-                         HLTHF_INITIAL_MAX_CAP) );
-        ent->client->bioKitHealthToRestore = 0;
-        ent->client->bioKitIncrementTime = 0;
-        ent->healthReserve = 0;
-        G_AddCreditToClient( ent->client, value, qfalse );
-      } else if( upgrade == UP_BATTLESUIT )
-      {
-        if( !IS_WARMUP &&
-            ent->client->ps.misc[ MISC_ARMOR ] < BSUIT_MAX_ARMOR )
-        {
-          G_AddCreditToClient( ent->client, (short)( BSUIT_PRICE_USED ),
-                               qfalse );
-          // Give credits for the damaged part of the battlesuit
-          G_RewardAttackers( ent, UP_BATTLESUIT );
-        } else
-          G_AddCreditToClient( ent->client, (short)BG_Upgrade( UP_BATTLESUIT )->price,
-                               qfalse );
-
-        ent->client->ps.misc[ MISC_ARMOR ] = 0;
-        ent->client->ps.stats[ STAT_FLAGS ] &= ~SFL_ARMOR_GENERATE;
-        ent->client->lastArmorGenTime = 0;
-        ent->client->armorToGen = 0;
-        ent->client->armorGenIncrementTime = 0;
-      } else
-        G_AddCreditToClient( ent->client, (short)BG_Upgrade( upgrade )->price,
-                             qfalse );
-    }
-  }
-  else if( !Q_stricmp( s, "upgrades" ) )
-  {
-    const int statMaxHealth = ent->client->ps.misc[ MISC_ARMOR ];
-
-    for( i = UP_NONE + 1; i < UP_NUM_UPGRADES; i++ )
-    {
-      //remove upgrade if carried
-      if( BG_InventoryContainsUpgrade( i, ent->client->ps.stats ) &&
-          BG_Upgrade( i )->purchasable )
-      {
-        if( i == UP_BATTLESUIT )
-        {
-          vec3_t newOrigin;
-
-          if( !G_RoomForClassChange( ent, PCL_HUMAN, newOrigin ) )
-          {
-            G_TriggerMenu( ent->client->ps.clientNum, MN_H_NOROOMBSUITOFF );
-            continue;
-          }
-          VectorCopy( newOrigin, ent->client->ps.origin );
-          ent->client->ps.stats[ STAT_CLASS ] = PCL_HUMAN;
-          ent->client->pers.classSelection = PCL_HUMAN;
-          ent->client->ps.eFlags ^= EF_TELEPORT_BIT;
-          ent->client->ps.misc[ MISC_ARMOR ] = 0;
-        }
-
-        BG_RemoveUpgradeFromInventory( i, ent->client->ps.stats );
-
-        if( i == UP_BATTPACK ||
-            i == UP_BATTLESUIT )
-          G_GiveClientMaxAmmo( ent, qtrue );
-
-        if( !BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->usesEnergy &&
-            !BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->infiniteAmmo &&
-            BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->ammoPurchasable &&
-            !BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->roundPrice &&
-            upgrade == UP_BATTLESUIT &&
-            ent->client->ps.clips > BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->maxClips )
-          ent->client->ps.clips = BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->maxClips;
-
-        if( IS_WARMUP )
-          continue;
-
-        //add to funds
-        if( i == UP_JETPACK && usedFuel )
-        {
-          const int costToFull = ( usedFuel * JETPACK_FULL_FUEL_PRICE ) /
-                                 JETPACK_FUEL_FULL;
-
-          // reduce the amount of credits returned from selling a jet that isn't full
-          G_AddCreditToClient( ent->client,
-                              (short)( BG_Upgrade( i )->price - costToFull ),
-                              qfalse );
-        } else if( i == UP_BATTLESUIT &&
-                   statMaxHealth < BSUIT_MAX_ARMOR )
-        {
-          G_AddCreditToClient( ent->client, (short)( BSUIT_PRICE_USED ),
-                               qfalse );
-
-          // Give credits for the damaged part of the battlesuit
-          G_RewardAttackers( ent, UP_BATTLESUIT );
-        } else
-          G_AddCreditToClient( ent->client, (short)BG_Upgrade( i )->price,
-                               qfalse );
-      }
-    }
-  }
-  else
-  {
-    G_TriggerMenu( ent->client->ps.clientNum, MN_H_UNKNOWNITEM );
-    return;
-  }
-
-  //update ClientInfo
-  ClientUserinfoChanged( ent->client->ps.clientNum, qfalse );
-  ent->client->pers.infoChangeTime = level.time;
+  G_GiveItemAfterCheck(ent, s, qfalse);
 }
 
 

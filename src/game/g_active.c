@@ -335,8 +335,18 @@ void ClientImpacts( pmove_t *pm, trace_t *trace,
     ClientShove( ent, other );
 
   // touch triggers
-  if( other->touch )
-    other->touch( other, ent, trace );
+  if( other->touch ) {
+    if(g_debugAMP.integer) {
+      char *s = va(
+        "touched by #%i (%s^7)",
+        (int)(ent-g_entities),
+        ent->client->pers.netname);
+      G_LoggedActivation(other, ent, NULL, trace, s, LOG_ACT_TOUCH);
+    }
+    else {
+      other->touch(other, ent, trace);
+    }
+  }
 }
 
 /*
@@ -367,6 +377,8 @@ void  G_TouchTriggers( gentity_t *ent )
   // dead clients don't activate triggers!
   if( ent->health <= 0 )
     return;
+
+  ent->activation.usable_map_trigger = ENTITYNUM_NONE;
 
   BG_ClassBoundingBox( ent->client->ps.stats[ STAT_CLASS ],
                        pmins, pmaxs, NULL, NULL, NULL );
@@ -403,8 +415,18 @@ void  G_TouchTriggers( gentity_t *ent )
 
     memset( &trace, 0, sizeof( trace ) );
 
-    if( hit->touch )
-      hit->touch( hit, ent, &trace );
+    if( hit->touch ) {
+      if( g_debugAMP.integer )
+      {
+        char *s = va(
+          "triggered by #%i (%s^7)",
+          (int)(ent-g_entities),
+          ent->client->pers.netname);
+        G_LoggedActivation(hit, ent, NULL, &trace, s, LOG_ACT_TOUCH);
+      }
+      else
+        hit->touch( hit, ent, &trace );
+    }
   }
 }
 
@@ -722,7 +744,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
 
     client->time100 -= 100;
 
-    if( !IS_WARMUP && g_freeFundPeriod.integer > 0 )
+    if( g_freeFundPeriod.integer > 0 )
     {
       // Give clients some credit periodically
       // (if not in warmup)
@@ -1455,7 +1477,11 @@ static void G_FindActivationEnt( gentity_t *ent )
 
   traceEnt = &g_entities[ trace.entityNum ];
 
-  if( G_CanActivateEntity( client, traceEnt ) )
+  if( ent->activation.usable_map_trigger != ENTITYNUM_NONE ) {
+    client->ps.persistant[ PERS_ACT_ENT ] = ent->activation.usable_map_trigger;
+    ent->occupation.occupied = &g_entities[ent->activation.usable_map_trigger];
+  }
+  else if( G_CanActivateEntity( client, traceEnt ) )
   {
     client->ps.persistant[ PERS_ACT_ENT ] = traceEnt->s.number;
     ent->occupation.occupied = traceEnt;
@@ -1607,27 +1633,49 @@ qboolean G_WillActivateEntity( gentity_t *actEnt, gentity_t *activator )
 
 /*
 =====================
+_G_LoggedActivateEnt
+
+A wrapper for optionally logging activation details
+=====================
+*/
+static qboolean _G_LoggedActivateEnt(gentity_t *actEnt, gentity_t *activator) {
+  if( g_debugAMP.integer ) {
+    char *s;
+    s = va(
+      "activated by #%i (%s^7)", 
+      (int)( activator-g_entities ),
+      activator->client->pers.netname);
+    return G_LoggedActivation(
+      actEnt, activator, activator, NULL, s, LOG_ACT_ACTIVATE);
+  }
+
+  return actEnt->activation.activate( actEnt, activator);
+}
+
+/*
+=====================
 G_ActivateEntity
 
 This is a general wrapper for activation.(*activate)()
 =====================
 */
-void G_ActivateEntity( gentity_t *actEnt, gentity_t *activator )
-{
-  if( !activator->client )
+void G_ActivateEntity(gentity_t *actEnt, gentity_t *activator) {
+  if(!activator->client) {
     return;
+  }
 
-  if( G_WillActivateEntity( actEnt, activator ) )
-  {
-    if( actEnt->activation.activate( actEnt, activator ) &&
-        ( actEnt->activation.flags & ACTF_OCCUPY ) )
-    {
+  if(G_WillActivateEntity(actEnt, activator)) {
+    if(
+      _G_LoggedActivateEnt(actEnt, activator) &&
+      (actEnt->activation.flags & ACTF_OCCUPY)) {
       //occupy the activation entity
-      G_OccupyEnt( actEnt );
+      G_OccupyEnt(actEnt);
     }
-  } else if( activator->activation.menuMsg )
-    G_TriggerMenu( activator->client->ps.clientNum,
-                   activator->activation.menuMsg );
+  } else if(activator->activation.menuMsg) {
+    G_TriggerMenu(
+      activator->client->ps.clientNum,
+      activator->activation.menuMsg);
+  }
 }
 
 /*
@@ -1912,12 +1960,12 @@ void G_OccupantThink( gentity_t *occupant )
                G_TriggerMenu( occupant->client->ps.clientNum,
                               occupant->activation.menuMsg );
             }
-            else if( !occupied->activation.activate( occupied, occupant ) )
+            else if(!_G_LoggedActivateEnt(occupied, occupant))
               G_UnoccupyEnt( occupied, occupant, occupant, qtrue );
           } else if( G_CanActivateEntity( occupant->client, occupied ) &&
                      G_WillActivateEntity( occupied, occupant ) )
           {
-            if ( occupied->activation.activate( occupied, occupant ) )
+            if(_G_LoggedActivateEnt(occupied, occupant))
             {
               //occupy the activation entity
               G_OccupyEnt( occupied );
@@ -2583,8 +2631,11 @@ void ClientThink_real( gentity_t *ent )
 
     if( client->ps.eFlags & EF_OCCUPYING )
       G_UnoccupyEnt( actEnt, ent, ent, qfalse );
-    else if( client->ps.persistant[ PERS_ACT_ENT ] != ENTITYNUM_NONE )
-      G_ActivateEntity( actEnt, ent );
+    else if( client->ps.persistant[ PERS_ACT_ENT ] != ENTITYNUM_NONE ) {
+      if(client->ps.persistant[ PERS_ACT_ENT ] != ent->activation.usable_map_trigger) {
+        G_ActivateEntity( actEnt, ent );
+      }
+    }
     else if( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
     {
       if( BG_AlienCanEvolve( client->ps.stats[ STAT_CLASS ],

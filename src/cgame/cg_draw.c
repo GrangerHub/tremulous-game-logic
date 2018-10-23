@@ -320,7 +320,7 @@ static void CG_DrawPlayerCreditsValue( rectDef_t *rect, vec4_t color, qboolean p
       cent->currentState.weapon == WP_ABUILD2 ) && ps->misc[ MISC_MISC ] )
     return;
 
-  value = cgs.warmup ? HUMAN_MAX_CREDITS : ps->persistant[ PERS_CREDIT ];
+  value = ps->persistant[ PERS_CREDIT ];
   if( value > -1 )
   {
     if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_ALIENS )
@@ -333,10 +333,7 @@ static void CG_DrawPlayerCreditsValue( rectDef_t *rect, vec4_t color, qboolean p
         color[ 3 ] = 0.0f;
       }
 
-      if ( cgs.warmup )
-        value = ALIEN_MAX_FRAGS;
-      else
-        value /= ALIEN_CREDITS_PER_KILL;
+      value /= ALIEN_CREDITS_PER_KILL;
     }
 
     trap_R_SetColor( color );
