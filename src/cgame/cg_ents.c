@@ -937,6 +937,16 @@ static int CG_Get_Foundation_Ent_Num(int ent_num) {
     return cg_entities[groundEntityNum].currentState.otherEntityNum;
   }
 
+  if(groundEntityNum < 0 || groundEntityNum >= MAX_GENTITIES) {
+    if(cg_debugPVS.integer) {
+      CG_Printf(
+        "^1CG_Get_Foundation_Ent_Num: groundEntityNum %d for entity num %d is invalid^7\n",
+        groundEntityNum, ent_num);
+    }
+
+    return ENTITYNUM_NONE;
+  }
+
   //check the ground entity to see if it is on a foundation entity
   return CG_Get_Foundation_Ent_Num(groundEntityNum);
 }
