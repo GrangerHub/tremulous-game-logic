@@ -2471,6 +2471,8 @@ static void UI_LoadHumanArmouryBuys( void )
   }
 
   uiInfo.humanArmouryBuyCount = 0;
+  uiInfo.humanArmouryBuyWeaponCount = 0;
+  uiInfo.humanArmouryBuyUpgradesCount = 0;
 
   for( i = WP_NONE + 1; i < WP_NUM_WEAPONS; i++ )
   {
@@ -2489,6 +2491,7 @@ static void UI_LoadHumanArmouryBuys( void )
       j++;
 
       uiInfo.humanArmouryBuyCount++;
+      uiInfo.humanArmouryBuyWeaponCount++;
     }
   }
 
@@ -2513,6 +2516,7 @@ static void UI_LoadHumanArmouryBuys( void )
       j++;
 
       uiInfo.humanArmouryBuyCount++;
+      uiInfo.humanArmouryBuyUpgradesCount++;
     }
   }
 }
@@ -3586,8 +3590,10 @@ static int UI_FeederCount( int feederID )
     return uiInfo.humanItemCount;
   else if( feederID == FEEDER_TREMALIENCLASSES )
     return uiInfo.alienClassCount;
-  else if( feederID == FEEDER_TREMHUMANARMOURYBUY )
-    return uiInfo.humanArmouryBuyCount;
+  else if( feederID == FEEDER_TREMHUMANARMOURYBUYWEAPON )
+    return uiInfo.humanArmouryBuyWeaponCount;
+  else if( feederID == FEEDER_TREMHUMANARMOURYBUYUPGRADES )
+    return uiInfo.humanArmouryBuyUpgradesCount;
   else if( feederID == FEEDER_TREMHUMANARMOURYSELL )
     return uiInfo.humanArmourySellCount;
   else if( feederID == FEEDER_TREMALIENUPGRADE )
@@ -3846,10 +3852,15 @@ static const char *UI_FeederItemText( int feederID, int index, int column, qhand
     if( index >= 0 && index < uiInfo.alienClassCount )
       return uiInfo.alienClassList[ index ].text;
   }
-  else if( feederID == FEEDER_TREMHUMANARMOURYBUY )
+  else if( feederID == FEEDER_TREMHUMANARMOURYBUYWEAPON )
   {
-    if( index >= 0 && index < uiInfo.humanArmouryBuyCount )
+    if( index >= 0 && index < uiInfo.humanArmouryBuyWeaponCount )
       return uiInfo.humanArmouryBuyList[ index ].text;
+  }
+  else if( feederID == FEEDER_TREMHUMANARMOURYBUYUPGRADES )
+  {
+    if( index >= 0 && index < uiInfo.humanArmouryBuyUpgradesCount )
+      return uiInfo.humanArmouryBuyList[ index + uiInfo.humanArmouryBuyWeaponCount ].text;
   }
   else if( feederID == FEEDER_TREMHUMANARMOURYSELL )
   {
@@ -4015,8 +4026,10 @@ static void UI_FeederSelection( int feederID, int index )
     uiInfo.humanItemIndex = index;
   else if( feederID == FEEDER_TREMALIENCLASSES )
     uiInfo.alienClassIndex = index;
-  else if( feederID == FEEDER_TREMHUMANARMOURYBUY )
+  else if( feederID == FEEDER_TREMHUMANARMOURYBUYWEAPON )
     uiInfo.humanArmouryBuyIndex = index;
+  else if( feederID == FEEDER_TREMHUMANARMOURYBUYUPGRADES )
+    uiInfo.humanArmouryBuyIndex = index + uiInfo.humanArmouryBuyWeaponCount;
   else if( feederID == FEEDER_TREMHUMANARMOURYSELL )
     uiInfo.humanArmourySellIndex = index;
   else if( feederID == FEEDER_TREMALIENUPGRADE )
