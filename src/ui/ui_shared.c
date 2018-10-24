@@ -2779,6 +2779,8 @@ void Item_ListBox_MouseEnter( itemDef_t *item, float x, float y )
     else
       listPtr->cursorPos = -1;
   }
+
+  DC->feederSelection( item->feederID, item->cursorPos );
 }
 
 void Item_MouseEnter( itemDef_t *item, float x, float y )
