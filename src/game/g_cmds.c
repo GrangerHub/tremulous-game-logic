@@ -3907,7 +3907,7 @@ qboolean G_GiveItemAfterCheck(gentity_t *ent, const char *itemName, qboolean for
      }
    }
 
-   G_GiveItem( ent, itemName, price, energyOnly, qfalse );
+   G_GiveItem( ent, itemName, price, energyOnly, force );
    return qtrue;
 }
 
