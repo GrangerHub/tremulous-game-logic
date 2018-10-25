@@ -3393,6 +3393,28 @@ int G_CanAutoSell( gentity_t *ent, const char *itemToBuyName,
     }
   }
 
+  //if attempting to buy a non-energy weapon, there is no need to keep a
+  //battery pack, however, if for some reason a battery pack can't be sold,
+  //don't make its sale necessary.
+  if(
+    !force && weaponToBuy != WP_NONE && !BG_Weapon(weaponToBuy)->usesEnergy &&
+    BG_InventoryContainsUpgrade(UP_BATTPACK, ent->client->ps.stats) &&
+    !(upgradesToSellTemp & (1 << UP_BATTPACK))) {
+    int value;
+
+    autoSellErrors[ UP_BATTPACK ] = G_CanSell( ent,
+                                     BG_Upgrade( UP_BATTPACK )->name,
+                                     &value, force );
+
+    if( autoSellErrors[ UP_BATTPACK ] == ERR_SELL_NONE )
+    {
+      upgradesToSellTemp |= ( 1 << UP_BATTPACK );
+      currentValue[UP_BATTPACK] += value;
+      slotsCanFree |= BG_Upgrade( UP_BATTPACK )->slots;
+      slotsToCheck &= ~BG_Upgrade( UP_BATTPACK )->slots;
+    }
+  }
+
   //check if all blocked slots necessary for the purchase can be freed
   if( slotsToCheck )
     return 0;
@@ -3482,7 +3504,7 @@ buyErr_t G_CanBuy( gentity_t *ent, const char *itemName, int *price,
         return ERR_BUY_NOT_ALLOWED;
 
       //can afford this?
-      if( *price > (short)ent->client->pers.credit )
+      if( *price > (short)(ent->client->pers.credit + fundsFromAutoSell) )
         return ERR_BUY_NO_FUNDS;
 
       // In some instances, weapons can't be changed
@@ -3515,7 +3537,7 @@ buyErr_t G_CanBuy( gentity_t *ent, const char *itemName, int *price,
       return ERR_BUY_ITEM_HELD;
 
     //can afford this?
-    if( *price > (short)ent->client->pers.credit && !force )
+    if( *price > (short)(ent->client->pers.credit + fundsFromAutoSell) && !force )
       return ERR_BUY_NO_FUNDS;
 
     //have space to carry this?
