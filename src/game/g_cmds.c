@@ -3173,8 +3173,12 @@ void G_TakeItem( gentity_t *ent, const char *itemName, const int value )
 
       if( upgrade == UP_BATTPACK ||
           upgrade == UP_BATTLESUIT ) {
+        int rounds, clips, price;
+
+        if(G_CanGiveClientMaxAmmo(ent, qtrue, &rounds, &clips, &price)) {
+          ent->client->ps.pm_flags |= PMF_WEAPON_RELOAD;
+        }
         G_GiveClientMaxAmmo( ent, qtrue );
-        ent->client->ps.pm_flags |= PMF_WEAPON_RELOAD;
       }
 
       //add to funds
@@ -3227,8 +3231,12 @@ void G_TakeItem( gentity_t *ent, const char *itemName, const int value )
       BG_RemoveUpgradeFromInventory( i, ent->client->ps.stats );
 
       if( i == UP_BATTPACK || i == UP_BATTLESUIT ) {
+        int rounds, clips, price;
+
+        if(G_CanGiveClientMaxAmmo(ent, qtrue, &rounds, &clips, &price)) {
+          ent->client->ps.pm_flags |= PMF_WEAPON_RELOAD;
+        }
         G_GiveClientMaxAmmo( ent, qtrue );
-        ent->client->ps.pm_flags |= PMF_WEAPON_RELOAD;
       }
 
       //add to funds
@@ -3840,8 +3848,12 @@ void G_GiveItem( gentity_t *ent, const char *itemName, const int price,
 
     if( upgrade == UP_BATTPACK ||
         upgrade == UP_BATTLESUIT ) {
+      int rounds, clips, price;
+
+      if(G_CanGiveClientMaxAmmo(ent, qtrue, &rounds, &clips, &price)) {
+        ent->client->ps.pm_flags |= PMF_WEAPON_RELOAD;
+      }
       G_GiveClientMaxAmmo( ent, qtrue );
-      ent->client->ps.pm_flags |= PMF_WEAPON_RELOAD;
     }
 
     if( !BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->usesEnergy &&
