@@ -296,7 +296,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define SPITFIRE_HEALTH               AHM(165000)
 #define SPITFIRE_MIN_HEALTH           (0.3f * SPITFIRE_HEALTH)
 #define SPITFIRE_REGEN                (0.03f * SPITFIRE_HEALTH)
-#define SPITFIRE_COST                 3
+#define SPITFIRE_COST                 2
 
 /*
  * ALIEN buildables
