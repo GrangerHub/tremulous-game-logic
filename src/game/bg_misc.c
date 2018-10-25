@@ -5881,9 +5881,9 @@ static const upgradeAttributes_t bg_upgrades[ ] =
   },
   {
     UP_BIOKIT,              //int   upgradeNum;
-    qfalse,                 //qboolean enabled;
+    qtrue,                  //qboolean enabled;
     BIOKIT_PRICE,           //int   price;
-    qtrue,                  //qboolean warmupFree;
+    qfalse,                 //qboolean warmupFree;
     ( 1 << S2 )|( 1 << S2 )|( 1 << S3 ),//int  stages
     SLOT_NONE,              //int   slots;
     "biokit",               //char  *upgradeName;
