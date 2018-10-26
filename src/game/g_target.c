@@ -593,26 +593,29 @@ void Use_Target_force_class(gentity_t *ent, gentity_t *other, gentity_t *activat
 
   if( activator && activator->client &&
       activator->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
-      (G_RoomForClassChange(activator, class, infestOrigin)) &&
-      (activator->client->ps.stats[STAT_CLASS] != class)) {
+      (G_RoomForClassChange(activator, class, infestOrigin))) {
+    activator->client->ps.stats[STAT_FLAGS] |= SFL_CLASS_FORCED;
+
     if(class == PCL_NONE) {
       SV_GameSendServerCommand(-1 , "print \"Unknown class (target_force_class)\n\"");
       return;
     }
-    clientNum = activator->client - level.clients;
-    if( activator->client->ps.stats[ STAT_STATE ] & SS_WALLCLIMBING )
-      activator->client->ps.stats[ STAT_STATE ] &= ~SS_WALLCLIMBING;
 
-    activator->client->pers.evolveHealthFraction = (float)activator->client->ps.misc[ MISC_HEALTH ] /
-                                                   (float)BG_Class( activator->client->pers.classSelection )->health;
+    if(activator->client->ps.stats[STAT_CLASS] != class) {
+      clientNum = activator->client - level.clients;
+      if( activator->client->ps.stats[ STAT_STATE ] & SS_WALLCLIMBING )
+        activator->client->ps.stats[ STAT_STATE ] &= ~SS_WALLCLIMBING;
 
-    G_Evolve( activator, class, 0, infestOrigin, qtrue );
+      G_Evolve( activator, class, 0, infestOrigin, qtrue );
 
-    ent->activator = activator;
-    G_UseTargets( ent, ent->activator );
-  }
-  else
+      ent->activator = activator;
+      G_UseTargets( ent, ent->activator );
+    } else {
+      return;
+    }
+  } else {
     return;
+  }
 }
 
 void SP_target_force_class( gentity_t *ent ) {
