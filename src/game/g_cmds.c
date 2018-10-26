@@ -2508,7 +2508,7 @@ void G_Evolve( gentity_t *ent, class_t newClass,
     ent->timestamp = ent->client->pers.barbRegenTime;
   }
 
-  if( !g_cheats.integer )
+  if( !g_cheats.integer && !force )
   {
     int evolvePeriod = MIN_EVOLVE_PERIOD;
 
