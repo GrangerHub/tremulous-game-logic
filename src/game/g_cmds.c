@@ -2354,7 +2354,7 @@ given also the cost and infestOrigin.
 =================
 */
 void G_Evolve( gentity_t *ent, class_t newClass,
-               int cost, vec3_t infestOrigin )
+               int cost, vec3_t infestOrigin, qboolean force )
 {
   class_t   currentClass;
   int       clientNum;
@@ -2415,6 +2415,10 @@ void G_Evolve( gentity_t *ent, class_t newClass,
     ent->client->boostedTime = oldBoostTime;
     ent->client->ps.stats[ STAT_STATE ] |= SS_BOOSTED;
   }
+
+  if(force) {
+    ent->client->ps.stats[STAT_FLAGS] |= SFL_CLASS_FORCED;
+  }
 }
 
 /*
@@ -2433,7 +2437,7 @@ qboolean G_EvolveAfterCheck( gentity_t *ent, class_t newClass, qboolean give )
   cost = G_CheckEvolve( ent, newClass, infestOrigin, give );
 
   if( cost >= 0 ) {
-    G_Evolve( ent, newClass, cost, infestOrigin );
+    G_Evolve( ent, newClass, cost, infestOrigin, qfalse );
     return qtrue;
   } else {
     return qfalse;
