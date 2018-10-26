@@ -2289,7 +2289,8 @@ void ClientThink_real( gentity_t *ent )
     {
       if( BG_AlienCanEvolve( client->ps.stats[ STAT_CLASS ],
                              client->pers.credit, g_alienStage.integer,
-                             IS_WARMUP, g_cheats.integer ) )
+                             IS_WARMUP, g_cheats.integer,
+                             (client->ps.stats[STAT_FLAGS] & SFL_CLASS_FORCED)) )
       {
         //no nearby objects and alien - show class menu
         G_TriggerMenu( ent->client->ps.clientNum, MN_A_INFEST );

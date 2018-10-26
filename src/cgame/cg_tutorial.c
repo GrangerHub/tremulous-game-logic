@@ -812,7 +812,8 @@ const char *CG_TutorialText( void )
         if( BG_AlienCanEvolve( ps->stats[ STAT_CLASS ],
                                ps->persistant[ PERS_CREDIT ],
                                cgs.alienStage,
-                               cgs.warmup, cgs.devMode ) )
+                               cgs.warmup, cgs.devMode,
+                               (ps->stats[STAT_FLAGS] & SFL_CLASS_FORCED)) )
         {
           Q_strcat( text, MAX_TUTORIAL_TEXT,
               va( "Press %s to evolve\n",
