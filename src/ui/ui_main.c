@@ -1666,7 +1666,8 @@ static void UI_DrawInfoPane( menuItem_t *item, rectDef_t *rect, float text_x, fl
   const char  *s = "";
   char        *string = "";
 
-  int         class, credits;
+  int         class, credits, class_forced_int;
+  qboolean    class_forced;
   char        ui_currentClass[ MAX_STRING_CHARS ];
 
   qboolean fuelFull = qfalse;
@@ -1675,7 +1676,9 @@ static void UI_DrawInfoPane( menuItem_t *item, rectDef_t *rect, float text_x, fl
 
   trap_Cvar_VariableStringBuffer( "ui_currentClass", ui_currentClass, MAX_STRING_CHARS );
 
-  sscanf( ui_currentClass, "%d %d", &class, &credits );
+  sscanf( ui_currentClass, "%d %d %d", &class, &credits, &class_forced_int );
+
+  class_forced = class_forced_int ? qtrue : qfalse;
 
   switch( item->type )
   {
@@ -1698,7 +1701,8 @@ static void UI_DrawInfoPane( menuItem_t *item, rectDef_t *rect, float text_x, fl
       value = ( BG_ClassCanEvolveFromTo( class, item->v.pclass, credits,
                                          UI_GetCurrentAlienStage(),
                                          UI_GameIsInWarmup( ),
-                                         UI_DevModeIsOn( ) ) +
+                                         UI_DevModeIsOn( ),
+                                         class_forced ) +
                 ALIEN_CREDITS_PER_KILL - 1 ) / ALIEN_CREDITS_PER_KILL;
 
       if( value < 1 )
@@ -2658,15 +2662,18 @@ UI_LoadAlienUpgrades
 */
 static void UI_LoadAlienUpgrades( void )
 {
-  int     i, j = 0;
+  int      i, j = 0;
 
-  int     class, credits;
-  char    ui_currentClass[ MAX_STRING_CHARS ];
-  stage_t stage = UI_GetCurrentAlienStage( );
+  int      class, credits, class_forced_int;
+  qboolean class_forced;
+  char     ui_currentClass[ MAX_STRING_CHARS ];
+  stage_t  stage = UI_GetCurrentAlienStage( );
 
   trap_Cvar_VariableStringBuffer( "ui_currentClass", ui_currentClass, MAX_STRING_CHARS );
 
-  sscanf( ui_currentClass, "%d %d", &class, &credits );
+  sscanf( ui_currentClass, "%d %d %d", &class, &credits, &class_forced_int );
+
+  class_forced = class_forced_int ? qtrue : qfalse;
 
   uiInfo.alienUpgradeCount = 0;
 
@@ -2674,7 +2681,8 @@ static void UI_LoadAlienUpgrades( void )
   {
     if( BG_ClassCanEvolveFromTo( class, i, credits, stage,
                                  UI_GameIsInWarmup( ),
-                                 UI_DevModeIsOn( ) ) >= 0 )
+                                 UI_DevModeIsOn( ),
+                                 class_forced ) >= 0 )
     {
       uiInfo.alienUpgradeList[ j ].text = BG_ClassConfig( i )->humanName;
       uiInfo.alienUpgradeList[ j ].cmd =
