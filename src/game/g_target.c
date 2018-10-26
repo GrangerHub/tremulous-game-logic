@@ -606,8 +606,7 @@ void Use_Target_force_class(gentity_t *ent, gentity_t *other, gentity_t *activat
     activator->client->pers.evolveHealthFraction = (float)activator->client->ps.misc[ MISC_HEALTH ] /
                                                    (float)BG_Class( activator->client->pers.classSelection )->health;
 
-    G_Evolve( activator, class, 0, infestOrigin );
-    activator->client->ps.stats[STAT_FLAGS] |= SFL_CLASS_FORCED;
+    G_Evolve( activator, class, 0, infestOrigin, qtrue );
 
     ent->activator = activator;
     G_UseTargets( ent, ent->activator );
