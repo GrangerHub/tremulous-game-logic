@@ -1000,7 +1000,7 @@ char      *G_NewString( const char *string );
 int      G_CheckEvolve( gentity_t *ent, class_t newClass,
                         vec3_t infestOrigin, qboolean give );
 void     G_Evolve( gentity_t *ent, class_t newClass,
-                   int cost, vec3_t infestOrigin );
+                   int cost, vec3_t infestOrigin, qboolean force );
 qboolean G_EvolveAfterCheck( gentity_t *ent, class_t newClass, qboolean give );
 
 typedef enum
