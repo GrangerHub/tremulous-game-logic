@@ -1846,8 +1846,12 @@ BG_ClassCanEvolveFromTo
 */
 int BG_ClassCanEvolveFromTo(
   class_t fclass, class_t tclass, int credits, int stage, int cost,
-  int gameIsInWarmup, qboolean devMode) {
+  int gameIsInWarmup, qboolean devMode, qboolean class_forced) {
   int value;
+
+  if(class_forced) {
+    return -1;
+  }
 
   value = _BG_ClassCanEvolveFromTo(
     fclass, tclass, credits, stage, cost, gameIsInWarmup, devMode);
@@ -1868,9 +1872,14 @@ BG_AlienCanEvolve
 ==============
 */
 qboolean BG_AlienCanEvolve( class_t class, int credits, int stage,
-                            int gameIsInWarmup, qboolean devMode )
+                            int gameIsInWarmup, qboolean devMode,
+                            qboolean class_forced )
 {
   int i, j, tclass;
+
+  if(class_forced) {
+    return qfalse;
+  }
 
   for( i = 0; i < bg_numClasses; i++ )
   {

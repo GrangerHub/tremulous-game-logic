@@ -357,6 +357,7 @@ typedef enum
 #define SFL_READY               0x00000001 // player ready state
 #define SFL_REFRESH_MISC        0x00000002 // hax to ensure the misc changes are broadcasted
 #define SFL_GIBBED              0x00000004
+#define SFL_CLASS_FORCED        0x00000008 // can't evolve from a class that a map forced
 
 // player_state->persistant[] indexes
 // these fields are the only part of player_state that isn't
@@ -1534,11 +1535,13 @@ int                         BG_ClassCanEvolveFromTo( class_t fclass,
                                                      int credits,
                                                      int alienStage, int num,
                                                      int gameIsInWarmup,
-                                                     qboolean devMode );
+                                                     qboolean devMode,
+                                                     qboolean class_forced);
 qboolean                    BG_AlienCanEvolve( class_t class, int credits,
                                                int alienStage,
                                                int gameIsInWarmup,
-                                               qboolean devMode );
+                                               qboolean devMode,
+                                               qboolean class_forced );
 
 void                        BG_InitClassConfigs( void );
 

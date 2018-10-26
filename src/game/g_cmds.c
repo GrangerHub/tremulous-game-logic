@@ -413,6 +413,8 @@ static qboolean Give_Class( gentity_t *ent, char *s ) {
     return qfalse;
   }
 
+  ent->client->ps.stats[STAT_FLAGS] &= ~SFL_CLASS_FORCED;
+
   if( !G_EvolveAfterCheck( ent, newClass, qtrue ) ) {
     ADMP( va( "^3give: ^7failed to give class %s\n", s ) );
     return qfalse;
@@ -2296,7 +2298,8 @@ int G_CheckEvolve( gentity_t *ent, class_t newClass,
       {
         cost = BG_ClassCanEvolveFromTo(
           currentClass, newClass, ent->client->pers.credit, g_alienStage.integer,
-          0, IS_WARMUP, g_cheats.integer );
+          0, IS_WARMUP, g_cheats.integer,
+          (ent->client->ps.stats[STAT_FLAGS] & SFL_CLASS_FORCED));
       }
 
       if( G_RoomForClassChange( ent, newClass, infestOrigin ) )

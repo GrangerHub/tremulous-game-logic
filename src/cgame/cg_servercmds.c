@@ -1113,8 +1113,9 @@ void CG_Menu( int menu, int arg )
 
     case MN_A_INFEST:
       trap_Cvar_Set( "ui_currentClass",
-         va( "%d %d", cg.snap->ps.stats[ STAT_CLASS ],
-                      cg.snap->ps.persistant[ PERS_CREDIT ] ) );
+         va( "%d %d %d", cg.snap->ps.stats[ STAT_CLASS ],
+                      cg.snap->ps.persistant[ PERS_CREDIT ],
+                      (cg.snap->ps.stats[STAT_FLAGS] & SFL_CLASS_FORCED)) );
 
       cmd       = "menu tremulous_alienupgrade\n";
       type      = DT_INTERACTIVE;
