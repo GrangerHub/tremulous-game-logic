@@ -906,8 +906,14 @@ supported by the world, a mover, or has no foundational support
 ================
 */
 static int CG_Get_Foundation_Ent_Num(int ent_num) {
+  static int depth = 0;
   int groundEntityNum;
+  int foundation_for_ground;
   centity_t *cent;
+
+  if(depth > 50) {
+    return ENTITYNUM_NONE;
+  }
 
   Com_Assert(ent_num >= 0 && ent_num < MAX_GENTITIES);
 
@@ -948,7 +954,10 @@ static int CG_Get_Foundation_Ent_Num(int ent_num) {
   }
 
   //check the ground entity to see if it is on a foundation entity
-  return CG_Get_Foundation_Ent_Num(groundEntityNum);
+  depth++;
+  foundation_for_ground = CG_Get_Foundation_Ent_Num(groundEntityNum);
+  depth--;
+  return foundation_for_ground;
 }
 
 /*
