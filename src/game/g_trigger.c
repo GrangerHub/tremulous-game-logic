@@ -195,6 +195,8 @@ void trigger_push_touch(gentity_t *self, gentity_t *other, trace_t *trace) {
 AimAtTarget
 
 Calculate origin2 so the target apogee will be hit
+TODO: Generalize the algorithm to optionally calculate indirect trajectories to
+reach a specified target.
 =================
 */
 void AimAtTarget( gentity_t *self )
@@ -217,7 +219,7 @@ void AimAtTarget( gentity_t *self )
 
   height = ent->r.currentOrigin[ 2 ] - origin[ 2 ];
   gravity = g_gravity.value;
-  time = sqrt( height / ( 0.5 * gravity ) );
+  time = sqrt( fabsf(height) / ( 0.5 * gravity ) );
 
   if( !time )
   {
@@ -233,7 +235,9 @@ void AimAtTarget( gentity_t *self )
   forward = dist / time;
   VectorScale( self->s.origin2, forward, self->s.origin2 );
 
-  self->s.origin2[ 2 ] = time * gravity;
+  if(height > 0.0f) {
+    self->s.origin2[ 2 ] = time * gravity;
+  }
 }
 
 
