@@ -2961,17 +2961,19 @@ sellErr_t G_CanSell(gentity_t *ent, const char *itemName, int *value, qboolean f
     } else
       return ERR_SELL_NOT_ITEM_HELD;
   }
-  else if( upgrade != UP_NONE )
+  else if(upgrade != UP_NONE)
   {
-    if( force || (IS_WARMUP && BG_Upgrade( upgrade )->warmupFree) )
+    if(force || (IS_WARMUP && BG_Upgrade(upgrade)->warmupFree)) {
       *value = 0;
-    else {
-      if( upgrade == UP_BIOKIT ) {
+    } else {
+      if(upgrade == UP_BIOKIT) {
         *value = (short)( BG_Upgrade( upgrade )->price *
                            ( ( (float)(ent->healthReserve) ) /
                              ( (float)(BIOKIT_HEALTH_RESERVE) ) ) );
-      } else if( upgrade == UP_BATTLESUIT &&
-        ent->client->ps.misc[ MISC_ARMOR ] < BSUIT_MAX_ARMOR ) {
+      } else if(
+        upgrade == UP_BATTLESUIT &&
+        ent->client->ps.misc[ MISC_ARMOR ] + ent->client->armorToGen <
+          BSUIT_MAX_ARMOR) {
         *value = BSUIT_PRICE_USED;
       } else {
         *value = BG_Upgrade( upgrade )->price;
@@ -3027,7 +3029,10 @@ sellErr_t G_CanSell(gentity_t *ent, const char *itemName, int *value, qboolean f
             *value += (short)( BG_Upgrade( i )->price *
                                ( ( (float)(ent->healthReserve) ) /
                                  ( (float)(BIOKIT_HEALTH_RESERVE) ) ) );
-          } else if( i == UP_BATTLESUIT ) {
+          } else if(
+            i == UP_BATTLESUIT &&
+            ent->client->ps.misc[ MISC_ARMOR ] + ent->client->armorToGen <
+              BSUIT_MAX_ARMOR) {
             *value += BSUIT_PRICE_USED;
           } else {
             *value += BG_Upgrade( i )->price;
@@ -3153,7 +3158,9 @@ void G_TakeItem( gentity_t *ent, const char *itemName, const int value )
             ent->client->ps.clips = BG_Weapon(ent->client->ps.stats[STAT_WEAPON])->maxClips;
         }
 
-        if(ent->client->ps.misc[MISC_ARMOR] < BSUIT_MAX_ARMOR) {
+        if(
+          ent->client->ps.misc[MISC_ARMOR] + ent->client->armorToGen <
+          BSUIT_MAX_ARMOR) {
           // Give credits for the damaged part of the battlesuit
           G_RewardAttackers(ent, UP_BATTLESUIT);
         }
@@ -3213,7 +3220,9 @@ void G_TakeItem( gentity_t *ent, const char *itemName, const int value )
             ent->client->ps.clips = BG_Weapon(ent->client->ps.stats[STAT_WEAPON])->maxClips;
         }
 
-        if(ent->client->ps.misc[MISC_ARMOR] < BSUIT_MAX_ARMOR) {
+        if(
+          ent->client->ps.misc[MISC_ARMOR] + ent->client->armorToGen <
+          BSUIT_MAX_ARMOR) {
           // Give credits for the damaged part of the battlesuit
           G_RewardAttackers(ent, UP_BATTLESUIT);
         }
