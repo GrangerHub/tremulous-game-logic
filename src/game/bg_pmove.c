@@ -5401,8 +5401,11 @@ static void PM_DropTimers( void )
   else
     pm->ps->persistant[PERS_JUMPTIME] += pml.msec;
 
-  if( pm->ps->stats[ STAT_TEAM ] == TEAM_ALIENS &&
-      pm->ps->eFlags & EF_EVOLVING )
+  if( 
+    pm->ps->stats[ STAT_TEAM ] == TEAM_ALIENS &&
+    pm->ps->eFlags & EF_EVOLVING &&
+    (pm->ps->commandTime - pm->ps->misc[ MISC_LAST_DAMAGE_TIME ]) >
+      ALIEN_REGEN_DAMAGE_TIME)
   {
     if( pm->ps->stats[ STAT_MISC3 ] > 0 )
     {

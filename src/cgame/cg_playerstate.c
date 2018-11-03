@@ -257,8 +257,10 @@ void CG_CheckLocalSounds( playerState_t *ps, playerState_t *ops )
       ( ps->misc[ MISC_ARMOR ] < ops->misc[ MISC_ARMOR ] &&
         BG_InventoryContainsUpgrade( UP_BATTLESUIT, ps->stats ) ) ) )
   {
-    if( !( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_ALIENS &&
-            ( cg.predictedPlayerState.eFlags & EF_EVOLVING ) ) &&
+    if( !( ps->stats[ STAT_TEAM ] == TEAM_ALIENS &&
+            ( ps->eFlags & EF_EVOLVING ) &&
+            (ps->commandTime - ps->misc[ MISC_LAST_DAMAGE_TIME ]) >
+              ALIEN_REGEN_DAMAGE_TIME) &&
         ps->misc[ MISC_HEALTH ] > 0 )
       CG_PainEvent( &cg.predictedPlayerEntity, BG_GetPainState( ps ) );
   }

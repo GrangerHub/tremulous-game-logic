@@ -2385,12 +2385,9 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       targ->client->lastArmorGenTime += HUMAN_DAMAGE_HEAL_DELAY_TIME;
       targ->client->ps.misc[ MISC_LAST_DAMAGE_TIME ] = level.time;
     }
-    if( !targ->client ||
-        !( targ->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
-           targ->client->ps.eFlags & EF_EVOLVING &&
-           targ->client->pers.evolveHealthRegen &&
-           targ->client->ps.stats[ STAT_MISC3 ] > 0 ) )
-      targ->nextRegenTime = level.time + ALIEN_REGEN_DAMAGE_TIME;
+
+    targ->nextEvoTime = level.time + ALIEN_REGEN_DAMAGE_TIME;
+    targ->nextRegenTime = level.time + ALIEN_REGEN_DAMAGE_TIME;
     targ->nextHPReserveRegenTime = level.time + ALIEN_REGEN_DAMAGE_TIME;
 
     if ( targ->s.eType == ET_CORPSE ) {
