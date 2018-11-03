@@ -400,6 +400,8 @@ typedef enum
 #define MISC_RECOIL_PITCH              ( MAX_MISC - 7 )
 #define MISC_RECOIL_YAW                ( MAX_MISC - 8 )
 
+#define MISC_LAST_DAMAGE_TIME          ( MAX_MISC - 9 )
+
 #define PS_WALLCLIMBINGFOLLOW   0x00000001
 #define PS_WALLCLIMBINGTOGGLE   0x00000002
 #define PS_NONSEGMODEL          0x00000004
