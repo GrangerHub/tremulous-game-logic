@@ -2456,6 +2456,7 @@ static void UI_ParseCarriageList( void )
 
   uiInfo.weapons = 0;
   uiInfo.upgrades = 0;
+  uiInfo.heldWeapon = 0;
 
   //simple parser to give rise to weapon/upgrade list
 
