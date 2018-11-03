@@ -891,7 +891,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
             client->ps.stats[ STAT_BUILDABLE ] &= ~SB_VALID_TOGGLEBIT;
 
           // Let the client know which buildables will be removed by building
-          for( i = 0; i < ( MAX_MISC - 8 ); i++ )
+          for( i = 0; i < ( MAX_MISC - 9 ); i++ )
           {
             if( i < level.numBuildablesForRemoval )
               client->ps.misc[ i ] = level.markedBuildables[ i ]->s.number;
@@ -901,7 +901,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
         }
         else
         {
-          for( i = 0; i < ( MAX_MISC - 8 ); i++ )
+          for( i = 0; i < ( MAX_MISC - 9 ); i++ )
             client->ps.misc[ i ] = 0;
         }
         break;

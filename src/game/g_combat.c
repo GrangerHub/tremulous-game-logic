@@ -2383,6 +2383,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       targ->client->lastMedKitTime += HUMAN_DAMAGE_HEAL_DELAY_TIME;
       targ->client->lastBioKitTime += HUMAN_DAMAGE_HEAL_DELAY_TIME;
       targ->client->lastArmorGenTime += HUMAN_DAMAGE_HEAL_DELAY_TIME;
+      targ->client->ps.misc[ MISC_LAST_DAMAGE_TIME ] = level.time;
     }
     if( !targ->client ||
         !( targ->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
