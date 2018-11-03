@@ -1457,6 +1457,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
     {
       targ->client->ps.misc[ MISC_HEALTH ] = targ->health;
       targ->client->pers.infoChangeTime = level.time;
+      targ->client->ps.misc[ MISC_LAST_DAMAGE_TIME ] = level.time;
     }
 
     targ->lastDamageTime = level.time;
