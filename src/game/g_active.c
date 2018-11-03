@@ -861,7 +861,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
     }
 
     if( weapon == WP_ABUILD || weapon == WP_ABUILD2 ||
-        weapon == WP_HBUILD )
+        weapon == WP_HBUILD || weapon == WP_HBUILD2 )
     {
         // Update build timer
         if( client->ps.misc[ MISC_MISC ] > 0 )
@@ -876,6 +876,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
       case WP_ABUILD:
       case WP_ABUILD2:
       case WP_HBUILD:
+      case WP_HBUILD2:
 
         // Set validity bit on buildable
         if( ( client->ps.stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT ) > BA_NONE )
@@ -1208,7 +1209,8 @@ void ClientTimerActions( gentity_t *ent, int msec )
     {
       AddScore( ent, ALIEN_BUILDER_SCOREINC );
     }
-    else if( ent->client->ps.weapon == WP_HBUILD )
+    else if( ent->client->ps.weapon == WP_HBUILD ||
+             ent->client->ps.weapon == WP_HBUILD2 )
     {
       AddScore( ent, HUMAN_BUILDER_SCOREINC );
     }
@@ -2574,6 +2576,7 @@ void ClientThink_real( gentity_t *ent )
       break;
 
     case WP_HBUILD:
+    case WP_HBUILD2:
       CheckCkitRepair( ent );
       break;
 

@@ -832,7 +832,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       break;
 
     case EV_FIRE_WEAPON:
-      if( es->weapon != WP_HBUILD )
+      if(es->weapon != WP_HBUILD && es->weapon != WP_HBUILD2)
       {
         CG_FireWeapon( cent, WPM_PRIMARY );
         if( cent->currentState.number == cg.predictedPlayerState.clientNum )
@@ -842,12 +842,12 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       break;
 
     case EV_FIRE_WEAPON2:
-      if( es->weapon != WP_HBUILD )
+      if(es->weapon != WP_HBUILD && es->weapon != WP_HBUILD2)
         CG_FireWeapon( cent, WPM_SECONDARY );
       break;
 
     case EV_FIRE_WEAPON3:
-      if( es->weapon != WP_HBUILD )
+      if(es->weapon != WP_HBUILD && es->weapon != WP_HBUILD2)
         CG_FireWeapon( cent, WPM_TERTIARY );
       break;
 

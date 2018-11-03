@@ -1217,8 +1217,12 @@ void CG_RangeMarker( centity_t *cent )
     return;
 
   //only display range markers if you are a builder
-  if( ( BG_GetPlayerWeapon( &cg.predictedPlayerState ) != WP_HBUILD ) &&
-      cg.predictedPlayerState.weapon != WP_ABUILD && cg.predictedPlayerState.weapon != WP_ABUILD2 )
+  if(
+    (
+      BG_GetPlayerWeapon(&cg.predictedPlayerState) != WP_HBUILD &&
+      BG_GetPlayerWeapon(&cg.predictedPlayerState) != WP_HBUILD2) &&
+    cg.predictedPlayerState.weapon != WP_ABUILD &&
+    cg.predictedPlayerState.weapon != WP_ABUILD2)
     return;
 
   if( !( cg_buildableRangeMarkerMask.integer &

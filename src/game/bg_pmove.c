@@ -5890,7 +5890,8 @@ void PmoveSingle( pmove_t *pmove )
 
   if( pm->ps->weapon == WP_ABUILD ||
       pm->ps->weapon == WP_ABUILD2 ||
-      pm->ps->weapon == WP_HBUILD )
+      pm->ps->weapon == WP_HBUILD ||
+      pm->ps->weapon == WP_HBUILD2)
   {
     // check for precise buildable placement mode
     if( pm->cmd.buttons & BUTTON_WALKING )

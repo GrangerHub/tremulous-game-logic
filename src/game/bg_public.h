@@ -592,6 +592,7 @@ typedef enum
   WP_ABUILD,
   WP_ABUILD2,
   WP_HBUILD,
+  WP_HBUILD2,
   WP_PORTAL_GUN,
   //ok?
 

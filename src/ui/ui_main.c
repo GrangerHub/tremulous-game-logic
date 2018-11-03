@@ -2433,6 +2433,9 @@ static void UI_LoadHumanItems( void )
 
   if( BG_WeaponIsAllowed( WP_MACHINEGUN, UI_DevModeIsOn( ) ) )
     UI_AddItem( WP_MACHINEGUN );
+
+  if( BG_WeaponIsAllowed( WP_HBUILD2, UI_DevModeIsOn( ) ) )
+    UI_AddItem( WP_HBUILD2 );
 }
 
 /*

@@ -700,7 +700,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     HSPAWN_SPLASHRADIUS,   //int       splashRadius;
     MOD_HSPAWN,            //int       meansOfDeath;
     TEAM_HUMANS,           //int       team;
-    ( 1 << WP_HBUILD ),    //weapon_t  buildWeapon;
+    ( 1 << WP_HBUILD2 ),    //weapon_t  buildWeapon;
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     HSPAWN_BT,             //int       buildTime;
@@ -754,7 +754,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     HTELEPORTER_SPLASHRADIUS, //int       splashRadius;
     MOD_HSPAWN,            //int       meansOfDeath;
     TEAM_HUMANS,           //int       team;
-    ( 1 << WP_HBUILD ),    //weapon_t  buildWeapon;
+    ( 1 << WP_HBUILD )|( 1 << WP_HBUILD2 ),//weapon_t  buildWeapon;
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     HTELEPORTER_BT,        //int       buildTime;
@@ -816,7 +816,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     MGTURRET_SPLASHRADIUS, //int       splashRadius;
     MOD_HSPAWN,            //int       meansOfDeath;
     TEAM_HUMANS,           //int       team;
-    ( 1 << WP_HBUILD ),    //weapon_t  buildWeapon;
+    ( 1 << WP_HBUILD )|( 1 << WP_HBUILD2 ),//weapon_t  buildWeapon;
     BANIM_IDLE1,           //int       idleAnim;
     MGTURRET_NEXTTHINK,    //int       nextthink;
     MGTURRET_BT,           //int       buildTime;
@@ -869,7 +869,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     TESLAGEN_SPLASHRADIUS, //int       splashRadius;
     MOD_HSPAWN,            //int       meansOfDeath;
     TEAM_HUMANS,           //int       team;
-    ( 1 << WP_HBUILD ),    //weapon_t  buildWeapon;
+    ( 1 << WP_HBUILD )|( 1 << WP_HBUILD2 ),//weapon_t  buildWeapon;
     BANIM_IDLE1,           //int       idleAnim;
     150,                   //int       nextthink;
     TESLAGEN_BT,           //int       buildTime;
@@ -922,7 +922,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     ARMOURY_SPLASHRADIUS,  //int       splashRadius;
     MOD_HSPAWN,            //int       meansOfDeath;
     TEAM_HUMANS,           //int       team;
-    ( 1 << WP_HBUILD ),    //weapon_t  buildWeapon;
+    ( 1 << WP_HBUILD2 ),   //weapon_t  buildWeapon;
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     ARMOURY_BT,            //int       buildTime;
@@ -979,7 +979,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     DC_SPLASHRADIUS,       //int       splashRadius;
     MOD_HSPAWN,            //int       meansOfDeath;
     TEAM_HUMANS,           //int       team;
-    ( 1 << WP_HBUILD ),    //weapon_t  buildWeapon;
+    ( 1 << WP_HBUILD )|( 1 << WP_HBUILD2 ),//weapon_t  buildWeapon;
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     DC_BT,                 //int       buildTime;
@@ -1034,7 +1034,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     MEDISTAT_SPLASHRADIUS, //int       splashRadius;
     MOD_HSPAWN,            //int       meansOfDeath;
     TEAM_HUMANS,           //int       team;
-    ( 1 << WP_HBUILD ),    //weapon_t  buildWeapon;
+    ( 1 << WP_HBUILD )|( 1 << WP_HBUILD2 ),//weapon_t  buildWeapon;
     BANIM_IDLE1,           //int       idleAnim;
     MEDISTAT_REPEAT,       //int       nextthink;
     MEDISTAT_BT,           //int       buildTime;
@@ -1087,7 +1087,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     REACTOR_SPLASHRADIUS,  //int       splashRadius;
     MOD_HSPAWN,            //int       meansOfDeath;
     TEAM_HUMANS,           //int       team;
-    ( 1 << WP_HBUILD ),    //weapon_t  buildWeapon;
+    ( 1 << WP_HBUILD )|( 1 << WP_HBUILD2 ),    //weapon_t  buildWeapon;
     BANIM_IDLE1,           //int       idleAnim;
     REACTOR_ATTACK_DCC_REPEAT, //int   nextthink;
     REACTOR_BT,            //int       buildTime;
@@ -1147,7 +1147,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     REPEATER_SPLASHRADIUS, //int       splashRadius;
     MOD_HSPAWN,            //int       meansOfDeath;
     TEAM_HUMANS,           //int       team;
-    ( 1 << WP_HBUILD ),    //weapon_t  buildWeapon;
+    ( 1 << WP_HBUILD )|( 1 << WP_HBUILD2 ),//weapon_t  buildWeapon;
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     REPEATER_BT,           //int       buildTime;
@@ -5297,7 +5297,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     "ckit",               //char      *name;
     "Construction Kit",   //char      *humanName;
     "Used for building structures. This includes "
-      "spawns, power and basic defense. More structures become "
+      "power and basic defense. More structures become "
       "available with new stages.",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
@@ -5327,6 +5327,101 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //qboolean  canZoom;
     90.0f,                //float     zoomFov;
     qfalse,                //qboolean  purchasable;
+    qfalse,               //qboolean  longRanged;
+    qfalse,               //qboolean  relativeMissileSpeed;
+    {
+      {                     //impactPrediction_t impactPrediction[0];
+        WPM_NONE,           //weaponMode_t  weaponMode;
+        TR_STATIONARY,      //trType_t      trType;
+        0,                  //int       missileLifeTime;
+        0,                  //int       missileSize;
+        0                   //int       missileLaunchSpeed;
+      },
+      {                     //impactPrediction_t impactPrediction[1];
+        WPM_NONE,           //weaponMode_t  weaponMode;
+        TR_STATIONARY,      //trType_t      trType;
+        0,                  //int       missileLifeTime;
+        0,                  //int       missileSize;
+        0                   //int       missileLaunchSpeed;
+      }
+    },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      }
+    },
+    TEAM_HUMANS           //team_t    team;
+  },
+  {
+    WP_HBUILD2,            //int       number;
+    qtrue,                //qboolean enabled;
+    HBUILD_PRICE,         //int       price;
+    qtrue,               //qboolean  warmupFree;
+    ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
+    SLOT_WEAPON,          //int       slots;
+    "ackit",               //char      *name;
+    "Adv Construction Kit", //char      *humanName;
+    "Used for building structures. This includes "
+      "spawns, armories, power, and basic defense. More structures become "
+      "available with new stages.",
+    0,                    //int       maxAmmo;
+    0,                    //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
+    0,                    //int       roundPrice;
+    qfalse,               //qboolean  ammoPurchasable;
+    qtrue,                //int       infiniteAmmo;
+    qfalse,               //int       usesEnergy;
+    HBUILD_REPEAT,        //int       repeatRate1;
+    0,                    //int       repeatRate2;
+    0,                    //int       repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
+    0,                    //int       reloadTime;
+    0.0f,                 //float     knockbackScale;
+    0.0f,                 //float     recoil1;
+    0.0f,                 //float     recoil2;
+    0.0f,                 //float     recoil3;
+    qtrue,                //qboolean  hasAltMode;
+    qfalse,               //qboolean  hasThirdMode;
+    qfalse,               //qboolean  canZoom;
+    90.0f,                //float     zoomFov;
+    qtrue,                //qboolean  purchasable;
     qfalse,               //qboolean  longRanged;
     qfalse,               //qboolean  relativeMissileSpeed;
     {
@@ -6759,14 +6854,17 @@ BG_InventoryContainsWeapon
 Does the player hold a weapon?
 ========================
 */
-qboolean BG_InventoryContainsWeapon( int weapon, int stats[ ] )
-{
+qboolean BG_InventoryContainsWeapon(int weapon, int stats[ ]) {
   // humans always have a blaster and a ckit
-  if( stats[ STAT_TEAM ] == TEAM_HUMANS &&
-      ( weapon == WP_BLASTER || weapon == WP_HBUILD ) )
+  if(
+    stats[STAT_TEAM] == TEAM_HUMANS &&
+    (
+      weapon == WP_BLASTER ||
+      (weapon == WP_HBUILD && stats[STAT_WEAPON] != WP_HBUILD2))) {
     return qtrue;
+  }
 
-  return ( stats[ STAT_WEAPON ] == weapon );
+  return (stats[STAT_WEAPON] == weapon);
 }
 
 /*
@@ -6784,7 +6882,9 @@ int BG_SlotsForInventory( int stats[ ] )
   if( stats[ STAT_TEAM ] == TEAM_HUMANS )
   {
     slots |= BG_Weapon( WP_BLASTER )->slots;
-    slots |= BG_Weapon( WP_HBUILD )->slots;
+    if(stats[STAT_WEAPON] != WP_HBUILD2) {
+      slots |= BG_Weapon( WP_HBUILD )->slots;
+    }
   }
 
   for( i = UP_NONE; i < UP_NUM_UPGRADES; i++ )
@@ -7277,7 +7377,7 @@ qboolean BG_PlayerCanChangeWeapon( playerState_t *ps, pmoveExt_t *pmext )
     return qfalse;
 
   // The ckit's build timer must be complete before switching
-  if( ps->weapon == WP_HBUILD &&
+  if( (ps->weapon == WP_HBUILD || ps->weapon == WP_ABUILD2) &&
       ps->misc[ MISC_MISC ] )
     return qfalse;
 

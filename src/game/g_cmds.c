@@ -1423,7 +1423,7 @@ void Cmd_TeamStatus_f( gentity_t *ent )
           tmp->health > 0 &&
           ( tmp->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_BUILDER0 ||
             tmp->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_BUILDER0_UPG ||
-            BG_InventoryContainsWeapon( WP_HBUILD, tmp->client->ps.stats ) ) )
+            BG_InventoryContainsWeapon( WP_HBUILD2, tmp->client->ps.stats ) ) )
         builders++;
       continue;
     }
@@ -2635,6 +2635,11 @@ void Cmd_Class_f( gentity_t *ent )
       {
         ent->client->pers.humanItemSelection = WP_MACHINEGUN;
       }
+      else if( !Q_stricmp( s, BG_Weapon( WP_HBUILD2 )->name ) &&
+               BG_WeaponIsAllowed( WP_HBUILD2, g_cheats.integer ) )
+      {
+        ent->client->pers.humanItemSelection = WP_HBUILD2;
+      }
       else
       {
         G_TriggerMenu( ent->client->ps.clientNum, MN_H_UNKNOWNSPAWNITEM );
@@ -2695,7 +2700,7 @@ void Cmd_Destroy_f( gentity_t *ent ) {
       ( traceEnt->s.eType == ET_BUILDABLE ) &&
       ( traceEnt->buildableTeam == ent->client->pers.teamSelection ) &&
       ( ( ent->client->ps.weapon >= WP_ABUILD ) &&
-        ( ent->client->ps.weapon <= WP_HBUILD ) ) ) {
+        ( ent->client->ps.weapon <= WP_HBUILD2 ) ) ) {
     if( ent->client->pers.teamSelection == TEAM_HUMANS &&
         traceEnt->health < traceEnt->s.constantLight ) {
       G_TriggerMenu( ent->client->ps.clientNum, MN_B_REPAIR_TO_DECON );
@@ -2849,10 +2854,26 @@ void Cmd_ToggleItem_f( gentity_t *ent )
     if( !BG_PlayerCanChangeWeapon( &ent->client->ps, &ent->client->pmext ) )
       return;
 
-    if( weapon == WP_HBUILD )
-    {
-      if( ent->client->ps.weapon != WP_HBUILD )
-        weapon = WP_HBUILD;
+    if(weapon == WP_HBUILD) {
+      if(ent->client->ps.weapon != WP_HBUILD  && ent->client->ps.weapon != WP_HBUILD2) {
+        if(BG_InventoryContainsUpgrade(WP_HBUILD2, ent->client->ps.stats)) {
+          weapon = WP_HBUILD2;
+        } else {
+          weapon = WP_HBUILD;
+        }
+      }
+      else if( ent->client->ps.ammo || ent->client->ps.clips )
+        weapon = WP_NONE;
+      else
+        weapon = WP_BLASTER;
+    } else if(weapon == WP_HBUILD2) {
+      if(ent->client->ps.weapon != WP_HBUILD  && ent->client->ps.weapon != WP_HBUILD2) {
+        if(BG_InventoryContainsUpgrade(WP_HBUILD2, ent->client->ps.stats)) {
+          weapon = WP_HBUILD2;
+        } else {
+          weapon = WP_HBUILD;
+        }
+      }
       else if( ent->client->ps.ammo || ent->client->ps.clips )
         weapon = WP_NONE;
       else
@@ -2955,7 +2976,9 @@ sellErr_t G_CanSell(gentity_t *ent, const char *itemName, int *value, qboolean f
     if( BG_InventoryContainsWeapon( weapon, ent->client->ps.stats ) )
     {
       //guard against selling the HBUILD weapons exploit
-      if( !force && weapon == WP_HBUILD && ent->client->ps.misc[ MISC_MISC ] > 0 ) {
+      if(
+        !force && (weapon == WP_HBUILD || weapon == WP_HBUILD2) &&
+        ent->client->ps.misc[ MISC_MISC ] > 0 ) {
         return ERR_SELL_ARMOURYBUILDTIMER;
       }
     } else
@@ -4054,7 +4077,8 @@ void Cmd_Reload_f( gentity_t *ent )
   playerState_t *ps = &ent->client->ps;
 
   if( ps->stats[ STAT_TEAM ] == TEAM_HUMANS &&
-      ps->weapon != WP_HBUILD )
+      ps->weapon != WP_HBUILD &&
+      ps->weapon != WP_ABUILD2)
   {
     // reload is being attempted
     int ammo;
@@ -4089,6 +4113,7 @@ void Cmd_Reload_f( gentity_t *ent )
 
     if( ent->client->pers.namelog->denyBuild &&
         ( ps->weapon == WP_HBUILD ||
+          ps->weapon == WP_HBUILD2 ||
           ps->weapon == WP_ABUILD ||
           ps->weapon == WP_ABUILD2 ) )
     {
@@ -4112,7 +4137,7 @@ void Cmd_Reload_f( gentity_t *ent )
         ( traceEnt->s.eType == ET_BUILDABLE ) &&
         ( traceEnt->buildableTeam == ent->client->pers.teamSelection ) &&
         ( ( ent->client->ps.weapon >= WP_ABUILD ) &&
-          ( ent->client->ps.weapon <= WP_HBUILD ) ) )
+          ( ent->client->ps.weapon <= WP_HBUILD2 ) ) )
     {
       // Cancel deconstruction (unmark)
       if( !( IS_WARMUP && g_warmupBuildableRespawning.integer ) &&

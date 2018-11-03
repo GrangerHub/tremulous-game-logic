@@ -6835,6 +6835,7 @@ void G_UpdateBuildableRangeMarkers( void )
 
       team = client->pers.teamSelection;
       weaponDisplays = ( ( BG_GetPlayerWeapon( &client->ps ) == WP_HBUILD ) ||
+            (BG_GetPlayerWeapon(&client->ps) == WP_HBUILD2) ||
             client->ps.weapon == WP_ABUILD || client->ps.weapon == WP_ABUILD2 );
       wantsToSee = ( client->pers.buildableRangeMarkerMask & ( 1 << bType ) );
 

@@ -474,6 +474,7 @@ static void CG_DrawPlayerClipsRing( rectDef_t *rect, vec4_t backColor,
     case WP_ABUILD:
     case WP_ABUILD2:
     case WP_HBUILD:
+    case WP_HBUILD2:
       if( buildTime > MAXIMUM_BUILD_TIME )
         buildTime = MAXIMUM_BUILD_TIME;
       progress = ( MAXIMUM_BUILD_TIME - buildTime ) / MAXIMUM_BUILD_TIME;
@@ -642,7 +643,9 @@ static void CG_DrawPlayerAmmoValue( rectDef_t *rect, vec4_t color )
   int valueReserve = -1;
   qboolean bp = qfalse;
 
-  if( cg.snap->ps.weapon == WP_HBUILD )
+  if(
+    cg.snap->ps.weapon == WP_HBUILD ||
+    cg.snap->ps.weapon == WP_HBUILD2)
   {
       value = cg.snap->ps.persistant[ PERS_BP ];
       valueMarked = cg.snap->ps.persistant[ PERS_MARKEDBP ];
@@ -846,7 +849,9 @@ static void CG_DrawPlayerBuildTimer( rectDef_t *rect, vec4_t color )
   if( ps->misc[ MISC_MISC ] <= 0 )
     return;
 
-  if( cg.snap->ps.weapon != WP_HBUILD )
+  if(
+    cg.snap->ps.weapon != WP_HBUILD &&
+    cg.snap->ps.weapon != WP_HBUILD2)
   {
     switch( ps->stats[ STAT_WEAPON ] )
     {
@@ -884,7 +889,9 @@ static void CG_DrawPlayerClipsValue( rectDef_t *rect, vec4_t color )
   int           value;
   playerState_t *ps = &cg.snap->ps;
 
-  if( ps->weapon == WP_HBUILD )
+  if(
+    ps->weapon == WP_HBUILD ||
+    ps->weapon == WP_HBUILD2)
     value = ps->persistant[ PERS_BP_RESERVE ];
   else
   {
@@ -2179,7 +2186,8 @@ static void CG_DrawTeamOverlay( rectDef_t *rect, float scale, vec4_t color )
               ci->curWeaponClass == PCL_ALIEN_BUILDER0_UPG ||
               ci->curWeaponClass == PCL_ALIEN_LEVEL1 || 
               ci->curWeaponClass == PCL_ALIEN_LEVEL1_UPG ||
-              ci->curWeaponClass == WP_HBUILD )
+              ci->curWeaponClass == WP_HBUILD ||
+              ci->curWeaponClass == WP_HBUILD2)
           {
             displayClients[ maxDisplayCount++ ] = i;
           }

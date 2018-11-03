@@ -2331,10 +2331,16 @@ void CG_BuildFire( entityState_t *es )
   else
     builder = &cg_entities[ es->otherEntityNum ];
 
-  if( es->weapon != WP_HBUILD ||
-      ( ( es->otherEntityNum == cg.clientNum ) ?
-           ( cg.predictedPlayerState.weapon != WP_HBUILD ) :
-           ( builder->currentState.weapon != WP_HBUILD ) ) )
+  if(
+    (es->weapon != WP_HBUILD && es->weapon != WP_HBUILD2) ||
+    (
+      ( es->otherEntityNum == cg.clientNum ) ?
+        (
+          cg.predictedPlayerState.weapon != WP_HBUILD &&
+          cg.predictedPlayerState.weapon != WP_HBUILD2) :
+          (
+            builder->currentState.weapon != WP_HBUILD  &&
+            builder->currentState.weapon != WP_HBUILD2)))
     return;
 
   // produce the flash and sound effects

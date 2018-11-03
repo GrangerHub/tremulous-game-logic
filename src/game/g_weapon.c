@@ -1318,8 +1318,11 @@ void buildFire( gentity_t *ent, dynMenu_t menu )
     if( G_BuildIfValid( ent, buildable ) )
     {
       // send ckit build effects
-      if( ent->client->ps.weapon == WP_HBUILD &&
-          ent->client->built )
+      if(
+        (
+          ent->client->ps.weapon == WP_HBUILD ||
+          ent->client->ps.weapon == WP_HBUILD2) &&
+        ent->client->built )
       {
         gentity_t *tent;
 
@@ -2485,6 +2488,7 @@ void FireWeapon2( gentity_t *ent )
     case WP_ABUILD:
     case WP_ABUILD2:
     case WP_HBUILD:
+    case WP_HBUILD2:
       cancelBuildFire( ent );
       break;
     default:
@@ -2613,6 +2617,7 @@ void FireWeapon( gentity_t *ent )
       buildFire( ent, MN_A_BUILD );
       break;
     case WP_HBUILD:
+    case WP_HBUILD2:
       buildFire( ent, MN_H_BUILD );
       break;
     default:
