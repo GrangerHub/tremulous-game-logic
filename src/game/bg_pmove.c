@@ -3704,6 +3704,7 @@ static void PM_FinishWeaponChange( void )
   if( !BG_InventoryContainsWeapon( weapon, pm->ps->stats ) )
     weapon = WP_NONE;
 
+  pm->ps->misc[MISC_HELD_WEAPON] = weapon;
   pm->ps->weapon = weapon;
   pm->ps->weaponstate = WEAPON_RAISING;
   pm->ps->weaponTime += 250;
@@ -3993,17 +3994,17 @@ static void PM_Weapon( void )
     pm->pmext->repairRepeatDelay = 0;
 
   // allways allow upgrades to be usable
-  if( pm->cmd.weapon >= 32 &&
+  if( pm->cmd.weapon >= WP_NUM_WEAPONS &&
       ( pm->cmd.buttons & BUTTON_USE_HOLDABLE ) &&
       !( pm->ps->pm_flags & PMF_USE_ITEM_HELD ) )
   {
     //if trying to toggle an upgrade, toggle it
-    if( BG_InventoryContainsUpgrade( pm->cmd.weapon - 32, pm->ps->stats ) ) //sanity check
+    if( BG_InventoryContainsUpgrade( pm->cmd.weapon - WP_NUM_WEAPONS, pm->ps->stats ) ) //sanity check
     {
-      if( BG_UpgradeIsActive( pm->cmd.weapon - 32, pm->ps->stats ) )
-        BG_DeactivateUpgrade( pm->cmd.weapon - 32, pm->ps->stats );
+      if( BG_UpgradeIsActive( pm->cmd.weapon - WP_NUM_WEAPONS, pm->ps->stats ) )
+        BG_DeactivateUpgrade( pm->cmd.weapon - WP_NUM_WEAPONS, pm->ps->stats );
       else
-        BG_ActivateUpgrade( pm->cmd.weapon - 32, pm->ps->stats );
+        BG_ActivateUpgrade( pm->cmd.weapon - WP_NUM_WEAPONS, pm->ps->stats );
     }
 
     pm->ps->pm_flags |= PMF_USE_ITEM_HELD;
@@ -4018,7 +4019,7 @@ static void PM_Weapon( void )
     {
       if( !( pm->ps->pm_flags & PMF_USE_ITEM_HELD ) )
       {
-        if( pm->cmd.weapon < 32 )
+        if( pm->cmd.weapon < WP_NUM_WEAPONS )
         {
           //if trying to select a weapon, select it
           if( pm->ps->weapon != pm->cmd.weapon )

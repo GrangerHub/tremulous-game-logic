@@ -1670,8 +1670,8 @@ void CG_DrawItemSelect( rectDef_t *rect, vec4_t color )
   float         height = rect->h;
   float         iconWidth;
   float         iconHeight;
-  int           items[ 64 ];
-  int           colinfo[ 64 ];
+  int           items[ WP_NUM_WEAPONS + UP_NUM_UPGRADES ];
+  int           colinfo[ WP_NUM_WEAPONS + UP_NUM_UPGRADES ];
   int           numItems = 0, selectedItem = 0;
   int           length;
   qboolean      vertical;
@@ -1686,14 +1686,14 @@ void CG_DrawItemSelect( rectDef_t *rect, vec4_t color )
   if( !( cg.snap->ps.pm_flags & PMF_FOLLOW ) )
   {
     // first make sure that whatever it selected is actually selectable
-    if( cg.weaponSelect < 32 )
+    if( cg.weaponSelect < WP_NUM_WEAPONS )
     {
       if( !CG_WeaponSelectable( cg.weaponSelect ) )
         CG_NextWeapon_f( );
     }
     else
     {
-      if( !CG_UpgradeSelectable( cg.weaponSelect - 32 ) )
+      if( !CG_UpgradeSelectable( cg.weaponSelect - WP_NUM_WEAPONS ) )
         CG_NextWeapon_f( );
     }
   }
@@ -1734,7 +1734,7 @@ void CG_DrawItemSelect( rectDef_t *rect, vec4_t color )
     if( !BG_Upgrade( i )->usable )
       colinfo[ numItems ] = 2;
 
-    if( i == cg.weaponSelect - 32 )
+    if( i == cg.weaponSelect - WP_NUM_WEAPONS )
       selectedItem = numItems;
 
     if( !cg_upgrades[ i ].registered )
@@ -1743,7 +1743,7 @@ void CG_DrawItemSelect( rectDef_t *rect, vec4_t color )
   	"is not registered\n", i, BG_Upgrade( i )->name );
       continue;
     }
-    items[ numItems ] = i + 32;
+    items[ numItems ] = i + WP_NUM_WEAPONS;
     numItems++;
   }
 
@@ -1788,12 +1788,12 @@ void CG_DrawItemSelect( rectDef_t *rect, vec4_t color )
       color[3] = 0.5;
       trap_R_SetColor( color );
 
-      if( items[ item ] < 32 )
+      if( items[ item ] < WP_NUM_WEAPONS )
         CG_DrawPic( x, y, iconWidth, iconHeight,
                     cg_weapons[ items[ item ] ].weaponIcon );
       else
         CG_DrawPic( x, y, iconWidth, iconHeight,
-                    cg_upgrades[ items[ item ] - 32 ].upgradeIcon );
+                    cg_upgrades[ items[ item ] - WP_NUM_WEAPONS ].upgradeIcon );
     }
     if( vertical )
       y += iconHeight;
@@ -1822,7 +1822,7 @@ void CG_DrawItemSelectText( rectDef_t *rect, float scale, int textStyle )
   trap_R_SetColor( color );
 
   // draw the selected name
-  if( cg.weaponSelect < 32 )
+  if( cg.weaponSelect < WP_NUM_WEAPONS )
   {
     if( cg_weapons[ cg.weaponSelect ].registered &&
         BG_InventoryContainsWeapon( cg.weaponSelect, cg.snap->ps.stats ) )
@@ -1837,10 +1837,10 @@ void CG_DrawItemSelectText( rectDef_t *rect, float scale, int textStyle )
   }
   else
   {
-    if( cg_upgrades[ cg.weaponSelect - 32 ].registered &&
-        BG_InventoryContainsUpgrade( cg.weaponSelect - 32, cg.snap->ps.stats ) )
+    if( cg_upgrades[ cg.weaponSelect - WP_NUM_WEAPONS ].registered &&
+        BG_InventoryContainsUpgrade( cg.weaponSelect - WP_NUM_WEAPONS, cg.snap->ps.stats ) )
     {
-      if( ( name = cg_upgrades[ cg.weaponSelect - 32 ].humanName ) )
+      if( ( name = cg_upgrades[ cg.weaponSelect - WP_NUM_WEAPONS ].humanName ) )
       {
         w = UI_Text_Width( name, scale );
         x = rect->x + rect->w / 2;
@@ -1875,25 +1875,25 @@ void CG_NextWeapon_f( void )
   cg.weaponSelectTime = cg.time;
   original = cg.weaponSelect;
 
-  for( i = 0; i < 64; i++ )
+  for( i = 0; i < WP_NUM_WEAPONS + UP_NUM_UPGRADES; i++ )
   {
     cg.weaponSelect++;
-    if( cg.weaponSelect == 64 )
+    if( cg.weaponSelect == WP_NUM_WEAPONS + UP_NUM_UPGRADES )
       cg.weaponSelect = 0;
 
-    if( cg.weaponSelect < 32 )
+    if( cg.weaponSelect < WP_NUM_WEAPONS )
     {
       if( CG_WeaponSelectable( cg.weaponSelect ) )
         break;
     }
     else
     {
-      if( CG_UpgradeSelectable( cg.weaponSelect - 32 ) )
+      if( CG_UpgradeSelectable( cg.weaponSelect - WP_NUM_WEAPONS ) )
         break;
     }
   }
 
-  if( i == 64 )
+  if( i == WP_NUM_WEAPONS + UP_NUM_UPGRADES )
     cg.weaponSelect = original;
 }
 
@@ -1919,25 +1919,25 @@ void CG_PrevWeapon_f( void )
   cg.weaponSelectTime = cg.time;
   original = cg.weaponSelect;
 
-  for( i = 0; i < 64; i++ )
+  for( i = 0; i < WP_NUM_WEAPONS + UP_NUM_UPGRADES; i++ )
   {
     cg.weaponSelect--;
     if( cg.weaponSelect == -1 )
-      cg.weaponSelect = 63;
+      cg.weaponSelect = WP_NUM_WEAPONS + UP_NUM_UPGRADES - 1;
 
-    if( cg.weaponSelect < 32 )
+    if( cg.weaponSelect < WP_NUM_WEAPONS )
     {
       if( CG_WeaponSelectable( cg.weaponSelect ) )
         break;
     }
     else
     {
-      if( CG_UpgradeSelectable( cg.weaponSelect - 32 ) )
+      if( CG_UpgradeSelectable( cg.weaponSelect - WP_NUM_WEAPONS ) )
         break;
     }
   }
 
-  if( i == 64 )
+  if( i == WP_NUM_WEAPONS + UP_NUM_UPGRADES )
     cg.weaponSelect = original;
 }
 
@@ -1958,7 +1958,7 @@ void CG_Weapon_f( void )
 
   num = atoi( CG_Argv( 1 ) );
 
-  if( num < 1 || num > 31 )
+  if( num < 1 || num >= WP_NUM_WEAPONS )
     return;
 
   cg.weaponSelectTime = cg.time;
