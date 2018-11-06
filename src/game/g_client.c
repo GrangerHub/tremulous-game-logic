@@ -1667,6 +1667,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
     if( spawn != NULL && spawn != ent )
       G_UseTargets( spawn, ent );
 
+    client->ps.misc[MISC_HELD_WEAPON] = client->ps.stats[ STAT_WEAPON ];
     client->ps.weapon = client->ps.stats[ STAT_WEAPON ];
   }
 

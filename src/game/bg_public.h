@@ -398,6 +398,9 @@ typedef enum
 
 #define MISC_LAST_DAMAGE_TIME          ( MAX_MISC - 9 )
 
+//for storing more than just 32 different weapon numbers
+#define MISC_HELD_WEAPON               ( MAX_MISC - 10 )
+
 #define PS_WALLCLIMBINGFOLLOW   0x00000001
 #define PS_WALLCLIMBINGTOGGLE   0x00000002
 #define PS_NONSEGMODEL          0x00000004
