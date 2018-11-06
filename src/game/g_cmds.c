@@ -3116,6 +3116,77 @@ void G_SellErrHandling( gentity_t *ent, const sellErr_t error )
 
 /*
 =================
+G_TakeUpgrade
+=================
+*/
+static void G_TakeUpgrade(
+  gentity_t *ent, const upgrade_t upgrade, qboolean force) {
+  if(upgrade == UP_BATTLESUIT) {
+    vec3_t newOrigin;
+
+    G_RoomForClassChange(ent, PCL_HUMAN_BSUIT, newOrigin);
+    VectorCopy(newOrigin, ent->client->ps.origin);
+    ent->client->ps.stats[STAT_CLASS] = PCL_HUMAN;
+    ent->client->pers.classSelection = PCL_HUMAN;
+    ent->client->ps.eFlags ^= EF_TELEPORT_BIT;
+
+    if(ent->client->ps.pm_flags & PMF_WEAPON_RELOAD) {
+      if(
+        ent->client->ps.clips >
+          BG_Weapon(ent->client->ps.stats[STAT_WEAPON])->maxClips + 1) {
+        ent->client->ps.clips =
+          BG_Weapon(ent->client->ps.stats[STAT_WEAPON])->maxClips + 1;
+      }
+    } else {
+      if(
+        ent->client->ps.clips >
+          BG_Weapon(ent->client->ps.stats[STAT_WEAPON])->maxClips) {
+        ent->client->ps.clips =
+          BG_Weapon(ent->client->ps.stats[STAT_WEAPON])->maxClips;
+      }
+    }
+
+    if(
+      ent->client->ps.misc[MISC_ARMOR] + ent->client->armorToGen <
+        BSUIT_MAX_ARMOR) {
+      // Give credits for the damaged part of the battlesuit
+      G_RewardAttackers(ent, UP_BATTLESUIT);
+    }
+
+    ent->client->ps.misc[MISC_ARMOR] = 0;
+    ent->client->ps.stats[STAT_FLAGS] &= ~SFL_ARMOR_GENERATE;
+    ent->client->lastArmorGenTime = 0;
+    ent->client->armorToGen = 0;
+    ent->client->armorGenIncrementTime = 0;
+  } else if(upgrade == UP_BIOKIT)
+  {
+    ent->client->ps.misc[MISC_MAX_HEALTH] =
+          BG_Class(ent->client->ps.stats[STAT_CLASS])->health;
+    G_ChangeHealth(
+      ent, ent, ent->health, (HLTHF_SET_TO_CHANGE|HLTHF_INITIAL_MAX_CAP));
+    ent->client->bioKitHealthToRestore = 0;
+    ent->client->bioKitIncrementTime = 0;
+    ent->healthReserve = 0;
+  }
+
+  //remove from inventory
+  BG_RemoveUpgradeFromInventory(upgrade, ent->client->ps.stats);
+
+  if(
+    upgrade == UP_BATTPACK ||
+    upgrade == UP_BATTLESUIT) {
+    int rounds, clips, price;
+
+    if(G_CanGiveClientMaxAmmo(ent, qtrue, &rounds, &clips, &price)) {
+      ent->client->ps.pm_flags |= PMF_WEAPON_RELOAD;
+    }
+
+    G_GiveClientMaxAmmo( ent, qtrue );
+  }
+}
+
+/*
+=================
 G_TakeItem
 =================
 */
@@ -3154,60 +3225,7 @@ void G_TakeItem(
   }
   else if( upgrade != UP_NONE )
   {
-      if( upgrade == UP_BATTLESUIT )
-      {
-        vec3_t newOrigin;
-
-        G_RoomForClassChange( ent, PCL_HUMAN_BSUIT, newOrigin );
-        VectorCopy( newOrigin, ent->client->ps.origin );
-        ent->client->ps.stats[ STAT_CLASS ] = PCL_HUMAN;
-        ent->client->pers.classSelection = PCL_HUMAN;
-        ent->client->ps.eFlags ^= EF_TELEPORT_BIT;
-
-        if(ent->client->ps.pm_flags & PMF_WEAPON_RELOAD) {
-          if(ent->client->ps.clips > BG_Weapon(ent->client->ps.stats[STAT_WEAPON])->maxClips + 1)
-            ent->client->ps.clips = BG_Weapon(ent->client->ps.stats[STAT_WEAPON])->maxClips + 1;
-        } else {
-          if(ent->client->ps.clips > BG_Weapon(ent->client->ps.stats[STAT_WEAPON])->maxClips)
-            ent->client->ps.clips = BG_Weapon(ent->client->ps.stats[STAT_WEAPON])->maxClips;
-        }
-
-        if(
-          ent->client->ps.misc[MISC_ARMOR] + ent->client->armorToGen <
-          BSUIT_MAX_ARMOR) {
-          // Give credits for the damaged part of the battlesuit
-          G_RewardAttackers(ent, UP_BATTLESUIT);
-        }
-
-        ent->client->ps.misc[ MISC_ARMOR ] = 0;
-        ent->client->ps.stats[ STAT_FLAGS ] &= ~SFL_ARMOR_GENERATE;
-        ent->client->lastArmorGenTime = 0;
-        ent->client->armorToGen = 0;
-        ent->client->armorGenIncrementTime = 0;
-      } else if( upgrade == UP_BIOKIT )
-      {
-        ent->client->ps.misc[ MISC_MAX_HEALTH ] =
-              BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->health;
-        G_ChangeHealth( ent, ent, ent->health,
-                        (HLTHF_SET_TO_CHANGE|
-                         HLTHF_INITIAL_MAX_CAP) );
-        ent->client->bioKitHealthToRestore = 0;
-        ent->client->bioKitIncrementTime = 0;
-        ent->healthReserve = 0;
-      }
-
-      //remove from inventory
-      BG_RemoveUpgradeFromInventory( upgrade, ent->client->ps.stats );
-
-      if( upgrade == UP_BATTPACK ||
-          upgrade == UP_BATTLESUIT ) {
-        int rounds, clips, price;
-
-        if(G_CanGiveClientMaxAmmo(ent, qtrue, &rounds, &clips, &price)) {
-          ent->client->ps.pm_flags |= PMF_WEAPON_RELOAD;
-        }
-        G_GiveClientMaxAmmo( ent, qtrue );
-      }
+      G_TakeUpgrade(ent, upgrade, force);
 
       //add to funds
       G_AddCreditToClient( ent->client, (short)value, qfalse );
@@ -3217,64 +3235,12 @@ void G_TakeItem(
     for( i = UP_NONE + 1; i < UP_NUM_UPGRADES; i++ )
     {
       int       dummy_value;
-      sellErr_t sell_err = G_CanSellUpgrade(ent, i, &dummy_value, force);
 
-      if(sell_err != ERR_SELL_NONE) {
+      if(G_CanSellUpgrade(ent, i, &dummy_value, force) != ERR_SELL_NONE) {
         continue;
       }
-      // shouldn't really need to test for this, but just to be safe
-      if( i == UP_BATTLESUIT )
-      {
-        vec3_t newOrigin;
 
-        G_RoomForClassChange( ent, PCL_HUMAN_BSUIT, newOrigin );
-        VectorCopy( newOrigin, ent->client->ps.origin );
-        ent->client->ps.stats[ STAT_CLASS ] = PCL_HUMAN;
-        ent->client->pers.classSelection = PCL_HUMAN;
-        ent->client->ps.eFlags ^= EF_TELEPORT_BIT;
-
-        if(ent->client->ps.pm_flags & PMF_WEAPON_RELOAD) {
-          if(ent->client->ps.clips > BG_Weapon(ent->client->ps.stats[STAT_WEAPON])->maxClips + 1)
-            ent->client->ps.clips = BG_Weapon(ent->client->ps.stats[STAT_WEAPON])->maxClips + 1;
-        } else {
-          if(ent->client->ps.clips > BG_Weapon(ent->client->ps.stats[STAT_WEAPON])->maxClips)
-            ent->client->ps.clips = BG_Weapon(ent->client->ps.stats[STAT_WEAPON])->maxClips;
-        }
-
-        if(
-          ent->client->ps.misc[MISC_ARMOR] + ent->client->armorToGen <
-          BSUIT_MAX_ARMOR) {
-          // Give credits for the damaged part of the battlesuit
-          G_RewardAttackers(ent, UP_BATTLESUIT);
-        }
-
-        ent->client->ps.misc[ MISC_ARMOR ] = 0;
-        ent->client->ps.stats[ STAT_FLAGS ] &= ~SFL_ARMOR_GENERATE;
-        ent->client->lastArmorGenTime = 0;
-        ent->client->armorToGen = 0;
-        ent->client->armorGenIncrementTime = 0;
-      } else if( i == UP_BIOKIT )
-      {
-        ent->client->ps.misc[ MISC_MAX_HEALTH ] =
-              BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->health;
-        G_ChangeHealth( ent, ent, ent->health,
-                        (HLTHF_SET_TO_CHANGE|
-                         HLTHF_INITIAL_MAX_CAP) );
-        ent->client->bioKitHealthToRestore = 0;
-        ent->client->bioKitIncrementTime = 0;
-        ent->healthReserve = 0;
-      }
-
-      BG_RemoveUpgradeFromInventory( i, ent->client->ps.stats );
-
-      if( i == UP_BATTPACK || i == UP_BATTLESUIT ) {
-        int rounds, clips, price;
-
-        if(G_CanGiveClientMaxAmmo(ent, qtrue, &rounds, &clips, &price)) {
-          ent->client->ps.pm_flags |= PMF_WEAPON_RELOAD;
-        }
-        G_GiveClientMaxAmmo( ent, qtrue );
-      }
+      G_TakeUpgrade(ent, i, force);
     }
     //add to funds
     G_AddCreditToClient( ent->client, (short)value, qfalse );
