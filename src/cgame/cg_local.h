@@ -1603,8 +1603,8 @@ extern  cg_t      cg;
 extern  centity_t cg_entities[ MAX_GENTITIES ];
 extern  displayContextDef_t  cgDC;
 
-extern  weaponInfo_t    cg_weapons[ 32 ];
-extern  upgradeInfo_t   cg_upgrades[ 32 ];
+extern  weaponInfo_t    cg_weapons[ WP_NUM_WEAPONS ];
+extern  upgradeInfo_t   cg_upgrades[ UP_NUM_UPGRADES ];
 
 extern  buildableInfo_t cg_buildables[ BA_NUM_BUILDABLES ];
 

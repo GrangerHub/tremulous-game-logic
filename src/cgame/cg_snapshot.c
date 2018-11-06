@@ -92,6 +92,9 @@ void CG_SetInitialSnapshot( snapshot_t *snap )
 
   cg.snap = snap;
 
+  //hack for extending beyond the limit of 32 weapon numbers
+  cg.snap->ps.weapon = cg.snap->ps.misc[MISC_HELD_WEAPON];
+
   BG_PlayerStateToEntityState( &snap->ps, &cg_entities[ snap->ps.clientNum ].currentState, qfalse );
 
   // sort out solid entities
@@ -202,6 +205,9 @@ static void CG_SetNextSnap( snapshot_t *snap )
   centity_t     *cent;
 
   cg.nextSnap = snap;
+
+  //hack for extending beyond the limit of 32 weapon numbers
+  cg.nextSnap->ps.weapon = cg.nextSnap->ps.misc[MISC_HELD_WEAPON];
 
   BG_PlayerStateToEntityState( &snap->ps, &cg_entities[ snap->ps.clientNum ].nextState, qfalse );
   cg_entities[ cg.snap->ps.clientNum ].interpolate = qtrue;

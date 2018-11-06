@@ -106,8 +106,8 @@ cg_t        cg;
 cgs_t       cgs;
 centity_t   cg_entities[ MAX_GENTITIES ];
 
-weaponInfo_t    cg_weapons[ 32 ];
-upgradeInfo_t   cg_upgrades[ 32 ];
+weaponInfo_t    cg_weapons[ WP_NUM_WEAPONS ];
+upgradeInfo_t   cg_upgrades[ UP_NUM_UPGRADES ];
 
 buildableInfo_t cg_buildables[ BA_NUM_BUILDABLES ];
 

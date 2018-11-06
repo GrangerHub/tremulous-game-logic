@@ -664,12 +664,12 @@ static void CG_HumanText( char *text, playerState_t *ps )
           CG_KeyNameForCommand( "ready" ) ) );
   }
 
-  if( cg.weaponSelect < 32 )
+  if( cg.weaponSelect < WP_NUM_WEAPONS )
     name = cg_weapons[ cg.weaponSelect ].humanName;
   else
   {
-    name = cg_upgrades[ cg.weaponSelect - 32 ].humanName;
-    upgrade = cg.weaponSelect - 32;
+    name = cg_upgrades[ cg.weaponSelect - WP_NUM_WEAPONS ].humanName;
+    upgrade = cg.weaponSelect - WP_NUM_WEAPONS;
   }
 
   if( !ps->ammo && !ps->clips && !BG_Weapon( ps->weapon )->infiniteAmmo )
