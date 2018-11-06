@@ -2933,6 +2933,31 @@ void G_SellErrHandling( gentity_t *ent, const sellErr_t error )
 
 /*
 =================
+G_TakeUpgrade
+=================
+*/
+static void G_TakeUpgrade(
+  gentity_t *ent, const upgrade_t upgrade, qboolean force) {
+  if(upgrade == UP_BATTLESUIT) {
+    vec3_t newOrigin;
+
+    G_RoomForClassChange(ent, PCL_HUMAN_BSUIT, newOrigin);
+    VectorCopy( newOrigin, ent->client->ps.origin );
+    ent->client->ps.stats[STAT_CLASS] = PCL_HUMAN;
+    ent->client->pers.classSelection = PCL_HUMAN;
+    ent->client->ps.eFlags ^= EF_TELEPORT_BIT;
+  }
+
+  //remove from inventory
+  BG_RemoveUpgradeFromInventory(upgrade, ent->client->ps.stats);
+
+  if(upgrade == UP_BATTPACK) {
+    G_GiveClientMaxAmmo(ent, qtrue);
+  }
+}
+
+/*
+=================
 G_TakeItem
 =================
 */
@@ -2971,23 +2996,7 @@ void G_TakeItem(
   }
   else if( upgrade != UP_NONE )
   {
-      // shouldn't really need to test for this, but just to be safe
-      if( upgrade == UP_BATTLESUIT )
-      {
-        vec3_t newOrigin;
-
-        G_RoomForClassChange( ent, PCL_HUMAN_BSUIT, newOrigin );
-        VectorCopy( newOrigin, ent->client->ps.origin );
-        ent->client->ps.stats[ STAT_CLASS ] = PCL_HUMAN;
-        ent->client->pers.classSelection = PCL_HUMAN;
-        ent->client->ps.eFlags ^= EF_TELEPORT_BIT;
-      }
-
-      //add to inventory
-      BG_RemoveUpgradeFromInventory( upgrade, ent->client->ps.stats );
-
-      if( upgrade == UP_BATTPACK )
-        G_GiveClientMaxAmmo( ent, qtrue );
+      G_TakeUpgrade(ent, upgrade, force);
 
       //add to funds
       G_AddCreditToClient( ent->client, (short)value, qfalse );
@@ -2997,27 +3006,12 @@ void G_TakeItem(
     for( i = UP_NONE + 1; i < UP_NUM_UPGRADES; i++ )
     {
       int       dummy_value;
-      sellErr_t sell_err = G_CanSellUpgrade(ent, i, &dummy_value, force);
 
-      if(sell_err != ERR_SELL_NONE) {
+      if(G_CanSellUpgrade(ent, i, &dummy_value, force) != ERR_SELL_NONE) {
         continue;
       }
-      // shouldn't really need to test for this, but just to be safe
-      if( i == UP_BATTLESUIT )
-      {
-        vec3_t newOrigin;
 
-        G_RoomForClassChange( ent, PCL_HUMAN_BSUIT, newOrigin );
-        VectorCopy( newOrigin, ent->client->ps.origin );
-        ent->client->ps.stats[ STAT_CLASS ] = PCL_HUMAN;
-        ent->client->pers.classSelection = PCL_HUMAN;
-        ent->client->ps.eFlags ^= EF_TELEPORT_BIT;
-      }
-
-      BG_RemoveUpgradeFromInventory( i, ent->client->ps.stats );
-
-      if( i == UP_BATTPACK )
-        G_GiveClientMaxAmmo( ent, qtrue );
+      G_TakeUpgrade(ent, i, force);
     }
 
     //add to funds
