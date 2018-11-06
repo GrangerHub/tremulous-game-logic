@@ -952,7 +952,7 @@ typedef enum
 } sellErr_t;
 
 sellErr_t G_CanSell( gentity_t *ent, const char *itemName, int *value, qboolean force );
-void G_TakeItem( gentity_t *ent, const char *itemName, const int value );
+void G_TakeItem( gentity_t *ent, const char *itemName, const int value, qboolean force );
 int G_CanAutoSell( gentity_t *ent, const char *itemToBuyName,
                         weapon_t *weaponToSell, int *upgradesToSell,
                         int *values, int numValues, sellErr_t *autoSellErrors, qboolean force );

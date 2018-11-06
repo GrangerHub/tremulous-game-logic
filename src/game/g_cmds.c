@@ -2739,6 +2739,42 @@ void Cmd_ToggleItem_f( gentity_t *ent )
 
 /*
 =================
+G_CanSellUpgrade
+=================
+*/
+static sellErr_t G_CanSellUpgrade(
+  gentity_t *ent, const upgrade_t upgrade, int *value, qboolean force) {
+  if(force || (IS_WARMUP && BG_Upgrade(upgrade)->warmupFree)) {
+    *value = 0;
+  }
+  else {
+    *value = BG_Upgrade(upgrade)->price;
+  }
+
+  //are we /allowed/ to sell this?
+  if( !BG_Upgrade(upgrade)->purchasable && !force) {
+    return ERR_Sell_NOT_PURCHASABLE;
+  }
+
+  //remove upgrade if carried
+  if(BG_InventoryContainsUpgrade(upgrade, ent->client->ps.stats)) {
+    // shouldn't really need to test for this, but just to be safe
+    if(upgrade == UP_BATTLESUIT) {
+      vec3_t newOrigin;
+
+      if(!G_RoomForClassChange(ent, PCL_HUMAN, newOrigin)) {
+        return ERR_SELL_NOROOMBSUITOFF;
+      }
+    }
+  } else {
+    return ERR_SELL_NOT_ITEM_HELD;
+  }
+
+  return ERR_SELL_NONE;
+}
+
+/*
+=================
 G_CanSell
 =================
 */
@@ -2817,47 +2853,21 @@ sellErr_t G_CanSell(gentity_t *ent, const char *itemName, int *value, qboolean f
   }
   else if( upgrade != UP_NONE )
   {
-    if( force || (IS_WARMUP && BG_Upgrade( upgrade )->warmupFree) )
-      *value = 0;
-    else
-      *value = BG_Upgrade( upgrade )->price;
+    sellErr_t sell_err = G_CanSellUpgrade(ent, upgrade, value, force);
 
-    //are we /allowed/ to sell this?
-    if( !BG_Upgrade( upgrade )->purchasable && !force )
-      return ERR_Sell_NOT_PURCHASABLE;
-
-    //remove upgrade if carried
-    if( BG_InventoryContainsUpgrade( upgrade, ent->client->ps.stats ) )
-    {
-      // shouldn't really need to test for this, but just to be safe
-      if( upgrade == UP_BATTLESUIT )
-      {
-        vec3_t newOrigin;
-
-        if( !G_RoomForClassChange( ent, PCL_HUMAN, newOrigin ) )
-          return ERR_SELL_NOROOMBSUITOFF;
-      }
-    } else
-      return ERR_SELL_NOT_ITEM_HELD;
+    if(sell_err != ERR_SELL_NONE) {
+      return sell_err;
+    }
   }
   else if( !Q_stricmp( itemName, "upgrades" ) )
   {
     for( i = UP_NONE + 1; i < UP_NUM_UPGRADES; i++ )
     {
-      //remove upgrade if carried
-      if( BG_InventoryContainsUpgrade( i, ent->client->ps.stats ) &&
-          ( BG_Upgrade( i )->purchasable || force ) )
-      {
-        // shouldn't really need to test for this, but just to be safe
-        if( i == UP_BATTLESUIT )
-        {
-          vec3_t newOrigin;
+      int       upgrade_value;
+      sellErr_t sell_err = G_CanSellUpgrade(ent, i, &upgrade_value, force);
 
-          if( !G_RoomForClassChange( ent, PCL_HUMAN, newOrigin ) )
-            continue;
-        }
-
-        *value += BG_Upgrade( i )->price;
+      if(sell_err == ERR_SELL_NONE) {
+        *value += upgrade_value;
       }
     }
   }
@@ -2920,8 +2930,8 @@ void G_SellErrHandling( gentity_t *ent, const sellErr_t error )
 G_TakeItem
 =================
 */
-void G_TakeItem( gentity_t *ent, const char *itemName, const int value )
-{
+void G_TakeItem(
+  gentity_t *ent, const char *itemName, const int value, qboolean force) {
   int       i;
   weapon_t  weapon;
   upgrade_t upgrade;
@@ -2980,6 +2990,12 @@ void G_TakeItem( gentity_t *ent, const char *itemName, const int value )
   {
     for( i = UP_NONE + 1; i < UP_NUM_UPGRADES; i++ )
     {
+      int       dummy_value;
+      sellErr_t sell_err = G_CanSellUpgrade(ent, i, &dummy_value, force);
+
+      if(sell_err != ERR_SELL_NONE) {
+        continue;
+      }
       // shouldn't really need to test for this, but just to be safe
       if( i == UP_BATTLESUIT )
       {
@@ -2996,10 +3012,10 @@ void G_TakeItem( gentity_t *ent, const char *itemName, const int value )
 
       if( i == UP_BATTPACK )
         G_GiveClientMaxAmmo( ent, qtrue );
-
-      //add to funds
-      G_AddCreditToClient( ent->client, (short)value, qfalse );
     }
+
+    //add to funds
+    G_AddCreditToClient( ent->client, (short)value, qfalse );
   }
 
   //update ClientInfo
@@ -3025,7 +3041,7 @@ qboolean G_TakeItemAfterCheck(gentity_t *ent, const char *itemName, qboolean for
     return qfalse;
   }
 
-  G_TakeItem( ent, itemName, value );
+  G_TakeItem( ent, itemName, value, force );
   return qtrue;
 }
 
@@ -3550,7 +3566,7 @@ qboolean G_GiveItemAfterCheck(gentity_t *ent, const char *itemName, qboolean for
 
    if( weaponToAutoSell != WP_NONE )
      G_TakeItem( ent, BG_Weapon( weaponToAutoSell )->name,
-                 fundsFromAutoSell[ UP_NUM_UPGRADES ] );
+                 fundsFromAutoSell[ UP_NUM_UPGRADES ], force );
 
    if( upgradesToAutoSell )
    {
@@ -3559,7 +3575,7 @@ qboolean G_GiveItemAfterCheck(gentity_t *ent, const char *itemName, qboolean for
        if( !( upgradesToAutoSell & ( 1 << i ) ) )
          continue;
 
-       G_TakeItem( ent, BG_Upgrade( i )->name, fundsFromAutoSell[ i ] );
+       G_TakeItem( ent, BG_Upgrade( i )->name, fundsFromAutoSell[ i ], force );
      }
    }
 
