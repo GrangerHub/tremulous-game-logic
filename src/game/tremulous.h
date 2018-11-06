@@ -500,7 +500,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LCANNON_CHARGE_TIME_MIN     400
 #define LCANNON_CHARGE_TIME_WARN    ( LCANNON_CHARGE_TIME_MAX - ( 2000 / 3 ) )
 #define LCANNON_CHARGE_AMMO         10       // ammo cost of a full charge shot
-#define LCANNON_CHARGE_AMMO_REDUCE  0.25f    // rate at which luci ammo is reduced when using +attack2
+#define LCANNON_CHARGE_AMMO_REDUCE  0.0f     // rate at which luci ammo is reduced when using +attack2
 #define LCANNON_SPLASH_LIGHTARMOUR  0.50f    // reduction of damage fraction for luci splash on light armour
 #define LCANNON_SPLASH_HELMET       0.75f    // reduction of damage fraction for luci splash on helmets
 #define LCANNON_SPLASH_BATTLESUIT   0.50f    // reduction of damage fraction for luci splash on battlesuits
