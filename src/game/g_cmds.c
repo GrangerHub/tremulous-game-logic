@@ -4041,6 +4041,8 @@ void Cmd_Reload_f( gentity_t *ent )
 
   if( ps->stats[ STAT_TEAM ] == TEAM_HUMANS &&
       ps->weapon != WP_HBUILD &&
+      ps->weapon != WP_HBUILD2 &&
+      ps->weapon != WP_ABUILD &&
       ps->weapon != WP_ABUILD2)
   {
     // reload is being attempted
