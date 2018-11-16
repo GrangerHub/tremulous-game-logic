@@ -912,6 +912,7 @@ if desired.
 Q_EXPORT char *ClientUserinfoChanged( int clientNum, qboolean forceName )
 {
   gentity_t *ent;
+  int       value;
   char      *s, *s2;
   char      model[ MAX_QPATH ];
   char      buffer[ MAX_QPATH ];
@@ -1080,12 +1081,20 @@ Q_EXPORT char *ClientUserinfoChanged( int clientNum, qboolean forceName )
     client->ps.persistant[ PERS_STATE ] &= ~PS_WALLCLIMBINGTOGGLE;
 
   // always sprint
-  s = Info_ValueForKey( userinfo, "cg_sprintToggle" );
+  s = Info_ValueForKey(userinfo, "cg_sprintToggle");
+  value = atoi(s);
 
-  if( atoi( s ) )
+  if(value) {
     client->ps.persistant[ PERS_STATE ] |= PS_SPRINTTOGGLE;
-  else
+    if(value == 2) {
+      client->ps.persistant[ PERS_STATE ] |= PS_SPRINTTOGGLEONSTOP;
+    } else {
+      client->ps.persistant[ PERS_STATE ] &= ~PS_SPRINTTOGGLEONSTOP;
+    }
+  } else {
     client->ps.persistant[ PERS_STATE ] &= ~PS_SPRINTTOGGLE;
+    client->ps.persistant[ PERS_STATE ] &= ~PS_SPRINTTOGGLEONSTOP;
+  }
 
   // fly speed
   s = Info_ValueForKey( userinfo, "cg_flySpeed" );

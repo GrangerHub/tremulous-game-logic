@@ -935,6 +935,12 @@ static float PM_CmdScale( usercmd_t *cmd, qboolean zFlight )
         sprint = qfalse;
         pm->ps->pm_flags &= ~PMF_SPRINTHELD;
       }
+      else if( ( pm->ps->persistant[ PERS_STATE ] & PS_SPRINTTOGGLEONSTOP ) &&
+               !pm->cmd.forwardmove && !pm->cmd.rightmove )
+      {
+        sprint = qfalse;
+        pm->ps->pm_flags &= ~PMF_SPRINTHELD;
+      }
       else if( ( cmd->buttons & BUTTON_SPRINT ) &&
                !( pm->ps->pm_flags & PMF_SPRINTHELD ) &&
                !( cmd->buttons & BUTTON_WALKING ) )
