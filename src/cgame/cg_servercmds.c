@@ -816,14 +816,34 @@ void CG_Menu( int menu, int arg )
         case TEAM_ALIENS:
           longMsg   = "You cannot build within the range of a human reactor "
                       "nor a repeater during pre-game warmup.";
-          shortMsg  = "^5A nearby human reactor or a repeater is disrupting creep here.";
+          shortMsg  = "A nearby human reactor or a repeater is disrupting creep here.";
           break;
         case TEAM_HUMANS:
           longMsg   = "You cannot build on alien creep, within the range of "
                       "an overmind nor an egg nor during pre-game warmup.";
-          shortMsg  = "^5Alien creep is disrupting power here.";
+          shortMsg  = "Alien creep is disrupting power here.";
           break;
       }
+      break;
+
+    case MN_B_SD_UNIQUE:
+      longMsg   = "You can only rebuild one of each type of rebuildable "
+                  "structure during Sudden Death.";
+      shortMsg  = "You can only rebuild one of each type of rebuildable "
+                  "structure during Sudden Death.";
+      break;
+
+    case MN_B_SD_IRREPLACEABLE:
+      longMsg   = "Structures not built at the start of sudden death, spawns, "
+                  "and defensive buildables can't be rebuilt during sudden death.";
+      shortMsg  = "This building type cannot be rebuilt during Sudden Death";
+      break;
+
+    case MN_B_SD_NODECON:
+      longMsg   = "This structure can't be deconstructed nor marked during "
+                  "sudden death";
+      shortMsg  = "This structure can't be deconstructed nor marked during "
+                  "sudden death";
       break;
 
     case MN_B_SURRENDER:

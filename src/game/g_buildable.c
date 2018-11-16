@@ -453,26 +453,31 @@ G_GetBuildPoints
 Get the number of build points from a position
 ==================
 */
-int G_GetBuildPoints( const vec3_t pos, team_t team )
-{
-  if( !IS_WARMUP && G_TimeTilSuddenDeath( ) <= 0 )
-  {
-    return 0;
+int G_GetBuildPoints(const vec3_t pos, team_t team) {
+  if(!IS_WARMUP && G_TimeTilSuddenDeath( ) <= 0) {
+    if(g_suddenDeathMode.integer == SDMODE_SELECTIVE) {
+      if(team == TEAM_ALIENS) {
+        return level.alienBuildPoints;
+      } else if(team == TEAM_HUMANS) {
+        return level.humanBuildPoints;
+      }
+    } else {
+      return 0;
+    }
   }
-  else if( team == TEAM_ALIENS )
-  {
+  else if(team == TEAM_ALIENS) {
     return level.alienBuildPoints;
-  }
-  else if( team == TEAM_HUMANS )
-  {
-    gentity_t *powerPoint = G_PowerEntityForPoint( pos );
+  } else if(team == TEAM_HUMANS) {
+    gentity_t *powerPoint = G_PowerEntityForPoint(pos);
 
-    if( powerPoint && powerPoint->s.modelindex == BA_H_REACTOR )
+    if(powerPoint && powerPoint->s.modelindex == BA_H_REACTOR) {
       return level.humanBuildPoints;
+    }
 
-    if( powerPoint && powerPoint->s.modelindex == BA_H_REPEATER &&
-        powerPoint->usesBuildPointZone && level.buildPointZones[ powerPoint->buildPointZone ].active )
-    {
+    if(
+      powerPoint && powerPoint->s.modelindex == BA_H_REPEATER &&
+      powerPoint->usesBuildPointZone &&
+      level.buildPointZones[powerPoint->buildPointZone].active) {
       return level.buildPointZones[ powerPoint->buildPointZone ].totalBuildPoints -
              level.buildPointZones[ powerPoint->buildPointZone ].queuedBuildPoints;
     }
@@ -711,8 +716,6 @@ The code here will break if more than one reactor or overmind is allowed, even
 if one of them is dead/unspawned
 ================
 */
-static gentity_t *G_FindBuildable( buildable_t buildable );
-
 gentity_t *G_Reactor( void )
 {
   static gentity_t *rc;
@@ -3304,6 +3307,21 @@ static int G_QueueValue( gentity_t *self )
   int       queuePoints;
   double    queueFraction = 0;
 
+  if(
+    G_TimeTilSuddenDeath() <= 0 &&
+    g_suddenDeathMode.integer == SDMODE_SELECTIVE) {
+
+    //don't queue buildables that are not allowed to be replaced
+    if(!level.sudden_death_replacable[self->s.modelindex]) {
+      return 0;
+    }
+
+    //determine if there is another built buildable of this type
+    if(!G_BuildableIsUnique(self)) {
+      return 0;
+    }
+  }
+
   for( i = 0; i < level.maxclients; i++ )
   {
     gentity_t *player = g_entities + i;
@@ -3358,9 +3376,11 @@ void G_QueueBuildPoints( gentity_t *self )
       if( powerEntity )
       {
         int nqt;
-        switch( powerEntity->s.modelindex )
-        {
-          case BA_H_REACTOR:
+
+        if(
+          !IS_WARMUP &&
+          G_TimeTilSuddenDeath() <= 0 &&
+          g_suddenDeathMode.integer == SDMODE_SELECTIVE) {
             nqt = G_NextQueueTime( level.humanBuildPointQueue,
                                    g_humanBuildPoints.integer,
                                    g_humanBuildQueueTime.integer );
@@ -3369,28 +3389,41 @@ void G_QueueBuildPoints( gentity_t *self )
               level.humanNextQueueTime = level.time + nqt;
 
             level.humanBuildPointQueue += queuePoints;
-            break;
+        } else {
+          switch( powerEntity->s.modelindex )
+          {
+            case BA_H_REACTOR:
+              nqt = G_NextQueueTime( level.humanBuildPointQueue,
+                                     g_humanBuildPoints.integer,
+                                     g_humanBuildQueueTime.integer );
+              if( !level.humanBuildPointQueue ||
+                  level.time + nqt < level.humanNextQueueTime )
+                level.humanNextQueueTime = level.time + nqt;
 
-          case BA_H_REPEATER:
-            if( powerEntity->usesBuildPointZone &&
-                level.buildPointZones[ powerEntity->buildPointZone ].active )
-            {
-              buildPointZone_t *zone = &level.buildPointZones[ powerEntity->buildPointZone ];
+              level.humanBuildPointQueue += queuePoints;
+              break;
 
-              nqt = G_NextQueueTime( zone->queuedBuildPoints,
-                                     zone->totalBuildPoints,
-                                     g_humanRepeaterBuildQueueTime.integer );
+            case BA_H_REPEATER:
+              if( powerEntity->usesBuildPointZone &&
+                  level.buildPointZones[ powerEntity->buildPointZone ].active )
+              {
+                buildPointZone_t *zone = &level.buildPointZones[ powerEntity->buildPointZone ];
 
-              if( !zone->queuedBuildPoints ||
-                  level.time + nqt < zone->nextQueueTime )
-                zone->nextQueueTime = level.time + nqt;
+                nqt = G_NextQueueTime( zone->queuedBuildPoints,
+                                       zone->totalBuildPoints,
+                                       g_humanRepeaterBuildQueueTime.integer );
 
-              zone->queuedBuildPoints += queuePoints;
-            }
-            break;
+                if( !zone->queuedBuildPoints ||
+                    level.time + nqt < zone->nextQueueTime )
+                  zone->nextQueueTime = level.time + nqt;
 
-          default:
-            break;
+                zone->queuedBuildPoints += queuePoints;
+              }
+              break;
+
+            default:
+              break;
+          }
         }
       }
   }
@@ -3781,7 +3814,7 @@ G_FindBuildable
 Finds a buildable of the specified type
 ================
 */
-static gentity_t *G_FindBuildable( buildable_t buildable )
+gentity_t *G_FindBuildable( buildable_t buildable )
 {
   int       i;
   gentity_t *ent;
@@ -3797,6 +3830,39 @@ static gentity_t *G_FindBuildable( buildable_t buildable )
   }
 
   return NULL;
+}
+
+/*
+================
+G_BuildableIsUnique
+
+Determines if a given buildable unique.
+================
+*/
+qboolean G_BuildableIsUnique(gentity_t *buildable) {
+  int       i;
+  gentity_t *ent;
+
+  Com_Assert(buildable && "G_BuildableIsUnique: ent is NULL");
+  Com_Assert(buildable->s.eType == ET_BUILDABLE && "G_BuildableIsUnique: ent is NULL");
+
+  for(
+    i = MAX_CLIENTS, ent = g_entities + i;
+    i < level.num_entities; i++, ent++ ) {
+    if( ent->s.eType != ET_BUILDABLE ) {
+      continue;
+    }
+
+    if(ent == buildable) {
+      continue;
+    }
+
+    if(ent->s.modelindex == buildable->s.modelindex && !(ent->s.eFlags & EF_DEAD)) {
+      return qfalse;
+    }
+  }
+
+  return qtrue;
 }
 
 /*
@@ -4524,7 +4590,13 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
     reason = IBE_PERMISSION;
 
   // Can we only have one of these?
-  if( BG_Buildable( buildable )->uniqueTest )
+  if(
+    BG_Buildable( buildable )->uniqueTest ||
+    (
+      !IS_WARMUP &&
+      G_TimeTilSuddenDeath() <= 0 &&
+      g_suddenDeathMode.integer == SDMODE_SELECTIVE &&
+      level.sudden_death_replacable[buildable]))
   {
     tempent = G_FindBuildable( buildable );
     intersectsBuildable = qfalse;
@@ -4551,10 +4623,24 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
           break;
 
         default:
-          Com_Error( ERR_FATAL, "No reason for denying build of %d", buildable );
+          if(
+            !IS_WARMUP &&
+            G_TimeTilSuddenDeath() <= 0 &&
+            g_suddenDeathMode.integer == SDMODE_SELECTIVE) {
+            reason = IBE_SD_UNIQUE;
+          } else {
+            Com_Error( ERR_FATAL, "No reason for denying build of %d", buildable );
+          }
           break;
       }
     }
+  }
+
+  if(
+    !IS_WARMUP && G_TimeTilSuddenDeath() <= 0 &&
+    g_suddenDeathMode.integer == SDMODE_SELECTIVE &&
+    !level.sudden_death_replacable[buildable]) {
+    reason = IBE_SD_IRREPLACEABLE;
   }
 
   if( ( IS_WARMUP && g_warmupBuildableRespawning.integer ) ||
@@ -4951,6 +5037,14 @@ qboolean G_BuildIfValid( gentity_t *ent, buildable_t buildable )
 
     case IBE_BLOCKEDBYENEMY:
       G_TriggerMenu( ent->client->ps.clientNum, MN_B_BLOCKEDBYENEMY );
+      return qfalse;
+
+    case IBE_SD_UNIQUE:
+      G_TriggerMenu( ent->client->ps.clientNum, MN_B_SD_UNIQUE );
+      return qfalse;
+
+    case IBE_SD_IRREPLACEABLE:
+      G_TriggerMenu( ent->client->ps.clientNum, MN_B_SD_IRREPLACEABLE );
       return qfalse;
 
     default:
@@ -5681,11 +5775,40 @@ void G_BuildLogRevert( int id )
 
         if( BG_Buildable( log->modelindex )->team == TEAM_ALIENS )
         {
-          level.alienBuildPointQueue =
-            MAX( 0, level.alienBuildPointQueue - value );
+          if(
+            G_TimeTilSuddenDeath() <= 0 &&
+            g_suddenDeathMode.integer == SDMODE_SELECTIVE) {
+            if(
+              level.sudden_death_replacable[log->modelindex] &&
+              !G_FindBuildable(log->modelindex)) {
+              level.alienBuildPointQueue =
+                MAX(
+                  0,
+                  level.alienBuildPointQueue -
+                    value );
+            }
+          } else {
+            level.alienBuildPointQueue =
+              MAX( 0, level.alienBuildPointQueue - value );
+          }
+          
         }
         else
         {
+          if(
+            G_TimeTilSuddenDeath() <= 0 &&
+            g_suddenDeathMode.integer == SDMODE_SELECTIVE) {
+            if(
+              level.sudden_death_replacable[log->modelindex] &&
+              !G_FindBuildable(log->modelindex)) {
+              level.humanBuildPointQueue =
+                MAX(
+                  0,
+                  level.humanBuildPointQueue -
+                    value );
+            }
+          }
+
           if( log->powerSource == BA_H_REACTOR )
           {
             level.humanBuildPointQueue =

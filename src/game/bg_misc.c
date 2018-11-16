@@ -4503,8 +4503,7 @@ BG_SplatterRandom
 ==============
 */
 static float BG_SplatterRandom( splatterPatternData_t *data, angleIndex_t angle_index ) {
-  Com_Assert( data &&
-              "BG_SplatterRandom" );
+  Com_Assert( data );
 
   return Q_random( &data->seed );
 }
@@ -4517,10 +4516,8 @@ BG_SplatterUniform
 static float BG_SplatterUniform( splatterPatternData_t *data, angleIndex_t angle_index ) {
   const int yaw_layers = data->splatter->number / data->splatter->pitchLayers;
 
-  Com_Assert( data &&
-              "BG_SplatterUniform" );
-  Com_Assert( data->fragment_num &&
-              "BG_SplatterUniform" );
+  Com_Assert( data );
+  Com_Assert( data->fragment_num );
 
   if( angle_index == YAW ) {
     const int yaw_layer_num = *data->fragment_num % yaw_layers;
@@ -4531,8 +4528,7 @@ static float BG_SplatterUniform( splatterPatternData_t *data, angleIndex_t angle
   }
 
   //at this point angle_index must be PITCH
-  Com_Assert( ( angle_index == PITCH ) &&
-    "BG_SplatterUniform" );
+  Com_Assert( angle_index == PITCH );
 
   {
     const int pitch_layer_num = *data->fragment_num / yaw_layers;
@@ -4549,10 +4545,8 @@ BG_SplatterUniformAlternating
 static float BG_SplatterUniformAlternating( splatterPatternData_t *data, angleIndex_t angle_index ) {
   const int yaw_layers = data->splatter->number / data->splatter->pitchLayers;
 
-  Com_Assert( data &&
-              "BG_SplatterUniform" );
-  Com_Assert( data->fragment_num &&
-              "BG_SplatterUniform" );
+  Com_Assert( data );
+  Com_Assert( data->fragment_num );
 
   if( angle_index == YAW ) {
     const int pitch_layer_num = *data->fragment_num / yaw_layers;
@@ -4567,8 +4561,7 @@ static float BG_SplatterUniformAlternating( splatterPatternData_t *data, angleIn
   }
 
   //at this point angle_index must be PITCH
-  Com_Assert( ( angle_index == PITCH ) &&
-    "BG_SplatterUniform" );
+  Com_Assert( angle_index == PITCH );
 
   {
     const int pitch_layer_num = *data->fragment_num / yaw_layers;
@@ -4585,12 +4578,9 @@ BG_SplatterSphericalCone
 static void BG_SplatterSphericalCone( splatterPatternData_t *data, vec3_t out ) {
   vec3_t splatter_angles;
 
-  Com_Assert( data &&
-              "BG_SplatterSphericalCone" );
-  Com_Assert( data->distribution &&
-              "BG_SplatterSphericalCone" );
-  Com_Assert( out &&
-              "BG_SplatterSphericalCone" );
+  Com_Assert( data );
+  Com_Assert( data->distribution );
+  Com_Assert( out );
 
   splatter_angles[PITCH] =  data->distribution( data, PITCH ) * data->splatter->spread;
   AngleNormalize180( splatter_angles[PITCH] );
@@ -4611,12 +4601,9 @@ BG_SplatterMirroredInverseSphericalCone
 static void BG_SplatterMirroredInverseSphericalCone( splatterPatternData_t *data, vec3_t out ) {
   vec3_t splatter_angles;
 
-  Com_Assert( data &&
-              "BG_SplatterSphericalCone" );
-  Com_Assert( data->distribution &&
-              "BG_SplatterSphericalCone" );
-  Com_Assert( out &&
-              "BG_SplatterSphericalCone" );
+  Com_Assert( data );
+  Com_Assert( data->distribution );
+  Com_Assert( out );
 
   splatter_angles[PITCH] =  data->distribution( data, PITCH ) * data->splatter->spread;
   AngleNormalize180( splatter_angles[PITCH] );
@@ -4654,26 +4641,18 @@ void BG_SplatterPattern( vec3_t origin2, int seed, int passEntNum,
   splatterData.splatter = &BG_Weapon( weapon )->splatter[modeIndex];
 
   Com_Assert( modeIndex >= 0 &&
-              modeIndex < 3 &&
-              "BG_SplatterPattern" );
-  Com_Assert( trace &&
-              "BG_SplatterPattern" );
-  Com_Assert( func &&
-              "BG_SplatterPattern" );
-  Com_Assert( splatterData.splatter &&
-              "BG_SplatterPattern" );
+              modeIndex < 3 );
+  Com_Assert( trace);
+  Com_Assert( func );
+  Com_Assert( splatterData.splatter );
   Com_Assert( splatterData.splatter->spread >= 0 &&
-              splatterData.splatter->spread <= 180 &&
-              "BG_SplatterPattern"  );
+              splatterData.splatter->spread <= 180 );
   Com_Assert( ( splatterData.distribution == SPLATD_RANDOM ||
-                splatterData.splatter->pitchLayers > 0 ) &&
-              "BG_SplatterPattern" );
-  Com_Assert( ( splatterData.distribution == SPLATD_RANDOM ||
-                splatterData.splatter->pitchLayers < splatterData.splatter->number ) &&
-              "BG_SplatterPattern" );
-  Com_Assert( ( splatterData.distribution == SPLATD_RANDOM ||
-                !( splatterData.splatter->number % splatterData.splatter->pitchLayers ) ) &&
-              "BG_SplatterPattern" );
+                splatterData.splatter->pitchLayers > 0 ) );
+  Com_Assert( splatterData.distribution == SPLATD_RANDOM ||
+              splatterData.splatter->pitchLayers < splatterData.splatter->number );
+  Com_Assert( splatterData.distribution == SPLATD_RANDOM ||
+              !( splatterData.splatter->number % splatterData.splatter->pitchLayers ) );
 
   splatterData.seed = seed;
 
@@ -4690,8 +4669,7 @@ void BG_SplatterPattern( vec3_t origin2, int seed, int passEntNum,
       break;
   }
 
-  Com_Assert( splatterData.pattern &&
-              "BG_SplatterPattern" );
+  Com_Assert( splatterData.pattern );
 
   switch( splatterData.splatter->distribution ) {
     case SPLATD_RANDOM:
@@ -4707,8 +4685,7 @@ void BG_SplatterPattern( vec3_t origin2, int seed, int passEntNum,
       break;
   }
 
-  Com_Assert( splatterData.distribution &&
-              "BG_SplatterPattern" );
+  Com_Assert( splatterData.distribution );
 
   //prepare for rotation to the facing direction
   VectorCopy( origin2, forward );
@@ -5763,7 +5740,7 @@ int BG_LightningBoltRange( const entityState_t *es,
   {
     int charge;
 
-    Com_Assert( ps->weapon == WP_LIGHTNING && "BG_LightningBoltRange" );
+    Com_Assert( ps->weapon == WP_LIGHTNING );
 
     if( currentRange )
       charge = ps->misc[ MISC_MISC ];
@@ -5773,8 +5750,8 @@ int BG_LightningBoltRange( const entityState_t *es,
     return ( charge * LIGHTNING_BOLT_RANGE_MAX ) / LIGHTNING_BOLT_CHARGE_TIME_MAX;
   }
   
-  Com_Assert( es && "BG_LightningBoltRange" )
-  Com_Assert( es->weapon == WP_LIGHTNING && "BG_LightningBoltRange" );
+  Com_Assert( es );
+  Com_Assert( es->weapon == WP_LIGHTNING );
   return ( es->constantLight * LIGHTNING_BOLT_RANGE_MAX ) / LIGHTNING_BOLT_CHARGE_TIME_MAX;
 }
 
@@ -6489,10 +6466,8 @@ void BG_EvaluateBBOXPoint( bboxPoint_t *bboxPoint, vec3_t origin,
   const float inset = 1.0f;
   int         i;
 
-  Com_Assert( bboxPoint &&
-              "BG_EvaluateBBOXPoint" );
-  Com_Assert( origin &&
-              "BG_EvaluateBBOXPointL" );
+  Com_Assert( bboxPoint );
+  Com_Assert( origin );
 
   VectorCopy( origin, bboxPoint->point );
 
@@ -6500,12 +6475,9 @@ void BG_EvaluateBBOXPoint( bboxPoint_t *bboxPoint, vec3_t origin,
   if( !minsIn || !maxsIn )
     return;
 
-  Com_Assert( minsIn[ 0 ] <= maxsIn[ 0 ] &&
-    "BG_EvaluateBBOXPoint" );
-  Com_Assert( minsIn[ 1 ] <= maxsIn[ 1 ] &&
-    "BG_EvaluateBBOXPoint" );
-  Com_Assert( minsIn[ 2 ] <= maxsIn[ 2 ] &&
-    "BG_EvaluateBBOXPoint" );
+  Com_Assert( minsIn[ 0 ] <= maxsIn[ 0 ] );
+  Com_Assert( minsIn[ 1 ] <= maxsIn[ 1 ] );
+  Com_Assert( minsIn[ 2 ] <= maxsIn[ 2 ] );
 
   VectorCopy( minsIn, mins );
   VectorCopy( maxsIn, maxs );
