@@ -405,6 +405,7 @@ typedef enum
 #define PS_WALLCLIMBINGTOGGLE   0x00000002
 #define PS_NONSEGMODEL          0x00000004
 #define PS_SPRINTTOGGLE         0x00000008
+#define PS_SPRINTTOGGLEONSTOP   0x00000010
 
 // entityState_t->eFlags
 // notice that some flags are overlapped, so their meaning depends on context
