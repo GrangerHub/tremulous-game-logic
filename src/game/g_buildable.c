@@ -459,14 +459,19 @@ G_GetBuildPoints
 Get the number of build points from a position
 ==================
 */
-int G_GetBuildPoints( const vec3_t pos, team_t team )
-{
-  if( !IS_WARMUP && G_TimeTilSuddenDeath( ) <= 0 )
-  {
-    return 0;
+int G_GetBuildPoints(const vec3_t pos, team_t team) {
+  if(!IS_WARMUP && G_TimeTilSuddenDeath( ) <= 0) {
+    if(g_suddenDeathMode.integer == SDMODE_SELECTIVE) {
+      if(team == TEAM_ALIENS) {
+        return level.alienBuildPoints;
+      } else if(team == TEAM_HUMANS) {
+        return level.humanBuildPoints;
+      }
+    } else {
+      return 0;
+    }
   }
-  else if( team == TEAM_ALIENS )
-  {
+  else if(team == TEAM_ALIENS) {
     return level.alienBuildPoints;
   }
   else if( team == TEAM_HUMANS )
@@ -726,8 +731,6 @@ The code here will break if more than one reactor or overmind is allowed, even
 if one of them is dead/unspawned
 ================
 */
-static gentity_t *G_FindBuildable( buildable_t buildable );
-
 gentity_t *G_Reactor( void )
 {
   static gentity_t *rc;
@@ -4152,6 +4155,21 @@ static int G_QueueValue( gentity_t *self )
   double    queueFraction = 0;
   double    spawnProgress;
 
+  if(
+    G_TimeTilSuddenDeath() <= 0 &&
+    g_suddenDeathMode.integer == SDMODE_SELECTIVE) {
+
+    //don't queue buildables that are not allowed to be replaced
+    if(!level.sudden_death_replacable[self->s.modelindex]) {
+      return 0;
+    }
+
+    //determine if there is another built buildable of this type
+    if(!G_BuildableIsUnique(self)) {
+      return 0;
+    }
+  }
+
   for( i = 0; i < level.maxclients; i++ )
   {
     gentity_t *player = g_entities + i;
@@ -4190,6 +4208,12 @@ void G_QueueBuildPoints( gentity_t *self )
 {
   int       queuePoints;
 
+  if(self->buildPointsQueued) {
+    return;
+  }
+
+  self->buildPointsQueued = qtrue;
+
   // dont queue bp in warmup
   queuePoints = IS_WARMUP ? 0 : G_QueueValue( self );
 
@@ -4209,9 +4233,12 @@ void G_QueueBuildPoints( gentity_t *self )
       level.alienBuildPointQueue += queuePoints;
 
       // vampire the reserve
-      if( g_humanBuildPointsReserveVampireMod.value > 0.0 )
-        level.humanBuildPointsReserveLost -= (int)( ( (float)queuePoints ) *
-                                                    g_humanBuildPointsReserveVampireMod.value );
+      if(
+        g_humanBuildPointsReserveVampireMod.value > 0.0 &&
+        G_TimeTilSuddenDeath() > 0 ) {
+        level.humanBuildPointsReserveLost -= (int)(((float)queuePoints) *
+          g_humanBuildPointsReserveVampireMod.value);
+      }
       break;
 
     case TEAM_HUMANS:
@@ -4221,9 +4248,12 @@ void G_QueueBuildPoints( gentity_t *self )
       level.humanBuildPointQueue += queuePoints;
 
       // vampire the reserve
-      if( g_alienBuildPointsReserveVampireMod.value > 0.0 )
-        level.alienBuildPointsReserveLost -= (int)( ( (float)queuePoints ) *
-                                                    g_alienBuildPointsReserveVampireMod.value );
+      if(
+        g_alienBuildPointsReserveVampireMod.value > 0.0 &&
+        G_TimeTilSuddenDeath() > 0) {
+        level.alienBuildPointsReserveLost -= (int)(((float)queuePoints) *
+          g_alienBuildPointsReserveVampireMod.value);
+      }
       break;
 
   }
@@ -4698,7 +4728,7 @@ G_FindBuildable
 Finds a buildable of the specified type
 ================
 */
-static gentity_t *G_FindBuildable( buildable_t buildable )
+gentity_t *G_FindBuildable( buildable_t buildable )
 {
   int       i;
   gentity_t *ent;
@@ -4714,6 +4744,39 @@ static gentity_t *G_FindBuildable( buildable_t buildable )
   }
 
   return NULL;
+}
+
+/*
+================
+G_BuildableIsUnique
+
+Determines if a given buildable unique.
+================
+*/
+qboolean G_BuildableIsUnique(gentity_t *buildable) {
+  int       i;
+  gentity_t *ent;
+
+  Com_Assert(buildable && "G_BuildableIsUnique: ent is NULL");
+  Com_Assert(buildable->s.eType == ET_BUILDABLE && "G_BuildableIsUnique: buildable is not ET_BUILDABLE");
+
+  for(
+    i = MAX_CLIENTS, ent = g_entities + i;
+    i < level.num_entities; i++, ent++ ) {
+    if( ent->s.eType != ET_BUILDABLE ) {
+      continue;
+    }
+
+    if(ent == buildable) {
+      continue;
+    }
+
+    if(ent->s.modelindex == buildable->s.modelindex && !(ent->s.eFlags & EF_DEAD)) {
+      return qfalse;
+    }
+  }
+
+  return qtrue;
 }
 
 /*
@@ -5452,7 +5515,13 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
     reason = IBE_PERMISSION;
 
   // Can we only have one of these?
-  if( BG_Buildable( buildable )->uniqueTest )
+  if(
+    BG_Buildable( buildable )->uniqueTest ||
+    (
+      !IS_WARMUP &&
+      G_TimeTilSuddenDeath() <= 0 &&
+      g_suddenDeathMode.integer == SDMODE_SELECTIVE &&
+      level.sudden_death_replacable[buildable]))
   {
     tempent = G_FindBuildable( buildable );
     intersectsBuildable = qfalse;
@@ -5487,10 +5556,24 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
           break;
 
         default:
-          Com_Error( ERR_FATAL, "No reason for denying build of %d", buildable );
+          if(
+            !IS_WARMUP &&
+            G_TimeTilSuddenDeath() <= 0 &&
+            g_suddenDeathMode.integer == SDMODE_SELECTIVE) {
+            reason = IBE_SD_UNIQUE;
+          } else {
+            Com_Error( ERR_FATAL, "No reason for denying build of %d", buildable );
+          }
           break;
       }
     }
+  }
+
+  if(
+    !IS_WARMUP && G_TimeTilSuddenDeath() <= 0 &&
+    g_suddenDeathMode.integer == SDMODE_SELECTIVE &&
+    !level.sudden_death_replacable[buildable]) {
+    reason = IBE_SD_IRREPLACEABLE;
   }
 
   if( ( IS_WARMUP && g_warmupBuildableRespawning.integer ) ||
@@ -6044,6 +6127,14 @@ qboolean G_BuildIfValid( gentity_t *ent, buildable_t buildable )
 
     case IBE_BLOCKEDBYENEMY:
       G_TriggerMenu( ent->client->ps.clientNum, MN_B_BLOCKEDBYENEMY );
+      return qfalse;
+
+    case IBE_SD_UNIQUE:
+      G_TriggerMenu( ent->client->ps.clientNum, MN_B_SD_UNIQUE );
+      return qfalse;
+
+    case IBE_SD_IRREPLACEABLE:
+      G_TriggerMenu( ent->client->ps.clientNum, MN_B_SD_IRREPLACEABLE );
       return qfalse;
 
     default:
@@ -6782,8 +6873,23 @@ void G_BuildLogRevert( int id )
 
         if( BG_Buildable( log->modelindex )->team == TEAM_ALIENS )
         {
-          level.alienBuildPointQueue =
-            MAX( 0, level.alienBuildPointQueue - value );
+          if(
+            G_TimeTilSuddenDeath() <= 0 &&
+            g_suddenDeathMode.integer == SDMODE_SELECTIVE) {
+            if(
+              level.sudden_death_replacable[log->modelindex] &&
+              !G_FindBuildable(log->modelindex)) {
+              level.alienBuildPointQueue =
+                MAX(
+                  0,
+                  level.alienBuildPointQueue -
+                    value );
+            }
+          } else {
+            level.alienBuildPointQueue =
+              MAX( 0, level.alienBuildPointQueue - value );
+          }
+          
         }
         else
         {

@@ -1863,7 +1863,12 @@ void Cmd_CallVote_f( gentity_t *ent )
       if(!g_suddenDeathVotePercent.integer)
       {
         SV_GameSendServerCommand( ent-g_entities,
-              "print \"Sudden Death votes have been disabled\n\"" );
+              "print \"callvote: Sudden Death votes have been disabled\n\"" );
+        return;
+      }
+      if(IS_WARMUP) {
+        SV_GameSendServerCommand( ent-g_entities,
+              "print \"callvote: Sudden Death votes can't be called during warmup\n\"" );
         return;
       }
       if( G_TimeTilSuddenDeath( ) <= 0 )
@@ -1872,8 +1877,10 @@ void Cmd_CallVote_f( gentity_t *ent )
               va( "print \"callvote: Sudden Death has already begun\n\"") );
         return;
       }
-      if( level.suddenDeathBeginTime > 0 &&
-          G_TimeTilSuddenDeath() <= g_suddenDeathVoteDelay.integer * 1000 )
+      if(
+        level.suddenDeathBeginTime > 0 &&
+        G_TimeTilSuddenDeath() <=
+          g_suddenDeathVoteDelay.integer * 1000 + VOTE_TIME)
       {
         SV_GameSendServerCommand( ent - g_entities,
               va( "print \"callvote: Sudden Death is imminent\n\"") );
@@ -2733,8 +2740,20 @@ void Cmd_Destroy_f( gentity_t *ent ) {
 
     // Don't allow destruction of buildables that cannot be rebuilt
     if( !IS_WARMUP && G_TimeTilSuddenDeath( ) <= 0 ) {
-      G_TriggerMenu( ent->client->ps.clientNum, MN_B_SUDDENDEATH );
-      return;
+      if(g_suddenDeathMode.integer == SDMODE_SELECTIVE) {
+        if(!level.sudden_death_replacable[traceEnt->s.modelindex]) {
+          G_TriggerMenu(ent->client->ps.clientNum, MN_B_SD_NODECON);
+          return;
+        } else if(!G_BuildableIsUnique(traceEnt)) {
+          G_TriggerMenu(ent->client->ps.clientNum, MN_B_SD_NODECON);
+          return;
+        }
+      } else if(
+        g_suddenDeathMode.integer != SDMODE_BP ||
+        BG_Buildable(traceEnt->s.modelindex)->buildPoints){
+        G_TriggerMenu(ent->client->ps.clientNum, MN_B_SD_NODECON);
+        return;
+      }
     }
 
     if( IS_WARMUP || ( ent->client->pers.teamSelection == TEAM_HUMANS &&
@@ -4002,7 +4021,9 @@ void Cmd_Build_f( gentity_t *ent )
     return;
   }
 
-  if( !IS_WARMUP && G_TimeTilSuddenDeath( ) <= 0 )
+  if(
+    !IS_WARMUP && G_TimeTilSuddenDeath( ) <= 0 &&
+    g_suddenDeathMode.integer == SDMODE_NO_BUILD)
   {
     G_TriggerMenu( ent->client->ps.clientNum, MN_B_SUDDENDEATH );
     return;
@@ -4113,10 +4134,21 @@ void Cmd_Reload_f( gentity_t *ent )
       }
 
       // Don't allow destruction of buildables that cannot be rebuilt
-      if( !IS_WARMUP && G_TimeTilSuddenDeath( ) <= 0 )
-      {
-        G_TriggerMenu( ent->client->ps.clientNum, MN_B_SUDDENDEATH );
-        return;
+      if( !IS_WARMUP && G_TimeTilSuddenDeath( ) <= 0 ) {
+        if(g_suddenDeathMode.integer == SDMODE_SELECTIVE) {
+          if(!level.sudden_death_replacable[traceEnt->s.modelindex]) {
+            G_TriggerMenu(ent->client->ps.clientNum, MN_B_SD_NODECON);
+            return;
+          } else if(!G_BuildableIsUnique(traceEnt)) {
+            G_TriggerMenu(ent->client->ps.clientNum, MN_B_SD_NODECON);
+            return;
+          }
+        } else if(
+          g_suddenDeathMode.integer != SDMODE_BP ||
+          BG_Buildable(traceEnt->s.modelindex)->buildPoints){
+          G_TriggerMenu(ent->client->ps.clientNum, MN_B_SD_NODECON);
+          return;
+        }
       }
 
       if( traceEnt->health > 0 )

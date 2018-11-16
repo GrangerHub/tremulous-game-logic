@@ -50,6 +50,7 @@ vmCvar_t  g_extendVotesPercent;
 vmCvar_t  g_extendVotesTime;
 vmCvar_t  g_extendVotesCount;
 vmCvar_t  g_suddenDeathTime;
+vmCvar_t  g_suddenDeathMode;
 
 vmCvar_t  g_warmup;
 vmCvar_t  g_warmupTimers;
@@ -271,6 +272,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_extendVotesTime, "g_extendVotesTime", "10", CVAR_ARCHIVE, 0, qfalse },
   { &g_extendVotesCount, "g_extendVotesCount", "5", CVAR_ARCHIVE, 0, qfalse },
   { &g_suddenDeathTime, "g_suddenDeathTime", "0", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_NORESTART, 0, qtrue },
+  { &g_suddenDeathMode, "g_suddenDeathMode", "2", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_NORESTART,0, qtrue },
 
   { &g_synchronousClients, "g_synchronousClients", "0", CVAR_SYSTEMINFO, 0, qfalse  },
 
@@ -1248,6 +1250,28 @@ int G_TimeTilSuddenDeath( void )
   return ( ( level.suddenDeathBeginTime ) - ( level.time - level.startTime ) );
 }
 
+/*
+============
+G_SuddenDeathModeString
+============
+*/
+char *G_SuddenDeathModeString( void ) {
+  sdmode_t sdmode = g_suddenDeathMode.integer;
+
+  switch (sdmode) {
+    case SDMODE_BP:
+      return "Build Point";
+
+    case SDMODE_NO_BUILD:
+      return "No Build";
+
+    case SDMODE_SELECTIVE:
+      return "Selective";
+
+    case SDMODE_NO_DECON:
+      return "No Deconstruct";
+  }
+}
 
 #define PLAYER_COUNT_MOD 5.0f
 
@@ -1395,12 +1419,15 @@ void G_CalculateBuildPoints( void )
   int               i;
 
   // BP queue updates
-  while( level.alienBuildPointQueue > 0 &&
-         level.alienBuildPointsReserve > 0 &&
-         level.alienNextQueueTime < level.time )
-  {
+  while(
+    level.alienBuildPointQueue > 0 &&
+    (
+      level.alienBuildPointsReserve > 0 ||
+      (g_suddenDeathMode.integer == SDMODE_SELECTIVE &&
+        G_TimeTilSuddenDeath() <= 0)) &&
+    level.alienNextQueueTime < level.time) {
     level.alienBuildPointQueue--;
-    if( !IS_WARMUP && G_TimeTilSuddenDeath( ) > 0 )
+    if(!IS_WARMUP && G_TimeTilSuddenDeath( ) > 0)
       level.alienBuildPointsReserveLost++;
     level.alienNextQueueTime += G_NextQueueTime( level.alienBuildPointQueue,
                                                G_StageBuildPointMaxForTeam( TEAM_ALIENS ),
@@ -1408,10 +1435,13 @@ void G_CalculateBuildPoints( void )
   }
 
 
-  while( level.humanBuildPointQueue > 0 &&
-         level.humanBuildPointsReserve > 0 &&
-         level.humanNextQueueTime < level.time )
-  {
+  while(
+    level.humanBuildPointQueue > 0 &&
+    (
+      level.humanBuildPointsReserve > 0 ||
+      (g_suddenDeathMode.integer == SDMODE_SELECTIVE &&
+        G_TimeTilSuddenDeath() <= 0)) &&
+    level.humanNextQueueTime < level.time) {
     level.humanBuildPointQueue--;
     if( !IS_WARMUP && G_TimeTilSuddenDeath( ) > 0 )
       level.humanBuildPointsReserveLost++;
@@ -1425,17 +1455,23 @@ void G_CalculateBuildPoints( void )
   // Sudden Death checks (not applicable in warmup)
   if( !IS_WARMUP && G_TimeTilSuddenDeath( ) <= 0 && level.suddenDeathWarning < TW_PASSED )
   {
+    buildable_t buildable;
+
     G_LogPrintf( "Beginning Sudden Death\n" );
     SV_GameSendServerCommand( -1,
                             va( "cp \"Sudden Death!\" %d",
                                 CP_SUDDEN_DEATH ) );
-    SV_GameSendServerCommand( -1, "print \"Beginning Sudden Death.\n\"" );
+    SV_GameSendServerCommand(
+      -1,
+      va(
+        "print \"Beginning Sudden Death (Mode: %s).\n\"",
+        G_SuddenDeathModeString()) );
     level.suddenDeathWarning = TW_PASSED;
     G_ClearDeconMarks( );
 
     // empty the build points reserves
-    level.alienBuildPointsReserveLost = g_alienBuildPointsReserve.integer;
-    level.humanBuildPointsReserveLost = g_humanBuildPointsReserve.integer;
+    level.alienBuildPointsReserveLost = G_StageBuildPointReserveMaxForTeam( TEAM_ALIENS );
+    level.humanBuildPointsReserveLost = G_StageBuildPointReserveMaxForTeam( TEAM_HUMANS );
 
     // Clear blueprints, or else structs that cost 0 BP can still be built after SD
     for( i = 0; i < level.maxclients; i++ )
@@ -1443,6 +1479,26 @@ void G_CalculateBuildPoints( void )
       if( g_entities[ i ].client->ps.stats[ STAT_BUILDABLE ] != BA_NONE )
         g_entities[ i ].client->ps.stats[ STAT_BUILDABLE ] = BA_NONE;
     }
+
+    //for SDMODE_SELECTIVE
+    for(buildable = 0; buildable < BA_NUM_BUILDABLES; buildable++) {
+      //always allow core buildables to be rebuilt
+      if(BG_Buildable(buildable)->role & ROLE_CORE) {
+        level.sudden_death_replacable[buildable] = qtrue;
+      }
+
+      //don't allow spawns and offesnive buildables to be rebuilt
+      if(BG_Buildable(buildable)->role & (ROLE_SPAWN|ROLE_OFFENSE)) {
+        continue;
+      }
+
+      //determine if a buildable type already exists
+      if(G_FindBuildable(buildable)) {
+        level.sudden_death_replacable[buildable] = qtrue;
+      }
+    }
+
+    level.humanBuildPointQueue = level.alienBuildPointQueue = 0;
   }
   else if( !IS_WARMUP && G_TimeTilSuddenDeath( ) <= SUDDENDEATHWARNING &&
     level.suddenDeathWarning < TW_IMMINENT )
@@ -1454,6 +1510,37 @@ void G_CalculateBuildPoints( void )
     SV_GameSendServerCommand( -1, va( "print \"Sudden Death will begin in %d seconds.\n\"",
           (int)( G_TimeTilSuddenDeath( ) / 1000 ) ) );
     level.suddenDeathWarning = TW_IMMINENT;
+  }
+
+  if(G_TimeTilSuddenDeath() <= 0 && g_suddenDeathMode.integer == SDMODE_SELECTIVE) {
+    buildable_t buildable;
+
+    level.humanBuildPoints = 0;
+    level.humanBuildPointsReserve = 0;
+    level.alienBuildPoints = 0;
+    level.alienBuildPointsReserve = 0;
+
+    for(buildable = 0; buildable < BA_NUM_BUILDABLES; buildable++) {
+      if(level.sudden_death_replacable[buildable] && !G_FindBuildable(buildable)) {
+        switch(BG_Buildable(buildable)->team) {
+          case TEAM_ALIENS:
+            level.alienBuildPoints += BG_Buildable(buildable)->buildPoints;
+            break;
+
+          case TEAM_HUMANS:
+            level.humanBuildPoints += BG_Buildable(buildable)->buildPoints;
+            break;
+
+          default:
+            break;
+        }
+      }
+    }
+
+    level.humanBuildPoints -= level.humanBuildPointQueue;
+    level.alienBuildPoints -= level.alienBuildPointQueue;
+
+    return;
   }
 
   level.humanBuildPoints = G_StageBuildPointMaxForTeam( TEAM_HUMANS ) - level.humanBuildPointQueue;
@@ -2942,6 +3029,18 @@ void CheckCvars(void) {
   if(g_suddenDeathTime.modificationCount != lastSDTimeModCount) {
     lastSDTimeModCount = g_suddenDeathTime.modificationCount;
     level.suddenDeathBeginTime = g_suddenDeathTime.integer * 60000;
+
+    if(G_TimeTilSuddenDeath( ) > 0) {
+      // reset the sudden death time warnings
+      if(G_TimeTilSuddenDeath( ) <= SUDDENDEATHWARNING) {
+        level.suddenDeathWarning = TW_IMMINENT;
+      } else {
+        level.suddenDeathWarning = TW_NOT;
+      }
+
+      // reset the replacable buildables for SDMODE_SELECTIVE
+      memset(level.sudden_death_replacable, 0, sizeof(level.sudden_death_replacable));
+    }
   }
 
   // If the number of zones changes, we need a new array
