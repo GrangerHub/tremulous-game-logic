@@ -130,6 +130,10 @@ static void CG_ScoresUp_f( void )
   }
 }
 
+static void CG_Boost_f(void) {
+  trap_SendConsoleCommand( "+button8; wait; -button8;\n" );
+}
+
 void CG_ClientList_f( void )
 {
   clientInfo_t *ci;
@@ -198,6 +202,7 @@ static consoleCommand_t commands[ ] =
 {
   { "+scores", CG_ScoresDown_f },
   { "-scores", CG_ScoresUp_f },
+  { "boost", CG_Boost_f },
   { "cgame_memory", BG_MemoryInfo },
   { "clientlist", CG_ClientList_f },
   { "destroyTestPS", CG_DestroyTestPS_f },
