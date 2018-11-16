@@ -2709,6 +2709,7 @@ void Cmd_Destroy_f( gentity_t *ent ) {
       ( ( ent->client->ps.weapon >= WP_ABUILD ) &&
         ( ent->client->ps.weapon <= WP_HBUILD2 ) ) ) {
     if( ent->client->pers.teamSelection == TEAM_HUMANS &&
+        traceEnt->spawned &&
         traceEnt->health < traceEnt->s.constantLight ) {
       G_TriggerMenu( ent->client->ps.clientNum, MN_B_REPAIR_TO_DECON );
       return;
