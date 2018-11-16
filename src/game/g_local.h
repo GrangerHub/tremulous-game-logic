@@ -844,9 +844,12 @@ typedef struct
 
   team_t            lastWin;
 
+  int               suddenDeathABuildPoints;
+  int               suddenDeathHBuildPoints;
   int               suddenDeathBeginTime;
   timeWarning_t     suddenDeathWarning;
   timeWarning_t     timelimitWarning;
+  qboolean          sudden_death_replacable[BA_NUM_BUILDABLES];
 
   spawnQueue_t      alienSpawnQueue;
   spawnQueue_t      humanSpawnQueue;
@@ -1055,6 +1058,8 @@ typedef enum
   IBE_PERMISSION,
   IBE_LASTSPAWN,
   IBE_BLOCKEDBYENEMY,
+  IBE_SD_UNIQUE,
+  IBE_SD_IRREPLACEABLE,
 
   IBE_MAXERRORS
 } itemBuildError_t;
@@ -1069,6 +1074,8 @@ int               G_FindDCC( gentity_t *self );
 gentity_t         *G_Reactor( void );
 gentity_t         *G_Overmind( void );
 qboolean          G_FindCreep( gentity_t *self );
+gentity_t         *G_FindBuildable( buildable_t buildable );
+qboolean          G_BuildableIsUnique(gentity_t *buildable);
 
 qboolean G_FindBuildableInStack( int groundBuildableNum, int stackedBuildableNum, int *index );
 void G_AddBuildableToStack( int groundBuildableNum, int stackedBuildableNum );
@@ -1384,6 +1391,15 @@ void FireWeapon3( gentity_t *ent );
 //
 // g_main.c
 //
+// g_suddenDeathMode settings
+typedef enum sdmode_s {
+  SDMODE_BP = 0, //disallows the building of any buildable that costs bp
+  SDMODE_NO_BUILD = 1, //disallows all building without exception
+  SDMODE_SELECTIVE = 2, //disallow building spawns and defensive buildables,
+                        //allow rebuilding of other types of buildables only if
+                        //it has been built prior to sd, and apply the unique requirement
+  SDMODE_NO_DECON = 3 //like SDMODE_BP, but also disallows decon/mark of all buildables.
+} sdmode_t;
 void ScoreboardMessage( gentity_t *client );
 void MoveClientToIntermission( gentity_t *client );
 void G_MapConfigs( const char *mapname );
@@ -1402,6 +1418,7 @@ void G_EndVote( team_t team, qboolean cancel );
 void G_CheckVote( team_t team );
 void LogExit( const char *string );
 int  G_TimeTilSuddenDeath( void );
+char *G_SuddenDeathModeString( void );
 
 //
 // g_client.c
@@ -1523,6 +1540,7 @@ extern  vmCvar_t  g_extendVotesPercent;
 extern  vmCvar_t  g_extendVotesTime;
 extern  vmCvar_t  g_extendVotesCount;
 extern  vmCvar_t  g_suddenDeathTime;
+extern  vmCvar_t  g_suddenDeathMode;
 
 extern  vmCvar_t  g_doWarmup;
 extern  vmCvar_t  g_warmupTimers;
