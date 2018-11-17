@@ -3907,7 +3907,11 @@ static void PM_Weapon( void )
         ( ( !pm->swapAttacks ?
               (pm->cmd.buttons & BUTTON_ATTACK) : (pm->cmd.buttons & BUTTON_ATTACK2) ) ) )
     {
-      if( ( pm->cmd.buttons & BUTTON_ATTACK2 ) && ( pm->ps->misc[ MISC_MISC ] > 0 ) )
+      if(
+        (
+          !pm->swapAttacks ?
+          (pm->cmd.buttons & BUTTON_ATTACK2) : (pm->cmd.buttons & BUTTON_ATTACK) ) &&
+        ( pm->ps->misc[ MISC_MISC ] > 0 ) )
       {
         pm->ps->misc[ MISC_MISC ] -= pml.msec;
         if( pm->ps->misc[ MISC_MISC ] < 0 )
@@ -3927,7 +3931,10 @@ static void PM_Weapon( void )
           }
         }
       }
-      else if( !( pm->cmd.buttons & BUTTON_ATTACK2 ) )
+      else if(
+        !(
+          !pm->swapAttacks ?
+          (pm->cmd.buttons & BUTTON_ATTACK2) : (pm->cmd.buttons & BUTTON_ATTACK)))
         pm->ps->misc[ MISC_MISC ] += pml.msec;
       if( pm->ps->misc[ MISC_MISC ] >= LCANNON_CHARGE_TIME_MAX )
         pm->ps->misc[ MISC_MISC ] = LCANNON_CHARGE_TIME_MAX;
