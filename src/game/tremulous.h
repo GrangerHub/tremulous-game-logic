@@ -403,8 +403,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define PAINSAW_PRICE               100
 #define PAINSAW_REPEAT              75
 #define PAINSAW_K_SCALE             1.0f
-#define PAINSAW_DAMAGE              HWDM(11000)
-#define PAINSAW_RANGE               64.0f
+#define PAINSAW_DAMAGE              HWDM(15000)
+#define PAINSAW_RANGE               40.0f
 #define PAINSAW_WIDTH               0.0f
 #define PAINSAW_HEIGHT              8.0f
 
