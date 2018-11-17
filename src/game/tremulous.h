@@ -363,7 +363,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define ALIEN_SPAWN_PROTECTION_TIME 3000
 
 #define ALIEN_REGEN_DAMAGE_TIME     2000 //msec since damage that regen starts again
-#define ALIEN_REGEN_NOCREEP_MOD     (1.0f/3.0f) //regen off creep
+#define ALIEN_REGEN_NOCREEP_MOD     (1.0f) //regen off creep
 
 #define ALIEN_MAX_FRAGS             9
 #define ALIEN_MAX_CREDITS           (ALIEN_MAX_FRAGS*ALIEN_CREDITS_PER_KILL)
