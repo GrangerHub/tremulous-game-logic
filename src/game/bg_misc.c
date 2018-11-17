@@ -1469,7 +1469,7 @@ static const classAttributes_t bg_classList[ ] =
     3.0f,                                           //float   airAcceleration;
     6.0f,                                           //float   friction;
     100.0f,                                         //float   stopSpeed;
-    380.0f,                                         //float   jumpMagnitude;
+    400.0f,                                         //float   jumpMagnitude;
     0.8f,                                           //float   knockbackScale;
     CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;
@@ -1502,7 +1502,7 @@ static const classAttributes_t bg_classList[ ] =
     3.0f,                                           //float   airAcceleration;
     6.0f,                                           //float   friction;
     100.0f,                                         //float   stopSpeed;
-    380.0f,                                         //float   jumpMagnitude;
+    400.0f,                                         //float   jumpMagnitude;
     0.7f,                                           //float   knockbackScale
     CHARGE_STAMINA_MAX,                    //int     chargeStaminaMax;
     CHARGE_STAMINA_RESTORE,                //int     chargeStaminaRestore;

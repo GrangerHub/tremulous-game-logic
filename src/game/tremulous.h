@@ -82,9 +82,9 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL1_JUMP_MAGNITUDE       270.0f
 
 #define LEVEL2_CLAW_DMG             AWDM(40000)
-#define LEVEL2_CLAW_RANGE           80.0f
-#define LEVEL2_CLAW_U_RANGE         LEVEL2_CLAW_RANGE + 2.0f
-#define LEVEL2_CLAW_WIDTH           14.0f
+#define LEVEL2_CLAW_RANGE           96.0f
+#define LEVEL2_CLAW_U_RANGE         LEVEL2_CLAW_RANGE
+#define LEVEL2_CLAW_WIDTH           12.0f
 #define LEVEL2_CLAW_REPEAT          500
 #define LEVEL2_CLAW_K_SCALE         1.0f
 #define LEVEL2_CLAW_U_REPEAT        400
@@ -181,25 +181,25 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL1_SPEED                1.25f
 #define LEVEL1_VALUE                AVM(270)
 #define LEVEL1_HEALTH               AHM(75000)
-#define LEVEL1_REGEN                (0.03f * LEVEL1_HEALTH)
+#define LEVEL1_REGEN                2000
 #define LEVEL1_COST                 1
 
 #define LEVEL1_UPG_SPEED            1.25f
 #define LEVEL1_UPG_VALUE            AVM(330)
 #define LEVEL1_UPG_HEALTH           AHM(80000)
-#define LEVEL1_UPG_REGEN            (0.03f * LEVEL1_UPG_HEALTH)
+#define LEVEL1_UPG_REGEN            3000
 #define LEVEL1_UPG_COST             1
 
 #define LEVEL2_SPEED                1.35f
 #define LEVEL2_VALUE                AVM(420)
 #define LEVEL2_HEALTH               AHM(150000)
-#define LEVEL2_REGEN                4000.0
+#define LEVEL2_REGEN                4000
 #define LEVEL2_COST                 1
 
 #define LEVEL2_UPG_SPEED            1.35f
 #define LEVEL2_UPG_VALUE            AVM(540)
 #define LEVEL2_UPG_HEALTH           AHM(175000)
-#define LEVEL2_UPG_REGEN            (0.03f * LEVEL2_UPG_HEALTH)
+#define LEVEL2_UPG_REGEN            5000
 #define LEVEL2_UPG_COST             1
 
 #define LEVEL3_SPEED                1.1f
@@ -211,13 +211,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define LEVEL3_UPG_SPEED            1.1f
 #define LEVEL3_UPG_VALUE            AVM(720)
 #define LEVEL3_UPG_HEALTH           AHM(250000)
-#define LEVEL3_UPG_REGEN            (0.03f * LEVEL3_UPG_HEALTH)
+#define LEVEL3_UPG_REGEN            7000
 #define LEVEL3_UPG_COST             1
 
 #define LEVEL4_SPEED                1.2f
 #define LEVEL4_VALUE                AVM(960)
 #define LEVEL4_HEALTH               AHM(400000)
-#define LEVEL4_REGEN                (0.025f * LEVEL4_HEALTH)
+#define LEVEL4_REGEN                7000
 #define LEVEL4_COST                 2
 
 /*
