@@ -1553,7 +1553,7 @@ static const classAttributes_t bg_classList[ ] =
     "In addition to the basic Dragoon abilities, the Advanced "
       "Dragoon has 3 barbs which may be used to attack humans "
       "from a distance.",
-    ( 1 << S2 )|( 1 << S3 ),                        //int     stages;
+    ( 1 << S3 ),                                    //int     stages;
     LEVEL3_UPG_HEALTH,                              //int     health;
     0.0f,                                           //float   fallDamage;
     LEVEL3_UPG_REGEN,                               //float   regenRate;
