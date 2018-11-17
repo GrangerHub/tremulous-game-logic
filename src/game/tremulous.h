@@ -61,18 +61,18 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define LEVEL1_CLAW_DMG             AWDM(32000)
 #define LEVEL1_CLAW_RANGE           96.0f
-#define LEVEL1_CLAW_U_RANGE         LEVEL1_CLAW_RANGE + 3.0f
+#define LEVEL1_CLAW_U_RANGE         LEVEL1_CLAW_RANGE
 #define LEVEL1_CLAW_WIDTH           10.0f
 #define LEVEL1_CLAW_REPEAT          600
 #define LEVEL1_CLAW_U_REPEAT        500
 #define LEVEL1_CLAW_K_SCALE         1.0f
 #define LEVEL1_CLAW_U_K_SCALE       1.0f
 #define LEVEL1_GRAB_RANGE           64.0f
-#define LEVEL1_GRAB_U_RANGE         LEVEL1_GRAB_RANGE + 3.0f
+#define LEVEL1_GRAB_U_RANGE         LEVEL1_GRAB_RANGE
 #define LEVEL1_GRAB_TIME            300
-#define LEVEL1_GRAB_U_TIME          300
+#define LEVEL1_GRAB_U_TIME          450
 #define LEVEL1_PCLOUD_DMG           AWDM(4000)
-#define LEVEL1_PCLOUD_RANGE         120.0f
+#define LEVEL1_PCLOUD_RANGE         200.0f
 #define LEVEL1_PCLOUD_REPEAT        2000
 #define LEVEL1_PCLOUD_TIME          10000
 #define LEVEL1_REGEN_MOD            2.0f
@@ -186,7 +186,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define LEVEL1_UPG_SPEED            1.25f
 #define LEVEL1_UPG_VALUE            AVM(330)
-#define LEVEL1_UPG_HEALTH           AHM(80000)
+#define LEVEL1_UPG_HEALTH           AHM(100000)
 #define LEVEL1_UPG_REGEN            3000
 #define LEVEL1_UPG_COST             1
 
