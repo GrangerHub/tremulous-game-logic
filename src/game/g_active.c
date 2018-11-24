@@ -602,7 +602,7 @@ qboolean ClientInactivityTimer( gentity_t *ent )
     client->inactivityTime = level.time + g_inactivity.integer * 1000;
     client->inactivityWarning = qfalse;
   }
-  else if( !client->pers.localClient )
+  else if( !client->pers.localClient && !IS_SCRIM )
   {
     if( level.time > client->inactivityTime - 10000 )
     {
@@ -934,6 +934,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
 
     client->pers.secondsAlive++;
     if( g_freeFundPeriod.integer > 0 &&
+        !(IS_SCRIM && !level.scrim.timed_income ) &&
         client->pers.secondsAlive % g_freeFundPeriod.integer == 0 )
     {
       // Give clients some credit periodically

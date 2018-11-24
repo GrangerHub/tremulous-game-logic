@@ -506,7 +506,7 @@ Get the number of build points from a position
 */
 int G_GetBuildPoints(const vec3_t pos, team_t team) {
   if(!IS_WARMUP && G_TimeTilSuddenDeath( ) <= 0) {
-    if(g_suddenDeathMode.integer == SDMODE_SELECTIVE) {
+    if(G_SD_Mode( ) == SDMODE_SELECTIVE) {
       if(team == TEAM_ALIENS) {
         return level.alienBuildPoints;
       } else if(team == TEAM_HUMANS) {
@@ -3356,7 +3356,7 @@ static int G_QueueValue( gentity_t *self )
 
   if(
     G_TimeTilSuddenDeath() <= 0 &&
-    g_suddenDeathMode.integer == SDMODE_SELECTIVE) {
+    G_SD_Mode( ) == SDMODE_SELECTIVE) {
 
     //don't queue buildables that are not allowed to be replaced
     if(!level.sudden_death_replacable[self->s.modelindex]) {
@@ -3427,7 +3427,7 @@ void G_QueueBuildPoints( gentity_t *self )
         if(
           !IS_WARMUP &&
           G_TimeTilSuddenDeath() <= 0 &&
-          g_suddenDeathMode.integer == SDMODE_SELECTIVE) {
+          G_SD_Mode( ) == SDMODE_SELECTIVE) {
             nqt = G_NextQueueTime( level.humanBuildPointQueue,
                                    g_humanBuildPoints.integer,
                                    g_humanBuildQueueTime.integer );
@@ -4664,7 +4664,7 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
     (
       !IS_WARMUP &&
       G_TimeTilSuddenDeath() <= 0 &&
-      g_suddenDeathMode.integer == SDMODE_SELECTIVE &&
+      G_SD_Mode( ) == SDMODE_SELECTIVE &&
       level.sudden_death_replacable[buildable]))
   {
     tempent = G_FindBuildable( buildable );
@@ -4695,7 +4695,7 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
           if(
             !IS_WARMUP &&
             G_TimeTilSuddenDeath() <= 0 &&
-            g_suddenDeathMode.integer == SDMODE_SELECTIVE) {
+            G_SD_Mode( ) == SDMODE_SELECTIVE) {
             reason = IBE_SD_UNIQUE;
           } else {
             Com_Error( ERR_FATAL, "No reason for denying build of %d", buildable );
@@ -4707,7 +4707,7 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
 
   if(
     !IS_WARMUP && G_TimeTilSuddenDeath() <= 0 &&
-    g_suddenDeathMode.integer == SDMODE_SELECTIVE &&
+    G_SD_Mode( ) == SDMODE_SELECTIVE &&
     !level.sudden_death_replacable[buildable]) {
     reason = IBE_SD_IRREPLACEABLE;
   }
@@ -5857,7 +5857,7 @@ void G_BuildLogRevert( int id )
         {
           if(
             G_TimeTilSuddenDeath() <= 0 &&
-            g_suddenDeathMode.integer == SDMODE_SELECTIVE) {
+            G_SD_Mode( ) == SDMODE_SELECTIVE) {
             if(
               level.sudden_death_replacable[log->modelindex] &&
               !G_FindBuildable(log->modelindex)) {
@@ -5877,7 +5877,7 @@ void G_BuildLogRevert( int id )
         {
           if(
             G_TimeTilSuddenDeath() <= 0 &&
-            g_suddenDeathMode.integer == SDMODE_SELECTIVE) {
+            G_SD_Mode( ) == SDMODE_SELECTIVE) {
             if(
               level.sudden_death_replacable[log->modelindex] &&
               !G_FindBuildable(log->modelindex)) {

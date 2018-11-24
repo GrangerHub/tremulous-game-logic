@@ -101,23 +101,6 @@ typedef struct g_admin_admin
 }
 g_admin_admin_t;
 
-#define ADDRLEN 16
-/*
-addr_ts are passed as "arg" to admin_search for IP address matching
-admin_search prints (char *)arg, so the stringified address needs to be first
-*/
-typedef struct
-{
-  char str[ 44 ];
-  enum
-  {
-    IPv4,
-    IPv6
-  } type;
-  byte addr[ ADDRLEN ];
-  int mask;
-} addr_t;
-
 typedef struct g_admin_ban
 {
   struct g_admin_ban *next;
@@ -153,6 +136,7 @@ qboolean G_admin_permission( gentity_t *ent, const char *flag );
 qboolean G_admin_name_check( gentity_t *ent, char *name, char *err, int len );
 g_admin_admin_t *G_admin_admin( const char *guid );
 void G_admin_authlog( gentity_t *ent );
+void G_admin_scrim_status(gentity_t *ent );
 
 // admin command functions
 qboolean G_admin_time( gentity_t *ent );
@@ -181,6 +165,7 @@ qboolean G_admin_admintest( gentity_t *ent );
 qboolean G_admin_allready( gentity_t *ent );
 qboolean G_admin_endvote( gentity_t *ent );
 qboolean G_admin_spec999( gentity_t *ent );
+qboolean G_admin_forcespec( gentity_t * ent );
 qboolean G_admin_rename( gentity_t *ent );
 qboolean G_admin_transform( gentity_t *ent );
 qboolean G_admin_restart( gentity_t *ent );
@@ -199,6 +184,7 @@ qboolean G_admin_setdevmode( gentity_t *ent );
 qboolean G_admin_listflags( gentity_t *ent );
 qboolean G_admin_flag( gentity_t *ent );
 qboolean G_admin_gamedir( gentity_t *ent );
+qboolean G_admin_scrim( gentity_t *ent );
 qboolean G_admin_seen( gentity_t *ent );
 qboolean G_admin_maplog( gentity_t *ent );
 

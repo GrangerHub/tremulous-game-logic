@@ -52,6 +52,9 @@ vmCvar_t  g_extendVotesCount;
 vmCvar_t  g_suddenDeathTime;
 vmCvar_t  g_suddenDeathMode;
 
+vmCvar_t  g_allowScrims;
+vmCvar_t  g_scrimMaxPauseTime;
+
 vmCvar_t  g_warmup;
 vmCvar_t  g_warmupTimers;
 vmCvar_t  g_doWarmup;
@@ -78,6 +81,7 @@ vmCvar_t  g_friendlyFireLastSpawnProtection;
 vmCvar_t  g_dretchPunt;
 vmCvar_t  g_password;
 vmCvar_t  g_needpass;
+vmCvar_t  g_autoGhost;
 vmCvar_t  g_maxclients;
 vmCvar_t  g_maxGameClients;
 vmCvar_t  g_dedicated;
@@ -178,6 +182,7 @@ vmCvar_t  g_newbieNamePrefix;
 vmCvar_t  g_admin;
 vmCvar_t  g_adminTempBan;
 vmCvar_t  g_adminMaxBan;
+vmCvar_t  g_adminTempSpec;
 
 vmCvar_t  g_playMapEnable;
 vmCvar_t  g_playMapPoolConfig;
@@ -207,6 +212,10 @@ static cvarTable_t   gameCvarTable[ ] =
   // don't override the cheat state set by the system
   { &g_cheats, "sv_cheats", "", 0, 0, qfalse },
 
+  // scrim
+  { &g_allowScrims, "g_allowScrims", "0", CVAR_ARCHIVE|CVAR_SERVERINFO, 0, qtrue },
+  { &g_scrimMaxPauseTime, "g_scrimMaxPauseTime", "5", CVAR_ARCHIVE, 0, qtrue },
+
   // warmup
   { &g_warmup, "g_warmup", "1", 0, 0, qfalse },
   { &g_warmupTimers, "g_warmupTimers", "", CVAR_ROM, 0, qfalse },
@@ -233,7 +242,7 @@ static cvarTable_t   gameCvarTable[ ] =
     "g_warmupFriendlyBuildableFire", "1", CVAR_SERVERINFO | CVAR_ARCHIVE, 0,
     qtrue },
   { &g_nextMapStartedMatchWhenEmptyTeams,
-    "g_nextMapStartedMatchWhenEmptyTeams", "180", CVAR_ARCHIVE, 0, qtrue },
+    "g_nextMapStartedMatchWhenEmptyTeams", "120", CVAR_ARCHIVE, 0, qtrue },
 
   { &g_damageProtection, "g_damageProtection", "1", CVAR_ARCHIVE, 0, qtrue },
     { &g_targetProtection, "g_targetProtection", "1", CVAR_ARCHIVE, 0, qtrue },
@@ -278,6 +287,8 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_password, "g_password", "", CVAR_USERINFO, 0, qfalse  },
 
   { &g_needpass, "g_needpass", "0", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse },
+
+  { &g_autoGhost, "g_autoGhost", "1", CVAR_SERVERINFO, 0, qfalse },
 
   { &g_dedicated, "dedicated", "0", 0, 0, qfalse  },
 
@@ -374,8 +385,9 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_newbieNamePrefix, "g_newbieNamePrefix", "UnnamedPlayer#", CVAR_ARCHIVE, 0, qfalse  },
 
   { &g_admin, "g_admin", "admin.dat", CVAR_ARCHIVE, 0, qfalse  },
-  { &g_adminTempBan, "g_adminTempBan", "2m", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_adminTempBan, "g_adminTempBan", "30m", CVAR_ARCHIVE, 0, qfalse  },
   { &g_adminMaxBan, "g_adminMaxBan", "2w", CVAR_ARCHIVE, 0, qfalse  },
+  { &g_adminTempSpec, "g_adminTempSpec", "5m", CVAR_ARCHIVE, 0, qfalse },
 
   // playmap pool
 
@@ -600,7 +612,6 @@ Q_EXPORT void G_InitGame( int levelTime, int randomSeed, int restart )
   // set some level globals
   memset( &level, 0, sizeof( level ) );
 
-
   sl_query( DB_OPEN, "game.db", NULL );
   sl_query( DB_TIME_GET, level.database_data, NULL );
   unpack_start( level.database_data, DATABASE_DATA_MAX );
@@ -730,6 +741,8 @@ Q_EXPORT void G_InitGame( int levelTime, int randomSeed, int restart )
 
   G_Init_Unlagged( );
 
+  G_Scrim_Load();
+
   level.emoticonCount = BG_LoadEmoticons( level.emoticons, MAX_EMOTICONS );
 
   SV_SetConfigstring( CS_INTERMISSION, "0" );
@@ -775,7 +788,11 @@ Q_EXPORT void G_InitGame( int levelTime, int randomSeed, int restart )
   Cvar_SetSafe( "g_humanStage", va( "%d", S1 ) );
   Cvar_SetSafe( "g_alienCredits", 0 );
   Cvar_SetSafe( "g_humanCredits", 0 );
-  level.suddenDeathBeginTime = g_suddenDeathTime.integer * 60000;
+  if(IS_SCRIM) {
+    level.suddenDeathBeginTime = level.scrim.sudden_death_time * 60000;
+  } else {
+    level.suddenDeathBeginTime = g_suddenDeathTime.integer * 60000;
+  }
 
   Com_Printf( "-----------------------------------\n" );
 
@@ -831,6 +848,20 @@ Q_EXPORT void G_ShutdownGame( int restart )
 {
   // in case of a map_restart
   G_ClearVotes( );
+
+  if(IS_SCRIM && level.scrim.scrim_completed) {
+    G_Scrim_Reset_Settings();
+  } else {
+    if(level.scrim.swap_teams) {
+      team_t temp = level.scrim.team[SCRIM_TEAM_1].current_team;
+
+      //swap teams
+      level.scrim.team[SCRIM_TEAM_1].current_team =
+        level.scrim.team[SCRIM_TEAM_2].current_team;
+      level.scrim.team[SCRIM_TEAM_2].current_team = temp;
+    }
+    G_Scrim_Save();
+  }
 
   G_RestoreCvars( );
 
@@ -896,6 +927,15 @@ int QDECL SortRanks( const void *a, const void *b )
 
   ca = &level.clients[ *(int *)a ];
   cb = &level.clients[ *(int *)b ];
+
+  // sort by rank for a given team
+  if(ca->pers.teamSelection == cb->pers.teamSelection) {
+    if(ca->sess.rank > cb->sess.rank) {
+      return -1;
+    } else if(ca->sess.rank < cb->sess.rank) {
+      return 1;
+    }
+  }
 
   // then sort by score
   if( ca->ps.persistant[ PERS_SCORE ] > cb->ps.persistant[ PERS_SCORE ] )
@@ -1165,7 +1205,7 @@ void G_SpawnClients( team_t team )
 
       ent->client->sess.spectatorState = SPECTATOR_NOT;
       ClientUserinfoChanged( clientNum, qfalse );
-      ClientSpawn( ent, spawn, spawn_origin, spawn_angles );
+      ClientSpawn( ent, spawn, spawn_origin, spawn_angles, qtrue );
     }
   }
 }
@@ -1206,12 +1246,32 @@ G_TimeTilSuddenDeath
 #define SUDDENDEATHWARNING 60000
 int G_TimeTilSuddenDeath( void )
 {
-  if( ( !g_suddenDeathTime.integer && level.suddenDeathBeginTime == 0 ) ||
-      ( level.suddenDeathBeginTime < 0 ) ||
-      IS_WARMUP )
-    return SUDDENDEATHWARNING + 1; // Always some time away
+  if(IS_SCRIM) {
+    if( ( !level.scrim.sudden_death_time && level.suddenDeathBeginTime == 0 ) ||
+        ( level.suddenDeathBeginTime < 0 ) ||
+        IS_WARMUP )
+      return SUDDENDEATHWARNING + 1; // Always some time away
+  } else {
+    if( ( !g_suddenDeathTime.integer && level.suddenDeathBeginTime == 0 ) ||
+        ( level.suddenDeathBeginTime < 0 ) ||
+        IS_WARMUP )
+      return SUDDENDEATHWARNING + 1; // Always some time away
+  }
 
   return ( ( level.suddenDeathBeginTime ) - ( level.time - level.startTime ) );
+}
+
+/*
+============
+G_SD_Mode
+============
+*/
+sdmode_t G_SD_Mode(void) {
+  if(IS_SCRIM) {
+    return level.scrim.sudden_death_mode;
+  } else {
+    return g_suddenDeathMode.integer;
+  }
 }
 
 /*
@@ -1219,10 +1279,8 @@ int G_TimeTilSuddenDeath( void )
 G_SuddenDeathModeString
 ============
 */
-char *G_SuddenDeathModeString( void ) {
-  sdmode_t sdmode = g_suddenDeathMode.integer;
-
-  switch (sdmode) {
+char *G_SuddenDeathModeString(void) {
+  switch (G_SD_Mode( )) {
     case SDMODE_BP:
       return "Build Point";
 
@@ -1327,7 +1385,7 @@ void G_CalculateBuildPoints( void )
     level.suddenDeathWarning = TW_IMMINENT;
   }
 
-  if(G_TimeTilSuddenDeath() <= 0 && g_suddenDeathMode.integer == SDMODE_SELECTIVE) {
+  if(G_TimeTilSuddenDeath() <= 0 && G_SD_Mode( ) == SDMODE_SELECTIVE) {
     buildable_t buildable;
 
     level.humanBuildPoints = 0;
@@ -1625,7 +1683,7 @@ This will be called on every client connect, begin, disconnect, death,
 and team change.
 ============
 */
-void CalculateRanks( void )
+void CalculateRanks( qboolean check_exit_rules )
 {
   int       i;
   char      P[ MAX_CLIENTS + 1 ] = {""};
@@ -1680,8 +1738,10 @@ void CalculateRanks( void )
   qsort( level.sortedClients, level.numConnectedClients,
     sizeof( level.sortedClients[ 0 ] ), SortRanks );
 
-  // see if it is time to end the level
-  CheckExitRules( );
+  if(check_exit_rules || IS_WARMUP) {
+    // see if it is time to end the level
+    CheckExitRules( );
+  }
 
   // if we are at the intermission, send the new info to everyone
   if( level.intermissiontime )
@@ -1841,12 +1901,29 @@ void ExitLevel( void )
 {
   int       i;
   gclient_t *cl;
+  clientList_t readyMasks;
+
+  //clear the "ready" configstring
+  Com_Memset( &readyMasks, 0, sizeof( readyMasks ) );
+  SV_SetConfigstring( CS_CLIENTS_READY, Com_ClientListString( &readyMasks ) );
 
   if ( G_MapExists( g_nextMap.string ) )
   {
-    G_MapConfigs( g_nextMap.string );
-    Cbuf_ExecuteText( EXEC_APPEND, va( "%smap \"%s\"\n",
-      ( g_cheats.integer ? "dev" : "" ), g_nextMap.string ) );
+    char map[ MAX_CVAR_VALUE_STRING ];
+
+    Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
+
+    if(
+      IS_SCRIM &&
+      !level.scrim.scrim_completed &&
+      !Q_stricmp(g_nextMap.string, map)) {
+      //if the nextmap for the scrim is the same as the current map, just restart
+      G_LevelRestart(qfalse);
+    } else {
+      G_MapConfigs( g_nextMap.string );
+      Cbuf_ExecuteText( EXEC_APPEND, va( "%smap \"%s\"\n",
+        ( g_cheats.integer ? "dev" : "" ), g_nextMap.string ) );
+    }
   }
   else if( G_PlayMapActive( ) )
     G_NextPlayMap();
@@ -1973,6 +2050,10 @@ void LogExit( const char *string )
   gclient_t   *cl;
   gentity_t   *ent;
   char        map[ MAX_QPATH ];
+
+  G_Scrim_Check_Win_Conditions( );
+
+  SV_SetConfigstring(CS_WINNER, level.winner_configstring);
 
   Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
   pack_start( level.database_data, DATABASE_DATA_MAX );
@@ -2147,6 +2228,25 @@ qboolean ScoreIsTied( void )
 
 /*
 =================
+G_Time_Limit
+
+=================
+*/
+int G_Time_Limit(void) {
+  if(IS_SCRIM) {
+    if(IS_WARMUP) {
+      //the general time limit doesn't apply to scrim warmups
+      return 0;
+    } else {
+      return level.scrim.time_limit;
+    }
+  } else {
+    return g_timelimit.integer;
+  }
+}
+
+/*
+=================
 CheckExitRules
 
 There will be a delay between the time the exit is qualified for
@@ -2184,10 +2284,12 @@ void CheckExitRules( void )
   }
 
   if(
-    g_doWarmup.integer &&
-    !g_warmup.integer &&
+    !g_restartingFlags.integer &&
+    ((g_doWarmup.integer && !g_warmup.integer) || IS_SCRIM) &&
     g_nextMapStartedMatchWhenEmptyTeams.integer > 0) {
-    if(level.numAlienClients || level.numHumanClients) {
+    if(
+        (level.numAlienClients || level.numHumanClients) &&
+        !(g_allowScrims.integer && level.scrim.mode == SCRIM_MODE_SETUP)) {
       level.nextmap_when_empty_teams = level.time + (g_nextMapStartedMatchWhenEmptyTeams.integer * 1000);
     } else {
       int i;
@@ -2199,6 +2301,11 @@ void CheckExitRules( void )
           level.nextmap_when_empty_teams = level.time + (g_nextMapStartedMatchWhenEmptyTeams.integer * 1000);
           break;
         } else if(client->pers.connected != CON_CONNECTED) {
+          continue;
+        }
+
+        if(IS_SCRIM &&
+          !G_admin_permission( &g_entities[i], "scrim" )) {
           continue;
         }
 
@@ -2214,32 +2321,42 @@ void CheckExitRules( void )
       }
 
       if(level.nextmap_when_empty_teams < level.time) {
+        if(IS_SCRIM) {
+          G_Scrim_Reset_Settings();
+          level.scrim.mode = SCRIM_MODE_OFF;
+        }
         level.lastWin = TEAM_NONE;
         SV_GameSendServerCommand( -1, "print \"Teams empty\n\"" );
-        SV_SetConfigstring( CS_WINNER, va( "%i %i %i",
-                                           MATCHOUTCOME_TIME,
-                                           index,
-                                           TEAM_NONE ) );
-        LogExit( "Teams empty." );
+        Q_strncpyz(
+          level.winner_configstring,
+          va("%i %i %i", MATCHOUTCOME_TIME, index, TEAM_NONE),
+          sizeof(level.winner_configstring));
+        LogExit("Teams empty.");
         return;
       }
     }
   }
 
-  if( g_timelimit.integer )
+  if(
+    G_Time_Limit() &&
+    !(
+      g_allowScrims.integer &&
+      (
+        (level.scrim.mode == SCRIM_MODE_SETUP) ||
+        (level.scrim.mode == SCRIM_MODE_PAUSED))) )
   {
-    if( level.time - level.startTime >= g_timelimit.integer * 60000 )
+    if( level.time - level.startTime >= G_Time_Limit() * 60000 )
     {
       level.lastWin = TEAM_NONE;
       SV_GameSendServerCommand( -1, "print \"Timelimit hit\n\"" );
-      SV_SetConfigstring( CS_WINNER, va( "%i %i %i",
-                                         MATCHOUTCOME_TIME,
-                                         index,
-                                         TEAM_NONE ) );
-      LogExit( "Timelimit hit." );
+      Q_strncpyz(
+        level.winner_configstring,
+        va("%i %i %i", MATCHOUTCOME_TIME, index, TEAM_NONE),
+        sizeof(level.winner_configstring));
+      LogExit("Timelimit hit.");
       return;
     }
-    else if( level.time - level.startTime >= ( g_timelimit.integer - 5 ) * 60000 &&
+    else if( level.time - level.startTime >= ( G_Time_Limit() - 5 ) * 60000 &&
           level.timelimitWarning < TW_IMMINENT )
     {
       SV_GameSendServerCommand( -1,
@@ -2247,7 +2364,7 @@ void CheckExitRules( void )
                                   CP_TIME_LIMIT ) );
       level.timelimitWarning = TW_IMMINENT;
     }
-    else if( level.time - level.startTime >= ( g_timelimit.integer - 1 ) * 60000 &&
+    else if( level.time - level.startTime >= ( G_Time_Limit() - 1 ) * 60000 &&
           level.timelimitWarning < TW_PASSED )
     {
       SV_GameSendServerCommand( -1,
@@ -2257,7 +2374,86 @@ void CheckExitRules( void )
     }
   }
 
-  if( level.uncondHumanWin ||
+  //automatic scrim forfeit
+  if(
+    IS_SCRIM && level.scrim.mode != SCRIM_MODE_SETUP &&
+    level.scrim.scrim_forfeiter == SCRIM_TEAM_NONE) {
+    scrim_team_t scrim_team;
+
+    scrim_team = BG_Scrim_Team_From_Playing_Team(&level.scrim, TEAM_ALIENS);
+    if(scrim_team != SCRIM_TEAM_NONE && level.numAlienClients) {
+      level.forfeit_when_team_is_empty[scrim_team] = level.time + 125000;
+    }
+
+    scrim_team = BG_Scrim_Team_From_Playing_Team(&level.scrim, TEAM_HUMANS);
+    if(scrim_team != SCRIM_TEAM_NONE && level.numHumanClients) {
+      level.forfeit_when_team_is_empty[scrim_team] = level.time + 125000;
+    }
+
+    for(scrim_team = 0; scrim_team < NUM_SCRIM_TEAMS; scrim_team++) {
+      if(scrim_team == SCRIM_TEAM_NONE) {
+        continue;
+      }
+
+      if(level.scrim.team[scrim_team].current_team == TEAM_NONE) {
+        continue;
+      }
+
+      if(level.forfeit_when_team_is_empty[scrim_team] < level.time) {
+        level.scrim.scrim_forfeiter = scrim_team;
+      }
+    }
+  }
+
+  //draw condition
+  if(
+    (level.uncondAlienWin && level.uncondHumanWin) ||
+    (
+      !(g_restartingFlags.integer & RESTART_WARMUP_RESET) &&
+      (level.time > level.startTime + 1000) &&
+      (level.numAlienSpawns == 0) && (level.numHumanSpawns == 0) &&
+      (
+        IS_WARMUP ||
+        ((level.numAlienClientsAlive == 0) && (level.numHumanClientsAlive == 0))))) {
+    // We do not want any team to win in warmup
+    if(IS_WARMUP) {
+      if(level.lastLayoutReset > (level.time - 5000)) {
+        return;
+      }
+      // FIXME: this is awfully ugly
+      G_LevelRestart(qfalse);
+      SV_GameSendServerCommand(
+        -1, 
+        "print \"^3Warmup Reset: ^7A mysterious force restores balance in the universe.\n\"");
+      return;
+    }
+
+    //draw
+    SV_GameSendServerCommand( -1, "print \"Mutual destruction obtained\n\"" );
+    level.lastWin = TEAM_NONE;
+    Q_strncpyz(
+      level.winner_configstring,
+      va("%i %i %i", MATCHOUTCOME_MUTUAL, index, TEAM_NONE ),
+      sizeof(level.winner_configstring));
+    LogExit("Draw.");
+    return;
+  }
+
+  if(
+    IS_SCRIM &&
+    level.scrim.scrim_forfeiter != SCRIM_TEAM_NONE &&
+    TEAM_ALIENS ==
+      level.scrim.team[level.scrim.scrim_forfeiter].current_team) {
+    //humans win
+    winningTeam = level.lastWin = TEAM_HUMANS;
+  } else if(
+    IS_SCRIM &&
+    level.scrim.scrim_forfeiter != SCRIM_TEAM_NONE &&
+    TEAM_HUMANS ==
+      level.scrim.team[level.scrim.scrim_forfeiter].current_team) {
+    //aliens win
+    winningTeam = level.lastWin = TEAM_ALIENS;
+  } else if( level.uncondHumanWin ||
       ( !level.uncondAlienWin &&
         ( level.time > level.startTime + 1000 ) &&
         ( level.numAlienSpawns == 0 ) &&
@@ -2278,7 +2474,13 @@ void CheckExitRules( void )
     //humans win
     winningTeam = level.lastWin = TEAM_HUMANS;
   }
-  else if( level.uncondAlienWin ||
+  else if(
+           (
+             IS_SCRIM &&
+             level.scrim.scrim_forfeiter != SCRIM_TEAM_NONE &&
+             TEAM_HUMANS ==
+               level.scrim.team[level.scrim.scrim_forfeiter].current_team) ||
+           level.uncondAlienWin ||
            ( ( level.time > level.startTime + 1000 ) &&
              ( level.numHumanSpawns == 0 ) &&
              ( ( level.numHumanClientsAlive == 0 ) || IS_WARMUP ) &&
@@ -2302,11 +2504,11 @@ void CheckExitRules( void )
   if( winningTeam != TEAM_NONE )
   {
     SV_GameSendServerCommand( -1, va( "print \"%s win\n\"", BG_Team( winningTeam )->humanName ));
-    SV_SetConfigstring( CS_WINNER, va( "%i %i %i",
-                                       MATCHOUTCOME_WON,
-                                       index,
-                                       winningTeam ) );
-    LogExit( va( "%s win.", BG_Team( winningTeam )->humanName ) );
+    Q_strncpyz(
+        level.winner_configstring,
+        va("%i %i %i", MATCHOUTCOME_WON, index, winningTeam ),
+        sizeof(level.winner_configstring));
+    LogExit(va("%s win.", BG_Team( winningTeam )->humanName));
   }
 }
 
@@ -2393,6 +2595,10 @@ void G_LevelRestart( qboolean stopWarmup )
       //turn dev mode off
       Cvar_SetSafe( "sv_cheats", "0" );
       AP( va( "print \"^3warmup ended: ^7developer mode has been switched off\n\"" ) );
+
+      if(IS_SCRIM) {
+        G_Scrim_Broadcast_Status( );
+      }
     }
   } else if( IS_WARMUP )
   {
@@ -2429,6 +2635,7 @@ void G_LevelReady( void )
   int       i, numAliens = 0, numHumans = 0;
   float     percentAliens, percentHumans, threshold;
   qboolean  startGame;
+  qboolean  scrimNoExit;
   clientList_t readyMasks;
 
   // do not proceed if not in warmup
@@ -2443,6 +2650,11 @@ void G_LevelReady( void )
   // the map is still resetting
   if( g_restartingFlags.integer & RESTART_WARMUP_RESET )
     return;
+
+  scrimNoExit = g_allowScrims.integer &&
+    (
+      (level.scrim.mode == SCRIM_MODE_SETUP) ||
+      (level.scrim.mode == SCRIM_MODE_PAUSED));
 
   Com_Memset(&readyMasks, 0, sizeof(readyMasks));
   for(i = 0; i < g_maxclients.integer; i++) {
@@ -2509,20 +2721,32 @@ void G_LevelReady( void )
     // if previous conditions are not met and there are at least
     // (g_warmupTimeout1Trigger) players who are not spectators, start a
     // (g_warmupTimeout1) second countdown until warmup timeout
-    if( !startGame && ( numAliens > 0 ) && ( numHumans > 0 ) &&
-        ( numAliens + numHumans ) >= g_warmupTimeout1Trigger.integer )
+    if(
+      !startGame && !scrimNoExit &&
+      (
+        (
+          (numAliens > 0) && (numHumans > 0) &&
+          ((numAliens + numHumans ) >= g_warmupTimeout1Trigger.integer)) ||
+        (IS_SCRIM && level.scrim.mode == SCRIM_MODE_STARTED)))
     {
       if( ( level.warmup1Time > -1 ) &&
-          ( level.time - level.warmup1Time ) >= ( g_warmupTimeout1.integer * 1000 ) )
+          ( level.time - level.warmup1Time ) >= ( IS_SCRIM ? 180000 : ( g_warmupTimeout1.integer * 1000 ) ) )
       {
         startGame = qtrue;
       }
       else if ( level.warmup1Time == -1 ) // start countdown
       {
-        SV_GameSendServerCommand( -1, va( "print \"There are at least %d "
-              " non-spectating players. Pre-game warmup will expire in %d"
-              " seconds.\n\"", g_warmupTimeout1Trigger.integer,
-              g_warmupTimeout1.integer ) );
+        if(IS_SCRIM && level.scrim.mode == SCRIM_MODE_STARTED) {
+          SV_GameSendServerCommand( -1, va( "print \"A scrim is in "
+                " progress. Scrim warmup will expire in 180"
+                " seconds.\n\"" ) );
+        } else {
+          SV_GameSendServerCommand( -1, va( "print \"There are at least %d "
+                " non-spectating players. Pre-game warmup will expire in %d"
+                " seconds.\n\"", g_warmupTimeout1Trigger.integer,
+                g_warmupTimeout1.integer ) );
+        }
+
         level.warmup1Time = level.time;
       }
     }
@@ -2535,7 +2759,8 @@ void G_LevelReady( void )
     // if previous conditions are not met and at least (g_warmupTimeout2Trigger)%
     // of players in one team is ready, start a (g_warmupTimeout2) second
     // countdown until warmup timeout
-    if( !startGame && ( numAliens > 1 ) && ( numHumans > 1 ) &&
+    if( !startGame && !scrimNoExit &&
+        ( IS_SCRIM || ( ( numAliens > 1 ) && ( numHumans > 1 ) ) ) &&
         ( percentAliens >= (float) g_warmupTimeout2Trigger.integer ||
           percentHumans >= (float) g_warmupTimeout2Trigger.integer ) )
     {
@@ -2547,8 +2772,9 @@ void G_LevelReady( void )
       else if ( level.warmup2Time == -1 ) // start countdown
       {
         SV_GameSendServerCommand( -1, va( "print \"At least %d percent of players"
-              " in a team have become ready. Pre-game warmup will expire in %d"
+              " in a team have become ready. %s warmup will expire in %d"
               " seconds.\n\"", g_warmupTimeout2Trigger.integer,
+              IS_SCRIM ? "Scrim" : "Pre-game",
               g_warmupTimeout2.integer ) );
         level.warmup2Time = level.time;
       }
@@ -2568,6 +2794,11 @@ void G_LevelReady( void )
             -1 ) ) );
   } else
     startGame = qtrue;
+
+  //don't end warmup while a scrim is being setup or is paused.
+  if(scrimNoExit) {
+    return;
+  }
 
   // only continue to start game when conditions are met
   if( !startGame )
@@ -2601,6 +2832,14 @@ void G_Vote( gentity_t *ent, team_t team, qboolean voting )
 
   if( !voting && !( ent->client->pers.voted & ( 1 << team ) ) )
     return;
+
+  if(
+    IS_SCRIM &&
+    (
+      BG_Scrim_Team_From_Playing_Team(
+        &level.scrim, ent->client->pers.teamSelection) == SCRIM_TEAM_NONE)) {
+    return;
+  }
 
   ent->client->pers.voted |= 1 << team;
 
@@ -2695,6 +2934,9 @@ void G_CheckVote( team_t team )
   {
     if ( level.clients[ i ].pers.connected != CON_DISCONNECTED )
     {
+      if(IS_SCRIM && level.clients[ i ].pers.teamSelection == TEAM_NONE) {
+        continue;
+      }
       switch( team )
       {
         case TEAM_ALIENS:
@@ -2873,12 +3115,22 @@ void CheckCvars(void) {
   static int lastCheatsModCount           = -1;
   static int lastUnlaggedModCount         = -1;
   static int lastDoWarmupModCount         = 0;
+  static int lastAllowScrimsModCount      = -1;
 
   if(g_doWarmup.modificationCount != lastDoWarmupModCount) {
     lastDoWarmupModCount = g_doWarmup.modificationCount;
     if(g_warmup.integer && !g_doWarmup.integer) {
       //restart with warmup disabled
       G_LevelRestart(qtrue);
+    }
+  }
+
+  if(g_allowScrims.modificationCount != lastAllowScrimsModCount) {
+    lastAllowScrimsModCount = g_allowScrims.modificationCount;
+    if(!g_allowScrims.integer && level.scrim.mode) {
+      G_Scrim_Reset_Settings();
+      level.scrim.mode = SCRIM_MODE_OFF;
+      G_Scrim_Send_Status( );
     }
   }
 
@@ -2904,7 +3156,7 @@ void CheckCvars(void) {
 
   // If we change g_suddenDeathTime during a map, we need to update
   // when sd will begin
-  if(g_suddenDeathTime.modificationCount != lastSDTimeModCount) {
+  if(g_suddenDeathTime.modificationCount != lastSDTimeModCount && !IS_SCRIM) {
     lastSDTimeModCount = g_suddenDeathTime.modificationCount;
     level.suddenDeathBeginTime = g_suddenDeathTime.integer * 60000;
 
@@ -3099,6 +3351,8 @@ Q_EXPORT void G_RunFrame( int levelTime )
 
     return;
   }
+
+  G_Scrim_Check_Pause( );
 
   level.framenum++;
   level.previousTime = level.time;

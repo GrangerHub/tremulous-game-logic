@@ -738,7 +738,7 @@ void G_RemoveEntity( gentity_t *ent )
     ent->client->pers.classSelection = PCL_NONE;
     ent->client->pers.humanItemSelection = WP_NONE;
     ent->suicideTime = 0; // cancel any timed suicides
-    ClientSpawn( ent, NULL, NULL, NULL );
+    ClientSpawn( ent, NULL, NULL, NULL, qtrue );
     ent->client->pers.classSelection = class; // restore the spawn queue choice
     ent->client->pers.humanItemSelection = weapon; // restore
     return;
