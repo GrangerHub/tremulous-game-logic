@@ -233,6 +233,70 @@ static void SV_MapRestart_f( void ) {
 	Cvar_SetSafe( "g_restartingFlags", "0" );
 }
 
+//===============================================================
+
+/**
+ * @brief SV_Status_f
+ */
+static void SV_Status_f(void)
+{
+	int           i;
+	client_t      *cl;
+	playerState_t *ps;
+	const char    *s;
+	int           ping;
+	unsigned int  maxNameLength;
+
+	// make sure server is running
+	if (!com_sv_running->integer)
+	{
+		Com_Printf("Server is not running.\n");
+		return;
+	}
+
+	Com_Printf("cpu server utilization: %i %%\n"
+	           "avg response time     : %i ms\n"
+	           "server time           : %i\n"
+	           "internal time         : %i\n"
+	           "map                   : %s\n\n"
+	           "num score ping name                                lastmsg address               qport rate  lastConnectTime\n"
+	           "--- ----- ---- ----------------------------------- ------- --------------------- ----- ----- ---------------\n",
+	           ( int ) svs.stats.cpu,
+	           ( int ) svs.stats.avg,
+	           svs.time,
+	           Sys_Milliseconds(),
+	           sv_mapname->string);
+
+	for (i = 0, cl = svs.clients ; i < sv_maxclients->integer ; i++, cl++)
+	{
+		Com_Printf("%3i ", i);
+		ps = SV_GameClientNum(i);
+		Com_Printf("%5i ", ps->persistant[PERS_SCORE]);
+
+		if (cl->state == CS_CONNECTED)
+		{
+			Com_Printf("CNCT ");
+		}
+		else if (cl->state == CS_ZOMBIE)
+		{
+			Com_Printf("ZMBI ");
+		}
+		else
+		{
+			ping = cl->ping < 9999 ? cl->ping : 9999;
+			Com_Printf("%4i ", ping);
+		}
+
+		s = NET_AdrToString(cl->netchan.remoteAddress);
+
+		// extend the name length by couting extra color characters to keep well formated output
+		maxNameLength = sizeof(cl->name) + (strlen(cl->name) - Q_PrintStrlen(cl->name)) + 1;
+
+		Com_Printf("%-*s %7i %-21s %5i %5i %i\n", maxNameLength, rc(cl->name), svs.time - cl->lastPacketTime, s, cl->netchan.qport, cl->rate, svs.time - cl->lastConnectTime);
+	}
+
+	Com_Printf("\n");
+}
 
 /*
 ==================
@@ -320,6 +384,7 @@ void SV_AddOperatorCommands( void ) {
 	initialized = qtrue;
 
 	Cmd_AddCommand ("heartbeat", SV_Heartbeat_f);
+	Cmd_AddCommand ("status", SV_Status_f);
 	Cmd_AddCommand ("serverinfo", SV_Serverinfo_f);
 	Cmd_AddCommand ("systeminfo", SV_Systeminfo_f);
 	Cmd_AddCommand ("map_restart", SV_MapRestart_f);
@@ -340,6 +405,7 @@ void SV_RemoveOperatorCommands( void ) {
 #if 0
 	// removing these won't let the server start again
 	Cmd_RemoveCommand ("heartbeat");
+	Cmd_RemoveCommand ("status");
 	Cmd_RemoveCommand ("serverinfo");
 	Cmd_RemoveCommand ("systeminfo");
 	Cmd_RemoveCommand ("map_restart");

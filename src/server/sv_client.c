@@ -62,18 +62,23 @@ void SV_GetChallenge(netadr_t from)
 	challenge_t	*challenge;
 	qboolean wasfound = qfalse;
 
-	// Prevent using getchallenge as an amplifier
-	if ( SVC_RateLimitAddress( from, 10, 1000 ) ) {
-		Com_DPrintf( "SV_GetChallenge: rate limit from %s exceeded, dropping request\n",
-			NET_AdrToString( from ) );
-		return;
-	}
+	if (sv_protect->integer & SVP_IOQ3)
+	{
+		// Prevent using getchallenge as an amplifier
+		if (SVC_RateLimitAddress(from, 10, 1000))
+		{
+			SV_WriteAttackLog(va("SV_GetChallenge: rate limit from %s exceeded, dropping request\n",
+			                     NET_AdrToString(from)));
+			return;
+		}
 
-	// Allow getchallenge to be DoSed relatively easily, but prevent
-	// excess outbound bandwidth usage when being flooded inbound
-	if ( SVC_RateLimit( &outboundLeakyBucket, 10, 100 ) ) {
-		Com_DPrintf( "SV_GetChallenge: rate limit exceeded, dropping request\n" );
-		return;
+		// Allow getchallenge to be DoSed relatively easily, but prevent
+		// excess outbound bandwidth usage when being flooded inbound
+		if (SVC_RateLimit(&outboundLeakyBucket, 10, 100))
+		{
+			SV_WriteAttackLog("SV_GetChallenge: rate limit exceeded, dropping request\n");
+			return;
+		}
 	}
 
 	oldest = 0;
@@ -149,6 +154,17 @@ void SV_DirectConnect( netadr_t from ) {
 	char		*ip;
 
 	Com_DPrintf ("SVC_DirectConnect ()\n");
+
+	// Prevent using connect as an amplifier
+	if (sv_protect->integer & SVP_IOQ3)
+	{
+		if(SVC_RateLimitAddress(from, 10, 1000))
+		{
+			SV_WriteAttackLog(va("Bad direct connect - rate limit from %s exceeded, dropping request\n",
+		                     NET_AdrToString(from)));
+			return;
+		}
+	}
 
 	Q_strncpyz( userinfo, Cmd_Argv(1), sizeof(userinfo) );
 

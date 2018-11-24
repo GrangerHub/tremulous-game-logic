@@ -953,6 +953,8 @@ void Q_ParseNewlines( char *dest, const char *src, int destsize );
 // Count the number of char tocount encountered in string
 int Q_CountChar(const char *string, char tocount);
 
+#define rc(x) va("%s^7", x) ///< shortcut for color reset after printing variable
+
 //=============================================
 
 // 64-bit integers for global rankings interface
