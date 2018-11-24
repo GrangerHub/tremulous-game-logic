@@ -8,7 +8,7 @@ This file is part of Tremulous.
 
 Tremulous is free software; you can redistribute it
 and/or modify it under the terms of the GNU General Public License as
-published by the Free Software Foundation; either version 2 of the License,
+published by the Free Software Foundation; either version 3 of the License,
 or (at your option) any later version.
 
 Tremulous is distributed in the hope that it will be
@@ -17,8 +17,8 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Tremulous; if not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+along with Tremulous; if not, see <https://www.gnu.org/licenses/>
+
 ===========================================================================
 */
 // server.h
@@ -32,6 +32,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define	PERS_SCORE				0		// !!! MUST NOT CHANGE, SERVER AND
 										// GAME BOTH REFERENCE !!!
+
+// server attack protection
+#define SVP_IOQ3        0x0001      ///< 1  - ioQuake3 way
+#define SVP_OWOLF       0x0002      ///< 2  - OpenWolf way
+#define SVP_CONSOLE     0x0004      ///< 4  - console print
 
 #define	MAX_ENT_CLUSTERS	16
 
@@ -139,6 +144,7 @@ typedef struct netchan_buffer_s {
 typedef struct client_s {
 	clientState_t	state;
 	char			userinfo[MAX_INFO_STRING];		// name, etc
+	char			userinfobuffer[MAX_INFO_STRING];		///< used for buffering of user info
 
 	char			reliableCommands[MAX_RELIABLE_COMMANDS][MAX_STRING_CHARS];
 	int				reliableSequence;		// last added reliable message, not necesarily sent or acknowledged yet
@@ -171,6 +177,7 @@ typedef struct client_s {
 
 	int				deltaMessage;		// frame last client usercmd message
 	int				nextReliableTime;	// svs.time when another reliable command will be allowed
+	int				nextReliableUserTime;	// svs.time when another userinfo change will be allowed
 	int				lastPacketTime;		// svs.time when packet was last received
 	int				lastConnectTime;	// svs.time when connection started
 	int				lastSnapshotTime;	// svs.time of last sent snapshot
@@ -204,7 +211,24 @@ typedef struct client_s {
 } client_t;
 
 //=============================================================================
+#define STATFRAMES 200 ///< 5 seconds - assumed we run 40 fps
 
+/**
+ * @struct svstats_t
+ * @brief
+ */
+typedef struct
+{
+	double active;
+	double idle;
+	int count;
+
+	double latched_active;
+	double latched_idle;
+
+	float cpu;
+	float avg;
+} svstats_t;
 
 // MAX_CHALLENGES is made large to prevent a denial
 // of service attack that could cycle all of them
@@ -228,6 +252,39 @@ typedef struct {
 	qboolean	connected;
 } challenge_t;
 
+/**
+ * @struct receipt_t
+ * @brief
+ */
+typedef struct
+{
+	netadr_t adr;
+	int time;
+} receipt_t;
+
+/**
+ * @def MAX_INFO_RECEIPTS
+ * @brief the maximum number of getstatus+getinfo responses that we send in
+ * a two second time period.
+ */
+#define MAX_INFO_RECEIPTS  48
+
+/**
+ * @struct tempBan_s
+ * @typedef tempBan_t
+ * @brief
+ */
+typedef struct tempBan_s
+{
+	netadr_t adr;
+	int endtime;
+} tempBan_t;
+
+#define MAX_TEMPBAN_ADDRESSES               MAX_CLIENTS
+
+#define SERVER_PERFORMANCECOUNTER_FRAMES    600
+#define SERVER_PERFORMANCECOUNTER_SAMPLES   6
+
 // this structure will be cleared only when the game dll changes
 typedef struct {
 	qboolean	initialized;				// sv_init has completed
@@ -242,9 +299,17 @@ typedef struct {
 	entityState_t	*snapshotEntities;		// [numSnapshotEntities]
 	int			nextHeartbeatTime;
 	challenge_t	challenges[MAX_CHALLENGES];	// to prevent invalid IPs from connecting
+	receipt_t	infoReceipts[MAX_INFO_RECEIPTS];
 	netadr_t	redirectAddress;			// for rcon return messages
 
 	netadr_t	authorizeAddress;			// for rcon return messages
+
+	int sampleTimes[SERVER_PERFORMANCECOUNTER_SAMPLES];
+	int currentSampleIndex;
+	int totalFrameTime;
+	int currentFrameIndex;
+	int serverLoad;
+	svstats_t stats;
 } serverStatic_t;
 
 //=============================================================================
@@ -279,6 +344,9 @@ extern	cvar_t	*sv_maxPing;
 extern	cvar_t	*sv_pure;
 extern	cvar_t	*sv_lanForceRate;
 extern	cvar_t	*sv_banFile;
+
+extern	cvar_t *sv_protect;
+extern	cvar_t *sv_protectLog;
 
 #ifdef USE_VOIP
 extern	cvar_t	*sv_voip;
@@ -342,6 +410,13 @@ void      SV_GetUserinfo( int index, char *buffer, int bufferSize );
 
 void      SV_ChangeMaxClients( void );
 void      SV_SpawnServer( char *server, qboolean killBots );
+void      SV_WriteAttackLog(const char *log);
+
+#ifdef NDEBUG
+#define SV_WriteAttackLogD(x)
+#else
+#define SV_WriteAttackLogD(x) SV_WriteAttackLog(x)
+#endif
 
 
 
