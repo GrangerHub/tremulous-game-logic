@@ -3245,6 +3245,8 @@ void SP_func_spawn(gentity_t *ent) {
 
   ent->use = Use_func_spawn;
 
+  ent->s.eFlags |= EF_ASTRAL_NOCLIP;
+
   if( ( ent->spawnflags & 1 ) ) {
     SV_LinkEntity( ent );
   } else {
@@ -3320,6 +3322,8 @@ void SP_func_destructable(gentity_t *ent) {
   ent->moverMotionType = MM_LINEAR;
   ent->s.eType = ET_MOVER;
   VectorCopy(ent->pos1, ent->r.currentOrigin);
+
+  ent->s.eFlags |= EF_ASTRAL_NOCLIP;
 
   SV_LinkEntity(ent);
 
