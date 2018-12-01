@@ -769,7 +769,7 @@ typedef struct buildlog_s
 //
 // this structure is cleared as each map is entered
 //
-#define MAX_SPAWN_VARS      64
+#define MAX_SPAWN_VARS      512
 #define MAX_SPAWN_VARS_CHARS  4096
 #define MAX_BUILDLOG          1024
 #define MAX_PLAYER_MODEL    256
