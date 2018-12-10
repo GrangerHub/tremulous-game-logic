@@ -2411,21 +2411,41 @@ static void PM_CheckLadder( void )
       else
         drySurfaceDistance = trace.fraction * ( ( (float)pm->ps->viewheight ) - pm->mins[ 2 ] );
 
-      //find the bottom of the player's bbox
+      //find 1 QU below the bottom of the player's bbox
       VectorCopy( pm->ps->origin, bboxBottom );
-      bboxBottom[2] += pm->mins[2];
+      bboxBottom[2] += ( pm->mins[2] - 1 );
 
       // find how far below the viewheight the water level is
       pm->trace( &trace, start, mins, maxs, bboxBottom, pm->ps->clientNum,
                  MASK_WATER );
 
-      Com_Assert( ( trace.fraction < 1.0f || trace.startsolid || trace.allsolid ) &&
-                  "PM_CheckLadder" );
+      if( trace.fraction < 1.0f )
+      {
+        if( trace.startsolid || trace.allsolid )
+          waterLevelDistance = 0.0f;
+        else
+          waterLevelDistance = trace.fraction * ( ( (float)pm->ps->viewheight ) - pm->mins[ 2 ] - 1 );
 
-      waterLevelDistance = trace.fraction * ( ( (float)pm->ps->viewheight ) - pm->mins[ 2 ] );
-
-      if( STEPSIZE >= ( waterLevelDistance - drySurfaceDistance ) )
-        waterClimb = qtrue;
+        if( STEPSIZE >= ( waterLevelDistance - drySurfaceDistance ) )
+        {
+          waterClimb = qtrue;
+        } else if( !BG_ClassHasAbility( pm->ps->stats[ STAT_CLASS ], SCA_CANUSELADDERS ) )
+        {
+          //class can't use ladders
+          pml.ladder = qfalse;
+          return;
+        }
+      } else if( !BG_ClassHasAbility( pm->ps->stats[ STAT_CLASS ], SCA_CANUSELADDERS ) )
+      {
+        //class can't use ladders
+        pml.ladder = qfalse;
+        return;
+      }
+    } else if( !BG_ClassHasAbility( pm->ps->stats[ STAT_CLASS ], SCA_CANUSELADDERS ) )
+    {
+      //class can't use ladders
+      pml.ladder = qfalse;
+      return;
     }
   }
   else if( !BG_ClassHasAbility( pm->ps->stats[ STAT_CLASS ], SCA_CANUSELADDERS ) )
