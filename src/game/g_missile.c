@@ -1187,7 +1187,11 @@ gentity_t *fire_bounceBall( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->r.ownerNum = self->s.number;
   bolt->parent = self;
   bolt->damage = LEVEL3_BOUNCEBALL_DMG;
-  bolt->splashDamage = LEVEL3_BOUNCEBALL_DMG;
+  if(LEVEL3_BOUNCEBALL_RADIUS) {
+    bolt->splashDamage = LEVEL3_BOUNCEBALL_DMG;
+  } else {
+    bolt->splashDamage = 0;
+  }
   bolt->splashRadius = LEVEL3_BOUNCEBALL_RADIUS;
   bolt->methodOfDeath = MOD_LEVEL3_BOUNCEBALL;
   bolt->splashMethodOfDeath = MOD_LEVEL3_BOUNCEBALL;
