@@ -2761,6 +2761,7 @@ static void PM_CheckLadder( void )
   {
     // no solid surface in front of the player
     pml.ladder = qfalse;
+    pm->pmext->ladder = qfalse;
     return;
   }
 
@@ -2777,6 +2778,7 @@ static void PM_CheckLadder( void )
     {
       PM_WaterJumpMove();
       pml.ladder = qfalse;
+      pm->pmext->ladder = qfalse;
       return;
     }
 
@@ -2854,12 +2856,14 @@ static void PM_CheckLadder( void )
       {
         //class can't use ladders
         pml.ladder = qfalse;
+        pm->pmext->ladder = qfalse;
         return;
       }
     } else if( !BG_ClassHasAbility( pm->ps->stats[ STAT_CLASS ], SCA_CANUSELADDERS ) )
     {
       //class can't use ladders
       pml.ladder = qfalse;
+      pm->pmext->ladder = qfalse;
       return;
     }
   }
@@ -2867,6 +2871,7 @@ static void PM_CheckLadder( void )
   {
     //class can't use ladders
     pml.ladder = qfalse;
+    pm->pmext->ladder = qfalse;
     return;
   }
 
@@ -2875,6 +2880,7 @@ static void PM_CheckLadder( void )
           ( bboxTouchTrace.plane.normal[ 2 ] < MIN_WALK_NORMAL ) ) )
   {
     pml.ladder = qtrue;
+    pm->pmext->ladder = qtrue;
 
     if( BG_InventoryContainsUpgrade( UP_JETPACK, pm->ps->stats ) &&
         BG_UpgradeIsActive( UP_JETPACK, pm->ps->stats ) )
