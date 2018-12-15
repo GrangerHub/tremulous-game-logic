@@ -1066,7 +1066,13 @@ PM_CheckPounce
 */
 static qboolean PM_CheckPounce( void )
 {
-  int jumpMagnitude;
+  int     jumpMagnitude;
+  float   pounce_mod;
+  float   pounce_range = pm->ps->weapon == WP_ALEVEL3 ? LEVEL3_POUNCE_RANGE :
+            LEVEL3_POUNCE_UPG_RANGE;
+  vec3_t  muzzle, forward, right, up, end;
+  vec3_t  mins, maxs;
+  trace_t trace;
 
   if( pm->ps->weapon != WP_ALEVEL3 &&
       pm->ps->weapon != WP_ALEVEL3_UPG )
@@ -1095,6 +1101,26 @@ static qboolean PM_CheckPounce( void )
       pm->ps->groundEntityNum == ENTITYNUM_NONE )
     return qfalse;
 
+  // check for close targets
+  AngleVectors(pm->ps->viewangles, forward, right, up);
+  BG_CalcMuzzlePointFromPS(pm->ps, forward, right, up, muzzle);
+  VectorSet(mins, -(LEVEL3_POUNCE_WIDTH), -(LEVEL3_POUNCE_WIDTH), -(LEVEL3_POUNCE_WIDTH));
+  VectorSet(maxs, (LEVEL3_POUNCE_WIDTH), (LEVEL3_POUNCE_WIDTH), (LEVEL3_POUNCE_WIDTH));
+  if(pm->unlagged_on) {
+    pm->unlagged_on(pm->ps->clientNum, muzzle, pounce_range + LEVEL3_POUNCE_WIDTH);
+  }
+  VectorMA(muzzle, pounce_range, forward, end);
+  pm->trace(&trace, muzzle, mins, maxs,end, pm->ps->clientNum, MASK_SHOT);
+  if(pm->unlagged_off) {
+    pm->unlagged_off( );
+  }
+
+  if(trace.allsolid || trace.startsolid) {
+    return qfalse;
+  }
+
+  pounce_mod = trace.fraction;
+
   // Give the player forward velocity and simulate a jump
   pml.groundPlane = qfalse;
   pml.walking = qfalse;
@@ -1106,6 +1132,9 @@ static qboolean PM_CheckPounce( void )
   else
     jumpMagnitude = pm->ps->misc[ MISC_MISC ] *
                     LEVEL3_POUNCE_JUMP_MAG_UPG / LEVEL3_POUNCE_TIME_UPG;
+  if(pounce_mod < 1.0f) {
+    jumpMagnitude *= pounce_mod;
+  }
   VectorMA( pm->ps->velocity, jumpMagnitude, pml.forward, pm->ps->velocity );
   PM_AddEvent( EV_JUMP );
 
@@ -1130,6 +1159,9 @@ static qboolean PM_CheckPounce( void )
   }
 
   pm->pmext->pouncePayload = pm->ps->misc[ MISC_MISC ];
+  if(pounce_mod < 1.0f) {
+    pm->pmext->pouncePayload *= pounce_mod;
+  }
   pm->ps->misc[ MISC_MISC ] = 0;
 
   return qtrue;
