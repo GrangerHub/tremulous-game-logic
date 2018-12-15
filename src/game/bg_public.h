@@ -281,6 +281,9 @@ struct pmove_s
 
   int           (*pointcontents)( const vec3_t point, int passEntityNum );
 
+  void          (*unlagged_on)( int attackerNum, vec3_t muzzle, float range );
+  void          (*unlagged_off)( void );
+
   int           tauntSpam; // allow taunts to be spammed. only for clients that enable cg_tauntSpam
   int           humanPortalCreateTime[ PORTAL_NUM ];
 
