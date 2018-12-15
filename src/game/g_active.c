@@ -515,6 +515,8 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
     pm.tracemask = ent->clipmask;
     pm.trace = G_TraceWrapper;
     pm.pointcontents = SV_PointContents;
+    pm.unlagged_on = G_UnlaggedOn;
+    pm.unlagged_off = G_UnlaggedOff;
     pm.tauntSpam = 0;
     pm.swapAttacks = client->pers.swapAttacks;
     pm.wallJumperMinFactor = client->pers.wallJumperMinFactor;

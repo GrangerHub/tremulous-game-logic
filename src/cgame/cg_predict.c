@@ -607,6 +607,8 @@ void CG_PredictPlayerState( void )
   cg_pmove.pmext = &cg.pmext;
   cg_pmove.trace = CG_Trace;
   cg_pmove.pointcontents = CG_PointContents;
+  cg_pmove.unlagged_on = NULL;
+  cg_pmove.unlagged_off = NULL;
   cg_pmove.debugLevel = cg_debugMove.integer;
   cg_pmove.swapAttacks = cg_swapAttacks.integer;
   cg_pmove.wallJumperMinFactor = cg_wallJumperMinFactor.value;
