@@ -1207,7 +1207,8 @@ G_TimeTilSuddenDeath
 int G_TimeTilSuddenDeath( void )
 {
   if( ( !g_suddenDeathTime.integer && level.suddenDeathBeginTime == 0 ) ||
-      ( level.suddenDeathBeginTime < 0 ) )
+      ( level.suddenDeathBeginTime < 0 ) ||
+      IS_WARMUP )
     return SUDDENDEATHWARNING + 1; // Always some time away
 
   return ( ( level.suddenDeathBeginTime ) - ( level.time - level.startTime ) );
