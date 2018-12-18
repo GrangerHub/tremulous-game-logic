@@ -1411,7 +1411,7 @@ static void CG_PlayerNonSegAngles( centity_t *cent, vec3_t srcAngles, vec3_t non
   }
   else
   {
-    CG_SwingAngles( localAngles[ YAW ], 40, 90, cg_swingSpeed.value,
+    CG_SwingAngles( localAngles[ YAW ], 15, 90, cg_swingSpeed.value,
       &cent->pe.nonseg.yawAngle, &cent->pe.nonseg.yawing );
   }
 
