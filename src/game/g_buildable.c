@@ -3194,10 +3194,10 @@ static qboolean HMGTurret_TrackEnemy( gentity_t *self )
     self->s.angles2[ PITCH ] = (-360) + MGTURRET_VERTICALCAP;
 
   //if not pointing at our target then move accordingly
-  if( angularDiff[ YAW ] < 0 && angularDiff[ YAW ] < ( -MGTURRET_ANGULARSPEED ) )
-    self->s.angles2[ YAW ] += MGTURRET_ANGULARSPEED;
-  else if( angularDiff[ YAW ] > 0 && angularDiff[ YAW ] > MGTURRET_ANGULARSPEED )
-    self->s.angles2[ YAW ] -= MGTURRET_ANGULARSPEED;
+  if( angularDiff[ YAW ] < 0 && angularDiff[ YAW ] < ( -angularSpeed ) )
+    self->s.angles2[ YAW ] += angularSpeed;
+  else if( angularDiff[ YAW ] > 0 && angularDiff[ YAW ] > angularSpeed )
+    self->s.angles2[ YAW ] -= angularSpeed;
   else
     self->s.angles2[ YAW ] = angleToTarget[ YAW ];
 
