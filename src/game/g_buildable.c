@@ -3080,13 +3080,44 @@ static qboolean HMGTurret_FindTrackPoint( gentity_t *self,
 
 /*
 ================
+HMGTurret_NumOfTargeting
+
+Checks the validity of the members of an entity's targeted queue, then
+returns the length of the queue
+================
+*/
+size_t HMGTurret_NumOfTargeting(gentity_t *ent) {
+  bglist_t *list;
+
+  Com_Assert(ent && "HMGTurret_CheckTargetedQueue: ent is NULL");
+
+  list = ent->targeted.head;
+  while(list) {
+    bglist_t *next = list->next;
+    gentity_t *targeted = (gentity_t *)list->data;
+
+    if(
+      !targeted->inuse ||
+      targeted->s.eType != ET_BUILDABLE ||
+      targeted->enemy != ent ||
+      !targeted->powered) {
+      BG_Queue_Delete_Link(&ent->targeted, list);
+    }
+    list = next;
+  }
+
+  return BG_Queue_Get_Length(&ent->targeted);
+}
+
+/*
+================
 HMGTurret_CheckTarget
 
 Used by HMGTurret_Think to check enemies for validity
 ================
 */
 static qboolean HMGTurret_CheckTarget( gentity_t *self, gentity_t *target,
-                                       qboolean los_check )
+                                       qboolean los_check, qboolean ignorePainted )
 {
   bboxPoint_t trackPoint;
 
@@ -3096,6 +3127,16 @@ static qboolean HMGTurret_CheckTarget( gentity_t *self, gentity_t *target,
   if( !target || target->health <= 0 || !target->client ||
       target->client->pers.teamSelection != TEAM_ALIENS )
     return qfalse;
+
+  //some turret has already selected this target
+  if(self->dcc && !ignorePainted) {
+    size_t num_of_targeting = HMGTurret_NumOfTargeting(target);
+    if(
+      num_of_targeting > 0 &&
+      !(BG_Queue_Find(&target->targeted, self) && num_of_targeting == 1)) {
+      return qfalse;
+    }
+  }
 
   if( G_NoTarget( target ) )
     return qfalse;
@@ -3248,11 +3289,13 @@ static void HMGTurret_FindEnemy( gentity_t *self )
   vec3_t      mins, maxs;
   int         i, num;
   gentity_t   *target;
+  gentity_t   *prev_enemy;
   int         start;
 
   Com_Assert( self &&
               "HMGTurret_FindEnemy: self is NULL" );
 
+  prev_enemy = self->enemy;
   self->enemy = NULL;
 
   // Look for targets in a box around the turret
@@ -3264,15 +3307,56 @@ static void HMGTurret_FindEnemy( gentity_t *self )
   if( num == 0 )
     return;
 
-  start = rand( ) / ( RAND_MAX / num + 1 );
-  for( i = start; i < num + start ; i++ )
-  {
-    target = &g_entities[ entityList[ i % num ] ];
-    if( !HMGTurret_CheckTarget( self, target, qtrue ) )
-      continue;
+  if( self->dcc ) {
+    size_t min_targeting = MAX_GENTITIES;
 
-    self->enemy = target;
-    return;
+    //factor in targets being tracked by multiple turrets
+
+    //first check the previous enemy
+    if( HMGTurret_CheckTarget( self, prev_enemy, qtrue, qtrue ) ) {
+      self->enemy = prev_enemy;
+      min_targeting = HMGTurret_NumOfTargeting(prev_enemy);
+    }
+
+    //check all other area entities
+    start = rand( ) / ( RAND_MAX / num + 1 );
+    for( i = start; i < num + start ; i++ ) {
+      size_t         num_of_targeting;
+      bboxPointNum_t trackedEnemyPointNumBackup;
+
+      target = &g_entities[ entityList[ i % num ] ];
+
+      if(target == prev_enemy) {
+        //already checked
+        continue;
+      }
+
+      num_of_targeting = HMGTurret_NumOfTargeting(target);
+
+      if(num_of_targeting >= min_targeting) {
+        continue;
+      }
+
+      trackedEnemyPointNumBackup = self->trackedEnemyPointNum;
+      if( !HMGTurret_CheckTarget( self, target, qtrue, qtrue ) ) {
+        self->trackedEnemyPointNum = trackedEnemyPointNumBackup;
+        continue;
+      }
+
+      self->enemy = target;
+      min_targeting = num_of_targeting;
+    }
+  } else {
+    start = rand( ) / ( RAND_MAX / num + 1 );
+    for( i = start; i < num + start ; i++ ) {
+      target = &g_entities[ entityList[ i % num ] ];
+      if( !HMGTurret_CheckTarget( self, target, qtrue, qfalse ) ) {
+        continue;
+      }
+
+      self->enemy = target;
+      return;
+    }
   }
 }
 
@@ -3345,6 +3429,8 @@ Think function for MG turret
 */
 void HMGTurret_Think( gentity_t *self )
 {
+  gentity_t * prev_enemy;
+
   self->nextthink = level.time +
                     BG_Buildable( self->s.modelindex )->nextthink;
 
@@ -3370,17 +3456,30 @@ void HMGTurret_Think( gentity_t *self )
   if( !self->spawned )
     return;
 
+  prev_enemy = self->enemy;
+
   // If the current target is not valid find a new enemy
-  if( !HMGTurret_CheckTarget( self, self->enemy, qtrue ) )
+  if( !HMGTurret_CheckTarget( self, self->enemy, qtrue, qfalse ) )
   {
-    self->active = qfalse;
-    self->turretSpinupTime = -1;
+    if( self->enemy && BG_Queue_Find(&self->enemy->targeted, self) ) {
+      BG_Queue_Remove_All(&self->enemy->targeted, self);
+    }
     HMGTurret_FindEnemy( self );
   }
+
+  if(self->enemy != prev_enemy) {
+    self->active = qfalse;
+    self->turretSpinupTime = -1;
+  }
+
   // if newly powered raise turret
   HMGTurret_State( self, MGT_STATE_ACTIVE );
   if( !self->enemy )
     return;
+
+  if(BG_Queue_Find(&self->enemy->targeted, self) == NULL) {
+    BG_Queue_Push_Head(&self->enemy->targeted, self);
+  }
 
   // Track until we can hit the target
   if( !HMGTurret_TrackEnemy( self ) )

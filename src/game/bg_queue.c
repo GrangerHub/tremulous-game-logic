@@ -968,7 +968,7 @@ qboolean BG_Queue_Remove( bgqueue_t *queue, const void *data )
  *
  * Since: 2.4
  */
-size_t G_Queue_Remove_All( bgqueue_t *queue, const void *data )
+size_t BG_Queue_Remove_All( bgqueue_t *queue, const void *data )
 {
   bglist_t *list;
   size_t old_length;
