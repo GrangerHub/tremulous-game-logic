@@ -75,8 +75,8 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL1_PCLOUD_RANGE         200.0f
 #define LEVEL1_PCLOUD_REPEAT        2000
 #define LEVEL1_PCLOUD_TIME          10000
-#define LEVEL1_REGEN_MOD            2.0f
-#define LEVEL1_UPG_REGEN_MOD        3.0f
+#define LEVEL1_REGEN_MOD            1.5f
+#define LEVEL1_UPG_REGEN_MOD        2.0f
 #define LEVEL1_REGEN_SCOREINC       AVM(100) // score added for healing per 10s
 #define LEVEL1_UPG_REGEN_SCOREINC   AVM(200)
 #define LEVEL1_JUMP_MAGNITUDE       270.0f
