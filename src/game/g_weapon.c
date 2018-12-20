@@ -416,7 +416,7 @@ void meleeAttack( gentity_t *ent, float range, float width, float height,
   trace_t   tr;
   gentity_t *traceEnt;
 
-  G_WideTraceSolidSeries( &tr, ent, range, width, height, &traceEnt );
+  G_WideTraceSolid( &tr, ent, range, width, height, &traceEnt );
   if( traceEnt == NULL || !G_TakesDamage( traceEnt ) )
     return;
 

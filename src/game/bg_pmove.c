@@ -1119,7 +1119,11 @@ static qboolean PM_CheckPounce( void )
     return qfalse;
   }
 
-  pounce_mod = trace.fraction;
+  if(trace.fraction < 1.0f) {
+    pounce_mod = (trace.fraction * 0.25);
+  } else {
+    pounce_mod = 1.0f;
+  }
 
   // Give the player forward velocity and simulate a jump
   pml.groundPlane = qfalse;
