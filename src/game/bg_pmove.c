@@ -1533,26 +1533,26 @@ static qboolean PM_CheckJump( vec3_t customNormal )
     if( pm->ps->stats[ STAT_TEAM ] == TEAM_HUMANS )
     {
       maxHoppingSpeed *= 2.0f;
-      minKickFraction = 0.3f;
-      maxKickFraction = 0.4f;
+      minKickFraction = 0.1f;
+      maxKickFraction = 0.2f;
     }
     else if( PM_IsDretchOrBasilisk( ) )
     {
       maxHoppingSpeed *= 1.75f;
-      maxKickFraction = 0.5f;
-      minKickFraction = 0.3f;
+      maxKickFraction = 0.35f;
+      minKickFraction = 0.1f;
     }
     else if( PM_IsMarauder( ) )
     {
       maxHoppingSpeed *= 3.0f;
-      maxKickFraction = 0.5f;
-      minKickFraction = 0.2f;
+      maxKickFraction = 0.4f;
+      minKickFraction = 0.15f;
     }
     else
     {
       maxHoppingSpeed *= 1.75f;
-      maxKickFraction = 0.4f;
-      minKickFraction = 0.2f;
+      maxKickFraction = 0.3f;
+      minKickFraction = 0.1f;
     }
 
     if( maxHoppingSpeed >= 1.0f )
