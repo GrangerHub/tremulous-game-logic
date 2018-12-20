@@ -276,7 +276,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define BOOSTER_SPLASHDAMAGE        ABDM(50000)
 #define BOOSTER_SPLASHRADIUS        100
 #define BOOSTER_CREEPSIZE           120
-#define BOOSTER_REGEN_MOD           3.0f
+#define BOOSTER_REGEN_MOD           2.0f
 #define BOOSTER_VALUE               0
 #define BOOST_TIME                  30000
 #define BOOST_WARN_TIME             15000
