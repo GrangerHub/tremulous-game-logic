@@ -296,7 +296,7 @@ static void G_PuntBlocker( gentity_t *self, gentity_t *blocker ) {
 
         G_SetExpiration( blocker, EXP_SPAWN_BLOCK, 1000 );
       }
-    } else {
+    } else if( self->s.modelindex != BA_H_TELEPORTER ) {
       // damage the spawn
       damageSpawn = qtrue;
     }
@@ -2911,7 +2911,7 @@ qboolean HTeleporter_Activate( gentity_t *self, gentity_t *activator )
                                   CP_TELEPORT ) );
         } else {
           SV_GameSendServerCommand( activator - g_entities,
-                                  va( "cp \"^3Destination is blocked by alien entity, and is self destructing!\" %d",
+                                  va( "cp \"^3Destination is blocked by alien entity, try again later!\" %d",
                                   CP_TELEPORT ) );
         }
 
