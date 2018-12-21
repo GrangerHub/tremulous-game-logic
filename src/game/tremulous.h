@@ -692,7 +692,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define REACTOR_ATTACK_DCC_DAMAGE   HBDM(40000)
 #define REACTOR_VALUE               ( 2 * ALIEN_CREDITS_PER_KILL )
 
-#define REPEATER_BP                 4
+#define REPEATER_BP                 0
 #define REPEATER_BT                 10000
 #define REPEATER_HEALTH             HBHM(250000)
 #define REPEATER_SPLASHDAMAGE       HBDM(50000)
@@ -754,12 +754,12 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define FREEKILL_ALIEN              ALIEN_CREDITS_PER_KILL
 #define FREEKILL_HUMAN              LEVEL0_VALUE
 
-#define DEFAULT_ALIEN_BUILDPOINTS   "100"
+#define DEFAULT_ALIEN_BUILDPOINTS   "130"
 #define DEFAULT_ALIEN_QUEUE_TIME    "12000"
 #define DEFAULT_ALIEN_STAGE2_THRESH "12000"
 #define DEFAULT_ALIEN_STAGE3_THRESH "24000"
 #define DEFAULT_ALIEN_MAX_STAGE     "2"
-#define DEFAULT_HUMAN_BUILDPOINTS   "100"
+#define DEFAULT_HUMAN_BUILDPOINTS   "130"
 #define DEFAULT_HUMAN_QUEUE_TIME    "8000"
 #define DEFAULT_HUMAN_REPEATER_BUILDPOINTS "20"
 #define DEFAULT_HUMAN_REPEATER_QUEUE_TIME "2000"
