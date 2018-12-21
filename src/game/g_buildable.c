@@ -190,45 +190,96 @@ G_PuntBlocker
 Move spawn blockers
 ===============
 */
-static void G_PuntBlocker( gentity_t *self, gentity_t *blocker )
-{
-  vec3_t nudge;
+static void G_PuntBlocker( gentity_t *self, gentity_t *blocker ) {
+  vec3_t     nudge;
+  gentity_t  *tempEnt = blocker;
+  gentity_t  *blockers[ MAX_GENTITIES ], *ignoredEnts[ MAX_GENTITIES ];
+  qboolean   damageSpawn = qfalse;
+  int        i, numBlockers = 0, numIgnoredEnts = 0;
 
-  if( self )
-  {
-    if( !self->spawnBlockTime )
-    {
+  if( !g_antiSpawnBlock.integer ) {
+    return;
+  }
+
+  if( self->attemptSpawnTime < level.time ) {
+    self->spawnBlockTime = 0;
+    return;
+  }
+
+  while( tempEnt ) {
+    if( tempEnt->client ) {
+      blockers[ numBlockers ] = tempEnt;
+      numBlockers++;
+    } else {
+      ignoredEnts[ numIgnoredEnts ] = tempEnt;
+      numIgnoredEnts++;
+    }
+
+    SV_UnlinkEntity( tempEnt );
+
+    tempEnt = G_CheckSpawnPoint( self->s.number,self->r.currentOrigin,
+                                 self->s.origin2, self->s.modelindex, NULL );
+  }
+
+  for( i = 0; i < numBlockers; i++ ) {
+    SV_LinkEntity( blockers[ i ] );
+  }
+
+  for( i = 0; i < numIgnoredEnts; i++ ) {
+    SV_LinkEntity( ignoredEnts[ i ] );
+  }
+
+  if( numBlockers <= 0 )
+    return;
+
+  if( self ) {
+    if( !self->spawnBlockTime ) {
       // begin timer
       self->spawnBlockTime = level.time;
       return;
     }
-    else if( level.time - self->spawnBlockTime > 10000 )
-    {
+    else if( level.time - self->spawnBlockTime > 5000 ) {
       // still blocked, get rid of them
-      G_Damage( blocker, NULL, NULL, NULL, NULL, 0, DAMAGE_INSTAGIB, MOD_TRIGGER_HURT );
+      for( i = 0; i < numBlockers; i++ ) {
+        if( self->buildableTeam == blockers[i]->client->ps.stats[ STAT_TEAM ] )
+          G_Damage( blockers[ i ], NULL, NULL, NULL, NULL, 0, DAMAGE_INSTAGIB,
+                    MOD_TRIGGER_HURT );
+      }
+
       self->spawnBlockTime = 0;
       return;
     }
-    else if( level.time - self->spawnBlockTime < 5000 )
-    {
-      // within grace period
-      return;
+  }
+
+  for( i = 0; i < numBlockers; i++ ) {
+    // punt blockers that are on the same team as the buildable
+    if( self->buildableTeam == blockers[i]->client->ps.stats[ STAT_TEAM ] ) {
+      nudge[ 0 ] = crandom() * 250.0f;
+      nudge[ 1 ] = crandom() * 250.0f;
+      nudge[ 2 ] = 100.0f;
+
+      VectorAdd( blockers[ i ]->client->ps.velocity, nudge,
+                 blockers[ i ]->client->ps.velocity );
+      if( G_Expired( blocker, EXP_SPAWN_BLOCK ) ) {
+        SV_GameSendServerCommand( blockers[ i ] - g_entities,
+                                    va( "cp \"Don't spawn block!\" %d",
+                                    CP_SPAWN_BLOCK ) );
+
+        G_SetExpiration( blocker, EXP_SPAWN_BLOCK, 1000 );
+      }
+    } else {
+      // damage the spawn
+      damageSpawn = qtrue;
     }
   }
 
-  nudge[ 0 ] = crandom() * 250.0f;
-  nudge[ 1 ] = crandom() * 250.0f;
-  nudge[ 2 ] = 175.0f;
+  if( damageSpawn &&
+      self->noTriggerHurtDmgTime <= level.time ) {
+    G_Damage( self, NULL, NULL, NULL, NULL, BG_HP2SU( 30 ), 0,
+              MOD_TRIGGER_HURT );
 
-  VectorAdd( blocker->client->ps.velocity, nudge, blocker->client->ps.velocity );
-  if( G_Expired( blocker, EXP_SPAWN_BLOCK ) )
-  {
-    SV_GameSendServerCommand( blocker - g_entities,
-                            va( "cp \"Don't spawn block!\" %d",
-                            CP_SPAWN_BLOCK ) );
-    G_SetExpiration( blocker, EXP_SPAWN_BLOCK, 1000 );
+    self->noTriggerHurtDmgTime = level.time + 1000;
   }
-  
 }
 
 #define POWER_REFRESH_TIME  2000
@@ -1103,18 +1154,16 @@ void ASpawn_Think( gentity_t *self )
           else
             G_Damage( ent, NULL, NULL, NULL, NULL, 0, DAMAGE_INSTAGIB, MOD_SUICIDE );
 
-          G_SetBuildableAnim( self, BANIM_SPAWN1, qtrue );
+          if( ent->health > 0 )
+            G_SetBuildableAnim( self, BANIM_SPAWN1, qtrue );
         }
         else if( ent->s.number == ENTITYNUM_WORLD || ent->s.eType == ET_MOVER )
         {
           G_Damage( self, NULL, NULL, NULL, NULL, 0, DAMAGE_INSTAGIB, MOD_SUICIDE );
           return;
         }
-        else if( g_antiSpawnBlock.integer &&
-                 ent->client && ent->client->pers.teamSelection == TEAM_ALIENS )
-        {
-          G_PuntBlocker( self, ent );
-        }
+
+        G_PuntBlocker( self, ent );
 
         if( ent->s.eType == ET_CORPSE )
           G_FreeEntity( ent ); //quietly remove
@@ -2406,26 +2455,24 @@ void HSpawn_Think( gentity_t *self )
     if( self->s.groundEntityNum != ENTITYNUM_NONE )
     {
       if( ( ent = G_CheckSpawnPoint( self->s.number, self->r.currentOrigin,
-              self->s.origin2, BA_H_SPAWN, NULL ) ) != NULL )
+              self->s.origin2, self->s.modelindex, NULL ) ) != NULL )
       {
         // If the thing blocking the spawn is a buildable, kill it.
         // If it's part of the map, kill self.
         if( ent->s.eType == ET_BUILDABLE )
         {
+          if( ent->health > 0 )
+            G_SetBuildableAnim( self, BANIM_SPAWN1, qtrue );
+
           G_Damage( ent, NULL, NULL, NULL, NULL, 0, DAMAGE_INSTAGIB, MOD_SUICIDE );
-          G_SetBuildableAnim( self, BANIM_SPAWN1, qtrue );
         }
         else if( ent->s.number == ENTITYNUM_WORLD || ent->s.eType == ET_MOVER )
         {
           G_Damage( self, NULL, NULL, NULL, NULL, 0, DAMAGE_INSTAGIB, MOD_SUICIDE );
           return;
         }
-        else if( g_antiSpawnBlock.integer &&
-                 ent->client && ent->client->pers.teamSelection == TEAM_HUMANS )
-        {
-          G_PuntBlocker( self, ent );
-        }
 
+        G_PuntBlocker( self, ent );
 
         if( ent->s.eType == ET_CORPSE )
           G_FreeEntity( ent ); //quietly remove
@@ -5109,6 +5156,7 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
   built->takedamage = qtrue;
   built->spawned = qfalse;
   built->buildTime = built->s.time = level.time;
+  built->attemptSpawnTime = -1;
 
   // initialize buildable stacking variables
   built->damageDroppedBuildable = qfalse;
