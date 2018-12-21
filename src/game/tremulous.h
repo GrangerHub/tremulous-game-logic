@@ -668,7 +668,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define DC_SPLASHDAMAGE             HBDM(50000)
 #define DC_SPLASHRADIUS             100
 #define DC_ATTACK_PERIOD            10000 // how often to spam "under attack"
-#define DC_HEALRATE                 4000
+#define DC_HEALRATE                 2000
 #define DC_RANGE                    10000
 #define DC_VALUE                    0
 
