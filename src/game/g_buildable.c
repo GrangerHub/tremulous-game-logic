@@ -3029,7 +3029,7 @@ static qboolean HMGTurret_FindTrackPoint( gentity_t *self,
     targetPoint->distance = VectorNormalize( projection );
     VectorNormalize( targetPoint->direction );
 
-    if( targetPoint->bboxPoint.num == BBXP_ORIGIN &&
+    if( !self->dcc && targetPoint->bboxPoint.num == BBXP_ORIGIN &&
         BG_Buildable( self->s.modelindex )->turretTrackOnlyOrigin )
     {
       //only need to check the origin in this case
@@ -3038,7 +3038,7 @@ static qboolean HMGTurret_FindTrackPoint( gentity_t *self,
   }
 
   // check if only the origin needs to be tracked
-  if( BG_Buildable( self->s.modelindex )->turretTrackOnlyOrigin )
+  if( !self->dcc && BG_Buildable( self->s.modelindex )->turretTrackOnlyOrigin )
   {
     targetPoint_t *targetPoint = &targetPoints[ BBXP_ORIGIN ];
 
@@ -3131,6 +3131,19 @@ static qboolean HMGTurret_CheckTarget( gentity_t *self, gentity_t *target,
   //some turret has already selected this target
   if(self->dcc && !ignorePainted) {
     size_t num_of_targeting = HMGTurret_NumOfTargeting(target);
+
+    if(
+      BG_ClassAllowedInStage(PCL_ALIEN_LEVEL4, g_alienStage.integer, IS_WARMUP) &&
+      (target->client && target->client->pers.classSelection != PCL_ALIEN_LEVEL4)) {
+      //check to see if a rant can be shot instead
+      return qfalse;
+    }
+
+    //check to see if another potential target is an agressor
+    if(!G_IsRecentAgressor(target)) {
+      return qfalse;
+    }
+
     if(
       num_of_targeting > 0 &&
       !(BG_Queue_Find(&target->targeted, self) && num_of_targeting == 1)) {
@@ -3178,7 +3191,7 @@ static qboolean HMGTurret_TrackEnemy( gentity_t *self )
   Com_Assert( self->enemy &&
               "HMGTurret_TrackEnemy: enemy is NULL" );
 
-  if( BG_Buildable( self->s.modelindex )->turretTrackOnlyOrigin )
+  if( !self->dcc && BG_Buildable( self->s.modelindex )->turretTrackOnlyOrigin )
     trackPoint.num = BBXP_ORIGIN;
   else
     trackPoint.num = self->trackedEnemyPointNum;
@@ -3254,7 +3267,7 @@ static qboolean HMGTurret_TrackEnemy( gentity_t *self )
   {
     return qtrue;
   }
-  else if( !BG_Buildable( self->s.modelindex )->turretTrackOnlyOrigin &&
+  else if( !(!self->dcc && BG_Buildable( self->s.modelindex )->turretTrackOnlyOrigin) &&
            self->active )
   {
     vec3_t  forward;
@@ -3308,7 +3321,9 @@ static void HMGTurret_FindEnemy( gentity_t *self )
     return;
 
   if( self->dcc ) {
-    size_t min_targeting = MAX_GENTITIES;
+    size_t   min_targeting = MAX_GENTITIES;
+    class_t  targeted_class = PCL_NONE;
+    qboolean targeted_agressor = qfalse;
 
     //factor in targets being tracked by multiple turrets
 
@@ -3316,6 +3331,12 @@ static void HMGTurret_FindEnemy( gentity_t *self )
     if( HMGTurret_CheckTarget( self, prev_enemy, qtrue, qtrue ) ) {
       self->enemy = prev_enemy;
       min_targeting = HMGTurret_NumOfTargeting(prev_enemy);
+      targeted_agressor = G_IsRecentAgressor(prev_enemy);
+      if(prev_enemy->client) {
+        targeted_class = prev_enemy->client->pers.classSelection;
+      } else {
+        targeted_class = PCL_NONE;
+      }
     }
 
     //check all other area entities
@@ -3331,9 +3352,35 @@ static void HMGTurret_FindEnemy( gentity_t *self )
         continue;
       }
 
+      if( targeted_class == PCL_ALIEN_LEVEL4) {
+        if(
+          target->client &&
+          target->client->pers.classSelection != PCL_ALIEN_LEVEL4) {
+          //give preference to shooting tyrants
+          continue;
+        }
+
+        if(targeted_agressor && !G_IsRecentAgressor(target)) {
+          //give agressor tyrants top priority
+          continue;
+        }
+      }
+
+      if(targeted_agressor && !G_IsRecentAgressor(target)) {
+        //give agressor enemies higher priority
+        continue;
+      }
+
       num_of_targeting = HMGTurret_NumOfTargeting(target);
 
-      if(num_of_targeting >= min_targeting) {
+      if(
+        !(
+          targeted_class != PCL_ALIEN_LEVEL4 &&
+          (
+            target->client &&
+            target->client->pers.classSelection == PCL_ALIEN_LEVEL4)) &&
+        !(!targeted_agressor && G_IsRecentAgressor(target)) &&
+        num_of_targeting >= min_targeting) {
         continue;
       }
 
@@ -3345,12 +3392,17 @@ static void HMGTurret_FindEnemy( gentity_t *self )
 
       self->enemy = target;
       min_targeting = num_of_targeting;
+      if(target->client) {
+        targeted_class = target->client->pers.classSelection;
+      } else {
+        targeted_class = PCL_NONE;
+      }
     }
   } else {
     start = rand( ) / ( RAND_MAX / num + 1 );
     for( i = start; i < num + start ; i++ ) {
       target = &g_entities[ entityList[ i % num ] ];
-      if( !HMGTurret_CheckTarget( self, target, qtrue, qfalse ) ) {
+      if( !HMGTurret_CheckTarget( self, target, qtrue, qtrue ) ) {
         continue;
       }
 
