@@ -252,9 +252,9 @@ spawned/healthy/unblocked etc.
 */
 static gentity_t *G_SelectSpawnBuildable( vec3_t preference, buildable_t buildable )
 {
-  gentity_t *search, *spot;
+  gentity_t *search, *spot, *tempBlocker, *blocker;
 
-  search = spot = NULL;
+  search = spot = blocker = NULL;
 
   while( ( search = G_Find( search, FOFS( classname ),
     BG_Buildable( buildable )->entityName ) ) != NULL )
@@ -271,14 +271,24 @@ static gentity_t *G_SelectSpawnBuildable( vec3_t preference, buildable_t buildab
     if( search->clientSpawnTime > 0 && !IS_WARMUP )
       continue;
 
-    if( G_CheckSpawnPoint( search->s.number, search->r.currentOrigin,
-          search->s.origin2, buildable, NULL ) != NULL )
+    if( ( tempBlocker = G_CheckSpawnPoint( search->s.number, search->r.currentOrigin,
+          search->s.origin2, buildable, NULL ) ) != NULL && !tempBlocker->client )
       continue;
 
     if( !spot || DistanceSquared( preference, search->r.currentOrigin ) <
                  DistanceSquared( preference, spot->r.currentOrigin ) )
+    {
       spot = search;
+      blocker = tempBlocker;
+    }
   }
+
+  if( blocker && blocker->client )
+  {
+    spot->attemptSpawnTime = level.time + 1000;
+    spot = NULL;
+  } else if( spot )
+    spot->attemptSpawnTime = -1;
 
   return spot;
 }

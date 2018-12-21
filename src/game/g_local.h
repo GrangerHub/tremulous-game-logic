@@ -345,6 +345,7 @@ struct gentity_s
                                         // every single frame.. so only do it periodically
   int               clientSpawnTime;    // the time until this spawn can spawn a client
   int               spawnBlockTime;     // timer for anti spawn block
+  int               attemptSpawnTime;
 
   int               credits[ MAX_CLIENTS ];     // human credits for each client
   int               killedBy;                   // clientNum of killer
