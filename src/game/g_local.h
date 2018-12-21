@@ -345,6 +345,7 @@ struct gentity_s
                                         // every single frame.. so only do it periodically
   int               clientSpawnTime;    // the time until this spawn can spawn a client
   int               spawnBlockTime;     // timer for anti spawn block
+  int               attemptSpawnTime;
 
   qboolean          lev1Grabbed;        //TA: for turrets interacting with lev1s
   int               lev1GrabTime;       //TA: for turrets interacting with lev1s
