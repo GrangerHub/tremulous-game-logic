@@ -3772,7 +3772,7 @@ void G_BuildableThink( gentity_t *ent, int msec )
           G_Damage( groundEnt, ent, &g_entities[ ent->dropperNum ], NULL, NULL,
               BG_Buildable( groundEnt->s.modelindex )->health / 5, DAMAGE_NO_PROTECTION,
               meansOD );
-        else
+        else if(ent->builtBy || groundEnt->builtBy)
           ent->damageDroppedBuildable = qtrue;
       }
       else if( groundEnt->client )
