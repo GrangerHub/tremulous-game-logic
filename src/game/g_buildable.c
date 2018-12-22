@@ -4619,7 +4619,7 @@ void G_BuildableThink( gentity_t *ent, int msec )
           G_Damage( groundEnt, ent, &g_entities[ ent->dropperNum ], NULL, NULL,
               BG_Buildable( groundEnt->s.modelindex )->health / 5, DAMAGE_NO_PROTECTION,
               meansOD );
-        else if( ( groundEnt->s.modelindex != BA_H_TELEPORTER ) || groundEnt->powered )
+        else if(ent->builtBy || groundEnt->builtBy)
           ent->damageDroppedBuildable = qtrue;
       }
       else if( groundEnt->client )
@@ -4630,6 +4630,28 @@ void G_BuildableThink( gentity_t *ent, int msec )
         G_Damage( ent, ent, &g_entities[ ent->dropperNum ], NULL, NULL,
             BG_Buildable( ent->s.modelindex )->health / 5, DAMAGE_NO_PROTECTION,
             meansOD );
+    }
+
+    //
+    // check for sizzle damage
+    //
+    if(ent->health > 0) {
+      trace_t   tr;
+      SV_Trace(
+        &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs,
+        ent->r.currentOrigin, ent->s.number,
+        (CONTENTS_LAVA|CONTENTS_SLIME), TT_AABB);
+      if(tr.fraction < 1.0f || tr.allsolid || tr.startsolid) {
+        if( tr.contents & CONTENTS_LAVA ) {
+          G_Damage( ent, ent, &g_entities[ ent->dropperNum ], NULL, NULL,
+            BG_Buildable( ent->s.modelindex )->health / 5, 0, MOD_LAVA );
+        }
+
+        if( ent->watertype & CONTENTS_SLIME ) {
+          G_Damage( ent, ent, &g_entities[ ent->dropperNum ], NULL, NULL,
+            BG_Buildable( ent->s.modelindex )->health / 10, 0, MOD_SLIME );
+        }
+      }
     }
   }
 
@@ -5342,7 +5364,7 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   vec3_t            angles;
   vec3_t            entity_origin;
   vec3_t            mins, maxs;
-  trace_t           tr1, tr2;
+  trace_t           tr1, tr2, tr3;
   itemBuildError_t  reason = IBE_NONE, tempReason;
   gentity_t         *tempent, *powerBuildable;
   float             minNormal;
@@ -5599,6 +5621,16 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   if( reason == IBE_NONE &&
       ( tr1.fraction >= 1.0f || tr2.startsolid ) )
     reason = IBE_NOROOM;
+
+  //can't build in lava nor slime
+  if(reason == IBE_NONE) {
+    SV_Trace(
+      &tr3, entity_origin, mins, maxs, entity_origin, ent->s.number,
+      (CONTENTS_LAVA|CONTENTS_SLIME), TT_AABB);
+    if(tr3.fraction < 1.0f || tr3.allsolid || tr3.startsolid) {
+      reason = IBE_NOROOM;
+    }
+  }
 
   if( reason != IBE_NONE )
     level.numBuildablesForRemoval = 0;
