@@ -1093,7 +1093,10 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
   if(
     g_friendlyFireLastSpawnProtection.integer &&
-    targ->s.eType == ET_BUILDABLE) {
+    targ->s.eType == ET_BUILDABLE &&
+    mod != MOD_TRIGGER_HURT &&
+    mod != MOD_LAVA &&
+    mod != MOD_SLIME) {
     if(BG_Buildable(targ->s.modelindex)->role & ROLE_SPAWN) {
       //don't allow teammates to deal damage to their last spawn
       switch (targ->buildableTeam) {
