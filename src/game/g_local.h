@@ -105,6 +105,24 @@ typedef enum
 
 /*
 --------------------------------------------------------------------------------
+for linearly transforming the dimensions of a missile over a given scale period
+*/
+
+typedef struct scale_missile_s
+{
+  qboolean scaling;
+
+  //if not initialized to  greater than 0 at launch, the missile doesn't scale
+  size_t time_to_scale;
+
+  //dimensions at the end of the scale_period
+  //has to be specified in the missile launch
+  vec3_t end_mins;
+  vec3_t end_maxs;
+} scale_missile_t;
+
+/*
+--------------------------------------------------------------------------------
 */
 
 typedef struct{
@@ -153,6 +171,8 @@ struct gentity_s
   int               clipmask;       // brushes with this content value will be collided against
                                     // when moving.  items and corpses do not collide against
                                     // players, for instance
+
+  scale_missile_t   scale_missile;
 
   // movers
   moverState_t      moverState;

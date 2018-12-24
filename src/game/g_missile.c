@@ -272,6 +272,59 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace )
   SV_LinkEntity( ent );
 }
 
+/*
+================
+G_CheckForMissileImpact
+
+================
+*/
+static qboolean G_CheckForMissileImpact(gentity_t *ent, vec3_t origin, trace_t *tr) {
+  int       passent;
+
+  // ignore interactions with the missile owner
+  passent = ent->r.ownerNum;
+
+  // general trace to see if we hit anything at all
+  SV_Trace(
+    tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs,
+    origin, passent, ent->clipmask, TT_AABB);
+
+  if(tr->startsolid || tr->allsolid) {
+    tr->fraction = 0.0f;
+    VectorCopy(ent->r.currentOrigin, tr->endpos);
+  }
+
+  if(tr->fraction < 1.0f) {
+    if(!ent->pointAgainstWorld || tr->contents & CONTENTS_BODY) {
+      // We hit an entity or we don't care
+      return qtrue;
+    } else {
+      SV_Trace(
+        tr, ent->r.currentOrigin, NULL, NULL, origin,
+        passent, ent->clipmask, TT_AABB);
+
+      if(tr->fraction < 1.0f) {
+        // Hit the world with point trace
+        return qtrue;
+      } else {
+        if(tr->contents & CONTENTS_BODY) {
+          // Hit an entity
+          return qtrue;
+        } else {
+          SV_Trace(
+            tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs,
+            origin, passent, CONTENTS_BODY, TT_AABB);
+
+          if(tr->fraction < 1.0f){
+            return qtrue;
+          }
+        }
+      }
+    }
+  }
+
+  return qfalse;
+}
 
 /*
 ================
@@ -283,60 +336,12 @@ void G_RunMissile( gentity_t *ent )
 {
   vec3_t    origin;
   trace_t   tr;
-  int       passent;
-  qboolean  impact = qfalse;
+  qboolean  impact;
 
   // get current position
   BG_EvaluateTrajectory( &ent->s.pos, level.time, origin );
 
-  // ignore interactions with the missile owner
-  passent = ent->r.ownerNum;
-
-  // general trace to see if we hit anything at all
-  SV_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs,
-              origin, passent, ent->clipmask, TT_AABB );
-
-  if( tr.startsolid || tr.allsolid )
-  {
-    tr.fraction = 0.0f;
-    VectorCopy( ent->r.currentOrigin, tr.endpos );
-  }
-
-  if( tr.fraction < 1.0f )
-  {
-    if( !ent->pointAgainstWorld || tr.contents & CONTENTS_BODY )
-    {
-      // We hit an entity or we don't care
-      impact = qtrue;
-    }
-    else
-    {
-      SV_Trace( &tr, ent->r.currentOrigin, NULL, NULL, origin,
-                  passent, ent->clipmask, TT_AABB );
-
-      if( tr.fraction < 1.0f )
-      {
-        // Hit the world with point trace
-        impact = qtrue;
-      }
-      else
-      {
-        if( tr.contents & CONTENTS_BODY )
-        {
-          // Hit an entity
-          impact = qtrue;
-        }
-        else
-        {
-          SV_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs,
-                      origin, passent, CONTENTS_BODY, TT_AABB );
-
-          if( tr.fraction < 1.0f )
-            impact = qtrue;
-        }
-      }
-    }
-  }
+  impact = G_CheckForMissileImpact(ent, origin, &tr);
 
   VectorCopy( tr.endpos, ent->r.currentOrigin );
 
@@ -353,6 +358,70 @@ void G_RunMissile( gentity_t *ent )
 
     if( ent->s.eType != ET_MISSILE )
       return;   // exploded
+  }
+
+  //check for scaling of the missile dimensions
+  if(ent->scale_missile.time_to_scale > 0 || ent->scale_missile.scaling) {
+    const int time_increment = level.time - level.previousTime;
+    vec3_t    backup_mins;
+    vec3_t    backup_maxs;
+    qboolean  restore_backup = qfalse;
+
+    if(time_increment > 0) {
+      VectorCopy(ent->r.mins, backup_mins);
+      VectorCopy(ent->r.maxs, backup_maxs);
+
+      if(time_increment >= ent->scale_missile.time_to_scale) {
+        VectorCopy(ent->scale_missile.end_mins, ent->r.mins);
+        VectorCopy(ent->scale_missile.end_maxs, ent->r.maxs);
+
+        //don't scale if the missile would impact as a result
+        if(G_CheckForMissileImpact(ent, origin, &tr)) {
+          restore_backup = qtrue;
+        } else {
+          //the scaling as finished
+          ent->scale_missile.time_to_scale = 0;
+          ent->scale_missile.scaling = qfalse;
+        }
+      } else if(time_increment > 0) {
+        int i;
+
+        if(!ent->scale_missile.scaling) {
+          //scaling has started
+          ent->scale_missile.scaling = qtrue;
+        } else {
+          //try scaling
+          for(i = 0; i < 3; i++) {
+            const float slope =
+                (ent->scale_missile.end_mins[i] - ent->r.mins[i]) /
+                  ent->scale_missile.time_to_scale;
+
+            ent->r.mins[i] += (slope) * time_increment;
+          }
+
+          for(i = 0; i < 3; i++) {
+            const float slope =
+                (ent->scale_missile.end_maxs[i] - ent->r.maxs[i]) /
+                  ent->scale_missile.time_to_scale;
+
+            ent->r.maxs[i] += (slope) * time_increment;
+          }
+
+          //don't scale if the missile would impact as a result
+          if(G_CheckForMissileImpact(ent, origin, &tr)) {
+            restore_backup = qtrue;
+          } else {
+            //increment the scaling
+            ent->scale_missile.time_to_scale -= time_increment;
+          }
+        }
+      }
+
+      if(restore_backup) {
+        VectorCopy(backup_mins, ent->r.mins);
+        VectorCopy(backup_maxs, ent->r.maxs);
+      }
+    }
   }
 
   G_SetContents( ent, CONTENTS_SOLID ); //trick SV_LinkEntity into...
@@ -396,8 +465,11 @@ gentity_t *fire_flamer( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->splashMethodOfDeath = MOD_FLAMER_SPLASH;
   G_SetClipmask( bolt, MASK_SHOT );
   bolt->target_ent = NULL;
-  bolt->r.mins[ 0 ] = bolt->r.mins[ 1 ] = bolt->r.mins[ 2 ] = -FLAMER_SIZE;
-  bolt->r.maxs[ 0 ] = bolt->r.maxs[ 1 ] = bolt->r.maxs[ 2 ] = FLAMER_SIZE;
+  bolt->r.mins[ 0 ] = bolt->r.mins[ 1 ] = bolt->r.mins[ 2 ] = -FLAMER_START_SIZE;
+  bolt->r.maxs[ 0 ] = bolt->r.maxs[ 1 ] = bolt->r.maxs[ 2 ] = FLAMER_START_SIZE;
+  bolt->scale_missile.time_to_scale = FLAMER_EXPAND_TIME;
+  bolt->scale_missile.end_mins[ 0 ] = bolt->scale_missile.end_mins[ 1 ] = bolt->scale_missile.end_mins[ 2 ] = -FLAMER_FULL_SIZE;
+  bolt->scale_missile.end_maxs[ 0 ] = bolt->scale_missile.end_maxs[ 1 ] = bolt->scale_missile.end_maxs[ 2 ] = FLAMER_FULL_SIZE;
 
   bolt->s.pos.trType = TR_LINEAR;
   bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;   // move a bit on the very first frame
