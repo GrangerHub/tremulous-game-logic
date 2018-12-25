@@ -481,7 +481,7 @@ void G_UnlaggedCalc(int time, gentity_t *rewindEnt) {
     lerp = G_UnlaggedLerpFraction(
       time,
       history_wheel_times[startIndex],
-      history_wheel_times[startIndex]);
+      history_wheel_times[stopIndex]);
   }
 
   for(i = 0; i < ENTITYNUM_MAX_NORMAL; i++) {
