@@ -467,11 +467,11 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define FLAMER_DMG                  HWDM(20000)
 #define FLAMER_SPLASHDAMAGE         HWDM(10000)
 #define FLAMER_RADIUS               50       // splash radius
-#define FLAMER_START_SIZE           2        // initial missile bounding box
-#define FLAMER_FULL_SIZE            20       // fully enlarged missile bounding box
-#define FLAMER_EXPAND_TIME          480
-#define FLAMER_LIFETIME             700
-#define FLAMER_SPEED                500.0f
+#define FLAMER_START_SIZE           4        // initial missile bounding box
+#define FLAMER_FULL_SIZE            40       // fully enlarged missile bounding box
+#define FLAMER_EXPAND_TIME          800
+#define FLAMER_LIFETIME             800
+#define FLAMER_SPEED                300.0f
 #define FLAMER_LAG                  0.65f    // the amount of player velocity that is added to the fireball
 
 #define PRIFLE_PRICE                450
