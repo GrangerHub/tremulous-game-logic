@@ -967,7 +967,6 @@ CG_Get_Pusher_Num
 */
 int CG_Get_Pusher_Num(int ent_num) {
   int          pusher_num;
-  int          foundation_ent_num;
   entityType_t eType;
 
   Com_Assert(ent_num >= 0 && ent_num < MAX_GENTITIES);
@@ -980,15 +979,13 @@ int CG_Get_Pusher_Num(int ent_num) {
     eType = cg_entities[ent_num].currentState.eType;
   }
 
-  foundation_ent_num = CG_Get_Foundation_Ent_Num(ent_num);
-
   if(
     eType != ET_ITEM && eType != ET_BUILDABLE &&
     eType != ET_CORPSE && eType != ET_PLAYER) {
     return ENTITYNUM_NONE;
   }
 
-  return (pusher_num == ENTITYNUM_NONE ? foundation_ent_num : pusher_num);
+  return (pusher_num == ENTITYNUM_NONE ? CG_Get_Foundation_Ent_Num(ent_num) : pusher_num);
 }
 
 /*
@@ -1190,7 +1187,7 @@ static void CG_CalcEntityLerpPositions( centity_t *cent )
 
   // adjust for riding a mover if it wasn't rolled into the predicted
   // player state
-  if(cent != &cg.predictedPlayerEntity) {
+  if(cent->currentState.number != cg.predictedPlayerState.clientNum) {
     delta_yaw = CG_AdjustPositionForMover(
                   cent->lerpOrigin, CG_Get_Pusher_Num(cent->currentState.number),
                   cg.snap->serverTime, cg.time, cent->lerpOrigin);

@@ -112,13 +112,13 @@ for linearly transforming the dimensions of a missile over a given scale period
 
 typedef struct scale_missile_s
 {
-  qboolean scaling;
+  qboolean enabled;
 
-  //if not initialized to  greater than 0 at launch, the missile doesn't scale
-  size_t time_to_scale;
+  int start_time;
+  int stop_time;
 
-  //dimensions at the end of the scale_period
-  //has to be specified in the missile launch
+  vec3_t start_mins;
+  vec3_t start_maxs;
   vec3_t end_mins;
   vec3_t end_maxs;
 } scale_missile_t;

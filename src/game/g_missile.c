@@ -327,6 +327,22 @@ static qboolean G_CheckForMissileImpact(gentity_t *ent, vec3_t origin, trace_t *
 }
 
 /*
+==============
+ G_MissileLerpFraction
+==============
+*/
+static float G_MissileLerpFraction(int time, int start_time, int stop_time) {
+  float frameMsec;
+
+  if(start_time == stop_time) {
+    return 0.0f;
+  } else {
+    frameMsec = stop_time - start_time;
+    return (float)(time - start_time) / (float)frameMsec;
+  }
+}
+
+/*
 ================
 G_RunMissile
 
@@ -361,66 +377,50 @@ void G_RunMissile( gentity_t *ent )
   }
 
   //check for scaling of the missile dimensions
-  if(ent->scale_missile.time_to_scale > 0 || ent->scale_missile.scaling) {
-    const int time_increment = level.time - level.previousTime;
+  if(ent->scale_missile.enabled && ent->scale_missile.start_time < level.time) {
     vec3_t    backup_mins;
     vec3_t    backup_maxs;
     qboolean  restore_backup = qfalse;
 
-    if(time_increment > 0) {
       VectorCopy(ent->r.mins, backup_mins);
       VectorCopy(ent->r.maxs, backup_maxs);
 
-      if(time_increment >= ent->scale_missile.time_to_scale) {
-        VectorCopy(ent->scale_missile.end_mins, ent->r.mins);
-        VectorCopy(ent->scale_missile.end_maxs, ent->r.maxs);
+    if(ent->scale_missile.stop_time < level.time) {
+      VectorCopy(ent->scale_missile.end_mins, ent->r.mins);
+      VectorCopy(ent->scale_missile.end_maxs, ent->r.maxs);
 
-        //don't scale if the missile would impact as a result
-        if(G_CheckForMissileImpact(ent, origin, &tr)) {
-          restore_backup = qtrue;
-        } else {
-          //the scaling as finished
-          ent->scale_missile.time_to_scale = 0;
-          ent->scale_missile.scaling = qfalse;
-        }
-      } else if(time_increment > 0) {
-        int i;
-
-        if(!ent->scale_missile.scaling) {
-          //scaling has started
-          ent->scale_missile.scaling = qtrue;
-        } else {
-          //try scaling
-          for(i = 0; i < 3; i++) {
-            const float slope =
-                (ent->scale_missile.end_mins[i] - ent->r.mins[i]) /
-                  ent->scale_missile.time_to_scale;
-
-            ent->r.mins[i] += (slope) * time_increment;
-          }
-
-          for(i = 0; i < 3; i++) {
-            const float slope =
-                (ent->scale_missile.end_maxs[i] - ent->r.maxs[i]) /
-                  ent->scale_missile.time_to_scale;
-
-            ent->r.maxs[i] += (slope) * time_increment;
-          }
-
-          //don't scale if the missile would impact as a result
-          if(G_CheckForMissileImpact(ent, origin, &tr)) {
-            restore_backup = qtrue;
-          } else {
-            //increment the scaling
-            ent->scale_missile.time_to_scale -= time_increment;
-          }
-        }
+      //don't scale if the missile would impact as a result
+      if(G_CheckForMissileImpact(ent, origin, &tr)) {
+        restore_backup = qtrue;
+      } else {
+        //the scaling as finished
+        ent->scale_missile.enabled = qfalse;
       }
+    } else {
+      float lerp = G_MissileLerpFraction(
+        level.time,
+        ent->scale_missile.start_time,
+        ent->scale_missile.stop_time);
 
-      if(restore_backup) {
-        VectorCopy(backup_mins, ent->r.mins);
-        VectorCopy(backup_maxs, ent->r.maxs);
+      //try scaling
+      VectorLerp2(
+        lerp, ent->scale_missile.start_mins,
+        ent->scale_missile.end_mins,
+        ent->r.mins);
+      VectorLerp2(
+        lerp, ent->scale_missile.start_maxs,
+        ent->scale_missile.end_maxs,
+        ent->r.maxs);
+
+      //don't scale if the missile would impact as a result
+      if(G_CheckForMissileImpact(ent, origin, &tr)) {
+        restore_backup = qtrue;
       }
+    }
+
+    if(restore_backup) {
+      VectorCopy(backup_mins, ent->r.mins);
+      VectorCopy(backup_maxs, ent->r.maxs);
     }
   }
 
@@ -467,12 +467,18 @@ gentity_t *fire_flamer( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->target_ent = NULL;
   bolt->r.mins[ 0 ] = bolt->r.mins[ 1 ] = bolt->r.mins[ 2 ] = -FLAMER_START_SIZE;
   bolt->r.maxs[ 0 ] = bolt->r.maxs[ 1 ] = bolt->r.maxs[ 2 ] = FLAMER_START_SIZE;
-  bolt->scale_missile.time_to_scale = FLAMER_EXPAND_TIME;
-  bolt->scale_missile.end_mins[ 0 ] = bolt->scale_missile.end_mins[ 1 ] = bolt->scale_missile.end_mins[ 2 ] = -FLAMER_FULL_SIZE;
-  bolt->scale_missile.end_maxs[ 0 ] = bolt->scale_missile.end_maxs[ 1 ] = bolt->scale_missile.end_maxs[ 2 ] = FLAMER_FULL_SIZE;
 
   bolt->s.pos.trType = TR_LINEAR;
   bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;   // move a bit on the very first frame
+
+  bolt->scale_missile.enabled = qtrue;
+  bolt->scale_missile.start_time = bolt->s.pos.trTime;
+  bolt->scale_missile.stop_time = bolt->scale_missile.start_time + FLAMER_EXPAND_TIME;
+  VectorCopy(bolt->r.mins, bolt->scale_missile.start_mins);
+  VectorCopy(bolt->r.maxs, bolt->scale_missile.start_maxs);
+  bolt->scale_missile.end_mins[ 0 ] = bolt->scale_missile.end_mins[ 1 ] = bolt->scale_missile.end_mins[ 2 ] = -FLAMER_FULL_SIZE;
+  bolt->scale_missile.end_maxs[ 0 ] = bolt->scale_missile.end_maxs[ 1 ] = bolt->scale_missile.end_maxs[ 2 ] = FLAMER_FULL_SIZE;
+
   VectorCopy( start, bolt->s.pos.trBase );
   VectorScale( self->client->ps.velocity, FLAMER_LAG, pvel );
   VectorMA( pvel, FLAMER_SPEED, dir, bolt->s.pos.trDelta );
