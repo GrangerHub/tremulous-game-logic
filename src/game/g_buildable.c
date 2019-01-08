@@ -62,6 +62,32 @@ void G_SetIdleBuildableAnim( gentity_t *ent, buildableAnimNumber_t anim )
 
 /*
 ================
+G_NumberOfDependants
+
+Return number of entities that depend on this one
+================
+*/
+static int G_NumberOfDependants(gentity_t *self) {
+  int       i, n = 0;
+  gentity_t *ent;
+
+  for(i = 1, ent = g_entities + i; i < level.num_entities; i++, ent++) {
+    if(
+      ent->s.eType != ET_BUILDABLE &&
+      strcmp(ent->classname, "trigger_buildable")) {
+      continue;
+    }
+
+    if(ent->parentNode == self) {
+      n++;
+    }
+  }
+
+  return n;
+}
+
+/*
+================
 G_SuffocateTrappedEntities
 
 Suffocate any entities still trapped within a buildable if we failed to shove
@@ -2574,6 +2600,22 @@ void HRepeater_Think( gentity_t *self )
       G_Damage( self, NULL, NULL, NULL, NULL, 0, DAMAGE_INSTAGIB, MOD_SUICIDE );
     return;
   }
+
+  if( G_NumberOfDependants( self ) == 0 )
+  {
+    //if no dependants for x seconds then disappear
+    if( self->count < 0 )
+      self->count = level.time;
+    else if( self->count > 0 && ( ( level.time - self->count ) > REPEATER_INACTIVE_TIME ) ) {
+      if( self->builtBy && self->builtBy->slot >= 0 )
+        G_Damage( self, NULL, g_entities + self->builtBy->slot, NULL, NULL, 0, DAMAGE_INSTAGIB, MOD_SUICIDE );
+      else
+        G_Damage( self, NULL, NULL, NULL, NULL, 0, DAMAGE_INSTAGIB, MOD_SUICIDE );
+      return;
+    }
+  }
+  else
+    self->count = -1;
 
   G_IdlePowerState( self );
 

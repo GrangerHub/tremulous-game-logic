@@ -699,6 +699,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define REPEATER_HEALTH             HBHM(250000)
 #define REPEATER_SPLASHDAMAGE       HBDM(50000)
 #define REPEATER_SPLASHRADIUS       100
+#define REPEATER_INACTIVE_TIME      90000
 #define REPEATER_VALUE              0
 
 /*
