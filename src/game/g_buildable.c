@@ -72,9 +72,7 @@ static int G_NumberOfDependants(gentity_t *self) {
   gentity_t *ent;
 
   for(i = 1, ent = g_entities + i; i < level.num_entities; i++, ent++) {
-    if(
-      ent->s.eType != ET_BUILDABLE &&
-      strcmp(ent->classname, "trigger_buildable")) {
+    if(ent->s.eType != ET_BUILDABLE) {
       continue;
     }
 

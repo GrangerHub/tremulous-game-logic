@@ -679,23 +679,14 @@ void trigger_buildable_trigger( gentity_t *self, gentity_t *activator )
   {
     if( !trigger_buildable_match( self, activator ) )
     {
-      self->parentNode = NULL;
       G_UseTargets( self, activator );
       trigger_check_wait( self );
-    }
-    else if(BG_Buildable(activator->s.modelindex)->role & ROLE_POWER_SOURCE)
-    {
-      self->parentNode = activator;
     }
   }
   else
   {
     if( trigger_buildable_match( self, activator ) )
     {
-      if(BG_Buildable(activator->s.modelindex)->role & ROLE_POWER_SOURCE)
-      {
-        self->parentNode = activator;
-      }
       G_UseTargets( self, activator );
       trigger_check_wait( self );
     }
