@@ -2683,7 +2683,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     "level3upg",          //char      *name;
     "Pounce (upgrade)",   //char      *humanName;
     "",
-    4,                    //int       maxAmmo;
+    3,                    //int       maxAmmo;
     0,                    //int       maxClips;
     1,                    //int       ammoUsage1;
     1,                    //int       ammoUsage2;
