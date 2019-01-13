@@ -126,6 +126,10 @@ g_admin_cmd_t g_admin_cmds[ ] =
       "[^3name^6|^3slot#^6|^3*adminlevel^7] (^5+^6|^5-^7)[^3flag^7]"
     },
 
+    {"forcespec", G_admin_forcespec, qfalse, "forcespec",
+      "temporarily force a player to stay on the spectator team",
+      "[^3name^6|^3slot#^6|^3namelog#]"},
+
     {"gamedir", G_admin_gamedir, qtrue, "gamedir",
       "Filter files on the server",
       "[^3dir^7] [^3extension^7] [^3filter^7]"
@@ -209,7 +213,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
 
     {"putteam", G_admin_putteam, qfalse, "putteam",
       "move a player to a specified team",
-      "[^3name^6|^3slot#^7] [^3h^6|^3a^6|^3s^7]"
+      "[^3name^6|^3slot#^6|^3namelog#] [^3h^6|^3a^6|^3s^7]"
     },
 
     {"readconfig", G_admin_readconfig, qfalse, "readconfig",
@@ -236,6 +240,11 @@ g_admin_cmd_t g_admin_cmds[ ] =
     {"revert", G_admin_revert, qfalse, "revert",
       "revert buildables to a given time",
       "[^3id^7]"
+    },
+
+    {"scrim", G_admin_scrim, qfalse, "scrim",
+      "sets up and manages scrims, to check the current scrim settings execute with no arguments",
+      "[^3on^6|^3off^7^6|^3restore_defaults^6|^3start^6|^3pause^6|^3win^6|^3timed_income^6|^3map^6|^3putteam^6|^3sd_mode^6|^3sd_time^6|^3time_limit^6|^3team_name^6|^3team_captain^6|^3max_rounds^6|^3roster^6|^3remove^7]"
     },
 
     {"seen", G_admin_seen, qfalse, "seen",
@@ -529,6 +538,52 @@ qboolean G_admin_name_check( gentity_t *ent, char *name, char *err, int len )
       return qfalse;
     }
   }
+
+  if(IS_SCRIM) {
+    scrim_team_t scrim_team;
+    int          roster_index;
+
+    //check if the name is in use in the scrim roster
+    for(scrim_team = 0; scrim_team < NUM_SCRIM_TEAMS; scrim_team++) {
+      if(scrim_team == SCRIM_TEAM_NONE) {
+        continue;
+      }
+      for(roster_index = 0; roster_index < 64; roster_index++) {
+        if(!level.scrim_team_rosters[scrim_team].members[roster_index].inuse) {
+          continue;
+        }
+
+        if(level.scrim_team_rosters[scrim_team].members[roster_index].guidless) {
+          if(ent->client->pers.guidless && G_AddressCompare(
+            &ent->client->pers.ip,
+            &level.scrim_team_rosters[scrim_team].members[roster_index].ip)) {
+            continue;
+          }
+        } else if(!ent->client->pers.guidless) {
+          if(
+            !Q_stricmp(
+              ent->client->pers.guid,
+              level.scrim_team_rosters[scrim_team].members[roster_index].guid)) {
+            continue;
+          }
+        }
+
+        G_SanitiseString(
+          level.scrim_team_rosters[scrim_team].members[roster_index].netname,
+          testName,
+          sizeof(testName));
+
+          if(!strcmp( name2, testName )){
+            if( err && len > 0 ) {
+              Com_sprintf( err, len, "The name '%s^7' is in use in the scrim roster, "
+                           "please use another name", name );
+            }
+            return qfalse;
+          }
+      }
+    }
+  }
+
   return qtrue;
 }
 
@@ -734,21 +789,21 @@ static void admin_default_levels( void )
   l->level = level++;
   Q_strncpyz( l->name, "^6Team Manager", sizeof( l->name ) );
   Q_strncpyz( l->flags,
-    "listplayers admintest adminhelp time putteam spec999",
+    "listplayers admintest adminhelp time putteam spec999 forcepec",
     sizeof( l->flags ) );
 
   l = l->next = BG_Alloc0( sizeof( g_admin_level_t ) );
   l->level = level++;
   Q_strncpyz( l->name, "^2Junior Admin", sizeof( l->name ) );
   Q_strncpyz( l->flags,
-    "listplayers admintest adminhelp time putteam spec999 kick mute ADMINCHAT",
+    "listplayers admintest adminhelp time putteam spec999 forcepec kick mute ADMINCHAT",
     sizeof( l->flags ) );
 
   l = l->next = BG_Alloc0( sizeof( g_admin_level_t ) );
   l->level = level++;
   Q_strncpyz( l->name, "^3Senior Admin", sizeof( l->name ) );
   Q_strncpyz( l->flags,
-    "listplayers admintest adminhelp time register rename putteam spec999 kick mute showbans ban "
+    "listplayers admintest adminhelp time register rename putteam spec999 forcepec kick mute showbans ban "
     "namelog ADMINCHAT",
     sizeof( l->flags ) );
 
@@ -1359,6 +1414,10 @@ qboolean G_admin_readconfig( gentity_t *ent )
     }
   }
 
+  if(IS_SCRIM) {
+    G_Scrim_Player_Refresh_Registered_Names( );
+  }
+
   return qtrue;
 }
 
@@ -1523,6 +1582,14 @@ qboolean G_admin_setlevel( gentity_t *ent )
   a->level = l->level;
   if( vic )
     Q_strncpyz( a->name, vic->client->pers.netname, sizeof( a->name ) );
+
+  if(IS_SCRIM) {
+    if(a->level) {
+      G_Scrim_Player_Set_Registered_Name(a->guid, a->name);
+    } else {
+      G_Scrim_Player_Set_Registered_Name(a->guid, NULL);
+    }
+  }
 
   admin_log( va( "%d (%s) \"%s" S_COLOR_WHITE "\"", a->level, a->guid,
     a->name ) );
@@ -1725,6 +1792,12 @@ qboolean G_admin_setdevmode( gentity_t *ent )
       ADMP( "^3setdevmode: ^7developer mode is already on\n" );
       return qfalse;
     }
+
+    if(IS_SCRIM) {
+      ADMP( "^3setdevmode: ^7scrim mode must be off to turn on dev mode\n" );
+      return qfalse;
+    }
+
     Cvar_SetSafe( "sv_cheats", "1" );
     Cvar_Update( &g_cheats );
     AP( va( "print \"^3setdevmode: ^7%s ^7has switched developer mode on\n\"",
@@ -1829,6 +1902,9 @@ qboolean G_admin_kick( gentity_t *ent )
     vic->client->pers.guid,
     vic->client->pers.netname,
     reason ) );
+  if(IS_SCRIM) {
+    G_Scrim_Remove_Player_From_Rosters(vic->client->pers.namelog, qtrue);
+  }
   admin_create_ban( ent,
     vic->client->pers.netname,
     vic->client->pers.guidless ? "" : vic->client->pers.guid,
@@ -1995,6 +2071,10 @@ qboolean G_admin_ban( gentity_t *ent )
   {
     ADMP( "^3ban: ^7disconnecting the host would end the game\n" );
     return qfalse;
+  }
+
+  if(IS_SCRIM && match) {
+    G_Scrim_Remove_Player_From_Rosters(match, qtrue);
   }
 
   G_admin_duration( ( seconds ) ? seconds : -1,
@@ -2298,29 +2378,37 @@ qboolean G_admin_adjustban( gentity_t *ent )
   return qtrue;
 }
 
-qboolean G_admin_putteam( gentity_t *ent )
-{
-  int pid;
-  char name[ MAX_NAME_LENGTH ], team[ sizeof( "spectators" ) ],
-       err[ MAX_STRING_CHARS ];
-  gentity_t *vic;
-  team_t teamnum = TEAM_NONE;
+qboolean G_admin_putteam(gentity_t *ent) {
+  char      name[MAX_NAME_LENGTH], team[sizeof("spectators")],
+            err[MAX_STRING_CHARS];
+  namelog_t *vic;
+  team_t    old_team;
+  team_t    teamnum = TEAM_NONE;
+  char      secs[MAX_TOKEN_CHARS];
+  int       seconds = 0;
+  qboolean  useDuration = qfalse;
 
-  Cmd_ArgvBuffer( 1, name, sizeof( name ) );
-  Cmd_ArgvBuffer( 2, team, sizeof( team ) );
-  if( Cmd_Argc() < 3 )
-  {
-    ADMP( "^3putteam: ^7usage: putteam [name] [h|a|s]\n" );
+  Cmd_ArgvBuffer(1, name, sizeof(name));
+  Cmd_ArgvBuffer(2, team, sizeof(team));
+
+  if(Cmd_Argc() < 3) {
+    ADMP("^3putteam: ^7usage: putteam [^3name^6|^3slot#^6|^3namelog#] [h|a|s]\n");
     return qfalse;
   }
 
-  if( ( pid = G_ClientNumberFromString( name, err, sizeof( err ) ) ) == -1 )
-  {
-    ADMP( va( "^3putteam: ^7%s", err ) );
+  if(!(vic = G_NamelogFromString(ent, name))) {
+    ADMP(va("^3putteam: ^7no player match\n"));
     return qfalse;
   }
-  vic = &g_entities[ pid ];
-  if( !admin_higher( ent, vic ) )
+
+  if(vic->slot >= 0 && vic->slot < MAX_CLIENTS) {
+    old_team = level.clients[vic->slot].pers.teamSelection;
+  } else {
+    old_team = vic->team;
+  }
+
+  if( ent && !admin_higher_admin( ent->client->pers.admin,
+      G_admin_admin( vic->guid ) ) )
   {
     ADMP( "^3putteam: ^7sorry, but your intended victim has a higher "
         " admin level than you\n" );
@@ -2332,15 +2420,72 @@ qboolean G_admin_putteam( gentity_t *ent )
     ADMP( va( "^3putteam: ^7unknown team %s\n", team ) );
     return qfalse;
   }
-  if( vic->client->pers.teamSelection == teamnum )
+  //duration code
+  if(Cmd_Argc() > 3) {
+    //can only lock players in spectator
+    if(teamnum != TEAM_NONE) {
+      ADMP( "^3putteam: ^7You can only lock a player into the spectators team\n" );
+      return qfalse;
+    }
+    Cmd_ArgvBuffer( 3, secs, sizeof( secs ) );
+    seconds = G_admin_parse_time( secs );
+    useDuration = qtrue;
+  }
+  if(
+    old_team == teamnum &&
+    !(useDuration && teamnum == TEAM_NONE))
+  {
+    ADMP( 
+      va(
+        "^3putteam: ^7%s ^7is already on the %s team\n",
+        vic->name[vic->nameOffset], BG_Team(teamnum)->name2));
     return qfalse;
-  admin_log( va( "%d (%s) \"%s" S_COLOR_WHITE "\"", pid, vic->client->pers.guid,
-    vic->client->pers.netname ) );
-  G_ChangeTeam( vic, teamnum );
+  }
 
-  AP( va( "print \"^3putteam: ^7%s^7 put %s^7 on to the %s team\n\"",
-          ( ent ) ? ent->client->pers.netname : "console",
-          vic->client->pers.netname, BG_Team( teamnum )->name2 ) );
+  if(IS_SCRIM) {
+    if(teamnum == TEAM_NONE) {
+      G_Scrim_Remove_Player_From_Rosters(vic, qfalse);
+    } else {
+      if(
+        !G_Scrim_Add_Namelog_To_Roster(
+          vic,
+          BG_Scrim_Team_From_Playing_Team(&level.scrim, teamnum), err, sizeof(err))) {
+        ADMP(va("^3scrim: ^7%s", err));
+        return qfalse;
+      }
+    }
+  }
+
+  admin_log(
+    va(
+      "%d (%s) \"%s" S_COLOR_WHITE "\"",
+      (vic->slot < 0) ? vic->id : vic->slot,
+      vic->guid,
+      vic->name[vic->nameOffset]));
+
+  if(vic->slot < 0 || vic->slot >= MAX_CLIENTS) {
+    vic->team = teamnum;
+  } else {
+    if(teamnum != old_team) {
+      G_ChangeTeam( &g_entities[vic->slot], teamnum );
+    }
+  }
+
+  if(useDuration && seconds > 0) {
+    vic->specExpires = level.time + ( seconds * 1000 );
+  } else {
+    vic->specExpires = 0;
+  }
+
+  if(useDuration && seconds > 0) {
+    AP( va( "print \"^3putteam: ^7%s^7 forced %s^7 on to the %s team for %d seconds\n\"",
+            ( ent ) ? ent->client->pers.netname : "console",
+            vic->name[vic->nameOffset], BG_Team( teamnum )->name2, seconds ) );
+  } else {
+    AP( va( "print \"^3putteam: ^7%s^7 put %s^7 on to the %s team\n\"",
+            ( ent ) ? ent->client->pers.netname : "console",
+            vic->name[vic->nameOffset], BG_Team( teamnum )->name2 ) );
+  }
   return qtrue;
 }
 
@@ -3058,6 +3203,17 @@ qboolean G_admin_allready( gentity_t *ent )
   // /allready will set all players' readyToPlay flag to true
   if ( g_warmup.integer && g_cheats.integer && !level.intermissiontime )
   {
+    if(IS_SCRIM) {
+      if(level.scrim.mode == SCRIM_MODE_SETUP) {
+        ADMP( "^3allready: ^7can't end warmup while a scrim is still being setup. see: scrim mode\n" );
+        return qfalse;
+      }
+
+      if(level.scrim.mode == SCRIM_MODE_PAUSED) {
+        ADMP( "^3allready: ^7can't end warmup while a scrim is paused. see: scrim mode\n" );
+        return qfalse;
+      }
+    }
     // cycle through each client and change their ready flag
     for( i = 0; i < g_maxclients.integer; i++ )
     {
@@ -3163,6 +3319,93 @@ qboolean G_admin_spec999( gentity_t *ent )
         vic->client->pers.netname ) );
     }
   }
+  return qtrue;
+}
+
+qboolean G_admin_forcespec( gentity_t *ent )
+{
+  const int seconds = G_admin_parse_time( g_adminTempSpec.string );;
+  team_t    old_team;
+  char      name[MAX_NAME_LENGTH];
+  namelog_t *vic;
+
+  Cmd_ArgvBuffer(1, name, sizeof(name));
+
+  if(Cmd_Argc() < 2) {
+    ADMP("^3forcepec: ^7usage: forcepec \n");
+    return qfalse;
+  }
+
+  if(!(vic = G_NamelogFromString(ent, name))) {
+    ADMP(va("^3forcepec: ^7no player match\n"));
+    return qfalse;
+  }
+
+  if(vic->slot >= 0 && vic->slot < MAX_CLIENTS) {
+    old_team = level.clients[vic->slot].pers.teamSelection;
+  } else {
+    old_team = vic->team;
+  }
+
+  if( ent && !admin_higher_admin( ent->client->pers.admin,
+      G_admin_admin( vic->guid ) ) )
+  {
+    ADMP( "^3forcepec: ^7sorry, but your intended victim has a higher "
+        " admin level than you\n" );
+    return qfalse;
+  }
+
+  if(old_team == TEAM_NONE) {
+    if(seconds > 0) {
+      if(vic->specExpires > level.time) {
+        SV_GameSendServerCommand( ent-g_entities,
+          va(
+             "print \"^3forcespec: ^7%s is already forced to be on spectators\n\"",
+             vic->name[vic->nameOffset] ) );
+        return qfalse;
+      }
+    } else {
+      SV_GameSendServerCommand( ent-g_entities,
+        va(
+           "print \"^3forcespec: ^7%s is already on spectators\n\"",
+           vic->name[vic->nameOffset] ) );
+      return qfalse;
+    }
+  }
+
+  if(IS_SCRIM) {
+    G_Scrim_Remove_Player_From_Rosters(vic, qfalse);
+  }
+
+  admin_log(
+    va(
+      "%d (%s) \"%s" S_COLOR_WHITE "\"",
+      (vic->slot < 0) ? vic->id : vic->slot,
+      vic->guid,
+      vic->name[vic->nameOffset]));
+
+  if(vic->slot < 0 || vic->slot >= MAX_CLIENTS) {
+    vic->team = TEAM_NONE;
+  } else {
+    if(old_team != TEAM_NONE) {
+      G_ChangeTeam( &g_entities[vic->slot], TEAM_NONE );
+    }
+  }
+
+  if(seconds > 0) {
+    vic->specExpires = level.time + ( seconds * 1000 );
+  }
+
+  if(seconds > 0) {
+    AP( va( "print \"^3forcespec: ^7%s^7 forced %s^7 on to the %s team for %d seconds\n\"",
+            ( ent ) ? ent->client->pers.netname : "console",
+            vic->name[vic->nameOffset], BG_Team( TEAM_NONE )->name2, seconds ) );
+  } else {
+    AP( va( "print \"^3forcespec: ^7%s^7 put %s^7 on to the %s team\n\"",
+            ( ent ) ? ent->client->pers.netname : "console",
+            vic->name[vic->nameOffset], BG_Team( TEAM_NONE )->name2 ) );
+  }
+
   return qtrue;
 }
 
@@ -3340,6 +3583,10 @@ qboolean G_admin_restart( gentity_t *ent )
   }
   else if( !Q_stricmpn( teampref, "switchteams", 11 ) )
   {
+    if(IS_SCRIM) {
+      level.scrim.swap_teams = qtrue;
+    }
+
     for( i = 0; i < g_maxclients.integer; i++ )
     {
       cl = level.clients + i;
@@ -3378,12 +3625,14 @@ qboolean G_admin_nextmap( gentity_t *ent )
   AP( va( "print \"^3nextmap: ^7%s^7 decided to load the next map\n\"",
     ( ent ) ? ent->client->pers.netname : "console" ) );
   level.lastWin = TEAM_NONE;
-  SV_SetConfigstring( CS_WINNER, va( "%i %i %i",
-                                     MATCHOUTCOME_EVAC,
-                                     index,
-                                     TEAM_NONE ) );
-  LogExit( va( "nextmap was run by %s",
-    ( ent ) ? ent->client->pers.netname : "console" ) );
+  Q_strncpyz(
+    level.winner_configstring,
+    va("%i %i %i", MATCHOUTCOME_EVAC, index, TEAM_NONE),
+    sizeof(level.winner_configstring));
+  LogExit( 
+    va(
+      "nextmap was run by %s",
+      ( ent ) ? ent->client->pers.netname : "console"));
   Cvar_SetSafe( "g_warmup", "1" );
   SV_SetConfigstring( CS_WARMUP, va( "%d", IS_WARMUP ) );
 
@@ -4820,6 +5069,1087 @@ void G_admin_cleanup( void )
     BG_Free( c );
   }
   g_admin_commands = NULL;
+}
+
+void G_admin_scrim_status(gentity_t *ent ) {
+  char *string;
+  int i;
+
+  ADMBP_begin();
+  ADMBP("^3======================================================^7\n");
+  ADMBP( va(
+    "^3Scrim Status: ^7%s ^7vs. ^7%s^7\n",
+    level.scrim.team[SCRIM_TEAM_1].name, level.scrim.team[SCRIM_TEAM_2].name) );
+    ADMBP("^7------------------------------------------------------\n");
+
+  if(level.scrim.scrim_completed) {
+    if(level.scrim.scrim_forfeiter != SCRIM_TEAM_NONE) {
+      ADMBP(
+        va(
+          "    ^7%s^7 forfeits the scrim.\n",
+          level.scrim.team[level.scrim.scrim_forfeiter].name));
+    }
+    switch (level.scrim.scrim_winner) {
+      case SCRIM_TEAM_1:
+        string =
+          va(
+            "^5T^7h^6e ^7S^1c^7r^4i^7m ^5i^7s ^6w^7o^1n ^7b^4y ^7%s^7",
+            level.scrim.team[SCRIM_TEAM_1].name);
+        break;
+
+      case SCRIM_TEAM_2:
+        string = 
+          va(
+            "^7%s ^5W^7i^6n^7s ^1T^7h^4e ^7S^5c^7r^6i^7m",
+            level.scrim.team[SCRIM_TEAM_2].name);
+        break;
+
+      default:
+        string = "^1T^7h^4e ^7S^5c^7r^6i^7m ^1I^7s ^4A ^7D^5r^7a^6w";
+        break;
+    }
+
+    ADMBP(va("    %s^7\n", string));
+    ADMBP(
+      "^7*^5*^7*^6*^7*^1*^7*^4*^7*^5*^7*^6*^7*^1*^7*^4*^7*^5*^7*^6*^7*^1*^7*^4*^7*^5*^7*^6*^7*^1*^7*^4*^7*^5*^7*^6*^7*^1*^7*^4*^7*^5*^7*^6*^7*^1*\n");
+  }
+
+  switch (level.scrim.win_condition) {
+    case SCRIM_WIN_CONDITION_DEFAULT:
+      string = "Default, the first team to win 2 rounds in\n                    a row wins the scrim, round draws are ignored";
+      break;
+
+    case SCRIM_WIN_CONDITION_SHORT:
+      string = "Short, out of exactly 2 rounds, the team\n                    that wins at least 1 round and loses no\n                    round wins the scrim";
+  }
+
+  ADMBP(va("    ^5Win Condistion: ^7%s^7\n", string));
+
+  switch (level.scrim.mode) {
+    case SCRIM_MODE_OFF:
+      string = "Off";
+      break;
+
+    case SCRIM_MODE_SETUP:
+      string = "Setup";
+      break;
+
+    case SCRIM_MODE_PAUSED:
+      string = "Paused";
+      break;
+
+    case SCRIM_MODE_STARTED:
+      string = "Started";
+      break;
+  }
+
+  ADMBP(va("    ^5Scrim Mode: ^7%s^7\n",string));
+
+  switch (level.scrim.sudden_death_mode) {
+    case SDMODE_BP:
+      string = "Build Point";
+      break;
+
+    case SDMODE_NO_BUILD:
+      string = "No Build";
+      break;
+
+    case SDMODE_SELECTIVE:
+      string = "Selective";
+      break;
+
+    case SDMODE_NO_DECON:
+      string = "No Deconstruct";
+      break;
+  }
+
+  ADMBP(va("    ^5Timed Income: ^7%s\n", level.scrim.timed_income ? "on" : "off"));
+
+  ADMBP(va("    ^5Sudden Death Mode: ^7%s^7\n", string));
+
+  ADMBP(va("    ^5Sudden Death Time: ^7%i^7\n", level.scrim.sudden_death_time));
+
+  ADMBP(va("    ^5Time Limit: ^7%i^7\n", level.scrim.time_limit));
+
+  ADMBP(va("    ^5Max Rounds: ^7%i^7\n", level.scrim.max_rounds));
+
+  ADMBP(va("    ^5Rounds Completed: ^7%i^7\n", (level.scrim.rounds_completed)));
+
+  if(level.scrim.rounds_completed > 0) {
+    switch (level.scrim.previous_round_win) {
+      case SCRIM_TEAM_1:
+        string = va("won by team ^7%s", level.scrim.team[SCRIM_TEAM_1].name);
+        break;
+
+      case SCRIM_TEAM_2:
+        string = va("won by team: ^7%s", level.scrim.team[SCRIM_TEAM_2].name);
+        break;
+
+      default:
+        string = "a draw";
+        break;
+    }
+
+    ADMBP(va("    ^5Previous round was %s^7\n", string));
+  }
+
+  for(i = 1; i < NUM_SCRIM_TEAMS; i++) {
+    ADMBP(
+        va(
+        "    ^5This round's team selection for ^7%s^5 is:^7 %s^7\n",
+        level.scrim.team[i].name,
+        BG_Team(level.scrim.team[i].current_team)->humanName));
+
+    ADMBP(
+      va(
+        "    ^5Stats for team ^7%s^5: ^7%i rounds won, %i rounds lost, %i rounds tied\n",
+        level.scrim.team[i].name,
+        level.scrim.team[i].wins,
+        level.scrim.team[i].losses,
+        level.scrim.team[i].draws));
+  }
+
+  ADMBP("^3======================================================^7\n");
+
+  ADMBP_end();
+}
+
+qboolean admin_scrim_team_name_check(scrim_team_t team, char *name, char *err, int len) {
+  int             i;
+  char            testName[ MAX_NAME_LENGTH ] = {""};
+  char            name2[ MAX_NAME_LENGTH ] = {""};
+
+  G_SanitiseString(name, name2, sizeof(name2));
+
+  if(!name[0] || !name[1]) {
+    if(err && len > 0) {
+      Q_strncpyz(err, "Scrim team names must contain at least 2 characters.", len);
+    }
+    return qfalse;
+  }
+
+  if(!strcmp(name2, "console")) {
+    if(err && len > 0)
+      Q_strncpyz(err, "The scrim team name 'console' is not allowed.", len);
+    return qfalse;
+  }
+
+  G_DecolorString(name, testName, sizeof(testName));
+  if(isdigit(testName[0])) {
+    if(err && len > 0)
+      Q_strncpyz( err, "Scrim team names cannot begin with numbers", len );
+    return qfalse;
+  }
+
+  for(i = 0; i < NUM_SCRIM_TEAMS; i++) {
+    if(i == SCRIM_TEAM_NONE) {
+      continue;
+    }
+
+    // can rename ones self to the same name using different colors
+    if(i == team) {
+      continue;
+    }
+
+    G_SanitiseString(level.scrim.team[i].name, testName, sizeof(testName));
+    if(!strcmp(name2, testName)) {
+      if(err && len > 0) {
+        Com_sprintf(err, len, "The scrim team name '%s^7' is already in use by another team", name);
+      }
+      return qfalse;
+    }
+  }
+
+  return qtrue;
+}
+
+qboolean G_admin_scrim_roster(gentity_t *ent) {
+  char                *registeredname;
+  char                rank_name[MAX_NAME_LENGTH];
+  const int           rank_name_length = Q_PrintStrlen(BG_Rank(RANK_CAPTAIN)->name);
+  char                namecleaned[MAX_NAME_LENGTH];
+  char                name2cleaned[MAX_NAME_LENGTH];
+  scrim_team_t        scrim_team;
+  int                 roster_index;
+  scrim_team_member_t *member;
+
+  ADMBP_begin( );
+  ADMBP(va("^3roster:\n"));
+
+  for(scrim_team = 0; scrim_team < NUM_SCRIM_TEAMS; scrim_team++) {
+    if(scrim_team == SCRIM_TEAM_NONE) {
+      continue;
+    }
+
+    ADMBP(va("\n  ^5Scrim Team: ^7%s^7\n", level.scrim.team[scrim_team].name));
+
+    for(roster_index = 0; roster_index < 64; roster_index++) {
+      member = &level.scrim_team_rosters[scrim_team].members[roster_index];
+
+      if(!member->inuse) {
+        continue;
+      }
+
+      if(
+        !member->guidless &&
+        level.scrim.team[scrim_team].has_captain &&
+        !Q_stricmp(level.scrim.team[scrim_team].captain_guid, member->guid)) {
+        Q_strncpyz(rank_name, BG_Rank(RANK_CAPTAIN)->name, sizeof(rank_name));
+      } else {
+        rank_name[0] = '\0';
+      }
+
+      registeredname = NULL;
+      if(member->registered_name[0]) {
+        G_SanitiseString(member->netname, namecleaned, sizeof(namecleaned));
+        G_SanitiseString(
+          member->registered_name, name2cleaned, sizeof(name2cleaned));
+        if(Q_stricmp(namecleaned, name2cleaned)) {
+          registeredname = member->registered_name;
+        }
+      }
+      ADMBP(
+        va(
+          "    %3lu %*s^7 %s^7 %s%s%s\n",
+          member->roster_id,
+          rank_name_length,
+          rank_name,
+          member->netname,
+          (registeredname) ? "(a.k.a. " : "",
+          (registeredname) ? registeredname : "",
+          (registeredname) ? S_COLOR_WHITE ")" : ""));
+    }
+  }
+
+  ADMBP_end();
+  return qtrue;
+}
+
+qboolean G_admin_scrim(gentity_t *ent) {
+  g_admin_cmd_t *admincmd;
+  char cmdStr[ MAX_ADMIN_CMD_LEN ] = "";
+  char subcmd[MAX_TOKEN_CHARS] = "";
+  char arg1[ MAX_TOKEN_CHARS ] = "";
+
+  if(!g_allowScrims.integer) {
+    ADMP("^3scrim: ^7g_allowScrims is set to 0 on this server\n" );
+  }
+
+  Cmd_ArgvBuffer(0, cmdStr, sizeof(cmdStr));
+  admincmd = G_admin_cmd(cmdStr);
+
+  if(Cmd_Argc() < 2) {
+    if(IS_SCRIM) {
+      G_admin_scrim_status(ent);
+    }
+    ADMP(
+      va(
+        "\n" S_COLOR_YELLOW "%s: " S_COLOR_WHITE "usage: %s %s\n",
+        admincmd->keyword, admincmd->keyword, admincmd->syntax));
+
+    return qfalse;
+  }
+
+  Cmd_ArgvBuffer(1, subcmd, sizeof(subcmd));
+  if(!Q_stricmp(subcmd, "on")) {
+    int client_num;
+    if( IS_SCRIM ) {
+      ADMP("^3scrim: ^7scrim mode is already on\n");
+      return qfalse;
+    }
+
+    if(!IS_WARMUP) {
+      ADMP("^3scrim: ^7scrim mode can only be turned on during warmup\n");
+      return qfalse;
+    }
+
+    if(g_cheats.integer) {
+      ADMP("^3scrim: ^7dev mode must be off to turn on scrim mode\n");
+      return qfalse;
+    }
+
+    //add the players on the current playing teams to the roster appropriately
+    for(client_num = 0; client_num < MAX_CLIENTS; client_num++) {
+      gclient_t *client = &level.clients[client_num];
+
+      if(client->pers.connected == CON_DISCONNECTED) {
+        continue;
+      }
+
+      if(client->pers.teamSelection == TEAM_NONE) {
+        continue;
+      }
+
+      G_Scrim_Add_Player_To_Roster(
+        client,
+        BG_Scrim_Team_From_Playing_Team(
+          &level.scrim, client->pers.teamSelection), NULL, 0);
+    }
+
+    level.scrim.mode = SCRIM_MODE_SETUP;
+    G_Scrim_Send_Status( );
+    G_admin_scrim_status(ent);
+    AP(
+      va(
+        "print \"^3scrim: ^7%s ^7has switched scrim mode on for setup\n\"",
+        ent ? ent->client->pers.netname : "console"));
+    ADMP("^3scrim: ^7once the scrim starts, the scrim setup settings can't be changed\n");
+    ADMP("^3scrim: ^7to start the scrim execute: scrim start\n");
+    return qtrue;
+  } else if(!Q_stricmp(subcmd, "off")) {
+    if(!IS_SCRIM) {
+      ADMP("^3scrim: ^7scrim mode is already off\n");
+      return qfalse;
+    }
+
+    if(!IS_WARMUP) {
+      ADMP("^3scrim: ^7scrim mode can only be turned off during warmup\n");
+      return qfalse;
+    }
+
+    G_Scrim_Reset_Settings();
+    level.scrim.mode = SCRIM_MODE_OFF;
+    G_Scrim_Send_Status( );
+    AP( va( "print \"^3scrim: ^7%s ^7has switched scrim mode off\n\"",
+            ent ? ent->client->pers.netname : "console" ) );
+    return qtrue;
+  } else if(!Q_stricmp(subcmd, "restore_defaults")) {
+    if(!IS_SCRIM) {
+      ADMP("^3scrim: ^7this subcommand requires scrim mode to be on\n");
+      return qfalse;
+    }
+
+    if(level.scrim.mode != SCRIM_MODE_SETUP) {
+      ADMP("^3scrim: ^7this subcommand can only be used during scrim setup\n");
+      return qfalse;
+    }
+
+    G_Scrim_Reset_Settings();
+    level.scrim.mode = SCRIM_MODE_SETUP;
+    G_Scrim_Send_Status( );
+    G_admin_scrim_status(ent);
+    AP( va( "print \"^3scrim: ^7%s ^7has restored scrim defaults\n\"",
+            ent ? ent->client->pers.netname : "console" ) );
+    return qtrue;
+  } else if(!Q_stricmp(subcmd, "start")) {
+    if(!IS_SCRIM) {
+      ADMP("^3scrim: ^7this subcommand requires scrim mode to be on\n");
+      return qfalse;
+    }
+
+    if(level.scrim.mode == SCRIM_MODE_STARTED) {
+      ADMP("^3scrim: ^7the scrim has already started\n");
+      return qfalse;
+    }
+
+    if(level.scrim.mode == SCRIM_MODE_SETUP) {
+      level.scrim.mode = SCRIM_MODE_STARTED;
+      G_LevelRestart(qfalse);
+      G_Scrim_Broadcast_Status( );
+      AP( va( "print \"^3scrim: ^7%s ^7has started the scrim\n\"",
+              ent ? ent->client->pers.netname : "console" ) );
+    } else {
+      level.scrim.mode = SCRIM_MODE_STARTED;
+      AP( va( "print \"^3scrim: ^7%s ^7has resumed the scrim\n\"",
+              ent ? ent->client->pers.netname : "console" ) );
+    }
+
+    G_Scrim_Send_Status( );
+
+    return qtrue;
+  } else if(!Q_stricmp(arg1, "pause")) {
+    if(!IS_SCRIM) {
+      ADMP("^3scrim: ^7this subcommand requires scrim mode to be on\n");
+      return qfalse;
+    }
+
+    if(level.scrim.mode == SCRIM_MODE_PAUSED) {
+      level.scrim.mode = SCRIM_MODE_STARTED;
+      G_Scrim_Send_Status( );
+      AP( va( "print \"^3scrim: ^7%s ^7has resumed the scrim\n\"",
+              ent ? ent->client->pers.netname : "console" ) );
+      return qtrue;
+    }
+
+    if(level.scrim.mode != SCRIM_MODE_STARTED) {
+      ADMP("^3scrim: ^7only scrims that have started can be paused\n");
+      return qfalse;
+    }
+
+    if(!IS_WARMUP) {
+      ADMP("^3scrim: ^7must be warmup to pause scrims\n");
+      return qfalse;
+    }
+
+    level.scrim.mode = SCRIM_MODE_PAUSED;
+    G_Scrim_Send_Status( );
+    AP( va( "print \"^3scrim: ^7%s ^7has paused the scrim\n\"",
+            ent ? ent->client->pers.netname : "console" ) );
+    AP( va( "print \"^3scrim: ^7to resume the scrim execute: scrim start\n\"" ) );
+    return qtrue;
+  } else if(!Q_stricmp(subcmd, "win")) {
+    if(!IS_SCRIM) {
+      ADMP("^3scrim: ^7this subcommand requires scrim mode to be on\n");
+      return qfalse;
+    }
+
+    if(level.scrim.mode != SCRIM_MODE_SETUP) {
+      ADMP("^3scrim: ^7this subcommand can only be used during scrim setup\n");
+      return qfalse;
+    }
+
+    if(Cmd_Argc() != 3) {
+      ADMP("^3scrim: ^7scrim win is used to set the win condition for the scrim\n");
+      ADMP(
+        va(
+          "\n" S_COLOR_YELLOW "%s: " S_COLOR_WHITE "usage: %s %s\n",
+          admincmd->keyword, admincmd->keyword, "win [^3default^6|^3short^7]"));
+      return qfalse;
+    }
+
+    Cmd_ArgvBuffer( 2, arg1, sizeof( arg1 ) );
+
+    if(!Q_stricmp(arg1, "default")) {
+      if(level.scrim.win_condition == SCRIM_WIN_CONDITION_DEFAULT) {
+        ADMP("^3scrim: ^7the win condition is already set to default\n");
+        return qfalse;
+      }
+
+      AP( va( "print \"^3scrim: ^7%s ^7has set the win condition to default, the first team to win 2 rounds in a row wins the scrim, round draws are ignored\n\"",
+              ent ? ent->client->pers.netname : "console" ) );
+      level.scrim.max_rounds = 5;
+      level.scrim.win_condition = SCRIM_WIN_CONDITION_DEFAULT;
+      G_Scrim_Send_Status( );
+      return qtrue;
+    } else if(!Q_stricmp(arg1, "short")) {
+      if(level.scrim.win_condition == SCRIM_WIN_CONDITION_SHORT) {
+        ADMP("^3scrim: ^7the win condition is already set to short\n");
+        return qfalse;
+      }
+
+      AP( va( "print \"^3scrim: ^7%s ^7has set the win condition to short, out of exactly 2 rounds, the team that wins at least 1 round and loses no round wins the scrim\n\"",
+              ent ? ent->client->pers.netname : "console" ) );
+      level.scrim.max_rounds = 2;
+      level.scrim.win_condition = SCRIM_WIN_CONDITION_SHORT;
+      G_Scrim_Send_Status( );
+      return qtrue;
+    } else {
+      ADMP(
+        va(
+          "\n" S_COLOR_YELLOW "%s: " S_COLOR_WHITE "usage: %s %s\n",
+          admincmd->keyword, admincmd->keyword, "win [^3extensive^6|^3short^7]"));
+      return qfalse;
+    }
+  } else if(!Q_stricmp(subcmd, "timed_income")) {
+    if(!IS_SCRIM) {
+      ADMP("^3scrim: ^7this subcommand requires scrim mode to be on\n");
+      return qfalse;
+    }
+
+    if(level.scrim.mode != SCRIM_MODE_SETUP) {
+      ADMP("^3scrim: ^7this subcommand can only be used during scrim setup\n");
+      return qfalse;
+    }
+
+    if(!g_freeFundPeriod.integer) {
+      ADMP("^3scrim: ^7g_freeFundPeriod is set to 0 on this server, not allowing timed income to change for scrims\n");
+      return qfalse;
+    }
+
+    if(Cmd_Argc() != 3) {
+      ADMP("^3scrim: ^7scrim timed_income is used to set the win condition for the scrim\n");
+      ADMP(
+        va(
+          "\n" S_COLOR_YELLOW "%s: " S_COLOR_WHITE "usage: %s %s\n",
+          admincmd->keyword, admincmd->keyword, "timed_income [^3on^6|^3off^7]"));
+      return qfalse;
+    }
+
+    Cmd_ArgvBuffer( 2, arg1, sizeof( arg1 ) );
+
+    if(!Q_stricmp(arg1, "on")) {
+      if(level.scrim.timed_income) {
+        ADMP("^3scrim: ^7timed income is already on\n");
+        return qfalse;
+      }
+
+      AP( va( "print \"^3scrim: ^7%s ^7has turned on timed income for the scrim\n\"",
+              ent ? ent->client->pers.netname : "console" ) );
+      level.scrim.timed_income = qtrue;
+      G_Scrim_Send_Status( );
+      return qtrue;
+    } else if(!Q_stricmp(arg1, "off")) {
+      if(!level.scrim.timed_income) {
+        ADMP("^3scrim: ^7timed income is already off\n");
+        return qfalse;
+      }
+
+      AP( va( "print \"^3scrim: ^7%s ^7has turned off timed income for the scrim\n\"",
+              ent ? ent->client->pers.netname : "console" ) );
+      level.scrim.timed_income = qfalse;
+      G_Scrim_Send_Status( );
+      return qtrue;
+    } else {
+      ADMP(
+        va(
+          "\n" S_COLOR_YELLOW "%s: " S_COLOR_WHITE "usage: %s %s\n",
+          admincmd->keyword, admincmd->keyword, "timed_income [^3on^6|^3off^7]"));
+      return qfalse;
+    }
+  } else if(!Q_stricmp(subcmd, "map")) {
+    char map[ MAX_QPATH ];
+    char layout[ MAX_QPATH ] = { "" };
+
+    if(!IS_SCRIM) {
+      ADMP("^3scrim: ^7this subcommand requires scrim mode to be on\n");
+      return qfalse;
+    }
+
+    if(level.scrim.mode != SCRIM_MODE_SETUP) {
+      ADMP("^3scrim: ^7this subcommand can only be used during scrim setup\n");
+      return qfalse;
+    }
+
+    if(Cmd_Argc( ) < 3) {
+      ADMP("^3scrim: ^7scrim map is used to set the map and optionally set the layout\n");
+      ADMP(
+        va(
+          "\n" S_COLOR_YELLOW "%s: " S_COLOR_WHITE "usage: %s %s\n",
+          admincmd->keyword, admincmd->keyword, "map [^3map name^7] (^5layout name^7)"));
+      return qfalse;
+    }
+
+    Cmd_ArgvBuffer(2, map, sizeof(map));
+
+    if(!G_MapExists(map)) {
+      ADMP(va("^3scrim: ^7invalid map name '%s'\n", map));
+      ADMP(
+        va(
+          "\n" S_COLOR_YELLOW "%s: " S_COLOR_WHITE "usage: %s %s\n",
+          admincmd->keyword, admincmd->keyword, "map [^3map name^7] (^5layout name^7)"));
+      return qfalse;
+    }
+
+    if(Cmd_Argc() > 3) {
+      Cmd_ArgvBuffer(3, layout, sizeof(layout));
+      if( G_LayoutExists(map, layout)) {
+        Cvar_SetSafe("g_nextLayout", layout);
+      }
+      else {
+        ADMP(va("^scrim: ^7invalid layout name '%s'\n", layout));
+        ADMP(
+          va(
+            "\n" S_COLOR_YELLOW "%s: " S_COLOR_WHITE "usage: %s %s\n",
+            admincmd->keyword, admincmd->keyword, "map [^3map name^7] (^5layout name^7)"));
+        return qfalse;
+      }
+    }
+    admin_log(map);
+    admin_log(layout);
+
+    G_MapConfigs(map);
+    Cbuf_ExecuteText(EXEC_APPEND, va( "%smap \"%s\"\n",
+                               (g_cheats.integer ? "dev" : "" ), map));
+    level.restarted = qtrue;
+    AP(va("print \"^3scrim: ^7map '%s' started by %s^7 %s\n\"", map,
+            (ent) ? ent->client->pers.netname : "console",
+            (layout[ 0 ]) ? va( "(forcing layout '%s')", layout) : ""));
+    Cvar_SetSafe("g_warmup", "1");
+    SV_SetConfigstring(CS_WARMUP, va( "%d", IS_WARMUP));
+    G_Scrim_Send_Status( );
+
+    return qtrue;
+  } else if(!Q_stricmp(subcmd, "putteam")) {
+    int pid;
+    char name[ MAX_NAME_LENGTH ], team[ sizeof( "spectators" ) ],
+         err[ MAX_STRING_CHARS ];
+    gentity_t *vic;
+    team_t teamnum = TEAM_NONE;
+
+    if(!IS_SCRIM) {
+      ADMP("^3scrim: ^7this subcommand requires scrim mode to be on\n");
+      return qfalse;
+    }
+
+    if(Cmd_Argc( ) < 4) {
+      ADMP("^3scrim: ^7scrim putteam is used to move a player to a specific team\n");
+      ADMP(
+        va(
+          "\n" S_COLOR_YELLOW "%s: " S_COLOR_WHITE "usage: %s %s\n",
+          admincmd->keyword, admincmd->keyword, "putteam [^3name^6|^3slot#^7] [^3h^6|^3a^6|^3s^7]"));
+      return qfalse;
+    }
+
+    Cmd_ArgvBuffer(2, name, sizeof(name));
+    Cmd_ArgvBuffer(3, team, sizeof(team));
+
+    if((pid = G_ClientNumberFromString(name, err, sizeof(err))) == -1) {
+      ADMP(va("^3scrim: ^7%s", err));
+      ADMP(
+        va(
+          "\n" S_COLOR_YELLOW "%s: " S_COLOR_WHITE "usage: %s %s\n",
+          admincmd->keyword, admincmd->keyword, "putteam [^3name^6|^3slot#^7] [^3h^6|^3a^6|^3s^7]"));
+      return qfalse;
+    }
+
+    vic = &g_entities[pid];
+    teamnum = G_TeamFromString(team);
+
+    if(teamnum == NUM_TEAMS) {
+      ADMP(va("^3scrim: ^7unknown team %s\n", team));
+      ADMP(
+        va(
+          "\n" S_COLOR_YELLOW "%s: " S_COLOR_WHITE "usage: %s %s\n",
+          admincmd->keyword, admincmd->keyword, "putteam [^3name^6|^3slot#^7] [^3h^6|^3a^6|^3s^7]"));
+      return qfalse;
+    }
+
+    if(vic->client->pers.teamSelection == teamnum) {
+      ADMP( 
+        va(
+          "^3scrim: ^7%s^7 is already on the %s team\n",
+          vic->client->pers.netname, BG_Team(teamnum)->name2));
+      return qfalse;
+    }
+
+    if(teamnum == TEAM_NONE) {
+      G_Scrim_Remove_Player_From_Rosters(vic->client->pers.namelog, qfalse);
+    } else {
+      if(
+        !G_Scrim_Add_Player_To_Roster(
+          vic->client,
+          BG_Scrim_Team_From_Playing_Team(&level.scrim, teamnum), err, sizeof(err))) {
+        ADMP(va("^3scrim: ^7%s", err));
+        ADMP(
+          va(
+            "\n" S_COLOR_YELLOW "%s: " S_COLOR_WHITE "usage: %s %s\n",
+            admincmd->keyword, admincmd->keyword, "putteam [^3name^6|^3slot#^7] [^3h^6|^3a^6|^3s^7]"));
+        return qfalse;
+      }
+    }
+
+    admin_log(
+      va(
+        "%d (%s) \"%s" S_COLOR_WHITE "\"", pid, vic->client->pers.guid,
+        vic->client->pers.netname));
+    admin_log(
+      va(
+        "scrim team: %d",
+        BG_Scrim_Team_From_Playing_Team(&level.scrim, teamnum)));
+
+    if(teamnum != TEAM_NONE || vic->client->pers.teamSelection != TEAM_NONE) {
+      G_ChangeTeam( vic, teamnum );
+    }
+
+    G_Scrim_Send_Status( );
+    AP(
+      va(
+        "print \"^3scrim: ^7%s^7 put %s^7 on to the %s team\n\"",
+        (ent) ? ent->client->pers.netname : "console",
+        vic->client->pers.netname, BG_Team(teamnum)->name2));
+    return qtrue;
+  } else if(!Q_stricmp(subcmd, "sd_mode")) {
+    if(!IS_SCRIM) {
+      ADMP("^3scrim: ^7this subcommand requires scrim mode to be on\n");
+      return qfalse;
+    }
+
+    if(level.scrim.mode != SCRIM_MODE_SETUP) {
+      ADMP("^3scrim: ^7this subcommand can only be used during scrim setup\n");
+      return qfalse;
+    }
+
+    if(Cmd_Argc( ) != 3) {
+      ADMP("^3scrim: ^7scrim sd_mode is used to set the sudden death mode for the scrim, selective is the default mode\n");
+      ADMP(
+        va(
+          "\n" S_COLOR_YELLOW "%s: " S_COLOR_WHITE "usage: %s %s\n",
+          admincmd->keyword, admincmd->keyword, "sd_mode [^3bp^6|^3nobuild^6|^3selective^6|^3nodecon^7]"));
+      return qfalse;
+    }
+
+    Cmd_ArgvBuffer(2, arg1, sizeof(arg1));
+
+    if(!Q_stricmp(arg1, "bp")) {
+      if(level.scrim.sudden_death_mode == SDMODE_BP) {
+        ADMP("^3scrim: ^7sudden death mode is already set to bp\n");
+        return qfalse;
+      }
+
+      level.scrim.sudden_death_mode = SDMODE_BP;
+      G_Scrim_Send_Status( );
+      AP( va( "print \"^3scrim: ^7%s ^7has set the sudden death mode to bp\n\"",
+              ent ? ent->client->pers.netname : "console" ) );
+      return qtrue;
+    } else if(!Q_stricmp(arg1, "nobuild")) {
+      if(level.scrim.sudden_death_mode == SDMODE_NO_BUILD) {
+        ADMP("^3scrim: ^sudden death mode is already set to nobuild\n");
+        return qfalse;
+      }
+
+      level.scrim.sudden_death_mode = SDMODE_NO_BUILD;
+      G_Scrim_Send_Status( );
+      AP( va( "print \"^3scrim: ^7%s ^7has set the sudden death mode to nobuild\n\"",
+              ent ? ent->client->pers.netname : "console" ) );
+      return qtrue;
+    } else if(!Q_stricmp(arg1, "selective")) {
+      if(level.scrim.sudden_death_mode == SDMODE_SELECTIVE) {
+        ADMP("^3scrim: ^sudden death mode is already set to selective\n");
+        return qfalse;
+      }
+
+      level.scrim.sudden_death_mode = SDMODE_SELECTIVE;
+      G_Scrim_Send_Status( );
+      AP( va( "print \"^3scrim: ^7%s ^7has set the sudden death mode to selective\n\"",
+              ent ? ent->client->pers.netname : "console" ) );
+      return qtrue;
+    } else if(!Q_stricmp(arg1, "nodecon")) {
+      if(level.scrim.sudden_death_mode == SDMODE_NO_DECON) {
+        ADMP("^3scrim: ^sudden death mode is already set to nodecon\n");
+        return qfalse;
+      }
+
+      level.scrim.sudden_death_mode = SDMODE_NO_DECON;
+      G_Scrim_Send_Status( );
+      AP( va( "print \"^3scrim: ^7%s ^7has set the sudden death mode to nodecon\n\"",
+              ent ? ent->client->pers.netname : "console" ) );
+      return qtrue;
+    } else {
+      ADMP(
+        va(
+          "\n" S_COLOR_YELLOW "%s: " S_COLOR_WHITE "usage: %s %s\n",
+          admincmd->keyword, admincmd->keyword, "sd_mode [^3bp^6|^3nobuild^6|^3selective^6|^3nodecon^7]"));
+      return qfalse;
+    }
+  } else if(!Q_stricmp(subcmd, "sd_time")) {
+    int sdtime;
+
+    if(!IS_SCRIM) {
+      ADMP("^3scrim: ^7this subcommand requires scrim mode to be on\n");
+      return qfalse;
+    }
+
+    if(level.scrim.mode != SCRIM_MODE_SETUP) {
+      ADMP("^3scrim: ^7this subcommand can only be used during scrim setup\n");
+      return qfalse;
+    }
+
+    if(Cmd_Argc( ) != 3) {
+      ADMP("^3scrim: ^7scrim sd_time is used to set the sudden death time in minutes for the scrim, setting to 0 disables sudden death for the scrim\n");
+      ADMP(
+        va(
+          "\n" S_COLOR_YELLOW "%s: " S_COLOR_WHITE "usage: %s %s\n",
+          admincmd->keyword, admincmd->keyword, "sd_time [^3time in minutes^7]"));
+      return qfalse;
+    }
+
+    Cmd_ArgvBuffer(2, arg1, sizeof(arg1));
+
+    sdtime = atoi(arg1);
+    if(sdtime < 0) {
+      sdtime = 0;
+    }
+
+    if(sdtime == level.scrim.sudden_death_time) {
+      ADMP(va("^3scrim: ^7the sudden death time is already set to %i\n", level.scrim.sudden_death_time));
+      return qfalse;
+    }
+
+    level.scrim.sudden_death_time = sdtime;
+    G_Scrim_Send_Status( );
+    if(level.scrim.sudden_death_time) {
+      AP(
+        va(
+          "print \"^3scrim: ^7%s ^7has set the sudden death time to %i minute%s for the scrim\n\"",
+          ent ? ent->client->pers.netname : "console",
+          level.scrim.sudden_death_time,
+          level.scrim.sudden_death_time > 1 ? "s" : ""));
+    } else {
+      AP(
+        va(
+          "print \"^3scrim: ^7%s ^7has disabled sudden death for the scrim\n\"",
+          ent ? ent->client->pers.netname : "console"));
+    }
+
+    return qtrue;
+  } else if(!Q_stricmp(subcmd, "time_limit")) {
+    int time_limit;
+
+    if(!IS_SCRIM) {
+      ADMP("^3scrim: ^7this subcommand requires scrim mode to be on\n");
+      return qfalse;
+    }
+
+    if(level.scrim.mode != SCRIM_MODE_SETUP) {
+      ADMP("^3scrim: ^7this subcommand can only be used during scrim setup\n");
+      return qfalse;
+    }
+
+    if(Cmd_Argc( ) != 3) {
+      ADMP("^3scrim: ^7scrim time_limit is used to set the time limit in minutes for the scrim, setting to 0 disables the time limit for the scrim\n");
+      ADMP(
+        va(
+          "\n" S_COLOR_YELLOW "%s: " S_COLOR_WHITE "usage: %s %s\n",
+          admincmd->keyword, admincmd->keyword, "time_limit [^3time in minutes^7]"));
+      return qfalse;
+    }
+
+    Cmd_ArgvBuffer(2, arg1, sizeof(arg1));
+
+    time_limit = atoi(arg1);
+    if(time_limit < 0) {
+      time_limit = 0;
+    }
+
+    if(time_limit == level.scrim.time_limit) {
+      ADMP(va("^3scrim: ^7the time limit is already set to %i\n", level.scrim.time_limit));
+      return qfalse;
+    }
+
+    level.scrim.time_limit = time_limit;
+    G_Scrim_Send_Status( );
+    if(level.scrim.time_limit) {
+      AP(
+        va(
+          "print \"^3scrim: ^7%s ^7has set the time limit to %i minute%s for the scrim\n\"",
+          ent ? ent->client->pers.netname : "console",
+          level.scrim.time_limit,
+          level.scrim.time_limit > 1 ? "s" : ""));
+    } else {
+      AP(
+        va(
+          "print \"^3scrim: ^7%s ^7has disabled the time limit for the scrim\n\"",
+          ent ? ent->client->pers.netname : "console"));
+    }
+
+    return qtrue;
+  } else if(!Q_stricmp(subcmd, "team_name")) {
+    char newname[ MAX_NAME_LENGTH ];
+    char err[ MAX_STRING_CHARS ];
+    team_t       playing_team;
+    scrim_team_t scrim_team;
+
+    if(!IS_SCRIM) {
+      ADMP("^3scrim: ^7this subcommand requires scrim mode to be on\n");
+      return qfalse;
+    }
+
+    if(level.scrim.mode != SCRIM_MODE_SETUP) {
+      ADMP("^3scrim: ^7this subcommand can only be used during scrim setup\n");
+      return qfalse;
+    }
+
+    if(Cmd_Argc( ) < 4) {
+      ADMP("^3scrim: ^7scrim team_name is used to set the scrim team name for the scrim team currently on the given playing team.\n");
+      ADMP(
+        va(
+          "\n" S_COLOR_YELLOW "%s: " S_COLOR_WHITE "usage: %s %s\n",
+          admincmd->keyword, admincmd->keyword, "team_name [^3a^6|^3h^7] [^3name of team^7]"));
+      return qfalse;
+    }
+
+    Cmd_ArgvBuffer(2, arg1, sizeof(arg1));
+    Q_strncpyz(newname, ConcatArgs(3), sizeof(newname));
+
+    playing_team = G_TeamFromString(arg1);
+    scrim_team = BG_Scrim_Team_From_Playing_Team(&level.scrim, playing_team);
+    if(scrim_team == SCRIM_TEAM_NONE) {
+      ADMP("^3scrim: ^7invalid playing team\n");
+      ADMP(
+        va(
+          "\n" S_COLOR_YELLOW "%s: " S_COLOR_WHITE "usage: %s %s\n",
+          admincmd->keyword, admincmd->keyword, "team_name [^3a^6|^3h^7] [^3name of team^7]"));
+      return qfalse;
+    }
+
+    if(!admin_scrim_team_name_check( scrim_team, newname, err, sizeof(err))) {
+      ADMP(va("^3scrim: ^7%s\n",err));
+      ADMP(
+        va(
+          "\n" S_COLOR_YELLOW "%s: " S_COLOR_WHITE "usage: %s %s\n",
+          admincmd->keyword, admincmd->keyword, "team_name [^3a^6|^3h^7] [^3name of team^7]"));
+
+      return qfalse;
+    }
+
+    AP( va( "print \"^3scrim: ^7scrim team %s^7 has been renamed to %s^7 by %s\n\"",
+            level.scrim.team[scrim_team].name,
+            newname,
+            ( ent ) ? ent->client->pers.netname : "console" ) );
+    Q_strncpyz(
+      level.scrim.team[scrim_team].name, newname,
+      sizeof( level.scrim.team[scrim_team].name ) );
+    G_Scrim_Send_Status( );
+    return qtrue;
+  } else if(!Q_stricmp(subcmd, "team_captain")) {
+    char                captain_name[ MAX_NAME_LENGTH ];
+    char                err[ MAX_STRING_CHARS ];
+    scrim_team_t        scrim_team;
+    scrim_team_member_t *member;
+    qboolean            removed_captain;
+
+    if(!IS_SCRIM) {
+      ADMP("^3scrim: ^7this subcommand requires scrim mode to be on\n");
+      return qfalse;
+    }
+
+    if(Cmd_Argc( ) < 3) {
+      ADMP("^3scrim: ^7scrim team_captain is used to set the scrim team captain for the team of the player, to designate a player with some team management abilities. Executing this subcommand on an existing team captain will remove their captain rank.\n");
+      ADMP(
+        va(
+          "\n" S_COLOR_YELLOW "%s: " S_COLOR_WHITE "usage: %s %s\n",
+          admincmd->keyword, admincmd->keyword, "team_captain [^3roster id^6|^3player name^7]"));
+      return qfalse;
+    }
+
+    Cmd_ArgvBuffer(2, arg1, sizeof(arg1));
+    Q_strncpyz(captain_name, ConcatArgs(2), sizeof(captain_name));
+
+    if(!(member = G_Scrim_Roster_Member_From_String(captain_name, &scrim_team, err, sizeof(err)))) {
+      ADMP(va("^3scrim: ^7%s", err));
+      ADMP(
+        va(
+          "\n" S_COLOR_YELLOW "%s: " S_COLOR_WHITE "usage: %s %s\n",
+          admincmd->keyword, admincmd->keyword, "team_captain [^3roster id^6|^3player name^7]"));
+      return qfalse;
+    }
+
+    if(scrim_team == SCRIM_TEAM_NONE || scrim_team < 0 || scrim_team >= NUM_SCRIM_TEAMS) {
+      ADMP("^3scrim: ^7team captains must be on a valid scrim team\n");
+      ADMP(
+        va(
+          "\n" S_COLOR_YELLOW "%s: " S_COLOR_WHITE "usage: %s %s\n",
+          admincmd->keyword, admincmd->keyword, "team_captain [^3name of team captain^7]"));
+      return qfalse;
+    }
+
+    if(!G_Scrim_Set_Team_Captain(scrim_team, member->roster_id, &removed_captain, err, sizeof(err))) {
+      ADMP(va("^3scrim: ^7%s", err));
+      ADMP(
+        va(
+          "\n" S_COLOR_YELLOW "%s: " S_COLOR_WHITE "usage: %s %s\n",
+          admincmd->keyword, admincmd->keyword, "team_captain [^3name of team captain^7]"));
+      return qfalse;
+    }
+
+    if(removed_captain) {
+      AP(
+        va(
+          "print \"^sscrim: ^7%s^7 has demoted %s^7 from team captain for scrim team %s\n\"",
+          (ent) ? ent->client->pers.netname : "console",
+          member->netname, level.scrim.team[scrim_team].name));
+    } else {
+      AP(
+        va(
+          "print \"^sscrim: ^7%s^7 has promoted %s^7 to team captain for scrim team %s\n\"",
+          (ent) ? ent->client->pers.netname : "console",
+          member->netname, level.scrim.team[scrim_team].name));
+    }
+    return qtrue;
+  } else if(!Q_stricmp(subcmd, "max_rounds")) {
+    int max_rounds;
+
+    if(!IS_SCRIM) {
+      ADMP("^3scrim: ^7this subcommand requires scrim mode to be on\n");
+      return qfalse;
+    }
+
+    if(level.scrim.mode != SCRIM_MODE_SETUP) {
+      ADMP("^3scrim: ^7this subcommand can only be used during scrim setup\n");
+      return qfalse;
+    }
+
+    if(Cmd_Argc( ) != 3) {
+      ADMP("^3scrim: ^7scrim max_rounds is used to set the maximum rounds for the scrim.\n");
+      ADMP(
+        va(
+          "\n" S_COLOR_YELLOW "%s: " S_COLOR_WHITE "usage: %s %s\n",
+          admincmd->keyword, admincmd->keyword, "time_limit [^3time in minutes^7]"));
+      return qfalse;
+    }
+
+    if(level.scrim.win_condition == SCRIM_WIN_CONDITION_SHORT) {
+      ADMP("^3scrim: ^7the max rounds are fixed at 2 for the short win condition\n");
+      return qfalse;
+    }
+
+    Cmd_ArgvBuffer(2, arg1, sizeof(arg1));
+
+    max_rounds = atoi(arg1);
+    if(max_rounds < 2) {
+      ADMP("^3scrim: ^7the max rounds must be at least 2\n");
+      return qfalse;
+    }
+
+    if(max_rounds == level.scrim.max_rounds) {
+      ADMP(va("^3scrim: ^7the max rounds is already set to %i\n", level.scrim.max_rounds));
+      return qfalse;
+    }
+
+    level.scrim.max_rounds = max_rounds;
+    AP(
+      va(
+        "print \"^3scrim: ^7%s ^7has set the max rounds to %i for the scrim\n\"",
+        ent ? ent->client->pers.netname : "console",
+        level.scrim.max_rounds));
+    G_Scrim_Send_Status( );
+    return qtrue;
+  } else if(!Q_stricmp(subcmd, "roster")) {
+    if(!IS_SCRIM) {
+      ADMP("^3scrim: ^7this subcommand requires scrim mode to be on\n");
+      return qfalse;
+    }
+
+    G_admin_scrim_roster(ent);
+    return qtrue;
+  } else if(!Q_stricmp(subcmd, "remove")) {
+    scrim_team_t        scrim_team;
+    scrim_team_member_t *member;
+    char name[ MAX_NAME_LENGTH ], err[ MAX_STRING_CHARS ], netname[ MAX_NAME_LENGTH ];
+
+    if(!IS_SCRIM) {
+      ADMP("^3scrim: ^7this subcommand requires scrim mode to be on\n");
+      return qfalse;
+    }
+
+    if(Cmd_Argc( ) < 3) {
+      ADMP("^3scrim: ^7this command is used to remove a player from the roster, even if the player is disconnected. To look up the roster IDs execute: scrim roster\n");
+      ADMP(
+        va(
+          "\n" S_COLOR_YELLOW "%s: " S_COLOR_WHITE "usage: %s %s\n",
+          admincmd->keyword, admincmd->keyword, "remove [^3roster id^6|^3player name^7]"));
+      return qfalse;
+    }
+
+    Q_strncpyz(name, ConcatArgs(2), sizeof(name));
+
+    if(!(member = G_Scrim_Roster_Member_From_String(name, &scrim_team, err, sizeof(err)))) {
+      ADMP(va("^3scrim: ^7%s", err));
+      ADMP(
+        va(
+          "\n" S_COLOR_YELLOW "%s: " S_COLOR_WHITE "usage: %s %s\n",
+          admincmd->keyword, admincmd->keyword, "remove [^3roster id^6|^3player name^7]"));
+      return qfalse;
+    }
+
+    Q_strncpyz(netname, member->netname, sizeof(netname));
+
+    G_Scrim_Remove_Player_From_Rosters_By_ID(member->roster_id);
+
+    G_Scrim_Send_Status( );
+    AP(
+      va(
+        "print \"^3scrim: ^7%s^7 removed %s^7 from the roster\n\"",
+        (ent) ? ent->client->pers.netname : "console",
+        netname));
+    return qtrue;
+  } else {
+    ADMP(
+      va(
+        "\n" S_COLOR_YELLOW "%s: " S_COLOR_WHITE "usage: %s %s\n",
+        admincmd->keyword, admincmd->keyword, admincmd->syntax));
+    return qfalse;
+  }
 }
 
 qboolean G_admin_seen( gentity_t *ent )

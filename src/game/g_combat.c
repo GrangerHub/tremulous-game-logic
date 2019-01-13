@@ -67,7 +67,7 @@ void AddScore( gentity_t *ent, int score )
   score = rint( ((float)score) / 50.0f );
 
   ent->client->ps.persistant[ PERS_SCORE ] += score;
-  CalculateRanks( );
+  CalculateRanks(qfalse);
 }
 
 /*

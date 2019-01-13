@@ -639,7 +639,7 @@ qboolean ClientInactivityTimer( gentity_t *ent )
     client->inactivityTime = level.time + g_inactivity.integer * 1000;
     client->inactivityWarning = qfalse;
   }
-  else if( !client->pers.localClient )
+  else if( !client->pers.localClient && !IS_SCRIM )
   {
     if( level.time > client->inactivityTime - 10000 )
     {
@@ -743,8 +743,8 @@ void ClientTimerActions( gentity_t *ent, int msec )
     weapon_t weapon = BG_GetPlayerWeapon( &client->ps );
 
     client->time100 -= 100;
-
-    if( g_freeFundPeriod.integer > 0 )
+    if( g_freeFundPeriod.integer > 0 &&
+        !(IS_SCRIM && !level.scrim.timed_income ) )
     {
       // Give clients some credit periodically
       // (if not in warmup)

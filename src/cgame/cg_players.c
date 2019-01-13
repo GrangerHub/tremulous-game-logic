@@ -751,6 +751,22 @@ static void CG_StatusMessages( clientInfo_t *new, clientInfo_t *old )
   if( strcmp( new->name, old->name ) )
     CG_Printf( "%s" S_COLOR_WHITE " renamed to %s\n", old->name, new->name );
 
+  if(new->rank > old->rank) {
+    CG_Printf(
+      "%s" S_COLOR_WHITE " was promoted to %s\n",
+      new->name, BG_Rank(new->rank)->humanName );
+  } else if(new->rank < old->rank) {
+    if(new->rank) {
+      CG_Printf(
+        "%s" S_COLOR_WHITE " was demoted to %s\n",
+        new->name, BG_Rank(new->rank)->humanName );
+    } else {
+        CG_Printf(
+          "%s" S_COLOR_WHITE " was demoted from all rank\n",
+          new->name );
+    }
+  }
+
   if( old->team != new->team &&
       !( new->restartFlags & ( RESTART_WARMUP_RESET | RESTART_WARMUP_END ) ) )
   {
@@ -798,6 +814,10 @@ void CG_NewClientInfo( int clientNum )
   // team
   v = Info_ValueForKey( configstring, "t" );
   newInfo.team = atoi( v );
+
+  //rank
+  v = Info_ValueForKey( configstring, "rank" );
+  newInfo.rank = atoi( v );
 
   // if this is us, execute team-specific config files
   // the spectator config is a little unreliable because it's easy to get on

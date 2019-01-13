@@ -75,8 +75,10 @@ static void SV_Map_f( void ) {
 	// and thus nuke the arguments of the map command
 	Q_strncpyz(mapname, map, sizeof(mapname));
 
-	// The map isn't restarting
-	Cvar_SetSafe( "g_restartingFlags", "0" );
+	// consider only if a scrim is still in progress
+	Cvar_SetSafe( 
+		"g_restartingFlags",
+		va("%i", (Cvar_VariableIntegerValue("g_restartingFlags") & RESTART_SCRIM)));
 
 	// start up the map
 	SV_SpawnServer( mapname, killBots );
@@ -96,6 +98,8 @@ static void SV_Map_f( void ) {
 	for( a = 0; a < 3; ++a )
 		for( i = 0; i < MAX_MASTER_SERVERS; i++ )
 			sv_masters[ a ][ i ]->modified  = qtrue;
+
+	Cvar_SetSafe( "g_restartingFlags", "0" );
 }
 
 /*

@@ -162,52 +162,58 @@
 #define CG_SPEEDOMETER                  52
 #define CG_PLAYER_CROSSHAIRNAMES        53
 #define CG_STAGE_REPORT_TEXT            54
-#define CG_ALIENS_SCORE_LABEL           55
-#define CG_HUMANS_SCORE_LABEL           56
-#define CG_DEMO_PLAYBACK                57
-#define CG_DEMO_RECORDING               58
+#define CG_SCRIM_SETTINGS               55
+#define CG_SCRIM_WIN_CONDITION          56
+#define CG_SCRIM_STATUS                 57
+#define CG_ALIENS_SCRIM_TEAM_STATUS     58
+#define CG_HUMANS_SCRIM_TEAM_STATUS     59
+#define CG_ALIENS_SCRIM_TEAM_LABEL      60
+#define CG_HUMANS_SCRIM_TEAM_LABEL      61
+#define CG_ALIENS_SCORE_LABEL           62
+#define CG_HUMANS_SCORE_LABEL           63
+#define CG_DEMO_PLAYBACK                64
+#define CG_DEMO_RECORDING               65
 
-#define CG_CONSOLE                      59
-#define CG_TUTORIAL                     60
-#define CG_CLOCK                        61
+#define CG_CONSOLE                      66
+#define CG_TUTORIAL                     67
+#define CG_CLOCK                        68
 
-#define UI_NETSOURCE                    62
-#define UI_NETMAPPREVIEW                63
-#define UI_NETMAPCINEMATIC              64
-#define UI_SERVERREFRESHDATE            65
-#define UI_SERVERMOTD                   66
-#define UI_GLINFO                       67
-#define UI_KEYBINDSTATUS                68
-#define UI_SELECTEDMAPPREVIEW           69
-#define UI_SELECTEDMAPNAME              70
+#define UI_NETSOURCE                    69
+#define UI_NETMAPPREVIEW                70
+#define UI_NETMAPCINEMATIC              71
+#define UI_SERVERREFRESHDATE            72
+#define UI_SERVERMOTD                   73
+#define UI_GLINFO                       74
+#define UI_KEYBINDSTATUS                75
+#define UI_SELECTEDMAPPREVIEW           76
+#define UI_SELECTEDMAPNAME              77
 
-#define UI_TEAMINFOPANE                 71
-#define UI_ACLASSINFOPANE               72
-#define UI_AUPGRADEINFOPANE             73
-#define UI_HITEMINFOPANE                74
-#define UI_HBUYINFOPANE                 75
-#define UI_HSELLINFOPANE                76
-#define UI_ABUILDINFOPANE               77
-#define UI_HBUILDINFOPANE               78
-#define UI_HELPINFOPANE                 79
+#define UI_TEAMINFOPANE                 78
+#define UI_ACLASSINFOPANE               79
+#define UI_AUPGRADEINFOPANE             80
+#define UI_HITEMINFOPANE                81
+#define UI_HBUYINFOPANE                 82
+#define UI_HSELLINFOPANE                83
+#define UI_ABUILDINFOPANE               84
+#define UI_HBUILDINFOPANE               85
+#define UI_HELPINFOPANE                 86
 
-#define CG_WARMUP                       80
-#define CG_WARMUP_PLAYER_READY          81
-#define CG_WARMUP_ALIENS_READY          82
-#define CG_WARMUP_HUMANS_READY          83
-#define CG_WARMUP_HUMANS_READY_HDR      84
-#define CG_WARMUP_ALIENS_READY_HDR      85
+#define CG_WARMUP                       87
+#define CG_WARMUP_PLAYER_READY          88
+#define CG_WARMUP_ALIENS_READY          89
+#define CG_WARMUP_HUMANS_READY          90
+#define CG_WARMUP_HUMANS_READY_HDR      91
+#define CG_WARMUP_ALIENS_READY_HDR      92
 
-#define UI_VOICECMDINFOPANE             86
+#define UI_VOICECMDINFOPANE             93
 
-#define CG_PLAYER_CHARGE_STAMINA_BAR    87
-#define CG_PLAYER_CHARGE_STAMINA_BAR_BG 88
+#define CG_PLAYER_CHARGE_STAMINA_BAR    94
+#define CG_PLAYER_CHARGE_STAMINA_BAR_BG 95
 
-#define CG_PLAYER_EQUIP_HUD             89
-#define CG_PLAYER_JETPACK_ICON          90
-#define CG_PLAYER_JETPACK_FUEL          91
-#define CG_PLAYER_ARMOR_SHIELD          92
-#define CG_PLAYER_ARMOR                 93
+#define CG_PLAYER_EQUIP_HUD             96
+#define CG_PLAYER_JETPACK_ICON          97
+#define CG_PLAYER_JETPACK_FUEL          98
+#define CG_PLAYER_ARMOR_SHIELD          99
+#define CG_PLAYER_ARMOR                 100
 
-#define UI_VOICECMDINFOPANE          86
 #endif

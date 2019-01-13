@@ -316,6 +316,39 @@ static void Svcmd_AdmitDefeat_f( void )
   G_BaseSelfDestruct( team );
 }
 
+static void Svcmd_Forfeit_f(void) {
+  scrim_team_t scrim_team;
+  char teamNum[2];
+
+  if(!IS_SCRIM) {
+    Com_Printf("forfeit: scrim mode is off\n");
+    return;
+  }
+
+  if(Cmd_Argc( ) != 2) {
+    Com_Printf("forfeit: must provide a scrim team number\n");
+    return;
+  }
+
+  Cmd_ArgvBuffer( 1, teamNum, sizeof( teamNum ) );
+  scrim_team = (scrim_team_t)atoi(teamNum);
+
+  if(
+    scrim_team == SCRIM_TEAM_NONE ||
+    scrim_team >= NUM_SCRIM_TEAMS ||
+    scrim_team < 0 ||
+    level.scrim.team[scrim_team].current_team == TEAM_NONE) {
+    Com_Printf("forfeit: invalid scrim team number\n");
+    return;
+  }
+
+  SV_GameSendServerCommand(
+    -1, 
+    va(
+      "print \"%s forfeits the scrim\n\"", level.scrim.team[scrim_team].name));
+  level.scrim.scrim_forfeiter = scrim_team;
+}
+
 static void Svcmd_TeamWin_f( void )
 {
   // this is largely made redundant by admitdefeat <team>
@@ -345,11 +378,11 @@ static void Svcmd_Evacuation_f( void )
     return;
   SV_GameSendServerCommand( -1, "print \"Evacuation ordered\n\"" );
   level.lastWin = TEAM_NONE;
-  SV_SetConfigstring( CS_WINNER, va( "%i %i %i",
-                                     MATCHOUTCOME_EVAC,
-                                     index,
-                                     TEAM_NONE ) );
-  LogExit( "Evacuation." );
+  Q_strncpyz(
+        level.winner_configstring,
+        va("%i %i %i", MATCHOUTCOME_EVAC, index, TEAM_NONE),
+        sizeof(level.winner_configstring));
+  LogExit("Evacuation.");
 }
 
 static void Svcmd_MapRotation_f( void )
@@ -590,6 +623,7 @@ struct svcmd
   { "evacuation", qfalse, Svcmd_Evacuation_f },
   { "extend", qfalse, Svcmd_Extend_f },
   { "forceTeam", qfalse, Svcmd_ForceTeam_f },
+  { "forfeit", qfalse, Svcmd_Forfeit_f },
   { "game_memory", qfalse, Svcmd_G_MemoryInfo },
   { "humanWin", qfalse, Svcmd_TeamWin_f },
   { "layoutLoad", qfalse, Svcmd_LayoutLoad_f },

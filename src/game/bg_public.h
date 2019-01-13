@@ -73,18 +73,83 @@ typedef enum
   PORTAL_NUM
 } portal_t;
 
-/*
---------------------------------------------------------------------------------
-Flags for map restarts
-*/
-#define  RESTART_WARMUP_RESET 0x00000001 // Warmup is resetting from a "win
-                                         // condition" but isn't ending.
+typedef enum
+{
+  RANK_NONE,
+  RANK_CAPTAIN,
 
-#define  RESTART_WARMUP_END   0x00000002 // Warmup is ending and the match is
-                                         // beginning.
+  NUM_OF_RANKS
+} rank_t;
+
+// sudden death mode settings settings
+typedef enum sdmode_s {
+  SDMODE_BP = 0, //disallows the building of any buildable that costs bp
+  SDMODE_NO_BUILD = 1, //disallows all building without exception
+  SDMODE_SELECTIVE = 2, //disallow building spawns and defensive buildables,
+                        //allow rebuilding of other types of buildables only if
+                        //it has been built prior to sd, and apply the unique requirement
+  SDMODE_NO_DECON = 3 //like SDMODE_BP, but also disallows decon/mark of all buildables.
+} sdmode_t;
+
 /*
 --------------------------------------------------------------------------------
+Scrim
 */
+typedef enum
+{
+  SCRIM_TEAM_NONE = 0,
+
+  SCRIM_TEAM_1,
+  SCRIM_TEAM_2,
+
+  NUM_SCRIM_TEAMS
+} scrim_team_t;
+
+typedef enum
+{
+  SCRIM_MODE_OFF = 0,
+  SCRIM_MODE_SETUP,
+  SCRIM_MODE_PAUSED,
+  SCRIM_MODE_STARTED
+} scrim_mode_t;
+
+typedef enum
+{
+  SCRIM_WIN_CONDITION_DEFAULT = 0, // first to win 2 rounds, without a loss between
+  SCRIM_WIN_CONDITION_SHORT // 2 rounds, at least 1 win, no loss
+} scrim_win_condition_t;
+
+typedef struct scrim_team_info_s
+{
+  char     name[MAX_NAME_LENGTH];
+  team_t   current_team;
+  qboolean has_captain;
+  char     captain_guid[ 33 ]; // guid is only stored in the game module, don't broadcast to clients
+  int      captain_num; // broadcasted to the clients
+  int      wins;
+  int      losses;
+  int      draws;
+} scrim_team_info_t;
+
+typedef struct scrim_s
+{
+  scrim_mode_t          mode;
+  scrim_win_condition_t win_condition;
+  qboolean              scrim_completed;
+  scrim_team_t          scrim_winner;
+  scrim_team_t          scrim_forfeiter;
+  qboolean              timed_income;
+  sdmode_t              sudden_death_mode;
+  int                   sudden_death_time;
+  int                   time_limit;
+  scrim_team_info_t     team[NUM_SCRIM_TEAMS];
+  scrim_team_t          previous_round_win;
+  int                   rounds_completed;
+  int                   max_rounds;
+  qboolean              swap_teams;
+} scrim_t;
+
+scrim_team_t BG_Scrim_Team_From_Playing_Team(scrim_t *scrim, team_t playing_team);
 
 //
 // config strings are a general means of communicating variable length strings
@@ -119,6 +184,10 @@ enum
   CS_WARMUP,                // g_warmup
   CS_WARMUP_READY,
 
+  CS_SCRIM_TEAM,
+  CS_SCRIM_TEAM_NAME = CS_SCRIM_TEAM + NUM_SCRIM_TEAMS,
+  CS_SCRIM            = CS_SCRIM_TEAM_NAME + NUM_SCRIM_TEAMS,
+
   CS_DEVMODE,
 
   CS_HUMAN_STAMINA_MODE,
@@ -146,6 +215,7 @@ typedef enum
 {
   MATCHOUTCOME_WON,
   MATCHOUTCOME_EVAC,
+  MATCHOUTCOME_MUTUAL,
   MATCHOUTCOME_TIME
 } matchOutcomes_t;
 
@@ -1347,6 +1417,13 @@ typedef struct
   char          *info;
 } teamAttributes_t;
 
+typedef struct
+{
+  rank_t number;
+  char   *name;
+  char   *humanName;
+} rankAttributes_t;
+
 #define MAX_BUILDABLE_MODELS 4
 
 // buildable item record
@@ -1810,6 +1887,8 @@ int BG_LoadEmoticons( emoticon_t *emoticons, int num );
 
 const teamAttributes_t *BG_Team( team_t team );
 
+const rankAttributes_t *BG_Rank( rank_t rank );
+
 entityState_t *BG_EntityState(int ent_num);
 void BG_Link_entityState(entityState_t *es, int ent_num);
 
@@ -1859,6 +1938,7 @@ int cmdcmp( const void *a, const void *b );
 typedef enum
 {
   KICK_VOTE,
+  SPEC_VOTE,
   POLL_VOTE,
   MUTE_VOTE,
   UNMUTE_VOTE,

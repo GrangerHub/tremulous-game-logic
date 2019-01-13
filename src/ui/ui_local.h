@@ -44,6 +44,8 @@ void UI_LoadArenas( void );
 void UI_ServerInfo( void );
 void UI_UpdateNews( qboolean );
 
+qboolean UI_GameIsInScrimMode( void );
+
 void UI_RegisterCvars( void );
 void UI_UpdateCvars( void );
 void UI_DrawConnectScreen( qboolean overlay );
