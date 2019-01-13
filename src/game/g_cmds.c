@@ -754,6 +754,13 @@ void Cmd_Team_f( gentity_t *ent )
   int       aliens = level.numAlienClients;
   int       humans = level.numHumanClients;
 
+  if(IS_SCRIM) {
+    SV_GameSendServerCommand(
+      ent-g_entities,
+      va("print \"Scrim mode is ^1on^7, joining teams has been disabled\n\""));
+    return;
+  }
+
   if( oldteam == TEAM_ALIENS )
     aliens--;
   else if( oldteam == TEAM_HUMANS )
@@ -772,6 +779,16 @@ void Cmd_Team_f( gentity_t *ent )
     SV_GameSendServerCommand( ent-g_entities,
       va( "print \"You must wait another %d seconds before changing teams again\n\"",
         (int) ( ( 30000 - ( level.time - ent->client->pers.teamChangeTime ) ) / 1000.f ) ) );
+    return;
+  }
+
+  //check for forced spectator
+  if(ent->client->pers.namelog->specExpires > level.time) {
+    SV_GameSendServerCommand(
+      ent-g_entities,
+      va(
+        "print \"You can't join a team yet. Expires in %d seconds.\n\"",
+        (ent->client->pers.namelog->specExpires - level.time) / 1000));
     return;
   }
 
@@ -1099,6 +1116,20 @@ void G_Say( gentity_t *ent, saymode_t mode, const char *chatText )
   {
     SV_GameSendServerCommand( ent-g_entities, "print \"say: Global chatting for "
       "spectators has been disabled. You may only use team chat.\n\"" );
+    mode = SAY_TEAM;
+  }
+
+  if( ( IS_SCRIM ) && ( mode != SAY_TEAM ) &&
+      ( ent ) &&
+      ( ( ent->client->pers.teamSelection == TEAM_NONE ) ||
+        ( level.scrim.mode == SCRIM_MODE_STARTED &&
+          !IS_WARMUP && !level.intermissiontime ) ) &&
+      ( !G_admin_permission( ent, ADMF_NOCENSORFLOOD ) ) && 
+      ( !G_admin_permission( ent, "scrim" ) ) )
+  {
+    SV_GameSendServerCommand( ent-g_entities,
+      "print \"say: A scrim is in progress, global chatting "
+      "has been disabled. You may only use team chat.\n\"" );
     mode = SAY_TEAM;
   }
 
@@ -1496,6 +1527,124 @@ void Cmd_CallVote_f( gentity_t *ent )
     return;
   }
 
+  if(IS_SCRIM) {
+    const scrim_team_t scrim_team =
+      BG_Scrim_Team_From_Playing_Team(
+        &level.scrim, ent->client->pers.teamSelection);
+    const qboolean iscaptain =
+      (
+        scrim_team != SCRIM_TEAM_NONE &&
+        !ent->client->pers.guidless &&
+        level.scrim.team[scrim_team].has_captain &&
+        !Q_stricmp(
+          level.scrim.team[scrim_team].captain_guid, ent->client->pers.guid));
+
+    if(level.scrim.mode == SCRIM_MODE_SETUP) {
+      if(G_admin_permission( ent, "scrim" )) {
+        if(team == TEAM_NONE) {
+          if(
+            Q_stricmp( vote, "cancel" ) &&
+            Q_stricmp( vote, "map" ) &&
+            Q_stricmp( vote, "poll" ) &&
+            Q_stricmp( vote, "map" ) &&
+            Q_stricmp( vote, "kick" ) &&
+            Q_stricmp( vote, "mute" ) &&
+            Q_stricmp( vote, "unmute" )) {
+            SV_GameSendServerCommand( ent-g_entities, "print \"Invalid vote string\n\"" );
+            SV_GameSendServerCommand( ent-g_entities, "print \"Valid vote commands "
+                "are: map, kick, poll, mute, "
+                "unmute, and cancel\n" );
+            return;
+          }
+        } else {
+          if(
+            Q_stricmp( vote, "cancel" ) &&
+            Q_stricmp( vote, "poll" ) &&
+            Q_stricmp( vote, "denybuild" ) &&
+            Q_stricmp( vote, "allowbuild" ) &&
+            Q_stricmp( vote, "spec" )) {
+            SV_GameSendServerCommand( ent-g_entities, "print \"Invalid vote string\n\"" );
+            SV_GameSendServerCommand( ent-g_entities, "print \"Valid team vote commands "
+                "are: poll, denybuild, allowbuild, spec, and cancel\n" );
+            return;
+          }
+        }
+      } else if(iscaptain) {
+        SV_GameSendServerCommand( ent-g_entities,
+          va( "print \"%s: you don't have permission to call votes while a scrim is being setup^7\n\"", cmd ) );
+        return;
+      } else {
+        SV_GameSendServerCommand( ent-g_entities,
+          va( "print \"%s: you don't have permission to call votes while a scrim is ^1on^7\n\"", cmd ) );
+        return;
+      }
+    } else {
+      if(G_admin_permission( ent, "scrim" )) {
+        if(team == TEAM_NONE) {
+          if(
+            Q_stricmp( vote, "cancel" ) &&
+            Q_stricmp( vote, "draw" ) &&
+            Q_stricmp( vote, "kick" ) &&
+            Q_stricmp( vote, "spec" ) &&
+            Q_stricmp( vote, "poll" ) &&
+            Q_stricmp( vote, "mute" ) &&
+            Q_stricmp( vote, "unmute" )) {
+            SV_GameSendServerCommand( ent-g_entities, "print \"Invalid vote string\n\"" );
+            SV_GameSendServerCommand( ent-g_entities, "print \"Valid vote commands "
+                "are: draw, spec, kick, poll, mute, "
+                "unmute, and cancel\n" );
+            return;
+          }
+        } else {
+          if(
+            Q_stricmp( vote, "cancel" ) &&
+            Q_stricmp( vote, "poll" ) &&
+            Q_stricmp( vote, "admitdefeat" ) &&
+            Q_stricmp( vote, "forfeit" ) &&
+            Q_stricmp( vote, "spec" ) &&
+            Q_stricmp( vote, "denybuild" ) &&
+            Q_stricmp( vote, "allowbuild" )) {
+            SV_GameSendServerCommand( ent-g_entities, "print \"Invalid vote string\n\"" );
+            SV_GameSendServerCommand( ent-g_entities, "print \"Valid team vote commands "
+                "are: spec, poll, denybuild, allowbuild, admitdefeat, forfeit, and cancel\n" );
+            return;
+          }
+        }
+      } else if(iscaptain) {
+        if(team == TEAM_NONE) {
+          if(
+            Q_stricmp( vote, "cancel" ) &&
+            Q_stricmp( vote, "draw" ) &&
+            Q_stricmp( vote, "spec" ) &&
+            Q_stricmp( vote, "kick" )) {
+            SV_GameSendServerCommand( ent-g_entities, "print \"Invalid vote string\n\"" );
+            SV_GameSendServerCommand( ent-g_entities, "print \"Valid vote commands "
+                "are: spec, kick, draw, and cancel\n" );
+            return;
+          }
+        } else {
+          if(
+            Q_stricmp( vote, "cancel" ) &&
+            Q_stricmp( vote, "poll" ) &&
+            Q_stricmp( vote, "admitdefeat" ) &&
+            Q_stricmp( vote, "forfeit" ) &&
+            Q_stricmp( vote, "denybuild" ) &&
+            Q_stricmp( vote, "allowbuild" ) &&
+            Q_stricmp( vote, "spec" )) {
+            SV_GameSendServerCommand( ent-g_entities, "print \"Invalid vote string\n\"" );
+            SV_GameSendServerCommand( ent-g_entities, "print \"Valid team vote commands "
+                "are: spec, poll, denybuild, allowbuild, admitdefeat, forfeit and cancel\n" );
+            return;
+          }
+        }
+      } else {
+        SV_GameSendServerCommand( ent-g_entities,
+          va( "print \"%s: you don't have permission to call votes while a scrim is ^1on^7\n\"", cmd ) );
+        return;
+      }
+    }
+  }
+
   if( level.voteTime[ team ] )
   {
     if( !Q_stricmp( vote, "cancel" ) )
@@ -1553,8 +1702,9 @@ void Cmd_CallVote_f( gentity_t *ent )
     return;
   }
 
-  // kick, mute, unmute, denybuild, allowbuild
+  // kick, spec, mute, unmute, denybuild, allowbuild
   if( !Q_stricmp( vote, "kick" ) ||
+      !Q_stricmp( vote, "spec") ||
       !Q_stricmp( vote, "mute" ) || !Q_stricmp( vote, "unmute" ) ||
       !Q_stricmp( vote, "denybuild" ) || !Q_stricmp( vote, "allowbuild" ) )
   {
@@ -1576,19 +1726,28 @@ void Cmd_CallVote_f( gentity_t *ent )
       return;
     }
 
+    if(
+      ent &&
+      ent->s.number == clientNum &&
+      Q_stricmp( vote, "unmute" ) && Q_stricmp( vote, "allowbuild" )) {
+      SV_GameSendServerCommand( ent-g_entities,
+        va( "print \"%s: you can't call that vote on yourself\n\"", cmd ) );
+      return;
+    }
+
     G_DecolorString( level.clients[ clientNum ].pers.netname, name, sizeof( name ) );
     id = level.clients[ clientNum ].pers.namelog->id;
 
-    if( !Q_stricmp( vote, "kick" ) || !Q_stricmp( vote, "mute" ) ||
-        !Q_stricmp( vote, "denybuild" ) )
+    if( !Q_stricmp( vote, "kick" ) || !Q_stricmp( vote, "spec") ||
+        !Q_stricmp( vote, "mute" ) || !Q_stricmp( vote, "denybuild" ) )
     {
       if( G_admin_permission( g_entities + clientNum, ADMF_IMMUNITY ) )
       {
         SV_GameSendServerCommand( ent-g_entities,
-          va( "print \"%s: admin is immune\n\"", cmd ) );
+          va( "print \"%s: player is immune\n\"", cmd ) );
 
         G_AdminMessage( NULL, va( S_COLOR_WHITE "%s" S_COLOR_YELLOW " attempted %s %s"
-                                " on immune admin " S_COLOR_WHITE "%s" S_COLOR_YELLOW
+                                " on immune player " S_COLOR_WHITE "%s" S_COLOR_YELLOW
                                 " for: %s",
                                 ent->client->pers.netname, cmd, vote,
                                 g_entities[ clientNum ].client->pers.netname,
@@ -1614,23 +1773,23 @@ void Cmd_CallVote_f( gentity_t *ent )
     }
   }
 
-  if( !Q_stricmp( vote, "kick" ) )
+  if( !Q_stricmp( vote, "spec" ) )
   {
-    if( level.clients[ clientNum ].pers.localClient )
-    {
+    if(
+      level.clients[clientNum].pers.teamSelection == TEAM_NONE &&
+      level.clients[clientNum].pers.namelog->specExpires > level.time) {
       SV_GameSendServerCommand( ent-g_entities,
-        va( "print \"%s: admin is immune\n\"", cmd ) );
+        va(
+           "print \"%s: %s is already forced to be on spectators\n\"",
+           level.clients[clientNum].pers.netname, cmd ) );
       return;
     }
 
     Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
-      "ban %s \"1s%s\" vote kick (%s)", level.clients[ clientNum ].pers.ip.str,
-      g_adminTempBan.string, reason );
+      "putteam %i s %s",id, g_adminTempSpec.string );
     Com_sprintf( level.voteDisplayString[ team ], sizeof( level.voteDisplayString[ team ] ),
-                 "^4[^3Kick^4] ^5player '%s' (Needs > %d%% of %s)", name, level.voteThreshold[ team ],
+                 "^4[^3Force Spec^4] ^5player '%s' (Needs > %d%% of %s)", name, level.voteThreshold[ team ],
                  g_impliedVoting.integer ? "active players" : "total votes" );
-
-    level.voteType[ team ] = KICK_VOTE;
 
     if( reason[ 0 ] )
     {
@@ -1638,7 +1797,7 @@ void Cmd_CallVote_f( gentity_t *ent )
         sizeof( level.voteDisplayString[ team ] ), va( "%cfor '%s'", STRING_DELIMITER, reason ) );
     }
 
-    level.voteType[ team ] = KICK_VOTE;
+    level.voteType[ team ] = SPEC_VOTE;
   }
   else if( !Q_stricmp( vote, "poll" ) )
   {
@@ -1659,7 +1818,30 @@ void Cmd_CallVote_f( gentity_t *ent )
   }
   else if( team == TEAM_NONE )
   {
-    if( !Q_stricmp( vote, "mute" ) )
+    if( !Q_stricmp( vote, "kick" ) )
+    {
+      if( level.clients[ clientNum ].pers.localClient )
+      {
+        SV_GameSendServerCommand( ent-g_entities,
+          va( "print \"%s: player is immune\n\"", cmd ) );
+        return;
+      }
+
+      Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
+        "ban %s \"1s%s\" vote kick (%s)", level.clients[ clientNum ].pers.ip.str,
+        g_adminTempBan.string, reason );
+      Com_sprintf( level.voteDisplayString[ team ], sizeof( level.voteDisplayString[ team ] ),
+                   "^4[^3Kick^4] ^5player '%s' (Needs > %d%% of %s)", name, level.voteThreshold[ team ],
+                   g_impliedVoting.integer ? "active players" : "total votes" );
+
+      if( reason[ 0 ] )
+      {
+        Q_strcat( level.voteDisplayString[ team ],
+          sizeof( level.voteDisplayString[ team ] ), va( "%cfor '%s'", STRING_DELIMITER, reason ) );
+      }
+
+      level.voteType[ team ] = KICK_VOTE;
+    } else if( !Q_stricmp( vote, "mute" ) )
     {
       if( level.clients[ clientNum ].pers.namelog->muted )
       {
@@ -1861,13 +2043,13 @@ void Cmd_CallVote_f( gentity_t *ent )
                                     g_extendVotesCount.integer ) );
         return;
       }
-      if( !g_timelimit.integer ) {
+      if( !G_Time_Limit() ) {
         SV_GameSendServerCommand( ent-g_entities,
                                 "print \"This match has no timelimit so extend votes wont work\n\"" );
         return;
       }
       if( level.time - level.startTime <
-          ( g_timelimit.integer - g_extendVotesTime.integer / 2 ) * 60000 )
+          ( G_Time_Limit() - g_extendVotesTime.integer / 2 ) * 60000 )
       {
         SV_GameSendServerCommand( ent-g_entities,
                                 va( "print \"callvote: Extend votes only allowed with less than %d minutes remaining\n\"",
@@ -1887,7 +2069,7 @@ void Cmd_CallVote_f( gentity_t *ent )
     {
       SV_GameSendServerCommand( ent-g_entities, "print \"Invalid vote string\n\"" );
       SV_GameSendServerCommand( ent-g_entities, "print \"Valid vote commands "
-          "are: map, nextmap, map_restart, draw, sudden_death, extend, kick, poll, mute, "
+          "are: map, nextmap, map_restart, draw, sudden_death, extend, spec, kick, poll, mute, "
           "unmute, and cancel\n" );
       return;
     }
@@ -1947,12 +2129,28 @@ void Cmd_CallVote_f( gentity_t *ent )
     level.voteDelay[ team ] = 3000;
 
     level.voteType[ team ] = ADMITDEFEAT_VOTE;
+  } else if( IS_SCRIM && !Q_stricmp(vote, "forfeit")) {
+    const scrim_team_t scrim_team = BG_Scrim_Team_From_Playing_Team(&level.scrim, team);
+
+    if(
+      scrim_team == SCRIM_TEAM_NONE ||
+      level.scrim.team[scrim_team].current_team == TEAM_NONE) {
+      SV_GameSendServerCommand( ent-g_entities,
+        va( "print \"%s: you are not on a valid team to call a forfeit vote\n\"", cmd ) );
+      return;
+    }
+
+    Com_sprintf( level.voteString[ team ], sizeof( level.voteString[ team ] ),
+      "forfeit %d", scrim_team );
+    Com_sprintf( level.voteDisplayString[ team ], sizeof( level.voteDisplayString[ team ] ),
+                 "^4[^1Forfeit Scrim^4] ^5 (Needs > %d%% of %s)", level.voteThreshold[ team ],
+                 g_impliedVoting.integer ? "active teammates" : "total votes" );
   }
   else
   {
     SV_GameSendServerCommand( ent-g_entities, "print \"Invalid vote string\n\"" );
     SV_GameSendServerCommand( ent-g_entities, "print \"Valid team vote commands "
-        "are: kick, poll, denybuild, allowbuild, admitdefeat and cancel\n" );
+        "are: spec, poll, denybuild, allowbuild, admitdefeat and cancel\n" );
     return;
   }
 
@@ -2020,6 +2218,11 @@ void Cmd_CallVote_f( gentity_t *ent )
   ent->client->pers.namelog->voteCount++;
   ent->client->pers.vote |= 1 << team;
 
+  //during scrims, only players on teams can vote
+  if(IS_SCRIM && ent->client->pers.teamSelection == TEAM_NONE) {
+    voteYes = qfalse;
+  }
+
   if ( voteYes == qtrue )
     G_Vote( ent, team, qtrue );   //Caller calls vote YES as default but not in all cases.
 }
@@ -2077,6 +2280,12 @@ void Cmd_Vote_f( gentity_t *ent )
   Cmd_ArgvBuffer( 0, cmd, sizeof( cmd ) );
   if( Q_stricmp( cmd, "teamvote" ) )
     team = TEAM_NONE;
+
+  if( IS_SCRIM && ent->client->pers.teamSelection == TEAM_NONE ) {
+    SV_GameSendServerCommand( ent-g_entities,
+      va( "print \"%s: You must be on a team to vote while a scrim is ^1on^7\n\"", cmd ) );
+    return;
+  }
 
   if( !level.voteTime[ team ] )
   {
@@ -2414,7 +2623,7 @@ void G_Evolve( gentity_t *ent, class_t newClass,
   if( ent->client->ps.stats[ STAT_STATE ] & SS_BOOSTED )
     oldBoostTime = ent->client->boostedTime;
 
-  ClientSpawn( ent, ent, ent->s.pos.trBase, ent->s.apos.trBase );
+  ClientSpawn( ent, ent, ent->s.pos.trBase, ent->s.apos.trBase, qtrue );
 
   VectorCopy( oldVel, ent->client->ps.velocity );
   if( oldBoostTime > 0 )
@@ -2604,7 +2813,7 @@ void Cmd_Destroy_f( gentity_t *ent )
 
     // Don't allow destruction of buildables that cannot be rebuilt
     if( !IS_WARMUP && G_TimeTilSuddenDeath( ) <= 0 ) {
-      if(g_suddenDeathMode.integer == SDMODE_SELECTIVE) {
+      if(G_SD_Mode( ) == SDMODE_SELECTIVE) {
         if(!level.sudden_death_replacable[traceEnt->s.modelindex]) {
           G_TriggerMenu(ent->client->ps.clientNum, MN_B_SD_NODECON);
           return;
@@ -2613,7 +2822,7 @@ void Cmd_Destroy_f( gentity_t *ent )
           return;
         }
       } else if(
-        g_suddenDeathMode.integer != SDMODE_BP ||
+        G_SD_Mode( ) != SDMODE_BP ||
         BG_Buildable(traceEnt->s.modelindex)->buildPoints){
         G_TriggerMenu(ent->client->ps.clientNum, MN_B_SD_NODECON);
         return;
@@ -3666,7 +3875,7 @@ void Cmd_Build_f( gentity_t *ent )
 
   if(
     !IS_WARMUP && G_TimeTilSuddenDeath( ) <= 0 &&
-    g_suddenDeathMode.integer == SDMODE_NO_BUILD)
+    G_SD_Mode( ) == SDMODE_NO_BUILD)
   {
     G_TriggerMenu( ent->client->ps.clientNum, MN_B_SUDDENDEATH );
     return;
@@ -3773,7 +3982,7 @@ void Cmd_Reload_f( gentity_t *ent )
 
       // Don't allow destruction of buildables that cannot be rebuilt
       if( !IS_WARMUP && G_TimeTilSuddenDeath( ) <= 0 ) {
-        if(g_suddenDeathMode.integer == SDMODE_SELECTIVE) {
+        if(G_SD_Mode( ) == SDMODE_SELECTIVE) {
           if(!level.sudden_death_replacable[traceEnt->s.modelindex]) {
             G_TriggerMenu(ent->client->ps.clientNum, MN_B_SD_NODECON);
             return;
@@ -3782,7 +3991,7 @@ void Cmd_Reload_f( gentity_t *ent )
             return;
           }
         } else if(
-          g_suddenDeathMode.integer != SDMODE_BP ||
+          G_SD_Mode( ) != SDMODE_BP ||
           BG_Buildable(traceEnt->s.modelindex)->buildPoints){
           G_TriggerMenu(ent->client->ps.clientNum, MN_B_SD_NODECON);
           return;
@@ -3876,7 +4085,7 @@ void G_StopFollowing( gentity_t *ent )
     TeleportPlayer( ent, viewOrigin, angles, qfalse );
   }
 
-  CalculateRanks( );
+  CalculateRanks(qtrue);
 }
 
 /*
@@ -5006,11 +5215,13 @@ void Cmd_PrivateMessage_f( gentity_t *ent )
   char text[ MAX_STRING_CHARS ];
   char *msg;
   char color;
+  int scrimming = 0;
   int i;
   int count = 0;
   qboolean teamonly = qfalse;
   qboolean sendToprevRecipients = qfalse;
   prevRecipients_t *prevRecipients = NULL;
+  char scrimmers[ MAX_STRING_CHARS ] = "";
   char recipients[ MAX_STRING_CHARS ] = "";
   char disconnectedRecipients[ MAX_STRING_CHARS ] = "";
   int disconnectedRecipientsCount = 0;
@@ -5082,10 +5293,18 @@ void Cmd_PrivateMessage_f( gentity_t *ent )
           Q_strcat( disconnectedRecipients, sizeof( disconnectedRecipients ), va( "%s" S_COLOR_WHITE ", ",
             n->name[ n->nameOffset ] ) );
         } else if( G_SayTo( ent, &g_entities[ slot ],
-                            teamonly ? SAY_TPRIVMSG : SAY_PRIVMSG, text ) )
+                            (teamonly || 
+                              (IS_SCRIM && level.scrim.mode != SCRIM_MODE_SETUP))
+                              ? SAY_TPRIVMSG : SAY_PRIVMSG, text ) )
         {
           count++;
           Q_strcat( recipients, sizeof( recipients ), va( "%s" S_COLOR_WHITE ", ",
+            level.clients[ slot ].pers.netname ) );
+        } else if(
+          !teamonly && (IS_SCRIM && level.scrim.mode != SCRIM_MODE_SETUP) && ent &&
+          !OnSameTeam( ent, &g_entities[ slot ] )) {
+          scrimming++;
+          Q_strcat( scrimmers, sizeof( scrimmers ), va( "%s" S_COLOR_WHITE ", ",
             level.clients[ slot ].pers.netname ) );
         }
       }
@@ -5102,7 +5321,8 @@ void Cmd_PrivateMessage_f( gentity_t *ent )
     for( i = 0; i < pcount; i++ )
     {
       if( G_SayTo( ent, &g_entities[ pids[ i ] ],
-          teamonly ? SAY_TPRIVMSG : SAY_PRIVMSG, text ) )
+          (teamonly || (IS_SCRIM && level.scrim.mode != SCRIM_MODE_SETUP))
+            ? SAY_TPRIVMSG : SAY_PRIVMSG, text ) )
       {
         count++;
         Q_strcat( recipients, sizeof( recipients ), va( "%s" S_COLOR_WHITE ", ",
@@ -5110,19 +5330,39 @@ void Cmd_PrivateMessage_f( gentity_t *ent )
 
         prevRecipients->id[prevRecipients->count] = level.clients[ pids[ i ] ].pers.namelog->id;
         prevRecipients->count++;
+      }  else if(
+        !teamonly && (IS_SCRIM && level.scrim.mode != SCRIM_MODE_SETUP) && ent &&
+        !OnSameTeam( ent, &g_entities[ pids[ i ] ] )) {
+          scrimming++;
+          Q_strcat( scrimmers, sizeof( scrimmers ), va( "%s" S_COLOR_WHITE ", ",
+            level.clients[ pids[ i ] ].pers.netname ) );
       }
     }
   }
 
   // report the results
-  color = teamonly ? COLOR_CYAN : COLOR_YELLOW;
+  color = (teamonly || (IS_SCRIM && level.scrim.mode != SCRIM_MODE_SETUP))
+    ? COLOR_CYAN : COLOR_YELLOW;
+
+  if( scrimming )
+  {
+    // remove trailing ", "
+    scrimmers[ strlen( scrimmers ) - 2 ] = '\0';
+    ADMP(
+      va(
+        "^%ccan't send to %i player%s because scrim mode is ^1on^%c: " S_COLOR_WHITE "%s^7\n",
+        color, scrimming, scrimming == 1 ? "" : "s", color, scrimmers ) );
+  }
 
   if( !count )
   {
     if( sendToprevRecipients )
     {
       ADMP( va( "^%c%s: No connected %s on your previous recipients list.\n" ,
-                color, cmd, teamonly ? "players" : "teammates" ) );
+                color, cmd,
+                (teamonly ||
+                  (IS_SCRIM && level.scrim.mode != SCRIM_MODE_SETUP))
+                  ? "teammates" : "players" ) );
       if( disconnectedRecipientsCount )
       {
         // remove trailing ", "
@@ -5154,7 +5394,9 @@ void Cmd_PrivateMessage_f( gentity_t *ent )
 
     if( g_logPrivateMessages.integer )
       G_LogPrintf( "%s: %d \"%s" S_COLOR_WHITE "\" \"%s" S_COLOR_WHITE "\": ^%c%s\n",
-        ( teamonly ) ? "TPrivMsg" : "PrivMsg",
+        ( (teamonly || 
+            (IS_SCRIM && level.scrim.mode != SCRIM_MODE_SETUP)) )
+            ? "TPrivMsg" : "PrivMsg",
         (int)( ( ent ) ? ent - g_entities : -1 ),
         ( ent ) ? ent->client->pers.netname : "console",
         recipients, color, msg );

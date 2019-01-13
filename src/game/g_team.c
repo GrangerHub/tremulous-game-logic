@@ -247,10 +247,13 @@ void G_ChangeTeam( gentity_t *ent, team_t newTeam )
     return;
 
   G_LeaveTeam( ent );
+  if(IS_SCRIM && newTeam == TEAM_NONE) {
+    G_Vote( ent, TEAM_NONE, qfalse );
+  }
   ent->client->pers.teamChangeTime = level.time;
   ent->client->pers.teamSelection = newTeam;
   ent->client->pers.classSelection = PCL_NONE;
-  ClientSpawn( ent, NULL, NULL, NULL );
+  ClientSpawn( ent, NULL, NULL, NULL, qtrue );
 
   if( oldTeam == TEAM_HUMANS && newTeam == TEAM_ALIENS )
   {
@@ -278,6 +281,9 @@ void G_ChangeTeam( gentity_t *ent, team_t newTeam )
     ent->flags &= ~( FL_GODMODE | FL_NOTARGET );
   }
 
+  //reset spectator lock
+  ent->client->pers.namelog->specExpires = 0;
+
   // Copy credits to ps for the client
   ent->client->ps.persistant[ PERS_CREDIT ] = ent->client->pers.credit;
 
@@ -287,6 +293,10 @@ void G_ChangeTeam( gentity_t *ent, team_t newTeam )
 
   G_LogPrintf( "ChangeTeam: %d %s: %s" S_COLOR_WHITE " switched teams\n",
     (int)( ent - g_entities ), BG_Team( newTeam )->name2, ent->client->pers.netname );
+
+  if(IS_SCRIM) {
+    G_Scrim_Restore_Player_Rank( ent->s.number );
+  }
 
   G_namelog_update_score( ent->client );
   // refresh the teamoverlay

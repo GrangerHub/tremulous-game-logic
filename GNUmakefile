@@ -2318,6 +2318,7 @@ GOBJ_ = \
   $(B)/game/g_team.o \
   $(B)/game/g_trigger.o \
   $(B)/game/g_utils.o \
+  $(B)/game/g_scrim.o \
   $(B)/game/g_maprotation.o \
   $(B)/game/g_weapon.o \
   $(B)/game/g_admin.o \

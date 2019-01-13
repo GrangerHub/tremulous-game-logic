@@ -440,6 +440,7 @@ typedef struct
   spectatorState_t  spectatorState;
   int               spectatorClient;  // for chasecam and follow mode
   team_t            restartTeam; //for !restart keepteams and !restart switchteams
+  rank_t            rank;
   qboolean          readyToPlay; // ready state for Warmup
   clientList_t      ignoreList;
 } clientSession_t;
@@ -473,6 +474,8 @@ typedef struct namelog_s
 
   qboolean          muted;
   qboolean          denyBuild;
+  int               specExpires; // level.time at which a player can join a
+                                 // team again after being forced into spectator
 
   int               score;
   int               credits;
@@ -777,6 +780,8 @@ typedef struct
 
   qboolean          restarted;                    // waiting for a map_restart to fire
 
+  scrim_t           scrim;
+  scrim_team_roster_t scrim_team_rosters[NUM_SCRIM_TEAMS];
 
   int               numConnectedClients;
   int               numNonSpectatorClients;       // includes connecting clients
@@ -823,6 +828,7 @@ typedef struct
   int               intermissiontime;             // time the intermission was started
   char              *changemap;
   int               nextmap_when_empty_teams;
+  int               forfeit_when_team_is_empty[NUM_SCRIM_TEAMS];
   qboolean          readyToExit;                  // at least one client wants to exit
   int               exitTime;
   vec3_t            intermission_origin;          // also used for spectator spawns
@@ -866,6 +872,8 @@ typedef struct
   int               humanBaseAttackTimer;
 
   team_t            lastWin;
+
+  char              winner_configstring[MAX_STRING_CHARS];
 
   int               suddenDeathABuildPoints;
   int               suddenDeathHBuildPoints;
@@ -1390,7 +1398,7 @@ gentity_t *G_SelectAlienLockSpawnPoint( vec3_t origin, vec3_t angles );
 gentity_t *G_SelectHumanLockSpawnPoint( vec3_t origin, vec3_t angles );
 void      respawn( gentity_t *ent );
 void      BeginIntermission( void );
-void      ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const vec3_t angles );
+void      ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const vec3_t angles, qboolean check_exit_rules );
 void      body_die( gentity_t *self, gentity_t*, gentity_t*, int, int );
 void      player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod );
 qboolean  SpotWouldTelefrag( gentity_t *spot );
@@ -1413,36 +1421,59 @@ void FireWeapon2( gentity_t *ent );
 void FireWeapon3( gentity_t *ent );
 
 //
+// g_scrim.c
+//
+void                G_Scrim_Restore_Player_Rank(int client_num);
+qboolean G_Scrim_Set_Team_Captain(
+  scrim_team_t scrim_team, const int roster_id, qboolean *removed_captain,
+  char *err, int err_len);
+void                G_Scrim_Load(void);
+void                G_Scrim_Reset_Settings(void);
+void                G_Scrim_Save(void);
+void                G_Scrim_Send_Status(void);
+void                G_Scrim_Broadcast_Status(void);
+void                G_Scrim_Check_Win_Conditions(void);
+void                G_Scrim_Check_Pause(void);
+void                G_Scrim_Remove_Player_From_Rosters(namelog_t *namelog,
+  qboolean force_ip);
+void                G_Scrim_Remove_Player_From_Rosters_By_ID(size_t roster_id);
+qboolean            G_Scrim_Add_Player_To_Roster(
+  gclient_t *client, scrim_team_t scrim_team, char *err, int err_len);
+qboolean G_Scrim_Add_Namelog_To_Roster(
+  namelog_t *namelog, scrim_team_t scrim_team, char *err, int err_len);
+scrim_team_t        G_Scrim_Find_Player_In_Rosters(gclient_t *client,
+  int *roster_index);
+scrim_team_member_t *G_Scrim_Roster_Member_From_String(
+  char *s, scrim_team_t *scrim_team, char *err, int len);
+void                G_Scrim_Player_Netname_Updated(gclient_t *client);
+void                G_Scrim_Player_Set_Registered_Name(const char *guid,
+  const char *name);
+void                G_Scrim_Player_Refresh_Registered_Names( void );
+
+//
 // g_main.c
 //
-// g_suddenDeathMode settings
-typedef enum sdmode_s {
-  SDMODE_BP = 0, //disallows the building of any buildable that costs bp
-  SDMODE_NO_BUILD = 1, //disallows all building without exception
-  SDMODE_SELECTIVE = 2, //disallow building spawns and defensive buildables,
-                        //allow rebuilding of other types of buildables only if
-                        //it has been built prior to sd, and apply the unique requirement
-  SDMODE_NO_DECON = 3 //like SDMODE_BP, but also disallows decon/mark of all buildables.
-} sdmode_t;
-void ScoreboardMessage( gentity_t *client );
-void MoveClientToIntermission( gentity_t *client );
-void G_MapConfigs( const char *mapname );
-void CalculateRanks( void );
-void FindIntermissionPoint( void );
-void G_CountSpawns( void );
-void G_RunThink( gentity_t *ent );
-void G_AdminMessage( gentity_t *ent, const char *string );
-void QDECL G_LogPrintf( const char *fmt, ... ) __attribute__ ((format (printf, 1, 2)));
-void SendScoreboardMessageToAllClients( void );
-void G_LevelRestart( qboolean stopWarmup );
-void G_LevelReady( void );
-void G_Vote( gentity_t *ent, team_t team, qboolean voting );
-void G_ExecuteVote( team_t team );
-void G_EndVote( team_t team, qboolean cancel );
-void G_CheckVote( team_t team );
-void LogExit( const char *string );
-int  G_TimeTilSuddenDeath( void );
-char *G_SuddenDeathModeString( void );
+void     ScoreboardMessage( gentity_t *client );
+void     MoveClientToIntermission( gentity_t *client );
+void     G_MapConfigs( const char *mapname );
+void     CalculateRanks( qboolean check_exit_rules );
+void     FindIntermissionPoint( void );
+void     G_CountSpawns( void );
+void     G_RunThink( gentity_t *ent );
+void     G_AdminMessage( gentity_t *ent, const char *string );
+void     QDECL G_LogPrintf( const char *fmt, ... ) __attribute__ ((format (printf, 1, 2)));
+void     SendScoreboardMessageToAllClients( void );
+int      G_Time_Limit(void);
+void     G_LevelRestart( qboolean stopWarmup );
+void     G_LevelReady( void );
+void     G_Vote( gentity_t *ent, team_t team, qboolean voting );
+void     G_ExecuteVote( team_t team );
+void     G_EndVote( team_t team, qboolean cancel );
+void     G_CheckVote( team_t team );
+void     LogExit( const char *string );
+int      G_TimeTilSuddenDeath( void );
+sdmode_t G_SD_Mode(void);
+char     *G_SuddenDeathModeString( void );
 
 //
 // g_client.c
@@ -1566,6 +1597,11 @@ extern  vmCvar_t  g_extendVotesCount;
 extern  vmCvar_t  g_suddenDeathTime;
 extern  vmCvar_t  g_suddenDeathMode;
 
+extern  vmCvar_t  g_allowScrims;
+extern  vmCvar_t  g_scrimMaxPauseTime;
+
+#define IS_SCRIM  (g_allowScrims.integer && level.scrim.mode)
+
 extern  vmCvar_t  g_doWarmup;
 extern  vmCvar_t  g_warmupTimers;
 extern  vmCvar_t  g_warmup;
@@ -1582,10 +1618,10 @@ extern  vmCvar_t  g_warmupBlockEnemyBuilding;
 extern  vmCvar_t  g_warmupFriendlyBuildableFire;
 extern  vmCvar_t  g_nextMapStartedMatchWhenEmptyTeams;
 
+#define IS_WARMUP  ( g_doWarmup.integer && g_warmup.integer )
+
 extern  vmCvar_t   g_damageProtection;
 extern  vmCvar_t   g_targetProtection;
-
-#define IS_WARMUP  ( g_doWarmup.integer && g_warmup.integer )
 
 extern  vmCvar_t  g_humanStaminaMode; // when set to 0, human stamina doesn't drain
 extern  vmCvar_t  g_friendlyFire;
@@ -1595,6 +1631,7 @@ extern  vmCvar_t  g_dretchPunt;
 extern  vmCvar_t  g_logPrivateMessages;
 extern  vmCvar_t  g_password;
 extern  vmCvar_t  g_needpass;
+extern  vmCvar_t  g_autoGhost;
 extern  vmCvar_t  g_gravity;
 extern  vmCvar_t  g_speed;
 extern  vmCvar_t  g_knockback;
@@ -1683,6 +1720,7 @@ extern  vmCvar_t  g_newbieNamePrefix;
 extern  vmCvar_t  g_admin;
 extern  vmCvar_t  g_adminTempBan;
 extern  vmCvar_t  g_adminMaxBan;
+extern  vmCvar_t  g_adminTempSpec;
 
 extern	vmCvar_t  g_playMapEnable;
 extern  vmCvar_t  g_playMapPoolConfig;
@@ -1712,6 +1750,7 @@ void      Cbuf_ExecuteText( int exec_when, const char *text );
 void      Cvar_Register( vmCvar_t *cvar, const char *var_name, const char *value, int flags );
 void      Cvar_Update( vmCvar_t *cvar );
 void      Cvar_SetSafe( const char *var_name, const char *value );
+void 	    Cvar_ForceReset(const char *var_name);
 int       Cvar_VariableIntegerValue( const char *var_name );
 void      Cvar_VariableStringBuffer( const char *var_name, char *buffer, int bufsize );
 void      SV_LocateGameData( gentity_t *gEnts, int numGEntities, int sizeofGEntity_t,
@@ -1722,6 +1761,11 @@ void      SV_SendClientGameState2( int clientNum );
 void      SV_PlayMap_Save_Queue_Entry( playMap_t pm, int index );
 void      SV_PlayMap_Clear_Saved_Queue( int default_flags );
 playMap_t SV_PlayMap_Get_Queue_Entry( int index );
+void      SV_Scrim_Init(void);
+void      SV_Scrim_Save(pers_scrim_t *scrim_input);
+void      SV_Scrim_Load(pers_scrim_t *scrim_input);
+size_t    SV_Scrim_Get_New_Roster_ID(void);
+size_t    SV_Scrim_Get_Last_Roster_ID(void);
 void      SV_SetConfigstring( int num, const char *string );
 void      SV_GetConfigstring( int num, char *buffer, int bufferSize );
 void      SV_SetConfigstringRestrictions( int num, const clientList_t *clientList );

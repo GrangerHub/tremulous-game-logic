@@ -83,6 +83,684 @@ playMap_t SV_PlayMap_Get_Queue_Entry( int index ) {
 	return playMap[index];
 }
 
+static size_t roster_id = 0;
+static pers_scrim_t scrim;
+static const pers_scrim_t scrim_defaults =
+{
+	0,           //int                    mode;
+	0,           //int                    win_condition;
+	qtrue,       //qboolean               timed_income;
+	2,           //int                    sudden_death_mode;
+	25,          //int                    sudden_death_time;
+	35,          //int                    time_limit;
+	{            //pers_scrim_team_info_t team[];
+		{            //pers_scrim_team_info_t team[0];
+			"",          //char   name[MAX_NAME_LENGTH];
+			0,           //int    current_team;
+			qfalse,      //qboolean has_captain;
+			"",          //char     captain_guid[ 33 ];
+			0,           //int    wins;
+			0,           //int    losses;
+			0,           //int    draws;
+			{              //scrim_team_roster_t roster;
+				{              //scrim_team_member_t members[];
+					{              //scrim_team_member_t members[0];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[1];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[2];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[3];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[4];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[5];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[6];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[7];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[8];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[9];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[10];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[11];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[12];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[13];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[14];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[15];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[16];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[17];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[18];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[19];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[20];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[21];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[22];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[23];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[24];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[25];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[26];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[27];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[28];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[29];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[30];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[31];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[32];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[33];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[34];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[35];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[36];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[37];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[38];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[39];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[40];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[41];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[42];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[43];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[44];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[45];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[46];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[47];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[48];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[49];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[50];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[51];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[52];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[53];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[54];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[55];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[56];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[57];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[58];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[59];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[60];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[61];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[62];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[63];
+						.inuse = qfalse //qboolean inuse
+					}
+				}
+			}
+		},
+		{            //pers_scrim_team_info_t team[1];
+			"Red",       //char   name[MAX_NAME_LENGTH];
+			1,           //int    current_team;
+			qfalse,      //qboolean has_captain;
+			"",          //char     captain_guid[ 33 ];
+			0,           //int    wins;
+			0,           //int    losses;
+			0,           //int    draws;
+			{              //scrim_team_roster_t roster;
+				{              //scrim_team_member_t members[];
+					{              //scrim_team_member_t members[0];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[1];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[2];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[3];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[4];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[5];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[6];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[7];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[8];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[9];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[10];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[11];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[12];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[13];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[14];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[15];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[16];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[17];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[18];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[19];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[20];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[21];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[22];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[23];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[24];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[25];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[26];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[27];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[28];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[29];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[30];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[31];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[32];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[33];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[34];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[35];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[36];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[37];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[38];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[39];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[40];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[41];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[42];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[43];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[44];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[45];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[46];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[47];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[48];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[49];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[50];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[51];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[52];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[53];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[54];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[55];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[56];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[57];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[58];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[59];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[60];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[61];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[62];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[63];
+						.inuse = qfalse //qboolean inuse
+					}
+				}
+			}
+		},
+		{            //pers_scrim_team_info_t team[2];
+			"Blue",      //char   name[MAX_NAME_LENGTH];
+			2,           //int    current_team;
+			qfalse,      //qboolean has_captain;
+			"",          //char     captain_guid[ 33 ];
+			0,           //int    wins;
+			0,           //int    losses;
+			0,           //int    draws;
+			{              //scrim_team_roster_t roster;
+				{              //scrim_team_member_t members[];
+					{              //scrim_team_member_t members[0];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[1];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[2];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[3];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[4];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[5];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[6];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[7];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[8];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[9];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[10];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[11];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[12];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[13];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[14];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[15];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[16];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[17];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[18];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[19];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[20];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[21];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[22];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[23];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[24];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[25];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[26];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[27];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[28];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[29];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[30];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[31];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[32];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[33];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[34];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[35];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[36];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[37];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[38];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[39];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[40];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[41];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[42];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[43];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[44];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[45];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[46];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[47];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[48];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[49];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[50];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[51];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[52];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[53];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[54];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[55];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[56];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[57];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[58];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[59];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[60];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[61];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[62];
+						.inuse = qfalse //qboolean inuse
+					},
+					{              //scrim_team_member_t members[63];
+						.inuse = qfalse //qboolean inuse
+					}
+				}
+			}
+		},
+	},
+	0,           //int                    previous_round_win;
+	0,           //int                    rounds_completed;
+	5,           //int                    max_rounds;
+};
+
+/*
+===============
+SV_Scrim_Init
+===============
+*/
+void SV_Scrim_Init(void) {
+	scrim = scrim_defaults;
+	roster_id = 0;
+}
+
+/*
+===============
+SV_Scrim_Save
+===============
+*/
+void SV_Scrim_Save(pers_scrim_t *scrim_input) {
+	scrim = *scrim_input;
+}
+
+/*
+===============
+SV_Scrim_Load
+===============
+*/
+void SV_Scrim_Load(pers_scrim_t *scrim_input) {
+	*scrim_input = scrim;
+}
+
+/*
+===============
+SV_Scrim_Get_New_Roster_ID
+===============
+*/
+size_t SV_Scrim_Get_New_Roster_ID(void) {
+	return (roster_id++);
+}
+
+/*
+===============
+SV_Scrim_Get_Last_Roster_ID
+===============
+*/
+size_t SV_Scrim_Get_Last_Roster_ID(void) {
+	return roster_id;
+}
+
 /*
 ===============
 SV_SendConfigstring
@@ -817,6 +1495,8 @@ void SV_Init (void)
 	SV_AddOperatorCommands ();
 
 	SV_PlayMap_Clear_Saved_Queue(0);
+
+	SV_Scrim_Init( );
 
 	// serverinfo vars
 	Cvar_Get ("timelimit", "0", CVAR_SERVERINFO);

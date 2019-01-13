@@ -1597,6 +1597,192 @@ static void CG_DrawFollow( rectDef_t *rect, float text_x, float text_y,
 
 /*
 ==================
+CG_DrawScrimSettings
+==================
+*/
+static void CG_DrawScrimSettings( rectDef_t *rect, float text_x, float text_y,
+    vec4_t color, float scale, int textalign, int textvalign, int textStyle )
+{
+  char  *settings;
+  char  *sd_mode;
+  float tx, ty;
+
+  switch(cgs.scrim.sudden_death_mode) {
+    case SDMODE_BP:
+      sd_mode = "Build Point";
+      break;
+
+    case SDMODE_NO_BUILD:
+      sd_mode = "No Build";
+      break;
+
+    case SDMODE_SELECTIVE:
+      sd_mode = "Selective";
+      break;
+
+    case SDMODE_NO_DECON:
+      sd_mode = "No Deconstruct";
+      break;
+  }
+
+  if(cgs.scrim.time_limit) {
+    if(cgs.scrim.sudden_death_time) {
+      settings = 
+        va(
+          "Sudden Death Mode: %s | Sudden Death Time: %i | Time Limit: %i",
+          sd_mode, cgs.scrim.sudden_death_time, cgs.scrim.time_limit);
+    } else {
+      settings = 
+        va(
+          "Sudden Death: disabled | Time Limit: %i", cgs.scrim.time_limit);
+    }
+  } else {
+    if(cgs.scrim.sudden_death_time) {
+      settings = 
+        va(
+          "Sudden Death Mode: %s | Sudden Death Time: %i | Time Limit: unlimited",
+          sd_mode, cgs.scrim.sudden_death_time);
+    } else {
+      settings = "Sudden Death: disabled | Time Limit: unlimited";
+    }
+  }
+
+  CG_AlignText( rect, settings, scale, 0.0f, 0.0f, textalign, textvalign, &tx, &ty );
+  UI_Text_Paint( text_x + tx, text_y + ty, scale, color, settings, 0, 0, textStyle );
+}
+
+/*
+==================
+CG_DrawScrimWinCondition
+==================
+*/
+static void CG_DrawScrimWinCondition( rectDef_t *rect, float text_x, float text_y,
+    vec4_t color, float scale, int textalign, int textvalign, int textStyle )
+{
+  char  *win_condition;
+  float tx, ty;
+
+  switch(cgs.scrim.win_condition) {
+    case SCRIM_WIN_CONDITION_DEFAULT:
+      win_condition = "Default; first team to win 2 rounds in a row, round draws are ignored";
+      break;
+
+    case SCRIM_WIN_CONDITION_SHORT:
+      win_condition = "Short; out of 2 rounds, the team that wins at least 1 round and loses no round";
+  }
+
+  win_condition = va("Scrim Victory Condition: %s", win_condition);
+
+  CG_AlignText( rect, win_condition, scale, 0.0f, 0.0f, textalign, textvalign, &tx, &ty );
+  UI_Text_Paint( text_x + tx, text_y + ty, scale, color, win_condition, 0, 0, textStyle );
+}
+
+/*
+==================
+CG_DrawScrimStatus
+==================
+*/
+static void CG_DrawScrimStatus( rectDef_t *rect, float text_x, float text_y,
+    vec4_t color, float scale, int textalign, int textvalign, int textStyle )
+{
+  char  *status;
+  char  *scrim_mode;
+  float tx, ty;
+
+  switch(cgs.scrim.mode) {
+    case SCRIM_MODE_OFF:
+      scrim_mode = "Off";
+      break;
+
+    case SCRIM_MODE_SETUP:
+      scrim_mode = "Set up";
+      break;
+
+    case SCRIM_MODE_STARTED:
+      scrim_mode = "Started";
+      break;
+
+    case SCRIM_MODE_PAUSED:
+      scrim_mode = "Time out";
+      break;
+  }
+
+  if(cgs.scrim.previous_round_win == SCRIM_TEAM_NONE) {
+    status = va(
+      "Scrim Mode: %s | Round: %i/%i",
+      scrim_mode,
+      cgs.scrim. mode == SCRIM_MODE_SETUP ? 0 : cgs.scrim.rounds_completed + 1,
+      cgs.scrim.max_rounds);
+  } else {
+    status = va(
+      "Scrim Mode: %s | Round: %i/%i | Previous Round Win was by: %s^7",
+      scrim_mode,
+      cg.intermissionStarted ? cgs.scrim.rounds_completed : cgs.scrim.rounds_completed + 1,
+      cgs.scrim.max_rounds,
+      cgs.scrim.team[cgs.scrim.previous_round_win].name);
+  }
+
+  CG_AlignText( rect, status, scale, 0.0f, 0.0f, textalign, textvalign, &tx, &ty );
+  UI_Text_Paint( text_x + tx, text_y + ty, scale, color, status, 0, 0, textStyle );
+}
+
+/*
+==================
+CG_DrawScrimTeamStatus
+==================
+*/
+static void CG_DrawScrimTeamStatus( rectDef_t *rect, team_t team, float text_x, float text_y,
+    vec4_t color, float scale, int textalign, int textvalign, int textStyle )
+{
+  char  stats[ MAX_TOKEN_CHARS ];
+  float tx, ty;
+  scrim_team_t scrim_team;
+
+  stats[ 0 ] = '\0';
+
+  for(scrim_team = 0; scrim_team < NUM_SCRIM_TEAMS; scrim_team++) {
+    if(cgs.scrim.team[scrim_team].current_team != team) {
+      continue;
+    }
+
+    Com_sprintf(
+      stats, MAX_TOKEN_CHARS,
+      "Rounds Won: %i | Rounds Lost: %i | Rounds Drawn: %i",
+      cgs.scrim.team[scrim_team].wins,
+      cgs.scrim.team[scrim_team].losses,
+      cgs.scrim.team[scrim_team].draws);
+  }
+
+  CG_AlignText( rect, stats, scale, 0.0f, 0.0f, textalign, textvalign, &tx, &ty );
+  UI_Text_Paint( text_x + tx, text_y + ty, scale, color, stats, 0, 0, textStyle );
+}
+
+/*
+==================
+CG_DrawScrimTeamLabel
+==================
+*/
+static void CG_DrawScrimTeamLabel( rectDef_t *rect, team_t team, float text_x, float text_y,
+    vec4_t color, float scale, int textalign, int textvalign, int textStyle )
+{
+  char  *name;
+  float tx, ty;
+  scrim_team_t scrim_team;
+
+  for(scrim_team = 0; scrim_team < NUM_SCRIM_TEAMS; scrim_team++) {
+    if(cgs.scrim.team[scrim_team].current_team != team) {
+      continue;
+    }
+
+    name = cgs.scrim.team[scrim_team].name;
+  }
+
+  CG_AlignText( rect, name, scale, 0.0f, 0.0f, textalign, textvalign, &tx, &ty );
+  UI_Text_Paint( text_x + tx, text_y + ty, scale, color, name, 0, 0, textStyle );
+}
+
+/*
+==================
 CG_DrawTeamLabel
 ==================
 */
@@ -1914,6 +2100,10 @@ static int QDECL SortScore( const void *a, const void *b )
   int na = *(int *)a;
   int nb = *(int *)b;
 
+  if(cgs.clientinfo[ nb ].rank != cgs.clientinfo[ na ].rank) {
+    return( cgs.clientinfo[ nb ].rank - cgs.clientinfo[ na ].rank );
+  }
+
   return( cgs.clientinfo[ nb ].score - cgs.clientinfo[ na ].score );
 }
 
@@ -1922,6 +2112,10 @@ static int QDECL SortWeaponClass( const void *a, const void *b )
   int out;
   clientInfo_t *ca = cgs.clientinfo + *(int *)a;
   clientInfo_t *cb = cgs.clientinfo + *(int *)b;
+
+  if(cb->rank != ca->rank) {
+    return( cb->rank - ca->rank );
+  }
 
   out = cb->curWeaponClass - ca->curWeaponClass;
 
@@ -2944,34 +3138,62 @@ static void CG_DrawWarmup( int ownerDraw, rectDef_t *rect, float textScale, int 
   if( cg.intermissionStarted )
     return;
 
-  if( !cgs.warmup )
-    return;
+  if( !cgs.warmup ) {
+    if(
+      IS_SCRIM &&
+      (
+        (cg.snap && (cg.snap->ps.pm_flags & PMF_FOLLOW)) ||
+        cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_NONE) &&
+      ownerDraw == CG_WARMUP) {
+      //always indicate to specfators if a scrim is in process
+      Com_sprintf( warmupText, sizeof( warmupText ), "SCRIM" );
+    } else {
+      return;
+    }
+  }
+  else {
+    switch( ownerDraw )
+    {
+      case CG_WARMUP:
+        if(IS_SCRIM) {
+          switch(cgs.scrim.mode) {
+            case SCRIM_MODE_SETUP:
+              Com_sprintf( warmupText, sizeof( warmupText ), "SCRIM SETUP" );
+              break;
 
-  switch( ownerDraw )
-  {
-    case CG_WARMUP:
-      Com_sprintf( warmupText, sizeof( warmupText ), "PRE-GAME WARMUP" );
-      break;
-    case CG_WARMUP_PLAYER_READY:
-      if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_NONE )
-        return;
-      Com_sprintf( warmupText, sizeof( warmupText ), "( You Are %sReady )",
-          (cg.predictedPlayerState.stats[ STAT_FLAGS ] & SFL_READY ) ? "" : "Not " );
-      break;
-    case CG_WARMUP_ALIENS_READY_HDR:
-      Com_sprintf( warmupText, sizeof( warmupText ), "Aliens" );
-      break;
-    case CG_WARMUP_ALIENS_READY:
-      Com_sprintf( warmupText, sizeof( warmupText ), "%d/%d Ready",
-          cgs.numAliensReady, cgs.numAliens );
-      break;
-    case CG_WARMUP_HUMANS_READY_HDR:
-      Com_sprintf( warmupText, sizeof( warmupText ), "Humans" );
-      break;
-    case CG_WARMUP_HUMANS_READY:
-      Com_sprintf( warmupText, sizeof( warmupText ), "%d/%d Ready",
-          cgs.numHumansReady, cgs.numHumans );
-      break;
+            case SCRIM_MODE_PAUSED:
+              Com_sprintf( warmupText, sizeof( warmupText ), "SCRIM TIME OUT" );;
+              break;
+
+            default:
+              Com_sprintf( warmupText, sizeof( warmupText ), "SCRIM WARMUP" );
+              break;
+          }
+        } else {
+          Com_sprintf( warmupText, sizeof( warmupText ), "PRE-GAME WARMUP" );
+        }
+        break;
+      case CG_WARMUP_PLAYER_READY:
+        if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_NONE )
+          return;
+        Com_sprintf( warmupText, sizeof( warmupText ), "( You Are %sReady )",
+            (cg.predictedPlayerState.stats[ STAT_FLAGS ] & SFL_READY ) ? "" : "Not " );
+        break;
+      case CG_WARMUP_ALIENS_READY_HDR:
+        Com_sprintf( warmupText, sizeof( warmupText ), "Aliens" );
+        break;
+      case CG_WARMUP_ALIENS_READY:
+        Com_sprintf( warmupText, sizeof( warmupText ), "%d/%d Ready",
+            cgs.numAliensReady, cgs.numAliens );
+        break;
+      case CG_WARMUP_HUMANS_READY_HDR:
+        Com_sprintf( warmupText, sizeof( warmupText ), "Humans" );
+        break;
+      case CG_WARMUP_HUMANS_READY:
+        Com_sprintf( warmupText, sizeof( warmupText ), "%d/%d Ready",
+            cgs.numHumansReady, cgs.numHumans );
+        break;
+    }
   }
 
   CG_AlignText( rect, warmupText, textScale, 0.0f, 0.0f, textAlign, VALIGN_CENTER, &tx, &ty );
@@ -3155,6 +3377,27 @@ void CG_OwnerDraw( float x, float y, float w, float h, float text_x,
       break;
     case CG_STAGE_REPORT_TEXT:
       CG_DrawStageReport( &rect, text_x, text_y, foreColor, scale, textalign, textvalign, textStyle );
+      break;
+    case CG_SCRIM_SETTINGS:
+      CG_DrawScrimSettings( &rect, text_x, text_y, foreColor, scale, textalign, textvalign, textStyle );
+      break;
+    case CG_SCRIM_WIN_CONDITION:
+      CG_DrawScrimWinCondition( &rect, text_x, text_y, foreColor, scale, textalign, textvalign, textStyle );
+      break;
+    case CG_SCRIM_STATUS:
+      CG_DrawScrimStatus( &rect, text_x, text_y, foreColor, scale, textalign, textvalign, textStyle );
+      break;
+    case CG_ALIENS_SCRIM_TEAM_STATUS:
+      CG_DrawScrimTeamStatus( &rect, TEAM_ALIENS, text_x, text_y, foreColor, scale, textalign, textvalign, textStyle );
+      break;
+    case CG_HUMANS_SCRIM_TEAM_STATUS:
+      CG_DrawScrimTeamStatus( &rect, TEAM_HUMANS, text_x, text_y, foreColor, scale, textalign, textvalign, textStyle );
+      break;
+    case CG_ALIENS_SCRIM_TEAM_LABEL:
+      CG_DrawScrimTeamLabel( &rect, TEAM_ALIENS, text_x, text_y, foreColor, scale, textalign, textvalign, textStyle );
+      break;
+    case CG_HUMANS_SCRIM_TEAM_LABEL:
+      CG_DrawScrimTeamLabel( &rect, TEAM_HUMANS, text_x, text_y, foreColor, scale, textalign, textvalign, textStyle );
       break;
     case CG_ALIENS_SCORE_LABEL:
       CG_DrawTeamLabel( &rect, TEAM_ALIENS, text_x, text_y, foreColor, scale, textalign, textvalign, textStyle );

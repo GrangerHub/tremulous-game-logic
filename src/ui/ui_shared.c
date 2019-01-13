@@ -29,6 +29,12 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define SCROLL_TIME_ADJUSTOFFSET  40
 #define SCROLL_TIME_FLOOR         20
 
+static qboolean ui_shared_is_scrim;
+
+void UI_Shared_Set_Is_Scrim(qboolean scrim_is_on) {
+  ui_shared_is_scrim = scrim_is_on;
+}
+
 typedef struct scrollInfo_s
 {
   int nextScrollTime;
@@ -120,7 +126,7 @@ void UI_RemoveCaptureFunc( void )
 }
 
 #ifdef CGAME
-#define MEM_POOL_SIZE  128 * 1024
+#define MEM_POOL_SIZE  256 * 1024
 #else
 #define MEM_POOL_SIZE  1024 * 1024
 #endif
@@ -5950,6 +5956,16 @@ void Item_Paint( itemDef_t *item )
   {
   }
 
+  if( item->window.flags & WINDOW_SCRIM && !ui_shared_is_scrim )
+  {
+    return;
+  }
+
+  if( item->window.flags & WINDOW_NOSCRIM && ui_shared_is_scrim ) 
+  {
+    return;
+  }
+
   if( !( item->window.flags & WINDOW_VISIBLE ) )
     return;
 
@@ -6610,6 +6626,20 @@ qboolean ItemParse_style( itemDef_t *item, int handle )
 qboolean ItemParse_decoration( itemDef_t *item, int handle )
 {
   item->window.flags |= WINDOW_DECORATION;
+  return qtrue;
+}
+
+// for scrims only
+qboolean ItemParse_scrim( itemDef_t *item, int handle )
+{
+  item->window.flags |= WINDOW_SCRIM;
+  return qtrue;
+}
+
+// for non-scrims only
+qboolean ItemParse_noscrim( itemDef_t *item, int handle )
+{
+  item->window.flags |= WINDOW_NOSCRIM;
   return qtrue;
 }
 
@@ -7298,6 +7328,8 @@ keywordHash_t itemParseKeywords[] = {
   {"aspectBias", ItemParse_aspectBias, TYPE_ANY},
   {"style", ItemParse_style, TYPE_ANY},
   {"decoration", ItemParse_decoration, TYPE_ANY},
+  {"scrim", ItemParse_scrim, TYPE_ANY},
+  {"noscrim", ItemParse_noscrim, TYPE_ANY},
   {"notselectable", ItemParse_notselectable, TYPE_LIST},
   {"noscrollbar", ItemParse_noscrollbar, TYPE_LIST},
   {"resetonfeederchange", ItemParse_resetonfeederchange, TYPE_LIST},

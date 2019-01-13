@@ -400,6 +400,12 @@ void      SV_PlayMap_Save_Queue_Entry( playMap_t pm, int index );
 void      SV_PlayMap_Clear_Saved_Queue( int default_flags );
 playMap_t SV_PlayMap_Get_Queue_Entry( int index );
 
+void      SV_Scrim_Init(void);
+void      SV_Scrim_Save(pers_scrim_t *scrim_input);
+void      SV_Scrim_Load(pers_scrim_t *scrim_input);
+size_t    SV_Scrim_Get_New_Roster_ID(void);
+size_t    SV_Scrim_Get_Last_Roster_ID(void);
+
 void      SV_SetConfigstring( int index, const char *val );
 void      SV_GetConfigstring( int index, char *buffer, int bufferSize );
 void      SV_SetConfigstringRestrictions(int index, const clientList_t* clientList);

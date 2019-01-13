@@ -80,6 +80,8 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define TEAM_OVERLAY_MAXNAME_WIDTH  12
 #define TEAM_OVERLAY_MAXLOCATION_WIDTH  16
 
+#define IS_SCRIM (cgs.allowScrims && cgs.scrim.mode)
+
 typedef enum
 {
   FOOTSTEP_NORMAL,
@@ -754,6 +756,7 @@ typedef struct
   team_t      team;
 
   int         score;                      // updated by score servercmds
+  rank_t      rank;                       // used by scrims
   int         location;                   // location index for team mode
   int         health;                     // you only get this info about your teammates
   int         upgrade;
@@ -1473,6 +1476,9 @@ typedef struct
   float         percentHumansReady;     // Percentage of human players ready
   int           numHumansReady;         // Number of human players ready
   int           numHumans;              // Total number of players in humans team
+
+  qboolean      allowScrims;
+  scrim_t       scrim;
 
   qboolean      devMode;
 

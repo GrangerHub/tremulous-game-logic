@@ -97,6 +97,22 @@ typedef struct {
 } sharedEntity_t;
 
 
+#define ADDRLEN 16
+/*
+addr_ts are passed as "arg" to admin_search for IP address matching
+admin_search prints (char *)arg, so the stringified address needs to be first
+*/
+typedef struct
+{
+  char str[ 44 ];
+  enum
+  {
+    IPv4,
+    IPv6
+  } type;
+  byte addr[ ADDRLEN ];
+  int mask;
+} addr_t;
 
 // Database
 typedef enum {
@@ -128,5 +144,49 @@ typedef struct playMap_s
   //playMapFlag_t plusFlags[ PLAYMAP_NUM_FLAGS ];
   //playMapFlag_t minusFlags[ PLAYMAP_NUM_FLAGS ];
 } playMap_t;
+
+//scrim
+typedef struct scrim_team_member_s
+{
+  qboolean inuse;
+  size_t   roster_id;
+  qboolean standby;
+  char     netname[ MAX_NAME_LENGTH ];
+  char     registered_name[ MAX_NAME_LENGTH ];
+  addr_t   ip;
+  char     guid[ 33 ];
+  qboolean guidless;
+} scrim_team_member_t;
+
+typedef struct scrim_team_roster_s
+{
+  scrim_team_member_t members[64];
+} scrim_team_roster_t;
+
+typedef struct pers_scrim_team_info_s
+{
+  char                name[MAX_NAME_LENGTH];
+  int                 current_team;
+  qboolean            has_captain;
+  char                captain_guid[ 33 ];
+  int                 wins;
+  int                 losses;
+  int                 draws;
+  scrim_team_roster_t roster;
+} pers_scrim_team_info_t;
+
+typedef struct pers_scrim_s
+{
+  int                    mode;
+  int                    win_condition;
+  qboolean               timed_income;
+  int                    sudden_death_mode;
+  int                    sudden_death_time;
+  int                    time_limit;
+  pers_scrim_team_info_t team[3];
+  int                    previous_round_win;
+  int                    rounds_completed;
+  int                    max_rounds;
+} pers_scrim_t;
 
 #endif	// __G_PUBLIC_H
