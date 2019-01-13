@@ -47,11 +47,12 @@ void G_WriteClientSessionData( gclient_t *client )
   const char  *s;
   const char  *var;
 
-  s = va( "%i %i %i %i %i %s",
+  s = va( "%i %i %i %i %i %i %s",
     client->sess.spectatorTime,
     client->sess.spectatorState,
     client->sess.spectatorClient,
     client->sess.restartTeam,
+    client->sess.rank,
     ( client->sess.readyToPlay ? 1 : 0 ),
     Com_ClientListString( &client->sess.ignoreList )
     );
@@ -74,23 +75,26 @@ void G_ReadSessionData( gclient_t *client )
   const char  *var;
   int         spectatorState;
   int         restartTeam;
+  int         rank;
   char        ignorelist[ 17 ];
   int         readyToPlay;
 
   var = va( "session%i", (int)( client - level.clients ) );
   Cvar_VariableStringBuffer( var, s, sizeof(s) );
 
-  sscanf( s, "%i %i %i %i %i %16s",
+  sscanf( s, "%i %i %i %i %i %i %16s",
     &client->sess.spectatorTime,
     &spectatorState,
     &client->sess.spectatorClient,
     &restartTeam,
+    &rank,
     &readyToPlay,
     ignorelist
     );
 
   client->sess.spectatorState = (spectatorState_t)spectatorState;
   client->sess.restartTeam = (team_t)restartTeam;
+  client->sess.rank = (rank_t)rank;
   Com_ClientListParse( &client->sess.ignoreList, ignorelist );
   if( readyToPlay )
     client->sess.readyToPlay = qtrue;
@@ -130,6 +134,7 @@ void G_InitSessionData( gclient_t *client, char *userinfo )
   }
 
   sess->restartTeam = TEAM_NONE;
+  sess->rank = RANK_NONE;
   sess->spectatorState = SPECTATOR_FREE;
   sess->spectatorTime = level.time;
   sess->spectatorClient = -1;

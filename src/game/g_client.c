@@ -612,7 +612,7 @@ void respawn( gentity_t *ent )
 
   // Clients can't respawn - they must go through the class cmd
   ent->client->pers.classSelection = PCL_NONE;
-  ClientSpawn( ent, NULL, NULL, NULL );
+  ClientSpawn( ent, NULL, NULL, NULL, qfalse );
 
   // stop any following clients that don't have sticky spec on
   for( i = 0; i < level.maxclients; i++ )
@@ -996,6 +996,11 @@ Q_EXPORT char *ClientUserinfoChanged( int clientNum, qboolean forceName )
                    DECOLOR_OFF, client->pers.netname, DECOLOR_ON );
       }
     }
+
+    if(IS_SCRIM) {
+      G_Scrim_Player_Netname_Updated(client);
+    }
+
     G_namelog_update_name( client );
   }
 
@@ -1138,8 +1143,8 @@ Q_EXPORT char *ClientUserinfoChanged( int clientNum, qboolean forceName )
   // print scoreboards, display models, and play custom sounds
 
   Com_sprintf( userinfo, sizeof( userinfo ),
-    "n\\%s\\t\\%i\\model\\%s\\ig\\%16s\\v\\%s\\restart\\%i",
-    client->pers.netname, client->pers.teamSelection, model,
+    "n\\%s\\t\\%i\\rank\\%i\\model\\%s\\ig\\%16s\\v\\%s\\restart\\%i",
+    client->pers.netname, client->pers.teamSelection, client->sess.rank, model,
     Com_ClientListString( &client->sess.ignoreList ),
     client->pers.voice, g_restartingFlags.integer );
 
@@ -1240,6 +1245,22 @@ Q_EXPORT char *ClientConnect( int clientNum, qboolean firstTime )
   if( i < sizeof( client->pers.guid ) - 1 )
     return "Invalid GUID";
 
+  // do autoghost now so that there won't be any name conflicts later on
+  if(g_autoGhost.integer && client->pers.guidless) {
+    for(i = 0; i < MAX_CLIENTS; i++) {
+      if(
+        i != ent - g_entities && g_entities[i].client &&
+        g_entities[i].client->pers.connected != CON_DISCONNECTED &&
+        !g_entities[i].client->pers.guidless &&
+        !g_entities[i].client->pers.localClient &&
+        !Q_stricmp( g_entities[i].client->pers.guid, client->pers.guid ) )
+      {
+        SV_GameSendServerCommand( i, "disconnect \"You may not be connected to this server multiple times\"" );
+        SV_GameDropClient( i, "disconnected" );
+      }
+    }
+  }
+
   client->pers.connected = CON_CONNECTING;
 
   // read or initialize the session data
@@ -1268,16 +1289,40 @@ Q_EXPORT char *ClientConnect( int clientNum, qboolean firstTime )
     G_admin_authlog( ent );
 
   // count current clients and rank for scoreboard
-  CalculateRanks( );
+  CalculateRanks(qtrue);
 
+  if(IS_SCRIM) {
+    int roster_id;
+    scrim_team_t scrim_team = G_Scrim_Find_Player_In_Rosters(client, &roster_id);
 
-  // if this is after !restart keepteams or !restart switchteams, apply said selection
-  if ( client->sess.restartTeam != TEAM_NONE )
-  {
-    G_ChangeTeam( ent, client->sess.restartTeam );
-    client->sess.restartTeam = TEAM_NONE;
-  } else
-    client->sess.readyToPlay = qfalse; // Spectators aren't suppose to have ready states
+    if(scrim_team != SCRIM_TEAM_NONE) {
+      team_t playing_team = level.scrim.team[scrim_team].current_team;
+
+      if(playing_team != TEAM_NONE) {
+        G_ChangeTeam(ent, playing_team);
+        client->sess.restartTeam = TEAM_NONE;
+        if(!IS_WARMUP) {
+          client->sess.readyToPlay = qfalse;
+        }
+      } else {
+        // Spectators aren't suppose to have ready states
+        client->sess.readyToPlay = qfalse;
+      }
+    } else {
+      // Spectators aren't suppose to have ready states
+      client->sess.readyToPlay = qfalse;
+    }
+  } else {
+    // if this is after !restart keepteams or !restart switchteams, apply said selection
+    if(client->sess.restartTeam != TEAM_NONE) {
+      G_ChangeTeam(ent, client->sess.restartTeam);
+      client->sess.restartTeam = TEAM_NONE;
+    } else {
+      // Spectators aren't suppose to have ready states
+      client->sess.readyToPlay = qfalse;
+    }
+  }
+  
 
   client->pers.firstConnection = firstTime;
 
@@ -1337,17 +1382,23 @@ Q_EXPORT void ClientBegin( int clientNum )
   }
 
   // locate ent at a spawn point
-  ClientSpawn( ent, NULL, NULL, NULL );
+  ClientSpawn( ent, NULL, NULL, NULL, qtrue );
 
   if( !( g_restartingFlags.integer &
-         ( RESTART_WARMUP_RESET | RESTART_WARMUP_END ) ) )
-    SV_GameSendServerCommand( -1, va( "print \"%s" S_COLOR_WHITE " entered the game\n\"", client->pers.netname ) );
+         ( RESTART_WARMUP_RESET | RESTART_WARMUP_END | RESTART_SCRIM ) ) ) {
+   SV_GameSendServerCommand( -1, va( "print \"%s" S_COLOR_WHITE " entered the game\n\"", client->pers.netname ) );
+ }
+    
   if( client->pers.firstConnection )
   {
     gentity_t *tent;
 
     tent = G_TempEntity( ent->client->ps.origin, EV_PLAYER_TELEPORT_IN );
     tent->r.svFlags = SVF_BROADCAST; // send to everyone
+
+    if(IS_SCRIM) {
+      G_admin_scrim_status(ent);
+    }
   }
 
   G_namelog_restore( client );
@@ -1355,7 +1406,7 @@ Q_EXPORT void ClientBegin( int clientNum )
   G_LogPrintf( "ClientBegin: %i\n", clientNum );
 
   // count current clients and rank for scoreboard
-  CalculateRanks( );
+  CalculateRanks(qtrue);
 
   // Update player ready states if in warmup
   if( IS_WARMUP )
@@ -1377,7 +1428,7 @@ after the first ClientBegin, and after each respawn
 Initializes all non-persistant parts of playerState
 ============
 */
-void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const vec3_t angles )
+void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const vec3_t angles, qboolean check_exit_rules )
 {
   int                 index;
   vec3_t              spawn_origin, spawn_angles;
@@ -1706,7 +1757,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   }
 
   // must do this here so the number of active clients is calculated
-  CalculateRanks( );
+  CalculateRanks(check_exit_rules);
 
   // run the presend to set anything else
   ClientEndFrame( ent );
@@ -1784,7 +1835,7 @@ Q_EXPORT void ClientDisconnect( int clientNum )
 
   SV_SetConfigstring( CS_PLAYERS + clientNum, "");
 
-  CalculateRanks( );
+  CalculateRanks(qtrue);
 
   // Update player ready states if in warmup
   if( IS_WARMUP )

@@ -1174,6 +1174,8 @@ void UI_Refresh( int realtime )
 
   UI_UpdateCvars();
 
+  UI_Shared_Set_Is_Scrim( UI_GameIsInScrimMode() );
+
   if( Menu_Count() > 0 )
   {
     Menu_UpdateAll( );
@@ -1589,6 +1591,20 @@ static int UI_GameIsInWarmup( void )
   trap_Cvar_VariableStringBuffer( "ui_warmup", buffer, sizeof( buffer ) );
 
   return atoi( buffer );
+}
+
+/*
+===============
+UI_GameIsInScrimMode
+===============
+*/
+qboolean UI_GameIsInScrimMode( void )
+{
+  char    buffer[ MAX_TOKEN_CHARS ];
+
+  trap_Cvar_VariableStringBuffer( "ui_scrim", buffer, sizeof( buffer ) );
+
+  return atoi( buffer ) ? qtrue : qfalse;
 }
 
 /*

@@ -130,6 +130,24 @@ size_t bg_numTeams = ARRAY_LEN( bg_teamList );
 
 static const teamAttributes_t nullTeam = { 0 };
 
+static const rankAttributes_t bg_rankList[ ] =
+{
+  {
+    RANK_NONE,       //rank_t number;
+    "",              //char   *name;
+    ""               //char   *humanName;
+  },
+  {
+    RANK_CAPTAIN,    //rank_t number;
+    "Cpt.",          //char   *name;
+    "Captain"        //char   *humanName;
+  }
+};
+
+size_t bg_numRanks = ARRAY_LEN( bg_rankList );
+
+static const rankAttributes_t nullRank = { 0 };
+
 //
 // XXX This MUST match the order of "buildable_t"!
 //
@@ -6495,6 +6513,17 @@ const teamAttributes_t *BG_Team( team_t team )
 }
 
 /*
+============
+BG_Rank
+============
+*/
+const rankAttributes_t *BG_Rank( rank_t rank )
+{
+  return ( rank < NUM_OF_RANKS ) ?
+    &bg_rankList[ rank ] : &nullRank;
+}
+
+/*
 ================
 BG_CreateRotationMatrix
 ================
@@ -6677,4 +6706,29 @@ void BG_EvaluateBBOXPoint( bboxPoint_t *bboxPoint, vec3_t origin,
 int cmdcmp( const void *a, const void *b )
 {
   return Q_stricmp( (const char *)a, ((dummyCmd_t *)b)->name );
+}
+
+/*
+============
+BG_Scrim_Team_From_Playing_Team
+============
+*/
+scrim_team_t BG_Scrim_Team_From_Playing_Team(scrim_t *scrim, team_t playing_team) {
+  scrim_team_t scrim_team;
+
+  if(playing_team == TEAM_NONE || playing_team >= NUM_TEAMS || playing_team < 0) {
+    return SCRIM_TEAM_NONE;
+  }
+
+  for(scrim_team = 0; scrim_team < NUM_SCRIM_TEAMS; scrim_team++) {
+    if(scrim_team == SCRIM_TEAM_NONE) {
+      continue;
+    }
+
+    if(scrim->team[scrim_team].current_team == playing_team) {
+      return scrim_team;
+    }
+  }
+
+  return SCRIM_TEAM_NONE;
 }

@@ -172,6 +172,69 @@ static void CG_ParseWarmupReady( void )
 
 /*
 ==================
+CG_ParseScrimTeamName
+==================
+*/
+static void CG_ParseScrimTeamName(scrim_team_t scrim_team, const char *conStr) {
+  Q_strncpyz(
+    cgs.scrim.team[scrim_team].name,
+    conStr, sizeof(cgs.scrim.team[scrim_team].name));
+}
+
+/*
+==================
+CG_ParseScrimTeam
+==================
+*/
+static void CG_ParseScrimTeam(scrim_team_t scrim_team, const char *conStr) {
+  int has_captain;
+
+  sscanf(
+    conStr, "%i %i %i %i %i %i",
+    &cgs.scrim.team[scrim_team].current_team,
+    &has_captain,
+    &cgs.scrim.team[scrim_team].captain_num,
+    &cgs.scrim.team[scrim_team].wins,
+    &cgs.scrim.team[scrim_team].losses,
+    &cgs.scrim.team[scrim_team].draws);
+
+  cgs.scrim.team[scrim_team].has_captain = has_captain ? qtrue : qfalse;
+}
+
+/*
+==================
+CG_ParseScrim
+==================
+*/
+static void CG_ParseScrim(const char *conStr) {
+  int allowScims;
+  int scrim_completed;
+
+  sscanf(
+    conStr, "%i %i %i %i %i %i %i %i %i %i %i %i %i",
+    &allowScims,
+    &cgs.scrim.mode,
+    &cgs.scrim.win_condition,
+    &scrim_completed,
+    &cgs.scrim.scrim_winner,
+    &cgs.scrim.scrim_forfeiter,
+    &cgs.scrim.timed_income,
+    &cgs.scrim.sudden_death_mode,
+    &cgs.scrim.sudden_death_time,
+    &cgs.scrim.time_limit,
+    &cgs.scrim.previous_round_win,
+    &cgs.scrim.rounds_completed,
+    &cgs.scrim.max_rounds);
+
+    cgs.allowScrims = allowScims ? qtrue : qfalse;
+    cgs.scrim.scrim_completed = scrim_completed ? qtrue : qfalse;
+
+    trap_Cvar_Set( "ui_scrim", va( "%d", IS_SCRIM ) );
+    UI_Shared_Set_Is_Scrim( IS_SCRIM );
+}
+
+/*
+==================
 CG_ParseCountdown
 ==================
 */
@@ -250,9 +313,10 @@ Called on load to set the initial values from configure strings
 */
 void CG_SetConfigValues( void )
 {
-  const char *alienStages = CG_ConfigString( CS_ALIEN_STAGES );
-  const char *humanStages = CG_ConfigString( CS_HUMAN_STAGES );
-  const char *playersReady = CG_ConfigString( CS_WARMUP_READY );
+  const char   *alienStages = CG_ConfigString( CS_ALIEN_STAGES );
+  const char   *humanStages = CG_ConfigString( CS_HUMAN_STAGES );
+  const char   *playersReady = CG_ConfigString( CS_WARMUP_READY );
+  scrim_team_t scrim_team;
 
   if( alienStages[0] )
   {
@@ -295,6 +359,15 @@ void CG_SetConfigValues( void )
 
   cgs.devMode = atoi( CG_ConfigString( CS_DEVMODE ) );
   trap_Cvar_Set( "ui_devMode", va( "%d", cgs.devMode ) );
+
+  // scrim settings
+  CG_ParseScrim(CG_ConfigString( CS_SCRIM ));
+  for(scrim_team = 0; scrim_team < NUM_SCRIM_TEAMS; scrim_team++) {
+    CG_ParseScrimTeamName(
+      scrim_team, CG_ConfigString( CS_SCRIM_TEAM_NAME + scrim_team ));
+    CG_ParseScrimTeam(
+      scrim_team, CG_ConfigString( CS_SCRIM_TEAM + scrim_team ));
+  }
 }
 
 
@@ -428,6 +501,12 @@ static void CG_ConfigStringModified( void )
     CG_ParseWarmup( );
   else if( num == CS_WARMUP_READY )
     CG_ParseWarmupReady( );
+  else if(num >= CS_SCRIM_TEAM_NAME && num < CS_SCRIM_TEAM_NAME + NUM_SCRIM_TEAMS)
+    CG_ParseScrimTeamName(num - CS_SCRIM_TEAM_NAME, str);
+  else if(num >= CS_SCRIM_TEAM && num < CS_SCRIM_TEAM + NUM_SCRIM_TEAMS)
+    CG_ParseScrimTeam(num - CS_SCRIM_TEAM, str);
+  else if( num == CS_SCRIM )
+    CG_ParseScrim(str);
   else if( num == CS_DEVMODE )
   {
     cgs.devMode = atoi( CG_ConfigString( CS_DEVMODE ) );
@@ -546,7 +625,35 @@ static void CG_ConfigStringModified( void )
       switch ( outcome )
       {
         case MATCHOUTCOME_WON:
-          strcpy( winner, va( "%s win.", BG_Team( winningTeam )->humanName ) );
+          if(IS_SCRIM) {
+            if(cgs.scrim.scrim_forfeiter != SCRIM_TEAM_NONE) {
+              strcpy(
+                winner,
+                va(
+                  "%s forfeited the scrim. Scrim victory goes to %s",
+                  cgs.scrim.team[cgs.scrim.scrim_forfeiter].name,
+                  cgs.scrim.team[cgs.scrim.scrim_winner].name));
+            }else if(cgs.scrim.scrim_completed) {
+              if(cgs.scrim.scrim_winner == SCRIM_TEAM_NONE) {
+                strcpy(
+                  winner,
+                  va(
+                    "%s win the round. The scrim is a draw",
+                    BG_Team( winningTeam )->humanName));
+              } else {
+                strcpy(
+                  winner,
+                  va(
+                    "%s win the round. Scrim victory goes to %s",
+                    BG_Team( winningTeam )->humanName,
+                    cgs.scrim.team[cgs.scrim.scrim_winner].name));
+              }
+            } else {
+              strcpy(winner, va("%s win the round.", BG_Team( winningTeam )->humanName));
+            }
+          } else {
+            strcpy( winner, va( "%s win.", BG_Team( winningTeam )->humanName ) );
+          }
           if( cg_intermissionMusic.integer )
           {
             CG_PlayIntermissionSound( winningTeam, INTMSN_SND_WIN, index );
@@ -554,13 +661,76 @@ static void CG_ConfigStringModified( void )
           break;
 
         case MATCHOUTCOME_EVAC:
-          strcpy( winner, "Evacuation" );
+          if(IS_SCRIM) {
+            if(cgs.scrim.scrim_completed) {
+              if(cgs.scrim.scrim_winner == SCRIM_TEAM_NONE) {
+                strcpy(
+                  winner,
+                  va(
+                    "The round was evacuated. The scrim is a draw"));
+              } else {
+                strcpy(
+                  winner,
+                  va(
+                    "The round was evacuated. Scrim victory goes to %s",
+                    cgs.scrim.team[cgs.scrim.scrim_winner].name));
+              }
+            } else {
+              strcpy(winner, va("The round was evacuated."));
+            }
+          } else {
+            strcpy( winner, "Evacuation" );
+          }
+          if( cg_intermissionMusic.integer )
+            CG_PlayIntermissionSound( team, INTMSN_SND_EVAC, index );
+          break;
+
+        case MATCHOUTCOME_MUTUAL:
+          if(IS_SCRIM) {
+            if(cgs.scrim.scrim_completed) {
+              if(cgs.scrim.scrim_winner == SCRIM_TEAM_NONE) {
+                strcpy(
+                  winner,
+                  va(
+                    "The round underwent mutual destruction. The scrim is a draw"));
+              } else {
+                strcpy(
+                  winner,
+                  va(
+                    "The round underwent mutual destruction. Scrim victory goes to %s",
+                    cgs.scrim.team[cgs.scrim.scrim_winner].name));
+              }
+            } else {
+              strcpy(winner, va("The round underwent mutual destruction."));
+            }
+          } else {
+            strcpy( winner, "Mutual destruction" );
+          }
           if( cg_intermissionMusic.integer )
             CG_PlayIntermissionSound( team, INTMSN_SND_EVAC, index );
           break;
 
         case MATCHOUTCOME_TIME:
-          strcpy( winner, "Stalemate" );
+          if(IS_SCRIM) {
+            if(cgs.scrim.scrim_completed) {
+              if(cgs.scrim.scrim_winner == SCRIM_TEAM_NONE) {
+                strcpy(
+                  winner,
+                  va(
+                    "The round is a stalemate. The scrim is a draw"));
+              } else {
+                strcpy(
+                  winner,
+                  va(
+                    "The round is a stalemate. Scrim victory goes to %s",
+                    cgs.scrim.team[cgs.scrim.scrim_winner].name));
+              }
+            } else {
+              strcpy( winner, "Stalemate" );
+            }
+          } else {
+            strcpy( winner, "Stalemate" );
+          }
           if( cg_intermissionMusic.integer )
             CG_PlayIntermissionSound( team, INTMSN_SND_TIME, index );
           break;
@@ -1620,7 +1790,7 @@ static void CG_PoisonCloud_f( void )
   }
 }
 
-static char   registeredCmds[ 8192 ]; // cmd1\0cmd2\0cmdn\0\0
+static char   registeredCmds[ 16384 ]; // cmd1\0cmd2\0cmdn\0\0
 static size_t gcmdsOffset;
 static void CG_GameCmds_f( void )
 {

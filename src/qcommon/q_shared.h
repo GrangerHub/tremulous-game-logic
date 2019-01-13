@@ -1087,6 +1087,20 @@ typedef struct {
 
 
 /*
+--------------------------------------------------------------------------------
+Flags for map restarts
+*/
+#define  RESTART_WARMUP_RESET 0x00000001 // Warmup is resetting from a "win
+                                         // condition" but isn't ending.
+
+#define  RESTART_WARMUP_END   0x00000002 // Warmup is ending and the match is
+                                         // beginning.
+#define  RESTART_SCRIM        0x00000004 // Map is restarting for a scrim
+/*
+--------------------------------------------------------------------------------
+*/
+
+/*
 ==============================================================
 
 VoIP

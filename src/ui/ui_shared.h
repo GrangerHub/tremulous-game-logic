@@ -65,6 +65,8 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define WINDOW_POPUP          0x00200000  // popup
 #define WINDOW_BACKCOLORSET   0x00400000  // backcolor was explicitly set
 #define WINDOW_TIMEDVISIBLE   0x00800000  // visibility timing ( NOT implemented )
+#define WINDOW_SCRIM          0x01000000  // only visible in scrim mode
+#define WINDOW_NOSCRIM        0x02000000  // not visible in scrim mode
 
 
 // CGAME cursor type bits
@@ -502,6 +504,8 @@ void Menu_Reset( void );
 qboolean Menus_AnyFullScreenVisible( void );
 void  Menus_Activate( menuDef_t *menu );
 qboolean  Menus_ReplaceActive( menuDef_t *menu );
+
+void UI_Shared_Set_Is_Scrim(qboolean scrim_is_on);
 
 displayContextDef_t *Display_GetContext( void );
 void *Display_CaptureItem( int x, int y );

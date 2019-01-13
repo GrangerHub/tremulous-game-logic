@@ -245,6 +245,7 @@ vmCvar_t  ui_currentClass;
 vmCvar_t  ui_carriage;
 vmCvar_t  ui_stages;
 vmCvar_t  ui_warmup;
+vmCvar_t  ui_scrim;
 vmCvar_t  ui_devMode;
 vmCvar_t  ui_dialog;
 vmCvar_t  ui_voteActive;
@@ -405,6 +406,7 @@ static cvarTable_t cvarTable[ ] =
   { &ui_carriage, "ui_carriage", "", CVAR_ROM },
   { &ui_stages, "ui_stages", "0 0", CVAR_ROM },
   { &ui_warmup, "ui_warmup", "0", CVAR_ROM },
+  { &ui_scrim, "ui_scrim", "0", CVAR_ROM },
   { &ui_devMode, "ui_devMode", "0", CVAR_ROM },
   { &ui_dialog, "ui_dialog", "Text not set", CVAR_ROM },
   { &ui_voteActive, "ui_voteActive", "0", CVAR_ROM },
@@ -507,6 +509,9 @@ static void CG_SetUIVars( void )
   trap_Cvar_Set( "ui_stages", va( "%d %d", cgs.alienStage, cgs.humanStage ) );
 
   trap_Cvar_Set( "ui_warmup", va( "%d", cgs.warmup ) );
+
+  trap_Cvar_Set( "ui_scrim", va( "%d", IS_SCRIM ) );
+  UI_Shared_Set_Is_Scrim( IS_SCRIM );
 }
 
 /*
@@ -1867,6 +1872,12 @@ static const char *CG_FeederItemText( int feederID, int index, int column, qhand
     switch( column )
     {
       case 0:
+        if(BG_Rank(info->rank)->name[0]) {
+          return BG_Rank(info->rank)->name;
+        }
+        break;
+
+      case 1:
         if( showIcons )
         {
           if( sp->weapon != WP_NONE )
@@ -1874,7 +1885,7 @@ static const char *CG_FeederItemText( int feederID, int index, int column, qhand
         }
         break;
 
-      case 1:
+      case 2:
         if( showIcons )
         {
           if( sp->team == TEAM_HUMANS && sp->upgrade != UP_NONE )
@@ -1897,24 +1908,24 @@ static const char *CG_FeederItemText( int feederID, int index, int column, qhand
         }
         break;
 
-      case 2:
+      case 3:
         if( (cg.intermissionStarted || cgs.warmup) && CG_ClientIsReady( sp->client ) )
           return "Ready";
         break;
 
-      case 3:
+      case 4:
         return va( S_COLOR_WHITE "%s", info->name );
         break;
 
-      case 4:
+      case 5:
         return va( "%d", sp->score );
         break;
 
-      case 5:
+      case 6:
         return va( "%4d", sp->time );
         break;
 
-      case 6:
+      case 7:
         if( sp->ping == -1 )
           return "";
 
