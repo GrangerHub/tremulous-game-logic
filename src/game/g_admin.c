@@ -5333,6 +5333,7 @@ qboolean G_admin_scrim(gentity_t *ent) {
 
   if(!g_allowScrims.integer) {
     ADMP("^3scrim: ^7g_allowScrims is set to 0 on this server\n" );
+    return qfalse;
   }
 
   Cmd_ArgvBuffer(0, cmdStr, sizeof(cmdStr));
