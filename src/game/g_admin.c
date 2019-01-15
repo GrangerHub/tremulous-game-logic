@@ -3210,7 +3210,7 @@ qboolean G_admin_allready( gentity_t *ent )
       }
 
       if(level.scrim.mode == SCRIM_MODE_TIMEOUT) {
-        ADMP( "^3allready: ^7can't end warmup while a scrim is paused. see: scrim mode\n" );
+        ADMP( "^3allready: ^7can't end warmup while a scrim is in timeout. see: scrim mode\n" );
         return qfalse;
       }
     }
@@ -3975,6 +3975,10 @@ qboolean G_admin_pause( gentity_t *ent )
 {
   if( !level.pausedTime )
   {
+    if(IS_WARMUP && level.countdownTime) {
+      ADMP( "^3pause: ^7Not allowed to pause while warmup is ending.\n" );
+      return qfalse;
+    }
     AP( va( "print \"^3pause: ^7%s^7 paused the game.\n\"",
           ( ent ) ? ent->client->pers.netname : "console" ) );
     level.pausedTime = 1;
@@ -5445,6 +5449,7 @@ qboolean G_admin_scrim(gentity_t *ent) {
 
     if(level.scrim.mode == SCRIM_MODE_SETUP) {
       level.scrim.mode = SCRIM_MODE_STARTED;
+      level.scrim_reset_time_on_restart = qtrue;
       G_LevelRestart(qfalse);
       G_Scrim_Broadcast_Status( );
       AP( va( "print \"^3scrim: ^7%s ^7has started the scrim\n\"",

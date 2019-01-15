@@ -1923,6 +1923,7 @@ void ExitLevel( void )
       !level.scrim.scrim_completed &&
       !Q_stricmp(g_nextMap.string, map)) {
       //if the nextmap for the scrim is the same as the current map, just restart
+      level.scrim_reset_time_on_restart = qtrue;
       G_LevelRestart(qfalse);
     } else {
       G_MapConfigs( g_nextMap.string );
@@ -2605,7 +2606,7 @@ void G_LevelRestart( qboolean stopWarmup )
         G_Scrim_Broadcast_Status( );
       }
     }
-  } else if( IS_WARMUP )
+  } else if( IS_WARMUP && !(IS_SCRIM && level.scrim_reset_time_on_restart) )
   {
     // save warmup reset information
     Cvar_SetSafe( "g_restartingFlags",
@@ -3324,6 +3325,31 @@ Q_EXPORT void G_RunFrame( int levelTime )
   {
     msec = levelTime - level.time - level.pausedTime;
     level.pausedTime = levelTime - level.time;
+
+    //adjust the start time
+    level.startTime += msec;
+    SV_SetConfigstring( CS_LEVEL_START_TIME, va( "%i", level.startTime ) );
+
+    //adjust the warmup timers
+    if(level.warmup1Time > -1) {
+      level.warmup1Time += msec;
+    }
+    if(level.warmup2Time > -1) {
+      level.warmup2Time += msec;
+    }
+
+    //adjust the countdownTime;
+    if(level.countdownTime > 0) {
+      int dummy, index;
+      char  info[ MAX_STRING_CHARS ];
+
+      level.countdownTime += msec;
+      SV_GetConfigstring( CS_COUNTDOWN, info, sizeof( info ) );
+      sscanf( info, "%i %i",
+                  &dummy,
+                  &index);
+      SV_SetConfigstring( CS_COUNTDOWN, va( "%i %i", level.countdownTime, index ) );
+    }
 
     ptime3000 += msec;
     while( ptime3000 > 3000 )
