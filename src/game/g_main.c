@@ -644,6 +644,11 @@ Q_EXPORT void G_InitGame( int levelTime, int randomSeed, int restart )
   level.alienStage2Time = level.alienStage3Time =
     level.humanStage2Time = level.humanStage3Time = level.startTime;
 
+  if(g_nextMapStartedMatchWhenEmptyTeams.integer > 0) {
+    level.nextmap_when_empty_teams =
+      level.time + (g_nextMapStartedMatchWhenEmptyTeams.integer * 1000);
+  }
+
   // initialize the human portals
 
   for( i = 0; i < PORTAL_NUM; i++ )
