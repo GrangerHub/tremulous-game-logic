@@ -790,6 +790,7 @@ typedef struct
   scrim_t           scrim;
   scrim_team_roster_t scrim_team_rosters[NUM_SCRIM_TEAMS];
   scrim_timout_t    scrim_timeout;
+  qboolean          scrim_reset_time_on_restart;
 
   int               numConnectedClients;
   int               numNonSpectatorClients;       // includes connecting clients
