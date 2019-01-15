@@ -89,7 +89,7 @@ static const pers_scrim_t scrim_defaults =
 {
 	0,           //int                    mode;
 	0,           //int                    win_condition;
-	qtrue,       //qboolean               timed_income;
+	qfalse,      //qboolean               timed_income;
 	2,           //int                    sudden_death_mode;
 	25,          //int                    sudden_death_time;
 	35,          //int                    time_limit;
