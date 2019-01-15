@@ -2766,7 +2766,8 @@ void G_LevelReady( void )
     // of players in one team is ready, start a (g_warmupTimeout2) second
     // countdown until warmup timeout
     if( !startGame && !scrimNoExit &&
-        ( ( numAliens > 1 ) && ( numHumans > 1 ) ) &&
+        ( ( IS_SCRIM && ( ( numAliens > 0 ) && ( numHumans > 0 ) ) ) ||
+          ( ( numAliens > 1 ) && ( numHumans > 1 ) ) ) &&
         ( percentAliens >= (float) g_warmupTimeout2Trigger.integer ||
           percentHumans >= (float) g_warmupTimeout2Trigger.integer ) )
     {
