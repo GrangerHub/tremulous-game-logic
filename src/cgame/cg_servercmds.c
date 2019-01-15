@@ -613,6 +613,7 @@ static void CG_ConfigStringModified( void )
       matchOutcomes_t outcome;
       team_t          winningTeam;
       team_t          team = cg.snap->ps.stats[ STAT_TEAM ];
+      scrim_team_t    winningScrimTeam = SCRIM_TEAM_NONE;
 
       sscanf( str, "%i %i %i",
               &intOutcome,
@@ -621,6 +622,10 @@ static void CG_ConfigStringModified( void )
 
       outcome = (matchOutcomes_t)intOutcome;
       winningTeam =(team_t)intWinningTeam;
+
+      if(IS_SCRIM) {
+        winningScrimTeam = BG_Scrim_Team_From_Playing_Team(&cgs.scrim, winningTeam);
+      }
 
       switch ( outcome )
       {
@@ -638,18 +643,18 @@ static void CG_ConfigStringModified( void )
                 strcpy(
                   winner,
                   va(
-                    "%s win the round. The scrim is a draw",
-                    BG_Team( winningTeam )->humanName));
+                    "This round is won by %s. The scrim is a draw",
+                    cgs.scrim.team[winningScrimTeam].name));
               } else {
                 strcpy(
                   winner,
                   va(
-                    "%s win the round. Scrim victory goes to %s",
-                    BG_Team( winningTeam )->humanName,
+                    "This round is won by %s. Scrim victory goes to %s",
+                    cgs.scrim.team[winningScrimTeam].name,
                     cgs.scrim.team[cgs.scrim.scrim_winner].name));
               }
             } else {
-              strcpy(winner, va("%s win the round.", BG_Team( winningTeam )->humanName));
+              strcpy(winner, va("This round is won by %s.", cgs.scrim.team[winningScrimTeam].name));
             }
           } else {
             strcpy( winner, va( "%s win.", BG_Team( winningTeam )->humanName ) );
