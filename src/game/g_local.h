@@ -2,7 +2,7 @@
 ===========================================================================
 Copyright (C) 1999-2005 Id Software, Inc.
 Copyright (C) 2000-2013 Darklegion Development
-Copyright (C) 2015-2018 GrangerHub
+Copyright (C) 2015-2019 GrangerHub
 
 This file is part of Tremulous.
 
@@ -742,6 +742,13 @@ typedef struct buildlog_s
 #define MAX_BUILDLOG          1024
 #define MAX_PLAYER_MODEL    256
 
+typedef struct scrim_timeout_s
+{
+  int start_time;
+  int warmup1Time;
+  int warmup2Time;
+} scrim_timout_t;
+
 typedef struct
 {
   struct gclient_s  *clients;   // [maxclients]
@@ -782,6 +789,7 @@ typedef struct
 
   scrim_t           scrim;
   scrim_team_roster_t scrim_team_rosters[NUM_SCRIM_TEAMS];
+  scrim_timout_t    scrim_timeout;
 
   int               numConnectedClients;
   int               numNonSpectatorClients;       // includes connecting clients

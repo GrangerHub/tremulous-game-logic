@@ -2,7 +2,7 @@
 ===========================================================================
 Copyright (C) 1999-2005 Id Software, Inc.
 Copyright (C) 2000-2013 Darklegion Development
-Copyright (C) 2015-2018 GrangerHubs
+Copyright (C) 2015-2019 GrangerHub
 
 This file is part of Tremulous.
 
@@ -643,6 +643,11 @@ Q_EXPORT void G_InitGame( int levelTime, int randomSeed, int restart )
   }
   level.alienStage2Time = level.alienStage3Time =
     level.humanStage2Time = level.humanStage3Time = level.startTime;
+
+  if(g_nextMapStartedMatchWhenEmptyTeams.integer > 0) {
+    level.nextmap_when_empty_teams =
+      level.time + (g_nextMapStartedMatchWhenEmptyTeams.integer * 1000);
+  }
 
   // initialize the human portals
 
@@ -2272,7 +2277,7 @@ void CheckExitRules( void )
       g_allowScrims.integer &&
       (
         (level.scrim.mode == SCRIM_MODE_SETUP) ||
-        (level.scrim.mode == SCRIM_MODE_PAUSED))) )
+        (level.scrim.mode == SCRIM_MODE_TIMEOUT))) )
   {
     if( level.time - level.startTime >= G_Time_Limit() * 60000 )
     {
@@ -2583,7 +2588,7 @@ void G_LevelReady( void )
   scrimNoExit = g_allowScrims.integer &&
     (
       (level.scrim.mode == SCRIM_MODE_SETUP) ||
-      (level.scrim.mode == SCRIM_MODE_PAUSED));
+      (level.scrim.mode == SCRIM_MODE_TIMEOUT));
 
   Com_Memset(&readyMasks, 0, sizeof(readyMasks));
   for(i = 0; i < g_maxclients.integer; i++) {
@@ -2689,7 +2694,7 @@ void G_LevelReady( void )
     // of players in one team is ready, start a (g_warmupTimeout2) second
     // countdown until warmup timeout
     if( !startGame && !scrimNoExit &&
-        ( IS_SCRIM || ( ( numAliens > 1 ) && ( numHumans > 1 ) ) ) &&
+        ( ( numAliens > 1 ) && ( numHumans > 1 ) ) &&
         ( percentAliens >= (float) g_warmupTimeout2Trigger.integer ||
           percentHumans >= (float) g_warmupTimeout2Trigger.integer ) )
     {
