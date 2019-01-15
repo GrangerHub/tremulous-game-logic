@@ -551,7 +551,7 @@ G_Scrim_Check_Pause
 void G_Scrim_Check_Pause(void) {
   static int pause_time = -1;
 
-  if(level.scrim.mode != SCRIM_MODE_PAUSED) {
+  if(level.scrim.mode != SCRIM_MODE_TIMEOUT) {
     pause_time = -1;
     return;
   } else if(pause_time < 0) {

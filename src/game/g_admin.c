@@ -244,7 +244,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
 
     {"scrim", G_admin_scrim, qfalse, "scrim",
       "sets up and manages scrims, to check the current scrim settings execute with no arguments",
-      "[^3on^6|^3off^7^6|^3restore_defaults^6|^3start^6|^3pause^6|^3win^6|^3timed_income^6|^3map^6|^3putteam^6|^3sd_mode^6|^3sd_time^6|^3time_limit^6|^3team_name^6|^3team_captain^6|^3max_rounds^6|^3roster^6|^3remove^7]"
+      "[^3on^6|^3off^7^6|^3restore_defaults^6|^3start^6|^3timeout^6|^3win^6|^3timed_income^6|^3map^6|^3putteam^6|^3sd_mode^6|^3sd_time^6|^3time_limit^6|^3team_name^6|^3team_captain^6|^3max_rounds^6|^3roster^6|^3remove^7]"
     },
 
     {"seen", G_admin_seen, qfalse, "seen",
@@ -3209,7 +3209,7 @@ qboolean G_admin_allready( gentity_t *ent )
         return qfalse;
       }
 
-      if(level.scrim.mode == SCRIM_MODE_PAUSED) {
+      if(level.scrim.mode == SCRIM_MODE_TIMEOUT) {
         ADMP( "^3allready: ^7can't end warmup while a scrim is paused. see: scrim mode\n" );
         return qfalse;
       }
@@ -5134,7 +5134,7 @@ void G_admin_scrim_status(gentity_t *ent ) {
       string = "Setup";
       break;
 
-    case SCRIM_MODE_PAUSED:
+    case SCRIM_MODE_TIMEOUT:
       string = "Paused";
       break;
 
@@ -5449,7 +5449,19 @@ qboolean G_admin_scrim(gentity_t *ent) {
       G_Scrim_Broadcast_Status( );
       AP( va( "print \"^3scrim: ^7%s ^7has started the scrim\n\"",
               ent ? ent->client->pers.netname : "console" ) );
-    } else {
+    } else if(level.scrim.mode == SCRIM_MODE_TIMEOUT) {
+      const int elapsed_time = level.time - level.scrim_timeout.start_time;
+
+      level.scrim.mode = SCRIM_MODE_STARTED;
+      level.warmup1Time = level.scrim_timeout.warmup1Time;
+      if(level.warmup1Time > -1) {
+        level.warmup1Time += elapsed_time;
+      }
+      level.warmup2Time = level.scrim_timeout.warmup2Time;
+      if(level.warmup2Time > -1) {
+        level.warmup2Time += elapsed_time;
+      }
+      G_LevelReady( );
       level.scrim.mode = SCRIM_MODE_STARTED;
       AP( va( "print \"^3scrim: ^7%s ^7has resumed the scrim\n\"",
               ent ? ent->client->pers.netname : "console" ) );
@@ -5458,33 +5470,50 @@ qboolean G_admin_scrim(gentity_t *ent) {
     G_Scrim_Send_Status( );
 
     return qtrue;
-  } else if(!Q_stricmp(arg1, "pause")) {
+  } else if(!Q_stricmp(subcmd, "timeout")) {
     if(!IS_SCRIM) {
       ADMP("^3scrim: ^7this subcommand requires scrim mode to be on\n");
       return qfalse;
     }
 
-    if(level.scrim.mode == SCRIM_MODE_PAUSED) {
+    if(level.scrim.mode == SCRIM_MODE_TIMEOUT) {
+      const int elapsed_time = level.time - level.scrim_timeout.start_time;
+
       level.scrim.mode = SCRIM_MODE_STARTED;
+      level.warmup1Time = level.scrim_timeout.warmup1Time;
+      if(level.warmup1Time > -1) {
+        level.warmup1Time += elapsed_time;
+      }
+      level.warmup2Time = level.scrim_timeout.warmup2Time;
+      if(level.warmup2Time > -1) {
+        level.warmup2Time += elapsed_time;
+      }
+      G_LevelReady( );
       G_Scrim_Send_Status( );
       AP( va( "print \"^3scrim: ^7%s ^7has resumed the scrim\n\"",
               ent ? ent->client->pers.netname : "console" ) );
       return qtrue;
     }
 
-    if(level.scrim.mode != SCRIM_MODE_STARTED) {
-      ADMP("^3scrim: ^7only scrims that have started can be paused\n");
+    if(level.scrim.mode == SCRIM_MODE_SETUP) {
+      ADMP("^3scrim: ^7timeout can't be initiated during scrim setup\n");
       return qfalse;
     }
 
     if(!IS_WARMUP) {
-      ADMP("^3scrim: ^7must be warmup to pause scrims\n");
+      ADMP("^3scrim: ^7must be warmup to initiate a timeout\n");
       return qfalse;
     }
 
-    level.scrim.mode = SCRIM_MODE_PAUSED;
+    level.scrim.mode = SCRIM_MODE_TIMEOUT;
+    level.scrim_timeout.start_time = level.time;
+    level.scrim_timeout.warmup1Time = level.warmup1Time;
+    level.warmup1Time = -1;
+    level.scrim_timeout.warmup2Time = level.warmup2Time;
+    level.warmup2Time = -1;
+    G_LevelReady( );
     G_Scrim_Send_Status( );
-    AP( va( "print \"^3scrim: ^7%s ^7has paused the scrim\n\"",
+    AP( va( "print \"^3scrim: ^7%s ^7has initiated a timeout\n\"",
             ent ? ent->client->pers.netname : "console" ) );
     AP( va( "print \"^3scrim: ^7to resume the scrim execute: scrim start\n\"" ) );
     return qtrue;

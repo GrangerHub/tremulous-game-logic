@@ -109,7 +109,7 @@ typedef enum
 {
   SCRIM_MODE_OFF = 0,
   SCRIM_MODE_SETUP,
-  SCRIM_MODE_PAUSED,
+  SCRIM_MODE_TIMEOUT,
   SCRIM_MODE_STARTED
 } scrim_mode_t;
 

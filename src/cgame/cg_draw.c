@@ -1587,7 +1587,7 @@ static void CG_DrawScrimStatus( rectDef_t *rect, float text_x, float text_y,
       scrim_mode = "Started";
       break;
 
-    case SCRIM_MODE_PAUSED:
+    case SCRIM_MODE_TIMEOUT:
       scrim_mode = "Time out";
       break;
   }
@@ -3049,7 +3049,7 @@ static void CG_DrawWarmup( int ownerDraw, rectDef_t *rect, float textScale, int 
               Com_sprintf( warmupText, sizeof( warmupText ), "SCRIM SETUP" );
               break;
 
-            case SCRIM_MODE_PAUSED:
+            case SCRIM_MODE_TIMEOUT:
               Com_sprintf( warmupText, sizeof( warmupText ), "SCRIM TIME OUT" );;
               break;
 
