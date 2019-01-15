@@ -2,7 +2,7 @@
 ===========================================================================
 Copyright (C) 2006 Kirk Barnes
 Copyright (C) 2006-2008 Robert Beckebans <trebor_7@users.sourceforge.net>
-Copyright (C) 2015-2018 GrangerHub
+Copyright (C) 2015-2019 GrangerHub
 
 This file is part of XreaL source code.
 

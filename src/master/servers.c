@@ -4,7 +4,7 @@
 	Server list and address mapping management for dpmaster
 
 	Copyright (C) 2004  Mathieu Olivier
-	Copyright (C) 2015-2018 GrangerHub
+	Copyright (C) 2015-2019 GrangerHub
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
