@@ -1152,7 +1152,7 @@ scrim_team_member_t *G_Scrim_Roster_Member_From_String(
   if( p )
   {
     Q_strncpyz( p, "more than one player name matches. "
-                "be more specific or use the slot #:\n", l2 );
+                "be more specific or use the roster id #:\n", l2 );
     l = strlen( p );
     p += l;
     l2 -= l;
@@ -1173,6 +1173,7 @@ scrim_team_member_t *G_Scrim_Roster_Member_From_String(
         n2, sizeof(n2));
 
       if(!strcmp(n2, s2)) {
+        *scrim_team = temp_scrim_team;
         return &level.scrim_team_rosters[temp_scrim_team].members[roster_index];
       }
 
