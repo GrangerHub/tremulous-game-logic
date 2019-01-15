@@ -2,13 +2,13 @@
 ===========================================================================
 Copyright (C) 1999-2005 Id Software, Inc.
 Copyright (C) 2000-2013 Darklegion Development
-Copyright (C) 2015-2018 GrangerHubs
+Copyright (C) 2015-2019 GrangerHub
 
 This file is part of Tremulous.
 
 Tremulous is free software; you can redistribute it
 and/or modify it under the terms of the GNU General Public License as
-published by the Free Software Foundation; either version 2 of the License,
+published by the Free Software Foundation; either version 3 of the License,
 or (at your option) any later version.
 
 Tremulous is distributed in the hope that it will be
@@ -17,8 +17,8 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Tremulous; if not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+along with Tremulous; if not, see <https://www.gnu.org/licenses/>
+
 ===========================================================================
 */
 
@@ -551,7 +551,7 @@ G_Scrim_Check_Pause
 void G_Scrim_Check_Pause(void) {
   static int pause_time = -1;
 
-  if(level.scrim.mode != SCRIM_MODE_PAUSED) {
+  if(level.scrim.mode != SCRIM_MODE_TIMEOUT) {
     pause_time = -1;
     return;
   } else if(pause_time < 0) {
@@ -1152,7 +1152,7 @@ scrim_team_member_t *G_Scrim_Roster_Member_From_String(
   if( p )
   {
     Q_strncpyz( p, "more than one player name matches. "
-                "be more specific or use the slot #:\n", l2 );
+                "be more specific or use the roster id #:\n", l2 );
     l = strlen( p );
     p += l;
     l2 -= l;
@@ -1173,6 +1173,7 @@ scrim_team_member_t *G_Scrim_Roster_Member_From_String(
         n2, sizeof(n2));
 
       if(!strcmp(n2, s2)) {
+        *scrim_team = temp_scrim_team;
         return &level.scrim_team_rosters[temp_scrim_team].members[roster_index];
       }
 

@@ -2,7 +2,7 @@
 ===========================================================================
 Copyright (C) 2008 Przemyslaw Iskra <sparky@pld-linux.org>
 Copyright (C) 2000-2013 Darklegion Development
-Copyright (C) 2015-2018 GrangerHub
+Copyright (C) 2015-2019 GrangerHub
 
 This file is part of Tremulous.
 
