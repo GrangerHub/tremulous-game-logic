@@ -1596,7 +1596,10 @@ static void CG_DrawScrimStatus( rectDef_t *rect, float text_x, float text_y,
     status = va(
       "Scrim Mode: %s | Round: %i/%i",
       scrim_mode,
-      cgs.scrim. mode == SCRIM_MODE_SETUP ? 0 : cgs.scrim.rounds_completed + 1,
+      cgs.scrim. mode == SCRIM_MODE_SETUP ? 0 :
+        (
+          cg.intermissionStarted ?
+            cgs.scrim.rounds_completed : cgs.scrim.rounds_completed + 1),
       cgs.scrim.max_rounds);
   } else {
     status = va(
