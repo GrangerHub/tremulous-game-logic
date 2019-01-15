@@ -1,7 +1,7 @@
 /*
 ===========================================================================
 Copyright (C) 2008-2009 Amanieu d'Antras
-Copyright (C) 2015-2018 GrangerHub
+Copyright (C) 2015-2019 GrangerHub
 
 This file is part of Tremulous.
 

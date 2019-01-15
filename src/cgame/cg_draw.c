@@ -2,7 +2,7 @@
 ===========================================================================
 Copyright (C) 1999-2005 Id Software, Inc.
 Copyright (C) 2000-2013 Darklegion Development
-Copyright (C) 2015-2018 GrangerHub
+Copyright (C) 2015-2019 GrangerHub
 
 This file is part of Tremulous.
 
@@ -1891,7 +1891,7 @@ static void CG_DrawScrimStatus( rectDef_t *rect, float text_x, float text_y,
       scrim_mode = "Started";
       break;
 
-    case SCRIM_MODE_PAUSED:
+    case SCRIM_MODE_TIMEOUT:
       scrim_mode = "Time out";
       break;
   }
@@ -1900,7 +1900,10 @@ static void CG_DrawScrimStatus( rectDef_t *rect, float text_x, float text_y,
     status = va(
       "Scrim Mode: %s | Round: %i/%i",
       scrim_mode,
-      cgs.scrim. mode == SCRIM_MODE_SETUP ? 0 : cgs.scrim.rounds_completed + 1,
+      cgs.scrim. mode == SCRIM_MODE_SETUP ? 0 :
+        (
+          cg.intermissionStarted ?
+            cgs.scrim.rounds_completed : cgs.scrim.rounds_completed + 1),
       cgs.scrim.max_rounds);
   } else {
     status = va(
@@ -3423,7 +3426,7 @@ static void CG_DrawWarmup( int ownerDraw, rectDef_t *rect, float textScale, int 
               Com_sprintf( warmupText, sizeof( warmupText ), "SCRIM SETUP" );
               break;
 
-            case SCRIM_MODE_PAUSED:
+            case SCRIM_MODE_TIMEOUT:
               Com_sprintf( warmupText, sizeof( warmupText ), "SCRIM TIME OUT" );;
               break;
 

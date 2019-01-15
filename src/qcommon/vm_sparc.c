@@ -2,7 +2,7 @@
 ===========================================================================
 Copyright (C) 2009 David S. Miller <davem@davemloft.net>
 Copyright (C) 2000-2013 Darklegion Development
-Copyright (C) 2015-2018 GrangerHub
+Copyright (C) 2015-2019 GrangerHub
 
 This file is part of Tremulous.
 
