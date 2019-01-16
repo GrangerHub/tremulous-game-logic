@@ -635,7 +635,7 @@ static void CG_ConfigStringModified( void )
               strcpy(
                 winner,
                 va(
-                  "%s forfeited the scrim. Scrim victory goes to %s",
+                  "^7%s^7 forfeited the scrim. Scrim victory goes to ^7%s^7.",
                   cgs.scrim.team[cgs.scrim.scrim_forfeiter].name,
                   cgs.scrim.team[cgs.scrim.scrim_winner].name));
             }else if(cgs.scrim.scrim_completed) {
@@ -643,21 +643,21 @@ static void CG_ConfigStringModified( void )
                 strcpy(
                   winner,
                   va(
-                    "This round is won by %s. The scrim is a draw",
+                    "This round is won by ^7%s^7. The scrim is a draw.",
                     cgs.scrim.team[winningScrimTeam].name));
               } else {
                 strcpy(
                   winner,
                   va(
-                    "This round is won by %s. Scrim victory goes to %s",
+                    "This round is won by ^7%s^7. Scrim victory goes to ^7%s^7.",
                     cgs.scrim.team[winningScrimTeam].name,
                     cgs.scrim.team[cgs.scrim.scrim_winner].name));
               }
             } else {
-              strcpy(winner, va("This round is won by %s.", cgs.scrim.team[winningScrimTeam].name));
+              strcpy(winner, va("This round is won by ^7%s^7.", cgs.scrim.team[winningScrimTeam].name));
             }
           } else {
-            strcpy( winner, va( "%s win.", BG_Team( winningTeam )->humanName ) );
+            strcpy( winner, va( "^7%s^7 win.", BG_Team( winningTeam )->humanName ) );
           }
           if( cg_intermissionMusic.integer )
           {
@@ -672,12 +672,12 @@ static void CG_ConfigStringModified( void )
                 strcpy(
                   winner,
                   va(
-                    "The round was evacuated. The scrim is a draw"));
+                    "The round was evacuated. The scrim is a draw."));
               } else {
                 strcpy(
                   winner,
                   va(
-                    "The round was evacuated. Scrim victory goes to %s",
+                    "The round was evacuated. Scrim victory goes to ^7%s^7.",
                     cgs.scrim.team[cgs.scrim.scrim_winner].name));
               }
             } else {
@@ -702,7 +702,7 @@ static void CG_ConfigStringModified( void )
                 strcpy(
                   winner,
                   va(
-                    "The round underwent mutual destruction. Scrim victory goes to %s",
+                    "The round underwent mutual destruction. Scrim victory goes to ^7%s^7.",
                     cgs.scrim.team[cgs.scrim.scrim_winner].name));
               }
             } else {
@@ -722,12 +722,12 @@ static void CG_ConfigStringModified( void )
                 strcpy(
                   winner,
                   va(
-                    "The round is a stalemate. The scrim is a draw"));
+                    "The round is a stalemate. The scrim is a draw."));
               } else {
                 strcpy(
                   winner,
                   va(
-                    "The round is a stalemate. Scrim victory goes to %s",
+                    "The round is a stalemate. Scrim victory goes to ^7%s^7.",
                     cgs.scrim.team[cgs.scrim.scrim_winner].name));
               }
             } else {
