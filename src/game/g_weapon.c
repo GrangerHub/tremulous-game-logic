@@ -1733,15 +1733,32 @@ qboolean CheckPounceAttack( gentity_t *ent )
   if( !( ent->client->ps.pm_flags & PMF_CHARGE ) )
     ent->client->pmext.pouncePayload = 0;
 
-  // Calculate muzzle point
-  AngleVectors( ent->client->ps.viewangles, forward, right, up );
-  BG_CalcMuzzlePointFromPS( &ent->client->ps, forward, right, up, muzzle );
+  traceEnt = & g_entities[ent->client->ps.groundEntityNum];
 
-  // Trace from muzzle to see what we hit
-  pounceRange = ent->client->ps.weapon == WP_ALEVEL3 ? LEVEL3_POUNCE_RANGE :
-                                                       LEVEL3_POUNCE_UPG_RANGE;
-  G_WideTraceSolidSeries( &tr, ent, pounceRange, LEVEL3_POUNCE_WIDTH,
-                          LEVEL3_POUNCE_WIDTH, &traceEnt);
+  if(ent->client->ps.groundEntityNum != ENTITYNUM_NONE) {
+    gentity_t *groundEnt = & g_entities[ent->client->ps.groundEntityNum];
+
+    if(G_TakesDamage(groundEnt)) {
+      //landed on something that can take damage, so use that as the target
+      traceEnt = groundEnt;
+    } else {
+      //landed on something that can't be damaged, so disarm the pounce
+      traceEnt = NULL;
+    }
+  } else {
+    //check for mid air pounce collision
+
+    // Calculate muzzle point
+    AngleVectors( ent->client->ps.viewangles, forward, right, up );
+    BG_CalcMuzzlePointFromPS( &ent->client->ps, forward, right, up, muzzle );
+
+    // Trace from muzzle to see what we hit
+    pounceRange = ent->client->ps.weapon == WP_ALEVEL3 ? LEVEL3_POUNCE_RANGE :
+                                                         LEVEL3_POUNCE_UPG_RANGE;
+    G_WideTraceSolidSeries( &tr, ent, pounceRange, LEVEL3_POUNCE_WIDTH,
+                            LEVEL3_POUNCE_WIDTH, &traceEnt);
+  }
+
   if( traceEnt == NULL )
     return qfalse;
 
