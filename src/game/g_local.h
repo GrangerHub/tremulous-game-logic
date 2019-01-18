@@ -1026,7 +1026,8 @@ buyErr_t G_CanBuy( gentity_t *ent, const char *itemName, int *price,
                    const int fundsFromAutoSell, qboolean force );
 void G_GiveItem( gentity_t *ent, const char *itemName, const int price,
                  const qboolean energyOnly, qboolean force );
-qboolean G_GiveItemAfterCheck(gentity_t *ent, const char *itemName, qboolean force);
+qboolean G_GiveItemAfterCheck(
+  gentity_t *ent, const char *itemName, qboolean force, qboolean autosell);
 
 #define DECOLOR_OFF '\16'
 #define DECOLOR_ON  '\17'
