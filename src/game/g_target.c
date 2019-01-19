@@ -663,7 +663,7 @@ void Use_Target_force_weapon(gentity_t *ent, gentity_t *other, gentity_t *activa
             ent->wTriggers[i], activator->client->ps.stats)) {
           continue;
         } else {
-          if(G_GiveItemAfterCheck(activator, BG_Weapon(ent->wTriggers[i])->name, qtrue)) {
+          if(G_GiveItemAfterCheck(activator, BG_Weapon(ent->wTriggers[i])->name, qtrue, qtrue)) {
             change = qtrue;
           }
         }
@@ -676,7 +676,7 @@ void Use_Target_force_weapon(gentity_t *ent, gentity_t *other, gentity_t *activa
               continue;
         }
 
-        if(G_GiveItemAfterCheck(activator, BG_Upgrade(ent->uTriggers[i])->name, qtrue)) {
+        if(G_GiveItemAfterCheck(activator, BG_Upgrade(ent->uTriggers[i])->name, qtrue, qtrue)) {
           change = qtrue;
         }
       }

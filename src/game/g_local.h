@@ -1027,7 +1027,8 @@ buyErr_t G_CanBuy( gentity_t *ent, const char *itemName, int *price,
                    const int fundsFromAutoSell, qboolean force );
 void G_GiveItem( gentity_t *ent, const char *itemName, const int price,
                  const qboolean energyOnly, qboolean force );
-qboolean G_GiveItemAfterCheck(gentity_t *ent, const char *itemName, qboolean force);
+qboolean G_GiveItemAfterCheck(
+  gentity_t *ent, const char *itemName, qboolean force, qboolean autosell);
 
 #define DECOLOR_OFF '\16'
 #define DECOLOR_ON  '\17'
@@ -1654,6 +1655,7 @@ extern  vmCvar_t  g_allowVote;
 extern  vmCvar_t  g_voteLimit;
 extern  vmCvar_t  g_suddenDeathVotePercent;
 extern  vmCvar_t  g_suddenDeathVoteDelay;
+extern  vmCvar_t  g_intermissionReadyPercent;
 extern  vmCvar_t  g_teamForceBalance;
 extern  vmCvar_t  g_smoothClients;
 extern  vmCvar_t  pmove_fixed;
