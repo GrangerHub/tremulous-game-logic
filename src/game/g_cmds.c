@@ -2734,7 +2734,10 @@ void Cmd_Class_f( gentity_t *ent )
     return;
   }
 
-  G_EvolveAfterCheck( ent, newClass, qfalse );
+  if(G_EvolveAfterCheck( ent, newClass, qfalse )) {
+    // end damage protection early
+    ent->dmgProtectionTime = 0;
+  }
 }
 
 
@@ -3823,9 +3826,15 @@ void Cmd_Buy_f( gentity_t *ent )
   Cmd_ArgvBuffer( 1, s, sizeof( s ) );
 
   if( !Q_stricmp( cmd, "autosellbuy" ) ) {
-    G_GiveItemAfterCheck(ent, s, qfalse, qtrue);
+    if(G_GiveItemAfterCheck(ent, s, qfalse, qtrue)) {
+      // end damage protection early
+      ent->dmgProtectionTime = 0;
+    }
   } else {
-    G_GiveItemAfterCheck(ent, s, qfalse, qfalse);
+    if(G_GiveItemAfterCheck(ent, s, qfalse, qfalse)) {
+      // end damage protection early
+      ent->dmgProtectionTime = 0;
+    }
   }
 }
 

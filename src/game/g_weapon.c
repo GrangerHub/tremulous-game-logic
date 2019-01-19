@@ -1214,6 +1214,9 @@ void buildFire( gentity_t *ent, dynMenu_t menu )
         ent->client->buildFireTime = level.time + 250;
       }
 
+      // end damage protection early
+      ent->dmgProtectionTime = 0;
+
       ent->client->ps.stats[ STAT_BUILDABLE ] = BA_NONE;
     }
 
