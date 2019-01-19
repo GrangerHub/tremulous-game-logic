@@ -675,8 +675,49 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
   self->healthReserve = 0;
 
-  if( attacker )
-  {
+  if( attacker ) {
+    //increase the spawn protection duration accordingly
+    if(
+      self->client &&
+      (
+        (
+          attacker->client &&
+          attacker->client->pers.teamSelection != TEAM_NONE &&
+          attacker->client->pers.teamSelection != self->client->pers.teamSelection) ||
+        (
+          attacker->buildableTeam != TEAM_NONE &&
+          attacker->buildableTeam != self->client->pers.teamSelection))) {
+      switch (self->client->pers.teamSelection) {
+        case TEAM_ALIENS:
+          if(self->client->pers.lastSpawnedTime + ALIEN_SPAWN_PROTECTION_TIME >= level.time) {
+            self->client->pers.damageProtectionDuration += ALIEN_SPAWN_PROTECTION_TIME / 5;
+          } else {
+            self->client->pers.damageProtectionDuration = 0;
+          }
+          if(self->client->pers.damageProtectionDuration > ALIEN_SPAWN_PROTECTION_TIME) {
+            self->client->pers.damageProtectionDuration = ALIEN_SPAWN_PROTECTION_TIME;
+          }
+          break;
+
+        case TEAM_HUMANS:
+          if(self->client->pers.lastSpawnedTime + HUMAN_SPAWN_PROTECTION_TIME >= level.time) {
+            self->client->pers.damageProtectionDuration += HUMAN_SPAWN_PROTECTION_TIME / 5;
+          } else {
+            self->client->pers.damageProtectionDuration = 0;
+          }
+          if(self->client->pers.damageProtectionDuration > HUMAN_SPAWN_PROTECTION_TIME) {
+            self->client->pers.damageProtectionDuration = HUMAN_SPAWN_PROTECTION_TIME;
+          }
+          break;
+
+        default:
+          self->client->pers.damageProtectionDuration = 0;
+          break;
+      }
+    } else if(self->client) {
+      self->client->pers.damageProtectionDuration = 0;
+    }
+
     killer = attacker->s.number;
 
     if( attacker->client )
@@ -686,6 +727,9 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   }
   else
   {
+    if(self->client) {
+      self->client->pers.damageProtectionDuration = 0;
+    }
     killer = ENTITYNUM_WORLD;
     killerName = "<world>";
   }

@@ -556,8 +556,11 @@ typedef struct
   g_admin_admin_t     *admin;
 
   int                 secondsAlive;       // time player has been alive in seconds
+  int                 lastSpawnedTime;    // level.time the client has last spawned
   qboolean            hasHealed;          // has healed a player (basi regen aura) in the last 10sec (for score use)
   float               timedIncome;
+
+  int                 damageProtectionDuration; //length of time for damage protection for the next spawn
 
   // used to save persistant[] values while in SPECTATOR_FOLLOW mode
   int                 credit;
