@@ -2871,7 +2871,10 @@ void Cmd_Class_f( gentity_t *ent )
     return;
   }
 
-  G_EvolveAfterCheck( ent, newClass, qfalse );
+  if(G_EvolveAfterCheck( ent, newClass, qfalse )) {
+    // end damage protection early
+    ent->dmgProtectionTime = 0;
+  }
 }
 
 
@@ -4122,31 +4125,36 @@ void G_GiveItem( gentity_t *ent, const char *itemName, const int price,
 G_GiveItemAfterCheck
 =================
 */
-qboolean G_GiveItemAfterCheck(gentity_t *ent, const char *itemName, qboolean force) {
+qboolean G_GiveItemAfterCheck(
+  gentity_t *ent, const char *itemName, qboolean force, qboolean autosell) {
   int  price;
-  int  slotsFreeFromAutoSell, upgradesToAutoSell;
+  int  slotsFreeFromAutoSell = 0;
+  int  upgradesToAutoSell = 0;
   int  fundsFromAutoSell[UP_NUM_UPGRADES + 1];
   int  totafundsFromAutoSell = 0;
   int  i;
-  weapon_t weaponToAutoSell;
+  weapon_t weaponToAutoSell = WP_NONE;
   sellErr_t autoSellErrors[UP_NUM_UPGRADES + 1];
   buyErr_t buyErr;
   qboolean  energyOnly = qfalse;
 
-   //attempt to automatically sell the current weapon
-   slotsFreeFromAutoSell = G_CanAutoSell( ent, itemName, &weaponToAutoSell,
-                                          &upgradesToAutoSell, fundsFromAutoSell,
-                                          ARRAY_LEN( fundsFromAutoSell ),
-                                          autoSellErrors, force );
+  if(autosell) {
+    //attempt to automatically sell the current weapon
+    slotsFreeFromAutoSell = G_CanAutoSell( ent, itemName, &weaponToAutoSell,
+                                           &upgradesToAutoSell, fundsFromAutoSell,
+                                           ARRAY_LEN( fundsFromAutoSell ),
+                                           autoSellErrors, force );
 
-   for( i = 0; i < ARRAY_LEN( fundsFromAutoSell ); i++ )
-   {
-     if( autoSellErrors[i] != ERR_SELL_NONE ) {
-        G_SellErrHandling( ent, autoSellErrors[i] );
-     }
+    for( i = 0; i < ARRAY_LEN( fundsFromAutoSell ); i++ )
+    {
+      if( autoSellErrors[i] != ERR_SELL_NONE ) {
+         G_SellErrHandling( ent, autoSellErrors[i] );
+      }
 
-     totafundsFromAutoSell += fundsFromAutoSell[ i ];
-   }
+      totafundsFromAutoSell += fundsFromAutoSell[ i ];
+    }
+  }
+   
 
    buyErr = G_CanBuy( ent, itemName, &price, &energyOnly, slotsFreeFromAutoSell,
                       totafundsFromAutoSell, force );
@@ -4184,10 +4192,22 @@ Cmd_Buy_f
 void Cmd_Buy_f( gentity_t *ent )
 {
   char s[ MAX_TOKEN_CHARS ];
+  char cmd[ MAX_TOKEN_CHARS ];
 
+  Cmd_ArgvBuffer( 0, cmd, sizeof( cmd ) );
   Cmd_ArgvBuffer( 1, s, sizeof( s ) );
 
-  G_GiveItemAfterCheck(ent, s, qfalse);
+  if( !Q_stricmp( cmd, "autosellbuy" ) ) {
+    if(G_GiveItemAfterCheck(ent, s, qfalse, qtrue)) {
+      // end damage protection early
+      ent->dmgProtectionTime = 0;
+    }
+  } else {
+    if(G_GiveItemAfterCheck(ent, s, qfalse, qfalse)) {
+      // end damage protection early
+      ent->dmgProtectionTime = 0;
+    }
+  }
 }
 
 
@@ -5369,6 +5389,7 @@ int G_FloodLimited( gentity_t *ent )
 
 commands_t cmds[ ] = {
   { "a", CMD_MESSAGE|CMD_INTERMISSION, Cmd_AdminMessage_f },
+  { "autosellbuy", CMD_HUMAN|CMD_ALIVE, Cmd_Buy_f },
   { "build", CMD_TEAM|CMD_ALIVE, Cmd_Build_f },
   { "buy", CMD_HUMAN|CMD_ALIVE, Cmd_Buy_f },
   { "callteamvote", CMD_MESSAGE|CMD_TEAM, Cmd_CallVote_f },

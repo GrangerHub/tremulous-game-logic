@@ -107,6 +107,7 @@ vmCvar_t  g_allowVote;
 vmCvar_t  g_voteLimit;
 vmCvar_t  g_suddenDeathVotePercent;
 vmCvar_t  g_suddenDeathVoteDelay;
+vmCvar_t  g_intermissionReadyPercent;
 vmCvar_t  g_teamForceBalance;
 vmCvar_t  g_smoothClients;
 vmCvar_t  pmove_fixed;
@@ -290,6 +291,8 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_friendlyBuildableFire, "g_friendlyBuildableFire", "100", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qtrue  },
   { &g_friendlyFireLastSpawnProtection, "g_friendlyFireLastSpawnProtection", "1", CVAR_ARCHIVE, 0, qtrue },
   { &g_dretchPunt, "g_dretchPunt", "1", CVAR_ARCHIVE, 0, qtrue  },
+
+  { &g_intermissionReadyPercent, "g_intermissionReadyPercent", "65", CVAR_ARCHIVE, 0, qtrue },
 
   { &g_teamForceBalance, "g_teamForceBalance", "0", CVAR_ARCHIVE, 0, qtrue },
 
@@ -2259,7 +2262,7 @@ wait 10 seconds before going on.
 */
 void CheckIntermissionExit( void )
 {
-  int       ready, notReady;
+  int       ready, notReady, numPlayers;
   int       i;
   gclient_t *cl;
   clientList_t readyMasks;
@@ -2274,6 +2277,7 @@ void CheckIntermissionExit( void )
   // see which players are ready
   ready = 0;
   notReady = 0;
+  numPlayers = 0;
   Com_Memset( &readyMasks, 0, sizeof( readyMasks ) );
   for( i = 0; i < g_maxclients.integer; i++ )
   {
@@ -2293,6 +2297,8 @@ void CheckIntermissionExit( void )
     }
     else
       notReady++;
+
+    numPlayers++;
   }
 
   SV_SetConfigstring( CS_CLIENTS_READY, Com_ClientListString( &readyMasks ) );
@@ -2322,16 +2328,25 @@ void CheckIntermissionExit( void )
     return;
   }
 
-  // the first person to ready starts the thirty second timeout
+  // if only a percent is needed to ready, check for it
+  if( g_intermissionReadyPercent.integer && !IS_SCRIM && numPlayers &&
+      ready * 100 / numPlayers >= g_intermissionReadyPercent.integer &&
+      level.time > level.intermissiontime + 7000 )
+  {
+    ExitLevel( );
+    return;
+  }
+
+  // the first person to ready starts the 15 second timeout
   if( !level.readyToExit )
   {
     level.readyToExit = qtrue;
     level.exitTime = level.time;
   }
 
-  // if we have waited thirty seconds since at least one player
+  // if we have waited 15 seconds since at least one player
   // wanted to exit, go ahead
-  if( level.time < level.exitTime + 30000 )
+  if( level.time < level.exitTime + 15000 )
     return;
 
   ExitLevel( );

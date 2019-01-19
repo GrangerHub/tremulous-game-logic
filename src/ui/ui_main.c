@@ -2569,7 +2569,7 @@ static void UI_LoadHumanArmouryBuys( void )
     {
       uiInfo.humanArmouryBuyList[ j ].text = BG_Weapon( i )->humanName;
       uiInfo.humanArmouryBuyList[ j ].cmd =
-        String_Alloc( va( "cmd buy %s\n", BG_Weapon( i )->name ) );
+        String_Alloc( va( "cmd autosellbuy %s\n", BG_Weapon( i )->name ) );
       uiInfo.humanArmouryBuyList[ j ].type = INFOTYPE_WEAPON;
       uiInfo.humanArmouryBuyList[ j ].v.weapon = i;
 
@@ -2595,7 +2595,7 @@ static void UI_LoadHumanArmouryBuys( void )
 
       uiInfo.humanArmouryBuyList[ j ].text = BG_Upgrade( i )->humanName;
       uiInfo.humanArmouryBuyList[ j ].cmd =
-        String_Alloc( va( "cmd buy %s\n", BG_Upgrade( i )->name ) );
+        String_Alloc( va( "cmd autosellbuy %s\n", BG_Upgrade( i )->name ) );
       uiInfo.humanArmouryBuyList[ j ].type = INFOTYPE_UPGRADE;
       uiInfo.humanArmouryBuyList[ j ].v.upgrade = i;
 
