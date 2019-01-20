@@ -3958,6 +3958,11 @@ static void PM_Weapon( void )
 
   if( pm->ps->weapon == WP_LUCIFER_CANNON )
   {
+    if(!(
+        !pm->swapAttacks ?
+          (pm->cmd.buttons & BUTTON_ATTACK2) : (pm->cmd.buttons & BUTTON_ATTACK))) {
+      pm->ps->pm_flags &= ~PMF_CHARGE_REDUCTION_HELD;
+    }
     // Charging up and charging down
     if( !pm->ps->weaponTime &&
         ( ( !pm->swapAttacks ?
@@ -3969,6 +3974,7 @@ static void PM_Weapon( void )
           (pm->cmd.buttons & BUTTON_ATTACK2) : (pm->cmd.buttons & BUTTON_ATTACK) ) &&
         ( pm->ps->misc[ MISC_MISC ] > 0 ) )
       {
+        pm->ps->pm_flags |= PMF_CHARGE_REDUCTION_HELD;
         pm->ps->misc[ MISC_MISC ] -= pml.msec;
         if( pm->ps->misc[ MISC_MISC ] < 0 )
           pm->ps->misc[ MISC_MISC ] = 0;
@@ -4282,8 +4288,11 @@ static void PM_Weapon( void )
       case WP_LUCIFER_CANNON:
         attack3 = qfalse;
 
-        // Can't fire secondary while primary is charging
-        if( attack1 || pm->ps->misc[ MISC_MISC ] > 0 )
+        // Can't fire secondary while primary is charging nor if secondary charge is still held after reduction
+        if(
+          attack1 ||
+          pm->ps->misc[ MISC_MISC ] > 0 ||
+          (pm->ps->pm_flags & PMF_CHARGE_REDUCTION_HELD) )
           attack2 = qfalse;
 
         if( ( attack1 || pm->ps->misc[ MISC_MISC ] == 0 ) && !attack2 )
