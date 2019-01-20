@@ -286,8 +286,9 @@ typedef enum
 #define PMF_HOPPED          0x020000 // a hop has occurred
 #define PMF_BUNNY_HOPPING   0x040000 // bunny hopping is enabled
 #define PMF_JUMPING         0x080000 // a jump has occurred but has not landed yet
-#define PMF_PAUSE_BEAM      0x100000 //for special cases of when continous beam wepons are not being fired 
-#define PMF_WEAPON_FORCE_RELOAD  0x200000 // for delaying a weapon change
+#define PMF_PAUSE_BEAM      0x100000 //for special cases of when continous beam wepons are not being fired
+#define PMF_CHARGE_REDUCTION_HELD 0x200000
+#define PMF_WEAPON_FORCE_RELOAD  0x400000 // for delaying a weapon change
 
 
 #define PMF_ALL_TIMES (PMF_TIME_WATERJUMP|PMF_TIME_LAND|PMF_TIME_KNOCKBACK|PMF_TIME_WALLJUMP)
