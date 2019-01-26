@@ -591,7 +591,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define JETPACK_FUEL_MIN_START      150 // Minimum fuel required to start the jet
 #define JETPACK_ACT_BOOST_FUEL_USE  ( JETPACK_FUEL_USAGE * 2 )
 #define JETPACK_ACT_BOOST_TIME      750
-#define JETPACK_ACT_BOOST_SPEED     280.0f
+#define JETPACK_ACT_BOOST_SPEED     224.0f
 #define JETPACK_FUEL_RECHARGE       4 // every 100ms
 
 #define BSUIT_PRICE                 400

@@ -237,6 +237,7 @@ static void PM_Friction( void )
   float   *vel;
   float   speed, newspeed, control;
   float   drop;
+  qboolean groundFriction = qfalse;
 
   vel = pm->ps->velocity;
 
@@ -265,6 +266,7 @@ static void PM_Friction( void )
 
         control = speed < stopSpeed ? stopSpeed : speed;
         drop += control * friction * pml.frametime;
+        groundFriction = qtrue;
       }
     }
   }
@@ -289,7 +291,12 @@ static void PM_Friction( void )
 
   vel[ 0 ] = vel[ 0 ] * newspeed;
   vel[ 1 ] = vel[ 1 ] * newspeed;
-  vel[ 2 ] = vel[ 2 ] * newspeed;
+  // Don't reduce upward velocity while using a jetpack
+  if( !( pm->ps->pm_type == PM_JETPACK &&
+         vel[2] > 0 &&
+         !groundFriction &&
+         !pm->waterlevel ) )
+    vel[ 2 ] = vel[ 2 ] * newspeed;
 }
 
 
@@ -665,6 +672,9 @@ static void PM_WallCoast( vec3_t wishDir, wallcoast_t grounded )
   float ramFactor;    
   // Resulting direction.
   vec3_t result;
+
+  //disable
+  return;
 
   // Get the ground normal.
   if( pml.groundPlane )
