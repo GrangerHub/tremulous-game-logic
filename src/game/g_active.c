@@ -888,17 +888,32 @@ void ClientTimerActions( gentity_t *ent, int msec )
       }
     }
 
-    //use fuel
-    if( BG_InventoryContainsUpgrade( UP_JETPACK, ent->client->ps.stats ) &&
-        BG_UpgradeIsActive( UP_JETPACK, ent->client->ps.stats ) &&
-        ent->client->ps.stats[ STAT_FUEL ] > 0 )
+    // jet fuel
+    if( BG_InventoryContainsUpgrade( UP_JETPACK, ent->client->ps.stats ) )
     {
-      ent->client->ps.stats[ STAT_FUEL ] -= JETPACK_FUEL_USAGE;
-      if( ent->client->ps.stats[ STAT_FUEL ] <= 0 )
+      if( BG_UpgradeIsActive( UP_JETPACK, ent->client->ps.stats ) )
       {
-        ent->client->ps.stats[ STAT_FUEL ] = 0;
-        BG_DeactivateUpgrade( UP_JETPACK, client->ps.stats );
-        BG_AddPredictableEventToPlayerstate( EV_JETPACK_DEACTIVATE, 0, &client->ps );
+        if( ent->client->ps.stats[ STAT_FUEL ] > 0 )
+        {
+          // use fuel
+          if( ent->client->ps.persistant[PERS_JUMPTIME] > JETPACK_ACT_BOOST_TIME )
+            ent->client->ps.stats[ STAT_FUEL ] -= JETPACK_FUEL_USAGE;
+          else
+            ent->client->ps.stats[ STAT_FUEL ] -= JETPACK_ACT_BOOST_FUEL_USE;
+          if( ent->client->ps.stats[ STAT_FUEL ] <= 0 )
+          {
+            ent->client->ps.stats[ STAT_FUEL ] = 0;
+            BG_DeactivateUpgrade( UP_JETPACK, client->ps.stats );
+            BG_AddPredictableEventToPlayerstate( EV_JETPACK_DEACTIVATE, 0, &client->ps );
+          }
+        }
+      } else if( ent->client->ps.stats[ STAT_FUEL ] < JETPACK_FUEL_FULL &&
+                 G_Reactor( ) )
+      {
+        // recharge fuel
+        ent->client->ps.stats[ STAT_FUEL ] += JETPACK_FUEL_RECHARGE;
+        if( ent->client->ps.stats[ STAT_FUEL ] > JETPACK_FUEL_FULL )
+          ent->client->ps.stats[ STAT_FUEL ] = JETPACK_FUEL_FULL;
       }
     }
 
@@ -1887,7 +1902,8 @@ void ClientThink_real( gentity_t *ent )
   else if( client->ps.stats[ STAT_STATE ] & SS_BLOBLOCKED ||
            client->ps.stats[ STAT_STATE ] & SS_GRABBED )
     client->ps.pm_type = PM_GRABBED;
-  else if( BG_InventoryContainsUpgrade( UP_JETPACK, client->ps.stats ) && BG_UpgradeIsActive( UP_JETPACK, client->ps.stats ) )
+  else if( BG_InventoryContainsUpgrade( UP_JETPACK, client->ps.stats ) &&
+           BG_UpgradeIsActive( UP_JETPACK, client->ps.stats ) )
     client->ps.pm_type = PM_JETPACK;
   else
     client->ps.pm_type = PM_NORMAL;

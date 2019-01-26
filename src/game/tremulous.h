@@ -579,14 +579,20 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define BATTPACK_PRICE              100
 #define BATTPACK_MODIFIER           1.5f //modifier for extra energy storage available
 
+#define JETPACK_FULL_FUEL_PRICE     90
 #define JETPACK_PRICE               120
-#define JETPACK_FLOAT_SPEED         128.0f //up movement speed
+#define JETPACK_FLOAT_SPEED         144.0f //up movement speed
 #define JETPACK_SINK_SPEED          192.0f //down movement speed
 #define JETPACK_DISABLE_TIME        1000 //time to disable the jetpack when player damaged
 #define JETPACK_DISABLE_CHANCE      0.3f
-#define JETPACK_FUEL_FULL           7500 //can't exceed 32767
-#define JETPACK_FUEL_LOW            1500
-#define JETPACK_FUEL_USAGE          8 //every 100ms
+#define JETPACK_FUEL_FULL           5000 //can't exceed 32767
+#define JETPACK_FUEL_LOW            1000
+#define JETPACK_FUEL_USAGE          12 //every 100ms
+#define JETPACK_FUEL_MIN_START      150 // Minimum fuel required to start the jet
+#define JETPACK_ACT_BOOST_FUEL_USE  ( JETPACK_FUEL_USAGE * 2 )
+#define JETPACK_ACT_BOOST_TIME      750
+#define JETPACK_ACT_BOOST_SPEED     280.0f
+#define JETPACK_FUEL_RECHARGE       4 // every 100ms
 
 #define BSUIT_PRICE                 400
 #define BSUIT_POISON_PROTECTION     3000

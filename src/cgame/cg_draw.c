@@ -990,7 +990,9 @@ static void CG_DrawJetpackIcon( rectDef_t *rect, vec4_t color,
 
   if( cg.predictedPlayerState.stats[ STAT_FUEL ] <= JETPACK_FUEL_LOW )
   {
-    if( cg.predictedPlayerState.stats[ STAT_FUEL ] > 0 )
+    if( ( cg.predictedPlayerState.stats[ STAT_FUEL ] > 0 &&
+          BG_UpgradeIsActive( UP_JETPACK, cg.predictedPlayerState.stats ) ) ||
+        cg.predictedPlayerState.stats[ STAT_FUEL ] > JETPACK_FUEL_MIN_START )
     {
       cg.jetpackIconAlert += cg.frametime / 500.0f;
       if( color[0] + cg.jetpackIconAlert > 1.0f )
@@ -1040,7 +1042,9 @@ static void CG_DrawJetpackFuel( rectDef_t *rect, vec4_t color )
 
   if( cg.predictedPlayerState.stats[ STAT_FUEL ] <= JETPACK_FUEL_LOW )
   {
-    if( cg.predictedPlayerState.stats[ STAT_FUEL ] > 0 )
+    if( ( cg.predictedPlayerState.stats[ STAT_FUEL ] > 0 &&
+          BG_UpgradeIsActive( UP_JETPACK, cg.predictedPlayerState.stats ) ) ||
+        cg.predictedPlayerState.stats[ STAT_FUEL ] > JETPACK_FUEL_MIN_START )
     {
       color[0] += cg.jetpackIconAlert;
       if( color[0] > 1.0f )

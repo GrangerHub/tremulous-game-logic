@@ -653,20 +653,34 @@ static void CG_HumanText( char *text, playerState_t *ps )
         CG_KeyNameForCommand( "+button8" ) ) );
 
   if( BG_InventoryContainsUpgrade( UP_JETPACK, ps->stats ) )
+  {
+    if( ps->stats[ STAT_FUEL ] >= JETPACK_FUEL_MIN_START )
     {
-      if( ( ps->stats[ STAT_FUEL ] <= JETPACK_FUEL_LOW ) && ( ps->stats[ STAT_FUEL ] > 0 )  )
-      {
-        Q_strcat( text, MAX_TUTORIAL_TEXT,
-                  va( "You are running low on jet fuel. Find an Armoury and press %s to refuel\n",
-                      CG_KeyNameForCommand( "buy ammo" ) ) );
-      }
-      else if( ps->stats[ STAT_FUEL ] <= 0 )
-      {
-        Q_strcat( text, MAX_TUTORIAL_TEXT,
-                  va( "You are out of jet fuel. You can no longer fly. Find an Armoury and press %s to refuel\n",
-                      CG_KeyNameForCommand( "buy ammo" ) ) );
-      }
+      Q_strcat( text, MAX_TUTORIAL_TEXT,
+                 va( "%sress and hold %s while off of the ground to activate the jetpack\n",
+                     ps->groundEntityNum == ENTITYNUM_NONE ? "P" : va( "Jump off the ground by pressing %s, then p",
+                                                                       CG_KeyNameForCommand( "+moveup" ) ),
+                     CG_KeyNameForCommand( "+moveup" ) ) );
     }
+
+    if( ps->stats[ STAT_FUEL ] < JETPACK_FUEL_MIN_START &&
+             !BG_UpgradeIsActive( UP_JETPACK, ps->stats ) )
+    {
+             Q_strcat( text, MAX_TUTORIAL_TEXT,
+                       va( "You don't have enough jet fuel to activate your jetpack. Find an Armoury to buy jet fuel, or wait for your jet fuel to regenerate\n" ) );
+    }
+    else if( ps->stats[ STAT_FUEL ] <= JETPACK_FUEL_LOW &&
+             ps->stats[ STAT_FUEL ] > 0 )
+    {
+      Q_strcat( text, MAX_TUTORIAL_TEXT,
+                va( "You are running low on jet fuel. Find an Armoury to buy jet fuel, or wait for your jet fuel to regenerate while your jetpack is deactivated\n" ) );
+    }
+    else if( ps->stats[ STAT_FUEL ] <= 0 )
+    {
+      Q_strcat( text, MAX_TUTORIAL_TEXT,
+                va( "You are out of jet fuel. You can no longer fly. Find an Armoury to buy jet fuel, or wait for your jet fuel to regenerate\n" ) );
+    }
+  }
 }
 
 /*
