@@ -673,9 +673,6 @@ static void PM_WallCoast( vec3_t wishDir, wallcoast_t grounded )
   // Resulting direction.
   vec3_t result;
 
-  //disable
-  return;
-
   // Get the ground normal.
   if( pml.groundPlane )
     groundNormal = pml.groundTrace.plane.normal;
@@ -1882,7 +1879,6 @@ static void PM_WaterMove( void )
   if( wishspeed > pm->ps->speed * pm_swimScale )
     wishspeed = pm->ps->speed * pm_swimScale;
 
-  PM_WallCoast( wishdir, WALLCOAST_3D );
   PM_Accelerate( wishdir, wishspeed, pm_wateraccelerate );
 
   // make sure we can go up slopes easily under water
@@ -2004,7 +2000,6 @@ static void PM_FlyMove( void )
   VectorCopy( wishvel, wishdir );
   wishspeed = VectorNormalize( wishdir );
 
-  PM_WallCoast( wishdir, WALLCOAST_3D );
   PM_Accelerate( wishdir, wishspeed, pm_flyaccelerate );
 
   PM_StepSlideMove( qfalse, qfalse );
@@ -2042,8 +2037,6 @@ static void PM_AirMove( void )
   }
   else
     controlFactor = 1.0f;
-
-  PM_WallCoast( wishdir, WALLCOAST_GROUNDED );
 
   // Give marauders more air control. Let them redirect their momentum in the
   // air and increase their acceleration when they accelerate against their
@@ -2288,7 +2281,6 @@ static void PM_WalkMove( void )
   else
     accelerate = BG_Class( pm->ps->stats[ STAT_CLASS ] )->acceleration;
 
-  PM_WallCoast( wishdir, WALLCOAST_GROUNDED );
   PM_Accelerate( wishdir, wishspeed, accelerate );
 
   //Com_Printf("velocity = %1.1f %1.1f %1.1f\n", pm->ps->velocity[0], pm->ps->velocity[1], pm->ps->velocity[2]);
@@ -4807,10 +4799,10 @@ static void PM_DropTimers( void )
     }
   }
 
-  // the jump timer increases
+  // the jump timer increases to a max of 10 seconds
   if( pm->ps->persistant[PERS_JUMPTIME] < 0 )
     pm->ps->persistant[PERS_JUMPTIME] = 0;
-  else
+  else if( pm->ps->persistant[PERS_JUMPTIME] < 10000 )
     pm->ps->persistant[PERS_JUMPTIME] += pml.msec;
 
   // pulsating beam timers
