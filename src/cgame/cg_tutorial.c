@@ -680,10 +680,6 @@ static void CG_HumanText( char *text, playerState_t *ps )
                   key_string_1,
                   key_string_2) );
 
-            Q_strcat( text, MAX_TUTORIAL_TEXT,
-                va( "Release %s to ascend with the jetpack\n",
-                  CG_KeyNameForCommand( "+speed" )) );
-
             Q_strncpyz(
               key_string_1,
               CG_KeyNameForCommand( "+moveup" ), sizeof(key_string_1));
@@ -707,53 +703,64 @@ static void CG_HumanText( char *text, playerState_t *ps )
 
             Q_strncpyz(
               key_string_1, 
-              CG_KeyNameForCommand( "+speed" ), sizeof(key_string_1));
+              CG_KeyNameForCommand( "+movedown" ), sizeof(key_string_1));
             Q_strncpyz(
               key_string_2, 
-              CG_KeyNameForCommand( "+movedown" ), sizeof(key_string_2));
-            Q_strncpyz(
-              key_string_3, 
-              CG_KeyNameForCommand( "+moveup" ), sizeof(key_string_3));
+              CG_KeyNameForCommand( "+moveup" ), sizeof(key_string_2));
             Q_strcat( text, MAX_TUTORIAL_TEXT,
-                va( "Release %s and %s while holding %s to ascend with the jetpack\n",
+                va( "Release %s and hold %s to ascend with the jetpack\n",
                   key_string_1,
-                  key_string_2,
-                  key_string_3 ) );
+                  key_string_2 ) );
           } else {
             Q_strcat( text, MAX_TUTORIAL_TEXT,
                 va( "Release %s to deactivate the jetpack\n",
                   CG_KeyNameForCommand( "+speed" )) );
 
                   
+            Q_strcat( text, MAX_TUTORIAL_TEXT,
+                va( "Hold down %s to ascend with the jetpack\n",
+                  CG_KeyNameForCommand( "+moveup" ) ) );
+
             Q_strncpyz(
               key_string_1,
-              CG_KeyNameForCommand( "+speed" ), sizeof(key_string_1));
+              CG_KeyNameForCommand( "+movedown" ), sizeof(key_string_1));
             Q_strncpyz(
               key_string_2,
-              CG_KeyNameForCommand( "+moveup" ), sizeof(key_string_2));
+              CG_KeyNameForCommand( "+speed" ), sizeof(key_string_2));
             Q_strcat( text, MAX_TUTORIAL_TEXT,
-                va( "Release %s while holding %s to ascend with the jetpack\n",
+                va( "Hold down %s and %s to descend with the jetpack\n",
                   key_string_1,
                   key_string_2 ) );
-
-            Q_strcat( text, MAX_TUTORIAL_TEXT,
-                va( "Hold down %s to descend with the jetpack\n",
-                  CG_KeyNameForCommand( "+movedown" ) ) );
           }
         } else {
           Q_strcat( text, MAX_TUTORIAL_TEXT,
               va( "Release %s to deactivate with the jetpack\n",
                 CG_KeyNameForCommand( "+moveup" )) );
+
+          Q_strncpyz(
+            key_string_1,
+            CG_KeyNameForCommand( "+speed" ), sizeof(key_string_1));
+          Q_strncpyz(
+            key_string_2,
+            CG_KeyNameForCommand( "+moveup" ), sizeof(key_string_2));
           Q_strcat( text, MAX_TUTORIAL_TEXT,
-              va( "Hold down %s to hover with the jetpack\n",
-                CG_KeyNameForCommand( "+speed" ) ) );
+              va( "Release %s and hold down %s to hover with the jetpack\n",
+                key_string_1,
+                key_string_2) );
         }
       } else {
+        Q_strncpyz(
+          key_string_1,
+          CG_KeyNameForCommand( "+moveup" ), sizeof(key_string_1));
+        Q_strncpyz(
+          key_string_2,
+          CG_KeyNameForCommand( "+speed" ), sizeof(key_string_2));
         Q_strcat( text, MAX_TUTORIAL_TEXT,
-                   va( "%sress and hold %s while off of the ground to activate the jetpack\n",
+                   va( "%sress and hold %s or %s while off of the ground to activate the jetpack\n",
                        ps->groundEntityNum == ENTITYNUM_NONE ? "P" : va( "Jump off the ground by pressing %s, then p",
                                                                          CG_KeyNameForCommand( "+moveup" ) ),
-                       CG_KeyNameForCommand( "+moveup" ) ) );
+                       key_string_1,
+                       key_string_2) );
       }
     }
 

@@ -1912,7 +1912,7 @@ static void PM_JetPackMove( void )
 
   wishvel[2] = 0.0f;
 
-  if( pm->cmd.upmove > 0.0f && !( pm->cmd.buttons & BUTTON_WALKING ) )
+  if( pm->cmd.upmove > 0.0f )
   {
     vec3_t thrustDir = { 0.0f, 0.0f, 1.0f };
 
@@ -5205,7 +5205,7 @@ void PmoveSingle( pmove_t *pmove )
   PM_CheckLadder( );
 
   // jet activation
-  if( pm->cmd.upmove >= 10 &&
+  if( (pm->cmd.upmove >= 10 || ( pm->cmd.buttons & BUTTON_WALKING )) &&
       BG_InventoryContainsUpgrade( UP_JETPACK, pm->ps->stats ) &&
       !BG_UpgradeIsActive( UP_JETPACK, pm->ps->stats ) &&
       ( pm->ps->groundEntityNum == ENTITYNUM_NONE ||
