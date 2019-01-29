@@ -1912,7 +1912,7 @@ static void PM_JetPackMove( void )
 
   wishvel[2] = 0.0f;
 
-  if( pm->cmd.upmove > 0.0f )
+  if( pm->cmd.upmove > 0.0f && !( pm->cmd.buttons & BUTTON_WALKING ) )
   {
     vec3_t thrustDir = { 0.0f, 0.0f, 1.0f };
 
@@ -5148,7 +5148,8 @@ void PmoveSingle( pmove_t *pmove )
 
     // deactivate the jet
     if( BG_InventoryContainsUpgrade( UP_JETPACK, pm->ps->stats ) &&
-        BG_UpgradeIsActive( UP_JETPACK, pm->ps->stats ) )
+        BG_UpgradeIsActive( UP_JETPACK, pm->ps->stats ) &&
+        !( pm->cmd.buttons & BUTTON_WALKING ) )
     {
       BG_DeactivateUpgrade( UP_JETPACK, pm->ps->stats );
       pm->ps->pm_type = PM_NORMAL;

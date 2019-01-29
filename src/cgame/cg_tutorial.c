@@ -656,11 +656,105 @@ static void CG_HumanText( char *text, playerState_t *ps )
   {
     if( ps->stats[ STAT_FUEL ] >= JETPACK_FUEL_MIN_START )
     {
-      Q_strcat( text, MAX_TUTORIAL_TEXT,
-                 va( "%sress and hold %s while off of the ground to activate the jetpack\n",
-                     ps->groundEntityNum == ENTITYNUM_NONE ? "P" : va( "Jump off the ground by pressing %s, then p",
-                                                                       CG_KeyNameForCommand( "+moveup" ) ),
-                     CG_KeyNameForCommand( "+moveup" ) ) );
+      char key_string_1[MAX_TUTORIAL_TEXT];
+      char key_string_2[MAX_TUTORIAL_TEXT];
+      char key_string_3[MAX_TUTORIAL_TEXT];
+
+      if(BG_UpgradeIsActive(UP_JETPACK, ps->stats)) {
+        usercmd_t cmd;
+        int       cmdNum;
+
+        cmdNum = trap_GetCurrentCmdNumber( );
+        trap_GetUserCmd( cmdNum, &cmd );
+
+        if(( cmd.buttons & BUTTON_WALKING )) {
+          if(cmd.upmove > 0.0f) {
+            Q_strncpyz(
+              key_string_1,
+              CG_KeyNameForCommand( "+speed" ), sizeof(key_string_1));
+            Q_strncpyz(
+              key_string_2,
+              CG_KeyNameForCommand( "+moveup" ), sizeof(key_string_2));
+            Q_strcat( text, MAX_TUTORIAL_TEXT,
+                va( "Release %s and %s to deactivate with the jetpack\n",
+                  key_string_1,
+                  key_string_2) );
+
+            Q_strcat( text, MAX_TUTORIAL_TEXT,
+                va( "Release %s to ascend with the jetpack\n",
+                  CG_KeyNameForCommand( "+speed" )) );
+
+            Q_strncpyz(
+              key_string_1,
+              CG_KeyNameForCommand( "+moveup" ), sizeof(key_string_1));
+            Q_strncpyz(
+              key_string_2,
+              CG_KeyNameForCommand( "+speed" ), sizeof(key_string_2));
+            Q_strncpyz(
+              key_string_3,
+              CG_KeyNameForCommand( "+movedown" ), sizeof(key_string_3));
+            Q_strcat( text, MAX_TUTORIAL_TEXT,
+                va( "Release %s while holding %s and %s to descend with the jetpack\n",
+                  key_string_1,
+                  key_string_2,
+                  key_string_3 ) );
+          } else if(cmd.upmove < 0.0f) {
+            Q_strcat( text, MAX_TUTORIAL_TEXT,
+                va( "Release %s to deactivate the jetpack\n",
+                  CG_KeyNameForCommand( "+speed" )) );
+
+                  
+
+            Q_strncpyz(
+              key_string_1, 
+              CG_KeyNameForCommand( "+speed" ), sizeof(key_string_1));
+            Q_strncpyz(
+              key_string_2, 
+              CG_KeyNameForCommand( "+movedown" ), sizeof(key_string_2));
+            Q_strncpyz(
+              key_string_3, 
+              CG_KeyNameForCommand( "+moveup" ), sizeof(key_string_3));
+            Q_strcat( text, MAX_TUTORIAL_TEXT,
+                va( "Release %s and %s while holding %s to ascend with the jetpack\n",
+                  key_string_1,
+                  key_string_2,
+                  key_string_3 ) );
+          } else {
+            Q_strcat( text, MAX_TUTORIAL_TEXT,
+                va( "Release %s to deactivate the jetpack\n",
+                  CG_KeyNameForCommand( "+speed" )) );
+
+                  
+            Q_strncpyz(
+              key_string_1,
+              CG_KeyNameForCommand( "+speed" ), sizeof(key_string_1));
+            Q_strncpyz(
+              key_string_2,
+              CG_KeyNameForCommand( "+moveup" ), sizeof(key_string_2));
+            Q_strcat( text, MAX_TUTORIAL_TEXT,
+                va( "Release %s while holding %s to ascend with the jetpack\n",
+                  key_string_1,
+                  key_string_2 ) );
+
+            Q_strcat( text, MAX_TUTORIAL_TEXT,
+                va( "Hold down %s to descend with the jetpack\n",
+                  CG_KeyNameForCommand( "+movedown" ) ) );
+          }
+        } else {
+          Q_strcat( text, MAX_TUTORIAL_TEXT,
+              va( "Release %s to deactivate with the jetpack\n",
+                CG_KeyNameForCommand( "+moveup" )) );
+          Q_strcat( text, MAX_TUTORIAL_TEXT,
+              va( "Hold down %s to hover with the jetpack\n",
+                CG_KeyNameForCommand( "+speed" ) ) );
+        }
+      } else {
+        Q_strcat( text, MAX_TUTORIAL_TEXT,
+                   va( "%sress and hold %s while off of the ground to activate the jetpack\n",
+                       ps->groundEntityNum == ENTITYNUM_NONE ? "P" : va( "Jump off the ground by pressing %s, then p",
+                                                                         CG_KeyNameForCommand( "+moveup" ) ),
+                       CG_KeyNameForCommand( "+moveup" ) ) );
+      }
     }
 
     if( ps->stats[ STAT_FUEL ] < JETPACK_FUEL_MIN_START &&
