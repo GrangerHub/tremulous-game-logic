@@ -1899,12 +1899,12 @@ void ClientThink_real( gentity_t *ent )
             ( ent->occupation.occupied->occupation.flags &
               OCCUPYF_PM_TYPE ) )
     client->ps.pm_type = ent->occupation.occupied->occupation.pm_type;
-  else if( client->ps.stats[ STAT_STATE ] & SS_BLOBLOCKED ||
-           client->ps.stats[ STAT_STATE ] & SS_GRABBED )
-    client->ps.pm_type = PM_GRABBED;
   else if( BG_InventoryContainsUpgrade( UP_JETPACK, client->ps.stats ) &&
            BG_UpgradeIsActive( UP_JETPACK, client->ps.stats ) )
     client->ps.pm_type = PM_JETPACK;
+  else if( client->ps.stats[ STAT_STATE ] & SS_BLOBLOCKED ||
+           client->ps.stats[ STAT_STATE ] & SS_GRABBED )
+    client->ps.pm_type = PM_GRABBED;
   else
     client->ps.pm_type = PM_NORMAL;
 

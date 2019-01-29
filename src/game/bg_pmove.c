@@ -859,8 +859,6 @@ without getting a sqrt(2) distortion in speed.
 */
 static float PM_CmdScale( usercmd_t *cmd, qboolean zFlight )
 {
-  static float HUMAN_WALL_MODIFIER = 1.15f;
-  static float ALIEN_WALL_MODIFIER = 1.2f;
   int         max;
   float       total;
   float       scale;
@@ -921,10 +919,7 @@ static float PM_CmdScale( usercmd_t *cmd, qboolean zFlight )
    {
      //can't move that fast sideways
      modifier *= HUMAN_SIDE_MODIFIER;
-     modifier *= MIX( HUMAN_SIDE_MODIFIER, 1.0f, pml.wallSpeedFactor );
    }
- 
-  modifier *= MIX( 1.0f, HUMAN_WALL_MODIFIER, pml.wallSpeedFactor );
 
     if( !zFlight )
     {
@@ -952,10 +947,6 @@ static float PM_CmdScale( usercmd_t *cmd, qboolean zFlight )
         modifier *= PCLOUD_ARMOUR_MODIFIER;
       else
         modifier *= PCLOUD_MODIFIER;
-    }
-    else if( pm->ps->stats[ STAT_TEAM ] == TEAM_ALIENS )
-    {
-      modifier *= MIX( 1.0f, ALIEN_WALL_MODIFIER, pml.wallSpeedFactor );
     }
   }
 
@@ -1918,6 +1909,8 @@ static void PM_JetPackMove( void )
   // user intentions
   for( i = 0; i < 2; i++ )
     wishvel[ i ] = scale * pml.forward[ i ] * pm->cmd.forwardmove + scale * pml.right[ i ] * pm->cmd.rightmove;
+
+  wishvel[2] = 0.0f;
 
   if( pm->cmd.upmove > 0.0f )
   {
@@ -3651,8 +3644,6 @@ static void PM_Footsteps( void )
 
   if( pm->ps->stats[ STAT_STATE ] & SS_SPEEDBOOST )
     bobmove *= HUMAN_SPRINT_MODIFIER;
-
-  bobmove *= MIX( 1.0f, 1.15f, pml.wallSpeedFactor );
 
   // check for footstep / splash sounds
   old = pm->ps->bobCycle;
