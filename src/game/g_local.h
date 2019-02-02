@@ -1639,6 +1639,7 @@ extern  vmCvar_t   g_damageProtection;
 extern  vmCvar_t   g_targetProtection;
 
 extern  vmCvar_t  g_humanStaminaMode; // when set to 0, human stamina doesn't drain
+extern  vmCvar_t  g_playerAccelMode; // when set to 1, strafe jumping is enabled
 extern  vmCvar_t  g_friendlyFire;
 extern  vmCvar_t  g_friendlyBuildableFire;
 extern  vmCvar_t  g_friendlyFireLastSpawnProtection;
