@@ -190,6 +190,8 @@ enum
 
   CS_DEVMODE,
 
+  CS_PHYSICS,
+
   CS_HUMAN_STAMINA_MODE,
 
   CS_HUMAN_PORTAL_CREATETIME,
@@ -349,6 +351,8 @@ struct pmove_s
   int           pmove_msec;
 
   int           humanStaminaMode; // when set to 0, human stamina doesn't drain
+
+  int           playerAccelMode; // when set to 1, strafe jumping is enabled
 
   // callbacks to test the world
   // these will be different functions during game and cgame

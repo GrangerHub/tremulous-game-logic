@@ -512,6 +512,8 @@ static void CG_ConfigStringModified( void )
     cgs.devMode = atoi( CG_ConfigString( CS_DEVMODE ) );
     trap_Cvar_Set( "ui_devMode", va( "%d", cgs.devMode ) );
   }
+  else if( num == CS_PHYSICS )
+    cgs.playerAccelMode = atoi( str );
   else if( num == CS_HUMAN_STAMINA_MODE )
     cgs.humanStaminaMode = atoi( str );
   else if( num >= CS_HUMAN_PORTAL_CREATETIME && num < CS_HUMAN_PORTAL_CREATETIME + PORTAL_NUM )

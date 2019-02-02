@@ -535,7 +535,6 @@ void G_Scrim_Check_Win_Conditions(void) {
         level.scrim.swap_teams = qtrue;
       }
 
-      Cvar_SetSafe( "g_lockTeamsAtStart", "1" );
       Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
       Cvar_SetSafe( "g_nextMap", map);
     }

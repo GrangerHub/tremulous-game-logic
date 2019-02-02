@@ -2513,6 +2513,8 @@ void ClientThink_real( gentity_t *ent )
 
   pm.humanStaminaMode = g_humanStaminaMode.integer;
 
+  pm.playerAccelMode = g_playerAccelMode.integer;
+
   pm.tauntSpam = 0;
 
   pm.swapAttacks = client->pers.swapAttacks;

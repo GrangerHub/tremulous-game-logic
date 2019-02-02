@@ -1514,6 +1514,7 @@ typedef struct
   // warmup-related values parsed from config strings
   qboolean      warmup;                 // Is it currently pre-game warmup?
   int           humanStaminaMode;       // when set to 0, human stamina doesn't drain
+  int           playerAccelMode;        // when set to 1, strafe jumping is enabled
   int           humanPortalCreateTime[ PORTAL_NUM ]; // delay firing timer for created portals
   float         percentAliensReady;     // Percentage of alien players ready
   int           numAliensReady;         // Number of alien players ready
