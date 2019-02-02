@@ -426,25 +426,61 @@ gravity, use PM_AccelerateHorizontal to avoid that.
 */
 static void PM_Accelerate( vec3_t wishDir, float wishSpeed, float accel )
 {
-  // How much to push the player during this frame.
-  float push = accel * pml.frametime * wishSpeed;
-  // Original speed of the player.
-  float originalSpeed = VectorLength( pm->ps->velocity );
-  // Speed of the player immediately after being pushed.
-  float pushedSpeed;
+  if(pm->playerAccelMode == 1) {
+#if 1
+    // q2 style
+    int     i;
+    float   addspeed, accelspeed, currentspeed;
 
-  // Push the player in the intended direction.
-  VectorMA( pm->ps->velocity, push, wishDir, pm->ps->velocity );
-  pushedSpeed = VectorLength( pm->ps->velocity );
+    currentspeed = DotProduct( pm->ps->velocity, wishDir );
+    addspeed = wishSpeed - currentspeed;
+    if( addspeed <= 0 )
+      return;
 
-  // If the push accelerated the player past the maximum movement speed, limit
-  // the resulting speed to either the maximum movement speed or to the original
-  // speed if the player was already going faster than that.
-  if( pushedSpeed > originalSpeed && pushedSpeed > wishSpeed )
-  {
-    float speedLimit = MAX( wishSpeed, originalSpeed );
-    VectorNormalize( pm->ps->velocity );
-    VectorScale( pm->ps->velocity, speedLimit, pm->ps->velocity );
+    accelspeed = accel * pml.frametime * wishSpeed;
+    if( accelspeed > addspeed )
+      accelspeed = addspeed;
+
+    for( i = 0; i < 3; i++ )
+      pm->ps->velocity[ i ] += accelspeed * wishDir[ i ];
+#else
+    // proper way (avoids strafe jump maxspeed bug), but feels bad
+    vec3_t    wishVelocity;
+    vec3_t    pushDir;
+    float     pushLen;
+    float     canPush;
+
+    VectorScale( wishdir, wishspeed, wishVelocity );
+    VectorSubtract( wishVelocity, pm->ps->velocity, pushDir );
+    pushLen = VectorNormalize( pushDir );
+
+    canPush = accel * pml.frametime * wishspeed;
+    if( canPush > pushLen )
+      canPush = pushLen;
+
+    VectorMA( pm->ps->velocity, canPush, pushDir, pm->ps->velocity );
+#endif
+  } else {
+    // How much to push the player during this frame.
+    float push = accel * pml.frametime * wishSpeed;
+    // Original speed of the player.
+    float originalSpeed = VectorLength( pm->ps->velocity );
+    // Speed of the player immediately after being pushed.
+    float pushedSpeed;
+
+    // Push the player in the intended direction.
+    VectorMA( pm->ps->velocity, push, wishDir, pm->ps->velocity );
+    pushedSpeed = VectorLength( pm->ps->velocity );
+
+    // If the push accelerated the player past the maximum movement speed, limit
+    // the resulting speed to either the maximum movement speed or to the original
+    // speed if the player was already going faster than that.
+    if( pushedSpeed > originalSpeed && pushedSpeed > wishSpeed )
+    {
+      float speedLimit = MAX( wishSpeed, originalSpeed );
+      VectorNormalize( pm->ps->velocity );
+      VectorScale( pm->ps->velocity, speedLimit, pm->ps->velocity );
+    }
   }
 }
 
@@ -1485,7 +1521,7 @@ static qboolean PM_CheckJump( vec3_t customNormal )
 
   VectorMA( pm->ps->velocity, jumpMagnitude, normal, pm->ps->velocity );
 
-  if( pm->cmd.forwardmove > 0 )
+  if( pm->playerAccelMode == 0 && pm->cmd.forwardmove > 0 )
   {
     // Add some ground speed as well, but limit the maximum speed. Returns from
     // subsequent jumps are diminishing, to prevent players from accelerating

@@ -75,6 +75,7 @@ vmCvar_t  g_damageProtection;
 vmCvar_t  g_targetProtection;
 
 vmCvar_t  g_humanStaminaMode;
+vmCvar_t  g_playerAccelMode;
 vmCvar_t  g_friendlyFire;
 vmCvar_t  g_friendlyBuildableFire;
 vmCvar_t  g_friendlyFireLastSpawnProtection;
@@ -273,6 +274,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_synchronousClients, "g_synchronousClients", "0", CVAR_SYSTEMINFO, 0, qfalse  },
 
   { &g_humanStaminaMode, "g_humanStaminaMode", "1", CVAR_ARCHIVE, 0, qtrue  },
+  { &g_playerAccelMode, "g_playerAccelMode", "0",CVAR_ARCHIVE, 0, qtrue },
   { &g_friendlyFire, "g_friendlyFire", "75", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qtrue  },
   { &g_friendlyBuildableFire, "g_friendlyBuildableFire", "100", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qtrue  },
   { &g_friendlyFireLastSpawnProtection, "g_friendlyFireLastSpawnProtection", "1", CVAR_ARCHIVE, 0, qtrue },
@@ -3064,6 +3066,7 @@ void CheckCvars(void) {
   static int lastExtendTimeLimit          =  0;
   static int lastHumanStaminaModeModCount = -1;
   static int lastCheatsModCount           = -1;
+  static int lastPlayerAccelModeModCount  = -1;
   static int lastUnlaggedModCount         = -1;
   static int lastDoWarmupModCount         = 0;
   static int lastAllowScrimsModCount      = -1;
@@ -3189,6 +3192,11 @@ void CheckCvars(void) {
 
   if(g_cheats.modificationCount != lastCheatsModCount) {
     SV_SetConfigstring(CS_DEVMODE, va("%i", g_cheats.integer));
+  }
+
+  if(g_playerAccelMode.modificationCount != lastPlayerAccelModeModCount) {
+    lastPlayerAccelModeModCount = g_playerAccelMode.modificationCount;
+    SV_SetConfigstring(CS_PHYSICS, va("%i", g_playerAccelMode.integer));
   }
 
   if(g_unlagged.modificationCount != lastUnlaggedModCount) {
