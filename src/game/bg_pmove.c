@@ -3198,6 +3198,8 @@ static void PM_GroundClimbTrace( void )
     pm->ps->pm_time = 0;
   }
 
+  pm->ps->pm_flags &= ~PMF_FEATHER_FALL;
+
   pm->ps->groundEntityNum = trace.entityNum;
 
   // don't reset the z velocity for slopes
@@ -3394,6 +3396,8 @@ static void PM_GroundTrace( void )
     pm->ps->pm_flags &= ~PMF_JUMPING;
     pm->ps->pm_flags |= PMF_HOPPED;
   }
+
+  pm->ps->pm_flags &= ~PMF_FEATHER_FALL;
 
   pm->ps->groundEntityNum = trace.entityNum;
 
