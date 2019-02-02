@@ -212,6 +212,34 @@ static void PM_ForceLegsAnim( int anim )
 
 /*
 ==================
+PM_Gravity
+
+Sreturns the current gravity of the player
+==================
+*/
+int PM_Gravity( playerState_t *ps )
+{
+  if(ps->pm_flags & PMF_FEATHER_FALL) {
+    if(
+      BG_InventoryContainsUpgrade(UP_JETPACK, ps->stats) &&
+      !BG_UpgradeIsActive(UP_JETPACK, ps->stats) &&
+      ps->groundEntityNum == ENTITYNUM_NONE &&
+      ps->persistant[PERS_JUMPTIME] < JETPACK_DEACTIVATION_FALL_TIME) {
+      return ps->gravity *
+      (((float)ps->persistant[PERS_JUMPTIME]) /
+        ((float)JETPACK_DEACTIVATION_FALL_TIME));
+    } else {
+      ps->pm_flags &= ~PMF_FEATHER_FALL;
+      return ps->gravity;
+    }
+  } else {
+    return ps->gravity;
+  }
+}
+
+
+/*
+==================
 PM_ClipVelocity
 
 Slide off of the impacting surface
@@ -1809,7 +1837,7 @@ static void PM_WaterJumpMove( void )
 
   PM_StepSlideMove( qtrue, qfalse );
 
-  pm->ps->velocity[ 2 ] -= pm->ps->gravity * pml.frametime;
+  pm->ps->velocity[ 2 ] -= PM_Gravity(pm->ps) * pml.frametime;
   if( pm->ps->velocity[ 2 ] < 0 )
   {
     // cancel as soon as we are falling down again
@@ -1933,7 +1961,7 @@ static void PM_JetPackMove( void )
   // apply the appropirate amount of gravity if the upward velocity is greater
   // than the max upward jet velocity.
   if( pm->ps->velocity[ 2 ] > wishvel[ 2 ] )
-    pm->ps->velocity[ 2 ] -= MIN( pm->ps->gravity * pml.frametime, pm->ps->velocity[ 2 ] - wishvel[ 2 ] );
+    pm->ps->velocity[ 2 ] -= MIN( PM_Gravity(pm->ps) * pml.frametime, pm->ps->velocity[ 2 ] - wishvel[ 2 ] );
 
   VectorCopy( wishvel, wishdir );
   wishspeed = VectorNormalize( wishdir );
@@ -2057,7 +2085,7 @@ static void PM_AirMove( void )
     // Check if we haven't moved down despite the gravity pulling on us. If this
     // is the case, we're probably stuck between two steep planes, allow jumping
     // as if on a level ground.
-    if( abs( pm->ps->gravity ) > 0 &&
+    if( abs( PM_Gravity(pm->ps) ) > 0 &&
         fabs( pm->ps->origin[ 2 ] - previousZ ) < 0.05f )
       PM_CheckJump( upNormal );
   }
@@ -2160,7 +2188,7 @@ static void PM_ClimbMove( void )
   PM_Accelerate( wishdir, wishspeed, accelerate );
 
   if( ( pml.groundTrace.surfaceFlags & SURF_SLICK ) || pm->ps->pm_flags & PMF_TIME_KNOCKBACK )
-    pm->ps->velocity[ 2 ] -= pm->ps->gravity * pml.frametime;
+    pm->ps->velocity[ 2 ] -= PM_Gravity(pm->ps) * pml.frametime;
 
   vel = VectorLength( pm->ps->velocity );
 
@@ -2280,7 +2308,7 @@ static void PM_WalkMove( void )
   //Com_Printf("velocity1 = %1.1f\n", VectorLength(pm->ps->velocity));
 
   if( ( pml.groundTrace.surfaceFlags & SURF_SLICK ) || pm->ps->pm_flags & PMF_TIME_KNOCKBACK )
-    pm->ps->velocity[ 2 ] -= pm->ps->gravity * pml.frametime;
+    pm->ps->velocity[ 2 ] -= PM_Gravity(pm->ps) * pml.frametime;
   else
   {
     // don't reset the z velocity for slopes
@@ -2514,6 +2542,7 @@ static void PM_CheckLadder( void )
         BG_UpgradeIsActive( UP_JETPACK, pm->ps->stats ) )
     {
       BG_DeactivateUpgrade( UP_JETPACK, pm->ps->stats );
+      pm->ps->pm_flags &= ~PMF_FEATHER_FALL;
       pm->ps->pm_type = PM_NORMAL;
     }
   }
@@ -2675,7 +2704,7 @@ static void PM_CrashLand( void )
   // calculate the exact velocity on landing
   dist = pm->ps->origin[ 2 ] - pml.previous_origin[ 2 ];
   vel = pml.previous_velocity[ 2 ];
-  acc = -pm->ps->gravity;
+  acc = -PM_Gravity(pm->ps);
 
   a = acc / 2;
   b = vel;
@@ -5152,6 +5181,10 @@ void PmoveSingle( pmove_t *pmove )
         !( pm->cmd.buttons & BUTTON_WALKING ) )
     {
       BG_DeactivateUpgrade( UP_JETPACK, pm->ps->stats );
+      if(pm->ps->groundEntityNum == ENTITYNUM_NONE) {
+        pm->ps->persistant[PERS_JUMPTIME] = 0;
+        pm->ps->pm_flags |= PMF_FEATHER_FALL;
+      }
       pm->ps->pm_type = PM_NORMAL;
     }
   }

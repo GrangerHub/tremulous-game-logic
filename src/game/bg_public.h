@@ -287,6 +287,7 @@ typedef enum
 #define PMF_JUMPING         0x080000 // a jump has occurred but has not landed yet
 #define PMF_PAUSE_BEAM      0x100000 //for special cases of when continous beam wepons are not being fired
 #define PMF_CHARGE_REDUCTION_HELD 0x200000
+#define PMF_FEATHER_FALL    0x400000 // for momentary gravity reduction
 
 
 #define PMF_ALL_TIMES (PMF_TIME_WATERJUMP|PMF_TIME_LAND|PMF_TIME_KNOCKBACK|PMF_TIME_WALLJUMP)
@@ -363,6 +364,8 @@ struct pmove_s
   float         wallJumperMinFactor;
   float         marauderMinJumpFactor;
 };
+
+int PM_Gravity( playerState_t *ps );
 
 // if a full pmove isn't done on the client, you can just update the angles
 void PM_UpdateViewAngles( playerState_t *ps, const usercmd_t *cmd );
