@@ -908,7 +908,8 @@ void ClientTimerActions( gentity_t *ent, int msec )
           }
         }
       } else if( ent->client->ps.stats[ STAT_FUEL ] < JETPACK_FUEL_FULL &&
-                 G_Reactor( ) )
+                 G_Reactor( ) &&
+                  !(ent->client->ps.pm_flags & PMF_FEATHER_FALL) )
       {
         // recharge fuel
         ent->client->ps.stats[ STAT_FUEL ] += JETPACK_FUEL_RECHARGE;
