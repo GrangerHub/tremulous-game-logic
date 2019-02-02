@@ -672,6 +672,8 @@ void CG_PredictPlayerState( void )
   
   cg_pmove.humanStaminaMode = cgs.humanStaminaMode;
 
+  cg_pmove.playerAccelMode = cgs.playerAccelMode;
+
   // Like the comments described above, a player's state is entirely
   // re-predicted from the last valid snapshot every client frame, which
   // can be really, really, really slow.  Every old command has to be
