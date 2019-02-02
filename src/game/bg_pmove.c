@@ -496,10 +496,15 @@ horizontal plane.
 static void PM_AccelerateHorizontal( vec3_t wishDir, float wishSpeed,
                                      float accel )
 {
-  float verticalSpeed = pm->ps->velocity[ 2 ];
-  pm->ps->velocity[ 2 ] = 0.0f;
-  PM_Accelerate( wishDir, wishSpeed, accel );
-  pm->ps->velocity[ 2 ] = verticalSpeed;
+  if(pm->playerAccelMode == 1) {
+    PM_Accelerate( wishDir, wishSpeed, accel );
+  } else {
+    float verticalSpeed = pm->ps->velocity[ 2 ];
+
+    pm->ps->velocity[ 2 ] = 0.0f;
+    PM_Accelerate( wishDir, wishSpeed, accel );
+    pm->ps->velocity[ 2 ] = verticalSpeed;
+  }
 }
 
 
