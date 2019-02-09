@@ -2411,42 +2411,84 @@ PM_AirMove
 */
 static void PM_AirMove( void )
 {
-  vec3_t wishdir;
-  float wishspeed;
-  float controlFactor;
-  float accel = BG_Class( pm->ps->stats[ STAT_CLASS ] )->airAcceleration;
+  if(pm->playerAccelMode == 0) {
+    vec3_t wishdir;
+    float wishspeed;
+    float controlFactor;
+    float accel = BG_Class( pm->ps->stats[ STAT_CLASS ] )->airAcceleration;
 
-  // Set the movementDir so clients can rotate the legs for strafing.
-  PM_SetMovementDir( );
+    // Set the movementDir so clients can rotate the legs for strafing.
+    PM_SetMovementDir( );
 
-  PM_GetDesiredDirAndSpeed( wishdir, &wishspeed, upNormal );
-  PM_CheckWallJump( wishdir, wishspeed );
-  PM_Friction( );
+    PM_GetDesiredDirAndSpeed( wishdir, &wishspeed, upNormal );
+    PM_CheckWallJump( wishdir, wishspeed );
+    PM_Friction( );
 
-  // Reduce air control immediately after a wall jump to give the player some
-  // time to actually move a small distance away from the wall even when moving
-  // directly towards it.
-  if( pm->ps->pm_flags & PMF_TIME_WALLJUMP )
-  {
-    float awayFactor = pm->ps->stats[ STAT_STAMINA ] / 100.0f;
-    controlFactor = ( float ) pm->ps->pm_time / WALLJUMP_TIME;
-    controlFactor = pow( controlFactor, awayFactor * 6.0f );
+    // Reduce air control immediately after a wall jump to give the player some
+    // time to actually move a small distance away from the wall even when moving
+    // directly towards it.
+    if( pm->ps->pm_flags & PMF_TIME_WALLJUMP )
+    {
+      float awayFactor = pm->ps->stats[ STAT_STAMINA ] / 100.0f;
+      controlFactor = ( float ) pm->ps->pm_time / WALLJUMP_TIME;
+      controlFactor = pow( controlFactor, awayFactor * 6.0f );
+    }
+    else
+      controlFactor = 1.0f;
+
+    // Give marauders more air control. Let them redirect their momentum in the
+    // air and increase their acceleration when they accelerate against their
+    // current velocity. Some drag is also applied, to prevent them from keeping
+    // all of their speed when turning.
+    if( PM_IsMarauder( ) && wishspeed >= 0.1f )
+    {
+      PM_RedirectMomentum( wishdir, wishspeed, 0.75f * controlFactor );
+      PM_RudderDrag( wishdir, wishspeed * 1.35f, wishspeed * 3.0f, 1500.0f );
+      PM_BoostBraking( wishdir, wishspeed, wishspeed * 1.75f, 1.5f, &accel );
+    }
+
+    PM_AccelerateHorizontal( wishdir, wishspeed, accel * controlFactor );
+  } else {
+    int       i;
+    vec3_t    wishvel;
+    float     fmove, smove;
+    vec3_t    wishdir;
+    float     wishspeed;
+    float     scale;
+    usercmd_t cmd;
+
+    PM_Friction( );
+
+    fmove = pm->cmd.forwardmove;
+    smove = pm->cmd.rightmove;
+
+    cmd = pm->cmd;
+    scale = PM_CmdScale( &cmd, qfalse );
+
+    // set the movementDir so clients can rotate the legs for strafing
+    PM_SetMovementDir( );
+
+    // project moves down to flat plane
+    pml.forward[ 2 ] = 0;
+    pml.right[ 2 ] = 0;
+    VectorNormalize( pml.forward );
+    VectorNormalize( pml.right );
+
+    for( i = 0; i < 2; i++ )
+      wishvel[ i ] = pml.forward[ i ] * fmove + pml.right[ i ] * smove;
+
+    wishvel[ 2 ] = 0;
+
+    VectorCopy( wishvel, wishdir );
+    wishspeed = VectorNormalize( wishdir );
+    wishspeed *= scale;
+
+    PM_CheckWallJump( wishdir, wishspeed );
+
+    // not on ground, so little effect on velocity
+    PM_AccelerateHorizontal( wishdir, wishspeed,
+      BG_Class( pm->ps->stats[ STAT_CLASS ] )->airAcceleration );
   }
-  else
-    controlFactor = 1.0f;
-
-  // Give marauders more air control. Let them redirect their momentum in the
-  // air and increase their acceleration when they accelerate against their
-  // current velocity. Some drag is also applied, to prevent them from keeping
-  // all of their speed when turning.
-  if( PM_IsMarauder( ) && wishspeed >= 0.1f )
-  {
-    PM_RedirectMomentum( wishdir, wishspeed, 0.75f * controlFactor );
-    PM_RudderDrag( wishdir, wishspeed * 1.35f, wishspeed * 3.0f, 1500.0f );
-    PM_BoostBraking( wishdir, wishspeed, wishspeed * 1.75f, 1.5f, &accel );
-  }
-
-  PM_AccelerateHorizontal( wishdir, wishspeed, accel * controlFactor );
 
   // We may have a ground plane that is very steep, even though we don't have a
   // groundentity slide along the steep plane.

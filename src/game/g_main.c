@@ -3379,18 +3379,18 @@ void CheckCvars(void) {
     }
   }
 
-  if(g_humanStaminaMode.modificationCount != lastHumanStaminaModeModCount) {
-    lastHumanStaminaModeModCount = g_humanStaminaMode.modificationCount;
-    SV_SetConfigstring(CS_HUMAN_STAMINA_MODE, va("%i", g_humanStaminaMode.integer));
-  }
-
   if(g_cheats.modificationCount != lastCheatsModCount) {
     SV_SetConfigstring(CS_DEVMODE, va("%i", g_cheats.integer));
   }
 
-  if(g_playerAccelMode.modificationCount != lastPlayerAccelModeModCount) {
+  if(
+    g_playerAccelMode.modificationCount != lastPlayerAccelModeModCount ||
+    g_humanStaminaMode.modificationCount != lastHumanStaminaModeModCount) {
     lastPlayerAccelModeModCount = g_playerAccelMode.modificationCount;
-    SV_SetConfigstring(CS_PHYSICS, va("%i", g_playerAccelMode.integer));
+    lastHumanStaminaModeModCount = g_humanStaminaMode.modificationCount;
+    SV_SetConfigstring(
+      CS_PHYSICS,
+      va("%i %i", g_playerAccelMode.integer, g_humanStaminaMode.integer));
   }
 
   if(g_unlagged.modificationCount != lastUnlaggedModCount) {

@@ -133,6 +133,25 @@ void CG_ParseServerinfo( void )
 }
 
 /*
+================
+CG_ParsePhysics
+
+This is called explicitly when the gamestate is first received,
+and whenever the server updates CS_PHYSICS
+================
+*/
+void CG_ParsePhysics( void )
+{
+  const char *info;
+  
+  info = CG_ConfigString( CS_PHYSICS );
+
+  if(info[0]) {
+    sscanf(info, "%i %i", &cgs.playerAccelMode, &cgs.humanStaminaMode);
+  }
+}
+
+/*
 ==================
 CG_ParseWarmup
 ==================
@@ -513,9 +532,7 @@ static void CG_ConfigStringModified( void )
     trap_Cvar_Set( "ui_devMode", va( "%d", cgs.devMode ) );
   }
   else if( num == CS_PHYSICS )
-    cgs.playerAccelMode = atoi( str );
-  else if( num == CS_HUMAN_STAMINA_MODE )
-    cgs.humanStaminaMode = atoi( str );
+    CG_ParsePhysics( );
   else if( num >= CS_HUMAN_PORTAL_CREATETIME && num < CS_HUMAN_PORTAL_CREATETIME + PORTAL_NUM )
     cgs.humanPortalCreateTime[ num - CS_HUMAN_PORTAL_CREATETIME ] = atoi( str );
   else if( num == CS_ALIEN_STAGES )
