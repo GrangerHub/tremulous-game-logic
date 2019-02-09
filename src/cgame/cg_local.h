@@ -1978,6 +1978,7 @@ qboolean      CG_RequestScores( void );
 //
 void          CG_ExecuteNewServerCommands( int latestSequence );
 void          CG_ParseServerinfo( void );
+void          CG_ParsePhysics( void );
 void          CG_ParseVoteStrings( int team, const char *conStr );
 void          CG_SetConfigValues( void );
 void          CG_ShaderStateChanged(void);

@@ -2203,6 +2203,8 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum )
 
   CG_ParseServerinfo( );
 
+  CG_ParsePhysics( );
+
   // load the new map
   trap_CM_LoadMap( cgs.mapname );
 
