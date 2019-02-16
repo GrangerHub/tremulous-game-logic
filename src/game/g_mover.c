@@ -700,6 +700,10 @@ static void G_Block_Stack(gentity_t *ent) {
     G_Clear_Rider_Collisions(ent);
 
     for(i = 0; i < MAX_GENTITIES; i++) {
+      if(!g_entities[i].inuse) {
+        continue;
+      }
+
       if(pushes.type[i][ent->s.number] != MPUSH_RIDING_STACK_HIT) {
         continue;
       }
@@ -797,6 +801,10 @@ static qboolean G_Find_Mover_Blockage(
   for(i = 0; i < MAX_GENTITIES; i++) {
     check = &g_entities[i];
 
+    if(!check->inuse) {
+      continue;
+    }
+
     // too much pushing
     if(pushed_p > &pushed[ MAX_PUSHES ]) {
       return qtrue;
@@ -810,6 +818,10 @@ static qboolean G_Find_Mover_Blockage(
   //confirm direct blocks
   for(i = 0; i < MAX_GENTITIES; i++) {
     check = &g_entities[i];
+
+    if(!check->inuse) {
+      continue;
+    }
 
     if(!pushes.mover_data[check->s.number].check_for_direct_block) {
       continue;
@@ -828,6 +840,10 @@ static qboolean G_Find_Mover_Blockage(
 
     check = &g_entities[i];
 
+    if(!check->inuse) {
+      continue;
+    }
+
     if(pushes.mover_data[check->s.number].blocked != MBLCK_DIRECT) {
       continue;
     }
@@ -835,6 +851,10 @@ static qboolean G_Find_Mover_Blockage(
     G_Clear_Rider_Collisions(check);
 
     for(j = 0; j < MAX_GENTITIES; j++) {
+      if(!g_entities[j].inuse) {
+        continue;
+      }
+
       if(pushes.type[j][check->s.number] < MPUSH_RIDING_STACK_HIT) {
         continue;
       }
@@ -906,6 +926,10 @@ static void G_Push_Unblocked_Ents(push_data_t *push_data) {
 
   for(i = 0; i < MAX_GENTITIES; i++) {
     check = &g_entities[i];
+
+    if(!check->inuse) {
+      continue;
+    }
 
     if(!pushes.mover_data[check->s.number].checked_for_push) {
       continue;
@@ -1004,6 +1028,10 @@ static qboolean G_TryPushingEntities(
   //finish initializing for the move
   memset(&pushes, 0, sizeof(pushes_t));
   for( i = 0; i < MAX_GENTITIES; i++ ) {
+    if(!g_entities[i].inuse) {
+      continue;
+    }
+
     VectorCopy(g_entities[i].r.currentOrigin, pushes.mover_data[i].start_origin);
     VectorCopy(g_entities[i].r.currentAngles, pushes.mover_data[i].start_angles);
   }
