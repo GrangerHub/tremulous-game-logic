@@ -728,8 +728,8 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define STAMINA_WALK_RESTORE        15
 #define STAMINA_RUN_RESTORE         7
 #define STAMINA_MEDISTAT_RESTORE    30 // stacked on STOP or WALK
-#define STAMINA_SPRINT_TAKE         6
-#define STAMINA_JUMP_TAKE           264
+#define STAMINA_SPRINT_TAKE         7
+#define STAMINA_JUMP_TAKE           500
 #define STAMINA_DODGE_TAKE          250
 #define STAMINA_MAX                 1000
 #define STAMINA_BREATHING_LEVEL     0
