@@ -979,8 +979,11 @@ void G_UnlaggedOn(unlagged_attacker_data_t *attacker_data) {
       float r1 = Distance(calc->origin, calc->maxs);
       float r2 = Distance(calc->origin, calc->mins);
       float maxRadius = (r1 > r2) ? r1 : r2;
+      float unlagged_range = attacker_data->range + maxRadius;
 
-      if(Distance(unlagged_point, calc->origin) > attacker_data->range + maxRadius) {
+      if(
+        Distance(unlagged_point, calc->origin) > unlagged_range &&
+        Distance(unlagged_point, ent->r.currentOrigin) > unlagged_range) {
         continue;
       }
     }
