@@ -114,6 +114,43 @@ void PM_AddTouchEnt( trace_t *trace, const vec3_t impactVelocity )
 
 /*
 ===================
+PM_UnlaggedOn
+===================
+*/
+static void PM_UnlaggedOn(unlagged_attacker_data_t *data) {
+  data->ent_num = pm->ps->clientNum;
+
+  if(pm->unlagged_on) {
+    pm->unlagged_on(data);
+  } else {
+    AngleVectors(
+      pm->ps->viewangles,
+      data->forward_out,
+      data->right_out,
+      data->up_out);
+    BG_CalcMuzzlePointFromPS(
+      pm->ps,
+      data->forward_out,
+      data->right_out,
+      data->up_out,
+      data->muzzle_out);
+    VectorCopy(pm->ps->origin, data->origin_out);
+  }
+}
+
+/*
+===================
+PM_UnlaggedOff
+===================
+*/
+static void PM_UnlaggedOff(void) {
+  if(pm->unlagged_off) {
+    pm->unlagged_off( );
+  }
+}
+
+/*
+===================
 PM_StartTorsoAnim
 ===================
 */
@@ -4180,41 +4217,32 @@ static void PM_Pain_Saw_Pull( void ) {
   const float              width = PAINSAW_WIDTH;
   const float              height = PAINSAW_HEIGHT;
   const float              range = PAINSAW_RANGE;
-  vec3_t                   muzzle, forward, end;
+  vec3_t                   end;
   vec3_t                   mins, maxs;
   trace_t                  trace;
   unlagged_attacker_data_t unlagged_attacker;
 
-  if(pm->unlagged_on) {
-    unlagged_attacker.ent_num = pm->ps->clientNum;
-    unlagged_attacker.point_type = UNLGD_PNT_MUZZLE;
-    unlagged_attacker.range = range + MAX(width, height);
-    pm->unlagged_on(&unlagged_attacker);
-    VectorCopy(unlagged_attacker.muzzle_out, muzzle);
-    VectorCopy(unlagged_attacker.forward_out, forward);
-    
-  } else {
-    vec3_t right, up;
+  unlagged_attacker.point_type = UNLGD_PNT_MUZZLE;
+  unlagged_attacker.range = range + MAX(width, height);
+  PM_UnlaggedOn(&unlagged_attacker);
 
-    AngleVectors( pm->ps->viewangles, forward, right, up );
-    BG_CalcMuzzlePointFromPS(pm->ps, forward, right, up, muzzle);
-  }
-
-  VectorMA(muzzle, range, forward, end);
+  VectorMA(
+    unlagged_attacker.muzzle_out, range, unlagged_attacker.forward_out, end);
 
   VectorSet( mins, -width, -width, -height );
   VectorSet( maxs, width, width, height );
 
   //check for impact
-  pm->trace( &trace, muzzle, mins, maxs, end, pm->ps->clientNum, MASK_SHOT );
+  pm->trace(
+    &trace, unlagged_attacker.muzzle_out, mins, maxs, end,
+    pm->ps->clientNum, MASK_SHOT );
   if(trace.fraction < 1.0f || trace.startsolid) {
     //pull towards direction of impact
-    VectorMA(pm->ps->velocity, PAINSAW_PULL, forward, pm->ps->velocity);
+    VectorMA(pm->ps->velocity, PAINSAW_PULL, unlagged_attacker.forward_out,
+      pm->ps->velocity);
   }
 
-  if(pm->unlagged_off) {
-    pm->unlagged_off( );
-  }
+  PM_UnlaggedOff( );
 }
 
 /*
