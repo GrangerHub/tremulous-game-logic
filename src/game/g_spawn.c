@@ -651,6 +651,7 @@ void SP_worldspawn( void )
   if( G_SpawnString( "alienBuildPoints", "", &s ) )
     Cvar_SetSafe( "g_alienBuildPoints", s );
 
+  G_SpawnString( "disabledEquipment", "", &s );
   Cvar_SetSafe( "g_disabledEquipment", s );
 
   G_SpawnString( "disabledClasses", "", &s );
