@@ -242,9 +242,10 @@ Trace a bounding box against entities and the world
 */
 static void G_WideTraceSolid(trace_t *tr, gentity_t *ent, float range,
                              float width, float height, gentity_t **target) {
-  vec3_t    mins, maxs;
-  vec3_t    end;
-  trace_t   tr2;
+  vec3_t                   mins, maxs;
+  vec3_t                   end;
+  unlagged_attacker_data_t unlagged_attacker;
+  trace_t                  tr2;
 
   VectorSet( mins, -width, -width, -height );
   VectorSet( maxs, width, width, height );
@@ -255,19 +256,27 @@ static void G_WideTraceSolid(trace_t *tr, gentity_t *ent, float range,
     return;
   }
 
-  G_UnlaggedOn(ent->s.number, muzzle, range + width);
+  unlagged_attacker.ent_num = ent->s.number;
+  unlagged_attacker.point_type = UNLGD_PNT_MUZZLE;
+  unlagged_attacker.range = range + width;
+  G_UnlaggedOn(&unlagged_attacker);
 
-  VectorMA(muzzle, range, forward, end);
+  VectorMA(unlagged_attacker.muzzle_out, range, unlagged_attacker.forward_out, end);
 
   // Trace against entities and the world
-  SV_Trace(tr, muzzle, mins, maxs, end, ent->s.number, MASK_SHOT, TT_AABB);
+  SV_Trace(
+    tr, unlagged_attacker.muzzle_out, mins, maxs, end, ent->s.number,
+    MASK_SHOT, TT_AABB);
   if(tr->entityNum != ENTITYNUM_NONE) {
     *target = &g_entities[ tr->entityNum ];
   }
 
   if(tr->startsolid) {
     //check for collision against the world
-    SV_Trace( &tr2, muzzle, mins, maxs, muzzle, ent->s.number, MASK_SOLID, TT_AABB );
+    SV_Trace(
+      &tr2, unlagged_attacker.muzzle_out, mins, maxs, unlagged_attacker.muzzle_out,
+      ent->s.number,
+      MASK_SOLID, TT_AABB );
     if(tr2.entityNum != ENTITYNUM_NONE) {
       *target = &g_entities[ tr2.entityNum ];
     }
@@ -448,11 +457,12 @@ MACHINEGUN
 
 void bulletFire( gentity_t *ent, float spread, int damage, int mod )
 {
-  trace_t   tr;
-  vec3_t    end;
-  float     t, u, r, x, y;
-  gentity_t *tent;
-  gentity_t *traceEnt;
+  trace_t                  tr;
+  vec3_t                   end, muzzle_temp, forward_temp;
+  float                    t, u, r, x, y;
+  gentity_t                *tent;
+  gentity_t                *traceEnt;
+  unlagged_attacker_data_t unlagged_attacker;
 
   spread *= 16;
 
@@ -463,19 +473,35 @@ void bulletFire( gentity_t *ent, float spread, int damage, int mod )
   x = r * cos( t );
   y = r * sin( t );
 
-  VectorMA( muzzle, 8192 * 16, forward, end );
-  VectorMA( end, x, right, end );
-  VectorMA( end, y, up, end );
-
   // don't use unlagged if this is not a client (e.g. turret)
-  if( ent->client )
-  {
-    G_UnlaggedOn( ent->s.number, muzzle, 8192 * 16 );
-    SV_Trace( &tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT, TT_AABB );
+  if( ent->client ) {
+    unlagged_attacker.ent_num = ent->s.number;
+    unlagged_attacker.point_type = UNLGD_PNT_MUZZLE;
+    unlagged_attacker.range = 8192 * 16;
+    G_UnlaggedOn(&unlagged_attacker);
+    VectorMA(
+      unlagged_attacker.muzzle_out, 8192 * 16,
+      unlagged_attacker.forward_out, end );
+    VectorMA(end, x, unlagged_attacker.right_out, end);
+    VectorMA(end, y, unlagged_attacker.up_out, end);
+    SV_Trace(
+      &tr, unlagged_attacker.muzzle_out, NULL, NULL, end, ent->s.number,
+      MASK_SHOT, TT_AABB );
     G_UnlaggedOff( );
+
+    VectorCopy(unlagged_attacker.muzzle_out, muzzle_temp);
+    VectorCopy(unlagged_attacker.forward_out, forward_temp);
   }
-  else
+  else {
+    VectorMA( muzzle, 8192 * 16, forward, end );
+    VectorMA( end, x, right, end );
+    VectorMA( end, y, up, end );
+
     SV_Trace( &tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT, TT_AABB );
+
+    VectorCopy(muzzle, muzzle_temp);
+    VectorCopy(forward, forward_temp);
+  }
 
   if( tr.surfaceFlags & SURF_NOIMPACT )
     return;
@@ -483,7 +509,7 @@ void bulletFire( gentity_t *ent, float spread, int damage, int mod )
   traceEnt = &g_entities[ tr.entityNum ];
 
   // snap the endpos to integers, but nudged towards the line
-  SnapVectorTowards( tr.endpos, muzzle );
+  SnapVectorTowards( tr.endpos, muzzle_temp );
 
   // send bullet impact
   if( G_TakesDamage( traceEnt ) &&
@@ -502,7 +528,7 @@ void bulletFire( gentity_t *ent, float spread, int damage, int mod )
 
   if( G_TakesDamage( traceEnt ) )
   {
-    G_Damage( traceEnt, ent, ent, forward, tr.endpos,
+    G_Damage( traceEnt, ent, ent, forward_temp, tr.endpos,
       damage, DAMAGE_NO_KNOCKBACK, mod );
   }
 }
@@ -627,10 +653,15 @@ SHOTGUN
 */
 void shotgunFire( gentity_t *ent )
 {
-  G_UnlaggedOn( ent->s.number, muzzle, SHOTGUN_RANGE );
-  G_SplatterFire( ent, ent,
-                       muzzle, forward,
-                       ent->s.weapon, ent->s.generic1, MOD_SHOTGUN );
+  unlagged_attacker_data_t unlagged_attacker;
+
+  unlagged_attacker.ent_num = ent->s.number;
+  unlagged_attacker.point_type = UNLGD_PNT_MUZZLE;
+  unlagged_attacker.range = SHOTGUN_RANGE;
+  G_UnlaggedOn(&unlagged_attacker);
+  G_SplatterFire(
+    ent, ent, unlagged_attacker.muzzle_out, unlagged_attacker.forward_out,
+    ent->s.weapon, ent->s.generic1, MOD_SHOTGUN );
   G_UnlaggedOff();
 }
 
@@ -648,13 +679,17 @@ void massDriverFire( gentity_t *ent )
   vec3_t hitPoints[ MDRIVER_MAX_HITS ], hitNormals[ MDRIVER_MAX_HITS ],
          origin, originToEnd, muzzleToEnd, muzzleToOrigin, end;
   gentity_t *traceEnts[ MDRIVER_MAX_HITS ], *traceEnt, *tent;
+  unlagged_attacker_data_t unlagged_attacker;
   float length_offset;
   int i, hits = 0, skipent;
 
   // loop through all entities hit by a line trace
-  G_UnlaggedOn( ent->s.number, muzzle, 8192.0f * 16.0f );
-  VectorMA( muzzle, 8192 * 16, forward, end );
-  VectorCopy( muzzle, tr.endpos );
+  unlagged_attacker.ent_num = ent->s.number;
+  unlagged_attacker.point_type = UNLGD_PNT_MUZZLE;
+  unlagged_attacker. range = 8192.0f * 16.0f;
+  G_UnlaggedOn(&unlagged_attacker);
+  VectorMA( unlagged_attacker.muzzle_out, 8192 * 16, unlagged_attacker.forward_out, end );
+  VectorCopy( unlagged_attacker.muzzle_out, tr.endpos );
   skipent = ent->s.number;
   for( i = 0; i < MDRIVER_MAX_HITS && skipent != ENTITYNUM_NONE; i++ )
   {
@@ -687,10 +722,10 @@ void massDriverFire( gentity_t *ent )
   }
 
   // originate trail line from the gun tip, not the head!
-  VectorCopy( muzzle, origin );
-  VectorMA( origin, -6, up, origin );
-  VectorMA( origin, 4, right, origin );
-  VectorMA( origin, 24, forward, origin );
+  VectorCopy( unlagged_attacker.muzzle_out, origin );
+  VectorMA( origin, -6, unlagged_attacker.up_out, origin );
+  VectorMA( origin, 4, unlagged_attacker.right_out, origin );
+  VectorMA( origin, 24, unlagged_attacker.forward_out, origin );
 
   // save the final position
   VectorCopy( tr.endpos, end );
@@ -698,8 +733,8 @@ void massDriverFire( gentity_t *ent )
   VectorNormalize( originToEnd );
 
   // origin is further in front than muzzle, need to adjust length
-  VectorSubtract( origin, muzzle, muzzleToOrigin );
-  VectorSubtract( end, muzzle, muzzleToEnd );
+  VectorSubtract( origin, unlagged_attacker.muzzle_out, muzzleToOrigin );
+  VectorSubtract( end, unlagged_attacker.muzzle_out, muzzleToEnd );
   VectorNormalize( muzzleToEnd );
   length_offset = DotProduct( muzzleToEnd, muzzleToOrigin );
 
@@ -717,7 +752,7 @@ void massDriverFire( gentity_t *ent )
     traceEnt = traceEnts[ i ];
 
     // compute the visually correct impact point
-    VectorSubtract( tr.endpos, muzzle, muzzleToPos );
+    VectorSubtract( tr.endpos, unlagged_attacker.muzzle_out, muzzleToPos );
     length = VectorLength( muzzleToPos ) - length_offset;
     VectorMA( origin, length, originToEnd, tr.endpos );
 
@@ -733,7 +768,7 @@ void massDriverFire( gentity_t *ent )
     }
 
     if( G_TakesDamage( traceEnt ) )
-      G_Damage( traceEnt, ent, ent, forward, tr.endpos,
+      G_Damage( traceEnt, ent, ent, unlagged_attacker.forward_out, tr.endpos,
                 MDRIVER_DMG/(i+1), 0, MOD_MDRIVER );
   }
 
@@ -992,15 +1027,22 @@ lasGunFire
 */
 void lasGunFire( gentity_t *ent )
 {
-  trace_t   tr;
-  vec3_t    end;
-  gentity_t *tent;
-  gentity_t *traceEnt;
+  trace_t                  tr;
+  vec3_t                   end;
+  gentity_t                *tent;
+  gentity_t                *traceEnt;
+  unlagged_attacker_data_t unlagged_attacker;
 
-  VectorMA( muzzle, 8192 * 16, forward, end );
-
-  G_UnlaggedOn( ent->s.number, muzzle, 8192 * 16 );
-  SV_Trace( &tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT, TT_AABB );
+  unlagged_attacker.ent_num = ent->s.number;
+  unlagged_attacker.point_type = UNLGD_PNT_MUZZLE;
+  unlagged_attacker.range = 8192 * 16;
+  G_UnlaggedOn(&unlagged_attacker);
+  VectorMA(
+    unlagged_attacker.muzzle_out, 8192 * 16,
+    unlagged_attacker.forward_out, end);
+  SV_Trace(
+    &tr, unlagged_attacker.muzzle_out, NULL, NULL, end, ent->s.number,
+    MASK_SHOT, TT_AABB);
   G_UnlaggedOff( );
 
   if( tr.surfaceFlags & SURF_NOIMPACT )
@@ -1009,7 +1051,7 @@ void lasGunFire( gentity_t *ent )
   traceEnt = &g_entities[ tr.entityNum ];
 
   // snap the endpos to integers, but nudged towards the line
-  SnapVectorTowards( tr.endpos, muzzle );
+  SnapVectorTowards( tr.endpos, unlagged_attacker.muzzle_out );
 
   // send impact
   if( G_TakesDamage( traceEnt ) &&
@@ -1027,7 +1069,9 @@ void lasGunFire( gentity_t *ent )
   }
 
   if( G_TakesDamage( traceEnt ) )
-    G_Damage( traceEnt, ent, ent, forward, tr.endpos, LASGUN_DAMAGE, 0, MOD_LASGUN );
+    G_Damage(
+      traceEnt, ent, ent, unlagged_attacker.forward_out, tr.endpos,
+      LASGUN_DAMAGE, 0, MOD_LASGUN );
 }
 
 /*
@@ -1437,18 +1481,17 @@ void CheckGrabAttack( gentity_t *ent )
   gentity_t   *traceEnt;
   const float range = ent->client->ps.weapon == WP_ALEVEL1 ?
                         LEVEL1_GRAB_RANGE : LEVEL1_GRAB_U_RANGE;
+  unlagged_attacker_data_t unlagged_attacker;
 
   if( ent->client->grabRepeatTime >= level.time )
     return;
 
-  // set aiming directions
-  AngleVectors( ent->client->ps.viewangles, forward, right, up );
-
-  BG_CalcMuzzlePointFromPS( &ent->client->ps, forward, right, up, muzzle );
-
-  VectorMA( muzzle, range, forward, end );
-
-  G_UnlaggedOn( ent->s.number, muzzle, range );
+  unlagged_attacker.ent_num = ent->s.number;
+  unlagged_attacker.point_type = UNLGD_PNT_MUZZLE;
+  unlagged_attacker.range = range;
+  G_UnlaggedOn(&unlagged_attacker);
+  VectorMA(
+    unlagged_attacker.muzzle_out, range, unlagged_attacker.forward_out, end);
   SV_Trace( &tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT, TT_AABB );
   G_UnlaggedOff();
   if( tr.surfaceFlags & SURF_NOIMPACT )
@@ -1515,17 +1558,21 @@ poisonCloud
 */
 void poisonCloud( gentity_t *ent )
 {
-  int       entityList[ MAX_GENTITIES ];
-  vec3_t    range = { LEVEL1_PCLOUD_RANGE, LEVEL1_PCLOUD_RANGE, LEVEL1_PCLOUD_RANGE };
-  vec3_t    mins, maxs;
-  int       i, num;
-  gentity_t *target;
-  trace_t   tr;
+  int                      entityList[ MAX_GENTITIES ];
+  int                      i, num;
+  gentity_t                *target;
+  trace_t                  tr;
+  unlagged_attacker_data_t unlagged_attacker;
+  vec3_t                   mins, maxs;
+  vec3_t                   range =
+    { LEVEL1_PCLOUD_RANGE, LEVEL1_PCLOUD_RANGE, LEVEL1_PCLOUD_RANGE };
 
-  VectorAdd( ent->client->ps.origin, range, maxs );
-  VectorSubtract( ent->client->ps.origin, range, mins );
-
-  G_UnlaggedOn( ent->s.number, ent->client->ps.origin, LEVEL1_PCLOUD_RANGE );
+  unlagged_attacker.ent_num = ent->s.number;
+  unlagged_attacker.point_type = UNLGD_PNT_ORIGIN;
+  unlagged_attacker.range = LEVEL1_PCLOUD_RANGE;
+  G_UnlaggedOn(&unlagged_attacker);
+  VectorAdd( unlagged_attacker.origin_out, range, maxs );
+  VectorSubtract( unlagged_attacker.origin_out, range, mins );
   num = SV_AreaEntities( mins, maxs, entityList, MAX_GENTITIES );
   for( i = 0; i < num; i++ )
   {
@@ -1535,8 +1582,9 @@ void poisonCloud( gentity_t *ent )
     {
       if( target->client->pers.teamSelection == TEAM_HUMANS )
       {
-        SV_Trace( &tr, muzzle, NULL, NULL, target->r.currentOrigin,
-                    target->s.number, CONTENTS_SOLID, TT_AABB );
+        SV_Trace(
+          &tr, unlagged_attacker.muzzle_out, NULL, NULL, target->r.currentOrigin,
+          target->s.number, CONTENTS_SOLID, TT_AABB );
 
         //can't see target from here
         if( tr.entityNum == ENTITYNUM_WORLD )

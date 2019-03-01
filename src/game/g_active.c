@@ -559,10 +559,6 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
     pm.wallJumperMinFactor = client->pers.wallJumperMinFactor;
     pm.marauderMinJumpFactor = client->pers.marauderMinJumpFactor;
 
-    // For firing lightning bolts early
-    BG_CheckBoltImpactTrigger( &pm, G_TraceWrapper,
-                               G_UnlaggedOn, G_UnlaggedOff );
-
     // Perform a pmove
     Pmove( &pm );
 
