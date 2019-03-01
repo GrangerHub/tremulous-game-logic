@@ -87,6 +87,43 @@ void PM_AddTouchEnt( trace_t *trace, const vec3_t impactVelocity )
 
 /*
 ===================
+PM_UnlaggedOn
+===================
+*/
+static void PM_UnlaggedOn(unlagged_attacker_data_t *data) {
+  data->ent_num = pm->ps->clientNum;
+
+  if(pm->unlagged_on) {
+    pm->unlagged_on(data);
+  } else {
+    AngleVectors(
+      pm->ps->viewangles,
+      data->forward_out,
+      data->right_out,
+      data->up_out);
+    BG_CalcMuzzlePointFromPS(
+      pm->ps,
+      data->forward_out,
+      data->right_out,
+      data->up_out,
+      data->muzzle_out);
+    VectorCopy(pm->ps->origin, data->origin_out);
+  }
+}
+
+/*
+===================
+PM_UnlaggedOff
+===================
+*/
+static void PM_UnlaggedOff(void) {
+  if(pm->unlagged_off) {
+    pm->unlagged_off( );
+  }
+}
+
+/*
+===================
 PM_StartTorsoAnim
 ===================
 */
