@@ -94,14 +94,21 @@ typedef struct unlagged_data_s {
   unlagged_t                   calc;
 } unlagged_data_t;
 
-static unlagged_data_t unlagged_data[ENTITYNUM_MAX_NORMAL];
-static unlagged_data_t *unlagged_data_head;
-static int             history_wheel_times[MAX_UNLAGGED_HISTORY_WHEEL_FRAMES];
-static int             current_history_frame;
-static bgqueue_t       dims_store_list = BG_QUEUE_INIT;
-static bgqueue_t       origin_store_list = BG_QUEUE_INIT;
-static bgqueue_t       pos_store_list = BG_QUEUE_INIT;
-static bgqueue_t       apos_store_list = BG_QUEUE_INIT;
+typedef struct rewind_ent_adjustment_s {
+  qboolean use;
+  vec3_t   move;
+  vec3_t   amove;
+} rewind_ent_adjustment_t;
+
+static unlagged_data_t     unlagged_data[ENTITYNUM_MAX_NORMAL];
+static unlagged_data_t     *unlagged_data_head;
+static int                 history_wheel_times[MAX_UNLAGGED_HISTORY_WHEEL_FRAMES];
+static int                 current_history_frame;
+static bgqueue_t           dims_store_list = BG_QUEUE_INIT;
+static bgqueue_t           origin_store_list = BG_QUEUE_INIT;
+static bgqueue_t           pos_store_list = BG_QUEUE_INIT;
+static bgqueue_t           apos_store_list = BG_QUEUE_INIT;
+static rewind_ent_adjustment_t rewind_ents_adjustments[ENTITYNUM_MAX_NORMAL];
 
 /*
 ==============
@@ -115,6 +122,7 @@ void G_Init_Unlagged(void) {
   unlagged_data_head = NULL;
   memset(&history_wheel_times, 0, sizeof(history_wheel_times));
   memset(&unlagged_data, 0, sizeof(unlagged_data));
+  memset(rewind_ents_adjustments, 0, sizeof(rewind_ents_adjustments));
   memset(frame_usage, 0, sizeof(frame_usage));
   BG_Queue_Clear(&dims_store_list);
   BG_Queue_Clear(&origin_store_list);
@@ -234,7 +242,7 @@ Saves a trajectory only if it different from the from the latest saved trajector
 */
 static qboolean G_SaveTrajectory(
   gentity_t                   *ent,
-  trajectory_t                *current_traj,
+  const trajectory_t          *current_traj,
   trajectory_t                **frame_traj,
   unlagged_latest_hist_traj_t *latest_saved_traj) {
   Com_Assert(ent && "G_SaveTrajectory: ent");
@@ -267,7 +275,7 @@ static qboolean G_SaveTrajectory(
         current_traj->trType == TR_INTERPOLATE) {
         //no need to copy the full trajectory for TR_STATIONARY and TR_INTERPOLATE
         (*frame_traj)->trType = current_traj->trType;
-        (*frame_traj)->trTime = current_traj->trType;
+        (*frame_traj)->trTime = current_traj->trTime;
         VectorCopy(current_traj->trBase, (*frame_traj)->trBase);
       } else {
         **frame_traj = *current_traj;
@@ -438,8 +446,10 @@ void G_UnlaggedCalc(int time, gentity_t *rewindEnt) {
   int startIndex;
   int stopIndex;
   float lerp;
+  rewind_ent_adjustment_t *rewind_ent_adjustment;
 
   Com_Assert(rewindEnt && "G_UnlaggedCalc: rewindEnt is NULL");
+  Com_Assert(rewindEnt->client && "G_UnlaggedCalc: rewindEnt->client is NULL");
 
   if(!g_unlagged.integer) {
     return;
@@ -658,23 +668,24 @@ void G_UnlaggedCalc(int time, gentity_t *rewindEnt) {
     if(!unlagged_data_for_ent->calc.use_origin) {
       //calculate the pos
       if(start_pos) {
-        Com_Assert(stop_pos && "G_UnlaggedCalc:stop_pos is NULL");
-
         unlagged_data_for_ent->calc.use_origin = qtrue;
 
         if(
-          start_pos->trTime == stop_pos->trTime &&
-          start_pos->trType == stop_pos->trType) {
-          int used_time = (time > start_pos->trTime) ? time : start_pos->trTime;
-
-          BG_EvaluateTrajectory(start_pos, used_time, unlagged_data_for_ent->calc.origin);
-        } else {
+          stop_pos &&
+          (
+            start_pos->trTime != stop_pos->trTime ||
+            start_pos->trType != stop_pos->trType) &&
+          stop_pos->trTime <= history_wheel_times[stopIndex]) {
           vec3_t start_origin, stop_origin;
 
           //lerp
           BG_EvaluateTrajectory(start_pos, history_wheel_times[startIndex], start_origin);
           BG_EvaluateTrajectory(stop_pos, history_wheel_times[stopIndex], stop_origin);
           VectorLerp2( lerp, start_origin, stop_origin, unlagged_data_for_ent->calc.origin );
+        } else {
+          int used_time = (time > start_pos->trTime) ? time : start_pos->trTime;
+
+          BG_EvaluateTrajectory(start_pos, used_time, unlagged_data_for_ent->calc.origin);
         }
       } else {
         unlagged_data_for_ent->calc.use_origin = qfalse;
@@ -683,23 +694,24 @@ void G_UnlaggedCalc(int time, gentity_t *rewindEnt) {
 
     //calculate the angles
     if(start_apos) {
-      Com_Assert(stop_apos && "G_UnlaggedCalc:stop_apos is NULL");
-
       unlagged_data_for_ent->calc.use_angles = qtrue;
 
       if(
-        start_apos->trTime == stop_apos->trTime &&
-        start_apos->trType == stop_apos->trType) {
-        int used_time = (time > start_apos->trTime) ? time : start_apos->trTime;
-
-        BG_EvaluateTrajectory(start_apos, used_time, unlagged_data_for_ent->calc.angles);
-      } else {
+        stop_apos &&
+        (
+          start_apos->trTime != stop_apos->trTime ||
+          start_apos->trType != stop_apos->trType) &&
+        stop_apos->trTime <= history_wheel_times[stopIndex]) {
         vec3_t start_angles, stop_angles;
 
         //lerp
         BG_EvaluateTrajectory(start_apos, history_wheel_times[startIndex], start_angles);
         BG_EvaluateTrajectory(stop_apos, history_wheel_times[stopIndex], stop_angles);
         VectorLerp2( lerp, start_angles, stop_angles, unlagged_data_for_ent->calc.angles );
+      } else {
+        int used_time = (time > start_apos->trTime) ? time : start_apos->trTime;
+
+        BG_EvaluateTrajectory(start_apos, used_time, unlagged_data_for_ent->calc.angles);
       }
     } else {
       unlagged_data_for_ent->calc.use_angles = qfalse;
@@ -710,6 +722,92 @@ void G_UnlaggedCalc(int time, gentity_t *rewindEnt) {
       unlagged_data_for_ent->calc.use_origin ||
       unlagged_data_for_ent->calc.use_angles) {
       unlagged_data_for_ent->calc.used = qtrue;
+    }
+  }
+
+  //account for any movers acted on the rewindEnt
+  rewind_ent_adjustment = &rewind_ents_adjustments[rewindEnt->s.number];
+  if(
+    time == level.time ||
+    (
+      rewindEnt->s.eType != ET_PLAYER && rewindEnt->s.eType != ET_BUILDABLE &&
+      rewindEnt->s.eType != ET_ITEM && rewindEnt->s.eType != ET_CORPSE)) {
+    rewind_ent_adjustment->use = qfalse;
+  } else {
+    int pusher_num;
+
+    if(rewindEnt->client) {
+      pusher_num = rewindEnt->client->ps.otherEntityNum;
+    } else {
+      pusher_num = rewindEnt->s.otherEntityNum;
+    }
+
+    if(pusher_num == ENTITYNUM_NONE) {
+      int foundation_num = G_Get_Foundation_Ent_Num(rewindEnt);
+
+      if(
+        foundation_num != ENTITYNUM_NONE &&
+        g_entities[foundation_num].s.eType == ET_MOVER) {
+        pusher_num = foundation_num;
+      }
+    }
+
+    if(pusher_num == ENTITYNUM_NONE) {
+      rewind_ent_adjustment->use = qfalse;
+    } else {
+      int       fromTime, toTime;
+      qboolean  negate_moves;
+      gentity_t *pusher;
+      vec3_t    old_origin, origin;
+      vec3_t    old_angles, angles;
+      vec3_t    org, org2, move2;
+      vec3_t    matrix[3], transpose[3];
+
+      rewind_ent_adjustment->use = qtrue;
+
+      pusher = &g_entities[pusher_num];
+
+      if(time < level.time) {
+        negate_moves = qtrue;
+        fromTime = time;
+        toTime = level.time;
+      } else {
+        negate_moves = qfalse;
+        fromTime = level.time;
+        toTime = time;
+      }
+
+      BG_EvaluateTrajectory(&pusher->s.pos, fromTime, old_origin);
+      BG_EvaluateTrajectory(&pusher->s.apos, fromTime, old_angles);
+
+      BG_EvaluateTrajectory(&pusher->s.pos, toTime, origin);
+      BG_EvaluateTrajectory(&pusher->s.apos, toTime, angles);
+
+      VectorSubtract(origin, old_origin, rewind_ent_adjustment->move);
+      VectorSubtract(angles, old_angles, rewind_ent_adjustment->amove);
+
+      // figure movement due to the pusher's amove
+      BG_CreateRotationMatrix(rewind_ent_adjustment->amove, transpose);
+      BG_TransposeMatrix(transpose, matrix);
+
+      VectorSubtract(rewindEnt->client->ps.origin, old_origin, org);
+
+      VectorCopy(org, org2);
+      BG_RotatePoint(org2, matrix);
+      VectorSubtract(org2, org, move2);
+      // combine movements
+      VectorAdd(
+        rewind_ent_adjustment->move,
+        move2,
+        rewind_ent_adjustment->move);
+
+      rewind_ent_adjustment->amove[ROLL] = 0.0f;
+      rewind_ent_adjustment->amove[PITCH] = 0.0f;
+
+      if(negate_moves) {
+        VectorNegate(rewind_ent_adjustment->move, rewind_ent_adjustment->move);
+        VectorNegate(rewind_ent_adjustment->amove, rewind_ent_adjustment->amove);
+      }
     }
   }
 }
@@ -768,18 +866,92 @@ void G_UnlaggedOff(void) {
 ==============
 */
 
-void G_UnlaggedOn(int attackerNum, vec3_t muzzle, float range) {
-  int       i;
-  gentity_t *attacker;
+void G_UnlaggedOn(unlagged_attacker_data_t *attacker_data) {
+  int                     i;
+  gentity_t               *attacker;
+  rewind_ent_adjustment_t *rewind_ent_adjustment;
+  vec3_t                  backup_origin;
+  vec3_t                  unlagged_point;
+
+  Com_Assert(attacker_data && "G_UnlaggedOn: attacker_data is NULL");
 
   if(!g_unlagged.integer) {
     return;
   }
 
-  attacker = &g_entities[attackerNum];
+  attacker = &g_entities[attacker_data->ent_num];
 
   if(!attacker->client || !attacker->client->pers.useUnlagged) {
     return;
+  }
+
+  rewind_ent_adjustment = &rewind_ents_adjustments[attacker_data->ent_num];
+
+  //evaluate the view vectors
+  if(rewind_ent_adjustment->use) {
+    vec3_t unlagged_view_angles;
+
+    VectorAdd(
+      attacker->client->ps.viewangles, rewind_ent_adjustment->amove,
+      unlagged_view_angles);
+
+    AngleVectors(
+      unlagged_view_angles, attacker_data->forward_out,
+      attacker_data->right_out, attacker_data->up_out);
+  } else {
+    AngleVectors(
+      attacker->client->ps.viewangles,
+      attacker_data->forward_out,
+      attacker_data->right_out,
+      attacker_data->up_out);
+  }
+
+  //evalutate the muzzle
+  if(rewind_ent_adjustment->use) {
+
+    VectorCopy(attacker->client->ps.origin, backup_origin);
+    VectorAdd(
+      attacker->client->ps.origin, rewind_ent_adjustment->move,
+      attacker->client->ps.origin);
+  }
+
+  BG_CalcMuzzlePointFromPS(
+    &attacker->client->ps,
+    attacker_data->forward_out,
+    attacker_data->right_out,
+    attacker_data->up_out,
+    attacker_data->muzzle_out);
+
+  if(rewind_ent_adjustment->use) {
+    VectorCopy(backup_origin, attacker->client->ps.origin);
+  }
+
+  //evaluate the current origin
+  if(rewind_ent_adjustment->use) {
+    VectorAdd(
+      attacker->client->ps.origin, rewind_ent_adjustment->move,
+      attacker_data->origin_out);
+  } else {
+    VectorCopy(attacker->client->ps.origin, attacker_data->origin_out);
+    
+  }
+
+  switch (attacker_data->point_type) {
+    case UNLGD_PNT_MUZZLE:
+      VectorCopy(attacker_data->muzzle_out, unlagged_point);
+      break;
+
+    case UNLGD_PNT_ORIGIN:
+      VectorCopy(attacker_data->origin_out, unlagged_point);
+      break;
+
+    case UNLGD_PNT_OLD_ORIGIN:
+      VectorCopy(attacker->client->oldOrigin, unlagged_point);
+      break;
+
+    default:
+      VectorCopy(attacker_data->muzzle_out, unlagged_point);
+      break;
   }
 
   for(i = 0; i < ENTITYNUM_MAX_NORMAL; i++) {
@@ -803,13 +975,12 @@ void G_UnlaggedOn(int attackerNum, vec3_t muzzle, float range) {
       continue;
     }
 
-    if(muzzle)
-    {
+    if(attacker_data->point_type != UNLGD_PNT_NONE){
       float r1 = Distance(calc->origin, calc->maxs);
       float r2 = Distance(calc->origin, calc->mins);
       float maxRadius = (r1 > r2) ? r1 : r2;
 
-      if(Distance(muzzle, calc->origin) > range + maxRadius) {
+      if(Distance(unlagged_point, calc->origin) > attacker_data->range + maxRadius) {
         continue;
       }
     }
@@ -875,11 +1046,12 @@ void G_UnlaggedOn(int attackerNum, vec3_t muzzle, float range) {
 ==============
 */
 void G_UnlaggedDetectCollisions(gentity_t *ent) {
-  unlagged_t *calc;
-  trace_t tr;
-  float r1, r2;
-  float range;
-  vec3_t *unlagged_origin, *unlagged_mins, *unlagged_maxs;
+  unlagged_t               *calc;
+  trace_t                  tr;
+  float                    r1, r2;
+  float                    range;
+  vec3_t                   *unlagged_origin, *unlagged_mins, *unlagged_maxs;
+  unlagged_attacker_data_t attacker_data;
 
   Com_Assert(ent && "G_UnlaggedDetectCollisions: ent is NULL");
 
@@ -924,7 +1096,10 @@ void G_UnlaggedDetectCollisions(gentity_t *ent) {
   r2 = Distance(*unlagged_origin, *unlagged_maxs);
   range += (r1 > r2) ? r1 : r2;
 
-  G_UnlaggedOn(ent->s.number, ent->client->oldOrigin, range);
+  attacker_data.ent_num = ent->s.number;
+  attacker_data.point_type = UNLGD_PNT_OLD_ORIGIN;
+  attacker_data.range = range;
+  G_UnlaggedOn(&attacker_data);
 
   SV_Trace(&tr, ent->client->oldOrigin, ent->r.mins, ent->r.maxs,
     ent->client->ps.origin, ent->s.number,  MASK_PLAYERSOLID, TT_AABB);

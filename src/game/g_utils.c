@@ -1215,6 +1215,10 @@ int G_Get_Foundation_Ent_Num(gentity_t *ent) {
     return groundEntityNum;
   }
 
+  if(groundEntityNum == ent->s.number) {
+    return ENTITYNUM_NONE;
+  }
+
   //check the ground entity to see if it is on a foundation entity
   return G_Get_Foundation_Ent_Num(&g_entities[groundEntityNum]);
 }

@@ -1137,7 +1137,7 @@ static qboolean PM_CheckPounce( void )
   float   pounce_mod;
   float   pounce_range = pm->ps->weapon == WP_ALEVEL3 ? LEVEL3_POUNCE_RANGE :
             LEVEL3_POUNCE_UPG_RANGE;
-  vec3_t  muzzle, forward, right, up, end;
+  vec3_t  muzzle, forward, end;
   vec3_t  mins, maxs;
   trace_t trace;
 
@@ -1169,12 +1169,23 @@ static qboolean PM_CheckPounce( void )
     return qfalse;
 
   // check for close targets
-  AngleVectors(pm->ps->viewangles, forward, right, up);
-  BG_CalcMuzzlePointFromPS(pm->ps, forward, right, up, muzzle);
+  
   VectorSet(mins, -(LEVEL3_POUNCE_WIDTH), -(LEVEL3_POUNCE_WIDTH), -(LEVEL3_POUNCE_WIDTH));
   VectorSet(maxs, (LEVEL3_POUNCE_WIDTH), (LEVEL3_POUNCE_WIDTH), (LEVEL3_POUNCE_WIDTH));
   if(pm->unlagged_on) {
-    pm->unlagged_on(pm->ps->clientNum, muzzle, pounce_range + LEVEL3_POUNCE_WIDTH);
+    unlagged_attacker_data_t unlagged_attacker;
+
+    unlagged_attacker.ent_num = pm->ps->clientNum;
+    unlagged_attacker.point_type = UNLGD_PNT_MUZZLE;
+    unlagged_attacker.range = pounce_range + LEVEL3_POUNCE_WIDTH;
+    pm->unlagged_on(&unlagged_attacker);
+    VectorCopy(unlagged_attacker.muzzle_out, muzzle);
+    VectorCopy(unlagged_attacker.forward_out, forward);
+  } else {
+    vec3_t right, up;
+
+    AngleVectors(pm->ps->viewangles, forward, right, up);
+    BG_CalcMuzzlePointFromPS(pm->ps, forward, right, up, muzzle);
   }
   VectorMA(muzzle, pounce_range, forward, end);
   pm->trace(&trace, muzzle, mins, maxs,end, pm->ps->clientNum, MASK_SHOT);

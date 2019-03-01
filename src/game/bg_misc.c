@@ -5876,33 +5876,49 @@ BG_CheckBoltImpactTrigger
 For firing lightning bolts early
 ===============
 */
-void BG_CheckBoltImpactTrigger( pmove_t *pm,
-                                void (*trace)( trace_t *, const vec3_t,
-                                               const vec3_t, const vec3_t,
-                                               const vec3_t, int, int ),
-                                void (*UnlaggedOn)( int, vec3_t, float ),
-                                void (*UnlaggedOff)( void ) )
-{
-  if( pm->ps->weapon == WP_LIGHTNING &&
-      pm->ps->misc[ MISC_MISC ] > LIGHTNING_BOLT_CHARGE_TIME_MIN &&
-      pm->ps->misc[ MISC_MISC ] - pm->ps->stats[ STAT_MISC3 ] > 50 )
-  {
-    vec3_t forward, right, up;
-    vec3_t muzzle, end;
+void BG_CheckBoltImpactTrigger(
+  pmove_t *pm,
+  void (*trace)(
+    trace_t *, const vec3_t, const vec3_t,
+    const vec3_t, const vec3_t, int, int),
+  void (*UnlaggedOn)(unlagged_attacker_data_t *),
+  void (*UnlaggedOff)(void)) {
+  if(
+    pm->ps->weapon == WP_LIGHTNING &&
+    pm->ps->misc[ MISC_MISC ] > LIGHTNING_BOLT_CHARGE_TIME_MIN &&
+    pm->ps->misc[ MISC_MISC ] - pm->ps->stats[ STAT_MISC3 ] > 50 ) {
+    vec3_t end;
 
-    AngleVectors( pm->ps->viewangles, forward, right, up );
-    BG_CalcMuzzlePointFromPS( pm->ps, forward, right, up, muzzle );
+    if(UnlaggedOn) {
+      unlagged_attacker_data_t attacker_data;
 
-    VectorMA( muzzle, BG_LightningBoltRange( NULL, pm->ps, qtrue ),
-              forward, end );
+      attacker_data.ent_num = pm->ps->clientNum;
+      attacker_data.point_type = UNLGD_PNT_MUZZLE;
+      attacker_data.range = BG_LightningBoltRange(NULL, pm->ps, qtrue);
+      UnlaggedOn(&attacker_data);
 
-    if( UnlaggedOn )
-      UnlaggedOn( pm->ps->clientNum, muzzle,
-                  BG_LightningBoltRange( NULL, pm->ps, qtrue ) );
-  	trace( &pm->pmext->impactTriggerTrace, muzzle, NULL, NULL, end,
-              pm->ps->clientNum, MASK_SHOT );
-    if( UnlaggedOff )
-      UnlaggedOff( );
+      VectorMA(attacker_data.muzzle_out, BG_LightningBoltRange(NULL, pm->ps, qtrue),
+                attacker_data.forward_out, end );
+
+      trace(
+        &pm->pmext->impactTriggerTrace, attacker_data.muzzle_out, NULL, NULL, end,
+        pm->ps->clientNum, MASK_SHOT );
+
+      if(UnlaggedOff) {
+        UnlaggedOff( );
+      }
+    } else {
+      vec3_t forward, right, up;
+      vec3_t muzzle;
+
+      AngleVectors(pm->ps->viewangles, forward, right, up);
+      BG_CalcMuzzlePointFromPS(pm->ps, forward, right, up, muzzle);
+
+      VectorMA(muzzle, BG_LightningBoltRange(NULL, pm->ps, qtrue),
+                forward, end );
+      trace( &pm->pmext->impactTriggerTrace, muzzle, NULL, NULL, end,
+                pm->ps->clientNum, MASK_SHOT );
+    }
 
     pm->ps->stats[ STAT_MISC3 ] = pm->ps->misc[ MISC_MISC ];
     pm->pmext->impactTriggerTraceChecked = qtrue;
