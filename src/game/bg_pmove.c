@@ -87,6 +87,43 @@ void PM_AddTouchEnt( trace_t *trace, const vec3_t impactVelocity )
 
 /*
 ===================
+PM_UnlaggedOn
+===================
+*/
+static void PM_UnlaggedOn(unlagged_attacker_data_t *data) {
+  data->ent_num = pm->ps->clientNum;
+
+  if(pm->unlagged_on) {
+    pm->unlagged_on(data);
+  } else {
+    AngleVectors(
+      pm->ps->viewangles,
+      data->forward_out,
+      data->right_out,
+      data->up_out);
+    BG_CalcMuzzlePointFromPS(
+      pm->ps,
+      data->forward_out,
+      data->right_out,
+      data->up_out,
+      data->muzzle_out);
+    VectorCopy(pm->ps->origin, data->origin_out);
+  }
+}
+
+/*
+===================
+PM_UnlaggedOff
+===================
+*/
+static void PM_UnlaggedOff(void) {
+  if(pm->unlagged_off) {
+    pm->unlagged_off( );
+  }
+}
+
+/*
+===================
 PM_StartTorsoAnim
 ===================
 */
@@ -1137,9 +1174,10 @@ static qboolean PM_CheckPounce( void )
   float   pounce_mod;
   float   pounce_range = pm->ps->weapon == WP_ALEVEL3 ? LEVEL3_POUNCE_RANGE :
             LEVEL3_POUNCE_UPG_RANGE;
-  vec3_t  muzzle, forward, end;
+  vec3_t  end;
   vec3_t  mins, maxs;
   trace_t trace;
+  unlagged_attacker_data_t unlagged_attacker;
 
   if( pm->ps->weapon != WP_ALEVEL3 &&
       pm->ps->weapon != WP_ALEVEL3_UPG )
@@ -1172,26 +1210,17 @@ static qboolean PM_CheckPounce( void )
   
   VectorSet(mins, -(LEVEL3_POUNCE_WIDTH), -(LEVEL3_POUNCE_WIDTH), -(LEVEL3_POUNCE_WIDTH));
   VectorSet(maxs, (LEVEL3_POUNCE_WIDTH), (LEVEL3_POUNCE_WIDTH), (LEVEL3_POUNCE_WIDTH));
-  if(pm->unlagged_on) {
-    unlagged_attacker_data_t unlagged_attacker;
 
-    unlagged_attacker.ent_num = pm->ps->clientNum;
-    unlagged_attacker.point_type = UNLGD_PNT_MUZZLE;
-    unlagged_attacker.range = pounce_range + LEVEL3_POUNCE_WIDTH;
-    pm->unlagged_on(&unlagged_attacker);
-    VectorCopy(unlagged_attacker.muzzle_out, muzzle);
-    VectorCopy(unlagged_attacker.forward_out, forward);
-  } else {
-    vec3_t right, up;
-
-    AngleVectors(pm->ps->viewangles, forward, right, up);
-    BG_CalcMuzzlePointFromPS(pm->ps, forward, right, up, muzzle);
-  }
-  VectorMA(muzzle, pounce_range, forward, end);
-  pm->trace(&trace, muzzle, mins, maxs,end, pm->ps->clientNum, MASK_SHOT);
-  if(pm->unlagged_off) {
-    pm->unlagged_off( );
-  }
+  unlagged_attacker.point_type = UNLGD_PNT_MUZZLE;
+  unlagged_attacker.range = pounce_range + LEVEL3_POUNCE_WIDTH;
+  PM_UnlaggedOn(&unlagged_attacker);
+  VectorMA(
+    unlagged_attacker.muzzle_out, pounce_range,
+    unlagged_attacker.forward_out, end);
+  pm->trace(
+    &trace, unlagged_attacker.muzzle_out, mins, maxs, end,
+    pm->ps->clientNum, MASK_SHOT);
+  PM_UnlaggedOff();
 
   if(trace.allsolid || trace.startsolid) {
     return qfalse;
@@ -1217,7 +1246,9 @@ static qboolean PM_CheckPounce( void )
   if(pounce_mod < 1.0f) {
     jumpMagnitude *= pounce_mod;
   }
-  VectorMA( pm->ps->velocity, jumpMagnitude, pml.forward, pm->ps->velocity );
+  VectorMA(
+    pm->ps->velocity, jumpMagnitude,
+    unlagged_attacker.forward_out, pm->ps->velocity );
   PM_AddEvent( EV_JUMP );
 
   // Play jumping animation
