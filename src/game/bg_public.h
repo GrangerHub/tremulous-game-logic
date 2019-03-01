@@ -264,6 +264,26 @@ typedef enum
   WEAPON_RELOADING,
 } weaponstate_t;
 
+typedef enum
+{
+  UNLGD_PNT_NONE,
+  UNLGD_PNT_MUZZLE,
+  UNLGD_PNT_ORIGIN,
+  UNLGD_PNT_OLD_ORIGIN
+} unlagged_point_t;
+
+typedef struct unlagged_attacker_data_s
+{
+  int              ent_num;
+  float            range;
+  unlagged_point_t point_type;
+  vec3_t           origin_out;
+  vec3_t           muzzle_out;
+  vec3_t           forward_out;
+  vec3_t           right_out;
+  vec3_t           up_out;
+} unlagged_attacker_data_t;
+
 // pmove->pm_flags
 #define PMF_DUCKED          0x000001
 #define PMF_JUMP_HELD       0x000002
@@ -355,7 +375,7 @@ struct pmove_s
 
   int           (*pointcontents)( const vec3_t point, int passEntityNum );
 
-  void          (*unlagged_on)( int attackerNum, vec3_t muzzle, float range );
+  void          (*unlagged_on)( unlagged_attacker_data_t *attacker_data );
   void          (*unlagged_off)( void );
 
   int           tauntSpam; // allow taunts to be spammed. only for clients that enable cg_tauntSpam
@@ -1577,12 +1597,12 @@ void      BG_CalcMuzzlePointFromPS( const playerState_t *ps, vec3_t forward,
 int       BG_LightningBoltRange( const entityState_t *es,
                                  const playerState_t *ps,
                                  qboolean currentRange );
-void      BG_CheckBoltImpactTrigger( pmove_t *pmove,
-                                     void (*trace)( trace_t *, const vec3_t,
-                                                    const vec3_t, const vec3_t,
-                                                    const vec3_t, int, int ),
-                                     void (*UnlaggedOn)( int, vec3_t, float ),
-                                     void (*UnlaggedOff)( void ) );
+void      BG_CheckBoltImpactTrigger(pmove_t *pmove,
+                                    void (*trace)(trace_t *, const vec3_t,
+                                                  const vec3_t, const vec3_t,
+                                                  const vec3_t, int, int ),
+                                    void (*UnlaggedOn)(unlagged_attacker_data_t *),
+                                    void (*UnlaggedOff)(void));
 void      BG_ResetLightningBoltCharge( playerState_t *ps, pmoveExt_t *pmext );
 void      BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
                                                 const vec3_t mins, const vec3_t maxs,

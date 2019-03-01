@@ -313,6 +313,7 @@ static void  G_Push_Ent(void *data, void *user_data) {
   // add movement
   VectorAdd(check->s.pos.trBase, push_data->move, check->s.pos.trBase);
   VectorAdd(check->s.pos.trBase, move2, check->s.pos.trBase);
+  check->s.pos.trTime = level.time;
 
   if(check->client) {
     VectorAdd( check->client->ps.origin, push_data->move, check->client->ps.origin );
@@ -323,6 +324,7 @@ static void  G_Push_Ent(void *data, void *user_data) {
   } else {
     VectorCopy(check->s.pos.trBase, check->r.currentOrigin);
     check->s.apos.trBase[YAW] += push_data->amove[YAW];
+    check->s.apos.trTime = level.time;
   }
   SV_LinkEntity(check);
 }
