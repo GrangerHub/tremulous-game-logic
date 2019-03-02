@@ -6640,6 +6640,49 @@ void BG_EvaluateBBOXPoint( bboxPoint_t *bboxPoint, vec3_t origin,
   }
 }
 
+/*
+============
+BG_PointIsInsideBBOX
+============
+*/
+qboolean BG_PointIsInsideBBOX(
+  const vec3_t point, const vec3_t mins, const vec3_t maxs) {
+  Com_Assert(point);
+  Com_Assert(mins);
+  Com_Assert(maxs);
+
+  if(
+    point[0] < mins[0] ||
+    point[1] < mins[1] ||
+    point[2] < mins[2] ||
+    point[0] > maxs[0] ||
+    point[1] > maxs[1] ||
+    point[2] > maxs[2]) {
+    return qfalse;
+  }
+
+  return qtrue;
+}
+
+/*
+============
+BG_FindBBoxCenter
+============
+*/
+void BG_FindBBoxCenter(
+  const vec3_t origin, const vec3_t mins, const vec3_t maxs, vec3_t center) {
+  vec3_t absmin;
+  vec3_t absmax;
+  int    i;
+
+  VectorAdd(origin, mins, absmin);
+  VectorAdd(origin, maxs, absmax);
+
+  for(i = 0; i < 3; i++) {
+    center[i] = (absmin[i] + absmax[i]) / 2;
+  }
+}
+
 int cmdcmp( const void *a, const void *b )
 {
   return Q_stricmp( (const char *)a, ((dummyCmd_t *)b)->name );
