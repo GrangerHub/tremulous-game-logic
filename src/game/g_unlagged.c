@@ -854,6 +854,40 @@ void G_UnlaggedOff(void) {
 
 /*
 ==============
+ G_Unlagged_BBOX_In_Range
+==============
+*/
+static qboolean G_Unlagged_BBOX_In_Range(
+  const vec3_t unlagged_point, float range, const vec3_t bbox_origin,
+  const vec3_t mins, const vec3_t maxs) {
+  vec3_t absmin, absmax;
+  float r1;
+  float r2;
+  float maxRadius;
+  vec3_t checked_point;
+
+  VectorAdd(bbox_origin, mins, absmin);
+  VectorAdd(bbox_origin, maxs, absmax);
+
+  if(BG_PointIsInsideBBOX(bbox_origin, mins, maxs)) {
+    VectorCopy(bbox_origin, checked_point);
+  } else {
+    BG_FindBBoxCenter(bbox_origin, mins, maxs, checked_point);
+  }
+
+  r1 = Distance(checked_point, absmax);
+  r2 = Distance(checked_point, absmin);
+  maxRadius = (r1 > r2) ? r1 : r2;
+
+  if(Distance(unlagged_point, checked_point) > range + maxRadius) {
+    return qfalse;
+  }
+
+  return qtrue;
+}
+
+/*
+==============
  G_UnlaggedOn
 
  Called after G_UnlaggedCalc() to apply the calculated values to all active
@@ -971,19 +1005,15 @@ void G_UnlaggedOn(unlagged_attacker_data_t *attacker_data) {
       continue;
     }
 
-    if(!calc->used) {
-      continue;
-    }
-
     if(attacker_data->point_type != UNLGD_PNT_NONE){
-      float r1 = Distance(calc->origin, calc->maxs);
-      float r2 = Distance(calc->origin, calc->mins);
-      float maxRadius = (r1 > r2) ? r1 : r2;
-      float unlagged_range = attacker_data->range + maxRadius;
-
       if(
-        Distance(unlagged_point, calc->origin) > unlagged_range &&
-        Distance(unlagged_point, ent->r.currentOrigin) > unlagged_range) {
+        !G_Unlagged_BBOX_In_Range(
+          unlagged_point, attacker_data->range, calc->origin,
+          calc->use_dims ? calc->mins : ent->r.mins,
+          calc->use_dims ? calc->maxs : ent->r.maxs) &&
+        !G_Unlagged_BBOX_In_Range(
+          unlagged_point, attacker_data->range, ent->r.currentOrigin,
+          ent->r.mins, ent->r.maxs)) {
         continue;
       }
     }
