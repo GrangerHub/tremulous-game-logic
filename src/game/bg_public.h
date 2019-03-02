@@ -1875,6 +1875,11 @@ typedef struct bboxPoint_s
 void BG_EvaluateBBOXPoint( bboxPoint_t *bboxPoint, vec3_t origin,
                            const vec3_t minsIn, const vec3_t maxsIn );
 
+qboolean BG_PointIsInsideBBOX(
+  const vec3_t point, const vec3_t mins, const vec3_t maxs);
+void     BG_FindBBoxCenter(
+  const vec3_t origin, const vec3_t mins, const vec3_t maxs, vec3_t center);
+
 typedef struct
 {
   const char *name;
