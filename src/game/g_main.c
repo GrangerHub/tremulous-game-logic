@@ -596,22 +596,26 @@ void G_RestoreCvars( void )
 G_MapConfigs
 =================
 */
-void G_MapConfigs( const char *mapname )
-{
+void G_MapConfigs(const char *mapname) {
+  int mapConfigsLoadedVal;
 
-  if( !g_mapConfigs.string[0] )
+  if(!g_mapConfigs.string[0]) {
     return;
+  }
 
-  if( Cvar_VariableIntegerValue( "g_mapConfigsLoaded" ) )
+  mapConfigsLoadedVal = Cvar_VariableIntegerValue("g_mapConfigsLoaded");
+
+  if(mapConfigsLoadedVal < 0 || mapConfigsLoadedVal > 1) {
     return;
+  }
 
-  Cbuf_ExecuteText( EXEC_APPEND,
-    va( "exec \"%s/default.cfg\"\n", g_mapConfigs.string ) );
+  Cbuf_ExecuteText(EXEC_APPEND,
+    va("exec \"%s/default.cfg\"\n", g_mapConfigs.string));
 
-  Cbuf_ExecuteText( EXEC_APPEND,
-    va( "exec \"%s/%s.cfg\"\n", g_mapConfigs.string, mapname ) );
+  Cbuf_ExecuteText(EXEC_APPEND,
+    va("exec \"%s/%s.cfg\"\n", g_mapConfigs.string, mapname));
 
-  Cvar_SetSafe( "g_mapConfigsLoaded", "1" );
+  Cvar_SetSafe("g_mapConfigsLoaded", va("%d", (mapConfigsLoadedVal + 1)));
 }
 
 static int G_StageBuildPointReserveMaxForTeam( team_t team );
@@ -727,19 +731,28 @@ Q_EXPORT void G_InitGame( int levelTime, int randomSeed, int restart )
   else
     Com_Printf( "Not logging to disk\n" );
 
-  if( g_mapConfigs.string[ 0 ] && !Cvar_VariableIntegerValue( "g_mapConfigsLoaded" ) )
-  {
-    char map[ MAX_CVAR_VALUE_STRING ] = {""};
+  if(g_mapConfigs.string[0]) {
+    if(!Cvar_VariableIntegerValue("g_mapConfigsLoaded")) {
+      char map[ MAX_CVAR_VALUE_STRING ] = {""};
 
-    Com_Printf( "InitGame: executing map configuration scripts and restarting\n" );
-    Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
-    G_MapConfigs( map );
-    Cbuf_ExecuteText( EXEC_APPEND, "wait\nmap_restart 0\n" );
-  }
-  else
-  {
+      Com_Printf("InitGame: executing map configuration scripts and restarting\n");
+      Cvar_VariableStringBuffer("mapname", map, sizeof(map));
+      G_MapConfigs(map);
+      Cbuf_ExecuteText(EXEC_APPEND, "wait\nmap_restart 0\n");
+    } else {
+      char map[MAX_CVAR_VALUE_STRING] = {""};
+
+      //execute the map configs one more time without a restart so that commands aren't reset
+      Com_Printf("InitGame: executing map configuration scripts\n");
+      Cvar_VariableStringBuffer("mapname", map, sizeof(map));
+      G_MapConfigs(map);
+
+      // we're done with g_mapConfigs, so reset this for the next map
+      Cvar_SetSafe("g_mapConfigsLoaded", "0");
+    }
+  } else {
     // we're done with g_mapConfigs, so reset this for the next map
-    Cvar_SetSafe( "g_mapConfigsLoaded", "0" );
+    Cvar_SetSafe("g_mapConfigsLoaded", "0");
   }
 
   // set this cvar to 0 if it exists, but otherwise avoid its creation
