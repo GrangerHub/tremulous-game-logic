@@ -909,13 +909,43 @@ void G_UnlaggedOn(unlagged_attacker_data_t *attacker_data) {
 
   Com_Assert(attacker_data && "G_UnlaggedOn: attacker_data is NULL");
 
+  attacker = &g_entities[attacker_data->ent_num];
+
   if(!g_unlagged.integer) {
+    if(attacker->client) {
+      VectorCopy(attacker->client->ps.origin, attacker_data->origin_out);
+      AngleVectors(
+        attacker->client->ps.viewangles,
+        attacker_data->forward_out,
+        attacker_data->right_out,
+        attacker_data->up_out);
+      BG_CalcMuzzlePointFromPS(
+        &attacker->client->ps,
+        attacker_data->forward_out,
+        attacker_data->right_out,
+        attacker_data->up_out,
+        attacker_data->muzzle_out);
+    }
     return;
   }
 
-  attacker = &g_entities[attacker_data->ent_num];
+  if(!attacker->client) {
+    return;
+  }
 
-  if(!attacker->client || !attacker->client->pers.useUnlagged) {
+  if(!attacker->client->pers.useUnlagged) {
+    VectorCopy(attacker->client->ps.origin, attacker_data->origin_out);
+    AngleVectors(
+      attacker->client->ps.viewangles,
+      attacker_data->forward_out,
+      attacker_data->right_out,
+      attacker_data->up_out);
+    BG_CalcMuzzlePointFromPS(
+      &attacker->client->ps,
+      attacker_data->forward_out,
+      attacker_data->right_out,
+      attacker_data->up_out,
+      attacker_data->muzzle_out);
     return;
   }
 
