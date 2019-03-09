@@ -1171,6 +1171,7 @@ PM_CheckPounce
 static qboolean PM_CheckPounce( void )
 {
   int     jumpMagnitude;
+  float   jump_mod;
   float   pounce_mod;
   float   pounce_range = pm->ps->weapon == WP_ALEVEL3 ? LEVEL3_POUNCE_RANGE :
             LEVEL3_POUNCE_UPG_RANGE;
@@ -1222,14 +1223,20 @@ static qboolean PM_CheckPounce( void )
     pm->ps->clientNum, MASK_SHOT);
   PM_UnlaggedOff();
 
-  if(trace.allsolid || trace.startsolid) {
-    return qfalse;
+  if(!trace.allsolid && !trace.startsolid) {
+    if(trace.fraction < 1.0f) {
+      pounce_mod = (trace.fraction * 0.25);
+    } else {
+      pounce_mod = 1.0f;
+    }
+  } else {
+    pounce_mod = 0.0f;
   }
 
-  if(trace.fraction < 1.0f) {
-    pounce_mod = (trace.fraction * 0.25);
+  if(trace.entityNum != ENTITYNUM_WORLD) {
+    jump_mod = pounce_mod;
   } else {
-    pounce_mod = 1.0f;
+    jump_mod = 1.0f;
   }
 
   // Give the player forward velocity and simulate a jump
@@ -1243,8 +1250,8 @@ static qboolean PM_CheckPounce( void )
   else
     jumpMagnitude = pm->ps->misc[ MISC_MISC ] *
                     LEVEL3_POUNCE_JUMP_MAG_UPG / LEVEL3_POUNCE_TIME_UPG;
-  if(pounce_mod < 1.0f) {
-    jumpMagnitude *= pounce_mod;
+  if(jump_mod < 1.0f) {
+    jumpMagnitude *= jump_mod;
   }
   VectorMA(
     pm->ps->velocity, jumpMagnitude,
