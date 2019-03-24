@@ -128,7 +128,8 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL4_CLAW_DMG             AWDM(100000)
 #define LEVEL4_CLAW_RANGE           100.0f
 #define LEVEL4_CLAW_WIDTH           20.0f
-#define LEVEL4_CLAW_HEIGHT          20.0f
+#define LEVEL4_CLAW_HEIGHT          24.0f
+#define LEVEL4_CLAW_OFFSET          (-15.0f)
 #define LEVEL4_CLAW_REPEAT          750
 #define LEVEL4_CLAW_K_SCALE         1.0f
 

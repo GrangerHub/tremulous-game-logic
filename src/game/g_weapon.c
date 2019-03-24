@@ -227,9 +227,11 @@ Trace a bounding box against entities and the world
 ================
 */
 static void G_WideTraceSolid(trace_t *tr, gentity_t *ent, float range,
-                             float width, float height, gentity_t **target) {
+                             float width, float height, const float height_offset,
+                             gentity_t **target) {
   vec3_t                   mins, maxs;
   vec3_t                   end;
+  float                    viewheight_backup;
   unlagged_attacker_data_t unlagged_attacker;
   trace_t                  tr2;
 
@@ -242,10 +244,19 @@ static void G_WideTraceSolid(trace_t *tr, gentity_t *ent, float range,
     return;
   }
 
+  if(height_offset) {
+    viewheight_backup = ent->client->ps.viewheight;
+    ent->client->ps.viewheight += height_offset;
+  }
+
   unlagged_attacker.ent_num = ent->s.number;
   unlagged_attacker.point_type = UNLGD_PNT_MUZZLE;
   unlagged_attacker.range = range + width;
   G_UnlaggedOn(&unlagged_attacker);
+
+  if(height_offset) {
+    ent->client->ps.viewheight = viewheight_backup;
+  }
 
   VectorMA(unlagged_attacker.muzzle_out, range, unlagged_attacker.forward_out, end);
 
@@ -287,7 +298,7 @@ static void G_WideTraceSolidSeries(trace_t *tr, gentity_t *ent, float range,
     widthAdjusted = (width * (float)(n)) / 5.00f;
     heightAdjusted = (height * (float)(n)) / 5.00f;
 
-    G_WideTraceSolid(tr, ent, range, widthAdjusted, heightAdjusted, target);
+    G_WideTraceSolid(tr, ent, range, widthAdjusted, heightAdjusted, 0, target);
     if(
       tr->startsolid ||
       (*target != NULL && G_TakesDamage(*target))) {
@@ -295,7 +306,7 @@ static void G_WideTraceSolidSeries(trace_t *tr, gentity_t *ent, float range,
     }
   }
 
-  G_WideTraceSolid(tr, ent, range, width, height, target);
+  G_WideTraceSolid(tr, ent, range, width, height, 0, target);
 }
 
 /*
@@ -420,12 +431,12 @@ meleeAttack
 */
 
 void meleeAttack( gentity_t *ent, float range, float width, float height,
-                  int damage, meansOfDeath_t mod )
+                  float height_offset, int damage, meansOfDeath_t mod )
 {
   trace_t   tr;
   gentity_t *traceEnt;
 
-  G_WideTraceSolid( &tr, ent, range, width, height, &traceEnt );
+  G_WideTraceSolid( &tr, ent, range, width, height, height_offset, &traceEnt );
   if( traceEnt == NULL || !G_TakesDamage( traceEnt ) )
     return;
 
@@ -1014,7 +1025,7 @@ void painSawFire( gentity_t *ent )
   gentity_t *tent, *traceEnt;
 
   G_WideTraceSolid( &tr, ent, PAINSAW_RANGE, PAINSAW_WIDTH, PAINSAW_HEIGHT,
-               &traceEnt );
+               0, &traceEnt );
   if( !traceEnt || !G_TakesDamage( traceEnt ) )
     return;
 
@@ -1217,7 +1228,7 @@ void cancelBuildFire( gentity_t *ent )
   if( ent->client->ps.weapon == WP_ABUILD ||
       ent->client->ps.weapon == WP_ABUILD2 )
     meleeAttack( ent, ABUILDER_CLAW_RANGE, ABUILDER_CLAW_WIDTH,
-                 ABUILDER_CLAW_WIDTH, ABUILDER_CLAW_DMG, MOD_ABUILDER_CLAW );
+                 ABUILDER_CLAW_WIDTH, 0, ABUILDER_CLAW_DMG, MOD_ABUILDER_CLAW );
 }
 
 /*
@@ -2071,31 +2082,32 @@ void FireWeapon( gentity_t *ent )
   {
     case WP_ALEVEL1:
       meleeAttack( ent, LEVEL1_CLAW_RANGE, LEVEL1_CLAW_WIDTH, LEVEL1_CLAW_WIDTH,
-                   LEVEL1_CLAW_DMG, MOD_LEVEL1_CLAW );
+                   0, LEVEL1_CLAW_DMG, MOD_LEVEL1_CLAW );
       break;
     case WP_ALEVEL1_UPG:
       meleeAttack( ent, LEVEL1_CLAW_U_RANGE, LEVEL1_CLAW_WIDTH, LEVEL1_CLAW_WIDTH,
-                   LEVEL1_CLAW_DMG, MOD_LEVEL1_CLAW );
+                   0, LEVEL1_CLAW_DMG, MOD_LEVEL1_CLAW );
       break;
     case WP_ALEVEL3:
       meleeAttack( ent, LEVEL3_CLAW_RANGE, LEVEL3_CLAW_WIDTH, LEVEL3_CLAW_WIDTH,
-                   LEVEL3_CLAW_DMG, MOD_LEVEL3_CLAW );
+                   0, LEVEL3_CLAW_DMG, MOD_LEVEL3_CLAW );
       break;
     case WP_ALEVEL3_UPG:
       meleeAttack( ent, LEVEL3_CLAW_UPG_RANGE, LEVEL3_CLAW_WIDTH,
-                   LEVEL3_CLAW_WIDTH, LEVEL3_CLAW_DMG, MOD_LEVEL3_CLAW );
+                   LEVEL3_CLAW_WIDTH, 0, LEVEL3_CLAW_DMG, MOD_LEVEL3_CLAW );
       break;
     case WP_ALEVEL2:
       meleeAttack( ent, LEVEL2_CLAW_RANGE, LEVEL2_CLAW_WIDTH, LEVEL2_CLAW_WIDTH,
-                   LEVEL2_CLAW_DMG, MOD_LEVEL2_CLAW );
+                   0, LEVEL2_CLAW_DMG, MOD_LEVEL2_CLAW );
       break;
     case WP_ALEVEL2_UPG:
       meleeAttack( ent, LEVEL2_CLAW_U_RANGE, LEVEL2_CLAW_WIDTH, LEVEL2_CLAW_WIDTH,
-                   LEVEL2_CLAW_DMG, MOD_LEVEL2_CLAW );
+                   0, LEVEL2_CLAW_DMG, MOD_LEVEL2_CLAW );
       break;
     case WP_ALEVEL4:
       meleeAttack( ent, LEVEL4_CLAW_RANGE, LEVEL4_CLAW_WIDTH,
-                   LEVEL4_CLAW_HEIGHT, LEVEL4_CLAW_DMG, MOD_LEVEL4_CLAW );
+                   LEVEL4_CLAW_HEIGHT, LEVEL4_CLAW_OFFSET, LEVEL4_CLAW_DMG,
+                   MOD_LEVEL4_CLAW );
       break;
 
     case WP_BLASTER:
