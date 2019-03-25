@@ -270,6 +270,10 @@ void G_ChangeTeam( gentity_t *ent, team_t newTeam )
              HUMAN_MAX_CREDITS / ALIEN_MAX_CREDITS + 0.5f );
   }
 
+  if(ent->client->pers.credit > SHRT_MAX) {
+    ent->client->pers.credit = SHRT_MAX;
+  }
+
   if( !g_cheats.integer )
   {
     if( ent->client->noclip )
