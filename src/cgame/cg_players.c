@@ -1990,14 +1990,16 @@ void CG_Player( centity_t *cent )
       renderfx = RF_THIRD_PERSON;     // only draw in mirrors
     else if( cg_cameraMode.integer )
       return;
-  }
 
-  if( cg_drawBBOX.integer )
-  {
-    vec3_t  mins, maxs;
+    if( cg_drawBBOX.integer )
+    {
+      vec3_t  mins, maxs, cmaxs;
 
-    BG_ClassBoundingBox( class, mins, maxs, NULL, NULL, NULL );
-    CG_DrawBoundingBox( cent->lerpOrigin, mins, maxs );
+      BG_ClassBoundingBox( class, mins, maxs, cmaxs, NULL, NULL );
+      CG_DrawBoundingBox(
+        cent->lerpOrigin, mins,
+        ( cg.predictedPlayerState.pm_flags & PMF_DUCKED ) ? cmaxs : maxs );
+    }
   }
 
   memset( &legs,    0, sizeof( legs ) );
