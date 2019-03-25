@@ -116,6 +116,9 @@ void G_AddCreditToClient( gclient_t *client, short credit, qboolean cap )
 
   if( client->pers.credit < 0 )
     client->pers.credit = 0;
+  else if(client->pers.credit > SHRT_MAX) {
+    client->pers.credit = SHRT_MAX;
+  }
 
   // Copy to ps so the client can access it
   client->ps.persistant[ PERS_CREDIT ] = client->pers.credit;
