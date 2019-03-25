@@ -1545,6 +1545,7 @@ void CG_AddPacketEntities( void )
 
       switch( es->eType )
       {
+        case ET_PLAYER:
         case ET_BUILDABLE:
         case ET_MISSILE:
         case ET_CORPSE:
