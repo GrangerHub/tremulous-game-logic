@@ -230,7 +230,7 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace )
         velocity[ 2 ] = 1;  // stepped on a grenade
 
       G_Damage( other, ent, attacker, velocity, ent->r.currentOrigin, ent->damage,
-        DAMAGE_NO_LOCDAMAGE, ent->methodOfDeath );
+        0, ent->methodOfDeath );
     }
   }
 

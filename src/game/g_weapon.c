@@ -1851,7 +1851,7 @@ qboolean CheckPounceAttack( gentity_t *ent )
     damage =  damage / 2;
   }
   G_Damage( traceEnt, ent, ent, forward, tr.endpos, damage,
-            0, MOD_LEVEL3_POUNCE );
+            DAMAGE_NO_LOCDAMAGE, MOD_LEVEL3_POUNCE );
 
   return qtrue;
 }
