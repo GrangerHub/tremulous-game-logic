@@ -2029,6 +2029,11 @@ void ClientThink_real( gentity_t *ent )
           class_t class = boost->client->ps.stats[ STAT_CLASS ];
           qboolean didBoost = qfalse;
 
+          //don't give a heal boost to self
+          if( boost->s.number == ent->s.number ) {
+            continue;
+          }
+
           if( class == PCL_ALIEN_LEVEL1 && modifier < LEVEL1_REGEN_MOD )
           {
             modifier = LEVEL1_REGEN_MOD;

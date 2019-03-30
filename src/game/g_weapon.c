@@ -1847,8 +1847,11 @@ qboolean CheckPounceAttack( gentity_t *ent )
                                                    LEVEL3_POUNCE_TIME_UPG;
   damage = payload * LEVEL3_POUNCE_DMG / timeMax;
   ent->client->pmext.pouncePayload = 0;
+  if(traceEnt->client) {
+    damage =  damage / 2;
+  }
   G_Damage( traceEnt, ent, ent, forward, tr.endpos, damage,
-            DAMAGE_NO_LOCDAMAGE, MOD_LEVEL3_POUNCE );
+            0, MOD_LEVEL3_POUNCE );
 
   return qtrue;
 }

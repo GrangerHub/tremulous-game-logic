@@ -399,7 +399,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define RIFLE_K_SCALE               1.0f
 #define RIFLE_RELOAD                2000
 #define RIFLE_PRICE                 0
-#define RIFLE_SPREAD                200
+#define RIFLE_SPREAD                180
 #define RIFLE_DMG                   HWDM(5000)
 
 #define PAINSAW_PRICE               100
