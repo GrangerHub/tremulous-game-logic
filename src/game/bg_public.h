@@ -496,6 +496,9 @@ typedef enum
 //for storing more than just 32 different weapon numbers
 #define MISC_HELD_WEAPON               ( MAX_MISC - 10 )
 
+//for footsteps and player bobbing
+#define MISC_BOB_CYCLE                 ( MAX_MISC - 11 )
+
 #define PS_WALLCLIMBINGFOLLOW   0x00000001
 #define PS_WALLCLIMBINGTOGGLE   0x00000002
 #define PS_NONSEGMODEL          0x00000004
