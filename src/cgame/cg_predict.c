@@ -366,11 +366,12 @@ static void CG_InterpolatePlayerState( qboolean grabAngles )
 
   f = (float)( cg.time - prev->serverTime ) / ( next->serverTime - prev->serverTime );
 
-  i = next->ps.bobCycle;
-  if( i < prev->ps.bobCycle )
-    i += 256;   // handle wraparound
+  i = next->ps.misc[MISC_BOB_CYCLE];
+  if( i < prev->ps.misc[MISC_BOB_CYCLE] )
+    i += 4096;   // handle wraparound
 
-  out->bobCycle = prev->ps.bobCycle + f * ( i - prev->ps.bobCycle );
+  out->misc[MISC_BOB_CYCLE] =
+    prev->ps.misc[MISC_BOB_CYCLE] + f * (i - prev->ps.misc[MISC_BOB_CYCLE]);
 
   for( i = 0; i < 3; i++ )
   {

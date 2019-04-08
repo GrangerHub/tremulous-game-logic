@@ -3227,7 +3227,7 @@ static void PM_CrashLand( void )
   }
 
   // start footstep cycle over
-  pm->ps->bobCycle = 0;
+  pm->ps->misc[MISC_BOB_CYCLE] = 0;
 }
 
 
@@ -4143,12 +4143,17 @@ static void PM_Footsteps( void )
 
   bobmove *= MIX( 1.0f, 1.15f, pml.wallSpeedFactor );
 
+  //slow appropriatly while evolving
+  if( ( pm->ps->stats[ STAT_TEAM ] == TEAM_ALIENS ) && 
+      ( pm->ps->eFlags & EF_EVOLVING ) )
+    bobmove *= BG_EvolveScale( pm->ps );
+
   // check for footstep / splash sounds
-  old = pm->ps->bobCycle;
-  pm->ps->bobCycle = (int)( old + bobmove * pml.msec ) & 255;
+  old = pm->ps->misc[MISC_BOB_CYCLE];
+  pm->ps->misc[MISC_BOB_CYCLE] = (int)( old + ( 16 * bobmove * pml.msec ) ) & 4095;
 
   // if we just crossed a cycle boundary, play an apropriate footstep event
-  if( ( ( old + 64 ) ^ ( pm->ps->bobCycle + 64 ) ) & 128 )
+  if( ( ( old + 1024 ) ^ ( pm->ps->misc[MISC_BOB_CYCLE] + 1024 ) ) & 2048 )
   {
     if( pm->waterlevel == 0 )
     {
