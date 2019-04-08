@@ -669,7 +669,7 @@ void CG_OffsetFirstPersonView( void )
     if( cg.predictedPlayerState.pm_flags & PMF_DUCKED )
       delta *= 3;   // crouching accentuates roll
 
-    if( cg.bobcycle & 1 )
+    if( cg.bobcycle & 15 )
       delta = -delta;
 
     angles[ ROLL ] += delta;
@@ -1265,8 +1265,8 @@ static int CG_CalcViewValues( void )
     return CG_CalcFov( );
   }
 
-  cg.bobcycle = ( ps->bobCycle & 128 ) >> 7;
-  cg.bobfracsin = fabs( sin( ( ps->bobCycle & 127 ) / 127.0 * M_PI ) );
+  cg.bobcycle = ( ps->misc[MISC_BOB_CYCLE] & 2048 ) >> 11;
+  cg.bobfracsin = fabs( sin( ( ps->misc[MISC_BOB_CYCLE] & 2047 ) / 2047.0 * M_PI ) );
   cg.xyspeed = sqrt( ps->velocity[ 0 ] * ps->velocity[ 0 ] +
     ps->velocity[ 1 ] * ps->velocity[ 1 ] );
 
