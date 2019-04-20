@@ -735,8 +735,10 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 #define BUNNY_HOP_DELAY             300  // minimum miliseconds delay between bunny hops
 
-#define CHARGE_STAMINA_MAX          10000
-#define CHARGE_STAMINA_RESTORE      15
+#define CHARGE_STAMINA_MAX          2400
+#define CHARGE_STAMINA_MIN          700
+#define CHARGE_STAMINA_USE_RATE     (0.50f)
+#define CHARGE_STAMINA_RESTORE_RATE (0.075f)
 
 #define DEFAULT_FREEKILL_PERIOD     "120" //seconds
 #define FREEKILL_ALIEN              ALIEN_CREDITS_PER_KILL
