@@ -767,21 +767,6 @@ void ClientTimerActions( gentity_t *ent, int msec )
               client->medKitStaminaToRestore = 0;
           }
       }
-    } else if( BG_ClassHasAbility( client->ps.stats[STAT_CLASS],
-                                   SCA_CHARGE_STAMINA ) )
-    {
-      if( client->ps.stats[ STAT_STAMINA ] < 0 )
-        client->ps.stats[ STAT_STAMINA ] = 0;
-
-      if( client->ps.stats[ STAT_STAMINA ] <
-                    BG_Class( client->ps.stats[STAT_CLASS] )->chargeStaminaMax )
-        client->ps.stats[ STAT_STAMINA ] +=
-                 BG_Class( client->ps.stats[STAT_CLASS] )->chargeStaminaRestore;
-
-      if(  client->ps.stats[ STAT_STAMINA ] >
-                    BG_Class( client->ps.stats[STAT_CLASS] )->chargeStaminaMax )
-        client->ps.stats[ STAT_STAMINA ] =
-                     BG_Class( client->ps.stats[STAT_CLASS] )->chargeStaminaMax;
     }
 
     if( weapon == WP_ABUILD || weapon == WP_ABUILD2 ||

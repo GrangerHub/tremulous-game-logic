@@ -1074,51 +1074,45 @@ static void CG_DrawJetpackFuel( rectDef_t *rect, vec4_t color )
   trap_R_SetColor( NULL );
 }
 
-static float CG_ChargeProgress( qboolean chargeStamina )
-{
+static float CG_ChargeProgress(qboolean chargeStamina) {
   float progress, rawProgress;
   int min = 0, max = 0;
 
-  if( chargeStamina )
-  {
-    rawProgress = (float)cg.predictedPlayerState.stats[ STAT_STAMINA ];
+  if(chargeStamina) {
+    rawProgress = (float)cg.predictedPlayerState.stats[STAT_STAMINA];
     min = 0;
-    max = BG_Class( cg.snap->ps.stats[STAT_CLASS] )->chargeStaminaMax;
-  } else
-  {
-    rawProgress = (float)cg.predictedPlayerState.misc[ MISC_MISC ];
-    if( cg.snap->ps.weapon == WP_ALEVEL3 )
-    {
+    max =
+      BG_Class(cg.snap->ps.stats[STAT_CLASS])->chargeStaminaMax /
+      BG_Class(cg.snap->ps.stats[STAT_CLASS])->chargeStaminaRestoreRate;
+  } else {
+    rawProgress = (float)cg.predictedPlayerState.misc[MISC_MISC];
+    if(cg.snap->ps.weapon == WP_LUCIFER_CANNON) {
+      min = LCANNON_CHARGE_TIME_MIN;
+      max = LCANNON_CHARGE_TIME_MAX;
+    } else if(cg.snap->ps.weapon == WP_LIGHTNING) {
+      min = LIGHTNING_BOLT_CHARGE_TIME_MIN;
+      max = LIGHTNING_BOLT_CHARGE_TIME_MAX;
+    } else if(cg.snap->ps.weapon == WP_ALEVEL3) {
       min = LEVEL3_POUNCE_TIME_MIN;
       max = LEVEL3_POUNCE_TIME;
-    }
-    else if( cg.snap->ps.weapon == WP_ALEVEL3_UPG )
-    {
+    }else if( cg.snap->ps.weapon == WP_ALEVEL3_UPG ) {
       min = LEVEL3_POUNCE_TIME_MIN;
       max = LEVEL3_POUNCE_TIME_UPG;
-    }
-    else if( cg.snap->ps.weapon == WP_ALEVEL4 )
-    {
-      if( cg.predictedPlayerState.stats[ STAT_STATE ] & SS_CHARGING )
-      {
+    } else if( cg.snap->ps.weapon == WP_ALEVEL4 ) {
+      if( cg.predictedPlayerState.stats[ STAT_STATE ] & SS_CHARGING ) {
         min = 0;
         max = LEVEL4_TRAMPLE_DURATION;
-      }
-      else
-      {
+      } else {
         min = LEVEL4_TRAMPLE_CHARGE_MIN;
         max = LEVEL4_TRAMPLE_CHARGE_MAX;
       }
     }
-    else if( cg.snap->ps.weapon == WP_LUCIFER_CANNON )
-    {
-      min = LCANNON_CHARGE_TIME_MIN;
-      max = LCANNON_CHARGE_TIME_MAX;
-    }
-    else if( cg.snap->ps.weapon == WP_LIGHTNING )
-    {
-      min = LIGHTNING_BOLT_CHARGE_TIME_MIN;
-      max = LIGHTNING_BOLT_CHARGE_TIME_MAX;
+
+    if(
+      BG_ClassHasAbility(cg.snap->ps.stats[STAT_CLASS], SCA_CHARGE_STAMINA)) {
+      max =
+        cg.predictedPlayerState.stats[STAT_STAMINA] *
+        BG_Class(cg.snap->ps.stats[STAT_CLASS])->chargeStaminaRestoreRate;
     }
   }
 
@@ -1138,22 +1132,34 @@ static float CG_ChargeProgress( qboolean chargeStamina )
 
 #define CHARGE_BAR_FADE_RATE 0.002f
 
-static void CG_DrawPlayerChargeBarBG( rectDef_t *rect, vec4_t ref_color,
-                                      qhandle_t shader, qboolean chargeStamina )
-{
+// FIXME: This should come from the element info
+#define CHARGE_BAR_CAP_SIZE 3
+
+static void CG_DrawPlayerChargeBarBG(
+  rectDef_t *rect, vec4_t ref_color, qhandle_t shader) {
   vec4_t color;
   float *meterAlpha;
+  const float stamina_fraction = CG_ChargeProgress(qtrue);
 
-  if( chargeStamina )
-  {
-    if( !BG_ClassHasAbility( cg.snap->ps.stats[STAT_CLASS],
-                             SCA_CHARGE_STAMINA ) )
-      return;
-
-    meterAlpha = &cg.chargeStaminaMeterAlpha;
-  }
-  else
+  if(BG_ClassHasAbility(cg.snap->ps.stats[STAT_CLASS], SCA_CHARGE_STAMINA)) {
+    if(stamina_fraction >= 1.0f) {
+      cg.chargeStaminaMeterAlpha -= CHARGE_BAR_FADE_RATE * cg.frametime;
+      if( cg.chargeStaminaMeterAlpha <= 0.0f ) {
+        cg.chargeStaminaMeterAlpha = 0.0f;
+      }
+    } else {
+      cg.chargeStaminaMeterAlpha += CHARGE_BAR_FADE_RATE * cg.frametime;
+      if( cg.chargeStaminaMeterAlpha > 1.0f )
+        cg.chargeStaminaMeterAlpha = 1.0f;
+    }
+    if(cg.chargeMeterAlpha < cg.chargeStaminaMeterAlpha) {
+      meterAlpha = &cg.chargeStaminaMeterAlpha;
+    } else {
+      meterAlpha = &cg.chargeMeterAlpha;
+    }
+  } else {
     meterAlpha = &cg.chargeMeterAlpha;
+  }
 
   if( !cg_drawChargeBar.integer || *meterAlpha <= 0.0f )
     return;
@@ -1167,58 +1173,89 @@ static void CG_DrawPlayerChargeBarBG( rectDef_t *rect, vec4_t ref_color,
   trap_R_SetColor( color );
   CG_DrawPic( rect->x, rect->y, rect->w, rect->h, shader );
   trap_R_SetColor( NULL );
+
+  //draw stamina background
+  if(BG_ClassHasAbility(cg.snap->ps.stats[STAT_CLASS], SCA_CHARGE_STAMINA)) {
+    if(stamina_fraction < 1.0f) {
+      float x, y, width, height, cap_size;
+
+      x = rect->x;
+      y = rect->y;
+
+      // Horizontal charge bar
+      if( rect->w >= rect->h )
+      {
+        width = ( rect->w - CHARGE_BAR_CAP_SIZE * 2 ) * stamina_fraction;
+        height = rect->h;
+        CG_AdjustFrom640( &x, &y, &width, &height );
+        cap_size = CHARGE_BAR_CAP_SIZE * cgs.screenXScale;
+
+        // Draw the meter
+        trap_R_SetColor( color );
+        trap_R_DrawStretchPic( x + width + cap_size, y, cap_size, height,
+                               1, 0, 0, 1, shader );
+        trap_R_DrawStretchPic( x, y, width + (2 * cap_size), height, 0, 0, 1, 1, shader );
+        trap_R_SetColor( NULL );
+      }
+
+      // Vertical charge bar
+      else
+      {
+        y += rect->h;
+        width = rect->w;
+        height = ( rect->h - CHARGE_BAR_CAP_SIZE * 2 ) * stamina_fraction;
+        CG_AdjustFrom640( &x, &y, &width, &height );
+        cap_size = CHARGE_BAR_CAP_SIZE * cgs.screenYScale;
+
+        // Draw the meter
+        trap_R_SetColor( color );
+        trap_R_DrawStretchPic( x, y - height - cap_size * 2, width,
+                               cap_size, 0, 0, 1, 1, shader );
+        trap_R_DrawStretchPic( x, y - height - cap_size * 2, width, height + cap_size * 2,
+                               0, 0, 1, 1, shader );
+        trap_R_SetColor( NULL );
+      }
+    }
+  }
 }
 
-// FIXME: This should come from the element info
-#define CHARGE_BAR_CAP_SIZE 3
-
-static void CG_DrawPlayerChargeBar( rectDef_t *rect, vec4_t ref_color,
-                                    qhandle_t shader, qboolean chargeStamina )
-{
+static void CG_DrawPlayerChargeBar(
+  rectDef_t *rect, vec4_t ref_color, qhandle_t shader) {
   vec4_t color;
   float x, y, width, height, cap_size, progress;
   float *meterAlpha;
   float *meterValue;
   qboolean fadeMeter = qfalse;
 
-  if( !cg_drawChargeBar.integer )
+  if(!cg_drawChargeBar.integer) {
     return;
+  }
 
   // Get progress proportion and pump fade
-  progress = CG_ChargeProgress( chargeStamina );
-  if( chargeStamina )
-  {
-    if( !BG_ClassHasAbility( cg.snap->ps.stats[STAT_CLASS],
-                             SCA_CHARGE_STAMINA ) )
-      return;
-
-    meterAlpha = &cg.chargeStaminaMeterAlpha;
-    meterValue = &cg.chargeStaminaMeterValue;
-    if( progress >= 1.0f )
-      fadeMeter = qtrue;
-  } else
-  {
-    meterAlpha = &cg.chargeMeterAlpha;
-    meterValue = &cg.chargeMeterValue;
-    if( progress <= 0.0f )
-      fadeMeter = qtrue;
+  progress = CG_ChargeProgress( qfalse );
+  if(BG_ClassHasAbility(cg.snap->ps.stats[STAT_CLASS], SCA_CHARGE_STAMINA)) {
+    progress *= CG_ChargeProgress( qtrue );
   }
-  if( fadeMeter )
-  {
+  meterAlpha = &cg.chargeMeterAlpha;
+  meterValue = &cg.chargeMeterValue;
+  if( progress <= 0.0f ) {
+    fadeMeter = qtrue;
+  }
+
+  if(fadeMeter) {
     *meterAlpha -= CHARGE_BAR_FADE_RATE * cg.frametime;
-    if( *meterAlpha <= 0.0f )
-    {
+    if(*meterAlpha <= 0.0f) {
       *meterAlpha = 0.0f;
       return;
     }
-  }
-  else
-  {
-    *meterValue = progress;
+  } else {
     *meterAlpha += CHARGE_BAR_FADE_RATE * cg.frametime;
-    if( *meterAlpha > 1.0f )
+    if( *meterAlpha > 1.0f ) {
       *meterAlpha = 1.0f;
+    }
   }
+
+  *meterValue = progress;
 
   color[ 0 ] = ref_color[ 0 ];
   color[ 1 ] = ref_color[ 1 ];
@@ -3316,16 +3353,14 @@ void CG_OwnerDraw( float x, float y, float w, float h, float text_x,
       CG_DrawPlayerHealthCross( &rect, foreColor );
       break;
     case CG_PLAYER_CHARGE_BAR_BG:
-      CG_DrawPlayerChargeBarBG( &rect, foreColor, shader, qfalse );
+      CG_DrawPlayerChargeBarBG( &rect, foreColor, shader );
       break;
     case CG_PLAYER_CHARGE_BAR:
-      CG_DrawPlayerChargeBar( &rect, foreColor, shader, qfalse );
+      CG_DrawPlayerChargeBar( &rect, foreColor, shader );
       break;
-    case CG_PLAYER_CHARGE_STAMINA_BAR_BG:
-      CG_DrawPlayerChargeBarBG( &rect, foreColor, shader, qtrue );
+    case CG_PLAYER_EVOLVE_COOL_DOWN_BAR_BG:
       break;
-    case CG_PLAYER_CHARGE_STAMINA_BAR:
-      CG_DrawPlayerChargeBar( &rect, foreColor, shader, qtrue );
+    case CG_PLAYER_EVOLVE_COOL_DOWN_BAR:
       break;
     case CG_PLAYER_CLIPS_RING:
       CG_DrawPlayerClipsRing( &rect, backColor, foreColor, shader );
