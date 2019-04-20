@@ -1207,6 +1207,25 @@ static qboolean PM_CheckPounce( void )
     pm->ps->pm_flags |= PMF_BACKWARDS_JUMP;
   }
 
+  //Reduce charged stamina
+  if(BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_CHARGE_STAMINA)) {
+    pm->ps->stats[ STAT_STAMINA ] -= 
+      (
+        pm->ps->misc[MISC_MISC] *
+        BG_Class(  pm->ps->stats[STAT_CLASS] )->chargeStaminaUseRate) /
+      BG_Class(  pm->ps->stats[STAT_CLASS] )->chargeStaminaRestoreRate;
+  
+    if(
+      pm->ps->stats[ STAT_STAMINA ] <
+      (
+        BG_Class(  pm->ps->stats[STAT_CLASS] )->chargeStaminaMin /
+        BG_Class(  pm->ps->stats[STAT_CLASS] )->chargeStaminaRestoreRate)) {
+      pm->ps->stats[ STAT_STAMINA ] =
+        BG_Class(  pm->ps->stats[STAT_CLASS] )->chargeStaminaMin /
+        BG_Class(  pm->ps->stats[STAT_CLASS] )->chargeStaminaRestoreRate;
+    }
+  }
+
   pm->pmext->pouncePayload = pm->ps->misc[ MISC_MISC ];
   pm->ps->misc[ MISC_MISC ] = 0;
 
@@ -3914,30 +3933,65 @@ static void PM_Weapon( void )
     return;
   }
 
+  //restore charge stamina
+  if(BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_CHARGE_STAMINA))  {
+    if( pm->ps->stats[STAT_STAMINA] < 0) {
+      pm->ps->stats[STAT_STAMINA] = 0;
+    }
+
+    if(
+      pm->ps->stats[ STAT_STAMINA ] <
+      (
+        BG_Class(pm->ps->stats[STAT_CLASS])->chargeStaminaMin /
+        BG_Class(pm->ps->stats[STAT_CLASS])->chargeStaminaRestoreRate)) {
+      pm->ps->stats[ STAT_STAMINA ] =
+        BG_Class(pm->ps->stats[STAT_CLASS])->chargeStaminaMin /
+        BG_Class(pm->ps->stats[STAT_CLASS])->chargeStaminaRestoreRate;
+    }
+
+    if(
+      pm->ps->stats[ STAT_STAMINA ] <
+      (
+        BG_Class(pm->ps->stats[STAT_CLASS])->chargeStaminaMax /
+        BG_Class(pm->ps->stats[STAT_CLASS])->chargeStaminaRestoreRate)) {
+      pm->ps->stats[ STAT_STAMINA ] += pml.msec;
+    }
+
+    if(
+      pm->ps->stats[ STAT_STAMINA ] >
+      (
+        BG_Class(pm->ps->stats[STAT_CLASS])->chargeStaminaMax /
+        BG_Class(pm->ps->stats[STAT_CLASS])->chargeStaminaRestoreRate)) {
+      pm->ps->stats[ STAT_STAMINA ] =
+        BG_Class(pm->ps->stats[STAT_CLASS])->chargeStaminaMax /
+        BG_Class(pm->ps->stats[STAT_CLASS])->chargeStaminaRestoreRate;
+    }
+  }
+
   // Charging for a pounce or canceling a pounce
   if( pm->ps->weapon == WP_ALEVEL3 || pm->ps->weapon == WP_ALEVEL3_UPG )
   {
     int max;
 
-    switch( pm->ps->weapon )
-    {
-      case WP_ALEVEL3:
-        max = LEVEL3_POUNCE_TIME;
-        break;
+    if(BG_ClassHasAbility( pm->ps->stats[STAT_CLASS], SCA_CHARGE_STAMINA)) {
+        max =
+          pm->ps->stats[STAT_STAMINA] *
+          BG_Class(  pm->ps->stats[STAT_CLASS] )->chargeStaminaRestoreRate;
+    } else {
+      switch( pm->ps->weapon )
+      {
+        case WP_ALEVEL3:
+          max = LEVEL3_POUNCE_TIME;
+          break;
 
-      case WP_ALEVEL3_UPG:
-        max = LEVEL3_POUNCE_TIME_UPG;
-        break;
+        case WP_ALEVEL3_UPG:
+          max = LEVEL3_POUNCE_TIME_UPG;
+          break;
 
-      default:
-        max = LEVEL3_POUNCE_TIME_UPG;
-        break;
-    }
-
-    if( BG_ClassHasAbility( pm->ps->stats[STAT_CLASS], SCA_CHARGE_STAMINA ) )
-    {
-      if( max > pm->ps->stats[STAT_STAMINA] )
-        max = pm->ps->stats[STAT_STAMINA];
+        default:
+          max = LEVEL3_POUNCE_TIME_UPG;
+          break;
+      }
     }
 
     if( ( !pm->swapAttacks ?

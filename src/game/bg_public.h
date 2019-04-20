@@ -1342,7 +1342,9 @@ typedef struct
   float     knockbackScale;
 
   int       chargeStaminaMax;
-  int       chargeStaminaRestore;
+  int       chargeStaminaMin;
+  float     chargeStaminaUseRate;
+  float     chargeStaminaRestoreRate;
 
   int       children[ 3 ];
   int       cost;
