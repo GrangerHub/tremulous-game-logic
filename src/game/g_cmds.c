@@ -520,7 +520,13 @@ static void Give_Funds( gentity_t *ent, char *s ) {
 }
 
 static void Give_Stamina( gentity_t *ent ) {
-  ent->client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
+  if(BG_ClassHasAbility(ent->client->ps.stats[STAT_CLASS], SCA_STAMINA)) {
+    ent->client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
+  } else if(BG_ClassHasAbility(ent->client->ps.stats[STAT_CLASS], SCA_CHARGE_STAMINA)) {
+    ent->client->ps.stats[ STAT_STAMINA ] =
+      BG_Class(ent->client->ps.stats[STAT_CLASS])->chargeStaminaMax /
+      BG_Class(ent->client->ps.stats[STAT_CLASS])->chargeStaminaRestoreRate;
+  }
 }
 
 static void Give_Ammo( gentity_t *ent ) {

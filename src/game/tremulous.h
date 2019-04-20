@@ -138,6 +138,11 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL3_POUNCE_WIDTH         16.0f
 #define LEVEL3_POUNCE_TIME          2400      // msec for full Dragoon pounce
 #define LEVEL3_POUNCE_TIME_UPG      2000      // msec for full Adv. Dragoon pounce
+#define LEVEL3_CHARGE_STAMINA_MAX   LEVEL3_POUNCE_TIME
+#define LEVEL3_CHARGE_STAMINA_MAX_UPG  LEVEL3_POUNCE_TIME_UPG
+#define LEVEL3_CHARGE_STAMINA_MIN   700
+#define LEVEL3_CHARGE_STAMINA_USE_RATE (0.50f)
+#define LEVEL3_CHARGE_STAMINA_RESTORE_RATE (0.075f)
 #define LEVEL3_POUNCE_TIME_MIN      150      // msec before which pounce cancels
 #define LEVEL3_POUNCE_REPEAT        700      // msec before a new pounce starts
 #define LEVEL3_POUNCE_SPEED_MOD     1.00f    // walking speed modifier for pounce charging
@@ -948,8 +953,10 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define DOUBLE_JUMP_MAX_TIME        400  // maximum miliseconds after a jump that
                                          // a higher "double jump" can be made
 
-#define CHARGE_STAMINA_MAX          10000
-#define CHARGE_STAMINA_RESTORE      15
+#define CHARGE_STAMINA_MAX          2400
+#define CHARGE_STAMINA_MIN          700
+#define CHARGE_STAMINA_USE_RATE     (0.50f)
+#define CHARGE_STAMINA_RESTORE_RATE (0.075f)
 
 #define DEFAULT_FREEKILL_PERIOD     "20" //seconds
 #define FREEKILL_ALIEN              ALIEN_CREDITS_PER_KILL

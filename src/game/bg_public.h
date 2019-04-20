@@ -439,6 +439,7 @@ typedef enum
 #define SCA_STAMINA             0x00000080
 #define SCA_REGEN               0x00000100 // XXX kinda wasted- keeps alien class on human team from never dieing when team admits defeat.
 #define SCA_CANHOVEL            0x00000200
+#define SCA_CHARGE_STAMINA      0x00000400
 
 #define SS_WALLCLIMBING         0x00000001
 #define SS_CREEPSLOWED          0x00000002
@@ -1395,7 +1396,9 @@ typedef struct
   float     knockbackScale;
 
   int       chargeStaminaMax;
-  int       chargeStaminaRestore;
+  int       chargeStaminaMin;
+  float     chargeStaminaUseRate;
+  float     chargeStaminaRestoreRate;
 
   int       cost;
   qboolean  warmupFree;
