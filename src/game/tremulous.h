@@ -141,7 +141,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL3_CHARGE_STAMINA_MAX   LEVEL3_POUNCE_TIME
 #define LEVEL3_CHARGE_STAMINA_MAX_UPG  LEVEL3_POUNCE_TIME_UPG
 #define LEVEL3_CHARGE_STAMINA_MIN   700
-#define LEVEL3_CHARGE_STAMINA_USE_RATE (0.50f)
+#define LEVEL3_CHARGE_STAMINA_USE_RATE (0.45f)
 #define LEVEL3_CHARGE_STAMINA_RESTORE_RATE (0.075f)
 #define LEVEL3_POUNCE_TIME_MIN      150      // msec before which pounce cancels
 #define LEVEL3_POUNCE_REPEAT        700      // msec before a new pounce starts
