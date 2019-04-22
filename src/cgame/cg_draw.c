@@ -1079,7 +1079,7 @@ static float CG_ChargeProgress(qboolean chargeStamina) {
   int min = 0, max = 0;
 
   if(chargeStamina) {
-    rawProgress = (float)cg.predictedPlayerState.stats[STAT_STAMINA];
+    rawProgress = (float)cg.predictedPlayerState.misc[MISC_CHARGE_STAMINA];
     min = 0;
     max =
       BG_Class(cg.snap->ps.stats[STAT_CLASS])->chargeStaminaMax /
@@ -1111,7 +1111,7 @@ static float CG_ChargeProgress(qboolean chargeStamina) {
     if(
       BG_ClassHasAbility(cg.snap->ps.stats[STAT_CLASS], SCA_CHARGE_STAMINA)) {
       max =
-        cg.predictedPlayerState.stats[STAT_STAMINA] *
+        cg.predictedPlayerState.misc[MISC_CHARGE_STAMINA] *
         BG_Class(cg.snap->ps.stats[STAT_CLASS])->chargeStaminaRestoreRate;
     }
   }

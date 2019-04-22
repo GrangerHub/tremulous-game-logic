@@ -477,8 +477,10 @@ static void Give_Funds( gentity_t *ent, char *s ) {
 static void Give_Stamina( gentity_t *ent ) {
   if(BG_ClassHasAbility(ent->client->ps.stats[STAT_CLASS], SCA_STAMINA)) {
     ent->client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
-  } else if(BG_ClassHasAbility(ent->client->ps.stats[STAT_CLASS], SCA_CHARGE_STAMINA)) {
-    ent->client->ps.stats[ STAT_STAMINA ] =
+  }
+
+  if(BG_ClassHasAbility(ent->client->ps.stats[STAT_CLASS], SCA_CHARGE_STAMINA)) {
+    ent->client->ps.misc[MISC_CHARGE_STAMINA] =
       BG_Class(ent->client->ps.stats[STAT_CLASS])->chargeStaminaMax /
       BG_Class(ent->client->ps.stats[STAT_CLASS])->chargeStaminaRestoreRate;
   }
@@ -2611,8 +2613,11 @@ void G_Evolve( gentity_t *ent, class_t newClass,
     ent->client->pers.evolveHealthFraction = 1.0f;
 
   ent->client->pers.evolveChargeStaminaFraction =
-                  (float)ent->client->ps.stats[ STAT_STAMINA ] /
-                  (float)BG_Class( currentClass )->chargeStaminaMax;
+                  (float)ent->client->ps.misc[MISC_CHARGE_STAMINA] /
+                  (float)
+                    (
+                      BG_Class( currentClass )->chargeStaminaMax /
+                      BG_Class( currentClass )->chargeStaminaRestoreRate);
 
   if( ent->client->pers.evolveChargeStaminaFraction < 0.0f )
     ent->client->pers.evolveChargeStaminaFraction = 0.0f;
