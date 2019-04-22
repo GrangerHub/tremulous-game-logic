@@ -1703,10 +1703,17 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
 
   if( BG_ClassHasAbility( client->ps.stats[STAT_CLASS], SCA_STAMINA ) )
     client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
-  else
+
+  if( BG_ClassHasAbility( client->ps.stats[STAT_CLASS], SCA_CHARGE_STAMINA) )
   {
-    client->ps.stats[ STAT_STAMINA ] =
-                     BG_Class( client->ps.stats[STAT_CLASS] )->chargeStaminaMax;
+    client->ps.misc[MISC_CHARGE_STAMINA] =
+                     BG_Class( client->ps.stats[STAT_CLASS] )->chargeStaminaMax /
+                     BG_Class( client->ps.stats[STAT_CLASS] )->chargeStaminaRestoreRate;
+
+    // if evolving scale charge stamina
+    if( ent == spawn )
+      client->ps.misc[MISC_CHARGE_STAMINA] *=
+                                  ent->client->pers.evolveChargeStaminaFraction;
   }
 
   G_SetOrigin( ent, spawn_origin );
