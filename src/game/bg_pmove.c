@@ -1209,20 +1209,20 @@ static qboolean PM_CheckPounce( void )
 
   //Reduce charged stamina
   if(BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_CHARGE_STAMINA)) {
-    pm->ps->stats[ STAT_STAMINA ] -= 
+    pm->ps->misc[MISC_CHARGE_STAMINA] -= 
       (
         pm->ps->misc[MISC_MISC] *
-        BG_Class(  pm->ps->stats[STAT_CLASS] )->chargeStaminaUseRate) /
-      BG_Class(  pm->ps->stats[STAT_CLASS] )->chargeStaminaRestoreRate;
+        BG_Class(pm->ps->stats[STAT_CLASS] )->chargeStaminaUseRate) /
+      BG_Class(pm->ps->stats[STAT_CLASS] )->chargeStaminaRestoreRate;
   
     if(
-      pm->ps->stats[ STAT_STAMINA ] <
+      pm->ps->misc[MISC_CHARGE_STAMINA] <
       (
-        BG_Class(  pm->ps->stats[STAT_CLASS] )->chargeStaminaMin /
-        BG_Class(  pm->ps->stats[STAT_CLASS] )->chargeStaminaRestoreRate)) {
-      pm->ps->stats[ STAT_STAMINA ] =
-        BG_Class(  pm->ps->stats[STAT_CLASS] )->chargeStaminaMin /
-        BG_Class(  pm->ps->stats[STAT_CLASS] )->chargeStaminaRestoreRate;
+        BG_Class(pm->ps->stats[STAT_CLASS] )->chargeStaminaMin /
+        BG_Class(pm->ps->stats[STAT_CLASS] )->chargeStaminaRestoreRate)) {
+      pm->ps->misc[MISC_CHARGE_STAMINA] =
+        BG_Class(pm->ps->stats[STAT_CLASS] )->chargeStaminaMin /
+        BG_Class(pm->ps->stats[STAT_CLASS] )->chargeStaminaRestoreRate;
     }
   }
 
@@ -3931,34 +3931,34 @@ static void PM_Weapon( void )
 
   //restore charge stamina
   if(BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_CHARGE_STAMINA))  {
-    if( pm->ps->stats[STAT_STAMINA] < 0) {
-      pm->ps->stats[STAT_STAMINA] = 0;
+    if( pm->ps->misc[MISC_CHARGE_STAMINA] < 0) {
+      pm->ps->misc[MISC_CHARGE_STAMINA] = 0;
     }
 
     if(
-      pm->ps->stats[ STAT_STAMINA ] <
+      pm->ps->misc[MISC_CHARGE_STAMINA] <
       (
         BG_Class(pm->ps->stats[STAT_CLASS])->chargeStaminaMin /
         BG_Class(pm->ps->stats[STAT_CLASS])->chargeStaminaRestoreRate)) {
-      pm->ps->stats[ STAT_STAMINA ] =
+      pm->ps->misc[MISC_CHARGE_STAMINA] =
         BG_Class(pm->ps->stats[STAT_CLASS])->chargeStaminaMin /
         BG_Class(pm->ps->stats[STAT_CLASS])->chargeStaminaRestoreRate;
     }
 
     if(
-      pm->ps->stats[ STAT_STAMINA ] <
+      pm->ps->misc[MISC_CHARGE_STAMINA] <
       (
         BG_Class(pm->ps->stats[STAT_CLASS])->chargeStaminaMax /
         BG_Class(pm->ps->stats[STAT_CLASS])->chargeStaminaRestoreRate)) {
-      pm->ps->stats[ STAT_STAMINA ] += pml.msec;
+      pm->ps->misc[MISC_CHARGE_STAMINA] += pml.msec;
     }
 
     if(
-      pm->ps->stats[ STAT_STAMINA ] >
+      pm->ps->misc[MISC_CHARGE_STAMINA] >
       (
         BG_Class(pm->ps->stats[STAT_CLASS])->chargeStaminaMax /
         BG_Class(pm->ps->stats[STAT_CLASS])->chargeStaminaRestoreRate)) {
-      pm->ps->stats[ STAT_STAMINA ] =
+      pm->ps->misc[MISC_CHARGE_STAMINA] =
         BG_Class(pm->ps->stats[STAT_CLASS])->chargeStaminaMax /
         BG_Class(pm->ps->stats[STAT_CLASS])->chargeStaminaRestoreRate;
     }
@@ -3971,7 +3971,7 @@ static void PM_Weapon( void )
 
     if(BG_ClassHasAbility( pm->ps->stats[STAT_CLASS], SCA_CHARGE_STAMINA)) {
         max =
-          pm->ps->stats[STAT_STAMINA] *
+          pm->ps->misc[MISC_CHARGE_STAMINA] *
           BG_Class(  pm->ps->stats[STAT_CLASS] )->chargeStaminaRestoreRate;
     } else {
       switch( pm->ps->weapon )
