@@ -233,6 +233,8 @@ vmCvar_t  cg_painBlendZoom;
 
 vmCvar_t  cg_drawInvincibleVision;
 vmCvar_t  cg_drawHelmetVision;
+vmCvar_t  cg_drawEvolveVision;
+vmCvar_t  cg_drawInvisibleVision;
 
 vmCvar_t  cg_stickySpec;
 vmCvar_t  cg_sprintToggle;
@@ -403,6 +405,8 @@ static cvarTable_t cvarTable[ ] =
 
   { &cg_drawInvincibleVision, "cg_drawInvincibleVision", "1", 0 },
   { &cg_drawHelmetVision, "cg_drawHelmetVision", "1", 0 },
+  { &cg_drawEvolveVision, "cg_drawEvolveVision", "1", 0 },
+  { &cg_drawInvisibleVision, "cg_drawInvisibleVision", "1", 0 },
 
   { &cg_debugVoices, "cg_debugVoices", "0", 0 },
 

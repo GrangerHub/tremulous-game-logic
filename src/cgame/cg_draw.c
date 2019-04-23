@@ -4464,6 +4464,11 @@ CG_EvolveVision
 static void CG_EvolveVision( void )
 {
   vec4_t      color = { 0.0f, 0.0f, 0.0f, 1.0f };
+
+  if(!cg_drawEvolveVision.integer) {
+    return;
+  }
+
   if( cg.snap->ps.persistant[ PERS_SPECSTATE ] != SPECTATOR_NOT )
     return;
 
@@ -4495,6 +4500,11 @@ CG_InvisibleVision
 static void CG_InvisibleVision( void )
 {
   vec4_t      color = { 0.0f, 0.0f, 0.0f, 1.0f };
+
+  if(!cg_drawInvisibleVision.integer) {
+    return;
+  }
+
   if( cg.renderingThirdPerson ||
       cg.snap->ps.persistant[ PERS_SPECSTATE ] != SPECTATOR_NOT )
     return;
