@@ -1693,6 +1693,7 @@ extern  vmCvar_t    cg_painBlendScale;
 extern  vmCvar_t    cg_painBlendZoom;
 
 extern  vmCvar_t    cg_drawInvincibleVision;
+extern  vmCvar_t    cg_drawHelmetVision;
 
 extern  vmCvar_t    cg_stickySpec;
 extern  vmCvar_t    cg_sprintToggle;
