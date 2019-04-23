@@ -1116,6 +1116,9 @@ void G_UnlaggedDetectCollisions(gentity_t *ent) {
   vec3_t                   *unlagged_origin, *unlagged_mins, *unlagged_maxs;
   unlagged_attacker_data_t attacker_data;
 
+  //Disable this function
+  return;
+
   Com_Assert(ent && "G_UnlaggedDetectCollisions: ent is NULL");
 
   if(!g_unlagged.integer) {
