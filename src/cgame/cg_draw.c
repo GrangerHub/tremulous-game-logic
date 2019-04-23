@@ -722,6 +722,10 @@ static void CG_HelmetVision( void )
 {
   vec4_t    color = { 0.0f, 0.0f, 0.0f, 1.0f };
 
+  if(!cg_drawHelmetVision.integer) {
+    return;
+  }
+
   if( BG_InventoryContainsUpgrade( UP_HELMET, cg.snap->ps.stats ) &&
       !cg.intermissionStarted )
   {
