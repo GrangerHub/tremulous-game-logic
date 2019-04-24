@@ -2261,6 +2261,8 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum )
   CG_ShaderStateChanged( );
 
   trap_S_ClearLoopingSounds( qtrue );
+
+  trap_SendClientCommand("replacable_buildables\n");
 }
 
 /*
