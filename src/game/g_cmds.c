@@ -5473,7 +5473,7 @@ commands_t cmds[ ] = {
   { "r", CMD_MESSAGE|CMD_INTERMISSION, Cmd_PrivateMessage_f },
   { "ready", CMD_MESSAGE|CMD_TEAM, Cmd_Ready_f },
   { "reload", CMD_TEAM|CMD_ALIVE, Cmd_Reload_f },
-  { "replacable_buildables", CMD_TEAM, G_ReplacableBuildablesMessage },
+  { "replacable_buildables", 0, G_ReplacableBuildablesMessage },
   { "rt", CMD_MESSAGE|CMD_INTERMISSION, Cmd_PrivateMessage_f },
   { "say", CMD_MESSAGE|CMD_INTERMISSION, Cmd_Say_f },
   { "say_area", CMD_MESSAGE|CMD_TEAM|CMD_ALIVE, Cmd_SayArea_f },
