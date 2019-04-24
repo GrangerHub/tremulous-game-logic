@@ -474,32 +474,40 @@ typedef enum
   // netcode has space for 1 more
 } persEnum_t;
 
-// hack to fit extra data in the misc[] array
-#define MISC_HEALTH                    ( MAX_MISC - 1 )
-#define MISC_MAX_HEALTH                ( MAX_MISC - 2 ) // for max health decay
-#define MISC_ARMOR                     ( MAX_MISC - 3 )
-//Do not use MISC_SEED outside of PM_PSRandom(),
-//and don't use PM_PSRandom() outside of bg_pmove.c.
-#define MISC_SEED                      ( MAX_MISC - 4 ) // for predicted psudorandom things
+#define MAX_REPLACABLE_BUILDABLES 16
 
-// for uh...misc stuff (pounce, trample, lcannon)
-#define MISC_MISC                      ( MAX_MISC - 5 )
-// for uh...other misc stuff (evolve cool down)
-#define MISC_MISC2                     ( MAX_MISC - 6 )
+// player_state->misc[] indexes
+typedef enum
+{
+  MISC_HEALTH,
+  MISC_MAX_HEALTH, // for max health decay
+  MISC_ARMOR,
 
-// for gradually applying recoil
-#define MISC_RECOIL_PITCH              ( MAX_MISC - 7 )
-#define MISC_RECOIL_YAW                ( MAX_MISC - 8 )
+  //Do not use MISC_SEED outside of PM_PSRandom(),
+  //and don't use PM_PSRandom() outside of bg_pmove.c.
+  MISC_SEED, // for predicted psudorandom things
 
-#define MISC_LAST_DAMAGE_TIME          ( MAX_MISC - 9 )
+  // for uh...misc stuff (pounce, trample, lcannon)
+  MISC_MISC,
+  // for uh...other misc stuff (evolve cool down)
+  MISC_MISC2,
 
-//for storing more than just 32 different weapon numbers
-#define MISC_HELD_WEAPON               ( MAX_MISC - 10 )
+  // for gradually applying recoil
+  MISC_RECOIL_PITCH,
+  MISC_RECOIL_YAW,
 
-//for footsteps and player bobbing
-#define MISC_BOB_CYCLE                 ( MAX_MISC - 11 )
+  MISC_LAST_DAMAGE_TIME,
 
-#define MISC_CHARGE_STAMINA            ( MAX_MISC - 12 )
+  //for storing more than just 32 different weapon numbers
+  MISC_HELD_WEAPON,
+
+  //for footsteps and player bobbing
+  MISC_BOB_CYCLE,
+
+  MISC_CHARGE_STAMINA
+
+  // netcode has space for 4 more
+} miscEnum_t;
 
 #define PS_WALLCLIMBINGFOLLOW   0x00000001
 #define PS_WALLCLIMBINGTOGGLE   0x00000002
