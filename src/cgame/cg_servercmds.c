@@ -73,6 +73,20 @@ static void CG_ParseScores( void )
 
 /*
 =================
+CG_ParseReplacableBuildables
+
+=================
+*/
+static void CG_ParseReplacableBuildables(void) {
+  int i;
+
+  for(i = 0; i < MAX_REPLACABLE_BUILDABLES; i++) {
+    cg.replacable_buildables[i] = atoi( CG_Argv( i ) );
+  }
+}
+
+/*
+=================
 CG_ParseTeamInfo
 
 =================
@@ -1907,6 +1921,7 @@ static consoleCommand_t svcommands[ ] =
   { "playpool_json", CG_PlayMap_Pool_Json_f },
   { "poisoncloud", CG_PoisonCloud_f },
   { "print", CG_Print_f },
+  { "replacable_buildables", CG_ParseReplacableBuildables },
   { "scores", CG_ParseScores },
   { "serverclosemenus", CG_ServerCloseMenus_f },
   { "servermenu", CG_ServerMenu_f },

@@ -867,44 +867,100 @@ void ClientTimerActions( gentity_t *ent, int msec )
           client->ps.misc[ MISC_MISC ] = 0;
     }
 
-    switch( weapon )
     {
-      case WP_ABUILD:
-      case WP_ABUILD2:
-      case WP_HBUILD:
-      case WP_HBUILD2:
+      qboolean send_replacable_buildables_message = qfalse;
 
-        // Set validity bit on buildable
-        if( ( client->ps.stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT ) > BA_NONE )
-        {
-          int     dist = BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->buildDist;
-          vec3_t  dummy, dummy2;
-          int     dummy3;
+      switch( weapon )
+      {
+        case WP_ABUILD:
+        case WP_ABUILD2:
+        case WP_HBUILD:
+        case WP_HBUILD2:
 
-          if( G_CanBuild( ent, client->ps.stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT,
-                          dist, dummy, dummy2, &dummy3 ) == IBE_NONE )
-            client->ps.stats[ STAT_BUILDABLE ] |= SB_VALID_TOGGLEBIT;
-          else
-            client->ps.stats[ STAT_BUILDABLE ] &= ~SB_VALID_TOGGLEBIT;
-
-          // Let the client know which buildables will be removed by building
-          for( i = 0; i < ( MAX_MISC - 12 ); i++ )
+          // Set validity bit on buildable
+          if( ( client->ps.stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT ) > BA_NONE )
           {
-            if( i < level.numBuildablesForRemoval )
-              client->ps.misc[ i ] = level.markedBuildables[ i ]->s.number;
+            int     dist = BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->buildDist;
+            vec3_t  dummy, dummy2;
+            int     dummy3;
+
+            if( G_CanBuild( ent, client->ps.stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT,
+                            dist, dummy, dummy2, &dummy3 ) == IBE_NONE )
+              client->ps.stats[ STAT_BUILDABLE ] |= SB_VALID_TOGGLEBIT;
             else
-              client->ps.misc[ i ] = 0;
+              client->ps.stats[ STAT_BUILDABLE ] &= ~SB_VALID_TOGGLEBIT;
+
+            // Let the client know which buildables will be removed by building
+            for( i = 0; i < MAX_REPLACABLE_BUILDABLES; i++ )
+            {
+              if( i < level.numBuildablesForRemoval ) {
+                if(
+                  client->pers.replacable_buildables[ i ] !=
+                  level.markedBuildables[ i ]->s.number) {
+                    client->pers.replacable_buildables[ i ] =
+                      level.markedBuildables[ i ]->s.number;
+                    send_replacable_buildables_message = qtrue;
+                  }
+              } else {
+                if(client->pers.replacable_buildables[ i ]) {
+                  client->pers.replacable_buildables[ i ] = 0;
+                  send_replacable_buildables_message = qtrue;
+                }
+              }
+            }
+          } else {
+            for(i = 0; i < MAX_REPLACABLE_BUILDABLES; i++) {
+              if(client->pers.replacable_buildables[ i ]) {
+                client->pers.replacable_buildables[ i ] = 0;
+                send_replacable_buildables_message = qtrue;
+              }
+            }
+          }
+          break;
+
+        default:
+          for(i = 0; i < MAX_REPLACABLE_BUILDABLES; i++) {
+            if(client->pers.replacable_buildables[i]) {
+              client->pers.replacable_buildables[i] = 0;
+              send_replacable_buildables_message = qtrue;
+            }
+          }
+          break;
+      }
+
+      if(send_replacable_buildables_message) {
+        G_ReplacableBuildablesMessage(ent);
+
+        //send to any following clients
+        for(i = 0; i < level.maxclients; i++) {
+          gentity_t *follower = &g_entities[i];
+
+          //don't resend
+          if(follower == ent) {
+            continue;
+          }
+
+          if(
+            !follower->client ||
+            follower->client->pers.connected == CON_DISCONNECTED) {
+            continue;
+          }
+
+          if(
+            follower->client->sess.spectatorState == SPECTATOR_FOLLOW &&
+            follower->client->sess.spectatorClient == ent->s.number) {
+            int j;
+
+            //copy the array
+            for(j = 0; j < MAX_REPLACABLE_BUILDABLES; j++) {
+              follower->client->pers.replacable_buildables[j] =
+                client->pers.replacable_buildables[j];
+            }
+            
+            G_ReplacableBuildablesMessage(follower);
           }
         }
-        else
-        {
-          for( i = 0; i < ( MAX_MISC - 12 ); i++ )
-            client->ps.misc[ i ] = 0;
-        }
-        break;
-
-      default:
-        break;
+      }
     }
 
     if( ent->client->pers.teamSelection == TEAM_HUMANS &&

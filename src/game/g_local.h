@@ -596,6 +596,8 @@ typedef struct
   int                 barbs;
   int                 barbRegenTime;
 
+  int                 replacable_buildables[MAX_REPLACABLE_BUILDABLES];
+
   // level.time when teamoverlay info changed so we know to tell other players
   int                 infoChangeTime;
 } clientPersistant_t;
@@ -1562,6 +1564,7 @@ void                G_Scrim_Player_Refresh_Registered_Names( void );
 // g_main.c
 //
 void     ScoreboardMessage( gentity_t *client );
+void     G_ReplacableBuildablesMessage( gentity_t *ent );
 void     MoveClientToIntermission( gentity_t *client );
 void     G_MapConfigs( const char *mapname );
 void     CalculateRanks( qboolean check_exit_rules );

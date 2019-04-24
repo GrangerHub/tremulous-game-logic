@@ -1226,6 +1226,8 @@ typedef struct
 
   int           nextWeaponClickTime;
 
+  int           replacable_buildables[MAX_REPLACABLE_BUILDABLES];
+
   int           numBinaryShadersUsed;
   cgBinaryShaderSetting_t binaryShaderSettings[ NUM_BINARY_SHADERS ];
 } cg_t;

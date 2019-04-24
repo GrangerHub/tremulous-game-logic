@@ -240,6 +240,30 @@ int G_ClientNumbersFromString( char *s, int *plist, int max )
 
 /*
 ==================
+G_ReplacableBuildablesMessage
+
+==================
+*/
+void G_ReplacableBuildablesMessage( gentity_t *ent ) {
+  char message[MAX_STRING_CHARS] = "replacable_buildables";
+  int i;
+
+  if(!ent || !ent->client) {
+    return;
+  }
+
+  for(i = 0; i < MAX_REPLACABLE_BUILDABLES; i++) {
+    Q_strcat(
+      message,
+      sizeof(message),
+      va(" %d", ent->client->pers.replacable_buildables[i]));
+  }
+
+  SV_GameSendServerCommand( ent-g_entities, message );
+}
+
+/*
+==================
 ScoreboardMessage
 
 ==================
@@ -4593,6 +4617,19 @@ qboolean G_FollowNewClient( gentity_t *ent, int dir )
     ent->client->sess.spectatorClient = clientnum;
     ent->client->sess.spectatorState = SPECTATOR_FOLLOW;
 
+    // send replacable buildables message
+    {
+      int j;
+
+      //copy the array
+      for(j = 0; j < MAX_REPLACABLE_BUILDABLES; j++) {
+        ent->client->pers.replacable_buildables[j] =
+          level.clients[clientnum].pers.replacable_buildables[j];
+      }
+      
+      G_ReplacableBuildablesMessage(ent);
+    }
+
     // if this client is in the spawn queue, we need to do something special
     if( level.clients[ clientnum ].sess.spectatorState != SPECTATOR_NOT )
       G_FollowLockView( ent );
@@ -5436,6 +5473,7 @@ commands_t cmds[ ] = {
   { "r", CMD_MESSAGE|CMD_INTERMISSION, Cmd_PrivateMessage_f },
   { "ready", CMD_MESSAGE|CMD_TEAM, Cmd_Ready_f },
   { "reload", CMD_TEAM|CMD_ALIVE, Cmd_Reload_f },
+  { "replacable_buildables", CMD_TEAM, G_ReplacableBuildablesMessage },
   { "rt", CMD_MESSAGE|CMD_INTERMISSION, Cmd_PrivateMessage_f },
   { "say", CMD_MESSAGE|CMD_INTERMISSION, Cmd_Say_f },
   { "say_area", CMD_MESSAGE|CMD_TEAM|CMD_ALIVE, Cmd_SayArea_f },
