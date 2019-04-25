@@ -1902,7 +1902,7 @@ static const classAttributes_t bg_classList[ ] =
     270.0f,                                         //float   jumpMagnitude;
     0.4f,                                           //float   knockbackScale;
     LEVEL3_CHARGE_STAMINA_MAX_UPG,                  //int     chargeStaminaMax;
-    LEVEL3_CHARGE_STAMINA_MIN,                      //int     chargeStaminaMin;
+    LEVEL3_CHARGE_STAMINA_MIN_UPG,                  //int     chargeStaminaMin;
     LEVEL3_CHARGE_STAMINA_USE_RATE,                 //float   chargeStaminaUseRate;
     LEVEL3_CHARGE_STAMINA_RESTORE_RATE,             //float   chargeStaminaRestoreRate;
     LEVEL3_UPG_COST,                                //int     cost;
