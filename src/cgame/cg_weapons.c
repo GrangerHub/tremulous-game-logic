@@ -919,6 +919,8 @@ static int CG_MapTorsoToWeaponFrame( clientInfo_t *ci, int frame )
 }
 
 
+#define LEVEL3_FEEDBACK  3.0f
+
 /*
 ==============
 CG_CalculateWeaponPosition
@@ -973,6 +975,27 @@ static void CG_CalculateWeaponPosition( vec3_t origin, vec3_t angles )
     angles[ ROLL ] += scale * fracsin * 0.01;
     angles[ YAW ] += scale * fracsin * 0.01;
     angles[ PITCH ] += scale * fracsin * 0.01;
+  }
+
+  //provide some feedback for pouncing
+  if( ( cg.predictedPlayerState.weapon == WP_ALEVEL3 ||
+        cg.predictedPlayerState.weapon == WP_ALEVEL3_UPG ) &&
+      cg.predictedPlayerState.misc[ MISC_MISC ] > 0 )
+  {
+    float fraction1, fraction2;
+    vec3_t forward;
+
+    AngleVectors( angles, forward, NULL, NULL );
+    VectorNormalize( forward );
+
+    fraction1 = (float)cg.predictedPlayerState.misc[ MISC_MISC ] /
+                LEVEL3_POUNCE_TIME_UPG;
+    if( fraction1 > 1.0f )
+      fraction1 = 1.0f;
+
+    fraction2 = sin( fraction1 * M_PI / 2 );
+
+    VectorMA( origin, LEVEL3_FEEDBACK * fraction2, forward, origin );
   }
 }
 
@@ -1673,28 +1696,45 @@ void CG_AddViewWeapon( playerState_t *ps )
   VectorMA( hand.origin, cg_gun_y.value, cg.refdef.viewaxis[ 1 ], hand.origin );
   VectorMA( hand.origin, ( cg_gun_z.value + fovOffset ), cg.refdef.viewaxis[ 2 ], hand.origin );
 
-  // Lucifer Cannon vibration effect
-  if( weapon == WP_LUCIFER_CANNON && ps->misc[ MISC_MISC ] > 0 )
-  {
+  //weapon vibration effects
+  if(ps->misc[ MISC_MISC ] > 0) {
     float fraction;
 
-    fraction = (float)ps->misc[ MISC_MISC ] / LCANNON_CHARGE_TIME_MAX;
-    VectorMA( hand.origin, random( ) * fraction, cg.refdef.viewaxis[ 0 ],
-              hand.origin );
-    VectorMA( hand.origin, random( ) * fraction, cg.refdef.viewaxis[ 1 ],
-              hand.origin );
-  }
+    switch (weapon) {
+      case WP_ALEVEL3:
+      case WP_ALEVEL3_UPG:
+        fraction = (float)ps->misc[ MISC_MISC ] /
+                    LEVEL3_POUNCE_TIME_UPG;
+        fraction *= 0.10;
+        break;
 
-  // Lighting Gun vibration effect
-  if( weapon == WP_LIGHTNING && ps->misc[ MISC_MISC ] > 0 )
-  {
-    float fraction;
+      case WP_LUCIFER_CANNON:
+        fraction = (float)ps->misc[ MISC_MISC ] / LCANNON_CHARGE_TIME_MAX;
+        break;
 
-    fraction = (float)ps->misc[ MISC_MISC ] / LIGHTNING_BOLT_CHARGE_TIME_MAX;
-    VectorMA( hand.origin, random( ) * fraction, cg.refdef.viewaxis[ 0 ],
-              hand.origin );
-    VectorMA( hand.origin, random( ) * fraction, cg.refdef.viewaxis[ 1 ],
-              hand.origin );
+      case WP_LIGHTNING:
+        fraction = (float)ps->misc[ MISC_MISC ] / LIGHTNING_BOLT_CHARGE_TIME_MAX;
+        break;
+
+      default:
+        fraction = 0.0f;
+        break;
+    }
+
+    switch (weapon) {
+      case WP_ALEVEL3:
+      case WP_ALEVEL3_UPG:
+      case WP_LUCIFER_CANNON:
+      case WP_LIGHTNING:
+        VectorMA( hand.origin, random( ) * fraction, cg.refdef.viewaxis[ 0 ],
+                  hand.origin );
+        VectorMA( hand.origin, random( ) * fraction, cg.refdef.viewaxis[ 1 ],
+                  hand.origin );
+        break;
+
+      default:
+        break;
+    }
   }
 
   AnglesToAxis( angles, hand.axis );
