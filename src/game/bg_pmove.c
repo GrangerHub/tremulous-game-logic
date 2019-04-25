@@ -1226,9 +1226,102 @@ static qboolean PM_CheckPounce( void )
       pm->ps->weapon != WP_ALEVEL3_UPG )
     return qfalse;
 
+  //in process of launching a pounce
+  if(pm->ps->pm_flags & PMF_LAUNCHING) {
+    int delta = 3 * pml.msec;
+
+    if(pm->ps->misc[ MISC_MISC ] < delta) {
+      delta = pm->ps->misc[ MISC_MISC ];
+    }
+
+    //transfer the charge to the launch
+    pm->ps->misc[ MISC_MISC3 ] += delta;
+    pm->ps->misc[ MISC_MISC ] -= delta;
+
+    //Reduce charged stamina
+    if(BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_CHARGE_STAMINA)) {
+      pm->ps->misc[MISC_CHARGE_STAMINA] -= 
+        (
+          delta *
+          BG_Class(pm->ps->stats[STAT_CLASS] )->chargeStaminaUseRate) /
+        BG_Class(pm->ps->stats[STAT_CLASS] )->chargeStaminaRestoreRate;
+    
+      if(
+        pm->ps->misc[MISC_CHARGE_STAMINA] <
+        (
+          BG_Class(pm->ps->stats[STAT_CLASS] )->chargeStaminaMin /
+          BG_Class(pm->ps->stats[STAT_CLASS] )->chargeStaminaRestoreRate)) {
+        pm->ps->misc[MISC_CHARGE_STAMINA] =
+          BG_Class(pm->ps->stats[STAT_CLASS] )->chargeStaminaMin /
+          BG_Class(pm->ps->stats[STAT_CLASS] )->chargeStaminaRestoreRate;
+      }
+    }
+
+    if(
+      pm->ps->misc[ MISC_MISC ] <= 0 ||
+      pm->ps->groundEntityNum == ENTITYNUM_NONE) {
+      //lift-off
+      // Give the player forward velocity and simulate a jump
+      pml.groundPlane = qfalse;
+      pml.walking = qfalse;
+      pm->ps->groundEntityNum = ENTITYNUM_NONE;
+      pm->ps->pm_flags |= PMF_CHARGE;
+      if( pm->ps->weapon == WP_ALEVEL0 )
+        jumpMagnitude = pm->ps->misc[ MISC_MISC3 ] *
+                        LEVEL0_POUNCE_JUMP_MAG / LEVEL0_POUNCE_TIME;
+      else if( pm->ps->weapon == WP_ALEVEL3 )
+        jumpMagnitude = pm->ps->misc[ MISC_MISC3 ] *
+                        LEVEL3_POUNCE_JUMP_MAG / LEVEL3_POUNCE_TIME;
+      else
+        jumpMagnitude = pm->ps->misc[ MISC_MISC3 ] *
+                        LEVEL3_POUNCE_JUMP_MAG_UPG / LEVEL3_POUNCE_TIME_UPG;
+
+      //scale due to evolving
+      if( ( pm->ps->stats[ STAT_TEAM ] == TEAM_ALIENS ) && 
+          ( pm->ps->eFlags & EF_EVOLVING ) )
+        jumpMagnitude = (int)( ((float) jumpMagnitude ) * BG_EvolveScale( pm->ps ) );
+
+      VectorMA( pm->ps->velocity, jumpMagnitude, pml.forward, pm->ps->velocity );
+      PM_AddEvent( EV_JUMP );
+
+      // Play jumping animation
+      if( pm->cmd.forwardmove >= 0 )
+      {
+        if( !( pm->ps->persistant[ PERS_STATE ] & PS_NONSEGMODEL ) )
+          PM_ForceLegsAnim( LEGS_JUMP );
+        else
+          PM_ForceLegsAnim( NSPA_JUMP );
+
+        pm->ps->pm_flags &= ~PMF_BACKWARDS_JUMP;
+      }
+      else
+      {
+        if( !( pm->ps->persistant[ PERS_STATE ] & PS_NONSEGMODEL ) )
+          PM_ForceLegsAnim( LEGS_JUMPB );
+        else
+          PM_ForceLegsAnim( NSPA_JUMPBACK );
+
+        pm->ps->pm_flags |= PMF_BACKWARDS_JUMP;
+      }
+
+      pm->pmext->pouncePayload = pm->ps->misc[ MISC_MISC ];
+      pm->ps->misc[ MISC_MISC ] = 0;
+      pm->ps->misc[ MISC_MISC3 ] = 0;
+      pm->ps->pm_flags &= ~PMF_LAUNCHING;
+
+      return qtrue;
+    } else {
+      return qfalse;
+    }
+  }
+
+  //need to be grounded to start a launch
+  if(pm->ps->groundEntityNum == ENTITYNUM_NONE) {
+    return qfalse;
+  }
+
   // We were pouncing, but we've landed
-  if( pm->ps->groundEntityNum != ENTITYNUM_NONE &&
-      ( pm->ps->pm_flags & PMF_CHARGE ) )
+  if(pm->ps->pm_flags & PMF_CHARGE)
   {
     pm->ps->pm_flags &= ~PMF_CHARGE;
     if( pm->ps->weapon == WP_ALEVEL0 )
@@ -1259,76 +1352,10 @@ static qboolean PM_CheckPounce( void )
       pm->ps->misc[ MISC_MISC ] < LEVEL3_POUNCE_TIME_MIN ||
       pm->ps->groundEntityNum == ENTITYNUM_NONE )
     return qfalse;
-  // cooling down from the pounce repeat
-  if( pm->ps->stats[ STAT_WEAPONTIME2 ] )
-    return qfalse;
 
-  // Give the player forward velocity and simulate a jump
-  pml.groundPlane = qfalse;
-  pml.walking = qfalse;
-  pm->ps->pm_flags |= PMF_CHARGE;
-  pm->ps->groundEntityNum = ENTITYNUM_NONE;
-  if( pm->ps->weapon == WP_ALEVEL0 )
-    jumpMagnitude = pm->ps->misc[ MISC_MISC ] *
-                    LEVEL0_POUNCE_JUMP_MAG / LEVEL0_POUNCE_TIME;
-  else if( pm->ps->weapon == WP_ALEVEL3 )
-    jumpMagnitude = pm->ps->misc[ MISC_MISC ] *
-                    LEVEL3_POUNCE_JUMP_MAG / LEVEL3_POUNCE_TIME;
-  else
-    jumpMagnitude = pm->ps->misc[ MISC_MISC ] *
-                    LEVEL3_POUNCE_JUMP_MAG_UPG / LEVEL3_POUNCE_TIME_UPG;
-
-  //scale due to evolving
-  if( ( pm->ps->stats[ STAT_TEAM ] == TEAM_ALIENS ) && 
-      ( pm->ps->eFlags & EF_EVOLVING ) )
-    jumpMagnitude = (int)( ((float) jumpMagnitude ) * BG_EvolveScale( pm->ps ) );
-
-  VectorMA( pm->ps->velocity, jumpMagnitude, pml.forward, pm->ps->velocity );
-  PM_AddEvent( EV_JUMP );
-
-  // Play jumping animation
-  if( pm->cmd.forwardmove >= 0 )
-  {
-    if( !( pm->ps->persistant[ PERS_STATE ] & PS_NONSEGMODEL ) )
-      PM_ForceLegsAnim( LEGS_JUMP );
-    else
-      PM_ForceLegsAnim( NSPA_JUMP );
-
-    pm->ps->pm_flags &= ~PMF_BACKWARDS_JUMP;
-  }
-  else
-  {
-    if( !( pm->ps->persistant[ PERS_STATE ] & PS_NONSEGMODEL ) )
-      PM_ForceLegsAnim( LEGS_JUMPB );
-    else
-      PM_ForceLegsAnim( NSPA_JUMPBACK );
-
-    pm->ps->pm_flags |= PMF_BACKWARDS_JUMP;
-  }
-
-  //Reduce charged stamina
-  if(BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_CHARGE_STAMINA)) {
-    pm->ps->misc[MISC_CHARGE_STAMINA] -= 
-      (
-        pm->ps->misc[MISC_MISC] *
-        BG_Class(pm->ps->stats[STAT_CLASS] )->chargeStaminaUseRate) /
-      BG_Class(pm->ps->stats[STAT_CLASS] )->chargeStaminaRestoreRate;
-  
-    if(
-      pm->ps->misc[MISC_CHARGE_STAMINA] <
-      (
-        BG_Class(pm->ps->stats[STAT_CLASS] )->chargeStaminaMin /
-        BG_Class(pm->ps->stats[STAT_CLASS] )->chargeStaminaRestoreRate)) {
-      pm->ps->misc[MISC_CHARGE_STAMINA] =
-        BG_Class(pm->ps->stats[STAT_CLASS] )->chargeStaminaMin /
-        BG_Class(pm->ps->stats[STAT_CLASS] )->chargeStaminaRestoreRate;
-    }
-  }
-
-  pm->pmext->pouncePayload = pm->ps->misc[ MISC_MISC ];
-  pm->ps->misc[ MISC_MISC ] = 0;
-
-  return qtrue;
+  //begin the launch
+  pm->ps->pm_flags |= PMF_LAUNCHING;
+  return qfalse;
 }
 
 #define WALLJUMP_TIME 350
@@ -2092,8 +2119,7 @@ static void PM_WaterMove( void )
   float scale;
   float vel;
 
-  if( PM_CheckWaterJump( ) )
-  {
+  if(!PM_CheckPounce( ) && PM_CheckWaterJump( )){
     PM_WaterJumpMove();
     return;
   }
@@ -2472,6 +2498,8 @@ static void PM_AirMove( void )
     float wishspeed;
     float controlFactor;
     float accel = BG_Class( pm->ps->stats[ STAT_CLASS ] )->airAcceleration;
+
+    PM_CheckPounce();
 
     // Set the movementDir so clients can rotate the legs for strafing.
     PM_SetMovementDir( );
@@ -3293,6 +3321,7 @@ static int PM_CorrectAllSolid(trace_t *trace) {
   pm->ps->groundEntityNum = ENTITYNUM_NONE;
   pml.groundPlane = qfalse;
   pml.walking = qfalse;
+  PM_CheckPounce( );
 
   return qfalse;
 }
@@ -3359,6 +3388,7 @@ static void PM_GroundTraceMissed( void )
   pm->ps->groundEntityNum = ENTITYNUM_NONE;
   pml.groundPlane = qfalse;
   pml.walking = qfalse;
+  PM_CheckPounce( );
 }
 
 /*
@@ -3798,6 +3828,7 @@ static void PM_GroundTrace( void )
     pm->ps->groundEntityNum = ENTITYNUM_NONE;
     pml.groundPlane = qfalse;
     pml.walking = qfalse;
+    PM_CheckPounce( );
     return;
   }
 
@@ -3812,6 +3843,7 @@ static void PM_GroundTrace( void )
     pm->ps->groundEntityNum = ENTITYNUM_NONE;
     pml.groundPlane = qtrue;
     pml.walking = qfalse;
+    PM_CheckPounce( );
     return;
   }
 
@@ -4567,67 +4599,70 @@ static void PM_Weapon( void )
       pm->ps->weapon == WP_ALEVEL3_UPG ||
       pm->ps->weapon == WP_ASPITFIRE )
   {
-    int max;
+    //don't adjust the charge while a launch is in progress
+    if(!(pm->ps->pm_flags & PMF_LAUNCHING)) {
+      int max;
 
-    if(BG_ClassHasAbility( pm->ps->stats[STAT_CLASS], SCA_CHARGE_STAMINA)) {
-        max =
-          pm->ps->misc[MISC_CHARGE_STAMINA] *
-          BG_Class(  pm->ps->stats[STAT_CLASS] )->chargeStaminaRestoreRate;
-    } else {
-      switch( pm->ps->weapon )
-      {
-        case WP_ALEVEL0:
-          max = LEVEL0_POUNCE_TIME;
-          break;
+      if(BG_ClassHasAbility( pm->ps->stats[STAT_CLASS], SCA_CHARGE_STAMINA)) {
+          max =
+            pm->ps->misc[MISC_CHARGE_STAMINA] *
+            BG_Class(  pm->ps->stats[STAT_CLASS] )->chargeStaminaRestoreRate;
+      } else {
+        switch( pm->ps->weapon )
+        {
+          case WP_ALEVEL0:
+            max = LEVEL0_POUNCE_TIME;
+            break;
 
-        case WP_ALEVEL3:
-          max = LEVEL3_POUNCE_TIME;
-          break;
+          case WP_ALEVEL3:
+            max = LEVEL3_POUNCE_TIME;
+            break;
 
-        case WP_ALEVEL3_UPG:
-          max = LEVEL3_POUNCE_TIME_UPG;
-          break;
+          case WP_ALEVEL3_UPG:
+            max = LEVEL3_POUNCE_TIME_UPG;
+            break;
 
-        case WP_ASPITFIRE:
-          max = SPITFIRE_POUNCE_TIME;
-          break;
+          case WP_ASPITFIRE:
+            max = SPITFIRE_POUNCE_TIME;
+            break;
 
-        default:
-          max = LEVEL3_POUNCE_TIME_UPG;
-          break;
+          default:
+            max = LEVEL3_POUNCE_TIME_UPG;
+            break;
+        }
       }
-    }
 
-    if( ( !pm->swapAttacks ?
-          (pm->cmd.buttons & BUTTON_ATTACK2) : (pm->cmd.buttons & BUTTON_ATTACK) ) &&
-        ( pm->ps->weapon != WP_ASPITFIRE ||
-          pm->waterlevel <= 1 ) ) {
-      if(
-        pm->ps->weapon != WP_ASPITFIRE  &&
-        (
-          !pm->swapAttacks ?
-          (pm->cmd.buttons & BUTTON_ATTACK) : (pm->cmd.buttons & BUTTON_ATTACK2) ) &&
-        ( pm->ps->misc[ MISC_MISC ] > 0 ) )
-      {
+      if( ( !pm->swapAttacks ?
+            (pm->cmd.buttons & BUTTON_ATTACK2) : (pm->cmd.buttons & BUTTON_ATTACK) ) &&
+          ( pm->ps->weapon != WP_ASPITFIRE ||
+            pm->waterlevel <= 1 ) ) {
+        if(
+          pm->ps->weapon != WP_ASPITFIRE  &&
+          (
+            !pm->swapAttacks ?
+            (pm->cmd.buttons & BUTTON_ATTACK) : (pm->cmd.buttons & BUTTON_ATTACK2) ) &&
+          ( pm->ps->misc[ MISC_MISC ] > 0 ) )
+        {
+          pm->ps->misc[ MISC_MISC ] -= pml.msec;
+          if( pm->ps->misc[ MISC_MISC ] < 0 )
+            pm->ps->misc[ MISC_MISC ] = 0;
+        }
+        else if(
+           pm->ps->weapon == WP_ASPITFIRE ||
+          !(
+            !pm->swapAttacks ?
+            (pm->cmd.buttons & BUTTON_ATTACK) : (pm->cmd.buttons & BUTTON_ATTACK2))) {
+          pm->ps->misc[ MISC_MISC ] += pml.msec;
+        }
+      }
+      else
         pm->ps->misc[ MISC_MISC ] -= pml.msec;
-        if( pm->ps->misc[ MISC_MISC ] < 0 )
-          pm->ps->misc[ MISC_MISC ] = 0;
-      }
-      else if(
-         pm->ps->weapon == WP_ASPITFIRE ||
-        !(
-          !pm->swapAttacks ?
-          (pm->cmd.buttons & BUTTON_ATTACK) : (pm->cmd.buttons & BUTTON_ATTACK2))) {
-        pm->ps->misc[ MISC_MISC ] += pml.msec;
-      }
-    }
-    else
-      pm->ps->misc[ MISC_MISC ] -= pml.msec;
 
-    if( pm->ps->misc[ MISC_MISC ] > max )
-      pm->ps->misc[ MISC_MISC ] = max;
-    else if( pm->ps->misc[ MISC_MISC ] < 0 )
-      pm->ps->misc[ MISC_MISC ] = 0;
+      if( pm->ps->misc[ MISC_MISC ] > max )
+        pm->ps->misc[ MISC_MISC ] = max;
+      else if( pm->ps->misc[ MISC_MISC ] < 0 )
+        pm->ps->misc[ MISC_MISC ] = 0;
+    }
   }
 
   // Trample charge mechanics

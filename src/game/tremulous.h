@@ -143,7 +143,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL3_CHARGE_STAMINA_MIN   700
 #define LEVEL3_CHARGE_STAMINA_USE_RATE (0.45f)
 #define LEVEL3_CHARGE_STAMINA_RESTORE_RATE (0.075f)
-#define LEVEL3_POUNCE_TIME_MIN      150      // msec before which pounce cancels
+#define LEVEL3_POUNCE_TIME_MIN      300      // msec before which pounce cancels
 #define LEVEL3_POUNCE_REPEAT        700      // msec before a new pounce starts
 #define LEVEL3_POUNCE_SPEED_MOD     1.00f    // walking speed modifier for pounce charging
 #define LEVEL3_POUNCE_JUMP_MAG      1725     // Dragoon pounce jump power

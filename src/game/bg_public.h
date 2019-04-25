@@ -309,6 +309,7 @@ typedef struct unlagged_attacker_data_s
 #define PMF_PAUSE_BEAM      0x100000 //for special cases of when continous beam wepons are not being fired
 #define PMF_CHARGE_REDUCTION_HELD 0x200000
 #define PMF_WEAPON_FORCE_RELOAD  0x400000 // for delaying a weapon change
+#define PMF_LAUNCHING       0x800000 // in process of launching a pounce
 
 
 #define PMF_ALL_TIMES (PMF_TIME_WATERJUMP|PMF_TIME_LAND|PMF_TIME_KNOCKBACK|PMF_TIME_WALLJUMP)

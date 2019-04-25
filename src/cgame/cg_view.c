@@ -685,7 +685,8 @@ void CG_OffsetFirstPersonView( void )
 #define LEVEL3_FEEDBACK  20.0f
 
   //provide some feedback for pouncing
-  if( ( cg.predictedPlayerState.weapon == WP_ALEVEL3 ||
+  if( ( cg.predictedPlayerState.weapon == WP_ALEVEL0 ||
+        cg.predictedPlayerState.weapon == WP_ALEVEL3 ||
         cg.predictedPlayerState.weapon == WP_ALEVEL3_UPG ) &&
       cg.predictedPlayerState.misc[ MISC_MISC ] > 0 )
   {
