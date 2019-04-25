@@ -1228,7 +1228,7 @@ static qboolean PM_CheckPounce( void )
 
   //in process of launching a pounce
   if(pm->ps->pm_flags & PMF_LAUNCHING) {
-    int delta = 3 * pml.msec;
+    int delta = 4.5 * pml.msec;
 
     if(pm->ps->misc[ MISC_MISC ] < delta) {
       delta = pm->ps->misc[ MISC_MISC ];
