@@ -917,7 +917,8 @@ static int CG_MapTorsoToWeaponFrame( clientInfo_t *ci, int frame )
 }
 
 
-#define LEVEL3_FEEDBACK  4.0f
+#define LEVEL3_FEEDBACK_FORWARD  2.50f
+#define LEVEL3_FEEDBACK_UP  0.50f
 
 /*
 ==============
@@ -978,10 +979,12 @@ static void CG_CalculateWeaponPosition( vec3_t origin, vec3_t angles )
       cg.predictedPlayerState.misc[ MISC_MISC ] > 0 )
   {
     float fraction1, fraction2;
-    vec3_t forward, right;
+    vec3_t forward, right, up;
 
+    VectorCopy(cg.predictedPlayerState.grapplePoint, up);
+    VectorNormalize(up);
     AngleVectors( angles, NULL, right, NULL );
-    CrossProduct(cg.predictedPlayerState.grapplePoint, right, forward);
+    CrossProduct(up, right, forward);
     VectorNormalize( forward );
 
     fraction1 = (float)cg.predictedPlayerState.misc[ MISC_MISC ] /
@@ -991,7 +994,8 @@ static void CG_CalculateWeaponPosition( vec3_t origin, vec3_t angles )
 
     fraction2 = sin( fraction1 * M_PI / 2 );
 
-    VectorMA( origin, LEVEL3_FEEDBACK * fraction2, forward, origin );
+    VectorMA( origin, LEVEL3_FEEDBACK_FORWARD * fraction2, forward, origin );
+    VectorMA( origin, LEVEL3_FEEDBACK_UP * fraction2, up, origin );
   }
 }
 
@@ -1605,7 +1609,7 @@ void CG_AddViewWeapon( playerState_t *ps )
       case WP_ALEVEL3_UPG:
         fraction = (float)ps->misc[ MISC_MISC ] /
                     LEVEL3_POUNCE_TIME_UPG;
-        fraction *= 0.10;
+        fraction *= 0.05;
         break;
 
       case WP_LUCIFER_CANNON:
