@@ -919,7 +919,7 @@ static int CG_MapTorsoToWeaponFrame( clientInfo_t *ci, int frame )
 }
 
 
-#define LEVEL3_FEEDBACK  3.0f
+#define LEVEL3_FEEDBACK  4.0f
 
 /*
 ==============
@@ -983,9 +983,10 @@ static void CG_CalculateWeaponPosition( vec3_t origin, vec3_t angles )
       cg.predictedPlayerState.misc[ MISC_MISC ] > 0 )
   {
     float fraction1, fraction2;
-    vec3_t forward;
+    vec3_t forward, right;
 
-    AngleVectors( angles, forward, NULL, NULL );
+    AngleVectors( angles, NULL, right, NULL );
+    CrossProduct(cg.predictedPlayerState.grapplePoint, right, forward);
     VectorNormalize( forward );
 
     fraction1 = (float)cg.predictedPlayerState.misc[ MISC_MISC ] /
