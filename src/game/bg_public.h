@@ -508,6 +508,8 @@ typedef enum
   MISC_MISC,
   // for uh...other misc stuff (evolve cool down)
   MISC_MISC2,
+  // fo uh. even more misc stuff (pounce launch delay)
+  MISC_MISC3,
 
   // for gradually applying recoil
   MISC_RECOIL_PITCH,
@@ -523,7 +525,7 @@ typedef enum
 
   MISC_CHARGE_STAMINA
 
-  // netcode has space for 4 more
+  // netcode has space for 3 more
 } miscEnum_t;
 
 #define PS_WALLCLIMBINGFOLLOW   0x00000001
