@@ -470,7 +470,7 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
     client->pers.classSelection = PCL_NONE;
     client->pers.humanItemSelection = WP_NONE;
     client->ps.stats[ STAT_CLASS ] = PCL_NONE;
-    client->ps.pm_flags &= ~PMF_QUEUED;
+    client->ps.persistant[ PERS_STATE ] &= ~PS_QUEUED;
     queued = qfalse;
   }
   else if( attack1 )
@@ -498,7 +498,7 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
       client->ps.pm_type = PM_SPECTATOR;
 
     if( queued )
-      client->ps.pm_flags |= PMF_QUEUED;
+      client->ps.persistant[ PERS_STATE ] |= PS_QUEUED;
 
     client->ps.speed = client->pers.flySpeed;
     client->ps.stats[ STAT_STAMINA ] = 0;
@@ -922,6 +922,36 @@ void ClientTimerActions( gentity_t *ent, int msec )
         }
         else
           ent->client->ps.stats[ STAT_STATE ] &= ~SS_HEALING_2X;
+      }
+    }
+
+    // jet fuel
+    if( BG_InventoryContainsUpgrade( UP_JETPACK, ent->client->ps.stats ) )
+    {
+      if( BG_UpgradeIsActive( UP_JETPACK, ent->client->ps.stats ) )
+      {
+        if( ent->client->ps.stats[ STAT_FUEL ] > 0 )
+        {
+          // use fuel
+          if( ent->client->ps.persistant[PERS_JUMPTIME] > JETPACK_ACT_BOOST_TIME )
+            ent->client->ps.stats[ STAT_FUEL ] -= JETPACK_FUEL_USAGE;
+          else
+            ent->client->ps.stats[ STAT_FUEL ] -= JETPACK_ACT_BOOST_FUEL_USE;
+          if( ent->client->ps.stats[ STAT_FUEL ] <= 0 )
+          {
+            ent->client->ps.stats[ STAT_FUEL ] = 0;
+            BG_DeactivateUpgrade( UP_JETPACK, client->ps.stats );
+            BG_AddPredictableEventToPlayerstate( EV_JETPACK_DEACTIVATE, 0, &client->ps );
+          }
+        }
+      } else if( ent->client->ps.stats[ STAT_FUEL ] < JETPACK_FUEL_FULL &&
+                 G_Reactor( ) &&
+                  !(ent->client->ps.pm_flags & PMF_FEATHER_FALL) )
+      {
+        // recharge fuel
+        ent->client->ps.stats[ STAT_FUEL ] += JETPACK_FUEL_RECHARGE;
+        if( ent->client->ps.stats[ STAT_FUEL ] > JETPACK_FUEL_FULL )
+          ent->client->ps.stats[ STAT_FUEL ] = JETPACK_FUEL_FULL;
       }
     }
   }
@@ -1902,11 +1932,12 @@ void ClientThink_real( gentity_t *ent )
             ( ent->occupation.occupied->occupation.flags &
               OCCUPYF_PM_TYPE ) )
     client->ps.pm_type = ent->occupation.occupied->occupation.pm_type;
+  else if( BG_InventoryContainsUpgrade( UP_JETPACK, client->ps.stats ) &&
+           BG_UpgradeIsActive( UP_JETPACK, client->ps.stats ) )
+    client->ps.pm_type = PM_JETPACK;
   else if( client->ps.stats[ STAT_STATE ] & SS_BLOBLOCKED ||
            client->ps.stats[ STAT_STATE ] & SS_GRABBED )
     client->ps.pm_type = PM_GRABBED;
-  else if( BG_InventoryContainsUpgrade( UP_JETPACK, client->ps.stats ) && BG_UpgradeIsActive( UP_JETPACK, client->ps.stats ) )
-    client->ps.pm_type = PM_JETPACK;
   else
     client->ps.pm_type = PM_NORMAL;
 
@@ -2144,10 +2175,6 @@ void ClientThink_real( gentity_t *ent )
       if( random( ) > JETPACK_DISABLE_CHANCE )
         client->ps.pm_type = PM_NORMAL;
     }
-
-    //switch jetpack off if no reactor
-    if( !G_Reactor( ) )
-      BG_DeactivateUpgrade( UP_JETPACK, client->ps.stats );
   }
 
   // set the clip mask and/or the contents of clients that occupied an
@@ -2456,7 +2483,7 @@ void SpectatorClientEndFrame( gentity_t *ent )
         ent->client->ps.ping = ping;
 
         ent->client->ps.pm_flags |= PMF_FOLLOW;
-        ent->client->ps.pm_flags &= ~PMF_QUEUED;
+        ent->client->ps.persistant[ PERS_STATE ] &= ~PS_QUEUED;
       }
     }
   }

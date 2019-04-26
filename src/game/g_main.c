@@ -1024,7 +1024,7 @@ int G_PopSpawnQueue( spawnQueue_t *sq )
     sq->clients[ sq->front ] = -1;
     sq->front = QUEUE_PLUS1( sq->front );
     G_StopFollowing( g_entities + clientNum );
-    g_entities[ clientNum ].client->ps.pm_flags &= ~PMF_QUEUED;
+    g_entities[ clientNum ].client->ps.persistant[ PERS_STATE ] &= ~PS_QUEUED;
 
     return clientNum;
   }
@@ -1080,7 +1080,7 @@ qboolean G_PushSpawnQueue( spawnQueue_t *sq, int clientNum )
   sq->back = QUEUE_PLUS1( sq->back );
   sq->clients[ sq->back ] = clientNum;
 
-  g_entities[ clientNum ].client->ps.pm_flags |= PMF_QUEUED;
+  g_entities[ clientNum ].client->ps.persistant[ PERS_STATE ] |= PS_QUEUED;
   return qtrue;
 }
 
@@ -1112,7 +1112,7 @@ qboolean G_RemoveFromSpawnQueue( spawnQueue_t *sq, int clientNum )
         } while( i != QUEUE_PLUS1( sq->back ) );
 
         sq->back = QUEUE_MINUS1( sq->back );
-        g_entities[ clientNum ].client->ps.pm_flags &= ~PMF_QUEUED;
+        g_entities[ clientNum ].client->ps.persistant[ PERS_STATE ] &= ~PS_QUEUED;
 
         return qtrue;
       }

@@ -297,7 +297,7 @@ typedef struct unlagged_attacker_data_s
 #define PMF_USE_ITEM_HELD   0x000200
 #define PMF_WEAPON_RELOAD   0x000400 // force a weapon switch
 #define PMF_FOLLOW          0x000800 // spectate following another player
-#define PMF_QUEUED          0x001000 // player is queued
+#define PMF_FEATHER_FALL    0x001000 // for momentary gravity reduction
 #define PMF_TIME_WALLJUMP   0x002000 // for limiting wall jumping
 #define PMF_CHARGE          0x004000 // keep track of pouncing
 #define PMF_WEAPON_SWITCH   0x008000 // force a weapon switch
@@ -384,6 +384,8 @@ struct pmove_s
   float         marauderMinJumpFactor;
 };
 
+int PM_Gravity( playerState_t *ps );
+
 // if a full pmove isn't done on the client, you can just update the angles
 void PM_UpdateViewAngles( playerState_t *ps, const usercmd_t *cmd );
 void PM_CalculateAngularVelocity( playerState_t *ps, const usercmd_t *cmd );
@@ -413,6 +415,7 @@ typedef enum
   STAT_BUILDABLE, // which ghost model to display for building
   STAT_FALLDIST,  // the distance the player fell
   STAT_VIEWLOCK,   // direction to lock the view in
+  STAT_FUEL,      // jetpacks
   STAT_SHAKE      // camera shake
   // netcode has space for 2 more
 } statIndex_t;
@@ -449,6 +452,7 @@ typedef enum
 #define SFL_REFRESH_MISC        0x00000002 // hax to ensure the misc changes are broadcasted
 #define SFL_GIBBED              0x00000004
 #define SFL_CLASS_FORCED        0x00000008 // can't evolve from a class that a map forced
+
 
 // player_state->persistant[] indexes
 // these fields are the only part of player_state that isn't
@@ -516,6 +520,7 @@ typedef enum
 #define PS_NONSEGMODEL          0x00000004
 #define PS_SPRINTTOGGLE         0x00000008
 #define PS_SPRINTTOGGLEONSTOP   0x00000010
+#define PS_QUEUED               0x00000020 // player is queued
 
 // entityState_t->eFlags
 // notice that some flags are overlapped, so their meaning depends on context
@@ -698,6 +703,7 @@ typedef enum
   UP_FRAGNADE,
 
   UP_AMMO,
+  UP_JETFUEL,
 
   UP_NUM_UPGRADES
 } upgrade_t;
@@ -817,6 +823,7 @@ typedef enum
   EV_FALLING,
 
   EV_JUMP,
+  EV_JETJUMP,
   EV_WATER_TOUCH, // foot touches
   EV_WATER_LEAVE, // foot leaves
   EV_WATER_UNDER, // head touches
@@ -890,6 +897,9 @@ typedef enum
   EV_MGTURRET_SPINUP, // turret spinup sound should play
 
   EV_RPTUSE_SOUND,    // trigger a sound
+
+  EV_JETPACK_DEACTIVATE,
+  EV_JETPACK_REFUEL,
 
   EV_FIGHT
 } entity_event_t;

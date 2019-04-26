@@ -257,6 +257,20 @@ void CG_CheckLocalSounds( playerState_t *ps, playerState_t *ops )
       CG_PainEvent( &cg.predictedPlayerEntity, BG_GetPainState( ps ) );
   }
 
+  if( ( BG_UpgradeIsActive( UP_JETPACK, ps->stats ) || 
+        ( cg.predictedPlayerEntity.jetPackJumpTime + 1000 > cg.time && 
+          cg.predictedPlayerEntity.jetPackJumpTime + 250 < cg.time ) ) && 
+      ps->stats[ STAT_FUEL ] <= JETPACK_FUEL_LOW )
+  {
+    static int last = 0;
+    
+    if( last + 740 < cg.time )
+    {
+      trap_S_StartSound( NULL, cg.predictedPlayerState.clientNum, CHAN_AUTO, cgs.media.jetpackLowFuelSound );
+      last = cg.time;
+    }
+  }
+
   if( cg_hitIndicator.integer > 0 )
   {
     if( ps->persistant[ PERS_HITS ] > ops->persistant[ PERS_HITS ] )

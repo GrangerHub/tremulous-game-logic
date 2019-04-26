@@ -681,6 +681,8 @@ typedef struct centity_s
 
   particleSystem_t      *jetPackPS;
   jetPackState_t        jetPackState;
+  int                   jetPackJumpTime;
+  int                   jetPackRefuelTime; //to avoid spamming sounds
 
   particleSystem_t      *poisonCloudedPS;
 
@@ -1198,6 +1200,7 @@ typedef struct
   float         chargeStaminaMeterValue;
   qhandle_t     lastHealthCross;
   float         healthCrossFade;
+  float         jetpackIconAlert;
   int           nearUsableBuildable;
 
   int           nextWeaponClickTime;
@@ -1314,6 +1317,12 @@ typedef struct
   sfxHandle_t jetpackDescendSound;
   sfxHandle_t jetpackIdleSound;
   sfxHandle_t jetpackAscendSound;
+  sfxHandle_t jetpackDescendDeactivateSound;
+  sfxHandle_t jetpackIdleDeactivateSound;
+  sfxHandle_t jetpackAscendDeactivateSound;
+  sfxHandle_t jetpackJumpSound;
+  sfxHandle_t jetpackLowFuelSound;
+  sfxHandle_t jetpackRefuelSound;
 
   qhandle_t   jetPackDescendPS;
   qhandle_t   jetPackHoverPS;
@@ -1705,6 +1714,7 @@ extern  vmCvar_t    ui_dialog;
 extern  vmCvar_t    ui_voteActive;
 extern  vmCvar_t    ui_alienTeamVoteActive;
 extern  vmCvar_t    ui_humanTeamVoteActive;
+extern  vmCvar_t    ui_fuel;
 
 extern  vmCvar_t    cg_debugRandom;
 

@@ -4855,7 +4855,7 @@ static const upgradeAttributes_t bg_upgrades[ ] =
       "to reach spots.",
     "icons/iconu_jetpack",
     qtrue,                  //qboolean  purchasable;
-    qtrue,                  //qboolean  usable;
+    qfalse,                  //qboolean  usable;
     TEAM_HUMANS             //team_t    team;
   },
   {
@@ -4919,6 +4919,21 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     "ammo",                 //char  *name;
     "Ammunition",           //char  *humanName;
     "Ammunition for the currently held weapon.",
+    0,
+    qtrue,                  //qboolean  purchasable;
+    qfalse,                 //qboolean  usable;
+    TEAM_HUMANS             //team_t    team;
+  },
+  {
+    UP_JETFUEL,             //int   number;
+    qtrue,                  //qboolean enabled;
+    0,                      //int   price;
+    qfalse,                 //qboolean warmupFree;
+    ( 1 << S2 )|( 1 << S3 ), //int  stages;
+    SLOT_NONE,              //int   slots;
+    "jetfuel",              //char  *name;
+    "Jet Pack Fuel",        //char  *humanName;
+    "Refuels the jet pack",
     0,
     qtrue,                  //qboolean  purchasable;
     qfalse,                 //qboolean  usable;
@@ -5172,6 +5187,7 @@ char *eventnames[ ] =
   "EV_FALLING",
 
   "EV_JUMP",
+  "EV_JETJUMP",
   "EV_WATER_TOUCH", // foot touches
   "EV_WATER_LEAVE", // foot leaves
   "EV_WATER_UNDER", // head touches
@@ -5246,6 +5262,9 @@ char *eventnames[ ] =
 
   "EV_RPTUSE_SOUND",    // trigger a sound
   "EV_LEV2_ZAP",
+
+  "EV_JETPACK_DEACTIVATE",
+  "EV_JETPACK_REFUEL",
 
   "EV_FIGHT"
 };
@@ -5638,7 +5657,8 @@ Activates an upgrade
 */
 void BG_ActivateUpgrade( int item, int stats[ ] )
 {
-  stats[ STAT_ACTIVEITEMS ] |= ( 1 << item );
+  if( item != UP_JETPACK || stats[ STAT_FUEL ] >  0)
+    stats[ STAT_ACTIVEITEMS ] |= ( 1 << item );
 }
 
 /*
