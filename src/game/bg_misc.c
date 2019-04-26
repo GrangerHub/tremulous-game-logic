@@ -7336,8 +7336,19 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
       }
 
       {//Do traces from behind the player to the target to find a valid spot.
+        trace_t tr2;
+
         if( !BG_FindValidSpot( trace, tr, viewOrigin, mins, maxs, targetOrigin, ps->clientNum, MASK_PLAYERSOLID,
                                5.0f, 5 ) ) {
+          VectorCopy( viewOrigin, outOrigin );
+          tr->plane.normal[ 2 ] = 0.0f;
+          tr->entityNum = ENTITYNUM_NONE;
+          return;
+        }
+
+        //Check that the spot is not on the opposite side of a thin wall
+        (*trace)( &tr2, viewOrigin, NULL, NULL, tr->endpos, ps->clientNum, MASK_PLAYERSOLID );
+        if(tr2.fraction < 1.0f || tr2.startsolid || tr2.allsolid) {
           VectorCopy( viewOrigin, outOrigin );
           tr->plane.normal[ 2 ] = 0.0f;
           tr->entityNum = ENTITYNUM_NONE;
