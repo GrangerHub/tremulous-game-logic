@@ -1036,7 +1036,6 @@ static void CG_RegisterSounds( void )
   cgs.media.jetpackLowFuelSound             = trap_S_RegisterSound( "sound/upgrades/jetpack/lowfuel.wav", qfalse );
   cgs.media.jetpackRefuelSound              = trap_S_RegisterSound( "sound/upgrades/jetpack/refuel.wav", qfalse );
 
-
   cgs.media.medkitUseSound          = trap_S_RegisterSound( "sound/upgrades/medkit/medkit.wav", qfalse );
 
   cgs.media.alienEvolveSound        = trap_S_RegisterSound( "sound/player/alienevolve.wav", qfalse );

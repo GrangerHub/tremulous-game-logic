@@ -470,7 +470,7 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
     client->pers.classSelection = PCL_NONE;
     client->pers.humanItemSelection = WP_NONE;
     client->ps.stats[ STAT_CLASS ] = PCL_NONE;
-    client->ps.pm_flags &= ~PMF_QUEUED;
+    client->ps.persistant[ PERS_STATE ] &= ~PS_QUEUED;
     queued = qfalse;
   }
   else if( attack1 )
@@ -498,7 +498,7 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
       client->ps.pm_type = PM_SPECTATOR;
 
     if( queued )
-      client->ps.pm_flags |= PMF_QUEUED;
+      client->ps.persistant[ PERS_STATE ] |= PS_QUEUED;
 
     client->ps.speed = client->pers.flySpeed;
     client->ps.stats[ STAT_STAMINA ] = 0;
@@ -954,7 +954,6 @@ void ClientTimerActions( gentity_t *ent, int msec )
           ent->client->ps.stats[ STAT_FUEL ] = JETPACK_FUEL_FULL;
       }
     }
-
   }
 
   //Camera Shake
@@ -2185,10 +2184,6 @@ void ClientThink_real( gentity_t *ent )
       if( random( ) > JETPACK_DISABLE_CHANCE )
         client->ps.pm_type = PM_NORMAL;
     }
-
-    //[DISABLED]switch jetpack off if no reactor
-   // if( !G_Reactor( ) )
-     // BG_DeactivateUpgrade( UP_JETPACK, client->ps.stats );
   }
 
   // set the clip mask and/or the contents of clients that occupied an
@@ -2497,7 +2492,7 @@ void SpectatorClientEndFrame( gentity_t *ent )
         ent->client->ps.ping = ping;
 
         ent->client->ps.pm_flags |= PMF_FOLLOW;
-        ent->client->ps.pm_flags &= ~PMF_QUEUED;
+        ent->client->ps.persistant[ PERS_STATE ] &= ~PS_QUEUED;
       }
     }
   }

@@ -4915,7 +4915,7 @@ static const upgradeAttributes_t bg_upgrades[ ] =
       "to reach spots.",
     "icons/iconu_jetpack",
     qtrue,                  //qboolean  purchasable;
-    qfalse,                 //qboolean  usable;
+    qfalse,                  //qboolean  usable;
     TEAM_HUMANS             //team_t    team;
   },
   {
@@ -5263,7 +5263,7 @@ char *eventnames[ ] =
   "EV_FALLING",
 
   "EV_JUMP",
-  "EV_JETJUMP"
+  "EV_JETJUMP",
   "EV_WATER_TOUCH", // foot touches
   "EV_WATER_LEAVE", // foot leaves
   "EV_WATER_UNDER", // head touches

@@ -1655,7 +1655,7 @@ static stage_t UI_GetCurrentHumanStage( void )
 
 /*
 ===============
-UI_GetCurrentHumanStage
+UI_GetFuel
 ===============
 */
 static int UI_GetFuel( int *credits )

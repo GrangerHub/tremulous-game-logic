@@ -2932,8 +2932,15 @@ void Cmd_ActivateItem_f( gentity_t *ent )
   upgrade = BG_UpgradeByName( s )->number;
   weapon = BG_WeaponByName( s )->number;
 
-  if( upgrade != UP_NONE && BG_InventoryContainsUpgrade( upgrade, ent->client->ps.stats ) )
-    BG_ActivateUpgrade( upgrade, ent->client->ps.stats );
+  if(
+    upgrade != UP_NONE &&
+    BG_InventoryContainsUpgrade( upgrade, ent->client->ps.stats ) ) {
+      if(BG_Upgrade(upgrade)->usable) {
+        BG_ActivateUpgrade( upgrade, ent->client->ps.stats );
+      } else {
+        SV_GameSendServerCommand( ent-g_entities, va( "print \"The %s can't be activated this way\n\"", s ) );
+      }
+    }
   else if( weapon != WP_NONE &&
            BG_InventoryContainsWeapon( weapon, ent->client->ps.stats ) )
   {
@@ -2961,8 +2968,13 @@ void Cmd_DeActivateItem_f( gentity_t *ent )
   Cmd_ArgvBuffer( 1, s, sizeof( s ) );
   upgrade = BG_UpgradeByName( s )->number;
 
-  if( BG_InventoryContainsUpgrade( upgrade, ent->client->ps.stats ) )
-    BG_DeactivateUpgrade( upgrade, ent->client->ps.stats );
+  if( BG_InventoryContainsUpgrade( upgrade, ent->client->ps.stats ) ) {
+    if(BG_Upgrade(upgrade)->usable) {
+      BG_DeactivateUpgrade( upgrade, ent->client->ps.stats );
+    } else {
+      SV_GameSendServerCommand( ent-g_entities, va( "print \"The %s can't be deactivated this way\n\"", s ) );
+    }
+  }
   else
     SV_GameSendServerCommand( ent-g_entities, va( "print \"You don't have the %s\n\"", s ) );
 }
@@ -2999,8 +3011,10 @@ void Cmd_ToggleItem_f( gentity_t *ent )
   }
   else if( BG_InventoryContainsUpgrade( upgrade, ent->client->ps.stats ) )
   {
-    if( upgrade == UP_JETPACK )
+    if(!BG_Upgrade(upgrade)->usable) {
+      SV_GameSendServerCommand( ent-g_entities, va( "print \"The %s can't be toggled\n\"", s ) );
       return;
+    }
 
     if( BG_UpgradeIsActive( upgrade, ent->client->ps.stats ) )
       BG_DeactivateUpgrade( upgrade, ent->client->ps.stats );
@@ -3020,8 +3034,7 @@ static sellErr_t G_CanSellUpgrade(
   gentity_t *ent, const upgrade_t upgrade, int *value, qboolean force) {
   if(force || (IS_WARMUP && BG_Upgrade(upgrade)->warmupFree)) {
     *value = 0;
-  }
-  else {
+  } else {
     const int usedFuel = JETPACK_FUEL_FULL -
                             ent->client->ps.stats[ STAT_FUEL ];
 

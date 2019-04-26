@@ -297,7 +297,7 @@ typedef struct unlagged_attacker_data_s
 #define PMF_USE_ITEM_HELD   0x000200
 #define PMF_WEAPON_RELOAD   0x000400 // force a weapon switch
 #define PMF_FOLLOW          0x000800 // spectate following another player
-#define PMF_QUEUED          0x001000 // player is queued
+#define PMF_FEATHER_FALL    0x001000 // for momentary gravity reduction
 #define PMF_TIME_WALLJUMP   0x002000 // for limiting wall jumping
 #define PMF_CHARGE          0x004000 // keep track of pouncing
 #define PMF_WEAPON_SWITCH   0x008000 // force a weapon switch
@@ -307,7 +307,6 @@ typedef struct unlagged_attacker_data_s
 #define PMF_JUMPING         0x080000 // a jump has occurred but has not landed yet
 #define PMF_PAUSE_BEAM      0x100000 //for special cases of when continous beam wepons are not being fired
 #define PMF_CHARGE_REDUCTION_HELD 0x200000
-#define PMF_FEATHER_FALL    0x400000 // for momentary gravity reduction
 
 
 #define PMF_ALL_TIMES (PMF_TIME_WATERJUMP|PMF_TIME_LAND|PMF_TIME_KNOCKBACK|PMF_TIME_WALLJUMP)
@@ -458,6 +457,7 @@ typedef enum
 #define SFL_GIBBED              0x00000004
 #define SFL_CLASS_FORCED        0x00000008 // can't evolve from a class that a map forced
 
+
 // player_state->persistant[] indexes
 // these fields are the only part of player_state that isn't
 // cleared on respawn
@@ -524,6 +524,7 @@ typedef enum
 #define PS_NONSEGMODEL          0x00000004
 #define PS_SPRINTTOGGLE         0x00000008
 #define PS_SPRINTTOGGLEONSTOP   0x00000010
+#define PS_QUEUED               0x00000020 // player is queued
 
 // entityState_t->eFlags
 // notice that some flags are overlapped, so their meaning depends on context

@@ -254,8 +254,7 @@ PM_Gravity
 Sreturns the current gravity of the player
 ==================
 */
-int PM_Gravity( playerState_t *ps )
-{
+int PM_Gravity( playerState_t *ps ) {
   if(ps->pm_flags & PMF_FEATHER_FALL) {
     if(
       BG_InventoryContainsUpgrade(UP_JETPACK, ps->stats) &&

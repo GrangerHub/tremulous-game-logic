@@ -3990,7 +3990,7 @@ static qboolean CG_DrawQueue( void )
   int         position;
   char        *ordinal, buffer[ MAX_STRING_CHARS ];
 
-  if( !( cg.snap->ps.pm_flags & PMF_QUEUED ) )
+  if( !( cg.snap->ps.persistant[ PERS_STATE ] & PS_QUEUED ) )
     return qfalse;
 
   color[ 0 ] = 1;
