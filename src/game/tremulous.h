@@ -182,8 +182,9 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define SPITFIRE_ZAP_RANGE              300.0f
 #define SPITFIRE_ZAP_DMG                AWDM(24000)
 #define SPITFIRE_ZAP_TIME               150
-#define SPITFIRE_ASCEND_REPEAT          400
-#define SPITFIRE_ASCEND_MAG             800.0f
+#define SPITFIRE_ASCEND_REPEAT          600
+#define SPITFIRE_ASCEND_MAG             500.0f
+#define SPITFIRE_FLAP_FALL_TIME         750 // amount of time gravity is reduced for a flap
 #define SPITFIRE_POUNCE_JUMP_MAG        2250
 #define SPITFIRE_POUNCE_REPEAT          450
 #define SPITFIRE_POUNCE_TIME            1500
@@ -744,20 +745,21 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define BATTPACK_PRICE              150
 #define BATTPACK_MODIFIER           1.5f //modifier for extra energy storage available
 
-#define JETPACK_FULL_FUEL_PRICE     300
-#define JETPACK_PRICE               ( 125 + JETPACK_FULL_FUEL_PRICE )
-#define JETPACK_FLOAT_SPEED         175.0f //up movement speed
-#define JETPACK_SINK_SPEED          192.0f //down movement speed
-#define JETPACK_DISABLE_TIME        500 //time to disable the jetpack when player damaged
-#define JETPACK_DISABLE_CHANCE      0.3f
-#define JETPACK_FUEL_FULL           5000 //can't exceed 32767
-#define JETPACK_FUEL_LOW            1000
-#define JETPACK_FUEL_USAGE          16 //every 100ms
-#define JETPACK_FUEL_MIN_START      150 // Minimum fuel required to start the jet
-#define JETPACK_ACT_BOOST_FUEL_USE  ( JETPACK_FUEL_USAGE * 2 )
-#define JETPACK_ACT_BOOST_TIME      750
-#define JETPACK_ACT_BOOST_SPEED     300.0f
-#define JETPACK_FUEL_RECHARGE       5 // every 100ms
+#define JETPACK_FULL_FUEL_PRICE        300
+#define JETPACK_PRICE                  ( 125 + JETPACK_FULL_FUEL_PRICE )
+#define JETPACK_FLOAT_SPEED            136.0f //up movement speed
+#define JETPACK_SINK_SPEED             184.0f //down movement speed
+#define JETPACK_DISABLE_TIME           1000 //time to disable the jetpack when player damaged
+#define JETPACK_DISABLE_CHANCE         0.3f
+#define JETPACK_FUEL_FULL              6000 //can't exceed 32767
+#define JETPACK_FUEL_LOW               1000
+#define JETPACK_FUEL_USAGE             12 //every 100ms
+#define JETPACK_FUEL_MIN_START         300 // Minimum fuel required to start the jet
+#define JETPACK_ACT_BOOST_FUEL_USE     ( JETPACK_FUEL_USAGE * 2 )
+#define JETPACK_ACT_BOOST_TIME         750
+#define JETPACK_ACT_BOOST_SPEED        184.0f
+#define JETPACK_FUEL_RECHARGE          5 // every 100ms
+#define JETPACK_DEACTIVATION_FALL_TIME 750 // amount of time gravity is reduced after deactivation
 
 #define BSUIT_PRICE                 1000
 #define BSUIT_PRICE_USED            200

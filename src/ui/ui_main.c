@@ -1655,7 +1655,7 @@ static stage_t UI_GetCurrentHumanStage( void )
 
 /*
 ===============
-UI_GetCurrentHumanStage
+UI_GetFuel
 ===============
 */
 static int UI_GetFuel( int *credits )
@@ -1688,7 +1688,6 @@ static void UI_DrawInfoPane( menuItem_t *item, rectDef_t *rect, float text_x, fl
 
   qboolean fuelFull = qfalse;
   qboolean insufficientFunds = qfalse;
-
 
   trap_Cvar_VariableStringBuffer( "ui_currentClass", ui_currentClass, MAX_STRING_CHARS );
 
@@ -1771,7 +1770,10 @@ static void UI_DrawInfoPane( menuItem_t *item, rectDef_t *rect, float text_x, fl
             break;
         }
 
-        value = BG_Weapon( i )->roundPrice;
+        if( UI_GameIsInWarmup() && BG_Weapon( i )->warmupFree )
+          value = 0;
+        else
+          value = BG_Weapon( i )->roundPrice;
       } else if( item->v.upgrade == UP_JETFUEL )
       {
         int humanCredits;

@@ -507,7 +507,7 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
     client->pers.classSelection = PCL_NONE;
     client->pers.humanItemSelection = WP_NONE;
     client->ps.stats[ STAT_CLASS ] = PCL_NONE;
-    client->ps.pm_flags &= ~PMF_QUEUED;
+    client->ps.persistant[ PERS_STATE ] &= ~PS_QUEUED;
     queued = qfalse;
   }
   else if( attack1 )
@@ -535,7 +535,7 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
       client->ps.pm_type = PM_SPECTATOR;
 
     if( queued )
-      client->ps.pm_flags |= PMF_QUEUED;
+      client->ps.persistant[ PERS_STATE ] |= PS_QUEUED;
 
     client->ps.speed = client->pers.flySpeed;
     client->ps.stats[ STAT_STAMINA ] = 0;
@@ -1131,7 +1131,8 @@ void ClientTimerActions( gentity_t *ent, int msec )
           }
         }
       } else if( ent->client->ps.stats[ STAT_FUEL ] < JETPACK_FUEL_FULL &&
-                 G_Reactor( ) )
+                 G_Reactor( ) &&
+                  !(ent->client->ps.pm_flags & PMF_FEATHER_FALL) )
       {
         // recharge fuel
         ent->client->ps.stats[ STAT_FUEL ] += JETPACK_FUEL_RECHARGE;
@@ -1139,7 +1140,6 @@ void ClientTimerActions( gentity_t *ent, int msec )
           ent->client->ps.stats[ STAT_FUEL ] = JETPACK_FUEL_FULL;
       }
     }
-
   }
 
   //Camera Shake
@@ -2531,6 +2531,17 @@ void ClientThink_real( gentity_t *ent )
   if( client->lastCreepSlowTime + CREEP_TIMEOUT < level.time )
     client->ps.stats[ STAT_STATE ] &= ~SS_CREEPSLOWED;
 
+  //randomly disable the jet pack if damaged
+  if( BG_InventoryContainsUpgrade( UP_JETPACK, client->ps.stats ) &&
+      BG_UpgradeIsActive( UP_JETPACK, client->ps.stats ) )
+  {
+    if( ent->lastDamageTime + JETPACK_DISABLE_TIME > level.time )
+    {
+      if( random( ) > JETPACK_DISABLE_CHANCE )
+        client->ps.pm_type = PM_NORMAL;
+    }
+  }
+
   // set the clip mask and/or the contents of clients that occupied an
   // activation entity
   G_OccupantClip( ent );
@@ -2826,7 +2837,7 @@ void SpectatorClientEndFrame( gentity_t *ent )
         ent->client->ps.ping = ping;
 
         ent->client->ps.pm_flags |= PMF_FOLLOW;
-        ent->client->ps.pm_flags &= ~PMF_QUEUED;
+        ent->client->ps.persistant[ PERS_STATE ] &= ~PS_QUEUED;
       }
     }
   }

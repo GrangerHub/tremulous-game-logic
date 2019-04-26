@@ -3069,8 +3069,15 @@ void Cmd_ActivateItem_f( gentity_t *ent )
   upgrade = BG_UpgradeByName( s )->number;
   weapon = BG_WeaponByName( s )->number;
 
-  if( upgrade != UP_NONE && BG_InventoryContainsUpgrade( upgrade, ent->client->ps.stats ) )
-    BG_ActivateUpgrade( upgrade, ent->client->ps.stats );
+  if(
+    upgrade != UP_NONE &&
+    BG_InventoryContainsUpgrade( upgrade, ent->client->ps.stats ) ) {
+      if(BG_Upgrade(upgrade)->usable) {
+        BG_ActivateUpgrade( upgrade, ent->client->ps.stats );
+      } else {
+        SV_GameSendServerCommand( ent-g_entities, va( "print \"The %s can't be activated this way\n\"", s ) );
+      }
+    }
   else if( weapon != WP_NONE &&
            BG_InventoryContainsWeapon( weapon, ent->client->ps.stats ) )
   {
@@ -3098,8 +3105,13 @@ void Cmd_DeActivateItem_f( gentity_t *ent )
   Cmd_ArgvBuffer( 1, s, sizeof( s ) );
   upgrade = BG_UpgradeByName( s )->number;
 
-  if( BG_InventoryContainsUpgrade( upgrade, ent->client->ps.stats ) )
-    BG_DeactivateUpgrade( upgrade, ent->client->ps.stats );
+  if( BG_InventoryContainsUpgrade( upgrade, ent->client->ps.stats ) ) {
+    if(BG_Upgrade(upgrade)->usable) {
+      BG_DeactivateUpgrade( upgrade, ent->client->ps.stats );
+    } else {
+      SV_GameSendServerCommand( ent-g_entities, va( "print \"The %s can't be deactivated this way\n\"", s ) );
+    }
+  }
   else
     SV_GameSendServerCommand( ent-g_entities, va( "print \"You don't have the %s\n\"", s ) );
 }
@@ -3161,8 +3173,10 @@ void Cmd_ToggleItem_f( gentity_t *ent )
   }
   else if( BG_InventoryContainsUpgrade( upgrade, ent->client->ps.stats ) )
   {
-    if( upgrade == UP_JETPACK )
+    if(!BG_Upgrade(upgrade)->usable) {
+      SV_GameSendServerCommand( ent-g_entities, va( "print \"The %s can't be toggled\n\"", s ) );
       return;
+    }
 
     if( BG_UpgradeIsActive( upgrade, ent->client->ps.stats ) )
       BG_DeactivateUpgrade( upgrade, ent->client->ps.stats );
@@ -3838,9 +3852,12 @@ buyErr_t G_CanBuy( gentity_t *ent, const char *itemName, int *price,
 
     if( upgrade == UP_JETFUEL )
     {
+      if(!BG_InventoryContainsUpgrade( UP_JETPACK, ent->client->ps.stats )) {
+        return ERR_BUY_NO_JET;
+      }
+
       // refuel the jet pack
-      if( BG_InventoryContainsUpgrade( UP_JETPACK, ent->client->ps.stats ) &&
-          ent->client->ps.stats[ STAT_FUEL ] < JETPACK_FUEL_FULL )
+      if( ent->client->ps.stats[ STAT_FUEL ] < JETPACK_FUEL_FULL )
       {
         const int usedFuel = JETPACK_FUEL_FULL -
                                 ent->client->ps.stats[ STAT_FUEL ];
@@ -3863,6 +3880,8 @@ buyErr_t G_CanBuy( gentity_t *ent, const char *itemName, int *price,
         }
         else
           return ERR_BUY_NO_FUNDS;
+      } else {
+        return ERR_BUY_FUEL_FULL;
       }
     }
     else
@@ -3967,6 +3986,12 @@ static void G_BuyErrHandling( gentity_t *ent, const buyErr_t error )
       break;
 
     case ERR_BUY_NO_MORE_AMMO:
+      break;
+
+    case ERR_BUY_NO_JET:
+      break;
+
+    case ERR_BUY_FUEL_FULL:
       break;
 
     case ERR_BUY_NOROOMBSUITON:

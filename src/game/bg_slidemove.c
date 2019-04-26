@@ -69,7 +69,7 @@ qboolean  PM_SlideMove( qboolean gravity )
   if( gravity )
   {
     VectorCopy( pm->ps->velocity, endVelocity );
-    endVelocity[ 2 ] -= pm->ps->gravity * pml.frametime;
+    endVelocity[ 2 ] -= PM_Gravity(pm->ps) * pml.frametime;
     pm->ps->velocity[ 2 ] = ( pm->ps->velocity[ 2 ] + endVelocity[ 2 ] ) * 0.5;
     primal_velocity[ 2 ] = endVelocity[ 2 ];
 
