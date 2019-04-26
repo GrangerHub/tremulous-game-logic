@@ -652,21 +652,140 @@ static void CG_HumanText( char *text, playerState_t *ps )
       va( "Press %s and any direction to sprint\n",
         CG_KeyNameForCommand( "+button8" ) ) );
 
+  Q_strcat( text, MAX_TUTORIAL_TEXT,
+      va( "Press %s and back or strafe to dodge\n",
+        CG_KeyNameForCommand( "+button6" ) ) );
+
   if( BG_InventoryContainsUpgrade( UP_JETPACK, ps->stats ) )
+  {
+    if( ps->stats[ STAT_FUEL ] >= JETPACK_FUEL_MIN_START )
     {
-      if( ( ps->stats[ STAT_FUEL ] <= JETPACK_FUEL_LOW ) && ( ps->stats[ STAT_FUEL ] > 0 )  )
-      {
+      char key_string_1[MAX_TUTORIAL_TEXT];
+      char key_string_2[MAX_TUTORIAL_TEXT];
+      char key_string_3[MAX_TUTORIAL_TEXT];
+
+      if(BG_UpgradeIsActive(UP_JETPACK, ps->stats)) {
+        usercmd_t cmd;
+        int       cmdNum;
+
+        cmdNum = trap_GetCurrentCmdNumber( );
+        trap_GetUserCmd( cmdNum, &cmd );
+
+        if(( cmd.buttons & BUTTON_WALKING )) {
+          if(cmd.upmove > 0.0f) {
+            Q_strncpyz(
+              key_string_1,
+              CG_KeyNameForCommand( "+speed" ), sizeof(key_string_1));
+            Q_strncpyz(
+              key_string_2,
+              CG_KeyNameForCommand( "+moveup" ), sizeof(key_string_2));
+            Q_strcat( text, MAX_TUTORIAL_TEXT,
+                va( "Release %s and %s to deactivate with the jetpack\n",
+                  key_string_1,
+                  key_string_2) );
+
+            Q_strncpyz(
+              key_string_1,
+              CG_KeyNameForCommand( "+moveup" ), sizeof(key_string_1));
+            Q_strncpyz(
+              key_string_2,
+              CG_KeyNameForCommand( "+speed" ), sizeof(key_string_2));
+            Q_strncpyz(
+              key_string_3,
+              CG_KeyNameForCommand( "+movedown" ), sizeof(key_string_3));
+            Q_strcat( text, MAX_TUTORIAL_TEXT,
+                va( "Release %s while holding %s and %s to descend with the jetpack\n",
+                  key_string_1,
+                  key_string_2,
+                  key_string_3 ) );
+          } else if(cmd.upmove < 0.0f) {
+            Q_strcat( text, MAX_TUTORIAL_TEXT,
+                va( "Release %s to deactivate the jetpack\n",
+                  CG_KeyNameForCommand( "+speed" )) );
+
+                  
+
+            Q_strncpyz(
+              key_string_1, 
+              CG_KeyNameForCommand( "+movedown" ), sizeof(key_string_1));
+            Q_strncpyz(
+              key_string_2, 
+              CG_KeyNameForCommand( "+moveup" ), sizeof(key_string_2));
+            Q_strcat( text, MAX_TUTORIAL_TEXT,
+                va( "Release %s and hold %s to ascend with the jetpack\n",
+                  key_string_1,
+                  key_string_2 ) );
+          } else {
+            Q_strcat( text, MAX_TUTORIAL_TEXT,
+                va( "Release %s to deactivate the jetpack\n",
+                  CG_KeyNameForCommand( "+speed" )) );
+
+                  
+            Q_strcat( text, MAX_TUTORIAL_TEXT,
+                va( "Hold down %s to ascend with the jetpack\n",
+                  CG_KeyNameForCommand( "+moveup" ) ) );
+
+            Q_strncpyz(
+              key_string_1,
+              CG_KeyNameForCommand( "+movedown" ), sizeof(key_string_1));
+            Q_strncpyz(
+              key_string_2,
+              CG_KeyNameForCommand( "+speed" ), sizeof(key_string_2));
+            Q_strcat( text, MAX_TUTORIAL_TEXT,
+                va( "Hold down %s and %s to descend with the jetpack\n",
+                  key_string_1,
+                  key_string_2 ) );
+          }
+        } else {
+          Q_strcat( text, MAX_TUTORIAL_TEXT,
+              va( "Release %s to deactivate with the jetpack\n",
+                CG_KeyNameForCommand( "+moveup" )) );
+
+          Q_strncpyz(
+            key_string_1,
+            CG_KeyNameForCommand( "+speed" ), sizeof(key_string_1));
+          Q_strncpyz(
+            key_string_2,
+            CG_KeyNameForCommand( "+moveup" ), sizeof(key_string_2));
+          Q_strcat( text, MAX_TUTORIAL_TEXT,
+              va( "Release %s and hold down %s to hover with the jetpack\n",
+                key_string_1,
+                key_string_2) );
+        }
+      } else {
+        Q_strncpyz(
+          key_string_1,
+          CG_KeyNameForCommand( "+moveup" ), sizeof(key_string_1));
+        Q_strncpyz(
+          key_string_2,
+          CG_KeyNameForCommand( "+speed" ), sizeof(key_string_2));
         Q_strcat( text, MAX_TUTORIAL_TEXT,
-                  va( "You are running low on jet fuel. Find an Armoury and press %s to refuel\n",
-                      CG_KeyNameForCommand( "buy ammo" ) ) );
-      }
-      else if( ps->stats[ STAT_FUEL ] <= 0 )
-      {
-        Q_strcat( text, MAX_TUTORIAL_TEXT,
-                  va( "You are out of jet fuel. You can no longer fly. Find an Armoury and press %s to refuel\n",
-                      CG_KeyNameForCommand( "buy ammo" ) ) );
+                   va( "%sress and hold %s or %s while off of the ground to activate the jetpack\n",
+                       ps->groundEntityNum == ENTITYNUM_NONE ? "P" : va( "Jump off the ground by pressing %s, then p",
+                                                                         CG_KeyNameForCommand( "+moveup" ) ),
+                       key_string_1,
+                       key_string_2) );
       }
     }
+
+    if( ps->stats[ STAT_FUEL ] < JETPACK_FUEL_MIN_START &&
+             !BG_UpgradeIsActive( UP_JETPACK, ps->stats ) )
+    {
+             Q_strcat( text, MAX_TUTORIAL_TEXT,
+                       va( "You don't have enough jet fuel to activate your jetpack. Find an Armoury to buy jet fuel, or wait for your jet fuel to regenerate\n" ) );
+    }
+    else if( ps->stats[ STAT_FUEL ] <= JETPACK_FUEL_LOW &&
+             ps->stats[ STAT_FUEL ] > 0 )
+    {
+      Q_strcat( text, MAX_TUTORIAL_TEXT,
+                va( "You are running low on jet fuel. Find an Armoury to buy jet fuel, or wait for your jet fuel to regenerate while your jetpack is deactivated\n" ) );
+    }
+    else if( ps->stats[ STAT_FUEL ] <= 0 )
+    {
+      Q_strcat( text, MAX_TUTORIAL_TEXT,
+                va( "You are out of jet fuel. You can no longer fly. Find an Armoury to buy jet fuel, or wait for your jet fuel to regenerate\n" ) );
+    }
+  }
 }
 
 /*
@@ -685,7 +804,7 @@ static void CG_SpectatorText( char *text, playerState_t *ps )
             CG_KeyNameForCommand( "ready" ) ) );
     }
 
-    if( ps->pm_flags & PMF_QUEUED )
+    if( ps->persistant[ PERS_STATE ] & PS_QUEUED )
       Q_strcat( text, MAX_TUTORIAL_TEXT,
                 va( "Press %s to leave spawn queue\n",
                     CG_KeyNameForCommand( "+attack" ) ) );

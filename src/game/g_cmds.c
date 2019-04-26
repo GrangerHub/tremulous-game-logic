@@ -2932,8 +2932,15 @@ void Cmd_ActivateItem_f( gentity_t *ent )
   upgrade = BG_UpgradeByName( s )->number;
   weapon = BG_WeaponByName( s )->number;
 
-  if( upgrade != UP_NONE && BG_InventoryContainsUpgrade( upgrade, ent->client->ps.stats ) )
-    BG_ActivateUpgrade( upgrade, ent->client->ps.stats );
+  if(
+    upgrade != UP_NONE &&
+    BG_InventoryContainsUpgrade( upgrade, ent->client->ps.stats ) ) {
+      if(BG_Upgrade(upgrade)->usable) {
+        BG_ActivateUpgrade( upgrade, ent->client->ps.stats );
+      } else {
+        SV_GameSendServerCommand( ent-g_entities, va( "print \"The %s can't be activated this way\n\"", s ) );
+      }
+    }
   else if( weapon != WP_NONE &&
            BG_InventoryContainsWeapon( weapon, ent->client->ps.stats ) )
   {
@@ -2961,8 +2968,13 @@ void Cmd_DeActivateItem_f( gentity_t *ent )
   Cmd_ArgvBuffer( 1, s, sizeof( s ) );
   upgrade = BG_UpgradeByName( s )->number;
 
-  if( BG_InventoryContainsUpgrade( upgrade, ent->client->ps.stats ) )
-    BG_DeactivateUpgrade( upgrade, ent->client->ps.stats );
+  if( BG_InventoryContainsUpgrade( upgrade, ent->client->ps.stats ) ) {
+    if(BG_Upgrade(upgrade)->usable) {
+      BG_DeactivateUpgrade( upgrade, ent->client->ps.stats );
+    } else {
+      SV_GameSendServerCommand( ent-g_entities, va( "print \"The %s can't be deactivated this way\n\"", s ) );
+    }
+  }
   else
     SV_GameSendServerCommand( ent-g_entities, va( "print \"You don't have the %s\n\"", s ) );
 }
@@ -2999,6 +3011,11 @@ void Cmd_ToggleItem_f( gentity_t *ent )
   }
   else if( BG_InventoryContainsUpgrade( upgrade, ent->client->ps.stats ) )
   {
+    if(!BG_Upgrade(upgrade)->usable) {
+      SV_GameSendServerCommand( ent-g_entities, va( "print \"The %s can't be toggled\n\"", s ) );
+      return;
+    }
+
     if( BG_UpgradeIsActive( upgrade, ent->client->ps.stats ) )
       BG_DeactivateUpgrade( upgrade, ent->client->ps.stats );
     else
@@ -3017,9 +3034,17 @@ static sellErr_t G_CanSellUpgrade(
   gentity_t *ent, const upgrade_t upgrade, int *value, qboolean force) {
   if(force || (IS_WARMUP && BG_Upgrade(upgrade)->warmupFree)) {
     *value = 0;
-  }
-  else {
+  } else {
+    const int usedFuel = JETPACK_FUEL_FULL -
+                            ent->client->ps.stats[ STAT_FUEL ];
+
+    
     *value = BG_Upgrade(upgrade)->price;
+
+    if(upgrade == UP_JETPACK && usedFuel) {
+      *value -= ( usedFuel * JETPACK_FULL_FUEL_PRICE ) /
+                             JETPACK_FUEL_FULL;
+    }
   }
 
   //are we /allowed/ to sell this?
@@ -3602,33 +3627,70 @@ buyErr_t G_CanBuy( gentity_t *ent, const char *itemName, int *price,
         return ERR_BUY_NOT_ALLOWED;
     }
 
-    if( upgrade == UP_AMMO )
+    if( upgrade == UP_JETFUEL )
     {
-      int rounds, clips, ammoPrice;
+      if(!BG_InventoryContainsUpgrade( UP_JETPACK, ent->client->ps.stats )) {
+        return ERR_BUY_NO_JET;
+      }
 
-      //bursts must complete
-      if( ent->client->pmext.burstRoundsToFire[ 2 ] ||
-          ent->client->pmext.burstRoundsToFire[ 1 ] ||
-          ent->client->pmext.burstRoundsToFire[ 0 ] )
-        return ERR_BUY_BURST_UNFINISHED;
+      // refuel the jet pack
+      if( ent->client->ps.stats[ STAT_FUEL ] < JETPACK_FUEL_FULL )
+      {
+        const int usedFuel = JETPACK_FUEL_FULL -
+                                ent->client->ps.stats[ STAT_FUEL ];
+        const int costToFull = ( usedFuel * JETPACK_FULL_FUEL_PRICE ) /
+                               JETPACK_FUEL_FULL;
+        const int affordableFuel = ( ent->client->pers.credit * JETPACK_FUEL_FULL ) /
+                                   JETPACK_FULL_FUEL_PRICE;
 
-      if( ent->client->ps.weapon == WP_LIGHTNING &&
-      ( ent->client->ps.misc[ MISC_MISC ] > LIGHTNING_BOLT_CHARGE_TIME_MIN ||
-        ( ent->client->ps.stats[ STAT_STATE ] & SS_CHARGING ) ) )
-        return ERR_BUY_CHARGING_LIGHTNING;
-
-      if( !G_CanGiveClientMaxAmmo( ent, *energyOnly,
-                                   &rounds, &clips, &ammoPrice ) )
-        return ERR_BUY_NO_MORE_AMMO;
+        if( (IS_WARMUP && BG_Upgrade(UP_JETFUEL)->warmupFree) || force )
+        {
+          *price = 0;
+        }
+        else if( costToFull <= ent->client->pers.credit )
+        {
+          *price = costToFull;
+        }
+        else if( affordableFuel > 0 )
+        {
+          *price = (short)ent->client->pers.credit;
+        }
+        else
+          return ERR_BUY_NO_FUNDS;
+      } else {
+        return ERR_BUY_FUEL_FULL;
+      }
     }
     else
     {
-      if( upgrade == UP_BATTLESUIT )
+      if( upgrade == UP_AMMO )
       {
-        vec3_t newOrigin;
+        int rounds, clips, ammoPrice;
 
-        if( !G_RoomForClassChange( ent, PCL_HUMAN_BSUIT, newOrigin ) )
-          return ERR_BUY_NOROOMBSUITON;
+        //bursts must complete
+        if( ent->client->pmext.burstRoundsToFire[ 2 ] ||
+            ent->client->pmext.burstRoundsToFire[ 1 ] ||
+            ent->client->pmext.burstRoundsToFire[ 0 ] )
+          return ERR_BUY_BURST_UNFINISHED;
+
+        if( ent->client->ps.weapon == WP_LIGHTNING &&
+        ( ent->client->ps.misc[ MISC_MISC ] > LIGHTNING_BOLT_CHARGE_TIME_MIN ||
+          ( ent->client->ps.stats[ STAT_STATE ] & SS_CHARGING ) ) )
+          return ERR_BUY_CHARGING_LIGHTNING;
+
+        if( !G_CanGiveClientMaxAmmo( ent, *energyOnly,
+                                     &rounds, &clips, &ammoPrice ) )
+          return ERR_BUY_NO_MORE_AMMO;
+      }
+      else
+      {
+        if( upgrade == UP_BATTLESUIT )
+        {
+          vec3_t newOrigin;
+
+          if( !G_RoomForClassChange( ent, PCL_HUMAN_BSUIT, newOrigin ) )
+            return ERR_BUY_NOROOMBSUITON;
+        }
       }
     }
   }
@@ -3703,6 +3765,12 @@ static void G_BuyErrHandling( gentity_t *ent, const buyErr_t error )
     case ERR_BUY_NO_MORE_AMMO:
       break;
 
+    case ERR_BUY_NO_JET:
+      break;
+
+    case ERR_BUY_FUEL_FULL:
+      break;
+
     case ERR_BUY_NOROOMBSUITON:
       G_TriggerMenu( ent->client->ps.clientNum, MN_H_NOROOMBSUITON );
       break;
@@ -3756,33 +3824,52 @@ void G_GiveItem( gentity_t *ent, const char *itemName, const int price,
   }
   else if( upgrade != UP_NONE )
   {
-    if( upgrade == UP_AMMO )
+    if( upgrade == UP_JETFUEL )
     {
-      G_GiveClientMaxAmmo( ent, energyOnly );
-      if( !energyOnly && BG_InventoryContainsUpgrade( UP_JETPACK, ent->client->ps.stats ) &&
-          ent->client->ps.stats[ STAT_FUEL ] < JETPACK_FUEL_FULL )
+      const int usedFuel = JETPACK_FUEL_FULL -
+                              ent->client->ps.stats[ STAT_FUEL ];
+      const int costToFull = ( usedFuel * JETPACK_FULL_FUEL_PRICE ) /
+                             JETPACK_FUEL_FULL;
+      const int affordableFuel = ( ent->client->pers.credit * JETPACK_FUEL_FULL ) /
+                                 JETPACK_FULL_FUEL_PRICE;
+
+      if(
+        (costToFull <= ent->client->pers.credit) ||
+        (IS_WARMUP && BG_Upgrade(UP_JETFUEL)->warmupFree) || force )
       {
-        G_AddEvent( ent, EV_JETPACK_REFUEL, 0) ;
+        G_AddEvent( ent, EV_JETPACK_REFUEL, 0);
         ent->client->ps.stats[ STAT_FUEL ] = JETPACK_FUEL_FULL;
       }
-    }
+      else
+      {
+        G_AddEvent( ent, EV_JETPACK_REFUEL, 0);
+        ent->client->ps.stats[ STAT_FUEL ] += affordableFuel;
+      }
+    } 
     else
     {
-      if( upgrade == UP_BATTLESUIT )
+      if( upgrade == UP_AMMO )
       {
-        vec3_t newOrigin;
-
-        G_RoomForClassChange( ent, PCL_HUMAN_BSUIT, newOrigin );
-        VectorCopy( newOrigin, ent->client->ps.origin );
-        ent->client->ps.stats[ STAT_CLASS ] = PCL_HUMAN_BSUIT;
-        ent->client->pers.classSelection = PCL_HUMAN_BSUIT;
-        ent->client->ps.eFlags ^= EF_TELEPORT_BIT;
+        G_GiveClientMaxAmmo( ent, energyOnly );
       }
-      else if( upgrade == UP_JETPACK )
-       ent->client->ps.stats[ STAT_FUEL ] = JETPACK_FUEL_FULL;
+      else
+      {
+        if( upgrade == UP_BATTLESUIT )
+        {
+          vec3_t newOrigin;
 
-      //add to inventory
-      BG_AddUpgradeToInventory( upgrade, ent->client->ps.stats );
+          G_RoomForClassChange( ent, PCL_HUMAN_BSUIT, newOrigin );
+          VectorCopy( newOrigin, ent->client->ps.origin );
+          ent->client->ps.stats[ STAT_CLASS ] = PCL_HUMAN_BSUIT;
+          ent->client->pers.classSelection = PCL_HUMAN_BSUIT;
+          ent->client->ps.eFlags ^= EF_TELEPORT_BIT;
+        }
+        else if( upgrade == UP_JETPACK )
+         ent->client->ps.stats[ STAT_FUEL ] = JETPACK_FUEL_FULL;
+
+        //add to inventory
+        BG_AddUpgradeToInventory( upgrade, ent->client->ps.stats );
+      }
     }
 
     if( upgrade == UP_BATTPACK )

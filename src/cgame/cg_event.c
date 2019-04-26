@@ -681,6 +681,10 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       }
 
       break;
+    case EV_JETJUMP:
+      cent->jetPackJumpTime = cg.time; //for visual effects
+      trap_S_StartSound( NULL, es->number, CHAN_VOICE, cgs.media.jetpackJumpSound );
+      break;
 
     case EV_JETPACK_DEACTIVATE:
       switch( cent->jetPackState )

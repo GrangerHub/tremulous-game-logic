@@ -1320,6 +1320,7 @@ typedef struct
   sfxHandle_t jetpackDescendDeactivateSound;
   sfxHandle_t jetpackIdleDeactivateSound;
   sfxHandle_t jetpackAscendDeactivateSound;
+  sfxHandle_t jetpackJumpSound;
   sfxHandle_t jetpackLowFuelSound;
   sfxHandle_t jetpackRefuelSound;
 
@@ -1713,6 +1714,7 @@ extern  vmCvar_t    ui_dialog;
 extern  vmCvar_t    ui_voteActive;
 extern  vmCvar_t    ui_alienTeamVoteActive;
 extern  vmCvar_t    ui_humanTeamVoteActive;
+extern  vmCvar_t    ui_fuel;
 
 extern  vmCvar_t    cg_debugRandom;
 

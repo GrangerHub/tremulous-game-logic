@@ -994,7 +994,9 @@ static void CG_DrawJetpackIcon( rectDef_t *rect, vec4_t color,
 
   if( cg.predictedPlayerState.stats[ STAT_FUEL ] <= JETPACK_FUEL_LOW )
   {
-    if( cg.predictedPlayerState.stats[ STAT_FUEL ] > 0 )
+    if( ( cg.predictedPlayerState.stats[ STAT_FUEL ] > 0 &&
+          BG_UpgradeIsActive( UP_JETPACK, cg.predictedPlayerState.stats ) ) ||
+        cg.predictedPlayerState.stats[ STAT_FUEL ] > JETPACK_FUEL_MIN_START )
     {
       cg.jetpackIconAlert += cg.frametime / 500.0f;
       if( color[0] + cg.jetpackIconAlert > 1.0f )
@@ -1044,7 +1046,9 @@ static void CG_DrawJetpackFuel( rectDef_t *rect, vec4_t color )
 
   if( cg.predictedPlayerState.stats[ STAT_FUEL ] <= JETPACK_FUEL_LOW )
   {
-    if( cg.predictedPlayerState.stats[ STAT_FUEL ] > 0 )
+    if( ( cg.predictedPlayerState.stats[ STAT_FUEL ] > 0 &&
+          BG_UpgradeIsActive( UP_JETPACK, cg.predictedPlayerState.stats ) ) ||
+        cg.predictedPlayerState.stats[ STAT_FUEL ] > JETPACK_FUEL_MIN_START )
     {
       color[0] += cg.jetpackIconAlert;
       if( color[0] > 1.0f )
@@ -3986,7 +3990,7 @@ static qboolean CG_DrawQueue( void )
   int         position;
   char        *ordinal, buffer[ MAX_STRING_CHARS ];
 
-  if( !( cg.snap->ps.pm_flags & PMF_QUEUED ) )
+  if( !( cg.snap->ps.persistant[ PERS_STATE ] & PS_QUEUED ) )
     return qfalse;
 
   color[ 0 ] = 1;

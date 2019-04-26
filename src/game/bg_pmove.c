@@ -249,6 +249,33 @@ static void PM_ForceLegsAnim( int anim )
 
 /*
 ==================
+PM_Gravity
+
+Sreturns the current gravity of the player
+==================
+*/
+int PM_Gravity( playerState_t *ps ) {
+  if(ps->pm_flags & PMF_FEATHER_FALL) {
+    if(
+      BG_InventoryContainsUpgrade(UP_JETPACK, ps->stats) &&
+      !BG_UpgradeIsActive(UP_JETPACK, ps->stats) &&
+      ps->groundEntityNum == ENTITYNUM_NONE &&
+      ps->persistant[PERS_JUMPTIME] < JETPACK_DEACTIVATION_FALL_TIME) {
+      return ps->gravity *
+      (((float)ps->persistant[PERS_JUMPTIME]) /
+        ((float)JETPACK_DEACTIVATION_FALL_TIME));
+    } else {
+      ps->pm_flags &= ~PMF_FEATHER_FALL;
+      return ps->gravity;
+    }
+  } else {
+    return ps->gravity;
+  }
+}
+
+
+/*
+==================
 PM_ClipVelocity
 
 Slide off of the impacting surface
@@ -274,6 +301,7 @@ static void PM_Friction( void )
   float   *vel;
   float   speed, newspeed, control;
   float   drop;
+  qboolean groundFriction = qfalse;
 
   vel = pm->ps->velocity;
 
@@ -302,6 +330,7 @@ static void PM_Friction( void )
 
         control = speed < stopSpeed ? stopSpeed : speed;
         drop += control * friction * pml.frametime;
+        groundFriction = qtrue;
       }
     }
   }
@@ -326,7 +355,12 @@ static void PM_Friction( void )
 
   vel[ 0 ] = vel[ 0 ] * newspeed;
   vel[ 1 ] = vel[ 1 ] * newspeed;
-  vel[ 2 ] = vel[ 2 ] * newspeed;
+  // Don't reduce upward velocity while using a jetpack
+  if( !( pm->ps->pm_type == PM_JETPACK &&
+         vel[2] > 0 &&
+         !groundFriction &&
+         !pm->waterlevel ) )
+    vel[ 2 ] = vel[ 2 ] * newspeed;
 }
 
 
@@ -1496,12 +1530,14 @@ static qboolean PM_CheckJump( vec3_t customNormal )
   }
 
   if( BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_STAMINA) &&
-     (pm->ps->stats[STAT_STAMINA] < STAMINA_SLOW_LEVEL + STAMINA_JUMP_TAKE) )
- {
-   // disable bunny hop
-   pm->ps->pm_flags &= ~PMF_ALL_HOP_FLAGS;
-   return qfalse;
- }
+      ( pm->ps->stats[ STAT_STAMINA ] < STAMINA_SLOW_LEVEL + STAMINA_JUMP_TAKE ) &&
+      ( !BG_InventoryContainsUpgrade( UP_JETPACK, pm->ps->stats ) ||
+        pm->ps->stats[ STAT_FUEL ] < JETPACK_ACT_BOOST_FUEL_USE ) )
+  {
+    // disable bunny hop
+    pm->ps->pm_flags &= ~PMF_ALL_HOP_FLAGS;
+    return qfalse;
+  }
 
 
   //no bunny hopping off a dodge
@@ -1870,7 +1906,7 @@ static void PM_WaterJumpMove( void )
 
   PM_StepSlideMove( qtrue, qfalse );
 
-  pm->ps->velocity[ 2 ] -= pm->ps->gravity * pml.frametime;
+  pm->ps->velocity[ 2 ] -= PM_Gravity(pm->ps) * pml.frametime;
   if( pm->ps->velocity[ 2 ] < 0 )
   {
     // cancel as soon as we are falling down again
@@ -1972,17 +2008,34 @@ static void PM_JetPackMove( void )
   for( i = 0; i < 2; i++ )
     wishvel[ i ] = scale * pml.forward[ i ] * pm->cmd.forwardmove + scale * pml.right[ i ] * pm->cmd.rightmove;
 
+  wishvel[2] = 0.0f;
+
   if( pm->cmd.upmove > 0.0f )
-    wishvel[ 2 ] = JETPACK_FLOAT_SPEED;
+  {
+    vec3_t thrustDir = { 0.0f, 0.0f, 1.0f };
+
+    if( pm->ps->viewangles[ PITCH ] > 0.0f )
+      VectorCopy( pml.up, thrustDir ) ;
+
+    // give an initial vertical boost when first activating the jet
+    if( pm->ps->persistant[PERS_JUMPTIME] <= JETPACK_ACT_BOOST_TIME )
+      VectorMA( wishvel, JETPACK_ACT_BOOST_SPEED, thrustDir, wishvel );
+    else
+      VectorMA( wishvel, JETPACK_FLOAT_SPEED, thrustDir, wishvel );
+  }
   else if( pm->cmd.upmove < 0.0f )
     wishvel[ 2 ] = -JETPACK_SINK_SPEED;
   else
     wishvel[ 2 ] = 0.0f;
 
+  // apply the appropirate amount of gravity if the upward velocity is greater
+  // than the max upward jet velocity.
+  if( pm->ps->velocity[ 2 ] > wishvel[ 2 ] )
+    pm->ps->velocity[ 2 ] -= MIN( PM_Gravity(pm->ps) * pml.frametime, pm->ps->velocity[ 2 ] - wishvel[ 2 ] );
+
   VectorCopy( wishvel, wishdir );
   wishspeed = VectorNormalize( wishdir );
 
-  PM_WallCoast( wishdir, WALLCOAST_3D );
   PM_Accelerate( wishdir, wishspeed, pm_flyaccelerate );
 
   PM_StepSlideMove( qfalse, qfalse );
@@ -2147,7 +2200,7 @@ static void PM_AirMove( void )
     // Check if we haven't moved down despite the gravity pulling on us. If this
     // is the case, we're probably stuck between two steep planes, allow jumping
     // as if on a level ground.
-    if( abs( pm->ps->gravity ) > 0 &&
+    if( abs( PM_Gravity(pm->ps) ) > 0 &&
         fabs( pm->ps->origin[ 2 ] - previousZ ) < 0.05f )
       PM_CheckJump( upNormal );
   }
@@ -2250,7 +2303,7 @@ static void PM_ClimbMove( void )
   PM_Accelerate( wishdir, wishspeed, accelerate );
 
   if( ( pml.groundTrace.surfaceFlags & SURF_SLICK ) || pm->ps->pm_flags & PMF_TIME_KNOCKBACK )
-    pm->ps->velocity[ 2 ] -= pm->ps->gravity * pml.frametime;
+    pm->ps->velocity[ 2 ] -= PM_Gravity(pm->ps) * pml.frametime;
 
   vel = VectorLength( pm->ps->velocity );
 
@@ -2371,7 +2424,7 @@ static void PM_WalkMove( void )
   //Com_Printf("velocity1 = %1.1f\n", VectorLength(pm->ps->velocity));
 
   if( ( pml.groundTrace.surfaceFlags & SURF_SLICK ) || pm->ps->pm_flags & PMF_TIME_KNOCKBACK )
-    pm->ps->velocity[ 2 ] -= pm->ps->gravity * pml.frametime;
+    pm->ps->velocity[ 2 ] -= PM_Gravity(pm->ps) * pml.frametime;
   else
   {
     // don't reset the z velocity for slopes
@@ -2598,7 +2651,17 @@ static void PM_CheckLadder( void )
   if( ( bboxTouchTrace.surfaceFlags & SURF_LADDER ) ||
         ( waterClimb && !(bboxTouchTrace.surfaceFlags & (SURF_SLICK|SURF_SKY)) &&
           ( bboxTouchTrace.plane.normal[ 2 ] < MIN_WALK_NORMAL ) ) )
+  {
     pml.ladder = qtrue;
+
+    if( BG_InventoryContainsUpgrade( UP_JETPACK, pm->ps->stats ) &&
+        BG_UpgradeIsActive( UP_JETPACK, pm->ps->stats ) )
+    {
+      BG_DeactivateUpgrade( UP_JETPACK, pm->ps->stats );
+      pm->ps->pm_flags &= ~PMF_FEATHER_FALL;
+      pm->ps->pm_type = PM_NORMAL;
+    }
+  }
   else
     pml.ladder = qfalse;
 }
@@ -2757,7 +2820,7 @@ static void PM_CrashLand( void )
   // calculate the exact velocity on landing
   dist = pm->ps->origin[ 2 ] - pml.previous_origin[ 2 ];
   vel = pml.previous_velocity[ 2 ];
-  acc = -pm->ps->gravity;
+  acc = -PM_Gravity(pm->ps);
 
   a = acc / 2;
   b = vel;
@@ -3411,6 +3474,8 @@ static void PM_GroundTrace( void )
     pm->ps->pm_flags &= ~PMF_JUMPING;
     pm->ps->pm_flags |= PMF_HOPPED;
   }
+
+  pm->ps->pm_flags &= ~PMF_FEATHER_FALL;
 
   pm->ps->groundEntityNum = trace.entityNum;
 
@@ -5264,6 +5329,19 @@ void PmoveSingle( pmove_t *pmove )
     }
 
     pm->ps->pm_flags &= ~PMF_JUMP_HELD;
+
+    // deactivate the jet
+    if( BG_InventoryContainsUpgrade( UP_JETPACK, pm->ps->stats ) &&
+        BG_UpgradeIsActive( UP_JETPACK, pm->ps->stats ) &&
+        !( pm->cmd.buttons & BUTTON_WALKING ) )
+    {
+      BG_DeactivateUpgrade( UP_JETPACK, pm->ps->stats );
+      if(pm->ps->groundEntityNum == ENTITYNUM_NONE) {
+        pm->ps->persistant[PERS_JUMPTIME] = 0;
+        pm->ps->pm_flags |= PMF_FEATHER_FALL;
+      }
+      pm->ps->pm_type = PM_NORMAL;
+    }
   }
 
   // decide if backpedaling animations should be used
@@ -5313,6 +5391,30 @@ void PmoveSingle( pmove_t *pmove )
   pml.previous_waterlevel = pmove->waterlevel;
 
   PM_CheckLadder( );
+
+  // jet activation
+  if( (pm->cmd.upmove >= 10 || ( pm->cmd.buttons & BUTTON_WALKING )) &&
+      BG_InventoryContainsUpgrade( UP_JETPACK, pm->ps->stats ) &&
+      !BG_UpgradeIsActive( UP_JETPACK, pm->ps->stats ) &&
+      ( pm->ps->groundEntityNum == ENTITYNUM_NONE ||
+        pm->ps->stats[ STAT_STATE ] & SS_GRABBED ) &&
+      !(pm->ps->pm_flags & PMF_JUMP_HELD) &&
+      pm->ps->stats[ STAT_FUEL ] > JETPACK_FUEL_MIN_START &&
+      ( pm->ps->pm_type == PM_NORMAL || 
+        ( pm->ps->pm_type == PM_GRABBED && 
+          pm->ps->stats[ STAT_STATE ] & SS_GRABBED ) ) &&
+      !pml.ladder )
+  {
+    BG_ActivateUpgrade( UP_JETPACK, pm->ps->stats );
+    pm->ps->pm_type = PM_JETPACK;
+
+    if( pm->ps->stats[ STAT_FUEL ] >= JETPACK_ACT_BOOST_FUEL_USE )
+    {
+      // give an upwards boost when activating the jet
+      pm->ps->persistant[PERS_JUMPTIME] = 0;
+      PM_AddEvent( EV_JETJUMP );
+    }
+  }
 
   // set groundentity
   PM_GroundTrace( );
