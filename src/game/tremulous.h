@@ -137,18 +137,18 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL3_POUNCE_UPG_RANGE     LEVEL3_POUNCE_RANGE + 3.0f
 #define LEVEL3_POUNCE_WIDTH         16.0f
 #define LEVEL3_POUNCE_TIME          2400      // msec for full Dragoon pounce
-#define LEVEL3_POUNCE_TIME_UPG      2100      // msec for full Adv. Dragoon pounce
+#define LEVEL3_POUNCE_TIME_UPG      2200      // msec for full Adv. Dragoon pounce
 #define LEVEL3_CHARGE_STAMINA_MAX   LEVEL3_POUNCE_TIME
 #define LEVEL3_CHARGE_STAMINA_MAX_UPG  LEVEL3_POUNCE_TIME_UPG
-#define LEVEL3_CHARGE_STAMINA_MIN   850
-#define LEVEL3_CHARGE_STAMINA_MIN_UPG 700
+#define LEVEL3_CHARGE_STAMINA_MIN   700
+#define LEVEL3_CHARGE_STAMINA_MIN_UPG 750
 #define LEVEL3_CHARGE_STAMINA_USE_RATE (0.45f)
 #define LEVEL3_CHARGE_STAMINA_RESTORE_RATE (0.075f)
 #define LEVEL3_POUNCE_TIME_MIN      350      // msec before which pounce cancels
-#define LEVEL3_POUNCE_REPEAT        700      // msec before a new pounce starts
+#define LEVEL3_POUNCE_REPEAT        500      // msec before a new pounce starts
 #define LEVEL3_POUNCE_SPEED_MOD     1.00f    // walking speed modifier for pounce charging
-#define LEVEL3_POUNCE_JUMP_MAG      1725     // Dragoon pounce jump power
-#define LEVEL3_POUNCE_JUMP_MAG_UPG  2100     // Adv. Dragoon pounce jump power
+#define LEVEL3_POUNCE_JUMP_MAG      2100     // Dragoon pounce jump power
+#define LEVEL3_POUNCE_JUMP_MAG_UPG  2200     // Adv. Dragoon pounce jump power
 #define LEVEL3_BOUNCEBALL_DMG       AWDM(110000)
 #define LEVEL3_BOUNCEBALL_REPEAT    1000
 #define LEVEL3_BOUNCEBALL_SPEED     1000.0f

@@ -1305,6 +1305,7 @@ static qboolean PM_CheckPounce( void )
       pml.groundPlane = qfalse;
       pml.walking = qfalse;
       pm->ps->groundEntityNum = ENTITYNUM_NONE;
+      pm->ps->persistant[PERS_JUMPTIME] = 0;
       pm->ps->pm_flags |= PMF_CHARGE;
       if( pm->ps->weapon == WP_ALEVEL0 )
         jumpMagnitude = pm->ps->misc[ MISC_MISC3 ] *
@@ -4606,7 +4607,10 @@ static void PM_Weapon( void )
   }
 
   //restore charge stamina
-  if(BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_CHARGE_STAMINA))  {
+  if(
+    BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_CHARGE_STAMINA) &&
+    !(pm->ps->pm_flags & PMF_CHARGE) &&
+    (pm->ps->stats[STAT_WEAPONTIME2] <= 0))  {
     if( pm->ps->misc[MISC_CHARGE_STAMINA] < 0) {
       pm->ps->misc[MISC_CHARGE_STAMINA] = 0;
     }
