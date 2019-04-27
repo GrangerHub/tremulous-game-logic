@@ -7295,6 +7295,7 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
     qboolean validAngle;
     float heightOffset = 0.0f;
     qboolean preciseBuild = ps->stats[ STAT_STATE ] & SS_PRECISE_BUILD;
+    qboolean onBuilderPlane = qfalse;
 
     if( !preciseBuild ) {
       buildDist *= 2.0f;
@@ -7307,6 +7308,7 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
     {
       {//Do a small bbox trace to find the true targetOrigin.
         vec3_t mins2, maxs2;
+        vec3_t builderNormal, targertNormal;
 
         maxs2[ 0 ] = maxs2[ 1 ] = 14;
         maxs2[ 2 ] = ps->stats[ STAT_TEAM ] == TEAM_HUMANS ? 7 :maxs2[ 0 ];
@@ -7321,6 +7323,46 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
           return;
         }
         VectorCopy( tr->endpos, targetOrigin );
+
+        //check if the targetOrigin and builder are on the same plane
+        VectorCopy(ps->grapplePoint, builderNormal);
+        VectorNormalize(builderNormal);
+        VectorCopy(tr->plane.normal, targertNormal);
+        if(
+          ps->groundEntityNum != ENTITYNUM_NONE &&
+          VectorCompare(builderNormal, targertNormal)) {
+          float builderDia;
+          vec3_t builderBottom, builderMins, builderMaxs;
+          trace_t tr2;
+
+          //trace the bottom of the builder
+          BG_ClassBoundingBox(
+            ps->stats[ STAT_CLASS ], builderMins, builderMaxs, NULL, NULL, NULL);
+          builderDia = RadiusFromBounds(builderMins, builderMaxs);
+          builderDia *= 2.0f;
+          VectorMA(viewOrigin, -builderDia, builderNormal, builderBottom);
+          (*trace)( &tr2, viewOrigin, mins2, maxs2, builderBottom, ps->clientNum, MASK_PLAYERSOLID );
+          VectorCopy(tr2.endpos, builderBottom);
+          if(tr2.fraction < 1.0f) {
+            //offset from the surface
+            VectorMA(builderBottom, 0.5f, builderNormal, builderBottom);
+          }
+
+          if(!tr2.startsolid && !tr2.allsolid) {
+            vec3_t end;
+
+            //check that there is a clear trace from the builderBottom to the target
+            VectorMA(targetOrigin, 0.5, targertNormal, end);
+            (*trace)( &tr2, builderBottom, mins2, maxs2, end, ps->clientNum, MASK_PLAYERSOLID );
+            if(!tr2.startsolid && !tr2.allsolid && tr2.fraction >= 1.0f) {
+              //undo the offset
+              VectorMA(builderBottom, -0.5f, builderNormal, builderBottom);
+              //use the builderBottom
+              VectorCopy(builderBottom, viewOrigin);
+              onBuilderPlane = qtrue;
+            }
+          }
+        }
       }
 
       {//Center height and find the smallest axis.  This assumes that all x and y axis are the same magnitude.
@@ -7330,7 +7372,7 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
         mins[ 2 ] += heightOffset;
       }
 
-      if( ( minNormal > 0.0f && !invertNormal ) || preciseBuild ) {//Raise origins by 1+maxs[2].
+      if( ( minNormal > 0.0f && !invertNormal ) || preciseBuild || onBuilderPlane ) {//Raise origins by 1+maxs[2].
         VectorMA( viewOrigin, maxs[ 2 ] + 1.0f, playerNormal, viewOrigin );
         VectorMA( targetOrigin, maxs[ 2 ] + 1.0f, playerNormal, targetOrigin );
       }
