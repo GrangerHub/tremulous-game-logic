@@ -1288,6 +1288,10 @@ static float CG_ChargeProgress(qboolean chargeStamina, qboolean evolveCoolDown) 
         cg.predictedPlayerState.misc[MISC_CHARGE_STAMINA] *
         BG_Class(cg.snap->ps.stats[STAT_CLASS])->chargeStaminaRestoreRate;
     }
+
+    if(cg.predictedPlayerState.pm_flags & PMF_LAUNCHING) {
+      min = 0.0f;
+    }
   }
 
   if( max - min <= 0.0f )
@@ -1450,9 +1454,15 @@ static void CG_DrawPlayerChargeBar(
 
   *meterValue = progress;
 
-  color[ 0 ] = ref_color[ 0 ];
-  color[ 1 ] = ref_color[ 1 ];
-  color[ 2 ] = ref_color[ 2 ];
+  if(!evolveCoolDown && (cg.predictedPlayerState.pm_flags & PMF_LAUNCHING)) {
+    color[ 0 ] = 0.0f;
+    color[ 1 ] = 1.0f;
+    color[ 2 ] = 0.0f;
+  } else {
+    color[ 0 ] = ref_color[ 0 ];
+    color[ 1 ] = ref_color[ 1 ];
+    color[ 2 ] = ref_color[ 2 ];
+  }
   color[ 3 ] = ref_color[ 3 ] * *meterAlpha;
 
   // Flash red for Lucifer Cannon warning
