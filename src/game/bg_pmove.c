@@ -1160,7 +1160,7 @@ static float PM_CmdScale( usercmd_t *cmd, qboolean zFlight )
       ( pm->ps->eFlags & EF_EVOLVING ) )
     modifier *= BG_EvolveScale( pm->ps );
 
-  if( pm->ps->pm_type == PM_GRABBED )
+  if( pm->ps->pm_type == PM_GRABBED || (pm->ps->pm_flags & PMF_LAUNCHING) )
     modifier = 0.0f;
 
   max = abs( cmd->forwardmove );
@@ -1268,9 +1268,11 @@ static qboolean PM_CheckPounce( void )
 
   //in process of launching a pounce
   if(pm->ps->pm_flags & PMF_LAUNCHING) {
-    int delta = 4.5 * pml.msec;
+    int delta = 5.0f * pml.msec;
 
-    if(pm->ps->misc[ MISC_MISC ] < delta) {
+    if(
+      pm->ps->misc[ MISC_MISC ] < delta ||
+      pm->ps->groundEntityNum == ENTITYNUM_NONE) {
       delta = pm->ps->misc[ MISC_MISC ];
     }
 
@@ -1298,8 +1300,7 @@ static qboolean PM_CheckPounce( void )
     }
 
     if(
-      pm->ps->misc[ MISC_MISC ] <= 0 ||
-      pm->ps->groundEntityNum == ENTITYNUM_NONE) {
+      pm->ps->misc[ MISC_MISC ] <= 0) {
       //lift-off
       // Give the player forward velocity and simulate a jump
       pml.groundPlane = qfalse;
@@ -3710,6 +3711,9 @@ static void PM_GroundClimbTrace( void )
 
     //we get very bizarre effects if we don't do this :0
     VectorCopy( refNormal, pm->ps->grapplePoint );
+
+    //adjust ROLL
+    pm->ps->delta_angles[ ROLL ] -= ANGLE2SHORT( pm->ps->viewangles[ ROLL ] );
     return;
   }
 
@@ -4101,7 +4105,7 @@ static void PM_Footsteps( void )
   }
 
   // if not trying to move
-  if( !pm->cmd.forwardmove && !pm->cmd.rightmove )
+  if( (!pm->cmd.forwardmove && !pm->cmd.rightmove) || (pm->ps->pm_flags & PMF_LAUNCHING) )
   {
     if( pm->xyspeed < 5 )
     {
@@ -5871,6 +5875,34 @@ void PM_UpdateViewAngles( playerState_t *ps, const usercmd_t *cmd )
   }
 
   PM_CalculateAngularVelocity( ps, cmd );
+
+  //lock angles while launching a pounce
+  if(pm->ps->pm_flags & PMF_LAUNCHING) {
+    for(i = 0; i < 3; i++) {
+      float diff = AngleSubtract( tempang[i], ps->viewangles[i] );
+
+      while( diff > 180.0f ) {
+        diff -= 360.0f;
+      }
+      while(diff < -180.0f) {
+        diff += 360.0f;
+      }
+
+      if(diff < -90.0f) {
+        ps->delta_angles[ i ] += ANGLE2SHORT( fabs( diff ) - 90.0f );
+      } else if( diff > 90.0f ) {
+        ps->delta_angles[ i ] -= ANGLE2SHORT( fabs( diff ) - 90.0f );
+      }
+
+      if( diff < 0.0f ) {
+        ps->delta_angles[ i ] += ANGLE2SHORT( fabs( diff ) );
+      } else if( diff > 0.0f ) {
+        ps->delta_angles[ i ] -= ANGLE2SHORT( fabs( diff ) );
+      }
+    }
+
+    return;
+  }
 
   //actually set the viewangles
   for( i = 0; i < 3; i++ )

@@ -66,7 +66,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL0_POUNCE_TIME_MIN      250      // msec before which pounce cancels
 #define LEVEL0_POUNCE_REPEAT        500      // msec before a new pounce starts
 #define LEVEL0_POUNCE_SPEED_MOD     1.00f    // walking speed modifier for pounce charging
-#define LEVEL0_POUNCE_JUMP_MAG      600      // Dretch pounce jump power
+#define LEVEL0_POUNCE_JUMP_MAG      900      // Dretch pounce jump power
 
 #define LEVEL1_CLAW_DMG                AWDM(32000)
 #define LEVEL1_CLAW_RANGE              90.0f
@@ -140,7 +140,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL3_POUNCE_TIME_UPG      2200      // msec for full Adv. Dragoon pounce
 #define LEVEL3_CHARGE_STAMINA_MAX   LEVEL3_POUNCE_TIME
 #define LEVEL3_CHARGE_STAMINA_MAX_UPG  LEVEL3_POUNCE_TIME_UPG
-#define LEVEL3_CHARGE_STAMINA_MIN   700
+#define LEVEL3_CHARGE_STAMINA_MIN   750
 #define LEVEL3_CHARGE_STAMINA_MIN_UPG 750
 #define LEVEL3_CHARGE_STAMINA_USE_RATE (0.45f)
 #define LEVEL3_CHARGE_STAMINA_RESTORE_RATE (0.075f)
