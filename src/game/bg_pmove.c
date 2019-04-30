@@ -5881,10 +5881,6 @@ void PM_UpdateViewAngles( playerState_t *ps, const usercmd_t *cmd )
     for(i = 0; i < 3; i++) {
       float diff = AngleSubtract( tempang[i], ps->viewangles[i] );
 
-      if(i == YAW) {
-        continue;
-      }
-
       while( diff > 180.0f ) {
         diff -= 360.0f;
       }
@@ -5904,8 +5900,6 @@ void PM_UpdateViewAngles( playerState_t *ps, const usercmd_t *cmd )
         ps->delta_angles[ i ] -= ANGLE2SHORT( fabs( diff ) );
       }
     }
-
-    ps->viewangles[ YAW ] = tempang[ YAW ];
 
     return;
   }
