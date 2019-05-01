@@ -1254,13 +1254,72 @@ static void PM_CheckCharge( void )
 
 /*
 =============
+PM_PounceLiftOff
+=============
+*/
+static void PM_PounceLiftOff( void )
+{
+  int jumpMagnitude;
+
+  // Give the player forward velocity and simulate a jump
+  pml.groundPlane = qfalse;
+  pml.walking = qfalse;
+  pm->ps->groundEntityNum = ENTITYNUM_NONE;
+  pm->ps->persistant[PERS_JUMPTIME] = 0;
+  pm->ps->pm_flags |= PMF_CHARGE;
+  if( pm->ps->weapon == WP_ALEVEL0 )
+    jumpMagnitude = pm->ps->misc[ MISC_MISC3 ] *
+                    LEVEL0_POUNCE_JUMP_MAG / LEVEL0_POUNCE_TIME;
+  else if( pm->ps->weapon == WP_ALEVEL3 )
+    jumpMagnitude = pm->ps->misc[ MISC_MISC3 ] *
+                    LEVEL3_POUNCE_JUMP_MAG / LEVEL3_POUNCE_TIME;
+  else
+    jumpMagnitude = pm->ps->misc[ MISC_MISC3 ] *
+                    LEVEL3_POUNCE_JUMP_MAG_UPG / LEVEL3_POUNCE_TIME_UPG;
+
+  //scale due to evolving
+  if( ( pm->ps->stats[ STAT_TEAM ] == TEAM_ALIENS ) && 
+      ( pm->ps->eFlags & EF_EVOLVING ) )
+    jumpMagnitude = (int)( ((float) jumpMagnitude ) * BG_EvolveScale( pm->ps ) );
+
+  VectorMA( pm->ps->velocity, jumpMagnitude, pml.forward, pm->ps->velocity );
+  PM_AddEvent( EV_JUMP );
+
+  // Play jumping animation
+  if( pm->cmd.forwardmove >= 0 )
+  {
+    if( !( pm->ps->persistant[ PERS_STATE ] & PS_NONSEGMODEL ) )
+      PM_ForceLegsAnim( LEGS_JUMP );
+    else
+      PM_ForceLegsAnim( NSPA_JUMP );
+
+    pm->ps->pm_flags &= ~PMF_BACKWARDS_JUMP;
+  }
+  else
+  {
+    if( !( pm->ps->persistant[ PERS_STATE ] & PS_NONSEGMODEL ) )
+      PM_ForceLegsAnim( LEGS_JUMPB );
+    else
+      PM_ForceLegsAnim( NSPA_JUMPBACK );
+
+    pm->ps->pm_flags |= PMF_BACKWARDS_JUMP;
+  }
+
+  pm->pmext->pouncePayload = pm->ps->misc[ MISC_MISC3 ];
+  pm->ps->misc[ MISC_MISC ] = 0;
+  pm->ps->misc[ MISC_MISC3 ] = 0;
+  pm->ps->pm_flags &= ~PMF_LAUNCHING;
+
+  return;
+}
+
+/*
+=============
 PM_CheckPounce
 =============
 */
 static qboolean PM_CheckPounce( void )
 {
-  int jumpMagnitude;
-
   if( pm->ps->weapon != WP_ALEVEL0 &&
       pm->ps->weapon != WP_ALEVEL3 &&
       pm->ps->weapon != WP_ALEVEL3_UPG )
@@ -1301,56 +1360,7 @@ static qboolean PM_CheckPounce( void )
 
     if(
       pm->ps->misc[ MISC_MISC ] <= 0) {
-      //lift-off
-      // Give the player forward velocity and simulate a jump
-      pml.groundPlane = qfalse;
-      pml.walking = qfalse;
-      pm->ps->groundEntityNum = ENTITYNUM_NONE;
-      pm->ps->persistant[PERS_JUMPTIME] = 0;
-      pm->ps->pm_flags |= PMF_CHARGE;
-      if( pm->ps->weapon == WP_ALEVEL0 )
-        jumpMagnitude = pm->ps->misc[ MISC_MISC3 ] *
-                        LEVEL0_POUNCE_JUMP_MAG / LEVEL0_POUNCE_TIME;
-      else if( pm->ps->weapon == WP_ALEVEL3 )
-        jumpMagnitude = pm->ps->misc[ MISC_MISC3 ] *
-                        LEVEL3_POUNCE_JUMP_MAG / LEVEL3_POUNCE_TIME;
-      else
-        jumpMagnitude = pm->ps->misc[ MISC_MISC3 ] *
-                        LEVEL3_POUNCE_JUMP_MAG_UPG / LEVEL3_POUNCE_TIME_UPG;
-
-      //scale due to evolving
-      if( ( pm->ps->stats[ STAT_TEAM ] == TEAM_ALIENS ) && 
-          ( pm->ps->eFlags & EF_EVOLVING ) )
-        jumpMagnitude = (int)( ((float) jumpMagnitude ) * BG_EvolveScale( pm->ps ) );
-
-      VectorMA( pm->ps->velocity, jumpMagnitude, pml.forward, pm->ps->velocity );
-      PM_AddEvent( EV_JUMP );
-
-      // Play jumping animation
-      if( pm->cmd.forwardmove >= 0 )
-      {
-        if( !( pm->ps->persistant[ PERS_STATE ] & PS_NONSEGMODEL ) )
-          PM_ForceLegsAnim( LEGS_JUMP );
-        else
-          PM_ForceLegsAnim( NSPA_JUMP );
-
-        pm->ps->pm_flags &= ~PMF_BACKWARDS_JUMP;
-      }
-      else
-      {
-        if( !( pm->ps->persistant[ PERS_STATE ] & PS_NONSEGMODEL ) )
-          PM_ForceLegsAnim( LEGS_JUMPB );
-        else
-          PM_ForceLegsAnim( NSPA_JUMPBACK );
-
-        pm->ps->pm_flags |= PMF_BACKWARDS_JUMP;
-      }
-
-      pm->pmext->pouncePayload = pm->ps->misc[ MISC_MISC ];
-      pm->ps->misc[ MISC_MISC ] = 0;
-      pm->ps->misc[ MISC_MISC3 ] = 0;
-      pm->ps->pm_flags &= ~PMF_LAUNCHING;
-
+      PM_PounceLiftOff( );
       return qtrue;
     } else {
       return qfalse;
@@ -1395,9 +1405,16 @@ static qboolean PM_CheckPounce( void )
       pm->ps->groundEntityNum == ENTITYNUM_NONE )
     return qfalse;
 
-  //begin the launch
-  pm->ps->pm_flags |= PMF_LAUNCHING;
-  return qfalse;
+  if(pm->ps->stats[ STAT_WEAPONTIME2 ]) {
+    //begin launch launch delay if recovering from a previous pounce
+    pm->ps->pm_flags |= PMF_LAUNCHING;
+    return qfalse;
+  } else {
+    pm->ps->misc[ MISC_MISC3 ] = pm->ps->misc[ MISC_MISC ];
+    PM_PounceLiftOff( );
+    return qtrue;
+  }
+  
 }
 
 #define WALLJUMP_TIME 350

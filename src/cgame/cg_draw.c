@@ -1317,7 +1317,7 @@ static void CG_DrawPlayerChargeBarBG(
   rectDef_t *rect, vec4_t ref_color, qhandle_t shader, qboolean evolveCoolDown) {
   vec4_t color;
   float *meterAlpha;
-  const float stamina_fraction = CG_ChargeProgress(qtrue, qfalse);
+  float stamina_fraction = 1.0f;
 
   if( evolveCoolDown )
   {
@@ -1325,8 +1325,14 @@ static void CG_DrawPlayerChargeBarBG(
       return;
 
     meterAlpha = &cg.evolveCoolDownaMeterAlpha;
-  } else if(BG_ClassHasAbility(cg.snap->ps.stats[STAT_CLASS], SCA_CHARGE_STAMINA)) {
-    if(stamina_fraction >= 1.0f) {
+  } else {
+    if(BG_ClassHasAbility(cg.snap->ps.stats[STAT_CLASS], SCA_CHARGE_STAMINA)) {
+      stamina_fraction = CG_ChargeProgress(qtrue, qfalse);
+    }
+
+    if(
+      (stamina_fraction >= 1.0f) &&
+      (cg.predictedPlayerState.stats[ STAT_WEAPONTIME2 ] <= 0)) {
       cg.chargeStaminaMeterAlpha -= CHARGE_BAR_FADE_RATE * cg.frametime;
       if( cg.chargeStaminaMeterAlpha <= 0.0f ) {
         cg.chargeStaminaMeterAlpha = 0.0f;
@@ -1341,16 +1347,22 @@ static void CG_DrawPlayerChargeBarBG(
     } else {
       meterAlpha = &cg.chargeMeterAlpha;
     }
-  } else {
-    meterAlpha = &cg.chargeMeterAlpha;
   }
 
   if( !cg_drawChargeBar.integer || *meterAlpha <= 0.0f )
     return;
 
-  color[ 0 ] = ref_color[ 0 ];
-  color[ 1 ] = ref_color[ 1 ];
-  color[ 2 ] = ref_color[ 2 ];
+  if(
+    !evolveCoolDown &&
+    cg.predictedPlayerState.stats[ STAT_WEAPONTIME2 ] > 0) {
+    color[ 0 ] = 0.0f;
+    color[ 1 ] = 1.0f;
+    color[ 2 ] = 1.0f;
+  } else {
+    color[ 0 ] = ref_color[ 0 ];
+    color[ 1 ] = ref_color[ 1 ];
+    color[ 2 ] = ref_color[ 2 ];
+  }
   color[ 3 ] = ref_color[ 3 ] * *meterAlpha;
 
   // Draw meter background
