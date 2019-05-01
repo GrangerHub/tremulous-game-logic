@@ -66,7 +66,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL0_POUNCE_TIME_MIN      250      // msec before which pounce cancels
 #define LEVEL0_POUNCE_REPEAT        500      // msec before a new pounce starts
 #define LEVEL0_POUNCE_SPEED_MOD     1.00f    // walking speed modifier for pounce charging
-#define LEVEL0_POUNCE_JUMP_MAG      900      // Dretch pounce jump power
+#define LEVEL0_POUNCE_JUMP_MAG      500      // Dretch pounce jump power
 
 #define LEVEL1_CLAW_DMG                AWDM(32000)
 #define LEVEL1_CLAW_RANGE              90.0f
@@ -136,12 +136,12 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL3_POUNCE_RANGE         72.0f
 #define LEVEL3_POUNCE_UPG_RANGE     LEVEL3_POUNCE_RANGE + 3.0f
 #define LEVEL3_POUNCE_WIDTH         16.0f
-#define LEVEL3_POUNCE_TIME          2400      // msec for full Dragoon pounce
-#define LEVEL3_POUNCE_TIME_UPG      2200      // msec for full Adv. Dragoon pounce
+#define LEVEL3_POUNCE_TIME          2640      // msec for full Dragoon pounce
+#define LEVEL3_POUNCE_TIME_UPG      2420      // msec for full Adv. Dragoon pounce
 #define LEVEL3_CHARGE_STAMINA_MAX   LEVEL3_POUNCE_TIME
 #define LEVEL3_CHARGE_STAMINA_MAX_UPG  LEVEL3_POUNCE_TIME_UPG
-#define LEVEL3_CHARGE_STAMINA_MIN   750
-#define LEVEL3_CHARGE_STAMINA_MIN_UPG 750
+#define LEVEL3_CHARGE_STAMINA_MIN   825
+#define LEVEL3_CHARGE_STAMINA_MIN_UPG 825
 #define LEVEL3_CHARGE_STAMINA_USE_RATE (0.45f)
 #define LEVEL3_CHARGE_STAMINA_RESTORE_RATE (0.075f)
 #define LEVEL3_POUNCE_TIME_MIN      350      // msec before which pounce cancels
@@ -149,7 +149,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL3_POUNCE_SPEED_MOD     1.00f    // walking speed modifier for pounce charging
 #define LEVEL3_POUNCE_JUMP_MAG      2100     // Dragoon pounce jump power
 #define LEVEL3_POUNCE_JUMP_MAG_UPG  2200     // Adv. Dragoon pounce jump power
-#define LEVEL3_BOUNCEBALL_DMG       AWDM(110000)
+#define LEVEL3_BOUNCEBALL_DMG       AWDM(150000)
 #define LEVEL3_BOUNCEBALL_REPEAT    1000
 #define LEVEL3_BOUNCEBALL_SPEED     1000.0f
 #define LEVEL3_BOUNCEBALL_RADIUS    0
