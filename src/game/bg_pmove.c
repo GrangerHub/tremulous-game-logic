@@ -1315,6 +1315,33 @@ static void PM_PounceLiftOff( void )
 
 /*
 =============
+PM_ReduceChargeStamina
+=============
+*/
+static void PM_ReduceChargeStamina( float delta) {
+
+  if(BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_CHARGE_STAMINA)) {
+    delta = fabs(delta);
+    pm->ps->misc[MISC_CHARGE_STAMINA] -= 
+      (
+        delta *
+        BG_Class(pm->ps->stats[STAT_CLASS] )->chargeStaminaUseRate) /
+      BG_Class(pm->ps->stats[STAT_CLASS] )->chargeStaminaRestoreRate;
+  
+    if(
+      pm->ps->misc[MISC_CHARGE_STAMINA] <
+      (
+        BG_Class(pm->ps->stats[STAT_CLASS] )->chargeStaminaMin /
+        BG_Class(pm->ps->stats[STAT_CLASS] )->chargeStaminaRestoreRate)) {
+      pm->ps->misc[MISC_CHARGE_STAMINA] =
+        BG_Class(pm->ps->stats[STAT_CLASS] )->chargeStaminaMin /
+        BG_Class(pm->ps->stats[STAT_CLASS] )->chargeStaminaRestoreRate;
+    }
+  }
+}
+
+/*
+=============
 PM_CheckPounce
 =============
 */
@@ -1339,24 +1366,7 @@ static qboolean PM_CheckPounce( void )
     pm->ps->misc[ MISC_MISC3 ] += delta;
     pm->ps->misc[ MISC_MISC ] -= delta;
 
-    //Reduce charged stamina
-    if(BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_CHARGE_STAMINA)) {
-      pm->ps->misc[MISC_CHARGE_STAMINA] -= 
-        (
-          delta *
-          BG_Class(pm->ps->stats[STAT_CLASS] )->chargeStaminaUseRate) /
-        BG_Class(pm->ps->stats[STAT_CLASS] )->chargeStaminaRestoreRate;
-    
-      if(
-        pm->ps->misc[MISC_CHARGE_STAMINA] <
-        (
-          BG_Class(pm->ps->stats[STAT_CLASS] )->chargeStaminaMin /
-          BG_Class(pm->ps->stats[STAT_CLASS] )->chargeStaminaRestoreRate)) {
-        pm->ps->misc[MISC_CHARGE_STAMINA] =
-          BG_Class(pm->ps->stats[STAT_CLASS] )->chargeStaminaMin /
-          BG_Class(pm->ps->stats[STAT_CLASS] )->chargeStaminaRestoreRate;
-      }
-    }
+    PM_ReduceChargeStamina(delta);
 
     if(
       pm->ps->misc[ MISC_MISC ] <= 0) {
@@ -1411,6 +1421,7 @@ static qboolean PM_CheckPounce( void )
     return qfalse;
   } else {
     pm->ps->misc[ MISC_MISC3 ] = pm->ps->misc[ MISC_MISC ];
+    PM_ReduceChargeStamina(pm->ps->misc[ MISC_MISC3 ]);
     PM_PounceLiftOff( );
     return qtrue;
   }
