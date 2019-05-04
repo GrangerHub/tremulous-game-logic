@@ -62,11 +62,15 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL0_BITE_K_SCALE         1.0f
 #define LEVEL0_POUNCE_RANGE         48.0f
 #define LEVEL0_POUNCE_WIDTH         14.0f
-#define LEVEL0_POUNCE_TIME          1000      // msec for full Dretch pounce
-#define LEVEL0_POUNCE_TIME_MIN      250      // msec before which pounce cancels
-#define LEVEL0_POUNCE_REPEAT        500      // msec before a new pounce starts
+#define LEVEL0_POUNCE_TIME          900      // msec for full Dretch pounce
+#define LEVEL0_POUNCE_TIME_MIN      150      // msec before which pounce cancels
+#define LEVEL0_CHARGE_STAMINA_MAX   LEVEL0_POUNCE_TIME
+#define LEVEL0_CHARGE_STAMINA_MIN   400
+#define LEVEL0_CHARGE_STAMINA_USE_RATE (0.45f)
+#define LEVEL0_CHARGE_STAMINA_RESTORE_RATE (0.075f)
+#define LEVEL0_POUNCE_REPEAT        750      // msec before a new pounce starts
 #define LEVEL0_POUNCE_SPEED_MOD     1.00f    // walking speed modifier for pounce charging
-#define LEVEL0_POUNCE_JUMP_MAG      500      // Dretch pounce jump power
+#define LEVEL0_POUNCE_JUMP_MAG      800      // Dretch pounce jump power
 
 #define LEVEL1_CLAW_DMG                AWDM(32000)
 #define LEVEL1_CLAW_RANGE              90.0f

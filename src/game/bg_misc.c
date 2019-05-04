@@ -1620,7 +1620,7 @@ static const classAttributes_t bg_classList[ ] =
     LEVEL0_MIN_HEALTH,                              //int     minHealth;
     0.0f,                                           //float   fallDamage;
     LEVEL0_REGEN,                                   //float   regenRate;
-    SCA_WALLCLIMBER|SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,    //int     abilities;
+    SCA_WALLCLIMBER|SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN|SCA_CHARGE_STAMINA,    //int     abilities;
     WP_ALEVEL0,                                     //weapon_t startWeapon;
     0.0f,                                           //float   buildDist;
     140,                                            //int     fov;
@@ -1635,10 +1635,10 @@ static const classAttributes_t bg_classList[ ] =
     400.0f,                                         //float   stopSpeed;
     250.0f,                                         //float   jumpMagnitude;
     2.0f,                                           //float   knockbackScale;
-    CHARGE_STAMINA_MAX,                             //int     chargeStaminaMax;
-    CHARGE_STAMINA_MIN,                             //int     chargeStaminaMin;
-    CHARGE_STAMINA_USE_RATE,                        //float   chargeStaminaUseRate;
-    CHARGE_STAMINA_RESTORE_RATE,                    //float   chargeStaminaRestoreRate;
+    LEVEL0_CHARGE_STAMINA_MAX,                      //int     chargeStaminaMax;
+    LEVEL0_CHARGE_STAMINA_MIN,                      //int     chargeStaminaMin;
+    LEVEL0_CHARGE_STAMINA_USE_RATE,                 //float   chargeStaminaUseRate;
+    LEVEL0_CHARGE_STAMINA_RESTORE_RATE,             //float   chargeStaminaRestoreRate;
     LEVEL0_COST,                                    //int     cost;
     qtrue,                                          //qboolean warmupFree;
     LEVEL0_VALUE,                                   //int     value;
