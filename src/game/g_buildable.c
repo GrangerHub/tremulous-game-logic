@@ -5372,13 +5372,7 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   int               contents;
   playerState_t     *ps = &ent->client->ps;
 
-  if( ( IS_WARMUP && g_warmupBuildableRespawning.integer ) ||
-      !g_allowBuildableStacking.integer )
-  {
-    // Stop all buildables from interacting with traces
-    G_SetBuildableLinkState( qfalse );
-  } else
-    G_SetBuildableMarkedLinkState( qfalse );
+  G_SetBuildableMarkedLinkState( qfalse );
 
   BG_BuildableBoundingBox( buildable, mins, maxs );
 
@@ -5598,13 +5592,7 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
     reason = IBE_SD_IRREPLACEABLE;
   }
 
-  if( ( IS_WARMUP && g_warmupBuildableRespawning.integer ) ||
-      !g_allowBuildableStacking.integer )
-  {
-    // Relink buildables
-    G_SetBuildableLinkState( qtrue );
-  } else
-    G_SetBuildableMarkedLinkState( qtrue );
+  G_SetBuildableMarkedLinkState( qtrue );
 
   //check there is enough room to spawn from (presuming this is a spawn)
   if( reason == IBE_NONE )
