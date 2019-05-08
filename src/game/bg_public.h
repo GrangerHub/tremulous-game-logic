@@ -55,6 +55,12 @@ int BG_SU2HP( int healthSubUnits );
 #define CROUCH_VIEWHEIGHT       12
 #define DEAD_VIEWHEIGHT         4 // height from ground
 
+#ifdef CGAME
+  #define MAGIC_TRACE_HACK      (-2)
+#else 
+  #define MAGIC_TRACE_HACK      ENTITYNUM_NONE
+#endif
+
 // player teams
 typedef enum
 {
@@ -1701,6 +1707,7 @@ void      BG_CheckBoltImpactTrigger(pmove_t *pmove,
                                     void (*UnlaggedOff)(void));
 void      BG_ResetLightningBoltCharge( playerState_t *ps, pmoveExt_t *pmext );
 void      BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
+                                                const qboolean builder_adjacent_placement,
                                                 void (*trace)( trace_t *, const vec3_t, const vec3_t,
                                                                const vec3_t, const vec3_t, int, int ),
                                                 vec3_t outOrigin, vec3_t outAngles, trace_t *tr );

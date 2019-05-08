@@ -6145,21 +6145,6 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     qfalse,                 //qboolean  sellable;
     qfalse,                 //qboolean  usable;
     TEAM_HUMANS             //team_t    team;
-  },
-  {
-    UP_JETFUEL,             //int   number;
-    qtrue,                  //qboolean enabled;
-    0,                      //int   price;
-    qfalse,                 //qboolean warmupFree;
-    ( 1 << S2 )|( 1 << S3 ), //int  stages;
-    SLOT_NONE,              //int   slots;
-    "jetfuel",              //char  *name;
-    "Jet Pack Fuel",        //char  *humanName;
-    "Refuels the jet pack",
-    0,
-    qtrue,                  //qboolean  purchasable;
-    qfalse,                 //qboolean  usable;
-    TEAM_HUMANS             //team_t    team;
   }
 };
 
@@ -7231,28 +7216,27 @@ void BG_ResetLightningBoltCharge( playerState_t *ps, pmoveExt_t *pmext )
 BG_FindValidSpot
 ===============
 */
-qboolean BG_FindValidSpot( void (*trace)( trace_t *, const vec3_t, const vec3_t,
-                                          const vec3_t, const vec3_t, int, int ),
-                           trace_t *tr, vec3_t start, vec3_t mins, vec3_t maxs,
-                           vec3_t end, int passEntityNum, int contentmask,
-                           float incDist, int limit )
-{
+qboolean BG_FindValidSpot(
+  void (*trace)(
+    trace_t *, const vec3_t, const vec3_t, const vec3_t, const vec3_t, int, int),
+  trace_t *tr, vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
+  int passEntityNum, int contentmask, float incDist, int limit) {
   vec3_t start2, increment;
 
-  VectorCopy( start, start2 );
+  VectorCopy(start, start2);
 
-  VectorSubtract( end, start2, increment );
-  VectorNormalize( increment );
-  VectorScale( increment, incDist, increment );
+  VectorSubtract(end, start2, increment);
+  VectorNormalize(increment);
+  VectorScale(increment, incDist, increment);
 
-  do
-  {
-    (*trace)( tr, start2, mins, maxs, end, passEntityNum, contentmask );
-    VectorAdd( tr->endpos, increment, start2 );
-    if( !tr->allsolid )
+  do {
+    (*trace)(tr, start2, mins, maxs, end, passEntityNum, contentmask);
+    VectorAdd(tr->endpos, increment, start2);
+    if(!tr->allsolid) {
       return qtrue;
+    }
     limit--;
-  } while ( tr->fraction < 1.0f && limit >= 0 );
+  } while (tr->fraction < 1.0f && limit >= 0);
   return qfalse;
 }
 
@@ -7264,58 +7248,87 @@ Find a place to build a buildable
 ===============
 */
 //TODO: Partial move of canbuild to this function to allow quicker updates for the red shader.
-void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
-                                           void (*trace)( trace_t *,
-                                                          const vec3_t,
-                                                          const vec3_t,
-                                                          const vec3_t,
-                                                          const vec3_t, int,
-                                                          int ),
-                                           vec3_t outOrigin, vec3_t outAngles,
-                                           trace_t *tr )
-{
-  vec3_t  forward, targetOrigin;
-  vec3_t  playerNormal;
-  vec3_t  mins, maxs;
-  float   buildDist = BG_Class( ps->stats[ STAT_CLASS ] )->buildDist;
-  const   buildable_t buildable = ps->stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT;
+void BG_PositionBuildableRelativeToPlayer(
+  const playerState_t *ps, const qboolean builder_adjacent_placement,
+  void (*trace)(
+    trace_t *, const vec3_t, const vec3_t, const vec3_t, const vec3_t, int, int),
+  vec3_t outOrigin, vec3_t outAngles, trace_t *tr) {
+  vec3_t forward, targetOrigin;
+  vec3_t playerNormal;
+  vec3_t mins, maxs;
+  float  buildDist = BG_Class( ps->stats[STAT_CLASS])->buildDist;
+  const  buildable_t buildable = ps->stats[STAT_BUILDABLE] & ~SB_VALID_TOGGLEBIT;
  
-  BG_BuildableBoundingBox( buildable, mins, maxs );
+  BG_BuildableBoundingBox(buildable, mins, maxs);
 
-  BG_GetClientNormal( ps, playerNormal );
+  BG_GetClientNormal(ps, playerNormal);
 
-  VectorCopy( ps->viewangles, outAngles );
+  VectorCopy(ps->viewangles, outAngles);
 
-  AngleVectors( outAngles, forward, NULL, NULL );
+  if(builder_adjacent_placement) {
+    vec3_t right;
+
+    AngleVectors(outAngles, NULL, right, NULL);
+    CrossProduct(playerNormal, right, forward);
+  } else {
+    AngleVectors(outAngles, forward, NULL, NULL);
+  }
 
   {
-    vec3_t viewOrigin;
-    const float minNormal = BG_Buildable( buildable )->minNormal;
-    const qboolean invertNormal = BG_Buildable( buildable )->invertNormal;
+    vec3_t viewOrigin, startOrigin;
+    vec3_t mins2, maxs2;
+    vec3_t builderBottom;
+    trace_t builder_bottom_trace;
+    const float minNormal = BG_Buildable(buildable)->minNormal;
+    const qboolean invertNormal = BG_Buildable(buildable)->invertNormal;
     qboolean validAngle;
+    const int conditional_pass_ent_num =
+      builder_adjacent_placement ? MAGIC_TRACE_HACK : ps->clientNum;
     float heightOffset = 0.0f;
-    qboolean preciseBuild = ps->stats[ STAT_STATE ] & SS_PRECISE_BUILD;
+    float builderDia;
+    vec3_t builderMins, builderMaxs;
+    qboolean preciseBuild = ps->stats[STAT_STATE] & SS_PRECISE_BUILD;
     qboolean onBuilderPlane = qfalse;
 
-    if( !preciseBuild ) {
+    BG_ClassBoundingBox(
+      ps->stats[STAT_CLASS], builderMins, builderMaxs, NULL, NULL, NULL);
+    builderDia = RadiusFromBounds(builderMins, builderMaxs);
+    builderDia *= 2.0f;
+
+    if(builder_adjacent_placement) {
+      buildDist = (2 * RadiusFromBounds(mins, maxs)) + builderDia + 1.0f;
+    } else if(!preciseBuild) {
       buildDist *= 2.0f;
     }
 
-    BG_GetClientViewOrigin( ps, viewOrigin );
+    BG_GetClientViewOrigin(ps, viewOrigin);
 
-    VectorMA( viewOrigin, buildDist, forward, targetOrigin );
+    maxs2[ 0 ] = maxs2[ 1 ] = 14;
+    maxs2[ 2 ] = ps->stats[ STAT_TEAM ] == TEAM_HUMANS ? 7 :maxs2[ 0 ];
+    mins2[ 0 ] = mins2[ 1 ] = -maxs2[ 0 ];
+    mins2[ 2 ] = 0;
+
+    //trace the bottom of the builder
+    VectorMA(viewOrigin, -builderDia, playerNormal, builderBottom);
+    (*trace)(
+      &builder_bottom_trace, viewOrigin, mins2, maxs2, builderBottom,
+      ps->clientNum, MASK_PLAYERSOLID );
+    VectorCopy(builder_bottom_trace.endpos, builderBottom);
+    VectorMA(builderBottom, 0.5f, playerNormal, builderBottom);
+
+    if(builder_adjacent_placement) {
+      VectorCopy(builderBottom, startOrigin);
+    } else {
+      VectorCopy(viewOrigin, startOrigin);
+    }
+
+    VectorMA( startOrigin, buildDist, forward, targetOrigin );
 
     {
       {//Do a small bbox trace to find the true targetOrigin.
-        vec3_t mins2, maxs2;
-        vec3_t builderNormal, targertNormal;
+        vec3_t targetNormal;
 
-        maxs2[ 0 ] = maxs2[ 1 ] = 14;
-        maxs2[ 2 ] = ps->stats[ STAT_TEAM ] == TEAM_HUMANS ? 7 :maxs2[ 0 ];
-        mins2[ 0 ] = mins2[ 1 ] = -maxs2[ 0 ];
-        mins2[ 2 ] = 0;
-
-        (*trace)( tr, viewOrigin, mins2, maxs2, targetOrigin, ps->clientNum, MASK_PLAYERSOLID );
+        (*trace)( tr, startOrigin, mins2, maxs2, targetOrigin, ps->clientNum, MASK_PLAYERSOLID );
         if( tr->startsolid || tr->allsolid ) {
           VectorCopy( viewOrigin, outOrigin );
           tr->plane.normal[ 2 ] = 0.0f;
@@ -7324,41 +7337,60 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
         }
         VectorCopy( tr->endpos, targetOrigin );
 
-        //check if the targetOrigin and builder are on the same plane
-        VectorCopy(ps->grapplePoint, builderNormal);
-        VectorNormalize(builderNormal);
-        VectorCopy(tr->plane.normal, targertNormal);
+        //check if tracing should be view the view or from the base of the builder
+        VectorCopy(tr->plane.normal, targetNormal);
         if(
           ps->groundEntityNum != ENTITYNUM_NONE &&
-          VectorCompare(builderNormal, targertNormal)) {
-          float builderDia;
-          vec3_t builderBottom, builderMins, builderMaxs;
-          trace_t tr2;
+          (
+            builder_adjacent_placement ||
+            VectorCompare(playerNormal, targetNormal))) {
 
-          //trace the bottom of the builder
-          BG_ClassBoundingBox(
-            ps->stats[ STAT_CLASS ], builderMins, builderMaxs, NULL, NULL, NULL);
-          builderDia = RadiusFromBounds(builderMins, builderMaxs);
-          builderDia *= 2.0f;
-          VectorMA(viewOrigin, -builderDia, builderNormal, builderBottom);
-          (*trace)( &tr2, viewOrigin, mins2, maxs2, builderBottom, ps->clientNum, MASK_PLAYERSOLID );
-          VectorCopy(tr2.endpos, builderBottom);
-          if(tr2.fraction < 1.0f) {
-            //offset from the surface
-            VectorMA(builderBottom, 0.5f, builderNormal, builderBottom);
+          if(builder_adjacent_placement) {
+            vec3_t end;
+            trace_t tr2;
+
+            VectorCopy(playerNormal, targetNormal);
+
+            //move the target origin away from any collided surface
+            VectorSubtract(startOrigin, targetOrigin, end);
+            VectorNormalize(end);
+            VectorMA(targetOrigin, 1.0f, end, end);
+            (*trace)(
+              &tr2, startOrigin, mins2, maxs2, end, MAGIC_TRACE_HACK,
+              MASK_PLAYERSOLID);
+            if(!tr2.allsolid && tr2.fraction >= 1.0f) {
+              VectorCopy(tr2.endpos, startOrigin);
+            } else {
+              VectorCopy(viewOrigin, outOrigin);
+              tr->plane.normal[2] = 0.0f;
+              tr->entityNum = ENTITYNUM_NONE;
+              return;
+            }
+
+            //nudge the target origin back down to undo the offset
+            VectorMA(targetOrigin, -0.5f, targetNormal, end);
+            (*trace)(
+              &tr2, targetOrigin, mins2, maxs2, end, ps->clientNum,
+              MASK_PLAYERSOLID);
+            if(!tr2.startsolid && !tr2.allsolid) {
+              VectorCopy(tr2.endpos, targetOrigin);
+            }
           }
 
-          if(!tr2.startsolid && !tr2.allsolid) {
+          if(!builder_bottom_trace.startsolid && !builder_bottom_trace.allsolid) {
             vec3_t end;
+            trace_t tr2;
 
             //check that there is a clear trace from the builderBottom to the target
-            VectorMA(targetOrigin, 0.5, targertNormal, end);
-            (*trace)( &tr2, builderBottom, mins2, maxs2, end, ps->clientNum, MASK_PLAYERSOLID );
+            VectorMA(targetOrigin, 0.5, targetNormal, end);
+            (*trace)(
+              &tr2, builderBottom, mins2, maxs2, end, ps->clientNum,
+              MASK_PLAYERSOLID);
             if(!tr2.startsolid && !tr2.allsolid && tr2.fraction >= 1.0f) {
               //undo the offset
-              VectorMA(builderBottom, -0.5f, builderNormal, builderBottom);
+              VectorMA(builderBottom, -0.5f, playerNormal, builderBottom);
               //use the builderBottom
-              VectorCopy(builderBottom, viewOrigin);
+              VectorCopy(builderBottom, startOrigin);
               onBuilderPlane = qtrue;
             }
           }
@@ -7366,66 +7398,134 @@ void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
       }
 
       {//Center height and find the smallest axis.  This assumes that all x and y axis are the same magnitude.
-        heightOffset = -( maxs[ 2 ] + mins[ 2 ] ) / 2.0f;
+        heightOffset = -(maxs[2] + mins[2]) / 2.0f;
 
-        maxs[ 2 ] += heightOffset;
-        mins[ 2 ] += heightOffset;
+        maxs[2] += heightOffset;
+        mins[2] += heightOffset;
       }
 
-      if( ( minNormal > 0.0f && !invertNormal ) || preciseBuild || onBuilderPlane ) {//Raise origins by 1+maxs[2].
-        VectorMA( viewOrigin, maxs[ 2 ] + 1.0f, playerNormal, viewOrigin );
-        VectorMA( targetOrigin, maxs[ 2 ] + 1.0f, playerNormal, targetOrigin );
+      if(
+        (minNormal > 0.0f && !invertNormal) ||
+        preciseBuild ||
+        onBuilderPlane ||
+        builder_adjacent_placement) {
+        //Raise origins by 1+maxs[2].
+        VectorMA(startOrigin, maxs[2] + 1.0f, playerNormal, startOrigin);
+        VectorMA(targetOrigin, maxs[2] + 1.0f, playerNormal, targetOrigin);
+      }
+
+      if(builder_adjacent_placement) {
+        vec3_t  temp;
+        trace_t tr2;
+
+        //swap the startOrigin with the targetOrigin to position back against the builder
+        VectorCopy(startOrigin, temp);
+        VectorCopy(targetOrigin, startOrigin);
+        VectorCopy(temp, targetOrigin);
+
+        //position the target origin to collide back against the builder.
+        (*trace)(
+          &tr2, startOrigin, mins2, maxs2, targetOrigin, MAGIC_TRACE_HACK,
+          MASK_PLAYERSOLID);
+        if(!tr2.startsolid && !tr2.allsolid) {
+          VectorCopy(tr2.endpos, targetOrigin);
+
+          //allow for a gap between the builder and the builder
+          VectorSubtract(startOrigin, targetOrigin, temp);
+          VectorNormalize(temp);
+          VectorMA(targetOrigin, 5.0f, temp, temp);
+          (*trace)(
+            &tr2, targetOrigin, mins2, maxs2, temp, ps->clientNum,
+            MASK_PLAYERSOLID);
+          if(!tr2.startsolid && !tr2.allsolid && tr2.fraction >= 1.0f) {
+            VectorCopy(tr2.endpos, targetOrigin);
+          } else {
+            VectorCopy( viewOrigin, outOrigin );
+            tr->plane.normal[ 2 ] = 0.0f;
+            tr->entityNum = ENTITYNUM_NONE;
+            return;
+          }
+        } else {
+          VectorCopy( viewOrigin, outOrigin );
+          tr->plane.normal[ 2 ] = 0.0f;
+          tr->entityNum = ENTITYNUM_NONE;
+          return;
+        }
       }
 
       {//Do traces from behind the player to the target to find a valid spot.
         trace_t tr2;
 
-        if( !BG_FindValidSpot( trace, tr, viewOrigin, mins, maxs, targetOrigin, ps->clientNum, MASK_PLAYERSOLID,
-                               5.0f, 5 ) ) {
-          VectorCopy( viewOrigin, outOrigin );
-          tr->plane.normal[ 2 ] = 0.0f;
+        if(
+          !BG_FindValidSpot(
+            trace, tr, startOrigin, mins, maxs, targetOrigin,
+            conditional_pass_ent_num, MASK_PLAYERSOLID, 5.0f, 5)) {
+          VectorCopy(viewOrigin, outOrigin);
+          tr->plane.normal[2] = 0.0f;
           tr->entityNum = ENTITYNUM_NONE;
           return;
         }
 
         //Check that the spot is not on the opposite side of a thin wall
-        (*trace)( &tr2, viewOrigin, NULL, NULL, tr->endpos, ps->clientNum, MASK_PLAYERSOLID );
+        (*trace)(
+          &tr2, startOrigin, NULL, NULL, tr->endpos, ps->clientNum,
+          MASK_PLAYERSOLID);
         if(tr2.fraction < 1.0f || tr2.startsolid || tr2.allsolid) {
-          VectorCopy( viewOrigin, outOrigin );
-          tr->plane.normal[ 2 ] = 0.0f;
+          VectorCopy(viewOrigin, outOrigin);
+          tr->plane.normal[2] = 0.0f;
           tr->entityNum = ENTITYNUM_NONE;
           return;
         }
       }
     }
 
-    validAngle = tr->plane.normal[ 2 ] >= minNormal ||
-                   ( invertNormal && tr->plane.normal[ 2 ] <= -minNormal );
+    validAngle =
+      tr->plane.normal[2] >=
+        minNormal || (invertNormal && tr->plane.normal[2] <= -minNormal);
 
-    //Down trace if precision building, no hit, or surface is too steep.
-    if( preciseBuild ||
-        tr->fraction >= 1.0f || !validAngle ) //TODO: These should be utility functions like "if(traceHit(&tr))"
-    {
-      if( tr->fraction < 1.0f )
-      {
+    //Down trace if precision building, builder adjacent placement, no hit, or surface is too steep.
+    if(
+      preciseBuild ||
+      builder_adjacent_placement ||
+      tr->fraction >= 1.0f ||
+      !validAngle ) {//TODO: These should be utility functions like "if(traceHit(&tr))"
+      if(tr->fraction < 1.0f) {
         //Bring endpos away from surface it has hit.
-        VectorAdd( tr->endpos, tr->plane.normal, tr->endpos );
+        VectorAdd(tr->endpos, tr->plane.normal, tr->endpos);
       }
 
       {
         vec3_t startOrigin;
 
-        VectorMA( tr->endpos, -buildDist / 2.0f, playerNormal, targetOrigin );
+        VectorMA(tr->endpos, -buildDist / 2.0f, playerNormal, targetOrigin);
 
-        VectorCopy( tr->endpos, startOrigin );
+        VectorCopy(tr->endpos, startOrigin);
 
-        (*trace)( tr, startOrigin, mins, maxs, targetOrigin, ps->clientNum,
-          MASK_PLAYERSOLID );
+        (*trace)(
+          tr, startOrigin, mins, maxs, targetOrigin, ps->clientNum,
+          MASK_PLAYERSOLID);
       }
     }
+
+    if(!builder_adjacent_placement) {
+      trace_t tr2;
+
+      //check if this position would collide with the builder
+      (*trace)(
+        &tr2, tr->endpos, mins, maxs, tr->endpos, MAGIC_TRACE_HACK,
+        MASK_PLAYERSOLID);
+
+      if((tr2.startsolid || tr2.allsolid) && tr2.entityNum == ps->clientNum) {
+        //attempt to position buildable adjacent to the builder
+        BG_PositionBuildableRelativeToPlayer(
+          ps, qtrue, trace, outOrigin, outAngles, tr);
+        return;
+      }
+    }
+
     tr->endpos[2] += heightOffset;
   }
-  VectorCopy( tr->endpos, outOrigin );
+  VectorCopy(tr->endpos, outOrigin);
 }
 
 /*

@@ -1932,8 +1932,6 @@ void        CG_ModelDoor( centity_t *cent );
 // cg_predict.c
 //
 
-#define MAGIC_TRACE_HACK -2
-
 void        CG_BuildSolidList( void );
 int         CG_PointContents( const vec3_t point, int passEntityNum );
 qboolean    CG_Visible( centity_t *cent, int contents );

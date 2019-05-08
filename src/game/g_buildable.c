@@ -557,7 +557,7 @@ int G_GetMarkedBuildPoints( playerState_t *ps )
     return 0;
 
 G_SetPlayersLinkState( qfalse, &g_entities[ ps->clientNum ] );
-  BG_PositionBuildableRelativeToPlayer( ps, G_TraceWrapper, origin,
+  BG_PositionBuildableRelativeToPlayer( ps, qfalse, G_TraceWrapper, origin,
                                         angles, &tr1 );
 G_SetPlayersLinkState( qtrue, &g_entities[ ps->clientNum ] );
 
@@ -5383,7 +5383,7 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   BG_BuildableBoundingBox( buildable, mins, maxs );
 
   G_SetPlayersLinkState( qfalse, ent );
-  BG_PositionBuildableRelativeToPlayer( ps, G_TraceWrapper,
+  BG_PositionBuildableRelativeToPlayer( ps, qfalse, G_TraceWrapper,
                                         entity_origin, angles, &tr1 );
   G_SetPlayersLinkState( qtrue, ent );
 
