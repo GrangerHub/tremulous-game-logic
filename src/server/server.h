@@ -532,6 +532,12 @@ void SV_Trace( trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs, c
 void SV_ClipToEntity( trace_t *trace, const vec3_t start, vec3_t mins, vec3_t maxs, const vec3_t end, int entityNum, int contentmask, traceType_t type );
 // clip to a specific entity
 
+void SV_ClipToTestArea(
+	trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs,
+	const vec3_t end, const vec3_t test_mins, const vec3_t test_maxs,
+	const vec3_t test_origin, int test_contents, int contentmask, traceType_t type);
+// clip to a temporary test volume
+
 //
 // sv_net_chan.c
 //
