@@ -1629,7 +1629,6 @@ extern  vmCvar_t  g_warmupTimeout1;
 extern  vmCvar_t  g_warmupTimeout1Trigger;
 extern  vmCvar_t  g_warmupTimeout2;
 extern  vmCvar_t  g_warmupTimeout2Trigger;
-extern  vmCvar_t  g_warmupBuildableRespawning;
 extern  vmCvar_t  g_warmupBuildableRespawnTime;
 extern  vmCvar_t  g_warmupDefensiveBuildableRespawnTime;
 extern  vmCvar_t  g_warmupBlockEnemyBuilding;

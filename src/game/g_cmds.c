@@ -4115,8 +4115,7 @@ void Cmd_Reload_f( gentity_t *ent )
           ( ent->client->ps.weapon <= WP_HBUILD ) ) )
     {
       // Cancel deconstruction (unmark)
-      if( !( IS_WARMUP && g_warmupBuildableRespawning.integer ) &&
-          traceEnt->deconstruct )
+      if( traceEnt->deconstruct )
       {
         traceEnt->deconstruct = qfalse;
         return;
@@ -4142,11 +4141,8 @@ void Cmd_Reload_f( gentity_t *ent )
 
       if( traceEnt->health > 0 )
       {
-        if( !( IS_WARMUP && g_warmupBuildableRespawning.integer ) )
-        {
-          traceEnt->deconstruct     = qtrue; // Mark buildable for deconstruction
-          traceEnt->deconstructTime = level.time;
-        }
+        traceEnt->deconstruct     = qtrue; // Mark buildable for deconstruction
+        traceEnt->deconstructTime = level.time;
       }
     }
   }
