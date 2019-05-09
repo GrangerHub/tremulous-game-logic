@@ -1729,8 +1729,6 @@ extern  vmCvar_t    cg_emoticons;
 
 extern  vmCvar_t    cg_chatTeamPrefix;
 
-extern  vmCvar_t    cg_warmupBuildableRespawning;
-
 extern  vmCvar_t    cg_intermissionMusic;
 
 //
