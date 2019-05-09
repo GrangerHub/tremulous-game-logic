@@ -666,6 +666,80 @@ void SV_Trace( trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs, c
 }
 
 
+/*
+==================
+SV_ClipToTestArea
+
+Moves the given mins/maxs volume through the world from start to end.
+Checks against a specified temporary volume with its own given test mins/maxs/origin/contents.
+==================
+*/
+void SV_ClipToTestArea(
+	trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs,
+	const vec3_t end, const vec3_t test_mins, const vec3_t test_maxs,
+	const vec3_t test_origin, int test_contents, int contentmask, traceType_t type) {
+	const vec3_t angles = {0.0f, 0.0f, 0.0f};
+	vec3_t test_abs_mins, test_abs_maxs, boxmaxs, boxmins;
+	clipHandle_t clipHandle;
+	int			i;
+
+	if ( !mins ) {
+		mins = vec3_origin;
+	}
+	if ( !maxs ) {
+		maxs = vec3_origin;
+	}
+
+	Com_Memset ( results, 0, sizeof ( trace_t) );
+	results->entityNum = ENTITYNUM_NONE;
+	results->fraction = 1.0;
+	VectorCopy(end, results->endpos);
+
+	// EF_ASTRAL_NOCLIP flagged entities don't clip with ASTRALSOLID entities
+	if ( ( contentmask & EF_ASTRAL_NOCLIP ) & test_contents ) {
+		return;
+	}
+
+	// if it doesn't have any brushes of a type we
+	// are looking for, ignore it
+	if ( ! ( contentmask & test_contents ) ) {
+		return;
+	}
+
+	// create the bounding box of the entire move
+	// we can limit it to the part of the move not
+	// already clipped off by the world, which can be
+	// a significant savings for line of sight and shot traces
+	for ( i=0 ; i<3 ; i++ ) {
+		if ( end[i] > start[i] ) {
+			boxmins[i] = start[i] + mins[i] - 1;
+			boxmaxs[i] = end[i] + maxs[i] + 1;
+		} else {
+			boxmins[i] = end[i] + mins[i] - 1;
+			boxmaxs[i] = start[i] + maxs[i] + 1;
+		}
+	}
+
+	VectorAdd(test_origin, test_mins, test_abs_mins);
+	VectorAdd(test_origin, test_maxs, test_abs_maxs);
+
+	if(test_abs_mins[0] > boxmaxs[0]
+		|| test_abs_mins[1] > boxmaxs[1]
+		|| test_abs_mins[2] > boxmaxs[2]
+		|| test_abs_maxs[0] < boxmins[0]
+		|| test_abs_maxs[1] < boxmins[1]
+		|| test_abs_maxs[2] < boxmins[2]) {
+		return;
+	}
+
+	clipHandle = CM_TempBoxModel( test_mins, test_maxs, qfalse );
+
+	CM_TransformedBoxTrace ( results, start, end,
+		mins, maxs, clipHandle,  contentmask,
+		test_origin, angles, type);
+}
+
+
 
 /*
 =============

@@ -185,6 +185,58 @@ gentity_t *G_CheckSpawnPoint( int spawnNum, const vec3_t origin,
 
 /*
 ===============
+G_CheckAreaForSpawnIntersection
+
+Checks if a given area would intersect with a given buildable's spawn area
+===============
+*/
+static qboolean G_CheckAreaForSpawnIntersection(
+  const vec3_t origin, const vec3_t normal, buildable_t spawn,
+  vec3_t area_mins, vec3_t area_maxs, vec3_t area_origin) {
+  float   displacement;
+  vec3_t  mins, maxs;
+  vec3_t  cmins, cmaxs;
+  vec3_t  localOrigin;
+  trace_t tr;
+
+  BG_BuildableBoundingBox( spawn, mins, maxs );
+
+  if(spawn == BA_A_SPAWN) {
+    VectorSet(cmins, -MAX_ALIEN_BBOX, -MAX_ALIEN_BBOX, -MAX_ALIEN_BBOX);
+    VectorSet(cmaxs,  MAX_ALIEN_BBOX,  MAX_ALIEN_BBOX,  MAX_ALIEN_BBOX);
+
+    displacement = (maxs[ 2 ] + MAX_ALIEN_BBOX) * M_ROOT3 + 1.0f;
+    VectorMA(origin, displacement, normal, localOrigin);
+  } else if(spawn == BA_H_SPAWN) {
+    BG_ClassBoundingBox(PCL_HUMAN, cmins, cmaxs, NULL, NULL, NULL);
+
+    VectorCopy( origin, localOrigin );
+    localOrigin[2] += maxs[2] + fabs(cmins[2]) + 1.0f;
+  } else {
+    return qfalse;
+  }
+
+  SV_ClipToTestArea(
+    &tr, origin, NULL, NULL, localOrigin, area_mins, area_maxs, area_origin,
+    MASK_SHOT, MASK_SHOT, TT_AABB);
+
+  if(tr.entityNum != ENTITYNUM_NONE) {
+    return qtrue;
+  }
+
+  SV_ClipToTestArea(
+    &tr, origin, cmins, cmaxs, localOrigin, area_mins, area_maxs, area_origin,
+    MASK_PLAYERSOLID, MASK_PLAYERSOLID, TT_AABB);
+
+  if(tr.entityNum != ENTITYNUM_NONE) {
+    return qtrue;
+  }
+
+  return qfalse;
+}
+
+/*
+===============
 G_PuntBlocker
 
 Move spawn blockers
@@ -4433,6 +4485,18 @@ static itemBuildError_t G_SufficientBPAvailable( buildable_t     buildable,
 
       if( ent->deconstruct )
         SV_UnlinkEntity( ent );
+    }
+
+    if(
+      !collision && ent->s.eType == ET_BUILDABLE &&
+      ( ent->s.modelindex == BA_A_SPAWN || ent->s.modelindex == BA_H_SPAWN ) )
+    {
+      vec3_t buildable_mins, buildable_maxs;
+      BG_BuildableBoundingBox( buildable, buildable_mins, buildable_maxs );
+      collision = 
+        G_CheckAreaForSpawnIntersection(
+          ent->r.currentOrigin, ent->s.origin2, ent->s.modelindex,
+          buildable_mins, buildable_maxs, origin);
     }
 
     if( collision )
