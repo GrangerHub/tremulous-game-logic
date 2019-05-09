@@ -1184,16 +1184,28 @@ qboolean G_BBOXes_Visible(
     destination_num = ENTITYNUM_NONE;
   }
 
-  // use the midpoint of the bounds instead of the origin, because
-  // bmodels may have their origin set to 0,0,0
-  VectorAdd(source_origin, source_mins, absmins);
-  VectorAdd(source_origin, source_maxs, absmaxs);
-  VectorAdd( absmins, absmaxs, source_midpoint );
-  VectorScale( source_midpoint, 0.5, source_midpoint );
-  VectorAdd(dest_origin, dest_mins, absmins);
-  VectorAdd(dest_origin, dest_maxs, absmaxs);
-  VectorAdd( absmins, absmaxs, destination_midpoint );
-  VectorScale( destination_midpoint, 0.5, destination_midpoint );
+  if(source_mins && source_maxs) {
+    // use the midpoint of the bounds instead of the origin, because
+    // bmodels may have their origin set to 0,0,0
+    VectorAdd(source_origin, source_mins, absmins);
+    VectorAdd(source_origin, source_maxs, absmaxs);
+    VectorAdd( absmins, absmaxs, source_midpoint );
+    VectorScale( source_midpoint, 0.5, source_midpoint );
+  } else {
+    VectorCopy(source_origin, source_midpoint);
+  }
+
+  if(dest_mins && dest_maxs) {
+    // use the midpoint of the bounds instead of the origin, because
+    // bmodels may have their origin set to 0,0,0
+    VectorAdd(dest_origin, dest_mins, absmins);
+    VectorAdd(dest_origin, dest_maxs, absmaxs);
+    VectorAdd( absmins, absmaxs, destination_midpoint );
+    VectorScale( destination_midpoint, 0.5, destination_midpoint );
+  } else {
+    VectorCopy(dest_origin, destination_midpoint);
+  }
+  
 
   source_point.num = 0;
 
