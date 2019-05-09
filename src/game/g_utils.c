@@ -1151,6 +1151,79 @@ qboolean G_Visible( gentity_t *ent1, gentity_t *ent2, int contents )
 
 /*
 ===============
+G_Visible
+
+Test for a LOS between two bboxes
+===============
+*/
+qboolean G_BBOXes_Visible(
+  int source_num,
+  const vec3_t source_origin, const vec3_t source_mins, const vec3_t source_maxs,
+  int destination_num,
+  const vec3_t dest_origin, const vec3_t dest_mins, const vec3_t dest_maxs,
+  int contents) {
+  trace_t        tr;
+  vec3_t         source_midpoint, destination_midpoint, absmins, absmaxs;
+  bboxPoint_t    source_point, destination_point;
+
+  Com_Assert(source_origin && "G_BBOXes_Visible: source_origin is NULL");
+  Com_Assert(dest_origin && "G_BBOXes_Visible: dest_origin is NULL" );
+
+  if(source_num < 0 || source_num >= MAX_GENTITIES) {
+    source_num = ENTITYNUM_NONE;
+  }
+
+  if(destination_num < 0 || destination_num >= MAX_GENTITIES) {
+    destination_num = ENTITYNUM_NONE;
+  }
+
+  // use the midpoint of the bounds instead of the origin, because
+  // bmodels may have their origin set to 0,0,0
+  VectorAdd(source_origin, source_mins, absmins);
+  VectorAdd(source_origin, source_maxs, absmaxs);
+  VectorAdd( absmins, absmaxs, source_midpoint );
+  VectorScale( source_midpoint, 0.5, source_midpoint );
+  VectorAdd(dest_origin, dest_mins, absmins);
+  VectorAdd(dest_origin, dest_maxs, absmaxs);
+  VectorAdd( absmins, absmaxs, destination_midpoint );
+  VectorScale( destination_midpoint, 0.5, destination_midpoint );
+
+  source_point.num = 0;
+
+  do {//check between the different points
+    BG_EvaluateBBOXPoint( &source_point, source_midpoint, source_mins, source_maxs );
+
+    destination_point.num = 0;
+    do {
+      BG_EvaluateBBOXPoint( &destination_point, destination_midpoint, dest_mins, dest_maxs );
+      SV_Trace(
+        &tr, source_point.point, NULL, NULL, destination_point.point,
+        source_num, contents, TT_AABB );
+      if( tr.fraction == 1.0  || tr.entityNum == destination_num ) {
+        return qtrue;
+      }
+
+      // check only the midpoint if mins or maxs are NULL
+      if(!dest_mins || !dest_maxs) {
+        break;
+      }
+
+      destination_point.num++;
+    } while( destination_point.num < NUM_NONVERTEX_BBOX_POINTS );
+
+    // check only the midpoint if mins or maxs are NULL
+    if(!source_mins || !source_maxs) {
+      break;
+    }
+
+    source_point.num++;
+  } while( source_point.num < NUM_BBOX_POINTS );
+
+  return qfalse;
+}
+
+/*
+===============
 G_ClosestEnt
 
 Test a list of entities for the closest to a particular point

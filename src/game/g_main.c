@@ -64,8 +64,6 @@ vmCvar_t  g_warmupTimeout1;
 vmCvar_t  g_warmupTimeout1Trigger;
 vmCvar_t  g_warmupTimeout2;
 vmCvar_t  g_warmupTimeout2Trigger;
-vmCvar_t  g_warmupBuildableRespawnTime;
-vmCvar_t  g_warmupDefensiveBuildableRespawnTime;
 vmCvar_t  g_warmupBlockEnemyBuilding;
 vmCvar_t  g_warmupFriendlyBuildableFire;
 vmCvar_t  g_nextMapStartedMatchWhenEmptyTeams;
@@ -230,12 +228,8 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_warmupTimeout2, "g_warmupTimeout2", "60", CVAR_ARCHIVE, 0, qtrue },
   { &g_warmupTimeout2Trigger, "g_warmupTimeout2Trigger", "66", CVAR_ARCHIVE, 0,
     qtrue },
-  { &g_warmupBuildableRespawnTime, "g_warmupBuildableRespawnTime", "10",
-    CVAR_ARCHIVE, 0, qtrue },
-  { &g_warmupDefensiveBuildableRespawnTime,
-    "g_warmupDefensiveBuildableRespawnTime", "30", CVAR_ARCHIVE, 0, qtrue },
   { &g_warmupBlockEnemyBuilding,
-    "g_warmupBlockEnemyBuilding", "0", CVAR_SERVERINFO | CVAR_ARCHIVE, 0,
+    "g_warmupBlockEnemyBuilding", "1", CVAR_SERVERINFO | CVAR_ARCHIVE, 0,
     qtrue },
   { &g_warmupFriendlyBuildableFire,
     "g_warmupFriendlyBuildableFire", "1", CVAR_SERVERINFO | CVAR_ARCHIVE, 0,

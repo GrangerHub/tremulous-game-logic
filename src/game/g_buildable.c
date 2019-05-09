@@ -4771,14 +4771,18 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
 
     // Check if the enemy isn't blocking your building during pre-game warmup
     if( IS_WARMUP && g_warmupBlockEnemyBuilding.integer &&
-        ( G_IsPowered( entity_origin ) != BA_NONE ) )
+        ( G_IsPowered( entity_origin ) == BA_H_REACTOR ) )
     {
-      if( G_IsPowered( entity_origin ) == BA_H_REACTOR )
-      {
-        reason = IBE_BLOCKEDBYENEMY;
-      } else if( !G_IsOvermindCreepHere( entity_origin ) &&
-                 buildable != BA_A_OVERMIND  )
-      {
+      gentity_t *blocking_ent = G_PowerEntityForPoint( entity_origin );
+
+      if(
+        blocking_ent && buildable != BA_A_OVERMIND &&
+        (
+          !G_IsOvermindCreepHere( entity_origin ) ||
+          G_BBOXes_Visible(
+            ENTITYNUM_NONE, entity_origin, mins, maxs,
+            blocking_ent->s.number, blocking_ent->r.currentOrigin,
+            blocking_ent->r.mins, blocking_ent->r.maxs, MASK_SHOT))) {
         reason = IBE_BLOCKEDBYENEMY;
       }
     }
@@ -4801,14 +4805,18 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
 
     // Check if the enemy isn't blocking your building during pre-game warmup
     if( IS_WARMUP && g_warmupBlockEnemyBuilding.integer &&
-        G_IsCreepHere( entity_origin ) )
+        G_IsOvermindCreepHere( entity_origin ) )
     {
-      if( G_IsOvermindCreepHere( entity_origin ) )
-      {
-        reason = IBE_BLOCKEDBYENEMY;
-      } else if( G_IsPowered( entity_origin ) != BA_H_REACTOR &&
-                 buildable != BA_H_REACTOR  )
-      {
+      gentity_t *blocking_ent = G_Overmind();
+
+      if(
+        blocking_ent && buildable != BA_H_REACTOR &&
+        (
+          G_IsPowered( entity_origin ) != BA_H_REACTOR ||
+          G_BBOXes_Visible(
+            ENTITYNUM_NONE, entity_origin, mins, maxs,
+            blocking_ent->s.number, blocking_ent->r.currentOrigin,
+            blocking_ent->r.mins, blocking_ent->r.maxs, MASK_SHOT))) {
         reason = IBE_BLOCKEDBYENEMY;
       }
     }
