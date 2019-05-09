@@ -2496,80 +2496,16 @@ Returns qtrue if the inflictor can directly damage the target.  Used for
 explosions and melee attacks.
 ============
 */
-qboolean CanDamage( gentity_t *targ, vec3_t origin,
-                    vec3_t mins, vec3_t maxs )
-{
-  vec3_t         dest;
-  trace_t        tr;
-  vec3_t         midpoint;
-  bboxPoint_t    sourcePoint;
-
+qboolean CanDamage(
+  gentity_t *targ, vec3_t origin, vec3_t mins, vec3_t maxs ) {
   Com_Assert( targ &&
               "CanDamage: targ is NULL" );
   Com_Assert( origin &&
               "CanDamage: origin is NULL" );
 
-  // use the midpoint of the bounds instead of the origin, because
-  // bmodels may have their origin is 0,0,0
-  VectorAdd( targ->r.absmin, targ->r.absmax, midpoint );
-  VectorScale( midpoint, 0.5, midpoint );
-
-  sourcePoint.num = 0;
-
-  do
-  {
-    //check from the different source points
-    BG_EvaluateBBOXPoint( &sourcePoint, origin,
-                     mins, maxs );
-
-    VectorCopy( midpoint, dest );
-    SV_Trace( &tr, sourcePoint.point, NULL, NULL, dest, ENTITYNUM_NONE,
-      MASK_SOLID, TT_AABB );
-    if( tr.fraction == 1.0  || tr.entityNum == targ->s.number )
-      return qtrue;
-
-    // this should probably check in the plane of projection,
-    // rather than in world coordinate, and also include Z
-    VectorCopy( midpoint, dest );
-    dest[ 0 ] += 15.0;
-    dest[ 1 ] += 15.0;
-    SV_Trace( &tr, sourcePoint.point, NULL, NULL, dest, ENTITYNUM_NONE,
-      MASK_SOLID, TT_AABB );
-    if( tr.fraction == 1.0 )
-      return qtrue;
-
-    VectorCopy( midpoint, dest );
-    dest[ 0 ] += 15.0;
-    dest[ 1 ] -= 15.0;
-    SV_Trace( &tr, sourcePoint.point, NULL, NULL, dest, ENTITYNUM_NONE,
-      MASK_SOLID, TT_AABB );
-    if( tr.fraction == 1.0 )
-      return qtrue;
-
-    VectorCopy( midpoint, dest );
-    dest[ 0 ] -= 15.0;
-    dest[ 1 ] += 15.0;
-    SV_Trace( &tr, sourcePoint.point, NULL, NULL, dest, ENTITYNUM_NONE,
-      MASK_SOLID, TT_AABB );
-    if( tr.fraction == 1.0 )
-      return qtrue;
-
-    VectorCopy( midpoint, dest );
-    dest[ 0 ] -= 15.0;
-    dest[ 1 ] -= 15.0;
-    SV_Trace( &tr, sourcePoint.point, NULL, NULL, dest, ENTITYNUM_NONE,
-      MASK_SOLID, TT_AABB );
-    if( tr.fraction == 1.0 )
-      return qtrue;
-
-    // check only the origin if mins or maxs are NULL
-    if( !mins || !maxs )
-      break;
-
-    sourcePoint.num++;
-  } while( sourcePoint.num < NUM_BBOX_POINTS );
-
-  return qfalse;
+  return G_BBOXes_Visible(
+    ENTITYNUM_NONE, origin, mins, maxs,
+    targ->s.number, targ->r.currentOrigin, targ->r.mins, targ->r.maxs, MASK_SHOT);
 }
 
 /*

@@ -1331,6 +1331,12 @@ void        G_TriggerMenuArgs( int clientNum, dynMenu_t menu, int arg );
 void        G_CloseMenus( int clientNum );
 
 qboolean    G_Visible( gentity_t *ent1, gentity_t *ent2, int contents );
+qboolean    G_BBOXes_Visible(
+  int source_num,
+  const vec3_t source_origin, const vec3_t source_mins, const vec3_t source_maxs,
+  int destination_num,
+  const vec3_t dest_origin, const vec3_t dest_mins, const vec3_t dest_maxs,
+  int contents);
 gentity_t   *G_ClosestEnt( vec3_t origin, gentity_t **entities, int numEntities );
 
 typedef enum {
@@ -1724,8 +1730,6 @@ extern  vmCvar_t  g_warmupTimeout1;
 extern  vmCvar_t  g_warmupTimeout1Trigger;
 extern  vmCvar_t  g_warmupTimeout2;
 extern  vmCvar_t  g_warmupTimeout2Trigger;
-extern  vmCvar_t  g_warmupBuildableRespawnTime;
-extern  vmCvar_t  g_warmupDefensiveBuildableRespawnTime;
 extern  vmCvar_t  g_warmupBlockEnemyBuilding;
 extern  vmCvar_t  g_warmupFriendlyBuildableFire;
 extern  vmCvar_t  g_nextMapStartedMatchWhenEmptyTeams;
