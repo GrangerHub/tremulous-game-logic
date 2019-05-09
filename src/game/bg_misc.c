@@ -7296,7 +7296,17 @@ void BG_PositionBuildableRelativeToPlayer(
     builderDia *= 2.0f;
 
     if(builder_adjacent_placement) {
-      buildDist = (2 * RadiusFromBounds(mins, maxs)) + builderDia + 1.0f;
+      float projected_maxs, projected_mins;
+  
+      projected_maxs =
+        fabs(maxs[0] * forward[0]) +
+        fabs(maxs[1] * forward[1]) +
+        fabs(maxs[2] * forward[2]);
+      projected_mins =
+        fabs(mins[0] * forward[0]) +
+        fabs(mins[1] * forward[1]) +
+        fabs(mins[2] * forward[2]);
+      buildDist = max(projected_maxs, projected_mins) + builderDia + 5.0f;
     } else if(!preciseBuild) {
       buildDist *= 2.0f;
     }
