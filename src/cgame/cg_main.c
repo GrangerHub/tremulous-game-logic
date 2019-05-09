@@ -267,8 +267,6 @@ vmCvar_t  cg_cameraShakeMagnitude;
 
 vmCvar_t  cg_chatTeamPrefix;
 
-vmCvar_t  cg_warmupBuildableRespawning;
-
 vmCvar_t  cg_intermissionMusic;
 
 typedef struct
@@ -448,8 +446,6 @@ static cvarTable_t cvarTable[ ] =
   { &cg_cameraShakeMagnitude, "cg_cameraShakeMagnitude", "1", CVAR_ARCHIVE },
 	
   { &cg_chatTeamPrefix, "cg_chatTeamPrefix", "1", CVAR_ARCHIVE },
-
-  { &cg_warmupBuildableRespawning, "g_warmupBuildableRespawning", "0", 0 },
 
   { &cg_intermissionMusic, "cg_intermissionMusic", "1", CVAR_ARCHIVE }
 };
