@@ -1023,13 +1023,13 @@ void CG_Menu( int menu, int arg )
       {
         case TEAM_ALIENS:
           longMsg   = "You cannot build within the range of a human reactor "
-                      "nor a repeater during pre-game warmup.";
-          shortMsg  = "A nearby human reactor or a repeater is disrupting creep here.";
+                      "during pre-game warmup.";
+          shortMsg  = "A nearby human reactor disrupting creep here.";
           break;
         case TEAM_HUMANS:
           longMsg   = "You cannot build on alien creep, within the range of "
-                      "an overmind nor an egg nor during pre-game warmup.";
-          shortMsg  = "Alien creep is disrupting power here.";
+                      "an overmind during pre-game warmup.";
+          shortMsg  = "Alien overmind creep is disrupting power here.";
           break;
       }
       break;

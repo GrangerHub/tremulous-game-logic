@@ -229,7 +229,7 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_warmupTimeout2Trigger, "g_warmupTimeout2Trigger", "66", CVAR_ARCHIVE, 0,
     qtrue },
   { &g_warmupBlockEnemyBuilding,
-    "g_warmupBlockEnemyBuilding", "0", CVAR_SERVERINFO | CVAR_ARCHIVE, 0,
+    "g_warmupBlockEnemyBuilding", "1", CVAR_SERVERINFO | CVAR_ARCHIVE, 0,
     qtrue },
   { &g_warmupFriendlyBuildableFire,
     "g_warmupFriendlyBuildableFire", "1", CVAR_SERVERINFO | CVAR_ARCHIVE, 0,
