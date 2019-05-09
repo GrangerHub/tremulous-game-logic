@@ -604,8 +604,7 @@ int G_GetMarkedBuildPoints( playerState_t *ps )
   if( G_TimeTilSuddenDeath( ) <= 0 )
     return 0;
 
-  if( ( ( IS_WARMUP && g_warmupBuildableRespawning.integer ) ||
-        !g_markDeconstruct.integer ) )
+  if( !g_markDeconstruct.integer )
     return 0;
 
 G_SetPlayersLinkState( qfalse, &g_entities[ ps->clientNum ] );
@@ -980,85 +979,6 @@ static void nullDieFunction( gentity_t *self, gentity_t *inflictor, gentity_t *a
 //==================================================================================
 
 
-
-/*
-================
-AGeneric_CreepRespawn
-
-Called after an alien buildable dies in warmup
-================
- */
-
-static void G_LayoutBuildItem( buildable_t buildable, vec3_t origin, vec3_t angles, vec3_t origin2, vec3_t angles2 );
-void AGeneric_CreepRespawn( gentity_t *self )
-{
-  int buildable;
-  gentity_t *built;
-
-  vec3_t origin = { 0.0f, 0.0f, 0.0f };
-  vec3_t angles = { 0.0f, 0.0f, 0.0f };
-  vec3_t origin2 = { 0.0f, 0.0f, 0.0f };
-  vec3_t angles2 = { 0.0f, 0.0f, 0.0f };
-
-  int       i, num;
-  int       touch[ MAX_GENTITIES ];
-  gentity_t *hit;
-  vec3_t    mins, maxs;
-
-  VectorAdd( self->r.currentOrigin, self->r.mins, mins );
-  VectorAdd( self->r.currentOrigin, self->r.maxs, maxs );
-  num = SV_AreaEntities( mins, maxs, touch, MAX_GENTITIES );
-  for( i = 0; i < num; i++ )
-  {
-    hit = &g_entities[ touch[ i ] ];
-    if( hit->client )
-    {
-      // players taking up same space gets shoved away pretty hard
-      vec3_t velocity;
-      velocity[0] = 40 * (hit->r.currentOrigin[0] - self->r.currentOrigin[0]);
-      velocity[1] = 40 * (hit->r.currentOrigin[1] - self->r.currentOrigin[1]);
-      velocity[2] = 50; //(hit->r.currentOrigin[2] - self->r.currentOrigin[2]);
-
-      VectorAdd( hit->client->ps.velocity, velocity, hit->client->ps.velocity );
-    }
-    else if( hit != self )
-    {
-      // buildables taking the same space kill themselves
-      G_Damage( hit, NULL, NULL, NULL, NULL, 0, DAMAGE_INSTAGIB, MOD_SUICIDE );
-    }
-  }
-
-  // cancel respawning if respawning buildable needs to be unique and there already is
-  // one on the map
-  if( BG_Buildable( self->s.modelindex )->uniqueTest && G_FindBuildable( self->s.modelindex ) )
-  {
-    G_FreeEntity( self );
-    return;
-  }
-
-  // Copy buildable model index
-  buildable = self->s.modelindex;
-
-  // Copy vectors
-  VectorCopy( self->r.currentOrigin, origin );
-  VectorCopy( self->r.currentAngles, angles );
-  VectorCopy( self->s.origin2, origin2 );
-  VectorCopy( self->s.angles2, angles2 );
-
-  // Free entity before respawning new one in its place
-  G_FreeEntity( self );
-
-  // Respawn the new buildable
-  built = G_Spawn( );
-  VectorCopy( origin, built->r.currentOrigin );
-  VectorCopy( angles, built->r.currentAngles );
-  VectorCopy( origin2, built->s.origin2 );
-  VectorCopy( angles2, built->s.angles2 );
-  built->buildableTeam = BG_Buildable( buildable )->team;
-  BG_BuildableBoundingBox( buildable, built->r.mins, built->r.maxs );
-  G_SpawnBuildable( built, buildable );
-}
-
 /*
 ================
 AGeneric_CreepRecede
@@ -1068,8 +988,6 @@ Called when an alien buildable dies
 */
 void AGeneric_CreepRecede( gentity_t *self )
 {
-  int adjustedRespawnTime;
-
   //if the creep just died begin the recession
   if( !( self->s.eFlags & EF_DEAD ) )
   {
@@ -1094,36 +1012,7 @@ void AGeneric_CreepRecede( gentity_t *self )
     self->nextthink = level.time + 500;
   else //creep has died
   {
-    // Respawn buildable if in warmup, otherwise free the entity
-    if( IS_WARMUP && g_warmupBuildableRespawning.integer &&
-        self->enemy->client &&
-        self->methodOfDeath != MOD_TRIGGER_HURT )
-    {
-      self->think = AGeneric_CreepRespawn;
-      if( self->s.modelindex == BA_A_ACIDTUBE ||
-          self->s.modelindex == BA_A_HIVE ||
-          self->s.modelindex == BA_A_TRAPPER ||
-          self->s.modelindex == BA_A_ZUNGE )
-      {
-        if (g_warmupDefensiveBuildableRespawnTime.integer >= 10)
-          adjustedRespawnTime = g_warmupDefensiveBuildableRespawnTime.integer - 10;
-        else
-          adjustedRespawnTime = g_warmupDefensiveBuildableRespawnTime.integer;
-      }
-      else
-      {
-        if (g_warmupBuildableRespawnTime.integer >= 10)
-          adjustedRespawnTime = g_warmupBuildableRespawnTime.integer - 10;
-        else
-          adjustedRespawnTime = g_warmupBuildableRespawnTime.integer;
-      }
-
-      self->nextthink = level.time + adjustedRespawnTime * 1000;
-    }
-    else
-    {
-      G_FreeEntity( self );
-    }
+    G_FreeEntity( self );
   }
 }
 
@@ -2574,88 +2463,6 @@ static void G_IdlePowerState( gentity_t *self )
 //==================================================================================
 
 
-
-
-/*
-================
-HSpawn_Respawn
-
-Called after a human buildable dies in warmup
-================
- */
-
-void HSpawn_Respawn( gentity_t *self )
-{
-  int buildable;
-  gentity_t *built;
-
-  vec3_t origin = { 0.0f, 0.0f, 0.0f };
-  vec3_t angles = { 0.0f, 0.0f, 0.0f };
-  vec3_t origin2 = { 0.0f, 0.0f, 0.0f };
-  vec3_t angles2 = { 0.0f, 0.0f, 0.0f };
-
-  int       i, num;
-  int       touch[ MAX_GENTITIES ];
-  gentity_t *hit;
-  vec3_t    mins, maxs;
-
-  VectorAdd( self->r.currentOrigin, self->r.mins, mins );
-  VectorAdd( self->r.currentOrigin, self->r.maxs, maxs );
-  num = SV_AreaEntities( mins, maxs, touch, MAX_GENTITIES );
-  for( i = 0; i < num; i++ )
-  {
-    hit = &g_entities[ touch[ i ] ];
-    if( hit->client )
-    {
-      // players taking up same space gets shoved away pretty hard
-      vec3_t velocity;
-      velocity[0] = 20 * (hit->r.currentOrigin[0] - self->r.currentOrigin[0]);
-      velocity[1] = 20 * (hit->r.currentOrigin[1] - self->r.currentOrigin[1]);
-      velocity[2] = 20 * (hit->r.currentOrigin[2] - self->r.currentOrigin[2]);
-
-      VectorAdd( hit->client->ps.velocity, velocity, hit->client->ps.velocity );
-      SV_GameSendServerCommand( hit-g_entities, va( "cp \"Don't block respawning buildables!\" %d", CP_SPAWN_BLOCK ) );
-    }
-    else if( hit != self )
-    {
-      // buildables taking the same space kill themselves
-      G_Damage( hit, self, self, NULL, NULL,
-        0, DAMAGE_INSTAGIB|DAMAGE_NO_PROTECTION, MOD_SUICIDE );
-    }
-  }
-
-  // cancel respawning if respawning buildable needs to be unique and there already is
-  // one on the map
-  if( BG_Buildable( self->s.modelindex )->uniqueTest && G_FindBuildable( self->s.modelindex ) )
-  {
-    G_FreeEntity( self );
-    return;
-  }
-
-  // copy buildable model index
-  buildable = self->s.modelindex;
-
-  // copy vectors
-  VectorCopy( self->r.currentOrigin, origin );
-  VectorCopy( self->r.currentAngles, angles );
-  VectorCopy( self->s.origin2, origin2 );
-  VectorCopy( self->s.angles2, angles2 );
-
-  // free entity before respawning new one in its place
-  G_FreeEntity( self );
-
-  // Respawn the new buildable
-  built = G_Spawn( );
-  VectorCopy( origin, built->r.currentOrigin );
-  VectorCopy( angles, built->r.currentAngles );
-  VectorCopy( origin2, built->s.origin2 );
-  VectorCopy( angles2, built->s.angles2 );
-  built->buildableTeam = BG_Buildable( buildable )->team;
-  BG_BuildableBoundingBox( buildable, built->r.mins, built->r.maxs );
-  G_SpawnBuildable( built, buildable );
-}
-
-
 /*
 ================
 HSpawn_Disappear
@@ -2705,28 +2512,8 @@ void HSpawn_Blast( gentity_t *self )
   // ensure that the entity isn't marked as spotted, so that the explosion effect
   // doesn't occur from a player
   self->s.eFlags &= ~EF_SCAN_SPOTTED;
-  // respawn the buildable in next think in warmup
-  // and attacker was a player, but don't respawn a repeater killed from another
-  // power zone.
-  if( IS_WARMUP && g_warmupBuildableRespawning.integer
-      && self->enemy->client &&
-      self->methodOfDeath != MOD_TRIGGER_HURT &&
-      !( self->methodOfDeath == MOD_SUICIDE &&
-         self->s.modelindex == BA_H_REPEATER ) )
-  {
-    self->think = HSpawn_Respawn;
-    if( self->s.modelindex == BA_H_MGTURRET || self->s.modelindex == BA_H_TESLAGEN )
-      self->nextthink = level.time +
-        g_warmupDefensiveBuildableRespawnTime.integer * 1000;
-    else
-      self->nextthink = level.time +
-        g_warmupBuildableRespawnTime.integer * 1000;
-    self->unlinkAfterEvent = qtrue;
-  }
-  else
-  {
-    self->freeAfterEvent = qtrue;
-  }
+  self->freeAfterEvent = qtrue;
+
   G_AddEvent( self, EV_HUMAN_BUILDABLE_EXPLOSION, DirToByte( dir ) );
 }
 
@@ -4652,8 +4439,7 @@ void G_BuildableThink( gentity_t *ent, int msec )
       }
     }
 
-    if(  !( IS_WARMUP && g_warmupBuildableRespawning.integer ) &&
-         g_allowBuildableStacking.integer )
+    if(  g_allowBuildableStacking.integer )
     {
       meansOfDeath_t meansOD;
 
@@ -5005,8 +4791,7 @@ void G_FreeMarkedBuildables( gentity_t *deconner, char *readable, int rsize,
   if( nums && nsize )
     nums[ 0 ] = '\0';
 
-  if( ( ( IS_WARMUP && g_warmupBuildableRespawning.integer ) ||
-        !g_markDeconstruct.integer ) )
+  if( !g_markDeconstruct.integer )
     return; // Not enabled, can't deconstruct anything
 
   for( i = 0; i < level.numBuildablesForRemoval; i++ )
@@ -5111,8 +4896,7 @@ static itemBuildError_t G_SufficientBPAvailable( buildable_t     buildable,
   }
 
   // Simple non-marking case
-  if( ( ( IS_WARMUP && g_warmupBuildableRespawning.integer ) ||
-        !g_markDeconstruct.integer ) )
+  if( !g_markDeconstruct.integer )
   {
     if( remainingBP - buildPoints < 0 )
       return bpError;
@@ -5339,35 +5123,6 @@ static itemBuildError_t G_SufficientBPAvailable( buildable_t     buildable,
     return IBE_NONE;
 }
 
-/*
-================
-G_SetBuildableLinkState
-
-Links or unlinks all the buildable entities
-================
-*/
-static void G_SetBuildableLinkState( qboolean link ) {
-  int       i;
-  gentity_t *ent;
-
-  for ( i = 1, ent = g_entities + i; i < level.num_entities; i++, ent++ ) {
-    if( ent->s.eType != ET_BUILDABLE ) {
-      continue;
-    }
-
-    if( !ent->inuse ) {
-      continue;
-    }
-
-    if( link ) {
-      SV_LinkEntity( ent );
-    }
-    else {
-      SV_UnlinkEntity( ent );
-    }
-  }
-}
-
 static void G_SetBuildableMarkedLinkState( qboolean link ) {
   int       i;
   gentity_t *ent;
@@ -5466,7 +5221,6 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
     (
       tr1.entityNum != ENTITYNUM_WORLD &&
       (
-        ( IS_WARMUP && g_warmupBuildableRespawning.integer ) ||
         !g_allowBuildableStacking.integer ||
         (
           g_entities[ *groundEntNum ].s.eType == ET_BUILDABLE &&
@@ -5578,13 +5332,11 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
 
       if( tempent == NULL ) // No reactor
         reason = IBE_RPTNOREAC;
-      else if( !( IS_WARMUP && g_warmupBuildableRespawning.integer ) &&
-               g_markDeconstruct.integer && g_markDeconstruct.integer != 3 &&
+      else if( g_markDeconstruct.integer && g_markDeconstruct.integer != 3 &&
                powerBuildable && powerBuildable->s.modelindex == BA_H_REACTOR )
         reason = IBE_RPTPOWERHERE;
       else if( powerBuildable &&
-               ( ( IS_WARMUP && g_warmupBuildableRespawning.integer ) ||
-                 !g_markDeconstruct.integer || ( g_markDeconstruct.integer == 3 &&
+               ( !g_markDeconstruct.integer || ( g_markDeconstruct.integer == 3 &&
                    !intersectsBuildable ) ) )
         reason = IBE_RPTPOWERHERE;
     }
