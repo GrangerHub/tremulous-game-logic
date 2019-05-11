@@ -4116,7 +4116,7 @@ void G_GiveItem( gentity_t *ent, const char *itemName, const int price,
             ent->client->armorToGen = 0;
             ent->client->armorGenIncrementTime = 0;
           } else {
-            ent->client->ps.misc[ MISC_ARMOR ] = BG_HP2SU( 75 );
+            ent->client->ps.misc[ MISC_ARMOR ] = BG_HP2SU( 100 );
             ent->client->ps.stats[ STAT_FLAGS ] |= SFL_ARMOR_GENERATE;
             ent->client->lastArmorGenTime = level.time;
             ent->client->armorToGen = BSUIT_MAX_ARMOR - ent->client->ps.misc[ MISC_ARMOR ];
