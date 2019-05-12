@@ -3432,7 +3432,7 @@ int G_CanAutoSell( gentity_t *ent, const char *itemToBuyName,
     {
       int value;
 
-      if( !BG_InventoryContainsUpgrade( u, &ent->client->ps.stats ) )
+      if( !BG_InventoryContainsUpgrade( u, ent->client->ps.stats ) )
         continue;
 
       //check if this upgrade is blocking

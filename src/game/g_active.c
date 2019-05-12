@@ -731,41 +731,41 @@ void ClientTimerActions( gentity_t *ent, int msec )
         if( client->ps.stats[ STAT_STAMINA ] < -STAMINA_MAX )
           client->ps.stats[ STAT_STAMINA ] = -STAMINA_MAX;
 
-          //  restore stamina from medkit
-          staminaDifference = STAMINA_MAX - client->ps.stats[ STAT_STAMINA ];
+        //  restore stamina from medkit
+        staminaDifference = STAMINA_MAX - client->ps.stats[ STAT_STAMINA ];
 
-          if( client->medKitStaminaToRestore &&
-              client->nextMedKitRestoreStaminaTime < level.time )
+        if( client->medKitStaminaToRestore &&
+            client->nextMedKitRestoreStaminaTime < level.time )
+        {
+          if( client->medKitStaminaToRestore > STAMINA_MEDISTAT_RESTORE )
           {
-            if( client->medKitStaminaToRestore > STAMINA_MEDISTAT_RESTORE )
+            if( staminaDifference > STAMINA_MEDISTAT_RESTORE )
             {
-              if( staminaDifference > STAMINA_MEDISTAT_RESTORE )
-              {
-                client->ps.stats[ STAT_STAMINA ] += STAMINA_MEDISTAT_RESTORE;
-                client->medKitStaminaToRestore -= STAMINA_MEDISTAT_RESTORE;
-                if( client->medKitStaminaToRestore > 0 )
-                  client->nextMedKitRestoreStaminaTime = level.time + MEDISTAT_REPEAT;
-                else
-                  client->medKitStaminaToRestore = 0;
-              } else
-              {
+              client->ps.stats[ STAT_STAMINA ] += STAMINA_MEDISTAT_RESTORE;
+              client->medKitStaminaToRestore -= STAMINA_MEDISTAT_RESTORE;
+              if( client->medKitStaminaToRestore > 0 )
+                client->nextMedKitRestoreStaminaTime = level.time + MEDISTAT_REPEAT;
+              else
                 client->medKitStaminaToRestore = 0;
-                client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
-              }
-            } else if( client->medKitStaminaToRestore > 0 )
-            {
-              if( staminaDifference > client->medKitStaminaToRestore )
-              {
-                client->ps.stats[ STAT_STAMINA ] += client->medKitStaminaToRestore;
-                client->medKitStaminaToRestore = 0;
-              } else
-              {
-                client->medKitStaminaToRestore = 0;
-                client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
-              }
             } else
+            {
               client->medKitStaminaToRestore = 0;
-          }
+              client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
+            }
+          } else if( client->medKitStaminaToRestore > 0 )
+          {
+            if( staminaDifference > client->medKitStaminaToRestore )
+            {
+              client->ps.stats[ STAT_STAMINA ] += client->medKitStaminaToRestore;
+              client->medKitStaminaToRestore = 0;
+            } else
+            {
+              client->medKitStaminaToRestore = 0;
+              client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
+            }
+          } else
+            client->medKitStaminaToRestore = 0;
+        }
       }
     }
 
@@ -2032,7 +2032,7 @@ void ClientThink_real( gentity_t *ent )
     else
     {
       int       entityList[ MAX_GENTITIES ];
-      int       i, num;
+      int       num;
       int       count, interval;
       vec3_t    range, mins, maxs;
       float     modifier = 1.0f;

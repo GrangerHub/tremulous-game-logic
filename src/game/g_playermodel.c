@@ -60,7 +60,7 @@ void G_InitPlayerModel(void)
         start = filePtr + 15;
 
         // Only want directory names at the current depth.
-        for ( c = start; c != '\0'; c++ )
+        for ( c = start; *c != '\0'; c++ )
         {
             if ( *c == '/' || *c == '\\' )
             {

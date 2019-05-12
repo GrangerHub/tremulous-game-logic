@@ -1438,7 +1438,7 @@ void SV_WriteAttackLog(const char *log)
 /**
  * @brief SV_InitAttackLog
  */
-void SV_InitAttackLog()
+void SV_InitAttackLog(void)
 {
 	if (sv_protectLog->string[0] == '\0')
 	{
@@ -1466,7 +1466,7 @@ void SV_InitAttackLog()
 /**
  * @brief SV_CloseAttackLog
  */
-void SV_CloseAttackLog()
+void SV_CloseAttackLog(void)
 {
 	if (attHandle > 0)
 	{

@@ -401,12 +401,12 @@ g_admin_cmd_t *G_admin_cmd( const char *cmd )
 
 g_admin_level_t *G_admin_level( const int l )
 {
-  g_admin_level_t *level;
+  g_admin_level_t *alevel;
 
-  for( level = g_admin_levels; level; level = level->next )
+  for( alevel = g_admin_levels; alevel; alevel = alevel->next )
   {
-    if( level->level == l )
-      return level;
+    if( alevel->level == l )
+      return alevel;
   }
 
   return NULL;
@@ -769,38 +769,38 @@ static void admin_readconfig_int( char **cnf, int *v )
 static void admin_default_levels( void )
 {
   g_admin_level_t *l;
-  int             level = 0;
+  int             alevel = 0;
 
   l = g_admin_levels = BG_Alloc0( sizeof( g_admin_level_t ) );
-  l->level = level++;
+  l->level = alevel++;
   Q_strncpyz( l->name, "^4Unknown Player", sizeof( l->name ) );
   Q_strncpyz( l->flags,
     "listplayers admintest adminhelp time register",
     sizeof( l->flags ) );
 
   l = l->next = BG_Alloc0( sizeof( g_admin_level_t ) );
-  l->level = level++;
+  l->level = alevel++;
   Q_strncpyz( l->name, "^5Server Regular", sizeof( l->name ) );
   Q_strncpyz( l->flags,
     "listplayers admintest adminhelp time",
     sizeof( l->flags ) );
 
   l = l->next = BG_Alloc0( sizeof( g_admin_level_t ) );
-  l->level = level++;
+  l->level = alevel++;
   Q_strncpyz( l->name, "^6Team Manager", sizeof( l->name ) );
   Q_strncpyz( l->flags,
     "listplayers admintest adminhelp time putteam spec999 forcepec",
     sizeof( l->flags ) );
 
   l = l->next = BG_Alloc0( sizeof( g_admin_level_t ) );
-  l->level = level++;
+  l->level = alevel++;
   Q_strncpyz( l->name, "^2Junior Admin", sizeof( l->name ) );
   Q_strncpyz( l->flags,
     "listplayers admintest adminhelp time putteam spec999 forcepec kick mute ADMINCHAT",
     sizeof( l->flags ) );
 
   l = l->next = BG_Alloc0( sizeof( g_admin_level_t ) );
-  l->level = level++;
+  l->level = alevel++;
   Q_strncpyz( l->name, "^3Senior Admin", sizeof( l->name ) );
   Q_strncpyz( l->flags,
     "listplayers admintest adminhelp time register rename putteam spec999 forcepec kick mute showbans ban "
@@ -808,7 +808,7 @@ static void admin_default_levels( void )
     sizeof( l->flags ) );
 
   l = l->next = BG_Alloc0( sizeof( g_admin_level_t ) );
-  l->level = level++;
+  l->level = alevel++;
   Q_strncpyz( l->name, "^1Server Operator", sizeof( l->name ) );
   Q_strncpyz( l->flags,
     "ALLFLAGS -IMMUTABLE -INCOGNITO",
@@ -819,7 +819,7 @@ static void admin_default_levels( void )
 void G_admin_authlog( gentity_t *ent )
 {
   char            aflags[ MAX_ADMIN_FLAGS * 2 ];
-  g_admin_level_t *level;
+  g_admin_level_t *alevel;
   int             levelNum = 0;
 
   if( !ent )
@@ -828,11 +828,11 @@ void G_admin_authlog( gentity_t *ent )
   if( ent->client->pers.admin )
     levelNum = ent->client->pers.admin->level;
 
-  level = G_admin_level( levelNum );
+  alevel = G_admin_level( levelNum );
 
   Com_sprintf( aflags, sizeof( aflags ), "%s %s",
                ent->client->pers.admin->flags,
-               ( level ) ? level->flags : "" );
+               ( alevel ) ? alevel->flags : "" );
 
   G_LogPrintf( "AdminAuth: %i \"%s" S_COLOR_WHITE "\" \"%s" S_COLOR_WHITE
                "\" [%d] (%s): %s\n",
@@ -3533,9 +3533,9 @@ qboolean G_admin_restart( gentity_t *ent )
 
   if( Cmd_Argc( ) > 1 )
   {
-    char map[ MAX_QPATH ];
+    char map2[ MAX_QPATH ];
 
-    Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
+    Cvar_VariableStringBuffer( "mapname", map2, sizeof( map2 ) );
     Cmd_ArgvBuffer( 1, layout, sizeof( layout ) );
 
     // Figure out which argument is which
@@ -3544,7 +3544,7 @@ qboolean G_admin_restart( gentity_t *ent )
         Q_stricmp( layout, "switchteams" ) &&
         Q_stricmp( layout, "switchteamslock" ) )
     {
-      if( G_LayoutExists( map, layout ) )
+      if( G_LayoutExists( map2, layout ) )
       {
         Cvar_SetSafe( "g_nextLayout", layout );
       }
@@ -5076,7 +5076,7 @@ void G_admin_cleanup( void )
 }
 
 void G_admin_scrim_status(gentity_t *ent ) {
-  char *string;
+  char *string = NULL;
   int i;
 
   ADMBP_begin();

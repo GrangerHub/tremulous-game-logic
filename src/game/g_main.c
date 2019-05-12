@@ -1307,6 +1307,7 @@ char *G_SuddenDeathModeString(void) {
     case SDMODE_NO_DECON:
       return "No Deconstruct";
   }
+  return "";
 }
 
 #define PLAYER_COUNT_MOD 5.0f
@@ -1320,9 +1321,7 @@ Recalculate the quantity of building points available to the teams
 */
 void G_CalculateBuildPoints( void )
 {
-  int               i;
-  buildable_t       buildable;
-  buildPointZone_t  *zone;
+  int i;
 
   // BP queue updates
   while( level.alienBuildPointQueue > 0 &&
@@ -1486,7 +1485,8 @@ void G_CalculateBuildPoints( void )
   // note that this has to be done after the used BP is calculated
   for( i = MAX_CLIENTS; i < level.num_entities; i++ )
   {
-    gentity_t *ent = &g_entities[ i ];
+    buildable_t buildable;
+    gentity_t   *ent = &g_entities[ i ];
 
     if( ent->s.eType != ET_BUILDABLE || ent->s.eFlags & EF_DEAD ||
         ent->buildableTeam != TEAM_HUMANS )
@@ -1499,7 +1499,7 @@ void G_CalculateBuildPoints( void )
 
     if( ent->usesBuildPointZone && level.buildPointZones[ ent->buildPointZone ].active )
     {
-      zone = &level.buildPointZones[ ent->buildPointZone ];
+      buildPointZone_t *zone = &level.buildPointZones[ ent->buildPointZone ];
 
       if( G_TimeTilSuddenDeath( ) > 0 )
       {
@@ -3568,11 +3568,11 @@ Q_EXPORT void G_RunFrame( int levelTime )
       if(level.countdownTime > 0) {
         if(level.countdownTime <= (level.time + 1000)) {
           for(i = 0; i < level.maxclients; i++) {
-            gentity_t *ent = &g_entities[i];
+            gentity_t *ent2 = &g_entities[i];
 
-            if(ent->client->pers.connected == CON_CONNECTED ||
-               ent->client->pers.connected == CON_CONNECTING) {
-              ent->client->pers.fight = qtrue;
+            if(ent2->client->pers.connected == CON_CONNECTED ||
+               ent2->client->pers.connected == CON_CONNECTING) {
+              ent2->client->pers.fight = qtrue;
             }
           }
 
