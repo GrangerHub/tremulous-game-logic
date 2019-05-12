@@ -712,7 +712,6 @@ void CG_PredictPlayerState( void )
     else
     {
       // we have a new snapshot
-      int i;
       int errorcode;
       qboolean error = qtrue;
 

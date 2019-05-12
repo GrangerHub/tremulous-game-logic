@@ -1380,8 +1380,8 @@ static qboolean PM_CheckWallJump( vec3_t wishDir, float wishSpeed )
   if( wall.surfaceFlags & ( SURF_SKY | SURF_SLICK ) )
     return qfalse;
 
-    // Find out how much we look up.
-    upLook = MAX( pm->wallJumperMinFactor, DotProduct( upNormal, pml.forward ) );
+  // Find out how much we look up.
+  upLook = MAX( pm->wallJumperMinFactor, DotProduct( upNormal, pml.forward ) );
 
   // Check if we are looking up the wall.
   if( upLook < minUpLook )

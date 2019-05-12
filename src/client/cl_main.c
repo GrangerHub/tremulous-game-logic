@@ -2592,7 +2592,7 @@ void CL_ServersResponsePacket( const netadr_t* from, msg_t *msg, qboolean extend
 		{
 			// this denotes the start of new-syntax stuff
 			// have we already received this packet?
-			if( cls.receivedAlternateMasterPackets[from->alternateProtocol] & ( 1 << ( ind - 1 ) ) )
+			if( cls.receivedAlternateMasterPackets[from->alternateProtocol] & ( 1 << ind ) )
 			{
 				Com_DPrintf( "CL_ServersResponsePacket: "
 					"received packet %d again, ignoring\n",
@@ -2604,7 +2604,7 @@ void CL_ServersResponsePacket( const netadr_t* from, msg_t *msg, qboolean extend
 			Com_DPrintf( "CL_ServersResponsePacket:%s packet "
 				"%d of %d\n", ( from->alternateProtocol == 0 ? "" : from->alternateProtocol == 1 ? " alternate-1" : " alternate-2" ),
 				ind, cls.numAlternateMasterPackets[from->alternateProtocol] );
-			cls.receivedAlternateMasterPackets[from->alternateProtocol] |= ( 1 << ( ind - 1 ) );
+			cls.receivedAlternateMasterPackets[from->alternateProtocol] |= ( 1 << ind );
 
 			CL_GSRFeaturedLabel( &buffptr, label, sizeof( label ) );
 		}
@@ -4513,11 +4513,13 @@ qboolean CL_UpdateVisiblePings_f(int source) {
 								break;
 							}
 						}
-						memcpy(&cl_pinglist[j].adr, &server[i].adr, sizeof(netadr_t));
-						cl_pinglist[j].start = Sys_Milliseconds();
-						cl_pinglist[j].time = 0;
-						NET_OutOfBandPrint( NS_CLIENT, cl_pinglist[j].adr, "getinfo xxx" );
-						slots++;
+						if (j < MAX_PINGREQUESTS) {
+							memcpy(&cl_pinglist[j].adr, &server[i].adr, sizeof(netadr_t));
+							cl_pinglist[j].start = Sys_Milliseconds();
+							cl_pinglist[j].time = 0;
+							NET_OutOfBandPrint( NS_CLIENT, cl_pinglist[j].adr, "getinfo xxx" );
+							slots++;
+						}
 					}
 				}
 				// if the server has a ping higher than cl_maxPing or

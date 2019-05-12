@@ -2820,8 +2820,8 @@ void HMedistat_Think( gentity_t *self )
     }
     else if( self->enemy && self->enemy->client ) //heal!
     {
-      gentity_t *player = self->enemy;
-      gclient_t *client = player->client;
+      gentity_t *player2 = self->enemy;
+      gclient_t *client = player2->client;
       const int maxHealth = BG_Class( client->ps.stats[ STAT_CLASS ] )->health;
 
       if( client->ps.stats[ STAT_STAMINA ] <  STAMINA_MAX )
@@ -2830,18 +2830,18 @@ void HMedistat_Think( gentity_t *self )
       if( client->ps.stats[ STAT_STAMINA ] > STAMINA_MAX )
         client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
 
-      if( player->health < maxHealth )
+      if( player2->health < maxHealth )
       {
-        player->health += BG_HP2SU( 1 );
-        if( player->health > maxHealth )
-          player->health = maxHealth;
-        client->ps.misc[ MISC_HEALTH ] = player->health;
+        player2->health += BG_HP2SU( 1 );
+        if( player2->health > maxHealth )
+          player2->health = maxHealth;
+        client->ps.misc[ MISC_HEALTH ] = player2->health;
         client->pers.infoChangeTime = level.time;
       }
 
       //if they're completely healed and have full stamina, give them a medkit
-      if( player->health >= maxHealth &&
-          player->client->ps.stats[ STAT_STAMINA ] >= STAMINA_MAX )
+      if( player2->health >= maxHealth &&
+          player2->client->ps.stats[ STAT_STAMINA ] >= STAMINA_MAX )
       {
         if( !BG_InventoryContainsUpgrade( UP_MEDKIT, self->enemy->client->ps.stats ) )
           BG_AddUpgradeToInventory( UP_MEDKIT, self->enemy->client->ps.stats );

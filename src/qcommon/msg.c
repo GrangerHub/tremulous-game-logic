@@ -99,11 +99,9 @@ void MSG_Copy(msg_t *buf, byte *data, int length, msg_t *src)
 =============================================================================
 
 bit functions
-  
+	
 =============================================================================
 */
-
-int	overflows;
 
 // negative bit values include signs
 void MSG_WriteBits( msg_t *msg, int value, int bits ) {
@@ -121,32 +119,18 @@ void MSG_WriteBits( msg_t *msg, int value, int bits ) {
 		Com_Error( ERR_DROP, "MSG_WriteBits: bad bits %i", bits );
 	}
 
-	// check for overflows
-	if ( bits != 32 ) {
-		if ( bits > 0 ) {
-			if ( value > ( ( 1 << bits ) - 1 ) || value < 0 ) {
-				overflows++;
-			}
-		} else {
-			int	r;
+	// TODO: check for overflows?
 
-			r = 1 << (bits-1);
-
-			if ( value >  r - 1 || value < -r ) {
-				overflows++;
-			}
-		}
-	}
 	if ( bits < 0 ) {
 		bits = -bits;
 	}
 	if (msg->oob)
 	{
 		if (msg->cursize + (bits >> 3) > msg->maxsize)
-    {
-      msg->overflowed = qtrue;
-      return;
-    }
+		{
+			msg->overflowed = qtrue;
+			return;
+		}
 		if(bits==8)
 		{
 			msg->data[msg->cursize] = value;
@@ -175,10 +159,10 @@ void MSG_WriteBits( msg_t *msg, int value, int bits ) {
 			int nbits;
 			nbits = bits&7;
 			if ( msg->bit + nbits > msg->maxsize << 3 )
-      {
-        msg->overflowed = qtrue;
-        return;
-      }
+			{
+				msg->overflowed = qtrue;
+				return;
+			}
 			for(i=0;i<nbits;i++) {
 				Huff_putBit((value&1), msg->data, &msg->bit);
 				value = (value>>1);
@@ -189,14 +173,14 @@ void MSG_WriteBits( msg_t *msg, int value, int bits ) {
 			for(i=0;i<bits;i+=8) {
 //				fwrite(bp, 1, 1, fp);
 				Huff_offsetTransmit (&msgHuff.compressor, (value&0xff), msg->data,
-		                         &msg->bit, msg->maxsize << 3);
+														 &msg->bit, msg->maxsize << 3);
 				value = (value>>8);
 
 				if (msg->bit > msg->maxsize << 3)
-        {
-          msg->overflowed = qtrue;
-          return;
-        }
+				{
+					msg->overflowed = qtrue;
+					return;
+				}
 			}
 		}
 		msg->cursize = (msg->bit>>3)+1;
@@ -211,9 +195,9 @@ int MSG_ReadBits( msg_t *msg, int bits ) {
 	int i;
 
 	if (msg->readcount > msg->cursize)
-  {
-    return 0;
-  }
+	{
+		return 0;
+	}
 
 	value = 0;
 
@@ -227,10 +211,10 @@ int MSG_ReadBits( msg_t *msg, int bits ) {
 	if (msg->oob) 
 	{
 		if (msg->readcount + (bits >> 3) > msg->cursize)
-    {
-      msg->readcount = msg->cursize + 1;
-      return 0;
-    }
+		{
+			msg->readcount = msg->cursize + 1;
+			return 0;
+		}
 		if(bits==8)
 		{
 			value = msg->data[msg->readcount];
@@ -259,10 +243,10 @@ int MSG_ReadBits( msg_t *msg, int bits ) {
 		if (bits&7) {
 			nbits = bits&7;
 			if (msg->bit + nbits > msg->cursize << 3)
-      {
-        msg->readcount = msg->cursize + 1;
-        return 0;
-      }
+			{
+				msg->readcount = msg->cursize + 1;
+				return 0;
+			}
 			for(i=0;i<nbits;i++) {
 				value |= (Huff_getBit(msg->data, &msg->bit)<<i);
 			}
@@ -271,14 +255,14 @@ int MSG_ReadBits( msg_t *msg, int bits ) {
 		if (bits) {
 			for(i=0;i<bits;i+=8) {
 				Huff_offsetReceive (msgHuff.decompressor.tree, &get, msg->data,
-					                  &msg->bit, msg->cursize << 3);
+														&msg->bit, msg->cursize << 3);
 				value |= (get<<(i+nbits));
 
 				if (msg->bit > msg->cursize << 3)
-        {
-          msg->readcount = msg->cursize + 1;
-          return 0;
-        }
+				{
+					msg->readcount = msg->cursize + 1;
+					return 0;
+				}
 			}
 		}
 		msg->readcount = (msg->bit>>3)+1;
@@ -538,7 +522,7 @@ int MSG_HashKey(int alternateProtocol, const char *string, int maxlen) {
 =============================================================================
 
 delta functions
-  
+	
 =============================================================================
 */
 
@@ -587,7 +571,7 @@ float MSG_ReadDeltaFloat( msg_t *msg, float oldV ) {
 =============================================================================
 
 delta functions with keys
-  
+	
 =============================================================================
 */
 
@@ -729,7 +713,7 @@ void MSG_ReadDeltaUsercmdKey( msg_t *msg, int key, usercmd_t *from, usercmd_t *t
 =============================================================================
 
 entityState_t communication
-  
+	
 =============================================================================
 */
 
@@ -832,7 +816,7 @@ identical, under the assumption that the in-order delta code will catch it.
 ==================
 */
 void MSG_WriteDeltaEntity( int alternateProtocol, msg_t *msg, struct entityState_s *from, struct entityState_s *to,
-						   qboolean force ) {
+							 qboolean force ) {
 	int			i, lc;
 	int			numFields;
 	netField_t	*field;

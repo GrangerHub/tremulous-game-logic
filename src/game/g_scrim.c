@@ -613,7 +613,7 @@ void G_Scrim_Remove_Player_From_Rosters(namelog_t *namelog, qboolean force_ip) {
             if(
               Q_stricmp(
                 namelog->guid,
-                &level.scrim_team_rosters[scrim_team].members[roster_index].guid)) {
+                level.scrim_team_rosters[scrim_team].members[roster_index].guid)) {
               continue;
             }
           } else {
@@ -651,7 +651,7 @@ void G_Scrim_Remove_Player_From_Rosters(namelog_t *namelog, qboolean force_ip) {
         if(
           Q_stricmp(
             namelog->guid,
-            &level.scrim_team_rosters[scrim_team].members[roster_index].guid)) {
+            level.scrim_team_rosters[scrim_team].members[roster_index].guid)) {
           continue;
         }
 
@@ -728,7 +728,7 @@ void G_Scrim_Remove_Player_From_Rosters_By_ID(size_t roster_id) {
         } else if(
           Q_stricmp(
             client->pers.guid,
-            &level.scrim_team_rosters[scrim_team].members[roster_index].guid)) {
+            level.scrim_team_rosters[scrim_team].members[roster_index].guid)) {
           continue;
         }
 

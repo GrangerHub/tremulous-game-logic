@@ -904,6 +904,7 @@ void G_UnlaggedOn(unlagged_attacker_data_t *attacker_data) {
   int                     i;
   gentity_t               *attacker;
   rewind_ent_adjustment_t *rewind_ent_adjustment;
+  int                     inuse;
   vec3_t                  backup_origin;
   vec3_t                  unlagged_point;
 
@@ -950,9 +951,10 @@ void G_UnlaggedOn(unlagged_attacker_data_t *attacker_data) {
   }
 
   rewind_ent_adjustment = &rewind_ents_adjustments[attacker_data->ent_num];
+  inuse = rewind_ent_adjustment->use;
 
   //evaluate the view vectors
-  if(rewind_ent_adjustment->use) {
+  if(inuse) {
     vec3_t unlagged_view_angles;
 
     VectorAdd(
@@ -971,7 +973,7 @@ void G_UnlaggedOn(unlagged_attacker_data_t *attacker_data) {
   }
 
   //evalutate the muzzle
-  if(rewind_ent_adjustment->use) {
+  if(inuse) {
 
     VectorCopy(attacker->client->ps.origin, backup_origin);
     VectorAdd(
@@ -986,12 +988,12 @@ void G_UnlaggedOn(unlagged_attacker_data_t *attacker_data) {
     attacker_data->up_out,
     attacker_data->muzzle_out);
 
-  if(rewind_ent_adjustment->use) {
+  if(inuse) {
     VectorCopy(backup_origin, attacker->client->ps.origin);
   }
 
   //evaluate the current origin
-  if(rewind_ent_adjustment->use) {
+  if(inuse) {
     VectorAdd(
       attacker->client->ps.origin, rewind_ent_adjustment->move,
       attacker_data->origin_out);

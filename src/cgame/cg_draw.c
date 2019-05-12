@@ -1649,7 +1649,7 @@ static void CG_DrawScrimSettings( rectDef_t *rect, float text_x, float text_y,
     vec4_t color, float scale, int textalign, int textvalign, int textStyle )
 {
   char  *settings;
-  char  *sd_mode;
+  char  *sd_mode = NULL;
   float tx, ty;
 
   switch(cgs.scrim.sudden_death_mode) {
@@ -1704,7 +1704,7 @@ CG_DrawScrimWinCondition
 static void CG_DrawScrimWinCondition( rectDef_t *rect, float text_x, float text_y,
     vec4_t color, float scale, int textalign, int textvalign, int textStyle )
 {
-  char  *win_condition;
+  char  *win_condition = NULL;
   float tx, ty;
 
   switch(cgs.scrim.win_condition) {
@@ -2392,19 +2392,19 @@ static void CG_DrawClock( rectDef_t *rect, float text_x, float text_y,
   else
   {
     char *pm = "am";
-    int h = qt.tm_hour;
+    int hour = qt.tm_hour;
 
-    if( h == 0 )
-      h = 12;
-    else if( h == 12 )
+    if( hour == 0 )
+      hour = 12;
+    else if( hour == 12 )
       pm = "pm";
-    else if( h > 12 )
+    else if( hour > 12 )
     {
-      h -= 12;
+      hour -= 12;
       pm = "pm";
     }
 
-    s = va( "%d%s%02d%s", h, ( qt.tm_sec % 2 ) ? ":" : " ", qt.tm_min, pm );
+    s = va( "%d%s%02d%s", hour, ( qt.tm_sec % 2 ) ? ":" : " ", qt.tm_min, pm );
   }
   w = UI_Text_Width( "0", scale );
   h = UI_Text_Height( "0", scale );
@@ -3823,8 +3823,8 @@ static void CG_DrawCenterStrings( void )
       if( !*start )
         break;
 
-        start++;
-      }
+      start++;
+    }
   }
 
   trap_R_SetColor( NULL );
@@ -3854,7 +3854,7 @@ static void CG_DrawVote( team_t team )
   if( !cgs.voteTime[ team ] )
     return;
 
-    if( cgs.voteAlarmPlay[ team ] )
+  if( cgs.voteAlarmPlay[ team ] )
   {
     cgs.voteAlarmPlay[ team ] = qfalse;
     cgs.voteModified[ team ] = qfalse;
@@ -4144,7 +4144,7 @@ CG_InvincibleVision
 static void CG_InvincibleVision( void )
 {
   vec4_t    color = { 0.0f, 0.0f, 0.0f, 1.0f };
-  qhandle_t shader;
+  qhandle_t shader = cgs.media.whiteShader;
 
   if( cg.renderingThirdPerson ||
       cg.snap->ps.persistant[ PERS_SPECSTATE ] != SPECTATOR_NOT ||
