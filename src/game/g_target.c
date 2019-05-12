@@ -476,12 +476,12 @@ void target_hurt_use( gentity_t *self, gentity_t *other, gentity_t *activator )
   if( !activator || !activator->takedamage )
     return;
 
-    // Don't damage players that are not alive
-    if( activator->client &&
-        ( activator->client->pers.teamSelection == TEAM_NONE ||
-          activator->client->pers.classSelection == PCL_NONE ||
-          activator->client->ps.persistant[ PERS_SPECSTATE ] != SPECTATOR_NOT ||
-          activator->health <= 0 ) )
+  // Don't damage players that are not alive
+  if( activator->client &&
+    ( activator->client->pers.teamSelection == TEAM_NONE ||
+      activator->client->pers.classSelection == PCL_NONE ||
+      activator->client->ps.persistant[ PERS_SPECSTATE ] != SPECTATOR_NOT ||
+      activator->health <= 0 ) )
     return;
 
   G_Damage( activator, self, self, NULL, NULL, self->damage, 0, MOD_TRIGGER_HURT );
@@ -586,7 +586,6 @@ Force player to class.
 */
 void Use_Target_force_class(gentity_t *ent, gentity_t *other, gentity_t *activator) {
   vec3_t infestOrigin;
-  int     clientNum;
   class_t class;
 
   class = BG_ClassByName( ent->inventory )->number;
@@ -602,7 +601,6 @@ void Use_Target_force_class(gentity_t *ent, gentity_t *other, gentity_t *activat
     }
 
     if(activator->client->ps.stats[STAT_CLASS] != class) {
-      clientNum = activator->client - level.clients;
       if( activator->client->ps.stats[ STAT_STATE ] & SS_WALLCLIMBING )
         activator->client->ps.stats[ STAT_STATE ] &= ~SS_WALLCLIMBING;
 

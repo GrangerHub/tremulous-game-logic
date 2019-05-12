@@ -224,7 +224,7 @@ static void CG_ParseScrimTeam(scrim_team_t scrim_team, const char *conStr) {
 
   sscanf(
     conStr, "%i %i %i %i %i %i",
-    &cgs.scrim.team[scrim_team].current_team,
+    (int *)&cgs.scrim.team[scrim_team].current_team,
     &has_captain,
     &cgs.scrim.team[scrim_team].captain_num,
     &cgs.scrim.team[scrim_team].wins,
@@ -246,16 +246,16 @@ static void CG_ParseScrim(const char *conStr) {
   sscanf(
     conStr, "%i %i %i %i %i %i %i %i %i %i %i %i %i",
     &allowScims,
-    &cgs.scrim.mode,
-    &cgs.scrim.win_condition,
+    (int *)&cgs.scrim.mode,
+    (int *)&cgs.scrim.win_condition,
     &scrim_completed,
-    &cgs.scrim.scrim_winner,
-    &cgs.scrim.scrim_forfeiter,
-    &cgs.scrim.timed_income,
-    &cgs.scrim.sudden_death_mode,
+    (int *)&cgs.scrim.scrim_winner,
+    (int *)&cgs.scrim.scrim_forfeiter,
+    (int *)&cgs.scrim.timed_income,
+    (int *)&cgs.scrim.sudden_death_mode,
     &cgs.scrim.sudden_death_time,
     &cgs.scrim.time_limit,
-    &cgs.scrim.previous_round_win,
+    (int *)&cgs.scrim.previous_round_win,
     &cgs.scrim.rounds_completed,
     &cgs.scrim.max_rounds);
 

@@ -1152,7 +1152,7 @@ BUILD GUN
 */
 void CheckCkitRepair( gentity_t *ent )
 {
-  vec3_t      viewOrigin, forward, end;
+  vec3_t      viewOrigin, forward2, end;
   trace_t     tr;
   gentity_t   *traceEnt;
   int         bHealth;
@@ -1162,8 +1162,8 @@ void CheckCkitRepair( gentity_t *ent )
     return;
 
   BG_GetClientViewOrigin( &ent->client->ps, viewOrigin );
-  AngleVectors( ent->client->ps.viewangles, forward, NULL, NULL );
-  VectorMA( viewOrigin, 100, forward, end );
+  AngleVectors( ent->client->ps.viewangles, forward2, NULL, NULL );
+  VectorMA( viewOrigin, 100, forward2, end );
 
   G_SetPlayersLinkState( qfalse, ent );
   SV_Trace( &tr, viewOrigin, NULL, NULL, end, ent->s.number, MASK_PLAYERSOLID, TT_AABB );
@@ -1417,11 +1417,12 @@ void CheckGrabAttack( gentity_t *ent )
   }else if( traceEnt->s.eType == ET_BUILDABLE &&
       traceEnt->s.modelindex == BA_H_MGTURRET )
   {
-    if( !traceEnt->lev1Grabbed )
+    if( !traceEnt->lev1Grabbed ) {
       G_AddPredictableEvent( ent, EV_LEV1_GRAB, 0 );
+    }
 
-      traceEnt->lev1Grabbed = qtrue;
-      traceEnt->lev1GrabTime = level.time;
+    traceEnt->lev1Grabbed = qtrue;
+    traceEnt->lev1GrabTime = level.time;
   }
 }
 
@@ -1848,15 +1849,15 @@ void G_ChargeAttack( gentity_t *ent, gentity_t *victim )
 {
   int       damage;
   int       i;
-  vec3_t    forward;
+  vec3_t    forward2;
 
   if( ent->client->ps.misc[ MISC_MISC ] <= 0 ||
       !( ent->client->ps.stats[ STAT_STATE ] & SS_CHARGING ) ||
       ent->client->ps.weaponTime )
     return;
 
-  VectorSubtract( victim->r.currentOrigin, ent->r.currentOrigin, forward );
-  VectorNormalize( forward );
+  VectorSubtract( victim->r.currentOrigin, ent->r.currentOrigin, forward2 );
+  VectorNormalize( forward2 );
 
   if( !G_TakesDamage( victim ) )
     return;
@@ -1882,7 +1883,7 @@ void G_ChargeAttack( gentity_t *ent, gentity_t *victim )
   damage = LEVEL4_TRAMPLE_DMG * ent->client->ps.misc[ MISC_MISC ] /
            LEVEL4_TRAMPLE_DURATION;
 
-  G_Damage( victim, ent, ent, forward, victim->r.currentOrigin, damage,
+  G_Damage( victim, ent, ent, forward2, victim->r.currentOrigin, damage,
             DAMAGE_NO_LOCDAMAGE, MOD_LEVEL4_TRAMPLE );
 
   ent->client->ps.weaponTime += LEVEL4_TRAMPLE_REPEAT;

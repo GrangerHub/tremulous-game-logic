@@ -641,10 +641,10 @@ Cmd_FindCommand
 */
 cmd_function_t *Cmd_FindCommand( const char *cmd_name )
 {
-	cmd_function_t *cmd;
-	for( cmd = cmd_functions; cmd; cmd = cmd->next )
-		if( !Q_stricmp( cmd_name, cmd->name ) )
-			return cmd;
+	cmd_function_t *cmdf;
+	for( cmdf = cmd_functions; cmdf; cmdf = cmdf->next )
+		if( !Q_stricmp( cmd_name, cmdf->name ) )
+			return cmdf;
 	return NULL;
 }
 
@@ -654,7 +654,7 @@ Cmd_AddCommand
 ============
 */
 void	Cmd_AddCommand( const char *cmd_name, xcommand_t function ) {
-	cmd_function_t	*cmd;
+	cmd_function_t	*cmdf;
 	
 	// fail if the command already exists
 	if( Cmd_FindCommand( cmd_name ) )
@@ -666,12 +666,12 @@ void	Cmd_AddCommand( const char *cmd_name, xcommand_t function ) {
 	}
 
 	// use a small malloc to avoid zone fragmentation
-	cmd = S_Malloc (sizeof(cmd_function_t));
-	cmd->name = CopyString( cmd_name );
-	cmd->function = function;
-	cmd->complete = NULL;
-	cmd->next = cmd_functions;
-	cmd_functions = cmd;
+	cmdf = S_Malloc (sizeof(cmd_function_t));
+	cmdf->name = CopyString( cmd_name );
+	cmdf->function = function;
+	cmdf->complete = NULL;
+	cmdf->next = cmd_functions;
+	cmd_functions = cmdf;
 }
 
 /*
@@ -680,11 +680,11 @@ Cmd_SetCommandCompletionFunc
 ============
 */
 void Cmd_SetCommandCompletionFunc( const char *command, completionFunc_t complete ) {
-	cmd_function_t	*cmd;
+	cmd_function_t	*cmdf;
 
-	for( cmd = cmd_functions; cmd; cmd = cmd->next ) {
-		if( !Q_stricmp( command, cmd->name ) ) {
-			cmd->complete = complete;
+	for( cmdf = cmd_functions; cmdf; cmdf = cmdf->next ) {
+		if( !Q_stricmp( command, cmdf->name ) ) {
+			cmdf->complete = complete;
 		}
 	}
 }
@@ -695,24 +695,24 @@ Cmd_RemoveCommand
 ============
 */
 void	Cmd_RemoveCommand( const char *cmd_name ) {
-	cmd_function_t	*cmd, **back;
+	cmd_function_t	*cmdf, **back;
 
 	back = &cmd_functions;
 	while( 1 ) {
-		cmd = *back;
-		if ( !cmd ) {
+		cmdf = *back;
+		if ( !cmdf ) {
 			// command wasn't active
 			return;
 		}
-		if ( !strcmp( cmd_name, cmd->name ) ) {
-			*back = cmd->next;
-			if (cmd->name) {
-				Z_Free(cmd->name);
+		if ( !strcmp( cmd_name, cmdf->name ) ) {
+			*back = cmdf->next;
+			if (cmdf->name) {
+				Z_Free(cmdf->name);
 			}
-			Z_Free (cmd);
+			Z_Free (cmdf);
 			return;
 		}
-		back = &cmd->next;
+		back = &cmdf->next;
 	}
 }
 
@@ -725,11 +725,11 @@ Only remove commands with no associated function
 */
 void Cmd_RemoveCommandSafe( const char *cmd_name )
 {
-	cmd_function_t *cmd = Cmd_FindCommand( cmd_name );
+	cmd_function_t *cmdf = Cmd_FindCommand( cmd_name );
 
-	if( !cmd )
+	if( !cmdf )
 		return;
-	if( cmd->function )
+	if( cmdf->function )
 	{
 		Com_Error( ERR_DROP, "Restricted source tried to remove "
 			"system command \"%s\"", cmd_name );
@@ -745,10 +745,10 @@ Cmd_CommandCompletion
 ============
 */
 void	Cmd_CommandCompletion( void(*callback)(const char *s) ) {
-	cmd_function_t	*cmd;
+	cmd_function_t	*cmdf;
 	
-	for (cmd=cmd_functions ; cmd ; cmd=cmd->next) {
-		callback( cmd->name );
+	for (cmdf = cmd_functions; cmdf ;cmdf = cmdf->next) {
+		callback( cmdf->name );
 	}
 }
 
@@ -758,16 +758,16 @@ Cmd_CompleteArgument
 ============
 */
 void Cmd_CompleteArgument( const char *command, char *args, int argNum ) {
-	cmd_function_t	*cmd;
+	cmd_function_t	*cmdf;
 
 #ifndef DEDICATED
 	// Forward command argument completion to CGAME VM
 	if( !cgvm || !VM_Call( cgvm, CG_CONSOLE_COMPLETARGUMENT, argNum ) )
 	  // Call local completion if VM doesn't pick up
 #endif
-	  for( cmd = cmd_functions; cmd; cmd = cmd->next ) {
-	    if( !Q_stricmp( command, cmd->name ) && cmd->complete ) {
-	      cmd->complete( args, argNum );
+	  for( cmdf = cmd_functions; cmdf; cmdf = cmdf->next ) {
+	    if( !Q_stricmp( command, cmdf->name ) && cmdf->complete ) {
+	      cmdf->complete( args, argNum );
 	    }
 	  }
 }
@@ -841,7 +841,7 @@ Cmd_List_f
 */
 void Cmd_List_f (void)
 {
-	cmd_function_t	*cmd;
+	cmd_function_t	*cmdf;
 	int				i;
 	char			*match;
 
@@ -852,10 +852,10 @@ void Cmd_List_f (void)
 	}
 
 	i = 0;
-	for (cmd=cmd_functions ; cmd ; cmd=cmd->next) {
-		if (match && !Com_Filter(match, cmd->name, qfalse)) continue;
+	for (cmdf = cmd_functions; cmdf; cmdf = cmdf->next) {
+		if (match && !Com_Filter(match, cmdf->name, qfalse)) continue;
 
-		Com_Printf ("%s\n", cmd->name);
+		Com_Printf ("%s\n", cmdf->name);
 		i++;
 	}
 	Com_Printf ("%i commands\n", i);

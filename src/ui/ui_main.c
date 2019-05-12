@@ -3472,20 +3472,20 @@ static void UI_RunMenuScript( char **args )
     {
       if( ui_netSource.integer != AS_FAVORITES )
       {
-        char name[MAX_NAME_LENGTH];
+        char name3[MAX_NAME_LENGTH];
         char addr[MAX_NAME_LENGTH];
         int res;
 
         trap_LAN_GetServerInfo( ui_netSource.integer,
                                 uiInfo.serverStatus.displayServers[uiInfo.serverStatus.currentServer],
                                 buff, MAX_STRING_CHARS );
-        name[0] = addr[0] = '\0';
-        Q_strncpyz( name,  Info_ValueForKey( buff, "hostname" ), MAX_NAME_LENGTH );
+        name3[0] = addr[0] = '\0';
+        Q_strncpyz( name3,  Info_ValueForKey( buff, "hostname" ), MAX_NAME_LENGTH );
         Q_strncpyz( addr,  Info_ValueForKey( buff, "addr" ), MAX_NAME_LENGTH );
 
-        if( strlen( name ) > 0 && strlen( addr ) > 0 )
+        if( strlen( name3 ) > 0 && strlen( addr ) > 0 )
         {
-          res = trap_LAN_AddServer( AS_FAVORITES, name, addr );
+          res = trap_LAN_AddServer( AS_FAVORITES, name3, addr );
 
           if( res == 0 )
           {
@@ -3524,17 +3524,17 @@ static void UI_RunMenuScript( char **args )
     {
       if( ui_netSource.integer == AS_FAVORITES )
       {
-        char name[MAX_NAME_LENGTH];
+        char name3[MAX_NAME_LENGTH];
         char addr[MAX_NAME_LENGTH];
         int res;
 
-        name[0] = addr[0] = '\0';
-        Q_strncpyz( name,  UI_Cvar_VariableString( "ui_favoriteName" ), MAX_NAME_LENGTH );
+        name3[0] = addr[0] = '\0';
+        Q_strncpyz( name3,  UI_Cvar_VariableString( "ui_favoriteName" ), MAX_NAME_LENGTH );
         Q_strncpyz( addr,  UI_Cvar_VariableString( "ui_favoriteAddress" ), MAX_NAME_LENGTH );
 
-        if( strlen( name ) > 0 && strlen( addr ) > 0 )
+        if( strlen( name3 ) > 0 && strlen( addr ) > 0 )
         {
-          res = trap_LAN_AddServer( AS_FAVORITES, name, addr );
+          res = trap_LAN_AddServer( AS_FAVORITES, name3, addr );
 
           if( res == 0 )
           {

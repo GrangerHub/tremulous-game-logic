@@ -239,7 +239,7 @@ typedef struct {
 } netchan_t;
 
 void Netchan_Init( int qport );
-void Netchan_Setup(int alternateProtocol, netsrc_t sock, netchan_t *chan, netadr_t adr, int qport, int challenge);
+void Netchan_Setup(int alternateProtocol, netsrc_t sock, netchan_t *chan, netadr_t adr, int port, int challenge);
 
 void Netchan_Transmit( netchan_t *chan, int length, const byte *data );
 void Netchan_TransmitNextFragment( netchan_t *chan );
