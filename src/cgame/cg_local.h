@@ -1986,6 +1986,7 @@ void          CG_ParseVoteStrings( int team, const char *conStr );
 void          CG_SetConfigValues( void );
 void          CG_ShaderStateChanged(void);
 void          CG_UnregisterCommands( void );
+void          CG_Menu( int menu, int arg );
 
 //
 // cg_playerstate.c
