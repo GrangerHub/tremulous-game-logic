@@ -571,16 +571,21 @@ static void ROQ_GenYUVTables( void )
 *
 ******************************************************************************/
 
-static unsigned short yuv_to_rgb( long y, long u, long v )
-{ 
+static unsigned short yuv_to_rgb(long y, long u, long v) { 
 	long r,g,b,YY = (long)(ROQ_YY_tab[(y)]);
 
 	r = (YY + ROQ_VR_tab[v]) >> 9;
 	g = (YY + ROQ_UG_tab[u] + ROQ_VG_tab[v]) >> 8;
 	b = (YY + ROQ_UB_tab[u]) >> 9;
-	
-	if (r<0) r = 0; if (g<0) g = 0; if (b<0) b = 0;
-	if (r > 31) r = 31; if (g > 63) g = 63; if (b > 31) b = 31;
+
+	r = MAX(r, 0);
+	r = MIN(r, 31);
+
+	g = MAX(g, 0);
+	g = MIN(g, 63);
+
+	b = MAX(b, 0);
+	b = MIN(b, 31);
 
 	return (unsigned short)((r<<11)+(g<<5)+(b));
 }
@@ -592,16 +597,21 @@ static unsigned short yuv_to_rgb( long y, long u, long v )
 * Description:	
 *
 ******************************************************************************/
-static unsigned int yuv_to_rgb24( long y, long u, long v )
-{ 
+static unsigned int yuv_to_rgb24(long y, long u, long v) { 
 	long r,g,b,YY = (long)(ROQ_YY_tab[(y)]);
 
 	r = (YY + ROQ_VR_tab[v]) >> 6;
 	g = (YY + ROQ_UG_tab[u] + ROQ_VG_tab[v]) >> 6;
 	b = (YY + ROQ_UB_tab[u]) >> 6;
-	
-	if (r<0) r = 0; if (g<0) g = 0; if (b<0) b = 0;
-	if (r > 255) r = 255; if (g > 255) g = 255; if (b > 255) b = 255;
+
+	r = MAX(r, 0);
+	r = MIN(r, 255);
+
+	g = MAX(g, 0);
+	g = MIN(g, 255);
+
+	b = MAX(b, 0);
+	b = MIN(b, 255);
 	
 	return LittleLong ((r)|(g<<8)|(b<<16)|(255<<24));
 }
