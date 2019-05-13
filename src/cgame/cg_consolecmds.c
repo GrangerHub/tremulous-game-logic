@@ -215,21 +215,26 @@ CG_SpawnMenuClass
 */
 static void CG_SpawnMenuClass( void )
 {
-  if( cg.predictedPlayerState.misc[ MISC_HEALTH ] > 0 &&
-    ( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_ALIENS ) ) //Are we alive and on aliens?
+  if(cg.snap->ps.stats[ STAT_TEAM ] != TEAM_NONE)
   {
-    CG_Menu( MN_A_INFEST, 0 );
-    return;
-  }
-  if( cg.predictedPlayerState.misc[ MISC_HEALTH ] <= 0 ) //Are we dead?
-  {
-    if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_ALIENS )
+    if( cg.snap->ps.persistant[ PERS_SPECSTATE ] != SPECTATOR_NOT ) //Are we alive and on aliens?
     {
-      CG_Menu( MN_A_CLASS, 0 );
+      if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_ALIENS )
+      {
+        CG_Menu( MN_A_INFEST, 0 );
+        return;
+      }
     }
-    else if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_HUMANS )
+    else //Are we dead?
     {
-      CG_Menu( MN_H_SPAWN, 0 );
+      if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_ALIENS )
+      {
+        CG_Menu( MN_A_CLASS, 0 );
+      }
+      else if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_HUMANS )
+      {
+        CG_Menu( MN_H_SPAWN, 0 );
+      }
     }
   }
 }
