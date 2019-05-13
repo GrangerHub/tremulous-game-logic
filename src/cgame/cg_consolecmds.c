@@ -260,6 +260,9 @@ static consoleCommand_t commands[ ] =
   { "clientlist", CG_ClientList_f },
   { "destroyTestPS", CG_DestroyTestPS_f },
   { "destroyTestTS", CG_DestroyTestTS_f },
+  { "menu_build", CG_SpawnMenuBuild },
+  { "menu_class", CG_SpawnMenuClass },
+  { "menu_team", CG_SpawnMenuTeam},
   { "nextframe", CG_TestModelNextFrame_f },
   { "nextskin", CG_TestModelNextSkin_f },
   { "prevframe", CG_TestModelPrevFrame_f },
@@ -279,10 +282,7 @@ static consoleCommand_t commands[ ] =
   { "voicemenu3", CG_VoiceMenu_f },
   { "weapnext", CG_NextWeapon_f },
   { "weapon", CG_Weapon_f },
-  { "weapprev", CG_PrevWeapon_f },
-  { "menu_team", CG_SpawnMenuTeam},
-  { "menu_class", CG_SpawnMenuClass },
-  { "menu_build", CG_SpawnMenuBuild },
+  { "weapprev", CG_PrevWeapon_f }
 };
 
 /*
