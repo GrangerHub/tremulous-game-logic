@@ -1269,8 +1269,6 @@ void buildFire( gentity_t *ent, dynMenu_t menu )
 
     return;
   }
-
-  G_TriggerMenu( ent->client->ps.clientNum, menu );
 }
 
 void slowBlobFire( gentity_t *ent )

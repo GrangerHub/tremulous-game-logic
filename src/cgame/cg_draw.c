@@ -3655,6 +3655,58 @@ void CG_KeyEvent( int key, qboolean down )
     return;
   }
 
+  {
+    int key_attack, key_evolve;
+    key_attack = trap_Key_GetKey( CG_KeyBinding( "+attack" ) );
+    key_evolve = trap_Key_GetKey( CG_KeyBinding( "+button7" ) );
+    if( key == key_attack )
+    {
+      if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_NONE ) //Are we not on a team? Spawn TEAM menu.
+      {
+        CG_Menu( MN_TEAM, 0 );
+        return;
+      }
+      if( cg.predictedPlayerState.stats[ STAT_HEALTH ] <= 0 ) //Are we dead? Spawn CLASS menu.
+      {
+        if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_ALIENS )
+        {
+          CG_Menu( MN_A_CLASS, 0 );
+          return;
+        }
+        if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_HUMANS )
+        {
+          CG_Menu( MN_H_SPAWN, 0 );
+          return;
+        }
+      }
+      else if( ( cg.predictedPlayerState.stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT ) == BA_NONE ) //Are we alive and have a building weapon equiped? Spawn BUILD menu.
+      {
+        if( cg.snap->ps.weapon == WP_ABUILD || cg.snap->ps.weapon == WP_ABUILD2 )
+        {
+          CG_Menu( MN_A_BUILD, 0 );
+          return;
+        }
+        if( cg.snap->ps.weapon == WP_HBUILD )
+        {
+          CG_Menu( MN_H_BUILD, 0 );
+          return;
+        }
+      }
+    }
+    else if( ( key == key_evolve ) ) {
+      if(
+        cg.predictedPlayerState.stats[ STAT_HEALTH ] > 0 &&
+        ( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_ALIENS ) ) //Are we alive and on aliens? Spawn INFEST menu.
+      {
+        //TODO: Check if we can evolve?
+        //trap_S_StartLocalSound( cgs.media.buildableRepairedSound, CHAN_LOCAL_SOUND );
+        //cg.lastEvolveAttempt = cg.time;
+        CG_Menu( MN_A_INFEST, 0 );
+        return;
+      }
+    }
+  }
+
   Display_HandleKey( key, down, cgs.cursorX, cgs.cursorY );
 
   if( cgs.capturedItem )

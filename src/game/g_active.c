@@ -478,12 +478,6 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
     // Wants to get into spawn queue
     if( client->sess.spectatorState == SPECTATOR_FOLLOW )
       G_StopFollowing( ent );
-    if( client->pers.teamSelection == TEAM_NONE )
-      G_TriggerMenu( client->ps.clientNum, MN_TEAM );
-    else if( client->pers.teamSelection == TEAM_ALIENS )
-      G_TriggerMenu( client->ps.clientNum, MN_A_CLASS );
-    else if( client->pers.teamSelection == TEAM_HUMANS )
-      G_TriggerMenu( client->ps.clientNum, MN_H_SPAWN );
   }
 
   // We are either not following anyone or following a spectator
@@ -2354,22 +2348,6 @@ void ClientThink_real( gentity_t *ent )
     else if( client->ps.persistant[ PERS_ACT_ENT ] != ENTITYNUM_NONE ) {
       if(client->ps.persistant[ PERS_ACT_ENT ] != ent->activation.usable_map_trigger) {
         G_ActivateEntity( actEnt, ent );
-      }
-    }
-    else if( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
-    {
-      if( BG_AlienCanEvolve( client->ps.stats[ STAT_CLASS ],
-                             client->pers.credit, g_alienStage.integer,
-                             IS_WARMUP, g_cheats.integer,
-                             (client->ps.stats[STAT_FLAGS] & SFL_CLASS_FORCED)) )
-      {
-        //no nearby objects and alien - show class menu
-        G_TriggerMenu( ent->client->ps.clientNum, MN_A_INFEST );
-      }
-      else
-      {
-        //flash frags
-        G_AddEvent( ent, EV_ALIEN_EVOLVE_FAILED, 0 );
       }
     }
   }
