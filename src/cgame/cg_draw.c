@@ -3655,7 +3655,7 @@ void CG_KeyEvent( int key, qboolean down )
     return;
   }
 
-  {
+  if( !Display_CaptureItem( cgs.cursorX, cgs.cursorY ) && !Menu_GetFocused( ) ){
     int key_attack, key_evolve;
     key_attack = trap_Key_GetKey( CG_KeyBinding( "+attack" ) );
     key_evolve = trap_Key_GetKey( CG_KeyBinding( "+button7" ) );
