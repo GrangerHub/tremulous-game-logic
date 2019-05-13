@@ -217,7 +217,7 @@ static void CG_SpawnMenuClass( void )
 {
   if(cg.snap->ps.stats[ STAT_TEAM ] != TEAM_NONE)
   {
-    if( cg.snap->ps.persistant[ PERS_SPECSTATE ] != SPECTATOR_NOT ) //Are we alive and on aliens?
+    if( cg.snap->ps.persistant[ PERS_SPECSTATE ] == SPECTATOR_NOT ) //Are we alive and on aliens?
     {
       if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_ALIENS )
       {
