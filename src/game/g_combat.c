@@ -217,7 +217,7 @@ typedef struct rewardBuildableData_s
   qboolean  damagedByEnemyPlayer;
   int       *alienCredits;
   int       *humanCredits;
-  int       (*numTeamPlayers)[ NUM_TEAMS ];
+  int       *numTeamPlayers;
   float     totalDamage;
   int       maxHealth;
   float     value;
@@ -244,7 +244,7 @@ static void RewardBuildableAttackers( void *data, void *user_data )
   float                 totalDamage = rewardBuildableData->totalDamage;
   int                   maxHealth = rewardBuildableData->maxHealth;
   float                 value = rewardBuildableData->value;
-  int                   (*numTeamPlayers)[ NUM_TEAMS ];
+  int                   *numTeamPlayers;
   float                 damageFraction = ( (float)credits->credits ) / ( (float)totalDamage );
   int                   dBValue = value * damageFraction;
   int                   buildablesTeamDistributionEarnings;
@@ -274,11 +274,11 @@ static void RewardBuildableAttackers( void *data, void *user_data )
               "RewardBuildableAttackers: self is not in use" );
   Com_Assert( alienCredits &&
               "RewardBuildableAttackers: alienCredits is NULL" );
-  Com_Assert( alienCredits >= 0 &&
+  Com_Assert( *alienCredits >= 0 &&
               "RewardBuildableAttackers: alienCredits is negative" );
   Com_Assert( humanCredits &&
               "RewardBuildableAttackers: humanCredits is NULL" );
-  Com_Assert( humanCredits >= 0 &&
+  Com_Assert( *humanCredits >= 0 &&
               "RewardBuildableAttackers: humanCredits is negative" );
   Com_Assert( numTeamPlayers &&
               "RewardBuildableAttackers: numTeamPlayers is NULL" );
@@ -311,10 +311,14 @@ static void RewardBuildableAttackers( void *data, void *user_data )
   if( totalDamage < maxHealth )
     dBValue = (int)( ( (float)dBValue ) * ( ( totalDamage ) / ( (float)maxHealth ) ) );
 
-  if( (*numTeamPlayers)[ buildableTeam ] )
-    buildablesTeamDistributionEarnings = (int)( ( (float)dBValue ) * ( 2.0f / ( 5.0f * (float)(*numTeamPlayers)[ buildableTeam ] ) ) );
-  else
+  if(numTeamPlayers[buildableTeam]) {
+    buildablesTeamDistributionEarnings =
+    (int)(
+      ((float)dBValue) *
+      (2.0f / ( 5.0f * (float)numTeamPlayers[buildableTeam])));
+  } else {
     buildablesTeamDistributionEarnings = 0;
+  }
 
   G_IncreaseBonusValue( &buildable->bonusValue, ( ( (float)dBValue * 0.80f ) ) );
 
@@ -364,8 +368,8 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
   int                   i, maxHealth = 0;
   int                   alienCredits = 0, humanCredits = 0;
   int                   numTeamPlayers[ NUM_TEAMS ];
-  int                   ( *credits )[ MAX_CLIENTS ];
-  credits_t             ( *creditsDeffenses )[ MAX_GENTITIES ];
+  int                   *credits;
+  credits_t             *creditsDeffenses;
   team_t                team;
   gentity_t             *enemyPlayer = NULL;
   qboolean              damagedByEnemyPlayer = qfalse;
@@ -390,20 +394,20 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
     gentity_t *player = g_entities + i;
 
     // no damage from this player
-    if( !( *credits )[ i ] )
+    if( !credits[ i ] )
       continue;
 
     // don't count players that are no longer playing
     if( player->client->pers.connected != CON_CONNECTED ||
         player->client->ps.stats[ STAT_TEAM ] == TEAM_NONE )
     {
-      ( *credits )[ i ] = 0;
+      credits[ i ] = 0;
       continue;
     }
 
     if( !OnSameTeam( self, player ) )
     {
-      totalDamage += (float)( *credits )[ i ];
+      totalDamage += (float)credits[ i ];
       damagedByEnemyPlayer = qtrue;
       enemyPlayer = player;
     }
@@ -415,13 +419,13 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
   {
     gentity_t *buildable = &g_entities[ i ];
 
-    if( !( *creditsDeffenses )[ i ].credits )
+    if( !creditsDeffenses[ i ].credits )
       continue;
 
     // no longer the same entity that damaged this entity
-    if( G_Entity_id_get( &( *creditsDeffenses )[ i ].id ) != buildable )
+    if( G_Entity_id_get( &(creditsDeffenses[ i ].id) ) != buildable )
     {
-      ( *creditsDeffenses )[ i ].credits = 0;
+      creditsDeffenses[ i ].credits = 0;
       continue;
     }
 
@@ -433,9 +437,9 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
       continue;
     }
 
-    BG_Queue_Push_Head( &enemyBuildables, &( *creditsDeffenses )[ i ] );
+    BG_Queue_Push_Head( &enemyBuildables, &(creditsDeffenses[ i ]) );
 
-    totalDamage += ( *creditsDeffenses )[ i ].credits;
+    totalDamage += creditsDeffenses[ i ].credits;
   }
 
   if( totalDamage <= 0.0f )
@@ -507,7 +511,7 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
   // Give credits and empty the array
   for( i = 0; i < level.maxclients; i++ )
   {
-    int stageValue = (int)( (float)value * ( ( (float)( *credits )[ i ] ) / ( totalDamage ) ) );
+    int stageValue = (int)( (float)value * ( ( (float)credits[ i ] ) / ( totalDamage ) ) );
     int j;
     team_t playersTeam;
     gentity_t *player = g_entities + i;
@@ -522,7 +526,7 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
       if( totalDamage < maxHealth )
         stageValue *= totalDamage / maxHealth;
 
-      if( !( *credits )[ i ] || player->client->ps.stats[ STAT_TEAM ] == team )
+      if( !credits[ i ] || player->client->ps.stats[ STAT_TEAM ] == team )
         continue;
 
       playersTeamDistributionEarnings = ( stageValue * (  isBuildable ? 4 : 3 ) ) / ( 10 * numTeamPlayers[ playersTeam ] );
@@ -562,7 +566,7 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
           G_IncreaseDamageCredits( &humanCredits, stageValue );
       }
     }
-    ( *credits )[ i ] = 0;
+    credits[ i ] = 0;
   }
 
   rewardBuildableData.self = self;
@@ -883,11 +887,11 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
   {
     // normal death
-    static int i;
+    static int animNum = 0;
 
     if( !( self->client->ps.persistant[ PERS_STATE ] & PS_NONSEGMODEL ) )
     {
-      switch( i )
+      switch( animNum )
       {
         case 0:
           anim = BOTH_DEATH1;
@@ -903,7 +907,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
     }
     else
     {
-      switch( i )
+      switch( animNum )
       {
         case 0:
           anim = NSPA_DEATH1;
@@ -928,11 +932,11 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
     }
 
     // use own entityid if killed by non-client to prevent uint8_t overflow
-    G_AddEvent( self, EV_DEATH1 + i,
+    G_AddEvent( self, EV_DEATH1 + animNum,
       ( killer < MAX_CLIENTS ) ? killer : self - g_entities );
 
     // globally cycle through the different death animations
-    i = ( i + 1 ) % 3;
+    animNum = ( animNum + 1 ) % 3;
   }
 
   SV_LinkEntity( self );
@@ -2040,11 +2044,11 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       if( g_dretchPunt.integer &&
           targ->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_LEVEL0 )
       {
-        vec3_t dir, push;
+        vec3_t dir2, push;
 
-        VectorSubtract( targ->r.currentOrigin, attacker->r.currentOrigin, dir );
-        VectorNormalizeFast( dir );
-        VectorScale( dir, ( BG_SU2HP( damage ) * 10.0f ), push );
+        VectorSubtract( targ->r.currentOrigin, attacker->r.currentOrigin, dir2 );
+        VectorNormalizeFast( dir2 );
+        VectorScale( dir2, ( BG_SU2HP( damage ) * 10.0f ), push );
         push[2] = 64.0f;
         VectorAdd( targ->client->ps.velocity, push, targ->client->ps.velocity );
         return;
@@ -2681,7 +2685,7 @@ qboolean G_RadiusDamage( vec3_t origin, vec3_t originMins, vec3_t originMaxs,
     if( ent == ignore )
       continue;
 
-      if(!ent->takedamage)
+    if(!ent->takedamage)
       continue;
 
     if( ent->client && ( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING ) )
@@ -2749,7 +2753,7 @@ qboolean G_RadiusDamage( vec3_t origin, vec3_t originMins, vec3_t originMaxs,
     if( !ent->client )
       continue;
 
-      if( !ent->takedamage )
+    if( !ent->takedamage )
       continue;
 
     shake = damage * 10 / Distance( origin, ent->r.currentOrigin );

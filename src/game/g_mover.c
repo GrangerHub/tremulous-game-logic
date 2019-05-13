@@ -260,8 +260,9 @@ G_Move_From_amove
 */
 static void G_Move_From_amove(
   const gentity_t *check,
-  const push_data_t *push_data,
-  vec3_t move) {
+  push_data_t *push_data,
+  vec3_t move)
+{
   vec3_t       matrix[ 3 ], transpose[ 3 ];
   vec3_t       org, org2;
 

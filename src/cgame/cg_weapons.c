@@ -1396,11 +1396,11 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
       gun.renderfx |= RF_DEPTHHACK;
     }
 
-    if( !noDraw )
-  {
-    trap_R_AddRefEntityToScene( &gun );
-  } else
-    noDraw = qfalse;
+    if( !noDraw ) {
+      trap_R_AddRefEntityToScene( &gun );
+    } else {
+      noDraw = qfalse;
+    }
 
     if( !ps )
     {

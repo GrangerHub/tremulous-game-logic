@@ -360,7 +360,7 @@ Reload map pool from configuration file
 */
 playMapError_t G_ReloadPlayMapPool( void )
 {
-  playMapError_t playMapError;
+  playMapError_t playMapError2;
   fileHandle_t f;
   int len, minClients, maxClients;
   char *cnf, *cnf2, mapName[ MAX_PLAYMAP_MAPNAME ], mapType[ MAX_PLAYMAP_MAPNAME ];
@@ -368,9 +368,9 @@ playMapError_t G_ReloadPlayMapPool( void )
   if( !g_playMapPoolConfig.string[ 0 ] )
     return G_PlayMapErrorByCode( PLAYMAP_ERROR_NO_POOL_CONFIG );
 
-  playMapError = G_ClearPlayMapPool();
-  if( playMapError.errorCode != PLAYMAP_ERROR_NONE )
-    return playMapError;
+  playMapError2 = G_ClearPlayMapPool();
+  if( playMapError2.errorCode != PLAYMAP_ERROR_NONE )
+    return playMapError2;
 
   // read playmap pool config file
   len = FS_FOpenFileByMode( g_playMapPoolConfig.string, &f, FS_READ );
@@ -650,13 +650,13 @@ playMapError_t G_ClearPlayMapQueue( void )
 
   for( i = 0; i < G_GetPlayMapQueueLength(); i++ )
   {
-    playMap_t playMap =
-      playMapQueue.playMap[ PLAYMAP_QUEUE_ADD(playMapQueue.head, i) ];
+    playMap_t *playMap =
+      &playMapQueue.playMap[ PLAYMAP_QUEUE_ADD(playMapQueue.head, i) ];
 
-    playMap.mapName[0] = '\0';
+    playMap->mapName[0] = '\0';
     playMapQueue.playMap[ i ].console = qfalse;
     playMapQueue.playMap[ i ].guid[0] = '\0';
-    playMap.layout[0] = '\0';
+    playMap->layout[0] = '\0';
   }
 
   // All contents gone, now must initialize it

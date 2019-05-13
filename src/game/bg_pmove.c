@@ -1479,11 +1479,13 @@ static qboolean PM_CheckAirPounce( void )
   // Play jumping animation
   if( pm->cmd.forwardmove >= 1 )
   {
-    if( !( pm->ps->persistant[ PERS_STATE ] & PS_NONSEGMODEL ) )
+    if( !( pm->ps->persistant[ PERS_STATE ] & PS_NONSEGMODEL ) ) {
       PM_ForceLegsAnim( LEGS_JUMP );
-    else
+    } else {
       PM_ForceLegsAnim( NSPA_JUMP );
-      pm->ps->pm_flags &= ~PMF_BACKWARDS_JUMP;
+    }
+
+    pm->ps->pm_flags &= ~PMF_BACKWARDS_JUMP;
   }
   else
   {
@@ -1572,8 +1574,8 @@ static qboolean PM_CheckWallJump( vec3_t wishDir, float wishSpeed )
   if( wall.surfaceFlags & ( SURF_SKY | SURF_SLICK ) )
     return qfalse;
 
-    // Find out how much we look up.
-    upLook = MAX( pm->wallJumperMinFactor, DotProduct( upNormal, pml.forward ) );
+  // Find out how much we look up.
+  upLook = MAX( pm->wallJumperMinFactor, DotProduct( upNormal, pml.forward ) );
 
   // Check if we are looking up the wall.
   if( upLook < minUpLook )

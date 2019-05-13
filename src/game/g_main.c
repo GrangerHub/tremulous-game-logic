@@ -1344,6 +1344,7 @@ char *G_SuddenDeathModeString(void) {
     case SDMODE_NO_DECON:
       return "No Deconstruct";
   }
+  return "";
 }
 
 #define PLAYER_COUNT_MOD 5.0f
@@ -1489,7 +1490,7 @@ Recalculate the quantity of building points available to the teams
 */
 void G_CalculateBuildPoints( void )
 {
-  int               i;
+  int i;
 
   // BP queue updates
   while(
@@ -3691,11 +3692,11 @@ Q_EXPORT void G_RunFrame( int levelTime )
       if(level.countdownTime > 0) {
         if(level.countdownTime <= (level.time + 1000)) {
           for(i = 0; i < level.maxclients; i++) {
-            gentity_t *ent = &g_entities[i];
+            gentity_t *ent2 = &g_entities[i];
 
-            if(ent->client->pers.connected == CON_CONNECTED ||
-               ent->client->pers.connected == CON_CONNECTING) {
-              ent->client->pers.fight = qtrue;
+            if(ent2->client->pers.connected == CON_CONNECTED ||
+               ent2->client->pers.connected == CON_CONNECTING) {
+              ent2->client->pers.fight = qtrue;
             }
           }
 

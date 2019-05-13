@@ -4728,11 +4728,11 @@ void Item_Text_Wrapped_Paint( itemDef_t *item )
 
         if( DC->getCVarValue( "ui_developer" ) )
         {
-          vec4_t color;
-          color[ 0 ] = color[ 2 ] = color[ 3 ] = 1.0f;
-          color[ 1 ] = 0.0f;
+          vec4_t color2;
+          color2[ 0 ] = color2[ 2 ] = color2[ 3 ] = 1.0f;
+          color2[ 1 ] = 0.0f;
           DC->drawRect( lineItem.window.rect.x, lineItem.window.rect.y,
-                        lineItem.window.rect.w, lineItem.window.rect.h, 1, color );
+                        lineItem.window.rect.w, lineItem.window.rect.h, 1, color2 );
         }
 
         Item_SetTextExtents( &lineItem, buff );
