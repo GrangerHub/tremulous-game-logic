@@ -897,6 +897,13 @@ static int CG_CalcFov( void )
   trap_GetUserCmd( cmdNum, &cmd );
   trap_GetUserCmd( cmdNum - 1, &oldcmd );
 
+  // Use client's FOV offset (if it's within a REASON(TM)able range)
+  fov_Offset = cg_fovOffset.integer;
+  if ( fov_Offset > MAX_FOV_OFFSET )
+    fov_Offset = MAX_FOV_OFFSET;
+  else if ( fov_Offset < -MAX_FOV_OFFSET )
+    fov_Offset = -MAX_FOV_OFFSET;
+
   // switch follow modes if necessary: cycle between free -> follow -> third-person follow
   if( cmd.buttons & BUTTON_USE_HOLDABLE && !( oldcmd.buttons & BUTTON_USE_HOLDABLE ) )
   {
@@ -919,12 +926,12 @@ static int CG_CalcFov( void )
       ( cg.renderingThirdPerson ) )
   {
     // if in intermission or third person, use a fixed value
-    fov_y = BASE_FOV_Y;
+    fov_y = BASE_FOV_Y + fov_Offset;
   }
   else
   {
     // don't lock the fov globally - we need to be able to change it
-    attribFov = BG_Class( cg.predictedPlayerState.stats[ STAT_CLASS ] )->fov * 0.75f;
+    attribFov = (BG_Class( cg.predictedPlayerState.stats[ STAT_CLASS ] )->fov + fov_Offset) * 0.75f;
     fov_y = attribFov;
 
     if ( fov_y < 1.0f )
@@ -1020,21 +1027,16 @@ static int CG_CalcFov( void )
     fov_y += v;
   }
 
-  // Use client's FOV offset (if it's within a REASON(TM)able range)
-  fov_Offset = cg_fovOffset.integer;
-  if ( fov_Offset > MAX_FOV_OFFSET )
-    fov_Offset = MAX_FOV_OFFSET;
-  else if ( fov_Offset < -MAX_FOV_OFFSET )
-    fov_Offset = -MAX_FOV_OFFSET;
-
   // set it
-  cg.refdef.fov_x = fov_x + fov_Offset;
-  cg.refdef.fov_y = fov_y + fov_Offset;
+  cg.refdef.fov_x = fov_x;
+  cg.refdef.fov_y = fov_y;
 
-  if( !cg.zoomed )
+  if( !cg.zoomed ) {
     cg.zoomSensitivity = 1.0f;
-  else
-    cg.zoomSensitivity = ( cg.refdef.fov_y + fov_Offset ) / 75.0f;
+  }
+  else {
+    cg.zoomSensitivity = (cg.refdef.fov_y) / 75.0f;
+  }
 
   return inwater;
 }
