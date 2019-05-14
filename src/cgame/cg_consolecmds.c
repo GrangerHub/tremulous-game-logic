@@ -198,6 +198,64 @@ static void CG_UIMenu_f( void )
   trap_SendConsoleCommand( va( "menu \"%s\"\n", CG_Argv( 1 ) ) );
 }
 
+/*
+=====================
+CG_SpawnMenuTeam
+=====================
+*/
+static void CG_SpawnMenuTeam( void )
+{
+  CG_Menu( MN_TEAM, 0 );
+}
+
+/*
+=====================
+CG_SpawnMenuClass
+=====================
+*/
+static void CG_SpawnMenuClass( void )
+{
+  if(cg.snap->ps.stats[ STAT_TEAM ] != TEAM_NONE)
+  {
+    if( cg.snap->ps.persistant[ PERS_SPECSTATE ] == SPECTATOR_NOT ) //Are we alive and on aliens?
+    {
+      if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_ALIENS )
+      {
+        CG_Menu( MN_A_INFEST, 0 );
+        return;
+      }
+    }
+    else //Are we dead?
+    {
+      if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_ALIENS )
+      {
+        CG_Menu( MN_A_CLASS, 0 );
+      }
+      else if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_HUMANS )
+      {
+        CG_Menu( MN_H_SPAWN, 0 );
+      }
+    }
+  }
+}
+
+/*
+=====================
+CG_SpawnMenuBuild
+=====================
+*/
+static void CG_SpawnMenuBuild( void )
+{
+  if( cg.snap->ps.weapon == WP_ABUILD || cg.snap->ps.weapon == WP_ABUILD2 )
+  {
+    CG_Menu( MN_A_BUILD, 0 );
+  }
+  else if( cg.snap->ps.weapon == WP_HBUILD )
+  {
+    CG_Menu( MN_H_BUILD, 0 );
+  }
+}
+
 static consoleCommand_t commands[ ] =
 {
   { "+scores", CG_ScoresDown_f },
@@ -207,6 +265,9 @@ static consoleCommand_t commands[ ] =
   { "clientlist", CG_ClientList_f },
   { "destroyTestPS", CG_DestroyTestPS_f },
   { "destroyTestTS", CG_DestroyTestTS_f },
+  { "menu_build", CG_SpawnMenuBuild },
+  { "menu_class", CG_SpawnMenuClass },
+  { "menu_team", CG_SpawnMenuTeam},
   { "nextframe", CG_TestModelNextFrame_f },
   { "nextskin", CG_TestModelNextSkin_f },
   { "prevframe", CG_TestModelPrevFrame_f },
