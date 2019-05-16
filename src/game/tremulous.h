@@ -63,6 +63,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL0_POUNCE_RANGE         48.0f
 #define LEVEL0_POUNCE_WIDTH         14.0f
 #define LEVEL0_POUNCE_TIME          900      // msec for full Dretch pounce
+#define LEVEL0_SHORT_POUNCE_TIME    600      // max msec for short Dretch pounce
 #define LEVEL0_POUNCE_TIME_MIN      150      // msec before which pounce cancels
 #define LEVEL0_CHARGE_STAMINA_MAX   LEVEL0_POUNCE_TIME
 #define LEVEL0_CHARGE_STAMINA_MIN   400
@@ -142,6 +143,8 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL3_POUNCE_WIDTH         16.0f
 #define LEVEL3_POUNCE_TIME          2640      // msec for full Dragoon pounce
 #define LEVEL3_POUNCE_TIME_UPG      2420      // msec for full Adv. Dragoon pounce
+#define LEVEL3_SHORT_POUNCE_TIME    950      // max msec for short Dragoon pounce
+#define LEVEL3_SHORT_POUNCE_TIME_UPG 850     // max msec for short Adv. Dragoon pounce
 #define LEVEL3_CHARGE_STAMINA_MAX   LEVEL3_POUNCE_TIME
 #define LEVEL3_CHARGE_STAMINA_MAX_UPG  LEVEL3_POUNCE_TIME_UPG
 #define LEVEL3_CHARGE_STAMINA_MIN   825

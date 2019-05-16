@@ -1466,10 +1466,26 @@ static void CG_DrawPlayerChargeBar(
 
   *meterValue = progress;
 
-  if(!evolveCoolDown && (cg.predictedPlayerState.pm_flags & PMF_LAUNCHING)) {
-    color[ 0 ] = 0.0f;
-    color[ 1 ] = 1.0f;
-    color[ 2 ] = 0.0f;
+  if(!evolveCoolDown) {
+    int         cmdNum;
+    usercmd_t   cmd;
+
+    cmdNum = trap_GetCurrentCmdNumber( );
+    trap_GetUserCmd( cmdNum, &cmd );
+
+    if(cg.predictedPlayerState.pm_flags & PMF_LAUNCHING) {
+      color[ 0 ] = 0.0f;
+      color[ 1 ] = 1.0f;
+      color[ 2 ] = 0.0f;
+    } else if( cmd.buttons & BUTTON_WALKING ) {
+      color[ 0 ] = 1.0f;
+      color[ 1 ] = 1.0f;
+      color[ 2 ] = 0.0f;
+    } else {
+      color[ 0 ] = ref_color[ 0 ];
+      color[ 1 ] = ref_color[ 1 ];
+      color[ 2 ] = ref_color[ 2 ];
+    }
   } else {
     color[ 0 ] = ref_color[ 0 ];
     color[ 1 ] = ref_color[ 1 ];

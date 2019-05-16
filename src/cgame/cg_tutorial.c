@@ -316,6 +316,14 @@ static void CG_AlienLevel0Text( char *text, playerState_t *ps )
   Q_strcat( text, MAX_TUTORIAL_TEXT,
       va( "Press %s to walk on walls\n",
         CG_KeyNameForCommand( "+movedown" ) ) );
+
+  Q_strcat( text, MAX_TUTORIAL_TEXT,
+      va( "Hold down and release %s to pounce\n",
+        CG_KeyNameForCommand( "+button5" ) ) );
+
+  Q_strcat( text, MAX_TUTORIAL_TEXT,
+      va( "Hold down %s to keep pounces short\n",
+        CG_KeyNameForCommand( "+speed" ) ) );
 }
 
 /*
@@ -421,6 +429,10 @@ static void CG_AlienLevel3Text( char *text, playerState_t *ps )
   Q_strcat( text, MAX_TUTORIAL_TEXT,
       va( "Hold down and release %s to pounce\n",
         CG_KeyNameForCommand( "+button5" ) ) );
+
+  Q_strcat( text, MAX_TUTORIAL_TEXT,
+      va( "Hold down %s to keep pounces short\n",
+        CG_KeyNameForCommand( "+speed" ) ) );
 }
 
 /*

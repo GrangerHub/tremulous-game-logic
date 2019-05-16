@@ -4687,6 +4687,7 @@ static void PM_Weapon( void )
     //don't adjust the charge while a launch is in progress
     if(!(pm->ps->pm_flags & PMF_LAUNCHING)) {
       int max;
+      int short_max;
 
       if(BG_ClassHasAbility( pm->ps->stats[STAT_CLASS], SCA_CHARGE_STAMINA)) {
           max =
@@ -4714,6 +4715,35 @@ static void PM_Weapon( void )
           default:
             max = LEVEL3_POUNCE_TIME_UPG;
             break;
+        }
+      }
+
+      if(pm->cmd.buttons & BUTTON_WALKING) {
+        switch( pm->ps->weapon )
+        {
+          case WP_ALEVEL0:
+            short_max = LEVEL0_SHORT_POUNCE_TIME;
+            break;
+
+          case WP_ALEVEL3:
+            short_max = LEVEL3_SHORT_POUNCE_TIME;
+            break;
+
+          case WP_ALEVEL3_UPG:
+            short_max = LEVEL3_SHORT_POUNCE_TIME_UPG;
+            break;
+
+          case WP_ASPITFIRE:
+            short_max = SPITFIRE_POUNCE_TIME;
+            break;
+
+          default:
+            short_max = LEVEL3_POUNCE_TIME_UPG;
+            break;
+        }
+
+        if(max > short_max) {
+          max = short_max;
         }
       }
 
