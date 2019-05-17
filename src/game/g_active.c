@@ -716,20 +716,23 @@ void ClientTimerActions( gentity_t *ent, int msec )
             crouched = qfalse;
   int       i;
 
-  ucmd = &ent->client->pers.cmd;
+  client = ent->client;
+  ucmd = &client->pers.cmd;
 
   aForward  = abs( ucmd->forwardmove );
   aRight    = abs( ucmd->rightmove );
 
-  if( aForward == 0 && aRight == 0 )
-    stopped = qtrue;
-  else if( aForward <= 64 && aRight <= 64 )
+  if( aForward == 0 && aRight == 0 ) {
+    if(client->ps.persistant[PERS_JUMPTIME] > STAMINA_JUMP_RESTORE_DELAY) {
+      stopped = qtrue;
+    }
+  } else if( aForward <= 64 && aRight <= 64 ) {
     walking = qtrue;
+  }
 
   if( ucmd->upmove <= 0 && ent->client->ps.pm_flags & PMF_DUCKED )
     crouched = qtrue;
 
-  client = ent->client;
   client->time100 += msec;
   client->time1000 += msec;
   client->time10000 += msec;
@@ -766,10 +769,12 @@ void ClientTimerActions( gentity_t *ent, int msec )
                  client->ps.groundEntityNum != ENTITYNUM_NONE &&
                !( client->buttons & BUTTON_WALKING ) ) // walk overrides sprint
         client->ps.stats[ STAT_STAMINA ] -= STAMINA_SPRINT_TAKE;
-      else if( walking || crouched )
-        client->ps.stats[ STAT_STAMINA ] += STAMINA_WALK_RESTORE;
-      else
-        client->ps.stats[ STAT_STAMINA ] += STAMINA_RUN_RESTORE;
+      else if(client->ps.persistant[PERS_JUMPTIME] > STAMINA_JUMP_RESTORE_DELAY) {
+        if( walking || crouched )
+          client->ps.stats[ STAT_STAMINA ] += STAMINA_WALK_RESTORE;
+        else
+          client->ps.stats[ STAT_STAMINA ] += STAMINA_RUN_RESTORE;
+      }
 
       // Check stamina limits
       if( client->ps.stats[ STAT_STAMINA ] > STAMINA_MAX )

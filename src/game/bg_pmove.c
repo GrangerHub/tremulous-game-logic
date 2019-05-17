@@ -5778,12 +5778,6 @@ static void PM_DropTimers( void )
     }
   }
 
-  // the jump timer increases
-  if( pm->ps->persistant[PERS_JUMPTIME] < 0 )
-    pm->ps->persistant[PERS_JUMPTIME] = 0;
-  else
-    pm->ps->persistant[PERS_JUMPTIME] += pml.msec;
-
   if( 
     pm->ps->stats[ STAT_TEAM ] == TEAM_ALIENS &&
     pm->ps->eFlags & EF_EVOLVING &&
