@@ -1565,10 +1565,22 @@ static qboolean PM_CheckJump( vec3_t customNormal )
     return qfalse;
   }
 
+  if((pm->ps->persistant[ PERS_STATE ] & PS_BUNNYHOPENABLED)) {
+    if((pm->ps->pm_flags & PMF_JUMP_HELD) &&
+      !(pm->ps->persistant[ PERS_STATE ] & PS_BUNNYHOPTOGGLE)) {
+      pm->ps->pm_flags |= PMF_BUNNY_HOPPING; // enable hunny hop
+    }
+  } else {
+    // disable bunny hop
+    pm->ps->pm_flags &= ~PMF_ALL_HOP_FLAGS;
+  }
+
   if( !( pm->ps->pm_flags & PMF_JUMP_HELD ) )
   {
-    if( !( pm->ps->pm_flags & PMF_JUMPING ) &&
-        (pm->ps->pm_flags & PMF_HOPPED) )
+    if(
+      (pm->ps->persistant[ PERS_STATE ] & PS_BUNNYHOPENABLED) &&
+      !( pm->ps->pm_flags & PMF_JUMPING ) &&
+      (pm->ps->pm_flags & PMF_HOPPED) )
       pm->ps->pm_flags |= PMF_BUNNY_HOPPING; // enable hunny hop
   } else if( pm->ps->persistant[PERS_JUMPTIME] < BUNNY_HOP_DELAY ||
              !(pm->ps->pm_flags & PMF_BUNNY_HOPPING) ||
