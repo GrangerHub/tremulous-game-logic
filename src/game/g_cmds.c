@@ -2646,6 +2646,8 @@ void G_Evolve( gentity_t *ent, class_t newClass,
   int       creditsSaved[ MAX_CLIENTS ]; // human credits for each client
   credits_t creditsDeffensesSaved[ MAX_GENTITIES ];
   int       i;
+  qboolean  preserve_charge;
+  int       preserved_weapon_time_2;
 
   Com_Assert( ent->client &&
               "G_Evolve: Attempted to evolve a non-client entity" );
@@ -2736,7 +2738,66 @@ void G_Evolve( gentity_t *ent, class_t newClass,
                                  valueMod ) );
   }
 
+  //preserve pounce delays
+  if(ent->client->ps.pm_flags & PMF_CHARGE) {
+    switch (ent->client->ps.weapon) {
+      case WP_ALEVEL0:
+      case WP_ALEVEL3:
+      case WP_ALEVEL3_UPG:
+        preserve_charge = qtrue;
+        break;
+
+      default:
+        preserve_charge = qfalse;
+        break;
+    }
+  } else {
+    preserve_charge = qfalse;
+  }
+
+  if(ent->client->ps.stats[STAT_WEAPONTIME2] > 0) {
+    switch (ent->client->ps.weapon) {
+      case WP_ALEVEL0:
+      case WP_ALEVEL3:
+      case WP_ALEVEL3_UPG:
+        preserved_weapon_time_2 = ent->client->ps.stats[STAT_WEAPONTIME2];
+        break;
+
+      default:
+        preserved_weapon_time_2 = 0;
+        break;
+    }
+  } else {
+    preserved_weapon_time_2 = 0;
+  }
+
   ClientSpawn( ent, ent, ent->s.pos.trBase, ent->s.apos.trBase, qtrue );
+
+  if(preserve_charge) {
+    switch (ent->client->ps.weapon) {
+      case WP_ALEVEL0:
+      case WP_ALEVEL3:
+      case WP_ALEVEL3_UPG:
+        ent->client->ps.pm_flags |= PMF_CHARGE;
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  if(preserved_weapon_time_2 > 0) {
+    switch (ent->client->ps.weapon) {
+      case WP_ALEVEL0:
+      case WP_ALEVEL3:
+      case WP_ALEVEL3_UPG:
+        ent->client->ps.stats[STAT_WEAPONTIME2] = preserved_weapon_time_2;
+        break;
+
+      default:
+        break;
+    }
+  }
 
   ent->bonusValue = bonusValue;
 
