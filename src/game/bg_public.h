@@ -510,6 +510,9 @@ typedef enum
   //for footsteps and player bobbing
   MISC_BOB_CYCLE,
 
+  //time since the last time the player landed on a ground entity
+  MISC_LANDED_TIME,
+
   MISC_CHARGE_STAMINA
 
   // netcode has space for 3 more
