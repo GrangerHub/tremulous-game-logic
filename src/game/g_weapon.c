@@ -2191,7 +2191,6 @@ qboolean CheckPounceAttack( gentity_t *ent, trace_t *trace,
   vec3_t    impactDir;
   vec3_t    impactEntVelocity;
   vec3_t    relativeVelocity;
-  vec3_t    impactNormal;
   float     impactSpeed;
   float     speedmod;
   float     deflectionMod;
@@ -2261,24 +2260,22 @@ qboolean CheckPounceAttack( gentity_t *ent, trace_t *trace,
   }
 
   if( impactEnt->client ||
-      impactEnt->s.eType == ET_BUILDABLE )
-  {
-    VectorSubtract( ent->r.currentOrigin, impactEnt->r.currentOrigin,
-                    impactNormal);
-    VectorNormalize( impactNormal );
-  }
-  else
-    VectorCopy( trace->plane.normal, impactNormal );
+      impactEnt->s.eType == ET_BUILDABLE ) {
+    deflectionMod = 1.0f;
+  } else {
+    vec3_t    impactNormal;
 
-  deflectionMod = -DotProduct( impactNormal, impactDir );
+    VectorCopy( trace->plane.normal, impactNormal );
+    deflectionMod = -DotProduct( impactNormal, impactDir );
+  }
 
   // ensure that the impact entity is in the direction of travel
-  if( deflectionMod <= 0 )
-  {
-    if( impactEnt->s.number == ent->client->ps.groundEntityNum )
+  if(deflectionMod <= 0) {
+    if(impactEnt->s.number == ent->client->ps.groundEntityNum) {
       usePayload = qtrue;
-    else
+    } else {
       return qfalse;
+    }
   }
 
   payloadMod *= ( (float)ent->client->pmext.pouncePayload ) /
