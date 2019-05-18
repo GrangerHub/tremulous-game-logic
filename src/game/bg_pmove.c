@@ -1747,13 +1747,11 @@ static qboolean PM_CheckJump( vec3_t customNormal )
   if( BG_Class( pm->ps->stats[ STAT_CLASS ] )->jumpMagnitude == 0.0f )
     return qfalse;
 
-  //can't jump and pounce at the same time, and
-  // can't jump imediately after a pounce
+  //can't jump and pounce at the same time
   if( ( pm->ps->weapon == WP_ALEVEL0 ||
         pm->ps->weapon == WP_ALEVEL3 ||
         pm->ps->weapon == WP_ALEVEL3_UPG ) &&
-      ( pm->ps->misc[ MISC_MISC ] > 0 ||
-        pm->ps->stats[ STAT_WEAPONTIME2 ] > 0 ) )
+      ( pm->ps->misc[ MISC_MISC ] > 0 ) )
   {
     // disable bunny hop
     pm->ps->pm_flags &= ~PMF_ALL_HOP_FLAGS;
@@ -1830,7 +1828,12 @@ static qboolean PM_CheckJump( vec3_t customNormal )
     return qfalse;
   }
 
-  if(pm->playerAccelMode == 2 && pm->ps->misc[MISC_LANDED_TIME] < 100) {
+  if(
+    (
+      pm->playerAccelMode == 2 ||
+      pm->ps->weapon == WP_ALEVEL3 ||
+      pm->ps->weapon == WP_ALEVEL3_UPG) &&
+    pm->ps->misc[MISC_LANDED_TIME] < 100) {
     //allow friction enough time to slow against potential strafe jumping
     return qfalse;
   }
