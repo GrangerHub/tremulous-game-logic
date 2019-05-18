@@ -532,6 +532,9 @@ typedef enum
   //for footsteps and player bobbing
   MISC_BOB_CYCLE,
 
+  //time since the last time the player landed on a ground entity
+  MISC_LANDED_TIME,
+
   MISC_CHARGE_STAMINA
 
   // netcode has space for 3 more
@@ -543,6 +546,8 @@ typedef enum
 #define PS_SPRINTTOGGLE         0x00000008
 #define PS_SPRINTTOGGLEONSTOP   0x00000010
 #define PS_QUEUED               0x00000020 // player is queued
+#define PS_BUNNYHOPENABLED      0x00000040
+#define PS_BUNNYHOPTOGGLE       0x00000080
 
 // entityState_t->eFlags
 // notice that some flags are overlapped, so their meaning depends on context

@@ -244,7 +244,7 @@ g_admin_cmd_t g_admin_cmds[ ] =
 
     {"scrim", G_admin_scrim, qfalse, "scrim",
       "sets up and manages scrims, to check the current scrim settings execute with no arguments",
-      "[^3on^6|^3off^7^6|^3restore_defaults^6|^3start^6|^3timeout^6|^3win^6|^3timed_income^6|^3map^6|^3putteam^6|^3sd_mode^6|^3sd_time^6|^3time_limit^6|^3team_name^6|^3team_captain^6|^3max_rounds^6|^3roster^6|^3remove^7]"
+      "[^3on^6|^3off^7^6|^3restore_defaults^6|^3start^6|^3timeout^6|^3win^6|^3timed_income^6|^3map^6|^3putteam^6|^3sd_mode^6|^3sd_time^6|^3time_limit^6|^3team_name^6|^3team_captain^6|^3max_rounds^6|^3roster^6|^3remove^6|^3warn^7]"
     },
 
     {"seen", G_admin_seen, qfalse, "seen",
@@ -6177,6 +6177,57 @@ qboolean G_admin_scrim(gentity_t *ent) {
         "print \"^3scrim: ^7%s^7 removed %s^7 from the roster\n\"",
         (ent) ? ent->client->pers.netname : "console",
         netname));
+    return qtrue;
+  } else if(!Q_stricmp(subcmd, "warn")) {
+    int       pid;
+    char      name[ MAX_NAME_LENGTH ], err[ MAX_STRING_CHARS ], reason[ 64 ];
+    gentity_t *vic;
+
+    if(!IS_SCRIM) {
+      ADMP("^3scrim: ^7this subcommand requires scrim mode to be on\n");
+      return qfalse;
+    }
+
+    if( Cmd_Argc() < 4 )
+    {
+      ADMP("^3scrim: ^7this command is used to issue a warning to a specified player.\n");
+      ADMP(
+        va(
+          "\n" S_COLOR_YELLOW "%s: " S_COLOR_WHITE "usage: %s %s\n",
+          admincmd->keyword, admincmd->keyword, "warn [name|slot#] [reason]"));
+      return qfalse;
+    }
+
+    Cmd_ArgvBuffer( 2, name, sizeof( name ) );
+    if( ( pid = G_ClientNumberFromString( name, err, sizeof( err ) ) ) == -1 )
+    {
+      ADMP(va("^3scrim: ^7%s", err));
+      ADMP(
+        va(
+          "\n" S_COLOR_YELLOW "%s: " S_COLOR_WHITE "usage: %s %s\n",
+          admincmd->keyword, admincmd->keyword, "warn [name|slot#] [reason]"));
+      return qfalse;
+    }
+
+    if(ent && (ent->s.number == pid)) {
+      ADMP(va("^3scrim: ^7you can't use this command on yourself."));
+      ADMP(
+        va(
+          "\n" S_COLOR_YELLOW "%s: " S_COLOR_WHITE "usage: %s %s\n",
+          admincmd->keyword, admincmd->keyword, "warn [name|slot#] [reason]"));
+      return qfalse;
+    }
+
+    vic = &g_entities[ pid ];
+
+    G_DecolorString( ConcatArgs( 3 ), reason, sizeof( reason ) );
+    CPx( pid, va( "cp \"^1You have been warned by a scrim referee:\n^7%s\" %d",
+                  reason, CP_ADMIN ) );
+    AP( va( "print \"^3scrim: ^7%s^7 has been warned: '%s^7' by %s^7\n\"",
+            vic->client->pers.netname,
+            reason,
+            ( ent ) ? ent->client->pers.netname : "console" ) );
+
     return qtrue;
   } else {
     ADMP(

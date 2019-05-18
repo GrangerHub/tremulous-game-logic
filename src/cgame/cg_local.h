@@ -1749,6 +1749,7 @@ extern  vmCvar_t    cg_drawInvisibleVision;
 
 extern  vmCvar_t    cg_stickySpec;
 extern  vmCvar_t    cg_sprintToggle;
+extern  vmCvar_t    cg_bunnyHopMode;
 extern  vmCvar_t    cg_unlagged;
 extern  vmCvar_t    cg_swapAttacks;
 extern  vmCvar_t    cg_wallJumperMinFactor;

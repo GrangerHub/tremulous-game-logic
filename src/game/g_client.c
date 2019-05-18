@@ -1104,6 +1104,22 @@ Q_EXPORT char *ClientUserinfoChanged( int clientNum, qboolean forceName )
     client->ps.persistant[ PERS_STATE ] &= ~PS_SPRINTTOGGLEONSTOP;
   }
 
+  //bunny hopping
+  s = Info_ValueForKey(userinfo, "cg_bunnyHopMode");
+  value = atoi(s);
+
+  if(value) {
+    client->ps.persistant[ PERS_STATE ] |= PS_BUNNYHOPENABLED;
+    if(value == 1) {
+      client->ps.persistant[ PERS_STATE ] |= PS_BUNNYHOPTOGGLE;
+    } else {
+      client->ps.persistant[ PERS_STATE ] &= ~PS_BUNNYHOPTOGGLE;
+    }
+  } else {
+    client->ps.persistant[ PERS_STATE ] &= ~PS_BUNNYHOPENABLED;
+    client->ps.persistant[ PERS_STATE ] &= ~PS_BUNNYHOPTOGGLE;
+  }
+
   // fly speed
   s = Info_ValueForKey( userinfo, "cg_flySpeed" );
 

@@ -562,7 +562,7 @@ gravity, use PM_AccelerateHorizontal to avoid that.
 */
 static void PM_Accelerate( vec3_t wishDir, float wishSpeed, float accel )
 {
-  if(pm->playerAccelMode == 1) {
+  if((pm->playerAccelMode == 1) || (pm->playerAccelMode == 2)) {
 #if 1
     // q2 style
     int     i;
@@ -632,7 +632,7 @@ horizontal plane.
 static void PM_AccelerateHorizontal( vec3_t wishDir, float wishSpeed,
                                      float accel )
 {
-  if(pm->playerAccelMode == 1) {
+  if((pm->playerAccelMode == 1) || (pm->playerAccelMode == 2)) {
     PM_Accelerate( wishDir, wishSpeed, accel );
   } else {
     float verticalSpeed = pm->ps->velocity[ 2 ];
@@ -1804,10 +1804,22 @@ static qboolean PM_CheckJump( vec3_t customNormal )
     return qfalse;
   }
 
+  if((pm->ps->persistant[ PERS_STATE ] & PS_BUNNYHOPENABLED)) {
+    if((pm->ps->pm_flags & PMF_JUMP_HELD) &&
+      !(pm->ps->persistant[ PERS_STATE ] & PS_BUNNYHOPTOGGLE)) {
+      pm->ps->pm_flags |= PMF_BUNNY_HOPPING; // enable hunny hop
+    }
+  } else {
+    // disable bunny hop
+    pm->ps->pm_flags &= ~PMF_ALL_HOP_FLAGS;
+  }
+
   if( !( pm->ps->pm_flags & PMF_JUMP_HELD ) )
   {
-    if( !( pm->ps->pm_flags & PMF_JUMPING ) &&
-        (pm->ps->pm_flags & PMF_HOPPED) )
+    if(
+      (pm->ps->persistant[ PERS_STATE ] & PS_BUNNYHOPENABLED) &&
+      !( pm->ps->pm_flags & PMF_JUMPING ) &&
+      (pm->ps->pm_flags & PMF_HOPPED) )
       pm->ps->pm_flags |= PMF_BUNNY_HOPPING; // enable hunny hop
   } else if( pm->ps->persistant[PERS_JUMPTIME] < BUNNY_HOP_DELAY ||
              !(pm->ps->pm_flags & PMF_BUNNY_HOPPING) ||
@@ -1815,6 +1827,11 @@ static qboolean PM_CheckJump( vec3_t customNormal )
              ( pm->ps->pm_flags & PMF_TIME_LAND ) )
   {
     // don't bunnhy hop
+    return qfalse;
+  }
+
+  if(pm->playerAccelMode == 2 && pm->ps->misc[MISC_LANDED_TIME] < 100) {
+    //allow friction enough time to slow against potential strafe jumping
     return qfalse;
   }
 
@@ -3757,6 +3774,10 @@ static void PM_GroundClimbTrace( void )
     pm->ps->pm_time = 0;
   }
 
+  if(pm->ps->groundEntityNum == ENTITYNUM_NONE) {
+    pm->ps->misc[MISC_LANDED_TIME] = 0;
+  }
+
   pm->ps->groundEntityNum = trace.entityNum;
 
   // don't reset the z velocity for slopes
@@ -3957,6 +3978,10 @@ static void PM_GroundTrace( void )
   }
 
   pm->ps->pm_flags &= ~PMF_FEATHER_FALL;
+
+  if(pm->ps->groundEntityNum == ENTITYNUM_NONE) {
+    pm->ps->misc[MISC_LANDED_TIME] = 0;
+  }
 
   pm->ps->groundEntityNum = trace.entityNum;
 
@@ -5764,6 +5789,12 @@ static void PM_DropTimers( void )
     pm->ps->persistant[PERS_JUMPTIME] = 0;
   else
     pm->ps->persistant[PERS_JUMPTIME] += pml.msec;
+
+  // the landed timer increases
+  if( pm->ps->misc[MISC_LANDED_TIME] < 0 )
+    pm->ps->misc[MISC_LANDED_TIME] = 0;
+  else
+    pm->ps->misc[MISC_LANDED_TIME] += pml.msec;
 
   // pulsating beam timers
   for( i = 0; i < 3; i++ )
