@@ -1386,12 +1386,7 @@ static qboolean PM_CheckPounce( void )
   if(pm->ps->pm_flags & PMF_CHARGE)
   {
     pm->ps->pm_flags &= ~PMF_CHARGE;
-    if( pm->ps->weapon == WP_ALEVEL0 )
-      pm->ps->stats[ STAT_WEAPONTIME2 ] += LEVEL0_POUNCE_REPEAT; // don't interfere with dretch bite
-    else
-    {
-      pm->ps->stats[ STAT_WEAPONTIME2 ] += LEVEL3_POUNCE_REPEAT;
-    }
+    pm->ps->stats[ STAT_WEAPONTIME2 ] += 300;
     return qfalse;
   }
 
