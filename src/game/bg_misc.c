@@ -1217,6 +1217,8 @@ static const classAttributes_t bg_classList[ ] =
     0,                                              //int     abilities;
     WP_NONE,                                        //weapon_t startWeapon;
     0.0f,                                           //float   buildDist;
+    0.0f,                                           //float   buildDistPrecise;
+    qfalse,                                         //qboolean buildPreciseForce;
     90,                                             //int     fov;
     0.000f,                                         //float   bob;
     1.0f,                                           //float   bobCycle;
@@ -1252,6 +1254,8 @@ static const classAttributes_t bg_classList[ ] =
     SCA_TAKESFALLDAMAGE|SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN, //int    abilities;
     WP_ABUILD,                                      //weapon_t startWeapon;
     95.0f,                                          //float   buildDist;
+    95.0f,                                          //float   buildDistPrecise;
+    qtrue,                                          //qboolean buildPreciseForce;
     110,                                            //int     fov;
     0.001f,                                         //float   bob;
     2.0f,                                           //float   bobCycle;
@@ -1288,6 +1292,8 @@ static const classAttributes_t bg_classList[ ] =
     SCA_TAKESFALLDAMAGE|SCA_FOVWARPS|SCA_WALLCLIMBER|SCA_ALIENSENSE|SCA_REGEN, //int  abilities;
     WP_ABUILD2,                                     //weapon_t startWeapon;
     105.0f,                                         //float   buildDist;
+    105.0f,                                         //float   buildDistPrecise;
+    qfalse,                                         //qboolean buildPreciseForce;
     110,                                            //int     fov;
     0.001f,                                         //float   bob;
     2.0f,                                           //float   bobCycle;
@@ -1323,6 +1329,8 @@ static const classAttributes_t bg_classList[ ] =
     SCA_WALLCLIMBER|SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,    //int     abilities;
     WP_ALEVEL0,                                     //weapon_t startWeapon;
     0.0f,                                           //float   buildDist;
+    0.0f,                                           //float   buildDistPrecise;
+    qfalse,                                         //qboolean buildPreciseForce;
     140,                                            //int     fov;
     0.0f,                                           //float   bob;
     2.5f,                                           //float   bobCycle;
@@ -1360,6 +1368,8 @@ static const classAttributes_t bg_classList[ ] =
     SCA_FOVWARPS|SCA_WALLCLIMBER|SCA_ALIENSENSE|SCA_REGEN,    //int     abilities;
     WP_ALEVEL1,                                     //weapon_t startWeapon;
     0.0f,                                           //float   buildDist;
+    0.0f,                                           //float   buildDistPrecise;
+    qfalse,                                         //qboolean buildPreciseForce;
     120,                                            //int     fov;
     0.001f,                                         //float   bob;
     1.8f,                                           //float   bobCycle;
@@ -1397,6 +1407,8 @@ static const classAttributes_t bg_classList[ ] =
     SCA_FOVWARPS|SCA_WALLCLIMBER|SCA_ALIENSENSE|SCA_REGEN,    //int     abilities;
     WP_ALEVEL1_UPG,                                 //weapon_t startWeapon;
     0.0f,                                           //float   buildDist;
+    0.0f,                                           //float   buildDistPrecise;
+    qfalse,                                         //qboolean buildPreciseForce;
     120,                                            //int     fov;
     0.001f,                                         //float   bob;
     1.8f,                                           //float   bobCycle;
@@ -1432,6 +1444,8 @@ static const classAttributes_t bg_classList[ ] =
     SCA_WALLJUMPER|SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,     //int     abilities;
     WP_ALEVEL2,                                     //weapon_t startWeapon;
     0.0f,                                           //float   buildDist;
+    0.0f,                                           //float   buildDistPrecise;
+    qfalse,                                         //qboolean buildPreciseForce;
     90,                                             //int     fov;
     0.001f,                                         //float   bob;
     1.5f,                                           //float   bobCycle;
@@ -1467,6 +1481,8 @@ static const classAttributes_t bg_classList[ ] =
     SCA_WALLJUMPER|SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,     //int     abilities;
     WP_ALEVEL2_UPG,                                 //weapon_t startWeapon;
     0.0f,                                           //float   buildDist;
+    0.0f,                                           //float   buildDistPrecise;
+    qfalse,                                         //qboolean buildPreciseForce;
     90,                                             //int     fov;
     0.001f,                                         //float   bob;
     1.5f,                                           //float   bobCycle;
@@ -1503,6 +1519,8 @@ static const classAttributes_t bg_classList[ ] =
     SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,          //int     abilities;
     WP_ALEVEL3,                                     //weapon_t startWeapon;
     0.0f,                                           //float   buildDist;
+    0.0f,                                           //float   buildDistPrecise;
+    qfalse,                                         //qboolean buildPreciseForce;
     110,                                            //int     fov;
     0.0005f,                                        //float   bob;
     1.3f,                                           //float   bobCycle;
@@ -1539,6 +1557,8 @@ static const classAttributes_t bg_classList[ ] =
     SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,          //int     abilities;
     WP_ALEVEL3_UPG,                                 //weapon_t startWeapon;
     0.0f,                                           //float   buildDist;
+    0.0f,                                           //float   buildDistPrecise;
+    qfalse,                                         //qboolean buildPreciseForce;
     110,                                            //int     fov;
     0.0005f,                                        //float   bob;
     1.3f,                                           //float   bobCycle;
@@ -1576,6 +1596,8 @@ static const classAttributes_t bg_classList[ ] =
     SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,                    //int     abilities;
     WP_ALEVEL4,                                     //weapon_t startWeapon;
     0.0f,                                           //float   buildDist;
+    0.0f,                                           //float   buildDistPrecise;
+    qfalse,                                         //qboolean buildPreciseForce;
     90,                                             //int     fov;
     0.001f,                                         //float   bob;
     1.1f,                                           //float   bobCycle;
@@ -1610,6 +1632,8 @@ static const classAttributes_t bg_classList[ ] =
     SCA_TAKESFALLDAMAGE|SCA_CANUSELADDERS|SCA_STAMINA,          //int     abilities;
     WP_NONE, //special-cased in g_client.c          //weapon_t startWeapon;
     110.0f,                                         //float   buildDist;
+    110.0f,                                         //float   buildDistPrecise;
+    qfalse,                                         //qboolean buildPreciseForce;
     90,                                             //int     fov;
     0.002f,                                         //float   bob;
     1.0f,                                           //float   bobCycle;
@@ -1644,6 +1668,8 @@ static const classAttributes_t bg_classList[ ] =
     SCA_TAKESFALLDAMAGE|SCA_CANUSELADDERS|SCA_STAMINA,          //int     abilities;
     WP_NONE, //special-cased in g_client.c          //weapon_t startWeapon;
     110.0f,                                         //float   buildDist;
+    110.0f,                                         //float   buildDistPrecise;
+    qfalse,                                         //qboolean buildPreciseForce;
     90,                                             //int     fov;
     0.002f,                                         //float   bob;
     1.0f,                                           //float   bobCycle;
@@ -5895,44 +5921,333 @@ void BG_ResetLightningBoltCharge( playerState_t *ps, pmoveExt_t *pmext )
 
 /*
 ===============
+BG_FindValidSpot
+===============
+*/
+qboolean BG_FindValidSpot(
+  void (*trace)(
+    trace_t *, const vec3_t, const vec3_t, const vec3_t, const vec3_t, int, int),
+  trace_t *tr, vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end,
+  int passEntityNum, int contentmask, float incDist, int limit) {
+  vec3_t start2, increment;
+
+  VectorCopy(start, start2);
+
+  VectorSubtract(end, start2, increment);
+  VectorNormalize(increment);
+  VectorScale(increment, incDist, increment);
+
+  do {
+    (*trace)(tr, start2, mins, maxs, end, passEntityNum, contentmask);
+    VectorAdd(tr->endpos, increment, start2);
+    if(!tr->allsolid) {
+      return qtrue;
+    }
+    limit--;
+  } while (tr->fraction < 1.0f && limit >= 0);
+  return qfalse;
+}
+
+/*
+===============
 BG_PositionBuildableRelativeToPlayer
 
 Find a place to build a buildable
 ===============
 */
-void BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
-                                           const vec3_t mins, const vec3_t maxs,
-                                           void (*trace)( trace_t *, const vec3_t, const vec3_t,
-                                                          const vec3_t, const vec3_t, int, int ),
-                                           vec3_t outOrigin, vec3_t outAngles, trace_t *tr )
-{
-  vec3_t  forward, entityOrigin, targetOrigin;
-  vec3_t  angles, playerOrigin, playerNormal;
-  float   buildDist;
+//TODO: Partial move of canbuild to this function to allow quicker updates for the red shader.
+void BG_PositionBuildableRelativeToPlayer(
+  const playerState_t *ps, const qboolean builder_adjacent_placement,
+  void (*trace)(
+    trace_t *, const vec3_t, const vec3_t, const vec3_t, const vec3_t, int, int),
+  vec3_t outOrigin, vec3_t outAngles, trace_t *tr) {
+  vec3_t forward, targetOrigin;
+  vec3_t playerNormal;
+  vec3_t mins, maxs;
+  float  buildDist;
+  const  buildable_t buildable = ps->stats[STAT_BUILDABLE] & ~SB_VALID_TOGGLEBIT;
+ 
+  BG_BuildableBoundingBox(buildable, mins, maxs);
 
-  BG_GetClientNormal( ps, playerNormal );
+  BG_GetClientNormal(ps, playerNormal);
 
-  VectorCopy( ps->viewangles, angles );
-  VectorCopy( ps->origin, playerOrigin );
-  buildDist = BG_Class( ps->stats[ STAT_CLASS ] )->buildDist;
+  VectorCopy(ps->viewangles, outAngles);
 
-  AngleVectors( angles, forward, NULL, NULL );
-  ProjectPointOnPlane( forward, forward, playerNormal );
-  VectorNormalize( forward );
+  if(builder_adjacent_placement) {
+    vec3_t right;
 
-  VectorMA( playerOrigin, buildDist, forward, entityOrigin );
+    AngleVectors(outAngles, NULL, right, NULL);
+    CrossProduct(playerNormal, right, forward);
+  } else {
+    AngleVectors(outAngles, forward, NULL, NULL);
+  }
 
-  VectorCopy( entityOrigin, targetOrigin );
+  {
+    vec3_t viewOrigin, startOrigin;
+    vec3_t mins2, maxs2;
+    vec3_t builderBottom;
+    trace_t builder_bottom_trace;
+    const float minNormal = BG_Buildable(buildable)->minNormal;
+    const qboolean invertNormal = BG_Buildable(buildable)->invertNormal;
+    qboolean validAngle;
+    const int conditional_pass_ent_num =
+      builder_adjacent_placement ? MAGIC_TRACE_HACK : ps->clientNum;
+    float heightOffset = 0.0f;
+    float builderDia;
+    vec3_t builderMins, builderMaxs;
+    const qboolean preciseBuild = 
+      (ps->stats[STAT_STATE] & SS_PRECISE_BUILD) ||
+      BG_Class(ps->stats[STAT_CLASS])->buildPreciseForce;
+    qboolean onBuilderPlane = qfalse;
 
-  //so buildings can be placed facing slopes
-  VectorMA( entityOrigin, 32, playerNormal, entityOrigin );
+    BG_ClassBoundingBox(
+      ps->stats[STAT_CLASS], builderMins, builderMaxs, NULL, NULL, NULL);
+    builderDia = RadiusFromBounds(builderMins, builderMaxs);
+    builderDia *= 2.0f;
 
-  //so buildings drop to floor
-  VectorMA( targetOrigin, -128, playerNormal, targetOrigin );
+    if(builder_adjacent_placement) {
+      float projected_maxs, projected_mins;
+  
+      projected_maxs =
+        fabs(maxs[0] * forward[0]) +
+        fabs(maxs[1] * forward[1]) +
+        fabs(maxs[2] * forward[2]);
+      projected_mins =
+        fabs(mins[0] * forward[0]) +
+        fabs(mins[1] * forward[1]) +
+        fabs(mins[2] * forward[2]);
+      buildDist = max(projected_maxs, projected_mins) + builderDia + 5.0f;
+    } else if(preciseBuild) {
+      buildDist = BG_Class(ps->stats[STAT_CLASS])->buildDistPrecise;
+    } else {
+      buildDist = BG_Class(ps->stats[STAT_CLASS])->buildDist;
+    }
 
-  (*trace)( tr, entityOrigin, mins, maxs, targetOrigin, ps->clientNum, MASK_PLAYERSOLID );
-  VectorCopy( tr->endpos, outOrigin );
-  vectoangles( forward, outAngles );
+    BG_GetClientViewOrigin(ps, viewOrigin);
+
+    maxs2[ 0 ] = maxs2[ 1 ] = 14;
+    maxs2[ 2 ] = ps->stats[ STAT_TEAM ] == TEAM_HUMANS ? 7 :maxs2[ 0 ];
+    mins2[ 0 ] = mins2[ 1 ] = -maxs2[ 0 ];
+    mins2[ 2 ] = 0;
+
+    //trace the bottom of the builder
+    VectorMA(viewOrigin, -builderDia, playerNormal, builderBottom);
+    (*trace)(
+      &builder_bottom_trace, viewOrigin, mins2, maxs2, builderBottom,
+      ps->clientNum, MASK_PLAYERSOLID );
+    VectorCopy(builder_bottom_trace.endpos, builderBottom);
+    VectorMA(builderBottom, 0.5f, playerNormal, builderBottom);
+
+    if(builder_adjacent_placement) {
+      VectorCopy(builderBottom, startOrigin);
+    } else {
+      VectorCopy(viewOrigin, startOrigin);
+    }
+
+    VectorMA( startOrigin, buildDist, forward, targetOrigin );
+
+    {
+      {//Do a small bbox trace to find the true targetOrigin.
+        vec3_t targetNormal;
+
+        (*trace)( tr, startOrigin, mins2, maxs2, targetOrigin, ps->clientNum, MASK_PLAYERSOLID );
+        if( tr->startsolid || tr->allsolid ) {
+          VectorCopy( viewOrigin, outOrigin );
+          tr->plane.normal[ 2 ] = 0.0f;
+          tr->entityNum = ENTITYNUM_NONE;
+          return;
+        }
+        VectorCopy( tr->endpos, targetOrigin );
+
+        //check if tracing should be view the view or from the base of the builder
+        VectorCopy(tr->plane.normal, targetNormal);
+        if(
+          ps->groundEntityNum != ENTITYNUM_NONE &&
+          (
+            builder_adjacent_placement ||
+            VectorCompare(playerNormal, targetNormal))) {
+
+          if(builder_adjacent_placement) {
+            vec3_t end;
+            trace_t tr2;
+
+            VectorCopy(playerNormal, targetNormal);
+
+            //move the target origin away from any collided surface
+            VectorSubtract(startOrigin, targetOrigin, end);
+            VectorNormalize(end);
+            VectorMA(targetOrigin, 1.0f, end, end);
+            (*trace)(
+              &tr2, startOrigin, mins2, maxs2, end, MAGIC_TRACE_HACK,
+              MASK_PLAYERSOLID);
+            if(!tr2.allsolid && tr2.fraction >= 1.0f) {
+              VectorCopy(tr2.endpos, startOrigin);
+            } else {
+              VectorCopy(viewOrigin, outOrigin);
+              tr->plane.normal[2] = 0.0f;
+              tr->entityNum = ENTITYNUM_NONE;
+              return;
+            }
+
+            //nudge the target origin back down to undo the offset
+            VectorMA(targetOrigin, -0.5f, targetNormal, end);
+            (*trace)(
+              &tr2, targetOrigin, mins2, maxs2, end, ps->clientNum,
+              MASK_PLAYERSOLID);
+            if(!tr2.startsolid && !tr2.allsolid) {
+              VectorCopy(tr2.endpos, targetOrigin);
+            }
+          }
+
+          if(!builder_bottom_trace.startsolid && !builder_bottom_trace.allsolid) {
+            vec3_t end;
+            trace_t tr2;
+
+            //check that there is a clear trace from the builderBottom to the target
+            VectorMA(targetOrigin, 0.5, targetNormal, end);
+            (*trace)(
+              &tr2, builderBottom, mins2, maxs2, end, ps->clientNum,
+              MASK_PLAYERSOLID);
+            if(!tr2.startsolid && !tr2.allsolid && tr2.fraction >= 1.0f) {
+              //undo the offset
+              VectorMA(builderBottom, -0.5f, playerNormal, builderBottom);
+              //use the builderBottom
+              VectorCopy(builderBottom, startOrigin);
+              onBuilderPlane = qtrue;
+            }
+          }
+        }
+      }
+
+      {//Center height and find the smallest axis.  This assumes that all x and y axis are the same magnitude.
+        heightOffset = -(maxs[2] + mins[2]) / 2.0f;
+
+        maxs[2] += heightOffset;
+        mins[2] += heightOffset;
+      }
+
+      if(
+        (minNormal > 0.0f && !invertNormal) ||
+        preciseBuild ||
+        onBuilderPlane ||
+        builder_adjacent_placement) {
+        //Raise origins by 1+maxs[2].
+        VectorMA(startOrigin, maxs[2] + 1.0f, playerNormal, startOrigin);
+        VectorMA(targetOrigin, maxs[2] + 1.0f, playerNormal, targetOrigin);
+      }
+
+      if(builder_adjacent_placement) {
+        vec3_t  temp;
+        trace_t tr2;
+
+        //swap the startOrigin with the targetOrigin to position back against the builder
+        VectorCopy(startOrigin, temp);
+        VectorCopy(targetOrigin, startOrigin);
+        VectorCopy(temp, targetOrigin);
+
+        //position the target origin to collide back against the builder.
+        (*trace)(
+          &tr2, startOrigin, mins2, maxs2, targetOrigin, MAGIC_TRACE_HACK,
+          MASK_PLAYERSOLID);
+        if(!tr2.startsolid && !tr2.allsolid) {
+          VectorCopy(tr2.endpos, targetOrigin);
+
+          //allow for a gap between the builder and the builder
+          VectorSubtract(startOrigin, targetOrigin, temp);
+          VectorNormalize(temp);
+          VectorMA(targetOrigin, 5.0f, temp, temp);
+          (*trace)(
+            &tr2, targetOrigin, mins2, maxs2, temp, ps->clientNum,
+            MASK_PLAYERSOLID);
+          if(!tr2.startsolid && !tr2.allsolid && tr2.fraction >= 1.0f) {
+            VectorCopy(tr2.endpos, targetOrigin);
+          } else {
+            VectorCopy( viewOrigin, outOrigin );
+            tr->plane.normal[ 2 ] = 0.0f;
+            tr->entityNum = ENTITYNUM_NONE;
+            return;
+          }
+        } else {
+          VectorCopy( viewOrigin, outOrigin );
+          tr->plane.normal[ 2 ] = 0.0f;
+          tr->entityNum = ENTITYNUM_NONE;
+          return;
+        }
+      }
+
+      {//Do traces from behind the player to the target to find a valid spot.
+        trace_t tr2;
+
+        if(
+          !BG_FindValidSpot(
+            trace, tr, startOrigin, mins, maxs, targetOrigin,
+            conditional_pass_ent_num, MASK_PLAYERSOLID, 5.0f, 5)) {
+          VectorCopy(viewOrigin, outOrigin);
+          tr->plane.normal[2] = 0.0f;
+          tr->entityNum = ENTITYNUM_NONE;
+          return;
+        }
+
+        //Check that the spot is not on the opposite side of a thin wall
+        (*trace)(
+          &tr2, startOrigin, NULL, NULL, tr->endpos, ps->clientNum,
+          MASK_PLAYERSOLID);
+        if(tr2.fraction < 1.0f || tr2.startsolid || tr2.allsolid) {
+          VectorCopy(viewOrigin, outOrigin);
+          tr->plane.normal[2] = 0.0f;
+          tr->entityNum = ENTITYNUM_NONE;
+          return;
+        }
+      }
+    }
+
+    validAngle =
+      tr->plane.normal[2] >=
+        minNormal || (invertNormal && tr->plane.normal[2] <= -minNormal);
+
+    //Down trace if precision building, builder adjacent placement, no hit, or surface is too steep.
+    if(
+      preciseBuild ||
+      builder_adjacent_placement ||
+      tr->fraction >= 1.0f ||
+      !validAngle ) {//TODO: These should be utility functions like "if(traceHit(&tr))"
+      if(tr->fraction < 1.0f) {
+        //Bring endpos away from surface it has hit.
+        VectorAdd(tr->endpos, tr->plane.normal, tr->endpos);
+      }
+
+      {
+        vec3_t startOrigin;
+
+        VectorMA(tr->endpos, -buildDist / 2.0f, playerNormal, targetOrigin);
+
+        VectorCopy(tr->endpos, startOrigin);
+
+        (*trace)(
+          tr, startOrigin, mins, maxs, targetOrigin, ps->clientNum,
+          MASK_PLAYERSOLID);
+      }
+    }
+
+    if(!builder_adjacent_placement) {
+      trace_t tr2;
+
+      //check if this position would collide with the builder
+      (*trace)(
+        &tr2, tr->endpos, mins, maxs, tr->endpos, MAGIC_TRACE_HACK,
+        MASK_PLAYERSOLID);
+
+      if((tr2.startsolid || tr2.allsolid) && tr2.entityNum == ps->clientNum) {
+        //attempt to position buildable adjacent to the builder
+        BG_PositionBuildableRelativeToPlayer(
+          ps, qtrue, trace, outOrigin, outAngles, tr);
+        return;
+      }
+    }
+
+    tr->endpos[2] += heightOffset;
+  }
+  VectorCopy(tr->endpos, outOrigin);
 }
 
 /*
