@@ -55,6 +55,12 @@ int BG_SU2HP( int healthSubUnits );
 #define CROUCH_VIEWHEIGHT       12
 #define DEAD_VIEWHEIGHT         4 // height from ground
 
+#ifdef CGAME
+  #define MAGIC_TRACE_HACK      (-2)
+#else 
+  #define MAGIC_TRACE_HACK      ENTITYNUM_NONE
+#endif
+
 // player teams
 typedef enum
 {
@@ -449,6 +455,8 @@ typedef enum
 #define SS_HEALING_3X           0x00001000 // triple healing rate
 #define SS_HOVELING             0x00002000 // indicates if the entity is occupying a hovel
 #define SS_HOVEL_MARKED         0x00004000 // tells if the hovel occupied is marked
+
+#define SS_PRECISE_BUILD        0x00008000 // pecision positioning for buildables, only for non-grabbers
 
 #define SB_VALID_TOGGLEBIT      0x00004000
 
@@ -1349,6 +1357,8 @@ typedef struct
   weapon_t  startWeapon;
 
   float     buildDist;
+  float     buildDistPrecise;
+  qboolean  buildPreciseForce;
 
   int       fov;
   float     bob;
@@ -1633,7 +1643,7 @@ void      BG_CheckBoltImpactTrigger(pmove_t *pmove,
                                     void (*UnlaggedOff)(void));
 void      BG_ResetLightningBoltCharge( playerState_t *ps, pmoveExt_t *pmext );
 void      BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
-                                                const vec3_t mins, const vec3_t maxs,
+                                                const qboolean builder_adjacent_placement,
                                                 void (*trace)( trace_t *, const vec3_t, const vec3_t,
                                                                const vec3_t, const vec3_t, int, int ),
                                                 vec3_t outOrigin, vec3_t outAngles, trace_t *tr );
