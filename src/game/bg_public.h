@@ -1407,6 +1407,8 @@ typedef struct
   weapon_t  startWeapon;
 
   float     buildDist;
+  float     buildDistPrecise;
+  qboolean  buildPreciseForce;
 
   int       fov;
   float     bob;

@@ -6338,7 +6338,6 @@ void PmoveSingle( pmove_t *pmove )
     else
       pm->ps->stats[ STAT_STATE ] &= ~SS_PRECISE_BUILD;
   }
-    
 
   if( pm->ps->pm_type == PM_NOCLIP )
   {

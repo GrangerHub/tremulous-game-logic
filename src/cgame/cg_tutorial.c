@@ -208,18 +208,20 @@ static void CG_AlienBuilderText( char *text, playerState_t *ps )
             CG_KeyNameForCommand( "+button5" ),
             BG_Buildable( buildable )->humanName ) );
 
-      if( ps->stats[ STAT_STATE ] & SS_PRECISE_BUILD )
-      {
-        Q_strcat( text, MAX_TUTORIAL_TEXT,
-            va( "Release %s to position the %s with greater range\n",
-              CG_KeyNameForCommand( "+speed" ),
-              BG_Buildable( buildable )->humanName ) );
-      } else
-      {
-        Q_strcat( text, MAX_TUTORIAL_TEXT,
-            va( "Hold down %s to position the %s with better precision\n",
-              CG_KeyNameForCommand( "+speed" ),
-              BG_Buildable( buildable )->humanName ) );
+      if(!BG_Class(ps->stats[ STAT_CLASS ])->buildPreciseForce) {
+        if( ps->stats[ STAT_STATE ] & SS_PRECISE_BUILD )
+        {
+          Q_strcat( text, MAX_TUTORIAL_TEXT,
+              va( "Release %s to position the %s by line of sight\n",
+                CG_KeyNameForCommand( "+speed" ),
+                BG_Buildable( buildable )->humanName ) );
+        } else
+        {
+          Q_strcat( text, MAX_TUTORIAL_TEXT,
+              va( "Hold down %s to position the %s relative to you\n",
+                CG_KeyNameForCommand( "+speed" ),
+                BG_Buildable( buildable )->humanName ) );
+        }
       }
     }
     else
@@ -611,18 +613,20 @@ static void CG_HumanCkitText( char *text, playerState_t *ps )
           CG_KeyNameForCommand( "+button5" ),
           BG_Buildable( buildable )->humanName ) );
 
-    if( ps->stats[ STAT_STATE ] & SS_PRECISE_BUILD )
-    {
-      Q_strcat( text, MAX_TUTORIAL_TEXT,
-          va( "Release %s to position the %s relative to you\n",
-            CG_KeyNameForCommand( "+speed" ),
-            BG_Buildable( buildable )->humanName ) );
-    } else
-    {
-      Q_strcat( text, MAX_TUTORIAL_TEXT,
-          va( "Hold down %s to position the %s by line of sight\n",
-            CG_KeyNameForCommand( "+speed" ),
-            BG_Buildable( buildable )->humanName ) );
+    if(!BG_Class(ps->stats[ STAT_CLASS ])->buildPreciseForce) {
+      if( ps->stats[ STAT_STATE ] & SS_PRECISE_BUILD )
+      {
+        Q_strcat( text, MAX_TUTORIAL_TEXT,
+            va( "Release %s to position the %s by line of sight\n",
+              CG_KeyNameForCommand( "+speed" ),
+              BG_Buildable( buildable )->humanName ) );
+      } else
+      {
+        Q_strcat( text, MAX_TUTORIAL_TEXT,
+            va( "Hold down %s to position the %s relative to you\n",
+              CG_KeyNameForCommand( "+speed" ),
+              BG_Buildable( buildable )->humanName ) );
+      }
     }
   }
   else

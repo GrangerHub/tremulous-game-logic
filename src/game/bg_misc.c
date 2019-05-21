@@ -1509,6 +1509,8 @@ static const classAttributes_t bg_classList[ ] =
     0,                                              //int     abilities;
     WP_NONE,                                        //weapon_t startWeapon;
     0.0f,                                           //float   buildDist;
+    0.0f,                                           //float   buildDistPrecise;
+    qfalse,                                         //qboolean buildPreciseForce;
     90,                                             //int     fov;
     0.000f,                                         //float   bob;
     1.0f,                                           //float   bobCycle;
@@ -1546,7 +1548,9 @@ static const classAttributes_t bg_classList[ ] =
     SCA_WALLCLIMBER|SCA_ALIENSENSE|
     SCA_REGEN|SCA_CANHOVEL,                         //int    abilities;
     WP_ABUILD,                                      //weapon_t startWeapon;
-    120.0f,                                         //float   buildDist;
+    240.0f,                                         //float   buildDist;
+    120.0f,                                         //float   buildDistPrecise;
+    qfalse,                                         //qboolean buildPreciseForce;
     110,                                            //int     fov;
     0.001f,                                         //float   bob;
     2.0f,                                           //float   bobCycle;
@@ -1586,7 +1590,9 @@ static const classAttributes_t bg_classList[ ] =
     SCA_WALLCLIMBER|SCA_ALIENSENSE|
     SCA_REGEN|SCA_CANHOVEL,                         //int  abilities;
     WP_ABUILD2,                                     //weapon_t startWeapon;
-    120.0f,                                         //float   buildDist;
+    240.0f,                                         //float   buildDist;
+    120.0f,                                         //float   buildDistPrecise;
+    qfalse,                                         //qboolean buildPreciseForce;
     110,                                            //int     fov;
     0.001f,                                         //float   bob;
     2.0f,                                           //float   bobCycle;
@@ -1623,6 +1629,8 @@ static const classAttributes_t bg_classList[ ] =
     SCA_WALLCLIMBER|SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN|SCA_CHARGE_STAMINA,    //int     abilities;
     WP_ALEVEL0,                                     //weapon_t startWeapon;
     0.0f,                                           //float   buildDist;
+    0.0f,                                           //float   buildDistPrecise;
+    qfalse,                                         //qboolean buildPreciseForce;
     140,                                            //int     fov;
     0.0f,                                           //float   bob;
     2.5f,                                           //float   bobCycle;
@@ -1664,6 +1672,8 @@ static const classAttributes_t bg_classList[ ] =
     SCA_FOVWARPS|SCA_WALLCLIMBER|SCA_ALIENSENSE|SCA_REGEN,    //int     abilities;
     WP_ALEVEL1,                                     //weapon_t startWeapon;
     0.0f,                                           //float   buildDist;
+    0.0f,                                           //float   buildDistPrecise;
+    qfalse,                                         //qboolean buildPreciseForce;
     120,                                            //int     fov;
     0.001f,                                         //float   bob;
     1.8f,                                           //float   bobCycle;
@@ -1704,6 +1714,8 @@ static const classAttributes_t bg_classList[ ] =
     SCA_FOVWARPS|SCA_WALLCLIMBER|SCA_ALIENSENSE|SCA_REGEN,    //int     abilities;
     WP_ALEVEL1_UPG,                                 //weapon_t startWeapon;
     0.0f,                                           //float   buildDist;
+    0.0f,                                           //float   buildDistPrecise;
+    qfalse,                                         //qboolean buildPreciseForce;
     120,                                            //int     fov;
     0.001f,                                         //float   bob;
     1.8f,                                           //float   bobCycle;
@@ -1742,6 +1754,8 @@ static const classAttributes_t bg_classList[ ] =
     SCA_WALLJUMPER|SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,     //int     abilities;
     WP_ALEVEL2,                                     //weapon_t startWeapon;
     0.0f,                                           //float   buildDist;
+    0.0f,                                           //float   buildDistPrecise;
+    qfalse,                                         //qboolean buildPreciseForce;
     90,                                             //int     fov;
     0.001f,                                         //float   bob;
     1.5f,                                           //float   bobCycle;
@@ -1779,6 +1793,8 @@ static const classAttributes_t bg_classList[ ] =
     SCA_WALLJUMPER|SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,     //int     abilities;
     WP_ALEVEL2_UPG,                                 //weapon_t startWeapon;
     0.0f,                                           //float   buildDist;
+    0.0f,                                           //float   buildDistPrecise;
+    qfalse,                                         //qboolean buildPreciseForce;
     90,                                             //int     fov;
     0.001f,                                         //float   bob;
     1.5f,                                           //float   bobCycle;
@@ -1815,6 +1831,8 @@ static const classAttributes_t bg_classList[ ] =
     (SCA_FOVWARPS|SCA_ALIENSENSE),                  //int     abilities;
     WP_ASPITFIRE,                                   //weapon_t  startWeapon
     0.0f,                                           //float   buildDist;
+    0.0f,                                           //float   buildDistPrecise;
+    qfalse,                                         //qboolean buildPreciseForce;
     90,                                             //int     fov;
     0.001f,                                         //float   bob;
     1.8f,                                           //float   bobCycle;
@@ -1852,6 +1870,8 @@ static const classAttributes_t bg_classList[ ] =
     SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN|SCA_CHARGE_STAMINA, //int     abilities;
     WP_ALEVEL3,                                     //weapon_t startWeapon;
     0.0f,                                           //float   buildDist;
+    0.0f,                                           //float   buildDistPrecise;
+    qfalse,                                         //qboolean buildPreciseForce;
     110,                                            //int     fov;
     0.0005f,                                        //float   bob;
     1.3f,                                           //float   bobCycle;
@@ -1889,6 +1909,8 @@ static const classAttributes_t bg_classList[ ] =
     SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN|SCA_CHARGE_STAMINA, //int     abilities;
     WP_ALEVEL3_UPG,                                 //weapon_t startWeapon;
     0.0f,                                           //float   buildDist;
+    0.0f,                                           //float   buildDistPrecise;
+    qfalse,                                         //qboolean buildPreciseForce;
     110,                                            //int     fov;
     0.0005f,                                        //float   bob;
     1.3f,                                           //float   bobCycle;
@@ -1928,6 +1950,8 @@ static const classAttributes_t bg_classList[ ] =
     SCA_FOVWARPS|SCA_ALIENSENSE|SCA_REGEN,                    //int     abilities;
     WP_ALEVEL4,                                     //weapon_t startWeapon;
     0.0f,                                           //float   buildDist;
+    0.0f,                                           //float   buildDistPrecise;
+    qfalse,                                         //qboolean buildPreciseForce;
     90,                                             //int     fov;
     0.001f,                                         //float   bob;
     1.1f,                                           //float   bobCycle;
@@ -1962,7 +1986,9 @@ static const classAttributes_t bg_classList[ ] =
     0.0f,                                           //float   regenRate;
     SCA_TAKESFALLDAMAGE|SCA_CANUSELADDERS|SCA_STAMINA,          //int     abilities;
     WP_NONE, //special-cased in g_client.c          //weapon_t startWeapon;
-    125.0f,                                         //float   buildDist;
+    250.0f,                                         //float   buildDist;
+    125.0f,                                         //float   buildDistPrecise;
+    qfalse,                                         //qboolean buildPreciseForce;
     90,                                             //int     fov;
     0.002f,                                         //float   bob;
     1.0f,                                           //float   bobCycle;
@@ -1997,7 +2023,9 @@ static const classAttributes_t bg_classList[ ] =
     0.0f,                                           //float   regenRate;
     SCA_TAKESFALLDAMAGE|SCA_CANUSELADDERS|SCA_STAMINA,          //int     abilities;
     WP_NONE, //special-cased in g_client.c          //weapon_t startWeapon;
-    125.0f,                                         //float   buildDist;
+    250.0f,                                         //float   buildDist;
+    125.0f,                                         //float   buildDistPrecise;
+    qfalse,                                         //qboolean buildPreciseForce;
     90,                                             //int     fov;
     0.002f,                                         //float   bob;
     1.0f,                                           //float   bobCycle;
@@ -7256,7 +7284,7 @@ void BG_PositionBuildableRelativeToPlayer(
   vec3_t forward, targetOrigin;
   vec3_t playerNormal;
   vec3_t mins, maxs;
-  float  buildDist = BG_Class( ps->stats[STAT_CLASS])->buildDist;
+  float  buildDist;
   const  buildable_t buildable = ps->stats[STAT_BUILDABLE] & ~SB_VALID_TOGGLEBIT;
  
   BG_BuildableBoundingBox(buildable, mins, maxs);
@@ -7287,7 +7315,9 @@ void BG_PositionBuildableRelativeToPlayer(
     float heightOffset = 0.0f;
     float builderDia;
     vec3_t builderMins, builderMaxs;
-    qboolean preciseBuild = ps->stats[STAT_STATE] & SS_PRECISE_BUILD;
+    const qboolean preciseBuild = 
+      (ps->stats[STAT_STATE] & SS_PRECISE_BUILD) ||
+      BG_Class(ps->stats[STAT_CLASS])->buildPreciseForce;
     qboolean onBuilderPlane = qfalse;
 
     BG_ClassBoundingBox(
@@ -7307,8 +7337,10 @@ void BG_PositionBuildableRelativeToPlayer(
         fabs(mins[1] * forward[1]) +
         fabs(mins[2] * forward[2]);
       buildDist = max(projected_maxs, projected_mins) + builderDia + 5.0f;
-    } else if(!preciseBuild) {
-      buildDist *= 2.0f;
+    } else if(preciseBuild) {
+      buildDist = BG_Class(ps->stats[STAT_CLASS])->buildDistPrecise;
+    } else {
+      buildDist = BG_Class(ps->stats[STAT_CLASS])->buildDist;
     }
 
     BG_GetClientViewOrigin(ps, viewOrigin);
