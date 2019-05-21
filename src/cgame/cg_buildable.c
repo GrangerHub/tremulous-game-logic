@@ -676,7 +676,8 @@ void CG_GhostBuildable( buildable_t buildable )
   cgs.sublimeMarkedBuildables = qtrue;
   cgs.sublimePlayers = qtrue;
 
-  BG_PositionBuildableRelativeToPlayer( ps, mins, maxs, CG_Trace, entity_origin, angles, &tr );
+  BG_PositionBuildableRelativeToPlayer( ps, qfalse, CG_Trace,
+                                        entity_origin, angles, &tr );
 
   if( cg_rangeMarkerForBlueprint.integer && tr.entityNum != ENTITYNUM_NONE )
     CG_GhostBuildableRangeMarker( buildable, entity_origin, tr.plane.normal );

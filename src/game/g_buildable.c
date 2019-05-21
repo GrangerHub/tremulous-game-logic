@@ -535,7 +535,6 @@ int G_GetMarkedBuildPoints( playerState_t *ps )
   buildable_t buildable = ( ps->stats[ STAT_BUILDABLE ] & ~SB_VALID_TOGGLEBIT );
   vec3_t            angles;
   vec3_t            origin;
-  vec3_t            mins, maxs;
   trace_t           tr1;
   int       i;
   int sum = 0;
@@ -547,7 +546,8 @@ int G_GetMarkedBuildPoints( playerState_t *ps )
     return 0;
 
   G_SetPlayersLinkState( qfalse, &g_entities[ ps->clientNum ] );
-  BG_PositionBuildableRelativeToPlayer( ps, mins, maxs, G_TraceWrapper, origin, angles, &tr1 );
+  BG_PositionBuildableRelativeToPlayer( ps, qfalse, G_TraceWrapper, origin,
+                                        angles, &tr1 );
   G_SetPlayersLinkState( qtrue, &g_entities[ ps->clientNum ] );
 
   for( i = MAX_CLIENTS, ent = g_entities + i; i < level.num_entities; i++, ent++ )
@@ -4503,7 +4503,7 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   vec3_t            angles;
   vec3_t            entity_origin;
   vec3_t            mins, maxs;
-  trace_t           tr1, tr2, tr3, tr4;
+  trace_t           tr1, tr2, tr3;
   itemBuildError_t  reason = IBE_NONE, tempReason;
   gentity_t         *tempent, *powerBuildable;
   float             minNormal;
@@ -4516,10 +4516,12 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   BG_BuildableBoundingBox( buildable, mins, maxs );
 
   G_SetPlayersLinkState( qfalse, ent );
-  BG_PositionBuildableRelativeToPlayer( ps, mins, maxs, G_TraceWrapper, entity_origin, angles, &tr1 );
+  BG_PositionBuildableRelativeToPlayer( ps, qfalse, G_TraceWrapper,
+                                        entity_origin, angles, &tr1 );
   G_SetPlayersLinkState( qtrue, ent );
-  SV_Trace( &tr2, entity_origin, mins, maxs, entity_origin, ent->s.number, MASK_PLAYERSOLID, TT_AABB );
-  SV_Trace( &tr3, ps->origin, NULL, NULL, entity_origin, ent->s.number, MASK_PLAYERSOLID, TT_AABB );
+
+  SV_Trace( &tr2, entity_origin, mins, maxs, entity_origin, -1,
+                MASK_PLAYERSOLID, TT_AABB );
 
   VectorCopy( entity_origin, origin );
   *groundEntNum = tr1.entityNum;
@@ -4630,7 +4632,6 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
       }
     }
 
-
     //this buildable requires a DCC
     if( BG_Buildable( buildable )->dccTest && !G_IsDCCBuilt( ) )
       reason = IBE_NODCC;
@@ -4738,21 +4739,24 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   if( reason == IBE_NONE )
   {
     G_SetBuildableMarkedLinkState( qfalse );
+    SV_UnlinkEntity( ent );
     if( G_CheckSpawnPoint( ENTITYNUM_NONE, origin, normal, buildable, NULL ) != NULL )
       reason = IBE_NORMAL;
     G_SetBuildableMarkedLinkState( qtrue );
+    SV_LinkEntity( ent );
   }
 
   //this item does not fit here
-  if( reason == IBE_NONE && ( tr2.fraction < 1.0f || tr3.fraction < 1.0f ) )
+  if( reason == IBE_NONE &&
+      ( tr1.fraction >= 1.0f || tr2.startsolid ) )
     reason = IBE_NOROOM;
 
   //can't build in lava nor slime
   if(reason == IBE_NONE) {
     SV_Trace(
-      &tr4, entity_origin, mins, maxs, entity_origin, ent->s.number,
+      &tr3, entity_origin, mins, maxs, entity_origin, ent->s.number,
       (CONTENTS_LAVA|CONTENTS_SLIME), TT_AABB);
-    if(tr4.fraction < 1.0f || tr4.allsolid || tr4.startsolid) {
+    if(tr3.fraction < 1.0f || tr3.allsolid || tr3.startsolid) {
       reason = IBE_NOROOM;
     }
   }
