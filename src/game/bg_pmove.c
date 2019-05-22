@@ -5369,30 +5369,6 @@ static void PM_Weapon( void )
         }
         break;
 
-        if( pm->ps->misc[ MISC_MISC ] > LCANNON_CHARGE_TIME_MIN )
-        {
-          // The lucifer cannon has overcharged
-          // Fire primary attack
-          attack1 = qtrue;
-          attack2 = qfalse;
-        }
-        else if( pm->ps->misc[ MISC_MISC ] > 0 )
-        {
-          // Not enough charge
-          pm->ps->misc[ MISC_MISC ] = 0;
-          pm->ps->weaponTime = 0;
-          pm->ps->weaponstate = WEAPON_READY;
-          return;
-        }
-        else if( !attack2 )
-        {
-          // Idle
-          pm->ps->weaponTime = 0;
-          pm->ps->weaponstate = WEAPON_READY;
-          return;
-        }
-        break;
-
       case WP_LAS_GUN:
       case WP_MASS_DRIVER:
         attack2 = attack3 = qfalse;
