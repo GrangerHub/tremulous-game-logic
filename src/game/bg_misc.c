@@ -905,7 +905,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qfalse,                //qboolean  invertNormal;
     qfalse,                //qboolean  creepTest;
     0,                     //int       creepSize;
-    qtrue,                 //qboolean  dccTest;
+    qfalse,                //qboolean  dccTest;
     qtrue,                 //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
     TESLAGEN_VALUE,        //int       value;
