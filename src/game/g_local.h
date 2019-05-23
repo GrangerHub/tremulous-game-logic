@@ -343,7 +343,7 @@ struct gentity_s
   stage_t           stageStage;
 
   team_t            buildableTeam;      // buildable item team
-  gentity_t         *parentNode;        // for creep and defence/spawn dependencies
+  gentity_t         *parentNode;        // for creep and defense/spawn dependencies
   qboolean          rangeMarker;
   qboolean          active;             // for power repeater, but could be useful elsewhere
   qboolean          powered;            // for human buildables
