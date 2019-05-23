@@ -1198,10 +1198,10 @@ gentity_t *fire_lockblob( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->s.generic1 = WPM_PRIMARY; //weaponMode
   bolt->r.ownerNum = self->s.number;
   bolt->parent = self;
-  bolt->damage = 0;
+  bolt->damage = LOCKBLOB_DMG;
   bolt->splashDamage = 0;
   bolt->splashRadius = 0;
-  bolt->methodOfDeath = MOD_UNKNOWN; //doesn't do damage so will never kill
+  bolt->methodOfDeath = MOD_TRAP;
   G_SetClipmask( bolt, MASK_SHOT );
   bolt->target_ent = NULL;
 
