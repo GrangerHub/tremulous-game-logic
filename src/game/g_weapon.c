@@ -1408,6 +1408,15 @@ void CheckGrabAttack( gentity_t *ent )
       traceEnt->client->grabExpiryTime = level.time + LEVEL1_GRAB_TIME;
     else if( ent->client->ps.weapon == WP_ALEVEL1_UPG )
       traceEnt->client->grabExpiryTime = level.time + LEVEL1_GRAB_U_TIME;
+  } else if( traceEnt->s.eType == ET_BUILDABLE &&
+      traceEnt->s.modelindex == BA_H_MGTURRET )
+  {
+    if( !traceEnt->lev1Grabbed ) {
+      G_AddPredictableEvent( ent, EV_LEV1_GRAB, 0 );
+    }
+
+    traceEnt->lev1Grabbed = qtrue;
+    traceEnt->lev1GrabTime = level.time;
   }
 }
 

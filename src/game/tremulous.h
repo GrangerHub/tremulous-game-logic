@@ -646,6 +646,8 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define MGTURRET_DMG                HBDM(8000)
 #define MGTURRET_SPINUP_TIME        750 // time between target sighted and fire
 #define MGTURRET_VALUE              HBVM(MGTURRET_BP)
+#define MGTURRET_DCC_ANGULARSPEED   12
+#define MGTURRET_GRAB_ANGULARSPEED  3
 
 #define TESLAGEN_BP                 10
 #define TESLAGEN_BT                 15000
