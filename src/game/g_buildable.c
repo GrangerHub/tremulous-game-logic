@@ -4060,12 +4060,7 @@ void HTeslaGen_Think( gentity_t *self )
 
   G_SuffocateTrappedEntities( self );
 
-  if( !G_IsDCCBuilt( ) )
-  {
-    self->powered = qfalse;
-    self->batteryPower = -1;
-  } else
-    self->powered = G_FindPower( self, qfalse );
+  self->powered = G_FindPower( self, qfalse );
 
   G_IdlePowerState( self );
 
