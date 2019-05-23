@@ -100,7 +100,7 @@ void G_SuffocateTrappedEntities( gentity_t *self )
     if( ent->health <= 0 )
       continue;
 
-    // not needed for enemies stuck in active defence buildables
+    // not needed for enemies stuck in active defense buildables
     if( ent->client->ps.stats[ STAT_TEAM ] != self->buildableTeam &&
         ( self->s.modelindex == BA_H_MGTURRET ||
           self->s.modelindex == BA_H_TESLAGEN ||
