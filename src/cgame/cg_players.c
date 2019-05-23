@@ -2797,6 +2797,11 @@ void CG_GibBsuit( vec3_t origin, vec3_t dir )
 {
   particleSystem_t  *ps;
 
+  if(cg.intermissionStarted) {
+    //don't break the bsuit if intermission started
+    return;
+  }
+
   trap_S_StartSound( origin, ENTITYNUM_WORLD, CHAN_AUTO, cgs.media.humanBuildableExplosion );
 
   //particle system

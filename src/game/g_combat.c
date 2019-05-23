@@ -2286,9 +2286,11 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
       targ->client->ps.misc[ MISC_ARMOR ] -= take;
       take = 0;
-      if( targ->client->ps.misc[ MISC_ARMOR ] <= 0 ||
-          (dflags & DAMAGE_INSTAGIB) )
-      {
+      if(
+        !(level.intermissiontime) &&
+        (
+          targ->client->ps.misc[ MISC_ARMOR ] <= 0 ||
+          (dflags & DAMAGE_INSTAGIB))) {
         gentity_t *tent;
         vec3_t newOrigin;
         const weapon_t weapon = targ->client->ps.stats[ STAT_WEAPON ];
