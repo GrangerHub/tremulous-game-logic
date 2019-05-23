@@ -980,9 +980,9 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  enabled;
     "dcc",                 //char      *name;
     "Defence Computer",    //char      *humanName;
-    "A structure that enables self-repair functionality in "
-      "human structures. Each Defence Computer built increases "
-      "repair rate slightly.",
+    "A structure coordinating and enhancing the action of base defense so that "
+      "defense is distributed optimally among the enemy. The Defence "
+      "Computer additionally eneables auto-repair in human structures.",
     "team_human_dcc",      //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
     0.1,                   //float     bounce;

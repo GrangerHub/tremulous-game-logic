@@ -584,6 +584,7 @@ void G_InitGentity( gentity_t *e )
   e->classname = "noclass";
   e->s.number = e - g_entities;
   e->r.ownerNum = ENTITYNUM_NONE;
+  BG_Queue_Init(&e->targeted);
 }
 
 /*
@@ -705,6 +706,7 @@ void G_FreeEntity( gentity_t *ent )
     return;
 
   G_UnlaggedClear( ent );
+  BG_Queue_Clear(&ent->targeted);
   memset( ent, 0, sizeof( *ent ) );
   ent->classname = "freent";
   ent->freetime = level.time;

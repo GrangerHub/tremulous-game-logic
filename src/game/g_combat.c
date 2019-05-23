@@ -769,7 +769,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   {
     attacker->client->lastkilled_client = self->s.number;
 
-    if( ( attacker == self || OnSameTeam( self, attacker ) ) && meansOfDeath != MOD_HSPAWN )
+    if( ( attacker == self || (self->client && OnSameTeam( self, attacker )) ) && meansOfDeath != MOD_HSPAWN )
     {
       //punish team kills and suicides
       if( attacker->client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
@@ -1859,6 +1859,10 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
     }
   }
 
+  if(attacker && !OnSameTeam(targ, attacker)) {
+    attacker->lastInflictDamageOnEnemyTime = level.time;
+  }
+
   // shootable doors / buttons don't actually have any health
   if(targ->s.eType == ET_MOVER) {
     for( k = 0; targ->wTriggers[ k ]; ++k ) {
@@ -2860,4 +2864,23 @@ void G_LogDestruction( gentity_t *self, gentity_t *actor, int mod )
         self->builtBy->name[ self->builtBy->nameOffset ],
         BG_Buildable( actor->s.modelindex )->humanName ) );
   }
+}
+
+/*
+================
+G_IsRecentAgressor
+
+Given entity has attacked an enemy in the last 5 seconds
+================
+*/
+qboolean G_IsRecentAgressor(const gentity_t *ent) {
+  if(!ent) {
+    return qfalse;
+  }
+
+  if((level.time - ent->lastInflictDamageOnEnemyTime) < 5000) {
+    return qtrue;
+  }
+
+  return qfalse;
 }

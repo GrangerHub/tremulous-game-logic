@@ -406,6 +406,7 @@ struct gentity_s
   credits_t         creditsUpgradeDeffenses[ UP_NUM_UPGRADES ][ MAX_GENTITIES ]; // breakable upgrade credits for damage done by an enemy defensive buildables.
   int      bonusValue; // additional value this entity is worth (due to its effectiveness/etc since it last spawned)
 
+  bgqueue_t         targeted;           // a queue of currently valid targets for a turret
   vec3_t            turretAim;          // aim vector for turrets
   vec3_t            turretAimRate;      // track turn speed for norfenturrets
   int               turretSpinupTime;   // time elapsed during the spinup process
@@ -427,6 +428,7 @@ struct gentity_s
   int               nextRegenTime;
   int               nextEvoTime; //for gradually spending evos over delayed evolving
   int               nextHPReserveRegenTime;
+  int               lastInflictDamageOnEnemyTime;
 
   qboolean          pointAgainstWorld;              // don't use the bbox for map collisions
 
@@ -1364,6 +1366,7 @@ void        G_SetExpiration( gentity_t *ent, expire_t index, int expiration );
 void      G_IncreaseBonusValue( int *bonusValue, int diff );
 int       G_ChangeHealth( gentity_t *targ, gentity_t *changer,
                           int change, int healthFlags );
+qboolean  G_IsRecentAgressor(const gentity_t *ent);
 qboolean  CanDamage( gentity_t *targ, vec3_t origin,
                      vec3_t mins, vec3_t maxs );
 void      G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
@@ -1634,7 +1637,7 @@ void G_DisableUnlaggedCalc(gentity_t *ent);
 //
 team_t    G_TeamFromString( char *str );
 void      G_TeamCommand( team_t team, char *cmd );
-qboolean  OnSameTeam( gentity_t *ent1, gentity_t *ent2 );
+qboolean  OnSameTeam(const gentity_t *ent1, const gentity_t *ent2);
 void      G_LeaveTeam( gentity_t *self );
 void      G_ChangeTeam( gentity_t *ent, team_t newTeam );
 gentity_t *Team_GetLocation( gentity_t *ent );

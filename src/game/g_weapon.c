@@ -1531,7 +1531,7 @@ void CheckGrabAttack( gentity_t *ent )
       traceEnt->client->grabExpiryTime = level.time + LEVEL1_GRAB_U_TIME;
       ent->client->grabRepeatTime = level.time + LEVEL1_GRAB_U_REPEAT;
     }
-  }else if( traceEnt->s.eType == ET_BUILDABLE &&
+  } else if( traceEnt->s.eType == ET_BUILDABLE &&
       traceEnt->s.modelindex == BA_H_MGTURRET )
   {
     if( !traceEnt->lev1Grabbed ) {

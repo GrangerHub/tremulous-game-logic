@@ -3451,8 +3451,7 @@ static qboolean HMGTurret_FindTrackPoint( gentity_t *self,
     targetPoint->distance = VectorNormalize( projection );
     VectorNormalize( targetPoint->direction );
 
-    if( targetPoint->bboxPoint.num == BBXP_ORIGIN &&
-        BG_Buildable( self->s.modelindex )->turretTrackOnlyOrigin )
+    if( !self->dcc && targetPoint->bboxPoint.num == BBXP_ORIGIN )
     {
       //only need to check the origin in this case
       break;
@@ -3460,7 +3459,7 @@ static qboolean HMGTurret_FindTrackPoint( gentity_t *self,
   }
 
   // check if only the origin needs to be tracked
-  if( BG_Buildable( self->s.modelindex )->turretTrackOnlyOrigin )
+  if( !self->dcc )
   {
     targetPoint_t *targetPoint = &targetPoints[ BBXP_ORIGIN ];
 
@@ -3502,13 +3501,44 @@ static qboolean HMGTurret_FindTrackPoint( gentity_t *self,
 
 /*
 ================
+HMGTurret_NumOfTargeting
+
+Checks the validity of the members of an entity's targeted queue, then
+returns the length of the queue
+================
+*/
+size_t HMGTurret_NumOfTargeting(gentity_t *ent) {
+  bglist_t *list;
+
+  Com_Assert(ent && "HMGTurret_CheckTargetedQueue: ent is NULL");
+
+  list = ent->targeted.head;
+  while(list) {
+    bglist_t *next = list->next;
+    gentity_t *targeted = (gentity_t *)list->data;
+
+    if(
+      !targeted->inuse ||
+      targeted->s.eType != ET_BUILDABLE ||
+      targeted->enemy != ent ||
+      !targeted->powered) {
+      BG_Queue_Delete_Link(&ent->targeted, list);
+    }
+    list = next;
+  }
+
+  return BG_Queue_Get_Length(&ent->targeted);
+}
+
+/*
+================
 HMGTurret_CheckTarget
 
 Used by HMGTurret_Think to check enemies for validity
 ================
 */
 static qboolean HMGTurret_CheckTarget( gentity_t *self, gentity_t *target,
-                                       qboolean los_check )
+                                       qboolean los_check, qboolean ignorePainted )
 {
   bboxPoint_t trackPoint;
 
@@ -3521,6 +3551,29 @@ static qboolean HMGTurret_CheckTarget( gentity_t *self, gentity_t *target,
          !( target->s.eType == ET_BUILDABLE &&
             target->buildableTeam == TEAM_ALIENS ) ) )
     return qfalse;
+
+  //some turret has already selected this target
+  if(self->dcc && !ignorePainted) {
+    size_t num_of_targeting = HMGTurret_NumOfTargeting(target);
+
+    if(
+      BG_ClassAllowedInStage(PCL_ALIEN_LEVEL4, g_alienStage.integer, IS_WARMUP) &&
+      (target->client && target->client->pers.classSelection != PCL_ALIEN_LEVEL4)) {
+      //check to see if a rant can be shot instead
+      return qfalse;
+    }
+
+    //check to see if another potential target is an agressor
+    if(!G_IsRecentAgressor(target)) {
+      return qfalse;
+    }
+
+    if(
+      num_of_targeting > 0 &&
+      !(BG_Queue_Find(&target->targeted, self) && num_of_targeting == 1)) {
+      return qfalse;
+    }
+  }
 
   if( G_NoTarget( target ) )
     return qfalse;
@@ -3567,7 +3620,7 @@ static qboolean HMGTurret_TrackEnemy( gentity_t *self )
   Com_Assert( self->enemy &&
               "HMGTurret_TrackEnemy: enemy is NULL" );
 
-  if( BG_Buildable( self->s.modelindex )->turretTrackOnlyOrigin )
+  if( !self->dcc )
     trackPoint.num = BBXP_ORIGIN;
   else
     trackPoint.num = self->trackedEnemyPointNum;
@@ -3596,7 +3649,11 @@ static qboolean HMGTurret_TrackEnemy( gentity_t *self )
 
   // allow the yaw to turn faster the further from horizontal the turret is aiming
   AngleVectors( self->s.angles2, currentdir, NULL, NULL );
-  angularYawSpeed = angularBaseSpeed + fabs( DotProduct( refNormal, currentdir ) * MGTURRET_ANGULARYAWSPEED_MOD );
+  if(angularBaseSpeed) {
+    angularYawSpeed = angularBaseSpeed + fabs( DotProduct( refNormal, currentdir ) * MGTURRET_ANGULARYAWSPEED_MOD );
+  } else {
+    angularYawSpeed = 0.0f;
+  }
 
   VectorSubtract( trackPoint.point, self->s.pos.trBase, dirToTarget );
   VectorNormalize( dirToTarget );
@@ -3628,9 +3685,9 @@ static qboolean HMGTurret_TrackEnemy( gentity_t *self )
     self->s.angles2[ PITCH ] = (-360) + MGTURRET_VERTICALCAP;
 
   //if not pointing at our target then move accordingly
-  if( angularDiff[ YAW ] < 0 && angularDiff[ YAW ] < ( -MGTURRET_ANGULARSPEED ) )
+  if( angularDiff[ YAW ] < 0 && angularDiff[ YAW ] < ( -angularYawSpeed ) )
     self->s.angles2[ YAW ] += angularYawSpeed;
-  else if( angularDiff[ YAW ] > 0 && angularDiff[ YAW ] > MGTURRET_ANGULARSPEED )
+  else if( angularDiff[ YAW ] > 0 && angularDiff[ YAW ] > angularYawSpeed )
     self->s.angles2[ YAW ] -= angularYawSpeed;
   else
     self->s.angles2[ YAW ] = angleToTarget[ YAW ];
@@ -3647,8 +3704,7 @@ static qboolean HMGTurret_TrackEnemy( gentity_t *self )
   {
     return qtrue;
   }
-  else if( !BG_Buildable( self->s.modelindex )->turretTrackOnlyOrigin &&
-           self->active )
+  else if( self->dcc && self->active )
   {
     vec3_t  forward;
     vec3_t  end;
@@ -3682,11 +3738,13 @@ static void HMGTurret_FindEnemy( gentity_t *self )
   vec3_t      mins, maxs;
   int         i, num;
   gentity_t   *target;
+  gentity_t   *prev_enemy;
   int         start;
 
   Com_Assert( self &&
               "HMGTurret_FindEnemy: self is NULL" );
 
+  prev_enemy = self->enemy;
   self->enemy = NULL;
 
   // Look for targets in a box around the turret
@@ -3698,15 +3756,95 @@ static void HMGTurret_FindEnemy( gentity_t *self )
   if( num == 0 )
     return;
 
-  start = rand( ) / ( RAND_MAX / num + 1 );
-  for( i = start; i < num + start ; i++ )
-  {
-    target = &g_entities[ entityList[ i % num ] ];
-    if( !HMGTurret_CheckTarget( self, target, qtrue ) )
-      continue;
+  if( self->dcc ) {
+    size_t   min_targeting = MAX_GENTITIES;
+    class_t  targeted_class = PCL_NONE;
+    qboolean targeted_agressor = qfalse;
 
-    self->enemy = target;
-    return;
+    //factor in targets being tracked by multiple turrets
+
+    //first check the previous enemy
+    if( HMGTurret_CheckTarget( self, prev_enemy, qtrue, qtrue ) ) {
+      self->enemy = prev_enemy;
+      min_targeting = HMGTurret_NumOfTargeting(prev_enemy);
+      targeted_agressor = G_IsRecentAgressor(prev_enemy);
+      if(prev_enemy->client) {
+        targeted_class = prev_enemy->client->pers.classSelection;
+      } else {
+        targeted_class = PCL_NONE;
+      }
+    }
+
+    //check all other area entities
+    start = rand( ) / ( RAND_MAX / num + 1 );
+    for( i = start; i < num + start ; i++ ) {
+      size_t         num_of_targeting;
+      bboxPointNum_t trackedEnemyPointNumBackup;
+
+      target = &g_entities[ entityList[ i % num ] ];
+
+      if(target == prev_enemy) {
+        //already checked
+        continue;
+      }
+
+      if( targeted_class == PCL_ALIEN_LEVEL4) {
+        if(
+          target->client &&
+          target->client->pers.classSelection != PCL_ALIEN_LEVEL4) {
+          //give preference to shooting tyrants
+          continue;
+        }
+
+        if(targeted_agressor && !G_IsRecentAgressor(target)) {
+          //give agressor tyrants top priority
+          continue;
+        }
+      }
+
+      if(targeted_agressor && !G_IsRecentAgressor(target)) {
+        //give agressor enemies higher priority
+        continue;
+      }
+
+      num_of_targeting = HMGTurret_NumOfTargeting(target);
+
+      if(
+        !(
+          targeted_class != PCL_ALIEN_LEVEL4 &&
+          (
+            target->client &&
+            target->client->pers.classSelection == PCL_ALIEN_LEVEL4)) &&
+        !(!targeted_agressor && G_IsRecentAgressor(target)) &&
+        num_of_targeting >= min_targeting) {
+        continue;
+      }
+
+      trackedEnemyPointNumBackup = self->trackedEnemyPointNum;
+      if( !HMGTurret_CheckTarget( self, target, qtrue, qtrue ) ) {
+        self->trackedEnemyPointNum = trackedEnemyPointNumBackup;
+        continue;
+      }
+
+      self->enemy = target;
+      min_targeting = num_of_targeting;
+      if(target->client) {
+        targeted_class = target->client->pers.classSelection;
+      } else {
+        targeted_class = PCL_NONE;
+      }
+    }
+  } else {
+    start = rand( ) / ( RAND_MAX / num + 1 );
+    for( i = start; i < num + start ; i++ ) {
+      target = &g_entities[ entityList[ i % num ] ];
+      if( !HMGTurret_CheckTarget( self, target, qtrue, qtrue ) ) {
+        continue;
+      }
+
+      self->enemy = target;
+      return;
+    }
   }
 }
 
@@ -3779,6 +3917,8 @@ Think function for MG turret
 */
 void HMGTurret_Think( gentity_t *self )
 {
+  gentity_t * prev_enemy;
+
   self->nextthink = level.time +
                     BG_Buildable( self->s.modelindex )->nextthink;
 
@@ -3826,16 +3966,30 @@ void HMGTurret_Think( gentity_t *self )
     return;
   }
 
-  // If the current target is not valid find a new enemy
-  if( !HMGTurret_CheckTarget( self, self->enemy, qtrue ) )
+  prev_enemy = self->enemy;
+
+   // If the current target is not valid find a new enemy
+  if( !HMGTurret_CheckTarget( self, self->enemy, qtrue, qfalse ) )
   {
+    if( self->enemy && BG_Queue_Find(&self->enemy->targeted, self) ) {
+      BG_Queue_Remove_All(&self->enemy->targeted, self);
+    }
+    HMGTurret_FindEnemy( self );
+  }
+
+  if(self->enemy != prev_enemy) {
     self->active = qfalse;
     HMGTurret_FindEnemy( self );
   }
+  
   // if newly powered raise turret
   HMGTurret_State( self, MGT_STATE_ACTIVE );
   if( !self->enemy )
     return;
+
+  if(BG_Queue_Find(&self->enemy->targeted, self) == NULL) {
+    BG_Queue_Push_Head(&self->enemy->targeted, self);
+  }
 
   // Track until we can hit the target
   if( !HMGTurret_TrackEnemy( self ) )
