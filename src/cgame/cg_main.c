@@ -1193,7 +1193,7 @@ static void CG_RegisterGraphics( void )
   cgs.media.alienEvolvePS             = CG_RegisterParticleSystem( "alienEvolvePS" );
   cgs.media.airpounceblast            = CG_RegisterParticleSystem( "airpounceblast" );
   cgs.media.alienAcidTubePS           = CG_RegisterParticleSystem( "alienAcidTubePS" );
-  cgs.media.alienSlimeZungePS         = CG_RegisterParticleSystem( "alienSlimeZungePS" );
+  cgs.media.alienSlimerPS         = CG_RegisterParticleSystem( "alienSlimeZungePS" );
 
   cgs.media.alienEvolveShader         = trap_R_RegisterShader( "gfx/misc/alienEvolve" );
   cgs.media.alienEvolveVisionShader   = trap_R_RegisterShader( "gfx/misc/aevolve_view" );

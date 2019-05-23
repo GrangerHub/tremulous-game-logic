@@ -1415,7 +1415,7 @@ typedef struct
   qhandle_t   alienEvolvePS;
   qhandle_t   airpounceblast;
   qhandle_t   alienAcidTubePS;
-  qhandle_t   alienSlimeZungePS;
+  qhandle_t   alienSlimerPS;
 
   sfxHandle_t alienEvolveSound;
   sfxHandle_t alienLoopedEvolveSound;
@@ -1447,7 +1447,7 @@ typedef struct
   qhandle_t   spitfireWingsGibPS;
 
   qhandle_t   teslaZapTS;
-  qhandle_t   slimeZungeTS;
+  qhandle_t   slimerTS;
 
   sfxHandle_t lCannonWarningSound;
   sfxHandle_t lCannonWarningSound2;

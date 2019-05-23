@@ -452,19 +452,19 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LOCKBLOB_K_SCALE            1.0f
 #define LOCKBLOB_LIFETIME           15000
 
-#define SLIME_ZUNGE_BP              12
-#define SLIME_ZUNGE_BT              8000
-#define SLIME_ZUNGE_HEALTH          ABHM(250000)
-#define SLIME_ZUNGE_REGEN           ABRM(12000)
-#define SLIME_ZUNGE_SPLASHDAMAGE    ABDM(15000)
-#define SLIME_ZUNGE_SPLASHRADIUS    200
-#define SLIME_ZUNGE_CREEPSIZE       170
-#define SLIME_ZUNGE_VALUE           ( 2 * LEVEL0_VALUE )
-#define SLIME_ZUNGE_BAT_PWR         25000
-#define SLIME_ZUNGE_DMGRADIUS       120
-#define SLIME_ZUNGE_REPEAT          300
-#define SLIME_ZUNGE_RANGE           300
-#define SLIME_ZUNGE_DOT             0.79f // max angle = acos( SLIME_ZUNGE )
+#define SLIMER_BP              12
+#define SLIMER_BT              8000
+#define SLIMER_HEALTH          ABHM(250000)
+#define SLIMER_REGEN           ABRM(12000)
+#define SLIMER_SPLASHDAMAGE    ABDM(15000)
+#define SLIMER_SPLASHRADIUS    200
+#define SLIMER_CREEPSIZE       170
+#define SLIMER_VALUE           ( 2 * LEVEL0_VALUE )
+#define SLIMER_BAT_PWR         25000
+#define SLIMER_DMGRADIUS       120
+#define SLIMER_REPEAT          300
+#define SLIMER_RANGE           300
+#define SLIMER_DOT             0.79f // max angle = acos( SLIMER )
 
 #define OVERMIND_BP                 0
 #define OVERMIND_BT                 25000

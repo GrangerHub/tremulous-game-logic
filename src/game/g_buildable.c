@@ -2260,10 +2260,10 @@ void ATrapper_Think( gentity_t *self )
 ================
 ATrapper_CheckTarget
 
-Used by ASlimeZunge_Think to check enemies for validity
+Used by ASlimer_Think to check enemies for validity
 ================
 */
-qboolean ASlimeZunge_CheckTarget( gentity_t *slime, gentity_t *target )
+qboolean ASlimer_CheckTarget( gentity_t *slime, gentity_t *target )
 {
   vec3_t distance;
 
@@ -2271,7 +2271,7 @@ qboolean ASlimeZunge_CheckTarget( gentity_t *slime, gentity_t *target )
     return qfalse;
 
   if( slime->s.eType != ET_BUILDABLE ||
-      slime->s.modelindex != BA_A_ZUNGE )
+      slime->s.modelindex != BA_A_SIMER )
     return qfalse;
 
   if( !slime->spawned )
@@ -2283,21 +2283,21 @@ qboolean ASlimeZunge_CheckTarget( gentity_t *slime, gentity_t *target )
   if( slime->health <= 0 )
     return qfalse;
 
-  // ignore targets that are already being sucked in by another slime zunge
-  if( target->slimeZunge &&
-      target->slimeZunge != slime )
+  // ignore targets that are already being sucked in by another slimer
+  if( target->slimer &&
+      target->slimer != slime )
   {
-    if( target->slimeZunge->slimeTarget == target )
+    if( target->slimer->slimeTarget == target )
     {
-      if( ASlimeZunge_CheckTarget( target->slimeZunge, target ) )
+      if( ASlimer_CheckTarget( target->slimer, target ) )
         return qfalse;
       else
       {
-        target->slimeZunge->slimeTarget = NULL;
-        target->slimeZunge = NULL;
+        target->slimer->slimeTarget = NULL;
+        target->slimer = NULL;
       }
     } else
-      target->slimeZunge = NULL;
+      target->slimer = NULL;
   }
 
   if (target->client)
@@ -2320,7 +2320,7 @@ qboolean ASlimeZunge_CheckTarget( gentity_t *slime, gentity_t *target )
     return qfalse;
 
   VectorSubtract( target->r.currentOrigin, slime->r.currentOrigin, distance );
-  if( VectorLength( distance ) > SLIME_ZUNGE_RANGE ) // is the target within range?
+  if( VectorLength( distance ) > SLIMER_RANGE ) // is the target within range?
     return qfalse;
 
   if( !slime->slimeTarget ||
@@ -2328,7 +2328,7 @@ qboolean ASlimeZunge_CheckTarget( gentity_t *slime, gentity_t *target )
   {
     //only allow a narrow field of "vision" if this slime isn't currently grabbing the target
     VectorNormalize( distance ); //is now direction of target
-    if( DotProduct( distance, slime->s.origin2 ) <= SLIME_ZUNGE_DOT )
+    if( DotProduct( distance, slime->s.origin2 ) <= SLIMER_DOT )
       return qfalse;
   }
 
@@ -2337,23 +2337,23 @@ qboolean ASlimeZunge_CheckTarget( gentity_t *slime, gentity_t *target )
 
 /*
 ================
-ASlimeZunge_Suck
+ASlimer_Suck
 
 Have the given target sucked in by the given slime
 ================
 */
-static void ASlimeZunge_Suck( gentity_t *slime, gentity_t *target )
+static void ASlimer_Suck( gentity_t *slime, gentity_t *target )
 {
-  gentity_t *tent; // zunge trail
+  gentity_t *tent; // slimer trail
   vec3_t start, end, dir;
 
   // attach to the victum
-  tent = G_TempEntity( target->s.pos.trBase, EV_ZUNGETRAIL );
+  tent = G_TempEntity( target->s.pos.trBase, EV_SLIMERTRAIL );
   tent->s.generic1 = slime->s.number; //src
   tent->s.clientNum = target->s.number; //dest
   VectorCopy( slime->s.pos.trBase, tent->s.origin2 );
   slime->slimeTarget = target;
-  target->slimeZunge = slime;
+  target->slimer = slime;
 
   // suck the victum in
   VectorCopy(target->r.currentOrigin, start); 
@@ -2366,7 +2366,7 @@ static void ASlimeZunge_Suck( gentity_t *slime, gentity_t *target )
     VectorScale(dir,400, target->s.pos.trDelta );
   VectorCopy(dir, target->movedir); 
 
-  G_AddEvent( slime, EV_ALIEN_SLIME_ZUNGE, DirToByte( slime->r.currentOrigin ) );
+  G_AddEvent( slime, EV_ALIEN_SLIMER, DirToByte( slime->r.currentOrigin ) );
 
   if( level.time >= slime->timestamp + 500 )
   {
@@ -2376,23 +2376,23 @@ static void ASlimeZunge_Suck( gentity_t *slime, gentity_t *target )
   G_SelectiveRadiusDamage( slime->s.pos.trBase,
                            slime->r.mins, slime->r.maxs,
                            slime, ACIDTUBE_DAMAGE,
-                           SLIME_ZUNGE_DMGRADIUS, slime,
-                           MOD_ZUNGE, TEAM_ALIENS, qfalse );
+                           SLIMER_DMGRADIUS, slime,
+                           MOD_SLIMER, TEAM_ALIENS, qfalse );
             
-  slime->nextthink = level.time + SLIME_ZUNGE_REPEAT;
+  slime->nextthink = level.time + SLIMER_REPEAT;
 
   return;
 }
 
 /*
 ================
-ASlimeZunge_Think
+ASlimer_Think
 ================
 */
-void ASlimeZunge_Think( gentity_t *self )
+void ASlimer_Think( gentity_t *self )
 {
   int       entityList[ MAX_GENTITIES ];
-  vec3_t    range = { SLIME_ZUNGE_RANGE, SLIME_ZUNGE_RANGE, SLIME_ZUNGE_RANGE };
+  vec3_t    range = { SLIMER_RANGE, SLIMER_RANGE, SLIMER_RANGE };
   vec3_t    mins, maxs;
   int       i, num;
   gentity_t *target;
@@ -2403,15 +2403,15 @@ void ASlimeZunge_Think( gentity_t *self )
 
   if( self->slimeTarget )
   {
-    if( ASlimeZunge_CheckTarget( self, self->slimeTarget ) )
+    if( ASlimer_CheckTarget( self, self->slimeTarget ) )
     {
-      ASlimeZunge_Suck( self, self->slimeTarget );
+      ASlimer_Suck( self, self->slimeTarget );
       return;
     } else
     {
       // reset
-      if( self->slimeTarget->slimeZunge == self )
-        self->slimeTarget->slimeZunge = NULL;
+      if( self->slimeTarget->slimer == self )
+        self->slimeTarget->slimer = NULL;
 
       self->slimeTarget = NULL;
     }
@@ -2424,10 +2424,10 @@ void ASlimeZunge_Think( gentity_t *self )
     {
       target = &g_entities[ entityList[ i ] ];
 
-      if( !ASlimeZunge_CheckTarget( self, target ) )
+      if( !ASlimer_CheckTarget( self, target ) )
         continue;
 
-      ASlimeZunge_Suck( self, target );
+      ASlimer_Suck( self, target );
       return;
     }
   }
@@ -4812,7 +4812,7 @@ static int G_CompareBuildablesForRemoval( const void *a, const void *b )
     BA_A_ACIDTUBE,
     BA_A_TRAPPER,
     BA_A_HIVE,
-    BA_A_ZUNGE,
+    BA_A_SIMER,
     BA_A_HOVEL,
     BA_A_GRAPNEL,
     BA_A_BOOSTER,
@@ -5864,9 +5864,9 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
       built->pain = AGeneric_Pain;
       break;
 
-    case BA_A_ZUNGE:
+    case BA_A_SIMER:
       built->die = AGeneric_Die;
-      built->think = ASlimeZunge_Think;
+      built->think = ASlimer_Think;
       built->pain = AGeneric_Pain;
       break;
 

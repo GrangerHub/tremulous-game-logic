@@ -376,7 +376,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  enabled;
     "trapper",             //char      *name;
     "Trapper",             //char      *humanName;
-    "Fires a blob of adhesive spit at any non-alien in its line of "
+    "Fires a blob of adhesive damaging spit at any non-alien in its line of "
       "sight. This hinders their movement, making them an easy target "
       "for other defensive structures or aliens.",
     "team_alien_trapper",  //char      *entityName;
@@ -425,30 +425,30 @@ static const buildableAttributes_t bg_buildableList[ ] =
     (ROLE_OFFENSE)         //int               role;
   },
   {
-    BA_A_ZUNGE,            //int       buildNum;
+    BA_A_SIMER,            //int       buildNum;
     qtrue,                 //qboolean  enabled;
     "slime_zunge",         //char      *name;
-    "Slime Zunge",         //char      *humanName;
+    "Slimer",         //char      *humanName;
 	  "Used for passive and active base defense."
 	  "Nearby Humans get *sucked* in and take damage.",
-    "team_alien_slime_zunge", //char   *entityName;
+    "team_alien_slimer", //char   *entityName;
     TR_GRAVITY,            //trType_t  traj;
     0.1,                   //float     bounce;
-    SLIME_ZUNGE_BP,        //int       buildPoints;
+    SLIMER_BP,        //int       buildPoints;
     ( 1 << S3 ),           //int       stages;
-    SLIME_ZUNGE_HEALTH,    //int       health;
+    SLIMER_HEALTH,    //int       health;
     0.5f,                  //float     maxHealthDecayRate;
     0,                     //int       minHealth;
-    SLIME_ZUNGE_REGEN,     //int       regenRate;
+    SLIMER_REGEN,     //int       regenRate;
     1.0f,                  //float     ballisticDmgMod;
-    SLIME_ZUNGE_SPLASHDAMAGE, //int    splashDamage;
-    SLIME_ZUNGE_SPLASHRADIUS, //int    splashRadius;
+    SLIMER_SPLASHDAMAGE, //int    splashDamage;
+    SLIMER_SPLASHRADIUS, //int    splashRadius;
     MOD_ASPAWN,            //int       meansOfDeath;
     TEAM_ALIENS,           //int       team;
     ( 1 << WP_ABUILD )|( 1 << WP_ABUILD2 ), //weapon_t  buildWeapon;
     BANIM_IDLE1,           //int       idleAnim;
     200,                   //int       nextthink;
-    SLIME_ZUNGE_BT,        //int       buildTime;
+    SLIMER_BT,        //int       buildTime;
     qfalse,                //qboolean  activationEnt;
     0,                     //int       activationFlags;
     0,                     //int       occupationFlags;
@@ -462,15 +462,15 @@ static const buildableAttributes_t bg_buildableList[ ] =
     0.0f,                  //float     minNormal;
     qtrue,                 //qboolean  invertNormal;
     qtrue,                 //qboolean  creepTest;
-    SLIME_ZUNGE_CREEPSIZE, //int       creepSize;
+    SLIMER_CREEPSIZE, //int       creepSize;
     qfalse,                //qboolean  dccTest;
     qtrue,                 //qboolean  transparentTest;
     qfalse,                //qboolean  uniqueTest;
-	  SLIME_ZUNGE_VALUE,     //int       value;
+	  SLIMER_VALUE,     //int       value;
     qfalse,                //qboolean  stackable;
-    SLIME_ZUNGE_BAT_PWR,    //int       batteryPower;
+    SLIMER_BAT_PWR,    //int       batteryPower;
     RMT_SPHERICAL_CONE_64, //rangeMarkerType_t rangeMarkerType;
-    SLIME_ZUNGE_RANGE,     //float             rangeMarkerRange;
+    SLIMER_RANGE,     //float             rangeMarkerRange;
     SHC_PINK,              //shaderColorEnum_t rangeMarkerColor;
     qtrue,                 //qboolean          rangeMarkerUseNormal;
     qfalse,                //qboolean          rangeMarkerOriginAtTop;
@@ -6491,7 +6491,7 @@ char *eventnames[ ] =
   "EV_MISSILE_MISS",
   "EV_MISSILE_MISS_METAL",
   "EV_TESLATRAIL",
-  "EV_ZUNGETRAIL",
+  "EV_SLIMERTRAIL",
   "EV_BULLET",        // otherEntity is the shooter
 
   "EV_LEV1_GRAB",
@@ -6518,7 +6518,7 @@ char *eventnames[ ] =
   "EV_HUMAN_BUILDABLE_EXPLOSION",
   "EV_ALIEN_BUILDABLE_EXPLOSION",
   "EV_ALIEN_ACIDTUBE",
-  "EV_ALIEN_SLIME_ZUNGE",
+  "EV_ALIEN_SLIMER",
 
   "EV_MEDKIT_USED",
 

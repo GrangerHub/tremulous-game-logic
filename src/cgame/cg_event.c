@@ -124,8 +124,8 @@ static void CG_Obituary( entityState_t *ent )
     case MOD_TRAP:
       message = "was caught in a trap";
       break;
-    case MOD_ZUNGE:
-      message = "was sucked by a slime zunge";
+    case MOD_SLIMER:
+      message = "was devoured by a slimer";
       break;
     case MOD_OVERMIND:
       message = "got too close to the overmind";
@@ -938,7 +938,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       CG_AlienBuildableExplosion( position, dir );
       break;
 
-    case EV_ZUNGETRAIL:
+    case EV_SLIMERTRAIL:
       cent->currentState.weapon = WP_NONE;
       {
         centity_t *source = &cg_entities[ es->generic1 ];
@@ -948,7 +948,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
         if( !CG_IsTrailSystemValid( &source->muzzleTS ) )
         {
 		      //trailsystem
-          source->muzzleTS = CG_SpawnNewTrailSystem( cgs.media.slimeZungeTS );
+          source->muzzleTS = CG_SpawnNewTrailSystem( cgs.media.slimerTS );
 
           if( CG_IsTrailSystemValid( &source->muzzleTS ) )
           {
@@ -1189,9 +1189,9 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       }
       break;
 
-  case EV_ALIEN_SLIME_ZUNGE:
+  case EV_ALIEN_SLIMER:
     {
-      particleSystem_t *ps = CG_SpawnNewParticleSystem( cgs.media.alienSlimeZungePS );
+      particleSystem_t *ps = CG_SpawnNewParticleSystem( cgs.media.alienSlimerPS );
 
       if( CG_IsParticleSystemValid( &ps ) )
       {

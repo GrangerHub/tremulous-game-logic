@@ -392,7 +392,7 @@ void CG_InitBuildables( void )
   }
 
   cgs.media.teslaZapTS = CG_RegisterTrailSystem( "models/buildables/tesla/zap" );
-  cgs.media.slimeZungeTS =
+  cgs.media.slimerTS =
               CG_RegisterTrailSystem( "/models/buildables/slime_zunge/zunge" );
 }
 
