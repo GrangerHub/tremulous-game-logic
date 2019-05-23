@@ -6265,7 +6265,8 @@ void PmoveSingle( pmove_t *pmove )
     pm->ps->pm_flags &= ~PMF_JUMP_HELD;
 
     // deactivate the jet
-    if( BG_InventoryContainsUpgrade( UP_JETPACK, pm->ps->stats ) &&
+    if( pm->ps->pm_type != PM_INTERMISSION &&
+        BG_InventoryContainsUpgrade( UP_JETPACK, pm->ps->stats ) &&
         BG_UpgradeIsActive( UP_JETPACK, pm->ps->stats ) &&
         !( pm->cmd.buttons & BUTTON_WALKING ) )
     {
