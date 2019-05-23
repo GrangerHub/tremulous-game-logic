@@ -2350,7 +2350,7 @@ void G_ChargeAttack( gentity_t *ent, gentity_t *victim )
 
   if( ent->client->ps.misc[ MISC_MISC ] <= 0 ||
       !( ent->client->ps.stats[ STAT_STATE ] & SS_CHARGING ) ||
-      ent->client->ps.weaponTime )
+      ent->client->ps.stats[ STAT_WEAPONTIME2 ] )
     return;
 
   VectorSubtract( victim->r.currentOrigin, ent->r.currentOrigin, forward2 );
@@ -2383,7 +2383,7 @@ void G_ChargeAttack( gentity_t *ent, gentity_t *victim )
   G_Damage( victim, ent, ent, forward2, victim->r.currentOrigin, damage,
             DAMAGE_NO_LOCDAMAGE, MOD_LEVEL4_TRAMPLE );
 
-  ent->client->ps.weaponTime += LEVEL4_TRAMPLE_REPEAT;
+  ent->client->ps.stats[ STAT_WEAPONTIME2 ] += LEVEL4_TRAMPLE_REPEAT;
 }
 
 /*

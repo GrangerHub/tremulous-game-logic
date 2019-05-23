@@ -4853,12 +4853,6 @@ static void PM_Weapon( void )
       }
     }
 
-    // maul cancels trample
-    else if( attack1 )
-    {
-      pm->ps->misc[ MISC_MISC ] = 0;
-    }
-
     // Discharging
     else
     {
