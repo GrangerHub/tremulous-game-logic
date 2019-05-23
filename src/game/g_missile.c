@@ -224,13 +224,20 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace )
     if( ent->damage )
     {
       vec3_t  velocity;
+      int     dflags;
 
       BG_EvaluateTrajectoryDelta( &ent->s.pos, level.time, velocity );
       if( VectorLength( velocity ) == 0 )
         velocity[ 2 ] = 1;  // stepped on a grenade
 
+      dflags = DAMAGE_NO_LOCDAMAGE;
+
+      if(ent->noKnockback) {
+        dflags |= DAMAGE_NO_KNOCKBACK;
+      }
+
       G_Damage( other, ent, attacker, velocity, ent->r.currentOrigin, ent->damage,
-        DAMAGE_NO_LOCDAMAGE, ent->methodOfDeath );
+        dflags, ent->methodOfDeath );
     }
   }
 
@@ -465,6 +472,7 @@ gentity_t *fire_flamer( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->splashRadius = FLAMER_RADIUS;
   bolt->methodOfDeath = MOD_FLAMER;
   bolt->splashMethodOfDeath = MOD_FLAMER_SPLASH;
+  bolt->noKnockback = qfalse;
   G_SetClipmask( bolt, MASK_SHOT );
   bolt->target_ent = NULL;
   bolt->r.mins[ 0 ] = bolt->r.mins[ 1 ] = bolt->r.mins[ 2 ] = -FLAMER_START_SIZE;
@@ -520,6 +528,7 @@ gentity_t *fire_blaster( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->splashRadius = 0;
   bolt->methodOfDeath = MOD_BLASTER;
   bolt->splashMethodOfDeath = MOD_BLASTER;
+  bolt->noKnockback = qfalse;
   G_SetClipmask( bolt, MASK_SHOT );
   bolt->target_ent = NULL;
   bolt->r.mins[ 0 ] = bolt->r.mins[ 1 ] = bolt->r.mins[ 2 ] = -BLASTER_SIZE;
@@ -569,6 +578,7 @@ gentity_t *fire_pulseRifle( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->splashRadius = 0;
   bolt->methodOfDeath = MOD_PRIFLE;
   bolt->splashMethodOfDeath = MOD_PRIFLE;
+  bolt->noKnockback = qfalse;
   G_SetClipmask( bolt, MASK_SHOT );
   bolt->target_ent = NULL;
   bolt->r.mins[ 0 ] = bolt->r.mins[ 1 ] = bolt->r.mins[ 2 ] = -PRIFLE_SIZE;
@@ -622,6 +632,7 @@ gentity_t *fire_luciferCannon( gentity_t *self, vec3_t start, vec3_t dir,
   bolt->splashRadius = radius;
   bolt->methodOfDeath = MOD_LCANNON;
   bolt->splashMethodOfDeath = MOD_LCANNON_SPLASH;
+  bolt->noKnockback = qfalse;
   G_SetClipmask( bolt, MASK_SHOT );
   bolt->target_ent = NULL;
 
@@ -693,6 +704,7 @@ gentity_t *launch_grenade( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->splashRadius = GRENADE_RANGE;
   bolt->methodOfDeath = MOD_GRENADE;
   bolt->splashMethodOfDeath = MOD_GRENADE;
+  bolt->noKnockback = qfalse;
   G_SetClipmask( bolt, MASK_SHOT );
   bolt->takedamage = qtrue;
   G_ChangeHealth( bolt, bolt, GRENADE_HEALTH,
@@ -748,6 +760,7 @@ gentity_t *launch_grenade2( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->splashRadius = 1.0f;
   bolt->methodOfDeath = MOD_GRENADE;
   bolt->splashMethodOfDeath = MOD_GRENADE;
+  bolt->noKnockback = qfalse;
   G_SetClipmask( bolt, MASK_SHOT );
   bolt->target_ent = NULL;
   bolt->r.mins[ 0 ] = bolt->r.mins[ 1 ] = bolt->r.mins[ 2 ] = -3.0f;
@@ -800,6 +813,7 @@ gentity_t *launch_grenade3( gentity_t *self, vec3_t start, vec3_t dir,
   bolt->splashRadius = LAUNCHER_RADIUS;
   bolt->methodOfDeath = MOD_GRENADE_LAUNCHER;
   bolt->splashMethodOfDeath = MOD_GRENADE_LAUNCHER;
+  bolt->noKnockback = qfalse;
   G_SetClipmask( bolt, MASK_SHOT );
   bolt->takedamage = qtrue;
   G_ChangeHealth( bolt, bolt, GRENADE_HEALTH,
@@ -854,6 +868,7 @@ gentity_t *launch_fragnade( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->splashRadius = FRAGNADE_BLAST_RANGE;
   bolt->methodOfDeath = MOD_FRAGNADE;
   bolt->splashMethodOfDeath = MOD_FRAGNADE;
+  bolt->noKnockback = qfalse;
   G_SetClipmask( bolt, MASK_SHOT );
   bolt->target_ent = NULL;
   bolt->r.mins[ 0 ] = bolt->r.mins[ 1 ] = bolt->r.mins[ 2 ] = -FRAGNADE_SIZE;
@@ -937,6 +952,7 @@ gentity_t *fire_lightningBall( gentity_t *self, qboolean EMP,
     bolt->splashRadius = LIGHTNING_BALL_RADIUS1;
     speed = LIGHTNING_BALL_SPEED;
   }
+  bolt->noKnockback = qfalse;
   bolt->pointAgainstWorld = qtrue;
   bolt->think = G_ExplodeMissile;
   bolt->s.eType = ET_MISSILE;
@@ -1023,6 +1039,7 @@ gentity_t *fire_portalGun( gentity_t *self, vec3_t start, vec3_t dir,
   bolt->parent = self;
   bolt->damage = PORTALGUN_DAMAGE;
   bolt->clipmask = MASK_PLAYERSOLID;
+  bolt->noKnockback = qfalse;
 
   // Give the missile a small bounding box
   bolt->r.mins[ 0 ] = bolt->r.mins[ 1 ] = bolt->r.mins[ 2 ] =
@@ -1161,6 +1178,7 @@ gentity_t *fire_hive( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->splashDamage = 0;
   bolt->splashRadius = 0;
   bolt->methodOfDeath = MOD_SWARM;
+  bolt->noKnockback = qfalse;
   G_SetClipmask( bolt, MASK_SHOT );
   bolt->target_ent = self->target_ent;
   bolt->timestamp = level.time + HIVE_LIFETIME;
@@ -1202,6 +1220,7 @@ gentity_t *fire_lockblob( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->splashDamage = 0;
   bolt->splashRadius = 0;
   bolt->methodOfDeath = MOD_TRAP;
+  bolt->noKnockback = qtrue;
   G_SetClipmask( bolt, MASK_SHOT );
   bolt->target_ent = NULL;
 
@@ -1245,6 +1264,7 @@ gentity_t *fire_slowBlob( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->splashRadius = 0;
   bolt->methodOfDeath = MOD_SLOWBLOB;
   bolt->splashMethodOfDeath = MOD_SLOWBLOB;
+  bolt->noKnockback = qfalse;
   G_SetClipmask( bolt, MASK_SHOT );
   bolt->target_ent = NULL;
 
@@ -1286,6 +1306,7 @@ gentity_t *fire_paraLockBlob( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->damage = 0;
   bolt->splashDamage = 0;
   bolt->splashRadius = 0;
+  bolt->noKnockback = qtrue;
   G_SetClipmask( bolt, MASK_SHOT );
   bolt->target_ent = NULL;
 
@@ -1334,6 +1355,7 @@ gentity_t *fire_bounceBall( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->splashRadius = LEVEL3_BOUNCEBALL_RADIUS;
   bolt->methodOfDeath = MOD_LEVEL3_BOUNCEBALL;
   bolt->splashMethodOfDeath = MOD_LEVEL3_BOUNCEBALL;
+  bolt->noKnockback = qfalse;
   G_SetClipmask( bolt, MASK_SHOT );
   bolt->target_ent = NULL;
 
