@@ -979,9 +979,9 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BA_H_DCC,              //int       number;
     qtrue,                 //qboolean  enabled;
     "dcc",                 //char      *name;
-    "Defence Computer",    //char      *humanName;
+    "Defense Computer",    //char      *humanName;
     "A structure coordinating and enhancing the action of base defense so that "
-      "defense is distributed optimally among the enemy. The Defence "
+      "defense is distributed optimally among the enemy. The Defense "
       "Computer additionally eneables auto-repair in human structures.",
     "team_human_dcc",      //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
