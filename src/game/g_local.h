@@ -373,7 +373,7 @@ struct gentity_s
   int               credits[ MAX_CLIENTS ];     // human credits for each client
   int               killedBy;                   // clientNum of killer
 
-  bgqueue_t         targeted;          // true if the player is currently a valid target of a turret
+  bgqueue_t         targeted;           // a queue of currently valid targets for a turret
   vec3_t            turretAim;          // aim vector for turrets
   vec3_t            turretAimRate;      // track turn speed for norfenturrets
   int               turretSpinupTime;   // spinup delay for norfenturrets
@@ -1539,7 +1539,7 @@ void G_DisableUnlaggedCalc(gentity_t *ent);
 //
 team_t    G_TeamFromString( char *str );
 void      G_TeamCommand( team_t team, char *cmd );
-qboolean  OnSameTeam( const gentity_t *ent1, const gentity_t *ent2 );
+qboolean  OnSameTeam(const gentity_t *ent1, const gentity_t *ent2);
 void      G_LeaveTeam( gentity_t *self );
 void      G_ChangeTeam( gentity_t *ent, team_t newTeam );
 gentity_t *Team_GetLocation( gentity_t *ent );

@@ -2956,8 +2956,7 @@ static qboolean HMGTurret_FindTrackPoint( gentity_t *self,
     targetPoint->distance = VectorNormalize( projection );
     VectorNormalize( targetPoint->direction );
 
-    if( !self->dcc && targetPoint->bboxPoint.num == BBXP_ORIGIN &&
-        BG_Buildable( self->s.modelindex )->turretTrackOnlyOrigin )
+    if( !self->dcc && targetPoint->bboxPoint.num == BBXP_ORIGIN )
     {
       //only need to check the origin in this case
       break;
@@ -2965,7 +2964,7 @@ static qboolean HMGTurret_FindTrackPoint( gentity_t *self,
   }
 
   // check if only the origin needs to be tracked
-  if( !self->dcc && BG_Buildable( self->s.modelindex )->turretTrackOnlyOrigin )
+  if( !self->dcc )
   {
     targetPoint_t *targetPoint = &targetPoints[ BBXP_ORIGIN ];
 
@@ -3118,7 +3117,7 @@ static qboolean HMGTurret_TrackEnemy( gentity_t *self )
   Com_Assert( self->enemy &&
               "HMGTurret_TrackEnemy: enemy is NULL" );
 
-  if( !self->dcc && BG_Buildable( self->s.modelindex )->turretTrackOnlyOrigin )
+  if( !self->dcc )
     trackPoint.num = BBXP_ORIGIN;
   else
     trackPoint.num = self->trackedEnemyPointNum;
@@ -3194,8 +3193,7 @@ static qboolean HMGTurret_TrackEnemy( gentity_t *self )
   {
     return qtrue;
   }
-  else if( !(!self->dcc && BG_Buildable( self->s.modelindex )->turretTrackOnlyOrigin) &&
-           self->active )
+  else if( self->dcc && self->active )
   {
     vec3_t  forward;
     vec3_t  end;
@@ -3434,10 +3432,10 @@ void HMGTurret_Think( gentity_t *self )
   }
   if( !self->spawned )
     return;
-
+ 
   prev_enemy = self->enemy;
 
-  // If the current target is not valid find a new enemy
+   // If the current target is not valid find a new enemy
   if( !HMGTurret_CheckTarget( self, self->enemy, qtrue, qfalse ) )
   {
     if( self->enemy && BG_Queue_Find(&self->enemy->targeted, self) ) {
