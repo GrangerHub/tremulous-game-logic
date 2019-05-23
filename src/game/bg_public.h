@@ -422,7 +422,8 @@ typedef enum
   STAT_FALLDIST,  // the distance the player fell
   STAT_VIEWLOCK,   // direction to lock the view in
   STAT_FUEL,      // jetpacks
-  STAT_SHAKE      // camera shake
+  STAT_SHAKE,      // camera shake
+  STAT_WEAPONTIME2 // independent weapon time for secondary attack
   // netcode has space for 2 more
 } statIndex_t;
 

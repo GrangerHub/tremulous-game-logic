@@ -4248,6 +4248,12 @@ static void PM_Weapon( void )
   if( pm->pmext->repairRepeatDelay < 0 )
     pm->pmext->repairRepeatDelay = 0;
 
+  // pump the secondary weapon timer
+  if( pm->ps->stats[ STAT_WEAPONTIME2 ] > 0 )
+    pm->ps->stats[ STAT_WEAPONTIME2 ] -= pml.msec;
+  if( pm->ps->stats[ STAT_WEAPONTIME2 ] < 0 )
+    pm->ps->stats[ STAT_WEAPONTIME2 ] = 0;
+
   // no slash during charge
   if( pm->ps->stats[ STAT_STATE ] & SS_CHARGING &&
       pm->ps->weapon == WP_ALEVEL4 )
