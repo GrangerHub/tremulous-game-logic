@@ -320,6 +320,7 @@ struct gentity_s
   int               splashRadius;
   int               methodOfDeath;
   int               splashMethodOfDeath;
+  qboolean          noKnockback; // for direct impact by missiles.
 
   int               count;
 
