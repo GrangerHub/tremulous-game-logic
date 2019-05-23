@@ -4146,12 +4146,6 @@ static void PM_Weapon( void )
       }
     }
 
-    // maul cancels trample
-    else if( attack1 )
-    {
-      pm->ps->misc[ MISC_MISC ] = 0;
-    }
-
     // Discharging
     else
     {
@@ -4295,6 +4289,12 @@ static void PM_Weapon( void )
     pm->pmext->repairRepeatDelay -= pml.msec;
   if( pm->pmext->repairRepeatDelay < 0 )
     pm->pmext->repairRepeatDelay = 0;
+
+  // pump the secondary weapon timer
+  if( pm->ps->stats[ STAT_WEAPONTIME2 ] > 0 )
+    pm->ps->stats[ STAT_WEAPONTIME2 ] -= pml.msec;
+  if( pm->ps->stats[ STAT_WEAPONTIME2 ] < 0 )
+    pm->ps->stats[ STAT_WEAPONTIME2 ] = 0;
 
   // allways allow upgrades to be usable
   if( pm->cmd.weapon >= WP_NUM_WEAPONS &&
