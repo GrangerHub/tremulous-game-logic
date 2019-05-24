@@ -902,7 +902,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define REACTOR_ATTACK_DCC_DAMAGE   HBDM(40000)
 #define REACTOR_VALUE               ( 4 * ALIEN_CREDITS_PER_KILL )
 
-#define REPEATER_BP                 4
+#define REPEATER_BP                 2
 #define REPEATER_BT                 10000
 #define REPEATER_HEALTH             HBHM(250000)
 #define REPEATER_SPLASHDAMAGE       HBDM(150000)
