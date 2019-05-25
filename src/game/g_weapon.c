@@ -241,9 +241,11 @@ Trace a bounding box against entities and the world
 ================
 */
 static void G_WideTraceSolid(trace_t *tr, gentity_t *ent, float range,
-                             float width, float height, gentity_t **target) {
+                             float width, float height, const float *upper_height_bound,
+                             gentity_t **target) {
   vec3_t                   mins, maxs;
   vec3_t                   end;
+  float                    height_offset, viewheight_backup;
   unlagged_attacker_data_t unlagged_attacker;
   trace_t                  tr2;
 
@@ -256,10 +258,31 @@ static void G_WideTraceSolid(trace_t *tr, gentity_t *ent, float range,
     return;
   }
 
+  if(upper_height_bound) {
+    float top_of_box = ent->r.currentOrigin[2] + ent->client->ps.viewheight + height;
+
+    if(top_of_box > *upper_height_bound) {
+      height_offset = top_of_box - *upper_height_bound;
+    } else {
+      height_offset = 0.0f;
+    }
+  } else {
+    height_offset = 0.0f;
+  }
+
+  if(height_offset != 0.0f) {
+    viewheight_backup = ent->client->ps.viewheight;
+    ent->client->ps.viewheight -= height_offset;
+  }
+
   unlagged_attacker.ent_num = ent->s.number;
   unlagged_attacker.point_type = UNLGD_PNT_MUZZLE;
   unlagged_attacker.range = range + width;
   G_UnlaggedOn(&unlagged_attacker);
+
+  if(height_offset != 0.0f) {
+    ent->client->ps.viewheight = viewheight_backup;
+  }
 
   VectorMA(unlagged_attacker.muzzle_out, range, unlagged_attacker.forward_out, end);
 
@@ -292,16 +315,18 @@ G_WideTraceSolidSeries
 Uses a series of enlarging traces starting with a line trace.
 ================
 */
-static void G_WideTraceSolidSeries(trace_t *tr, gentity_t *ent, float range,
-                                    float width, float height, gentity_t **target) {
+static void G_WideTraceSolidSeries(
+  trace_t *tr, gentity_t *ent, float range, float width, float height,
+  const size_t sub_checks, const float *upper_height_bound, gentity_t **target) {
   int n;
   float widthAdjusted, heightAdjusted;
 
-  for(n = 0; n < 5; ++n) {
-    widthAdjusted = (width * (float)(n)) / 5.00f;
-    heightAdjusted = (height * (float)(n)) / 5.00f;
+  for(n = 0; n < sub_checks; ++n) {
+    widthAdjusted = (width * (float)(n)) / (0.00f + sub_checks);
+    heightAdjusted = (height * (float)(n)) / (0.00f + sub_checks);
 
-    G_WideTraceSolid(tr, ent, range, widthAdjusted, heightAdjusted, target);
+    G_WideTraceSolid(
+      tr, ent, range, widthAdjusted, heightAdjusted, upper_height_bound, target);
     if(
       tr->startsolid ||
       (*target != NULL && G_TakesDamage(*target))) {
@@ -309,7 +334,7 @@ static void G_WideTraceSolidSeries(trace_t *tr, gentity_t *ent, float range,
     }
   }
 
-  G_WideTraceSolid(tr, ent, range, width, height, target);
+  G_WideTraceSolid(tr, ent, range, width, height, upper_height_bound, target);
 }
 
 /*
@@ -434,12 +459,14 @@ meleeAttack
 */
 
 void meleeAttack( gentity_t *ent, float range, float width, float height,
-                  int damage, meansOfDeath_t mod )
+                  int damage, const size_t sub_checks, meansOfDeath_t mod )
 {
   trace_t   tr;
   gentity_t *traceEnt;
+  const float upper_height_bound = ent->r.absmax[2] - 0.5f;
 
-  G_WideTraceSolidSeries( &tr, ent, range, width, height, &traceEnt );
+  G_WideTraceSolidSeries(
+    &tr, ent, range, width, height, sub_checks, &upper_height_bound, &traceEnt );
   if( traceEnt == NULL || !G_TakesDamage( traceEnt ) )
     return;
 
@@ -1088,7 +1115,7 @@ void painSawFire( gentity_t *ent) {
   gentity_t *tent, *traceEnt;
 
   G_WideTraceSolid(
-    &tr, ent, PAINSAW_RANGE, PAINSAW_WIDTH, PAINSAW_HEIGHT, &traceEnt);
+    &tr, ent, PAINSAW_RANGE, PAINSAW_WIDTH, PAINSAW_HEIGHT, NULL, &traceEnt);
 
   if(!traceEnt)
     return;
@@ -1332,11 +1359,13 @@ void cancelBuildFire( gentity_t *ent )
   }
 
   if( ent->client->ps.weapon == WP_ABUILD )
-    meleeAttack( ent, ABUILDER_CLAW_RANGE, ABUILDER_CLAW_WIDTH,
-                 ABUILDER_CLAW_WIDTH, ABUILDER_CLAW_DMG, MOD_ABUILDER_CLAW );
+    meleeAttack(
+      ent, ABUILDER_CLAW_RANGE, ABUILDER_CLAW_WIDTH, ABUILDER_CLAW_WIDTH,
+      ABUILDER_CLAW_DMG, ABUILDER_CLAW_SUBCHECKS, MOD_ABUILDER_CLAW );
   else if( ent->client->ps.weapon == WP_ABUILD2 )
-    meleeAttack( ent, ABUILDER_CLAW_RANGE, ABUILDER_CLAW_WIDTH,
-                 ABUILDER_CLAW_WIDTH, ABUILDER_UPG_CLAW_DMG, MOD_ABUILDER_CLAW );
+    meleeAttack(
+      ent, ABUILDER_CLAW_RANGE, ABUILDER_CLAW_WIDTH, ABUILDER_CLAW_WIDTH,
+      ABUILDER_UPG_CLAW_DMG, ABUILDER_CLAW_SUBCHECKS, MOD_ABUILDER_CLAW );
 }
 
 /*
@@ -1424,8 +1453,9 @@ qboolean CheckVenomAttack( gentity_t *ent )
   AngleVectors( ent->client->ps.viewangles, forward, right, up );
   BG_CalcMuzzlePointFromPS( &ent->client->ps, forward, right, up, muzzle );
 
-  G_WideTraceSolidSeries( &tr, ent, LEVEL0_BITE_RANGE, LEVEL0_BITE_WIDTH,
-                          LEVEL0_BITE_WIDTH, &traceEnt );
+  G_WideTraceSolidSeries(
+    &tr, ent, LEVEL0_BITE_RANGE, LEVEL0_BITE_WIDTH, LEVEL0_BITE_WIDTH,
+    LEVEL0_BITE_SUBCHECKS, NULL, &traceEnt );
 
   if( traceEnt == NULL )
     return qfalse;
@@ -2136,8 +2166,9 @@ void areaLev2ZapFire( gentity_t *ent )
   trace_t   tr;
   gentity_t *traceEnt;
 
-  G_WideTraceSolidSeries( &tr, ent, LEVEL2_AREAZAP_RANGE, LEVEL2_AREAZAP_WIDTH,
-                          LEVEL2_AREAZAP_WIDTH, &traceEnt );
+  G_WideTraceSolidSeries(
+    &tr, ent, LEVEL2_AREAZAP_RANGE, LEVEL2_AREAZAP_WIDTH, LEVEL2_AREAZAP_WIDTH,
+    LEVEL2_AREAZAP_SUBCHECKS, NULL, &traceEnt );
 
   if( traceEnt == NULL )
     return;
@@ -2565,37 +2596,42 @@ void FireWeapon( gentity_t *ent )
   switch( ent->s.weapon )
   {
     case WP_ALEVEL1:
-      meleeAttack( ent, LEVEL1_CLAW_RANGE, LEVEL1_CLAW_WIDTH, LEVEL1_CLAW_WIDTH,
-                   LEVEL1_CLAW_DMG, MOD_LEVEL1_CLAW );
-      CheckGrabAttack( ent );
+      meleeAttack( 
+        ent, LEVEL1_CLAW_RANGE, LEVEL1_CLAW_WIDTH, LEVEL1_CLAW_WIDTH,
+        LEVEL1_CLAW_DMG, LEVEL1_CLAW_SUBCHECKS, MOD_LEVEL1_CLAW);
       break;
     case WP_ALEVEL1_UPG:
-      meleeAttack( ent, LEVEL1_CLAW_U_RANGE, LEVEL1_CLAW_WIDTH, LEVEL1_CLAW_WIDTH,
-                   LEVEL1_CLAW_DMG, MOD_LEVEL1_CLAW );
-      CheckGrabAttack( ent );
+      meleeAttack(
+        ent, LEVEL1_CLAW_U_RANGE, LEVEL1_CLAW_WIDTH, LEVEL1_CLAW_WIDTH, 
+        LEVEL1_CLAW_DMG, LEVEL1_CLAW_SUBCHECKS, MOD_LEVEL1_CLAW);
       break;
     case WP_ALEVEL3:
-      meleeAttack( ent, LEVEL3_CLAW_RANGE, LEVEL3_CLAW_WIDTH, LEVEL3_CLAW_WIDTH,
-                   LEVEL3_CLAW_DMG, MOD_LEVEL3_CLAW );
+      meleeAttack(
+        ent, LEVEL3_CLAW_RANGE, LEVEL3_CLAW_WIDTH, LEVEL3_CLAW_WIDTH,
+        LEVEL3_CLAW_DMG, LEVEL3_CLAW_SUBCHECKS, MOD_LEVEL3_CLAW);
       break;
     case WP_ALEVEL3_UPG:
-      meleeAttack( ent, LEVEL3_CLAW_UPG_RANGE, LEVEL3_CLAW_WIDTH,
-                   LEVEL3_CLAW_WIDTH, LEVEL3_CLAW_DMG, MOD_LEVEL3_CLAW );
+      meleeAttack(
+        ent, LEVEL3_CLAW_UPG_RANGE, LEVEL3_CLAW_WIDTH, LEVEL3_CLAW_WIDTH,
+        LEVEL3_CLAW_DMG, LEVEL3_CLAW_SUBCHECKS, MOD_LEVEL3_CLAW);
       break;
     case WP_ALEVEL2:
-      meleeAttack( ent, LEVEL2_CLAW_RANGE, LEVEL2_CLAW_WIDTH, LEVEL2_CLAW_WIDTH,
-                   LEVEL2_CLAW_DMG, MOD_LEVEL2_CLAW );
+      meleeAttack(
+        ent, LEVEL2_CLAW_RANGE, LEVEL2_CLAW_WIDTH, LEVEL2_CLAW_WIDTH,
+        LEVEL2_CLAW_DMG, LEVEL2_CLAW_SUBCHECKS, MOD_LEVEL2_CLAW );
       break;
     case WP_ALEVEL2_UPG:
-      meleeAttack( ent, LEVEL2_CLAW_U_RANGE, LEVEL2_CLAW_WIDTH, LEVEL2_CLAW_WIDTH,
-                   LEVEL2_CLAW_DMG, MOD_LEVEL2_CLAW );
+      meleeAttack(
+        ent, LEVEL2_CLAW_U_RANGE, LEVEL2_CLAW_WIDTH, LEVEL2_CLAW_WIDTH,
+        LEVEL2_CLAW_DMG, LEVEL2_CLAW_SUBCHECKS, MOD_LEVEL2_CLAW );
       break;
     case WP_ASPITFIRE:
       SpitfireZap( ent );			   
       break;
     case WP_ALEVEL4:
-      meleeAttack( ent, LEVEL4_CLAW_RANGE, LEVEL4_CLAW_WIDTH,
-                   LEVEL4_CLAW_HEIGHT, LEVEL4_CLAW_DMG, MOD_LEVEL4_CLAW );
+      meleeAttack(
+        ent, LEVEL4_CLAW_RANGE, LEVEL4_CLAW_WIDTH, LEVEL4_CLAW_HEIGHT,
+        LEVEL4_CLAW_DMG, LEVEL4_CLAW_SUBCHECKS, MOD_LEVEL4_CLAW );
       break;
 
     case WP_BLASTER:

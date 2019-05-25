@@ -42,6 +42,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define AWDM(d)                     ((int)((float)d*ALIEN_WDMG_MODIFIER))
 
 #define ABUILDER_BUILD_REPEAT       500
+#define ABUILDER_CLAW_SUBCHECKS     5
 #define ABUILDER_CLAW_DMG           AWDM(20000)
 #define ABUILDER_UPG_CLAW_DMG       AWDM(60000)
 #define ABUILDER_CLAW_RANGE         64.0f
@@ -55,6 +56,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define ABUILDER_BLOB_TIME          4000
 #define ABUILDER_BLOB_LIFETIME      15000
 
+#define LEVEL0_BITE_SUBCHECKS       5
 #define LEVEL0_BITE_DMG             AWDM(48000)
 #define LEVEL0_BITE_RANGE           60.0f
 #define LEVEL0_BITE_WIDTH           6.0f
@@ -73,6 +75,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL0_POUNCE_SPEED_MOD     1.00f    // walking speed modifier for pounce charging
 #define LEVEL0_POUNCE_JUMP_MAG      800      // Dretch pounce jump power
 
+#define LEVEL1_CLAW_SUBCHECKS          5
 #define LEVEL1_CLAW_DMG                AWDM(32000)
 #define LEVEL1_CLAW_RANGE              90.0f
 #define LEVEL1_CLAW_U_RANGE            LEVEL1_CLAW_RANGE + 3.0f
@@ -102,6 +105,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL1_INVISIBILITY_TIME       20000
 #define LEVEL1_UPG_INVISIBILITY_TIME   36000
 
+#define LEVEL2_CLAW_SUBCHECKS       5
 #define LEVEL2_CLAW_DMG             AWDM(50000)
 #define LEVEL2_CLAW_RANGE           80.0f
 #define LEVEL2_CLAW_U_RANGE         LEVEL2_CLAW_RANGE + 2.0f
@@ -110,6 +114,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL2_CLAW_K_SCALE         1.0f
 #define LEVEL2_CLAW_U_REPEAT        400
 #define LEVEL2_CLAW_U_K_SCALE       1.0f
+#define LEVEL2_AREAZAP_SUBCHECKS    5
 #define LEVEL2_AREAZAP_DMG          AWDM(60000)
 #define LEVEL2_AREAZAP_RANGE        220.0f
 #define LEVEL2_AREAZAP_CHAIN_RANGE  150.0f
@@ -129,6 +134,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL2_EXPLODE_CHARGE_ZAP_RADIUS 300.0f // zap radius at max charge
 #define LEVEL2_EXPLODE_CHARGE_SHAKE 1.25f
 
+#define LEVEL3_CLAW_SUBCHECKS       5
 #define LEVEL3_CLAW_DMG             AWDM(80000)
 #define LEVEL3_CLAW_RANGE           90.0f
 #define LEVEL3_CLAW_UPG_RANGE       LEVEL3_CLAW_RANGE // + 3.0f
@@ -163,6 +169,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL3_BOUNCEBALL_REGEN     6000    // msec until new barb
 #define LEVEL3_BOUNCEBALL_LIFETIME  3000
 
+#define LEVEL4_CLAW_SUBCHECKS       5
 #define LEVEL4_CLAW_DMG             AWDM(100000)
 #define LEVEL4_CLAW_RANGE           96.0f
 #define LEVEL4_CLAW_WIDTH           20.0f
@@ -187,6 +194,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define SPITFIRE_ZAP_REPEAT             1250
 #define SPITFIRE_ZAP_K_SCALE            1.0f
 #define SPITFIRE_ZAP_RANGE              300.0f
+#define SPITFIRE_ZAP_SUBCHECKS          5
 #define SPITFIRE_ZAP_DMG                AWDM(24000)
 #define SPITFIRE_ZAP_TIME               150
 #define SPITFIRE_ASCEND_REPEAT          600
