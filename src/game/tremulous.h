@@ -308,7 +308,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 #define LEVEL4_SPEED                1.2f
 #define LEVEL4_VALUE                AVM(8 * ALIEN_CREDITS_PER_KILL)
-#define LEVEL4_HEALTH               AHM(800000)
+#define LEVEL4_HEALTH               AHM(950000)
 #define LEVEL4_MIN_HEALTH           (0.3f * LEVEL4_HEALTH)
 #define LEVEL4_REGEN                (15000)
 #define LEVEL4_COST                 10
