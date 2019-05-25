@@ -1167,10 +1167,6 @@ void ClientTimerActions( gentity_t *ent, int msec )
       if( BG_InventoryContainsUpgrade( UP_LIGHTARMOUR, client->ps.stats ) )
         damage -= LIGHTARMOUR_POISON_PROTECTION;
 
-      if( BG_InventoryContainsUpgrade( UP_BIOKIT, client->ps.stats ) &&
-          ent->healthReserve > 0 )
-        damage *= BIOKIT_POISON_MODIFIER;
-
       G_Damage( ent, client->lastPoisonClient, client->lastPoisonClient, NULL,
         0, damage, 0, MOD_POISON );
     }

@@ -755,7 +755,6 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 #define BIOKIT_PRICE                250
 #define BIOKIT_REGEN_REPEAT         750 // msec to regen 1 hp
-#define BIOKIT_POISON_MODIFIER      0.3f
 #define BIOKIT_MAX_HEALTH           150000 // initial max health when purchased
 #define BIOKIT_HEALTH_RESERVE       150000 // initial health reserve when purcased
 
