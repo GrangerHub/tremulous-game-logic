@@ -1558,6 +1558,7 @@ static qboolean AHive_CheckTarget( gentity_t *self, gentity_t *enemy )
 {
   trace_t trace;
   vec3_t tip_origin, dirToTarget;
+  bboxPointNum_t bbox_point_num;
 
   // Check if this is a valid target
   if( enemy->health <= 0 || !enemy->client ||
@@ -1570,26 +1571,46 @@ static qboolean AHive_CheckTarget( gentity_t *self, gentity_t *enemy )
   // Check if the tip of the hive can see the target
   VectorMA( self->s.pos.trBase, self->r.maxs[ 2 ], self->s.origin2,
             tip_origin );
-  if( Distance( tip_origin, enemy->r.currentOrigin ) > HIVE_SENSE_RANGE )
-    return qfalse;
 
-  SV_Trace( &trace, tip_origin, NULL, NULL, enemy->s.pos.trBase,
-              self->s.number, MASK_SHOT, TT_AABB );
-  if( trace.fraction < 1.0f && trace.entityNum != enemy->s.number )
-    return qfalse;
+  for(
+    bbox_point_num = 0; bbox_point_num < NUM_NONVERTEX_BBOX_POINTS;
+    bbox_point_num++) {
+    bboxPoint_t bboxPoint;
 
-  self->active = qtrue;
-  self->target_ent = enemy;
-  self->timestamp = level.time + HIVE_REPEAT;
+    bboxPoint.num = bbox_point_num;
+    BG_EvaluateBBOXPoint( &bboxPoint,
+                          enemy->r.currentOrigin,
+                          enemy->r.mins, enemy->r.maxs);
 
-  VectorSubtract( enemy->s.pos.trBase, self->s.pos.trBase, dirToTarget );
-  VectorNormalize( dirToTarget );
-  vectoangles( dirToTarget, self->turretAim );
+    if(Distance(tip_origin, bboxPoint.point) > HIVE_SENSE_RANGE) {
+      continue;
+    }
 
-  // Fire at target
-  FireWeapon( self );
-  G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
-  return qtrue;
+    SV_Trace( &trace, tip_origin, NULL, NULL, bboxPoint.point,
+                self->s.number, MASK_SHOT, TT_AABB );
+    if( trace.fraction < 1.0f && trace.entityNum != enemy->s.number ) {
+      continue;
+    }
+
+    self->active = qtrue;
+    self->target_ent = enemy;
+    self->timestamp = level.time + HIVE_REPEAT;
+
+    BG_EvaluateBBOXPoint( &bboxPoint,
+                          enemy->s.pos.trBase,
+                          enemy->r.mins, enemy->r.maxs);
+
+    VectorSubtract( bboxPoint.point, self->s.pos.trBase, dirToTarget );
+    VectorNormalize( dirToTarget );
+    vectoangles( dirToTarget, self->turretAim );
+
+    // Fire at target
+    FireWeapon( self );
+    G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
+    return qtrue;
+  }
+
+  return qfalse;
 }
 
 /*
