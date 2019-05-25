@@ -2599,11 +2599,13 @@ void FireWeapon( gentity_t *ent )
       meleeAttack( 
         ent, LEVEL1_CLAW_RANGE, LEVEL1_CLAW_WIDTH, LEVEL1_CLAW_WIDTH,
         LEVEL1_CLAW_DMG, LEVEL1_CLAW_SUBCHECKS, MOD_LEVEL1_CLAW);
+      CheckGrabAttack( ent );
       break;
     case WP_ALEVEL1_UPG:
       meleeAttack(
         ent, LEVEL1_CLAW_U_RANGE, LEVEL1_CLAW_WIDTH, LEVEL1_CLAW_WIDTH, 
         LEVEL1_CLAW_DMG, LEVEL1_CLAW_SUBCHECKS, MOD_LEVEL1_CLAW);
+      CheckGrabAttack( ent );
       break;
     case WP_ALEVEL3:
       meleeAttack(
