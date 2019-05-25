@@ -1028,19 +1028,20 @@ AHive_SearchAndDestroy
 Adjust the trajectory to point towards the target
 ================
 */
-void AHive_SearchAndDestroy( gentity_t *self )
-{
-  vec3_t    dir;
-  trace_t   tr;
-  gentity_t *ent;
-  int       i;
-  float     d, nearest;
+void AHive_SearchAndDestroy(gentity_t *self) {
+  vec3_t         dir;
+  trace_t        tr;
+  gentity_t      *ent;
+  bboxPoint_t    targeted_bbox_point;
+  bboxPointNum_t bbox_point_num;
+  int            i;
+  float          d, nearest;
 
-  if( self->parent && !self->parent->inuse )
+  if(self->parent && !self->parent->inuse) {
     self->parent = NULL;
+  }
 
-  if( level.time > self->timestamp )
-  {
+  if(level.time > self->timestamp) {
     VectorCopy( self->r.currentOrigin, self->s.pos.trBase );
     self->s.pos.trType = TR_STATIONARY;
     self->s.pos.trTime = level.time;
@@ -1053,54 +1054,98 @@ void AHive_SearchAndDestroy( gentity_t *self )
   }
 
   ent = self->target_ent;
-  if( ent && ent->health > 0 && ent->client && ent->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
-    nearest = DistanceSquared( self->r.currentOrigin, ent->r.currentOrigin );
-  else
-  {
+  if(
+    ent && ent->health > 0 && ent->client &&
+    ent->client->ps.stats[STAT_TEAM] == TEAM_HUMANS) {
+      qboolean isVisible = qfalse;
+      //check for visibility
+      for(
+        bbox_point_num = 0; bbox_point_num < NUM_NONVERTEX_BBOX_POINTS;
+        bbox_point_num++) {
+        bboxPoint_t bboxPoint;
+
+        bboxPoint.num = bbox_point_num;
+        BG_EvaluateBBOXPoint( &bboxPoint,
+                              ent->r.currentOrigin,
+                              ent->r.mins, ent->r.maxs);
+
+        SV_Trace(
+          &tr, self->r.currentOrigin, self->r.mins, self->r.maxs,
+          bboxPoint.point, self->r.ownerNum, self->clipmask, TT_AABB);
+
+        if(tr.entityNum != ENTITYNUM_WORLD) {
+          isVisible = qtrue;
+          targeted_bbox_point.num = bboxPoint.num;
+          VectorCopy(bboxPoint.point, targeted_bbox_point.point);
+          nearest =
+            DistanceSquared(self->r.currentOrigin, targeted_bbox_point.point);
+          break;
+        }
+      }
+
+      if(!isVisible) {
+        self->target_ent = NULL;
+        nearest = 0; // silence warning
+      }
+  } else {
     self->target_ent = NULL;
     nearest = 0; // silence warning
   }
 
   //find the closest human
-  for( i = 0; i < MAX_CLIENTS; i++ )
-  {
+  for( i = 0; i < MAX_CLIENTS; i++ ) {
     ent = &g_entities[ i ];
 
-    if( G_NoTarget( ent ) )
+    if(G_NoTarget(ent)) {
       continue;
+    }
 
-    if( ent->client &&
-        ent->health > 0 &&
-        ent->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
-        ( d = DistanceSquared( ent->r.currentOrigin, self->r.currentOrigin ),
-          ( self->target_ent == NULL || d < nearest ) ) )
-    {
-      SV_Trace( &tr, self->r.currentOrigin, self->r.mins, self->r.maxs,
-                  ent->r.currentOrigin, self->r.ownerNum, self->clipmask,
-                  TT_AABB);
-      if( tr.entityNum != ENTITYNUM_WORLD )
-      {
-        nearest = d;
-        self->target_ent = ent;
+    if(
+      ent->client &&
+      ent->health > 0 &&
+      ent->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
+      (
+        d = DistanceSquared( ent->r.currentOrigin, self->r.currentOrigin ),
+        (self->target_ent == NULL || d < nearest))) {
+      for(
+        bbox_point_num = 0; bbox_point_num < NUM_NONVERTEX_BBOX_POINTS;
+        bbox_point_num++) {
+        bboxPoint_t bboxPoint;
+
+        bboxPoint.num = bbox_point_num;
+        BG_EvaluateBBOXPoint( &bboxPoint,
+                              ent->r.currentOrigin,
+                              ent->r.mins, ent->r.maxs);
+
+        SV_Trace(
+          &tr, self->r.currentOrigin, self->r.mins, self->r.maxs,
+          bboxPoint.point, self->r.ownerNum, self->clipmask, TT_AABB);
+
+        if(tr.entityNum != ENTITYNUM_WORLD) {
+          nearest = d;
+          self->target_ent = ent;
+          targeted_bbox_point.num = bboxPoint.num;
+          VectorCopy(bboxPoint.point, targeted_bbox_point.point);
+          break;
+        }
       }
     }
   }
 
-  if( self->target_ent == NULL )
-    VectorClear( dir );
-  else
-  {
-    VectorSubtract( self->target_ent->r.currentOrigin, self->r.currentOrigin, dir );
-    VectorNormalize( dir );
+  if(self->target_ent == NULL) {
+    VectorClear(dir);
+  } else {
+    VectorSubtract(targeted_bbox_point.point, self->r.currentOrigin, dir);
+    VectorNormalize(dir);
   }
 
-    //change direction towards the player
-    VectorScale( dir, HIVE_SPEED, self->s.pos.trDelta );
-    SnapVector( self->s.pos.trDelta );      // save net bandwidth
-    VectorCopy( self->r.currentOrigin, self->s.pos.trBase );
-    self->s.pos.trTime = level.time;
+  //change direction towards the player
+  VectorScale(dir, HIVE_SPEED, self->s.pos.trDelta);
+  SnapVector(self->s.pos.trDelta);      // save net bandwidth
+  VectorCopy(self->r.currentOrigin, self->s.pos.trBase);
+  self->s.pos.trTime = level.time;
 
-    self->nextthink = level.time + HIVE_DIR_CHANGE_PERIOD;
+  self->nextthink = level.time + HIVE_DIR_CHANGE_PERIOD;
 }
 
 /*
