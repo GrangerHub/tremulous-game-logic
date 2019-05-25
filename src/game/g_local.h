@@ -673,6 +673,7 @@ struct gclient_s
   int                 lastPoisonTime;
   int                 poisonImmunityTime;
   gentity_t           *lastPoisonClient;
+  gentity_id          last_trapper_id;
   int                 lastPoisonCloudedTime;
   gentity_t           *lastPoisonCloudedClient;
   int                 grabExpiryTime;

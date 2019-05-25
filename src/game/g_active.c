@@ -1175,6 +1175,17 @@ void ClientTimerActions( gentity_t *ent, int msec )
         0, damage, 0, MOD_POISON );
     }
 
+    //client is trapped
+    if(
+      (client->ps.stats[STAT_STATE] & SS_BLOBLOCKED) &&
+      !BG_InventoryContainsUpgrade(UP_BATTLESUIT, client->ps.stats)) {
+      gentity_t *trapper = G_Entity_id_get(&client->last_trapper_id);
+
+      G_Damage(
+        ent, trapper, trapper, NULL, 0,
+        LOCKBLOB_DMG_OVER_TIME, DAMAGE_NO_LOCDAMAGE, MOD_TRAP );
+    }
+
     //self damage the kamikaze marauder
     if( client->ps.weapon == WP_ALEVEL2 &&
         client->ps.misc[ MISC_MISC ] >= LEVEL2_EXPLODE_CHARGE_TIME_WARNING )

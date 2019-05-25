@@ -171,6 +171,7 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace )
       other->client->lastLockTime = level.time;
       AngleVectors( other->client->ps.viewangles, dir, NULL, NULL );
       other->client->ps.stats[ STAT_VIEWLOCK ] = DirToByte( dir );
+      G_Entity_id_set(&other->client->last_trapper_id, attacker);
     }
   }
   else if( !strcmp( ent->classname, "slowblob" ) )
