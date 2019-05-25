@@ -42,6 +42,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define AWDM(d)                     ((int)((float)d*ALIEN_WDMG_MODIFIER))
 
 #define ABUILDER_BUILD_REPEAT       500
+#define ABUILDER_CLAW_SUBCHECKS     5
 #define ABUILDER_CLAW_DMG           AWDM(20000)
 #define ABUILDER_CLAW_RANGE         64.0f
 #define ABUILDER_CLAW_WIDTH         4.0f
@@ -53,12 +54,14 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define ABUILDER_BLOB_SPEED_MOD     0.5f
 #define ABUILDER_BLOB_TIME          2000
 
+#define LEVEL0_BITE_SUBCHECKS       5
 #define LEVEL0_BITE_DMG             AWDM(48000)
 #define LEVEL0_BITE_RANGE           64.0f
 #define LEVEL0_BITE_WIDTH           6.0f
 #define LEVEL0_BITE_REPEAT          500
 #define LEVEL0_BITE_K_SCALE         1.0f
 
+#define LEVEL1_CLAW_SUBCHECKS       5
 #define LEVEL1_CLAW_DMG             AWDM(32000)
 #define LEVEL1_CLAW_RANGE           96.0f
 #define LEVEL1_CLAW_U_RANGE         LEVEL1_CLAW_RANGE + 3.0f
@@ -80,6 +83,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL1_REGEN_SCOREINC       AVM(100) // score added for healing per 10s
 #define LEVEL1_UPG_REGEN_SCOREINC   AVM(200)
 
+#define LEVEL2_CLAW_SUBCHECKS       5
 #define LEVEL2_CLAW_DMG             AWDM(40000)
 #define LEVEL2_CLAW_RANGE           80.0f
 #define LEVEL2_CLAW_U_RANGE         LEVEL2_CLAW_RANGE + 2.0f
@@ -88,6 +92,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL2_CLAW_K_SCALE         1.0f
 #define LEVEL2_CLAW_U_REPEAT        400
 #define LEVEL2_CLAW_U_K_SCALE       1.0f
+#define LEVEL2_AREAZAP_SUBCHECKS    5
 #define LEVEL2_AREAZAP_DMG          AWDM(60000)
 #define LEVEL2_AREAZAP_RANGE        200.0f
 #define LEVEL2_AREAZAP_CHAIN_RANGE  150.0f
@@ -98,6 +103,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL2_AREAZAP_MAX_TARGETS  5
 #define LEVEL2_WALLJUMP_MAXSPEED    1000.0f
 
+#define LEVEL3_CLAW_SUBCHECKS       5
 #define LEVEL3_CLAW_DMG             AWDM(80000)
 #define LEVEL3_CLAW_RANGE           96.0f
 #define LEVEL3_CLAW_UPG_RANGE       LEVEL3_CLAW_RANGE // + 3.0f          
@@ -106,6 +112,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL3_CLAW_K_SCALE         1.0f
 #define LEVEL3_CLAW_U_REPEAT        600
 #define LEVEL3_CLAW_U_K_SCALE       1.0f
+#define LEVEL3_POUNCE_SUBCHECKS     5
 #define LEVEL3_POUNCE_DMG           AWDM(100000)
 #define LEVEL3_POUNCE_RANGE         72.0f
 #define LEVEL3_POUNCE_UPG_RANGE     LEVEL3_POUNCE_RANGE + 3.0f
@@ -123,6 +130,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL3_BOUNCEBALL_RADIUS    0
 #define LEVEL3_BOUNCEBALL_REGEN     12500    // msec until new barb
 
+#define LEVEL4_CLAW_SUBCHECKS       5
 #define LEVEL4_CLAW_DMG             AWDM(100000)
 #define LEVEL4_CLAW_RANGE           100.0f
 #define LEVEL4_CLAW_WIDTH           20.0f
