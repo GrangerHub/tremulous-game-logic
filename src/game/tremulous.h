@@ -592,8 +592,8 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define SHOTGUN_MAXCLIPS            3
 #define SHOTGUN_REPEAT              1000
 #define SHOTGUN_K_SCALE             1.0f
-#define SHOTGUN_RECOIL1             256.0f
-#define SHOTGUN_RECOIL2             512.0f
+#define SHOTGUN_RECOIL1             64.0f
+#define SHOTGUN_RECOIL2             128.0f
 #define SHOTGUN_RELOAD              2000
 #define SHOTGUN_SPREAD              (6.5f)
 #define SHOTGUN_DMG                 HWDM(4000)
