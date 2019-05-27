@@ -179,12 +179,11 @@ void G_LeaveTeam( gentity_t *self )
   team_t    team = self->client->pers.teamSelection;
   gentity_t *ent;
   int       i;
+  
+  self->client->ps.persistant[ PERS_STATE ] &= ~PS_QUEUED;
+  self->client->spawnReady = qfalse;
 
-  if( team == TEAM_ALIENS )
-    G_RemoveFromSpawnQueue( &level.alienSpawnQueue, self->client->ps.clientNum );
-  else if( team == TEAM_HUMANS )
-    G_RemoveFromSpawnQueue( &level.humanSpawnQueue, self->client->ps.clientNum );
-  else
+  if( team == TEAM_NONE )
   {
     if( self->client->sess.spectatorState == SPECTATOR_FOLLOW )
       G_StopFollowing( self );

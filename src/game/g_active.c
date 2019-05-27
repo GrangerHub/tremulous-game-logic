@@ -402,18 +402,14 @@ Send spawn queue data to a client
 */
 static void G_ClientUpdateSpawnQueue( gclient_t *client )
 {
-  if( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
-  {
-    client->ps.persistant[ PERS_QUEUEPOS ] =
-      G_GetPosInSpawnQueue( &level.alienSpawnQueue, client->ps.clientNum );
-    client->ps.persistant[ PERS_SPAWNS ] = level.numAlienSpawns;
-  }
-  else if( client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
-  {
-    client->ps.persistant[ PERS_QUEUEPOS ] =
-      G_GetPosInSpawnQueue( &level.humanSpawnQueue, client->ps.clientNum );
-    client->ps.persistant[ PERS_SPAWNS ] = level.numHumanSpawns;
-  }
+	client->ps.persistant[ PERS_QUEUEPOS ] = (client->spawnTime - level.time) / 1000;
+	if( client->ps.persistant[ PERS_QUEUEPOS ] < 0 ) {
+		client->ps.persistant[ PERS_QUEUEPOS ] = 0; }
+
+	if( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS ) {
+		client->ps.persistant[ PERS_SPAWNS ] = level.numAlienSpawns; }
+	else if( client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS ) {
+		client->ps.persistant[ PERS_SPAWNS ] = level.numHumanSpawns; }
 }
 
 /*
@@ -451,22 +447,14 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
   }
 
   // Check to see if we are in the spawn queue
-  if( client->pers.teamSelection == TEAM_ALIENS )
-    queued = G_SearchSpawnQueue( &level.alienSpawnQueue, ent - g_entities );
-  else if( client->pers.teamSelection == TEAM_HUMANS )
-    queued = G_SearchSpawnQueue( &level.humanSpawnQueue, ent - g_entities );
-  else
-    queued = qfalse;
+  queued = client->spawnReady;
 
   // Wants to get out of spawn queue
   if( attack1 && queued )
   {
     if( client->sess.spectatorState == SPECTATOR_FOLLOW )
       G_StopFollowing( ent );
-    if( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
-      G_RemoveFromSpawnQueue( &level.alienSpawnQueue, client->ps.clientNum );
-    else if( client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
-      G_RemoveFromSpawnQueue( &level.humanSpawnQueue, client->ps.clientNum );
+    client->spawnReady = qfalse;
     client->pers.classSelection = PCL_NONE;
     client->pers.humanItemSelection = WP_NONE;
     client->ps.stats[ STAT_CLASS ] = PCL_NONE;
@@ -592,8 +580,7 @@ qboolean ClientInactivityTimer( gentity_t *ent )
            ( client->pers.cmd.buttons & BUTTON_ATTACK ) ||
            ( client->pers.cmd.buttons & BUTTON_ATTACK2 ) ||
            client->pers.cmdAnglesChanged ||
-           G_SearchSpawnQueue( &level.alienSpawnQueue, ent-g_entities ) ||
-           G_SearchSpawnQueue( &level.humanSpawnQueue, ent-g_entities ) )
+           client->spawnReady )
   {
     client->inactivityTime = level.time + g_inactivity.integer * 1000;
     client->inactivityWarning = qfalse;
@@ -653,8 +640,7 @@ void VoterInactivityTimer( gentity_t *ent )
       ( client->pers.cmd.buttons & BUTTON_ATTACK ) ||
       ( client->pers.cmd.buttons & BUTTON_ATTACK2 ) ||
       client->pers.cmdAnglesChanged ||
-      G_SearchSpawnQueue( &level.alienSpawnQueue, ent-g_entities ) ||
-      G_SearchSpawnQueue( &level.humanSpawnQueue, ent-g_entities ) )
+      client->spawnReady )
   {
     client->pers.voterInactivityTime = level.time + ( VOTE_TIME );
   }

@@ -517,33 +517,6 @@ static void Svcmd_Pr_f( void )
   SV_GameSendServerCommand( cl, va( "print \"%s\n\"", ConcatArgs( 2 ) ) );
 }
 
-static void Svcmd_PrintQueue_f( void )
-{
-  char team[ MAX_STRING_CHARS ];
-
-  if( Cmd_Argc() != 2 )
-  {
-    Com_Printf( "usage: printqueue <team>\n" );
-    return;
-  }
-
-  Cmd_ArgvBuffer( 1, team, sizeof( team ) );
-
-  switch( G_TeamFromString( team ) )
-  {
-    case TEAM_ALIENS:
-      G_PrintSpawnQueue( &level.alienSpawnQueue );
-      break;
-
-    case TEAM_HUMANS:
-      G_PrintSpawnQueue( &level.humanSpawnQueue );
-      break;
-
-    default:
-      Com_Printf( "unknown team\n" );
-  }
-}
-
 // dumb wrapper for "a", "m", "chat", and "say"
 static void Svcmd_MessageWrapper( void )
 {
@@ -630,7 +603,6 @@ struct svcmd
   { "m", qtrue, Svcmd_MessageWrapper },
   { "mapRotation", qfalse, Svcmd_MapRotation_f },
   { "pr", qfalse, Svcmd_Pr_f },
-  { "printqueue", qfalse, Svcmd_PrintQueue_f },
   { "say", qtrue, Svcmd_MessageWrapper },
   { "say_team", qtrue, Svcmd_TeamMessage_f },
   { "status", qfalse, Svcmd_Status_f },

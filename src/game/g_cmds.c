@@ -2700,11 +2700,14 @@ Cmd_Class_f
 */
 void Cmd_Class_f( gentity_t *ent )
 {
+  gclient_t *client;
   char      s[ MAX_TOKEN_CHARS ];
   int       clientNum;
   class_t   newClass;
 
-  clientNum = ent->client - level.clients;
+  client = ent->client;
+  clientNum = client - level.clients;
+  
   Cmd_ArgvBuffer( 1, s, sizeof( s ) );
   newClass = BG_ClassByName( s )->number;
 
@@ -2735,10 +2738,12 @@ void Cmd_Class_f( gentity_t *ent )
       }
 
       // spawn from an egg
-      if( G_PushSpawnQueue( &level.alienSpawnQueue, clientNum ) )
+      if( !client->spawnReady )
       {
+        g_entities[ clientNum ].client->ps.persistant[ PERS_STATE ] |= PS_QUEUED;
         ent->client->pers.classSelection = newClass;
         ent->client->ps.stats[ STAT_CLASS ] = newClass;
+        client->spawnReady = qtrue;
       }
     }
     else if( ent->client->pers.teamSelection == TEAM_HUMANS )
@@ -2760,10 +2765,12 @@ void Cmd_Class_f( gentity_t *ent )
         return;
       }
       // spawn from a telenode
-      if( G_PushSpawnQueue( &level.humanSpawnQueue, clientNum ) )
+      if( !client->spawnReady )
       {
+        g_entities[ clientNum ].client->ps.persistant[ PERS_STATE ] |= PS_QUEUED;
         ent->client->pers.classSelection = PCL_HUMAN;
         ent->client->ps.stats[ STAT_CLASS ] = PCL_HUMAN;
+        client->spawnReady = qtrue;
       }
     }
     return;

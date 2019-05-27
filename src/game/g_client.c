@@ -1864,3 +1864,38 @@ Q_EXPORT void ClientDisconnect( int clientNum )
   if( IS_WARMUP )
     G_LevelReady();
 }
+
+qboolean G_Client_Alive( gentity_t *ent )
+{
+	if(
+		ent == NULL ||
+		ent->client == NULL ||
+		ent->client->sess.spectatorState != SPECTATOR_NOT)
+	{
+		return qfalse;
+	}
+	return qtrue;
+}
+
+team_t G_Client_Team( gentity_t *ent )
+{
+	if(
+		ent == NULL ||
+		ent->client == NULL)
+	{
+		return TEAM_NONE;
+	}
+	return ent->client->ps.stats[ STAT_TEAM ];
+}
+
+void G_Client_For_All( void (*func)( gentity_t *ent ) )
+{
+	int i;
+	Com_Assert( func != NULL );
+	for(i = 0; i < level.maxclients; i++)
+	{
+		gentity_t *ent2 = g_entities + i;
+		if(ent2->inuse && ent2->client != NULL) {
+			func(ent2); }
+	}
+}

@@ -477,6 +477,8 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   // don't allow respawn until the death anim is done
   // g_forcerespawn may force spawning at some later time
   self->client->respawnTime = level.time + 1700;
+  
+  self->client->spawnTime = level.time + (g_spawnCountdown.integer * 1000);
 
   // clear misc
   memset( self->client->ps.misc, 0, sizeof( self->client->ps.misc ) );

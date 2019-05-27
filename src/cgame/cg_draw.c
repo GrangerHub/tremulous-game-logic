@@ -3987,7 +3987,6 @@ static qboolean CG_DrawQueue( void )
 {
   float       w;
   vec4_t      color;
-  int         position;
   char        *ordinal, buffer[ MAX_STRING_CHARS ];
 
   if( !( cg.snap->ps.persistant[ PERS_STATE ] & PS_QUEUED ) )
@@ -3998,30 +3997,8 @@ static qboolean CG_DrawQueue( void )
   color[ 2 ] = 1;
   color[ 3 ] = 1;
 
-  position = cg.snap->ps.persistant[ PERS_QUEUEPOS ] + 1;
-  if( position < 1 )
-    return qfalse;
-
-  switch( position % 100 )
-  {
-    case 11:
-    case 12:
-    case 13:
-      ordinal = "th";
-      break;
-    default:
-      switch( position % 10 )
-      {
-        case 1:  ordinal = "st"; break;
-        case 2:  ordinal = "nd"; break;
-        case 3:  ordinal = "rd"; break;
-        default: ordinal = "th"; break;
-      }
-      break;
-  }
-
-  Com_sprintf( buffer, MAX_STRING_CHARS, "You are %d%s in the spawn queue",
-               position, ordinal );
+  Com_sprintf( buffer, MAX_STRING_CHARS, "You will spawn in %d second(s)",
+               cg.snap->ps.persistant[ PERS_QUEUEPOS ] );
 
   w = UI_Text_Width( buffer, 0.7f );
   UI_Text_Paint( 320 - w / 2, 360, 0.7f, color, buffer, 0, 0, ITEM_TEXTSTYLE_SHADOWED );
