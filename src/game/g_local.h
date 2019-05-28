@@ -564,6 +564,9 @@ typedef struct
   qboolean            hasHealed;          // has healed a player (basi regen aura) in the last 10sec (for score use)
   float               timedIncome;
 
+  int                 spawn_queue_pos;    // position in the spawn queue
+  int                 spawnTime;          // can spawn when time > this
+
   int                 damageProtectionDuration; //length of time for damage protection for the next spawn
 
   // used to save persistant[] values while in SPECTATOR_FOLLOW mode
@@ -648,7 +651,8 @@ struct gclient_s
   int                 lasthurt_mod;     // type of damage the client did
 
   // timers
-  int                 respawnTime;      // can respawn when time > this
+  int                 respawnTime;      // can join queue when time > this
+  qboolean            spawnReady;       // player will spawn when spawnTime > level.time and spawnReady
   int                 inactivityTime;   // kick players when time > this
   qboolean            inactivityWarning;// qtrue if the five seoond warning has been given
   int                 rewardTime;       // clear the EF_AWARD_IMPRESSIVE, etc when time > this
@@ -720,26 +724,10 @@ struct gclient_s
   int                 timeToInvisibility; //for the invisible basilisk
 };
 
-
-typedef struct spawnQueue_s
-{
-  int clients[ MAX_CLIENTS ];
-
-  int front, back;
-} spawnQueue_t;
-
 #define QUEUE_PLUS1(x)  (((x)+1)%MAX_CLIENTS)
 #define QUEUE_MINUS1(x) (((x)+MAX_CLIENTS-1)%MAX_CLIENTS)
 
-void      G_InitSpawnQueue( spawnQueue_t *sq );
-int       G_GetSpawnQueueLength( spawnQueue_t *sq );
-int       G_PopSpawnQueue( spawnQueue_t *sq );
-int       G_PeekSpawnQueue( spawnQueue_t *sq );
-qboolean  G_SearchSpawnQueue( spawnQueue_t *sq, int clientNum );
-qboolean  G_PushSpawnQueue( spawnQueue_t *sq, int clientNum );
-qboolean  G_RemoveFromSpawnQueue( spawnQueue_t *sq, int clientNum );
-int       G_GetPosInSpawnQueue( spawnQueue_t *sq, int clientNum );
-void      G_PrintSpawnQueue( spawnQueue_t *sq );
+void      G_PrintSpawnQueue( team_t team );
 
 
 #define MAX_DAMAGE_REGION_TEXT    8192
@@ -962,8 +950,7 @@ typedef struct
   timeWarning_t     timelimitWarning;
   qboolean          sudden_death_replacable[BA_NUM_BUILDABLES];
 
-  spawnQueue_t      alienSpawnQueue;
-  spawnQueue_t      humanSpawnQueue;
+  bgqueue_t         spawn_queue[NUM_TEAMS];
 
   gentity_t         *teleporters;                    //  pointer for the linking of human teleporter buildables
 
@@ -1527,6 +1514,9 @@ void      player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker
 qboolean  SpotWouldTelefrag( gentity_t *spot );
 char      *GetSkin( char *modelname, char *wish );
 qboolean  G_IsNewbieName( const char *name );
+qboolean  G_Client_Alive( gentity_t *ent );
+team_t    G_Client_Team( gentity_t *ent );
+void      G_Client_For_All( void (*func)( gentity_t *ent ) );
 
 
 //
@@ -1766,6 +1756,7 @@ extern  vmCvar_t  g_synchronousClients;
 extern  vmCvar_t  g_motd;
 extern  vmCvar_t  g_countdown;
 extern  vmCvar_t  g_doCountdown;
+extern  vmCvar_t  g_spawnCountdown;
 extern  vmCvar_t  g_allowVote;
 extern  vmCvar_t  g_voteLimit;
 extern  vmCvar_t  g_suddenDeathVotePercent;

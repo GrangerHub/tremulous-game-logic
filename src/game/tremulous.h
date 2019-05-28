@@ -500,7 +500,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define ALIEN_POISON_DMG            5000
 #define ALIEN_POISON_DIVIDER        (1.0f/1.32f) //about 1.0/(time`th root of damage)
 
-#define ALIEN_SPAWN_REPEAT_TIME     10000
+#define ALIEN_SPAWN_REPEAT_TIME     500
 #define ALIEN_SPAWN_PROTECTION_TIME 3000
 
 #define ALIEN_HIVEMIND_LINK_TIME    150000 //amount of time aliens can survive without any eggs/overmind
@@ -944,7 +944,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define STAMINA_SLOW_LEVEL          -500
 #define STAMINA_BLACKOUT_LEVEL      -800
 
-#define HUMAN_SPAWN_REPEAT_TIME     10000
+#define HUMAN_SPAWN_REPEAT_TIME     500
 #define HUMAN_SPAWN_PROTECTION_TIME 5000
 #define HUMAN_REGEN_DAMAGE_TIME     3000 //msec since damage before dcc repairs
 
