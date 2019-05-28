@@ -539,6 +539,7 @@ typedef enum
 #define PS_QUEUED               0x00000020 // player is queued
 #define PS_BUNNYHOPENABLED      0x00000040
 #define PS_BUNNYHOPTOGGLE       0x00000080
+#define PS_QUEUED_NOT_FIRST     0x00000100 // player is not first in the queue
 
 // entityState_t->eFlags
 // notice that some flags are overlapped, so their meaning depends on context

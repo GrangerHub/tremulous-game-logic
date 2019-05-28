@@ -96,6 +96,7 @@ vmCvar_t  g_motd;
 vmCvar_t  g_synchronousClients;
 vmCvar_t  g_countdown;
 vmCvar_t  g_doCountdown;
+vmCvar_t  g_spawnCountdown;
 vmCvar_t  g_restarted;
 vmCvar_t  g_restartingFlags;
 vmCvar_t  g_lockTeamsAtStart;
@@ -277,6 +278,7 @@ static cvarTable_t   gameCvarTable[ ] =
 
   { &g_countdown, "g_countdown", "10", CVAR_ARCHIVE, 0, qtrue  },
   { &g_doCountdown, "g_doCountdown", "0", CVAR_ARCHIVE, 0, qtrue  },
+  { &g_spawnCountdown, "g_spawnCountdown", "15", CVAR_ARCHIVE, 0, qtrue  },
   { &g_logFile, "g_logFile", "games.log", CVAR_ARCHIVE, 0, qfalse  },
   { &g_logFileSync, "g_logFileSync", "0", CVAR_ARCHIVE, 0, qfalse  },
 
@@ -788,8 +790,10 @@ Q_EXPORT void G_InitGame( int levelTime, int randomSeed, int restart )
   G_ReloadPlayMapPool();
   G_ReloadPlayMapQueue();
   G_ExecutePlaymapFlags( level.playmapFlags );
-  G_InitSpawnQueue( &level.alienSpawnQueue );
-  G_InitSpawnQueue( &level.humanSpawnQueue );
+
+  for(i = 0; i < NUM_TEAMS; i++) {
+    BG_Queue_Init(&level.spawn_queue[i]);
+  }
 
   if( g_debugMapRotation.integer )
     G_PrintRotations( );
@@ -860,8 +864,14 @@ G_ShutdownGame
 */
 Q_EXPORT void G_ShutdownGame( int restart )
 {
+  int i;
+
   // in case of a map_restart
   G_ClearVotes( );
+
+  for(i = 0; i < NUM_TEAMS; i++) {
+    BG_Queue_Clear(&level.spawn_queue[i]);
+  }
 
   if(IS_SCRIM && level.scrim.scrim_completed) {
     G_Scrim_Reset_Settings();
@@ -960,217 +970,30 @@ int QDECL SortRanks( const void *a, const void *b )
     return 0;
 }
 
-/*
-============
-G_InitSpawnQueue
+static void G_Print_Client_Num_For_Spawn_Pos(void *data, void *user_data) {
+  gclient_t *client = (gclient_t *)data;
 
-Initialise a spawn queue
-============
-*/
-void G_InitSpawnQueue( spawnQueue_t *sq )
-{
-  int i;
-
-  sq->back = sq->front = 0;
-  sq->back = QUEUE_MINUS1( sq->back );
-
-  //0 is a valid clientNum, so use something else
-  for( i = 0; i < MAX_CLIENTS; i++ )
-    sq->clients[ i ] = -1;
+  Com_Printf( "%d:", client - g_clients);
 }
 
 /*
-============
-G_GetSpawnQueueLength
+-============
+-G_PrintSpawnQueue
+-
+-Print the contents of a spawn queue
+-============
+-*/
+void G_PrintSpawnQueue(team_t team) {
+  bgqueue_t *spawn_queue = &level.spawn_queue[team];
+  gclient_t *head_client = (gclient_t *)spawn_queue->head;
+  gclient_t *tail_client = (gclient_t *)spawn_queue->tail;
+  int       head = head_client ? head_client - g_clients : -1;
+  int       tail = tail_client ? tail_client - g_clients : -1;
+  int length = BG_Queue_Get_Length(spawn_queue);
 
-Return the length of a spawn queue
-============
-*/
-int G_GetSpawnQueueLength( spawnQueue_t *sq )
-{
-  int length = sq->back - sq->front + 1;
+  Com_Printf("length:%d head:%d tail:%d    :", length, head, tail);
 
-  while( length < 0 )
-    length += MAX_CLIENTS;
-
-  while( length >= MAX_CLIENTS )
-    length -= MAX_CLIENTS;
-
-  return length;
-}
-
-/*
-============
-G_PopSpawnQueue
-
-Remove from front element from a spawn queue
-============
-*/
-int G_PopSpawnQueue( spawnQueue_t *sq )
-{
-  int clientNum = sq->clients[ sq->front ];
-
-  if( G_GetSpawnQueueLength( sq ) > 0 )
-  {
-    sq->clients[ sq->front ] = -1;
-    sq->front = QUEUE_PLUS1( sq->front );
-    G_StopFollowing( g_entities + clientNum );
-    g_entities[ clientNum ].client->ps.persistant[ PERS_STATE ] &= ~PS_QUEUED;
-
-    return clientNum;
-  }
-  else
-    return -1;
-}
-
-/*
-============
-G_PeekSpawnQueue
-
-Look at front element from a spawn queue
-============
-*/
-int G_PeekSpawnQueue( spawnQueue_t *sq )
-{
-  return sq->clients[ sq->front ];
-}
-
-/*
-============
-G_SearchSpawnQueue
-
-Look to see if clientNum is already in the spawnQueue
-============
-*/
-qboolean G_SearchSpawnQueue( spawnQueue_t *sq, int clientNum )
-{
-  int i;
-
-  for( i = 0; i < MAX_CLIENTS; i++ )
-  {
-    if( sq->clients[ i ] == clientNum )
-      return qtrue;
-  }
-
-  return qfalse;
-}
-
-/*
-============
-G_PushSpawnQueue
-
-Add an element to the back of the spawn queue
-============
-*/
-qboolean G_PushSpawnQueue( spawnQueue_t *sq, int clientNum )
-{
-  // don't add the same client more than once
-  if( G_SearchSpawnQueue( sq, clientNum ) )
-    return qfalse;
-
-  sq->back = QUEUE_PLUS1( sq->back );
-  sq->clients[ sq->back ] = clientNum;
-
-  g_entities[ clientNum ].client->ps.persistant[ PERS_STATE ] |= PS_QUEUED;
-  return qtrue;
-}
-
-/*
-============
-G_RemoveFromSpawnQueue
-
-remove a specific client from a spawn queue
-============
-*/
-qboolean G_RemoveFromSpawnQueue( spawnQueue_t *sq, int clientNum )
-{
-  int i = sq->front;
-
-  if( G_GetSpawnQueueLength( sq ) )
-  {
-    do
-    {
-      if( sq->clients[ i ] == clientNum )
-      {
-        //and this kids is why it would have
-        //been better to use an LL for internal
-        //representation
-        do
-        {
-          sq->clients[ i ] = sq->clients[ QUEUE_PLUS1( i ) ];
-
-          i = QUEUE_PLUS1( i );
-        } while( i != QUEUE_PLUS1( sq->back ) );
-
-        sq->back = QUEUE_MINUS1( sq->back );
-        g_entities[ clientNum ].client->ps.persistant[ PERS_STATE ] &= ~PS_QUEUED;
-
-        return qtrue;
-      }
-
-      i = QUEUE_PLUS1( i );
-    } while( i != QUEUE_PLUS1( sq->back ) );
-  }
-
-  return qfalse;
-}
-
-/*
-============
-G_GetPosInSpawnQueue
-
-Get the position of a client in a spawn queue
-============
-*/
-int G_GetPosInSpawnQueue( spawnQueue_t *sq, int clientNum )
-{
-  int i = sq->front;
-
-  if( G_GetSpawnQueueLength( sq ) )
-  {
-    do
-    {
-      if( sq->clients[ i ] == clientNum )
-      {
-        if( i < sq->front )
-          return i + MAX_CLIENTS - sq->front;
-        else
-          return i - sq->front;
-      }
-
-      i = QUEUE_PLUS1( i );
-    } while( i != QUEUE_PLUS1( sq->back ) );
-  }
-
-  return -1;
-}
-
-/*
-============
-G_PrintSpawnQueue
-
-Print the contents of a spawn queue
-============
-*/
-void G_PrintSpawnQueue( spawnQueue_t *sq )
-{
-  int i = sq->front;
-  int length = G_GetSpawnQueueLength( sq );
-
-  Com_Printf( "l:%d f:%d b:%d    :", length, sq->front, sq->back );
-
-  if( length > 0 )
-  {
-    do
-    {
-      if( sq->clients[ i ] == -1 )
-        Com_Printf( "*:" );
-      else
-        Com_Printf( "%d:", sq->clients[ i ] );
-
-      i = QUEUE_PLUS1( i );
-    } while( i != QUEUE_PLUS1( sq->back ) );
-  }
+  BG_Queue_Foreach(spawn_queue, G_Print_Client_Num_For_Spawn_Pos, NULL);
 
   Com_Printf( "\n" );
 }
@@ -1182,46 +1005,56 @@ G_SpawnClients
 Spawn queued clients
 ============
 */
-void G_SpawnClients( team_t team )
-{
-  int           clientNum;
-  gentity_t     *ent, *spawn;
-  vec3_t        spawn_origin, spawn_angles;
-  spawnQueue_t  *sq = NULL;
-  int           numSpawns = 0;
+void G_SpawnClients(void *data, void *user_data) {
+  gclient_t *client = (gclient_t *)data;
+  gentity_t *ent = NULL;
+	team_t    team;
+  bgqueue_t *spawn_queue;
+  int       client_num = client - level.clients;
+	int       numSpawns = 0;
 
-  if( team == TEAM_ALIENS )
-  {
-    sq = &level.alienSpawnQueue;
-    numSpawns = level.numAlienSpawns;
-  }
-  else if( team == TEAM_HUMANS )
-  {
-    sq = &level.humanSpawnQueue;
-    numSpawns = level.numHumanSpawns;
+  if(client && client_num < MAX_CLIENTS && client_num >= 0) {
+    ent = &g_entities[client_num];
   }
 
-  if( G_GetSpawnQueueLength( sq ) > 0 && numSpawns > 0 )
-  {
-    clientNum = G_PeekSpawnQueue( sq );
-    ent = &g_entities[ clientNum ];
+	if(
+		G_Client_Alive( ent ) ||
+    ent->client->pers.connected != CON_CONNECTED ||
+		!ent->client->spawnReady ||
+    (!IS_WARMUP && ent->client->pers.spawnTime > level.time)) {
+		return;
+	}
 
-    if( ( spawn = G_SelectTremulousSpawnPoint( team,
-            ent->client->pers.lastDeathLocation,
-            spawn_origin, spawn_angles ) ) )
-    {
-      clientNum = G_PopSpawnQueue( sq );
-
-      if( clientNum < 0 )
-        return;
-
-      ent = &g_entities[ clientNum ];
-
-      ent->client->sess.spectatorState = SPECTATOR_NOT;
-      ClientUserinfoChanged( clientNum, qfalse );
-      ClientSpawn( ent, spawn, spawn_origin, spawn_angles, qtrue );
-    }
+	team = G_Client_Team( ent );
+	if( team == TEAM_ALIENS ) {
+		numSpawns = level.numAlienSpawns;
+  } else if( team == TEAM_HUMANS ) {
+		numSpawns = level.numHumanSpawns;
   }
+
+  spawn_queue = &level.spawn_queue[team];
+  if(!IS_WARMUP && BG_Queue_Index(spawn_queue, ent->client) > 0) {
+    return;
+  }
+
+	if(numSpawns > 0) {
+		gentity_t *spawn;
+		vec3_t    spawn_origin, spawn_angles;
+
+		spawn =
+      G_SelectTremulousSpawnPoint(
+        team, ent->client->pers.lastDeathLocation, spawn_origin, spawn_angles);
+		if(spawn != NULL) {
+			ent->client->sess.spectatorState = SPECTATOR_NOT;
+			ClientUserinfoChanged( ent->client->ps.clientNum, qfalse );
+			ClientSpawn( ent, spawn, spawn_origin, spawn_angles, qtrue );
+      BG_Queue_Remove_All(
+        &level.spawn_queue[team], ent->client);
+			ent->client->spawnReady = qfalse;
+      ent->client->ps.persistant[ PERS_STATE ] &= ~PS_QUEUED;
+      ent->client->pers.spawnTime = level.time + (g_spawnCountdown.integer * 1000);
+		}
+	}
 }
 
 /*
@@ -1808,6 +1641,10 @@ void BeginIntermission( void )
   level.intermissiontime = level.time;
 
   G_ClearVotes( );
+
+  for(i = 0; i < NUM_TEAMS; i++) {
+    BG_Queue_Clear(&level.spawn_queue[i]);
+  }
 
   G_UpdateTeamConfigStrings( );
 
@@ -3486,8 +3323,9 @@ Q_EXPORT void G_RunFrame( int levelTime )
   {
     G_CalculateBuildPoints( );
     G_CalculateStages( );
-    G_SpawnClients( TEAM_ALIENS );
-    G_SpawnClients( TEAM_HUMANS );
+    for(i = 0; i < NUM_TEAMS; i++) {
+      BG_Queue_Foreach(&level.spawn_queue[i], G_SpawnClients, NULL);
+    }
     G_CalculateAvgPlayers( );
     G_UpdateZaps( msec );
   }
