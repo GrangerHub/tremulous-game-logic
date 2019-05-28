@@ -517,30 +517,28 @@ static void Svcmd_Pr_f( void )
   SV_GameSendServerCommand( cl, va( "print \"%s\n\"", ConcatArgs( 2 ) ) );
 }
 
-static void Svcmd_PrintQueue_f( void )
-{
-  char team[ MAX_STRING_CHARS ];
+static void Svcmd_PrintQueue_f(void) {
+  char   team_name[ MAX_STRING_CHARS ];
+  team_t team;
+  
 
-  if( Cmd_Argc() != 2 )
-  {
-    Com_Printf( "usage: printqueue <team>\n" );
+  if(Cmd_Argc() != 2) {
+    Com_Printf("usage: printqueue <team>\n");
     return;
   }
 
-  Cmd_ArgvBuffer( 1, team, sizeof( team ) );
+  Cmd_ArgvBuffer(1, team_name, sizeof(team_name));
 
-  switch( G_TeamFromString( team ) )
-  {
-    case TEAM_ALIENS:
-      G_PrintSpawnQueue( &level.alienSpawnQueue );
-      break;
-
-    case TEAM_HUMANS:
-      G_PrintSpawnQueue( &level.humanSpawnQueue );
+  team = G_TeamFromString(team_name);
+  switch(team) {
+    case TEAM_NONE:
+    case NUM_TEAMS:
+      Com_Printf("unknown team\n");
       break;
 
     default:
-      Com_Printf( "unknown team\n" );
+      G_PrintSpawnQueue(team);
+      break;
   }
 }
 

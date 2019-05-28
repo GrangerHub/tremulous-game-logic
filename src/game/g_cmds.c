@@ -2695,6 +2695,17 @@ qboolean G_EvolveAfterCheck( gentity_t *ent, class_t newClass, qboolean give )
   }
 }
 
+static int G_CompareSpawnQueuePoss( const void *a, const void *b ) {
+  gclient_t *client_a = (gclient_t *)a;
+  gclient_t *client_b = (gclient_t *)b;
+
+  if(client_a == NULL || client_b == NULL) {
+    return 0;
+  }
+
+  return client_a->pers.spawnTime - client_b->pers.spawnTime;
+}
+
 /*
 =================
 Cmd_Class_f
@@ -2702,11 +2713,14 @@ Cmd_Class_f
 */
 void Cmd_Class_f( gentity_t *ent )
 {
+  gclient_t *client;
   char      s[ MAX_TOKEN_CHARS ];
   int       clientNum;
   class_t   newClass;
 
-  clientNum = ent->client - level.clients;
+  client = ent->client;
+  clientNum = client - level.clients;
+  
   Cmd_ArgvBuffer( 1, s, sizeof( s ) );
   newClass = BG_ClassByName( s )->number;
 
@@ -2737,10 +2751,19 @@ void Cmd_Class_f( gentity_t *ent )
       }
 
       // spawn from an egg
-      if( G_PushSpawnQueue( &level.alienSpawnQueue, clientNum ) )
+      if( !client->spawnReady )
       {
+        bgqueue_t *spawn_queue = &level.spawn_queue[client->ps.stats[STAT_TEAM]];
+
+        if(BG_Queue_Find(spawn_queue, client) == NULL) {
+          BG_Queue_Insert_Sorted(
+            spawn_queue, client, G_CompareSpawnQueuePoss, NULL);
+        }
+
+        g_entities[ clientNum ].client->ps.persistant[ PERS_STATE ] |= PS_QUEUED;
         ent->client->pers.classSelection = newClass;
         ent->client->ps.stats[ STAT_CLASS ] = newClass;
+        client->spawnReady = qtrue;
       }
     }
     else if( ent->client->pers.teamSelection == TEAM_HUMANS )
@@ -2762,10 +2785,19 @@ void Cmd_Class_f( gentity_t *ent )
         return;
       }
       // spawn from a telenode
-      if( G_PushSpawnQueue( &level.humanSpawnQueue, clientNum ) )
+      if( !client->spawnReady )
       {
+        bgqueue_t *spawn_queue = &level.spawn_queue[client->ps.stats[STAT_TEAM]];
+
+        if(BG_Queue_Find(spawn_queue, client) == NULL) {
+          BG_Queue_Insert_Sorted(
+            spawn_queue, client, G_CompareSpawnQueuePoss, NULL);
+        }
+
+        g_entities[ clientNum ].client->ps.persistant[ PERS_STATE ] |= PS_QUEUED;
         ent->client->pers.classSelection = PCL_HUMAN;
         ent->client->ps.stats[ STAT_CLASS ] = PCL_HUMAN;
+        client->spawnReady = qtrue;
       }
     }
     return;
