@@ -2693,6 +2693,17 @@ qboolean G_EvolveAfterCheck( gentity_t *ent, class_t newClass, qboolean give )
   }
 }
 
+static int G_CompareSpawnQueuePoss( const void *a, const void *b ) {
+  gclient_t *client_a = (gclient_t *)a;
+  gclient_t *client_b = (gclient_t *)b;
+
+  if(client_a == NULL || client_b == NULL) {
+    return 0;
+  }
+
+  return client_a->pers.spawnTime - client_b->pers.spawnTime;
+}
+
 /*
 =================
 Cmd_Class_f
@@ -2740,6 +2751,13 @@ void Cmd_Class_f( gentity_t *ent )
       // spawn from an egg
       if( !client->spawnReady )
       {
+        bgqueue_t *spawn_queue = &level.spawn_queue[client->ps.stats[STAT_TEAM]];
+
+        if(BG_Queue_Find(spawn_queue, client) == NULL) {
+          BG_Queue_Insert_Sorted(
+            spawn_queue, client, G_CompareSpawnQueuePoss, NULL);
+        }
+
         g_entities[ clientNum ].client->ps.persistant[ PERS_STATE ] |= PS_QUEUED;
         ent->client->pers.classSelection = newClass;
         ent->client->ps.stats[ STAT_CLASS ] = newClass;
@@ -2767,6 +2785,13 @@ void Cmd_Class_f( gentity_t *ent )
       // spawn from a telenode
       if( !client->spawnReady )
       {
+        bgqueue_t *spawn_queue = &level.spawn_queue[client->ps.stats[STAT_TEAM]];
+
+        if(BG_Queue_Find(spawn_queue, client) == NULL) {
+          BG_Queue_Insert_Sorted(
+            spawn_queue, client, G_CompareSpawnQueuePoss, NULL);
+        }
+
         g_entities[ clientNum ].client->ps.persistant[ PERS_STATE ] |= PS_QUEUED;
         ent->client->pers.classSelection = PCL_HUMAN;
         ent->client->ps.stats[ STAT_CLASS ] = PCL_HUMAN;

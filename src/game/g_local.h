@@ -521,6 +521,9 @@ typedef struct
   int                 lastSpawnedTime;    // level.time the client has last spawned
   qboolean            hasHealed;          // has healed a player (basi regen aura) in the last 10sec (for score use)
 
+  int                 spawn_queue_pos;    // position in the spawn queue
+  int                 spawnTime;          // can spawn when time > this
+
   int                 damageProtectionDuration; //length of time for damage protection for the next spawn
 
   // used to save persistant[] values while in SPECTATOR_FOLLOW mode
@@ -603,7 +606,6 @@ struct gclient_s
 
   // timers
   int                 respawnTime;      // can join queue when time > this
-  int                 spawnTime;        // can spawn when time > this
   qboolean            spawnReady;       // player will spawn when spawnTime > level.time and spawnReady
   int                 inactivityTime;   // kick players when time > this
   qboolean            inactivityWarning;// qtrue if the five seoond warning has been given
@@ -663,6 +665,8 @@ struct gclient_s
 
 #define QUEUE_PLUS1(x)  (((x)+1)%MAX_CLIENTS)
 #define QUEUE_MINUS1(x) (((x)+MAX_CLIENTS-1)%MAX_CLIENTS)
+
+void      G_PrintSpawnQueue( team_t team );
 
 
 #define MAX_DAMAGE_REGION_TEXT    8192
@@ -882,6 +886,8 @@ typedef struct
   timeWarning_t     suddenDeathWarning;
   timeWarning_t     timelimitWarning;
   qboolean          sudden_death_replacable[BA_NUM_BUILDABLES];
+
+  bgqueue_t         spawn_queue[NUM_TEAMS];
 
   int               alienStage2Time;
   int               alienStage3Time;

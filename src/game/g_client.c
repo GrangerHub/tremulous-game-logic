@@ -1870,7 +1870,8 @@ qboolean G_Client_Alive( gentity_t *ent )
 	if(
 		ent == NULL ||
 		ent->client == NULL ||
-		ent->client->sess.spectatorState != SPECTATOR_NOT)
+		ent->client->sess.spectatorState != SPECTATOR_NOT ||
+    ent->client->ps.misc[MISC_HEALTH] <= 0)
 	{
 		return qfalse;
 	}

@@ -3983,36 +3983,77 @@ static void CG_DrawIntermission( void )
 CG_DrawQueue
 =================
 */
-static qboolean CG_DrawQueue( void )
-{
+static qboolean CG_DrawQueue(void) {
   float       w;
   vec4_t      color;
-  char        *ordinal, buffer[ MAX_STRING_CHARS ];
+  char        buffer[ MAX_STRING_CHARS ];
 
-  if( !( cg.snap->ps.persistant[ PERS_STATE ] & PS_QUEUED ) )
+  if(!(cg.snap->ps.persistant[PERS_STATE] & PS_QUEUED)) {
     return qfalse;
+  }
 
-  color[ 0 ] = 1;
-  color[ 1 ] = 1;
-  color[ 2 ] = 1;
-  color[ 3 ] = 1;
+  color[0] = 1;
+  color[1] = 1;
+  color[2] = 1;
+  color[3] = 1;
 
-  Com_sprintf( buffer, MAX_STRING_CHARS, "You will spawn in %d second(s)",
-               cg.snap->ps.persistant[ PERS_QUEUEPOS ] );
+  if(cg.snap->ps.persistant[PERS_STATE] & PS_QUEUED_NOT_FIRST) {
+    int         position;
+    char        *ordinal;
 
-  w = UI_Text_Width( buffer, 0.7f );
-  UI_Text_Paint( 320 - w / 2, 360, 0.7f, color, buffer, 0, 0, ITEM_TEXTSTYLE_SHADOWED );
+    position = cg.snap->ps.persistant[PERS_QUEUEPOS] + 1;
 
-  if( cg.snap->ps.persistant[ PERS_SPAWNS ] == 0 )
-    Com_sprintf( buffer, MAX_STRING_CHARS, "There are no spawns remaining" );
-  else if( cg.snap->ps.persistant[ PERS_SPAWNS ] == 1 )
-    Com_sprintf( buffer, MAX_STRING_CHARS, "There is 1 spawn remaining" );
-  else
-    Com_sprintf( buffer, MAX_STRING_CHARS, "There are %d spawns remaining",
-                 cg.snap->ps.persistant[ PERS_SPAWNS ] );
+    if(position < 1)
+      return qfalse;
 
-  w = UI_Text_Width( buffer, 0.7f );
-  UI_Text_Paint( 320 - w / 2, 400, 0.7f, color, buffer, 0, 0, ITEM_TEXTSTYLE_SHADOWED );
+    switch(position % 100) {
+      case 11:
+      case 12:
+      case 13:
+        ordinal = "th";
+        break;
+      default:
+        switch(position % 10) {
+          case 1:  ordinal = "st"; break;
+          case 2:  ordinal = "nd"; break;
+          case 3:  ordinal = "rd"; break;
+          default: ordinal = "th"; break;
+        }
+        break;
+    }
+
+    Com_sprintf(
+      buffer, MAX_STRING_CHARS, "You are %d%s in the spawn queue", position,
+      ordinal);
+  } else {
+    if(cg.snap->ps.persistant[PERS_QUEUEPOS] > 0) {
+      Com_sprintf(
+        buffer, MAX_STRING_CHARS, "You will spawn in %d second%s",
+        cg.snap->ps.persistant[PERS_QUEUEPOS],
+        (cg.snap->ps.persistant[PERS_QUEUEPOS] != 1) ? "s" : "");
+    } else {
+      Com_sprintf(
+        buffer, MAX_STRING_CHARS, "You are spawning next");
+    }
+    
+  }
+
+  w = UI_Text_Width(buffer, 0.7f);
+  UI_Text_Paint(320 - w / 2, 360, 0.7f, color, buffer, 0, 0, ITEM_TEXTSTYLE_SHADOWED);
+
+  if(cg.snap->ps.persistant[ PERS_SPAWNS ] == 0) {
+    Com_sprintf(buffer, MAX_STRING_CHARS, "There are no spawns remaining");
+  } else if(cg.snap->ps.persistant[ PERS_SPAWNS ] == 1) {
+    Com_sprintf(buffer, MAX_STRING_CHARS, "There is 1 spawn remaining");
+  } else {
+    Com_sprintf(
+      buffer, MAX_STRING_CHARS, "There are %d spawns remaining",
+      cg.snap->ps.persistant[PERS_SPAWNS]);
+  }
+    
+
+  w = UI_Text_Width(buffer, 0.7f);
+  UI_Text_Paint(320 - w / 2, 400, 0.7f, color, buffer, 0, 0, ITEM_TEXTSTYLE_SHADOWED);
 
   return qtrue;
 }

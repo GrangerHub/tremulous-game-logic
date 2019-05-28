@@ -400,16 +400,27 @@ G_ClientUpdateSpawnQueue
 Send spawn queue data to a client
 =================
 */
-static void G_ClientUpdateSpawnQueue( gclient_t *client )
-{
-	client->ps.persistant[ PERS_QUEUEPOS ] = (client->spawnTime - level.time) / 1000;
-	if( client->ps.persistant[ PERS_QUEUEPOS ] < 0 ) {
-		client->ps.persistant[ PERS_QUEUEPOS ] = 0; }
+static void G_ClientUpdateSpawnQueue(gclient_t *client) {
+  client->pers.spawn_queue_pos =
+    BG_Queue_Index(
+      &level.spawn_queue[client->ps.stats[STAT_TEAM]], client);
 
-	if( client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS ) {
-		client->ps.persistant[ PERS_SPAWNS ] = level.numAlienSpawns; }
-	else if( client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS ) {
-		client->ps.persistant[ PERS_SPAWNS ] = level.numHumanSpawns; }
+  if(client->pers.spawn_queue_pos < 1) {
+    client->ps.persistant[PERS_QUEUEPOS] = (client->pers.spawnTime - level.time) / 1000;
+  	if( client->ps.persistant[PERS_QUEUEPOS] < 0 ) {
+  		client->ps.persistant[PERS_QUEUEPOS] = 0;
+    }
+    client->ps.persistant[PERS_STATE] &= ~PS_QUEUED_NOT_FIRST;
+  } else {
+    client->ps.persistant[PERS_QUEUEPOS] = client->pers.spawn_queue_pos;
+    client->ps.persistant[PERS_STATE] |= PS_QUEUED_NOT_FIRST;
+  }
+
+	if( client->ps.stats[STAT_TEAM] == TEAM_ALIENS) {
+		client->ps.persistant[PERS_SPAWNS] = level.numAlienSpawns;
+  } else if(client->ps.stats[STAT_TEAM] == TEAM_HUMANS) {
+		client->ps.persistant[PERS_SPAWNS] = level.numHumanSpawns;
+  }
 }
 
 /*
@@ -447,13 +458,21 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
   }
 
   // Check to see if we are in the spawn queue
-  queued = client->spawnReady;
+  
+  if(BG_Queue_Find(&level.spawn_queue[client->ps.stats[STAT_TEAM]], client)) {
+    queued = qtrue;
+  } else {
+    queued = client->spawnReady;
+  }
 
   // Wants to get out of spawn queue
   if( attack1 && queued )
   {
-    if( client->sess.spectatorState == SPECTATOR_FOLLOW )
+    if( client->sess.spectatorState == SPECTATOR_FOLLOW ) {
       G_StopFollowing( ent );
+    }
+    BG_Queue_Remove_All(
+      &level.spawn_queue[client->ps.stats[STAT_TEAM]], client);
     client->spawnReady = qfalse;
     client->pers.classSelection = PCL_NONE;
     client->pers.humanItemSelection = WP_NONE;
