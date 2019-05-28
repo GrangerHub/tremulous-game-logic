@@ -278,7 +278,7 @@ static cvarTable_t   gameCvarTable[ ] =
 
   { &g_countdown, "g_countdown", "10", CVAR_ARCHIVE, 0, qtrue  },
   { &g_doCountdown, "g_doCountdown", "0", CVAR_ARCHIVE, 0, qtrue  },
-  { &g_spawnCountdown, "g_spawnCountdown", "15", CVAR_ARCHIVE, 0, qtrue  },
+  { &g_spawnCountdown, "g_spawnCountdown", "10", CVAR_ARCHIVE, 0, qtrue  },
   { &g_logFile, "g_logFile", "games.log", CVAR_ARCHIVE, 0, qfalse  },
   { &g_logFileSync, "g_logFileSync", "0", CVAR_ARCHIVE, 0, qfalse  },
 
