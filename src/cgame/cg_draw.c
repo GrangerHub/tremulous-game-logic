@@ -779,6 +779,25 @@ static void CG_DrawHumanScanner( rectDef_t *rect, qhandle_t shader, vec4_t color
     CG_Scanner( rect, shader, color );
 }
 
+/*
+==============
+CG_DrawCompass
+==============
+*/
+static void CG_DrawCompass(rectDef_t *rect, qhandle_t shader, vec4_t color) {
+  float orientation_offset =
+    (AngleNormalize360(cg.refdefViewAngles[YAW]) / 360.0f) * rect->w;
+  float clip_offset =
+    ((360.0f - AngleNormalize360(cg.refdef.fov_x)) / 360.0f) * rect->w;
+
+  CG_SetClipRegion(
+    rect->x + (clip_offset / 2), rect->y, rect->w - clip_offset, rect->h);
+  trap_R_SetColor(color);
+  CG_DrawPic(rect->x + orientation_offset, rect->y, rect->w, rect->h, shader);
+  CG_DrawPic(rect->x - rect->w + orientation_offset, rect->y, rect->w, rect->h, shader);
+  trap_R_SetColor(NULL);
+  CG_ClearClipRegion( );
+}
 
 /*
 ==============
@@ -3543,6 +3562,10 @@ void CG_OwnerDraw( float x, float y, float w, float h, float text_x,
     case CG_WARMUP_ALIENS_READY_HDR: case CG_WARMUP_ALIENS_READY:
     case CG_WARMUP_HUMANS_READY_HDR: case CG_WARMUP_HUMANS_READY:
       CG_DrawWarmup( ownerDraw, &rect, scale, textalign, textStyle, foreColor );
+      break;
+
+    case CG_PLAYER_COMPASS:
+      CG_DrawCompass( &rect, shader, foreColor );
       break;
 
     // Equipment values
