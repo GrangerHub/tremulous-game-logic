@@ -210,10 +210,12 @@
 #define CG_PLAYER_EVOLVE_COOL_DOWN_BAR    94
 #define CG_PLAYER_EVOLVE_COOL_DOWN_BAR_BG 95
 
-#define CG_PLAYER_EQUIP_HUD             96
-#define CG_PLAYER_JETPACK_ICON          97
-#define CG_PLAYER_JETPACK_FUEL          98
-#define CG_PLAYER_ARMOR_SHIELD          99
-#define CG_PLAYER_ARMOR                 100
+#define CG_PLAYER_COMPASS               96
+
+#define CG_PLAYER_EQUIP_HUD             97
+#define CG_PLAYER_JETPACK_ICON          98
+#define CG_PLAYER_JETPACK_FUEL          99
+#define CG_PLAYER_ARMOR_SHIELD          100
+#define CG_PLAYER_ARMOR                 101
 
 #endif

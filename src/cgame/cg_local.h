@@ -57,6 +57,9 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define ATTACKER_HEAD_TIME  10000
 #define REWARD_TIME         3000
 
+#define BASE_FOV_Y          (73.739792f) // atan2( 3, 4 / tan( 90 ) )
+#define MAX_FOV_OFFSET      (30.0f)
+
 #define PULSE_SCALE         1.5     // amount to scale up the icons when activating
 
 #define MAX_STEP_CHANGE     32
