@@ -756,6 +756,7 @@ CG_UpdateCvars
 */
 void CG_UpdateCvars( void )
 {
+  static int fov_offset_mod_count = -1;
   int         i;
   cvarTable_t *cv;
 
@@ -770,6 +771,17 @@ void CG_UpdateCvars( void )
   CG_SetUIVars( );
   CG_UpdateBuildableRangeMarkerMask( );
   CG_UpdatePMoveCvars( );
+
+  if(cg_fovOffset.modificationCount != fov_offset_mod_count) {
+    if(cg_fovOffset.value > MAX_FOV_OFFSET) {
+      trap_Cvar_Set("cg_fovOffset", va("%f", MAX_FOV_OFFSET));
+    }
+    else if(cg_fovOffset.value < -MAX_FOV_OFFSET) {
+      trap_Cvar_Set("cg_fovOffset", va("%f", -MAX_FOV_OFFSET));
+    }
+
+    fov_offset_mod_count = cg_fovOffset.modificationCount;
+  }
 }
 
 

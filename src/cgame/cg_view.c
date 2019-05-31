@@ -872,10 +872,8 @@ Fixed fov at intermissions, otherwise account for fov variable and zooms.
 #define WAVE_FREQUENCY  0.4f
 
 #define FOVWARPTIME     400.0f
-#define BASE_FOV_Y      73.739792f // atan2( 3, 4 / tan( 90 ) )
 #define MAX_FOV_Y       120.0f
 #define MAX_FOV_WARP_Y  127.5f
-#define MAX_FOV_OFFSET  30
 
 static int CG_CalcFov( void )
 {
@@ -898,11 +896,7 @@ static int CG_CalcFov( void )
   trap_GetUserCmd( cmdNum - 1, &oldcmd );
 
   // Use client's FOV offset (if it's within a REASON(TM)able range)
-  fov_Offset = cg_fovOffset.integer;
-  if ( fov_Offset > MAX_FOV_OFFSET )
-    fov_Offset = MAX_FOV_OFFSET;
-  else if ( fov_Offset < -MAX_FOV_OFFSET )
-    fov_Offset = -MAX_FOV_OFFSET;
+  fov_Offset = cg_fovOffset.value;
 
   // switch follow modes if necessary: cycle between free -> follow -> third-person follow
   if( cmd.buttons & BUTTON_USE_HOLDABLE && !( oldcmd.buttons & BUTTON_USE_HOLDABLE ) )
