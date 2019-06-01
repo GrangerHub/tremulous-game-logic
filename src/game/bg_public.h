@@ -30,9 +30,6 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 // linked lists
 #include "bg_list.h"
 
-// queues
-#include "bg_queue.h"
-
 // BGAME Dynamic Memory Allocation
 #include "bg_alloc.h"
 

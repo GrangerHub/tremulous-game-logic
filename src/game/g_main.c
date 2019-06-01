@@ -792,7 +792,7 @@ Q_EXPORT void G_InitGame( int levelTime, int randomSeed, int restart )
   G_ExecutePlaymapFlags( level.playmapFlags );
 
   for(i = 0; i < NUM_TEAMS; i++) {
-    BG_Queue_Init(&level.spawn_queue[i]);
+    BG_List_Init(&level.spawn_queue[i]);
   }
 
   if( g_debugMapRotation.integer )
@@ -870,7 +870,7 @@ Q_EXPORT void G_ShutdownGame( int restart )
   G_ClearVotes( );
 
   for(i = 0; i < NUM_TEAMS; i++) {
-    BG_Queue_Clear(&level.spawn_queue[i]);
+    BG_List_Clear(&level.spawn_queue[i]);
   }
 
   if(IS_SCRIM && level.scrim.scrim_completed) {
@@ -984,16 +984,16 @@ static void G_Print_Client_Num_For_Spawn_Pos(void *data, void *user_data) {
 -============
 -*/
 void G_PrintSpawnQueue(team_t team) {
-  bgqueue_t *spawn_queue = &level.spawn_queue[team];
+  bglist_t *spawn_queue = &level.spawn_queue[team];
   gclient_t *head_client = (gclient_t *)spawn_queue->head;
   gclient_t *tail_client = (gclient_t *)spawn_queue->tail;
   int       head = head_client ? head_client - g_clients : -1;
   int       tail = tail_client ? tail_client - g_clients : -1;
-  int length = BG_Queue_Get_Length(spawn_queue);
+  int length = BG_List_Get_Length(spawn_queue);
 
   Com_Printf("length:%d head:%d tail:%d    :", length, head, tail);
 
-  BG_Queue_Foreach(spawn_queue, G_Print_Client_Num_For_Spawn_Pos, NULL);
+  BG_List_Foreach(spawn_queue, NULL, G_Print_Client_Num_For_Spawn_Pos, NULL);
 
   Com_Printf( "\n" );
 }
@@ -1009,7 +1009,7 @@ void G_SpawnClients(void *data, void *user_data) {
   gclient_t *client = (gclient_t *)data;
   gentity_t *ent = NULL;
 	team_t    team;
-  bgqueue_t *spawn_queue;
+  bglist_t *spawn_queue;
   int       client_num = client - level.clients;
 	int       numSpawns = 0;
 
@@ -1033,7 +1033,7 @@ void G_SpawnClients(void *data, void *user_data) {
   }
 
   spawn_queue = &level.spawn_queue[team];
-  if(!IS_WARMUP && BG_Queue_Index(spawn_queue, ent->client) > 0) {
+  if(!IS_WARMUP && BG_List_Index(spawn_queue, ent->client) > 0) {
     return;
   }
 
@@ -1048,7 +1048,7 @@ void G_SpawnClients(void *data, void *user_data) {
 			ent->client->sess.spectatorState = SPECTATOR_NOT;
 			ClientUserinfoChanged( ent->client->ps.clientNum, qfalse );
 			ClientSpawn( ent, spawn, spawn_origin, spawn_angles, qtrue );
-      BG_Queue_Remove_All(
+      BG_List_Remove_All(
         &level.spawn_queue[team], ent->client);
 			ent->client->spawnReady = qfalse;
       ent->client->ps.persistant[ PERS_STATE ] &= ~PS_QUEUED;
@@ -1713,7 +1713,7 @@ void BeginIntermission( void )
   G_ClearVotes( );
 
   for(i = 0; i < NUM_TEAMS; i++) {
-    BG_Queue_Clear(&level.spawn_queue[i]);
+    BG_List_Clear(&level.spawn_queue[i]);
   }
 
   G_UpdateTeamConfigStrings( );
@@ -3394,7 +3394,7 @@ Q_EXPORT void G_RunFrame( int levelTime )
     G_CalculateBuildPoints( );
     G_CalculateStages( );
     for(i = 0; i < NUM_TEAMS; i++) {
-      BG_Queue_Foreach(&level.spawn_queue[i], G_SpawnClients, NULL);
+      BG_List_Foreach(&level.spawn_queue[i], NULL, G_SpawnClients, NULL);
     }
     G_CalculateAvgPlayers( );
     G_UpdateZaps( msec );

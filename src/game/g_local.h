@@ -374,7 +374,7 @@ struct gentity_s
   int               credits[ MAX_CLIENTS ];     // human credits for each client
   int               killedBy;                   // clientNum of killer
 
-  bgqueue_t         targeted;           // a queue of currently valid targets for a turret
+  bglist_t         targeted;           // a queue of currently valid targets for a turret
   vec3_t            turretAim;          // aim vector for turrets
   vec3_t            turretAimRate;      // track turn speed for norfenturrets
   int               turretSpinupTime;   // spinup delay for norfenturrets
@@ -421,7 +421,7 @@ struct gentity_s
   qboolean          MasterPower;
   int               PowerRadius;
 
-  bglist_t          *zapLink;  // For ET_LEV2_ZAP_CHAIN
+  bglink_t          *zapLink;  // For ET_LEV2_ZAP_CHAIN
 };
 
 typedef enum
@@ -887,7 +887,7 @@ typedef struct
   timeWarning_t     timelimitWarning;
   qboolean          sudden_death_replacable[BA_NUM_BUILDABLES];
 
-  bgqueue_t         spawn_queue[NUM_TEAMS];
+  bglist_t         spawn_queue[NUM_TEAMS];
 
   int               alienStage2Time;
   int               alienStage3Time;
@@ -1359,19 +1359,19 @@ typedef struct zapTarget_s
 
 typedef struct zap_s
 {
-  bglist_t      *zapLink;
+  bglink_t      *zapLink;
   gentity_t     *creator;
-  bgqueue_t     targetQueue;
+  bglist_t     targetQueue;
 
   int           timeToLive;
 
   gentity_t     *effectChannel;
 } zap_t;
 
-extern bglist_t *lev2ZapList;
+extern bglink_t *lev2ZapList;
 
 void      G_PackEntityNumbers( entityState_t *es, int creatorNum,
-                               bgqueue_t *targetQueue );
+                               bglist_t *targetQueue );
 
 void      Blow_up( gentity_t *ent );
 void      G_ForceWeaponChange( gentity_t *ent, weapon_t weapon );
@@ -1389,7 +1389,7 @@ void      CheckCkitRepair( gentity_t *ent );
 void      G_ChargeAttack( gentity_t *ent, gentity_t *victim );
 void      G_CrushAttack( gentity_t *ent, gentity_t *victim );
 void      G_DeleteZapData( void *data );
-bglist_t  *G_FindZapLinkFromEffectChannel( const gentity_t *effectChannel );
+bglink_t  *G_FindZapLinkFromEffectChannel( const gentity_t *effectChannel );
 void      G_UpdateZaps( int msec );
 void      G_ClearPlayerZapEffects( gentity_t *player );
 

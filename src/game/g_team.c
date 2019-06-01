@@ -182,7 +182,7 @@ void G_LeaveTeam( gentity_t *self )
   
   self->client->ps.persistant[ PERS_STATE ] &= ~PS_QUEUED;
   self->client->spawnReady = qfalse;
-  BG_Queue_Remove_All(
+  BG_List_Remove_All(
     &level.spawn_queue[self->client->ps.stats[STAT_TEAM]], self->client);
 
   if( team == TEAM_NONE )
