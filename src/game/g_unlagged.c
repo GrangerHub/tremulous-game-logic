@@ -104,10 +104,10 @@ static unlagged_data_t     unlagged_data[ENTITYNUM_MAX_NORMAL];
 static unlagged_data_t     *unlagged_data_head;
 static int                 history_wheel_times[MAX_UNLAGGED_HISTORY_WHEEL_FRAMES];
 static int                 current_history_frame;
-static bgqueue_t           dims_store_list = BG_QUEUE_INIT;
-static bgqueue_t           origin_store_list = BG_QUEUE_INIT;
-static bgqueue_t           pos_store_list = BG_QUEUE_INIT;
-static bgqueue_t           apos_store_list = BG_QUEUE_INIT;
+static bglist_t           dims_store_list = BG_LIST_INIT;
+static bglist_t           origin_store_list = BG_LIST_INIT;
+static bglist_t           pos_store_list = BG_LIST_INIT;
+static bglist_t           apos_store_list = BG_LIST_INIT;
 static rewind_ent_adjustment_t rewind_ents_adjustments[ENTITYNUM_MAX_NORMAL];
 
 /*
@@ -124,10 +124,10 @@ void G_Init_Unlagged(void) {
   memset(&unlagged_data, 0, sizeof(unlagged_data));
   memset(rewind_ents_adjustments, 0, sizeof(rewind_ents_adjustments));
   memset(frame_usage, 0, sizeof(frame_usage));
-  BG_Queue_Clear(&dims_store_list);
-  BG_Queue_Clear(&origin_store_list);
-  BG_Queue_Clear(&pos_store_list);
-  BG_Queue_Clear(&apos_store_list);
+  BG_List_Clear(&dims_store_list);
+  BG_List_Clear(&origin_store_list);
+  BG_List_Clear(&pos_store_list);
+  BG_List_Clear(&apos_store_list);
 }
 
 /*
@@ -142,10 +142,10 @@ void G_Unlagged_Prepare_Store(void) {
     return;
   }
 
-  BG_Queue_Clear(&dims_store_list);
-  BG_Queue_Clear(&origin_store_list);
-  BG_Queue_Clear(&pos_store_list);
-  BG_Queue_Clear(&apos_store_list);
+  BG_List_Clear(&dims_store_list);
+  BG_List_Clear(&origin_store_list);
+  BG_List_Clear(&pos_store_list);
+  BG_List_Clear(&apos_store_list);
 }
 
 /*
@@ -177,19 +177,19 @@ void G_Unlagged_Link_To_Store_Data(
   }
 
   if(dims) {
-    BG_Queue_Push_Head(&dims_store_list, ent);
+    BG_List_Push_Head(&dims_store_list, ent);
   }
 
   if(pos) {
-    BG_Queue_Push_Head(&pos_store_list, ent);
+    BG_List_Push_Head(&pos_store_list, ent);
   }
 
   if(apos) {
-    BG_Queue_Push_Head(&apos_store_list, ent);
+    BG_List_Push_Head(&apos_store_list, ent);
   }
 
   if(origin) {
-    BG_Queue_Push_Head(&origin_store_list, ent);
+    BG_List_Push_Head(&origin_store_list, ent);
   }
 }
 
@@ -381,10 +381,10 @@ void G_UnlaggedStore( void ) {
     0,
     sizeof(frame_usage[current_history_frame]));
 
-  BG_Queue_Foreach(&dims_store_list, G_Unlagged_Store_Dimensions, NULL);
-  BG_Queue_Foreach(&origin_store_list, G_Unlagged_Store_Origin, NULL);
-  BG_Queue_Foreach(&pos_store_list, G_Unlagged_Store_pos, NULL);
-  BG_Queue_Foreach(&apos_store_list, G_Unlagged_Store_apos, NULL);
+  BG_List_Foreach(&dims_store_list, NULL, G_Unlagged_Store_Dimensions, NULL);
+  BG_List_Foreach(&origin_store_list, NULL, G_Unlagged_Store_Origin, NULL);
+  BG_List_Foreach(&pos_store_list, NULL, G_Unlagged_Store_pos, NULL);
+  BG_List_Foreach(&apos_store_list, NULL, G_Unlagged_Store_apos, NULL);
 }
 
 /*
