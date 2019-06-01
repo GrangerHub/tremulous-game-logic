@@ -3529,13 +3529,13 @@ returns the length of the queue
 ================
 */
 size_t HMGTurret_NumOfTargeting(gentity_t *ent) {
-  bglist_t *list;
+  bglink_t *list;
 
   Com_Assert(ent && "HMGTurret_CheckTargetedQueue: ent is NULL");
 
   list = ent->targeted.head;
   while(list) {
-    bglist_t *next = list->next;
+    bglink_t *next = list->next;
     gentity_t *targeted = (gentity_t *)list->data;
 
     if(
@@ -3543,12 +3543,12 @@ size_t HMGTurret_NumOfTargeting(gentity_t *ent) {
       targeted->s.eType != ET_BUILDABLE ||
       targeted->enemy != ent ||
       !targeted->powered) {
-      BG_Queue_Delete_Link(&ent->targeted, list);
+      BG_List_Delete_Link(list);
     }
     list = next;
   }
 
-  return BG_Queue_Get_Length(&ent->targeted);
+  return BG_List_Get_Length(&ent->targeted);
 }
 
 /*
@@ -3591,7 +3591,7 @@ static qboolean HMGTurret_CheckTarget( gentity_t *self, gentity_t *target,
 
     if(
       num_of_targeting > 0 &&
-      !(BG_Queue_Find(&target->targeted, self) && num_of_targeting == 1)) {
+      !(BG_List_Find(&target->targeted, self) && num_of_targeting == 1)) {
       return qfalse;
     }
   }
@@ -3992,8 +3992,8 @@ void HMGTurret_Think( gentity_t *self )
    // If the current target is not valid find a new enemy
   if( !HMGTurret_CheckTarget( self, self->enemy, qtrue, qfalse ) )
   {
-    if( self->enemy && BG_Queue_Find(&self->enemy->targeted, self) ) {
-      BG_Queue_Remove_All(&self->enemy->targeted, self);
+    if( self->enemy && BG_List_Find(&self->enemy->targeted, self) ) {
+      BG_List_Remove_All(&self->enemy->targeted, self);
     }
     HMGTurret_FindEnemy( self );
   }
@@ -4008,8 +4008,8 @@ void HMGTurret_Think( gentity_t *self )
   if( !self->enemy )
     return;
 
-  if(BG_Queue_Find(&self->enemy->targeted, self) == NULL) {
-    BG_Queue_Push_Head(&self->enemy->targeted, self);
+  if(BG_List_Find(&self->enemy->targeted, self) == NULL) {
+    BG_List_Push_Head(&self->enemy->targeted, self);
   }
 
   // Track until we can hit the target

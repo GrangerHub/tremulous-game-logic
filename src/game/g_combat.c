@@ -375,7 +375,7 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
   gentity_t             *enemyPlayer = NULL;
   qboolean              damagedByEnemyPlayer = qfalse;
   const qboolean        isBuildable = ( self->s.eType == ET_BUILDABLE );
-  bgqueue_t             enemyBuildables = BG_QUEUE_INIT;
+  bglist_t              enemyBuildables = BG_LIST_INIT;
   rewardBuildableData_t rewardBuildableData;
 
   if( destroyedUp != UP_NONE )
@@ -438,7 +438,7 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
       continue;
     }
 
-    BG_Queue_Push_Head( &enemyBuildables, &(creditsDeffenses[ i ]) );
+    BG_List_Push_Head( &enemyBuildables, &(creditsDeffenses[ i ]) );
 
     totalDamage += creditsDeffenses[ i ].credits;
   }
@@ -580,9 +580,9 @@ float G_RewardAttackers( gentity_t *self, upgrade_t destroyedUp )
   rewardBuildableData.maxHealth = maxHealth;
   rewardBuildableData.value = value;
 
-  BG_Queue_Foreach( &enemyBuildables, RewardBuildableAttackers,
+  BG_List_Foreach( &enemyBuildables, NULL, RewardBuildableAttackers,
                     &rewardBuildableData );
-  BG_Queue_Clear( &enemyBuildables );
+  BG_List_Clear( &enemyBuildables );
 
 
   if( alienCredits )

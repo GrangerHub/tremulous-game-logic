@@ -340,7 +340,7 @@ If rough_check is false, collisions are further tested with a trace
 static qboolean G_Pushable_Area_Ents_For_Move(
   gentity_t   *ent,
   push_data_t *push_data,
-  bgqueue_t   *ent_list,
+  bglist_t   *ent_list,
   qboolean    rough_check) {
   vec3_t      total_move;
   qboolean    check_for_direct_block = qfalse;
@@ -442,7 +442,7 @@ static qboolean G_Pushable_Area_Ents_For_Move(
     }
 
     if(rough_check || G_TestEntAgainstOtherEnt(pushable, ent->s.number)) {
-      BG_Queue_Push_Head(ent_list, pushable);
+      BG_List_Push_Head(ent_list, pushable);
       //only need to find one pushable entity for the roughcheck
       if(rough_check) {
         return qfalse;
@@ -489,7 +489,7 @@ static void G_Find_Mover_Pushes(void *data, void *user_data ) {
   gentity_t   *check = (gentity_t *)data;
   push_data_t *push_data = (push_data_t *)user_data;
   push_data_t next_push_data;
-  bgqueue_t   pushable_ents = BG_QUEUE_INIT;
+  bglist_t   pushable_ents = BG_LIST_INIT;
   int         i;
 
   Com_Assert(push_data && "G_Find_Mover_Pushes: push_data is NULL");
@@ -542,8 +542,8 @@ static void G_Find_Mover_Pushes(void *data, void *user_data ) {
     VectorCopy(push_data->amove, next_push_data.amove);
     VectorCopy(push_data->move, next_push_data.move);
 
-    BG_Queue_Foreach(&pushable_ents, G_Foreach_Find_Mover_Pushes, &next_push_data);
-    BG_Queue_Clear(&pushable_ents);
+    BG_List_Foreach(&pushable_ents, NULL, G_Foreach_Find_Mover_Pushes, &next_push_data);
+    BG_List_Clear(&pushable_ents);
   }
 
   //check riding entities that have not collided from the push
@@ -791,7 +791,7 @@ returns qtrue if an obstacle blocks the prime mover
 */
 static qboolean G_Find_Mover_Blockage(
   push_data_t *push_data,
-  bgqueue_t   *obstacles) {
+  bglist_t   *obstacles) {
   gentity_t   *check;
   pushed_t    *saved_pushed = pushed_p;
   qboolean    block_prime_mover = qfalse;
@@ -871,7 +871,7 @@ static qboolean G_Find_Mover_Blockage(
           continue;
         }
 
-        BG_Queue_Push_Head(obstacles, check);
+        BG_List_Push_Head(obstacles, check);
         block_prime_mover = qtrue;
         continue;
       }
@@ -982,9 +982,9 @@ static qboolean G_TryPushingEntities(
   vec3_t       start_angles,
   vec3_t       move,
   vec3_t       amove,
-  bgqueue_t    *obstacles) {
+  bglist_t    *obstacles) {
   push_data_t  push_data;
-  bgqueue_t    pushable_ents = BG_QUEUE_INIT;
+  bglist_t    pushable_ents = BG_LIST_INIT;
   qboolean     rider_in_range = qfalse;
   int          i;
 
@@ -1025,7 +1025,7 @@ static qboolean G_TryPushingEntities(
       //nothing to move
       return qtrue;
     }
-    BG_Queue_Clear(&pushable_ents);
+    BG_List_Clear(&pushable_ents);
   }
 
   //finish initializing for the move
@@ -1070,7 +1070,7 @@ qboolean G_MoverPush(
   vec3_t    start_angles,
   vec3_t    move,
   vec3_t    amove,
-  bgqueue_t *obstacles) {
+  bglist_t *obstacles) {
   pushed_t  *p;
 
   // move the prime pusher to its final position
@@ -1132,7 +1132,7 @@ void G_MoverTeam(gentity_t *ent) {
   vec3_t    move, amove;
   gentity_t *part;
   vec3_t    origin, angles;
-  bgqueue_t obstacles = BG_QUEUE_INIT;
+  bglist_t obstacles = BG_LIST_INIT;
   qboolean  move_blocked = qfalse;
 
   // make sure all team slaves can move before commiting
@@ -1181,10 +1181,10 @@ void G_MoverTeam(gentity_t *ent) {
 
     // if the pusher has a "blocked" function, call it
     if(ent->blocked) {
-      BG_Queue_Foreach(&obstacles, G_Foreach_Blocked, ent);
+      BG_List_Foreach(&obstacles, NULL, G_Foreach_Blocked, ent);
     }
 
-    BG_Queue_Clear(&obstacles);
+    BG_List_Clear(&obstacles);
 
     return;
   }

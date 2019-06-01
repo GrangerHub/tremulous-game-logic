@@ -2896,7 +2896,8 @@ qboolean G_EvolveAfterCheck( gentity_t *ent, class_t newClass, qboolean give )
   }
 }
 
-static int G_CompareSpawnQueuePoss( const void *a, const void *b ) {
+static int G_CompareSpawnQueuePoss(
+  const void *a, const void *b, const void *user_data) {
   gclient_t *client_a = (gclient_t *)a;
   gclient_t *client_b = (gclient_t *)b;
 
@@ -2953,10 +2954,10 @@ void Cmd_Class_f( gentity_t *ent )
       // spawn from an egg
       if( !client->spawnReady )
       {
-        bgqueue_t *spawn_queue = &level.spawn_queue[client->ps.stats[STAT_TEAM]];
+        bglist_t *spawn_queue = &level.spawn_queue[client->ps.stats[STAT_TEAM]];
 
-        if(BG_Queue_Find(spawn_queue, client) == NULL) {
-          BG_Queue_Insert_Sorted(
+        if(BG_List_Find(spawn_queue, client) == NULL) {
+          BG_List_Insert_Sorted(
             spawn_queue, client, G_CompareSpawnQueuePoss, NULL);
         }
 
@@ -2987,10 +2988,10 @@ void Cmd_Class_f( gentity_t *ent )
       // spawn from a telenode
       if( !client->spawnReady )
       {
-        bgqueue_t *spawn_queue = &level.spawn_queue[client->ps.stats[STAT_TEAM]];
+        bglist_t *spawn_queue = &level.spawn_queue[client->ps.stats[STAT_TEAM]];
 
-        if(BG_Queue_Find(spawn_queue, client) == NULL) {
-          BG_Queue_Insert_Sorted(
+        if(BG_List_Find(spawn_queue, client) == NULL) {
+          BG_List_Insert_Sorted(
             spawn_queue, client, G_CompareSpawnQueuePoss, NULL);
         }
 

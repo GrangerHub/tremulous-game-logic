@@ -477,11 +477,11 @@ Used for sending zap effects to clients.
 ===============
 */
 void G_PackEntityNumbers( entityState_t *es, int creatorNum,
-                           bgqueue_t *targetQueue )
+                           bglist_t *targetQueue )
 {
-  bglist_t *targetZapLink = BG_Queue_Peek_Head_Link( targetQueue );
+  bglink_t *targetZapLink = BG_List_Peek_Head_Link( targetQueue );
   int      i;
-  int      count = BG_Queue_Get_Length( targetQueue ) + 1;
+  int      count = BG_List_Get_Length( targetQueue ) + 1;
 
   if( count > MAX_NUM_PACKED_ENTITY_NUMS )
   {
