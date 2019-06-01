@@ -113,7 +113,13 @@ void CG_UpdateEntityPositions( void )
 #define NEAR_ALPHA  1.2f
 
 static float FindDegree(float y, float x) {
-    float value = -(float)(RAD2DEG(atan2(y, x)));
+    float value;
+
+    if(y == 0 && x == 0) {
+      return 0;
+    } else {
+      value = -(float)(RAD2DEG(atan2(y, x)));
+    }
 
     value += AngleNormalize360(entityPositions.vangles[YAW]);
 

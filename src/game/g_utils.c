@@ -584,7 +584,7 @@ void G_InitGentity( gentity_t *e )
   e->classname = "noclass";
   e->s.number = e - g_entities;
   e->r.ownerNum = ENTITYNUM_NONE;
-  BG_Queue_Init(&e->targeted);
+  BG_List_Init(&e->targeted);
 }
 
 /*
@@ -706,7 +706,7 @@ void G_FreeEntity( gentity_t *ent )
     return;
 
   G_UnlaggedClear( ent );
-  BG_Queue_Clear(&ent->targeted);
+  BG_List_Clear(&ent->targeted);
   memset( ent, 0, sizeof( *ent ) );
   ent->classname = "freent";
   ent->freetime = level.time;
@@ -756,7 +756,7 @@ void G_RemoveEntity( gentity_t *ent )
         ((zap_t *)(ent->zapLink->data))->effectChannel == ent )
     {
       G_DeleteZapData( ent->zapLink->data );
-      lev2ZapList = BG_List_Delete_Link( lev2ZapList, ent->zapLink );
+      lev2ZapList = BG_Link_Delete_Link( lev2ZapList, ent->zapLink );
     }
   }
   else if( ent->s.eType == ET_MOVER )

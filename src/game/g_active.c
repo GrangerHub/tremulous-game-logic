@@ -402,7 +402,7 @@ Send spawn queue data to a client
 */
 static void G_ClientUpdateSpawnQueue(gclient_t *client) {
   client->pers.spawn_queue_pos =
-    BG_Queue_Index(
+    BG_List_Index(
       &level.spawn_queue[client->ps.stats[STAT_TEAM]], client);
 
   if(client->pers.spawn_queue_pos < 1) {
@@ -459,7 +459,7 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
 
   // Check to see if we are in the spawn queue
   
-  if(BG_Queue_Find(&level.spawn_queue[client->ps.stats[STAT_TEAM]], client)) {
+  if(BG_List_Find(&level.spawn_queue[client->ps.stats[STAT_TEAM]], client)) {
     queued = qtrue;
   } else {
     queued = client->spawnReady;
@@ -471,7 +471,7 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
     if( client->sess.spectatorState == SPECTATOR_FOLLOW ) {
       G_StopFollowing( ent );
     }
-    BG_Queue_Remove_All(
+    BG_List_Remove_All(
       &level.spawn_queue[client->ps.stats[STAT_TEAM]], client);
     client->spawnReady = qfalse;
     client->pers.classSelection = PCL_NONE;

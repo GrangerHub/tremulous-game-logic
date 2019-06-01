@@ -1516,7 +1516,7 @@ LEVEL2
 ======================================================================
 */
 
-bglist_t *lev2ZapList = NULL;
+bglink_t *lev2ZapList = NULL;
 
 /*
 ===============
@@ -1527,7 +1527,7 @@ void G_DeleteZapData( void *data )
 {
   zap_t *zapData = (zap_t *)data;
 
-  BG_Queue_Clear_Full( &zapData->targetQueue, BG_FreePassed );
+  BG_List_Clear_Full( &zapData->targetQueue, BG_FreePassed );
 
   BG_Free( zapData );
 }
@@ -1540,7 +1540,7 @@ G_FindLev2ZapChainTargets
 static void G_FindLev2ZapChainTargets( zap_t *zap )
 {
   gentity_t *ent =
-            ((zapTarget_t *)BG_Queue_Peek_Head( &zap->targetQueue ))->targetEnt; // the source
+            ((zapTarget_t *)BG_List_Peek_Head( &zap->targetQueue ))->targetEnt; // the source
   int       entityList[ MAX_GENTITIES ];
   vec3_t    range = { LEVEL2_AREAZAP_CHAIN_RANGE,
                       LEVEL2_AREAZAP_CHAIN_RANGE,
@@ -1584,9 +1584,9 @@ static void G_FindLev2ZapChainTargets( zap_t *zap )
         zapTarget = BG_Alloc( sizeof(zapTarget_t) );
         zapTarget->targetEnt = enemy;
         zapTarget->distance = distance;
-        BG_Queue_Push_Tail( &zap->targetQueue, zapTarget );
+        BG_List_Push_Tail( &zap->targetQueue, zapTarget );
 
-        if( BG_Queue_Get_Length( &zap->targetQueue ) >=
+        if( BG_List_Get_Length( &zap->targetQueue ) >=
                                                     LEVEL2_AREAZAP_MAX_TARGETS )
           return;
       }
@@ -1636,16 +1636,16 @@ static void G_CreateNewZap( gentity_t *creator, gentity_t *targetEnt )
   zapTarget_t *primaryZapTarget;
 
   // add the newly created zap to the lev2ZapList
-  lev2ZapList = zap->zapLink = BG_List_Prepend( lev2ZapList, zap );
+  lev2ZapList = zap->zapLink = BG_Link_Prepend( lev2ZapList, zap );
 
   // initialize the zap
   zap->timeToLive = LEVEL2_AREAZAP_TIME;
   zap->creator = creator;
-  BG_Queue_Init( &zap->targetQueue );
+  BG_List_Init( &zap->targetQueue );
   primaryZapTarget = BG_Alloc( sizeof(zapTarget_t) );
   primaryZapTarget->targetEnt = targetEnt;
   primaryZapTarget->distance  = 0;
-  BG_Queue_Push_Head( &zap->targetQueue, primaryZapTarget );
+  BG_List_Push_Head( &zap->targetQueue, primaryZapTarget );
 
   // the zap chains only through living entities
   if( targetEnt->health > 0 )
@@ -1657,7 +1657,7 @@ static void G_CreateNewZap( gentity_t *creator, gentity_t *targetEnt )
               DAMAGE_NO_KNOCKBACK | DAMAGE_NO_LOCDAMAGE,
               MOD_LEVEL2_ZAP );
 
-    BG_List_Foreach( BG_Queue_Peek_Head_Link( &zap->targetQueue )->next,
+    BG_Link_Foreach( BG_List_Peek_Head_Link( &zap->targetQueue )->next,
                      G_DamageLev2ZapTarget, zap );
   }
 
@@ -1678,8 +1678,8 @@ static void G_UpdateLev2Zap( void *data, void *user_data )
 {
   zap_t *zap = (zap_t *)data;
   zapTarget_t *primaryTarget =
-              (zapTarget_t *)BG_Queue_Peek_Head_Link( &zap->targetQueue )->data;
-  bglist_t    *targetZapLink = BG_Queue_Peek_Head_Link( &zap->targetQueue )->next;
+              (zapTarget_t *)BG_List_Peek_Head_Link( &zap->targetQueue )->data;
+  bglink_t    *targetZapLink = BG_List_Peek_Head_Link( &zap->targetQueue )->next;
   int j;
 
 
@@ -1691,7 +1691,7 @@ static void G_UpdateLev2Zap( void *data, void *user_data )
   if( zap->timeToLive <= 0 || !primaryTarget->targetEnt->inuse )
   {
     G_FreeEntity( zap->effectChannel );
-    lev2ZapList = BG_List_Delete_Link( lev2ZapList, zap->zapLink );
+    lev2ZapList = BG_Link_Delete_Link( lev2ZapList, zap->zapLink );
     G_DeleteZapData( zap );
     return;
   }
@@ -1699,12 +1699,12 @@ static void G_UpdateLev2Zap( void *data, void *user_data )
   // the deconstruction or gibbing of chained buildables destroy the appropriate beams
   for( j = 1; targetZapLink; j++ )
   {
-    bglist_t *next = targetZapLink->next;
+    bglink_t *next = targetZapLink->next;
 
     if( !((zapTarget_t *)targetZapLink->data)->targetEnt->inuse )
       {
         BG_Free( targetZapLink->data );
-        BG_Queue_Delete_Link( &zap->targetQueue, targetZapLink );
+        BG_List_Delete_Link(targetZapLink);
       }
 
       targetZapLink = next;
@@ -1719,7 +1719,7 @@ G_UpdateZaps
 */
 void G_UpdateZaps( int msec )
 {
-  BG_List_Foreach( lev2ZapList, G_UpdateLev2Zap, &msec );
+  BG_Link_Foreach( lev2ZapList, G_UpdateLev2Zap, &msec );
 }
 
 /*
@@ -1731,8 +1731,8 @@ void G_ClearPlayerLev2ZapEffects( void *data, void *user_data )
 {
   zap_t *zap = (zap_t *)data;
   zapTarget_t *primaryTarget =
-              (zapTarget_t *)BG_Queue_Peek_Head_Link( &zap->targetQueue )->data;
-  bglist_t    *targetZapLink = BG_Queue_Peek_Head_Link( &zap->targetQueue )->next;
+              (zapTarget_t *)BG_List_Peek_Head_Link( &zap->targetQueue )->data;
+  bglink_t    *targetZapLink = BG_List_Peek_Head_Link( &zap->targetQueue )->next;
   gentity_t *player = (gentity_t *)user_data;
   int       j;
 
@@ -1740,7 +1740,7 @@ void G_ClearPlayerLev2ZapEffects( void *data, void *user_data )
   if( zap->creator == player || primaryTarget->targetEnt == player )
   {
     G_FreeEntity( zap->effectChannel );
-    lev2ZapList = BG_List_Delete_Link( lev2ZapList, zap->zapLink );
+    lev2ZapList = BG_Link_Delete_Link( lev2ZapList, zap->zapLink );
     G_DeleteZapData( zap );
     return;
   }
@@ -1748,12 +1748,12 @@ void G_ClearPlayerLev2ZapEffects( void *data, void *user_data )
   // the disappearance of chained players destroy the appropriate beams
   for( j = 1; targetZapLink; j++ )
   {
-    bglist_t *next = targetZapLink->next;
+    bglink_t *next = targetZapLink->next;
 
     if( ((zapTarget_t *)targetZapLink->data)->targetEnt == player )
       {
         BG_Free( targetZapLink->data );
-        BG_Queue_Delete_Link( &zap->targetQueue, targetZapLink );
+        BG_List_Delete_Link(targetZapLink);
       }
 
       targetZapLink = next;
@@ -1769,7 +1769,7 @@ called from G_LeaveTeam() and TeleportPlayer()
 */
 void G_ClearPlayerZapEffects( gentity_t *player )
 {
-  BG_List_Foreach( lev2ZapList, G_ClearPlayerLev2ZapEffects, player );
+  BG_Link_Foreach( lev2ZapList, G_ClearPlayerLev2ZapEffects, player );
 }
 
 /*
