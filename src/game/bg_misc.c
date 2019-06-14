@@ -1889,7 +1889,7 @@ static const classAttributes_t bg_classList[ ] =
     LEVEL3_CHARGE_STAMINA_USE_RATE,                 //float   chargeStaminaUseRate;
     LEVEL3_CHARGE_STAMINA_RESTORE_RATE,             //float   chargeStaminaRestoreRate;
     LEVEL3_COST,                                    //int     cost;
-    qtrue,                                          //qboolean warmupFree;
+    qfalse,                                         //qboolean warmupFree;
     LEVEL3_VALUE,                                   //int     value;
     TEAM_ALIENS                                     //team_t  team;
   },
@@ -6005,7 +6005,7 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     UP_HELMET,              //int   number;
     qtrue,                  //qboolean enabled;
     HELMET_PRICE,           //int   price;
-    qtrue,                  //qboolean warmupFree;
+    qfalse,                 //qboolean warmupFree;
     ( 1 << S2 )|( 1 << S3 ), //int  stages;
     SLOT_HEAD,              //int   slots;
     "helmet",               //char  *name;

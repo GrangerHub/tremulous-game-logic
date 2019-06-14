@@ -86,8 +86,8 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL1_CLAW_U_K_SCALE          1.0f
 #define LEVEL1_GRAB_RANGE              LEVEL1_CLAW_RANGE
 #define LEVEL1_GRAB_U_RANGE            LEVEL1_GRAB_RANGE + 3.0f
-#define LEVEL1_GRAB_TIME               900
-#define LEVEL1_GRAB_U_TIME             950
+#define LEVEL1_GRAB_TIME               1200
+#define LEVEL1_GRAB_U_TIME             1000
 #define LEVEL1_GRAB_REPEAT             1200
 #define LEVEL1_GRAB_U_REPEAT           1000
 #define LEVEL1_PCLOUD_DMG              AWDM(4000)
@@ -297,21 +297,21 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL3_HEALTH               AHM(275000)
 #define LEVEL3_MIN_HEALTH           (0.25f * LEVEL3_HEALTH)
 #define LEVEL3_REGEN                (0.03f * LEVEL3_HEALTH)
-#define LEVEL3_COST                 5
+#define LEVEL3_COST                 6
 
 #define LEVEL3_UPG_SPEED            1.1f
 #define LEVEL3_UPG_VALUE            AVM(5 * ALIEN_CREDITS_PER_KILL)
 #define LEVEL3_UPG_HEALTH           AHM(400000)
 #define LEVEL3_UPG_MIN_HEALTH       (0.25f * LEVEL3_UPG_HEALTH)
 #define LEVEL3_UPG_REGEN            (10000)
-#define LEVEL3_UPG_COST             7
+#define LEVEL3_UPG_COST             9
 
 #define LEVEL4_SPEED                1.2f
 #define LEVEL4_VALUE                AVM(8 * ALIEN_CREDITS_PER_KILL)
 #define LEVEL4_HEALTH               AHM(950000)
 #define LEVEL4_MIN_HEALTH           (0.3f * LEVEL4_HEALTH)
 #define LEVEL4_REGEN                (15000)
-#define LEVEL4_COST                 10
+#define LEVEL4_COST                 12
 
 #define SPITFIRE_SPEED                1.3f
 #define SPITFIRE_VALUE                AVM(3 * ALIEN_CREDITS_PER_KILL)
@@ -554,7 +554,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define PAINSAW_REPEAT              75
 #define PAINSAW_RELOAD              1000
 #define PAINSAW_K_SCALE             1.0f
-#define PAINSAW_DAMAGE              HWDM(11000)
+#define PAINSAW_DAMAGE              HWDM(15000)
 #define PAINSAW_RANGE               64.0f
 #define PAINSAW_WIDTH               0.0f
 #define PAINSAW_HEIGHT              8.0f
@@ -742,18 +742,18 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
  * HUMAN upgrades
  */
 
-#define LIGHTARMOUR_PRICE           70
+#define LIGHTARMOUR_PRICE           100
 #define LIGHTARMOUR_POISON_PROTECTION 1000
 #define LIGHTARMOUR_PCLOUD_PROTECTION 1000
 
-#define HELMET_PRICE                125
+#define HELMET_PRICE                250
 #define HELMET_RANGE                1000.0f
 #define HELMET_POISON_PROTECTION    1000
 #define HELMET_PCLOUD_PROTECTION    3500
 
 #define MEDKIT_PRICE                30
 
-#define BIOKIT_PRICE                250
+#define BIOKIT_PRICE                500
 #define BIOKIT_REGEN_REPEAT         750 // msec to regen 1 hp
 #define BIOKIT_MAX_HEALTH           150000 // initial max health when purchased
 #define BIOKIT_HEALTH_RESERVE       150000 // initial health reserve when purcased
