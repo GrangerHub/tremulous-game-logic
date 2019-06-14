@@ -96,11 +96,6 @@ static void PM_UnlaggedOn(unlagged_attacker_data_t *data) {
   if(pm->unlagged_on) {
     pm->unlagged_on(data);
   } else {
-    AngleVectors(
-      pm->ps->viewangles,
-      data->forward_out,
-      data->right_out,
-      data->up_out);
     BG_CalcMuzzlePointFromPS(
       pm->ps,
       data->forward_out,
