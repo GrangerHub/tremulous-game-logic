@@ -38,7 +38,6 @@ Blow_up
 void Blow_up( gentity_t *ent )
 {
   // set directions
-  AngleVectors( ent->client->ps.viewangles, forward, right, up );
   BG_CalcMuzzlePointFromPS( &ent->client->ps, forward, right, up, muzzle );
 
   launch_grenade2( ent, muzzle, forward );
@@ -1331,7 +1330,6 @@ qboolean CheckVenomAttack( gentity_t *ent )
 	return qfalse;
 
   // Calculate muzzle point
-  AngleVectors( ent->client->ps.viewangles, forward, right, up );
   BG_CalcMuzzlePointFromPS( &ent->client->ps, forward, right, up, muzzle );
 
   G_WideTraceSolidSeries(
@@ -1827,7 +1825,6 @@ qboolean CheckPounceAttack( gentity_t *ent )
     ent->client->pmext.pouncePayload = 0;
 
   // Calculate muzzle point
-  AngleVectors( ent->client->ps.viewangles, forward, right, up );
   BG_CalcMuzzlePointFromPS( &ent->client->ps, forward, right, up, muzzle );
 
   // Trace from muzzle to see what we hit
@@ -1977,7 +1974,6 @@ void FireWeapon3( gentity_t *ent )
   if( ent->client )
   {
     // set aiming directions
-    AngleVectors( ent->client->ps.viewangles, forward, right, up );
     BG_CalcMuzzlePointFromPS( &ent->client->ps, forward, right, up, muzzle );
   }
   else
@@ -2016,7 +2012,6 @@ void FireWeapon2( gentity_t *ent )
   if( ent->client )
   {
     // set aiming directions
-    AngleVectors( ent->client->ps.viewangles, forward, right, up );
     BG_CalcMuzzlePointFromPS( &ent->client->ps, forward, right, up, muzzle );
   }
   else
@@ -2072,7 +2067,6 @@ void FireWeapon( gentity_t *ent )
   if( ent->client )
   {
     // set aiming directions
-    AngleVectors( ent->client->ps.viewangles, forward, right, up );
     BG_CalcMuzzlePointFromPS( &ent->client->ps, forward, right, up, muzzle );
   }
   else

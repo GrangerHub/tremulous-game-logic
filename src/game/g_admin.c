@@ -3922,12 +3922,14 @@ qboolean G_admin_builder( gentity_t *ent )
 
   buildlog = G_admin_permission( ent, "buildlog" );
 
-  AngleVectors( ent->client->ps.viewangles, forward, right, up );
-  if( ent->client->pers.teamSelection != TEAM_NONE &&
-      ent->client->sess.spectatorState == SPECTATOR_NOT )
+  if(
+    ent->client->pers.teamSelection != TEAM_NONE &&
+    ent->client->sess.spectatorState == SPECTATOR_NOT) {
     BG_CalcMuzzlePointFromPS( &ent->client->ps, forward, right, up, start );
-  else
+  } else {
+    AngleVectors( ent->client->ps.viewangles, forward, right, up );
     VectorCopy( ent->client->ps.origin, start );
+  }
   VectorMA( start, 1000, forward, end );
 
   SV_Trace( &tr, start, NULL, NULL, end, ent->s.number, MASK_PLAYERSOLID, TT_AABB );
