@@ -7125,12 +7125,69 @@ set muzzle location relative to pivoting eye
 void BG_CalcMuzzlePointFromPS( const playerState_t *ps, vec3_t forward,
                                vec3_t right, vec3_t up, vec3_t muzzlePoint )
 {
-  vec3_t normal;
+  vec3_t normal, view_angles;
+  float  xyspeed;
+  float  bobfracsin, bob, bob2;
+  int    bobcycle;
 
+  VectorCopy(ps->viewangles, view_angles);
+
+  // initialize bobbing values;
+  bobcycle = (ps->misc[MISC_BOB_CYCLE] & 2048) >> 11;
+  bobfracsin = fabs(sin((ps->misc[MISC_BOB_CYCLE] & 2047) / 2047.0 * M_PI));
+  xyspeed =
+    sqrt(ps->velocity[0] * ps->velocity[0] + ps->velocity[1] * ps->velocity[1]);
+  // the bob velocity should't get too fast to avoid jerking
+  if(xyspeed > 300.0f) {
+    xyspeed = 300.0f;
+  }
+  // bob amount is class dependant
+  if( ps->persistant[PERS_SPECSTATE] != SPECTATOR_NOT) {
+    bob2 = 0.0f;
+  } else {
+    bob2 = BG_Class(ps->stats[ STAT_CLASS ])->bob;
+  }
+
+  // adjust the angles for bobbing
+  if(bob2 != 0.0f) {
+    float speed;
+    float delta;
+
+    // make sure the bob is visible even at low speeds
+    speed = xyspeed > 200 ? xyspeed : 200;
+
+    delta = bobfracsin * bob2 * speed;
+    if(ps->pm_flags & PMF_DUCKED) {
+      delta *= 3;   // crouching
+    }
+
+    view_angles[ PITCH ] += delta;
+    delta = bobfracsin * bob2 * speed;
+    if(ps->pm_flags & PMF_DUCKED) {
+      delta *= 3;   // crouching accentuates roll
+    }
+
+    if(bobcycle & 15) {
+      delta = -delta;
+    }
+
+    view_angles[ ROLL ] += delta;
+  }
+
+  AngleVectors(view_angles, forward, right, up);
   VectorCopy( ps->origin, muzzlePoint );
   BG_GetClientNormal( ps, normal );
   VectorMA( muzzlePoint, ps->viewheight, normal, muzzlePoint );
   VectorMA( muzzlePoint, 1, forward, muzzlePoint );
+
+  // add bob height
+  bob = bobfracsin * xyspeed * bob2;
+
+  if( bob > 6 )
+    bob = 6;
+
+  VectorMA( muzzlePoint, bob, normal, muzzlePoint );
+
   // snap to integer coordinates for more efficient network bandwidth usage
   SnapVector( muzzlePoint );
 }
@@ -7207,7 +7264,6 @@ void BG_CheckBoltImpactTrigger(
       vec3_t forward, right, up;
       vec3_t muzzle;
 
-      AngleVectors(pm->ps->viewangles, forward, right, up);
       BG_CalcMuzzlePointFromPS(pm->ps, forward, right, up, muzzle);
 
       VectorMA(muzzle, BG_LightningBoltRange(NULL, pm->ps, qtrue),

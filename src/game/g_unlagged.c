@@ -906,6 +906,7 @@ void G_UnlaggedOn(unlagged_attacker_data_t *attacker_data) {
   rewind_ent_adjustment_t *rewind_ent_adjustment;
   int                     inuse;
   vec3_t                  backup_origin;
+  vec3_t                  backup_view_angles;
   vec3_t                  unlagged_point;
 
   Com_Assert(attacker_data && "G_UnlaggedOn: attacker_data is NULL");
@@ -915,11 +916,6 @@ void G_UnlaggedOn(unlagged_attacker_data_t *attacker_data) {
   if(!g_unlagged.integer) {
     if(attacker->client) {
       VectorCopy(attacker->client->ps.origin, attacker_data->origin_out);
-      AngleVectors(
-        attacker->client->ps.viewangles,
-        attacker_data->forward_out,
-        attacker_data->right_out,
-        attacker_data->up_out);
       BG_CalcMuzzlePointFromPS(
         &attacker->client->ps,
         attacker_data->forward_out,
@@ -936,11 +932,6 @@ void G_UnlaggedOn(unlagged_attacker_data_t *attacker_data) {
 
   if(!attacker->client->pers.useUnlagged) {
     VectorCopy(attacker->client->ps.origin, attacker_data->origin_out);
-    AngleVectors(
-      attacker->client->ps.viewangles,
-      attacker_data->forward_out,
-      attacker_data->right_out,
-      attacker_data->up_out);
     BG_CalcMuzzlePointFromPS(
       &attacker->client->ps,
       attacker_data->forward_out,
@@ -953,32 +944,17 @@ void G_UnlaggedOn(unlagged_attacker_data_t *attacker_data) {
   rewind_ent_adjustment = &rewind_ents_adjustments[attacker_data->ent_num];
   inuse = rewind_ent_adjustment->use;
 
-  //evaluate the view vectors
-  if(inuse) {
-    vec3_t unlagged_view_angles;
-
-    VectorAdd(
-      attacker->client->ps.viewangles, rewind_ent_adjustment->amove,
-      unlagged_view_angles);
-
-    AngleVectors(
-      unlagged_view_angles, attacker_data->forward_out,
-      attacker_data->right_out, attacker_data->up_out);
-  } else {
-    AngleVectors(
-      attacker->client->ps.viewangles,
-      attacker_data->forward_out,
-      attacker_data->right_out,
-      attacker_data->up_out);
-  }
-
   //evalutate the muzzle
   if(inuse) {
-
     VectorCopy(attacker->client->ps.origin, backup_origin);
     VectorAdd(
       attacker->client->ps.origin, rewind_ent_adjustment->move,
       attacker->client->ps.origin);
+
+    VectorCopy(attacker->client->ps.viewangles, backup_view_angles);
+    VectorAdd(
+      attacker->client->ps.viewangles, rewind_ent_adjustment->amove,
+      attacker->client->ps.viewangles);
   }
 
   BG_CalcMuzzlePointFromPS(
@@ -990,6 +966,7 @@ void G_UnlaggedOn(unlagged_attacker_data_t *attacker_data) {
 
   if(inuse) {
     VectorCopy(backup_origin, attacker->client->ps.origin);
+    VectorCopy(backup_view_angles, attacker->client->ps.viewangles);
   }
 
   //evaluate the current origin
