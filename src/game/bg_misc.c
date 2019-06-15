@@ -77,21 +77,6 @@ int BG_SU2HP( int healthSubUnits )
   int  FS_GetFileList(  const char *path, const char *extension, char *listbuf, int bufsize );
 #endif
 
-static entityState_t *bg_entityStates[MAX_GENTITIES];
-
-entityState_t *BG_EntityState(int ent_num) {
-  Com_Assert(ent_num >= 0 && ent_num < MAX_GENTITIES);
-
-  return bg_entityStates[ent_num];
-}
-
-void BG_Link_entityState(entityState_t *es, int ent_num) {
-  Com_Assert(es);
-  Com_Assert(ent_num >= 0 && ent_num < MAX_GENTITIES);
-
-  bg_entityStates[ent_num] = es;
-}
-
 static const teamAttributes_t bg_teamList[ ] =
 {
   {
@@ -5452,6 +5437,8 @@ void BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s,
   s->otherEntityNum2 = ps->stats[ STAT_FLAGS ];
 
   s->constantLight = ps->stats[ STAT_MISC2 ];
+
+  s->origin[0] = (float)(ps->misc[MISC_ID]);
 }
 
 
@@ -5566,6 +5553,8 @@ void BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s
   s->otherEntityNum2 = ps->stats[ STAT_FLAGS ];
 
   s->constantLight = ps->stats[ STAT_MISC2 ];
+
+  s->origin[0] = (float)(ps->misc[MISC_ID]);
 }
 
 /*

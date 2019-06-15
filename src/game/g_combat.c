@@ -321,7 +321,10 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   if( level.intermissiontime )
     return;
 
-  self->id = 0;
+  self->s.origin[0] = (float)((int)0); // reset for UEIDs
+  if(self->client) {
+    self->client->ps.misc[MISC_ID] = 0;
+  }
 
   self->client->ps.pm_type = PM_DEAD;
   self->suicideTime = 0;
@@ -1524,7 +1527,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
     if( ( targ->health <= deathHealth ||
           (dflags & DAMAGE_INSTAGIB) ) &&
-        targ != G_Entity_id_get( &targ->idAtLastDeath ) )
+        targ != G_Entity_UEID_get( &targ->idAtLastDeath ) )
     {
       if( client )
         targ->flags |= FL_NO_KNOCKBACK;
@@ -1537,7 +1540,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       }
 
       targ->enemy = attacker;
-      G_Entity_id_set( &targ->idAtLastDeath, targ );
+      G_Entity_UEID_set( &targ->idAtLastDeath, targ );
       targ->die( targ, inflictor, attacker, take, mod );
       if(
         targ->s.eType == ET_BUILDABLE &&

@@ -519,9 +519,15 @@ typedef enum
   //time since the last time the player landed on a ground entity
   MISC_LANDED_TIME,
 
-  MISC_CHARGE_STAMINA
+  MISC_CHARGE_STAMINA,
 
-  // netcode has space for 3 more
+  //id for a client used by ueid that is communicated to said client
+  MISC_ID,
+
+  //contents of the client communicated to the client for collision detection
+  MISC_CONTENTS
+
+  // netcode has space for 0 more
 } miscEnum_t;
 
 #define PS_WALLCLIMBINGFOLLOW   0x00000001
@@ -1854,8 +1860,20 @@ const teamAttributes_t *BG_Team( team_t team );
 
 const rankAttributes_t *BG_Rank( rank_t rank );
 
-entityState_t *BG_EntityState(int ent_num);
-void BG_Link_entityState(entityState_t *es, int ent_num);
+//bg_entities.c
+typedef struct{
+  unsigned int id;
+  int          ent_num;
+} bgentity_id;
+
+void          BG_Init_Entities(void);
+entityState_t *BG_entityState_From_Ent_Num(int ent_num);
+void          BG_Locate_entityState(
+  entityState_t *es, int ent_num, qboolean *valid_check_variable);
+playerState_t *BG_playerState_From_Ent_Num(int ent_num);
+void          BG_Locate_playerState(playerState_t *ps, int ent_num);
+void          BG_UEID_set(bgentity_id *ueid, int ent_num);
+int           BG_UEID_get_ent_num(bgentity_id *ueid);
 
 //for movers
 void BG_CreateRotationMatrix( vec3_t angles, vec3_t matrix[ 3 ] );
