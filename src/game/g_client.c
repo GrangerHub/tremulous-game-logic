@@ -1465,9 +1465,12 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   vec3_t              up = { 0.0f, 0.0f, 1.0f };
   int                 maxAmmo, maxClips;
   weapon_t            weapon;
+  int                 id;
 
   index = ent - g_entities;
   client = ent->client;
+
+  id = ent->client->ps.misc[MISC_ID];
 
   teamLocal = client->pers.teamSelection;
 
@@ -1574,8 +1577,12 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
 
   //Com_Printf( "ent->client->pers->pclass = %i\n", ent->client->pers.classSelection );
 
-  if( spawn && ent != spawn )
-    G_Entity_id_init(ent);
+  if(spawn && ent != spawn) {
+    G_Entity_UEID_init(ent);
+  } else {
+    ent->client->ps.misc[MISC_ID] = id;
+    ent->s.origin[0] = (float)(id);
+  }
 
   ent->s.groundEntityNum = ENTITYNUM_NONE;
   ent->client = &level.clients[ index ];
@@ -1849,7 +1856,8 @@ Q_EXPORT void ClientDisconnect( int clientNum )
   }
 
   SV_UnlinkEntity( ent );
-  ent->id = 0;
+  ent->s.origin[0] = (float)((int)0); // reset for UEIDs
+  ent->client->ps.misc[MISC_ID] = 0;
   ent->inuse = qfalse;
   ent->classname = "disconnected";
   ent->client->pers.connected = CON_DISCONNECTED;

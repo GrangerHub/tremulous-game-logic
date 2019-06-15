@@ -878,7 +878,7 @@ void lightningBallFire( gentity_t *ent )
   missile = fire_lightningBall( ent, qfalse, muzzle, forward );
 
   //add to the client's ball lightning array
-  G_Entity_id_set( &client->firedBallLightning[ client->firedBallLightningNum ],
+  G_Entity_UEID_set( &client->firedBallLightning[ client->firedBallLightningNum ],
                    missile );
   client->firedBallLightningNum++;
 
@@ -902,7 +902,7 @@ void lightningEMPFire( gentity_t *ent )
 
   for( i = 0; i < LIGHTNING_BALL_BURST_ROUNDS; i++ )
   {
-    gentity_t *missile = G_Entity_id_get( &client->firedBallLightning[ i ] );
+    gentity_t *missile = G_Entity_UEID_get( &client->firedBallLightning[ i ] );
 
     if( missile &&
         missile->s.eType == ET_MISSILE &&

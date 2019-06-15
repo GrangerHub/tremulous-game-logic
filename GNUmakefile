@@ -2197,6 +2197,7 @@ CGOBJ_ = \
   $(B)/cgame/cg_main.o \
   $(B)/cgame/bg_misc.o \
   $(B)/cgame/bg_pmove.o \
+	$(B)/cgame/bg_entities.o \
   $(B)/cgame/bg_slidemove.o \
   $(B)/cgame/bg_lib.o \
   $(B)/cgame/bg_alloc.o \
@@ -2232,6 +2233,7 @@ CGOBJ11_ = \
   $(B)/11/cgame/cg_main.o \
   $(B)/cgame/bg_misc.o \
   $(B)/cgame/bg_pmove.o \
+  $(B)/cgame/bg_entities.o \
   $(B)/cgame/bg_slidemove.o \
   $(B)/cgame/bg_lib.o \
   $(B)/cgame/bg_alloc.o \
@@ -2293,6 +2295,7 @@ GOBJ_ = \
   $(B)/game/g_main.o \
   $(B)/game/bg_misc.o \
   $(B)/game/bg_pmove.o \
+  $(B)/game/bg_entities.o \
   $(B)/game/bg_slidemove.o \
   $(B)/game/bg_lib.o \
   $(B)/game/bg_alloc.o \
