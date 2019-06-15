@@ -405,7 +405,7 @@ qboolean G_FindPower( gentity_t *self, qboolean searchUnspawned )
   {
     if(
       !strcmp(ent->classname, "target_power") && ent->powered &&
-      (int)Distance(self->s.origin, ent->s.origin) <= ent->PowerRadius &&
+      (int)Distance(self->r.currentOrigin, ent->r.currentOrigin) <= ent->PowerRadius &&
       (ent->MasterPower || G_Reactor( ) != NULL)) {
       self->parentNode = ent;
       return qtrue;
@@ -662,7 +662,7 @@ gentity_t *G_InPowerZone( gentity_t *self )
   {
     if(
       !strcmp(ent->classname, "target_power") && ent->powered &&
-      (int)Distance(self->s.origin, ent->s.origin) <= ent->PowerRadius &&
+      (int)Distance(self->r.currentOrigin, ent->r.currentOrigin) <= ent->PowerRadius &&
       (ent->MasterPower || G_Reactor() != NULL)) {
       return ent;
     }
@@ -841,7 +841,7 @@ qboolean G_FindCreep( gentity_t *self ) {
     for( i = MAX_CLIENTS, ent = g_entities + i; i < level.num_entities; i++, ent++ ) {
       if(
         !strcmp(ent->classname, "target_creep") && ent->powered &&
-        (int)Distance(self->s.origin, ent->s.origin) <= ent->PowerRadius &&
+        (int)Distance(self->r.currentOrigin, ent->r.currentOrigin) <= ent->PowerRadius &&
         (ent->MasterPower || G_Overmind() != NULL)) {
         if(!self->client) {
           self->parentNode = ent;
@@ -3182,7 +3182,7 @@ void HMedistat_Die( gentity_t *self, gentity_t *inflictor,
   //clear targets' healing flag
   for( i = 0; i < self->numEnemies; i++ )
   {
-    player = G_Entity_id_get( &self->enemies[i] );
+    player = G_Entity_UEID_get( &self->enemies[i] );
 
     if( !player )
       continue;
@@ -3222,7 +3222,7 @@ void HMedistat_Think( gentity_t *self )
   //clear targets' healing flag
   for( i = 0; i < self->numEnemies; i++ )
   {
-    player = G_Entity_id_get( &self->enemies[i] );
+    player = G_Entity_UEID_get( &self->enemies[i] );
 
     if( !player )
       continue;
@@ -3329,7 +3329,7 @@ void HMedistat_Think( gentity_t *self )
 
         player->client->ps.stats[ STAT_STATE ] |= SS_HEALING_ACTIVE;
 
-        G_Entity_id_set( &self->enemies[self->numEnemies], player);
+        G_Entity_UEID_set( &self->enemies[self->numEnemies], player);
         self->numEnemies++;
 
         if( client->ps.stats[ STAT_STAMINA ] <  STAMINA_MAX )
@@ -5798,7 +5798,7 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
   for( i = 0; i < MAX_GENTITIES; i++ )
   {
     built->creditsDeffenses[ i ].credits = 0;
-    G_Entity_id_set( &built->creditsDeffenses[ i ].id, &g_entities[ i ] );
+    G_Entity_UEID_set( &built->creditsDeffenses[ i ].id, &g_entities[ i ] );
   }
 
   if( buildable == BA_H_TELEPORTER )

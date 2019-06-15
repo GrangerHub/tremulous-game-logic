@@ -2203,8 +2203,16 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum )
   cgs.media.charsetShader   = trap_R_RegisterShader( "gfx/2d/bigchars" );
   cgs.media.outlineShader   = trap_R_RegisterShader( "outline" );
 
+  BG_Init_Entities();
+  BG_Locate_playerState(&cg.predictedPlayerState, cg.clientNum);
   for(i = 0; i < MAX_GENTITIES; i++) {
-    BG_Link_entityState(&cg_entities[i].currentState, i);
+    if(i == cg.clientNum) {
+      BG_Locate_entityState(
+        &cg.predictedPlayerEntity.currentState, i, &cg.predictedPlayerEntity.valid);
+    } else {
+      BG_Locate_entityState(
+        &cg_entities[i].currentState, i, &cg_entities[i].valid);
+    }
   }
 
   // load overrides

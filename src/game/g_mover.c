@@ -71,10 +71,10 @@ PUSHMOVE
 
 typedef struct
 {
-  gentity_id id;
-  vec3_t  origin;
-  vec3_t  angles;
-  float deltayaw;
+  bgentity_id id;
+  vec3_t      origin;
+  vec3_t      angles;
+  float       deltayaw;
 } pushed_t;
 
 #define MAX_PUSHES (MAX_GENTITIES * 8)
@@ -298,7 +298,7 @@ static void  G_Push_Ent(void *data, void *user_data) {
   Com_Assert(check && "G_Push_Ent: check is NUll");
   Com_Assert(push_data->pusher && "G_Push_Ent: pusher is NULL");
 
-  G_Entity_id_set(&pushed_p->id, check);
+  G_Entity_UEID_set(&pushed_p->id, check);
   VectorCopy(check->s.pos.trBase, pushed_p->origin);
   VectorCopy(check->s.apos.trBase, pushed_p->angles);
 
@@ -891,7 +891,7 @@ static qboolean G_Find_Mover_Blockage(
   //collapse the pushes back
   if(pushed_p > saved_pushed) {
     for(pushed_p--; pushed_p >= saved_pushed; pushed_p--) {
-      gentity_t *ent = G_Entity_id_get(&pushed_p->id);
+      gentity_t *ent = G_Entity_UEID_get(&pushed_p->id);
 
       if(ent) {
         VectorCopy(pushed_p->origin, ent->r.currentOrigin);
@@ -1094,7 +1094,7 @@ qboolean G_MoverPush(
     // go backwards, so if the same entity was pushed
     // twice, it goes back to the original position
     for(p = pushed_p - 1; p >= pushed; p--) {
-      gentity_t *ent = G_Entity_id_get(&pushed_p->id);
+      gentity_t *ent = G_Entity_UEID_get(&pushed_p->id);
 
       VectorCopy(p->origin, ent->s.pos.trBase);
       VectorCopy(p->angles, ent->s.apos.trBase);

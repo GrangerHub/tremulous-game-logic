@@ -518,7 +518,7 @@ static void Give_Armor(gentity_t *ent) {
 
   for(i = 0; i < MAX_GENTITIES; i++) {
     ent->creditsUpgradeDeffenses[UP_BATTLESUIT][i].credits = 0;
-    G_Entity_id_set( &ent->creditsUpgradeDeffenses[UP_BATTLESUIT][i].id, &g_entities[i]);
+    G_Entity_UEID_set( &ent->creditsUpgradeDeffenses[UP_BATTLESUIT][i].id, &g_entities[i]);
   }
 }
 
@@ -2665,7 +2665,7 @@ void G_Evolve( gentity_t *ent, class_t newClass,
   {
     creditsDeffensesSaved[i].credits = ent->creditsDeffenses[i].credits;
     creditsDeffensesSaved[i].id.id = ent->creditsDeffenses[i].id.id;
-    creditsDeffensesSaved[i].id.ptr = ent->creditsDeffenses[i].id.ptr;
+    creditsDeffensesSaved[i].id.ent_num = ent->creditsDeffenses[i].id.ent_num;
   }
 
   // regain some of the evos when devolving
@@ -2814,7 +2814,7 @@ void G_Evolve( gentity_t *ent, class_t newClass,
       ent->creditsDeffenses[i].credits = 0;
 
     ent->creditsDeffenses[i].id.id = creditsDeffensesSaved[i].id.id;
-    ent->creditsDeffenses[i].id.ptr = creditsDeffensesSaved[i].id.ptr;
+    ent->creditsDeffenses[i].id.ent_num = creditsDeffensesSaved[i].id.ent_num;
   }
 
   //restore the barbs
@@ -4269,7 +4269,7 @@ void G_GiveItem( gentity_t *ent, const char *itemName, const int price,
     for( i = 0; i < MAX_GENTITIES; i++ )
     {
       ent->creditsUpgradeDeffenses[ upgrade ][ i ].credits = 0;
-      G_Entity_id_set( &ent->creditsUpgradeDeffenses[ upgrade ][ i ].id, &g_entities[ i ] );
+      G_Entity_UEID_set( &ent->creditsUpgradeDeffenses[ upgrade ][ i ].id, &g_entities[ i ] );
     }
   }
 

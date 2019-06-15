@@ -1180,7 +1180,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
     if(
       (client->ps.stats[STAT_STATE] & SS_BLOBLOCKED) &&
       !BG_InventoryContainsUpgrade(UP_BATTLESUIT, client->ps.stats)) {
-      gentity_t *trapper = G_Entity_id_get(&client->last_trapper_id);
+      gentity_t *trapper = G_Entity_UEID_get(&client->last_trapper_id);
 
       G_Damage(
         ent, trapper, trapper, NULL, 0,
