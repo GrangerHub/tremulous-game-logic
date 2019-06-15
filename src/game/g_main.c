@@ -604,10 +604,6 @@ Q_EXPORT void G_InitGame( int levelTime, int randomSeed, int restart )
   Com_Printf( "------- Game Initialization -------\n" );
   Com_Printf( "gamename: %s\n", GAME_VERSION );
 
-  for(i = 0; i < MAX_GENTITIES; i++) {
-    BG_Link_entityState(&g_entities[i].s, i);
-  }
-
   // Dynamic memory
   BG_InitMemory( );
 
@@ -754,6 +750,15 @@ Q_EXPORT void G_InitGame( int levelTime, int randomSeed, int restart )
   // let the server system know where the entites are
   SV_LocateGameData( level.gentities, level.num_entities, sizeof( gentity_t ),
     &level.clients[ 0 ].ps, sizeof( level.clients[ 0 ] ) );
+
+  //init enitity stuff for the bgame
+  BG_Init_Entities( );
+  for(i = 0; i < MAX_CLIENTS; i++) {
+    BG_Locate_playerState(&level.clients[i].ps, i);
+  }
+  for(i = 0; i < MAX_GENTITIES; i++) {
+    BG_Locate_entityState(&g_entities[i].s, i, &g_entities[i].inuse);
+  }
 
   G_Init_Unlagged( );
 

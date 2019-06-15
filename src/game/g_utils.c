@@ -628,7 +628,7 @@ gentity_t *G_Spawn( void )
 
       // reuse this slot
       G_InitGentity( e );
-      G_Entity_id_init( e );
+      G_Entity_UEID_init( e );
       return e;
     }
 
@@ -652,7 +652,7 @@ gentity_t *G_Spawn( void )
     &level.clients[ 0 ].ps, sizeof( level.clients[ 0 ] ) );
 
   G_InitGentity( e );
-  G_Entity_id_init( e );
+  G_Entity_UEID_init( e );
   return e;
 }
 
@@ -707,9 +707,13 @@ void G_FreeEntity( gentity_t *ent )
 
   G_UnlaggedClear( ent );
   BG_List_Clear(&ent->targeted);
+  if(ent->client) {
+    ent->client->ps.misc[MISC_ID] = 0;
+  }
   memset( ent, 0, sizeof( *ent ) );
   ent->classname = "freent";
   ent->freetime = level.time;
+  ent->s.origin[0] = (float)((int)0); // reset for UEIDs
   ent->inuse = qfalse;
 }
 
@@ -1529,29 +1533,44 @@ qboolean G_AddressCompare( const addr_t *a, const addr_t *b )
   return qtrue;
 }
 
-void G_Entity_id_init(gentity_t *ptr){
+void G_Entity_UEID_init(gentity_t *ent){
   static unsigned int inc_id = 1;
-  Com_Assert(ptr);
-  ptr->id = inc_id++;
-}
 
-void G_Entity_id_set(gentity_id *id,gentity_t *target){
-  Com_Assert(id);
-  id->ptr = target;
-  if(target) {
-    id->id = target->id;
+  Com_Assert(ent);
+
+  if(ent->client) {
+    ent->client->ps.misc[MISC_ID] = inc_id;
   }
+
+  ent->s.origin[0] = (float)(inc_id);
+  inc_id++;
 }
 
-gentity_t *G_Entity_id_get(gentity_id *id){
-  assert(id);
-  if(id->ptr == NULL){
+void G_Entity_UEID_set(bgentity_id *ueid,gentity_t *target){
+  int ent_num;
+
+  Com_Assert(ueid);
+
+  if(!target) {
+    ent_num = ENTITYNUM_NONE;
+  } else {
+    ent_num = target->s.number;
+  }
+
+  BG_UEID_set(ueid, ent_num);
+}
+
+gentity_t *G_Entity_UEID_get(bgentity_id *ueid){
+  int ent_num;
+
+  Com_Assert(ueid);
+
+  ent_num = BG_UEID_get_ent_num(ueid);
+  if(ent_num == ENTITYNUM_NONE) {
     return NULL;
   }
-  if(id->id != id->ptr->id){
-    id->ptr = NULL;
-  }
-  return id->ptr;
+
+  return &g_entities[ent_num];
 }
 
 /*

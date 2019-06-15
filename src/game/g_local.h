@@ -125,11 +125,6 @@ typedef struct scale_missile_s
 --------------------------------------------------------------------------------
 */
 
-typedef struct{
-  unsigned int id;
-  gentity_t   *ptr;
-} gentity_id;
-
 //============================================================================
 
 struct gentity_s
@@ -141,9 +136,7 @@ struct gentity_s
   // EXPECTS THE FIELDS IN THAT ORDER!
   //================================
 
-  int               id; // Set on spawn and cleared on free, disconnect, or death.
-
-  gentity_id        idAtLastDeath; // Used to ensure that entities don't die twice without respawning
+  bgentity_id       idAtLastDeath; // Used to ensure that entities don't die twice without respawning
 
   struct gclient_s  *client;        // NULL if not a client
 
@@ -645,7 +638,7 @@ struct gclient_s
 
   qboolean            charging;
 
-  gentity_id          firedBallLightning[ LIGHTNING_BALL_BURST_ROUNDS ];
+  bgentity_id         firedBallLightning[ LIGHTNING_BALL_BURST_ROUNDS ];
   int                 firedBallLightningNum;
 
   int                 lastFlameBall;        // s.number of the last flame ball fired
@@ -1262,9 +1255,9 @@ qboolean    G_LoggedActivation(
 
 int          G_Get_Foundation_Ent_Num(gentity_t *ent);
 
-void        G_Entity_id_init(gentity_t *ptr);
-void        G_Entity_id_set(gentity_id *id,gentity_t *target);
-gentity_t   *G_Entity_id_get(gentity_id *id);
+void        G_Entity_UEID_init(gentity_t *ent);
+void        G_Entity_UEID_set(bgentity_id *ueid,gentity_t *target);
+gentity_t   *G_Entity_UEID_get(bgentity_id *ueid);
 
 void        G_SetPlayersLinkState( qboolean link, gentity_t *skipPlayer );
 

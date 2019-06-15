@@ -400,7 +400,7 @@ qboolean G_FindPower( gentity_t *self, qboolean searchUnspawned )
   {
     if(
       !strcmp(ent->classname, "target_power") && ent->powered &&
-      (int)Distance(self->s.origin, ent->s.origin) <= ent->PowerRadius &&
+      (int)Distance(self->r.currentOrigin, ent->r.currentOrigin) <= ent->PowerRadius &&
       (ent->MasterPower || G_Reactor( ) != NULL)) {
       self->parentNode = ent;
       return qtrue;
@@ -624,7 +624,7 @@ gentity_t *G_InPowerZone( gentity_t *self )
   {
     if(
       !strcmp(ent->classname, "target_power") && ent->powered &&
-      (int)Distance(self->s.origin, ent->s.origin) <= ent->PowerRadius &&
+      (int)Distance(self->r.currentOrigin, ent->r.currentOrigin) <= ent->PowerRadius &&
       (ent->MasterPower || G_Reactor() != NULL)) {
       return ent;
     }
@@ -801,7 +801,7 @@ qboolean G_FindCreep( gentity_t *self )
     {
       if(
         !strcmp(ent->classname, "target_creep") && ent->powered &&
-        (int)Distance(self->s.origin, ent->s.origin) <= ent->PowerRadius &&
+        (int)Distance(self->r.currentOrigin, ent->r.currentOrigin) <= ent->PowerRadius &&
         (ent->MasterPower || G_Reactor() != NULL)) {
         if(!self->client) {
           self->parentNode = ent;
