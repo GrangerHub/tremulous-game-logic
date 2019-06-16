@@ -673,6 +673,8 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   if( level.intermissiontime )
     return;
 
+  self->client->pers.spawnTime = level.time + (g_spawnCountdown.integer * 1000);
+
   self->client->ps.pm_type = PM_DEAD;
   self->suicideTime = 0;
 
