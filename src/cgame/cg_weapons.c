@@ -1298,8 +1298,7 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
         !( cent->currentState.modelindex & ( 1 << UP_BATTLESUIT ) ) )
     {
       gun.shaderTime = cent->invisTime/1000.0f;
-      if( ci->team != cg.snap->ps.stats[ STAT_TEAM ] ||
-          cent->currentState.number == cg.snap->ps.clientNum )
+      if( ci->team != cg.snap->ps.stats[ STAT_TEAM ] )
       {
         if( cg.time - cent->invisTime < 1000  )
           gun.customShader = cgs.media.invisFadeShader;
@@ -1336,8 +1335,7 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
         !( cent->currentState.modelindex & ( 1 << UP_BATTLESUIT ) ) )
     {
       gun.shaderTime = cent->invisTime/1000.0f;
-      if( ci->team != cg.snap->ps.stats[ STAT_TEAM ] ||
-          cent->currentState.number == cg.snap->ps.clientNum )
+      if( ci->team != cg.snap->ps.stats[ STAT_TEAM ] )
       {
         if( cg.time - cent->invisTime < 1000  )
           gun.customShader = cgs.media.invisFadeShader;
@@ -1425,8 +1423,7 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
         !( cent->currentState.modelindex & ( 1 << UP_BATTLESUIT ) ) )
     {
       barrel.shaderTime = cent->invisTime/1000.0f;
-      if( ci->team != cg.snap->ps.stats[ STAT_TEAM ] ||
-          cent->currentState.number == cg.snap->ps.clientNum )
+      if( ci->team != cg.snap->ps.stats[ STAT_TEAM ] )
       {
         if( cg.time - cent->invisTime < 1000  )
           barrel.customShader = cgs.media.invisFadeShader;

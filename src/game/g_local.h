@@ -714,7 +714,10 @@ struct gclient_s
 
   int                 evolveCost; //amount of evos to deduct
 
-  int                 timeToInvisibility; //for the invisible basilisk
+  //for the invisible basilisk
+  int                 timeToInvisibility; 
+  int                 invisTime;
+  int                 invisCollisionTime[MAX_CLIENTS];
 };
 
 #define QUEUE_PLUS1(x)  (((x)+1)%MAX_CLIENTS)

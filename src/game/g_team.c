@@ -179,7 +179,8 @@ void G_LeaveTeam( gentity_t *self )
   team_t    team = self->client->pers.teamSelection;
   gentity_t *ent;
   int       i, u;
-  
+
+  self->r.svFlags &= ~SVF_CLIENTMASK_EXCLUSIVE;
   self->client->ps.persistant[ PERS_STATE ] &= ~PS_QUEUED;
   self->client->spawnReady = qfalse;
   BG_List_Remove_All(

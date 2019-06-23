@@ -1294,7 +1294,9 @@ static void CG_CEntityPVSEnter( centity_t *cent )
 
   //clear any particle systems from previous uses of this centity_t
   cent->muzzlePS = NULL;
-  cent->muzzlePsTrigger = qfalse;
+  if(!((es->eFlags & EF_INVISIBILE) && (es->weapon != WP_LUCIFER_CANNON))) {
+    cent->muzzlePsTrigger = qfalse;
+  }
   cent->jetPackPS = NULL;
   cent->jetPackState = JPS_OFF;
   cent->buildablePS = NULL;
@@ -1520,6 +1522,9 @@ void CG_AddPacketEntities( void )
       CG_CEntityPVSEnter( cent );
     else if( !cent->valid && cent->oldValid )
       CG_CEntityPVSLeave( cent );
+    else if( !cent->valid ) {
+      cent->muzzlePsTrigger = qfalse;
+    }
 
     cent->oldValid = cent->valid;
   }
@@ -1542,6 +1547,17 @@ void CG_AddPacketEntities( void )
 
       cent = &cg_entities[ cg.snap->entities[ num ].number ];
       es = &cent->currentState;
+
+      //invis
+      if(
+        (es->number < MAX_CLIENTS) &&
+        (
+          cgs.clientinfo[es->number].team !=
+            cg.predictedPlayerState.stats[STAT_TEAM]) &&
+        (es->eFlags & EF_INVISIBILE) &&
+        (es->weapon != WP_LUCIFER_CANNON)) {
+        continue;
+      }
 
       switch( es->eType )
       {

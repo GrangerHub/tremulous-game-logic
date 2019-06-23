@@ -1833,6 +1833,10 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
     client->ps.weapon = client->ps.stats[ STAT_WEAPON ];
   }
 
+  if(client->ps.weapon != WP_ALEVEL1 && client->ps.weapon != WP_ALEVEL1_UPG) {
+    ent->r.svFlags &= ~SVF_CLIENTMASK_EXCLUSIVE;
+  }
+
   // run a client frame to drop exactly to the floor,
   // initialize animations and other things
   client->ps.commandTime = level.time - 100;

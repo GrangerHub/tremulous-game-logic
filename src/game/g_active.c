@@ -860,10 +860,15 @@ void ClientTimerActions( gentity_t *ent, int msec )
           client->timeToInvisibility = LEVEL1_INVISIBILITY_DELAY + level.time;
       }
 
-      if( client->timeToInvisibility <= level.time )
+      if( client->timeToInvisibility <= level.time ) {
+        if(!(client->ps.eFlags & EF_INVISIBILE)) {
+          client->invisTime = level.time + 1000;
+        }
         client->ps.eFlags |= EF_INVISIBILE;
-      else
+      } else {
+        ent->r.svFlags &= ~SVF_CLIENTMASK_EXCLUSIVE;
         client->ps.eFlags &= ~EF_INVISIBILE;
+      }
     }
 
     if( weapon == WP_ABUILD || weapon == WP_ABUILD2 ||
@@ -1323,6 +1328,103 @@ void ClientTimerActions( gentity_t *ent, int msec )
     else
       client->pers.barbRegenTime = level.time;
   }
+
+  // limit the broadcasting of invis players to guard against wallhax
+  if(
+    (client->ps.eFlags & EF_INVISIBILE) &&
+    (client->ps.weapon != WP_LUCIFER_CANNON)) {
+    if(
+        (client->ps.eFlags & EF_INVINCIBLE) ||
+        (
+          client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
+          (client->ps.eFlags & EF_EVOLVING))) {
+      client->invisTime = level.time + 1000;
+    }
+
+    //check if the player would be marking the surface of the water
+    if(level.time > client->invisTime) {
+      vec3_t   end, start;
+      int      contents1, contents2;
+
+      VectorCopy(ent->r.currentOrigin, end);
+      end[2] += ent->r.mins[2];
+
+      // if the feet aren't in liquid, don't make a mark
+      // this won't handle moving water brushes, but they wouldn't draw right anyway...
+      contents1 = SV_PointContents( end, 0 );
+
+      VectorCopy(ent->r.currentOrigin, start );
+      start[ 2 ] += 32;
+
+      // if the head isn't out of liquid, don't make a mark
+      contents2 = SV_PointContents( start, 0 );
+
+      if(
+        (contents1 & (CONTENTS_WATER|CONTENTS_SLIME|CONTENTS_LAVA)) &&
+        !(contents2 & (CONTENTS_SOLID|CONTENTS_WATER|CONTENTS_SLIME|CONTENTS_LAVA))) {
+        client->invisTime = level.time + 1000;
+      }
+    }
+
+    if(level.time > client->invisTime) {
+      ent->r.svFlags |= SVF_CLIENTMASK_EXCLUSIVE;
+
+      ent->r.hack.generic1 = 0;
+      ent->r.singleClient = 0;
+      for(i = 0; i < level.maxclients; ++i) {
+        gclient_t *client_other;
+        gentity_t *other;
+
+        other = &g_entities[i];
+        client_other = &level.clients[i];
+        if(client_other->pers.connected != CON_CONNECTED) {
+          continue;
+        }
+
+        if(
+          (client->pers.teamSelection != client_other->ps.stats[STAT_TEAM]) &&
+          client->invisCollisionTime[i] <= level.time) {
+          //check for possible collision
+          if(
+            (other->clipmask & ent->r.contents) &&
+            G_Visible(other, ent, other->clipmask)) {
+            float radius1, radius2;
+
+            radius1 = RadiusFromBounds(ent->r.mins, ent->r.maxs);
+            radius1 +=
+              (
+                MAX(VectorLength(client->ps.velocity), client->ps.speed) *
+                MIN(MAX(client_other->ps.ping, 50), 333)) / 1000;
+
+            radius2 = RadiusFromBounds(other->r.mins, other->r.maxs);
+            radius2 +=
+              (
+                MAX(VectorLength(client_other->ps.velocity), client_other->ps.speed) *
+                MIN(MAX(client_other->ps.ping, 50), 333)) / 1000;
+
+            if(
+              (radius1 + radius2) >
+                Distance(ent->r.currentOrigin, other->r.currentOrigin)) {
+              client->invisCollisionTime[i] =
+                level.time + (MIN(MAX(client_other->ps.ping, 50), 333) * 2);
+            } else {
+              continue;
+            }
+          } else {
+            continue;
+          }
+        }
+
+        if(i >= 32) {
+          ent->r.hack.generic1 |= 1 << ( i - 32 );
+        } else {
+          ent->r.singleClient |= 1 << i;
+        }
+      }
+    } else {
+      ent->r.svFlags &= ~SVF_CLIENTMASK_EXCLUSIVE;
+    }
+  }
 }
 
 /*
@@ -1418,6 +1520,52 @@ void ClientEvents( gentity_t *ent, int oldEventSequence )
 
       default:
         break;
+    }
+
+    //check for any events that need to be broadcasted for invis players
+    if(
+      (client->ps.eFlags & EF_INVISIBILE) &&
+      (client->ps.weapon != WP_LUCIFER_CANNON)) {
+      switch (event) {
+        case EV_FOOTSPLASH:
+        case EV_FOOTWADE:
+        case EV_JUMP:
+        case EV_JETJUMP:
+        case EV_WATER_TOUCH:
+        case EV_WATER_LEAVE:
+        case EV_WATER_UNDER:
+        case EV_WATER_CLEAR:
+        case EV_FIRE_WEAPON:
+        case EV_FIRE_WEAPON2:
+        case EV_FIRE_WEAPON3:
+        case EV_BULLET_HIT_FLESH:
+        case EV_SPLATTER:
+        case EV_MISSILE_HIT:
+        case EV_MISSILE_MISS:
+        case EV_BULLET:
+        case EV_LEV1_GRAB:
+        case EV_PAIN:
+        case EV_DEATH1:
+        case EV_DEATH2:
+        case EV_DEATH3:
+        case EV_GIB_PLAYER:
+        case EV_GIB_BSUIT:
+        case EV_GIB_SPITFIRE_WINGS:
+        case EV_BUILD_FIRE:
+        case EV_MEDKIT_USED:
+        case EV_ALIEN_SPAWN_PROTECTION_ENDED:
+        case EV_ALIEN_EVOLVE:
+        case EV_STOPLOOPINGSOUND:
+        case EV_TAUNT:
+        case EV_JETPACK_DEACTIVATE:
+        case EV_JETPACK_REFUEL:
+          client->invisTime = level.time + 1000;
+          ent->r.svFlags &= ~SVF_CLIENTMASK_EXCLUSIVE;
+          break;
+
+        default:
+          break;
+      }
     }
   }
 }
@@ -2167,7 +2315,7 @@ void ClientThink_real( gentity_t *ent )
 
   if(
     client->ps.stats[ STAT_TEAM ] == TEAM_ALIENS &&
-    (client->ps.eFlags & EF_EVOLVING ) &&
+    (client->ps.eFlags & EF_EVOLVING) &&
     (client->ps.stats[ STAT_MISC3 ] <= 0 || ent->health <= 0)) {
     // evolution has completed
     client->ps.eFlags &= ~EF_EVOLVING;

@@ -666,6 +666,8 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   int       i;
   char      *killerName, *obit;
 
+  self->r.svFlags &= ~SVF_CLIENTMASK_EXCLUSIVE;
+
   if( self->client->ps.pm_type == PM_DEAD &&
       meansOfDeath != MOD_SELFDESTRUCT )
     return;
