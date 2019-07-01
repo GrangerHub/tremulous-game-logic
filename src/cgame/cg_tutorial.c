@@ -343,7 +343,7 @@ static void CG_AlienLevel1Text( char *text, playerState_t *ps )
   }
 
   Q_strcat( text, MAX_TUTORIAL_TEXT,
-      "Touch humans to grab them\n" );
+      "swipe humans to grab them\n" );
 
   Q_strcat( text, MAX_TUTORIAL_TEXT,
       va( "Press %s to swipe\n",

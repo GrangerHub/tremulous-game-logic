@@ -4306,25 +4306,24 @@ static void PM_Footsteps( void )
   // if we just crossed a cycle boundary, play an apropriate footstep event
   if( ( ( old + 1024 ) ^ ( pm->ps->misc[MISC_BOB_CYCLE] + 1024 ) ) & 2048 )
   {
-    if( pm->waterlevel == 0 )
-    {
-      // on ground will only play sounds if running
-      if( footstep && !pm->noFootsteps )
-        PM_AddEvent( PM_FootstepForSurface( ) );
-    }
-    else if( pm->waterlevel == 1 )
-    {
-      // splashing
-      PM_AddEvent( EV_FOOTSPLASH );
-    }
-    else if( pm->waterlevel == 2 )
-    {
-      // wading / swimming at surface
-      PM_AddEvent( EV_SWIM );
-    }
-    else if( pm->waterlevel == 3 )
-    {
-      // no sound when completely underwater
+    //no footstep sounds while invis
+    if(
+      !(
+        (pm->ps->eFlags & EF_INVISIBILE) &&
+        (pm->ps->weapon != WP_LUCIFER_CANNON))) {
+      if( pm->waterlevel == 0 ) {
+        // on ground will only play sounds if running
+        if( footstep && !pm->noFootsteps )
+          PM_AddEvent( PM_FootstepForSurface( ) );
+      } else if( pm->waterlevel == 1 ) {
+        // splashing
+        PM_AddEvent( EV_FOOTSPLASH );
+      } else if( pm->waterlevel == 2 ) {
+        // wading / swimming at surface
+        PM_AddEvent( EV_SWIM );
+      } else if( pm->waterlevel == 3 ) {
+        // no sound when completely underwater
+      }
     }
   }
 }
@@ -4338,6 +4337,12 @@ Generate sound events for entering and leaving water
 */
 static void PM_WaterEvents( void )
 {
+  if(
+    (pm->ps->eFlags & EF_INVISIBILE) &&
+    (pm->ps->weapon != WP_LUCIFER_CANNON)) {
+    return;
+  }
+
   // FIXME?
   //
   // if just entered a water volume, play a sound

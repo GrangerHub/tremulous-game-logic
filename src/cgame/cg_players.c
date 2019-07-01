@@ -1785,6 +1785,20 @@ static void CG_PlayerSplash( centity_t *cent, class_t class )
   if( !cg_shadows.integer )
     return;
 
+  if(cent->invis &&
+    cent->invisTime >= 1000 &&
+    !(cent->currentState.modelindex & ( 1 << UP_BATTLESUIT))) {
+    if(
+      (
+        cgs.clientinfo[cent->currentState.number].team !=
+          cgs.clientinfo[cg.clientNum].team) &&
+      !(
+        cg_spectatorWallhack.integer &&
+        cgs.clientinfo[ cg.clientNum ].team == TEAM_NONE)) {
+      return;
+    }
+  }
+
   BG_ClassBoundingBox( class, mins, maxs, NULL, NULL, NULL );
 
   VectorCopy( cent->lerpOrigin, end );
@@ -2204,7 +2218,11 @@ void CG_Player( centity_t *cent )
         !( held & ( 1 << UP_BATTLESUIT ) ) )
     {
       legs.shaderTime = cent->invisTime/1000.0f;
-      if( ci->team != cg.snap->ps.stats[ STAT_TEAM ] )
+      if(
+        (ci->team != cgs.clientinfo[ cg.clientNum ].team) &&
+        !(
+          cg_spectatorWallhack.integer &&
+          cgs.clientinfo[ cg.clientNum ].team == TEAM_NONE))
       {
         if( cg.time - cent->invisTime < 1000  )
           legs.customShader = cgs.media.invisFadeShader;
@@ -2272,7 +2290,11 @@ void CG_Player( centity_t *cent )
              !( held & ( 1 << UP_BATTLESUIT ) ) )
     {
       legs.shaderTime = cent->invisTime/1000.0f;
-      if( ci->team != cg.snap->ps.stats[ STAT_TEAM ] )
+      if(
+        (ci->team != cgs.clientinfo[ cg.clientNum ].team) &&
+        !(
+          cg_spectatorWallhack.integer &&
+          cgs.clientinfo[ cg.clientNum ].team == TEAM_NONE))
       {
         if( cg.time - cent->invisTime < 1000  )
           legs.customShader = cgs.media.invisFadeShader;
@@ -2408,7 +2430,11 @@ void CG_Player( centity_t *cent )
         !( held & ( 1 << UP_BATTLESUIT ) ) )
     {
       torso.shaderTime = cent->invisTime/1000.0f;
-      if( ci->team != cg.snap->ps.stats[ STAT_TEAM ] )
+      if(
+        (ci->team != cgs.clientinfo[ cg.clientNum ].team) &&
+        !(
+          cg_spectatorWallhack.integer &&
+          cgs.clientinfo[ cg.clientNum ].team == TEAM_NONE))
       {
         if( cg.time - cent->invisTime < 1000  )
           torso.customShader = cgs.media.invisFadeShader;
@@ -2481,7 +2507,11 @@ void CG_Player( centity_t *cent )
         !( held & ( 1 << UP_BATTLESUIT ) ) )
     {
       head.shaderTime = cent->invisTime/1000.0f;
-      if( ci->team != cg.snap->ps.stats[ STAT_TEAM ] )
+      if(
+        (ci->team != cgs.clientinfo[ cg.clientNum ].team) &&
+        !(
+          cg_spectatorWallhack.integer &&
+          cgs.clientinfo[ cg.clientNum ].team == TEAM_NONE))
       {
         if( cg.time - cent->invisTime < 1000  )
           head.customShader = cgs.media.invisFadeShader;
