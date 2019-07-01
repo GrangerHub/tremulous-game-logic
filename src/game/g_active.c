@@ -1366,20 +1366,20 @@ void ClientTimerActions( gentity_t *ent, int msec )
             radius1 +=
               (
                 MAX(VectorLength(client->ps.velocity), client->ps.speed) *
-                MIN(MAX(client_other->ps.ping, 50), 333)) / 1000;
+                100) / 1000;
 
             radius2 = RadiusFromBounds(other->r.mins, other->r.maxs);
             radius2 +=
               (
                 MAX(VectorLength(client_other->ps.velocity), client_other->ps.speed) *
-                MIN(MAX(client_other->ps.ping, 50), 333)) / 1000;
+                100) / 1000;
 
             if(
               ((radius1 + radius2) >
                 Distance(ent->r.currentOrigin, other->r.currentOrigin)) &&
               G_Visible(other, ent, other->clipmask)) {
               client->invisCollisionTime[i] =
-                level.time + (MIN(MAX(client_other->ps.ping, 50), 333) * 2);
+                level.time + 100;
             } else {
               continue;
             }
