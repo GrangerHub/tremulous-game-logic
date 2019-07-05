@@ -217,5 +217,6 @@
 #define CG_PLAYER_JETPACK_FUEL          99
 #define CG_PLAYER_ARMOR_SHIELD          100
 #define CG_PLAYER_ARMOR                 101
+#define CG_KILLFEED                     102
 
 #endif

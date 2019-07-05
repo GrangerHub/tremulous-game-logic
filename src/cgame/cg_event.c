@@ -28,6 +28,120 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #include "cg_local.h"
 
 /*
+=======================
+CG_AddToKillMsg
+
+=======================
+*/
+void CG_AddToKillMsg( const char* killername, const char* victimname, int icon )
+{
+  int   klen, vlen, index;
+  char  *kls, *vls;
+  char  *k, *v;
+  int   lastcolor;
+  int   chatHeight;
+
+  if( cg_killMsgHeight.integer < TEAMCHAT_HEIGHT )
+    chatHeight = cg_killMsgHeight.integer;
+  else
+    chatHeight = TEAMCHAT_HEIGHT;
+
+  if( chatHeight <= 0 || cg_killMsgTime.integer <= 0 ) {
+    cgs.killMsgPos = cgs.killMsgLastPos = 0;
+    return;
+  }
+
+  index = cgs.killMsgPos % chatHeight;
+  klen = vlen = 0;
+
+  k = cgs.killMsgKillers[ index ]; *k=0;
+  v = cgs.killMsgVictims[ index ]; *v=0;
+  cgs.killMsgWeapons[ index ] = icon;
+
+  memset( k, '\0', sizeof(cgs.killMsgKillers[index]));
+  memset( v, '\0', sizeof(cgs.killMsgVictims[index]));
+  kls = vls = NULL;
+
+  lastcolor = '7';
+
+  // Killers name
+  while( *killername )
+  {
+    if( klen > TEAMCHAT_WIDTH-1 ) {
+      if( kls ) {
+        killername -= ( k - kls );
+        killername ++;
+        k -= ( k - kls );
+      }
+      *k = 0;
+
+//      cgs.killMsgMsgTimes[index] = cg.time;
+      k = cgs.killMsgKillers[index];
+      *k = 0;
+      *k++ = Q_COLOR_ESCAPE;
+      *k++ = lastcolor;
+      klen = 0;
+      kls = NULL;
+    }
+
+    if( Q_IsColorString( killername ) )
+    {
+      *k++ = *killername++;
+      lastcolor = *killername;
+      *k++ = *killername++;
+      continue;
+    }
+
+    if( *killername == ' ' )
+      kls = k;
+
+    *k++ = *killername++;
+    klen++;
+  }
+
+  // Victims name
+  if (victimname)
+      while( *victimname )
+      {
+        if( vlen > TEAMCHAT_WIDTH-1 ) {
+          if( vls ) {
+            victimname -= ( v - vls );
+            victimname ++;
+            v -= ( v - vls );
+          }
+          *v = 0;
+
+          v = cgs.killMsgVictims[index];
+          *v = 0;
+          *v++ = Q_COLOR_ESCAPE;
+          *v++ = lastcolor;
+          vlen = 0;
+          vls = NULL;
+        }
+
+        if( Q_IsColorString( victimname ) )
+        {
+          *v++ = *victimname++;
+          lastcolor = *victimname;
+          *v++ = *victimname++;
+          continue;
+        }
+
+        if( *victimname == ' ' )
+          vls = v;
+
+        *v++ = *victimname++;
+        vlen++;
+      }
+
+  cgs.killMsgMsgTimes[ index ] = cg.time;
+  cgs.killMsgPos++;
+
+  if( cgs.killMsgPos - cgs.killMsgLastPos > chatHeight )
+    cgs.killMsgLastPos = cgs.killMsgPos - chatHeight;
+}
+
+/*
 =============
 CG_Obituary
 =============
@@ -46,10 +160,13 @@ static void CG_Obituary( entityState_t *ent )
   gender_t      gender;
   clientInfo_t  *ci;
   qboolean      teamKill = qfalse;
+  qboolean      skipnotify = qfalse;
+  weapon_t      icon;
 
   target = ent->otherEntityNum;
   attacker = ent->otherEntityNum2;
   mod = ent->eventParm;
+  icon = ent->weapon;
 
   if( target < 0 || target >= MAX_CLIENTS )
     CG_Error( "CG_Obituary: target out of range" );
@@ -229,7 +346,18 @@ static void CG_Obituary( entityState_t *ent )
 
   if( message )
   {
-    CG_Printf( "%s" S_COLOR_WHITE " %s\n", targetName, message );
+    if(
+      cg_killMsg.integer != 0 &&
+      (!(cgs.voteTime[TEAM_NONE] || cgs.voteTime[cg.predictedPlayerState.stats[STAT_TEAM]]))) {
+      CG_AddToKillMsg(va("%s ^7%s", targetName, message), NULL, WP_NONE);
+      skipnotify = qtrue;
+    }
+
+    if(skipnotify) {
+      CG_Printf( "[skipnotify]%s" S_COLOR_WHITE " %s\n", targetName, message );
+    } else {
+      CG_Printf( "%s" S_COLOR_WHITE " %s\n", targetName, message );
+    }
     return;
   }
 
@@ -396,17 +524,45 @@ static void CG_Obituary( entityState_t *ent )
         break;
     }
 
-    if( message )
-    {
-      CG_Printf( "%s" S_COLOR_WHITE " %s %s%s" S_COLOR_WHITE "%s\n",
-        targetName, message,
-        ( teamKill ) ? S_COLOR_RED "TEAMMATE " S_COLOR_WHITE : "",
-        attackerName, message2 );
-      if( teamKill && attacker == cg.clientNum )
-      {
+    if(
+      cg_killMsg.integer != 0 &&
+      (!(cgs.voteTime[TEAM_NONE] || cgs.voteTime[cg.predictedPlayerState.stats[STAT_TEAM]]))) {
+      if(cg_killMsg.integer == 2 && icon > WP_NONE) {
+        char killMessage[80];
+
+        Com_sprintf(killMessage, sizeof(killMessage), "%s%s",
+                    teamKill ? "^1TEAMMATE ^7":"",
+                    targetName);
+        CG_AddToKillMsg(attackerName, killMessage, icon);
+      } else {
+        CG_AddToKillMsg(
+          va("%s ^7%s %s%s",
+            targetName, message,
+            teamKill ? "^1TEAMMATE ^7" : "",
+                    attackerName), NULL, WP_NONE);
+      }
+
+      skipnotify = qtrue;
+    }
+
+    if(message) {
+      if(skipnotify) {
+        CG_Printf( "[skipnotify]%s" S_COLOR_WHITE " %s %s%s" S_COLOR_WHITE "%s\n",
+          targetName, message,
+          ( teamKill ) ? S_COLOR_RED "TEAMMATE " S_COLOR_WHITE : "",
+          attackerName, message2 );
+      } else {
+        CG_Printf( "%s" S_COLOR_WHITE " %s %s%s" S_COLOR_WHITE "%s\n",
+          targetName, message,
+          ( teamKill ) ? S_COLOR_RED "TEAMMATE " S_COLOR_WHITE : "",
+          attackerName, message2 );
+      }
+
+      
+      if( teamKill && attacker == cg.clientNum ) {
         CG_CenterPrint( CP_TEAM_KILL,
                         va ( "You killed " S_COLOR_RED "TEAMMATE "
-                             S_COLOR_WHITE "%s", targetName ),
+                           S_COLOR_WHITE "%s", targetName ),
                         BIGCHAR_WIDTH, -1 );
       }
       return;
@@ -414,7 +570,17 @@ static void CG_Obituary( entityState_t *ent )
   }
 
   // we don't know what it was
-  CG_Printf( "%s" S_COLOR_WHITE " died\n", targetName );
+  if(
+    cg_killMsg.integer != 0 &&
+    (!(cgs.voteTime[TEAM_NONE] || cgs.voteTime[cg.predictedPlayerState.stats[STAT_TEAM]]))) {
+    CG_AddToKillMsg(va("%s ^7%s", targetName, message), NULL, WP_NONE);
+    skipnotify = qtrue;
+  }
+  if(skipnotify) {
+    CG_Printf("[skipnotify]%s" S_COLOR_WHITE " %s\n", targetName, message);
+  } else {
+    CG_Printf("%s" S_COLOR_WHITE " %s\n", targetName, message);
+  }
 }
 
 

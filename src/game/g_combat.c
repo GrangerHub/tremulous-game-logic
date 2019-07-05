@@ -412,6 +412,14 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   ent->s.eventParm = meansOfDeath;
   ent->s.otherEntityNum = self->s.number;
   ent->s.otherEntityNum2 = killer;
+  if(
+    inflictor &&
+    inflictor->s.number != ENTITYNUM_WORLD &&
+    inflictor->s.number != ENTITYNUM_NONE) {
+    ent->s.weapon = inflictor->s.weapon;
+  } else {
+    ent->s.weapon = WP_NONE;
+  }
   ent->r.svFlags = SVF_BROADCAST; // send to everyone
 
   self->enemy = attacker;
