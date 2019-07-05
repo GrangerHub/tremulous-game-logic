@@ -2176,6 +2176,8 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum )
   cgs.processedSnapshotNum = serverMessageNum;
   cgs.serverCommandSequence = serverCommandSequence;
 
+  CG_Validate_Tab_Overlay_Modes();
+
   // get the rendering configuration from the client system
   trap_GetGlconfig( &cgs.glconfig );
   cgs.screenXScale = cgs.glconfig.vidWidth / 640.0f;
@@ -2293,6 +2295,8 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum )
   trap_S_ClearLoopingSounds( qtrue );
 
   trap_SendClientCommand("replacable_buildables\n");
+
+  CG_RequestTeamStatus();
 }
 
 /*

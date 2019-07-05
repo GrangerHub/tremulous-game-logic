@@ -840,6 +840,9 @@ typedef struct
 
   int               numAlienSpawns;
   int               numHumanSpawns;
+  int               num_buildables[BA_NUM_BUILDABLES];
+  qboolean          core_buildable_constructing[NUM_TEAMS];
+  int               core_buildable_health[NUM_TEAMS];
 
   int               numAlienClients;
   int               numHumanClients;
@@ -1466,7 +1469,7 @@ void     MoveClientToIntermission( gentity_t *client );
 void     G_MapConfigs( const char *mapname );
 void     CalculateRanks( qboolean check_exit_rules );
 void     FindIntermissionPoint( void );
-void     G_CountSpawns( void );
+void     G_CountBuildables( void );
 void     G_RunThink( gentity_t *ent );
 void     G_AdminMessage( gentity_t *ent, const char *string );
 void     QDECL G_LogPrintf( const char *fmt, ... ) __attribute__ ((format (printf, 1, 2)));

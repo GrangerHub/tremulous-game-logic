@@ -1911,6 +1911,12 @@ void CG_NextWeapon_f( void )
   if( !cg.snap )
     return;
 
+  if(CG_Num_Showable_Tab_Overlay_Modes() > 0) {
+    CG_Next_Tab_Overlay_Mode();
+
+    return;
+  }
+
   if( cg.snap->ps.pm_flags & PMF_FOLLOW )
   {
     trap_SendClientCommand( "followprev\n" );
@@ -1954,6 +1960,12 @@ void CG_PrevWeapon_f( void )
 
   if( !cg.snap )
     return;
+
+  if(CG_Num_Showable_Tab_Overlay_Modes() > 0) {
+    CG_Prev_Tab_Overlay_Mode();
+
+    return;
+  }
 
   if( cg.snap->ps.pm_flags & PMF_FOLLOW )
   {

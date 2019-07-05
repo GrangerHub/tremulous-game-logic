@@ -73,6 +73,34 @@ static void CG_ParseScores( void )
 
 /*
 =================
+CG_Parse_Team_Status
+
+=================
+*/
+static void CG_Parse_Team_Status(void) {
+  int   i;
+  int   total_buildables;
+
+  total_buildables = ( trap_Argc( ) - 4 ) / 2;
+
+  Com_Assert(total_buildables <= BA_NUM_BUILDABLES);
+
+  cg.team_status.num_builders = atoi(CG_Argv(1));
+  cg.team_status.core_buildable_health = atoi(CG_Argv(2));
+  cg.team_status.core_buildable_constructing = atoi(CG_Argv(3));
+
+  memset(
+    cg.team_status.num_buildables, 0, sizeof(cg.team_status.num_buildables));
+
+  for(i = 0; i < total_buildables; i++) {
+    //
+    cg.team_status.num_buildables[atoi(CG_Argv(i * 2 + 4))] =
+      atoi(CG_Argv(i * 2 + 5));
+  }
+}
+
+/*
+=================
 CG_ParseReplacableBuildables
 
 =================
@@ -115,6 +143,7 @@ static void CG_ParseTeamInfo( void )
 
     cgs.clientinfo[ client ].location       = atoi( CG_Argv( ++i ) );
     cgs.clientinfo[ client ].health         = BG_HP2SU( atoi( CG_Argv( ++i ) ) );
+    cgs.clientinfo[ client ].credits        = atoi( CG_Argv( ++i ) );
     cgs.clientinfo[ client ].curWeaponClass = atoi( CG_Argv( ++i ) );
     if( cg.snap->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
       cgs.clientinfo[ client ].upgrade      = atoi( CG_Argv( ++i ) );
@@ -1830,6 +1859,7 @@ static consoleCommand_t svcommands[ ] =
   { "scores", CG_ParseScores },
   { "serverclosemenus", CG_ServerCloseMenus_f },
   { "servermenu", CG_ServerMenu_f },
+  { "teamstatus", CG_Parse_Team_Status },
   { "tinfo", CG_ParseTeamInfo },
   { "voice", CG_ParseVoice }
 };

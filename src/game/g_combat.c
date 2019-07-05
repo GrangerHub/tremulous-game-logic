@@ -1556,7 +1556,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       if(
         targ->s.eType == ET_BUILDABLE &&
         BG_Buildable(targ->s.modelindex)->role & ROLE_SPAWN) {
-        G_CountSpawns( );
+        G_CountBuildables( );
       }
       if( ( targ->activation.flags & ACTF_OCCUPY ) &&
           ( targ->flags & FL_OCCUPIED ) &&
