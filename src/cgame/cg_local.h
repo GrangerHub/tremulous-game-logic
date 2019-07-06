@@ -74,6 +74,9 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define CHAR_HEIGHT         48
 #define TEXT_ICON_SPACE     4
 
+#define TEAMCHAT_WIDTH     80
+#define TEAMCHAT_HEIGHT     8
+
 // very large characters
 #define GIANT_WIDTH         32
 #define GIANT_HEIGHT        48
@@ -1594,6 +1597,14 @@ typedef struct
 
   voice_t       *voices;
 
+  // Kill Message
+  char          killMsgKillers[ TEAMCHAT_HEIGHT ][ 33*3+1 ];
+  char          killMsgVictims[ TEAMCHAT_HEIGHT ][ 33*3+1 ];
+  int           killMsgWeapons[ TEAMCHAT_HEIGHT ];
+  int           killMsgMsgTimes[ TEAMCHAT_HEIGHT ];
+  int           killMsgPos;
+  int           killMsgLastPos;
+
   // playmap
   char		playMapPoolJson[ MAX_PLAYMAP_POOL_CHARS ];
 } cgs_t;
@@ -1782,6 +1793,10 @@ extern  vmCvar_t    cg_emoticons;
 
 extern  vmCvar_t    cg_chatTeamPrefix;
 
+extern  vmCvar_t    cg_killMsg;
+extern  vmCvar_t    cg_killMsgTime;
+extern  vmCvar_t    cg_killMsgHeight;
+
 extern  vmCvar_t    cg_intermissionMusic;
 
 //
@@ -1952,6 +1967,8 @@ void        CG_PredictPlayerState( void );
 void        CG_CheckEvents( centity_t *cent );
 void        CG_EntityEvent( centity_t *cent, vec3_t position );
 void        CG_PainEvent( centity_t *cent, pain_t painState );
+
+void        CG_AddToKillMsg(const char* killername, const char* victimname, int icon);
 
 
 //
