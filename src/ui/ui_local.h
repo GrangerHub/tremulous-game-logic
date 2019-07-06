@@ -280,9 +280,9 @@ typedef struct
   int         helpCount;
   int         helpIndex;
 
-  int         weapons;
+  long        weapons;
   int         upgrades;
-  int         heldWeapon;
+  long        heldWeapon;
 
   serverStatus_t serverStatus;
 

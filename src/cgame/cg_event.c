@@ -305,6 +305,15 @@ static void CG_Obituary( entityState_t *ent )
           message = "shredded himself";
         break;
 
+      case MOD_LASERMINE:
+        if( gender == GENDER_FEMALE )
+          message = "tripped her own laser mine ";
+        else if( gender == GENDER_NEUTER )
+          message = "tripped its own laser mine";
+        else
+          message = "tripped his own laser mine";
+        break;
+
       case MOD_LIGHTNING:
       case MOD_LIGHTNING_EMP:
         if( gender == GENDER_FEMALE )
@@ -444,6 +453,10 @@ static void CG_Obituary( entityState_t *ent )
       case MOD_FRAGNADE:
         message = "was shredded by";
         message2 = "'s frag grenade";
+        break;
+      case MOD_LASERMINE:
+        message = "tripped";
+        message2 = "'s laser mine";
         break;
       case MOD_GRENADE_LAUNCHER:
         message = "was pulverized by";
@@ -1075,6 +1088,10 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
         }
         break;
       }
+
+    case EV_LASERMINE_ARMED:
+      trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.lasermineArmedSound );
+      break;
 
     //
     // missile impacts

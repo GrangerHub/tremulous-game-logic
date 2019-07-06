@@ -586,6 +586,19 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define FRAGNADE_SIZE                3.0f        // missile bounding box
 #define FRAGNADE_LIFETIME            2000
 
+#define LASERMINE_PRICE             500
+#define LASERMINE_REPEAT            0
+#define LASERMINE_K_SCALE           1.0f
+#define LASERMINE_DAMAGE            HWDM(400000)
+#define LASERMINE_RANGE             300.0f
+#define LASERMINE_SPEED             500.0f
+#define LASERMINE_TRIP_RANGE        250.0f
+#define	LASERMINE_INIT_TIME         10000
+#define LASERMINE_CHECK_FREQUENCY   100
+#define	LASERMINE_BOOM_TIME         50
+#define	LASERMINE_SELF_DESTRUCT     120000
+#define LASERMINE_HEALTH            30
+
 #define SHOTGUN_PRICE               175
 #define SHOTGUN_SHELLS              10
 #define SHOTGUN_PELLETS             15 //used to sync server and client side

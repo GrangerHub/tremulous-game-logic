@@ -2613,6 +2613,21 @@ void ClientThink_real( gentity_t *ent )
     ent->s.weapon = lastWeapon;
   }
 
+  if( BG_InventoryContainsUpgrade( UP_LASERMINE, client->ps.stats ) &&
+      BG_UpgradeIsActive( UP_LASERMINE, client->ps.stats ) )
+  {
+    int lastWeapon = ent->s.weapon;
+
+    //remove lasermine
+    BG_DeactivateUpgrade( UP_LASERMINE, client->ps.stats );
+    BG_RemoveUpgradeFromInventory( UP_LASERMINE, client->ps.stats );
+
+    //M-M-M-M-MONSTER HACK
+    ent->s.weapon = WP_LASERMINE;
+    FireWeapon( ent );
+    ent->s.weapon = lastWeapon;
+  }
+
   // set speed
   if( client->ps.pm_type == PM_NOCLIP )
     client->ps.speed = client->pers.flySpeed;

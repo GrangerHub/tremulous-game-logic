@@ -2737,7 +2737,7 @@ static void UI_LoadAlienBuilds( void )
   for( i = BA_NONE + 1; i < BA_NUM_BUILDABLES; i++ )
   {
     if( BG_Buildable( i )->team == TEAM_ALIENS &&
-        BG_Buildable( i )->buildWeapon & uiInfo.weapons &&
+        ((( 1 << ((long)(BG_Buildable( i )->buildWeapon1))) & uiInfo.weapons) || (( 1 << ((long)(BG_Buildable( i )->buildWeapon2))) & uiInfo.weapons)) &&
         BG_BuildableAllowedInStage( i, stage, UI_GameIsInWarmup( ) ) &&
         BG_BuildableIsAllowed( i, UI_DevModeIsOn( ) ) )
     {
@@ -2772,7 +2772,7 @@ static void UI_LoadHumanBuilds( void )
   for( i = BA_NONE + 1; i < BA_NUM_BUILDABLES; i++ )
   {
     if( BG_Buildable( i )->team == TEAM_HUMANS &&
-        BG_Buildable( i )->buildWeapon & uiInfo.heldWeapon &&
+        ((( 1 << ((long)(BG_Buildable( i )->buildWeapon1))) & uiInfo.heldWeapon) || (( 1 << ((long)(BG_Buildable( i )->buildWeapon2))) & uiInfo.heldWeapon)) &&
         BG_BuildableAllowedInStage( i, stage, UI_GameIsInWarmup( ) ) &&
         BG_BuildableIsAllowed( i, UI_DevModeIsOn( ) ) )
     {

@@ -712,6 +712,7 @@ typedef enum
   WP_LUCIFER_CANNON,
   WP_GRENADE,
   WP_FRAGNADE,
+  WP_LASERMINE,
   WP_LAUNCHER,
   WP_LIGHTNING,
 
@@ -744,6 +745,7 @@ typedef enum
   UP_BATTLESUIT,
   UP_GRENADE,
   UP_FRAGNADE,
+  UP_LASERMINE,
 
   UP_AMMO,
   UP_JETFUEL,
@@ -888,6 +890,8 @@ typedef enum
   EV_PLAYER_TELEPORT_OUT,
 
   EV_GRENADE_BOUNCE,    // eventParm will be the soundindex
+
+  EV_LASERMINE_ARMED,
 
   EV_GENERAL_SOUND,
   EV_GLOBAL_SOUND,    // no attenuation
@@ -1325,6 +1329,7 @@ typedef enum
   MOD_FLAMER_SPLASH,
   MOD_GRENADE,
   MOD_FRAGNADE,
+  MOD_LASERMINE,
   MOD_GRENADE_LAUNCHER,
   MOD_LIGHTNING,
   MOD_LIGHTNING_EMP,
@@ -1519,7 +1524,8 @@ typedef struct
   int           meansOfDeath;
 
   team_t        team;
-  weapon_t      buildWeapon;
+  weapon_t      buildWeapon1;
+  weapon_t      buildWeapon2;
 
   int           idleAnim;
 

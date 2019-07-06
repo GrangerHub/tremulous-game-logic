@@ -66,6 +66,8 @@ void CG_RegisterUpgrade( int upgradeNum )
     upgradeInfo->upgradeIcon = cg_weapons[ WP_GRENADE ].weaponIcon;
   else if( upgradeNum == UP_FRAGNADE )
     upgradeInfo->upgradeIcon = cg_weapons[ WP_FRAGNADE ].weaponIcon;
+  else if( upgradeNum == UP_LASERMINE )
+    upgradeInfo->upgradeIcon = cg_weapons[ WP_LASERMINE ].weaponIcon;
   else if( ( icon = BG_Upgrade( upgradeNum )->icon ) )
     upgradeInfo->upgradeIcon = trap_R_RegisterShader( icon );
 }
@@ -831,6 +833,7 @@ void CG_InitWeapons( void )
 
   cgs.media.level2ZapTS = CG_RegisterTrailSystem( "models/weapons/lev2zap/lightning" );
   cgs.media.ckitTS = CG_RegisterTrailSystem( "models/weapons/ckit/ckitTS" );
+  cgs.media.lasermineTS =  CG_RegisterTrailSystem( "models/weapons/lasermine/lasermineTS" );
   cgs.media.spitfireZapTS = CG_RegisterTrailSystem( "models/weapons/spitfire/spitfireZapTS" );
   cgs.media.massDriverTS = CG_RegisterTrailSystem( "models/weapons/mdriver/fireTS" );
 }

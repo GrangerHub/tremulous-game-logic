@@ -1083,6 +1083,9 @@ static void CG_RegisterSounds( void )
   cgs.media.hardBounceSound1        = trap_S_RegisterSound( "sound/misc/hard_bounce1.wav", qfalse );
   cgs.media.hardBounceSound2        = trap_S_RegisterSound( "sound/misc/hard_bounce2.wav", qfalse );
 
+  cgs.media.lasermineArmedSound     = trap_S_RegisterSound( "models/weapons/lasermine/armed.wav", qfalse );
+  cgs.media.lasermineIdleSound     = trap_S_RegisterSound( "models/weapons/lasermine/idle0.wav", qfalse );
+
   cgs.media.repeaterUseSound        = trap_S_RegisterSound( "sound/buildables/repeater/use.wav", qfalse );
 
   cgs.media.buildableRepairSound    = trap_S_RegisterSound( "sound/buildables/human/repair.wav", qfalse );

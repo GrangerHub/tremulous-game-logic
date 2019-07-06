@@ -457,6 +457,65 @@ static void CG_LaunchMissile( centity_t *cent )
 
 /*
 ===============
+CG_LaserMine
+===============
+*/
+
+static void CG_LaserMine(centity_t *cent, refEntity_t *ent) {
+  entityState_t           *es;
+  const weaponInfo_t      *wi;
+  weapon_t                weapon;
+  weaponMode_t            weaponMode;
+  const weaponInfoMode_t  *wim;
+
+  es = &cent->currentState;
+
+  if(es->eType != ET_MISSILE) {
+    return;
+  }
+
+  weapon = es->weapon;
+
+  if( weapon != WP_LASERMINE ) {
+    return;
+  }
+
+  wi = &cg_weapons[ weapon ];
+  weaponMode = es->generic1;
+
+  wim = &wi->wim[ weaponMode ];
+
+  AnglesToAxis(es->apos.trBase, ent->axis);
+
+  //draw laser beam
+  if(es->eFlags & EF_WARN_CHARGE) {
+    if(!CG_IsTrailSystemValid( &cent->lasermineTS)) {
+      //create a new trail
+      cent->lasermineTS = CG_SpawnNewTrailSystem( cgs.media.lasermineTS);
+    }
+
+    if(CG_IsTrailSystemValid(&cent->lasermineTS)) {
+      vec3_t  end;
+      trace_t trace;
+
+      VectorMA(es->pos.trBase, LASERMINE_TRIP_RANGE, es->origin2, end);
+      CG_Trace(&trace, es->pos.trBase, NULL, NULL, end, es->number, MASK_SHOT);
+      CG_SetAttachmentCent( &cent->lasermineTS->frontAttachment, cent );
+      CG_AttachToCent( &cent->lasermineTS->frontAttachment );
+      CG_SetAttachmentPoint( &cent->lasermineTS->backAttachment, trace.endpos );
+      CG_AttachToPoint(&cent->lasermineTS->backAttachment);
+    }
+
+    trap_S_AddLoopingSound( es->number, cent->lerpOrigin, vec3_origin, cgs.media.lasermineIdleSound );
+  } else if(CG_IsTrailSystemValid(&cent->lasermineTS)) {
+    CG_DestroyTrailSystem(&cent->lasermineTS);
+    cent->lasermineTS = NULL;
+  }
+
+}
+
+/*
+===============
 CG_Missile
 ===============
 */
@@ -551,6 +610,8 @@ static void CG_Missile( centity_t *cent )
       }
     }
   }
+
+  CG_LaserMine(cent, &ent);
 
   //only refresh if there is something to display
   if( wim->missileSprite || wim->missileModel )
@@ -1339,6 +1400,10 @@ static void CG_CEntityPVSLeave( centity_t *cent )
           CG_DestroyTrailSystem( &cent->spitfireZapTS[ i ] );
       }
       break;
+  }
+
+  if(CG_IsTrailSystemValid(&cent->lasermineTS)) {
+    CG_DestroyTrailSystem(&cent->lasermineTS);
   }
 }
 
