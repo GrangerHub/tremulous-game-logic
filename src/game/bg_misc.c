@@ -6020,17 +6020,17 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     TEAM_HUMANS             //team_t    team;
   },
   {
-    UP_BIOKIT,              //int   upgradeNum;
+    UP_BIOPACK,              //int   upgradeNum;
     qtrue,                  //qboolean enabled;
-    BIOKIT_PRICE,           //int   price;
+    BIOPACK_PRICE,           //int   price;
     qfalse,                 //qboolean warmupFree;
     ( 1 << S2 )|( 1 << S2 )|( 1 << S3 ),//int  stages
-    SLOT_NONE,              //int   slots;
-    "biokit",               //char  *upgradeName;
-    "Biokit",               //char  *humanName;
-    "A biological implant utilizing nanotech that enhances "
+    SLOT_BACKPACK,          //int   slots;
+    "biopack",               //char  *upgradeName;
+    "Biopack",               //char  *humanName;
+    "A backpack utilizing nanotech injected into the spine that enhances "
     " the user's health.",
-    "icons/iconu_biokit",
+    "icons/iconu_biopack",
     qtrue,                  //qboolean purchasable
     qtrue,                  //qboolean  sellable;
     qfalse,                 //qboolean usable

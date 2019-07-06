@@ -753,10 +753,10 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 #define MEDKIT_PRICE                30
 
-#define BIOKIT_PRICE                500
-#define BIOKIT_REGEN_REPEAT         750 // msec to regen 1 hp
-#define BIOKIT_MAX_HEALTH           150000 // initial max health when purchased
-#define BIOKIT_HEALTH_RESERVE       150000 // initial health reserve when purcased
+#define BIOPACK_PRICE                350
+#define BIOPACK_REGEN_REPEAT         750 // msec to regen 1 hp
+#define BIOPACK_MAX_HEALTH           150000 // initial max health when purchased
+#define BIOPACK_HEALTH_RESERVE       150000 // initial health reserve when purcased
 
 #define BATTPACK_PRICE              150
 #define BATTPACK_MODIFIER           1.5f //modifier for extra energy storage available

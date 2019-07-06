@@ -1406,6 +1406,7 @@ typedef struct
   qhandle_t jetpackModel;
   qhandle_t jetpackFlashModel;
   qhandle_t battpackModel;
+  qhandle_t biopackModel;
 
   qhandle_t portal;
   qhandle_t portalBlueSkin;

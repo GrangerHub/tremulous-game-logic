@@ -1486,6 +1486,7 @@ static void CG_PlayerUpgrades( centity_t *cent, refEntity_t *torso )
   qboolean      jetjump;
   refEntity_t   jetpack;
   refEntity_t   battpack;
+  refEntity_t   biopack;
   refEntity_t   flash;
   entityState_t *es = &cent->currentState;
 
@@ -1619,6 +1620,29 @@ static void CG_PlayerUpgrades( centity_t *cent, refEntity_t *torso )
       battpack.renderfx |= RF_DEPTHHACK;
     }
     trap_R_AddRefEntityToScene( &battpack );
+  }
+
+  if( held & ( 1 << UP_BIOPACK ) )
+  {
+    memset( &biopack, 0, sizeof( biopack ) );
+    VectorCopy( torso->lightingOrigin, biopack.lightingOrigin );
+    biopack.shadowPlane = torso->shadowPlane;
+    biopack.renderfx = torso->renderfx;
+
+    biopack.hModel = cgs.media.biopackModel;
+
+    //identity matrix
+    AxisCopy( axisDefault, biopack.axis );
+
+    //FIXME: change to tag_back when it exists
+    CG_PositionRotatedEntityOnTag( &biopack, torso, torso->hModel, "tag_head" );
+
+    if( cg_spectatorWallhack.integer &&
+        cgs.clientinfo[ cg.clientNum ].team == TEAM_NONE )
+    {
+      biopack.renderfx |= RF_DEPTHHACK;
+    }
+    trap_R_AddRefEntityToScene( &biopack );
   }
 
   if( es->eFlags & EF_BLOBLOCKED )

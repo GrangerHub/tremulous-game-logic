@@ -4722,9 +4722,9 @@ static void CG_PainBlend( void )
   if( cg.snap->ps.persistant[ PERS_SPECSTATE ] != SPECTATOR_NOT || cg.intermissionStarted )
     return;
 
-  // just sold the biokit
+  // just sold the biopack
   if( ( cg.snap->ps.misc[ MISC_HEALTH ] == BG_Class( cg.snap->ps.stats[ STAT_CLASS ] )->health ) &&
-        !BG_InventoryContainsUpgrade( UP_BIOKIT, cg.snap->ps.stats ) )
+        !BG_InventoryContainsUpgrade( UP_BIOPACK, cg.snap->ps.stats ) )
   {
     CG_ResetPainBlend( );
     return;

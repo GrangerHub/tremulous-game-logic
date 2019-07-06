@@ -319,7 +319,7 @@ struct gentity_s
 
   int               health;
   int               lastHealth; // currently only used for overmind
-  int               healthReserve; // used for finite/restricted health sources like the biokit and medistat
+  int               healthReserve; // used for finite/restricted health sources like the biopack and medistat
   int               damageFromEnemies; // total damage received from enemies, can't exceed max health.
 
   qboolean          takedamage;

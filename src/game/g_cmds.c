@@ -475,10 +475,10 @@ static qboolean Give_Upgrade( gentity_t *ent, char *s ) {
 static void Give_Health(gentity_t *ent) {
   ent->client->bioKitHealthToRestore = 0;
   ent->client->bioKitIncrementTime = 0;
-  ent->healthReserve = BIOKIT_HEALTH_RESERVE;
+  ent->healthReserve = BIOPACK_HEALTH_RESERVE;
 
-  if(BG_InventoryContainsUpgrade(UP_BIOKIT, ent->client->ps.stats)) {
-    ent->client->ps.misc[ MISC_MAX_HEALTH ] = BIOKIT_MAX_HEALTH;
+  if(BG_InventoryContainsUpgrade(UP_BIOPACK, ent->client->ps.stats)) {
+    ent->client->ps.misc[ MISC_MAX_HEALTH ] = BIOPACK_MAX_HEALTH;
     G_ChangeHealth( ent, ent, ent->client->ps.misc[ MISC_MAX_HEALTH ],
                         (HLTHF_SET_TO_CHANGE) );
   } else {
@@ -3294,10 +3294,10 @@ static sellErr_t G_CanSellUpgrade(
     const int usedFuel = JETPACK_FUEL_FULL -
                             ent->client->ps.stats[ STAT_FUEL ];
 
-    if(upgrade == UP_BIOKIT) {
+    if(upgrade == UP_BIOPACK) {
       *value = (short)( BG_Upgrade( upgrade )->price *
                          ( ( (float)(ent->healthReserve) ) /
-                           ( (float)(BIOKIT_HEALTH_RESERVE) ) ) );
+                           ( (float)(BIOPACK_HEALTH_RESERVE) ) ) );
     } else if(
       upgrade == UP_BATTLESUIT &&
       ent->client->ps.misc[ MISC_ARMOR ] + ent->client->armorToGen <
@@ -3537,7 +3537,7 @@ static void G_TakeUpgrade(
     ent->client->lastArmorGenTime = 0;
     ent->client->armorToGen = 0;
     ent->client->armorGenIncrementTime = 0;
-  } else if(upgrade == UP_BIOKIT)
+  } else if(upgrade == UP_BIOPACK)
   {
     ent->client->ps.misc[MISC_MAX_HEALTH] =
           BG_Class(ent->client->ps.stats[STAT_CLASS])->health;
@@ -4220,16 +4220,16 @@ void G_GiveItem( gentity_t *ent, const char *itemName, const int price,
         }
         else if( upgrade == UP_JETPACK )
          ent->client->ps.stats[ STAT_FUEL ] = JETPACK_FUEL_FULL;
-        else if( upgrade == UP_BIOKIT )
+        else if( upgrade == UP_BIOPACK )
         {
-          ent->client->ps.misc[ MISC_MAX_HEALTH ] = BIOKIT_MAX_HEALTH;
+          ent->client->ps.misc[ MISC_MAX_HEALTH ] = BIOPACK_MAX_HEALTH;
 
           ent->client->lastBioKitTime = level.time;
-          ent->client->bioKitHealthToRestore = BIOKIT_MAX_HEALTH - ent->health;
+          ent->client->bioKitHealthToRestore = BIOPACK_MAX_HEALTH - ent->health;
           ent->client->bioKitIncrementTime = level.time +
             ( MEDKIT_STARTUP_TIME / MEDKIT_STARTUP_SPEED );
 
-          ent->healthReserve = BIOKIT_HEALTH_RESERVE;
+          ent->healthReserve = BIOPACK_HEALTH_RESERVE;
           G_AddEvent( ent, EV_MEDKIT_USED, 0 );
         }
 

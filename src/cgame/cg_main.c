@@ -1379,6 +1379,7 @@ static void CG_RegisterClients( void )
   cgs.media.jetpackModel       = trap_R_RegisterModel( "models/players/human_base/jetpack.md3" );
   cgs.media.jetpackFlashModel  = trap_R_RegisterModel( "models/players/human_base/jetpack_flash.md3" );
   cgs.media.battpackModel      = trap_R_RegisterModel( "models/players/human_base/battpack.md3" );
+  cgs.media.biopackModel       = trap_R_RegisterModel( "models/players/human_base/biopack.md3" );
 
   cg.charModelFraction = 1.0f;
   trap_UpdateScreen( );

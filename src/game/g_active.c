@@ -1019,8 +1019,8 @@ void ClientTimerActions( gentity_t *ent, int msec )
       }
     }
 
-    //biokit health regen
-    if( BG_InventoryContainsUpgrade( UP_BIOKIT, ent->client->ps.stats ) ) {
+    //biopack health regen
+    if( BG_InventoryContainsUpgrade( UP_BIOPACK, ent->client->ps.stats ) ) {
       if( ent->client->bioKitHealthToRestore > 0 &&
           ent->lastDamageTime + HUMAN_DAMAGE_HEAL_DELAY_TIME < level.time ) {
         int remainingStartupTime = MEDKIT_STARTUP_TIME - ( level.time - client->lastBioKitTime );
@@ -1068,7 +1068,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
         if( G_ChangeHealth( ent, ent, BG_HP2SU( 1 ),
                             (HLTHF_USE_TARG_RESERVE|
                              HLTHF_REQ_TARG_RESERVE) ) ) {
-          ent->nextRegenTime = level.time + BIOKIT_REGEN_REPEAT;
+          ent->nextRegenTime = level.time + BIOPACK_REGEN_REPEAT;
         }
       }
     }
