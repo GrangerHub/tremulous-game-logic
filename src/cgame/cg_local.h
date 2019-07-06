@@ -704,6 +704,8 @@ typedef struct centity_s
   struct centity_s      *muzzleTSEndEntity;
   qboolean              addMuzzleTS;
 
+  trailSystem_t         *lasermineTS;
+
   weapon_t              oldWeaponNum; // used for resetting player weapon firing effects when changing weapons.
 
   int                   buildFireTime; // used for the ckit flash
@@ -1251,6 +1253,8 @@ typedef struct
   qhandle_t   level2ZapTS;
   qhandle_t   ckitTS;
 
+  qhandle_t   lasermineTS;
+
   qhandle_t   balloonShader;
   qhandle_t   connectionShader;
 
@@ -1307,6 +1311,9 @@ typedef struct
 
   sfxHandle_t hardBounceSound1;
   sfxHandle_t hardBounceSound2;
+
+  sfxHandle_t lasermineArmedSound;
+  sfxHandle_t lasermineIdleSound;
 
   sfxHandle_t voteAlarmSound;
   sfxHandle_t voteNow;

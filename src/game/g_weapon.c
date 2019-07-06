@@ -842,6 +842,19 @@ void throwFragnade( gentity_t *ent )
 /*
 ======================================================================
 
+LASER MINE
+
+======================================================================
+*/
+
+void throwLaserMine( gentity_t *ent )
+{
+  launch_lasermine( ent, muzzle, forward );
+}
+
+/*
+======================================================================
+
 GRENADE LAUNCHER
 
 ======================================================================
@@ -2152,6 +2165,9 @@ void FireWeapon( gentity_t *ent )
       break;
     case WP_FRAGNADE:
       throwFragnade( ent );
+      break;
+    case WP_LASERMINE:
+      throwLaserMine( ent );
       break;
     case WP_LAUNCHER:
       launcherFire(ent, qtrue);
