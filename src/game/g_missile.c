@@ -83,6 +83,8 @@ void G_ExplodeMissile( gentity_t *ent )
 
   ent->s.eType = ET_GENERAL;
 
+  ent->s.eFlags &= ~EF_WARN_CHARGE;
+
   G_SplatterFire( ent, ent->parent, ent->s.pos.trBase, dir, ent->s.weapon,
                   ent->s.generic1, ent->splashMethodOfDeath );
 
@@ -138,6 +140,15 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace )
 
   other = &g_entities[ trace->entityNum ];
   attacker = &g_entities[ ent->r.ownerNum ];
+
+  if(!strcmp(ent->classname,"lasermine")) {
+    VectorCopy(trace->plane.normal, ent->s.origin2);
+    vectoangles(trace->plane.normal, ent->r.currentAngles);
+    VectorCopy(ent->r.currentAngles, ent->s.apos.trBase);
+    G_SetOrigin( ent, trace->endpos );
+    G_AddEvent( ent, EV_GRENADE_BOUNCE, 0 );
+    return;
+  }
 
   // check for bounce
   if( !G_TakesDamage( other ) &&
@@ -362,6 +373,7 @@ void G_RunMissile( gentity_t *ent )
   vec3_t    origin;
   trace_t   tr;
   qboolean  impact;
+  int       contents;
 
   // get current position
   BG_EvaluateTrajectory( &ent->s.pos, level.time, origin );
@@ -433,9 +445,14 @@ void G_RunMissile( gentity_t *ent )
     }
   }
 
-  G_SetContents( ent, CONTENTS_SOLID ); //trick SV_LinkEntity into...
+  contents = ent->r.contents;
+  if(!contents) {
+    G_SetContents( ent, CONTENTS_SOLID ); //trick SV_LinkEntity into...
+  }
   SV_LinkEntity( ent );
-  G_SetContents( ent, 0 ); //...encoding bbox information
+  if(!contents) {
+    G_SetContents( ent, contents ); //...encoding bbox information
+  }
 
   // check think function after bouncing
   G_RunThink( ent );
@@ -804,7 +821,7 @@ gentity_t *launch_grenade3( gentity_t *self, vec3_t start, vec3_t dir,
 
 /*
 =================
-launch_grenade
+launch_fragnade
 
 =================
 */
@@ -841,6 +858,113 @@ gentity_t *launch_fragnade( gentity_t *self, vec3_t start, vec3_t dir )
   bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;   // move a bit on the very first frame
   VectorCopy( start, bolt->s.pos.trBase );
   VectorScale( dir, GRENADE_SPEED, bolt->s.pos.trDelta );
+  SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
+
+  VectorCopy( start, bolt->r.currentOrigin );
+
+  return bolt;
+}
+//=============================================================================
+
+void lasermine_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod )
+{
+  self->nextthink = level.time + LASERMINE_BOOM_TIME;
+  self->think = G_ExplodeMissile;
+}
+
+/*
+================
+G_LaserMineThink
+Explode if the laser beam is tripped
+================
+*/
+void G_LaserMineThink(gentity_t *ent) {
+  trace_t previous_trace;
+  vec3_t  end;
+
+  //check for self destruct
+  if(ent->lasermine_set && ent->lasermine_self_destruct_time < level.time) {
+    lasermine_die(ent, ent, ent, LASERMINE_HEALTH, MOD_LASERMINE);
+    return;
+  }
+
+  ent->nextthink = level.time + LASERMINE_CHECK_FREQUENCY;
+
+  //backup the trace
+  previous_trace = ent->lasermine_trace;
+
+  VectorMA(ent->r.currentOrigin, LASERMINE_TRIP_RANGE, ent->s.origin2, end);
+
+  //perform a new trace
+  SV_Trace(
+    &ent->lasermine_trace, ent->r.currentOrigin, NULL, NULL, end, ent->s.number,
+    MASK_SHOT, TT_AABB);
+
+  if(!ent->lasermine_set) {
+    //the laser mine is being set
+    ent->lasermine_self_destruct_time = level.time + LASERMINE_SELF_DESTRUCT;
+    ent->s.eFlags |= EF_WARN_CHARGE;
+    ent->lasermine_set = qtrue;
+    G_AddEvent( ent, EV_LASERMINE_ARMED, 0 );
+    return;
+  }
+
+  //check if the laser beam has been tripped
+  if(
+    ent->lasermine_trace.entityNum != previous_trace.entityNum ||
+    ent->lasermine_trace.startsolid != previous_trace.startsolid ||
+    ent->lasermine_trace.allsolid != previous_trace.allsolid ||
+    ent->lasermine_trace.fraction != previous_trace.fraction) {
+    lasermine_die(ent, ent, ent, LASERMINE_HEALTH, MOD_LASERMINE);
+    return;
+  }
+}
+
+/*
+=================
+launch_lasermine
+
+=================
+*/
+gentity_t *launch_lasermine( gentity_t *self, vec3_t start, vec3_t dir )
+{
+  gentity_t *bolt;
+
+  VectorNormalize( dir );
+
+  bolt = G_Spawn( );
+  bolt->s.eFlags &= ~EF_WARN_CHARGE;
+  bolt->lasermine_set = qfalse;
+  bolt->classname = "lasermine";
+  bolt->pointAgainstWorld = qfalse;
+  bolt->nextthink = level.time + LASERMINE_INIT_TIME;
+  bolt->think = G_LaserMineThink;
+  bolt->die = lasermine_die;
+  bolt->takedamage = qtrue;
+  bolt->health = BG_HP2SU(LASERMINE_HEALTH);
+  bolt->s.eType = ET_MISSILE;
+  bolt->s.weapon = WP_LASERMINE;
+  bolt->flags |= FL_BOUNCE_HALF;
+  bolt->s.generic1 = WPM_PRIMARY; //weaponMode
+  bolt->r.ownerNum = self->s.number;
+  bolt->parent = self;
+  bolt->damage = LASERMINE_DAMAGE;
+  bolt->splashDamage = LASERMINE_DAMAGE;
+  bolt->splashRadius = LASERMINE_RANGE;
+  bolt->methodOfDeath = MOD_LASERMINE;
+  bolt->splashMethodOfDeath = MOD_LASERMINE;
+  bolt->noKnockback = qfalse;
+  G_SetClipmask( bolt, MASK_SHOT );
+  G_SetContents( bolt, CONTENTS_BODY );
+  bolt->target_ent = NULL;
+  bolt->r.mins[ 0 ] = bolt->r.mins[ 1 ] = bolt->r.mins[ 2 ] = -3.0f;
+  bolt->r.maxs[ 0 ] = bolt->r.maxs[ 1 ] = bolt->r.maxs[ 2 ] = 3.0f;
+  bolt->s.time = level.time;
+
+  bolt->s.pos.trType = TR_GRAVITY;
+  bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;   // move a bit on the very first frame
+  VectorCopy( start, bolt->s.pos.trBase );
+  VectorScale( dir, LASERMINE_SPEED, bolt->s.pos.trDelta );
   SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
 
   VectorCopy( start, bolt->r.currentOrigin );

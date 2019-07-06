@@ -414,6 +414,10 @@ struct gentity_s
   qboolean          MasterPower;
   int               PowerRadius;
 
+  qboolean          lasermine_set;
+  trace_t           lasermine_trace;
+  int               lasermine_self_destruct_time;
+
   bglink_t          *zapLink;  // For ET_LEV2_ZAP_CHAIN
 };
 
@@ -1315,6 +1319,7 @@ gentity_t *launch_grenade2( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *launch_grenade3( gentity_t *self, vec3_t start, vec3_t dir,
                             qboolean impact );
 gentity_t *launch_fragnade( gentity_t *self, vec3_t start, vec3_t dir );
+gentity_t *launch_lasermine( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *fire_lightningBall( gentity_t *self, qboolean primary,
                                vec3_t start, vec3_t dir );
 
