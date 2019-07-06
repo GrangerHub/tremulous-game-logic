@@ -268,6 +268,10 @@ vmCvar_t  cg_cameraShakeMagnitude;
 
 vmCvar_t  cg_chatTeamPrefix;
 
+vmCvar_t  cg_killMsg;
+vmCvar_t  cg_killMsgTime;
+vmCvar_t  cg_killMsgHeight;
+
 vmCvar_t  cg_intermissionMusic;
 
 typedef struct
@@ -448,6 +452,10 @@ static cvarTable_t cvarTable[ ] =
   { &cg_cameraShakeMagnitude, "cg_cameraShakeMagnitude", "1", CVAR_ARCHIVE },
 
   { &cg_chatTeamPrefix, "cg_chatTeamPrefix", "1", CVAR_ARCHIVE },
+
+  { &cg_killMsg, "cg_killMsg", "1", CVAR_ARCHIVE },
+  { &cg_killMsgTime, "cg_killMsgTime", "4000", CVAR_ARCHIVE },
+  { &cg_killMsgHeight, "cg_killMsgHeight", "7", CVAR_ARCHIVE },
 
   { &cg_intermissionMusic, "cg_intermissionMusic", "1", CVAR_ARCHIVE }
 };
