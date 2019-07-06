@@ -3767,6 +3767,79 @@ static const weaponAttributes_t bg_weapons[ ] =
     TEAM_HUMANS           //team_t    team;
   },
   {
+    WP_LASERMINE,         //int       number;
+    qfalse,               //qboolean enabled;
+    LASERMINE_PRICE,      //int       price;
+    qfalse,               //qboolean  warmupFree;
+    ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int    stages;
+    SLOT_NONE,            //int       slots;
+    "lasermine",          //char      *name;
+    "Lasermine",          //char      *humanName;
+    "",
+    1,                    //int       maxAmmo;
+    0,                    //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
+    0,                    //int       roundPrice;
+    qfalse,               //qboolean  ammoPurchasable;
+    qfalse,               //int       infiniteAmmo;
+    qfalse,               //int       usesEnergy;
+    LASERMINE_REPEAT,     //int       repeatRate1;
+    0,                    //int       repeatRate2;
+    0,                    //int       repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
+    0,                    //int       reloadTime;
+    LASERMINE_K_SCALE,    //float     knockbackScale;
+    qfalse,               //qboolean  hasAltMode;
+    qfalse,               //qboolean  hasThirdMode;
+    qfalse,               //qboolean  canZoom;
+    90.0f,                //float     zoomFov;
+    qfalse,               //qboolean  purchasable;
+    qfalse,               //
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      }
+    },
+    TEAM_HUMANS           //team_t    team;
+  },
+  {
     WP_LAUNCHER,          //int       number;
     qfalse,               //qboolean  enabled;
     LAUNCHER_PRICE,       //int       price;
@@ -4981,6 +5054,24 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     TEAM_HUMANS             //team_t    team;
   },
   {
+    UP_LASERMINE,           //int   number;
+    qfalse,                 //qboolean enabled;
+    LASERMINE_PRICE,        //int   price;
+    qfalse,                 //qboolean warmupFree;
+    ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
+    SLOT_NONE,              //int   slots;
+    "lasmine",              //char  *name;
+    "Laser Mine",           //char  *humanName;
+    "A highly explosive mine that can be attached to surfaces, it is"
+      "triggered by a laser trip beam.  It has a 2 minute self destruct timer, "
+      "and can be detonated early from being damaged, so take special care with "
+      "it's placement, and take cover while it is being armed!",
+    0,
+    qtrue,                  //qboolean  purchasable;
+    qtrue,                  //qboolean  usable;
+    TEAM_HUMANS             //team_t    team;
+  },
+  {
     UP_AMMO,                //int   number;
     qtrue,                  //qboolean enabled;
     0,                      //int   price;
@@ -5291,6 +5382,8 @@ char *eventnames[ ] =
   "EV_PLAYER_TELEPORT_OUT",
 
   "EV_GRENADE_BOUNCE",    // eventParm will be the soundindex
+
+  "EV_LASERMINE_ARMED",
 
   "EV_GENERAL_SOUND",
   "EV_GLOBAL_SOUND",    // no attenuation
