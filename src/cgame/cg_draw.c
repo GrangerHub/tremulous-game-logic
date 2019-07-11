@@ -815,19 +815,33 @@ static void CG_DrawHumanScanner( rectDef_t *rect, qhandle_t shader, vec4_t color
 CG_DrawCompass
 ==============
 */
-static void CG_DrawCompass(rectDef_t *rect, qhandle_t shader, vec4_t color) {
-  float orientation_offset =
-    (AngleNormalize360(cg.refdefViewAngles[YAW]) / 360.0f) * rect->w;
-  float clip_offset =
-    ((360.0f - AngleNormalize360(cg.refdef.fov_x)) / 360.0f) * rect->w;
+static void CG_DrawCompass(rectDef_t *rect, float scale, qhandle_t shader, vec4_t color) {
+  playerState_t *ps = &cg.predictedPlayerState;
 
-  CG_SetClipRegion(
-    rect->x + (clip_offset / 2), rect->y, rect->w - clip_offset, rect->h);
-  trap_R_SetColor(color);
-  CG_DrawPic(rect->x + orientation_offset, rect->y, rect->w, rect->h, shader);
-  CG_DrawPic(rect->x - rect->w + orientation_offset, rect->y, rect->w, rect->h, shader);
-  trap_R_SetColor(NULL);
-  CG_ClearClipRegion( );
+  if(ps->stats[ STAT_TEAM ] == TEAM_ALIENS) {
+    vec3_t      forward, angles;
+
+    VectorCopy(ps->viewangles, angles);
+    angles[YAW] = AngleNormalize360(angles[YAW] + 90.0f);
+    AngleVectors(angles, forward, NULL, NULL);
+    VectorScale(forward, 90.0f, forward);
+    CG_Draw3DModel(
+      rect->x, rect->y, rect->w, rect->h, scale, cg.time,
+      cgs.media.compassSphereModel, 0, 0, forward, NULL, angles);
+  } else {
+    float orientation_offset =
+      (AngleNormalize360(cg.refdefViewAngles[YAW]) / 360.0f) * rect->w;
+    float clip_offset =
+      ((360.0f - AngleNormalize360(cg.refdef.fov_x)) / 360.0f) * rect->w;
+
+    CG_SetClipRegion(
+      rect->x + (clip_offset / 2), rect->y, rect->w - clip_offset, rect->h);
+    trap_R_SetColor(color);
+    CG_DrawPic(rect->x + orientation_offset, rect->y, rect->w, rect->h, shader);
+    CG_DrawPic(rect->x - rect->w + orientation_offset, rect->y, rect->w, rect->h, shader);
+    trap_R_SetColor(NULL);
+    CG_ClearClipRegion( );
+  }
 }
 
 /*
@@ -3942,7 +3956,7 @@ void CG_OwnerDraw( float x, float y, float w, float h, float text_x,
       break;
 
     case CG_PLAYER_COMPASS:
-      CG_DrawCompass( &rect, shader, foreColor );
+      CG_DrawCompass( &rect, scale, shader, foreColor );
       break;
 
     // Equipment values

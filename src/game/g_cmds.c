@@ -4401,7 +4401,7 @@ void Cmd_Build_f( gentity_t *ent )
   team = ent->client->ps.stats[ STAT_TEAM ];
 
   if( buildable == BA_NONE || !BG_BuildableIsAllowed( buildable, g_cheats.integer ) ||
-      !( ent->client->ps.weapon == BG_Buildable( buildable )->buildWeapon1 || ent->client->ps.weapon == BG_Buildable( buildable )->buildWeapon2 ) ||
+      !BG_Weapon_Can_Build_Buildable(ent->client->ps.weapon, buildable) ||
       ( team == TEAM_ALIENS && !BG_BuildableAllowedInStage( buildable, g_alienStage.integer, IS_WARMUP ) ) ||
       ( team == TEAM_HUMANS && !BG_BuildableAllowedInStage( buildable, g_humanStage.integer, IS_WARMUP ) ) )
   {

@@ -234,6 +234,65 @@ void CG_DrawFadePic( float x, float y, float width, float height, vec4_t fcolor,
 }
 
 /*
+================
+CG_Draw3DModel
+================
+*/
+void CG_Draw3DModel(
+  float x, float y, float w, float h, float scale, int time, qhandle_t model,
+  qhandle_t skin, qhandle_t custom_shader, const vec3_t origin,
+  const vec3_t ent_angles, const vec3_t view_angles) {
+  refdef_t		refdef;
+  refEntity_t		ent;
+
+  Com_Assert(origin);
+
+  CG_AdjustFrom640(&x, &y, &w, &h);
+
+  memset(&refdef, 0, sizeof(refdef));
+
+  memset(&ent, 0, sizeof(ent));
+  if(ent_angles) {
+    AnglesToAxis(ent_angles, ent.axis);
+  } else {
+    AxisClear(ent.axis);
+  }
+  if(scale != 1.0f) {
+    ent.nonNormalizedAxes = qtrue;
+    VectorScale(ent.axis[0], scale, ent.axis[0]);
+    VectorScale(ent.axis[1], scale, ent.axis[1]);
+    VectorScale(ent.axis[2], scale, ent.axis[2]);
+  }
+  VectorCopy(origin, ent.origin);
+  ent.hModel = model;
+  ent.customSkin = skin;
+  ent.customShader= custom_shader;
+  ent.renderfx = RF_NOSHADOW;		// no stencil shadows
+
+  refdef.rdflags = RDF_NOWORLDMODEL;
+
+  if(view_angles) {
+    AnglesToAxis(view_angles, refdef.viewaxis);
+  } else {
+    AxisClear(refdef.viewaxis);
+  }
+
+  refdef.fov_x = 30;
+  refdef.fov_y = 30;
+
+  refdef.x = x;
+  refdef.y = y;
+  refdef.width = w;
+  refdef.height = h;
+
+  refdef.time = time;
+
+  trap_R_ClearScene();
+  trap_R_AddRefEntityToScene( &ent );
+  trap_R_RenderScene( &refdef );
+}
+
+/*
 =================
 CG_DrawStrlen
 
