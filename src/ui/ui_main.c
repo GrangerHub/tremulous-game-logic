@@ -1765,7 +1765,7 @@ static void UI_DrawInfoPane( menuItem_t *item, rectDef_t *rect, float text_x, fl
 
         for( i = WP_NONE + 1; i < WP_NUM_WEAPONS; i++ )
         {
-          if( uiInfo.weapons & ( 1 << i ) )
+          if( uiInfo.weapon == i )
             break;
         }
 
@@ -2476,7 +2476,7 @@ static void UI_ParseCarriageList( void )
   trap_Cvar_VariableStringBuffer( "ui_carriage", carriageCvar, sizeof( carriageCvar ) );
   iterator = carriageCvar;
 
-  uiInfo.weapons = 0;
+  uiInfo.weapon = WP_NONE;
   uiInfo.upgrades = 0;
 
   //simple parser to give rise to weapon/upgrade list
@@ -2496,7 +2496,7 @@ static void UI_ParseCarriageList( void )
 
       i = atoi( buffer );
 
-      uiInfo.weapons |= ( 1 << i );
+      uiInfo.weapon = i;
     }
     else if( iterator[ 0 ] == 'U' )
     {
@@ -2532,7 +2532,7 @@ static void UI_LoadHumanArmouryBuys( void )
 
   for( i = WP_NONE + 1; i < WP_NUM_WEAPONS; i++ )
   {
-    if( uiInfo.weapons & ( 1 << i ) )
+    if( uiInfo.weapon == i )
     {
       slots |= BG_Weapon( i )->slots;
       if( BG_Weapon( i )->ammoPurchasable &&
@@ -2557,7 +2557,7 @@ static void UI_LoadHumanArmouryBuys( void )
         BG_Weapon( i )->purchasable &&
         BG_WeaponAllowedInStage( i, stage, UI_GameIsInWarmup( ) ) &&
         BG_WeaponIsAllowed( i, UI_DevModeIsOn( ) ) &&
-        !( uiInfo.weapons & ( 1 << i ) ) )
+        !( uiInfo.weapon == i ) )
     {
       uiInfo.humanArmouryBuyList[ j ].text = BG_Weapon( i )->humanName;
       uiInfo.humanArmouryBuyList[ j ].cmd =
@@ -2613,7 +2613,7 @@ static void UI_LoadHumanArmourySells( void )
 
   for( i = WP_NONE + 1; i < WP_NUM_WEAPONS; i++ )
   {
-    if( uiInfo.weapons & ( 1 << i ) )
+    if( uiInfo.weapon == i )
     {
       uiInfo.humanArmourySellList[ j ].text = BG_Weapon( i )->humanName;
       uiInfo.humanArmourySellList[ j ].cmd =
@@ -2651,12 +2651,12 @@ UI_ArmouryRefreshCb
 */
 static void UI_ArmouryRefreshCb( void *data )
 {
-  int oldWeapons  = uiInfo.weapons;
+  weapon_t oldWeapons  = uiInfo.weapon;
   int oldUpgrades = uiInfo.upgrades;
 
   UI_ParseCarriageList( );
 
-  if( uiInfo.weapons != oldWeapons || uiInfo.upgrades != oldUpgrades )
+  if( uiInfo.weapon != oldWeapons || uiInfo.upgrades != oldUpgrades )
   {
     UI_LoadHumanArmouryBuys( );
     UI_LoadHumanArmourySells( );
@@ -2725,7 +2725,7 @@ static void UI_LoadAlienBuilds( void )
   for( i = BA_NONE + 1; i < BA_NUM_BUILDABLES; i++ )
   {
     if( BG_Buildable( i )->team == TEAM_ALIENS &&
-        BG_Buildable( i )->buildWeapon & uiInfo.weapons &&
+        BG_Weapon_Can_Build_Buildable(uiInfo.weapon, i) &&
         BG_BuildableAllowedInStage( i, stage, UI_GameIsInWarmup( ) ) &&
         BG_BuildableIsAllowed( i, UI_DevModeIsOn( ) ) )
     {
@@ -2760,7 +2760,7 @@ static void UI_LoadHumanBuilds( void )
   for( i = BA_NONE + 1; i < BA_NUM_BUILDABLES; i++ )
   {
     if( BG_Buildable( i )->team == TEAM_HUMANS &&
-        BG_Buildable( i )->buildWeapon & uiInfo.weapons &&
+        BG_Weapon_Can_Build_Buildable(uiInfo.weapon, i) &&
         BG_BuildableAllowedInStage( i, stage, UI_GameIsInWarmup( ) ) &&
         BG_BuildableIsAllowed( i, UI_DevModeIsOn( ) ) )
     {
