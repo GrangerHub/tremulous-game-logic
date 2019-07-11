@@ -3005,6 +3005,70 @@ static void PM_GroundTraceMissed( void )
 
 /*
 =============
+PM_Wall_Climb_Upside_Down_Drop
+=============
+*/
+static void PM_Wall_Climb_Upside_Down_Drop(void) {
+  if((pm->ps->eFlags & EF_WALLCLIMBCEILING) || pm->ps->grapplePoint[2] < 0)
+  {
+    vec3_t  forward, right, rotated, angles;
+    float   angle_correction = 180.0f;
+
+    AngleVectors( pm->ps->viewangles, forward, right, NULL );
+
+    if(!(pm->ps->eFlags & EF_WALLCLIMBCEILING)) {
+      vec3_t  level_forward, level_right, projected_forward, projected_right;
+      vec3_t  refNormal = { 0.0f, 0.0f, 1.0f };
+      float   projected_forward_dist, projected_right_dist;
+
+      ProjectPointOnPlane(level_forward, forward, refNormal);
+      ProjectPointOnPlane(level_right, right, refNormal);
+      VectorNormalize(level_forward);
+      VectorNormalize(level_right);
+      ProjectPointOnPlane(projected_forward, level_forward, pm->ps->grapplePoint);
+      ProjectPointOnPlane(projected_right, level_right, pm->ps->grapplePoint);
+      projected_forward_dist = Distance(level_forward, projected_forward);
+      if(projected_forward[2] < 0) {
+        projected_forward_dist = -projected_forward_dist;
+      }
+      projected_right_dist = Distance(level_right, projected_right);
+      if(projected_right[2] < 0) {
+        projected_right_dist = -projected_right_dist;
+      }
+      if(fabs(projected_right_dist + projected_forward_dist) > 0.5) {
+        angle_correction *=
+          projected_forward_dist /
+          (projected_right_dist + projected_forward_dist);
+      } else {
+        if(projected_forward_dist == 0.0f) {
+          angle_correction = 0;
+        } else if(projected_forward_dist < 0.0f) {
+          if(projected_right_dist + projected_forward_dist < 0.0f) {
+            angle_correction = 270;
+          } else {
+            angle_correction = 90;
+          }
+        } else {
+          if(projected_right_dist + projected_forward_dist < 0.0f) {
+            angle_correction = 90;
+          } else {
+            angle_correction = 270;
+          }
+        }
+      }
+    }
+
+    angle_correction = AngleNormalize360(angle_correction);
+
+    RotatePointAroundVector( rotated, pm->ps->grapplePoint, forward, angle_correction );
+    vectoangles( rotated, angles );
+
+    pm->ps->delta_angles[ YAW ] -= ANGLE2SHORT( angles[ YAW ] - pm->ps->viewangles[ YAW ] );
+  }
+}
+
+/*
+=============
 PM_GroundClimbTrace
 =============
 */
@@ -3260,17 +3324,7 @@ static void PM_GroundClimbTrace( void )
     pm->ps->eFlags &= ~EF_WALLCLIMB;
 
     //just transided from ceiling to floor... apply delta correction
-    if((pm->ps->eFlags & EF_WALLCLIMBCEILING) || pm->ps->grapplePoint[2] < 0)
-    {
-      vec3_t  forward, rotated, angles;
-
-      AngleVectors( pm->ps->viewangles, forward, NULL, NULL );
-
-      RotatePointAroundVector( rotated, pm->ps->grapplePoint, forward, 180.0f );
-      vectoangles( rotated, angles );
-
-      pm->ps->delta_angles[ YAW ] -= ANGLE2SHORT( angles[ YAW ] - pm->ps->viewangles[ YAW ] );
-    }
+    PM_Wall_Climb_Upside_Down_Drop();
 
     pm->ps->eFlags &= ~EF_WALLCLIMBCEILING;
 
@@ -3349,17 +3403,7 @@ static void PM_GroundTrace( void )
     }
 
     //just transided from ceiling to floor... apply delta correction
-    if((pm->ps->eFlags & EF_WALLCLIMBCEILING) || pm->ps->grapplePoint[2] < 0)
-    {
-      vec3_t  forward, rotated, angles;
-
-      AngleVectors( pm->ps->viewangles, forward, NULL, NULL );
-
-      RotatePointAroundVector( rotated, pm->ps->grapplePoint, forward, 180.0f );
-      vectoangles( rotated, angles );
-
-      pm->ps->delta_angles[ YAW ] -= ANGLE2SHORT( angles[ YAW ] - pm->ps->viewangles[ YAW ] );
-    }
+    PM_Wall_Climb_Upside_Down_Drop();
   }
 
   pm->ps->stats[ STAT_STATE ] &= ~SS_WALLCLIMBING;
