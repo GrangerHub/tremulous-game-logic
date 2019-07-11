@@ -154,7 +154,12 @@ static const buildableAttributes_t bg_buildableList[ ] =
     ASPAWN_SPLASHRADIUS,   //int       splashRadius;
     MOD_ASPAWN,            //int       meansOfDeath;
     TEAM_ALIENS,           //int       team;
-    ( 1 << WP_ABUILD )|( 1 << WP_ABUILD2 ), //weapon_t  buildWeapon;
+    {                      //weapon_t  buildWeapon[]
+      WP_ABUILD,           //weapon_t  buildWeapon[0]
+      WP_ABUILD2,          //weapon_t  buildWeapon[1]
+      WP_NONE,             //weapon_t  buildWeapon[2]
+      WP_NONE              //weapon_t  buildWeapon[3]
+    },
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     ASPAWN_BT,             //int       buildTime;
@@ -206,7 +211,12 @@ static const buildableAttributes_t bg_buildableList[ ] =
     OVERMIND_SPLASHRADIUS, //int       splashRadius;
     MOD_ASPAWN,            //int       meansOfDeath;
     TEAM_ALIENS,           //int       team;
-    ( 1 << WP_ABUILD )|( 1 << WP_ABUILD2 ), //weapon_t  buildWeapon;
+    {                      //weapon_t  buildWeapon[]
+      WP_ABUILD,           //weapon_t  buildWeapon[0]
+      WP_ABUILD2,          //weapon_t  buildWeapon[1]
+      WP_NONE,             //weapon_t  buildWeapon[2]
+      WP_NONE              //weapon_t  buildWeapon[3]
+    },
     BANIM_IDLE1,           //int       idleAnim;
     OVERMIND_ATTACK_REPEAT, //int      nextthink;
     OVERMIND_BT,           //int       buildTime;
@@ -258,7 +268,12 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BARRICADE_SPLASHRADIUS, //int      splashRadius;
     MOD_ASPAWN,            //int       meansOfDeath;
     TEAM_ALIENS,           //int       team;
-    ( 1 << WP_ABUILD )|( 1 << WP_ABUILD2 ), //weapon_t  buildWeapon;
+    {                      //weapon_t  buildWeapon[]
+      WP_ABUILD,           //weapon_t  buildWeapon[0]
+      WP_ABUILD2,          //weapon_t  buildWeapon[1]
+      WP_NONE,             //weapon_t  buildWeapon[2]
+      WP_NONE              //weapon_t  buildWeapon[3]
+    },
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     BARRICADE_BT,          //int       buildTime;
@@ -307,7 +322,12 @@ static const buildableAttributes_t bg_buildableList[ ] =
     ACIDTUBE_SPLASHRADIUS, //int       splashRadius;
     MOD_ASPAWN,            //int       meansOfDeath;
     TEAM_ALIENS,           //int       team;
-    ( 1 << WP_ABUILD )|( 1 << WP_ABUILD2 ), //weapon_t  buildWeapon;
+    {                      //weapon_t  buildWeapon[]
+      WP_ABUILD,           //weapon_t  buildWeapon[0]
+      WP_ABUILD2,          //weapon_t  buildWeapon[1]
+      WP_NONE,             //weapon_t  buildWeapon[2]
+      WP_NONE              //weapon_t  buildWeapon[3]
+    },
     BANIM_IDLE1,           //int       idleAnim;
     200,                   //int       nextthink;
     ACIDTUBE_BT,           //int       buildTime;
@@ -356,7 +376,12 @@ static const buildableAttributes_t bg_buildableList[ ] =
     TRAPPER_SPLASHRADIUS,  //int       splashRadius;
     MOD_ASPAWN,            //int       meansOfDeath;
     TEAM_ALIENS,           //int       team;
-    ( 1 << WP_ABUILD2 ),   //weapon_t  buildWeapon;
+    {                      //weapon_t  buildWeapon[]
+      WP_ABUILD2,          //weapon_t  buildWeapon[0]
+      WP_NONE,             //weapon_t  buildWeapon[1]
+      WP_NONE,             //weapon_t  buildWeapon[2]
+      WP_NONE              //weapon_t  buildWeapon[3]
+    },
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     TRAPPER_BT,            //int       buildTime;
@@ -406,7 +431,12 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BOOSTER_SPLASHRADIUS,  //int       splashRadius;
     MOD_ASPAWN,            //int       meansOfDeath;
     TEAM_ALIENS,           //int       team;
-    ( 1 << WP_ABUILD2 ),   //weapon_t  buildWeapon;
+    {                      //weapon_t  buildWeapon[]
+      WP_ABUILD2,          //weapon_t  buildWeapon[0]
+      WP_NONE,             //weapon_t  buildWeapon[1]
+      WP_NONE,             //weapon_t  buildWeapon[2]
+      WP_NONE              //weapon_t  buildWeapon[3]
+    },
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     BOOSTER_BT,            //int       buildTime;
@@ -455,7 +485,12 @@ static const buildableAttributes_t bg_buildableList[ ] =
     HIVE_SPLASHRADIUS,     //int       splashRadius;
     MOD_ASPAWN,            //int       meansOfDeath;
     TEAM_ALIENS,           //int       team;
-    ( 1 << WP_ABUILD2 ),   //weapon_t  buildWeapon;
+    {                      //weapon_t  buildWeapon[]
+      WP_ABUILD2,          //weapon_t  buildWeapon[0]
+      WP_NONE,             //weapon_t  buildWeapon[1]
+      WP_NONE,             //weapon_t  buildWeapon[2]
+      WP_NONE              //weapon_t  buildWeapon[3]
+    },
     BANIM_IDLE1,           //int       idleAnim;
     500,                   //int       nextthink;
     HIVE_BT,               //int       buildTime;
@@ -504,7 +539,12 @@ static const buildableAttributes_t bg_buildableList[ ] =
     HSPAWN_SPLASHRADIUS,   //int       splashRadius;
     MOD_HSPAWN,            //int       meansOfDeath;
     TEAM_HUMANS,           //int       team;
-    ( 1 << WP_HBUILD ),    //weapon_t  buildWeapon;
+    {                      //weapon_t  buildWeapon[]
+      WP_HBUILD,           //weapon_t  buildWeapon[0]
+      WP_NONE,             //weapon_t  buildWeapon[1]
+      WP_NONE,             //weapon_t  buildWeapon[2]
+      WP_NONE              //weapon_t  buildWeapon[3]
+    },
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     HSPAWN_BT,             //int       buildTime;
@@ -554,7 +594,12 @@ static const buildableAttributes_t bg_buildableList[ ] =
     MGTURRET_SPLASHRADIUS, //int       splashRadius;
     MOD_HSPAWN,            //int       meansOfDeath;
     TEAM_HUMANS,           //int       team;
-    ( 1 << WP_HBUILD ),    //weapon_t  buildWeapon;
+    {                      //weapon_t  buildWeapon[]
+      WP_HBUILD,           //weapon_t  buildWeapon[0]
+      WP_NONE,             //weapon_t  buildWeapon[1]
+      WP_NONE,             //weapon_t  buildWeapon[2]
+      WP_NONE              //weapon_t  buildWeapon[3]
+    },
     BANIM_IDLE1,           //int       idleAnim;
     50,                    //int       nextthink;
     MGTURRET_BT,           //int       buildTime;
@@ -603,7 +648,12 @@ static const buildableAttributes_t bg_buildableList[ ] =
     TESLAGEN_SPLASHRADIUS, //int       splashRadius;
     MOD_HSPAWN,            //int       meansOfDeath;
     TEAM_HUMANS,           //int       team;
-    ( 1 << WP_HBUILD ),    //weapon_t  buildWeapon;
+    {                      //weapon_t  buildWeapon[]
+      WP_HBUILD,           //weapon_t  buildWeapon[0]
+      WP_NONE,             //weapon_t  buildWeapon[1]
+      WP_NONE,             //weapon_t  buildWeapon[2]
+      WP_NONE              //weapon_t  buildWeapon[3]
+    },
     BANIM_IDLE1,           //int       idleAnim;
     150,                   //int       nextthink;
     TESLAGEN_BT,           //int       buildTime;
@@ -652,7 +702,12 @@ static const buildableAttributes_t bg_buildableList[ ] =
     ARMOURY_SPLASHRADIUS,  //int       splashRadius;
     MOD_HSPAWN,            //int       meansOfDeath;
     TEAM_HUMANS,           //int       team;
-    ( 1 << WP_HBUILD ),    //weapon_t  buildWeapon;
+    {                      //weapon_t  buildWeapon[]
+      WP_HBUILD,           //weapon_t  buildWeapon[0]
+      WP_NONE,             //weapon_t  buildWeapon[1]
+      WP_NONE,             //weapon_t  buildWeapon[2]
+      WP_NONE              //weapon_t  buildWeapon[3]
+    },
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     ARMOURY_BT,            //int       buildTime;
@@ -706,7 +761,12 @@ static const buildableAttributes_t bg_buildableList[ ] =
     DC_SPLASHRADIUS,       //int       splashRadius;
     MOD_HSPAWN,            //int       meansOfDeath;
     TEAM_HUMANS,           //int       team;
-    ( 1 << WP_HBUILD ),    //weapon_t  buildWeapon;
+    {                      //weapon_t  buildWeapon[]
+      WP_HBUILD,           //weapon_t  buildWeapon[0]
+      WP_NONE,             //weapon_t  buildWeapon[1]
+      WP_NONE,             //weapon_t  buildWeapon[2]
+      WP_NONE              //weapon_t  buildWeapon[3]
+    },
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     DC_BT,                 //int       buildTime;
@@ -757,7 +817,12 @@ static const buildableAttributes_t bg_buildableList[ ] =
     MEDISTAT_SPLASHRADIUS, //int       splashRadius;
     MOD_HSPAWN,            //int       meansOfDeath;
     TEAM_HUMANS,           //int       team;
-    ( 1 << WP_HBUILD ),    //weapon_t  buildWeapon;
+    {                      //weapon_t  buildWeapon[]
+      WP_HBUILD,           //weapon_t  buildWeapon[0]
+      WP_NONE,             //weapon_t  buildWeapon[1]
+      WP_NONE,             //weapon_t  buildWeapon[2]
+      WP_NONE              //weapon_t  buildWeapon[3]
+    },
     BANIM_IDLE1,           //int       idleAnim;
     MEDISTAT_REPEAT,       //int       nextthink;
     MEDISTAT_BT,           //int       buildTime;
@@ -806,7 +871,12 @@ static const buildableAttributes_t bg_buildableList[ ] =
     REACTOR_SPLASHRADIUS,  //int       splashRadius;
     MOD_HSPAWN,            //int       meansOfDeath;
     TEAM_HUMANS,           //int       team;
-    ( 1 << WP_HBUILD ),    //weapon_t  buildWeapon;
+    {                      //weapon_t  buildWeapon[]
+      WP_HBUILD,           //weapon_t  buildWeapon[0]
+      WP_NONE,             //weapon_t  buildWeapon[1]
+      WP_NONE,             //weapon_t  buildWeapon[2]
+      WP_NONE              //weapon_t  buildWeapon[3]
+    },
     BANIM_IDLE1,           //int       idleAnim;
     REACTOR_ATTACK_DCC_REPEAT, //int   nextthink;
     REACTOR_BT,            //int       buildTime;
@@ -862,7 +932,12 @@ static const buildableAttributes_t bg_buildableList[ ] =
     REPEATER_SPLASHRADIUS, //int       splashRadius;
     MOD_HSPAWN,            //int       meansOfDeath;
     TEAM_HUMANS,           //int       team;
-    ( 1 << WP_HBUILD ),    //weapon_t  buildWeapon;
+    {                      //weapon_t  buildWeapon[]
+      WP_HBUILD,           //weapon_t  buildWeapon[0]
+      WP_NONE,             //weapon_t  buildWeapon[1]
+      WP_NONE,             //weapon_t  buildWeapon[2]
+      WP_NONE              //weapon_t  buildWeapon[3]
+    },
     BANIM_IDLE1,           //int       idleAnim;
     100,                   //int       nextthink;
     REPEATER_BT,           //int       buildTime;
@@ -949,6 +1024,31 @@ const buildableAttributes_t *BG_Buildable( buildable_t buildable )
 {
   return ( buildable > BA_NONE && buildable < BA_NUM_BUILDABLES ) ?
     &bg_buildableList[ buildable - 1 ] : &nullBuildable;
+}
+
+/*
+==============
+BG_Weapon_Can_Build_Buildable
+==============
+*/
+qboolean BG_Weapon_Can_Build_Buildable(weapon_t weapon, buildable_t buildable) {
+  int i;
+
+  if(weapon == WP_NONE || weapon >= WP_NUM_WEAPONS) {
+    return qfalse;
+  }
+
+  if(buildable == BA_NONE || buildable >= BA_NUM_BUILDABLES) {
+    return qfalse;
+  }
+
+  for(i = 0; i < 4; i++) {
+    if(BG_Buildable(buildable)->buildWeapon[i] == weapon) {
+      return qtrue;
+    }
+  }
+
+  return qfalse;
 }
 
 /*
