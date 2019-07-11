@@ -1380,6 +1380,9 @@ typedef struct
   qhandle_t jetpackFlashModel;
   qhandle_t battpackModel;
 
+  qhandle_t compassCylinderModel;
+  qhandle_t compassSphereModel;
+
   qhandle_t portal;
   qhandle_t portalBlueSkin;
   qhandle_t portalRedSkin;
@@ -1816,6 +1819,10 @@ void        CG_FillRect( float x, float y, float width, float height, const floa
 void        CG_DrawPic( float x, float y, float width, float height, qhandle_t hShader );
 void        CG_DrawFadePic( float x, float y, float width, float height, vec4_t fcolor,
                             vec4_t tcolor, float amount, qhandle_t hShader );
+void        CG_Draw3DModel(
+  float x, float y, float w, float h, float scale, int time, qhandle_t model,
+  qhandle_t skin, qhandle_t custom_shader, const vec3_t origin,
+  const vec3_t ent_angles, const vec3_t view_angles);
 void        CG_SetClipRegion( float x, float y, float w, float h );
 void        CG_ClearClipRegion( void );
 

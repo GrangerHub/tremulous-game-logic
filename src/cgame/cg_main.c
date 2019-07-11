@@ -1353,6 +1353,8 @@ static void CG_RegisterClients( void )
   cgs.media.jetpackFlashModel  = trap_R_RegisterModel( "models/players/human_base/jetpack_flash.md3" );
   cgs.media.battpackModel      = trap_R_RegisterModel( "models/players/human_base/battpack.md3" );
 
+  cgs.media.compassSphereModel = trap_R_RegisterModel( "/models/hud/spherecompass/spherecompass.md3" );
+
   cg.charModelFraction = 1.0f;
   trap_UpdateScreen( );
 

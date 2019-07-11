@@ -280,7 +280,7 @@ typedef struct
   int         helpCount;
   int         helpIndex;
 
-  int         weapons;
+  weapon_t    weapon;
   int         upgrades;
 
   serverStatus_t serverStatus;

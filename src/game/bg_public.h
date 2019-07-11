@@ -1471,7 +1471,7 @@ typedef struct
   int           meansOfDeath;
 
   team_t        team;
-  weapon_t      buildWeapon;
+  weapon_t      buildWeapon[4];
 
   int           idleAnim;
 
@@ -1669,6 +1669,8 @@ int       BG_UnpackEntityNumbers( entityState_t *es, int *entityNums, int count 
 const buildableAttributes_t *BG_BuildableByName( const char *name );
 const buildableAttributes_t *BG_BuildableByEntityName( const char *name );
 const buildableAttributes_t *BG_Buildable( buildable_t buildable );
+qboolean                    BG_Weapon_Can_Build_Buildable(
+  weapon_t weapon, buildable_t buildable);
 qboolean                    BG_BuildableAllowedInStage( buildable_t buildable,
                                                         stage_t stage,
                                                         int gameIsInWarmup );
