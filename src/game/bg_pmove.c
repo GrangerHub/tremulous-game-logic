@@ -3060,10 +3060,10 @@ static void PM_Wall_Climb_Upside_Down_Drop(void) {
 
     angle_correction = AngleNormalize360(angle_correction);
 
-    RotatePointAroundVector( rotated, pm->ps->grapplePoint, forward, angle_correction );
-    vectoangles( rotated, angles );
+    RotatePointAroundVector(rotated, pm->ps->grapplePoint, forward, angle_correction);
+    vectoangles(rotated, angles);
 
-    pm->ps->delta_angles[ YAW ] -= ANGLE2SHORT( angles[ YAW ] - pm->ps->viewangles[ YAW ] );
+    pm->ps->delta_angles[YAW] -= ANGLE2SHORT(angles[YAW] - pm->ps->viewangles[YAW]);
   }
 }
 
@@ -3328,6 +3328,9 @@ static void PM_GroundClimbTrace( void )
 
     pm->ps->eFlags &= ~EF_WALLCLIMBCEILING;
 
+    //adjust ROLL
+    pm->ps->delta_angles[ROLL] -= ANGLE2SHORT(pm->ps->viewangles[ROLL]);
+
     //we get very bizarre effects if we don't do this :0
     VectorCopy( refNormal, pm->ps->grapplePoint );
     return;
@@ -3404,6 +3407,9 @@ static void PM_GroundTrace( void )
 
     //just transided from ceiling to floor... apply delta correction
     PM_Wall_Climb_Upside_Down_Drop();
+
+    //adjust ROLL
+    pm->ps->delta_angles[ROLL] -= ANGLE2SHORT(pm->ps->viewangles[ROLL]);
   }
 
   pm->ps->stats[ STAT_STATE ] &= ~SS_WALLCLIMBING;
