@@ -585,10 +585,10 @@ static void CG_Obituary( entityState_t *ent )
         CG_AddToKillMsg(attackerName, killMessage, icon);
       } else {
         CG_AddToKillMsg(
-          va("%s ^7%s %s%s",
+          va("%s ^7%s %s%s^7%s",
             targetName, message,
             teamKill ? "^1TEAMMATE ^7" : "",
-                    attackerName), NULL, WP_NONE);
+                    attackerName, message2), NULL, WP_NONE);
       }
 
       skipnotify = qtrue;
