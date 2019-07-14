@@ -275,7 +275,8 @@ static gentity_t *G_SelectSpawnBuildable( vec3_t preference, buildable_t buildab
       continue;
 
     if( ( tempBlocker = G_CheckSpawnPoint( search->s.number, search->r.currentOrigin,
-          search->s.origin2, buildable, NULL ) ) != NULL && !tempBlocker->client )
+          search->s.origin2, buildable, NULL ) ) != NULL &&
+          !(tempBlocker->client|| tempBlocker->s.eType == ET_MISSILE))
       continue;
 
     if( !spot || DistanceSquared( preference, search->r.currentOrigin ) <
@@ -286,7 +287,7 @@ static gentity_t *G_SelectSpawnBuildable( vec3_t preference, buildable_t buildab
     }
   }
 
-  if( blocker && blocker->client )
+  if( blocker && (blocker->client || blocker->s.eType == ET_MISSILE) )
   {
     spot->attemptSpawnTime = level.time + 1000;
     spot = NULL;
