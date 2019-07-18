@@ -2221,6 +2221,19 @@ void ClientThink_real( gentity_t *ent )
       !ClientInactivityTimer( ent ) )
     return;
 
+  if(client->pers.teamSelection != TEAM_NONE) {
+    client->ps.persistant[ PERS_BP ] = G_GetBuildPoints( client->ps.origin,
+      client->ps.stats[ STAT_TEAM ] );
+    client->ps.persistant[ PERS_BP_RESERVE ] = G_GetBuildPointsReserve( client->ps.stats[ STAT_TEAM ] );
+    client->ps.persistant[ PERS_MARKEDBP ] = G_GetMarkedBuildPoints( &client->ps );
+
+    if( client->ps.persistant[ PERS_BP ] < 0 )
+      client->ps.persistant[ PERS_BP ] = 0;
+
+    if( client->ps.persistant[ PERS_BP_RESERVE ] < 0 )
+      client->ps.persistant[ PERS_BP_RESERVE ] = 0;
+  }
+
   // spectators don't do much
   if( client->sess.spectatorState != SPECTATOR_NOT )
   {
@@ -2828,17 +2841,6 @@ void ClientThink_real( gentity_t *ent )
       }
     }
   }
-
-  client->ps.persistant[ PERS_BP ] = G_GetBuildPoints( client->ps.origin,
-    client->ps.stats[ STAT_TEAM ] );
-  client->ps.persistant[ PERS_BP_RESERVE ] = G_GetBuildPointsReserve( client->ps.stats[ STAT_TEAM ] );
-  client->ps.persistant[ PERS_MARKEDBP ] = G_GetMarkedBuildPoints( &client->ps );
-
-  if( client->ps.persistant[ PERS_BP ] < 0 )
-    client->ps.persistant[ PERS_BP ] = 0;
-
-  if( client->ps.persistant[ PERS_BP_RESERVE ] < 0 )
-    client->ps.persistant[ PERS_BP_RESERVE ] = 0;
 
   // perform once-a-second actions
   ClientTimerActions( ent, msec );

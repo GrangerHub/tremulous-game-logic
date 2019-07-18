@@ -432,7 +432,7 @@ static size_t gameCvarTableSize = ARRAY_LEN( gameCvarTable );
 
 void CheckExitRules( void );
 
-void G_CountSpawns( void );
+void G_CountBuildables( void );
 void G_CalculateBuildPoints( void );
 
 /*
@@ -854,7 +854,7 @@ Q_EXPORT void G_InitGame( int levelTime, int randomSeed, int restart )
   Com_Printf( "-----------------------------------\n" );
 
   // So the server counts the spawns without a client attached
-  G_CountSpawns( );
+  G_CountBuildables( );
 
   for( i = 0; i < NUM_TEAMS; i++ )
     level.numUnspawnedBuildables[ i ] = 0;
@@ -1100,28 +1100,56 @@ void G_SpawnClients(void *data, void *user_data) {
 
 /*
 ============
-G_CountSpawns
+G_CountBuildables
 
-Counts the number of spawns for each team
+Counts the number of buildables of each type, and the number of spawns for each team
 ============
 */
-void G_CountSpawns( void )
-{
+void G_CountBuildables( void ) {
   int i;
   gentity_t *ent;
 
   level.numAlienSpawns = 0;
   level.numHumanSpawns = 0;
-  for( i = 1, ent = g_entities + i ; i < level.num_entities ; i++, ent++ )
-  {
-    if( !ent->inuse || ent->s.eType != ET_BUILDABLE || ent->health <= 0 )
+  for(i = 0; i < BA_NUM_BUILDABLES; i++) {
+    level.num_buildables[i] = 0;
+  }
+  for(i = 0; i < NUM_TEAMS; i++) {
+    level.core_buildable_constructing[i] = qtrue;
+    level.core_buildable_health[i] = 0;
+  }
+
+  for(i = 1, ent = g_entities + i ; i < level.num_entities ; i++, ent++) {
+    buildable_t buildable;
+    team_t      team;
+
+    if(!ent->inuse || ent->s.eType != ET_BUILDABLE || ent->health <= 0) {
       continue;
+    }
 
-    if( ent->s.modelindex == BA_A_SPAWN )
+    buildable = ent->s.modelindex;
+    team = BG_Buildable(buildable)->team;
+
+    if(buildable == BA_A_SPAWN) {
       level.numAlienSpawns++;
+    }
 
-    if( ent->s.modelindex == BA_H_SPAWN )
+    if(buildable == BA_H_SPAWN) {
       level.numHumanSpawns++;
+    }
+
+    level.num_buildables[buildable]++;
+
+    if(BG_Buildable(buildable)->role & ROLE_CORE) {
+      int health = (BG_SU2HP(ent->health) * 100) / BG_SU2HP(BG_Buildable(buildable)->health);
+
+      if(level.core_buildable_constructing[team]) {
+        level.core_buildable_constructing[team] = !ent->spawned;
+      }
+      if(health > level.core_buildable_health[team]) {
+        level.core_buildable_health[team] = health;
+      }
+    }
   }
 }
 
@@ -3514,7 +3542,7 @@ Q_EXPORT void G_RunFrame( int levelTime )
   // save position information for all active clients and other shootable entities
   G_UnlaggedStore( );
 
-  G_CountSpawns( );
+  G_CountBuildables( );
   if( IS_WARMUP ||
       !g_doCountdown.integer ||
       level.countdownTime <= level.time )

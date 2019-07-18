@@ -1449,9 +1449,7 @@ void Cmd_TeamStatus_f( gentity_t *ent )
 {
   char multiple[ 12 ];
   int builders = 0;
-  int arm = 0, mediboost = 0;
-  int omrccount = 0, omrchealth = 0;
-  qboolean omrcbuild = qfalse;
+  int omrccount = 0;
   gentity_t *tmp;
   team_t team;
   int i;
@@ -1476,48 +1474,26 @@ void Cmd_TeamStatus_f( gentity_t *ent )
   level.lastTeamStatus[ team ] = level.time;
 
   tmp = &g_entities[ 0 ];
-  for ( i = 0; i < level.num_entities; i++, tmp++ )
+  for ( i = 0; i < MAX_CLIENTS; i++, tmp++ )
   {
-    if( i < MAX_CLIENTS )
-    {
-      if( tmp->client &&
-          tmp->client->pers.connected == CON_CONNECTED &&
-          tmp->client->pers.teamSelection == ent->client->pers.teamSelection &&
-          tmp->health > 0 &&
-          ( tmp->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_BUILDER0 ||
-            tmp->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_BUILDER0_UPG ||
-            BG_InventoryContainsWeapon( WP_HBUILD2, tmp->client->ps.stats ) ) )
-        builders++;
-      continue;
-    }
+    if( tmp->client &&
+        tmp->client->pers.connected == CON_CONNECTED &&
+        tmp->client->pers.teamSelection == ent->client->pers.teamSelection &&
+        tmp->health > 0 &&
+        ( tmp->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_BUILDER0 ||
+          tmp->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_BUILDER0_UPG ||
+          BG_InventoryContainsWeapon( WP_HBUILD2, tmp->client->ps.stats ) ) )
+      builders++;
+    continue;
+  }
 
-    if( tmp->s.eType == ET_BUILDABLE )
-    {
-      if( tmp->buildableTeam != ent->client->pers.teamSelection ||
-          tmp->health <= 0 )
-        continue;
-
-      switch( tmp->s.modelindex )
-      {
-        case BA_H_REACTOR:
-        case BA_A_OVERMIND:
-          omrccount++;
-          if( tmp->health > omrchealth )
-            omrchealth = tmp->health;
-          if( !omrcbuild )
-            omrcbuild = tmp->spawned;
-          break;
-        case BA_H_ARMOURY:
-          arm++;
-          break;
-        case BA_H_MEDISTAT:
-        case BA_A_BOOSTER:
-          mediboost++;
-          break;
-        default:
-          break;
-      }
-    }
+  switch (ent->client->pers.teamSelection) {
+    case TEAM_ALIENS:
+      omrccount = level.num_buildables[BA_A_OVERMIND];
+    case TEAM_HUMANS:
+      omrccount = level.num_buildables[BA_H_REACTOR];
+    default:
+      omrccount = 0;
   }
 
   if( omrccount > 1 )
@@ -1530,26 +1506,77 @@ void Cmd_TeamStatus_f( gentity_t *ent )
     case TEAM_ALIENS:
       G_Say( ent, SAY_TEAM,
         va( "^3OM: %s(%d)%s ^3Eggs: ^5%d ^3Builders: ^5%d ^3Boosters: ^5%d^7" ,
-        ( !omrccount ) ? "^1Down" : ( omrcbuild ) ? "^2Up" : "^5Building",
-        omrchealth * 100 / OVERMIND_HEALTH,
+        (!omrccount) ? "^1Down" : !level.core_buildable_constructing[ent->client->pers.teamSelection] ? "^2Up" : "^5Building",
+        level.core_buildable_health[ent->client->pers.teamSelection],
         multiple,
         level.numAlienSpawns,
         builders,
-        mediboost ) );
+        level.num_buildables[BA_A_BOOSTER] ) );
       break;
     case TEAM_HUMANS:
       G_Say( ent, SAY_TEAM,
         va( "^3RC: %s(%d)%s ^3Telenodes: ^5%d ^3Builders: ^5%d ^3Armouries: ^5%d ^3Medistations: ^5%d^7" ,
-        ( !omrccount ) ? "^1Down" : ( omrcbuild ) ? "^2Up" : "^5Building",
-        omrchealth * 100 / REACTOR_HEALTH,
+        ( !omrccount ) ? "^1Down" : !level.core_buildable_constructing[ent->client->pers.teamSelection] ? "^2Up" : "^5Building",
+        level.core_buildable_health[ent->client->pers.teamSelection],
         multiple,
         level.numHumanSpawns,
         builders,
-        arm, mediboost ) );
+        level.num_buildables[BA_H_ARMOURY], level.num_buildables[BA_H_MEDISTAT]));
       break;
     default:
       break;
   }
+}
+
+/*
+==================
+Cmd_TeamStatusOverlay_f
+==================
+*/
+void Cmd_TeamStatusOverlay_f( gentity_t *ent )
+{
+  gentity_t    *tmp;
+  const team_t team = ent->client->pers.teamSelection;
+  char         entry[ 1024 ];
+  char         string[ 1400 ];
+  int          stringlength = 0;
+  int          builders = 0;
+  int          i, j;
+
+  tmp = &g_entities[ 0 ];
+  for ( i = 0; i < MAX_CLIENTS; i++, tmp++ )
+  {
+    if( tmp->client &&
+        tmp->client->pers.connected == CON_CONNECTED &&
+        tmp->client->pers.teamSelection == team &&
+        tmp->health > 0 &&
+        ( tmp->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_BUILDER0 ||
+          tmp->client->ps.stats[ STAT_CLASS ] == PCL_ALIEN_BUILDER0_UPG ||
+          BG_InventoryContainsWeapon( WP_HBUILD2, tmp->client->ps.stats ) ) )
+      builders++;
+    continue;
+  }
+
+  for(i = 0; i < BA_NUM_BUILDABLES; i++) {
+
+    if(BG_Buildable(i)->team != team) {
+      continue;
+    }
+    Com_sprintf( entry, sizeof( entry ), " %d %d", i, level.num_buildables[i]);
+
+    j = strlen( entry );
+
+    if( stringlength + j >= sizeof( string ) )
+      break;
+
+    strcpy( string + stringlength, entry );
+    stringlength += j;
+  }
+
+  SV_GameSendServerCommand( ent-g_entities, va( "teamstatus %i %i %i%s",
+    builders,
+    level.core_buildable_health[team],
+    level.core_buildable_constructing[team] ? 1 : 0, string ) );
 }
 
 /*
@@ -5600,6 +5627,7 @@ commands_t cmds[ ] = {
   { "specme", CMD_TEAM, Cmd_SpecMe_f },
   { "team", 0, Cmd_Team_f },
   { "teamstatus", CMD_MESSAGE|CMD_TEAM, Cmd_TeamStatus_f },
+  { "teamstatusoverlay", CMD_TEAM, Cmd_TeamStatusOverlay_f },
   { "teamvote", CMD_TEAM, Cmd_Vote_f },
   { "test", CMD_CHEAT, Cmd_Test_f },
   { "unignore", 0, Cmd_Ignore_f },

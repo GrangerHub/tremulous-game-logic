@@ -362,7 +362,7 @@ Format:
 */
 void TeamplayInfoMessage( gentity_t *ent )
 {
-  char      entry[ 17 ],
+  char      entry[ 22 ],
             string[ ( MAX_CLIENTS - 1 ) * ( sizeof( entry ) - 1 ) + 1 ];
   int       i, j; 
   int       team, stringlength;
@@ -390,9 +390,9 @@ void TeamplayInfoMessage( gentity_t *ent )
     team = ent->client->pers.teamSelection;
 
   if( team == TEAM_ALIENS )
-    format = " %i %i %i %i"; // aliens don't have upgrades
+    format = " %i %i %i %i %i"; // aliens don't have upgrades
   else
-    format = " %i %i %i %i %i";
+    format = " %i %i %i %i %i %i";
 
   string[ 0 ] = '\0';
   stringlength = 0;
@@ -441,6 +441,7 @@ void TeamplayInfoMessage( gentity_t *ent )
     Com_sprintf( entry, sizeof( entry ), format, i,
       cl->pers.location,
       BG_SU2HP( player->health ),
+      cl->ps.persistant[ PERS_CREDIT ],
       curWeaponClass,
       upgrade );
 

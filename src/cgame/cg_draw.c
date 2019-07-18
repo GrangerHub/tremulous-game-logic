@@ -302,6 +302,890 @@ static void CG_DrawProgressBar( rectDef_t *rect, vec4_t color, float scale,
   }
 }
 
+/*
+================================================================================
+Multi-mode Tab Overlay
+================================================================================
+*/
+
+typedef struct tab_overlay_mode_attributes_s
+{
+  tab_overlay_modes_t mode;
+  char                *human_name;
+  qboolean            non_spectator_team;
+  qboolean            alive;
+  qboolean            show_at_intermission;
+} tab_overlay_mode_attributes_t;
+
+static const tab_overlay_mode_attributes_t cg_tab_overlay_mode_list[ ] =
+{
+  {
+    TOM_SCOREBOARD,    //tab_overlay_modes_t mode;
+    "Score Board",     //char                *human_name;
+    qfalse,            //qboolean            non_spectator_team;
+    qfalse,            //qboolean            alive;
+    qtrue              //qboolean            show_at_intermission;
+  },
+  {
+    TOM_TEAM_STATUS,   //tab_overlay_modes_t mode;
+    "Team Status",     //char                *human_name;
+    qtrue,             //qboolean            non_spectator_team;
+    qfalse,            //qboolean            alive;
+    qfalse             //qboolean            show_at_intermission;
+  },
+  {
+    TOM_TUTORIAL_TEXT, //tab_overlay_modes_t mode;
+    "Tutorial",        //char                *human_name;
+    qfalse,            //qboolean            non_spectator_team;
+    qfalse,            //qboolean            alive;
+    qfalse             //qboolean            show_at_intermission;
+  }
+};
+
+size_t cg_num_tab_overlay_modes = ARRAY_LEN(cg_tab_overlay_mode_list);
+
+/*
+=================
+CG_Validate_Tab_Overlay_Modes
+=================
+*/
+void CG_Validate_Tab_Overlay_Modes(void) {
+  tab_overlay_modes_t mode;
+
+  Com_Assert(cg_num_tab_overlay_modes == NUM_TAB_OVERLAY_MODES);
+
+  for(mode = 0; mode < NUM_TAB_OVERLAY_MODES; mode++) {
+    Com_Assert(cg_tab_overlay_mode_list[mode].mode == mode);
+  }
+}
+
+/*
+=================
+CG_Can_Show_Tab_Overlay_Mode
+
+returns qtrue if the given mode can be displayed if selected
+=================
+*/
+static qboolean CG_Can_Show_Tab_Overlay_Mode(tab_overlay_modes_t mode) {
+  Com_Assert(mode >= 0);
+  Com_Assert(mode < NUM_TAB_OVERLAY_MODES);
+
+  if(cg_paused.integer) {
+    return qfalse;
+  }
+
+  if(
+    cg.predictedPlayerState.pm_type == PM_INTERMISSION &&
+    !cg_tab_overlay_mode_list[mode].show_at_intermission) {
+    return qfalse;
+  } else if(!cg.show_tab_overlay) {
+    //tab isn't held
+    return qfalse;
+  }
+
+  if(
+    cg_tab_overlay_mode_list[mode].non_spectator_team &&
+    cg.snap->ps.stats[ STAT_TEAM ] == TEAM_NONE) {
+    return qfalse;
+  }
+
+  if(
+    cg_tab_overlay_mode_list[mode].alive &&
+    cg.snap->ps.persistant[ PERS_SPECSTATE ] == SPECTATOR_NOT) {
+    return qfalse;
+  }
+
+  // custom conditions
+  switch(mode) {
+    case TOM_TUTORIAL_TEXT:
+      if(!cg_tutorial.integer) {
+        return qfalse;
+      }
+      break;
+
+    default:
+      break;
+  }
+
+  return qtrue;
+}
+
+/*
+=================
+CG_Num_Showable_Tab_Overlay_Modes
+=================
+*/
+int CG_Num_Showable_Tab_Overlay_Modes(void) {
+  int                 num = 0;
+  tab_overlay_modes_t mode;
+
+  for(mode = 0; mode < NUM_TAB_OVERLAY_MODES; mode++) {
+    if(CG_Can_Show_Tab_Overlay_Mode(mode)) {
+      num++;
+    }
+  }
+
+  Com_Assert(num <= NUM_TAB_OVERLAY_MODES);
+
+  return num;
+}
+
+/*
+=================
+CG_Increment_Tab_Overlay_Mode
+
+Increments the tab overlay mode without checking if the next mode can be shown
+=================
+*/
+static void CG_Increment_Tab_Overlay_Mode(void) {
+  Com_Assert(cg.tab_overlay_mode >= 0);
+  Com_Assert(cg.tab_overlay_mode < NUM_TAB_OVERLAY_MODES);
+
+  if((cg.tab_overlay_mode + 1) >= NUM_TAB_OVERLAY_MODES) {
+    cg.tab_overlay_mode = 0;
+  } else {
+    cg.tab_overlay_mode++;
+  }
+}
+
+/*
+=================
+CG_Decrement_Tab_Overlay_Mode
+
+Decrements the tab overlay mode without checking if the previous mode can be shown
+=================
+*/
+static void CG_Decrement_Tab_Overlay_Mode(void) {
+  Com_Assert(cg.tab_overlay_mode >= 0);
+  Com_Assert(cg.tab_overlay_mode < NUM_TAB_OVERLAY_MODES);
+
+  if(cg.tab_overlay_mode <= 0) {
+    cg.tab_overlay_mode = NUM_TAB_OVERLAY_MODES - 1;
+  } else {
+    cg.tab_overlay_mode--;
+  }
+}
+
+/*
+=================
+CG_Selected_Tab_Overlay_Mode
+
+Returns the currently selected tab overlay mode
+=================
+*/
+static tab_overlay_modes_t CG_Selected_Tab_Overlay_Mode(void) {
+  tab_overlay_modes_t initial_mode;
+
+  if(CG_Num_Showable_Tab_Overlay_Modes() <= 0) {
+    cg.tab_overlay_mode = 0;
+    return cg.tab_overlay_mode;
+  }
+
+  if(cg.tab_overlay_mode < 0 || cg.tab_overlay_mode >= NUM_TAB_OVERLAY_MODES) {
+    cg.tab_overlay_mode = 0;
+  }
+
+  initial_mode = cg.tab_overlay_mode;
+  while(!CG_Can_Show_Tab_Overlay_Mode(cg.tab_overlay_mode)) {
+    //check the next mode if the current mode can't be shown
+    CG_Increment_Tab_Overlay_Mode();
+    //ensure that all of the modes haven't failed
+    Com_Assert(cg.tab_overlay_mode != initial_mode);
+  }
+
+  return cg.tab_overlay_mode;
+}
+
+/*
+=================
+CG_Next_Tab_Overlay_Mode
+=================
+*/
+void CG_Next_Tab_Overlay_Mode(void) {
+  tab_overlay_modes_t initial_mode = CG_Selected_Tab_Overlay_Mode();
+
+  if(CG_Num_Showable_Tab_Overlay_Modes() > 1) {
+    CG_Increment_Tab_Overlay_Mode();
+    while(!CG_Can_Show_Tab_Overlay_Mode(cg.tab_overlay_mode)) {
+      //check the next mode if the current mode can't be shown
+      CG_Increment_Tab_Overlay_Mode();
+      //ensure that all of the modes haven't failed
+      Com_Assert(cg.tab_overlay_mode != initial_mode);
+    }
+  }
+}
+
+/*
+=================
+CG_Prev_Tab_Overlay_Mode
+=================
+*/
+void CG_Prev_Tab_Overlay_Mode(void) {
+  tab_overlay_modes_t initial_mode = CG_Selected_Tab_Overlay_Mode();
+
+  if(CG_Num_Showable_Tab_Overlay_Modes() > 1) {
+    CG_Decrement_Tab_Overlay_Mode();
+    while(!CG_Can_Show_Tab_Overlay_Mode(cg.tab_overlay_mode)) {
+      //check the previous mode if the current mode can't be shown
+      CG_Decrement_Tab_Overlay_Mode();
+      //ensure that all of the modes haven't failed
+      Com_Assert(cg.tab_overlay_mode != initial_mode);
+    }
+  }
+}
+
+/*
+=================
+CG_Tab_Overlay_Mode_Is_Selected
+
+Indicates is a particular tab overlay mode should currently be displayed
+=================
+*/
+static qboolean CG_Tab_Overlay_Mode_Is_Selected(tab_overlay_modes_t mode) {
+  if(
+    CG_Can_Show_Tab_Overlay_Mode(mode) &&
+    mode == CG_Selected_Tab_Overlay_Mode()) {
+    return qtrue;
+  }
+
+  return qfalse;
+}
+
+/*
+=================
+CG_Show_Tab_Overlay_Selection_Bar
+
+Determines if the Tab Overlay Selection Bar should be shown
+=================
+*/
+static qboolean CG_Show_Tab_Overlay_Selection_Bar(void) {
+  if(cg_paused.integer) {
+    return qfalse;
+  }
+
+  if(
+    !cg.show_tab_overlay &&
+    cg.predictedPlayerState.pm_type != PM_INTERMISSION) {
+    return qfalse;
+  }
+  if(CG_Num_Showable_Tab_Overlay_Modes() <= 1) {
+    return qfalse;
+  }
+
+  return qtrue;
+}
+
+/*
+=================
+CG_DrawTabOverlaySelectionBar
+=================
+*/
+static void CG_DrawTabOverlaySelectionBar(
+  rectDef_t *rect, float textScale, int textAlign, int textStyle, vec4_t color) {
+  char                prev_overlay_string[32] = "", next_overlay_string[32] = "";
+  rectDef_t           box_rect;
+  vec4_t              border_color = {0.3f, 0.3f, 0.3f, 6.0f};
+  int                 num_modes = 0;
+  tab_overlay_modes_t selected_mode, temp_mode;
+  float               max_text_width;
+  float               mode_box_width, prev_box_width, next_box_width;
+  float               margin = 10.0f;
+  float               gap = 20.0f;
+  float               x;
+
+  if(!CG_Show_Tab_Overlay_Selection_Bar()) {
+    return;
+  }
+
+  margin *= textScale;
+  gap *= textScale;
+
+  selected_mode = CG_Selected_Tab_Overlay_Mode();
+
+  Com_sprintf(
+    prev_overlay_string, sizeof(prev_overlay_string),
+    "Press '%s' For Prev", 
+    CG_KeyBinding("weapprev"));
+  Com_sprintf(
+    next_overlay_string, sizeof(next_overlay_string),
+    "Press '%s' For Next", 
+    CG_KeyBinding("weapnext"));
+
+  //get the width of the boxes
+  for(temp_mode = 0; temp_mode < NUM_TAB_OVERLAY_MODES; temp_mode++) {
+    float text_width;
+
+    if(!CG_Can_Show_Tab_Overlay_Mode(temp_mode)) {
+      continue;
+    }
+
+    num_modes++;
+    text_width = UI_Text_Width(
+      cg_tab_overlay_mode_list[temp_mode].human_name, textScale);
+    if(text_width > max_text_width) {
+      max_text_width = text_width;
+    }
+  }
+
+  mode_box_width = ((2*margin) + max_text_width);
+  prev_box_width = ((2*margin) + UI_Text_Width(prev_overlay_string, textScale));
+  next_box_width = ((2*margin) + UI_Text_Width(next_overlay_string, textScale));
+  //set the alignment of the boxes
+  switch(textAlign) {
+    case ALIGN_LEFT:
+      x = rect->x;
+      break;
+
+    case ALIGN_CENTER:
+      x =
+        rect->x + (rect->w / 2.0f) - ((num_modes * mode_box_width) / 2) -
+        ((prev_box_width + next_box_width + (2 * gap)) / 2);
+      break;
+
+    case ALIGN_RIGHT:
+      x =
+        rect->x + rect->w - (num_modes * mode_box_width) - prev_box_width -
+        next_box_width - (2 * gap);
+      break;
+
+    default:
+      x = rect->x;
+      break;
+  }
+
+  //draw prev overlay box
+  box_rect.x = x;
+  box_rect.y = rect->y;
+  box_rect.w = prev_box_width;
+  box_rect.h = rect->h;
+
+  x += prev_box_width + gap;
+
+  //draw box borders
+  CG_DrawRect(box_rect.x, box_rect.y, box_rect.w, box_rect.h, 1.0f, border_color);
+
+  //draw box text
+  UI_DrawTextBlock(
+    &box_rect, 0, 0, color, textScale, ALIGN_CENTER, VALIGN_CENTER, textStyle,
+    prev_overlay_string);
+
+  //draw mode boxes
+  for(temp_mode = 0; temp_mode < NUM_TAB_OVERLAY_MODES; temp_mode++) {
+    vec4_t    box_color = {0.5f, 0.5f, 0.5f, 1.0f};
+
+    if(!CG_Can_Show_Tab_Overlay_Mode(temp_mode)) {
+      continue;
+    }
+
+    box_rect.x = x;
+    box_rect.y = rect->y;
+    box_rect.w = mode_box_width;
+    box_rect.h = rect->h;
+
+    x += mode_box_width;
+
+    if(temp_mode == selected_mode) {
+      //highlight selected mode
+      box_color[0] = 0.0f;
+      box_color[1] = 0.4f;
+      box_color[2] = 0.0f;
+      box_color[3] = 0.8f;
+      trap_R_SetColor(box_color);
+      CG_DrawPic(box_rect.x, box_rect.y, box_rect.w,
+                  box_rect.h, cgs.media.teamOverlayShader);
+      trap_R_SetColor(NULL);
+    }
+
+    //draw box borders
+    CG_DrawRect(box_rect.x, box_rect.y, box_rect.w, box_rect.h, 1.0f, box_color);
+
+    //draw box text
+    UI_DrawTextBlock(
+      &box_rect, 0, 0, color, textScale, ALIGN_CENTER, VALIGN_CENTER, textStyle,
+      cg_tab_overlay_mode_list[temp_mode].human_name);
+  }
+
+  x += gap;
+
+  //draw next overlay box
+  box_rect.x = x;
+  box_rect.y = rect->y;
+  box_rect.w = next_box_width;
+  box_rect.h = rect->h;
+
+  //draw box borders
+  CG_DrawRect(box_rect.x, box_rect.y, box_rect.w, box_rect.h, 1.0f, border_color);
+
+  //draw box text
+  UI_DrawTextBlock(
+    &box_rect, 0, 0, color, textScale, ALIGN_CENTER, VALIGN_CENTER, textStyle,
+    next_overlay_string);
+}
+
+static qboolean CG_DrawScoreboard( void )
+{
+  static qboolean firstTime = qtrue;
+
+  if( menuScoreboard )
+    menuScoreboard->window.flags &= ~WINDOW_FORCED;
+
+  if( cg_paused.integer )
+  {
+    cg.deferredPlayerLoading = 0;
+    firstTime = qtrue;
+    return qfalse;
+  }
+
+  if( !CG_Tab_Overlay_Mode_Is_Selected(TOM_SCOREBOARD) )
+  {
+    cg.deferredPlayerLoading = 0;
+    cg.killerName[ 0 ] = 0;
+    firstTime = qtrue;
+    return qfalse;
+  }
+
+  CG_RequestScores( );
+
+  if( menuScoreboard == NULL )
+    menuScoreboard = Menus_FindByName( "teamscore_menu" );
+
+  if( menuScoreboard )
+  {
+    if( firstTime )
+    {
+      cg.spectatorTime = trap_Milliseconds();
+      CG_SetScoreSelection( menuScoreboard );
+      firstTime = qfalse;
+    }
+
+    Menu_Update( menuScoreboard );
+    Menu_Paint( menuScoreboard, qtrue );
+  }
+
+  return qtrue;
+}
+
+/*
+=================
+CG_DrawTeamOverlay
+=================
+*/
+
+typedef enum
+{
+  TEAMOVERLAY_OFF,
+  TEAMOVERLAY_ALL,
+  TEAMOVERLAY_SUPPORT,
+  TEAMOVERLAY_NEARBY,
+} teamOverlayMode_t;
+
+typedef enum
+{
+  TEAMOVERLAY_SORT_NONE,
+  TEAMOVERLAY_SORT_SCORE,
+  TEAMOVERLAY_SORT_WEAPONCLASS,
+} teamOverlaySort_t;
+
+static int QDECL SortScore( const void *a, const void *b )
+{
+  int na = *(int *)a;
+  int nb = *(int *)b;
+
+  if(cgs.clientinfo[ nb ].rank != cgs.clientinfo[ na ].rank) {
+    return( cgs.clientinfo[ nb ].rank - cgs.clientinfo[ na ].rank );
+  }
+
+  return( cgs.clientinfo[ nb ].score - cgs.clientinfo[ na ].score );
+}
+
+static int QDECL SortWeaponClass( const void *a, const void *b )
+{
+  int out;
+  clientInfo_t *ca = cgs.clientinfo + *(int *)a;
+  clientInfo_t *cb = cgs.clientinfo + *(int *)b;
+
+  if(cb->rank != ca->rank) {
+    return( cb->rank - ca->rank );
+  }
+
+  out = cb->curWeaponClass - ca->curWeaponClass;
+
+  // We want grangers on top. ckits are already on top without the special case.
+  if( ca->team == TEAM_ALIENS )
+  {
+    if( ca->curWeaponClass == PCL_ALIEN_BUILDER0_UPG || 
+        cb->curWeaponClass == PCL_ALIEN_BUILDER0_UPG ||
+        ca->curWeaponClass == PCL_ALIEN_BUILDER0 || 
+        cb->curWeaponClass == PCL_ALIEN_BUILDER0 )
+    {
+      out = -out;
+    }
+  }
+
+  return( out );
+}
+
+static void CG_DrawTeamOverlay(rectDef_t *rect, float scale, vec4_t color) {
+  char              *s;
+  int               i, j;
+  float             x = rect->x;
+  float             y;
+  float             tx, ty;
+  rectDef_t         text_rect;
+  clientInfo_t      *ci, *pci;
+  vec4_t            tcolor;
+  float             iconSize = (rect->h - 2.0f) / 18.0f;
+  float             leftMargin = 4.0f;
+  float             iconTopMargin = 2.0f;
+  float             midSep = 2.0f;
+  float             backgroundWidth = rect->w;
+  float             fontScale = 0.30f;
+  float             nameWidth = 0.45f * rect->w;
+  char              name[ MAX_NAME_LENGTH + 2 ];
+  char              multiple[ 12 ];
+  qboolean          made_an_entry = qfalse;
+  char              entry[ 1024 ];
+  char              string[ MAX_STRING_CHARS ];
+  int               stringlength = 0;
+  int               maxDisplayCount = 0;
+  int               displayCount = 0;
+  float             nameMaxX, nameMaxXCp;
+  float             maxX = rect->x + rect->w;
+  float             maxXCp = maxX;
+  weapon_t          curWeapon = WP_NONE;
+  teamOverlayMode_t mode = cg_drawTeamOverlay.integer;
+  teamOverlaySort_t sort = cg_teamOverlaySortMode.integer;
+  int               displayClients[MAX_CLIENTS];
+  int               stage;
+  const team_t      team = cg.predictedPlayerState.stats[STAT_TEAM];
+  const char        *spawn_name;
+  const char        *core_name;
+  int               num_spawns = 0;
+  int               num_core_buildables = 0;
+  int               num_collumns = 1;
+  int               collumn = 0;
+
+  if(!CG_Tab_Overlay_Mode_Is_Selected(TOM_TEAM_STATUS)) {
+    return;
+  }
+
+  if( mode == TEAMOVERLAY_OFF ) {
+    mode = TEAMOVERLAY_ALL;
+  }
+
+  CG_RequestTeamStatus();
+
+  iconSize *= scale;
+  leftMargin *= scale;
+  iconTopMargin *= scale;
+  midSep *= scale;
+  backgroundWidth *= scale;
+  fontScale *= scale;
+  nameWidth *= scale;
+
+  y = rect->y;
+
+
+  tcolor[ 0 ] = 1.0f;
+  tcolor[ 1 ] = 1.0f;
+  tcolor[ 2 ] = 1.0f;
+  tcolor[ 3 ] = color[ 3 ];
+
+  //draw overall team status
+  trap_R_SetColor(color);
+  CG_DrawPic(x, y, rect->w,
+              iconSize, cgs.media.teamOverlayShader);
+  trap_R_SetColor(tcolor);
+
+  // get the stage
+  switch (team) {
+    case TEAM_ALIENS:
+      stage = cgs.alienStage + 1;
+      break;
+
+    case TEAM_HUMANS:
+      stage = cgs.humanStage + 1;
+      break;
+
+    default:
+      stage = 0;
+      break;
+  }
+
+  // get the number of spawns and core buildables
+  for(i = 0; i < BA_NUM_BUILDABLES; i++) {
+    if(BG_Buildable(i)->team != team) {
+      continue;
+    }
+
+    if(BG_Buildable(i)->role & ROLE_SPAWN) {
+      num_spawns += cg.team_status.num_buildables[i];
+    }
+    if(BG_Buildable(i)->role & ROLE_CORE) {
+      num_core_buildables += cg.team_status.num_buildables[i];
+    }
+  }
+
+  // get the names of the spawn and core buildables
+  switch (team) {
+    case TEAM_ALIENS:
+      spawn_name = BG_Buildable(BA_A_SPAWN)->humanName;
+      core_name = BG_Buildable(BA_A_OVERMIND)->humanName;
+      break;
+
+    case TEAM_HUMANS:
+      spawn_name = BG_Buildable(BA_H_SPAWN)->humanName;
+      core_name = BG_Buildable(BA_H_REACTOR)->humanName;
+      break;
+
+    default:
+      spawn_name = "Spawn";
+      core_name = "Core";
+      break;
+  }
+
+  if( num_core_buildables > 1 )
+    Com_sprintf( multiple, sizeof( multiple ), "^7[x%d]", num_core_buildables );
+  else
+    multiple[ 0 ] = '\0';
+
+  s = va(
+    "^3Stage^7: ^5%d ^7| ^3Build Points^7: ^5%d+(%d) ^7| ^3Build Point Reserve^7: ^5%d ^7| ^3Builders^7: ^5x%d ^7| ^3%ss^7: ^5x%d ^7| ^3%s^7: %s(%d%%)%s^7",
+    stage, cg.snap->ps.persistant[PERS_BP], cg.snap->ps.persistant[PERS_MARKEDBP],
+    cg.snap->ps.persistant[PERS_BP_RESERVE], cg.team_status.num_builders,
+    spawn_name, num_spawns, core_name,
+    (!num_core_buildables) ? "^1Down" : !cg.team_status.core_buildable_constructing ? "^2Up" : "^5Building",
+    cg.team_status.core_buildable_health, multiple);
+
+  trap_R_SetColor( NULL );
+  text_rect.x = x + leftMargin;
+  text_rect.y = y + iconSize - iconTopMargin;
+  text_rect.w = rect->w - (2.0f * leftMargin);
+  text_rect.h = iconSize;
+  CG_AlignText(
+    &text_rect, s, fontScale, 0.0f, 0.0f, ALIGN_CENTER, VALIGN_NONE, &tx, &ty);
+  nameMaxX = text_rect.x + text_rect.w;
+  UI_Text_Paint_Limit(
+    &nameMaxX, tx, ty, fontScale, tcolor, s,  0, 0 );
+
+  y += iconSize;
+
+  trap_R_SetColor(color);
+  CG_DrawPic(x, y, rect->w,
+              iconSize, cgs.media.teamOverlayShader);
+  trap_R_SetColor(tcolor);
+
+  for(i = 0; i < BA_NUM_BUILDABLES; i++) {
+    if(BG_Buildable(i)->role & (ROLE_CORE|ROLE_SPAWN)) {
+      continue;
+    }
+
+    if(BG_Buildable(i)->team != team) {
+      continue;
+    }
+
+    Com_sprintf(
+      entry, sizeof(entry), "^7%s^3%ss^7: ^5x%d^7", made_an_entry ? " | " : "",
+      BG_Buildable(i)->humanName, cg.team_status.num_buildables[i]);
+
+    made_an_entry = qtrue;
+
+    j = strlen(entry);
+
+    if(stringlength + j >= sizeof(string))
+      break;
+
+    strcpy(string + stringlength, entry);
+    stringlength += j;
+  }
+
+  trap_R_SetColor(NULL);
+  text_rect.x = x + leftMargin;
+  text_rect.y = y + iconSize - iconTopMargin;
+  text_rect.w = rect->w - (2.0f * leftMargin);
+  text_rect.h = iconSize;
+  CG_AlignText(
+    &text_rect, string, fontScale, 0.0f, 0.0f, ALIGN_CENTER, VALIGN_NONE, &tx, &ty);
+  nameMaxX = text_rect.x + text_rect.w;
+  UI_Text_Paint_Limit(
+    &nameMaxX, tx, ty, fontScale, tcolor, string, 0, 0);
+
+  y += iconSize + 2.0f;
+
+  if(!cgs.teaminfoReceievedTime) {
+    return;
+  }
+
+  pci = cgs.clientinfo + cg.snap->ps.clientNum;
+
+  if( mode == TEAMOVERLAY_ALL || mode == TEAMOVERLAY_SUPPORT )
+  {
+    for( i = 0; i < MAX_CLIENTS; i++ )
+    {
+      ci = cgs.clientinfo + i;
+      if( ci->infoValid && pci != ci && ci->team == pci->team )
+      {
+        if( mode == TEAMOVERLAY_ALL )
+          displayClients[ maxDisplayCount++ ] = i;
+        else
+        {
+          if( ci->curWeaponClass == PCL_ALIEN_BUILDER0 || 
+              ci->curWeaponClass == PCL_ALIEN_BUILDER0_UPG ||
+              ci->curWeaponClass == PCL_ALIEN_LEVEL1 || 
+              ci->curWeaponClass == PCL_ALIEN_LEVEL1_UPG ||
+              ci->curWeaponClass == WP_HBUILD ||
+              ci->curWeaponClass == WP_HBUILD2)
+          {
+            displayClients[ maxDisplayCount++ ] = i;
+          }
+        }
+      }
+    }
+  }
+  else // find nearby
+  {
+    for( i = 0; i < cg.snap->numEntities; i++ )
+    {
+      centity_t *cent = &cg_entities[ cg.snap->entities[ i ].number ];
+      vec3_t relOrigin = { 0.0f, 0.0f, 0.0f };
+      int team = cent->currentState.misc & 0x00FF;
+
+      if( cent->currentState.eType != ET_PLAYER || 
+          team != pci->team ||
+          cent->currentState.eFlags & EF_DEAD )
+      {
+        continue;
+      }
+
+      VectorSubtract( cent->lerpOrigin, cg.predictedPlayerState.origin, relOrigin );
+
+      if( VectorLength( relOrigin ) < HELMET_RANGE )
+        displayClients[ maxDisplayCount++ ] = cg.snap->entities[ i ].number;
+    }
+  }
+
+  // Sort
+  if( sort == TEAMOVERLAY_SORT_SCORE )
+  {
+    qsort( displayClients, maxDisplayCount,
+      sizeof( displayClients[ 0 ] ), SortScore );
+  }
+  else if( sort == TEAMOVERLAY_SORT_WEAPONCLASS )
+  {
+    qsort( displayClients, maxDisplayCount,
+      sizeof( displayClients[ 0 ] ), SortWeaponClass );
+  }
+
+  if( maxDisplayCount > MAX_CLIENTS )
+    maxDisplayCount = MAX_CLIENTS;
+
+  num_collumns = 1 + (maxDisplayCount / 16);
+
+  backgroundWidth = backgroundWidth / num_collumns;
+  nameWidth = nameWidth / num_collumns;
+
+  //draw teammate status
+  collumn = 0;
+  for( i = 0; i < MAX_CLIENTS && displayCount < maxDisplayCount; i++ )
+  {
+    ci = cgs.clientinfo + displayClients[ i ];
+
+    if( !ci->infoValid || pci == ci || ci->team != pci->team )
+      continue;
+
+    tx = x + (collumn * (rect->w / num_collumns));
+    maxX = tx + (rect->w / num_collumns);
+
+    Com_sprintf( name, sizeof( name ), "%s^7", ci->name );
+
+    trap_R_SetColor( color );
+    CG_DrawPic( tx, y, backgroundWidth,
+                iconSize, cgs.media.teamOverlayShader );
+    trap_R_SetColor( tcolor );
+    if( ci->health <= 0 || !ci->curWeaponClass )
+      s = "";
+    else
+    {
+      int credits;
+
+      if( ci->team == TEAM_HUMANS )
+        curWeapon = ci->curWeaponClass;
+      else if( ci->team == TEAM_ALIENS )
+        curWeapon = BG_Class( ci->curWeaponClass )->startWeapon;
+
+      CG_DrawPic( tx + leftMargin, y, iconSize, iconSize,
+                  cg_weapons[ curWeapon ].weaponIcon );
+      if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_HUMANS )
+      {
+        if( ci->upgrade != UP_NONE )
+        {
+          CG_DrawPic( tx + iconSize + leftMargin, y, iconSize, 
+                      iconSize, cg_upgrades[ ci->upgrade ].upgradeIcon );
+        }
+      }
+      else
+      {
+        if( curWeapon == WP_ABUILD2 || curWeapon == WP_ALEVEL1_UPG ||
+            curWeapon == WP_ALEVEL2_UPG || curWeapon == WP_ALEVEL3_UPG )
+        {
+          CG_DrawPic( tx + iconSize + leftMargin, y, iconSize, 
+                      iconSize, cgs.media.upgradeClassIconShader );
+        }
+      }
+
+      credits = ci->credits;
+      if(ci->team == TEAM_ALIENS) {
+        credits /= ALIEN_CREDITS_PER_KILL;
+      }
+
+      s = va( " [^%c%3d^7](^5$ %4d^7) ^7%s",
+              CG_GetColorCharForHealth( displayClients[ i ] ),
+              BG_SU2HP( ci->health ),
+              credits,
+              CG_ConfigString( CS_LOCATIONS + ci->location ) );
+    }
+
+    trap_R_SetColor( NULL );
+    nameMaxX = nameMaxXCp = tx + 2.0f * iconSize +
+                            leftMargin + midSep + nameWidth;
+    UI_Text_Paint_Limit( &nameMaxXCp, tx + 2.0f * iconSize + leftMargin + midSep, 
+                         y + iconSize - iconTopMargin, fontScale, tcolor, name,
+                         0, 0 );
+
+    maxXCp = maxX;
+
+    UI_Text_Paint_Limit( &maxXCp, nameMaxX, y + iconSize - iconTopMargin, 
+                         fontScale, tcolor, s, 0, 0 );
+    collumn++;
+    if(collumn >= num_collumns) {
+      collumn = 0;
+      y += iconSize;
+    }
+    displayCount++;
+  }
+}
+
+/*
+===================
+CG_DrawTutorial
+===================
+*/
+static void CG_DrawTutorial(
+  rectDef_t *rect, float text_x, float text_y, vec4_t color, float scale,
+  int textalign, int textvalign, int textStyle ) {
+  if(!CG_Tab_Overlay_Mode_Is_Selected(TOM_TUTORIAL_TEXT)) {
+    return;
+  }
+
+  UI_DrawTextBlock(
+    rect, text_x, text_y, color, scale, textalign, textvalign, textStyle,
+    CG_TutorialText( ));
+}
+
+/*
+================================================================================
+*/
+
 //=============== TA: was cg_newdraw.c
 
 #define NO_CREDITS_TIME 2000
@@ -806,8 +1690,9 @@ CG_DrawHumanScanner
 */
 static void CG_DrawHumanScanner( rectDef_t *rect, qhandle_t shader, vec4_t color )
 {
-  if( BG_InventoryContainsUpgrade( UP_HELMET, cg.snap->ps.stats ) )
+  if( BG_InventoryContainsUpgrade( UP_HELMET, cg.snap->ps.stats ) ) {
     CG_Scanner( rect, shader, color );
+  }
 }
 
 /*
@@ -829,16 +1714,18 @@ static void CG_DrawCompass(rectDef_t *rect, float scale, qhandle_t shader, vec4_
       rect->x, rect->y, rect->w, rect->h, scale, cg.time,
       cgs.media.compassSphereModel, 0, 0, forward, NULL, angles);
   } else {
+    const float width = 4 * rect->w;
+    const float x = rect->x - ((3 * rect->w) / 2.0f);
     float orientation_offset =
-      (AngleNormalize360(cg.refdefViewAngles[YAW]) / 360.0f) * rect->w;
+      (AngleNormalize360(cg.refdefViewAngles[YAW]) / 360.0f) * width;
     float clip_offset =
-      ((360.0f - AngleNormalize360(cg.refdef.fov_x)) / 360.0f) * rect->w;
+      ((360.0f - AngleNormalize360(cg.refdef.fov_x)) / 360.0f) * width;
 
     CG_SetClipRegion(
-      rect->x + (clip_offset / 2), rect->y, rect->w - clip_offset, rect->h);
+      x + (clip_offset / 2), rect->y, width - clip_offset, rect->h);
     trap_R_SetColor(color);
-    CG_DrawPic(rect->x + orientation_offset, rect->y, rect->w, rect->h, shader);
-    CG_DrawPic(rect->x - rect->w + orientation_offset, rect->y, rect->w, rect->h, shader);
+    CG_DrawPic(x + orientation_offset, rect->y, width, rect->h, shader);
+    CG_DrawPic(x - width + orientation_offset, rect->y, width, rect->h, shader);
     trap_R_SetColor(NULL);
     CG_ClearClipRegion( );
   }
@@ -2395,249 +3282,6 @@ static void CG_DrawTimer( rectDef_t *rect, float text_x, float text_y,
 
 /*
 =================
-CG_DrawTeamOverlay
-=================
-*/
-
-typedef enum
-{
-  TEAMOVERLAY_OFF,
-  TEAMOVERLAY_ALL,
-  TEAMOVERLAY_SUPPORT,
-  TEAMOVERLAY_NEARBY,
-} teamOverlayMode_t;
-
-typedef enum
-{
-  TEAMOVERLAY_SORT_NONE,
-  TEAMOVERLAY_SORT_SCORE,
-  TEAMOVERLAY_SORT_WEAPONCLASS,
-} teamOverlaySort_t;
-
-static int QDECL SortScore( const void *a, const void *b )
-{
-  int na = *(int *)a;
-  int nb = *(int *)b;
-
-  if(cgs.clientinfo[ nb ].rank != cgs.clientinfo[ na ].rank) {
-    return( cgs.clientinfo[ nb ].rank - cgs.clientinfo[ na ].rank );
-  }
-
-  return( cgs.clientinfo[ nb ].score - cgs.clientinfo[ na ].score );
-}
-
-static int QDECL SortWeaponClass( const void *a, const void *b )
-{
-  int out;
-  clientInfo_t *ca = cgs.clientinfo + *(int *)a;
-  clientInfo_t *cb = cgs.clientinfo + *(int *)b;
-
-  if(cb->rank != ca->rank) {
-    return( cb->rank - ca->rank );
-  }
-
-  out = cb->curWeaponClass - ca->curWeaponClass;
-
-  // We want grangers on top. ckits are already on top without the special case.
-  if( ca->team == TEAM_ALIENS )
-  {
-    if( ca->curWeaponClass == PCL_ALIEN_BUILDER0_UPG || 
-        cb->curWeaponClass == PCL_ALIEN_BUILDER0_UPG ||
-        ca->curWeaponClass == PCL_ALIEN_BUILDER0 || 
-        cb->curWeaponClass == PCL_ALIEN_BUILDER0 )
-    {
-      out = -out;
-    }
-  }
-
-  return( out );
-}
-
-static void CG_DrawTeamOverlay( rectDef_t *rect, float scale, vec4_t color )
-{
-  char              *s;
-  int               i;
-  float             x = rect->x;
-  float             y;
-  clientInfo_t      *ci, *pci;
-  vec4_t            tcolor;
-  float             iconSize = rect->h / 8.0f;
-  float             leftMargin = 4.0f;
-  float             iconTopMargin = 2.0f;
-  float             midSep = 2.0f;
-  float             backgroundWidth = rect->w;
-  float             fontScale = 0.30f;
-  float             vPad = 0.0f;
-  float             nameWidth = 0.5f * rect->w;
-  char              name[ MAX_NAME_LENGTH + 2 ];
-  int               maxDisplayCount = 0;
-  int               displayCount = 0;
-  float             nameMaxX, nameMaxXCp;
-  float             maxX = rect->x + rect->w;
-  float             maxXCp = maxX;
-  weapon_t          curWeapon = WP_NONE;
-  teamOverlayMode_t mode = cg_drawTeamOverlay.integer;
-  teamOverlaySort_t sort = cg_teamOverlaySortMode.integer;
-  int               displayClients[ MAX_CLIENTS ];
-
-  if( cg.predictedPlayerState.pm_type == PM_SPECTATOR )
-    return;
-
-  if( mode == TEAMOVERLAY_OFF || !cg_teamOverlayMaxPlayers.integer )
-    return;
-
-  if( !cgs.teaminfoReceievedTime )
-    return;
-
-  if( cg.showScores ||
-      cg.predictedPlayerState.pm_type == PM_INTERMISSION )
-    return;
-
-  pci = cgs.clientinfo + cg.snap->ps.clientNum;
-
-  if( mode == TEAMOVERLAY_ALL || mode == TEAMOVERLAY_SUPPORT )
-  {
-    for( i = 0; i < MAX_CLIENTS; i++ )
-    {
-      ci = cgs.clientinfo + i;
-      if( ci->infoValid && pci != ci && ci->team == pci->team )
-      {
-        if( mode == TEAMOVERLAY_ALL )
-          displayClients[ maxDisplayCount++ ] = i;
-        else
-        {
-          if( ci->curWeaponClass == PCL_ALIEN_BUILDER0 || 
-              ci->curWeaponClass == PCL_ALIEN_BUILDER0_UPG ||
-              ci->curWeaponClass == PCL_ALIEN_LEVEL1 || 
-              ci->curWeaponClass == PCL_ALIEN_LEVEL1_UPG ||
-              ci->curWeaponClass == WP_HBUILD ||
-              ci->curWeaponClass == WP_HBUILD2)
-          {
-            displayClients[ maxDisplayCount++ ] = i;
-          }
-        }
-      }
-    }
-  }
-  else // find nearby
-  {
-    for( i = 0; i < cg.snap->numEntities; i++ )
-    {
-      centity_t *cent = &cg_entities[ cg.snap->entities[ i ].number ];
-      vec3_t relOrigin = { 0.0f, 0.0f, 0.0f };
-      int team = cent->currentState.misc & 0x00FF;
-
-      if( cent->currentState.eType != ET_PLAYER || 
-          team != pci->team ||
-          cent->currentState.eFlags & EF_DEAD )
-      {
-        continue;
-      }
-
-      VectorSubtract( cent->lerpOrigin, cg.predictedPlayerState.origin, relOrigin );
-
-      if( VectorLength( relOrigin ) < HELMET_RANGE )
-        displayClients[ maxDisplayCount++ ] = cg.snap->entities[ i ].number;
-    }
-  }
-
-  // Sort
-  if( sort == TEAMOVERLAY_SORT_SCORE )
-  {
-    qsort( displayClients, maxDisplayCount,
-      sizeof( displayClients[ 0 ] ), SortScore );
-  }
-  else if( sort == TEAMOVERLAY_SORT_WEAPONCLASS )
-  {
-    qsort( displayClients, maxDisplayCount,
-      sizeof( displayClients[ 0 ] ), SortWeaponClass );
-  }
-
-  if( maxDisplayCount > cg_teamOverlayMaxPlayers.integer )
-    maxDisplayCount = cg_teamOverlayMaxPlayers.integer;
-
-  iconSize *= scale;
-  leftMargin *= scale;
-  iconTopMargin *= scale;
-  midSep *= scale;
-  backgroundWidth *= scale;
-  fontScale *= scale;
-  nameWidth *= scale;
-
-  vPad = ( rect->h - ( (float) maxDisplayCount * iconSize ) ) / 2.0f;
-  y = rect->y + vPad;
-
-  tcolor[ 0 ] = 1.0f;
-  tcolor[ 1 ] = 1.0f;
-  tcolor[ 2 ] = 1.0f;
-  tcolor[ 3 ] = color[ 3 ];
-
-  for( i = 0; i < MAX_CLIENTS && displayCount < maxDisplayCount; i++ )
-  {
-    ci = cgs.clientinfo + displayClients[ i ];
-
-    if( !ci->infoValid || pci == ci || ci->team != pci->team )
-      continue;
-
-    Com_sprintf( name, sizeof( name ), "%s^7", ci->name );
-
-    trap_R_SetColor( color );
-    CG_DrawPic( x, y, backgroundWidth,
-                iconSize, cgs.media.teamOverlayShader );
-    trap_R_SetColor( tcolor );
-    if( ci->health <= 0 || !ci->curWeaponClass )
-      s = "";
-    else
-    {
-      if( ci->team == TEAM_HUMANS )
-        curWeapon = ci->curWeaponClass;
-      else if( ci->team == TEAM_ALIENS )
-        curWeapon = BG_Class( ci->curWeaponClass )->startWeapon;
-
-      CG_DrawPic( x + leftMargin, y, iconSize, iconSize,
-                  cg_weapons[ curWeapon ].weaponIcon );
-      if( cg.predictedPlayerState.stats[ STAT_TEAM ] == TEAM_HUMANS )
-      {
-        if( ci->upgrade != UP_NONE )
-        {
-          CG_DrawPic( x + iconSize + leftMargin, y, iconSize, 
-                      iconSize, cg_upgrades[ ci->upgrade ].upgradeIcon );
-        }
-      }
-      else
-      {
-        if( curWeapon == WP_ABUILD2 || curWeapon == WP_ALEVEL1_UPG ||
-            curWeapon == WP_ALEVEL2_UPG || curWeapon == WP_ALEVEL3_UPG )
-        {
-          CG_DrawPic( x + iconSize + leftMargin, y, iconSize, 
-                      iconSize, cgs.media.upgradeClassIconShader );
-        }
-      }
-
-      s = va( " [^%c%3d^7] ^7%s",
-              CG_GetColorCharForHealth( displayClients[ i ] ),
-              BG_SU2HP( ci->health ),
-              CG_ConfigString( CS_LOCATIONS + ci->location ) );
-    }
-
-    trap_R_SetColor( NULL );
-    nameMaxX = nameMaxXCp = x + 2.0f * iconSize +
-                            leftMargin + midSep + nameWidth;
-    UI_Text_Paint_Limit( &nameMaxXCp, x + 2.0f * iconSize + leftMargin + midSep, 
-                         y + iconSize - iconTopMargin, fontScale, tcolor, name,
-                         0, 0 );
-
-    maxXCp = maxX;
-
-    UI_Text_Paint_Limit( &maxXCp, nameMaxX, y + iconSize - iconTopMargin, 
-                         fontScale, tcolor, s, 0, 0 );
-    y += iconSize;
-    displayCount++;
-  }
-}
-
-/*
-=================
 CG_DrawClock
 =================
 */
@@ -3250,20 +3894,6 @@ static void CG_DrawConsole( rectDef_t *rect, float text_x, float text_y, vec4_t 
 
 /*
 ===================
-CG_DrawTutorial
-===================
-*/
-static void CG_DrawTutorial( rectDef_t *rect, float text_x, float text_y, vec4_t color,
-                            float scale, int textalign, int textvalign, int textStyle )
-{
-  if( !cg_tutorial.integer )
-    return;
-
-  UI_DrawTextBlock( rect, text_x, text_y, color, scale, textalign, textvalign, textStyle, CG_TutorialText( ) );
-}
-
-/*
-===================
 CG_DrawWeaponIcon
 ===================
 */
@@ -3596,6 +4226,10 @@ static void CG_DrawWarmup( int ownerDraw, rectDef_t *rect, float textScale, int 
   if( cg.intermissionStarted )
     return;
 
+    if(CG_Show_Tab_Overlay_Selection_Bar()) {
+      return;
+    }
+
   if( !cgs.warmup ) {
     if(
       IS_SCRIM &&
@@ -3687,8 +4321,7 @@ static void CG_DrawCrosshairNames( rectDef_t *rect, float scale, int textStyle )
 
   // add health from overlay info to the crosshair client name
   name = cgs.clientinfo[ cg.crosshairClientNum ].name;
-  if( cg_teamOverlayUserinfo.integer &&
-      cg.snap->ps.stats[ STAT_TEAM ] != TEAM_NONE &&
+  if( cg.snap->ps.stats[ STAT_TEAM ] != TEAM_NONE &&
       cgs.teaminfoReceievedTime &&
       cgs.clientinfo[ cg.crosshairClientNum ].health > 0 )
   {
@@ -3943,9 +4576,7 @@ void CG_OwnerDraw( float x, float y, float w, float h, float text_x,
       break;
 
     case CG_TUTORIAL:
-      break;
-      if( !( cgs.voteTime[ TEAM_NONE ] || cgs.voteTime[ cg.predictedPlayerState.stats[ STAT_TEAM ] ] ) )
-        CG_DrawTutorial( &rect, text_x, text_y, foreColor, scale, textalign, textvalign, textStyle );
+      CG_DrawTutorial( &rect, text_x, text_y, foreColor, scale, textalign, textvalign, textStyle );
       break;
 
     // Warmup stuff
@@ -3982,6 +4613,10 @@ void CG_OwnerDraw( float x, float y, float w, float h, float text_x,
         CG_DrawKillMsg( &rect, text_x, text_y, scale, foreColor, textalign, textvalign, textStyle );
       break;
 
+    case CG_TABOVERLAYSELECTIONBAR:
+      CG_DrawTabOverlaySelectionBar(&rect, scale, textalign, textStyle, foreColor);
+      break;
+
     default:
       break;
   }
@@ -3993,7 +4628,7 @@ void CG_MouseEvent( int x, int y )
 
   if( ( cg.predictedPlayerState.pm_type == PM_NORMAL ||
         cg.predictedPlayerState.pm_type == PM_SPECTATOR ) &&
-        cg.showScores == qfalse )
+        cg.show_tab_overlay == qfalse )
   {
     trap_Key_SetCatcher( 0 );
     return;
@@ -4073,7 +4708,7 @@ void CG_KeyEvent( int key, qboolean down )
 
   if( cg.predictedPlayerState.pm_type == PM_NORMAL ||
       ( cg.predictedPlayerState.pm_type == PM_SPECTATOR &&
-        cg.showScores == qfalse ) )
+        cg.show_tab_overlay == qfalse ) )
   {
     CG_EventHandling( CGAME_EVENT_NONE );
     trap_Key_SetCatcher( 0 );
@@ -4342,50 +4977,6 @@ static void CG_DrawVote( team_t team )
   UI_Text_Paint( 8, 375 + offset, 0.3f, white, s, 0, 0, ITEM_TEXTSTYLE_SHADOWED );
 }
 
-
-static qboolean CG_DrawScoreboard( void )
-{
-  static qboolean firstTime = qtrue;
-
-  if( menuScoreboard )
-    menuScoreboard->window.flags &= ~WINDOW_FORCED;
-
-  if( cg_paused.integer )
-  {
-    cg.deferredPlayerLoading = 0;
-    firstTime = qtrue;
-    return qfalse;
-  }
-
-  if( !cg.showScores &&
-      cg.predictedPlayerState.pm_type != PM_INTERMISSION )
-  {
-    cg.deferredPlayerLoading = 0;
-    cg.killerName[ 0 ] = 0;
-    firstTime = qtrue;
-    return qfalse;
-  }
-
-  CG_RequestScores( );
-
-  if( menuScoreboard == NULL )
-    menuScoreboard = Menus_FindByName( "teamscore_menu" );
-
-  if( menuScoreboard )
-  {
-    if( firstTime )
-    {
-      cg.spectatorTime = trap_Milliseconds();
-      CG_SetScoreSelection( menuScoreboard );
-      firstTime = qfalse;
-    }
-
-    Menu_Update( menuScoreboard );
-    Menu_Paint( menuScoreboard, qtrue );
-  }
-
-  return qtrue;
-}
 
 /*
 =================

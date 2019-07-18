@@ -88,12 +88,15 @@ G_AddCreditToClient
 void G_AddCreditToClient( gclient_t *client, short credit, qboolean cap )
 {
   int capAmount;
+  int prev_credits;
 
   if( !client )
     return;
 
   if( !credit )
     return;
+
+  prev_credits = client->pers.credit;
 
   if( cap && credit > 0 )
   {
@@ -118,6 +121,23 @@ void G_AddCreditToClient( gclient_t *client, short credit, qboolean cap )
     client->pers.credit = 0;
   else if(client->pers.credit > SHRT_MAX) {
     client->pers.credit = SHRT_MAX;
+  }
+
+  switch(client->pers.teamSelection) {
+    case TEAM_ALIENS:
+      if(
+        (prev_credits / ALIEN_CREDITS_PER_KILL) != 
+        (client->pers.credit / ALIEN_CREDITS_PER_KILL)){
+        client->pers.infoChangeTime = level.time;
+      }
+      break;
+
+    default:
+      if(
+        prev_credits != client->pers.credit){
+        client->pers.infoChangeTime = level.time;
+      }
+      break;
   }
 
   // Copy to ps so the client can access it
@@ -274,7 +294,8 @@ static gentity_t *G_SelectSpawnBuildable( vec3_t preference, buildable_t buildab
       continue;
 
     if( ( tempBlocker = G_CheckSpawnPoint( search->s.number, search->r.currentOrigin,
-          search->s.origin2, buildable, NULL ) ) != NULL && !tempBlocker->client )
+          search->s.origin2, buildable, NULL ) ) != NULL &&
+          !(tempBlocker->client|| tempBlocker->s.eType == ET_MISSILE))
       continue;
 
     if( !spot || DistanceSquared( preference, search->r.currentOrigin ) <
@@ -285,7 +306,7 @@ static gentity_t *G_SelectSpawnBuildable( vec3_t preference, buildable_t buildab
     }
   }
 
-  if( blocker && blocker->client )
+  if( blocker && (blocker->client || blocker->s.eType == ET_MISSILE) )
   {
     spot->attemptSpawnTime = level.time + 1000;
     spot = NULL;
@@ -1153,16 +1174,8 @@ Q_EXPORT char *ClientUserinfoChanged( int clientNum, qboolean forceName )
   }
 
   // teamInfo
-  s = Info_ValueForKey( userinfo, "teamoverlay" );
-
-  if( atoi( s ) != 0 )
-  {
-    // teamoverlay was enabled so we need an update
-    if( client->pers.teamInfo == 0 )
-      client->pers.teamInfo = 1;
-  }
-  else
-    client->pers.teamInfo = 0;
+  if( client->pers.teamInfo == 0 )
+    client->pers.teamInfo = 1;
 
   s = Info_ValueForKey( userinfo, "cg_unlagged" );
   if( !s[0] || atoi( s ) != 0 )

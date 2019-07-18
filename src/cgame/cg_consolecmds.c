@@ -85,6 +85,20 @@ qboolean CG_RequestScores( void )
     return qfalse;
 }
 
+qboolean CG_RequestTeamStatus(void) {
+  if( cg.team_status.request_time + 2000 < cg.time )
+  {
+    // the team status update is more than two seconds out of data,
+    // so request new data
+    cg.team_status.request_time = cg.time;
+    trap_SendClientCommand( "teamstatusoverlay\n" );
+
+    return qtrue;
+  }
+  else
+    return qfalse;
+}
+
 extern menuDef_t *menuScoreboard;
 
 static void CG_scrollScoresDown_f( void )
@@ -108,24 +122,24 @@ static void CG_scrollScoresUp_f( void )
 
 static void CG_ScoresDown_f( void )
 {
-  if( !cg.showScores )
+  if( !cg.show_tab_overlay )
   {
     Menu_SetFeederSelection( menuScoreboard, FEEDER_ALIENTEAM_LIST, 0, NULL );
     Menu_SetFeederSelection( menuScoreboard, FEEDER_HUMANTEAM_LIST, 0, NULL );
-    cg.showScores = qtrue;
+    cg.show_tab_overlay = qtrue;
   }
   else
   {
-    cg.showScores = qfalse;
+    cg.show_tab_overlay = qfalse;
     cg.numScores = 0;
   }
 }
 
 static void CG_ScoresUp_f( void )
 {
-  if( cg.showScores )
+  if( cg.show_tab_overlay )
   {
-    cg.showScores = qfalse;
+    cg.show_tab_overlay = qfalse;
     cg.scoreFadeTime = cg.time;
   }
 }
