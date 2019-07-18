@@ -140,12 +140,14 @@ static void CG_DrawBlips( rectDef_t *rect, vec3_t origin, vec4_t colour )
     ( (float)( cg.time - entityPositions.lastUpdateTime ) /
       (float)HUMAN_SCANNER_UPDATE_PERIOD );
   vec4_t  localColour;
+  const float width = 4 * rect->w;
+  const float x = rect->x - ((3 * rect->w) / 2.0f);
   float orientation_offset_angle = FindDegree(origin[1], origin[0]); 
   float orientation_offset;
   float fov = AngleNormalize360(cg.refdef.fov_x);
   float half_fov = fov / 2.0f;
   float clip_offset =
-    ((360.0f - fov) / 360.0f) * rect->w;
+    ((360.0f - fov) / 360.0f) * width;
 
   Vector4Copy( colour, localColour );
 
@@ -158,9 +160,9 @@ static void CG_DrawBlips( rectDef_t *rect, vec3_t origin, vec4_t colour )
     orientation_offset_angle = 360.0f - half_fov;
   }
 
-  orientation_offset = (orientation_offset_angle / 360.0f) * rect->w;
+  orientation_offset = (orientation_offset_angle / 360.0f) * width;
 
-  drawOrigin[ 0 ] = rect->x + (rect->w / 2.0) + orientation_offset;
+  drawOrigin[ 0 ] = x + (width / 2.0) + orientation_offset;
   drawOrigin[ 1 ] = rect->y + (rect->h / 2.0);
   drawOrigin[2] = origin[2];
   drawOrigin[2] /= ( 2 * HELMET_RANGE / rect->h );
@@ -173,28 +175,28 @@ static void CG_DrawBlips( rectDef_t *rect, vec3_t origin, vec4_t colour )
     localColour[ 3 ] = 0.0f;
 
   CG_SetClipRegion(
-    rect->x + (clip_offset / 2), rect->y, rect->w - clip_offset, rect->h);
+    x + (clip_offset / 2), rect->y, width - clip_offset, rect->h);
   trap_R_SetColor( localColour );
 
   if( drawOrigin[ 2 ] > 0 ) {
     CG_DrawPic( drawOrigin[ 0 ] - ( STALKWIDTH / 2 ),
                 drawOrigin[ 1 ] - drawOrigin[ 2 ],
                 STALKWIDTH, drawOrigin[ 2 ], cgs.media.scannerLineShader );
-    CG_DrawPic( drawOrigin[ 0 ] - ( STALKWIDTH / 2 ) - rect->w,
+    CG_DrawPic( drawOrigin[ 0 ] - ( STALKWIDTH / 2 ) - width,
                 drawOrigin[ 1 ] - drawOrigin[ 2 ],
                 STALKWIDTH, drawOrigin[ 2 ], cgs.media.scannerLineShader );
   } else {
     CG_DrawPic( drawOrigin[ 0 ] - ( STALKWIDTH / 2 ),
                 drawOrigin[ 1 ],
                 STALKWIDTH, -drawOrigin[ 2 ], cgs.media.scannerLineShader );
-    CG_DrawPic( drawOrigin[ 0 ] - ( STALKWIDTH / 2 ) - rect->w,
+    CG_DrawPic( drawOrigin[ 0 ] - ( STALKWIDTH / 2 ) - width,
                 drawOrigin[ 1 ],
                 STALKWIDTH, -drawOrigin[ 2 ], cgs.media.scannerLineShader );
   }
   CG_DrawPic( drawOrigin[ 0 ] - ( BLIPX / 2 ),
               drawOrigin[ 1 ] - ( BLIPY / 2 ) - drawOrigin[ 2 ],
               BLIPX, BLIPY, cgs.media.scannerBlipShader );
-  CG_DrawPic( drawOrigin[ 0 ] - ( BLIPX / 2 ) - rect->w,
+  CG_DrawPic( drawOrigin[ 0 ] - ( BLIPX / 2 ) - width,
                drawOrigin[ 1 ] - ( BLIPY / 2 ) - drawOrigin[ 2 ],
               BLIPX, BLIPY, cgs.media.scannerBlipShader );
   trap_R_SetColor( NULL );
