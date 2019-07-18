@@ -283,7 +283,7 @@ static void G_PuntBlocker( gentity_t *self, gentity_t *blocker ) {
   }
 
   while( tempEnt ) {
-    if( tempEnt->client ) {
+    if( tempEnt->client || tempEnt->s.eType == ET_MISSILE ) {
       blockers[ numBlockers ] = tempEnt;
       numBlockers++;
     } else {
@@ -317,7 +317,9 @@ static void G_PuntBlocker( gentity_t *self, gentity_t *blocker ) {
     else if( level.time - self->spawnBlockTime > 5000 ) {
       // still blocked, get rid of them
       for( i = 0; i < numBlockers; i++ ) {
-        if( self->buildableTeam == blockers[i]->client->ps.stats[ STAT_TEAM ] )
+        if(
+          !blockers[i]->client ||
+          self->buildableTeam == blockers[i]->client->ps.stats[ STAT_TEAM ] )
           G_Damage( blockers[ i ], NULL, NULL, NULL, NULL, 0, DAMAGE_INSTAGIB,
                     MOD_TRIGGER_HURT );
       }
@@ -329,7 +331,9 @@ static void G_PuntBlocker( gentity_t *self, gentity_t *blocker ) {
 
   for( i = 0; i < numBlockers; i++ ) {
     // punt blockers that are on the same team as the buildable
-    if( self->buildableTeam == blockers[i]->client->ps.stats[ STAT_TEAM ] ) {
+    if(
+      blockers[i]->client &&
+      self->buildableTeam == blockers[i]->client->ps.stats[ STAT_TEAM ] ) {
       nudge[ 0 ] = crandom() * 250.0f;
       nudge[ 1 ] = crandom() * 250.0f;
       nudge[ 2 ] = 100.0f;
@@ -343,7 +347,10 @@ static void G_PuntBlocker( gentity_t *self, gentity_t *blocker ) {
 
         G_SetExpiration( blocker, EXP_SPAWN_BLOCK, 1000 );
       }
-    } else {
+    } else if(blockers[i]->s.eType == ET_MISSILE && G_TakesDamage(blockers[i])) {
+      G_Damage( blockers[i], NULL, NULL, NULL, NULL, BG_HP2SU( 30 ), 0,
+                MOD_TRIGGER_HURT );
+    }else {
       // damage the spawn
       damageSpawn = qtrue;
     }

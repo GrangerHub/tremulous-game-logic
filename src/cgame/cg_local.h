@@ -115,6 +115,15 @@ typedef enum
   JPS_ASCENDING
 } jetPackState_t;
 
+typedef enum
+{
+  TOM_SCOREBOARD,
+  TOM_TEAM_STATUS,
+  TOM_TUTORIAL_TEXT,
+
+  NUM_TAB_OVERLAY_MODES
+} tab_overlay_modes_t;
+
 //======================================================================
 
 // when changing animation, set animationTime to frameTime + lerping time
@@ -767,6 +776,7 @@ typedef struct
   rank_t      rank;                       // used by scrims
   int         location;                   // location index for team mode
   int         health;                     // you only get this info about your teammates
+  int         credits;
   int         upgrade;
   int         curWeaponClass;             // sends current weapon for H, current class for A
 
@@ -969,6 +979,15 @@ typedef struct
 
 #define NUM_BINARY_SHADERS 256
 
+typedef struct team_status_s
+{
+  int       request_time;
+  int       num_builders;
+  int       num_buildables[BA_NUM_BUILDABLES];
+  qboolean  core_buildable_constructing;
+  int       core_buildable_health;
+} team_status_t;
+
 typedef struct
 {
   int           clientFrame;                        // incremented each frame
@@ -1051,19 +1070,26 @@ typedef struct
   // information screen text during loading
   char          infoScreenText[ MAX_STRING_CHARS ];
 
+  // tab overlay
+  qboolean            show_tab_overlay;
+  tab_overlay_modes_t tab_overlay_mode;
+
   // scoreboard
   int           scoresRequestTime;
   int           numScores;
   int           selectedScore;
   int           teamScores[ 2 ];
   score_t       scores[MAX_CLIENTS];
-  qboolean      showScores;
   qboolean      scoreBoardShowing;
   int           scoreFadeTime;
   char          killerName[ MAX_NAME_LENGTH ];
   char          spectatorList[ MAX_STRING_CHARS ];  // list of names
   int           spectatorTime;                      // next time to offset
   float         spectatorOffset;                    // current offset from start
+
+  // team status overlay
+  team_status_t team_status;
+  
 
   // centerprinting
   struct centerPrinting_s
@@ -1847,7 +1873,10 @@ void        CG_DrawRangeMarker( rangeMarkerType_t rmType, const vec3_t origin, c
 //
 // cg_draw.c
 //
-
+void        CG_Validate_Tab_Overlay_Modes(void);
+int         CG_Num_Showable_Tab_Overlay_Modes(void);
+void        CG_Next_Tab_Overlay_Mode(void);
+void        CG_Prev_Tab_Overlay_Mode(void);
 void        CG_AddLagometerFrameInfo( void );
 void        CG_AddLagometerSnapshotInfo( snapshot_t *snap );
 void        CG_AddSpeed( void );
@@ -2008,6 +2037,7 @@ qboolean      CG_ConsoleCommand( void );
 qboolean      CG_Console_CompleteArgument( int argNum );
 void          CG_InitConsoleCommands( void );
 qboolean      CG_RequestScores( void );
+qboolean      CG_RequestTeamStatus( void );
 
 //
 // cg_servercmds.c
