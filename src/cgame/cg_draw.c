@@ -374,10 +374,10 @@ static qboolean CG_Can_Show_Tab_Overlay_Mode(tab_overlay_modes_t mode) {
     return qfalse;
   }
 
-  if(
-    cg.predictedPlayerState.pm_type == PM_INTERMISSION &&
-    !cg_tab_overlay_mode_list[mode].show_at_intermission) {
-    return qfalse;
+  if(cg.predictedPlayerState.pm_type == PM_INTERMISSION) {
+    if(!cg_tab_overlay_mode_list[mode].show_at_intermission) {
+      return qfalse;
+    }
   } else if(!cg.show_tab_overlay) {
     //tab isn't held
     return qfalse;
