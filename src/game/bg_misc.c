@@ -6678,6 +6678,7 @@ char *eventnames[ ] =
 
   "EV_JUMP",
   "EV_JETJUMP",
+  "EV_AIRPOUNCE",
   "EV_WATER_TOUCH", // foot touches
   "EV_WATER_LEAVE", // foot leaves
   "EV_WATER_UNDER", // head touches
