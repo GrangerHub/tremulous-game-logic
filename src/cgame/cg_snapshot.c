@@ -95,7 +95,7 @@ void CG_SetInitialSnapshot( snapshot_t *snap )
   //hack for extending beyond the limit of 32 weapon numbers
   cg.snap->ps.weapon = cg.snap->ps.misc[MISC_HELD_WEAPON];
 
-  BG_PlayerStateToEntityState( &snap->ps, &cg_entities[ snap->ps.clientNum ].currentState, qfalse );
+  BG_PlayerStateToEntityState( &snap->ps, &cg_entities[ snap->ps.clientNum ].currentState );
 
   // sort out solid entities
   CG_BuildSolidList( );
@@ -157,7 +157,7 @@ static void CG_TransitionSnapshot( void )
   oldFrame = cg.snap;
   cg.snap = cg.nextSnap;
 
-  BG_PlayerStateToEntityState( &cg.snap->ps, &cg_entities[ cg.snap->ps.clientNum ].currentState, qfalse );
+  BG_PlayerStateToEntityState( &cg.snap->ps, &cg_entities[ cg.snap->ps.clientNum ].currentState );
   cg_entities[ cg.snap->ps.clientNum ].interpolate = qfalse;
 
   for( i = 0; i < cg.snap->numEntities; i++ )
@@ -209,7 +209,7 @@ static void CG_SetNextSnap( snapshot_t *snap )
   //hack for extending beyond the limit of 32 weapon numbers
   cg.nextSnap->ps.weapon = cg.nextSnap->ps.misc[MISC_HELD_WEAPON];
 
-  BG_PlayerStateToEntityState( &snap->ps, &cg_entities[ snap->ps.clientNum ].nextState, qfalse );
+  BG_PlayerStateToEntityState( &snap->ps, &cg_entities[ snap->ps.clientNum ].nextState );
   cg_entities[ cg.snap->ps.clientNum ].interpolate = qtrue;
 
   // check for extrapolation errors
