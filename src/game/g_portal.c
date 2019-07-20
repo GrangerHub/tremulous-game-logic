@@ -188,7 +188,7 @@ static void G_Portal_Touch(gentity_t *self, gentity_t *other, trace_t *trace)
 		}
 		other->client->portalTime = level.time + 250;
 	}
-	BG_PlayerStateToEntityState(&other->client->ps, &other->s, qtrue);
+	BG_PlayerStateToEntityState(&other->client->ps, &other->s );
 	VectorCopy(other->client->ps.origin, other->r.currentOrigin);
 	SV_LinkEntity(other);
 

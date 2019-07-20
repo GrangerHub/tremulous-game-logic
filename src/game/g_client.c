@@ -1861,7 +1861,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   // positively link the client, even if the command times are weird
   if( client->sess.spectatorState == SPECTATOR_NOT )
   {
-    BG_PlayerStateToEntityState( &client->ps, &ent->s, qtrue );
+    BG_PlayerStateToEntityState( &client->ps, &ent->s );
     SV_LinkEntity( ent );
   }
 
@@ -1872,7 +1872,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   ClientEndFrame( ent );
 
   // clear entity state values
-  BG_PlayerStateToEntityState( &client->ps, &ent->s, qtrue );
+  BG_PlayerStateToEntityState( &client->ps, &ent->s );
 
   client->pers.infoChangeTime = level.time;
 }
