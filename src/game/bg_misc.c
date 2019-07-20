@@ -5612,8 +5612,7 @@ This is done after each set of usercmd_t on the server,
 and after local prediction on the client
 ========================
 */
-void BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s,
-                                  qboolean snap )
+void BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s )
 {
   int     i;
 
@@ -5629,17 +5628,11 @@ void BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s,
   s->pos.trType = TR_INTERPOLATE;
   VectorCopy( ps->origin, s->pos.trBase );
 
-  if( snap )
-    SnapVector( s->pos.trBase );
-
   //set the trDelta for flag direction
   VectorCopy( ps->velocity, s->pos.trDelta );
 
   s->apos.trType = TR_INTERPOLATE;
   VectorCopy( ps->viewangles, s->apos.trBase );
-
-  if( snap )
-    SnapVector( s->apos.trBase );
 
   s->time2 = ps->movementDir;
   s->legsAnim = ps->legsAnim;
@@ -5724,7 +5717,7 @@ and after local prediction on the client
 ========================
 */
 void BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s,
-                                             int time, qboolean snap )
+                                             int time )
 {
   int     i;
 
@@ -5740,9 +5733,6 @@ void BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s
   s->pos.trType = TR_LINEAR_STOP;
   VectorCopy( ps->origin, s->pos.trBase );
 
-  if( snap )
-    SnapVector( s->pos.trBase );
-
   // set the trDelta for flag direction and linear prediction
   VectorCopy( ps->velocity, s->pos.trDelta );
   // set the time for linear prediction
@@ -5752,8 +5742,6 @@ void BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s
 
   s->apos.trType = TR_INTERPOLATE;
   VectorCopy( ps->viewangles, s->apos.trBase );
-  if( snap )
-    SnapVector( s->apos.trBase );
 
   s->time2 = ps->movementDir;
   s->legsAnim = ps->legsAnim;
