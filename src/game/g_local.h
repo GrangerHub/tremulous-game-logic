@@ -59,6 +59,7 @@ gentity->flags
 #define FL_NO_BOUNCE_SOUND    0x00040000  // for missiles
 #define FL_OCCUPIED           0x00080000  // for occupiable entities
 #define FL_GRAPNEL_HLTH_BOOST 0x00100000
+#define FL_SELECTIVE_DMG      0x00200000  // for missiles
 
 #define  VALUE_MASK       0x0001FFFF
 #define  SIGN_BIT         0x00020000
@@ -598,6 +599,11 @@ typedef struct
 
   int                 barbs;
   int                 barbRegenTime;
+
+  bgentity_id         spitfire_gas_puffs[SPITFIRE_GAS_TRAIL_PUFFS];
+  int                 spitfire_gas_puffs_num;
+  int                 spitfire_fuel;
+  int                 SPITFIRE_GAS_TRAIL_REGEN_time;
 
   int                 replacable_buildables[MAX_REPLACABLE_BUILDABLES];
 
@@ -1407,6 +1413,7 @@ void      G_InitDamageLocations( void );
 void      G_RunMissile( gentity_t *ent );
 qboolean  G_PlayerHasUnexplodedGrenades( gentity_t *player );
 
+gentity_t *Gas_Trail_fire( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *fire_flamer( gentity_t *self, vec3_t start, vec3_t aimdir );
 gentity_t *fire_blaster( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *fire_pulseRifle( gentity_t *self, vec3_t start, vec3_t dir );
@@ -1499,7 +1506,7 @@ void      G_UpdateZaps( int msec );
 void      G_ClearPlayerZapEffects( gentity_t *player );
 void      SpitfireZap( gentity_t *self );
 void      MarauderExplosionZap( gentity_t *self );
-
+void      G_Spitfire_Detonate_Gas_Trail(gclient_t *client);
 
 //
 // g_client.c

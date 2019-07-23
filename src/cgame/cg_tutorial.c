@@ -487,6 +487,16 @@ static void CG_AlienSpitfireText( char *text, playerState_t *ps )
       va( "Press %s to zap\n",
         CG_KeyNameForCommand( "+attack" ) ) );
 
+  if(!(cmd.buttons & BUTTON_USE_HOLDABLE)) {
+    Q_strcat( text, MAX_TUTORIAL_TEXT,
+        va( "Hold %s to spray a gas trail\n",
+          CG_KeyNameForCommand( "+button2" ) ) );
+  } else {
+    Q_strcat( text, MAX_TUTORIAL_TEXT,
+        va( "Release %s to detonate the gas trail\n",
+          CG_KeyNameForCommand( "+button2" ) ) );
+  }
+
   BG_ClassBoundingBox( ps->stats[ STAT_CLASS ], mins, NULL, NULL, NULL, NULL );
 
   point[ 0 ] = ps->origin[ 0 ];

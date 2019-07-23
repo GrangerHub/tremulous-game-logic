@@ -1499,6 +1499,10 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   index = ent - g_entities;
   client = ent->client;
 
+  if(client->ps.weapon == WP_ASPITFIRE) {
+    G_Spitfire_Detonate_Gas_Trail(client);
+  }
+
   id = ent->client->ps.misc[MISC_ID];
 
   teamLocal = client->pers.teamSelection;
@@ -1566,6 +1570,8 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
       // reset the barbs
       ent->client->pers.barbs = BG_Weapon( WP_ALEVEL3_UPG )->maxAmmo;
       ent->client->pers.barbRegenTime = level.time;
+      ent->client->pers.spitfire_fuel = BG_Weapon(WP_ASPITFIRE)->maxClips + 1;
+      ent->client->pers.SPITFIRE_GAS_TRAIL_REGEN_time = level.time;
     }
   }
 
@@ -1844,6 +1850,10 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
 
     client->ps.misc[MISC_HELD_WEAPON] = client->ps.stats[ STAT_WEAPON ];
     client->ps.weapon = client->ps.stats[ STAT_WEAPON ];
+  }
+
+  if(client->ps.weapon == WP_ASPITFIRE) {
+    G_Spitfire_Detonate_Gas_Trail(client);
   }
 
   if(client->ps.weapon != WP_ALEVEL1 && client->ps.weapon != WP_ALEVEL1_UPG) {

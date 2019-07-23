@@ -95,10 +95,18 @@ void G_ExplodeMissile( gentity_t *ent )
   ent->freeAfterEvent = qtrue;
 
   // splash damage
-  if( ent->splashDamage )
-    G_RadiusDamage( ent->r.currentOrigin, ent->r.mins,
-                    ent->r.maxs, ent->parent, ent->splashDamage,
-                    ent->splashRadius, ent, ent->splashMethodOfDeath, qtrue );
+  if( ent->splashDamage ) {
+    if(ent->flags & FL_SELECTIVE_DMG) {
+      G_SelectiveRadiusDamage(
+        ent->r.currentOrigin, ent->r.mins, ent->r.maxs, ent->parent, ent->splashDamage,
+        ent->splashRadius, ent, ent->splashMethodOfDeath, ent->buildableTeam,
+        qtrue);
+    } else {
+      G_RadiusDamage( ent->r.currentOrigin, ent->r.mins,
+                      ent->r.maxs, ent->parent, ent->splashDamage,
+                      ent->splashRadius, ent, ent->splashMethodOfDeath, qtrue );
+    }
+  }
 
   SV_LinkEntity( ent );
 }
@@ -163,7 +171,13 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace )
     return;
   }
 
-  if( !strcmp( ent->classname, "grenade" ) )
+  if( !strcmp(ent->classname, "gas_trail") )
+  {
+    //gas_trail doesn't explode on impact
+    G_BounceMissile( ent, trace );
+    return;
+  }
+  else if( !strcmp( ent->classname, "grenade" ) )
   {
     //grenade doesn't explode on impact
     G_BounceMissile( ent, trace );
@@ -230,7 +244,9 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace )
   }
 
   // impact damage
-  if( G_TakesDamage( other ) )
+  if(
+    G_TakesDamage( other ) &&
+    !((ent->flags & FL_SELECTIVE_DMG) && OnSameTeam(ent, other)) )
   {
     // FIXME: wrong damage direction?
     if( ent->damage )
@@ -285,10 +301,18 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace )
 
   // splash damage (doesn't apply to person directly hit)
   if( ent->splashDamage ||
-      !strcmp( ent->classname, "lightningEMP" ) )
-    G_RadiusDamage( trace->endpos, NULL, NULL,
-                    ent->parent, ent->splashDamage, ent->splashRadius,
-                    other, ent->splashMethodOfDeath, qtrue );
+      !strcmp( ent->classname, "lightningEMP" ) ) {
+    if(ent->flags & FL_SELECTIVE_DMG) {
+      G_SelectiveRadiusDamage(
+        trace->endpos, ent->r.mins, ent->r.maxs, ent->parent, ent->splashDamage,
+        ent->splashRadius, other, ent->splashMethodOfDeath, ent->buildableTeam,
+        qtrue);
+    } else {
+      G_RadiusDamage( trace->endpos, NULL, NULL,
+                      ent->parent, ent->splashDamage, ent->splashRadius,
+                      other, ent->splashMethodOfDeath, qtrue );
+    }
+  }
 
   SV_LinkEntity( ent );
 }
@@ -461,6 +485,59 @@ void G_RunMissile( gentity_t *ent )
 
 
 //=============================================================================
+
+/*
+=================
+Gas_Trail_fire
+=================
+*/
+gentity_t *Gas_Trail_fire( gentity_t *self, vec3_t start, vec3_t dir )
+{
+  gentity_t *bolt;
+
+  VectorNormalize( dir );
+
+  bolt = G_Spawn( );
+  bolt->classname = "gas_trail";
+  bolt->flags = FL_SELECTIVE_DMG;
+  if(self->client) {
+    bolt->buildableTeam = self->client->pers.teamSelection;
+  } else {
+    bolt->buildableTeam = self->buildableTeam;
+  }
+  bolt->pointAgainstWorld = qtrue;
+  bolt->nextthink = level.time + SPITFIRE_GAS_TRAIL_LIFETIME;
+  bolt->think = G_ExplodeMissile;
+  bolt->s.eType = ET_MISSILE;
+  bolt->s.weapon = WP_ASPITFIRE;
+  bolt->s.generic1 = WPM_TERTIARY; //weaponMode
+  bolt->r.ownerNum = self->s.number;
+  bolt->parent = self;
+  bolt->damage = SPITFIRE_GAS_TRAIL_DMG;
+  bolt->splashDamage = SPITFIRE_GAS_TRAIL_DMG;
+  bolt->splashRadius = SPITFIRE_GAS_TRAIL_RADIUS;
+  bolt->methodOfDeath = MOD_SPITFIRE_GAS_TRAIL;
+  bolt->splashMethodOfDeath = MOD_SPITFIRE_GAS_TRAIL;
+  G_SetClipmask( bolt, MASK_SHOT );
+  bolt->target_ent = NULL;
+  
+  // Give the missile a big bounding box
+  bolt->r.mins[ 0 ] = bolt->r.mins[ 1 ] = bolt->r.mins[ 2 ] = -(25);
+  bolt->r.maxs[ 0 ] = bolt->r.maxs[ 1 ] = bolt->r.maxs[ 2 ] = (25);
+
+  bolt->s.pos.trType = TR_LINEAR;
+  bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;   // move a bit on the very first frame
+  VectorCopy( start, bolt->s.pos.trBase );
+  VectorScale( dir, SPITFIRE_GAS_TRAIL_SPEED, bolt->s.pos.trDelta );
+
+  if( self->client )
+    BG_ModifyMissleLaunchVelocity( self->s.pos.trDelta, self->client->ps.speed, bolt->s.pos.trDelta,
+                                   BG_Weapon( bolt->s.weapon )->relativeMissileSpeed );
+  SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
+
+  VectorCopy( start, bolt->r.currentOrigin );
+  return bolt;
+}
 
 /*
 =================

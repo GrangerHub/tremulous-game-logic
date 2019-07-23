@@ -1926,7 +1926,9 @@ static const classAttributes_t bg_classList[ ] =
     qtrue,                                          //qboolean enabled;
     "spitfire",                                     //char    *name;
     "The Spitfire is a flying air pouncing alien "
-    "that can zap all nearby grounded enemies.",
+    "that can zap all nearby enemies.  The Spitfire "
+    "can also spray a trail of flamable gas that roasts "
+    "enemies in the wake.",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages
     SPITFIRE_HEALTH,                                //int     health;
     0.25f,                                          //float   maxHealthDecayRate;
@@ -1955,7 +1957,7 @@ static const classAttributes_t bg_classList[ ] =
     CHARGE_STAMINA_USE_RATE,                        //float   chargeStaminaUseRate;
     CHARGE_STAMINA_RESTORE_RATE,                    //float   chargeStaminaRestoreRate;
     SPITFIRE_COST,                                  //int     cost;
-    qtrue,                                          //qboolean warmupFree;
+    qfalse,                                         //qboolean warmupFree;
     SPITFIRE_VALUE,                                 //int     value;
     TEAM_ALIENS                                     //team_t  team;
   },
@@ -3220,31 +3222,31 @@ static const weaponAttributes_t bg_weapons[ ] =
     "spitfire",           //char      *weaponName;
     "Spitfire",           //char      *humanName;
     "",
-    0,                    //int       maxAmmo; 
-    0,                    //int       maxClips;
-    1,                    //int       ammoUsage1;
+    SPITFIRE_GAS_TRAIL_PUFFS,//int       maxAmmo; 
+    SPITFIRE_GAS_TRAIL_CLIPS,//int       maxClips;
+    0,                    //int       ammoUsage1;
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
-    qtrue,                //int       infiniteAmmo;
+    qfalse,               //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     SPITFIRE_ZAP_REPEAT,  //int       repeatRate1;
     SPITFIRE_POUNCE_REPEAT, //int       repeatRate2;
-    0,                    //int       repeatRate3;
+    SPITFIRE_GAS_TRAIL_REPEAT, //int       repeatRate3;
     0,                    //int       burstRounds1;
     0,                    //int       burstRounds2;
     0,                    //int       burstRounds3;
     0,                    //int       burstDelay1;
     0,                    //int       burstDelay2;
     0,                    //int       burstDelay3;
-    0,                    //int       reloadTime;
+    SPITFIRE_GAS_TRAIL_RELOAD_TIME,//int       reloadTime;
     SPITFIRE_ZAP_K_SCALE, //float     knockbackScale;
     0.0f,                 //float     recoil1;
     0.0f,                 //float     recoil2;
     0.0f,                 //float     recoil3;
     qfalse,               //qboolean  hasAltMode;
-    qfalse,               //qboolean  hasThirdMode;
+    qtrue,                //qboolean  hasThirdMode;
     qfalse,               //qboolean  canZoom;
     90.0f,                //float     zoomFov;
     qfalse,               //qboolean  purchasable;
@@ -3252,11 +3254,11 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //qboolean  relativeMissileSpeed;
     {
       {                     //impactPrediction_t impactPrediction[0];
-        WPM_NONE,           //weaponMode_t  weaponMode;
-        TR_STATIONARY,      //trType_t      trType;
-        0,                  //int       missileLifeTime;
+        WPM_TERTIARY,       //weaponMode_t  weaponMode;
+        TR_LINEAR,          //trType_t      trType;
+        LEVEL3_BOUNCEBALL_LIFETIME,  //int       missileLifeTime;
         0,                  //int       missileSize;
-        0                   //int       missileLaunchSpeed;
+        LEVEL3_BOUNCEBALL_SPEED  //int       missileLaunchSpeed;
       },
       {                     //impactPrediction_t impactPrediction[1];
         WPM_NONE,           //weaponMode_t  weaponMode;

@@ -218,6 +218,15 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define SPITFIRE_GLIDE_MOD              1000
 #define SPITFIRE_GLIDE_ACCEL            3.8f
 #define SPITFIRE_HOVER_BOB              0.001f //for view bobbing from hovering
+#define SPITFIRE_GAS_TRAIL_REPEAT       300
+#define SPITFIRE_GAS_TRAIL_RELOAD_TIME  0
+#define SPITFIRE_GAS_TRAIL_SPEED        1
+#define SPITFIRE_GAS_TRAIL_DMG          AWDM(45000)
+#define SPITFIRE_GAS_TRAIL_RADIUS       150
+#define SPITFIRE_GAS_TRAIL_LIFETIME     10000
+#define SPITFIRE_GAS_TRAIL_PUFFS        20
+#define SPITFIRE_GAS_TRAIL_CLIPS        2
+#define SPITFIRE_GAS_TRAIL_REGEN        45000
 
 /*
  * ALIEN classes
@@ -315,10 +324,10 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 #define SPITFIRE_SPEED                1.3f
 #define SPITFIRE_VALUE                AVM(3 * ALIEN_CREDITS_PER_KILL)
-#define SPITFIRE_HEALTH               AHM(165000)
+#define SPITFIRE_HEALTH               AHM(190000)
 #define SPITFIRE_MIN_HEALTH           (0.3f * SPITFIRE_HEALTH)
 #define SPITFIRE_REGEN                (0.03f * SPITFIRE_HEALTH)
-#define SPITFIRE_COST                 2
+#define SPITFIRE_COST                 4
 
 /*
  * ALIEN buildables

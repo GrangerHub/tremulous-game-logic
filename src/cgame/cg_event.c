@@ -268,6 +268,7 @@ static void CG_Obituary( entityState_t *ent )
   {
     switch( mod )
     {
+      case MOD_SPITFIRE_GAS_TRAIL:
       case MOD_FLAMER_SPLASH:
         if( gender == GENDER_FEMALE )
           message = "toasted herself";
@@ -430,6 +431,9 @@ static void CG_Obituary( entityState_t *ent )
       case MOD_LASGUN:
         message = "was lasgunned by";
         break;
+      case MOD_SPITFIRE_GAS_TRAIL:
+        message = "was roasted by";
+        message2 = "'s gas trail";
       case MOD_FLAMER:
         message = "was grilled by";
         message2 = "'s flamer";

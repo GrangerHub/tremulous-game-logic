@@ -1312,7 +1312,26 @@ void ClientTimerActions( gentity_t *ent, int msec )
     }
     else
       ent->timestamp = level.time;
-  } else
+  } else if(client->ps.weapon == WP_ASPITFIRE)
+  {
+    if(
+      client->ps.clips < BG_Weapon(WP_ASPITFIRE)->maxClips ||
+      client->ps.ammo <= 0)
+    {
+      if( ent->timestamp + SPITFIRE_GAS_TRAIL_REGEN < level.time )
+      {
+        if(client->ps.ammo <= 0) {
+          G_Spitfire_Detonate_Gas_Trail(client);
+          client->ps.ammo = BG_Weapon(WP_ASPITFIRE)->maxAmmo;
+        } else {
+          client->ps.clips++;
+        }
+        ent->timestamp = level.time;
+      }
+    }
+    else
+      ent->timestamp = level.time;
+  }
   {
     // regen the barb while evolved to a different class
     if( client->pers.barbs < BG_Weapon( WP_ALEVEL3_UPG )->maxAmmo )
@@ -1325,6 +1344,17 @@ void ClientTimerActions( gentity_t *ent, int msec )
     }
     else
       client->pers.barbRegenTime = level.time;
+
+    if( client->pers.spitfire_fuel < BG_Weapon(WP_ASPITFIRE)->maxClips + 1 )
+    {
+      if( client->pers.SPITFIRE_GAS_TRAIL_REGEN_time + SPITFIRE_GAS_TRAIL_REGEN < level.time )
+      {
+        client->pers.spitfire_fuel++;
+        client->pers.SPITFIRE_GAS_TRAIL_REGEN_time = level.time;
+      }
+    }
+    else
+      client->pers.SPITFIRE_GAS_TRAIL_REGEN_time = level.time;
   }
 
   // limit the broadcasting of invis players to guard against wallhax

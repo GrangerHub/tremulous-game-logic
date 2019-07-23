@@ -4850,6 +4850,16 @@ static void PM_Weapon( void )
     }
   }
 
+  if(
+    pm->ps->weapon == WP_ASPITFIRE &&
+    !attack3 &&
+    pm->ps->ammo < BG_Weapon(WP_ASPITFIRE)->maxAmmo &&
+    pm->ps->ammo > 0) {
+    //detonate early
+    attack3 = qtrue;
+    pm->ps->ammo = 1;
+  }
+
   // Trample charge mechanics
   if( pm->ps->weapon == WP_ALEVEL4 )
   {
@@ -5150,7 +5160,7 @@ static void PM_Weapon( void )
   }
 
   // check for out of ammo
-  if( ( !pm->ps->ammo ||
+  if( ( (!pm->ps->ammo && !attack1 && !attack2 && !attack3) ||
         ( attack1 &&
           pm->ps->ammo < BG_Weapon( pm->ps->weapon )->ammoUsage1 ) || 
         ( ( BG_Weapon( pm->ps->weapon )->hasAltMode && attack2 ) &&
@@ -5279,7 +5289,7 @@ static void PM_Weapon( void )
         pm->ps->ammo < BG_Weapon( pm->ps->weapon )->ammoUsage1 ) || 
       ( ( BG_Weapon( pm->ps->weapon )->hasAltMode && attack2 ) &&
         pm->ps->ammo < BG_Weapon( pm->ps->weapon )->ammoUsage2 ) || 
-      ( ( BG_Weapon( pm->ps->weapon )->hasThirdMode && attack2 ) &&
+      ( ( BG_Weapon( pm->ps->weapon )->hasThirdMode && attack3 ) &&
         pm->ps->ammo < BG_Weapon( pm->ps->weapon )->ammoUsage3 ) ) &&
       ( pm->ps->clips > 0 ||  ( pm->ps->pm_flags & PMF_WEAPON_RELOAD ) ) )
   {
@@ -5348,7 +5358,7 @@ static void PM_Weapon( void )
   	  case WP_ASPITFIRE:
         //pouncing has primary secondary AND autohit procedures
         // pounce is autohit
-        if( !attack1 && !attack2 )
+        if( !attack1 && !attack2 && !attack3 )
           return;
         break;
 
@@ -5588,6 +5598,12 @@ static void PM_Weapon( void )
       {
         //hacky special case for slowblob
         if( pm->ps->weapon == WP_ALEVEL3_UPG && !pm->ps->ammo )
+        {
+          pm->ps->weaponTime += 200;
+          return;
+        }
+
+        if( pm->ps->weapon == WP_ASPITFIRE && !pm->ps->ammo )
         {
           pm->ps->weaponTime += 200;
           return;

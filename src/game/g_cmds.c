@@ -2740,6 +2740,14 @@ void G_Evolve( gentity_t *ent, class_t newClass,
     ent->client->pers.barbRegenTime = ent->timestamp;
   }
 
+  if(ent->client->ps.weapon == WP_ASPITFIRE) {
+    ent->client->pers.spitfire_fuel = ent->client->ps.clips;
+    if(ent->client->ps.ammo == BG_Weapon(WP_ASPITFIRE)->maxAmmo) {
+      ent->client->pers.spitfire_fuel++;
+    }
+    ent->client->pers.SPITFIRE_GAS_TRAIL_REGEN_time = ent->timestamp;
+  }
+
   ent->client->pers.classSelection = newClass;
   ClientUserinfoChanged( clientNum, qfalse );
   VectorCopy( infestOrigin, ent->s.pos.trBase );
@@ -2849,6 +2857,17 @@ void G_Evolve( gentity_t *ent, class_t newClass,
   {
     ent->client->ps.ammo = ent->client->pers.barbs;
     ent->timestamp = ent->client->pers.barbRegenTime;
+  }
+
+  if(ent->client->ps.weapon == WP_ASPITFIRE) {
+    if(ent->client->pers.spitfire_fuel > 0) {
+      ent->client->ps.ammo = BG_Weapon(WP_ASPITFIRE)->maxAmmo;
+    }
+    ent->client->ps.clips = ent->client->pers.spitfire_fuel - 1;
+    if(ent->client->ps.clips < 0) {
+      ent->client->ps.clips = 0;
+    }
+    ent->timestamp = ent->client->pers.SPITFIRE_GAS_TRAIL_REGEN_time;
   }
 
   if( !g_cheats.integer && !force )

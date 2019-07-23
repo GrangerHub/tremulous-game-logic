@@ -2212,6 +2212,56 @@ void MarauderExplosionZap( gentity_t *self )
   G_CreateNewSpitfireZap( self );
 }
 
+
+/*
+===============
+CheckPounceAttack
+===============
+*/
+void G_Spitfire_Detonate_Gas_Trail(gclient_t *client) {
+  int i;
+
+  Com_Assert(client && "G_Spitfire_Detonate_Gas_Trail: client is NULL");
+
+  for(i = client->pers.spitfire_gas_puffs_num - 1; i >= 0 ; i--) {
+    gentity_t *cloud = G_Entity_UEID_get(&client->pers.spitfire_gas_puffs[i]);
+
+    if(cloud) {
+      cloud->nextthink =
+        level.time + ((client->pers.spitfire_gas_puffs_num - i) * 100);
+    }
+  }
+
+  client->pers.spitfire_gas_puffs_num = 0;
+}
+
+/*
+===============
+Spitfire_Gas_Trail_Fire
+===============
+*/
+void Spitfire_Gas_Trail_Fire( gentity_t *ent )
+{
+  gentity_t *gas_trail_puff;
+  gclient_t *client = ent ->client;
+
+  Com_Assert( client && "Spitfire_Gas_Trail_Fire: Can only be used by clients" );
+
+  Com_Assert( client->pers.spitfire_gas_puffs_num < SPITFIRE_GAS_TRAIL_PUFFS &&
+              "Spitfire_Gas_Trail_Fire: attempted to exceed the gas cloud limit" );
+
+  gas_trail_puff = Gas_Trail_fire( ent, muzzle, forward );
+
+  //add to the client's ball lightning array
+  G_Entity_UEID_set( &client->pers.spitfire_gas_puffs[client->pers.spitfire_gas_puffs_num],
+                   gas_trail_puff );
+  client->pers.spitfire_gas_puffs_num ++;
+
+  if(!(client->pers.cmd.buttons & BUTTON_USE_HOLDABLE) || client->ps.ammo <= 0) {
+    G_Spitfire_Detonate_Gas_Trail(client);
+  }
+}
+
 /*
 ======================================================================
 
@@ -2506,6 +2556,10 @@ void FireWeapon3( gentity_t *ent )
     case WP_ABUILD:
     case WP_ABUILD2:
       slowBlobFire( ent );
+      break;
+
+    case WP_ASPITFIRE:
+      Spitfire_Gas_Trail_Fire(ent);
       break;
 
     default:

@@ -91,6 +91,10 @@ qboolean OnSameTeam(const gentity_t *ent1, const gentity_t *ent2) {
         ent1Team = BG_Buildable( ent1->s.modelindex )->team;
         break;
 
+      case ET_MISSILE:
+        ent1Team = ent1->buildableTeam;
+        break;
+
       default:
         return qfalse;
     }
@@ -103,6 +107,10 @@ qboolean OnSameTeam(const gentity_t *ent1, const gentity_t *ent2) {
     switch(ent2->s.eType) {
       case ET_BUILDABLE:
         ent2Team = BG_Buildable( ent2->s.modelindex )->team;
+        break;
+
+      case ET_MISSILE:
+        ent2Team = ent2->buildableTeam;
         break;
 
       default:
@@ -210,6 +218,10 @@ void G_LeaveTeam( gentity_t *self )
   // reset any activation entities the player might be occupying
   if( self->client->ps.eFlags & EF_OCCUPYING )
     G_ResetOccupation( self->occupation.occupied, self );
+
+  if(self->client->ps.weapon == WP_ASPITFIRE) {
+    G_Spitfire_Detonate_Gas_Trail(self->client);
+  }
 
   for( i = 0; i < level.num_entities; i++ )
   {

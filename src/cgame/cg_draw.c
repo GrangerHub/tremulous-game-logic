@@ -1462,8 +1462,16 @@ static void CG_DrawPlayerPoisonBarbs( rectDef_t *rect, vec4_t color, qhandle_t s
   float    diff;
   int      iconsize, numBarbs, maxBarbs;
 
-  maxBarbs = BG_Weapon( cg.snap->ps.weapon )->maxAmmo;
-  numBarbs = cg.snap->ps.ammo;
+  if(cg.snap->ps.weapon == WP_ASPITFIRE) {
+    maxBarbs = BG_Weapon( cg.snap->ps.weapon )->maxClips + 1;
+    numBarbs = cg.snap->ps.clips;
+    if(cg.snap->ps.ammo == BG_Weapon(cg.snap->ps.weapon)->maxAmmo) {
+      numBarbs++;
+    }
+  } else {
+    maxBarbs = BG_Weapon(cg.snap->ps.weapon)->maxAmmo;
+    numBarbs = cg.snap->ps.ammo;
+  }
   if( maxBarbs <= 0 || numBarbs <= 0 )
     return;
 

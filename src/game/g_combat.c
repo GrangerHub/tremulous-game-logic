@@ -100,6 +100,7 @@ char *modNames[ ] =
   "MOD_LASGUN",
   "MOD_LCANNON",
   "MOD_LCANNON_SPLASH",
+  "MOD_SPITFIRE_GAS_TRAIL",
   "MOD_FLAMER",
   "MOD_FLAMER_SPLASH",
   "MOD_GRENADE",
@@ -675,6 +676,10 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
   if( level.intermissiontime )
     return;
+
+  if(self->client->ps.weapon == WP_ASPITFIRE) {
+    G_Spitfire_Detonate_Gas_Trail(self->client);
+  }
 
   self->client->pers.spawnTime = level.time + (g_spawnCountdown.integer * 1000);
 
