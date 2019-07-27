@@ -322,7 +322,19 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   if( level.intermissiontime )
     return;
 
-  self->client->pers.spawnTime = level.time + (g_spawnCountdown.integer * 1000);
+  switch(self->client->pers.teamSelection) {
+    case TEAM_ALIENS:
+      self->client->pers.spawnTime = level.time + (g_alienSpawnCountdown.integer * 1000);
+      break;
+
+    case TEAM_HUMANS:
+      self->client->pers.spawnTime = level.time + (g_humanSpawnCountdown.integer * 1000);
+      break;
+
+    default:
+      self->client->pers.spawnTime = level.time + 10000;
+      break;
+  }
 
   self->s.origin[0] = (float)((int)0); // reset for UEIDs
   if(self->client) {
