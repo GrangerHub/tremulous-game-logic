@@ -96,7 +96,8 @@ vmCvar_t  g_motd;
 vmCvar_t  g_synchronousClients;
 vmCvar_t  g_countdown;
 vmCvar_t  g_doCountdown;
-vmCvar_t  g_spawnCountdown;
+vmCvar_t  g_humanSpawnCountdown;
+vmCvar_t  g_alienSpawnCountdown;
 vmCvar_t  g_restarted;
 vmCvar_t  g_restartingFlags;
 vmCvar_t  g_lockTeamsAtStart;
@@ -292,7 +293,8 @@ static cvarTable_t   gameCvarTable[ ] =
 
   { &g_countdown, "g_countdown", "10", CVAR_ARCHIVE, 0, qtrue  },
   { &g_doCountdown, "g_doCountdown", "0", CVAR_ARCHIVE, 0, qtrue  },
-  { &g_spawnCountdown, "g_spawnCountdown", "15", CVAR_ARCHIVE, 0, qtrue  },
+  { &g_humanSpawnCountdown, "g_humanSpawnCountdown", "15", CVAR_ARCHIVE, 0, qtrue },
+  { &g_alienSpawnCountdown, "g_alienSpawnCountdown", "8", CVAR_ARCHIVE,0,qtrue },
   { &g_logFile, "g_logFile", "games.log", CVAR_ARCHIVE, 0, qfalse  },
   { &g_logFileSync, "g_logFileSync", "0", CVAR_ARCHIVE, 0, qfalse  },
 

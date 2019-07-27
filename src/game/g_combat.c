@@ -677,11 +677,25 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   if( level.intermissiontime )
     return;
 
+  
+
   if(self->client->ps.weapon == WP_ASPITFIRE) {
     G_Spitfire_Detonate_Gas_Trail(self->client);
   }
 
-  self->client->pers.spawnTime = level.time + (g_spawnCountdown.integer * 1000);
+  switch(self->client->pers.teamSelection) {
+    case TEAM_ALIENS:
+      self->client->pers.spawnTime = level.time + (g_alienSpawnCountdown.integer * 1000);
+      break;
+
+    case TEAM_HUMANS:
+      self->client->pers.spawnTime = level.time + (g_humanSpawnCountdown.integer * 1000);
+      break;
+
+    default:
+      self->client->pers.spawnTime = level.time + 10000;
+      break;
+  }
 
   self->client->ps.pm_type = PM_DEAD;
   self->suicideTime = 0;
