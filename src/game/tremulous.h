@@ -221,7 +221,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define SPITFIRE_GAS_TRAIL_REPEAT       300
 #define SPITFIRE_GAS_TRAIL_RELOAD_TIME  0
 #define SPITFIRE_GAS_TRAIL_SPEED        1
-#define SPITFIRE_GAS_TRAIL_DMG          AWDM(25000)
+#define SPITFIRE_GAS_TRAIL_DMG          AWDM(40000)
 #define SPITFIRE_GAS_TRAIL_RADIUS       150
 #define SPITFIRE_GAS_TRAIL_LIFETIME     10000
 #define SPITFIRE_GAS_TRAIL_PUFFS        20
