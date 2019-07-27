@@ -434,6 +434,7 @@ static void CG_Obituary( entityState_t *ent )
       case MOD_SPITFIRE_GAS_TRAIL:
         message = "was roasted by";
         message2 = "'s gas trail";
+        break;
       case MOD_FLAMER:
         message = "was grilled by";
         message2 = "'s flamer";
