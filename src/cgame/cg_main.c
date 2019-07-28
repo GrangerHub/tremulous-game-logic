@@ -2219,17 +2219,20 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum )
   cgs.media.charsetShader   = trap_R_RegisterShader( "gfx/2d/bigchars" );
   cgs.media.outlineShader   = trap_R_RegisterShader( "outline" );
 
-  BG_Init_Entities();
-  BG_Locate_playerState(&cg.predictedPlayerState, cg.clientNum);
+  BG_Init_Entities(cg.clientNum);
   for(i = 0; i < MAX_GENTITIES; i++) {
     if(i == cg.clientNum) {
-      BG_Locate_entityState(
-        &cg.predictedPlayerEntity.currentState, i, &cg.predictedPlayerEntity.valid);
+      BG_Locate_Entity_Data(
+        i, &cg.predictedPlayerEntity.currentState, &cg.predictedPlayerState,
+        &cg.predictedPlayerEntity.valid, &cg.predictedPlayerEntity.linked,
+        &cgs.clientinfo[i].team);
     } else {
-      BG_Locate_entityState(
-        &cg_entities[i].currentState, i, &cg_entities[i].valid);
+        BG_Locate_Entity_Data(
+          i, &cg_entities[i].currentState, NULL, &cg_entities[i].valid,
+          &cg_entities[i].linked, NULL);
     }
   }
+
 
   // load overrides
   BG_InitClassConfigs( );
@@ -2301,9 +2304,7 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum )
   CG_UpdateMediaFraction( 1.0f );
 
   CG_InitBuildables( );
- 
-  cgs.sublimePlayers = qfalse;
- 
+
   cgs.voices = BG_VoiceInit( );
   BG_PrintVoices( cgs.voices, cg_debugVoices.integer );
 

@@ -56,6 +56,16 @@ void CG_BuildSolidList( void )
   cg_numSolidEntities = 0;
   cg_numTriggerEntities = 0;
 
+  for(i = 0; i < MAX_GENTITIES; i++) {
+    cg_entities[i].linked = qfalse;
+    cg_entities[i].is_in_solid_list = qfalse;
+  }
+
+  cg.predictedPlayerEntity.linked = qtrue;
+  cg.predictedPlayerEntity.is_in_solid_list = qtrue;
+  cg_entities[cg.clientNum].linked = qtrue;
+  cg_entities[cg.clientNum].is_in_solid_list = qtrue;
+
   if( cg.nextSnap && !cg.nextFrameTeleport && !cg.thisFrameTeleport )
     snap = cg.nextSnap;
   else
@@ -77,8 +87,192 @@ void CG_BuildSolidList( void )
     {
       cg_solidEntities[ cg_numSolidEntities ] = cent;
       cg_numSolidEntities++;
+      cent->linked = qtrue;
+      cent->is_in_solid_list = qtrue;
       continue;
     }
+  }
+}
+
+/*
+====================
+CG_Link_Solid_Entity
+====================
+*/
+void CG_Link_Solid_Entity(int ent_num) {
+  centity_t *cent;
+
+  Com_Assert(ent_num >= 0 && ent_num < MAX_GENTITIES);
+
+  if(ent_num == cg.clientNum) {
+    cent = &cg.predictedPlayerEntity;
+
+    if(cent->is_in_solid_list) {
+      cent->linked = qtrue;
+    }
+  }
+
+  cent = &cg_entities[ent_num];
+
+  if(cent->is_in_solid_list) {
+    cent->linked = qtrue;
+  }
+}
+
+/*
+====================
+CG_Unlink_Solid_Entity
+====================
+*/
+void CG_Unlink_Solid_Entity(int ent_num) {
+  centity_t *cent;
+
+  Com_Assert(ent_num >= 0 && ent_num < MAX_GENTITIES);
+
+  if(ent_num == cg.clientNum) {
+    cent = &cg.predictedPlayerEntity;
+  
+    if(!cent->is_in_solid_list || !cent->linked) {
+      return;
+    }
+
+    cent->linked = qfalse;
+  }
+
+  cent = &cg_entities[ent_num];
+
+  if(!cent->is_in_solid_list || !cent->linked) {
+    return;
+  }
+
+  cent->linked = qfalse;
+}
+
+/*
+====================
+CG_Link_Buildables
+
+====================
+*/
+void CG_Link_Buildables(void) {
+  int i;
+
+  for(i = 0; i < cg_numSolidEntities; i++) {
+    centity_t *ent = cg_solidEntities[i];
+
+    if(ent->currentState.eType != ET_BUILDABLE) {
+      continue;
+    }
+
+    CG_Link_Solid_Entity(ent->currentState.number);
+  }
+}
+
+/*
+====================
+CG_Unlink_Buildables
+
+====================
+*/
+void CG_Unlink_Buildables(void) {
+  int i;
+
+  for(i = 0; i < cg_numSolidEntities; i++) {
+    centity_t *ent = cg_solidEntities[i];
+
+    if(ent->currentState.eType != ET_BUILDABLE) {
+      continue;
+    }
+
+    CG_Unlink_Solid_Entity(ent->currentState.number);
+  }
+}
+
+/*
+====================
+CG_Link_Marked_Buildables
+
+====================
+*/
+void CG_Link_Marked_Buildables(void) {
+  int i;
+
+  for(i = 0; i < cg_numSolidEntities; i++) {
+    centity_t *ent = cg_solidEntities[i];
+
+    if(ent->currentState.eType != ET_BUILDABLE) {
+      continue;
+    }
+
+    if(!(ent->currentState.eFlags & EF_B_MARKED)) {
+      continue;
+    }
+
+    CG_Link_Solid_Entity(ent->currentState.number);
+  }
+}
+
+/*
+====================
+CG_Unlink_Marked_Buildables
+
+====================
+*/
+void CG_Unlink_Marked_Buildables(void) {
+  int i;
+
+  for(i = 0; i < cg_numSolidEntities; i++) {
+    centity_t *ent = cg_solidEntities[i];
+
+    if(ent->currentState.eType != ET_BUILDABLE) {
+      continue;
+    }
+
+    if(!(ent->currentState.eFlags & EF_B_MARKED)) {
+      continue;
+    }
+
+    CG_Unlink_Solid_Entity(ent->currentState.number);
+  }
+}
+
+/*
+====================
+CG_Link_Players
+
+====================
+*/
+void CG_Link_Players(void) {
+  int i;
+
+  for(i = 0; i < cg_numSolidEntities; i++) {
+    centity_t *ent = cg_solidEntities[i];
+
+    if(ent->currentState.number >= MAX_CLIENTS) {
+      continue;
+    }
+
+    CG_Link_Solid_Entity(ent->currentState.number);
+  }
+}
+
+/*
+====================
+CG_Unlink_Players
+
+====================
+*/
+void CG_Unlink_Players(void) {
+  int i;
+
+  for(i = 0; i < cg_numSolidEntities; i++) {
+    centity_t *ent = cg_solidEntities[i];
+
+    if(ent->currentState.number >= MAX_CLIENTS) {
+      continue;
+    }
+
+    CG_Unlink_Solid_Entity(ent->currentState.number);
   }
 }
 
@@ -124,15 +318,9 @@ static void CG_ClipMoveToEntities ( const vec3_t start, const vec3_t mins,
     if ( astralMask & ent->eFlags )
       continue;      // EF_ASTRAL_NOCLIP flagged entities don't clip with ASTRALSOLID entities
 
-    if( cgs.sublimeMarkedBuildables &&
-        ( ent->eType == ET_BUILDABLE ) &&
-       ( ent->eFlags & EF_B_MARKED ) )
-      continue;      // ghost buildables ignore marked buildables
-
-    if( cgs.sublimePlayers &&
-        ( ent->eType == ET_PLAYER ) &&
-        ( ent->number !=cg.predictedPlayerState.clientNum ) )
-    continue;
+    if(!cent->linked) {
+      continue;
+    }
 
     if( ent->solid == SOLID_BMODEL )
     {
