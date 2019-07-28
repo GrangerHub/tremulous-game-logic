@@ -1873,12 +1873,14 @@ typedef struct{
   int          ent_num;
 } bgentity_id;
 
-void          BG_Init_Entities(void);
+void          BG_Init_Entities(const int cgame_client_num);
 entityState_t *BG_entityState_From_Ent_Num(int ent_num);
-void          BG_Locate_entityState(
-  entityState_t *es, int ent_num, qboolean *valid_check_variable);
+void          BG_Locate_Entity_Data(
+  int ent_num, entityState_t *es, playerState_t *ps,
+  const qboolean *valid_check_var, const qboolean *linked_var,
+  const team_t *client_team_var);
 playerState_t *BG_playerState_From_Ent_Num(int ent_num);
-void          BG_Locate_playerState(playerState_t *ps, int ent_num);
+
 void          BG_UEID_set(bgentity_id *ueid, int ent_num);
 int           BG_UEID_get_ent_num(bgentity_id *ueid);
 
