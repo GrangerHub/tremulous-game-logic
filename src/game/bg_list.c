@@ -33,7 +33,7 @@
 Declarations of static BG_Link functions
 */
 static void      BG_Link_Free(bglink_t *link);
-static void      BG_Link_Free_Full(bglink_t *link, BG_DestroyNotify free_func);
+static void      BG_Link_Free_Full(bglink_t *link, BG_Destroy free_func);
 static void      BG_Link_Free_1(bglink_t *link);
 #define          BG_Link_Free1 BG_Link_Free_1
 
@@ -180,7 +180,7 @@ void BG_List_Free (bglist_t *list) {
  *
  * Since: 2.32
  */
-void BG_List_Free_Full(bglist_t *list, BG_DestroyNotify free_func) {
+void BG_List_Free_Full(bglist_t *list, BG_Destroy free_func) {
   BG_List_Foreach(list, NULL, (BG_Func) free_func, NULL);
   BG_List_Free(list);
 }
@@ -201,6 +201,7 @@ void BG_List_Init(bglist_t *list) {
 
   list->head = list->tail = NULL;
   list->length = 0;
+  list->locked = qfalse;
 }
 
 /**
@@ -246,7 +247,7 @@ qboolean BG_List_Valid(bglist_t *list) {
  *
  * Removes all the elements in @list. If list elements contain
  * dynamically-allocated memory, they should be freed first, or use 
- * BG_List_Clear_Full().
+ * BG_List_Clear_Full_Forced().
  *
  * Since: 2.14
  */
@@ -258,7 +259,43 @@ void BG_List_Clear(bglist_t *list) {
 }
 
 /**
- * BG_List_Free_Full:
+ * BG_List_Clear_Full:
+ * @list: a pointer to a #bglist_t
+ * @free_func: the function to be called to free each element's data
+ *  returns qfalse if the data was failed to be freed.
+ *
+ * Removes all the elements in @list that can be freed, and calls the specified
+ * destroy function on every element's data.  Returns qtrue if all of the
+ * elements were successfully removed.
+ *
+ */
+qboolean BG_List_Clear_Full(bglist_t *list, BG_DestroyNotify free_func) {
+  bglink_t *link, *tmp;
+  qboolean full_clear = qtrue;
+
+  Com_Assert(list != NULL);
+
+  link = list->head;
+  while(link) {
+    tmp = link->next;
+    if(free_func(link->data)) {
+      BG_List_Unlink(link);
+      BG_Link_Free_1(link);
+    } else {
+      full_clear = qfalse;
+    }
+    link = tmp;
+  }
+
+  if(full_clear) {
+    BG_List_Init(list);
+  }
+
+  return full_clear;
+}
+
+/**
+ * BG_List_Clear_Full_Forced:
  * @list: a pointer to a #bglist_t
  * @free_func: the function to be called to free each element's data
  *
@@ -266,7 +303,7 @@ void BG_List_Clear(bglist_t *list) {
  * function on every element's data.
  *
  */
-void BG_List_Clear_Full(bglist_t *list, BG_DestroyNotify free_func) {
+void BG_List_Clear_Full_Forced(bglist_t *list, BG_Destroy free_func) {
   Com_Assert(list != NULL);
 
   BG_Link_Free_Full(list->head, free_func);
@@ -1440,6 +1477,7 @@ static void BG_Link_Free(bglink_t *link) {
  * Another name for BG_Link_Free_1().
  **/
 static void BG_Link_Free_1(bglink_t *link) {
+  link->list = NULL;
   free_bglink(link, __FILE__, __LINE__);
 }
 
@@ -1453,7 +1491,7 @@ static void BG_Link_Free_1(bglink_t *link) {
  *
  * Since: 2.28
  */
-static void BG_Link_Free_Full(bglink_t *link, BG_DestroyNotify  free_func) {
+static void BG_Link_Free_Full(bglink_t *link, BG_Destroy  free_func) {
   bglink_t *tmp;
 
   while(link) {
