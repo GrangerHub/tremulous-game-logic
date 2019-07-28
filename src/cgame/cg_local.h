@@ -726,6 +726,8 @@ typedef struct centity_s
   qboolean              invincible;
   int                   invincibleTime;
 
+  qboolean              linked;
+  qboolean              is_in_solid_list;
   qboolean              valid;
   qboolean              oldValid;
   struct centity_s      *nextLocation;
@@ -1549,9 +1551,6 @@ typedef struct
   int           alienNextStageThreshold;
   int           humanNextStageThreshold;
 
-  qboolean      sublimeMarkedBuildables;  // make marked buildables non-solid
-  qboolean      sublimePlayers; // make all players except this client non-solid
-
   //
   // locally derived information from gamestate
   //
@@ -1943,6 +1942,14 @@ void        CG_ModelDoor( centity_t *cent );
 
 void        CG_BuildSolidList( void );
 int         CG_PointContents( const vec3_t point, int passEntityNum );
+void        CG_Link_Solid_Entity(int ent_num);
+void        CG_Unlink_Solid_Entity(int ent_num);
+void        CG_Link_Buildables(void);
+void        CG_Unlink_Buildables(void);
+void        CG_Link_Marked_Buildables(void);
+void        CG_Unlink_Marked_Buildables(void);
+void        CG_Link_Players(void);
+void        CG_Unlink_Players(void);
 void        CG_Trace( trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs,
                 const vec3_t end, int skipNumber, int mask );
 void        CG_CapTrace( trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs,
