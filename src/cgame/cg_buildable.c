@@ -321,8 +321,6 @@ void CG_InitBuildables( void )
   int           j;
   fileHandle_t  f;
 
-  cgs.sublimeMarkedBuildables = qfalse;
-
   memset( cg_buildables, 0, sizeof( cg_buildables ) );
 
   //default sounds
@@ -673,8 +671,8 @@ void CG_GhostBuildable( buildable_t buildable )
 
   BG_BuildableBoundingBox( buildable, mins, maxs );
 
-  cgs.sublimeMarkedBuildables = qtrue;
-  cgs.sublimePlayers = qtrue;
+  CG_Unlink_Marked_Buildables();
+  CG_Unlink_Players();
 
   BG_PositionBuildableRelativeToPlayer( ps, qfalse, CG_Trace,
                                         entity_origin, angles, &tr );
@@ -685,8 +683,8 @@ void CG_GhostBuildable( buildable_t buildable )
   CG_PositionAndOrientateBuildable( ps->viewangles, entity_origin, tr.plane.normal, ps->clientNum,
                                     mins, maxs, ent.axis, ent.origin );
 
-  cgs.sublimeMarkedBuildables = qfalse;
-  cgs.sublimePlayers = qfalse;
+  CG_Link_Marked_Buildables();
+  CG_Link_Players();
 
   //offset on the Z axis if required
   VectorMA( ent.origin, BG_BuildableConfig( buildable )->zOffset, tr.plane.normal, ent.origin );

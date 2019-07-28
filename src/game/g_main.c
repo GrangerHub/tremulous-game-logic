@@ -754,12 +754,17 @@ Q_EXPORT void G_InitGame( int levelTime, int randomSeed, int restart )
     &level.clients[ 0 ].ps, sizeof( level.clients[ 0 ] ) );
 
   //init enitity stuff for the bgame
-  BG_Init_Entities( );
-  for(i = 0; i < MAX_CLIENTS; i++) {
-    BG_Locate_playerState(&level.clients[i].ps, i);
-  }
+  BG_Init_Entities(ENTITYNUM_NONE);
   for(i = 0; i < MAX_GENTITIES; i++) {
-    BG_Locate_entityState(&g_entities[i].s, i, &g_entities[i].inuse);
+    if(i < MAX_CLIENTS) {
+      BG_Locate_Entity_Data(
+        i, &g_entities[i].s, &level.clients[i].ps, &g_entities[i].inuse,
+        &g_entities[i].r.linked, &g_clients[i].pers.teamSelection);
+    } else {
+      BG_Locate_Entity_Data(
+        i, &g_entities[i].s, NULL, &g_entities[i].inuse,
+        &g_entities[i].r.linked, NULL);
+    }
   }
 
   G_Init_Unlagged( );

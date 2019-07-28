@@ -27,11 +27,15 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 typedef struct bgentity_s
 {
-  entityState_t *es;
-  playerState_t *ps;
+  entityState_t  *es;
+  playerState_t  *ps;
 
-  qboolean      *valid_entityState;
+  const qboolean *valid_entityState;
+  const qboolean *linked;
+
+  const team_t   *client_team;
 } bgentity_t;
+
 
 static int        cgame_local_client_num; // this should be ENTITYNUM_NONE in the SGAME
 static bgentity_t bg_entities[ MAX_GENTITIES ];
@@ -44,9 +48,9 @@ BG_Init_Entities
 Initialized in the sgame and cgame
 ============
 */
-void BG_Init_Entities(void) {
+void BG_Init_Entities(const int cgame_client_num) {
   memset( bg_entities, 0, MAX_GENTITIES * sizeof( bg_entities[ 0 ] ) );
-  cgame_local_client_num = ENTITYNUM_NONE;
+  cgame_local_client_num = cgame_client_num;
 }
 
 /*
@@ -69,18 +73,23 @@ entityState_t *BG_entityState_From_Ent_Num(int ent_num) {
 
 /*
 ============
-BG_Locate_entityState
+BG_Locate_Entity_Data
 
 ============
 */
-void BG_Locate_entityState(
-  entityState_t *es, int ent_num, qboolean *valid_check_variable) {
-  Com_Assert(es);
+void BG_Locate_Entity_Data(
+  int ent_num, entityState_t *es, playerState_t *ps,
+  const qboolean *valid_check_var, const qboolean *linked_var,
+  const team_t *client_team_var) {
   Com_Assert(ent_num >= 0 && ent_num < MAX_GENTITIES);
-  Com_Assert(valid_check_variable);
+  Com_Assert(es);
+  Com_Assert(valid_check_var);
 
+  bg_entities[ent_num].ps = ps;
   bg_entities[ent_num].es = es;
-  bg_entities[ent_num].valid_entityState = valid_check_variable;
+  bg_entities[ent_num].valid_entityState = valid_check_var;
+  bg_entities[ent_num].linked = valid_check_var;
+  bg_entities[ent_num].client_team = client_team_var;
 }
 
 /*
@@ -101,22 +110,53 @@ playerState_t *BG_playerState_From_Ent_Num(int ent_num) {
 
 /*
 ============
-BG_Locate_playerState
+BG_Entity_Is_Valid
 
 ============
 */
-void BG_Locate_playerState(playerState_t *ps, int ent_num) {
-  Com_Assert(ps);
-  Com_Assert(ent_num >= 0 && ent_num < MAX_CLIENTS);
+qboolean BG_Entity_Is_Valid(int ent_num) {
+  bgentity_t *ent;
 
-  bg_entities[ent_num].ps = ps;
+  Com_Assert(ent_num >= 0 && ent_num < MAX_GENTITIES);
 
-#ifdef CGAME
-  //in the cgame this function should only be called for the local client's
-  //playerState
-  cgame_local_client_num = ent_num;
-#endif
+  ent = &bg_entities[ent_num];
+  if(
+    cgame_local_client_num != ENTITYNUM_NONE &&
+    cgame_local_client_num == ent_num) {
+    return qtrue;
+  }
+
+  if(!(ent->valid_entityState) || !(*(ent->valid_entityState))) {
+    return qfalse;
+  }
+
+  return qtrue;
 }
+
+/*
+============
+BG_Entity_Is_Linked
+
+============
+*/
+qboolean BG_Entity_Is_Linked(int ent_num) {
+  bgentity_t *ent;
+
+  Com_Assert(ent_num >= 0 && ent_num < MAX_GENTITIES);
+
+  if(!BG_Entity_Is_Valid(ent_num)) {
+    return qfalse;
+  }
+
+  ent = &bg_entities[ent_num];
+
+  if(ent->linked && !(*(ent->linked))) {
+    return qfalse;
+  }
+
+  return qtrue;
+}
+
 
 
 /*
@@ -194,10 +234,8 @@ int BG_UEID_get_ent_num(bgentity_id *ueid) {
     return ENTITYNUM_NONE;
   }
 
-  if(!(*bg_entities[ueid->ent_num].valid_entityState)) {
-    if(
-      cgame_local_client_num != ENTITYNUM_NONE &&
-      ueid->ent_num != cgame_local_client_num) {
+  if(!BG_Entity_Is_Valid(ueid->ent_num)) {
+    if(cgame_local_client_num != ENTITYNUM_NONE) {
       //if the entity isn't valid CGAME side, return ENTITYNUM_NONE but
       //don't reset the UEID
       return ENTITYNUM_NONE;
