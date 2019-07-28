@@ -1679,7 +1679,7 @@ void G_DeleteZapData( void *data )
 {
   zap_t *zapData = (zap_t *)data;
 
-  BG_List_Clear_Full( &zapData->targetQueue, BG_FreePassed );
+  BG_List_Clear_Full_Forced( &zapData->targetQueue, BG_FreePassed );
 
   BG_Free( zapData );
 }
