@@ -64,15 +64,17 @@ struct bglist_s
   bglink_t *head;
   bglink_t *tail;
   size_t   length;
+  qboolean locked;
 };
 
 /* Generic Function Pointer Types
  */
- typedef int  (*BG_CompareFunc) ( const void *a, const void *b );
- typedef int  (*BG_CompareDataFunc) ( const void *a, const void *b,
-                                      const void *user_data );
- typedef void (*BG_DestroyNotify) ( void *data );
- typedef void (*BG_Func) ( void *data, void *user_data );
+ typedef int  (*BG_CompareFunc)(const void *a, const void *b);
+ typedef int  (*BG_CompareDataFunc)(
+   const void *a, const void *b, const void *user_data);
+ typedef void (*BG_Destroy)(void *data);
+ typedef qboolean (*BG_DestroyNotify)(void *data);
+ typedef void (*BG_Func)(void *data, void *user_data);
  
  /**
  * BG_CopyFunc:
@@ -102,7 +104,7 @@ typedef void *(*BG_CopyFunc) ( const void *src, void *data );
  *
  * Since: 2.14
  */
-#define BG_LIST_INIT { NULL, NULL, 0 }
+#define BG_LIST_INIT { NULL, NULL, 0, qfalse }
 
 /* Linked lists
  */
@@ -111,13 +113,14 @@ void        BG_List_Init_Memory(char *calledFile, int calledLine);
 void        BG_List_Memory_Info(void);
 bglist_t    *BG_List_New(void);
 void        BG_List_Free(bglist_t *list);
-void        BG_List_Free_Full(bglist_t *list, BG_DestroyNotify free_func);
+void        BG_List_Free_Full(bglist_t *list, BG_Destroy free_func);
 
 qboolean    BG_List_Valid(bglist_t *list);
 
 void        BG_List_Init(bglist_t *list);
-void        BG_List_Clear(bglist_t *list) ;
-void        BG_List_Clear_Full(bglist_t *list, BG_DestroyNotify free_func);
+void        BG_List_Clear(bglist_t *list);
+qboolean    BG_List_Clear_Full(bglist_t *list, BG_DestroyNotify free_func);
+void        BG_List_Clear_Full_Forced(bglist_t *list, BG_Destroy free_func);
 
 qboolean    BG_List_Is_Empty(bglist_t *list);
 size_t      BG_List_Get_Length(bglist_t *list);
