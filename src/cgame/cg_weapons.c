@@ -1105,8 +1105,9 @@ static void CG_LightningBolt( centity_t *cent, vec3_t origin )
               forward, endPoint );
 
 	// see if it hit a wall
-	CG_Trace( &trace, muzzlePoint, NULL, NULL, endPoint,
-	          cent->currentState.number, MASK_SHOT );
+	CG_Trace(
+    &trace, muzzlePoint, NULL, NULL, endPoint, cent->currentState.number,
+    *Temp_Clip_Mask(MASK_SHOT, 0));
 
 	// this is the endpoint
 	VectorCopy( trace.endpos, beam.oldorigin );
@@ -2478,8 +2479,8 @@ void CG_Splatter( entityState_t *es )
   data.weapon = es->angles2[0];
   data.weaponMode = es->angles2[1];
 
-  BG_SplatterPattern( es->origin2, es->eventParm, es->otherEntityNum, &data,
-                      CG_SplatterMarks, CG_Trace );
+  BG_SplatterPattern(
+    es->origin2, es->eventParm, es->otherEntityNum, &data, CG_SplatterMarks);
 }
 
 /*

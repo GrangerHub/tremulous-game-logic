@@ -2162,9 +2162,10 @@ Will perform callbacks to make the loading info screen update.
 */
 void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum )
 {
-  const char  *s;
-  int          team;
-  int          i;
+  bg_collision_funcs_t collision_funcs;
+  const char           *s;
+  int                  team;
+  int                  i;
 
   // clear everything
   memset( &cgs, 0, sizeof( cgs ) );
@@ -2201,6 +2202,15 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum )
           &cg_entities[i].linked, NULL);
     }
   }
+
+  collision_funcs.trace = CG_Trace_Wrapper;
+  collision_funcs.pointcontents = CG_PointContents;
+  collision_funcs.unlagged_on = NULL;
+  collision_funcs.unlagged_off = NULL;
+  collision_funcs.area_entities = CG_Area_Entities;
+  collision_funcs.clip_to_entity  = CG_Clip_To_Entity;
+  collision_funcs.clip_to_test_area = CG_Clip_To_Test_Area;
+  BG_Init_Collision_Functions(collision_funcs);
 
 
   // load overrides

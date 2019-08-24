@@ -504,7 +504,9 @@ clipHandle_t SV_ClipHandleForEntity( const sharedEntity_t *ent );
 void SV_SectorList_f( void );
 
 
-int SV_AreaEntities( const vec3_t mins, const vec3_t maxs, int *entityList, int maxcount );
+int SV_AreaEntities(
+	const vec3_t mins, const vec3_t maxs, const content_mask_t *content_mask,
+	int *entityList, int maxcount);
 // fills in a table of entity numbers with entities that have bounding boxes
 // that intersect the given area.  It is possible for a non-axial bmodel
 // to be returned that doesn't actually intersect the area on an exact
@@ -517,7 +519,10 @@ int SV_PointContents( const vec3_t p, int passEntityNum );
 // returns the CONTENTS_* value from the world and all entities at the given point.
 
 
-void SV_Trace( trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs, const vec3_t end, int passEntityNum, int contentmask, traceType_t type );
+void SV_Trace(
+	trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs,
+	const vec3_t end, int passEntityNum, const content_mask_t content_mask,
+	traceType_t type );
 // mins and maxs are relative
 
 // if the entire move stays in a solid volume, trace.allsolid will be set,
@@ -529,13 +534,17 @@ void SV_Trace( trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs, c
 // passEntityNum is explicitly excluded from clipping checks (normally ENTITYNUM_NONE)
 
 
-void SV_ClipToEntity( trace_t *trace, const vec3_t start, vec3_t mins, vec3_t maxs, const vec3_t end, int entityNum, int contentmask, traceType_t type );
+void SV_ClipToEntity(
+	trace_t *trace, const vec3_t start, vec3_t mins, vec3_t maxs,
+	const vec3_t end, int entityNum, const content_mask_t content_mask,
+	traceType_t type);
 // clip to a specific entity
 
 void SV_ClipToTestArea(
 	trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs,
 	const vec3_t end, const vec3_t test_mins, const vec3_t test_maxs,
-	const vec3_t test_origin, int test_contents, int contentmask, traceType_t type);
+	const vec3_t test_origin, int test_contents, const content_mask_t content_mask,
+	traceType_t type);
 // clip to a temporary test volume
 
 //

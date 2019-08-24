@@ -3820,7 +3820,7 @@ static void CG_ScanForCrosshairEntity( void )
   VectorMA( start, 131072, cg.refdef.viewaxis[ 0 ], end );
 
   CG_Trace( &trace, start, vec3_origin, vec3_origin, end,
-    cg.snap->ps.clientNum, CONTENTS_SOLID|CONTENTS_BODY );
+    cg.snap->ps.clientNum, *Temp_Clip_Mask((CONTENTS_SOLID|CONTENTS_BODY), 0));
 
   // if the player is in fog, don't show it
 /*  content = trap_CM_PointContents( trace.endpos, 0 );*/
@@ -5176,7 +5176,7 @@ void CG_DrawActive( stereoFrame_t stereoView )
       CG_CapTrace( &trace, cg.refdef.vieworg, mins, maxs,
                    lanternOrigin,
                    cg.predictedPlayerState.clientNum,
-                   MASK_DEADSOLID );
+                   *Temp_Clip_Mask(MASK_DEADSOLID, 0) );
 
       if( trace.fraction != 1.0f )
       {
@@ -5190,7 +5190,7 @@ void CG_DrawActive( stereoFrame_t stereoView )
         CG_CapTrace( &trace, cg.refdef.vieworg, mins, maxs,
                      lanternOrigin,
                      cg.predictedPlayerState.clientNum,
-                     MASK_DEADSOLID );
+                     *Temp_Clip_Mask(MASK_DEADSOLID, 0) );
         VectorCopy( trace.endpos, lanternOrigin );
       }
     }

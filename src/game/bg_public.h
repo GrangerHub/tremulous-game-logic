@@ -340,7 +340,7 @@ struct pmove_s
   pmoveExt_t *pmext;
   // command (in)
   usercmd_t     cmd;
-  int           tracemask;      // collide against these types of surfaces
+  content_mask_t trace_mask;     // collide against these types of surfaces
   int           debugLevel;     // if set, diagnostic output will be printed
   qboolean      noFootsteps;    // if the game is setup for no footsteps by the server
   qboolean      autoWeaponHit[ 32 ];
@@ -367,24 +367,14 @@ struct pmove_s
 
   int           playerAccelMode; // when set to 1, strafe jumping is enabled
 
-  // callbacks to test the world
-  // these will be different functions during game and cgame
-  /*void    (*trace)( trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs, const vec3_t end, int passEntityNum, int contentMask );*/
-  void          (*trace)( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs,
-                          const vec3_t end, int passEntityNum, int contentMask );
-
-
-  int           (*pointcontents)( const vec3_t point, int passEntityNum );
-
-  void          (*unlagged_on)( unlagged_attacker_data_t *attacker_data );
-  void          (*unlagged_off)( void );
-
   int           tauntSpam; // allow taunts to be spammed. only for clients that enable cg_tauntSpam
   int           humanPortalCreateTime[ PORTAL_NUM ];
 
   int           swapAttacks;
   float         wallJumperMinFactor;
   float         marauderMinJumpFactor;
+
+  qboolean      (*pm_reactor)(void);
 };
 
 int PM_Gravity( playerState_t *ps );
@@ -455,9 +445,8 @@ typedef enum
 #define SB_VALID_TOGGLEBIT      0x00002000
 
 #define SFL_READY               0x00000001 // player ready state
-#define SFL_REFRESH_MISC        0x00000002 // hax to ensure the misc changes are broadcasted
-#define SFL_GIBBED              0x00000004
-#define SFL_CLASS_FORCED        0x00000008 // can't evolve from a class that a map forced
+#define SFL_GIBBED              0x00000002
+#define SFL_CLASS_FORCED        0x00000004 // can't evolve from a class that a map forced
 
 
 // player_state->persistant[] indexes
@@ -471,7 +460,7 @@ typedef enum
   PERS_SPECSTATE,
   PERS_SPAWN_COUNT,     // incremented every respawn
   PERS_ATTACKER,        // clientnum of last damage inflicter
-  PERS_KILLED,          // count of the number of times you died
+  PERS_PERIOD_TIMER,    // periodic timer for predicting things that occur every 100, 1000, and 10000 ms.
 
   PERS_STATE,
   PERS_CREDIT,    // human credit
@@ -560,8 +549,7 @@ typedef enum
 #define EF_NODRAW           0x00100    // may have an event, but no model (unspawned items)
 #define EF_MOVER_STOP       0x00200    // will push otherwise, used by ET_MOVER
 #define EF_INVINCIBLE       0x00200    // used to indicate if a player can't be damaged
-#define EF_ASTRAL_NOCLIP    0x00400    // EF_ASTRAL flagged entities don't clip with Astral entities,
-                                       // must be equal to CONTENTS_ASTRAL_NOCLIP
+#define EF_BMODEL           0x00400    // modelindex is an inline model number, must have same value as SOLID_BMODEL
 #define EF_FIRING           0x00800    // for lightning gun
 #define EF_FIRING2          0x01000    // alt fire
 #define EF_FIRING3          0x02000    // third fire
@@ -631,7 +619,7 @@ occupation.flags
                                        // to occupation.contents.
 
 #define  OCCUPYF_CLIPMASK       0x1000 // Change the clip mask of an occupant
-                                       // to occupation.clipMask.
+                                       // to occupation.clip_mask.
 
 #define  OCCUPYF_RESET_OTHER    0x2000 // When an occupied activation entity
                                        // is reset, also reset
@@ -1472,7 +1460,7 @@ typedef struct
                                  //abilities of a given occupation entity
   pmtype_t			activationPm_type; // changes client's pm_type of an occupant
   int           activationContents; // changes the contents of an occupant
-  int           activationClipMask; // changes the clip mask of an occupant
+  content_mask_t activationClipMask; // changes the clip mask of an occupant
 
   int           turretRange;
   int           turretFireSpeed;
@@ -1633,17 +1621,10 @@ void      BG_CalcMuzzlePointFromPS( const playerState_t *ps, vec3_t forward,
 int       BG_LightningBoltRange( const entityState_t *es,
                                  const playerState_t *ps,
                                  qboolean currentRange );
-void      BG_CheckBoltImpactTrigger(pmove_t *pmove,
-                                    void (*trace)(trace_t *, const vec3_t,
-                                                  const vec3_t, const vec3_t,
-                                                  const vec3_t, int, int ),
-                                    void (*UnlaggedOn)(unlagged_attacker_data_t *),
-                                    void (*UnlaggedOff)(void));
+void      BG_CheckBoltImpactTrigger(pmove_t *pmove);
 void      BG_ResetLightningBoltCharge( playerState_t *ps, pmoveExt_t *pmext );
 void      BG_PositionBuildableRelativeToPlayer( const playerState_t *ps,
                                                 const qboolean builder_adjacent_placement,
-                                                void (*trace)( trace_t *, const vec3_t, const vec3_t,
-                                                               const vec3_t, const vec3_t, int, int ),
                                                 vec3_t outOrigin, vec3_t outAngles, trace_t *tr );
 int       BG_GetValueOfPlayer( playerState_t *ps );
 qboolean  BG_PlayerCanChangeWeapon( playerState_t *ps, pmoveExt_t *pmext );
@@ -1712,11 +1693,9 @@ typedef struct splatterData_s
   trace_t      *tr;
   void         *user_data;
 } splatterData_t;
-void BG_SplatterPattern( vec3_t origin2, int seed, int passEntNum,
-                         splatterData_t *data, void (*func)( splatterData_t *data ),
-                         void (*trace)( trace_t *, const vec3_t,
-                                        const vec3_t, const vec3_t,
-                                        const vec3_t, int, int ) );
+void BG_SplatterPattern(
+  vec3_t origin2, int seed, int passEntNum, splatterData_t *data,
+  void (*func)(splatterData_t *data));
 
 const upgradeAttributes_t   *BG_UpgradeByName( const char *name );
 const upgradeAttributes_t   *BG_Upgrade( upgrade_t upgrade );
@@ -1729,7 +1708,6 @@ qboolean                    BG_UpgradeAllowedInStage( upgrade_t upgrade,
 #define MASK_SOLID        (CONTENTS_SOLID)
 #define MASK_PLAYERSOLID  (CONTENTS_SOLID|CONTENTS_PLAYERCLIP|CONTENTS_BODY)
 #define MASK_DEADSOLID    (CONTENTS_SOLID|CONTENTS_PLAYERCLIP)
-#define MASK_ASTRALSOLID  (CONTENTS_SOLID|CONTENTS_PLAYERCLIP|CONTENTS_ASTRAL_NOCLIP)
 #define MASK_WATER        (CONTENTS_WATER|CONTENTS_LAVA|CONTENTS_SLIME)
 #define MASK_OPAQUE       (CONTENTS_SOLID|CONTENTS_SLIME|CONTENTS_LAVA)
 #define MASK_SHOT         (CONTENTS_SOLID|CONTENTS_BODY|CONTENTS_CORPSE)
@@ -1868,10 +1846,32 @@ const teamAttributes_t *BG_Team( team_t team );
 const rankAttributes_t *BG_Rank( rank_t rank );
 
 //bg_entities.c
-typedef struct{
+typedef struct
+{
   unsigned int id;
   int          ent_num;
 } bgentity_id;
+
+typedef struct bg_collision_funcs_s
+{
+  void  (*trace)(
+    trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs,
+  	const vec3_t end, int passEntityNum, const content_mask_t content_mask,
+  	traceType_t type);
+  int   (*pointcontents)( const vec3_t point, int passEntityNum );
+  int (*area_entities)( const vec3_t mins, const vec3_t maxs,
+    const content_mask_t *content_mask, int *entityList, int maxcount );
+  void (*clip_to_entity)( trace_t *trace, const vec3_t start, vec3_t mins,
+    vec3_t maxs, const vec3_t end, int entityNum,
+    const content_mask_t content_mask, traceType_t type );
+  void (*clip_to_test_area)(
+  	trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs,
+  	const vec3_t end, const vec3_t test_mins, const vec3_t test_maxs,
+  	const vec3_t test_origin, int test_contents, const content_mask_t content_mask,
+  	traceType_t type);
+  void  (*unlagged_on)( unlagged_attacker_data_t *attacker_data );
+  void  (*unlagged_off)( void );
+} bg_collision_funcs_t;
 
 void          BG_Init_Entities(const int cgame_client_num);
 entityState_t *BG_entityState_From_Ent_Num(int ent_num);
@@ -1883,6 +1883,29 @@ playerState_t *BG_playerState_From_Ent_Num(int ent_num);
 
 void          BG_UEID_set(bgentity_id *ueid, int ent_num);
 int           BG_UEID_get_ent_num(bgentity_id *ueid);
+
+void          BG_Init_Collision_Functions(bg_collision_funcs_t funcs);
+void          BG_Trace(
+  trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs,
+  const vec3_t end, int passEntityNum, const content_mask_t content_mask,
+  traceType_t type);
+void          BG_Area_Entities(
+  const vec3_t mins, const vec3_t maxs, const content_mask_t *content_mask,
+  int *entityList, int maxcount);
+void          BG_Clip_To_Entity(
+    trace_t *trace, const vec3_t start, vec3_t mins, vec3_t maxs,
+    const vec3_t end, int entityNum, const content_mask_t content_mask,
+    traceType_t collisionType);
+void          BG_Clip_To_Test_Area(
+  trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs,
+  const vec3_t end, const vec3_t test_mins, const vec3_t test_maxs,
+  const vec3_t test_origin, int test_contents, const content_mask_t content_mask,
+  traceType_t collisionType);
+int           BG_PointContents(const vec3_t p, int passEntityNum);
+void          BG_UnlaggedOn(unlagged_attacker_data_t *data);
+void          BG_UnlaggedOff(void);
+void          BG_Update_Collision_Data_For_Entity(int ent_num, int time);
+
 
 //for movers
 void BG_CreateRotationMatrix( vec3_t angles, vec3_t matrix[ 3 ] );

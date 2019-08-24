@@ -1146,8 +1146,10 @@ void G_UnlaggedDetectCollisions(gentity_t *ent) {
   attacker_data.range = range;
   G_UnlaggedOn(&attacker_data);
 
-  SV_Trace(&tr, ent->client->oldOrigin, ent->r.mins, ent->r.maxs,
-    ent->client->ps.origin, ent->s.number,  MASK_PLAYERSOLID, TT_AABB);
+  SV_Trace(
+    &tr, ent->client->oldOrigin, ent->r.mins, ent->r.maxs,
+    ent->client->ps.origin, ent->s.number,
+    *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB);
 
   if(tr.entityNum >= 0 && tr.entityNum < MAX_CLIENTS) {
     unlagged_data[ tr.entityNum ].calc.used = qfalse;

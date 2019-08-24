@@ -195,7 +195,7 @@ Also called by event processing code
 */
 void CG_SetEntitySoundPosition( centity_t *cent )
 {
-  if( cent->currentState.solid == SOLID_BMODEL )
+  if( cent->currentState.eFlags & EF_BMODEL )
   {
     vec3_t  origin;
     float   *v;
@@ -494,7 +494,9 @@ static void CG_LaserMine(centity_t *cent, refEntity_t *ent) {
       trace_t trace;
 
       VectorMA(es->pos.trBase, LASERMINE_TRIP_RANGE, es->origin2, end);
-      CG_Trace(&trace, es->pos.trBase, NULL, NULL, end, es->number, MASK_SHOT);
+      CG_Trace(
+        &trace, es->pos.trBase, NULL, NULL, end, es->number,
+        *Temp_Clip_Mask(MASK_SHOT, 0));
       CG_SetAttachmentCent( &cent->lasermineTS->frontAttachment, cent );
       CG_AttachToCent( &cent->lasermineTS->frontAttachment );
       CG_SetAttachmentPoint( &cent->lasermineTS->backAttachment, trace.endpos );
@@ -640,7 +642,7 @@ static void CG_Mover( centity_t *cent )
   ent.skinNum = ( cg.time >> 6 ) & 1;
 
   // get the model, either as a bmodel or a modelindex
-  if( s1->solid == SOLID_BMODEL )
+  if( s1->eFlags & EF_BMODEL )
     ent.hModel = cgs.inlineDrawModel[ s1->modelindex ];
   else
     ent.hModel = cgs.gameModels[ s1->modelindex ];
@@ -763,7 +765,7 @@ static void CG_LightFlare( centity_t *cent )
     return;
 
   CG_Trace( &tr, cg.refdef.vieworg, NULL, NULL, es->angles2,
-            entityNum, MASK_SHOT );
+            entityNum, *Temp_Clip_Mask(MASK_SHOT, 0) );
 
   //if there is no los between the view and the flare source
   //it definately cannot be seen
@@ -831,7 +833,7 @@ static void CG_LightFlare( centity_t *cent )
     {
       //"correct" flares
       CG_BiSphereTrace( &tr, cg.refdef.vieworg, end,
-          1.0f, srcRadius, entityNum, MASK_SHOT );
+          1.0f, srcRadius, entityNum, *Temp_Clip_Mask(MASK_SHOT, 0));
 
       if( tr.fraction < 1.0f )
         ratio = tr.lateralFraction;
@@ -843,7 +845,7 @@ static void CG_LightFlare( centity_t *cent )
       //draw timed flares
       SETBOUNDS( mins, maxs, srcRadius );
       CG_Trace( &tr, start, mins, maxs, end,
-                entityNum, MASK_SHOT );
+                entityNum, *Temp_Clip_Mask(MASK_SHOT, 0) );
 
       if( ( tr.fraction < 1.0f || tr.startsolid ) && cent->lfs.status )
       {
@@ -880,7 +882,7 @@ static void CG_LightFlare( centity_t *cent )
       //draw nofade flares
       SETBOUNDS( mins, maxs, srcRadius );
       CG_Trace( &tr, start, mins, maxs, end,
-                entityNum, MASK_SHOT );
+                entityNum, *Temp_Clip_Mask(MASK_SHOT, 0) );
 
       //flare source occluded
       if( ( tr.fraction < 1.0f || tr.startsolid ) )
@@ -1107,7 +1109,7 @@ float CG_AdjustPositionForMover(
 CG_InterpolateEntityPosition
 =============================
 */
-static void CG_InterpolateEntityPosition( centity_t *cent )
+static void CG_InterpolateEntityPosition( centity_t *cent, int time )
 {
   vec3_t    current, next;
   float     f;
@@ -1117,7 +1119,19 @@ static void CG_InterpolateEntityPosition( centity_t *cent )
   if( cg.nextSnap == NULL )
     CG_Error( "CG_InterpoateEntityPosition: cg.nextSnap == NULL" );
 
-  f = cg.frameInterpolation;
+  if(time == cg.time) {
+    f = cg.frameInterpolation;
+  } else {
+    int   delta;
+
+    delta = ( cg.nextSnap->serverTime - cg.snap->serverTime );
+
+    if( delta == 0 ) {
+      f = 0;
+    } else {
+      f = (float)( time - cg.snap->serverTime ) / delta;
+    }
+  }
 
   // this will linearize a sine or parabolic curve, but it is important
   // to not extrapolate player positions if more recent data is available
@@ -1134,7 +1148,6 @@ static void CG_InterpolateEntityPosition( centity_t *cent )
   cent->lerpAngles[ 0 ] = LerpAngle( current[ 0 ], next[ 0 ], f );
   cent->lerpAngles[ 1 ] = LerpAngle( current[ 1 ], next[ 1 ], f );
   cent->lerpAngles[ 2 ] = LerpAngle( current[ 2 ], next[ 2 ], f );
-
 }
 
 /*
@@ -1143,7 +1156,7 @@ CG_CalcEntityLerpPositions
 
 ===============
 */
-static void CG_CalcEntityLerpPositions( centity_t *cent )
+void CG_CalcEntityLerpPositions(centity_t *cent, int time)
 {
   float  delta_yaw;
   // this will be set to how far forward projectiles will be extrapolated
@@ -1162,7 +1175,7 @@ static void CG_CalcEntityLerpPositions( centity_t *cent )
 
   if( cent->interpolate && cent->currentState.pos.trType == TR_INTERPOLATE )
   {
-    CG_InterpolateEntityPosition( cent );
+    CG_InterpolateEntityPosition( cent, time );
     return;
   }
 
@@ -1171,7 +1184,7 @@ static void CG_CalcEntityLerpPositions( centity_t *cent )
   if( cent->interpolate && cent->currentState.pos.trType == TR_LINEAR_STOP &&
       cent->currentState.number < MAX_CLIENTS )
   {
-    CG_InterpolateEntityPosition( cent );
+    CG_InterpolateEntityPosition( cent, time );
     return;
   }
 
@@ -1185,19 +1198,19 @@ static void CG_CalcEntityLerpPositions( centity_t *cent )
 
   // just use the current frame and evaluate as best we can
   BG_EvaluateTrajectory( &cent->currentState.pos,
-    ( cg.time + timeshift ), cent->lerpOrigin );
+    ( time + timeshift ), cent->lerpOrigin );
   BG_EvaluateTrajectory( &cent->currentState.apos,
-    ( cg.time + timeshift ), cent->lerpAngles );
+    ( time + timeshift ), cent->lerpAngles );
 
   if( timeshift )
   {
     trace_t tr;
     vec3_t lastOrigin;
 	
-    BG_EvaluateTrajectory( &cent->currentState.pos, cg.time, lastOrigin );
+    BG_EvaluateTrajectory( &cent->currentState.pos, time, lastOrigin );
 	
     CG_Trace( &tr, lastOrigin, vec3_origin, vec3_origin, cent->lerpOrigin,
-      cent->currentState.number, MASK_SHOT );
+      cent->currentState.number, *Temp_Clip_Mask(MASK_SHOT, 0) );
 	
     // don't let the projectile go through the floor
     if( tr.fraction < 1.0f )
@@ -1209,7 +1222,7 @@ static void CG_CalcEntityLerpPositions( centity_t *cent )
   if(cent->currentState.number != cg.predictedPlayerState.clientNum) {
     delta_yaw = CG_AdjustPositionForMover(
                   cent->lerpOrigin, CG_Get_Pusher_Num(cent->currentState.number),
-                  cg.snap->serverTime, cg.time, cent->lerpOrigin);
+                  cg.snap->serverTime, time, cent->lerpOrigin);
     cent->lerpAngles[YAW] += delta_yaw;
   }
 }
@@ -1351,7 +1364,7 @@ static void CG_AddCEntity( centity_t *cent )
     return;
 
   // calculate the current origin
-  CG_CalcEntityLerpPositions( cent );
+  CG_CalcEntityLerpPositions( cent, cg.time );
 
   // check to see if a body has been gibbed
   if( cg_blood.integer &&
@@ -1490,7 +1503,7 @@ void CG_AddPacketEntities( void )
   CG_AddCEntity( &cg.predictedPlayerEntity );
 
   // lerp the non-predicted value for lightning gun origins
-  CG_CalcEntityLerpPositions( &cg_entities[ cg.snap->ps.clientNum ] );
+  CG_CalcEntityLerpPositions( &cg_entities[ cg.snap->ps.clientNum ], cg.time );
 
   // scanner
   CG_UpdateEntityPositions( );

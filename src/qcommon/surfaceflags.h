@@ -39,8 +39,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define CONTENTS_NOTTEAM2		0x0100
 #define CONTENTS_NOBOTCLIP		0x0200
 
-#define CONTENTS_ASTRAL_NOCLIP          0x0400          // Content that doesn't clip with ASTRALSOLID entities. Must
-                                                        // be equal to EF_ASTRAL_NOCLIP
+#define CONTENTS_DOOR 0x0400 // Spectators and astral things don't clip against doors
 
 #define	CONTENTS_AREAPORTAL		0x8000
 

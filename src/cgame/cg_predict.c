@@ -57,19 +57,24 @@ void CG_BuildSolidList( void )
   cg_numTriggerEntities = 0;
 
   for(i = 0; i < MAX_GENTITIES; i++) {
+    const int *contents_pointer = (int *)(&cg_entities[i].currentState.origin[1]);
+
     cg_entities[i].linked = qfalse;
     cg_entities[i].is_in_solid_list = qfalse;
+    cg_entities[i].contents = *contents_pointer;
   }
-
-  cg.predictedPlayerEntity.linked = qtrue;
-  cg.predictedPlayerEntity.is_in_solid_list = qtrue;
-  cg_entities[cg.clientNum].linked = qtrue;
-  cg_entities[cg.clientNum].is_in_solid_list = qtrue;
 
   if( cg.nextSnap && !cg.nextFrameTeleport && !cg.thisFrameTeleport )
     snap = cg.nextSnap;
   else
     snap = cg.snap;
+
+  cg.predictedPlayerEntity.linked = qtrue;
+  cg.predictedPlayerEntity.is_in_solid_list = qtrue;
+  cg.predictedPlayerEntity.contents = snap->ps.misc[MISC_CONTENTS];
+  cg_entities[cg.clientNum].linked = qtrue;
+  cg_entities[cg.clientNum].is_in_solid_list = qtrue;
+  cg_entities[cg.clientNum].contents = snap->ps.misc[MISC_CONTENTS];
 
   for( i = 0; i < snap->numEntities; i++ )
   {
@@ -278,123 +283,539 @@ void CG_Unlink_Players(void) {
 
 /*
 ====================
+CG_Update_Collision_Data_For_Entity
+
+====================
+*/
+void CG_Update_Collision_Data_For_Entity(
+  int ent_num, int time, const vec3_t origin, const playerState_t *ps) {
+  centity_t     *cent;
+  entityState_t *ent;
+
+  Com_Assert(ent_num >= 0 && ent_num < ENTITYNUM_MAX_NORMAL);
+
+  if(ent_num == cg.clientNum) {
+    if(ps == NULL) {
+      return;
+    }
+    cent = &cg.predictedPlayerEntity;
+  } else {
+    cent = &cg_entities[ent_num];
+  }
+
+  if(!cent->is_in_solid_list) {
+    return;
+  }
+
+  ent = &cent->currentState;
+
+  if(ent->eFlags & EF_BMODEL) {
+    vec3_t previous_origin, offset, centered_maxs;
+    int    n;
+    int    previous_origin_time = *((int *)(&ent->origin[2]));
+
+    VectorCopy(cent->lerpAngles, cent->collision_angles);
+
+    centered_maxs[0] = (ent->solid & 255);
+    centered_maxs[1] = ((ent->solid >> 8) & 255);
+    centered_maxs[2] = ((ent->solid >> 16) & 255);
+
+    //for area checking assume the bmodel is huge in a given axis if the encoding is maxed.
+    for(n = 0; n < 3; n++) {
+      if(centered_maxs[n] >= 255) {
+        centered_maxs[n] *= 100;
+      }
+    }
+
+    BG_EvaluateTrajectory( &cent->currentState.pos, time, cent->collision_origin );
+    BG_EvaluateTrajectory(&cent->currentState.pos, previous_origin_time, previous_origin);
+    VectorSubtract(cent->collision_origin, previous_origin, offset);
+    VectorAdd(cent->currentState.angles, offset, offset);
+
+    VectorAdd(offset, centered_maxs, cent->absmax);
+    VectorSubtract(offset, centered_maxs, cent->absmin);
+    VectorSubtract(cent->absmax, cent->collision_origin, cent->maxs);
+    VectorSubtract(cent->absmin, cent->collision_origin, cent->mins);
+  } else {
+    int x, zd, zu;
+    int pusher_num = CG_Get_Pusher_Num(cent->currentState.number);
+
+    VectorCopy(vec3_origin, cent->collision_angles);
+
+    // encoded bbox
+    x = ( ent->solid & 255 );
+    zd = ( ( ent->solid >> 8 ) & 255 );
+    zu = ( ( ent->solid >> 16 ) & 255 ) - 32;
+
+    cent->mins[ 0 ] = cent->mins[ 1 ] = -x;
+    cent->maxs[ 0 ] = cent->maxs[ 1 ] = x;
+    cent->mins[ 2 ] = -zd;
+    cent->maxs[ 2 ] = zu;
+
+    if(ent_num == cg.clientNum) {
+      if( ps->pm_type == PM_DEAD ) {
+        BG_ClassBoundingBox(
+          (ent->misc >> 8) & 0xFF, NULL, NULL, NULL, cent->mins, cent->maxs);
+      } else if(ps->pm_flags & PMF_DUCKED) {
+        BG_ClassBoundingBox(
+          (ent->misc >> 8) & 0xFF, cent->mins, NULL, cent->maxs, NULL, NULL);
+      } else {
+        BG_ClassBoundingBox(
+          (ent->misc >> 8) & 0xFF, cent->mins, cent->maxs, NULL, NULL, NULL);
+      }
+    }
+
+    if(
+      pusher_num != ENTITYNUM_NONE &&
+      cg_entities[pusher_num].currentState.eType == ET_MOVER ){
+      //this entity is being moved in the same mover stack as the local player
+      BG_EvaluateTrajectory(
+        &cent->currentState.pos, time, cent->collision_origin);
+      CG_AdjustPositionForMover(
+                    cent->collision_origin,
+                    CG_Get_Pusher_Num(cent->currentState.number),
+                    cg.snap->serverTime, time,
+                    cent->collision_origin);
+    } else {
+      Com_Assert(origin);
+      VectorCopy(origin, cent->collision_origin);
+    }
+
+    VectorAdd (cent->collision_origin, cent->mins, cent->absmin);	
+    VectorAdd (cent->collision_origin, cent->maxs, cent->absmax);
+
+    if(!(ent->eFlags & EF_BMODEL)) {
+      // because movement is clipped an epsilon away from an actual edge,
+    	// we must fully check even when bounding boxes don't quite touch
+      cent->absmin[0] -= 1;
+      cent->absmin[1] -= 1;
+      cent->absmin[2] -= 1;
+      cent->absmax[0] += 1;
+      cent->absmax[1] += 1;
+      cent->absmax[2] += 1;
+    }
+  }
+}
+
+
+/*
+====================
+CG_Area_Entities
+
+====================
+*/
+int CG_Area_Entities(
+  const vec3_t mins, const vec3_t maxs, const content_mask_t *content_mask,
+  int *entityList, int maxcount) {
+  int           i;
+  int           count = 0;
+  entityState_t *ent;
+  centity_t     *cent;
+
+  for(i = 0; i < (cg_numSolidEntities + 1); i++) {
+    int ent_num;
+
+    if( i < cg_numSolidEntities ) {
+      cent = cg_solidEntities[ i ];
+      ent_num = cent->currentState.number;
+    } else {
+      cent = &cg.predictedPlayerEntity;
+      ent_num = cg.clientNum;
+    }
+
+    ent = &cent->currentState;
+
+    if(content_mask) {
+      if(cent->contents & content_mask->exclude) {
+        continue;
+      }
+
+      if(!(cent->contents & content_mask->include)) {
+        continue;
+      }
+    }
+
+    if(
+      !Com_BBOX_Intersects_Area(
+        cent->absmin, cent->absmax, mins, maxs)) {
+      continue;
+    }
+
+		if ( count == maxcount ) {
+      Com_Printf ("CG_Area_Entities: MAXCOUNT\n");
+      return count;
+    }
+
+    entityList[count] = ent_num;
+    count++;
+	}
+
+  return count;
+}
+
+/*
+====================
+CG_Clip_To_Entity
+
+====================
+*/
+void CG_Clip_To_Entity(
+  trace_t *trace, const vec3_t start, vec3_t mins, vec3_t maxs,
+  const vec3_t end, int entityNum, const content_mask_t content_mask,
+  traceType_t collisionType ) {
+  centity_t	    *cent;
+  entityState_t *ent;
+  clipHandle_t	cmodel;
+  vec3_t        move_mins, move_maxs;
+  int           k;
+
+	Com_Memset(trace, 0, sizeof(trace_t));
+
+  if(!mins) {
+    mins = vec3_origin;
+  }
+
+  if(!maxs) {
+    maxs = vec3_origin;
+  }
+
+  if(entityNum == ENTITYNUM_WORLD) {
+    switch(collisionType) {
+      case TT_AABB:
+        trap_CM_BoxTrace(trace, start, end, mins, maxs, 0, content_mask.include);
+        break;
+
+      case TT_CAPSULE:
+        trap_CM_CapsuleTrace(
+          trace, start, end, mins, maxs, 0, content_mask.include);
+        break;
+
+      case TT_BISPHERE:
+        trap_CM_BiSphereTrace(trace, start, end, mins[ 0 ], maxs[ 0 ], 0, content_mask.include);
+      case TT_NONE:
+      case TT_NUM_TRACE_TYPES:
+        Com_Assert(qfalse && "CG_Clip_To_Entity: trace type not supported");
+        break;
+    }
+		trace->entityNum = trace->fraction != 1.0 ? ENTITYNUM_WORLD : ENTITYNUM_NONE;
+		return;
+	}
+
+  if(entityNum == cg.clientNum) {
+    cent = &cg.predictedPlayerEntity;
+  } else {
+    cent = &cg_entities[entityNum];
+  }
+
+  if(!cent->is_in_solid_list || !cent->linked) {
+    trace->startsolid = qfalse;
+    trace->allsolid = qfalse;
+    trace->fraction = 1.0f;
+    trace->lateralFraction = 1.0f;
+    trace->entityNum = ENTITYNUM_NONE;
+    return;
+  }
+
+  ent = &cent->currentState;
+
+  if(!(cent->contents & content_mask.include)) {
+    return;
+  }
+
+  if(cent->contents & content_mask.exclude) {
+    return;
+  }
+
+  for ( k=0 ; k<3 ; k++ ) {
+    if ( end[k] > start[k] ) {
+      move_mins[k] = start[k] + mins[k] - 1;
+      move_maxs[k] = end[k] + maxs[k] + 1;
+    } else {
+      move_mins[k] = end[k] + mins[k] - 1;
+      move_maxs[k] = start[k] + maxs[k] + 1;
+    }
+  }
+
+  if(
+    !Com_BBOX_Intersects_Area(
+      cent->absmin, cent->absmax, move_mins, move_maxs)) {
+    return;
+  }
+
+  if(ent->eFlags & EF_BMODEL) {
+    cmodel = trap_CM_InlineModel( ent->modelindex );
+  } else {
+    cmodel = trap_CM_TempBoxModel( cent->mins, cent->maxs );
+  }
+
+  switch(collisionType) {
+    case TT_AABB:
+      trap_CM_TransformedBoxTrace(
+        trace, start, end, mins, maxs, cmodel,  content_mask.include,
+        cent->collision_origin, cent->collision_angles);
+      break;
+
+    case TT_CAPSULE:
+      trap_CM_TransformedCapsuleTrace(
+        trace, start, end, mins, maxs, cmodel,  content_mask.include,
+        cent->collision_origin, cent->collision_angles);
+      break;
+
+    case TT_BISPHERE:
+      trap_CM_TransformedBiSphereTrace(
+        trace, start, end, mins[ 0 ], maxs[ 0 ], cmodel,
+        content_mask.include, cent->collision_origin);
+      break;
+
+    default:
+      Com_Assert(qfalse && "CG_Clip_To_Entity: trace type not supported");
+  }
+}
+
+/*
+====================
+CG_Clip_To_Test_Area
+
+====================
+*/
+void CG_Clip_To_Test_Area(
+  trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs,
+  const vec3_t end, const vec3_t test_mins, const vec3_t test_maxs,
+  const vec3_t test_origin, int test_contents, const content_mask_t content_mask,
+  traceType_t collisionType) {
+  const vec3_t angles = {0.0f, 0.0f, 0.0f};
+  vec3_t       test_abs_mins, test_abs_maxs, boxmaxs, boxmins;
+  clipHandle_t clipHandle;
+  int          i;
+
+  if(!mins) {
+    mins = vec3_origin;
+  }
+  if(!maxs) {
+    maxs = vec3_origin;
+  }
+
+  Com_Memset(results, 0, sizeof(trace_t));
+  results->entityNum = ENTITYNUM_NONE;
+  results->fraction = 1.0;
+  VectorCopy(end, results->endpos);
+
+  // if it doesn't have any brushes of a type we
+  // are looking for, ignore it
+  if(!(content_mask.include & test_contents)) {
+    return;
+  }
+
+  // ignore entities that have brushes of a type that we want to exclude
+  if(content_mask.exclude & test_contents) {
+    return;
+  }
+
+  // create the bounding box of the entire move
+  // we can limit it to the part of the move not
+  // already clipped off by the world, which can be
+  // a significant savings for line of sight and shot traces
+  for(i=0 ; i<3 ; i++) {
+    if ( end[i] > start[i] ) {
+      boxmins[i] = start[i] + mins[i] - 1;
+      boxmaxs[i] = end[i] + maxs[i] + 1;
+    } else {
+      boxmins[i] = end[i] + mins[i] - 1;
+      boxmaxs[i] = start[i] + maxs[i] + 1;
+    }
+  }
+
+  VectorAdd(test_origin, test_mins, test_abs_mins);
+  VectorAdd(test_origin, test_maxs, test_abs_maxs);
+
+  if(
+    !Com_BBOX_Intersects_Area(
+      test_abs_mins, test_abs_maxs, boxmins, boxmaxs)) {
+    return;
+	}
+
+  clipHandle = trap_CM_TempBoxModel(test_mins, test_abs_maxs);
+
+  switch(collisionType) {
+    case TT_AABB:
+      trap_CM_TransformedBoxTrace(
+        results, start, end, mins, maxs, clipHandle,  content_mask.include,
+        test_origin, angles);
+      break;
+
+    case TT_CAPSULE:
+      trap_CM_TransformedCapsuleTrace(
+        results, start, end, mins, maxs, clipHandle,  content_mask.include,
+        test_origin, angles);
+      break;
+
+    case TT_BISPHERE:
+      trap_CM_TransformedBiSphereTrace(
+        results, start, end, mins[ 0 ], maxs[ 0 ], clipHandle,
+        content_mask.include, test_origin);
+      break;
+
+    default:
+      Com_Assert(qfalse && "CG_Clip_To_Test_Area: trace type not supported");
+  }
+}
+
+/*
+====================
 CG_ClipMoveToEntities
 
 ====================
 */
-static void CG_ClipMoveToEntities ( const vec3_t start, const vec3_t mins,
-    const vec3_t maxs, const vec3_t end, int skipNumber,
-    int mask, trace_t *tr, traceType_t collisionType )
-{
-  int           i, j, x, zd, zu, astralMask = 0;
+static void CG_ClipMoveToEntities(
+  const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end,
+  int skipNumber, content_mask_t content_mask, trace_t *tr,
+  traceType_t collisionType) {
+  int           i, j, k;
   trace_t       trace;
   entityState_t *ent;
   clipHandle_t  cmodel;
-  vec3_t        bmins, bmaxs;
-  vec3_t        origin, angles;
+  vec3_t        move_mins, move_maxs;
   centity_t     *cent;
 
   //SUPAR HACK
   //this causes a trace to collide with the local player
-  if( skipNumber == MAGIC_TRACE_HACK )
+  if(skipNumber == MAGIC_TRACE_HACK) {
     j = cg_numSolidEntities + 1;
-  else
+  } else {
     j = cg_numSolidEntities;
+  }
 
-  astralMask = mask & EF_ASTRAL_NOCLIP;
+  if(!mins) {
+    mins = vec3_origin;
+  }
 
-  for( i = 0; i < j; i++ )
-  {
-    if( i < cg_numSolidEntities )
-      cent = cg_solidEntities[ i ];
-    else
+  if(!maxs) {
+    maxs = vec3_origin;
+  }
+
+  // create the bounding box of the entire move
+  // we can limit it to the part of the move not
+  // already clipped off by the world, which can be
+  // a significant savings for line of sight and shot traces
+  for ( k=0 ; k<3 ; k++ ) {
+    if ( tr->endpos[k] > start[k] ) {
+      move_mins[k] = start[k] + mins[k] - 1;
+      move_maxs[k] = tr->endpos[k] + maxs[k] + 1;
+    } else {
+      move_mins[k] = tr->endpos[k] + mins[k] - 1;
+      move_maxs[k] = start[k] + maxs[k] + 1;
+    }
+  }
+
+  for(i = 0; i < j; i++) {
+    int ent_num;
+
+    if(i < cg_numSolidEntities) {
+      cent = cg_solidEntities[i];
+      ent_num = cent->currentState.number;
+    } else {
       cent = &cg.predictedPlayerEntity;
-
-    ent = &cent->currentState;
-
-    if( ent->number == skipNumber )
-      continue;
-
-    if ( astralMask & ent->eFlags )
-      continue;      // EF_ASTRAL_NOCLIP flagged entities don't clip with ASTRALSOLID entities
+      ent_num = cg.clientNum;
+    }
 
     if(!cent->linked) {
       continue;
     }
 
-    if( ent->solid == SOLID_BMODEL )
-    {
-      // special value for bmodel
+    ent = &cent->currentState;
+    if(ent->number == skipNumber) {
+      continue;
+    }
+
+    if(!(cent->contents & content_mask.include)) {
+      continue;
+    }
+
+    if(cent->contents & content_mask.exclude) {
+      continue;
+    }
+
+    CG_Update_Collision_Data_For_Entity(
+      ent_num, cg.physicsTime, cent->lerpOrigin,
+      &cg.predictedPlayerState);
+
+    if(
+      !Com_BBOX_Intersects_Area(
+        cent->absmin, cent->absmax, move_mins, move_maxs)) {
+      continue;
+    }
+
+    if(ent->eFlags & EF_BMODEL) {
       cmodel = trap_CM_InlineModel( ent->modelindex );
-      VectorCopy( cent->lerpAngles, angles );
-      BG_EvaluateTrajectory( &cent->currentState.pos, cg.physicsTime, origin );
-    }
-    else
-    {
-      int pusher_num = CG_Get_Pusher_Num(cent->currentState.number);
-      // encoded bbox
-      x = ( ent->solid & 255 );
-      zd = ( ( ent->solid >> 8 ) & 255 );
-      zu = ( ( ent->solid >> 16 ) & 255 ) - 32;
-
-      bmins[ 0 ] = bmins[ 1 ] = -x;
-      bmaxs[ 0 ] = bmaxs[ 1 ] = x;
-      bmins[ 2 ] = -zd;
-      bmaxs[ 2 ] = zu;
-
-      if( i == cg_numSolidEntities )
-        BG_ClassBoundingBox( ( ent->misc >> 8 ) & 0xFF, bmins, bmaxs, NULL, NULL, NULL );
-
-      cmodel = trap_CM_TempBoxModel( bmins, bmaxs );
-      VectorCopy( vec3_origin, angles );
-      if(
-        pusher_num != ENTITYNUM_NONE &&
-        cg_entities[pusher_num].currentState.eType == ET_MOVER ){
-        //this entity is being moved in the same mover stack as the local player
-        BG_EvaluateTrajectory( &cent->currentState.pos, cg.physicsTime, origin );
-        CG_AdjustPositionForMover(
-                      origin, CG_Get_Pusher_Num(cent->currentState.number),
-                      cg.snap->serverTime, cg.physicsTime, origin);
-      } else {
-        VectorCopy( cent->lerpOrigin, origin );
-      }
+    } else {
+      cmodel = trap_CM_TempBoxModel( cent->mins, cent->maxs );
     }
 
+    switch(collisionType) {
+      case TT_AABB:
+        trap_CM_TransformedBoxTrace(
+          &trace, start, end, mins, maxs, cmodel,  content_mask.include,
+          cent->collision_origin, cent->collision_angles);
+        break;
 
-    if( collisionType == TT_CAPSULE )
-    {
-      trap_CM_TransformedCapsuleTrace ( &trace, start, end,
-        mins, maxs, cmodel,  mask, origin, angles );
-    }
-    else if( collisionType == TT_AABB )
-    {
-      trap_CM_TransformedBoxTrace ( &trace, start, end,
-        mins, maxs, cmodel,  mask, origin, angles );
-    }
-    else if( collisionType == TT_BISPHERE )
-    {
-      trap_CM_TransformedBiSphereTrace( &trace, start, end,
-        mins[ 0 ], maxs[ 0 ], cmodel, mask, origin );
+      case TT_CAPSULE:
+        trap_CM_TransformedCapsuleTrace(
+          &trace, start, end, mins, maxs, cmodel,  content_mask.include,
+          cent->collision_origin, cent->collision_angles);
+        break;
+
+      case TT_BISPHERE:
+        trap_CM_TransformedBiSphereTrace(
+          &trace, start, end, mins[ 0 ], maxs[ 0 ], cmodel,
+          content_mask.include, cent->collision_origin);
+        break;
+
+      default:
+        Com_Assert(qfalse && "CG_ClipMoveToEntities: trace type not supported");
     }
 
-    if( trace.allsolid || trace.fraction < tr->fraction )
-    {
+    if ( trace.allsolid ) {
+      tr->allsolid = qtrue;
       trace.entityNum = ent->number;
+    } else if ( trace.startsolid ) {
+      tr->startsolid = qtrue;
+      trace.entityNum = ent->number;
+    }
 
-      if( tr->lateralFraction < trace.lateralFraction )
-      {
+    if(trace.fraction < tr->fraction) {
+      qboolean	oldStart;
+
+      // make sure we keep a startsolid from a previous trace
+      oldStart = tr->startsolid;
+
+      trace.entityNum = ent->number;
+      trace.contents |= cent->contents;
+      if(tr->lateralFraction < trace.lateralFraction) {
         float oldLateralFraction = tr->lateralFraction;
         *tr = trace;
         tr->lateralFraction = oldLateralFraction;
-      }
-      else
+      } else {
         *tr = trace;
-    }
-    else if( trace.startsolid )
-      tr->startsolid = qtrue;
+      }
+      tr->startsolid |= oldStart;
 
-    if( tr->allsolid )
+      //adjust the overall move bbox
+      for( k=0 ; k<3 ; k++ ) {
+        if( tr->endpos[k] > start[k] ) {
+          move_mins[k] = start[k] + mins[k] - 1;
+          move_maxs[k] = tr->endpos[k] + maxs[k] + 1;
+        } else {
+          move_mins[k] = tr->endpos[k] + mins[k] - 1;
+          move_maxs[k] = start[k] + maxs[k] + 1;
+        }
+      }
+    } else if( trace.startsolid ) {
+      tr->startsolid = qtrue;
+    }
+
+    if(tr->allsolid) {
       return;
+    }
   }
 }
 
@@ -404,14 +825,18 @@ CG_Trace
 ================
 */
 void  CG_Trace( trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end,
-                int skipNumber, int mask )
+                int skipNumber, content_mask_t content_mask )
 {
   trace_t t;
 
-  trap_CM_BoxTrace( &t, start, end, mins, maxs, 0, mask );
+  trap_CM_BoxTrace( &t, start, end, mins, maxs, 0, content_mask.include );
   t.entityNum = t.fraction != 1.0 ? ENTITYNUM_WORLD : ENTITYNUM_NONE;
+  if ( t.fraction == 0 ) {
+    *result = t;
+    return;		// blocked immediately by the world
+  }
   // check all other solid models
-  CG_ClipMoveToEntities( start, mins, maxs, end, skipNumber, mask, &t, TT_AABB );
+  CG_ClipMoveToEntities( start, mins, maxs, end, skipNumber, content_mask, &t, TT_AABB );
 
   *result = t;
 }
@@ -422,14 +847,18 @@ CG_CapTrace
 ================
 */
 void  CG_CapTrace( trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end,
-                   int skipNumber, int mask )
+                   int skipNumber, content_mask_t content_mask )
 {
   trace_t t;
 
-  trap_CM_CapsuleTrace( &t, start, end, mins, maxs, 0, mask );
+  trap_CM_CapsuleTrace( &t, start, end, mins, maxs, 0, content_mask.include );
   t.entityNum = t.fraction != 1.0 ? ENTITYNUM_WORLD : ENTITYNUM_NONE;
+  if ( t.fraction == 0 ) {
+    *result = t;
+    return;		// blocked immediately by the world
+  }
   // check all other solid models
-  CG_ClipMoveToEntities( start, mins, maxs, end, skipNumber, mask, &t, TT_CAPSULE );
+  CG_ClipMoveToEntities( start, mins, maxs, end, skipNumber, content_mask, &t, TT_CAPSULE );
 
   *result = t;
 }
@@ -440,7 +869,7 @@ CG_BiSphereTrace
 ================
 */
 void CG_BiSphereTrace( trace_t *result, const vec3_t start, const vec3_t end,
-    const float startRadius, const float endRadius, int skipNumber, int mask )
+    const float startRadius, const float endRadius, int skipNumber, content_mask_t content_mask )
 {
   trace_t t;
   vec3_t  mins, maxs;
@@ -448,12 +877,50 @@ void CG_BiSphereTrace( trace_t *result, const vec3_t start, const vec3_t end,
   mins[ 0 ] = startRadius;
   maxs[ 0 ] = endRadius;
 
-  trap_CM_BiSphereTrace( &t, start, end, startRadius, endRadius, 0, mask );
+  trap_CM_BiSphereTrace( &t, start, end, startRadius, endRadius, 0, content_mask.include );
   t.entityNum = t.fraction != 1.0 ? ENTITYNUM_WORLD : ENTITYNUM_NONE;
   // check all other solid models
-  CG_ClipMoveToEntities( start, mins, maxs, end, skipNumber, mask, &t, TT_BISPHERE );
+  CG_ClipMoveToEntities( start, mins, maxs, end, skipNumber, content_mask, &t, TT_BISPHERE );
 
   *result = t;
+}
+
+/*
+================
+CG_Trace_Wrapper
+================
+*/
+void CG_Trace_Wrapper(
+	trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs,
+	const vec3_t end, int passEntityNum, const content_mask_t content_mask,
+	traceType_t type) {
+  trace_t t;
+
+  switch(type) {
+    case TT_AABB:
+      CG_Trace(results, start, mins, maxs, end, passEntityNum, content_mask);
+      break;
+
+    case TT_CAPSULE:
+      CG_CapTrace(results, start, mins, maxs, end, passEntityNum, content_mask);
+      break;
+
+    case TT_BISPHERE:
+      trap_CM_BiSphereTrace(
+        &t, start, end, mins[ 0 ], maxs[ 0 ], 0, content_mask.include);
+      t.entityNum = t.fraction != 1.0 ? ENTITYNUM_WORLD : ENTITYNUM_NONE;
+      // check all other solid models
+      CG_ClipMoveToEntities(
+        start, mins, maxs, end, passEntityNum, content_mask, &t, TT_BISPHERE);
+
+      *results = t;
+      break;
+
+    case TT_NONE:
+    case TT_NUM_TRACE_TYPES:
+      Com_Assert(qfalse && "CG_Trace_Wrapper: trace type not supported");
+      break;
+  }
 }
 
 /*
@@ -463,7 +930,8 @@ CG_PointContents
 */
 int   CG_PointContents( const vec3_t point, int passEntityNum )
 {
-  int           i;
+  int           i, num;
+  int           touch[MAX_GENTITIES];
   entityState_t *ent;
   centity_t     *cent;
   clipHandle_t  cmodel;
@@ -471,27 +939,86 @@ int   CG_PointContents( const vec3_t point, int passEntityNum )
 
   contents = trap_CM_PointContents (point, 0);
 
-  for( i = 0; i < cg_numSolidEntities; i++ )
+  num = CG_Area_Entities( point, point, NULL, touch, MAX_GENTITIES );
+
+  for( i = 0; i < num; i++ )
   {
-    cent = cg_solidEntities[ i ];
+    trace_t trace;
+
+    if(touch[i] == passEntityNum) {
+      continue;
+    }
+    cent = &cg_entities[touch[i]];
 
     ent = &cent->currentState;
 
-    if( ent->number == passEntityNum )
-      continue;
+    if(!(ent->eFlags & EF_BMODEL)) {
+      trace_t trace;
 
-    if( ent->solid != SOLID_BMODEL ) // special value for bmodel
+      CG_Clip_To_Entity(
+        &trace, point, NULL, NULL, point, touch[i], *Temp_Clip_Mask(-1, 0),
+        TT_AABB);
+
+      if(trace.fraction < 1.0f || trace.startsolid || trace.allsolid) {
+        contents |= cent->contents;
+      }
       continue;
+    }
 
     cmodel = trap_CM_InlineModel( ent->modelindex );
 
-    if( !cmodel )
+    if(!cmodel) {
       continue;
+    }
 
-    contents |= trap_CM_TransformedPointContents( point, cmodel, cent->lerpOrigin, cent->lerpAngles );
+    contents |=
+      trap_CM_TransformedPointContents(
+        point, cmodel, cent->collision_origin, cent->collision_angles);
+
+    if((cent->contents & CONTENTS_DOOR)) {
+      CG_Clip_To_Entity(
+        &trace, point, NULL, NULL, point, touch[i],
+        *Temp_Clip_Mask(-1, 0), TT_AABB);
+
+      if(trace.fraction < 1 || trace.allsolid || trace.startsolid) {
+        contents |= (cent->contents & CONTENTS_DOOR);
+      }
+    }
   }
 
   return contents;
+}
+
+/*
+========================
+CG_Reactor_Is_Up
+========================
+*/
+static qboolean CG_Reactor_Is_Up(void) {
+  int i;
+
+  for(i = MAX_CLIENTS; i < ENTITYNUM_MAX_NORMAL; i++) {
+    centity_t     *cent = &cg_entities[i];
+    entityState_t *ent = &cent->currentState;
+
+    if(!cent->valid) {
+      continue;
+    }
+
+    if(ent->eType != ET_BUILDABLE) {
+      continue;
+    }
+
+    if(ent->modelindex != BA_H_REACTOR) {
+      continue;
+    }
+
+    if(ent->eFlags & EF_B_SPAWNED) {
+      return qtrue;
+    }
+  }
+
+  return qfalse;
 }
 
 
@@ -587,7 +1114,7 @@ static void CG_TouchTriggerPrediction( void )
     cent = cg_triggerEntities[ i ];
     ent = &cent->currentState;
 
-    if( ent->solid != SOLID_BMODEL )
+    if(!(ent->eFlags & EF_BMODEL))
       continue;
 
     cmodel = trap_CM_InlineModel( ent->modelindex );
@@ -710,14 +1237,26 @@ static int CG_IsUnacceptableError( playerState_t *ps, playerState_t *pps )
 
   for( i = 0; i < MAX_STATS; i++ )
   {
-    if( pps->stats[ i ] != ps->stats[ i ] )
+    if( pps->stats[ i ] != ps->stats[ i ] ) {
       return 15;
+    }
   }
 
   for( i = 0; i < MAX_PERSISTANT; i++ )
   {
     if( pps->persistant[ i ] != ps->persistant[ i ] )
       return 16;
+  }
+
+  for( i = 0; i < MAX_MISC; i++ )
+  {
+    if( pps->misc[ i ] != ps->misc[ i ] )
+      return 17;
+  }
+
+  if( pps->otherEntityNum != ps->otherEntityNum )
+  {
+    return 18;
   }
 
   if( pps->generic1 != ps->generic1 ||
@@ -794,22 +1333,29 @@ void CG_PredictPlayerState( void )
   // prepare for pmove
   cg_pmove.ps = &cg.predictedPlayerState;
   cg_pmove.pmext = &cg.pmext;
-  cg_pmove.trace = CG_Trace;
-  cg_pmove.pointcontents = CG_PointContents;
-  cg_pmove.unlagged_on = NULL;
-  cg_pmove.unlagged_off = NULL;
   cg_pmove.debugLevel = cg_debugMove.integer;
   cg_pmove.swapAttacks = cg_swapAttacks.integer;
   cg_pmove.wallJumperMinFactor = cg_wallJumperMinFactor.value;
   cg_pmove.marauderMinJumpFactor = cg_marauderMinJumpFactor.value;
+  cg_pmove.pm_reactor = CG_Reactor_Is_Up;
 
-  if( cg_pmove.ps->pm_type == PM_DEAD )
-    cg_pmove.tracemask = MASK_DEADSOLID;
-  else
-    cg_pmove.tracemask = MASK_PLAYERSOLID;
+  if( cg_pmove.ps->pm_type == PM_DEAD ) {
+    cg_pmove.trace_mask = *Temp_Clip_Mask(MASK_DEADSOLID, 0);
+  } else {
+    centity_t *act_ent = &cg_entities[cg.snap->ps.persistant[ PERS_ACT_ENT ]];
+
+    if(
+      act_ent->currentState.number != ENTITYNUM_NONE &&
+      (cg.snap->ps.eFlags & EF_OCCUPYING) &&
+      act_ent->currentState.eType == ET_BUILDABLE) {
+      cg_pmove.trace_mask = BG_Buildable(act_ent->currentState.modelindex)->activationClipMask;
+    } else {
+      cg_pmove.trace_mask = *Temp_Clip_Mask(MASK_PLAYERSOLID, 0);
+    }
+  }
 
   if( cg.snap->ps.persistant[ PERS_SPECSTATE ] != SPECTATOR_NOT )
-    cg_pmove.tracemask = MASK_ASTRALSOLID; // spectators can fly through bodies
+    cg_pmove.trace_mask = *Temp_Clip_Mask(MASK_DEADSOLID, CONTENTS_DOOR); // spectators can fly through bodies
 
   cg_pmove.noFootsteps = 0;
 
@@ -1054,17 +1600,18 @@ void CG_PredictPlayerState( void )
     for( i = 0; i < PORTAL_NUM; i++ )
       cg_pmove.humanPortalCreateTime[ i ] = cgs.humanPortalCreateTime[ i ];
 
-    // For firing lightning bolts early
-    BG_CheckBoltImpactTrigger( &cg_pmove, CG_Trace,
-                               NULL, NULL );
-
     if( !cg_optimizePrediction.integer )
     {
+      // For firing lightning bolts early
+      BG_CheckBoltImpactTrigger(&cg_pmove);
       Pmove( &cg_pmove );
     }
-    else if( cg_optimizePrediction.integer && ( cmdNum >= predictCmd ||
-      ( stateIndex + 1 ) % NUM_SAVED_STATES == cg.stateHead ) )
+    else if(
+      cmdNum >= predictCmd ||
+      (stateIndex + 1) % NUM_SAVED_STATES == cg.stateHead)
     {
+      // For firing lightning bolts early
+      BG_CheckBoltImpactTrigger(&cg_pmove);
       Pmove( &cg_pmove );
       // record the last predicted command
       cg.lastPredictedCommand = cmdNum;
@@ -1089,7 +1636,7 @@ void CG_PredictPlayerState( void )
     if( cg.predictedPlayerEntity.buildFireTime >= cg.time )
     {
       cg.predictedPlayerState.generic1 = cg.predictedPlayerEntity.buildFireMode;
-      switch ( cg.predictedPlayerEntity.buildFireMode )
+      switch( cg.predictedPlayerEntity.buildFireMode )
       {
         case WPM_PRIMARY:
           cg.predictedPlayerState.eFlags |= EF_FIRING;

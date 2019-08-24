@@ -109,6 +109,7 @@ sets mins and maxs for inline bmodels
 void SV_SetBrushModel( sharedEntity_t *ent, const char *name ) {
 	clipHandle_t	h;
 	vec3_t			mins, maxs;
+	float 			*contents_pointer;
 
 	if (!name) {
 		Com_Error( ERR_DROP, "SV_SetBrushModel: NULL" );
@@ -128,6 +129,9 @@ void SV_SetBrushModel( sharedEntity_t *ent, const char *name ) {
 	ent->r.bmodel = qtrue;
 
 	ent->r.contents = -1;		// we don't know exactly what is in the brushes
+	ent->r.contents &= ~(CONTENTS_DOOR);
+	contents_pointer = (float *)(&ent->r.contents);
+	ent->s.origin[1] = *contents_pointer;
 
 	SV_LinkEntity( ent );		// FIXME: remove
 }

@@ -1178,6 +1178,19 @@ typedef struct {
 // trace->entityNum can also be 0 to (MAX_GENTITIES-1)
 // or ENTITYNUM_NONE, ENTITYNUM_WORLD
 
+qboolean Com_BBOX_Intersects_Area(
+	const vec3_t bbox_abs_mins, const vec3_t bbox_abs_maxs,
+  const vec3_t area_mins, const vec3_t area_maxs);
+
+// content_mask_t is used help determine which entities are considered for
+// collision functions based on the contents of each entity. The exclude
+typedef struct {
+  int exclude; //ignore all entities that has any contents specified in this mask
+  int include; //ignore all entities that don't have any contents specified in this mask
+} content_mask_t;
+
+
+const content_mask_t *Temp_Clip_Mask(int include, int exclude);
 
 // markfragments are returned by R_MarkFragments()
 typedef struct {
@@ -1406,8 +1419,8 @@ typedef struct usercmd_s {
 
 //===================================================================
 
-// if entityState->solid == SOLID_BMODEL, modelindex is an inline model number
-#define	SOLID_BMODEL	0xffffff
+// if entityState->eFlags has SOLID_BMODEL, modelindex is an inline model number
+#define	SOLID_BMODEL	0x00400
 
 typedef enum {
 	TR_STATIONARY,

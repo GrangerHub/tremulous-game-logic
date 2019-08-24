@@ -274,7 +274,7 @@ static void G_WideTraceSolid(trace_t *tr, gentity_t *ent, float range,
   // Trace against entities and the world
   SV_Trace(
     tr, unlagged_attacker.muzzle_out, mins, maxs, end, ent->s.number,
-    MASK_SHOT, TT_AABB);
+    *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB);
   if(tr->entityNum != ENTITYNUM_NONE) {
     *target = &g_entities[ tr->entityNum ];
   }
@@ -284,7 +284,7 @@ static void G_WideTraceSolid(trace_t *tr, gentity_t *ent, float range,
     SV_Trace(
       &tr2, unlagged_attacker.muzzle_out, mins, maxs, unlagged_attacker.muzzle_out,
       ent->s.number,
-      MASK_SOLID, TT_AABB );
+      *Temp_Clip_Mask(MASK_SOLID, 0), TT_AABB );
     if(tr2.entityNum != ENTITYNUM_NONE) {
       *target = &g_entities[ tr2.entityNum ];
     }
@@ -498,7 +498,7 @@ void bulletFire( gentity_t *ent, float spread, int damage, int mod )
     VectorMA(end, y, unlagged_attacker.up_out, end);
     SV_Trace(
       &tr, unlagged_attacker.muzzle_out, NULL, NULL, end, ent->s.number,
-      MASK_SHOT, TT_AABB );
+      *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB );
     G_UnlaggedOff( );
 
     VectorCopy(unlagged_attacker.muzzle_out, muzzle_temp);
@@ -509,7 +509,9 @@ void bulletFire( gentity_t *ent, float spread, int damage, int mod )
     VectorMA( end, x, right, end );
     VectorMA( end, y, up, end );
 
-    SV_Trace( &tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT, TT_AABB );
+    SV_Trace(
+      &tr, muzzle, NULL, NULL, end, ent->s.number,
+      *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB);
 
     VectorCopy(muzzle, muzzle_temp);
     VectorCopy(forward, forward_temp);
@@ -652,8 +654,9 @@ void G_SplatterFire( gentity_t *inflicter, gentity_t *attacker,
   gData.mod = mod;
   data.user_data = &gData;
 
-  BG_SplatterPattern( tent->s.origin2, tent->s.eventParm, tent->s.otherEntityNum,
-                      &data, G_Splatter, G_TraceWrapper );
+  BG_SplatterPattern(
+    tent->s.origin2, tent->s.eventParm, tent->s.otherEntityNum,
+    &data, G_Splatter);
 }
 
 /*
@@ -702,7 +705,7 @@ void massDriverFire( gentity_t *ent )
     unlagged_attacker.forward_out, end);
   SV_Trace(
     &tr, unlagged_attacker.muzzle_out, NULL, NULL, end, ent->s.number,
-    MASK_SHOT, TT_AABB);
+    *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB);
   G_UnlaggedOff( );
 
   if( tr.surfaceFlags & SURF_NOIMPACT )
@@ -1006,7 +1009,7 @@ void lasGunFire( gentity_t *ent )
     unlagged_attacker.forward_out, end);
   SV_Trace(
     &tr, unlagged_attacker.muzzle_out, NULL, NULL, end, ent->s.number,
-    MASK_SHOT, TT_AABB);
+    *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB);
   G_UnlaggedOff( );
 
   if( tr.surfaceFlags & SURF_NOIMPACT )
@@ -1154,10 +1157,13 @@ void teslaFire( gentity_t *self )
 
   // Trace to the target entity
   if( self->enemy->s.eType != ET_TELEPORTAL )
-    SV_Trace( &tr, origin, NULL, NULL, target, self->s.number, MASK_SHOT, TT_AABB );
+    SV_Trace(
+      &tr, origin, NULL, NULL, target, self->s.number,
+      *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB);
   else
-    SV_Trace( &tr, origin, NULL, NULL, target, self->s.number,
-                (MASK_SHOT|CONTENTS_TELEPORTER), TT_AABB );
+    SV_Trace(
+      &tr, origin, NULL, NULL, target, self->s.number,
+      *Temp_Clip_Mask((MASK_SHOT|CONTENTS_TELEPORTER), 0), TT_AABB );
   if( tr.entityNum != self->enemy->s.number )
     return;
 
@@ -1204,7 +1210,9 @@ void CheckCkitRepair( gentity_t *ent )
   VectorMA( viewOrigin, 100, forward2, end );
 
   G_SetPlayersLinkState( qfalse, ent );
-  SV_Trace( &tr, viewOrigin, NULL, NULL, end, ent->s.number, MASK_PLAYERSOLID, TT_AABB );
+  SV_Trace(
+    &tr, viewOrigin, NULL, NULL, end, ent->s.number,
+    *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB);
   traceEnt = &g_entities[ tr.entityNum ];
   G_SetPlayersLinkState( qtrue, ent );
 
@@ -1414,7 +1422,7 @@ void CheckGrabAttack( gentity_t *ent )
     unlagged_attacker.muzzle_out, range, unlagged_attacker.forward_out, end);
   SV_Trace(
     &tr, unlagged_attacker.muzzle_out, NULL, NULL, end, ent->s.number,
-    MASK_SHOT, TT_AABB );
+    *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB );
   G_UnlaggedOff( );
 
   if( tr.surfaceFlags & SURF_NOIMPACT )
@@ -1482,7 +1490,7 @@ void poisonCloud( gentity_t *ent )
   G_UnlaggedOn(&unlagged_attacker);
   VectorAdd( unlagged_attacker.origin_out, range, maxs );
   VectorSubtract( unlagged_attacker.origin_out, range, mins );
-  num = SV_AreaEntities( mins, maxs, entityList, MAX_GENTITIES );
+  num = SV_AreaEntities(mins, maxs, NULL, entityList, MAX_GENTITIES);
   for( i = 0; i < num; i++ )
   {
     humanPlayer = &g_entities[ entityList[ i ] ];
@@ -1493,7 +1501,7 @@ void poisonCloud( gentity_t *ent )
       SV_Trace(
         &tr, unlagged_attacker.muzzle_out, NULL, NULL,
         humanPlayer->r.currentOrigin, humanPlayer->s.number,
-        CONTENTS_SOLID, TT_AABB );
+        *Temp_Clip_Mask(CONTENTS_SOLID, 0), TT_AABB );
 
       //can't see target from here
       if( tr.entityNum == ENTITYNUM_WORLD )
@@ -1556,7 +1564,9 @@ static void G_FindLev2ZapChainTargets( zap_t *zap )
   VectorAdd( ent->r.currentOrigin, range, maxs );
   VectorSubtract( ent->r.currentOrigin, range, mins );
 
-  num = SV_AreaEntities( mins, maxs, entityList, MAX_GENTITIES );
+  num =
+    SV_AreaEntities(
+      mins, maxs, Temp_Clip_Mask(MASK_SHOT, 0), entityList, MAX_GENTITIES);
 
   for( i = 0; i < num; i++ )
   {
@@ -1576,8 +1586,9 @@ static void G_FindLev2ZapChainTargets( zap_t *zap )
         distance <= LEVEL2_AREAZAP_CHAIN_RANGE )
     {
       // world-LOS check: trace against the world, ignoring other BODY entities
-      SV_Trace( &tr, ent->r.currentOrigin, NULL, NULL,
-         enemy->r.currentOrigin, ent->s.number, CONTENTS_SOLID, TT_AABB );
+      SV_Trace(
+        &tr, ent->r.currentOrigin, NULL, NULL, enemy->r.currentOrigin,
+        ent->s.number, *Temp_Clip_Mask(CONTENTS_SOLID, 0), TT_AABB);
 
       if( tr.entityNum == ENTITYNUM_NONE )
       {
