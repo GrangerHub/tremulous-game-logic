@@ -1541,14 +1541,12 @@ void G_CalculateBuildPoints( void )
       G_StageBuildPointMaxForTeam( TEAM_ALIENS ) +
       G_StageBuildPointReserveMaxForTeam( TEAM_ALIENS )));
 
-  level.humanBuildTimeMod *= level.humanBuildTimeMod;
   if(level.humanBuildTimeMod > 1.0f) {
     level.humanBuildTimeMod = 1.0f;
   } else if(level.humanBuildTimeMod < 0.05f) {
     level.humanBuildTimeMod = 0.05f;
   }
 
-  level.alienBuildTimeMod *= level.alienBuildTimeMod;
   if(level.alienBuildTimeMod > 1.0f) {
     level.alienBuildTimeMod = 1.0f;
   } else if(level.alienBuildTimeMod < 0.05f) {
