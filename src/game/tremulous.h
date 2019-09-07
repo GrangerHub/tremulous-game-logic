@@ -162,7 +162,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL3_POUNCE_SPEED_MOD     1.00f    // walking speed modifier for pounce charging
 #define LEVEL3_POUNCE_JUMP_MAG      2100     // Dragoon pounce jump power
 #define LEVEL3_POUNCE_JUMP_MAG_UPG  2200     // Adv. Dragoon pounce jump power
-#define LEVEL3_BOUNCEBALL_DMG       AWDM(150000)
+#define LEVEL3_BOUNCEBALL_DMG       AWDM(100000)
 #define LEVEL3_BOUNCEBALL_REPEAT    1000
 #define LEVEL3_BOUNCEBALL_SPEED     1000.0f
 #define LEVEL3_BOUNCEBALL_RADIUS    0
@@ -544,8 +544,8 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define BLASTER_SIZE                5
 #define BLASTER_LIFETIME            10000
 
-#define RIFLE_CLIPSIZE              48
-#define RIFLE_MAXCLIPS              5
+#define RIFLE_CLIPSIZE              288
+#define RIFLE_MAXCLIPS              0
 #define RIFLE_REPEAT                100
 #define RIFLE_K_SCALE               0.5f
 #define RIFLE_RECOIL                20.0f
@@ -609,9 +609,9 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LASERMINE_HEALTH            30
 
 #define SHOTGUN_PRICE               175
-#define SHOTGUN_SHELLS              10
+#define SHOTGUN_SHELLS              40
 #define SHOTGUN_PELLETS             15 //used to sync server and client side
-#define SHOTGUN_MAXCLIPS            3
+#define SHOTGUN_MAXCLIPS            0
 #define SHOTGUN_REPEAT              1000
 #define SHOTGUN_K_SCALE             1.0f
 #define SHOTGUN_RECOIL1             64.0f
@@ -634,8 +634,8 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LASGUN_DAMAGE               HWDM(9000)
 
 #define MDRIVER_PRICE               400
-#define MDRIVER_CLIPSIZE            5
-#define MDRIVER_MAXCLIPS            4
+#define MDRIVER_CLIPSIZE            25
+#define MDRIVER_MAXCLIPS            0
 #define MDRIVER_DMG                 HWDM(38000)
 #define MDRIVER_REPEAT              1000
 #define MDRIVER_RECOIL              30.0f
@@ -671,8 +671,8 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define FLAMER_RELOAD               2000
 
 #define PRIFLE_PRICE                500
-#define PRIFLE_CLIPS                40
-#define PRIFLE_MAXCLIPS             5
+#define PRIFLE_CLIPS                240
+#define PRIFLE_MAXCLIPS             0
 #define PRIFLE_REPEAT               100
 #define PRIFLE_K_SCALE              1.0f
 #define PRIFLE_RELOAD               2000
