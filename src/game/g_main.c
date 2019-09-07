@@ -1363,6 +1363,7 @@ Recalculate the quantity of building points available to the teams
 void G_CalculateBuildPoints( void )
 {
   int i;
+  int total_existing_alien_bp, total_existing_human_bp;
 
   // BP queue updates
   while(
@@ -1463,8 +1464,10 @@ void G_CalculateBuildPoints( void )
 
     level.humanBuildPoints = 0;
     level.humanBuildPointsReserve = 0;
+    level.humanBuildTimeMod = 1.0f;
     level.alienBuildPoints = 0;
     level.alienBuildPointsReserve = 0;
+    level.alienBuildTimeMod = 1.0f;
 
     for(buildable = 0; buildable < BA_NUM_BUILDABLES; buildable++) {
       if(level.sudden_death_replacable[buildable] && !G_FindBuildable(buildable)) {
@@ -1492,9 +1495,11 @@ void G_CalculateBuildPoints( void )
   level.humanBuildPoints = G_StageBuildPointMaxForTeam( TEAM_HUMANS ) - level.humanBuildPointQueue;
   level.humanBuildPointsReserve = G_StageBuildPointReserveMaxForTeam( TEAM_HUMANS ) -
                                   level.humanBuildPointsReserveLost;
+  total_existing_human_bp = level.humanBuildPoints + level.humanBuildPointsReserve;
   level.alienBuildPoints = G_StageBuildPointMaxForTeam( TEAM_ALIENS ) - level.alienBuildPointQueue;
   level.alienBuildPointsReserve = G_StageBuildPointReserveMaxForTeam( TEAM_ALIENS ) -
                                   level.alienBuildPointsReserveLost;
+  total_existing_alien_bp = level.alienBuildPoints + level.alienBuildPointsReserve;
 
   // Iterate through entities
   for( i = MAX_CLIENTS; i < level.num_entities; i++ )
@@ -1510,10 +1515,12 @@ void G_CalculateBuildPoints( void )
     buildable = ent->s.modelindex;
     cost = BG_Buildable( buildable )->buildPoints;
 
-    if( ent->buildableTeam == TEAM_ALIENS )
+    if( ent->buildableTeam == TEAM_ALIENS ) {
       level.alienBuildPoints -= cost;
-    if( ent->buildableTeam == TEAM_HUMANS )
+    }
+    if( ent->buildableTeam == TEAM_HUMANS ) {
       level.humanBuildPoints -= cost;
+    }
   }
 
   if( level.humanBuildPoints < 0 )
@@ -1521,8 +1528,33 @@ void G_CalculateBuildPoints( void )
 
   if( level.alienBuildPoints < 0 )
     level.alienBuildPoints = 0;
-}
 
+  level.humanBuildTimeMod =
+    ((float)total_existing_human_bp) /
+    ((float)(
+      G_StageBuildPointMaxForTeam( TEAM_HUMANS ) +
+      G_StageBuildPointReserveMaxForTeam( TEAM_HUMANS )));
+
+  level.alienBuildTimeMod =
+    ((float)total_existing_alien_bp) /
+    ((float)(
+      G_StageBuildPointMaxForTeam( TEAM_ALIENS ) +
+      G_StageBuildPointReserveMaxForTeam( TEAM_ALIENS )));
+
+  level.humanBuildTimeMod *= level.humanBuildTimeMod;
+  if(level.humanBuildTimeMod > 1.0f) {
+    level.humanBuildTimeMod = 1.0f;
+  } else if(level.humanBuildTimeMod < 0.05f) {
+    level.humanBuildTimeMod = 0.05f;
+  }
+
+  level.alienBuildTimeMod *= level.alienBuildTimeMod;
+  if(level.alienBuildTimeMod > 1.0f) {
+    level.alienBuildTimeMod = 1.0f;
+  } else if(level.alienBuildTimeMod < 0.05f) {
+    level.alienBuildTimeMod = 0.05f;
+  }
+}
 /*
 ============
 G_CalculateStages

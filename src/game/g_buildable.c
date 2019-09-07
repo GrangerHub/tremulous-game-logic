@@ -4163,7 +4163,7 @@ G_QueueValue
 ============
 */
 
-static int G_QueueValue( gentity_t *self )
+int G_QueueValue( gentity_t *self )
 {
   int       i;
   int       damageTotal = 0;
@@ -4489,6 +4489,36 @@ void G_SetBuildableDropper( int removedBuildableNum, int dropperNum )
 }
 
 /*
+============
+G_Build_Time_Mod
+============
+*/
+float G_Build_Time_Mod(team_t team) {
+  float build_time_mod;
+
+  if(IS_WARMUP) {
+    return 1.0f;
+  }
+
+  switch(team) {
+    case TEAM_ALIENS:
+      build_time_mod = level.alienBuildTimeMod;
+      break;
+
+    case TEAM_HUMANS:
+      build_time_mod = level.humanBuildTimeMod;
+      break;
+
+    case TEAM_NONE:
+    case NUM_TEAMS:
+      build_time_mod = 1.0f;
+      break;
+  }
+
+  return build_time_mod;
+}
+
+/*
 ===============
 G_BuildableThink
 
@@ -4533,8 +4563,7 @@ void G_BuildableThink( gentity_t *ent, int msec )
     if( !ent->spawned && ent->health > 0 &&
         ent->buildProgress >= 0 )
     {
-      int progressIncrement = 1000.0f /
-                              (float)( level.numUnspawnedBuildables[ ent->buildableTeam ] );
+      int progressIncrement = 1000.0f * G_Build_Time_Mod(ent->buildableTeam);
 
       if( progressIncrement < 1 )
         progressIncrement = 1;

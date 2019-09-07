@@ -928,11 +928,13 @@ typedef struct
   int               alienBuildPointsReserveLost;
   int               alienBuildPointQueue;
   int               alienNextQueueTime;
+  float             alienBuildTimeMod;
   int               humanBuildPoints;
   int               humanBuildPointsReserve;
   int               humanBuildPointsReserveLost;
   int               humanBuildPointQueue;
   int               humanNextQueueTime;
+  float             humanBuildTimeMod;
 
   buildPointZone_t  *buildPointZones;
 
@@ -1221,6 +1223,7 @@ void              HMedistat_Think( gentity_t *self );
 void              HMGTurret_Think( gentity_t *self );
 void              HTeslaGen_Think( gentity_t *self );
 
+float             G_Build_Time_Mod(team_t team);
 void              G_BuildableThink( gentity_t *ent, int msec );
 qboolean          G_BuildableRange( vec3_t origin, float r, buildable_t buildable );
 void              G_ClearDeconMarks( void );
@@ -1238,6 +1241,7 @@ void              G_LayoutSelect( void );
 void              G_LayoutLoad( char *lstr );
 void              G_BaseSelfDestruct( team_t team );
 int               G_NextQueueTime( int queuedBP, int totalBP, int queueBaseRate );
+int               G_QueueValue( gentity_t *self );
 void              G_QueueBuildPoints( gentity_t *self );
 int               G_GetBuildPoints( const vec3_t pos, team_t team );
 int               G_GetBuildPointsReserve( team_t team );
