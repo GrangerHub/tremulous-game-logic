@@ -268,7 +268,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 #define LEVEL0_SPEED                1.4f
 #define LEVEL0_VALUE                AVM(ALIEN_CREDITS_PER_KILL)
-#define LEVEL0_HEALTH               AHM(38000)
+#define LEVEL0_HEALTH               AHM(35000)
 #define LEVEL0_MIN_HEALTH           (0.3f * LEVEL0_HEALTH)
 #define LEVEL0_REGEN                (0.05f * LEVEL0_HEALTH)
 #define LEVEL0_COST                 0
