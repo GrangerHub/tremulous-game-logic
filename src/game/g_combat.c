@@ -2194,8 +2194,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
       ( BG_Buildable( targ->s.modelindex )->ballisticDmgMod != 1.0 ) ) {
     switch( mod ) {
       case MOD_SHOTGUN:
-      case MOD_MACHINEGUN:
-      case MOD_CHAINGUN:
       case MOD_FRAGNADE:
       case MOD_LEVEL3_BOUNCEBALL:
         modDamge = (int)( ( (float)modDamge ) * BG_Buildable( targ->s.modelindex )->ballisticDmgMod );

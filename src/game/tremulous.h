@@ -367,7 +367,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 #define ASPAWN_BP                   15
 #define ASPAWN_BT                   15000
-#define ASPAWN_HEALTH               ABHM(250000)
+#define ASPAWN_HEALTH               ABHM(500000)
 #define ASPAWN_REGEN                ABRM(8000)
 #define ASPAWN_SPLASHDAMAGE         ABDM(50000)
 #define ASPAWN_SPLASHRADIUS         100
@@ -376,7 +376,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 #define BARRICADE_BP                10
 #define BARRICADE_BT                15000
-#define BARRICADE_HEALTH            ABHM(675000)
+#define BARRICADE_HEALTH            ABHM(800000)
 #define BARRICADE_REGEN             ABRM(14000)
 #define BARRICADE_SPLASHDAMAGE      ABDM(50000)
 #define BARRICADE_SPLASHRADIUS      100
@@ -388,7 +388,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 #define BOOSTER_BP                  12
 #define BOOSTER_BT                  7500
-#define BOOSTER_HEALTH              ABHM(150000)
+#define BOOSTER_HEALTH              ABHM(300000)
 #define BOOSTER_REGEN               ABRM(8000)
 #define BOOSTER_SPLASHDAMAGE        ABDM(50000)
 #define BOOSTER_SPLASHRADIUS        100
@@ -401,12 +401,12 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 #define ACIDTUBE_BP                 8
 #define ACIDTUBE_BT                 7500
-#define ACIDTUBE_HEALTH             ABHM(125000)
+#define ACIDTUBE_HEALTH             ABHM(250000)
 #define ACIDTUBE_REGEN              ABRM(10000)
 #define ACIDTUBE_SPLASHDAMAGE       ABDM(50000)
 #define ACIDTUBE_SPLASHRADIUS       300
 #define ACIDTUBE_CREEPSIZE          120
-#define ACIDTUBE_DAMAGE             ABDM(6000)
+#define ACIDTUBE_DAMAGE             ABDM(4500)
 #define ACIDTUBE_RANGE              450.0f
 #define ACIDTUBE_REPEAT             200
 #define ACIDTUBE_REPEAT_ANIM        2000
@@ -415,7 +415,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 #define HIVE_BP                     12
 #define HIVE_BT                     10000
-#define HIVE_HEALTH                 ABHM(125000)
+#define HIVE_HEALTH                 ABHM(250000)
 #define HIVE_REGEN                  ABRM(10000)
 #define HIVE_SPLASHDAMAGE           ABDM(30000)
 #define HIVE_SPLASHRADIUS           200
@@ -424,7 +424,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define HIVE_LIFETIME               3000
 #define HIVE_REPEAT                 3000
 #define HIVE_K_SCALE                1.0f
-#define HIVE_DMG                    ABDM(80000)
+#define HIVE_DMG                    ABDM(60000)
 #define HIVE_SPEED                  320.0f
 #define HIVE_DIR_CHANGE_PERIOD      500
 #define HIVE_VALUE                  ( LEVEL0_VALUE )
@@ -432,7 +432,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 #define HOVEL_BP                     0
 #define HOVEL_BT                     7500
-#define HOVEL_HEALTH                 ABHM(375000)
+#define HOVEL_HEALTH                 ABHM(750000)
 #define HOVEL_REGEN                  ABRM(20000)
 #define HOVEL_SPLASHDAMAGE           ABDM(20000)
 #define HOVEL_SPLASHRADIUS           200
@@ -442,7 +442,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 #define GRAPNEL_BP                  2
 #define GRAPNEL_BT                  6000
-#define GRAPNEL_HEALTH              ABHM(325000)
+#define GRAPNEL_HEALTH              ABHM(650000)
 #define GRAPNEL_REGEN               ABRM(0)
 #define GRAPNEL_SPLASHDAMAGE        ABDM(20000)
 #define GRAPNEL_SPLASHRADIUS        100
@@ -452,7 +452,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 #define TRAPPER_BP                  8
 #define TRAPPER_BT                  6000
-#define TRAPPER_HEALTH              ABHM(75000)
+#define TRAPPER_HEALTH              ABHM(150000)
 #define TRAPPER_REGEN               ABRM(6000)
 #define TRAPPER_SPLASHDAMAGE        ABDM(15000)
 #define TRAPPER_SPLASHRADIUS        100
@@ -472,7 +472,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 #define SLIMER_BP              12
 #define SLIMER_BT              8000
-#define SLIMER_HEALTH          ABHM(250000)
+#define SLIMER_HEALTH          ABHM(500000)
 #define SLIMER_REGEN           ABRM(12000)
 #define SLIMER_SPLASHDAMAGE    ABDM(15000)
 #define SLIMER_SPLASHRADIUS    200
@@ -486,7 +486,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 #define OVERMIND_BP                 0
 #define OVERMIND_BT                 25000
-#define OVERMIND_HEALTH             ABHM(2000000)
+#define OVERMIND_HEALTH             ABHM(2500000)
 #define OVERMIND_REGEN              ABRM(6000)
 #define OVERMIND_SPLASHDAMAGE       ABDM(15000)
 #define OVERMIND_SPLASHRADIUS       300
@@ -839,14 +839,14 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 #define HSPAWN_BP                   10
 #define HSPAWN_BT                   10000
-#define HSPAWN_HEALTH               HBHM(310000)
+#define HSPAWN_HEALTH               HBHM(620000)
 #define HSPAWN_SPLASHDAMAGE         HBDM(0)
 #define HSPAWN_SPLASHRADIUS         0
 #define HSPAWN_VALUE                ( ALIEN_CREDITS_PER_KILL )
 
 #define HTELEPORTER_BP              10
 #define HTELEPORTER_BT              10000
-#define HTELEPORTER_HEALTH          HBHM(310000)
+#define HTELEPORTER_HEALTH          HBHM(620000)
 #define HTELEPORTER_SPLASHDAMAGE    HBDM(0)
 #define HTELEPORTER_SPLASHRADIUS    0
 #define HTELEPORTER_VALUE           ( ALIEN_CREDITS_PER_KILL )
@@ -856,7 +856,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 #define MEDISTAT_BP                 8
 #define MEDISTAT_BT                 10000
-#define MEDISTAT_HEALTH             HBHM(190000)
+#define MEDISTAT_HEALTH             HBHM(380000)
 #define MEDISTAT_REPEAT             100
 #define MEDISTAT_SPLASHDAMAGE       HBDM(0)
 #define MEDISTAT_SPLASHRADIUS       0
@@ -866,7 +866,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 #define MGTURRET_BP                  8
 #define MGTURRET_BT                  10000
-#define MGTURRET_HEALTH              HBHM(240000)
+#define MGTURRET_HEALTH              HBHM(480000)
 #define MGTURRET_SPLASHDAMAGE        HBDM(0)
 #define MGTURRET_SPLASHRADIUS        0
 #define MGTURRET_ANGULARSPEED        12
@@ -879,7 +879,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define MGTURRET_K_SCALE             1.0f
 #define MGTURRET_RANGE               475.0f
 #define MGTURRET_SPREAD              0
-#define MGTURRET_DMG                 HBDM(4400)
+#define MGTURRET_DMG                 HBDM(3300)
 #define MGTURRET_SPINUP_TIME         4000 // time to increase the fire rate to full speed
 #define MGTURRET_SPINDOWN_TIME       4000 // time it takes a ret to spindown from full speed to complete stop
 #define MGTURRET_SPINUP_SKIPFIRE     400 // the initial shot skips below this spinup value
@@ -890,19 +890,19 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 #define TESLAGEN_BP                 10
 #define TESLAGEN_BT                 15000
-#define TESLAGEN_HEALTH             HBHM(220000)
+#define TESLAGEN_HEALTH             HBHM(440000)
 #define TESLAGEN_SPLASHDAMAGE       HBDM(0)
 #define TESLAGEN_SPLASHRADIUS       0
 #define TESLAGEN_REPEAT             250
 #define TESLAGEN_K_SCALE            4.0f
 #define TESLAGEN_RANGE              250
-#define TESLAGEN_DMG                HBDM(6000)
+#define TESLAGEN_DMG                HBDM(4500)
 #define TESLAGEN_VALUE              ( ALIEN_CREDITS_PER_KILL )
 #define TESLAGEN_BAT_PWR            25000
 
 #define DC_BP                       8
 #define DC_BT                       10000
-#define DC_HEALTH                   HBHM(190000)
+#define DC_HEALTH                   HBHM(380000)
 #define DC_SPLASHDAMAGE             HBDM(0)
 #define DC_SPLASHRADIUS             0
 #define DC_ATTACK_PERIOD            10000 // how often to spam "under attack"
@@ -913,7 +913,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 #define ARMOURY_BP                  10
 #define ARMOURY_BT                  10000
-#define ARMOURY_HEALTH              HBHM(420000)
+#define ARMOURY_HEALTH              HBHM(840000)
 #define ARMOURY_SPLASHDAMAGE        HBDM(50000)
 #define ARMOURY_SPLASHRADIUS        100
 #define ARMOURY_VALUE               ( ( 3 * ALIEN_CREDITS_PER_KILL ) / 2 )
@@ -921,7 +921,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 #define REACTOR_BP                  0
 #define REACTOR_BT                  20000
-#define REACTOR_HEALTH              HBHM(1000000)
+#define REACTOR_HEALTH              HBHM(1500000)
 #define REACTOR_SPLASHDAMAGE        HBDM(500000)
 #define REACTOR_SPLASHRADIUS        500
 #define REACTOR_ATTACK_RANGE        100.0f
@@ -934,7 +934,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 #define REPEATER_BP                 2
 #define REPEATER_BT                 10000
-#define REPEATER_HEALTH             HBHM(250000)
+#define REPEATER_HEALTH             HBHM(500000)
 #define REPEATER_SPLASHDAMAGE       HBDM(150000)
 #define REPEATER_SPLASHRADIUS       200
 #define REPEATER_VALUE              ( ALIEN_CREDITS_PER_KILL )

@@ -152,7 +152,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     ASPAWN_BP,             //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     ASPAWN_HEALTH,         //int       health;
-    0.5f,                  //float     maxHealthDecayRate;
+    0.85f,                 //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     ASPAWN_REGEN,          //int       regenRate;
     1.0f,                  //float     ballisticDmgMod;
@@ -213,7 +213,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     OVERMIND_BP,           //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     OVERMIND_HEALTH,       //int       health;
-    0.5f,                  //float     maxHealthDecayRate;
+    0.85f,                 //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     OVERMIND_REGEN,        //int       regenRate;
     0.15f,                 //float     ballisticDmgMod;
@@ -274,7 +274,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BARRICADE_BP,          //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     BARRICADE_HEALTH,      //int       health;
-    0.75f,                 //float     maxHealthDecayRate;
+    0.85f,                 //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     BARRICADE_REGEN,       //int       regenRate;
     0.15f,                 //float     ballisticDmgMod;
@@ -332,7 +332,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     ACIDTUBE_BP,           //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     ACIDTUBE_HEALTH,       //int       health;
-    0.5f,                  //float     maxHealthDecayRate;
+    0.85f,                 //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     ACIDTUBE_REGEN,        //int       regenRate;
     1.0f,                  //float     ballisticDmgMod;
@@ -390,7 +390,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     TRAPPER_BP,            //int       buildPoints;
     ( 1 << S2 )|( 1 << S3 ), //int     stages; //NEEDS ADV BUILDER SO S2 AND UP
     TRAPPER_HEALTH,        //int       health;
-    0.5f,                  //float     maxHealthDecayRate;
+    0.85f,                 //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     TRAPPER_REGEN,         //int       regenRate;
     1.0f,                  //float     ballisticDmgMod;
@@ -447,7 +447,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     SLIMER_BP,        //int       buildPoints;
     ( 1 << S3 ),           //int       stages;
     SLIMER_HEALTH,    //int       health;
-    0.5f,                  //float     maxHealthDecayRate;
+    0.85f,                 //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     SLIMER_REGEN,     //int       regenRate;
     1.0f,                  //float     ballisticDmgMod;
@@ -506,7 +506,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     BOOSTER_BP,            //int       buildPoints;
     ( 1 << S2 )|( 1 << S3 ), //int     stages;
     BOOSTER_HEALTH,        //int       health;
-    0.5f,                  //float     maxHealthDecayRate;
+    0.85f,                 //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     BOOSTER_REGEN,         //int       regenRate;
     1.0f,                  //float     ballisticDmgMod;
@@ -565,7 +565,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     HIVE_BP,               //int       buildPoints;
     ( 1 << S2 )|( 1 << S3 ),           //int       stages;
     HIVE_HEALTH,           //int       health;
-    0.5f,                  //float     maxHealthDecayRate;
+    0.85f,                 //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     HIVE_REGEN,            //int       regenRate;
     1.0f,                  //float     ballisticDmgMod;
@@ -621,7 +621,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     HOVEL_BP,              //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),           //int  stages
     HOVEL_HEALTH,          //int       health;
-    0.5f,                  //float     maxHealthDecayRate;
+    0.85f,                 //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     HOVEL_REGEN,           //int       regenRate;
     1.0f,                  //float     ballisticDmgMod;
@@ -685,7 +685,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     GRAPNEL_BP,            //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     GRAPNEL_HEALTH,        //int       health;
-    0.5f,                  //float     maxHealthDecayRate;
+    0.85f,                 //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     GRAPNEL_REGEN,         //int       regenRate;
     1.0f,                  //float     ballisticDmgMod;
@@ -745,7 +745,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     HSPAWN_BP,             //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     HSPAWN_HEALTH,         //int       health;
-    0.5f,                  //float     maxHealthDecayRate;
+    0.85f,                 //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     0,                     //int       regenRate;
     1.0f,                  //float     ballisticDmgMod;
@@ -804,7 +804,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     HTELEPORTER_BP,        //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     HTELEPORTER_HEALTH,    //int       health;
-    0.5f,                  //float     maxHealthDecayRate;
+    0.85f,                 //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     0,                     //int       regenRate;
     1.0f,                  //float     ballisticDmgMod;
@@ -871,7 +871,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     MGTURRET_BP,           //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     MGTURRET_HEALTH,       //int       health;
-    0.5f,                  //float     maxHealthDecayRate;
+    0.85f,                 //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     0,                     //int       regenRate;
     1.0f,                  //float     ballisticDmgMod;
@@ -929,7 +929,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     TESLAGEN_BP,           //int       buildPoints;
     ( 1 << S3 ),           //int       stages;
     TESLAGEN_HEALTH,       //int       health;
-    0.5f,                  //float     maxHealthDecayRate;
+    0.85f,                 //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     0,                     //int       regenRate;
     1.0f,                  //float     ballisticDmgMod;
@@ -987,7 +987,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     ARMOURY_BP,            //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     ARMOURY_HEALTH,        //int       health;
-    0.5f,                  //float     maxHealthDecayRate;
+    0.85f,                 //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     0,                     //int       regenRate;
     1.0f,                  //float     ballisticDmgMod;
@@ -1049,7 +1049,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     DC_BP,                 //int       buildPoints;
     ( 1 << S2 )|( 1 << S3 ), //int     stages;
     DC_HEALTH,             //int       health;
-    0.5f,                  //float     maxHealthDecayRate;
+    0.85f,                 //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     0,                     //int       regenRate;
     1.0f,                  //float     ballisticDmgMod;
@@ -1109,7 +1109,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     MEDISTAT_BP,           //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     MEDISTAT_HEALTH,       //int       health;
-    0.5f,                  //float     maxHealthDecayRate;
+    0.85f,                 //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     0,                     //int       regenRate;
     1.0f,                  //float     ballisticDmgMod;
@@ -1167,10 +1167,10 @@ static const buildableAttributes_t bg_buildableList[ ] =
     REACTOR_BP,            //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     REACTOR_HEALTH,        //int       health;
-    0.5f,                  //float     maxHealthDecayRate;
+    0.85f,                 //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     0,                     //int       regenRate;
-    1.0f,                  //float     ballisticDmgMod;
+    0.8f,                  //float     ballisticDmgMod;
     REACTOR_SPLASHDAMAGE,  //int       splashDamage;
     REACTOR_SPLASHRADIUS,  //int       splashRadius;
     MOD_HSPAWN,            //int       meansOfDeath;
@@ -1232,7 +1232,7 @@ static const buildableAttributes_t bg_buildableList[ ] =
     REPEATER_BP,           //int       buildPoints;
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
     REPEATER_HEALTH,       //int       health;
-    0.5f,                  //float     maxHealthDecayRate;
+    0.85f,                 //float     maxHealthDecayRate;
     0,                     //int       minHealth;
     0,                     //int       regenRate;
     1.0f,                  //float     ballisticDmgMod;
