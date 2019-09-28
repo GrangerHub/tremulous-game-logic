@@ -879,7 +879,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define MGTURRET_K_SCALE             1.0f
 #define MGTURRET_RANGE               475.0f
 #define MGTURRET_SPREAD              0
-#define MGTURRET_DMG                 HBDM(3300)
+#define MGTURRET_DMG                 HBDM(2500)
 #define MGTURRET_SPINUP_TIME         4000 // time to increase the fire rate to full speed
 #define MGTURRET_SPINDOWN_TIME       4000 // time it takes a ret to spindown from full speed to complete stop
 #define MGTURRET_SPINUP_SKIPFIRE     400 // the initial shot skips below this spinup value
