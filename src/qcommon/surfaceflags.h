@@ -30,6 +30,9 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 // these definitions also need to be in q_shared.h!
 
 #define	CONTENTS_SOLID			1		// an eye is never valid in a solid
+
+#define CONTENTS_ASTRAL			2
+
 #define	CONTENTS_LAVA			8
 #define	CONTENTS_SLIME			16
 #define	CONTENTS_WATER			32
