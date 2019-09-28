@@ -1305,6 +1305,10 @@ static void PM_PounceLiftOff( void )
   pm->ps->misc[ MISC_MISC3 ] = 0;
   pm->ps->pm_flags &= ~PMF_LAUNCHING;
 
+  if(pm->ps->weapon == WP_ALEVEL3 || pm->ps->weapon == WP_ALEVEL3_UPG) {
+    pm->ps->weaponTime += LEVEL3_POUNCE_REPEAT;
+  }
+
   return;
 }
 
@@ -5065,6 +5069,13 @@ static void PM_Weapon( void )
       }
     }
   }
+
+  // no bite during pounce
+  if( ( pm->ps->weapon == WP_ALEVEL3 || pm->ps->weapon == WP_ALEVEL3_UPG )
+      && ( ( ( !pm->swapAttacks ?
+            (pm->cmd.buttons & BUTTON_ATTACK) : (pm->cmd.buttons & BUTTON_ATTACK2) ) ) )
+      && ( pm->ps->pm_flags & PMF_CHARGE ) )
+    return;
 
   // pump weapon delays (repeat times etc)
   if( pm->ps->weapon == WP_PORTAL_GUN  )
