@@ -1705,19 +1705,23 @@ static void CG_ParseVoice( void )
 CG_CenterPrint_f
 =================
 */
-static void CG_CenterPrint_f( void )
-{
-  if( trap_Argc( ) >= 5 )
-  {
-    CG_CenterPrint( atoi( CG_Argv( 2 ) ), CG_Argv( 1 ), atoi( CG_Argv( 3 ) ), atoi( CG_Argv( 3 ) ) );
-  } else if( trap_Argc( ) >= 4 )
-  {
-    CG_CenterPrint( atoi( CG_Argv( 2 ) ), CG_Argv( 1 ), BIGCHAR_WIDTH, atoi( CG_Argv( 3 ) ) );
-  } else if( trap_Argc( ) >= 3 )
-  {
-    CG_CenterPrint( atoi( CG_Argv( 2 ) ), CG_Argv( 1 ), BIGCHAR_WIDTH, -1 );
-  } else
-  {
+static void CG_CenterPrint_f( void ) {
+  if(trap_Argc( ) >= 5) {
+    char string[MAX_STRING_CHARS];
+
+    Q_strncpyz(string, CG_Argv(1), sizeof(string));
+    CG_CenterPrint(atoi(CG_Argv(2)), string, atoi(CG_Argv(3)), atoi(CG_Argv(3)));
+  } else if(trap_Argc( ) >= 4) {
+    char string[MAX_STRING_CHARS];
+
+    Q_strncpyz(string, CG_Argv(1), sizeof(string));
+    CG_CenterPrint(atoi(CG_Argv(2)), string, BIGCHAR_WIDTH, atoi(CG_Argv(3)));
+  } else if(trap_Argc( ) >= 3) {
+    char string[MAX_STRING_CHARS];
+
+    Q_strncpyz(string, CG_Argv(1), sizeof(string));
+    CG_CenterPrint(atoi(CG_Argv(2)), string, BIGCHAR_WIDTH, -1);
+  } else {
     CG_CenterPrint( 0, CG_Argv( 1 ), BIGCHAR_WIDTH, -1 );
   }
 }
