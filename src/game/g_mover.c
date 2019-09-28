@@ -118,10 +118,10 @@ gentity_t *G_TestEntityPosition(gentity_t *ent) {
 
   if(ent->client) {
     SV_Trace(&tr, ent->client->ps.origin, ent->r.mins, ent->r.maxs,
-      ent->client->ps.origin, ent->s.number, ent->clipmask, TT_AABB);
+      ent->client->ps.origin, ent->s.number, ent->clip_mask, TT_AABB);
   } else {
     SV_Trace(&tr, ent->s.pos.trBase, ent->r.mins, ent->r.maxs,
-      ent->s.pos.trBase, ent->s.number, ent->clipmask, TT_AABB);
+      ent->s.pos.trBase, ent->s.number, ent->clip_mask, TT_AABB);
   }
 
   if(tr.startsolid) {
@@ -142,7 +142,7 @@ qboolean G_TestEntAgainstOtherEnt(gentity_t *self, int touchedNum) {
   trace_t tr;
 
   SV_ClipToEntity( &tr, self->r.currentOrigin, self->r.mins, self->r.maxs,
-                   self->r.currentOrigin, touchedNum, self->clipmask, TT_AABB );
+                   self->r.currentOrigin, touchedNum, self->clip_mask, TT_AABB );
 
 
   if(tr.startsolid) {
@@ -390,6 +390,7 @@ static qboolean G_Pushable_Area_Ents_For_Move(
   num = SV_AreaEntities(
           pushes.mover_data[ent->s.number].total_mins,
           pushes.mover_data[ent->s.number].total_maxs,
+          NULL,
           ent_array,
           MAX_GENTITIES);
   for(i = 0; i < num; i++) {
@@ -738,6 +739,7 @@ static qboolean G_Entity_Is_Directly_Blocked(
   num = SV_AreaEntities(
           pushes.mover_data[ent->s.number].total_mins,
           pushes.mover_data[ent->s.number].total_maxs,
+          NULL,
           ent_array,
           MAX_GENTITIES);
   for(i = 0; i < num; i++) {
@@ -1454,7 +1456,9 @@ void Think_CloseModelDoor( gentity_t *ent )
   gentity_t *check;
   qboolean  canClose = qtrue;
 
-  numEntities = SV_AreaEntities( clipBrush->r.absmin, clipBrush->r.absmax, entityList, MAX_GENTITIES );
+  numEntities =
+    SV_AreaEntities(
+      clipBrush->r.absmin, clipBrush->r.absmax, NULL, entityList, MAX_GENTITIES);
 
   //set brush solid
   SV_LinkEntity( ent->clipBrush );
@@ -2077,7 +2081,7 @@ void Think_SpawnNewDoorTrigger( gentity_t *ent )
   VectorCopy( mins, other->r.mins );
   VectorCopy( maxs, other->r.maxs );
   other->parent = ent;
-  G_SetContents( other, CONTENTS_TRIGGER );
+  G_SetContents( other, CONTENTS_TRIGGER, qfalse );
   other->touch = Touch_DoorTrigger;
   // remember the thinnest axis
   other->count = best;
@@ -2170,7 +2174,7 @@ void SP_func_door( gentity_t *ent )
 
   InitMover( ent );
 
-  ent->s.eFlags |= EF_ASTRAL_NOCLIP;
+  G_SetContents(ent, (ent->r.contents|CONTENTS_DOOR), qfalse);
 
   ent->nextthink = level.time + FRAMETIME;
 
@@ -2283,7 +2287,7 @@ void SP_func_door_rotating( gentity_t *ent )
 
   InitRotator( ent );
 
-  ent->s.eFlags |= EF_ASTRAL_NOCLIP;
+  G_SetContents(ent, (ent->r.contents|CONTENTS_DOOR), qfalse);
 
   ent->nextthink = level.time + FRAMETIME;
 
@@ -2510,7 +2514,7 @@ void SpawnPlatTrigger( gentity_t *ent )
   trigger = G_Spawn( );
   trigger->classname = "plat_trigger";
   trigger->touch = Touch_PlatCenterTrigger;
-  G_SetContents( trigger, CONTENTS_TRIGGER );
+  G_SetContents( trigger, CONTENTS_TRIGGER, qfalse );
   trigger->parent = ent;
 
   tmin[ 0 ] = ent->pos1[ 0 ] + ent->r.mins[ 0 ] + 33;
@@ -3276,7 +3280,7 @@ void SP_func_spawn(gentity_t *ent) {
 
   ent->use = Use_func_spawn;
 
-  ent->s.eFlags |= EF_ASTRAL_NOCLIP;
+  G_SetContents(ent, (ent->r.contents|CONTENTS_DOOR), qfalse);
 
   if( ( ent->spawnflags & 1 ) ) {
     SV_LinkEntity( ent );
@@ -3354,7 +3358,7 @@ void SP_func_destructable(gentity_t *ent) {
   ent->s.eType = ET_MOVER;
   VectorCopy(ent->pos1, ent->r.currentOrigin);
 
-  ent->s.eFlags |= EF_ASTRAL_NOCLIP;
+  G_SetContents(ent, (ent->r.contents|CONTENTS_DOOR), qfalse);
 
   SV_LinkEntity(ent);
 

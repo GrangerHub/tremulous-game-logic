@@ -700,6 +700,7 @@ Marks the entity as free
 */
 void G_FreeEntity( gentity_t *ent )
 {
+  const int zero = 0;
   SV_UnlinkEntity( ent );   // unlink from world
 
   if( ent->neverFree )
@@ -713,7 +714,7 @@ void G_FreeEntity( gentity_t *ent )
   memset( ent, 0, sizeof( *ent ) );
   ent->classname = "freent";
   ent->freetime = level.time;
-  ent->s.origin[0] = (float)((int)0); // reset for UEIDs
+  ent->s.origin[0] = *((float *)(&zero)); // reset for UEIDs
   ent->inuse = qfalse;
 }
 
@@ -942,7 +943,7 @@ void G_KillBox( gentity_t *ent )
 
   VectorAdd( ent->r.currentOrigin, ent->r.mins, mins );
   VectorAdd( ent->r.currentOrigin, ent->r.maxs, maxs );
-  num = SV_AreaEntities( mins, maxs, touch, MAX_GENTITIES );
+  num = SV_AreaEntities( mins, maxs, NULL, touch, MAX_GENTITIES );
 
   for( i = 0; i < num; i++ )
   {
@@ -1143,14 +1144,16 @@ G_Visible
 Test for a LOS between two entities
 ===============
 */
-qboolean G_Visible( gentity_t *ent1, gentity_t *ent2, int contents )
-{
+qboolean G_Visible(
+  gentity_t *ent1, gentity_t *ent2, const content_mask_t content_mask) {
   trace_t trace;
 
   SV_Trace( &trace, ent1->s.pos.trBase, NULL, NULL, ent2->s.pos.trBase,
-              ent1->s.number, contents, TT_AABB );
+              ent1->s.number, content_mask, TT_AABB );
 
-  return trace.fraction >= 1.0f || trace.entityNum == ent2 - g_entities;
+  return
+    (trace.fraction >= 1.0f && !trace.startsolid && !trace.allsolid) ||
+    trace.entityNum == ent2 - g_entities;
 }
 
 /*
@@ -1165,7 +1168,7 @@ qboolean G_BBOXes_Visible(
   const vec3_t source_origin, const vec3_t source_mins, const vec3_t source_maxs,
   int destination_num,
   const vec3_t dest_origin, const vec3_t dest_mins, const vec3_t dest_maxs,
-  int contents) {
+  const content_mask_t content_mask) {
   trace_t        tr;
   vec3_t         source_midpoint, destination_midpoint, absmins, absmaxs;
   bboxPoint_t    source_point, destination_point;
@@ -1214,7 +1217,7 @@ qboolean G_BBOXes_Visible(
       BG_EvaluateBBOXPoint( &destination_point, destination_midpoint, dest_mins, dest_maxs );
       SV_Trace(
         &tr, source_point.point, NULL, NULL, destination_point.point,
-        source_num, contents, TT_AABB );
+        source_num, content_mask, TT_AABB );
       if( tr.fraction == 1.0  || tr.entityNum == destination_num ) {
         return qtrue;
       }
@@ -1535,6 +1538,7 @@ qboolean G_AddressCompare( const addr_t *a, const addr_t *b )
 
 void G_Entity_UEID_init(gentity_t *ent){
   static unsigned int inc_id = 1;
+  float *id_pointer = (float *)(&inc_id);
 
   Com_Assert(ent);
 
@@ -1542,7 +1546,7 @@ void G_Entity_UEID_init(gentity_t *ent){
     ent->client->ps.misc[MISC_ID] = inc_id;
   }
 
-  ent->s.origin[0] = (float)(inc_id);
+  ent->s.origin[0] = *id_pointer;
   inc_id++;
 }
 
@@ -1571,21 +1575,6 @@ gentity_t *G_Entity_UEID_get(bgentity_id *ueid){
   }
 
   return &g_entities[ent_num];
-}
-
-/*
-===============
-G_TraceWrapper
-
-Wraps trace for QVM shared code
-===============
-*/
-void G_TraceWrapper( trace_t *results, const vec3_t start,
-                            const vec3_t mins, const vec3_t maxs,
-                            const vec3_t end, int passEntityNum,
-                            int contentMask )
-{
-  SV_Trace( results, start, mins, maxs, end, passEntityNum, contentMask, TT_AABB );
 }
 
 /*

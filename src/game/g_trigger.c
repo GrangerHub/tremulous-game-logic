@@ -32,7 +32,7 @@ void InitTrigger( gentity_t *self )
     G_SetMovedir( self->r.currentAngles, self->movedir );
 
   SV_SetBrushModel( self, self->model );
-  G_SetContents( self, CONTENTS_TRIGGER ); // replaces the -1 from SV_SetBrushModel
+  G_SetContents( self, CONTENTS_TRIGGER, qfalse ); // replaces the -1 from SV_SetBrushModel
   self->r.svFlags = SVF_NOCLIENT;
 }
 
@@ -481,7 +481,7 @@ void SP_trigger_hurt( gentity_t *self )
 
   self->damage = BG_HP2SU( self->damage );
 
-  G_SetContents( self, CONTENTS_TRIGGER );
+  G_SetContents( self, CONTENTS_TRIGGER, qfalse );
 
   self->use = hurt_use;
 

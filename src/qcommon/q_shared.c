@@ -1570,3 +1570,37 @@ void Com_ClientListParse( clientList_t *list, const char *s )
   sscanf( t, "%x", &list->hi );
   sscanf( s + 8, "%x", &list->lo );
 }
+
+/*
+============
+Com_BBOX_Intersects_area
+============
+*/
+qboolean Com_BBOX_Intersects_Area(
+	const vec3_t bbox_abs_mins, const vec3_t bbox_abs_maxs,
+	const vec3_t area_mins, const vec3_t area_maxs) {
+	if ( bbox_abs_mins[0] > area_maxs[0]
+	|| bbox_abs_mins[1] > area_maxs[1]
+	|| bbox_abs_mins[2] > area_maxs[2]
+	|| bbox_abs_maxs[0] < area_mins[0]
+	|| bbox_abs_maxs[1] < area_mins[1]
+	|| bbox_abs_maxs[2] < area_mins[2]) {
+		return qfalse;
+	}
+
+	return qtrue;
+}
+
+/*
+============
+Temp_Clip_Mask
+============
+*/
+const content_mask_t *Temp_Clip_Mask(int include, int exclude) {
+	static content_mask_t content_mask;
+
+	content_mask.include = include;
+	content_mask.exclude = exclude;
+
+	return &content_mask;
+}

@@ -221,36 +221,6 @@ void SV_LinkEntity( sharedEntity_t *gEnt ) {
 		SV_UnlinkEntity( gEnt );	// unlink from old position
 	}
 
-	// encode the size into the entityState_t for client prediction
-	if ( gEnt->r.bmodel ) {
-		gEnt->s.solid = SOLID_BMODEL;		// a solid_box will never create this value
-	} else if ( gEnt->r.contents & ( CONTENTS_SOLID | CONTENTS_BODY ) ) {
-		// assume that x/y are equal and symetric
-		i = gEnt->r.maxs[0];
-		if (i<1)
-			i = 1;
-		if (i>255)
-			i = 255;
-
-		// z is not symetric
-		j = (-gEnt->r.mins[2]);
-		if (j<1)
-			j = 1;
-		if (j>255)
-			j = 255;
-
-		// and z maxs can be negative...
-		k = (gEnt->r.maxs[2]+32);
-		if (k<1)
-			k = 1;
-		if (k>255)
-			k = 255;
-
-		gEnt->s.solid = (k<<16) | (j<<8) | i;
-	} else {
-		gEnt->s.solid = 0;
-	}
-
 	// get the position
 	origin = gEnt->r.currentOrigin;
 	angles = gEnt->r.currentAngles;
@@ -279,6 +249,58 @@ void SV_LinkEntity( sharedEntity_t *gEnt ) {
 	gEnt->r.absmax[0] += 1;
 	gEnt->r.absmax[1] += 1;
 	gEnt->r.absmax[2] += 1;
+
+	// encode the size into the entityState_t for client prediction
+	if ( gEnt->r.bmodel ) {
+		int    n;
+		vec3_t center, centered_maxs;
+
+		gEnt->s.eFlags |= SOLID_BMODEL;
+
+		for(n = 0; n < 3; n++) {
+	    center[n] = (gEnt->r.absmin[n] + gEnt->r.absmax[n]) / 2;
+			centered_maxs[n] = gEnt->r.absmax[n] - center[n];
+	  }
+
+		VectorCopy(center, gEnt->s.angles);
+
+		for(n = 0; n < 3; n++) {
+			if(centered_maxs[n] < 1) {
+				centered_maxs[n] = 1;
+			} else if(centered_maxs[n] > 255) {
+				centered_maxs[n] = 255;
+			}
+		}
+
+		gEnt->s.solid =
+			(((int)centered_maxs[2])<<16)|(((int)centered_maxs[1])<<8)|((int)centered_maxs[0]);
+		gEnt->s.origin[2] = *((float *)(&sv.time));
+	} else if ( gEnt->r.contents & ( CONTENTS_SOLID | CONTENTS_BODY ) ) {
+		// assume that x/y are equal and symetric
+		i = gEnt->r.maxs[0];
+		if (i<1)
+			i = 1;
+		if (i>255)
+			i = 255;
+
+		// z is not symetric
+		j = (-gEnt->r.mins[2]);
+		if (j<1)
+			j = 1;
+		if (j>255)
+			j = 255;
+
+		// and z maxs can be negative...
+		k = (gEnt->r.maxs[2]+32);
+		if (k<1)
+			k = 1;
+		if (k>255)
+			k = 255;
+
+		gEnt->s.solid = (k<<16) | (j<<8) | i;
+	} else {
+		gEnt->s.solid = 0;
+	}
 
 	// link to PVS leafs
 	ent->numClusters = 0;
@@ -369,6 +391,7 @@ bounds.  This does NOT mean that they actually touch in the case of bmodels.
 typedef struct {
 	const float	*mins;
 	const float	*maxs;
+	const content_mask_t *content_mask;
 	int			*list;
 	int			count, maxcount;
 } areaParms_t;
@@ -389,12 +412,19 @@ static void SV_AreaEntities_r( worldSector_t *node, areaParms_t *ap ) {
 
 		gcheck = SV_GEntityForSvEntity( check );
 
-		if ( gcheck->r.absmin[0] > ap->maxs[0]
-		|| gcheck->r.absmin[1] > ap->maxs[1]
-		|| gcheck->r.absmin[2] > ap->maxs[2]
-		|| gcheck->r.absmax[0] < ap->mins[0]
-		|| gcheck->r.absmax[1] < ap->mins[1]
-		|| gcheck->r.absmax[2] < ap->mins[2]) {
+		if(ap->content_mask) {
+			if(gcheck->r.contents & ap->content_mask->exclude) {
+				continue;
+			}
+
+			if(!(gcheck->r.contents & ap->content_mask->include)) {
+				continue;
+			}
+		}
+
+		if(
+			!Com_BBOX_Intersects_Area(
+				gcheck->r.absmin, gcheck->r.absmax, ap->mins, ap->maxs)) {
 			continue;
 		}
 
@@ -425,12 +455,14 @@ static void SV_AreaEntities_r( worldSector_t *node, areaParms_t *ap ) {
 SV_AreaEntities
 ================
 */
-int SV_AreaEntities( const vec3_t mins, const vec3_t maxs, int *entityList, int maxcount ) {
+int SV_AreaEntities( const vec3_t mins, const vec3_t maxs,
+	const content_mask_t *content_mask, int *entityList, int maxcount ) {
 	areaParms_t		ap;
 
 	ap.mins = mins;
 	ap.maxs = maxs;
 	ap.list = entityList;
+	ap.content_mask = content_mask;
 	ap.count = 0;
 	ap.maxcount = maxcount;
 
@@ -452,7 +484,7 @@ typedef struct {
 	vec3_t		end;
 	trace_t		trace;
 	int			passEntityNum;
-	int			contentmask;
+	content_mask_t	content_mask;
 	traceType_t	collisionType;
 } moveclip_t;
 
@@ -465,7 +497,7 @@ SV_ClipToEntity
 */
 void SV_ClipToEntity( trace_t *trace, const vec3_t start, vec3_t mins,
 	                    vec3_t maxs, const vec3_t end, int entityNum,
-											int contentmask, traceType_t type ) {
+											const content_mask_t content_mask, traceType_t type ) {
 	sharedEntity_t	*touch;
 	clipHandle_t	clipHandle;
 	float			*origin, *angles;
@@ -474,23 +506,22 @@ void SV_ClipToEntity( trace_t *trace, const vec3_t start, vec3_t mins,
 
 	if( entityNum == ENTITYNUM_WORLD )
 	{
-		CM_BoxTrace( trace, start, end, mins, maxs, 0, contentmask, type );
+		CM_BoxTrace( trace, start, end, mins, maxs, 0, content_mask.include, type );
 		trace->entityNum = trace->fraction != 1.0 ? ENTITYNUM_WORLD : ENTITYNUM_NONE;
 		return;
 	}
 
 	touch = SV_GentityNum( entityNum );
 
-	// EF_ASTRAL_NOCLIP flagged entities don't clip with ASTRALSOLID entities
-	if ( ( contentmask & EF_ASTRAL_NOCLIP ) & touch->s.eFlags ) {
+	// if it doesn't have any brushes of a type we
+	// are looking for, ignore it
+	if ( ! ( content_mask.include & touch->r.contents ) ) {
 		trace->fraction = 1.0;
 		return;
 	}
 
-	// if it doesn't have any brushes of a type we
-	// are looking for, ignore it
-	if ( ! ( contentmask & touch->r.contents ) ) {
-		trace->fraction = 1.0;
+	// ignore entities that have brushes of a type that we want to exclude
+	if ( content_mask.exclude & touch->r.contents ) {
 		return;
 	}
 
@@ -505,7 +536,7 @@ void SV_ClipToEntity( trace_t *trace, const vec3_t start, vec3_t mins,
 	}
 
 	CM_TransformedBoxTrace ( trace, (float *)start, (float *)end,
-		(float *)mins, (float *)maxs, clipHandle,  contentmask,
+		(float *)mins, (float *)maxs, clipHandle,  content_mask.include,
 		origin, angles, type);
 
 	if ( trace->fraction < 1 ) {
@@ -528,13 +559,12 @@ static void SV_ClipMoveToEntities( moveclip_t *clip ) {
 	trace_t		trace;
 	clipHandle_t	clipHandle;
 	float		*origin, *angles;
-        int             astralMask = 0;
 
-	num = SV_AreaEntities( clip->boxmins, clip->boxmaxs, touchlist, MAX_GENTITIES);
+	num = SV_AreaEntities(
+		clip->boxmins, clip->boxmaxs, &clip->content_mask, touchlist, MAX_GENTITIES);
 
 	if ( clip->passEntityNum != ENTITYNUM_NONE ) {
 		passOwnerNum = ( SV_GentityNum( clip->passEntityNum ) )->r.ownerNum;
-                astralMask = clip->contentmask & EF_ASTRAL_NOCLIP;
 		if ( passOwnerNum == ENTITYNUM_NONE ) {
 			passOwnerNum = -1;
 		}
@@ -559,14 +589,23 @@ static void SV_ClipMoveToEntities( moveclip_t *clip ) {
 			if ( touch->r.ownerNum == passOwnerNum ) {
 				continue;	// don't clip against other missiles from our owner
 			}
-                        if ( astralMask & touch->s.eFlags ) {
-                                continue;      // EF_ASTRAL_NOCLIP flagged entities don't clip with ASTRALSOLID entities
-                        }
 		}
 
 		// if it doesn't have any brushes of a type we
 		// are looking for, ignore it
-		if ( ! ( clip->contentmask & touch->r.contents ) ) {
+		if ( ! ( clip->content_mask.include & touch->r.contents ) ) {
+			continue;
+		}
+
+		// ignore entities that have brushes of a type that we want to exclude
+		if ( clip->content_mask.exclude & touch->r.contents ) {
+			continue;
+		}
+
+		//check if the entity is still within the adjusted overall move bbox
+		if(
+			!Com_BBOX_Intersects_Area(
+				touch->r.absmin, touch->r.absmax, clip->boxmins, clip->boxmaxs)) {
 			continue;
 		}
 
@@ -581,9 +620,10 @@ static void SV_ClipMoveToEntities( moveclip_t *clip ) {
 			angles = vec3_origin;	// boxes don't rotate
 		}
 
-		CM_TransformedBoxTrace ( &trace, (float *)clip->start, (float *)clip->end,
-			(float *)clip->mins, (float *)clip->maxs, clipHandle,  clip->contentmask,
-			origin, angles, clip->collisionType);
+		CM_TransformedBoxTrace(
+			&trace, (float *)clip->start, (float *)clip->end,
+			(float *)clip->mins, (float *)clip->maxs, clipHandle,
+			clip->content_mask.include, origin, angles, clip->collisionType);
 
 		if ( trace.allsolid ) {
 			clip->trace.allsolid = qtrue;
@@ -593,8 +633,9 @@ static void SV_ClipMoveToEntities( moveclip_t *clip ) {
 			trace.entityNum = touch->s.number;
 		}
 
-		if ( trace.fraction < clip->trace.fraction ) {
+		if (trace.fraction < clip->trace.fraction) {
 			qboolean	oldStart;
+			int       j;
 
 			// make sure we keep a startsolid from a previous trace
 			oldStart = clip->trace.startsolid;
@@ -602,6 +643,17 @@ static void SV_ClipMoveToEntities( moveclip_t *clip ) {
 			trace.entityNum = touch->s.number;
 			clip->trace = trace;
 			clip->trace.startsolid |= oldStart;
+
+			//adjust the overall move bbox
+			for ( j=0 ; j<3 ; j++ ) {
+				if ( clip->trace.endpos[j] > clip->start[j] ) {
+					clip->boxmins[j] = clip->start[j] + clip->mins[j] - 1;
+					clip->boxmaxs[j] = clip->trace.endpos[j] + clip->maxs[j] + 1;
+				} else {
+					clip->boxmins[j] = clip->trace.endpos[j] + clip->mins[j] - 1;
+					clip->boxmaxs[j] = clip->start[j] + clip->maxs[j] + 1;
+				}
+			}
 		}
 	}
 }
@@ -615,7 +667,7 @@ Moves the given mins/maxs volume through the world from start to end.
 passEntityNum and entities owned by passEntityNum are explicitly not checked.
 ==================
 */
-void SV_Trace( trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs, const vec3_t end, int passEntityNum, int contentmask, traceType_t type ) {
+void SV_Trace( trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs, const vec3_t end, int passEntityNum, const content_mask_t content_mask, traceType_t type ) {
 	moveclip_t	clip;
 	int			i;
 
@@ -629,14 +681,14 @@ void SV_Trace( trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs, c
 	Com_Memset ( &clip, 0, sizeof ( moveclip_t ) );
 
 	// clip to world
-	CM_BoxTrace( &clip.trace, start, end, mins, maxs, 0, contentmask, type );
+	CM_BoxTrace( &clip.trace, start, end, mins, maxs, 0, content_mask.include, type );
 	clip.trace.entityNum = clip.trace.fraction != 1.0 ? ENTITYNUM_WORLD : ENTITYNUM_NONE;
 	if ( clip.trace.fraction == 0 ) {
 		*results = clip.trace;
 		return;		// blocked immediately by the world
 	}
 
-	clip.contentmask = contentmask;
+	clip.content_mask = content_mask;
 	clip.start = start;
 //	VectorCopy( clip.trace.endpos, clip.end );
 	VectorCopy( end, clip.end );
@@ -650,11 +702,11 @@ void SV_Trace( trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs, c
 	// already clipped off by the world, which can be
 	// a significant savings for line of sight and shot traces
 	for ( i=0 ; i<3 ; i++ ) {
-		if ( end[i] > start[i] ) {
+		if ( clip.trace.endpos[i] > start[i] ) {
 			clip.boxmins[i] = clip.start[i] + clip.mins[i] - 1;
-			clip.boxmaxs[i] = clip.end[i] + clip.maxs[i] + 1;
+			clip.boxmaxs[i] = clip.trace.endpos[i] + clip.maxs[i] + 1;
 		} else {
-			clip.boxmins[i] = clip.end[i] + clip.mins[i] - 1;
+			clip.boxmins[i] = clip.trace.endpos[i] + clip.mins[i] - 1;
 			clip.boxmaxs[i] = clip.start[i] + clip.maxs[i] + 1;
 		}
 	}
@@ -677,7 +729,8 @@ Checks against a specified temporary volume with its own given test mins/maxs/or
 void SV_ClipToTestArea(
 	trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs,
 	const vec3_t end, const vec3_t test_mins, const vec3_t test_maxs,
-	const vec3_t test_origin, int test_contents, int contentmask, traceType_t type) {
+	const vec3_t test_origin, int test_contents, const content_mask_t content_mask,
+	traceType_t type) {
 	const vec3_t angles = {0.0f, 0.0f, 0.0f};
 	vec3_t test_abs_mins, test_abs_maxs, boxmaxs, boxmins;
 	clipHandle_t clipHandle;
@@ -695,14 +748,14 @@ void SV_ClipToTestArea(
 	results->fraction = 1.0;
 	VectorCopy(end, results->endpos);
 
-	// EF_ASTRAL_NOCLIP flagged entities don't clip with ASTRALSOLID entities
-	if ( ( contentmask & EF_ASTRAL_NOCLIP ) & test_contents ) {
+	// if it doesn't have any brushes of a type we
+	// are looking for, ignore it
+	if ( ! ( content_mask.include & test_contents ) ) {
 		return;
 	}
 
-	// if it doesn't have any brushes of a type we
-	// are looking for, ignore it
-	if ( ! ( contentmask & test_contents ) ) {
+	// ignore entities that have brushes of a type that we want to exclude
+	if ( content_mask.exclude & test_contents ) {
 		return;
 	}
 
@@ -723,19 +776,16 @@ void SV_ClipToTestArea(
 	VectorAdd(test_origin, test_mins, test_abs_mins);
 	VectorAdd(test_origin, test_maxs, test_abs_maxs);
 
-	if(test_abs_mins[0] > boxmaxs[0]
-		|| test_abs_mins[1] > boxmaxs[1]
-		|| test_abs_mins[2] > boxmaxs[2]
-		|| test_abs_maxs[0] < boxmins[0]
-		|| test_abs_maxs[1] < boxmins[1]
-		|| test_abs_maxs[2] < boxmins[2]) {
+	if(
+		!Com_BBOX_Intersects_Area(
+			test_abs_mins, test_abs_maxs, boxmins, boxmaxs)) {
 		return;
 	}
 
 	clipHandle = CM_TempBoxModel( test_mins, test_maxs, qfalse );
 
 	CM_TransformedBoxTrace ( results, start, end,
-		mins, maxs, clipHandle,  contentmask,
+		mins, maxs, clipHandle,  content_mask.include,
 		test_origin, angles, type);
 }
 
@@ -758,7 +808,7 @@ int SV_PointContents( const vec3_t p, int passEntityNum ) {
 	contents = CM_PointContents( p, 0 );
 
 	// or in contents from all the other entities
-	num = SV_AreaEntities( p, p, touch, MAX_GENTITIES );
+	num = SV_AreaEntities( p, p, NULL, touch, MAX_GENTITIES );
 
 	for ( i=0 ; i<num ; i++ ) {
 		if ( touch[i] == passEntityNum ) {

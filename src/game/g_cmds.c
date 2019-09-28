@@ -720,13 +720,13 @@ void Cmd_Noclip_f( gentity_t *ent )
     if( ent->client->noclip )
     {
       msg = "noclip OFF\n";
-      ent->r.contents = ent->client->cliprcontents;
+      G_SetContents(ent, ent->client->cliprcontents, qtrue);
     }
     else
     {
       msg = "noclip ON\n";
       ent->client->cliprcontents = ent->r.contents;
-      ent->r.contents = 0;
+      G_SetContents(ent, 0, qtrue);
     }
 
     ent->client->noclip = !ent->client->noclip;
@@ -1229,7 +1229,7 @@ static void Cmd_SayArea_f( gentity_t *ent )
   VectorAdd( ent->r.currentOrigin, range, maxs );
   VectorSubtract( ent->r.currentOrigin, range, mins );
 
-  num = SV_AreaEntities( mins, maxs, entityList, MAX_GENTITIES );
+  num = SV_AreaEntities( mins, maxs, NULL, entityList, MAX_GENTITIES );
   for( i = 0; i < num; i++ )
     G_SayTo( ent, &g_entities[ entityList[ i ] ], SAY_AREA, msg );
 
@@ -2459,18 +2459,18 @@ qboolean G_RoomForClassChange( gentity_t *ent, class_t class,
   VectorCopy( newOrigin, temp );
   temp[ 2 ] += nudgeHeight;
   SV_Trace( &tr, newOrigin, toMins, toMaxs, temp, ent->s.number,
-    MASK_PLAYERSOLID, TT_AABB );
+    *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB );
 
   //trace down to the ground so that we can evolve on slopes
   VectorCopy( newOrigin, temp );
   temp[ 2 ] += ( nudgeHeight * tr.fraction );
   SV_Trace( &tr, temp, toMins, toMaxs, newOrigin, ent->s.number,
-    MASK_PLAYERSOLID, TT_AABB );
+    *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB );
   VectorCopy( tr.endpos, newOrigin );
 
   //make REALLY sure
   SV_Trace( &tr, newOrigin, toMins, toMaxs, newOrigin,
-    ent->s.number, MASK_PLAYERSOLID, TT_AABB );
+    ent->s.number, *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB );
 
   //check there is room to evolve
   return ( !tr.startsolid && tr.fraction == 1.0f );
@@ -2537,7 +2537,7 @@ int G_CheckEvolve( gentity_t *ent, class_t newClass,
       VectorAdd( ent->client->ps.origin, range, maxs );
       VectorSubtract( ent->client->ps.origin, range, mins );
 
-      num = SV_AreaEntities( mins, maxs, entityList, MAX_GENTITIES );
+      num = SV_AreaEntities( mins, maxs, NULL, entityList, MAX_GENTITIES );
       for( i = 0; i < num; i++ )
       {
         other = &g_entities[ entityList[ i ] ];
@@ -2866,8 +2866,8 @@ void Cmd_Destroy_f( gentity_t *ent )
   AngleVectors( ent->client->ps.viewangles, forward, NULL, NULL );
   VectorMA( viewOrigin, 100, forward, end );
 
-  SV_Trace( &tr, viewOrigin, NULL, NULL, end, ent->s.number, MASK_PLAYERSOLID,
-    TT_AABB);
+  SV_Trace( &tr, viewOrigin, NULL, NULL, end, ent->s.number,
+    *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB);
   if ( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING )
     traceEnt = &g_entities[ ent->client->ps.persistant[ PERS_ACT_ENT ] ];
   else
@@ -4160,8 +4160,8 @@ void Cmd_Reload_f( gentity_t *ent )
     AngleVectors( ent->client->ps.viewangles, forward, NULL, NULL );
     VectorMA( viewOrigin, 100, forward, end );
 
-    SV_Trace( &tr, viewOrigin, NULL, NULL, end, ent->s.number, MASK_PLAYERSOLID,
-      TT_AABB );
+    SV_Trace( &tr, viewOrigin, NULL, NULL, end, ent->s.number,
+      *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB );
     if ( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING )
       traceEnt = &g_entities[ ent->client->ps.persistant[ PERS_ACT_ENT ] ];
     else

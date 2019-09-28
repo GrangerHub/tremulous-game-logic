@@ -1831,9 +1831,8 @@ qboolean G_admin_setdevmode( gentity_t *ent )
       //disable noclip
       if( cl->noclip )
       {
-        tent->r.contents = cl->cliprcontents;
-
-        cl->noclip = !cl->noclip;
+        G_SetContents(tent, cl->cliprcontents, qtrue);
+        cl->noclip = qfalse;
 
         if( tent->r.linked )
           SV_LinkEntity( tent );
@@ -3932,7 +3931,9 @@ qboolean G_admin_builder( gentity_t *ent )
   }
   VectorMA( start, 1000, forward, end );
 
-  SV_Trace( &tr, start, NULL, NULL, end, ent->s.number, MASK_PLAYERSOLID, TT_AABB );
+  SV_Trace(
+    &tr, start, NULL, NULL, end, ent->s.number,
+    *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB );
   traceEnt = &g_entities[ tr.entityNum ];
   if( tr.fraction < 1.0f && ( traceEnt->s.eType == ET_BUILDABLE ) )
   {
