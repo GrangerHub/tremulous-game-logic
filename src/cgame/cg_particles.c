@@ -2053,8 +2053,9 @@ static void CG_EvaluateParticlePhysics( particle_t *p )
     return;
   }
 
-  CG_Trace( &trace, p->origin, mins, maxs, newOrigin,
-      CG_AttachmentCentNum( &ps->attachment ), CONTENTS_SOLID );
+  CG_Trace(
+    &trace, p->origin, mins, maxs, newOrigin,
+    CG_AttachmentCentNum(&ps->attachment), *Temp_Clip_Mask(CONTENTS_SOLID, 0));
 
   //not hit anything or not a collider
   if( trace.fraction == 1.0f || bounce == 0.0f )

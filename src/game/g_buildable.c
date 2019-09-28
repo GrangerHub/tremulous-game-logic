@@ -102,7 +102,7 @@ void G_SuffocateTrappedEntities( gentity_t *self )
 
   VectorAdd( self->r.currentOrigin, self->r.mins, mins );
   VectorAdd( self->r.currentOrigin, self->r.maxs, maxs );
-  num = SV_AreaEntities( mins, maxs, touch, MAX_GENTITIES );
+  num = SV_AreaEntities( mins, maxs, NULL, touch, MAX_GENTITIES );
 
   for( i = 0; i < num; i++ )
   {
@@ -141,7 +141,7 @@ void G_SuffocateTrappedEntities( gentity_t *self )
 
     // check to see if entity is really trapped inside
     SV_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs,
-                ent->r.currentOrigin, ent->s.number, ent->clipmask, TT_AABB );
+                ent->r.currentOrigin, ent->s.number, ent->clip_mask, TT_AABB );
     if( tr.startsolid )
     {
       G_Damage( ent, self, self, NULL, NULL,
@@ -191,12 +191,16 @@ gentity_t *G_CheckSpawnPoint( int spawnNum, const vec3_t origin,
   else
     return NULL;
 
-  SV_Trace( &tr, origin, NULL, NULL, localOrigin, spawnNum, MASK_SHOT, TT_AABB );
+  SV_Trace(
+    &tr, origin, NULL, NULL, localOrigin, spawnNum,
+    *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB);
 
   if( tr.entityNum != ENTITYNUM_NONE )
     return &g_entities[ tr.entityNum ];
 
-  SV_Trace( &tr, localOrigin, cmins, cmaxs, localOrigin, -1, MASK_PLAYERSOLID, TT_AABB );
+  SV_Trace(
+    &tr, localOrigin, cmins, cmaxs, localOrigin, -1,
+    *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB);
 
   if( tr.entityNum != ENTITYNUM_NONE )
     return &g_entities[ tr.entityNum ];
@@ -242,7 +246,7 @@ static qboolean G_CheckAreaForSpawnIntersection(
 
   SV_ClipToTestArea(
     &tr, origin, NULL, NULL, localOrigin, area_mins, area_maxs, area_origin,
-    MASK_SHOT, MASK_SHOT, TT_AABB);
+    MASK_SHOT, *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB);
 
   if(tr.entityNum != ENTITYNUM_NONE) {
     return qtrue;
@@ -250,7 +254,7 @@ static qboolean G_CheckAreaForSpawnIntersection(
 
   SV_ClipToTestArea(
     &tr, origin, cmins, cmaxs, localOrigin, area_mins, area_maxs, area_origin,
-    MASK_PLAYERSOLID, MASK_PLAYERSOLID, TT_AABB);
+    MASK_PLAYERSOLID, *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB);
 
   if(tr.entityNum != ENTITYNUM_NONE) {
     return qtrue;
@@ -577,8 +581,7 @@ int G_GetMarkedBuildPoints( playerState_t *ps )
     return 0;
 
   G_SetPlayersLinkState( qfalse, &g_entities[ ps->clientNum ] );
-  BG_PositionBuildableRelativeToPlayer( ps, qfalse, G_TraceWrapper, origin,
-                                        angles, &tr1 );
+  BG_PositionBuildableRelativeToPlayer(ps, qfalse, origin, angles, &tr1);
   G_SetPlayersLinkState( qtrue, &g_entities[ ps->clientNum ] );
 
   for( i = MAX_CLIENTS, ent = g_entities + i; i < level.num_entities; i++, ent++ )
@@ -894,7 +897,7 @@ static void G_CreepSlow( gentity_t *self )
   VectorSubtract( self->r.currentOrigin, range, mins );
 
   //find humans
-  num = SV_AreaEntities( mins, maxs, entityList, MAX_GENTITIES );
+  num = SV_AreaEntities( mins, maxs, NULL, entityList, MAX_GENTITIES );
   for( i = 0; i < num; i++ )
   {
     enemy = &g_entities[ entityList[ i ] ];
@@ -989,7 +992,7 @@ void AGeneric_Blast( gentity_t *self )
   self->think = AGeneric_CreepRecede;
   self->nextthink = level.time + 500;
 
-  G_SetContents( self, 0);    //stop collisions...
+  G_SetContents( self, 0, qfalse);    //stop collisions...
   SV_LinkEntity( self ); //...requires a relink
 }
 
@@ -1189,7 +1192,8 @@ void AOvermind_Think( gentity_t *self )
     VectorAdd( self->s.pos.trBase, range, maxs );
     VectorSubtract( self->s.pos.trBase, range, mins );
     //do some damage
-    num = SV_AreaEntities( mins, maxs, entityList, MAX_GENTITIES );
+    num = SV_AreaEntities(
+      mins, maxs, Temp_Clip_Mask(MASK_SHOT, 0), entityList, MAX_GENTITIES);
     for( i = 0; i < num; i++ )
     {
       enemy = &g_entities[ entityList[ i ] ];
@@ -1345,8 +1349,10 @@ void ABarricade_Shrink( gentity_t *self, qboolean shrink )
     trace_t tr;
     int anim;
 
-    SV_Trace( &tr, self->r.currentOrigin, self->r.mins, self->r.maxs,
-                self->r.currentOrigin, self->s.number, MASK_PLAYERSOLID, TT_AABB );
+    SV_Trace(
+      &tr, self->r.currentOrigin, self->r.mins, self->r.maxs,
+      self->r.currentOrigin, self->s.number,
+      *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB);
     if ( tr.startsolid || tr.fraction < 1.0f )
     {
       self->r.maxs[ 2 ] = (int)( self->r.maxs[ 2 ] * BARRICADE_SHRINKPROP );
@@ -1455,7 +1461,9 @@ void AAcidTube_Think( gentity_t *self )
   // attack nearby humans
   if( self->spawned && self->health > 0 && self->powered )
   {
-    num = SV_AreaEntities( mins, maxs, entityList, MAX_GENTITIES );
+    num =
+      SV_AreaEntities(
+        mins, maxs, Temp_Clip_Mask(MASK_SHOT, 0), entityList, MAX_GENTITIES);
     for( i = 0; i < num; i++ )
     {
       enemy = &g_entities[ entityList[ i ] ];
@@ -1532,7 +1540,7 @@ static qboolean AHive_CheckTarget( gentity_t *self, gentity_t *enemy )
     }
 
     SV_Trace( &trace, tip_origin, NULL, NULL, bboxPoint.point,
-                self->s.number, MASK_SHOT, TT_AABB );
+                self->s.number, *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB );
     if( trace.fraction < 1.0f && trace.entityNum != enemy->s.number ) {
       continue;
     }
@@ -1585,7 +1593,9 @@ void AHive_Think( gentity_t *self )
     VectorAdd( self->r.currentOrigin, range, maxs );
     VectorSubtract( self->r.currentOrigin, range, mins );
 
-    num = SV_AreaEntities( mins, maxs, entityList, MAX_GENTITIES );
+    num =
+      SV_AreaEntities(
+        mins, maxs, Temp_Clip_Mask(MASK_SHOT, 0), entityList, MAX_GENTITIES);
 
     if( num == 0 )
       return;
@@ -1668,7 +1678,8 @@ void ABooster_Think( gentity_t *self )
   VectorAdd( self->r.currentOrigin, range, maxs );
   VectorSubtract( self->r.currentOrigin, range, mins );
 
-  num = SV_AreaEntities( mins, maxs, entityList, MAX_GENTITIES );
+  num =
+    SV_AreaEntities(mins, maxs, NULL, entityList, MAX_GENTITIES );
   for( i = 0; i < num; i++ )
   {
     gentity_t *player = &g_entities[ entityList[ i ] ];
@@ -1683,7 +1694,9 @@ void ABooster_Think( gentity_t *self )
     if( Distance( client->ps.origin, self->r.currentOrigin ) > REGEN_BOOST_RANGE )
       continue;
 
-    if( !G_Visible( self, player, (CONTENTS_SOLID|CONTENTS_PLAYERCLIP) ) )
+    if(
+      !G_Visible(
+        self, player, *Temp_Clip_Mask(CONTENTS_SOLID|CONTENTS_PLAYERCLIP, 0)))
       continue;
 
     client->ps.stats[ STAT_STATE ] |= SS_BOOSTED;
@@ -1721,8 +1734,9 @@ qboolean AHovel_Blocked( gentity_t *hovel, gentity_t *player, qboolean provideEx
   VectorCopy( hovel->r.currentOrigin, target );
   target[2] += fabs( mins[2] ) + 1.0f;
   SV_UnlinkEntity( player );
-  SV_Trace( &tr, position, mins, maxs, target, hovel->s.number, MASK_PLAYERSOLID,
-            TT_AABB );
+  SV_Trace(
+    &tr, position, mins, maxs, target, hovel->s.number,
+    *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB );
   SV_LinkEntity( player );
   if( tr.startsolid || tr.fraction < 1.0f )
     return qtrue;
@@ -1780,7 +1794,7 @@ void G_PositionHovelsBuilder( gentity_t *self )
 
   SV_UnlinkEntity( self->occupation.occupant );
   SV_Trace( &tr, self->r.currentOrigin, mins, maxs, hovelOrigin, self->s.number,
-            MASK_DEADSOLID, TT_CAPSULE );
+            *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_CAPSULE );
   SV_LinkEntity( self->occupation.occupant );
 
   if( tr.fraction < 1.0f )
@@ -2131,7 +2145,9 @@ static qboolean ATrapper_CheckTarget( gentity_t *self, gentity_t *target, int ra
   if( DotProduct( distance, self->s.origin2 ) < LOCKBLOB_DOT )
     return qfalse;
 
-  SV_Trace( &trace, self->s.pos.trBase, NULL, NULL, target->s.pos.trBase, self->s.number, MASK_SHOT, TT_AABB );
+  SV_Trace(
+    &trace, self->s.pos.trBase, NULL, NULL, target->s.pos.trBase,
+    self->s.number, *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB);
   if ( trace.contents & CONTENTS_SOLID ) // can we see the target?
     return qfalse;
 
@@ -2578,13 +2594,13 @@ void HReactor_Think( gentity_t *self )
     qboolean fired = qfalse;
 
     // Creates a tesla trail for every target
-    num = SV_AreaEntities( mins, maxs, entityList, MAX_GENTITIES );
+    num = SV_AreaEntities( mins, maxs, NULL, entityList, MAX_GENTITIES );
     for( i = 0; i < num; i++ )
     {
       enemy = &g_entities[ entityList[ i ] ];
       if( ( !enemy->client ||
             enemy->client->ps.stats[ STAT_TEAM ] != TEAM_ALIENS ||
-            (enemy->r.contents & CONTENTS_ASTRAL_NOCLIP))
+            (enemy->r.contents & CONTENTS_ASTRAL))
           && enemy->s.eType != ET_TELEPORTAL )
         continue;
       if( G_NoTarget( enemy ) )
@@ -2762,7 +2778,7 @@ void HMedistat_Think( gentity_t *self )
       G_SetIdleBuildableAnim( self, BANIM_IDLE2 );
 
     //check if a previous occupier is still here
-    num = SV_AreaEntities( mins, maxs, entityList, MAX_GENTITIES );
+    num = SV_AreaEntities( mins, maxs, NULL, entityList, MAX_GENTITIES );
     for( i = 0; i < num; i++ )
     {
       player = &g_entities[ entityList[ i ] ];
@@ -2939,7 +2955,7 @@ static qboolean HMGTurret_TargetPointIsVisible( gentity_t *self,
 
   VectorMA( self->s.pos.trBase, MGTURRET_RANGE, targetPoint->direction, end );
   SV_Trace( &tr, self->s.pos.trBase, NULL, NULL, end,
-              self->s.number, MASK_SHOT, TT_AABB );
+              self->s.number, *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB );
 
   return ( tr.entityNum == target - g_entities );
 
@@ -3232,7 +3248,7 @@ static qboolean HMGTurret_TrackEnemy( gentity_t *self )
     VectorNormalize( forward );
     VectorMA( self->s.pos.trBase, MGTURRET_RANGE, forward, end );
     SV_Trace( &tr, self->s.pos.trBase, NULL, NULL, end,
-                self->s.number, MASK_SHOT, TT_AABB );
+                self->s.number, *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB );
 
     return ( tr.entityNum == self->enemy - g_entities );
   }
@@ -3268,7 +3284,9 @@ static void HMGTurret_FindEnemy( gentity_t *self )
   VectorSet( range, MGTURRET_RANGE, MGTURRET_RANGE, MGTURRET_RANGE );
   VectorAdd( self->r.currentOrigin, range, maxs );
   VectorSubtract( self->r.currentOrigin, range, mins );
-  num = SV_AreaEntities( mins, maxs, entityList, MAX_GENTITIES );
+  num =
+    SV_AreaEntities(
+      mins, maxs, Temp_Clip_Mask(MASK_SHOT, 0), entityList, MAX_GENTITIES);
 
   if( num == 0 )
     return;
@@ -3578,7 +3596,7 @@ void HTeslaGen_Think( gentity_t *self )
     VectorSubtract( origin, range, mins );
 
     // Attack nearby Aliens and portals
-    num = SV_AreaEntities( mins, maxs, entityList, MAX_GENTITIES );
+    num = SV_AreaEntities( mins, maxs, NULL, entityList, MAX_GENTITIES );
     for( i = 0; i < num; i++ )
     {
       self->enemy = &g_entities[ entityList[ i ] ];
@@ -3586,7 +3604,7 @@ void HTeslaGen_Think( gentity_t *self )
       if( G_NoTarget( self->enemy ) )
         continue;
 
-      if(self->enemy->r.contents & CONTENTS_ASTRAL_NOCLIP) {
+      if(self->enemy->r.contents & CONTENTS_ASTRAL) {
         continue;
       }
 
@@ -3749,7 +3767,9 @@ void G_BuildableTouchTriggers( gentity_t *ent )
   VectorSubtract( mins, range, mins );
   VectorAdd( maxs, range, maxs );
 
-  num = SV_AreaEntities( mins, maxs, touch, MAX_GENTITIES );
+  num =
+    SV_AreaEntities(
+      mins, maxs, Temp_Clip_Mask(CONTENTS_TRIGGER, 0), touch, MAX_GENTITIES);
 
   VectorAdd( ent->r.currentOrigin, bmins, mins );
   VectorAdd( ent->r.currentOrigin, bmaxs, maxs );
@@ -4020,7 +4040,7 @@ void G_BuildableThink( gentity_t *ent, int msec )
       SV_Trace(
         &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs,
         ent->r.currentOrigin, ent->s.number,
-        (CONTENTS_LAVA|CONTENTS_SLIME), TT_AABB);
+        *Temp_Clip_Mask((CONTENTS_LAVA|CONTENTS_SLIME), 0), TT_AABB);
       if(tr.fraction < 1.0f || tr.allsolid || tr.startsolid) {
         if( tr.contents & CONTENTS_LAVA ) {
           G_Damage( ent, ent, &g_entities[ ent->dropperNum ], NULL, NULL,
@@ -4104,7 +4124,7 @@ qboolean G_BuildableRange( vec3_t origin, float r, buildable_t buildable )
   VectorAdd( origin, range, maxs );
   VectorSubtract( origin, range, mins );
 
-  num = SV_AreaEntities( mins, maxs, entityList, MAX_GENTITIES );
+  num = SV_AreaEntities( mins, maxs, NULL, entityList, MAX_GENTITIES );
   for( i = 0; i < num; i++ )
   {
     ent = &g_entities[ entityList[ i ] ];
@@ -4733,12 +4753,11 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   BG_BuildableBoundingBox( buildable, mins, maxs );
 
   G_SetPlayersLinkState( qfalse, ent );
-  BG_PositionBuildableRelativeToPlayer( ps, qfalse, G_TraceWrapper,
-                                        entity_origin, angles, &tr1 );
+  BG_PositionBuildableRelativeToPlayer(ps, qfalse, entity_origin, angles, &tr1);
   G_SetPlayersLinkState( qtrue, ent );
 
   SV_Trace( &tr2, entity_origin, mins, maxs, entity_origin, -1,
-                MASK_PLAYERSOLID, TT_AABB );
+                *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB );
 
   VectorCopy( entity_origin, origin );
   *groundEntNum = tr1.entityNum;
@@ -4810,7 +4829,7 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
           G_BBOXes_Visible(
             ENTITYNUM_NONE, entity_origin, mins, maxs,
             blocking_ent->s.number, blocking_ent->r.currentOrigin,
-            blocking_ent->r.mins, blocking_ent->r.maxs, MASK_SHOT))) {
+            blocking_ent->r.mins, blocking_ent->r.maxs, *Temp_Clip_Mask(MASK_SHOT, 0)))) {
         reason = IBE_BLOCKEDBYENEMY;
       }
     }
@@ -4844,7 +4863,7 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
           G_BBOXes_Visible(
             ENTITYNUM_NONE, entity_origin, mins, maxs,
             blocking_ent->s.number, blocking_ent->r.currentOrigin,
-            blocking_ent->r.mins, blocking_ent->r.maxs, MASK_SHOT))) {
+            blocking_ent->r.mins, blocking_ent->r.maxs, *Temp_Clip_Mask(MASK_SHOT, 0)))) {
         reason = IBE_BLOCKEDBYENEMY;
       }
     }
@@ -4972,7 +4991,7 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   if(reason == IBE_NONE) {
     SV_Trace(
       &tr3, entity_origin, mins, maxs, entity_origin, ent->s.number,
-      (CONTENTS_LAVA|CONTENTS_SLIME), TT_AABB);
+      *Temp_Clip_Mask((CONTENTS_LAVA|CONTENTS_SLIME), 0), TT_AABB);
     if(tr3.fraction < 1.0f || tr3.allsolid || tr3.startsolid) {
       reason = IBE_NOROOM;
     }
@@ -5066,7 +5085,7 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
   built->occupation.flags = BG_Buildable( buildable )->occupationFlags;
   built->occupation.pm_type = BG_Buildable( buildable )->activationPm_type;
   built->occupation.contents = BG_Buildable( buildable )->activationContents;
-  built->occupation.clipMask = BG_Buildable( buildable )->activationClipMask;
+  built->occupation.clip_mask = BG_Buildable( buildable )->activationClipMask;
 
   built->takedamage = qtrue;
   built->spawned = qfalse;
@@ -5204,8 +5223,8 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
       break;
   }
 
-  G_SetContents( built, CONTENTS_BODY );
-  G_SetClipmask( built, MASK_PLAYERSOLID );
+  G_SetContents( built, CONTENTS_BODY, qfalse );
+  G_SetClipmask( built, MASK_PLAYERSOLID, 0 );
   built->enemy = NULL;
   built->s.weapon = BG_Buildable( buildable )->turretProjType;
 
@@ -5435,7 +5454,7 @@ static gentity_t *G_FinishSpawningBuildable( gentity_t *ent, qboolean force )
   VectorAdd( dest, built->r.currentOrigin, dest );
 
   SV_Trace( &tr, built->r.currentOrigin, built->r.mins, built->r.maxs, dest,
-    built->s.number, built->clipmask, TT_AABB );
+    built->s.number, built->clip_mask, TT_AABB );
 
   if( tr.startsolid && !force )
   {
@@ -6017,7 +6036,7 @@ void G_BuildLogRevertThink( gentity_t *ent )
     BG_BuildableBoundingBox( ent->s.modelindex, mins, maxs );
     VectorAdd( ent->s.pos.trBase, mins, mins );
     VectorAdd( ent->s.pos.trBase, maxs, maxs );
-    num = SV_AreaEntities( mins, maxs, blockers, MAX_GENTITIES );
+    num = SV_AreaEntities( mins, maxs, NULL, blockers, MAX_GENTITIES );
     for( i = 0; i < num; i++ )
     {
       gentity_t *targ;
@@ -6192,10 +6211,13 @@ void G_UpdateBuildableRangeMarkers( void )
             client->ps.weapon == WP_ABUILD || client->ps.weapon == WP_ABUILD2 );
       wantsToSee = ( client->pers.buildableRangeMarkerMask & ( 1 << bType ) );
 
-      if( ( team == bTeam ) &&
+      if(
+        (
+          ( team == bTeam ) &&
           weaponDisplays && 
           wantsToSee &&
-          (BG_Buildable( bType )->role & ROLE_PERVASIVE) )
+          (BG_Buildable( bType )->role & ROLE_PERVASIVE)) ||
+        (BG_Buildable( bType )->role & ROLE_CORE) )
       {
         if( i >= 32 )
           e->r.hack.generic1 |= 1 << ( i - 32 );
