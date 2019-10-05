@@ -738,6 +738,14 @@ typedef struct centity_s
   int                   armorGenTime;
   qboolean              armorGen;
 
+  vec3_t                mins;
+  vec3_t                maxs;
+  vec3_t                absmin;
+  vec3_t                absmax;
+  vec3_t                collision_origin;
+  vec3_t                collision_angles;
+
+  int                   contents;
   qboolean              linked;
   qboolean              is_in_solid_list;
   qboolean              valid;
@@ -1994,7 +2002,7 @@ void        CG_ModelDoor( centity_t *cent );
 
 void        CG_BuildSolidList( void );
 int         CG_PointContents( const vec3_t point, int passEntityNum );
-qboolean    CG_Visible( centity_t *cent, int contents );
+qboolean    CG_Visible( centity_t *cent, content_mask_t contents );
 void        CG_Link_Solid_Entity(int ent_num);
 void        CG_Unlink_Solid_Entity(int ent_num);
 void        CG_Link_Buildables(void);
@@ -2003,12 +2011,34 @@ void        CG_Link_Marked_Buildables(void);
 void        CG_Unlink_Marked_Buildables(void);
 void        CG_Link_Players(void);
 void        CG_Unlink_Players(void);
-void        CG_Trace( trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs,
-                const vec3_t end, int skipNumber, int mask );
-void        CG_CapTrace( trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs,
-                const vec3_t end, int skipNumber, int mask );
-void        CG_BiSphereTrace( trace_t *result, const vec3_t start, const vec3_t end,
-                const float startRadius, const float endRadius, int skipNumber, int mask );
+void        CG_Update_Collision_Data_For_Entity(
+  int ent_num , int time, const vec3_t origin, const playerState_t *ps);
+int CG_Area_Entities(
+  const vec3_t mins, const vec3_t maxs, const content_mask_t *content_mask,
+  int *entityList, int maxcount);
+void CG_Clip_To_Entity(
+  trace_t *trace, const vec3_t start, vec3_t mins, vec3_t maxs,
+  const vec3_t end, int entityNum, const content_mask_t content_mask,
+  traceType_t collisionType );
+void CG_Clip_To_Test_Area(
+  trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs,
+  const vec3_t end, const vec3_t test_mins, const vec3_t test_maxs,
+  const vec3_t test_origin, int test_contents, const content_mask_t content_mask,
+  traceType_t collisionType);
+void        CG_Trace(
+  trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs,
+  const vec3_t end, int skipNumber, content_mask_t content_mask);
+void        CG_CapTrace(
+  trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs,
+  const vec3_t end, int skipNumber, content_mask_t content_mask);
+void        CG_BiSphereTrace(
+  trace_t *result, const vec3_t start, const vec3_t end,
+  const float startRadius, const float endRadius, int skipNumber,
+  content_mask_t content_mask);
+void        CG_Trace_Wrapper(
+	trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs,
+	const vec3_t end, int passEntityNum, const content_mask_t content_mask,
+	traceType_t type);
 void        CG_PredictPlayerState( void );
 
 
@@ -2027,6 +2057,7 @@ void        CG_AddToKillMsg(const char* killername, const char* victimname, int 
 //
 void        CG_DrawBoundingBox( vec3_t origin, vec3_t mins, vec3_t maxs );
 void        CG_SetEntitySoundPosition( centity_t *cent );
+void        CG_CalcEntityLerpPositions(centity_t *cent, int time);
 void        CG_AddPacketEntities( void );
 void        CG_Beam( centity_t *cent );
 int         CG_Get_Pusher_Num(int ent_num);

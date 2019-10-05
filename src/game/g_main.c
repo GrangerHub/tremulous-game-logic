@@ -623,7 +623,8 @@ G_InitGame
 */
 Q_EXPORT void G_InitGame( int levelTime, int randomSeed, int restart )
 {
-  int i;
+  bg_collision_funcs_t collision_funcs;
+  int                  i;
 
   srand( randomSeed );
 
@@ -798,6 +799,15 @@ Q_EXPORT void G_InitGame( int levelTime, int randomSeed, int restart )
         &g_entities[i].r.linked, NULL);
     }
   }
+
+  collision_funcs.trace = SV_Trace;
+  collision_funcs.pointcontents = SV_PointContents;
+  collision_funcs.unlagged_on = G_UnlaggedOn;
+  collision_funcs.unlagged_off = G_UnlaggedOff;
+  collision_funcs.area_entities = SV_AreaEntities;
+  collision_funcs.clip_to_entity  = SV_ClipToEntity;
+  collision_funcs.clip_to_test_area = SV_ClipToTestArea;
+  BG_Init_Collision_Functions(collision_funcs);
 
   G_Init_Unlagged( );
 
@@ -1846,7 +1856,8 @@ void MoveClientToIntermission( gentity_t *ent )
   ent->s.eType = ET_GENERAL;
   ent->s.loopSound = 0;
   ent->s.event = 0;
-  ent->r.contents = 0;
+
+  G_SetContents(ent, 0, qtrue);
   G_BackupUnoccupyContents( ent );
 }
 
@@ -2631,9 +2642,9 @@ void G_LevelRestart( qboolean stopWarmup )
         //disable noclip
         if( cl->noclip )
         {
-          tent->r.contents = cl->cliprcontents;
 
-          cl->noclip = !cl->noclip;
+          G_SetContents(tent, tent->client->cliprcontents, qtrue);
+          cl->noclip = qfalse;
 
           if( tent->r.linked )
             SV_LinkEntity( tent );

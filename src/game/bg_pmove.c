@@ -114,38 +114,6 @@ void PM_AddTouchEnt( trace_t *trace, const vec3_t impactVelocity )
 
 /*
 ===================
-PM_UnlaggedOn
-===================
-*/
-static void PM_UnlaggedOn(unlagged_attacker_data_t *data) {
-  data->ent_num = pm->ps->clientNum;
-
-  if(pm->unlagged_on) {
-    pm->unlagged_on(data);
-  } else {
-    BG_CalcMuzzlePointFromPS(
-      pm->ps,
-      data->forward_out,
-      data->right_out,
-      data->up_out,
-      data->muzzle_out);
-    VectorCopy(pm->ps->origin, data->origin_out);
-  }
-}
-
-/*
-===================
-PM_UnlaggedOff
-===================
-*/
-static void PM_UnlaggedOff(void) {
-  if(pm->unlagged_off) {
-    pm->unlagged_off( );
-  }
-}
-
-/*
-===================
 PM_StartTorsoAnim
 ===================
 */
@@ -792,229 +760,7 @@ static qboolean PM_IsWall( trace_t *trace )
 
 
 /*
-==============
-WALLCOAST_GROUNDED
-WALLCOAST_3D
-
-Defined to increase readability.
-==============
-*/
-typedef enum
-{
-  WALLCOAST_3D = 0,
-  WALLCOAST_GROUNDED
-} wallcoast_t;
-
-
-/*
-==============
-PM_WallCoast
-
-Modifies `wishDir` as to allow coasting along walls at full speed even when the
-desired movement direction is not perfectly parallel with the wall. The
-`groundNormal` parameter is only used for ambiguity resolution.
-==============
-*/
-/*
-static void PM_WallCoast( vec3_t wishDir, wallcoast_t grounded )
-{
-  // How directly can the player need to look at the wall before slowing down.
-  static float SLOWDOWN_THRESHOLD = 0.95f;
-  // Pointer to the ground normal.
-  float* groundNormal;
-  // Look direction (possibly projected onto the ground).
-  vec3_t myLookDir;
-  // Desired movement direction (possibly projected onto the ground).
-  vec3_t myWishDir;
-  // Wall normal (possibly projected onto the ground).
-  vec3_t myWallNormal;
-  // The wall the player is running into.
-  trace_t wall;        
-  // Where to stop searching for a wall. 
-  vec3_t searchEnd;   
-  // How much does myWishDir align with myLookDir (0 to 1).
-  float alignment;   
-  // How much is the player is moving into the wall (0 to 1).
-  float ramFactor;    
-  // Resulting direction.
-  vec3_t result;
-
-  // Get the ground normal.
-  if( pml.groundPlane )
-    groundNormal = pml.groundTrace.plane.normal;
-  else
-    groundNormal = upNormal;
-
-  // Project the desired direction onto the ground.
-  if( grounded )
-  {
-    ProjectPointOnPlane( myWishDir, wishDir, groundNormal );
-    VectorNormalize( myWishDir );
-  }
-  else
-    VectorCopy( wishDir, myWishDir );
-  
-  // Find a wall the player is running into.
-  VectorMA( pm->ps->origin, 0.25f, myWishDir, searchEnd );
-  pm->trace( &wall, pm->ps->origin, pm->mins, pm->maxs,
-             searchEnd, pm->ps->clientNum, pm->tracemask );
-
-  // Nothing found or not a wall.
-  if( !PM_IsWall( &wall ) )
-    return;
-
-  // Project the look direction and the wall normal onto the ground.
-  if( grounded )
-  {
-    ProjectPointOnPlane( myWallNormal, wall.plane.normal, groundNormal );
-    ProjectPointOnPlane( myLookDir, pml.forward, groundNormal );
-    VectorNormalize( myLookDir );
-    VectorNormalize( myWallNormal );
-  }
-  else
-  {
-    VectorCopy( wall.plane.normal, myWallNormal );
-    VectorCopy( pml.forward, myLookDir );
-  }
-
-  // Check how much the look direction aligns with the desired direction.
-  alignment = DotProduct( myLookDir, myWishDir );
-
-  // Project the desired direction onto the wall.
-  ProjectPointOnPlane( result, wishDir, myWallNormal );
-
-  // If we are moving directly towards the wall, try to guess the intended
-  // movement direction.
-  if( VectorLength( result ) < 0.025f )
-  {
-    // The look direction and the desired movement direction are orthogonal.
-    // We have no information to work with, give up.
-    if( fabs( alignment ) < 0.025f )
-      return;
-
-    // Pick either the look direction or the opposite of it, whichever aligns
-    // with the original desired direction best.
-    if( alignment > 0.0f )
-      VectorCopy( myLookDir, result );
-    else
-      VectorNegate( myLookDir, result );
-
-    // Project the picked direction onto the wall. If this direction would still
-    // lead the player directly into the wall (this happens when moving directly
-    // forward or backward), give up.
-    ProjectPointOnPlane( result, result, wall.plane.normal );
-    if( VectorLength( result ) < 0.025f )
-      return;
-  }
-
-  // Normalize the resulting direction.
-  VectorNormalize( result );
-
-  // Calculate how much the player is moving into the wall.
-  ramFactor = MAX( 0.0f, -DotProduct( myWishDir, myWallNormal ) );
-
-  // Make sure that the transition from one direction to the opposite is not too
-  // sudden. When moving directly or almost directly into the wall, do not give
-  // the player full speed. Since we only have direct control over the movement
-  // direction and not the speed in this function, this is accomplished by
-  // directing some of the velocity into the wall, allowing PM_ClipVelocity to
-  // do the rest of the job.
-  if( ramFactor > SLOWDOWN_THRESHOLD )
-  {
-    float diff;
-    float maxDiff;
-    float fraction;
-
-    // Calculate how much of the speed to keep.
-    diff = ramFactor - SLOWDOWN_THRESHOLD;
-    maxDiff = 1.0f - SLOWDOWN_THRESHOLD;
-    fraction = 1.0f - diff * ( 1.0f / maxDiff );
-
-    // Always keep some speed unless going directly forward.
-    if ( alignment <= 0.95f )
-    {
-      static float MIN_FRACTION = 0.4f;
-      fraction = MIN_FRACTION + ( fraction * ( 1.0f - MIN_FRACTION ) );
-    }
-
-    // Modify the resulting direction.
-    VectorScale( result, fraction, result );
-    VectorMA( result, fraction - 1.0f, myWallNormal, result );
-    VectorNormalize( result );
-  }
-
-  // Set the new desired direction.
-  VectorCopy( result, wishDir );
-}
-*/
-
-/*
-==============
-PM_ScanForWall
-
-Scans for a wall in the given direction.
-==============
-*/
-/*static qboolean PM_ScanForWall( trace_t *wall, vec3_t searchDir )
-{
-  vec3_t searchEnd;
-  VectorMA( pm->ps->origin, 0.25f, searchDir, searchEnd );
-  pm->trace( wall, pm->ps->origin, pm->mins, pm->maxs,
-             searchEnd, pm->ps->clientNum, pm->tracemask );
-  return PM_IsWall( wall );
-}*/
-
-
-/*
-==============
-PM_ComputeWallSpeedFactor
-
-Checks if the player is in contact with a wall and computes how much of the
-potential speed increase to actually add to the maximum speed, putting the
-result in pml.wallSpeedFactor.
-==============
-*/
-/*static void PM_ComputeWallSpeedFactor( void )
-{
-  float*   groundNormal; //- Ground normal.
-  vec3_t   searchDir;    //- Direction for searching for a wall.
-  trace_t  wall;         //- Wall we are moving along.
-  vec3_t   lookDir;      //- Look direction (horizontal only).
-  vec3_t   normal;       //- Wall normal (horizontal only).
-  float    alignment;    //- How much the look direction aligns with the wall
-                         //  direction (from 0 to 1).
-
-  // Find the wall we are moving along.
-  if( pml.groundPlane )
-    groundNormal = pml.groundTrace.plane.normal;
-  else
-    groundNormal = upNormal;
-
-  ProjectPointOnPlane( searchDir, pml.right, groundNormal );
-  VectorNormalize( searchDir );
-
-  if( !PM_ScanForWall( &wall, searchDir ) )
-  {
-    VectorNegate( searchDir, searchDir );
-    if( !PM_ScanForWall( &wall, searchDir ) )
-      return;
-  }
-
-  // Project the look direction and the wall normal onto the ground.
-  ProjectPointOnPlane( lookDir, pml.forward, groundNormal );
-  ProjectPointOnPlane( normal, wall.plane.normal, groundNormal );
-  VectorNormalize( lookDir );
-  VectorNormalize( normal );
-
-  // Calculate the alignment.
-  alignment = 1.0f - fabs( DotProduct( lookDir, normal ) );
-
-  // Use sqrt to make this easier to use. MAX is used just in case.
-  pml.wallSpeedFactor = sqrt( MAX( 0.0f, alignment ) );
-}*/
-
-
-/*
+=======
 ============
 PM_CmdScale
 
@@ -1557,8 +1303,8 @@ static qboolean PM_CheckWallJump( vec3_t wishDir, float wishSpeed )
 
   // Find a wall to jump off of.
   VectorMA( pm->ps->origin, 0.25f, moveDir, searchEnd );
-  pm->trace( &wall, pm->ps->origin, pm->mins, pm->maxs,
-             searchEnd, pm->ps->clientNum, pm->tracemask );
+  BG_Trace( &wall, pm->ps->origin, pm->mins, pm->maxs,
+             searchEnd, pm->ps->clientNum, pm->trace_mask, TT_AABB );
 
   // Check if the found a wall.
   if( !PM_IsWall( &wall ) )
@@ -2037,8 +1783,8 @@ static qboolean PM_CheckWaterJump( void )
 
   VectorMA( start, 2.0f, flatforward, spot );
 
-  pm->trace( &trace, start, mins, maxs, spot, pm->ps->clientNum,
-             MASK_PLAYERSOLID );
+  BG_Trace( &trace, start, mins, maxs, spot, pm->ps->clientNum,
+             pm->trace_mask, TT_AABB );
 
   if( trace.fraction >= 1.0f  )
     return qfalse;
@@ -2046,8 +1792,8 @@ static qboolean PM_CheckWaterJump( void )
   start[ 2 ] += 16;
   spot[ 2 ] += 16;
 
-  pm->trace( &trace, start, mins, maxs, spot, pm->ps->clientNum,
-             MASK_PLAYERSOLID );
+  BG_Trace( &trace, start, mins, maxs, spot, pm->ps->clientNum,
+             pm->trace_mask, TT_AABB );
 
   if( trace.fraction < 1.0f  )
     return qfalse;
@@ -3009,8 +2755,9 @@ static void PM_CheckLadder( void )
     maxs[2] = mins[2] = ( pm->maxs[2] + pm->mins[2] ) / 2;
 
   // trace to check for touching a potential ladder surface
-  pm->trace( &bboxTouchTrace, pm->ps->origin, mins, maxs, end,
-             pm->ps->clientNum, MASK_PLAYERSOLID );
+  BG_Trace(
+    &bboxTouchTrace, pm->ps->origin, mins, maxs, end, pm->ps->clientNum,
+    pm->trace_mask, TT_AABB);
 
   if( bboxTouchTrace.fraction >= 1 &&
       !bboxTouchTrace.startsolid &&
@@ -3053,8 +2800,8 @@ static void PM_CheckLadder( void )
 
     VectorMA( start, 2.0f, flatforward, end );
 
-    pm->trace( &trace, start, mins, maxs, end, pm->ps->clientNum,
-               MASK_PLAYERSOLID );
+    BG_Trace(
+      &trace, start, mins, maxs, end, pm->ps->clientNum, pm->trace_mask, TT_AABB);
 
     if( trace.fraction >= 1.0f &&
         !trace.startsolid &&
@@ -3077,8 +2824,9 @@ static void PM_CheckLadder( void )
       maxs[0] += -0.5f;
 
       //find how far below the viewheight the dry surface is
-      pm->trace( &trace, dryTraceStart, mins, maxs, dryTraceEnd,
-                 pm->ps->clientNum, MASK_PLAYERSOLID );
+      BG_Trace(
+        &trace, dryTraceStart, mins, maxs, dryTraceEnd, pm->ps->clientNum,
+        pm->trace_mask, TT_AABB);
 
       if( trace.startsolid || trace.allsolid )
         drySurfaceDistance = 0;
@@ -3090,8 +2838,8 @@ static void PM_CheckLadder( void )
       bboxBottom[2] += ( pm->mins[2] - 1 );
 
       // find how far below the viewheight the water level is
-      pm->trace( &trace, start, mins, maxs, bboxBottom, pm->ps->clientNum,
-                 MASK_WATER );
+      BG_Trace( &trace, start, mins, maxs, bboxBottom, pm->ps->clientNum,
+                 *Temp_Clip_Mask(MASK_WATER, 0), TT_AABB);
 
       if( trace.fraction < 1.0f )
       {
@@ -3390,7 +3138,9 @@ static int PM_CorrectAllSolid(trace_t *trace) {
         point[0] += (float)i;
         point[1] += (float)j;
         point[2] += (float)k;
-        pm->trace( trace, point, pm->mins, pm->maxs, point, pm->ps->clientNum, pm->tracemask );
+        BG_Trace(
+          trace, point, pm->mins, pm->maxs, point, pm->ps->clientNum,
+          pm->trace_mask, TT_AABB);
 
         if( pm->debugLevel ) {
           Com_Printf("%i:trace->allsolid is %d\n", c_pmove, trace->allsolid);
@@ -3401,7 +3151,9 @@ static int PM_CorrectAllSolid(trace_t *trace) {
           point[1] = pm->ps->origin[1];
           point[2] = pm->ps->origin[2] - 0.25;
 
-          pm->trace( trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum, pm->tracemask );
+          BG_Trace(
+            trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum,
+            pm->trace_mask, TT_AABB);
           pml.groundTrace = *trace;
           return qtrue;
         }
@@ -3441,7 +3193,9 @@ static void PM_GroundTraceMissed( void )
     VectorCopy( pm->ps->origin, point );
     point[ 2 ] -= 64.0f;
 
-    pm->trace( &trace, pm->ps->origin, NULL, NULL, point, pm->ps->clientNum, pm->tracemask );
+    BG_Trace(
+      &trace, pm->ps->origin, NULL, NULL, point, pm->ps->clientNum,
+      pm->trace_mask, TT_AABB);
     if( trace.fraction == 1.0f )
     {
       if( pm->cmd.forwardmove >= 0 )
@@ -3603,7 +3357,9 @@ static void PM_GroundClimbTrace( void )
 
         //trace into direction we are moving
         VectorMA( pm->ps->origin, 0.25f, movedir, point );
-        pm->trace( &trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum, pm->tracemask );
+        BG_Trace(
+          &trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum,
+          pm->trace_mask, TT_AABB);
         break;
 
       case 1:
@@ -3611,7 +3367,11 @@ static void PM_GroundClimbTrace( void )
         //mask out CONTENTS_BODY to not hit other players and avoid the camera flipping out when
         // wallwalkers touch
         VectorMA( pm->ps->origin, -0.25f, surfNormal, point );
-        pm->trace( &trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum, pm->tracemask & ~CONTENTS_BODY );
+        BG_Trace(
+          &trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum,
+          *Temp_Clip_Mask(
+            (pm->trace_mask.include & ~CONTENTS_BODY), pm->trace_mask.exclude),
+          TT_AABB);
         break;
 
       case 2:
@@ -3619,7 +3379,9 @@ static void PM_GroundClimbTrace( void )
         {
           //step down
           VectorMA( pm->ps->origin, -STEPSIZE, surfNormal, point );
-          pm->trace( &trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum, pm->tracemask );
+          BG_Trace(
+            &trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum,
+            pm->trace_mask, TT_AABB);
         }
         else
           continue;
@@ -3631,7 +3393,9 @@ static void PM_GroundClimbTrace( void )
         {
           VectorMA( pm->ps->origin, -16.0f, surfNormal, point );
           VectorMA( point, -16.0f, movedir, point );
-          pm->trace( &trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum, pm->tracemask );
+          BG_Trace(
+            &trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum,
+            pm->trace_mask, TT_AABB);
         }
         else
           continue;
@@ -3641,7 +3405,9 @@ static void PM_GroundClimbTrace( void )
         //fall back so we don't have to modify PM_GroundTrace too much
         VectorCopy( pm->ps->origin, point );
         point[ 2 ] = pm->ps->origin[ 2 ] - 0.25f;
-        pm->trace( &trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum, pm->tracemask );
+        BG_Trace(
+          &trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum,
+          pm->trace_mask, TT_AABB);
         break;
     }
 
@@ -3898,7 +3664,9 @@ static void PM_GroundTrace( void )
   point[ 1 ] = pm->ps->origin[ 1 ];
   point[ 2 ] = pm->ps->origin[ 2 ] - 0.25f;
 
-  pm->trace( &trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum, pm->tracemask );
+  BG_Trace(
+    &trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum,
+    pm->trace_mask, TT_AABB);
 
   pml.groundTrace = trace;
 
@@ -3922,7 +3690,9 @@ static void PM_GroundTrace( void )
       point[ 0 ] = pm->ps->origin[ 0 ];
       point[ 1 ] = pm->ps->origin[ 1 ];
       point[ 2 ] = pm->ps->origin[ 2 ] - STEPSIZE;
-      pm->trace( &trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum, pm->tracemask );
+      BG_Trace(
+        &trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum,
+        pm->trace_mask, TT_AABB);
 
       //if we hit something
       if( trace.fraction < 1.0f )
@@ -4061,7 +3831,7 @@ static void PM_SetWaterLevel( void )
   point[ 0 ] = pm->ps->origin[ 0 ];
   point[ 1 ] = pm->ps->origin[ 1 ];
   point[ 2 ] = pm->ps->origin[ 2 ] + mins_z + 1;
-  cont = pm->pointcontents( point, pm->ps->clientNum );
+  cont = BG_PointContents( point, pm->ps->clientNum );
 
   if( cont & MASK_WATER )
   {
@@ -4071,7 +3841,7 @@ static void PM_SetWaterLevel( void )
     pm->watertype = cont;
     pm->waterlevel = 1;
     point[ 2 ] = pm->ps->origin[ 2 ] + mins_z + sample1;
-    cont = pm->pointcontents( point, pm->ps->clientNum );
+    cont = BG_PointContents( point, pm->ps->clientNum );
 
     if( cont & MASK_WATER )
     {
@@ -4080,7 +3850,7 @@ static void PM_SetWaterLevel( void )
 
       pm->waterlevel = 2;
       point[ 2 ] = pm->ps->origin[ 2 ] + mins_z + sample2;
-      cont = pm->pointcontents( point, pm->ps->clientNum );
+      cont = BG_PointContents( point, pm->ps->clientNum );
 
       if( cont & MASK_WATER )
         pm->waterlevel = 3;
@@ -4144,7 +3914,9 @@ static void PM_CheckDuck (void)
     {
       // try to stand up
       pm->maxs[ 2 ] = PCmaxs[ 2 ];
-      pm->trace( &trace, pm->ps->origin, pm->mins, pm->maxs, pm->ps->origin, pm->ps->clientNum, pm->tracemask );
+      BG_Trace(
+        &trace, pm->ps->origin, pm->mins, pm->maxs, pm->ps->origin,
+        pm->ps->clientNum, pm->trace_mask, TT_AABB);
       if( !trace.allsolid )
         pm->ps->pm_flags &= ~PMF_DUCKED;
     }
@@ -4436,7 +4208,8 @@ static void PM_Pain_Saw_Pull( void ) {
 
   unlagged_attacker.point_type = UNLGD_PNT_MUZZLE;
   unlagged_attacker.range = range + MAX(width, height);
-  PM_UnlaggedOn(&unlagged_attacker);
+  unlagged_attacker.ent_num = pm->ps->clientNum;
+  BG_UnlaggedOn(&unlagged_attacker);
 
   VectorMA(
     unlagged_attacker.muzzle_out, range, unlagged_attacker.forward_out, end);
@@ -4445,16 +4218,16 @@ static void PM_Pain_Saw_Pull( void ) {
   VectorSet( maxs, width, width, height );
 
   //check for impact
-  pm->trace(
+  BG_Trace(
     &trace, unlagged_attacker.muzzle_out, mins, maxs, end,
-    pm->ps->clientNum, MASK_SHOT );
+    pm->ps->clientNum, *Temp_Clip_Mask(MASK_SOLID, 0), TT_AABB );
   if(trace.fraction < 1.0f || trace.startsolid) {
     //pull towards direction of impact
     VectorMA(pm->ps->velocity, PAINSAW_PULL, unlagged_attacker.forward_out,
       pm->ps->velocity);
   }
 
-  PM_UnlaggedOff( );
+  BG_UnlaggedOff( );
 }
 
 /*
@@ -5780,12 +5553,176 @@ static void PM_Animate( void )
 
 /*
 ================
+PM_Adjust_Stamina
+================
+*/
+static void PM_Adjust_Stamina(void) {
+  qboolean  walking = qfalse, stopped = qfalse,
+            crouched = qfalse;
+  int       aForward, aRight;
+
+  if(!BG_ClassHasAbility( pm->ps->stats[STAT_CLASS], SCA_STAMINA)) {
+    return;
+  }
+
+  aForward  = abs( pm->cmd.forwardmove );
+  aRight    = abs( pm->cmd.rightmove );
+
+  if( aForward == 0 && aRight == 0 )
+    stopped = qtrue;
+  else if( aForward <= 64 && aRight <= 64 )
+    walking = qtrue;
+
+  if( pm->cmd.upmove <= 0 && pm->ps->pm_flags & PMF_DUCKED )
+    crouched = qtrue;
+
+    if( stopped || pm->ps->pm_type == PM_JETPACK ||
+        ( pm->ps->groundEntityNum == ENTITYNUM_NONE &&
+          pm->ps->persistant[PERS_JUMPTIME] > STAMINA_JUMP_RESTORE_DELAY ) )
+      pm->ps->stats[ STAT_STAMINA ] += STAMINA_STOP_RESTORE;
+    else if( ( pm->ps->stats[ STAT_STATE ] & SS_SPEEDBOOST )  &&
+               pm->humanStaminaMode &&
+               pm->ps->groundEntityNum != ENTITYNUM_NONE &&
+             !( pm->cmd.buttons & BUTTON_WALKING ) ) // walk overrides sprint
+      pm->ps->stats[ STAT_STAMINA ] -= STAMINA_SPRINT_TAKE;
+    else if(pm->ps->persistant[PERS_JUMPTIME] > STAMINA_JUMP_RESTORE_DELAY) {
+      if( walking || crouched )
+        pm->ps->stats[ STAT_STAMINA ] += STAMINA_WALK_RESTORE;
+      else
+        pm->ps->stats[ STAT_STAMINA ] += STAMINA_RUN_RESTORE;
+    }
+
+  // Check stamina limits
+  if( pm->ps->stats[ STAT_STAMINA ] > STAMINA_MAX ) {
+    pm->ps->stats[ STAT_STAMINA ] = STAMINA_MAX;
+  }
+
+}
+
+/*
+================
+PM_Adjust_Jet_Fuel
+================
+*/
+static void PM_Adjust_Jet_Fuel(void) {
+  if(!BG_InventoryContainsUpgrade( UP_JETPACK, pm->ps->stats)) {
+    return;
+  }
+
+  if( BG_UpgradeIsActive(UP_JETPACK, pm->ps->stats)) {
+    if(pm->ps->stats[ STAT_FUEL ] > 0) {
+      // use fuel
+      if( pm->ps->persistant[PERS_JUMPTIME] > JETPACK_ACT_BOOST_TIME )
+        pm->ps->stats[ STAT_FUEL ] -= JETPACK_FUEL_USAGE;
+      else
+        pm->ps->stats[ STAT_FUEL ] -= JETPACK_ACT_BOOST_FUEL_USE;
+
+      if( pm->ps->stats[ STAT_FUEL ] <= 0 ) {
+        pm->ps->stats[ STAT_FUEL ] = 0;
+        BG_DeactivateUpgrade( UP_JETPACK, pm->ps->stats );
+        PM_AddEvent( EV_JETPACK_DEACTIVATE );
+      }
+    }
+  } else if( pm->ps->stats[ STAT_FUEL ] < JETPACK_FUEL_FULL &&
+             pm->pm_reactor() &&
+              !(pm->ps->pm_flags & PMF_FEATHER_FALL) ) {
+    // recharge fuel
+    pm->ps->stats[ STAT_FUEL ] += JETPACK_FUEL_RECHARGE;
+    if( pm->ps->stats[ STAT_FUEL ] > JETPACK_FUEL_FULL )
+      pm->ps->stats[ STAT_FUEL ] = JETPACK_FUEL_FULL;
+  }
+}
+
+/*
+================
+PM_100ms_Timder_Actions
+================
+*/
+static void PM_100ms_Timder_Actions(void) {
+  PM_Adjust_Stamina();
+  PM_Adjust_Jet_Fuel();
+}
+
+/*
+================
+PM_1000ms_Timder_Actions
+================
+*/
+static void PM_1000ms_Timder_Actions(void) {
+  
+}
+
+/*
+================
+PM_10000ms_Timder_Actions
+================
+*/
+static void PM_10000ms_Timder_Actions(void) {
+  
+}
+
+/*
+================
+PM_Periodic_Timer_Count 
+================
+*/
+static int PM_Periodic_Timer_Count(
+  const int interval, const int old_time, int new_time) {
+  if(new_time < old_time){
+    new_time += 30000;
+  }
+
+  return (new_time / interval) - (old_time / interval);
+}
+
+/*
+================
+PM_Periodic_Timer_Actions
+================
+*/
+static void PM_Periodic_Timer_Actions(void) {
+  int old_time = pm->ps->persistant[PERS_PERIOD_TIMER];
+  int count;
+
+  //reset the timer if it would pass 30000
+  if(pm->ps->persistant[PERS_PERIOD_TIMER] >= (30000 - pml.msec)) {
+    pm->ps->persistant[PERS_PERIOD_TIMER] = 0;
+  } else {
+    pm->ps->persistant[PERS_PERIOD_TIMER] += pml.msec;
+  }
+
+  count = PM_Periodic_Timer_Count(
+    100, old_time, pm->ps->persistant[PERS_PERIOD_TIMER]);
+  while(count > 0) {
+    PM_100ms_Timder_Actions();
+    count--;
+  }
+
+  count = PM_Periodic_Timer_Count(
+    1000, old_time, pm->ps->persistant[PERS_PERIOD_TIMER]);
+  while(count > 0) {
+    PM_1000ms_Timder_Actions();
+    count--;
+  }
+
+  count = PM_Periodic_Timer_Count(
+    10000, old_time, pm->ps->persistant[PERS_PERIOD_TIMER]);
+  while(count > 0) {
+    PM_10000ms_Timder_Actions();
+    count--;
+  }
+}
+
+/*
+================
 PM_DropTimers
 ================
 */
 static void PM_DropTimers( void )
 {
   int i;
+
+  PM_Periodic_Timer_Actions();
 
   // drop misc timing counter
   if( pm->ps->pm_time )
@@ -5832,11 +5769,19 @@ static void PM_DropTimers( void )
   else
     pm->ps->persistant[PERS_JUMPTIME] += pml.msec;
 
+  if( pm->ps->persistant[PERS_JUMPTIME] > 0x7FFF)
+    pm->ps->persistant[PERS_JUMPTIME] = 0x7FFF;
+
   // the landed timer increases
   if( pm->ps->misc[MISC_LANDED_TIME] < 0 )
     pm->ps->misc[MISC_LANDED_TIME] = 0;
-  else
-    pm->ps->misc[MISC_LANDED_TIME] += pml.msec;
+  else {
+    if(pm->ps->misc[MISC_LANDED_TIME] > INT_MAX - pml.msec) {
+      pm->ps->misc[MISC_LANDED_TIME] = INT_MAX;
+    } else {
+      pm->ps->misc[MISC_LANDED_TIME] += pml.msec;
+    }
+  }
 
   // pulsating beam timers
   for( i = 0; i < 3; i++ )
@@ -6234,7 +6179,7 @@ void PmoveSingle( pmove_t *pmove )
   pm->waterlevel = 0;
 
   if( pm->ps->misc[ MISC_HEALTH ] <= 0 )
-    pm->tracemask &= ~CONTENTS_BODY;  // corpses can fly through bodies
+    pm->trace_mask.include &= ~CONTENTS_BODY;  // corpses can fly through bodies
 
   // make sure walking button is clear if they are running, to avoid
   // proxy no-footsteps cheats

@@ -136,7 +136,9 @@ static void CG_Creep( centity_t *cent )
   VectorScale( temp, -CREEP_DISTANCE, temp );
   VectorAdd( temp, cent->lerpOrigin, temp );
 
-  CG_Trace( &tr, cent->lerpOrigin, NULL, NULL, temp, cent->currentState.number, MASK_PLAYERSOLID );
+  CG_Trace(
+    &tr, cent->lerpOrigin, NULL, NULL, temp, cent->currentState.number,
+    *Temp_Clip_Mask(MASK_PLAYERSOLID, 0));
 
   VectorCopy( tr.endpos, origin );
 
@@ -602,7 +604,7 @@ static void CG_PositionAndOrientateBuildable( const vec3_t angles, const vec3_t 
   VectorMA( inOrigin, -TRACE_DEPTH, normal, end );
 
   CG_CapTrace( &tr, inOrigin, mins, maxs, end, skipNumber,
-               MASK_PLAYERSOLID );
+               *Temp_Clip_Mask(MASK_PLAYERSOLID, 0) );
 
   fraction = tr.fraction;
   if( tr.startsolid )
@@ -676,8 +678,7 @@ void CG_GhostBuildable( buildable_t buildable )
   CG_Unlink_Marked_Buildables();
   CG_Unlink_Players();
 
-  BG_PositionBuildableRelativeToPlayer( ps, qfalse, CG_Trace,
-                                        entity_origin, angles, &tr );
+  BG_PositionBuildableRelativeToPlayer(ps, qfalse, entity_origin, angles, &tr);
 
   if( cg_rangeMarkerForBlueprint.integer && tr.entityNum != ENTITYNUM_NONE )
     CG_GhostBuildableRangeMarker( buildable, entity_origin, tr.plane.normal );
@@ -999,7 +1000,9 @@ static void CG_BuildableStatusDisplay( centity_t *cent )
       // look through up to 3 players and/or transparent buildables
       for( i = 0; i < 3; i++ )
       {
-        CG_Trace( &tr, trOrigin, NULL, NULL, origin, entNum, MASK_SHOT );
+        CG_Trace(
+          &tr, trOrigin, NULL, NULL, origin, entNum,
+          *Temp_Clip_Mask(MASK_SHOT, 0));
         if( tr.entityNum == cent->currentState.number )
         {
           visible = qtrue;

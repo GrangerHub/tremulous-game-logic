@@ -168,7 +168,7 @@ qboolean SpotWouldTelefrag( gentity_t *spot )
 
   VectorAdd( spot->r.currentOrigin, playerMins, mins );
   VectorAdd( spot->r.currentOrigin, playerMaxs, maxs );
-  num = SV_AreaEntities( mins, maxs, touch, MAX_GENTITIES );
+  num = SV_AreaEntities( mins, maxs, NULL, touch, MAX_GENTITIES );
 
   for( i = 0; i < num; i++ )
   {
@@ -511,10 +511,10 @@ static void SpawnCorpse( gentity_t *ent )
   body->timestamp = level.time;
   body->s.event = 0;
   if( ent->client && ent->client->noclip )
-    G_SetContents( body, ent->client->cliprcontents );
+    G_SetContents( body, ent->client->cliprcontents, qfalse );
   else
-    G_SetContents( body, ent->r.contents );
-  G_SetClipmask( body, MASK_DEADSOLID );
+    G_SetContents( body, ent->r.contents, qfalse );
+  G_SetClipmask( body, MASK_DEADSOLID, 0 );
   body->s.clientNum = ent->client->ps.stats[ STAT_CLASS ];
   body->nonSegModel = ent->client->ps.persistant[ PERS_STATE ] & PS_NONSEGMODEL;
 
@@ -1629,19 +1629,25 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   if(spawn && ent != spawn) {
     G_Entity_UEID_init(ent);
   } else {
+    float *id_pointer;
+
     ent->client->ps.misc[MISC_ID] = id;
-    ent->s.origin[0] = (float)(id);
+    id_pointer = (float *)(&id);
+    ent->s.origin[0] = *id_pointer;
   }
+
+  ent->client->ps.misc[MISC_CONTENTS] = ent->r.contents;
+  ent->s.origin[1] = *((float *)(&ent->r.contents));
 
   ent->s.groundEntityNum = ENTITYNUM_NONE;
   ent->client = &level.clients[ index ];
   ent->takedamage = qtrue;
   ent->classname = "player";
-  G_SetContents( ent, CONTENTS_BODY);
+  G_SetContents( ent, CONTENTS_BODY, qfalse);
   if( client->pers.teamSelection == TEAM_NONE ) {
-    G_SetClipmask( ent, MASK_ASTRALSOLID );
+    G_SetClipmask( ent, MASK_DEADSOLID, CONTENTS_DOOR );
   } else {
-    G_SetClipmask( ent, MASK_PLAYERSOLID );
+    G_SetClipmask( ent, MASK_PLAYERSOLID, 0 );
   }
   ent->die = player_die;
   ent->waterlevel = 0;
@@ -1904,6 +1910,7 @@ Q_EXPORT void ClientDisconnect( int clientNum )
 {
   gentity_t *ent;
   gentity_t *tent;
+  const int zero = 0;
   int       i;
 
   ent = g_entities + clientNum;
@@ -1945,7 +1952,7 @@ Q_EXPORT void ClientDisconnect( int clientNum )
   }
 
   SV_UnlinkEntity( ent );
-  ent->s.origin[0] = (float)((int)0); // reset for UEIDs
+  ent->s.origin[0] = *((float *)(&zero)); // reset for UEIDs
   ent->client->ps.misc[MISC_ID] = 0;
   ent->inuse = qfalse;
   ent->classname = "disconnected";

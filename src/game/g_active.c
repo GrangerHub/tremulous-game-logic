@@ -389,7 +389,8 @@ void  G_TouchTriggers( gentity_t *ent )
   VectorSubtract( mins, range, mins );
   VectorAdd( maxs, range, maxs );
 
-  num = SV_AreaEntities( mins, maxs, touch, MAX_GENTITIES );
+  num = SV_AreaEntities(
+    mins, maxs, Temp_Clip_Mask(CONTENTS_TRIGGER, 0), touch, MAX_GENTITIES);
 
   // can't use ent->absmin, because that has a one unit pad
   VectorAdd( ent->client->ps.origin, ent->r.mins, mins );
@@ -406,7 +407,7 @@ void  G_TouchTriggers( gentity_t *ent )
       continue;
 
     // ignore most entities if a spectator
-    if( ( ent->clipmask & CONTENTS_ASTRAL_NOCLIP ) &&
+    if( ( ent->clip_mask.exclude & CONTENTS_DOOR ) &&
         hit->s.eType != ET_TELEPORT_TRIGGER )
       continue;
 
@@ -458,6 +459,10 @@ static void G_ClientUpdateSpawnQueue(gclient_t *client) {
   } else if(client->ps.stats[STAT_TEAM] == TEAM_HUMANS) {
 		client->ps.persistant[PERS_SPAWNS] = level.numHumanSpawns;
   }
+}
+
+static qboolean G_Reactor_Is_Up(void) {
+  return (G_Reactor() != NULL);
 }
 
 /*
@@ -556,15 +561,12 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
     pm.ps = &client->ps;
     pm.pmext = &client->pmext;
     pm.cmd = *ucmd;
-    pm.tracemask = ent->clipmask;
-    pm.trace = G_TraceWrapper;
-    pm.pointcontents = SV_PointContents;
-    pm.unlagged_on = G_UnlaggedOn;
-    pm.unlagged_off = G_UnlaggedOff;
+    pm.trace_mask = ent->clip_mask;
     pm.tauntSpam = 0;
     pm.swapAttacks = client->pers.swapAttacks;
     pm.wallJumperMinFactor = client->pers.wallJumperMinFactor;
     pm.marauderMinJumpFactor = client->pers.marauderMinJumpFactor;
+    pm.pm_reactor = G_Reactor_Is_Up;
 
     // Perform a pmove
     Pmove( &pm );
@@ -717,8 +719,6 @@ void ClientTimerActions( gentity_t *ent, int msec )
   usercmd_t *ucmd;
   int       aForward, aRight;
   const int maxHealth = BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->health;
-  qboolean  walking = qfalse, stopped = qfalse,
-            crouched = qfalse;
   int       i;
 
   client = ent->client;
@@ -727,17 +727,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
   aForward  = abs( ucmd->forwardmove );
   aRight    = abs( ucmd->rightmove );
 
-  if( aForward == 0 && aRight == 0 ) {
-    if(client->ps.persistant[PERS_JUMPTIME] > STAMINA_JUMP_RESTORE_DELAY) {
-      stopped = qtrue;
-    }
-  } else if( aForward <= 64 && aRight <= 64 ) {
-    walking = qtrue;
-  }
-
-  if( ucmd->upmove <= 0 && ent->client->ps.pm_flags & PMF_DUCKED )
-    crouched = qtrue;
-
+  client = ent->client;
   client->time100 += msec;
   client->time1000 += msec;
   client->time10000 += msec;
@@ -765,28 +755,11 @@ void ClientTimerActions( gentity_t *ent, int msec )
     // Restore or subtract stamina
     if( BG_ClassHasAbility( client->ps.stats[STAT_CLASS], SCA_STAMINA ) )
     {
-      if( stopped || client->ps.pm_type == PM_JETPACK ||
-          ( client->ps.groundEntityNum == ENTITYNUM_NONE &&
-            client->ps.persistant[PERS_JUMPTIME] > STAMINA_JUMP_RESTORE_DELAY ) )
-        client->ps.stats[ STAT_STAMINA ] += STAMINA_STOP_RESTORE;
-      else if( ( client->ps.stats[ STAT_STATE ] & SS_SPEEDBOOST )  &&
-                 g_humanStaminaMode.integer &&
-                 client->ps.groundEntityNum != ENTITYNUM_NONE &&
-               !( client->buttons & BUTTON_WALKING ) ) // walk overrides sprint
-        client->ps.stats[ STAT_STAMINA ] -= STAMINA_SPRINT_TAKE;
-      else if(client->ps.persistant[PERS_JUMPTIME] > STAMINA_JUMP_RESTORE_DELAY) {
-        if( walking || crouched )
-          client->ps.stats[ STAT_STAMINA ] += STAMINA_WALK_RESTORE;
-        else
-          client->ps.stats[ STAT_STAMINA ] += STAMINA_RUN_RESTORE;
-      }
-
       // Check stamina limits
-      if( client->ps.stats[ STAT_STAMINA ] > STAMINA_MAX )
+      if( client->ps.stats[ STAT_STAMINA ] >= STAMINA_MAX )
       {
         client->medKitStaminaToRestore = 0;
         client->nextMedKitRestoreStaminaTime = -1;
-        client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
       }
       else
       {
@@ -1123,36 +1096,6 @@ void ClientTimerActions( gentity_t *ent, int msec )
         }
       }
     }
-
-    // jet fuel
-    if( BG_InventoryContainsUpgrade( UP_JETPACK, ent->client->ps.stats ) )
-    {
-      if( BG_UpgradeIsActive( UP_JETPACK, ent->client->ps.stats ) )
-      {
-        if( ent->client->ps.stats[ STAT_FUEL ] > 0 )
-        {
-          // use fuel
-          if( ent->client->ps.persistant[PERS_JUMPTIME] > JETPACK_ACT_BOOST_TIME )
-            ent->client->ps.stats[ STAT_FUEL ] -= JETPACK_FUEL_USAGE;
-          else
-            ent->client->ps.stats[ STAT_FUEL ] -= JETPACK_ACT_BOOST_FUEL_USE;
-          if( ent->client->ps.stats[ STAT_FUEL ] <= 0 )
-          {
-            ent->client->ps.stats[ STAT_FUEL ] = 0;
-            BG_DeactivateUpgrade( UP_JETPACK, client->ps.stats );
-            BG_AddPredictableEventToPlayerstate( EV_JETPACK_DEACTIVATE, 0, &client->ps );
-          }
-        }
-      } else if( ent->client->ps.stats[ STAT_FUEL ] < JETPACK_FUEL_FULL &&
-                 G_Reactor( ) &&
-                  !(ent->client->ps.pm_flags & PMF_FEATHER_FALL) )
-      {
-        // recharge fuel
-        ent->client->ps.stats[ STAT_FUEL ] += JETPACK_FUEL_RECHARGE;
-        if( ent->client->ps.stats[ STAT_FUEL ] > JETPACK_FUEL_FULL )
-          ent->client->ps.stats[ STAT_FUEL ] = JETPACK_FUEL_FULL;
-      }
-    }
   }
 
   //Camera Shake
@@ -1243,7 +1186,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
               ( Distance( level.clients[ i ].ps.origin,
                           ent->r.currentOrigin ) < ALIENSENSE_RANGE ) &&
               ( level.clients[ i ].ps.persistant[ PERS_SPECSTATE ] == SPECTATOR_NOT ) &&
-              G_Visible( &g_entities[ i ] , ent, MASK_DEADSOLID ) )
+              G_Visible( &g_entities[ i ] , ent, *Temp_Clip_Mask(MASK_DEADSOLID, 0) ) )
           {
             client->ps.eFlags |= EF_SCAN_SPOTTED;
             break;
@@ -1262,7 +1205,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
               ( Distance( level.clients[ i ].ps.origin,
                           ent->r.currentOrigin ) < HELMET_RANGE ) &&
               ( level.clients[ i ].ps.persistant[ PERS_SPECSTATE ] == SPECTATOR_NOT ) &&
-              G_Visible( &g_entities[ i ] , ent, MASK_DEADSOLID ) )
+              G_Visible( &g_entities[ i ] , ent, *Temp_Clip_Mask(MASK_DEADSOLID, 0) ) )
           {
             client->ps.eFlags |= EF_SCAN_SPOTTED;
             break;
@@ -1389,7 +1332,9 @@ void ClientTimerActions( gentity_t *ent, int msec )
           (client_other->pers.teamSelection != TEAM_NONE) &&
           client->invisCollisionTime[i] <= level.time) {
           //check for possible collision
-          if(other->clipmask & ent->r.contents) {
+          if(
+            (other->clip_mask.include & ent->r.contents) &&
+            !(other->clip_mask.exclude & ent->r.contents)) {
             float radius1, radius2;
 
             radius1 = RadiusFromBounds(ent->r.mins, ent->r.maxs);
@@ -1407,7 +1352,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
             if(
               ((radius1 + radius2) >
                 Distance(ent->r.currentOrigin, other->r.currentOrigin)) &&
-              G_Visible(other, ent, other->clipmask)) {
+              G_Visible(other, ent, other->clip_mask)) {
               client->invisCollisionTime[i] =
                 level.time + 100;
             } else {
@@ -1610,7 +1555,7 @@ qboolean G_CanActivateEntity( gclient_t *client, gentity_t *ent )
 
   // entity line of sight check
   if( ( ent->activation.flags & ACTF_LINE_OF_SIGHT ) &&
-      !G_Visible( &g_entities[ client->ps.clientNum ], ent, MASK_DEADSOLID ) )
+      !G_Visible( &g_entities[ client->ps.clientNum ], ent, *Temp_Clip_Mask(MASK_SHOT, 0) ) )
     return qfalse;
 
   return qtrue;
@@ -1649,7 +1594,9 @@ static void G_FindActivationEnt( gentity_t *ent )
   // look for an activation entity infront of player
   AngleVectors( client->ps.viewangles, view, NULL, NULL );
   VectorMA( client->ps.origin, ACTIVATION_ENT_RANGE, view, point );
-  SV_Trace( &trace, client->ps.origin, NULL, NULL, point, ent->s.number, MASK_SHOT, TT_AABB );
+  SV_Trace(
+    &trace, client->ps.origin, NULL, NULL, point, ent->s.number,
+    *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB );
 
   traceEnt = &g_entities[ trace.entityNum ];
 
@@ -1679,15 +1626,16 @@ static void G_FindActivationEnt( gentity_t *ent )
     VectorAdd( client->ps.origin, range, maxs );
     VectorSubtract( client->ps.origin, range, mins );
 
-    num = SV_AreaEntities( mins, maxs, entityList, MAX_GENTITIES );
+    num = SV_AreaEntities( mins, maxs, NULL, entityList, MAX_GENTITIES );
     for( i = 0; i < num; i++ )
     {
       traceEnt = &g_entities[ entityList[ i ] ];
 
       if( G_CanActivateEntity( client, traceEnt ) )
       {
-        SV_Trace( &trace, client->ps.origin, NULL, NULL, traceEnt->r.currentOrigin,
-          client->ps.clientNum, MASK_PLAYERSOLID, TT_AABB );
+        SV_Trace(
+          &trace, client->ps.origin, NULL, NULL, traceEnt->r.currentOrigin,
+          client->ps.clientNum, *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB);
 
         if( trace.fraction < 1.0f && trace.entityNum == traceEnt->s.number )
           activationEntDistance = Distance( client->ps.origin, trace.endpos );
@@ -1979,13 +1927,12 @@ Used to set the clip mask of an entity taking into account
 the temporary OccupantClip condition.
 ===============
 */
-void G_SetClipmask( gentity_t *ent, int clipmask )
-{
-  if( ent->occupation.occupantFlags & OCCUPYF_CLIPMASK )
-    ent->occupation.unoccupiedClipMask = clipmask;
-  else
-  {
-    ent->clipmask = clipmask;
+void G_SetClipmask(gentity_t *ent, int clip_mask_include, int clip_mask_exclude) {
+  if(ent->occupation.occupantFlags & OCCUPYF_CLIPMASK) {
+    ent->occupation.unoccupied_clip_mask =
+      *Temp_Clip_Mask(clip_mask_include, clip_mask_exclude);
+  } else {
+    ent->clip_mask = *Temp_Clip_Mask(clip_mask_include, clip_mask_exclude);
   }
 }
 
@@ -1997,14 +1944,23 @@ Used to set the contents of an entity taking into account
 the temporary OccupantClip and noclip conditions.
 ===============
 */
-void G_SetContents( gentity_t *ent, int contents ) {
-  if( ent->occupation.occupantFlags & OCCUPYF_CONTENTS ) {
+void G_SetContents(gentity_t *ent, int contents, qboolean force_current_contents) {
+  if(force_current_contents) {
+    float *contents_pointer;
+
+    ent->r.contents = contents;
+    if(ent->client) {
+      ent->client->ps.misc[MISC_CONTENTS] = contents;
+    }
+    contents_pointer = (float *)(&contents);
+    ent->s.origin[1] = *contents_pointer;
+  } else if( ent->occupation.occupantFlags & OCCUPYF_CONTENTS ) {
     ent->occupation.unoccupiedContents = contents;
   } else {
     if( ent->client && ent->client->noclip ) {
       ent->client->cliprcontents = contents;
     } else {
-      ent->r.contents = contents;
+      G_SetContents(ent, contents, qtrue);
     }
   }
 }
@@ -2019,7 +1975,7 @@ unoccupying an occupiable entity that alters the clip mask of its occupants.
 */
 void G_BackupUnoccupyClipmask( gentity_t *ent )
 {
-  ent->occupation.unoccupiedClipMask = ent->clipmask;
+  ent->occupation.unoccupied_clip_mask = ent->clip_mask;
 
   return;
 }
@@ -2061,7 +2017,7 @@ void G_OccupantClip( gentity_t *occupant )
         !( occupant->occupation.occupantFlags & OCCUPYF_CLIPMASK ) )
     {
       G_BackupUnoccupyClipmask( occupant );
-      occupant->clipmask = occupant->occupation.occupied->occupation.clipMask;
+      occupant->clip_mask = occupant->occupation.occupied->occupation.clip_mask;
       occupant->occupation.occupantFlags |= OCCUPYF_CLIPMASK;
     }
 
@@ -2073,8 +2029,17 @@ void G_OccupantClip( gentity_t *occupant )
         occupant->client->cliprcontents =
                              occupant->occupation.occupied->occupation.contents;
       else {
-        occupant->r.contents =
-                             occupant->occupation.occupied->occupation.contents;
+        int contents;
+        float *contents_pointer;
+
+        contents = occupant->occupation.occupied->occupation.contents;
+
+        occupant->r.contents = contents;
+        if(occupant->client) {
+          occupant->client->ps.misc[MISC_CONTENTS] = contents;
+        }
+        contents_pointer = (float *)(&contents);
+        occupant->s.origin[1] = *contents_pointer;
       }
 
       occupant->occupation.occupantFlags |= OCCUPYF_CONTENTS;
@@ -2083,7 +2048,7 @@ void G_OccupantClip( gentity_t *occupant )
   {
     if( occupant->occupation.occupantFlags & OCCUPYF_CLIPMASK )
     {
-      occupant->clipmask = occupant->occupation.unoccupiedClipMask;
+      occupant->clip_mask = occupant->occupation.unoccupied_clip_mask;
       occupant->occupation.occupantFlags &= ~OCCUPYF_CLIPMASK;
     }
 
@@ -2091,8 +2056,19 @@ void G_OccupantClip( gentity_t *occupant )
     {
       if( occupant->client && occupant->client->noclip )
         occupant->client->cliprcontents = occupant->occupation.unoccupiedContents;
-      else
-        occupant->r.contents = occupant->occupation.unoccupiedContents;
+      else {
+        int contents;
+        float *contents_pointer;
+
+        contents = occupant->occupation.unoccupiedContents;
+
+        occupant->r.contents = contents;
+        if(occupant->client) {
+          occupant->client->ps.misc[MISC_CONTENTS] = contents;
+        }
+        contents_pointer = (float *)(&contents);
+        occupant->s.origin[1] = *contents_pointer;
+      }
 
       occupant->occupation.occupantFlags &= ~OCCUPYF_CONTENTS;
     }
@@ -2554,7 +2530,7 @@ void ClientThink_real( gentity_t *ent )
         VectorAdd( client->ps.origin, range, maxs );
         VectorSubtract( client->ps.origin, range, mins );
 
-        num = SV_AreaEntities( mins, maxs, entityList, MAX_GENTITIES );
+        num = SV_AreaEntities( mins, maxs, NULL, entityList, MAX_GENTITIES );
         for( i = 0; i < num; i++ )
         {
           gentity_t *boost = &g_entities[ entityList[ i ] ];
@@ -2713,11 +2689,7 @@ void ClientThink_real( gentity_t *ent )
   pm.ps = &client->ps;
   pm.pmext = &client->pmext;
   pm.cmd = *ucmd;
-  pm.tracemask = ent->clipmask;
-  pm.trace = G_TraceWrapper;
-  pm.pointcontents = SV_PointContents;
-  pm.unlagged_on = G_UnlaggedOn;
-  pm.unlagged_off = G_UnlaggedOff;
+  pm.trace_mask = ent->clip_mask;
   pm.debugLevel = g_debugMove.integer;
   pm.noFootsteps = 0;
 
@@ -2733,6 +2705,7 @@ void ClientThink_real( gentity_t *ent )
   pm.swapAttacks = client->pers.swapAttacks;
   pm.wallJumperMinFactor = client->pers.wallJumperMinFactor;
   pm.marauderMinJumpFactor = client->pers.marauderMinJumpFactor;
+  pm.pm_reactor = G_Reactor_Is_Up;
 
   VectorCopy( client->ps.origin, client->oldOrigin );
 
@@ -2747,8 +2720,7 @@ void ClientThink_real( gentity_t *ent )
   G_TouchTriggers( ent );
 
   // For firing lightning bolts early
-  BG_CheckBoltImpactTrigger( &pm, G_TraceWrapper,
-                             G_UnlaggedOn, G_UnlaggedOff );
+  BG_CheckBoltImpactTrigger(&pm);
 
   Pmove( &pm );
 
@@ -2951,9 +2923,6 @@ void SpectatorClientEndFrame( gentity_t *ent )
   gclient_t *cl;
   int       clientNum;
   int       score, ping;
-
-  //hax to ensure that changes in the misc array are broadcasted
-  ent->client->ps.stats[ STAT_FLAGS ] ^= SFL_REFRESH_MISC;
 
   // if we are doing a chase cam or a remote view, grab the latest info
   if( ent->client->sess.spectatorState == SPECTATOR_FOLLOW )

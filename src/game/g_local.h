@@ -170,7 +170,7 @@ struct gentity_s
   qboolean          physicsObject;  // if true, it can be pushed by movers and fall off edges
                                     // all game items are physicsObjects,
   float             physicsBounce;  // 1.0 = continuous bounce, 0.0 = no bounce
-  int               clipmask;       // brushes with this content value will be collided against
+  content_mask_t    clip_mask;      // brushes with this content value will be collided against
                                     // when moving.  items and corpses do not collide against
                                     // players, for instance
 
@@ -276,9 +276,9 @@ struct gentity_s
     int       unoccupiedContents; // Used to restore the contents of an occupant
                // that leaves its occupied activation entity.
 
-    int       clipMask; // Changes the clip mask of an occupant.
+    content_mask_t clip_mask; // Changes the clip mask of an occupant.
 
-    int       unoccupiedClipMask; // Used to restore the clip mask of an occupant
+    content_mask_t unoccupied_clip_mask; // Used to restore the clip mask of an occupant
                // that leaves its occupied activation entity.
 
    // Optional custom function called to perform additional operations for
@@ -1281,8 +1281,10 @@ void              G_UnoccupyEnt( gentity_t *occupied,
                                              // for players leaving an
                                              // occupiable activation entity.
 void              G_OccupyEnt( gentity_t *occupied );
-void              G_SetClipmask( gentity_t *ent, int clipmask );
-void              G_SetContents( gentity_t *ent, int contents );
+void              G_SetClipmask(
+  gentity_t *ent, int clip_mask_include, int clip_mask_exclude);
+void              G_SetContents(
+  gentity_t *ent, int contents, qboolean force_current_contents);
 void              G_BackupUnoccupyClipmask( gentity_t *ent );
 void              G_BackupUnoccupyContents( gentity_t *ent );
 void              G_OccupantClip( gentity_t *occupant );
@@ -1334,13 +1336,14 @@ void        G_TriggerMenu( int clientNum, dynMenu_t menu );
 void        G_TriggerMenuArgs( int clientNum, dynMenu_t menu, int arg );
 void        G_CloseMenus( int clientNum );
 
-qboolean    G_Visible( gentity_t *ent1, gentity_t *ent2, int contents );
+qboolean    G_Visible(
+  gentity_t *ent1, gentity_t *ent2, const content_mask_t content_mask);
 qboolean    G_BBOXes_Visible(
   int source_num,
   const vec3_t source_origin, const vec3_t source_mins, const vec3_t source_maxs,
   int destination_num,
   const vec3_t dest_origin, const vec3_t dest_mins, const vec3_t dest_maxs,
-  int contents);
+  const content_mask_t contents_mask);
 gentity_t   *G_ClosestEnt( vec3_t origin, gentity_t **entities, int numEntities );
 
 typedef enum {
@@ -1913,20 +1916,19 @@ void      SV_GetUserinfo( int num, char *buffer, int bufferSize );
 void      SV_SetUserinfo( int num, const char *buffer );
 void      SV_GetServerinfo( char *buffer, int bufferSize );
 void      SV_SetBrushModel( gentity_t *ent, const char *name );
-void      SV_ClipToEntity( trace_t *trace, const vec3_t start, vec3_t mins,
-                      vec3_t maxs, const vec3_t end, int entityNum,
-                      int contentmask, traceType_t type );
-void      SV_Trace( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs,
-                      const vec3_t end, int passEntityNum, int contentmask, traceType_t type );
+void      SV_ClipToEntity(
+  trace_t *trace, const vec3_t start, vec3_t mins, vec3_t maxs,
+  const vec3_t end, int entityNum, const content_mask_t content_mask,
+  traceType_t type);
+void      SV_Trace(
+	trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs,
+	const vec3_t end, int passEntityNum, const content_mask_t content_mask,
+	traceType_t type);
 void      SV_ClipToTestArea(
-            trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs,
-            const vec3_t end, const vec3_t test_mins, const vec3_t test_maxs,
-            const vec3_t test_origin, int test_contents, int contentmask,
-            traceType_t type);
-void      G_TraceWrapper( trace_t *results, const vec3_t start,
-                          const vec3_t mins, const vec3_t maxs,
-                          const vec3_t end, int passEntityNum,
-                          int contentMask );
+	trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs,
+	const vec3_t end, const vec3_t test_mins, const vec3_t test_maxs,
+	const vec3_t test_origin, int test_contents, const content_mask_t content_mask,
+	traceType_t type);
 int       SV_PointContents( const vec3_t point, int passEntityNum );
 qboolean  SV_inPVS( const vec3_t p1, const vec3_t p2 );
 qboolean  SV_inPVSIgnorePortals( const vec3_t p1, const vec3_t p2 );
@@ -1934,7 +1936,9 @@ void      SV_AdjustAreaPortalState( gentity_t *ent, qboolean open );
 qboolean  CM_AreasConnected( int area1, int area2 );
 void      SV_LinkEntity( gentity_t *ent );
 void      SV_UnlinkEntity( gentity_t *ent );
-int       SV_AreaEntities( const vec3_t mins, const vec3_t maxs, int *entityList, int maxcount );
+int       SV_AreaEntities(
+	const vec3_t mins, const vec3_t maxs, const content_mask_t *content_mask,
+	int *entityList, int maxcount);
 qboolean  SV_EntityContact( const vec3_t mins, const vec3_t maxs, const gentity_t *ent, traceType_t type );
 void      SV_GetUsercmd( int clientNum, usercmd_t *cmd );
 qboolean  SV_GetEntityToken( char *buffer, int bufferSize );

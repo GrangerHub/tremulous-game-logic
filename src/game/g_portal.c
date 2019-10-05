@@ -156,13 +156,15 @@ static void G_Portal_Touch(gentity_t *self, gentity_t *other, trace_t *trace)
 	for (i = PORTAL_MINRANGE; i < PORTAL_MAXRANGE; i++)
     {
 		VectorMA(origin, i, dir, end);
-		SV_Trace(&tr, origin, NULL, NULL, end, portal->s.number, MASK_SHOT, TT_AABB);
+		SV_Trace(
+			&tr, origin, NULL, NULL, end, portal->s.number,
+			*Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB);
 		if (tr.fraction != 1.0f)
     {
 			return;
     }
 		SV_Trace(&tr, end, other->r.mins, other->r.maxs, end, -1,
-			MASK_PLAYERSOLID | CONTENTS_TELEPORTER, TT_AABB);
+			*Temp_Clip_Mask((MASK_PLAYERSOLID|CONTENTS_TELEPORTER), 0), TT_AABB);
 		if (tr.fraction == 1.0f)
     {
 			break;
@@ -219,7 +221,7 @@ void G_Portal_Create(gentity_t *ent, vec3_t origin, vec3_t normal, portal_t port
 
 	// Create the portal
 	portal = G_Spawn();
-	portal->r.contents = CONTENTS_TRIGGER | CONTENTS_TELEPORTER;
+	G_SetContents(portal, (CONTENTS_TRIGGER|CONTENTS_TELEPORTER), qfalse);
 	portal->s.eType = ET_TELEPORTAL;
 	portal->touch = G_Portal_Touch;
 	portal->s.modelindex = BA_H_SPAWN;
@@ -239,8 +241,9 @@ void G_Portal_Create(gentity_t *ent, vec3_t origin, vec3_t normal, portal_t port
 	VectorScale( range, -1, portal->r.mins) ;
 	VectorCopy( origin, oldOrigin );
 	VectorMA( origin, -PORTAL_OFFSET, normal, origin );
-	SV_Trace( &tr, oldOrigin, NULL, NULL, origin,
-                  ent->s.number, MASK_PLAYERSOLID, TT_AABB );
+	SV_Trace(
+		&tr, oldOrigin, NULL, NULL, origin, ent->s.number,
+		*Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB);
 	VectorCopy( tr.endpos, origin);
 	G_SetOrigin( portal, origin );
 	VectorCopy( normal, portal->s.origin2 );

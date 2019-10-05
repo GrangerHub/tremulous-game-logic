@@ -1654,7 +1654,9 @@ static void CG_PlayerUpgrades( centity_t *cent, refEntity_t *torso )
     VectorCopy( es->pos.trBase, temp );
     temp[ 2 ] -= 4096.0f;
 
-    CG_Trace( &tr, es->pos.trBase, NULL, NULL, temp, es->number, MASK_SOLID );
+    CG_Trace(
+      &tr, es->pos.trBase, NULL, NULL, temp, es->number,
+      *Temp_Clip_Mask(MASK_SHOT, 0));
     VectorCopy( tr.endpos, origin );
 
     size = 32.0f;
@@ -2383,7 +2385,9 @@ void CG_Player( centity_t *cent )
 
     VectorMA( legs.origin, -TRACE_DEPTH, surfNormal, end );
     VectorMA( legs.origin, 1.0f, surfNormal, start );
-    CG_CapTrace( &tr, start, mins, maxs, end, es->number, MASK_PLAYERSOLID );
+    CG_CapTrace(
+      &tr, start, mins, maxs, end, es->number,
+      *Temp_Clip_Mask(MASK_PLAYERSOLID, 0));
 
     //if the trace misses completely then just use legs.origin
     //apparently capsule traces are "smaller" than box traces

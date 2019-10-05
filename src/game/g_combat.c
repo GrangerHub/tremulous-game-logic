@@ -626,7 +626,7 @@ void GibEntity( gentity_t *self )
     VectorCopy( self->s.pos.trDelta, tent->s.pos.trDelta );
 
   self->takedamage = qfalse;
-  G_SetContents( self, CONTENTS_CORPSE );
+  G_SetContents( self, CONTENTS_CORPSE, qfalse );
 
   //set the gibbed flag
   if( self->client )
@@ -794,7 +794,6 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   ent->r.svFlags = SVF_BROADCAST; // send to everyone
 
   self->enemy = attacker;
-  self->client->ps.persistant[ PERS_KILLED ]++;
 
   if( attacker && attacker->client )
   {
@@ -891,7 +890,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
     //cleanup the player entity
     self->takedamage = qfalse;
-    G_SetContents( self, 0 );
+    G_SetContents( self, 0, qtrue);
     self->die = NULL;
     return;
   }
@@ -903,13 +902,13 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
     } else
     {
       self->takedamage = qtrue; // can still be gibbed
-      G_SetContents( self, CONTENTS_CORPSE );
+      G_SetContents( self, CONTENTS_CORPSE, qfalse );
       self->die = body_die;
     }
   } else
   {
     self->takedamage = qfalse;
-    G_SetContents( self, 0 );
+    G_SetContents( self, 0, qfalse );
     self->die = NULL;
   }
 
@@ -2548,8 +2547,8 @@ qboolean CanDamage(
               "CanDamage: origin is NULL" );
 
   return G_BBOXes_Visible(
-    ENTITYNUM_NONE, origin, mins, maxs,
-    targ->s.number, targ->r.currentOrigin, targ->r.mins, targ->r.maxs, MASK_SHOT);
+    ENTITYNUM_NONE, origin, mins, maxs, targ->s.number, targ->r.currentOrigin,
+    targ->r.mins, targ->r.maxs, *Temp_Clip_Mask(MASK_SHOT, 0));
 }
 
 /*
@@ -2581,7 +2580,8 @@ qboolean G_SelectiveRadiusDamage( vec3_t origin, vec3_t originMins, vec3_t origi
     maxs[ i ] = origin[ i ] + radius;
   }
 
-  numListedEntities = SV_AreaEntities( mins, maxs, entityList, MAX_GENTITIES );
+  numListedEntities =
+    SV_AreaEntities(mins, maxs, NULL, entityList, MAX_GENTITIES);
 
   for( e = 0; e < numListedEntities; e++ )
   {
@@ -2596,7 +2596,7 @@ qboolean G_SelectiveRadiusDamage( vec3_t origin, vec3_t originMins, vec3_t origi
     if( G_NoTarget( ent ) )
       continue;
 
-    if(ent->r.contents & CONTENTS_ASTRAL_NOCLIP) {
+    if(ent->r.contents & CONTENTS_ASTRAL) {
       continue;
     }
 
@@ -2716,7 +2716,8 @@ qboolean G_RadiusDamage( vec3_t origin, vec3_t originMins, vec3_t originMaxs,
     maxs[ i ] = origin[ i ] + radius;
   }
 
-  numListedEntities = SV_AreaEntities( mins, maxs, entityList, MAX_GENTITIES );
+  numListedEntities =
+    SV_AreaEntities(mins, maxs, NULL, entityList, MAX_GENTITIES);
 
   for( e = 0; e < numListedEntities; e++ )
   {
@@ -2781,7 +2782,8 @@ qboolean G_RadiusDamage( vec3_t origin, vec3_t originMins, vec3_t originMaxs,
     maxs[ i ] = origin[ i ] + radius * 2;
   }
 
-  numListedEntities = SV_AreaEntities( mins, maxs, entityList, MAX_GENTITIES );
+  numListedEntities =
+    SV_AreaEntities(mins, maxs, NULL, entityList, MAX_GENTITIES);
 
   for( e = 0; e < numListedEntities; e++ )
   {

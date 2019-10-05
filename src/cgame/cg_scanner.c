@@ -283,7 +283,7 @@ void CG_AlienSense( rectDef_t *rect )
     VectorSubtract( entityPositions.alienBuildablePos[ i ], origin, relOrigin );
 
     if( VectorLength( relOrigin ) < ALIENSENSE_RANGE &&
-        ( !CG_Visible( entityPositions.alienBuildable[ i ], MASK_DEADSOLID ) ||
+        ( !CG_Visible( entityPositions.alienBuildable[ i ], *Temp_Clip_Mask(MASK_DEADSOLID, 0) ) ||
           entityPositions.alienBuildable[ i ]->currentState.modelindex == BA_A_OVERMIND ) )
       CG_DrawDir( rect, relOrigin, aBuildable );
   }
@@ -306,7 +306,7 @@ void CG_AlienSense( rectDef_t *rect )
 
     if( VectorLength( relOrigin ) < ALIENSENSE_RANGE &&
         ( ( entityPositions.humanBuildable[ i ]->currentState.eFlags & EF_SCAN_SPOTTED ) ||
-           CG_Visible( entityPositions.humanBuildable[ i ], MASK_DEADSOLID ) ) )
+           CG_Visible( entityPositions.humanBuildable[ i ], *Temp_Clip_Mask(MASK_DEADSOLID, 0) ) ) )
       CG_DrawDir( rect, relOrigin, hBuildable );
   }
 
@@ -320,7 +320,7 @@ void CG_AlienSense( rectDef_t *rect )
         !( ( entityPositions.humanClient[ i ]->currentState.eFlags & EF_INVISIBILE ) &&
            entityPositions.humanClient[ i ]->currentState.weapon != WP_LUCIFER_CANNON ) &&
         ( ( entityPositions.humanClient[ i ]->currentState.eFlags & EF_SCAN_SPOTTED ) ||
-           CG_Visible( entityPositions.humanClient[ i ], MASK_DEADSOLID ) ) )
+           CG_Visible( entityPositions.humanClient[ i ], *Temp_Clip_Mask(MASK_DEADSOLID, 0) ) ) )
       CG_DrawDir( rect, relOrigin, hClient );
   }
 }
@@ -350,7 +350,7 @@ void CG_Scanner( rectDef_t *rect, qhandle_t shader, vec4_t color )
     VectorSubtract( entityPositions.humanBuildablePos[ i ], origin, relOrigin );
 
     if( VectorLength( relOrigin ) < HELMET_RANGE &&
-        ( !CG_Visible( entityPositions.humanBuildable[ i ], MASK_DEADSOLID ) ||
+        ( !CG_Visible( entityPositions.humanBuildable[ i ], *Temp_Clip_Mask(MASK_DEADSOLID, 0) ) ||
             entityPositions.humanBuildable[ i ]->currentState.modelindex == BA_H_REACTOR ) )
       CG_DrawBlips( rect, relOrigin, hIabove );
   }
@@ -373,7 +373,7 @@ void CG_Scanner( rectDef_t *rect, qhandle_t shader, vec4_t color )
 
     if( VectorLength( relOrigin ) < HELMET_RANGE &&
         ( ( entityPositions.alienBuildable[ i ]->currentState.eFlags & EF_SCAN_SPOTTED ) ||
-           CG_Visible( entityPositions.alienBuildable[ i ], MASK_DEADSOLID ) ) )
+           CG_Visible( entityPositions.alienBuildable[ i ], *Temp_Clip_Mask(MASK_DEADSOLID, 0) ) ) )
       CG_DrawBlips( rect, relOrigin, aIabove );
   }
 
@@ -387,7 +387,7 @@ void CG_Scanner( rectDef_t *rect, qhandle_t shader, vec4_t color )
         !( ( entityPositions.alienClient[ i ]->currentState.eFlags & EF_INVISIBILE ) &&
            entityPositions.alienClient[ i ]->currentState.weapon != WP_LUCIFER_CANNON ) &&
         ( ( entityPositions.alienClient[ i ]->currentState.eFlags & EF_SCAN_SPOTTED ) ||
-          CG_Visible( entityPositions.alienClient[ i ], MASK_DEADSOLID ) ) )
+          CG_Visible( entityPositions.alienClient[ i ], *Temp_Clip_Mask(MASK_DEADSOLID, 0) ) ) )
       CG_DrawBlips( rect, relOrigin, aIabove );
   }
 }
