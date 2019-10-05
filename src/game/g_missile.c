@@ -879,8 +879,11 @@ Explode if the laser beam is tripped
 ================
 */
 void G_LaserMineThink(gentity_t *ent) {
-  trace_t previous_trace;
-  vec3_t  end;
+  trace_t     previous_trace;
+  vec3_t      end;
+  bgentity_id unlinked_humans[MAX_CLIENTS];
+  int         num_unnlinked_humans = 0;
+  int         i;
 
   //check for self destruct
   if(ent->lasermine_set && ent->lasermine_self_destruct_time < level.time) {
@@ -893,12 +896,47 @@ void G_LaserMineThink(gentity_t *ent) {
   //backup the trace
   previous_trace = ent->lasermine_trace;
 
+  //ignore friendly human players
+  for(i = 0; i < MAX_CLIENTS; i++) {
+    gentity_t *ent = &g_entities[i];
+
+    if(!ent->inuse) {
+      continue;
+    }
+
+    if(!ent->r.linked) {
+      continue;
+    }
+
+    if(!ent->client) {
+      continue;
+    }
+
+    if(ent->client->pers.connected != CON_CONNECTED) {
+      continue;
+    }
+
+    if(ent->client->pers.teamSelection != TEAM_HUMANS) {
+      continue;
+    }
+
+    SV_UnlinkEntity(ent);
+    BG_UEID_set(&unlinked_humans[i], i);
+    num_unnlinked_humans++;
+  }
+
   VectorMA(ent->r.currentOrigin, LASERMINE_TRIP_RANGE, ent->s.origin2, end);
 
   //perform a new trace
   SV_Trace(
     &ent->lasermine_trace, ent->r.currentOrigin, NULL, NULL, end, ent->s.number,
     *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB);
+
+  //relink unlinked human players
+  for(i = 0; i < num_unnlinked_humans; i++) {
+    gentity_t *ent = &g_entities[BG_UEID_get_ent_num(&unlinked_humans[i])];
+    SV_LinkEntity(ent);
+  }
 
   if(!ent->lasermine_set) {
     //the laser mine is being set
