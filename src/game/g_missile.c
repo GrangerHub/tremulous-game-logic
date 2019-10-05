@@ -106,6 +106,49 @@ void G_ExplodeMissile( gentity_t *ent )
                       ent->r.maxs, ent->parent, ent->splashDamage,
                       ent->splashRadius, ent, ent->splashMethodOfDeath, qtrue );
     }
+
+    if(!strcmp( ent->classname, "gas_trail")) {
+      int    i, num;
+      int    ent_list[MAX_GENTITIES];
+      vec3_t mins, maxs;
+
+      for(i = 0; i < 3; i++) {
+        mins[i] = ent->r.currentOrigin[i] - (ent->splashRadius);
+        maxs[i] = ent->r.currentOrigin[i] + (ent->splashRadius);
+      }
+      num = SV_AreaEntities(mins, maxs, NULL, ent_list, MAX_GENTITIES);
+      for(i = 0; i < num; i++) {
+        gentity_t *targ = &g_entities[ent_list[i]];
+
+        if(!targ->inuse) {
+          continue;
+        }
+
+        if(targ->s.eType != ET_MISSILE) {
+          continue;
+        }
+
+        if(strcmp( ent->classname, "gas_trail")) {
+          continue;
+        }
+
+        if(targ->nextthink <= level.time + 100) {
+          continue;
+        }
+
+        if(!G_Visible(ent, targ, ent->clip_mask)) {
+          continue;
+        }
+
+        if(
+          Distance(ent->r.currentOrigin, targ->r.currentOrigin) <
+          (ent->splashRadius / 2)) {
+          targ->nextthink = level.time + 100;
+        } else if(targ->nextthink > level.time + 200) {
+          targ->nextthink = level.time + 200;
+        }
+      }
+    }
   }
 
   SV_LinkEntity( ent );

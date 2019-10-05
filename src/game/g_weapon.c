@@ -2245,6 +2245,8 @@ void G_Spitfire_Detonate_Gas_Trail(gclient_t *client) {
   }
 
   client->pers.spitfire_gas_puffs_num = 0;
+
+  client->ps.weaponTime += 1000;
 }
 
 /*
