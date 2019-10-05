@@ -758,7 +758,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 #define HBUILD_PRICE                0
 #define HBUILD_REPEAT               1000
-#define HBUILD_HEALRATE             HBRM(18000)
+#define HBUILD_HEALRATE             HBRM(32000)
 
 /*
  * HUMAN upgrades
@@ -825,7 +825,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
  *
  */
 
-#define HUMAN_BHLTH_MODIFIER        1.25f
+#define HUMAN_BHLTH_MODIFIER        1.0f
 #define HBHM(h)                     ((int)((float)h*HUMAN_BHLTH_MODIFIER))
 #define HUMAN_BDMG_MODIFIER         1.0f
 #define HBDM(d)                     ((int)((float)d*ALIEN_WDMG_MODIFIER))

@@ -1691,10 +1691,14 @@ int G_ChangeHealth( gentity_t *targ, gentity_t *changer,
 
     if( maxHealthDecay )
     {
+      int old_max_health = *maxHealth;
+
       *maxHealth -= maxHealthDecay;
 
       if( *maxHealth < minHealth )
         *maxHealth = minHealth;
+
+      change -= (old_max_health - *maxHealth);
     }
   }
 
