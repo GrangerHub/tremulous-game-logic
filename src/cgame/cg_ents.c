@@ -492,15 +492,53 @@ static void CG_LaserMine(centity_t *cent, refEntity_t *ent) {
     if(CG_IsTrailSystemValid(&cent->lasermineTS)) {
       vec3_t  end;
       trace_t trace;
+      bgentity_id             unlinked_humans[MAX_CLIENTS];
+      int                     num_unnlinked_humans = 0;
+      int                     i;
+
+      //ignore friendly human players
+      for(i = 0; i < MAX_CLIENTS; i++) {
+        centity_t *cent = &cg_entities[i];
+
+        if(!cent->valid) {
+          continue;
+        }
+
+        if(!cent->is_in_solid_list) {
+          continue;
+        }
+
+        if(!cent->linked) {
+          continue;
+        }
+
+        if(cgs.clientinfo[i].team != TEAM_HUMANS) {
+          continue;
+        }
+
+        CG_Unlink_Solid_Entity(i);
+        BG_UEID_set(&unlinked_humans[i], i);
+        num_unnlinked_humans++;
+      }
 
       VectorMA(es->pos.trBase, LASERMINE_TRIP_RANGE, es->origin2, end);
+      CG_Unlink_Solid_Entity(es->number);
       CG_Trace(
-        &trace, es->pos.trBase, NULL, NULL, end, es->number,
+        &trace, es->pos.trBase, NULL, NULL, end,
+        (
+          cgs.clientinfo[cg.clientNum].team != TEAM_HUMANS &&
+          cgs.clientinfo[cg.clientNum].team != TEAM_NONE) ? MAGIC_TRACE_HACK : ENTITYNUM_NONE,
         *Temp_Clip_Mask(MASK_SHOT, 0));
+      CG_Link_Solid_Entity(es->number);
       CG_SetAttachmentCent( &cent->lasermineTS->frontAttachment, cent );
       CG_AttachToCent( &cent->lasermineTS->frontAttachment );
       CG_SetAttachmentPoint( &cent->lasermineTS->backAttachment, trace.endpos );
       CG_AttachToPoint(&cent->lasermineTS->backAttachment);
+
+      //relink unlinked human players
+      for(i = 0; i < num_unnlinked_humans; i++) {
+        CG_Link_Solid_Entity(BG_UEID_get_ent_num(&unlinked_humans[i]));
+      }
     }
 
     trap_S_AddLoopingSound( es->number, cent->lerpOrigin, vec3_origin, cgs.media.lasermineIdleSound );
