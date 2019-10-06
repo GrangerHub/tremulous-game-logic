@@ -1086,6 +1086,8 @@ static void CG_RegisterSounds( void )
   cgs.media.lasermineArmedSound     = trap_S_RegisterSound( "models/weapons/lasermine/armed.wav", qfalse );
   cgs.media.lasermineIdleSound     = trap_S_RegisterSound( "models/weapons/lasermine/idle0.wav", qfalse );
 
+  cgs.media.invis_warp_sound        = trap_S_RegisterSound("sound/misc/invis_warp_sound.wav", qfalse);
+
   cgs.media.repeaterUseSound        = trap_S_RegisterSound( "sound/buildables/repeater/use.wav", qfalse );
 
   cgs.media.buildableRepairSound    = trap_S_RegisterSound( "sound/buildables/human/repair.wav", qfalse );

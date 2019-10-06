@@ -459,6 +459,7 @@ typedef enum
 #define SFL_GIBBED              0x00000002
 #define SFL_CLASS_FORCED        0x00000004 // can't evolve from a class that a map forced
 #define SFL_ARMOR_GENERATE      0x00000008
+#define SFL_INVIS_ENEMY_NEARBY  0x00000010 // for indicating that an invisible enemy player is near
 
 
 // player_state->persistant[] indexes

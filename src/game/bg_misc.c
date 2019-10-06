@@ -1763,11 +1763,11 @@ static const classAttributes_t bg_classList[ ] =
     "level1",                                       //char    *name;
     "A stealthy support class able to crawl on walls and ceilings. Its "
       "melee attack is most effective when combined with the ability to "
-      "grab and hold its victims in place. Provides a weak healing aura "
-      "that accelerates the healing rate of nearby aliens.  Can charge to "
-      "to become invisible while not moving, but is momentarily revealed "
-      "while attacking or when damaged. While invisible, the Basilisk can "
-      "remain undetected by radar and turrets.",
+      "stun its victims in place. Provides a weak healing aura "
+      "that accelerates the healing rate of nearby aliens. Can sonically warp "
+      "light and radar, becoming invisible, but is momentarily revealed while "
+      "attacking or when damaged. While invisible, the Basilisk can remain "
+      "undetected by turrets.",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
     LEVEL1_HEALTH,                                  //int     health;
     0.0f,                                           //float   maxHealthDecayRate;
@@ -1809,7 +1809,8 @@ static const classAttributes_t bg_classList[ ] =
       "nearby humans. If boosted, its gas can inflict toxic "
       "damage on enemies, and supply poison to other aliens. "
       "Has a strong healing aura that accelerates the healing "
-      "rate of nearby aliens. Can remain invisible while moving.",
+      "rate of nearby aliens. It can better maintain its sonic "
+      "warp field and remain invisible while moving.",
     ( 1 << S2 )|( 1 << S3 ),                        //int     stages;
     LEVEL1_UPG_HEALTH,                              //int     health;
     0.0f,                                           //float   maxHealthDecayRate;

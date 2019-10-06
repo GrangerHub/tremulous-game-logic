@@ -875,6 +875,9 @@ Fixed fov at intermissions, otherwise account for fov variable and zooms.
 #define WAVE_AMPLITUDE  1.0f
 #define WAVE_FREQUENCY  0.4f
 
+#define INVIS_WAVE_AMPLITUDE  0.5f
+#define INVIS_WAVE_FREQUENCY  0.8f
+
 #define FOVWARPTIME     400.0f
 #define MAX_FOV_Y       120.0f
 #define MAX_FOV_WARP_Y  127.5f
@@ -1010,6 +1013,17 @@ static int CG_CalcFov( void )
   }
   else
     inwater = qfalse;
+
+  //warp if an invisible enemy player is nearby
+  if(cg.predictedPlayerState.stats[STAT_FLAGS] & SFL_INVIS_ENEMY_NEARBY) {
+    phase = cg.time / 1000.0f * INVIS_WAVE_FREQUENCY * M_PI * 2.0f;
+    v = INVIS_WAVE_AMPLITUDE * sin( phase );
+    fov_x += v;
+    fov_y -= v;
+    trap_S_AddLoopingSound(
+      cg.clientNum, cg.predictedPlayerState.origin, vec3_origin,
+      cgs.media.invis_warp_sound);
+  }
 
   if( ( cg.predictedPlayerEntity.currentState.eFlags & EF_POISONCLOUDED ) &&
       ( cg.time - cg.poisonedTime < PCLOUD_DISORIENT_DURATION) &&

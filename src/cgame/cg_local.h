@@ -1384,6 +1384,8 @@ typedef struct
   sfxHandle_t lasermineArmedSound;
   sfxHandle_t lasermineIdleSound;
 
+  sfxHandle_t invis_warp_sound;
+
   sfxHandle_t voteAlarmSound;
   sfxHandle_t voteNow;
   sfxHandle_t votePassed;

@@ -1373,6 +1373,56 @@ void ClientTimerActions( gentity_t *ent, int msec )
       ent->r.svFlags &= ~SVF_CLIENTMASK_EXCLUSIVE;
     }
   }
+
+#define INVIS_WARP_RANGE 400.0f
+
+  //send a warp effect if there is a nearby invisible enemy
+  if(client->ps.persistant[PERS_SPECSTATE] == SPECTATOR_NOT) {
+    int ent_list[MAX_GENTITIES];
+    int num;
+    vec3_t mins, maxs;
+
+    client->ps.stats[STAT_FLAGS] &= ~SFL_INVIS_ENEMY_NEARBY;
+
+    for(i = 0; i < 3; i++) {
+      mins[i] = ent->r.currentOrigin[i] - INVIS_WARP_RANGE;
+      maxs[i] = ent->r.currentOrigin[i] + INVIS_WARP_RANGE;
+    }
+
+    num = SV_AreaEntities(mins, maxs, NULL, ent_list, MAX_GENTITIES);
+
+    for(i = 0; i < num; i++) {
+      gentity_t *targ = &g_entities[ent_list[i]];
+      const content_mask_t content_mask = {0, MASK_DEADSOLID};
+
+      if(!targ->client || targ->client->pers.connected != CON_CONNECTED) {
+        continue;
+      }
+
+      if(OnSameTeam(ent, targ)) {
+        continue;
+      }
+
+      if(
+        !(targ->client->ps.eFlags & EF_INVISIBILE) ||
+        targ->client->ps.weapon == WP_LUCIFER_CANNON) {
+        continue;
+      }
+
+      if(
+        Distance(ent->r.currentOrigin, targ->r.currentOrigin) >
+        INVIS_WARP_RANGE) {
+        continue;
+      }
+
+      if(!G_Visible(ent, targ, content_mask)) {
+        continue;
+      }
+
+      client->ps.stats[STAT_FLAGS] |= SFL_INVIS_ENEMY_NEARBY;
+      break;
+    }
+  }
 }
 
 /*
