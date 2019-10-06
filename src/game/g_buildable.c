@@ -4547,8 +4547,15 @@ General think function for buildables
 */
 void G_BuildableThink( gentity_t *ent, int msec )
 {
-  int regenRate = BG_Buildable( ent->s.modelindex )->regenRate;
-  int buildTime = BG_Buildable( ent->s.modelindex )->buildTime;
+  int         regenRate = BG_Buildable( ent->s.modelindex )->regenRate;
+  int         buildTime = BG_Buildable( ent->s.modelindex )->buildTime;
+  const float maxHealthDecayRate =
+    BG_Buildable( ent->s.modelindex )->maxHealthDecayRate;
+
+  //adjust the regen rate for max hp decay
+  if(maxHealthDecayRate > 0.00f && maxHealthDecayRate < 1.00f) {
+    regenRate /= (1 - maxHealthDecayRate);
+  }
 
   //toggle spawned flag for buildables
   if( !ent->spawned && ent->health > 0 && !level.pausedTime )

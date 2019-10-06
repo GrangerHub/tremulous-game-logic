@@ -2512,8 +2512,15 @@ void ClientThink_real( gentity_t *ent )
     if( level.surrenderTeam != client->pers.teamSelection &&
         ent->nextRegenTime >= 0 && ent->nextRegenTime < level.time )
     {
-      float regenRate =
+      float       regenRate =
           BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->regenRate;
+      const float maxHealthDecayRate =
+          BG_Class( ent->client->ps.stats[ STAT_CLASS ] )->maxHealthDecayRate;
+
+      //adjust the regen rate for max hp decay
+      if(maxHealthDecayRate > 0.00f && maxHealthDecayRate < 1.00f) {
+        regenRate /= (1 - maxHealthDecayRate);
+      }
 
       if( ent->health <= 0 || ent->nextRegenTime < 0 || regenRate == 0 )
         ent->nextRegenTime = -1; // no regen

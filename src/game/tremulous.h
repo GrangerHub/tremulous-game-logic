@@ -758,7 +758,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 #define HBUILD_PRICE                0
 #define HBUILD_REPEAT               1000
-#define HBUILD_HEALRATE             HBRM(32000)
+#define HBUILD_HEALRATE             HBRM(18000)
 
 /*
  * HUMAN upgrades

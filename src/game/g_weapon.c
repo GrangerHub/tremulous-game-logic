@@ -1336,7 +1336,16 @@ void CheckCkitRepair( gentity_t *ent )
     {
       if( traceEnt->health < traceEnt->s.constantLight )
       {
-        G_ChangeHealth( traceEnt, ent, HBUILD_HEALRATE, 0 );
+        int heal_rate = HBUILD_HEALRATE;
+        const float maxHealthDecayRate =
+          BG_Buildable( traceEnt->s.modelindex )->maxHealthDecayRate;
+
+        //adjust the regen rate for max hp decay
+        if(maxHealthDecayRate > 0.00f && maxHealthDecayRate < 1.00f) {
+          heal_rate /= (1 - maxHealthDecayRate);
+        }
+
+        G_ChangeHealth( traceEnt, ent, heal_rate, 0 );
 
         if( traceEnt->health >= traceEnt->s.constantLight )
         {
