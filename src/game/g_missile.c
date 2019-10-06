@@ -442,6 +442,7 @@ void G_RunMissile( gentity_t *ent )
   trace_t   tr;
   qboolean  impact;
   int       contents;
+  gentity_t *attacker;
 
   // get current position
   BG_EvaluateTrajectory( &ent->s.pos, level.time, origin );
@@ -511,6 +512,61 @@ void G_RunMissile( gentity_t *ent )
       VectorCopy(backup_mins, ent->r.mins);
       VectorCopy(backup_maxs, ent->r.maxs);
     }
+  }
+
+  //check if poison should be applied to nearby humans
+  attacker = &g_entities[ent->r.ownerNum];
+  if(
+    attacker->client &&
+    (attacker->client->ps.stats[ STAT_STATE ] & SS_BOOSTED) &&
+    !strcmp( ent->classname, "gas_trail")) {
+      int    i, num;
+      int    ent_list[MAX_GENTITIES];
+      vec3_t mins, maxs;
+
+      for(i = 0; i < 3; i++) {
+        mins[i] = ent->r.currentOrigin[i] - (ent->splashRadius);
+        maxs[i] = ent->r.currentOrigin[i] + (ent->splashRadius);
+      }
+      num = SV_AreaEntities(mins, maxs, NULL, ent_list, MAX_GENTITIES);
+      for(i = 0; i < num; i++) {
+        gentity_t *targ = &g_entities[ent_list[i]];
+
+        if(!targ->client || targ->client->pers.connected != CON_CONNECTED) {
+          continue;
+        }
+
+        if(
+          targ->client->pers.teamSelection == TEAM_NONE ||
+          OnSameTeam(attacker, targ)) {
+          continue;
+        }
+
+        if(
+          targ->client->sess.spectatorState != SPECTATOR_NOT ||
+          targ->client->ps.misc[MISC_HEALTH] <= 0 ||
+          !PM_Alive( targ->client->ps.pm_type )) {
+          continue;
+        }
+
+        if(targ->client->poisonImmunityTime >= level.time) {
+          continue;
+        }
+
+        if(BG_InventoryContainsUpgrade(UP_BATTLESUIT, targ->client->ps.stats)) {
+          continue;
+        }
+
+        if(
+          Distance(ent->r.currentOrigin, targ->r.currentOrigin) >
+          ent->splashRadius) {
+          continue;
+        }
+
+        targ->client->ps.stats[ STAT_STATE ] |= SS_POISONED;
+        targ->client->lastPoisonTime = level.time;
+        targ->client->lastPoisonClient = attacker;
+      }
   }
 
   contents = ent->r.contents;
