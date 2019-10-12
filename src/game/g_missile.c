@@ -921,7 +921,7 @@ void G_LaserMineThink(gentity_t *ent) {
     }
 
     SV_UnlinkEntity(ent);
-    BG_UEID_set(&unlinked_humans[i], i);
+    BG_UEID_set(&unlinked_humans[num_unnlinked_humans], i);
     num_unnlinked_humans++;
   }
 
