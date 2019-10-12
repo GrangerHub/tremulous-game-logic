@@ -875,8 +875,8 @@ Fixed fov at intermissions, otherwise account for fov variable and zooms.
 #define WAVE_AMPLITUDE  1.0f
 #define WAVE_FREQUENCY  0.4f
 
-#define INVIS_WAVE_AMPLITUDE  0.5f
-#define INVIS_WAVE_FREQUENCY  0.8f
+#define INVIS_WAVE_AMPLITUDE  0.2f
+#define INVIS_WAVE_FREQUENCY  3.0f
 
 #define FOVWARPTIME     400.0f
 #define MAX_FOV_Y       120.0f
