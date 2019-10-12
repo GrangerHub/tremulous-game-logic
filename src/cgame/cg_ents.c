@@ -522,7 +522,7 @@ static void CG_LaserMine(centity_t *cent, refEntity_t *ent) {
         }
 
         CG_Unlink_Solid_Entity(i);
-        BG_UEID_set(&unlinked_humans[i], i);
+        BG_UEID_set(&unlinked_humans[num_unnlinked_humans], i);
         num_unnlinked_humans++;
       }
 
