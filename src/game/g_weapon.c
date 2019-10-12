@@ -326,6 +326,21 @@ static void G_WideTraceSolidSeries(
 
     G_WideTraceSolid(
       tr, ent, range, widthAdjusted, heightAdjusted, upper_height_bound, target);
+
+    if(ent->client) {
+      switch (ent->client->ps.weapon) {
+        case WP_ALEVEL3:
+        case WP_ALEVEL3_UPG:
+          if(ent->client->pounceEntHitTime[ tr->entityNum ] >= level.time) {
+            continue;
+          }
+          break;
+
+        default:
+          break;
+      }
+    }
+
     if(
       tr->startsolid ||
       (*target != NULL && G_TakesDamage(*target))) {
@@ -471,6 +486,23 @@ void meleeAttack( gentity_t *ent, float range, float width, float height,
 
   WideBloodSpurt( ent, traceEnt, &tr );
   G_Damage( traceEnt, ent, ent, forward, tr.endpos, damage, DAMAGE_NO_KNOCKBACK, mod );
+
+  if(ent->client) {
+    switch (ent->client->ps.weapon) {
+      case WP_ALEVEL3:
+        ent->client->pounceEntHitTime[ traceEnt->s.number ] =
+          level.time + LEVEL3_CLAW_REPEAT;
+        break;
+
+      case WP_ALEVEL3_UPG:
+        ent->client->pounceEntHitTime[ traceEnt->s.number ] =
+          level.time + LEVEL3_CLAW_U_REPEAT;
+        break;
+
+      default:
+        break;
+    }
+  }
 }
 
 /*
@@ -2236,7 +2268,7 @@ void MarauderExplosionZap( gentity_t *self )
 
 /*
 ===============
-CheckPounceAttack
+G_Spitfire_Detonate_Gas_Trail
 ===============
 */
 void G_Spitfire_Detonate_Gas_Trail(gclient_t *client) {
