@@ -127,6 +127,7 @@ void G_SuffocateTrappedEntities( gentity_t *self )
     // not needed for enemies stuck in active defense buildables
     if( ent->client->ps.stats[ STAT_TEAM ] != self->buildableTeam &&
         ( self->s.modelindex == BA_H_MGTURRET ||
+          self->s.modelindex == BA_H_FLAME_TURRET ||
           self->s.modelindex == BA_H_TESLAGEN ||
           self->s.modelindex == BA_A_ACIDTUBE ||
           self->s.modelindex == BA_A_HIVE ||
@@ -4085,6 +4086,99 @@ void HMGTurret_Think( gentity_t *self )
   G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
 }
 
+/*
+================
+HFlameTurret_Think
+
+Think function for Flame turret
+================
+*/
+void HFlameTurret_Think( gentity_t *self )
+{
+  gentity_t * prev_enemy;
+
+  self->nextthink = level.time +
+                    BG_Buildable( self->s.modelindex )->nextthink;
+
+  G_SuffocateTrappedEntities( self );
+
+  // Turn off client side muzzle flashes
+  self->s.eFlags &= ~EF_FIRING;
+
+  self->powered = G_FindPower( self, qfalse );
+  G_IdlePowerState( self );
+
+  // If not powered or spawned don't do anything
+  if( !self->powered )
+  {
+    // if power loss drop turret
+    if( self->spawned &&
+        HMGTurret_State( self, MGT_STATE_INACTIVE ) )
+      return;
+
+    self->nextthink = level.time + POWER_REFRESH_TIME;
+    return;
+  }
+  if( !self->spawned )
+    return;
+ 
+  prev_enemy = self->enemy;
+
+   // If the current target is not valid find a new enemy
+  if( !HMGTurret_CheckTarget( self, self->enemy, qtrue, qfalse ) )
+  {
+    if( self->enemy && BG_List_Find(&self->enemy->targeted, self) ) {
+      BG_List_Remove_All(&self->enemy->targeted, self);
+    }
+    HMGTurret_FindEnemy( self );
+  }
+
+  if(self->enemy != prev_enemy) {
+    self->active = qfalse;
+    self->turretSpinupTime = -1;
+  }
+  
+  // if newly powered raise turret
+  HMGTurret_State( self, MGT_STATE_ACTIVE );
+  if( !self->enemy )
+    return;
+
+  if(BG_List_Find(&self->enemy->targeted, self) == NULL) {
+    BG_List_Push_Head(&self->enemy->targeted, self);
+  }
+
+  // Track until we can hit the target
+  if( !HMGTurret_TrackEnemy( self ) )
+  {
+    self->active = qfalse;
+    self->turretSpinupTime = -1;
+    return;
+  }
+
+  // Update spin state
+  if( !self->active && self->timestamp < level.time )
+  {
+    self->active = qtrue;
+
+    self->turretSpinupTime = level.time + FLAME_TURRET_SPINUP_TIME;
+    G_AddEvent( self, EV_MGTURRET_SPINUP, 0 );
+  }
+
+  // Not firing or haven't spun up yet
+  if( !self->active || self->turretSpinupTime > level.time )
+    return;
+
+  // Fire repeat delay
+  if( self->timestamp > level.time )
+    return;
+
+  FireWeapon( self );
+  self->s.eFlags |= EF_FIRING;
+  self->timestamp = level.time + BG_Buildable( self->s.modelindex )->turretFireSpeed;
+  G_AddEvent( self, EV_FIRE_WEAPON, 0 );
+  G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
+}
+
 
 
 
@@ -4900,6 +4994,7 @@ static int G_CompareBuildablesForRemoval( const void *a, const void *b )
     BA_A_GRAPNEL,
 
     BA_H_MGTURRET,
+    BA_H_FLAME_TURRET,
     BA_H_TESLAGEN,
     BA_H_DCC,
     BA_H_MEDISTAT,
@@ -5978,6 +6073,11 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
     case BA_H_MGTURRET:
       built->die = HSpawn_Die;
       built->think = HMGTurret_Think;
+      break;
+
+    case BA_H_FLAME_TURRET:
+      built->die = HSpawn_Die;
+      built->think = HFlameTurret_Think;
       break;
 
     case BA_H_TESLAGEN:

@@ -923,6 +923,13 @@ void flamerFire( gentity_t *ent )
   fire_flamer( ent, origin, forward );
 }
 
+void flame_turret_fire( gentity_t *ent )
+{
+  muzzle[2] += 8.0f;
+  ent->s.generic1 = WPM_PRIMARY;
+  fire_flame_turret(ent, muzzle, forward);
+}
+
 /*
 ======================================================================
 
@@ -1622,8 +1629,11 @@ void CheckGrabAttack( gentity_t *ent )
       traceEnt->client->grabExpiryTime = level.time + LEVEL1_GRAB_U_TIME;
       ent->client->grabRepeatTime = level.time + LEVEL1_GRAB_U_REPEAT;
     }
-  } else if( traceEnt->s.eType == ET_BUILDABLE &&
-      traceEnt->s.modelindex == BA_H_MGTURRET )
+  } else if(
+    traceEnt->s.eType == ET_BUILDABLE &&
+    (
+      traceEnt->s.modelindex == BA_H_MGTURRET ||
+      traceEnt->s.modelindex == BA_H_FLAME_TURRET) )
   {
     if( !traceEnt->lev1Grabbed ) {
       G_AddPredictableEvent( ent, EV_LEV1_GRAB, 0 );
@@ -2813,6 +2823,9 @@ void FireWeapon( gentity_t *ent )
       break;
     case WP_MGTURRET:
       bulletFire( ent, MGTURRET_SPREAD, MGTURRET_DMG, MOD_MGTURRET );
+      break;
+    case WP_FLAME_TURRET:
+      flame_turret_fire( ent );
       break;
 
     case WP_ABUILD:

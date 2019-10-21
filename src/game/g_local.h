@@ -1422,6 +1422,7 @@ qboolean  G_PlayerHasUnexplodedGrenades( gentity_t *player );
 
 gentity_t *Gas_Trail_fire( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *fire_flamer( gentity_t *self, vec3_t start, vec3_t aimdir );
+gentity_t *fire_flame_turret( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *fire_blaster( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *fire_pulseRifle( gentity_t *self, vec3_t start, vec3_t dir );
 gentity_t *fire_luciferCannon( gentity_t *self, vec3_t start, vec3_t dir,

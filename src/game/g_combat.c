@@ -145,6 +145,7 @@ char *modNames[ ] =
   "MOD_HSPAWN",
   "MOD_TESLAGEN",
   "MOD_MGTURRET",
+  "MOD_FLAME_TURRET",
   "MOD_REACTOR",
   "MOD_MEDISTAT",
 
@@ -2136,8 +2137,16 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
         case MOD_LIGHTNING:
         case MOD_TESLAGEN:
         case MOD_MGTURRET:
+        case MOD_FLAME_TURRET:
         case MOD_REACTOR:
           return;
+      }
+    }
+
+    //flame turrets are resistant to flame damage
+    if(mod == MOD_FLAME_TURRET || mod == MOD_FLAMER) {
+      if(targ->s.eType == ET_BUILDABLE && targ->s.modelindex == BA_H_FLAME_TURRET) {
+        return;
       }
     }
 

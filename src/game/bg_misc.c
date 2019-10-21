@@ -916,6 +916,64 @@ static const buildableAttributes_t bg_buildableList[ ] =
     (ROLE_OFFENSE)         //int               role;
   },
   {
+    BA_H_FLAME_TURRET,     //int       number;
+    qtrue,                 //qboolean  enabled;
+    "flame_turret",        //char      *name;
+    "Flame Turret",        //char      *humanName;
+    "A defensive turret buildable that throws flames. Avoid placing "
+    "too close to other human buildables as there is a risk of friendly "
+    "damage.",
+    "team_human_flame_turret", //char      *entityName;
+    TR_GRAVITY,            //trType_t  traj;
+    0.1,                   //float     bounce;
+    FLAME_TURRET_BP,       //int       buildPoints;
+    ( 1 << S3 ),           //int  stages;
+    FLAME_TURRET_HEALTH,   //int       health;
+    0.80f,                 //float     maxHealthDecayRate;
+    0,                     //int       minHealth;
+    0,                     //int       regenRate;
+    1.0f,                  //float     ballisticDmgMod;
+    FLAME_TURRET_SPLASHDAMAGE, //int       splashDamage;
+    FLAME_TURRET_SPLASHRADIUS, //int       splashRadius;
+    MOD_HSPAWN,            //int       meansOfDeath;
+    TEAM_HUMANS,           //int       team;
+    {                      //weapon_t  buildWeapon[]
+      WP_HBUILD,           //weapon_t  buildWeapon[0]
+      WP_HBUILD2,          //weapon_t  buildWeapon[1]
+      WP_NONE,             //weapon_t  buildWeapon[2]
+      WP_NONE              //weapon_t  buildWeapon[3]
+    },
+    BANIM_IDLE1,           //int       idleAnim;
+    FLAME_TURRET_NEXTTHINK,//int       nextthink;
+    FLAME_TURRET_BT,       //int       buildTime;
+    qfalse,                //qboolean  activationEnt;
+    0,                     //int       activationFlags;
+    0,                     //int       occupationFlags;
+    PM_NORMAL,             //pmtype_t  activationPm_type;
+    CONTENTS_BODY,         //int       activationContents;
+    {MASK_PLAYERSOLID, 0}, //int       activationClipMask;
+    FLAME_TURRET_RANGE,    //int       turretRange;
+    FLAME_TURRET_REPEAT,   //int       turretFireSpeed;
+    qfalse,                //qboolean  turretTrackOnlyOrigin;
+    WP_FLAME_TURRET,       //weapon_t  turretProjType;
+    0.5f,                  //float     minNormal;
+    qfalse,                //qboolean  invertNormal;
+    qfalse,                //qboolean  creepTest;
+    0,                     //int       creepSize;
+    qfalse,                //qboolean  dccTest;
+    qtrue,                 //qboolean  transparentTest;
+    qfalse,                //qboolean  uniqueTest;
+    FLAME_TURRET_VALUE,    //int       value;
+    qfalse,                //qboolean  stackable;
+    FLAME_TURRET_BAT_PWR,  //int       batteryPower;
+    RMT_SPHERICAL_CONE_240,//rangeMarkerType_t rangeMarkerType;
+    FLAME_TURRET_RANGE,    //float             rangeMarkerRange;
+    SHC_ORANGE,            //shaderColorEnum_t rangeMarkerColor;
+    qtrue,                 //qboolean          rangeMarkerUseNormal;
+    qfalse,                //qboolean          rangeMarkerOriginAtTop;
+    (ROLE_OFFENSE)         //int               role;
+  },
+  {
     BA_H_TESLAGEN,         //int       number;
     qtrue,                 //qboolean  enabled;
     "tesla",               //char      *name;
@@ -5313,6 +5371,99 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       burstDelay3;
     0,                    //int       reloadTime;
     MGTURRET_K_SCALE,     //float     knockbackScale;
+    0.0f,                 //float     recoil1;
+    0.0f,                 //float     recoil2;
+    0.0f,                 //float     recoil3;
+    qfalse,               //qboolean  hasAltMode;
+    qfalse,               //qboolean  hasThirdMode;
+    qfalse,               //qboolean  canZoom;
+    90.0f,                //float     zoomFov;
+    qfalse,               //qboolean  purchasable;
+    qfalse,               //qboolean  longRanged;
+    qfalse,               //qboolean  relativeMissileSpeed;
+    {
+      {                     //impactPrediction_t impactPrediction[0];
+        WPM_NONE,           //weaponMode_t  weaponMode;
+        TR_STATIONARY,      //trType_t      trType;
+        0,                  //int       missileLifeTime;
+        0,                  //int       missileSize;
+        0                   //int       missileLaunchSpeed;
+      },
+      {                     //impactPrediction_t impactPrediction[1];
+        WPM_NONE,           //weaponMode_t  weaponMode;
+        TR_STATIONARY,      //trType_t      trType;
+        0,                  //int       missileLifeTime;
+        0,                  //int       missileSize;
+        0                   //int       missileLaunchSpeed;
+      }
+    },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      },
+      {                   //struct    splatter[1]
+        0,                //unsigned int number;;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      }
+    },
+    TEAM_HUMANS           //team_t    team;
+  },
+  {
+    WP_FLAME_TURRET,      //int       number;
+    qtrue,                //qboolean enabled;
+    0,                    //int       price;
+    qtrue,                //qboolean  warmupFree;
+    ( 1 << S2 )|( 1 << S3 ), //int    stages;
+    SLOT_WEAPON,          //int       slots;
+    "flame_turret",       //char      *name;
+    "Flame Turret",       //char      *humanName;
+    "",
+    0,                    //int       maxAmmo;
+    0,                    //int       maxClips;
+    1,                    //int       ammoUsage1;
+    1,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
+    0,                    //int       roundPrice;
+    qfalse,               //qboolean  ammoPurchasable;
+    qtrue,                //int       infiniteAmmo;
+    qfalse,               //int       usesEnergy;
+    0,                    //int       repeatRate1;
+    0,                    //int       repeatRate2;
+    0,                    //int       repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
+    0,                    //int       reloadTime;
+    FLAME_TURRET_K_SCALE, //float     knockbackScale;
     0.0f,                 //float     recoil1;
     0.0f,                 //float     recoil2;
     0.0f,                 //float     recoil3;

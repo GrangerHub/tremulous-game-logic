@@ -232,6 +232,9 @@ static void CG_Obituary( entityState_t *ent )
     case MOD_MGTURRET:
       message = "was gunned down by a turret";
       break;
+    case MOD_FLAME_TURRET:
+      message = "was barbecued by a flame turret";
+      break;
     case MOD_TESLAGEN:
       message = "was zapped by a tesla generator";
       break;

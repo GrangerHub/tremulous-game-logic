@@ -693,6 +693,61 @@ gentity_t *fire_flamer( gentity_t *self, vec3_t start, vec3_t dir )
   return bolt;
 }
 
+/*
+=================
+fire_flame_turret
+
+=================
+*/
+gentity_t *fire_flame_turret( gentity_t *self, vec3_t start, vec3_t dir )
+{
+  gentity_t *bolt;
+  vec3_t    pvel;
+
+  VectorNormalize (dir);
+
+  bolt = G_Spawn();
+  bolt->classname = "flame_turret_flame";
+  bolt->pointAgainstWorld = qfalse;
+  bolt->nextthink = level.time + FLAME_TURRET_LIFETIME;
+  bolt->think = G_ExplodeMissile;
+  bolt->s.eType = ET_MISSILE;
+  bolt->s.weapon = WP_FLAME_TURRET;
+  bolt->s.generic1 = self->s.generic1; //weaponMode
+  bolt->r.ownerNum = self->s.number;
+  bolt->parent = self;
+  bolt->damage = FLAME_TURRET_DMG;
+  bolt->splashDamage = FLAME_TURRET_FIRE_SPLASHDAMAGE;
+  bolt->splashRadius = FLAME_TURRET_RADIUS;
+  bolt->methodOfDeath = MOD_FLAME_TURRET;
+  bolt->splashMethodOfDeath = MOD_FLAME_TURRET;
+  bolt->noKnockback = qfalse;
+  G_SetClipmask( bolt, MASK_SHOT, 0 );
+  bolt->target_ent = NULL;
+  bolt->r.mins[ 0 ] = bolt->r.mins[ 1 ] = bolt->r.mins[ 2 ] = -FLAME_TURRET_START_SIZE;
+  bolt->r.maxs[ 0 ] = bolt->r.maxs[ 1 ] = bolt->r.maxs[ 2 ] = FLAME_TURRET_START_SIZE;
+
+  bolt->s.pos.trType = TR_LINEAR;
+  bolt->s.pos.trTime = level.time - MISSILE_PRESTEP_TIME;   // move a bit on the very first frame
+
+  bolt->scale_missile.enabled = qtrue;
+  bolt->scale_missile.start_time = bolt->s.pos.trTime;
+  bolt->scale_missile.stop_time = bolt->scale_missile.start_time + FLAME_TURRET_EXPAND_TIME;
+  VectorCopy(bolt->r.mins, bolt->scale_missile.start_mins);
+  VectorCopy(bolt->r.maxs, bolt->scale_missile.start_maxs);
+  bolt->scale_missile.end_mins[ 0 ] = bolt->scale_missile.end_mins[ 1 ] = bolt->scale_missile.end_mins[ 2 ] = -FLAMER_FULL_SIZE;
+  bolt->scale_missile.end_maxs[ 0 ] = bolt->scale_missile.end_maxs[ 1 ] = bolt->scale_missile.end_maxs[ 2 ] = FLAMER_FULL_SIZE;
+
+  VectorCopy( start, bolt->s.pos.trBase );
+  VectorScale( self->s.pos.trDelta, FLAMER_LAG, pvel );
+  VectorMA( pvel, FLAME_TURRET_SPEED, dir, bolt->s.pos.trDelta );
+  SnapVector( bolt->s.pos.trDelta );      // save net bandwidth
+
+  VectorCopy( start, bolt->r.currentOrigin );
+
+  return bolt;
+}
+
 //=============================================================================
 
 /*
