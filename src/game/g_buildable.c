@@ -2900,6 +2900,7 @@ static qboolean HMGTurret_TargetPointIsVisible( gentity_t *self,
 {
   trace_t       tr;
   vec3_t        end;
+  float         range = BG_Buildable(self->s.modelindex)->turretRange;
 
   Com_Assert( self &&
               "HMGTurret_TargetPointIsVisible: self is NULL" );
@@ -2913,7 +2914,7 @@ static qboolean HMGTurret_TargetPointIsVisible( gentity_t *self,
       -sin( DEG2RAD( MGTURRET_VERTICALCAP ) ) )
     return qfalse;
 
-  VectorMA( self->s.pos.trBase, MGTURRET_RANGE, targetPoint->direction, end );
+  VectorMA( self->s.pos.trBase, range, targetPoint->direction, end );
   SV_Trace( &tr, self->s.pos.trBase, NULL, NULL, end,
               self->s.number, *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB );
 
@@ -3115,6 +3116,7 @@ static qboolean HMGTurret_TrackEnemy( gentity_t *self )
   float   temp, rotAngle;
   bboxPoint_t trackPoint;
   float   angularSpeed;
+  float   range = BG_Buildable(self->s.modelindex)->turretRange;
 
   Com_Assert( self &&
               "HMGTurret_TrackEnemy: self is NULL" );
@@ -3206,7 +3208,7 @@ static qboolean HMGTurret_TrackEnemy( gentity_t *self )
     // check to see if the enemy is still in the line of fire
     AngleVectors( self->s.angles2, forward, NULL, NULL );
     VectorNormalize( forward );
-    VectorMA( self->s.pos.trBase, MGTURRET_RANGE, forward, end );
+    VectorMA( self->s.pos.trBase, range, forward, end );
     SV_Trace( &tr, self->s.pos.trBase, NULL, NULL, end,
                 self->s.number, *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB );
 
@@ -3227,7 +3229,8 @@ Used by HMGTurret_Think to locate enemy gentities
 static void HMGTurret_FindEnemy( gentity_t *self )
 {
   int         entityList[ MAX_GENTITIES ];
-  vec3_t      range;
+  float       range = BG_Buildable(self->s.modelindex)->turretRange;
+  vec3_t      range_vector;
   vec3_t      mins, maxs;
   int         i, num;
   gentity_t   *target;
@@ -3241,9 +3244,9 @@ static void HMGTurret_FindEnemy( gentity_t *self )
   self->enemy = NULL;
 
   // Look for targets in a box around the turret
-  VectorSet( range, MGTURRET_RANGE, MGTURRET_RANGE, MGTURRET_RANGE );
-  VectorAdd( self->r.currentOrigin, range, maxs );
-  VectorSubtract( self->r.currentOrigin, range, mins );
+  VectorSet( range_vector, range, range, range );
+  VectorAdd( self->r.currentOrigin, range_vector, maxs );
+  VectorSubtract( self->r.currentOrigin, range_vector, mins );
   num =
     SV_AreaEntities(
       mins, maxs, Temp_Clip_Mask(MASK_SHOT, 0), entityList, MAX_GENTITIES);
