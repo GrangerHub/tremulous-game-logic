@@ -546,6 +546,7 @@ typedef enum
 #define EF_B_SPAWNED        0x00008
 #define EF_B_POWERED        0x00010
 #define EF_B_MARKED         0x00020
+#define EF_B_ACTIVE         0x00040
 
 #define EF_WARN_CHARGE      0x00020    // Lucifer Cannon is about to overcharge
 #define EF_WALLCLIMB        0x00040    // wall walking

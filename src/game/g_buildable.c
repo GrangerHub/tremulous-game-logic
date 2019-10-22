@@ -3492,6 +3492,7 @@ void HMGTurret_Think( gentity_t *self )
 
   if(self->enemy != prev_enemy) {
     self->active = qfalse;
+    self->s.eFlags &= ~EF_B_ACTIVE;
     self->turretSpinupTime = -1;
   }
 
@@ -3516,6 +3517,7 @@ void HMGTurret_Think( gentity_t *self )
   if( !self->active && self->timestamp < level.time )
   {
     self->active = qtrue;
+    self->s.eFlags |= EF_B_ACTIVE;
 
     if( G_IsDCCBuilt( ) )
     {

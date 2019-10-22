@@ -683,6 +683,8 @@ typedef struct centity_s
   float                 lastBuildableHealth;
   int                   lastBuildableDamageSoundTime;
 
+  int    turret_idle_scan_progress;
+
   lightFlareStatus_t    lfs;
 
   qboolean              doorState;
