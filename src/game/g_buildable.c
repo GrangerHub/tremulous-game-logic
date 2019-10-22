@@ -4026,6 +4026,7 @@ void HMGTurret_Think( gentity_t *self )
 
   if(self->enemy != prev_enemy) {
     self->active = qfalse;
+    self->s.eFlags &= ~EF_B_ACTIVE;
     HMGTurret_FindEnemy( self );
   }
   
@@ -4042,6 +4043,7 @@ void HMGTurret_Think( gentity_t *self )
   if( !HMGTurret_TrackEnemy( self ) )
   {
     self->active = qfalse;
+    self->s.eFlags &= ~EF_B_ACTIVE;
     return;
   }
 
@@ -4049,6 +4051,7 @@ void HMGTurret_Think( gentity_t *self )
   if( !self->active && self->timestamp < level.time )
   {
     self->active = qtrue;
+    self->s.eFlags |= EF_B_ACTIVE;
 
     G_AddEvent( self, EV_MGTURRET_SPINUP, 0 );
 
@@ -4135,6 +4138,7 @@ void HFlameTurret_Think( gentity_t *self )
 
   if(self->enemy != prev_enemy) {
     self->active = qfalse;
+    self->s.eFlags &= ~EF_B_ACTIVE;
     self->turretSpinupTime = -1;
   }
   
@@ -4159,6 +4163,7 @@ void HFlameTurret_Think( gentity_t *self )
   if( !self->active && self->timestamp < level.time )
   {
     self->active = qtrue;
+    self->s.eFlags |= EF_B_ACTIVE;
 
     self->turretSpinupTime = level.time + FLAME_TURRET_SPINUP_TIME;
     G_AddEvent( self, EV_MGTURRET_SPINUP, 0 );

@@ -1386,6 +1386,7 @@ static void CG_CEntityPVSEnter( centity_t *cent )
 
     case ET_BUILDABLE:
       cent->lastBuildableHealth = es->misc;
+      cent->turret_idle_scan_progress = 0;
       break;
 
     case ET_PLAYER:
