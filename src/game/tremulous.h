@@ -900,7 +900,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define FLAME_TURRET_REPEAT              150  // repeat after full spin up
 #define FLAME_TURRET_NEXTTHINK           50
 #define FLAME_TURRET_K_SCALE             2.0f
-#define FLAME_TURRET_RANGE               50.0f
+#define FLAME_TURRET_RANGE               250.0f
 #define FLAME_TURRET_SPREAD              0
 #define FLAME_TURRET_DMG                 HWDM(20000)
 #define FLAME_TURRET_FIRE_SPLASHDAMAGE   HWDM(10000)
@@ -908,7 +908,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define FLAME_TURRET_START_SIZE          2        // initial missile bounding box
 #define FLAME_TURRET_FULL_SIZE           20       // fully enlarged missile bounding box
 #define FLAME_TURRET_EXPAND_TIME         480
-#define FLAME_TURRET_LIFETIME            700
+#define FLAME_TURRET_LIFETIME            500
 #define FLAME_TURRET_SPEED               500.0f
 #define FLAME_TURRET_SPINUP_TIME         550
 #define FLAME_TURRET_VALUE               (2 * ALIEN_CREDITS_PER_KILL )
