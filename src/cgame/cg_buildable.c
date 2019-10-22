@@ -1307,7 +1307,7 @@ void CG_Buildable( centity_t *cent )
 {
   refEntity_t     ent;
   entityState_t   *es = &cent->currentState;
-  vec3_t          surfNormal, xNormal, mins, maxs;
+  vec3_t          surfNormal, xNormal, mins, maxs, turret_angle;
   vec3_t          refNormal = { 0.0f, 0.0f, 1.0f };
   float           rotAngle;
   team_t          team = BG_Buildable( es->modelindex )->team;
@@ -1380,6 +1380,8 @@ void CG_Buildable( centity_t *cent )
   {
     sfxHandle_t prebuildSound = cgs.media.humanBuildablePrebuild;
 
+    cent->turret_idle_scan_progress = 0;
+
     if( team == TEAM_HUMANS )
     {
       ent.customShader = cgs.media.humanSpawningShader;
@@ -1422,11 +1424,37 @@ void CG_Buildable( centity_t *cent )
   VectorNormalize( xNormal );
   rotAngle = RAD2DEG( acos( DotProduct( surfNormal, refNormal ) ) );
 
+  VectorCopy(es->angles2, turret_angle);
+
   //turret barrel bit
   if( cg_buildables[ es->modelindex ].models[ 1 ] )
   {
     refEntity_t turretBarrel;
     vec3_t      flatAxis[ 3 ];
+
+    // turrets scan when idle
+    if(
+      (es->eFlags & EF_B_SPAWNED) &&
+      (es->eFlags & EF_B_POWERED) &&
+      !(es->eFlags & EF_B_ACTIVE)) {
+      float turret_idle_scan_yaw, turret_idle_scan_pitch, temp;
+
+      cent->turret_idle_scan_progress += cg.frametime;
+      turret_idle_scan_yaw = 15 * sin(((float)(cent->turret_idle_scan_progress))/((float)(4096)));
+      turret_idle_scan_pitch = 5 * sin(((float)(cent->turret_idle_scan_progress))/((float)(1024)));
+      turret_angle[YAW] += turret_idle_scan_yaw;
+      turret_angle[PITCH] += turret_idle_scan_pitch;
+      temp = fabs( turret_angle[ PITCH ] );
+      if( temp > 180 ) {
+        temp -= 360;
+      }
+
+      if( temp < -MGTURRET_VERTICALCAP ) {
+        turret_angle[ PITCH ] = (-360) + MGTURRET_VERTICALCAP;
+      }
+    } else {
+      cent->turret_idle_scan_progress = 0;
+    }
 
     memset( &turretBarrel, 0, sizeof( turretBarrel ) );
 
@@ -1434,7 +1462,7 @@ void CG_Buildable( centity_t *cent )
 
     CG_PositionEntityOnTag( &turretBarrel, &ent, ent.hModel, "tag_turret" );
     VectorCopy( cent->lerpOrigin, turretBarrel.lightingOrigin );
-    AnglesToAxis( es->angles2, flatAxis );
+    AnglesToAxis( turret_angle, flatAxis );
 
     RotatePointAroundVector( turretBarrel.axis[ 0 ], xNormal, flatAxis[ 0 ], -rotAngle );
     RotatePointAroundVector( turretBarrel.axis[ 1 ], xNormal, flatAxis[ 1 ], -rotAngle );
@@ -1466,6 +1494,9 @@ void CG_Buildable( centity_t *cent )
       turretBarrel.renderfx |= RF_DEPTHHACK;
     }
     trap_R_AddRefEntityToScene( &turretBarrel );
+  } else
+  {
+    cent->turret_idle_scan_progress = 0;
   }
 
   //turret barrel bit
@@ -1477,7 +1508,7 @@ void CG_Buildable( centity_t *cent )
 
     memset( &turretTop, 0, sizeof( turretTop ) );
 
-    VectorCopy( es->angles2, swivelAngles );
+    VectorCopy( turret_angle, swivelAngles );
     swivelAngles[ PITCH ] = 0.0f;
 
     turretTop.hModel = cg_buildables[ es->modelindex ].models[ 2 ];
