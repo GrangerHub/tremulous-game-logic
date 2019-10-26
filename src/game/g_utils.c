@@ -1284,7 +1284,13 @@ supported by the world, a mover, or has no foundational support
 ================
 */
 int G_Get_Foundation_Ent_Num(gentity_t *ent) {
+  static int depth = 0;
   int groundEntityNum;
+  int foundation_for_ground;
+
+  if(depth > 200) {
+    return ENTITYNUM_NONE;
+  }
 
   Com_Assert(ent && "G_Get_Foundation_Ent_Num: ent is NULL");
 
@@ -1312,7 +1318,10 @@ int G_Get_Foundation_Ent_Num(gentity_t *ent) {
   }
 
   //check the ground entity to see if it is on a foundation entity
-  return G_Get_Foundation_Ent_Num(&g_entities[groundEntityNum]);
+  depth++;
+  foundation_for_ground = G_Get_Foundation_Ent_Num(&g_entities[groundEntityNum]);
+  depth--;
+  return foundation_for_ground;
 }
 
 /*
