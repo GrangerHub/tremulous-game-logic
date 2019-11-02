@@ -893,14 +893,14 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define FLAME_TURRET_HEALTH              HBHM(600000)
 #define FLAME_TURRET_SPLASHDAMAGE        HBDM(0)
 #define FLAME_TURRET_SPLASHRADIUS        0
-#define FLAME_TURRET_ANGULARSPEED        18
+#define FLAME_TURRET_ANGULARSPEED        36
 #define FLAME_TURRET_ANGULARYAWSPEED_MOD 6
 #define FLAME_TURRET_ACCURACY_TO_FIRE    10
 #define FLAME_TURRET_VERTICALCAP         45  // +/- maximum pitch
 #define FLAME_TURRET_REPEAT              200  // repeat after full spin up
 #define FLAME_TURRET_NEXTTHINK           50
 #define FLAME_TURRET_K_SCALE             2.0f
-#define FLAME_TURRET_RANGE               250.0f
+#define FLAME_TURRET_RANGE               300.0f
 #define FLAME_TURRET_SPREAD              0
 #define FLAME_TURRET_DMG                 HWDM(15000)
 #define FLAME_TURRET_FIRE_SPLASHDAMAGE   HWDM(5000)
@@ -908,13 +908,14 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define FLAME_TURRET_START_SIZE          2        // initial missile bounding box
 #define FLAME_TURRET_FULL_SIZE           20       // fully enlarged missile bounding box
 #define FLAME_TURRET_EXPAND_TIME         480
-#define FLAME_TURRET_LIFETIME            757
+#define FLAME_TURRET_LIFETIME            910
 #define FLAME_TURRET_SPEED               330.0f
-#define FLAME_TURRET_SPINUP_TIME         550
+#define FLAME_TURRET_SPINUP_TIME         250
 #define FLAME_TURRET_VALUE               (2 * ALIEN_CREDITS_PER_KILL )
 #define FLAME_TURRET_BAT_PWR             25000
-#define FLAME_TURRET_DCC_ANGULARSPEED    22
-#define FLAME_TURRET_GRAB_ANGULARSPEED   8
+#define FLAME_TURRET_DCC_ANGULARSPEED    44
+#define FLAME_TURRET_GRAB_ANGULARSPEED   20
+#define FLAME_TURRET_ACCURACY 5 // lower is better
 
 #define TESLAGEN_BP                 10
 #define TESLAGEN_BT                 15000

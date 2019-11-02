@@ -3656,6 +3656,7 @@ Used by HMGTurret_Think to track enemy location
 static qboolean HMGTurret_TrackEnemy( gentity_t *self )
 {
   vec3_t  dirToTarget, dttAdjusted, angleToTarget, angularDiff, xNormal, currentdir;
+  vec3_t  predicted_enemy_position;
   vec3_t  refNormal = { 0.0f, 0.0f, 1.0f };
   float   temp, rotAngle;
   bboxPoint_t trackPoint;
@@ -3667,12 +3668,75 @@ static qboolean HMGTurret_TrackEnemy( gentity_t *self )
   Com_Assert( self->enemy &&
               "HMGTurret_TrackEnemy: enemy is NULL" );
 
-  if( !self->dcc )
+  if( !self->dcc ) {
     trackPoint.num = BBXP_ORIGIN;
-  else
+    VectorCopy(self->enemy->s.pos.trBase, predicted_enemy_position);
+  }
+  else {
     trackPoint.num = self->trackedEnemyPointNum;
+
+    if(self->enemy && BG_Buildable(self->s.modelindex)->turretProjType == WP_FLAME_TURRET) {
+      gentity_t *enemy = self->enemy;
+      vec3_t    dirToTarget, bestDirToTarget;
+      vec3_t    halfAcceleration, thirdJerk;
+      float     distanceToTarget = BG_Buildable( self->s.modelindex )->turretRange;
+      float     bestDistanceToTarget;
+      int       i = 0;
+      int       lowMsec = 0;
+      int       highMsec = (int)( (
+        ( ( distanceToTarget * FLAME_TURRET_SPEED ) +
+          ( distanceToTarget * BG_Class( enemy->client->ps.stats[ STAT_CLASS ] )->speed ) ) /
+        ( FLAME_TURRET_SPEED * FLAME_TURRET_SPEED ) ) * 1000.0f );
+
+      VectorSubtract( enemy->s.pos.trBase, self->s.pos.trBase, bestDirToTarget );
+      bestDistanceToTarget = VectorLength( bestDirToTarget );
+
+      VectorScale( enemy->acceleration, 1.0f / 2.0f, halfAcceleration );
+      VectorScale( enemy->jerk, 1.0f / 3.0f, thirdJerk );
+
+      // highMsec and lowMsec can only move toward
+      // one another, so the loop must terminate
+      while( highMsec - lowMsec > FLAME_TURRET_ACCURACY )
+      {
+        int   partitionMsec = ( highMsec + lowMsec ) / 2;
+        float time = (float)partitionMsec / 1000.0f;
+        float projectileDistance = FLAME_TURRET_SPEED * time;
+
+        VectorMA( enemy->s.pos.trBase, time, enemy->s.pos.trDelta, dirToTarget );
+        VectorMA( dirToTarget, time * time, halfAcceleration, dirToTarget );
+        VectorMA( dirToTarget, time * time * time, thirdJerk, dirToTarget );
+        VectorSubtract( dirToTarget, self->s.pos.trBase, dirToTarget );
+        distanceToTarget = VectorLength( dirToTarget );
+
+        if( projectileDistance < distanceToTarget )
+          lowMsec = partitionMsec;
+        else if( projectileDistance > distanceToTarget )
+          highMsec = partitionMsec;
+        else if( projectileDistance == distanceToTarget )
+          break; // unlikely to happen
+
+        if( Q_fabs( projectileDistance - distanceToTarget ) < Q_fabs( projectileDistance - bestDistanceToTarget ) )
+        {
+          VectorCopy( dirToTarget, bestDirToTarget );
+          bestDistanceToTarget = VectorLength( bestDirToTarget );
+        }
+
+        if( i > 50 )
+        {
+          VectorCopy( bestDirToTarget, dirToTarget );
+          break;
+        }
+
+        i++;
+      }
+
+      VectorAdd(self->s.pos.trBase, bestDirToTarget, predicted_enemy_position);
+    } else {
+      VectorCopy(self->enemy->s.pos.trBase, predicted_enemy_position);
+    }
+  }
   BG_EvaluateBBOXPoint( &trackPoint, 
-                        self->enemy->s.pos.trBase,
+                        predicted_enemy_position,
                         self->enemy->r.mins,
                         self->enemy->r.maxs );
 
