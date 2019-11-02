@@ -1441,9 +1441,8 @@ void CG_Buildable( centity_t *cent )
   //turret barrel bit
   if( cg_buildables[ es->modelindex ].models[ 1 ] )
   {
-    refEntity_t   turretBarrel;
-    vec3_t        flatAxis[ 3 ];
-    weaponInfo_t  *weapon = &cg_weapons[ es->weapon ];
+    refEntity_t turretBarrel;
+    vec3_t      flatAxis[ 3 ];
 
     // turrets scan when idle
     if(
@@ -1507,22 +1506,6 @@ void CG_Buildable( centity_t *cent )
       turretBarrel.renderfx |= RF_DEPTHHACK;
     }
     trap_R_AddRefEntityToScene( &turretBarrel );
-
-    if(
-      weapon->wim[WPM_PRIMARY].muzzleParticleSystem &&
-      (es->eFlags & EF_FIRING) &&
-      !(es->eFlags & EF_NODRAW))
-    {
-      cent->muzzlePS = CG_SpawnNewParticleSystem( weapon->wim[ WPM_PRIMARY ].muzzleParticleSystem );
-
-      if( CG_IsParticleSystemValid( &cent->muzzlePS ) )
-      {
-        CG_SetAttachmentTag( &cent->muzzlePS->attachment, turretBarrel, turretBarrel.hModel, "tag_flash" );
-
-        CG_SetAttachmentCent( &cent->muzzlePS->attachment, cent );
-        CG_AttachToTag( &cent->muzzlePS->attachment );
-      }
-    }
   } else
   {
     cent->turret_idle_scan_progress = 0;
@@ -1623,15 +1606,6 @@ void CG_Buildable( centity_t *cent )
 
       cent->lastBuildableDamageSoundTime = cg.time;
     }
-  }
-
-  if(health <= 0) {
-    //sanity check that particle systems are stopped when buildable dies
-      if( CG_IsParticleSystemValid( &cent->muzzlePS ) )
-        CG_DestroyParticleSystem( &cent->muzzlePS );
-
-      if( CG_IsTrailSystemValid( &cent->muzzleTS ) )
-        CG_DestroyTrailSystem( &cent->muzzleTS );
   }
 
   cent->lastBuildableHealth = health;
