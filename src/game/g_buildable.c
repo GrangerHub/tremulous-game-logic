@@ -3679,19 +3679,23 @@ static qboolean HMGTurret_TrackEnemy( gentity_t *self )
   // Move slow if no dcc or grabbed
   if( G_IsDCCBuilt( ) && self->lev1Grabbed )
   {
-    angularBaseSpeed = ( MGTURRET_DCC_ANGULARSPEED - MGTURRET_ANGULARSPEED ) + MGTURRET_GRAB_ANGULARSPEED;
+    angularBaseSpeed =
+      (
+        BG_Buildable(self->s.modelindex)->turretDCCAngularSpeed -
+        BG_Buildable(self->s.modelindex)->turretAngularSpeed ) +
+      BG_Buildable(self->s.modelindex)->turretGrabAngularSpeed;
   }
   else if( self->lev1Grabbed )
   {
-    angularBaseSpeed = MGTURRET_GRAB_ANGULARSPEED;
+    angularBaseSpeed = BG_Buildable(self->s.modelindex)->turretGrabAngularSpeed;;
   }
   else if( G_IsDCCBuilt( ) )
   {
-    angularBaseSpeed = MGTURRET_DCC_ANGULARSPEED;
+    angularBaseSpeed = BG_Buildable(self->s.modelindex)->turretDCCAngularSpeed;
   }
   else
   {
-    angularBaseSpeed = MGTURRET_ANGULARSPEED;
+    angularBaseSpeed = BG_Buildable(self->s.modelindex)->turretAngularSpeed;
   }
 
   // allow the yaw to turn faster the further from horizontal the turret is aiming
