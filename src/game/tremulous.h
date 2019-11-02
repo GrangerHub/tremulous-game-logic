@@ -893,7 +893,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define FLAME_TURRET_HEALTH              HBHM(600000)
 #define FLAME_TURRET_SPLASHDAMAGE        HBDM(0)
 #define FLAME_TURRET_SPLASHRADIUS        0
-#define FLAME_TURRET_ANGULARSPEED        36
+#define FLAME_TURRET_ANGULARSPEED        15
 #define FLAME_TURRET_ANGULARYAWSPEED_MOD 6
 #define FLAME_TURRET_ACCURACY_TO_FIRE    10
 #define FLAME_TURRET_VERTICALCAP         45  // +/- maximum pitch
@@ -910,11 +910,11 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define FLAME_TURRET_EXPAND_TIME         480
 #define FLAME_TURRET_LIFETIME            910
 #define FLAME_TURRET_SPEED               330.0f
-#define FLAME_TURRET_SPINUP_TIME         250
+#define FLAME_TURRET_SPINUP_TIME         100
 #define FLAME_TURRET_VALUE               (2 * ALIEN_CREDITS_PER_KILL )
 #define FLAME_TURRET_BAT_PWR             25000
-#define FLAME_TURRET_DCC_ANGULARSPEED    44
-#define FLAME_TURRET_GRAB_ANGULARSPEED   20
+#define FLAME_TURRET_DCC_ANGULARSPEED    20
+#define FLAME_TURRET_GRAB_ANGULARSPEED   2
 #define FLAME_TURRET_ACCURACY 5 // lower is better
 
 #define TESLAGEN_BP                 10

@@ -3662,6 +3662,7 @@ static qboolean HMGTurret_TrackEnemy( gentity_t *self )
   bboxPoint_t trackPoint;
   float   angularBaseSpeed, angularYawSpeed;
   float   range = BG_Buildable(self->s.modelindex)->turretRange;
+  qboolean enemy_position_is_predicted = qfalse;
 
   Com_Assert( self &&
               "HMGTurret_TrackEnemy: self is NULL" );
@@ -3731,6 +3732,7 @@ static qboolean HMGTurret_TrackEnemy( gentity_t *self )
       }
 
       VectorAdd(self->s.pos.trBase, bestDirToTarget, predicted_enemy_position);
+      enemy_position_is_predicted = qtrue;
     } else {
       VectorCopy(self->enemy->s.pos.trBase, predicted_enemy_position);
     }
@@ -3829,8 +3831,20 @@ static qboolean HMGTurret_TrackEnemy( gentity_t *self )
     AngleVectors( self->s.angles2, forward, NULL, NULL );
     VectorNormalize( forward );
     VectorMA( self->s.pos.trBase, range, forward, end );
-    SV_Trace( &tr, self->s.pos.trBase, NULL, NULL, end,
-                self->s.number, *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB );
+    if(enemy_position_is_predicted && self->enemy) {
+      vec3_t backup_position;
+
+      VectorCopy(self->enemy->r.currentOrigin, backup_position);
+      VectorCopy(predicted_enemy_position, self->enemy->r.currentOrigin);
+      SV_LinkEntity(self->enemy);
+      SV_Trace( &tr, self->s.pos.trBase, NULL, NULL, end,
+                  self->s.number, *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB );
+      VectorCopy(backup_position, self->enemy->r.currentOrigin);
+      SV_LinkEntity(self->enemy);
+    } else {
+      SV_Trace( &tr, self->s.pos.trBase, NULL, NULL, end,
+                  self->s.number, *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB );
+    }
 
     return ( tr.entityNum == self->enemy - g_entities );
   }
