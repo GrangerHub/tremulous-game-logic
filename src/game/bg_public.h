@@ -1465,6 +1465,9 @@ typedef struct
 
   int           turretRange;
   int           turretFireSpeed;
+  float         turretAngularSpeed;
+  float         turretDCCAngularSpeed;
+  float         turretGrabAngularSpeed;
   qboolean      turretTrackOnlyOrigin;
   weapon_t      turretProjType;
 
