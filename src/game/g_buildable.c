@@ -3175,19 +3175,23 @@ static qboolean HMGTurret_TrackEnemy( gentity_t *self )
   // Move slow if no dcc or grabbed
   if( G_IsDCCBuilt( ) && self->lev1Grabbed )
   {
-    angularSpeed = ( MGTURRET_DCC_ANGULARSPEED - MGTURRET_ANGULARSPEED ) + MGTURRET_GRAB_ANGULARSPEED;
+    angularSpeed =
+      (
+        BG_Buildable(self->s.modelindex)->turretDCCAngularSpeed -
+        BG_Buildable(self->s.modelindex)->turretAngularSpeed ) +
+      BG_Buildable(self->s.modelindex)->turretGrabAngularSpeed;
   }
   else if( self->lev1Grabbed )
   {
-    angularSpeed = MGTURRET_GRAB_ANGULARSPEED;
+    angularSpeed = BG_Buildable(self->s.modelindex)->turretGrabAngularSpeed;;
   }
   else if( G_IsDCCBuilt( ) )
   {
-    angularSpeed = MGTURRET_DCC_ANGULARSPEED;
+    angularSpeed = BG_Buildable(self->s.modelindex)->turretDCCAngularSpeed;
   }
   else
   {
-    angularSpeed = MGTURRET_ANGULARSPEED;
+    angularSpeed = BG_Buildable(self->s.modelindex)->turretAngularSpeed;
   }
 
   VectorSubtract( trackPoint.point, self->s.pos.trBase, dirToTarget );
