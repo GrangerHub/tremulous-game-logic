@@ -3685,7 +3685,7 @@ static qboolean HMGTurret_TrackEnemy( gentity_t *self )
       int       lowMsec = 0;
       int       highMsec = (int)( (
         ( ( distanceToTarget * FLAME_TURRET_SPEED ) +
-          ( distanceToTarget * BG_Class( enemy->client->ps.stats[ STAT_CLASS ] )->speed ) ) /
+          (enemy->client ? ( distanceToTarget * BG_Class( enemy->client->ps.stats[ STAT_CLASS ] )->speed ) : VectorLength(enemy->s.pos.trDelta) * 2.0f) ) /
         ( FLAME_TURRET_SPEED * FLAME_TURRET_SPEED ) ) * 1000.0f );
 
       VectorSubtract( enemy->s.pos.trBase, self->s.pos.trBase, bestDirToTarget );
