@@ -174,6 +174,9 @@ static const buildableAttributes_t bg_buildableList[ ] =
     {MASK_PLAYERSOLID, 0}, //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
+    0,                     //float     turretAngularSpeed;
+    0,                     //float     turretDCCAngularSpeed;
+    0,                     //float     turretGrabAngularSpeed;
     qfalse,                //qboolean  turretTrackOnlyOrigin;
     WP_NONE,               //weapon_t  turretProjType;
     0.5f,                  //float     minNormal;
@@ -231,6 +234,9 @@ static const buildableAttributes_t bg_buildableList[ ] =
     {MASK_PLAYERSOLID, 0}, //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
+    0,                     //float     turretAngularSpeed;
+    0,                     //float     turretDCCAngularSpeed;
+    0,                     //float     turretGrabAngularSpeed;
     qfalse,                //qboolean  turretTrackOnlyOrigin;
     WP_NONE,               //weapon_t  turretProjType;
     0.0f,                 //float     minNormal;
@@ -288,6 +294,9 @@ static const buildableAttributes_t bg_buildableList[ ] =
     {MASK_PLAYERSOLID, 0}, //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
+    0,                     //float     turretAngularSpeed;
+    0,                     //float     turretDCCAngularSpeed;
+    0,                     //float     turretGrabAngularSpeed;
     qfalse,                //qboolean  turretTrackOnlyOrigin;
     WP_NONE,               //weapon_t  turretProjType;
     0.707f,                //float     minNormal;
@@ -342,6 +351,9 @@ static const buildableAttributes_t bg_buildableList[ ] =
     {MASK_PLAYERSOLID, 0}, //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
+    0,                     //float     turretAngularSpeed;
+    0,                     //float     turretDCCAngularSpeed;
+    0,                     //float     turretGrabAngularSpeed;
     qfalse,                //qboolean  turretTrackOnlyOrigin;
     WP_NONE,               //weapon_t  turretProjType;
     0.0f,                  //float     minNormal;
@@ -396,6 +408,9 @@ static const buildableAttributes_t bg_buildableList[ ] =
     {MASK_PLAYERSOLID, 0}, //int       activationClipMask;
     TRAPPER_RANGE,         //int       turretRange;
     TRAPPER_REPEAT,        //int       turretFireSpeed;
+    0,                     //float     turretAngularSpeed;
+    0,                     //float     turretDCCAngularSpeed;
+    0,                     //float     turretGrabAngularSpeed;
     qfalse,                //qboolean  turretTrackOnlyOrigin;
     WP_LOCKBLOB_LAUNCHER,  //weapon_t  turretProjType;
     0.0f,                  //float     minNormal;
@@ -451,6 +466,9 @@ static const buildableAttributes_t bg_buildableList[ ] =
     {MASK_PLAYERSOLID, 0}, //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
+    0,                     //float     turretAngularSpeed;
+    0,                     //float     turretDCCAngularSpeed;
+    0,                     //float     turretGrabAngularSpeed;
     qfalse,                //qboolean  turretTrackOnlyOrigin;
     WP_NONE,               //weapon_t  turretProjType;
     0.707f,                //float     minNormal;
@@ -505,6 +523,9 @@ static const buildableAttributes_t bg_buildableList[ ] =
     {MASK_PLAYERSOLID, 0}, //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
+    0,                     //float     turretAngularSpeed;
+    0,                     //float     turretDCCAngularSpeed;
+    0,                     //float     turretGrabAngularSpeed;
     qfalse,                //qboolean  turretTrackOnlyOrigin;
     WP_HIVE,               //weapon_t  turretProjType;
     0.0f,                  //float     minNormal;
@@ -564,6 +585,9 @@ static const buildableAttributes_t bg_buildableList[ ] =
     {MASK_DEADSOLID, CONTENTS_DOOR}, //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
+    0,                     //float     turretAngularSpeed;
+    0,                     //float     turretDCCAngularSpeed;
+    0,                     //float     turretGrabAngularSpeed;
     qfalse,                //qboolean  turretTrackOnlyOrigin;
     WP_NONE,               //weapon_t  turretProjType;
     0.95f,                 //float     minNormal;
@@ -618,6 +642,9 @@ static const buildableAttributes_t bg_buildableList[ ] =
     {MASK_PLAYERSOLID, 0}, //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
+    0,                     //float     turretAngularSpeed;
+    0,                     //float     turretDCCAngularSpeed;
+    0,                     //float     turretGrabAngularSpeed;
     qfalse,                //qboolean  turretTrackOnlyOrigin;
     WP_NONE,               //weapon_t  turretProjType;
     0.95f,                 //float     minNormal;
@@ -673,6 +700,9 @@ static const buildableAttributes_t bg_buildableList[ ] =
     {MASK_PLAYERSOLID, 0}, //int       activationClipMask;
     MGTURRET_RANGE,        //int       turretRange;
     MGTURRET_REPEAT,       //int       turretFireSpeed;
+    MGTURRET_ANGULARSPEED, //float     turretAngularSpeed;
+    MGTURRET_DCC_ANGULARSPEED, //float     turretDCCAngularSpeed;
+    MGTURRET_GRAB_ANGULARSPEED, //float     turretGrabAngularSpeed;
     qtrue,                 //qboolean  turretTrackOnlyOrigin;
     WP_MGTURRET,           //weapon_t  turretProjType;
     0.95f,                 //float     minNormal;
@@ -727,6 +757,9 @@ static const buildableAttributes_t bg_buildableList[ ] =
     {MASK_PLAYERSOLID, 0}, //int       activationClipMask;
     TESLAGEN_RANGE,        //int       turretRange;
     TESLAGEN_REPEAT,       //int       turretFireSpeed;
+    0,                     //float     turretAngularSpeed;
+    0,                     //float     turretDCCAngularSpeed;
+    0,                     //float     turretGrabAngularSpeed;
     qfalse,                //qboolean  turretTrackOnlyOrigin;
     WP_TESLAGEN,           //weapon_t  turretProjType;
     0.95f,                 //float     minNormal;
@@ -785,6 +818,9 @@ static const buildableAttributes_t bg_buildableList[ ] =
     {MASK_PLAYERSOLID, 0}, //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
+    0,                     //float     turretAngularSpeed;
+    0,                     //float     turretDCCAngularSpeed;
+    0,                     //float     turretGrabAngularSpeed;
     qfalse,                //qboolean  turretTrackOnlyOrigin;
     WP_NONE,               //weapon_t  turretProjType;
     0.95f,                 //float     minNormal;
@@ -839,6 +875,9 @@ static const buildableAttributes_t bg_buildableList[ ] =
     {MASK_PLAYERSOLID, 0}, //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
+    0,                     //float     turretAngularSpeed;
+    0,                     //float     turretDCCAngularSpeed;
+    0,                     //float     turretGrabAngularSpeed;
     qfalse,                //qboolean  turretTrackOnlyOrigin;
     WP_NONE,               //weapon_t  turretProjType;
     0.5f,                  //float     minNormal;
@@ -895,6 +934,9 @@ static const buildableAttributes_t bg_buildableList[ ] =
     {MASK_PLAYERSOLID, 0}, //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
+    0,                     //float     turretAngularSpeed;
+    0,                     //float     turretDCCAngularSpeed;
+    0,                     //float     turretGrabAngularSpeed;
     qfalse,                //qboolean  turretTrackOnlyOrigin;
     WP_NONE,               //weapon_t  turretProjType;
     0.95f,                 //float     minNormal;
@@ -953,6 +995,9 @@ static const buildableAttributes_t bg_buildableList[ ] =
     {MASK_PLAYERSOLID, 0}, //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
+    0,                     //float     turretAngularSpeed;
+    0,                     //float     turretDCCAngularSpeed;
+    0,                     //float     turretGrabAngularSpeed;
     qfalse,                //qboolean  turretTrackOnlyOrigin;
     WP_NONE,               //weapon_t  turretProjType;
     0.95f,                 //float     minNormal;
@@ -1014,6 +1059,9 @@ static const buildableAttributes_t bg_buildableList[ ] =
     {MASK_PLAYERSOLID, 0}, //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
+    0,                     //float     turretAngularSpeed;
+    0,                     //float     turretDCCAngularSpeed;
+    0,                     //float     turretGrabAngularSpeed;
     qfalse,                //qboolean  turretTrackOnlyOrigin;
     WP_NONE,               //weapon_t  turretProjType;
     0.95f,                 //float     minNormal;
