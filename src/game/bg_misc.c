@@ -487,6 +487,9 @@ static const buildableAttributes_t bg_buildableList[ ] =
     {MASK_PLAYERSOLID, 0}, //int       activationClipMask;
     0,                     //int       turretRange;
     0,                     //int       turretFireSpeed;
+    0,                     //float     turretAngularSpeed;
+    0,                     //float     turretDCCAngularSpeed;
+    0,                     //float     turretGrabAngularSpeed;
     qfalse,                //qboolean  turretTrackOnlyOrigin;
     WP_NONE,               //weapon_t  turretProjType;
     0.0f,                  //float     minNormal;
