@@ -899,7 +899,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define FLAME_TURRET_VERTICALCAP         45  // +/- maximum pitch
 #define FLAME_TURRET_REPEAT              200  // repeat after full spin up
 #define FLAME_TURRET_NEXTTHINK           50
-#define FLAME_TURRET_K_SCALE             2.0f
+#define FLAME_TURRET_K_SCALE             0.0f
 #define FLAME_TURRET_RANGE               300.0f
 #define FLAME_TURRET_SPREAD              0
 #define FLAME_TURRET_DMG                 HWDM(15000)
