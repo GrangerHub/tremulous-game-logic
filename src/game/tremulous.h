@@ -549,7 +549,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define RIFLE_REPEAT                100
 #define RIFLE_K_SCALE               0.5f
 #define RIFLE_RECOIL                20.0f
-#define RIFLE_RELOAD                2000
+#define RIFLE_RELOAD                1000
 #define RIFLE_PRICE                 0
 #define RIFLE_SPREAD                0
 #define RIFLE_DMG                   HWDM(5500)
@@ -616,7 +616,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define SHOTGUN_K_SCALE             1.0f
 #define SHOTGUN_RECOIL1             64.0f
 #define SHOTGUN_RECOIL2             128.0f
-#define SHOTGUN_RELOAD              2000
+#define SHOTGUN_RELOAD              1000
 #define SHOTGUN_SPREAD              (6.5f)
 #define SHOTGUN_DMG                 HWDM(4000)
 #define SHOTGUN_RANGE               (8192 * 12)
@@ -630,7 +630,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LASGUN_AMMO                 200
 #define LASGUN_REPEAT               180
 #define LASGUN_K_SCALE              1.0f
-#define LASGUN_RELOAD               2000
+#define LASGUN_RELOAD               1000
 #define LASGUN_DAMAGE               HWDM(9000)
 
 #define MDRIVER_PRICE               400
@@ -640,7 +640,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define MDRIVER_REPEAT              1000
 #define MDRIVER_RECOIL              30.0f
 #define MDRIVER_K_SCALE             1.0f
-#define MDRIVER_RELOAD              2000
+#define MDRIVER_RELOAD              1000
 #define MDRIVER_MAX_HITS            3
 
 #define CHAINGUN_PRICE              450
@@ -650,7 +650,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define CHAINGUN_RECOIL             32.0f
 #define CHAINGUN_SPREAD             900
 #define CHAINGUN_DMG                HWDM(9000)
-#define CHAINGUN_RELOAD             2000
+#define CHAINGUN_RELOAD             1000
 #define CHAINGUN_REPEAT2            150
 #define CHAINGUN_SPREAD2            600
 #define CHAINGUN_DMG2               HWDM(9000)
@@ -668,14 +668,14 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define FLAMER_LIFETIME             700
 #define FLAMER_SPEED                500.0f
 #define FLAMER_LAG                  0.65f    // the amount of player velocity that is added to the fireball
-#define FLAMER_RELOAD               2000
+#define FLAMER_RELOAD               1000
 
 #define PRIFLE_PRICE                500
 #define PRIFLE_CLIPS                40
 #define PRIFLE_MAXCLIPS             5
 #define PRIFLE_REPEAT               100
 #define PRIFLE_K_SCALE              1.0f
-#define PRIFLE_RELOAD               2000
+#define PRIFLE_RELOAD               1000
 #define PRIFLE_DMG                  HWDM(9000)
 #define PRIFLE_SPEED                1200
 #define PRIFLE_SIZE                 5
@@ -685,7 +685,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LCANNON_AMMO                90
 #define LCANNON_K_SCALE             1.0f
 #define LCANNON_REPEAT              500
-#define LCANNON_RELOAD              2000
+#define LCANNON_RELOAD              1000
 #define LCANNON_DAMAGE              HWDM(265000)
 #define LCANNON_RADIUS              150      // primary splash damage radius
 #define LCANNON_SIZE                5        // missile bounding box radius
@@ -711,7 +711,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define PORTALGUN_ROUND_PRICE       0
 #define PORTALGUN_REPEAT            200     // repeat period if a portal isn't created
 #define PORTAL_CREATED_REPEAT       1500    // repeat period if a portal is created
-#define PORTALGUN_RELOAD            2000
+#define PORTALGUN_RELOAD            1000
 #define PORTALGUN_SPEED             8000
 #define PORTALGUN_SIZE              25       // missile bounding box radius
 #define PORTAL_LIFETIME             120000   // max time a portal can exist
@@ -724,7 +724,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LAUNCHER_ROUND_PRICE         400
 #define LAUNCHER_REPEAT              1000
 #define LAUNCHER_K_SCALE             1.0f
-#define LAUNCHER_RELOAD              3000
+#define LAUNCHER_RELOAD              1500
 #define LAUNCHER_DAMAGE              HWDM(220000)
 #define LAUNCHER_RADIUS              175
 #define LAUNCHER_SPEED               1200
