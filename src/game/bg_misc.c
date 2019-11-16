@@ -4307,7 +4307,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     CHAINGUN_RECOIL,      //float     recoil1;
     CHAINGUN_RECOIL,      //float     recoil2;
     0.0f,                 //float     recoil3;
-    qtrue,                //qboolean  hasAltMode;
+    qfalse,               //qboolean  hasAltMode;
     qfalse,               //qboolean  hasThirdMode;
     qfalse,               //qboolean  canZoom;
     90.0f,                //float     zoomFov;
