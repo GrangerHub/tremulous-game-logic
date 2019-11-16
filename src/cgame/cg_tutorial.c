@@ -433,7 +433,7 @@ static void CG_AlienLevel3Text( char *text, playerState_t *ps )
         CG_KeyNameForCommand( "+button5" ) ) );
 
   Q_strcat( text, MAX_TUTORIAL_TEXT,
-      va( "Hold down %s to keep pounces short\n",
+      va( "Hold down %s for greater pounces\n",
         CG_KeyNameForCommand( "+speed" ) ) );
 }
 

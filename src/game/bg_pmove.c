@@ -4561,7 +4561,7 @@ static void PM_Weapon( void )
         }
       }
 
-      if(pm->cmd.buttons & BUTTON_WALKING) {
+      if(!(pm->cmd.buttons & BUTTON_WALKING)) {
         switch( pm->ps->weapon )
         {
           case WP_ALEVEL0:
