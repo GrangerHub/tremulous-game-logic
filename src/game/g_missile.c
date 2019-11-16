@@ -708,7 +708,7 @@ gentity_t *fire_flame_turret( gentity_t *self, vec3_t start, vec3_t dir )
 
   bolt = G_Spawn();
   bolt->classname = "flame_turret_flame";
-  bolt->pointAgainstWorld = qfalse;
+  bolt->pointAgainstWorld = qtrue;
   bolt->nextthink = level.time + FLAME_TURRET_LIFETIME;
   bolt->think = G_ExplodeMissile;
   bolt->s.eType = ET_MISSILE;
