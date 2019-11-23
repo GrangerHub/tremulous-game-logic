@@ -4565,7 +4565,7 @@ static void PM_Weapon( void )
         switch( pm->ps->weapon )
         {
           case WP_ALEVEL0:
-            short_max = LEVEL0_SHORT_POUNCE_TIME;
+            short_max = LEVEL0_POUNCE_TIME;
             break;
 
           case WP_ALEVEL3:
