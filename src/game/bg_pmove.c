@@ -4864,6 +4864,32 @@ static void PM_Weapon( void )
   if( pm->ps->stats[ STAT_WEAPONTIME2 ] < 0 )
     pm->ps->stats[ STAT_WEAPONTIME2 ] = 0;
 
+  // pump the spinup time
+  if(BG_Weapon(pm->ps->weapon)->weaponOptionA == WEAPONOPTA_SPINUP) {
+    if(
+      attack1 ||
+      (BG_Weapon(pm->ps->weapon)->hasAltMode && attack2) ||
+      (BG_Weapon(pm->ps->weapon)->hasThirdMode && attack3)) {
+      pm->ps->misc[MISC_MISC3] += pml.msec;
+      if(pm->ps->misc[MISC_MISC3] > BG_Weapon(pm->ps->weapon)->spinUpTime) {
+        pm->ps->misc[MISC_MISC3] = BG_Weapon(pm->ps->weapon)->spinUpTime;
+      }
+    } else {
+      pm->ps->misc[MISC_MISC3] -=
+        (pml.msec * BG_Weapon(pm->ps->weapon)->spinUpTime) /
+        BG_Weapon(pm->ps->weapon)->spinDownTime;
+      if(pm->ps->misc[MISC_MISC3] < 0) {
+        pm->ps->misc[MISC_MISC3] = 0;
+      }
+    }
+
+    if(pm->ps->misc[MISC_MISC3] > 0) {
+      pm->ps->stats[STAT_FLAGS] |= SFL_SPIN_BARREL;
+    } else {
+      pm->ps->stats[STAT_FLAGS] &= ~SFL_SPIN_BARREL;
+    }
+  }
+
   // allways allow upgrades to be usable
   if( pm->cmd.weapon >= WP_NUM_WEAPONS &&
       ( pm->cmd.buttons & BUTTON_USE_HOLDABLE ) &&
@@ -5467,6 +5493,18 @@ static void PM_Weapon( void )
     // Stay on the safe side
     if( pm->ps->ammo < 0 )
       pm->ps->ammo = 0;
+  }
+
+  if(BG_Weapon(pm->ps->weapon)->weaponOptionA == WEAPONOPTA_SPINUP) {
+    int spinUpTime = BG_Weapon(pm->ps->weapon)->spinUpTime;
+
+    if(pm->ps->misc[MISC_MISC3] < spinUpTime) {
+      int startRepeat = BG_Weapon(pm->ps->weapon)->spinUpStartRepeat;
+
+      addTime =
+        startRepeat -
+        (((startRepeat - addTime) * pm->ps->misc[MISC_MISC3]) / spinUpTime);
+    }
   }
 
   //set the recoil

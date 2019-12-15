@@ -648,12 +648,15 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define CHAINGUN_REPEAT             80
 #define CHAINGUN_K_SCALE            1.0f
 #define CHAINGUN_RECOIL             32.0f
-#define CHAINGUN_SPREAD             900
-#define CHAINGUN_DMG                HWDM(9000)
+#define CHAINGUN_SPREAD             800
+#define CHAINGUN_DMG                HWDM(10000)
 #define CHAINGUN_RELOAD             1000
 #define CHAINGUN_REPEAT2            150
 #define CHAINGUN_SPREAD2            600
-#define CHAINGUN_DMG2               HWDM(9000)
+#define CHAINGUN_DMG2               HWDM(10000)
+#define CHAINGUN_START_REPEAT       300
+#define CHAINGUN_SPINUP_TIME        2500
+#define CHAINGUN_SPINDOWN_TIME      5000
 
 #define FLAMER_PRICE                450
 #define FLAMER_GAS                  200

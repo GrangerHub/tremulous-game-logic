@@ -1154,21 +1154,31 @@ CG_MachinegunSpinAngle
 */
 #define   SPIN_SPEED  0.9
 #define   COAST_TIME  1000
-static float CG_MachinegunSpinAngle( centity_t *cent, qboolean firing )
+static float CG_MachinegunSpinAngle(
+  weapon_t weaponNum, centity_t *cent, qboolean firing, qboolean force, playerState_t *ps )
 {
   int   delta;
   float angle;
   float speed;
 
   delta = cg.time - cent->pe.barrelTime;
-  if( cent->pe.barrelSpinning )
-    angle = cent->pe.barrelAngle + delta * SPIN_SPEED;
-  else
-  {
-    if( delta > COAST_TIME )
-      delta = COAST_TIME;
+  if( cent->pe.barrelSpinning || (force && !ps) ) {
+    if(
+        (BG_Weapon(weaponNum)->weaponOptionA == WEAPONOPTA_SPINUP) &&
+        ps &&
+        ps->misc[MISC_MISC3] > 0 &&
+        ps->misc[MISC_MISC3] < BG_Weapon(weaponNum)->spinUpTime) {
+      angle =
+        cent->pe.barrelAngle +
+        ((delta * SPIN_SPEED * ps->misc[MISC_MISC3]) / BG_Weapon(weaponNum)->spinUpTime);
+    } else {
+      angle = cent->pe.barrelAngle + delta * SPIN_SPEED;
+    }
+  } else {
+    if( delta > cent->pe.barrelCoastTime )
+      delta = cent->pe.barrelCoastTime;
 
-    speed = 0.5 * ( SPIN_SPEED + (float)( COAST_TIME - delta ) / COAST_TIME );
+    speed = 0.5 * ( SPIN_SPEED + (float)( cent->pe.barrelCoastTime - delta ) / cent->pe.barrelCoastTime );
     angle = cent->pe.barrelAngle + delta * speed;
   }
 
@@ -1177,6 +1187,14 @@ static float CG_MachinegunSpinAngle( centity_t *cent, qboolean firing )
     cent->pe.barrelTime = cg.time;
     cent->pe.barrelAngle = AngleMod( angle );
     cent->pe.barrelSpinning = firing;
+    if(
+        (BG_Weapon(weaponNum)->weaponOptionA == WEAPONOPTA_SPINUP) &&
+        cent->currentState.number == cg.predictedPlayerState.clientNum) {
+      cent->pe.barrelCoastTime =
+        (cg.predictedPlayerState.misc[MISC_MISC3] * BG_Weapon(weaponNum)->spinDownTime) / BG_Weapon(weaponNum)->spinUpTime;
+    } else {
+      cent->pe.barrelCoastTime = COAST_TIME;
+    }
   }
 
   return angle;
@@ -1212,6 +1230,8 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
   if( weaponNum != cent->oldWeaponNum )
   {
     cent->oldWeaponNum = weaponNum;
+
+    cent->pe.barrelCoastTime = COAST_TIME;
 
     if( !cg_flameLols.integer )
     {
@@ -1450,13 +1470,16 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
     // add the spinning barrel
     if( barrel.hModel )
     {
+      qboolean force_spin = (cent->currentState.otherEntityNum2 & SFL_SPIN_BARREL) ? qtrue : qfalse;
+
       VectorCopy( parent->lightingOrigin, barrel.lightingOrigin );
       barrel.shadowPlane = parent->shadowPlane;
       barrel.renderfx = parent->renderfx;
 
       angles[ YAW ] = 0;
       angles[ PITCH ] = 0;
-      angles[ ROLL ] = CG_MachinegunSpinAngle( cent, firing );
+      angles[ ROLL ] =
+        CG_MachinegunSpinAngle( weaponNum, cent, firing, force_spin, ps );
       AnglesToAxis( angles, barrel.axis );
 
       CG_PositionRotatedEntityOnTag( &barrel, &gun, gun.hModel, "tag_barrel" );
