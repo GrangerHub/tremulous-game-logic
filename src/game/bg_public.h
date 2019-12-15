@@ -447,6 +447,7 @@ typedef enum
 #define SFL_READY               0x00000001 // player ready state
 #define SFL_GIBBED              0x00000002
 #define SFL_CLASS_FORCED        0x00000004 // can't evolve from a class that a map forced
+#define SFL_SPIN_BARREL         0x00000020 // for weapons with spinup
 
 
 // player_state->persistant[] indexes
@@ -490,7 +491,8 @@ typedef enum
   MISC_MISC,
   // for uh...other misc stuff (evolve cool down)
   MISC_MISC2,
-  // fo uh. even more misc stuff (pounce launch delay)
+  // fo uh. even more misc stuff (pounce launch delay, weapon spinup,
+  // remainder ammo, weapon overheat)
   MISC_MISC3,
 
   // for gradually applying recoil
@@ -1531,6 +1533,15 @@ typedef struct splatterAttributes_s
   float                  range;
 } splatterAttributes_t;
 
+typedef enum
+{
+  WEAPONOPTA_NONE,
+  WEAPONOPTA_POUNCE,
+  WEAPONOPTA_SPINUP,
+  WEAPONOPTA_REMAINDER_AMMO,
+  WEAPONOPTA_OVERHEAT
+} weapon_Option_A_t;
+
 // weapon record
 typedef struct
 {
@@ -1556,6 +1567,12 @@ typedef struct
   qboolean  ammoPurchasable;
   qboolean  infiniteAmmo;
   qboolean  usesEnergy;
+
+  weapon_Option_A_t weaponOptionA;
+
+  int       spinUpStartRepeat;
+  int       spinUpTime;
+  int       spinDownTime;
 
   int       repeatRate1;
   int       repeatRate2;
