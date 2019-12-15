@@ -603,6 +603,7 @@ typedef struct
   // machinegun spinning
   float       barrelAngle;
   int         barrelTime;
+  int         barrelCoastTime;
   qboolean    barrelSpinning;
 
   vec3_t      lastNormal;
