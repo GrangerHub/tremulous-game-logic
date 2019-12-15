@@ -479,6 +479,9 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define CHAINGUN_K_SCALE            1.0f
 #define CHAINGUN_SPREAD             900
 #define CHAINGUN_DMG                HWDM(6000)
+#define CHAINGUN_START_REPEAT       300
+#define CHAINGUN_SPINUP_TIME        2500
+#define CHAINGUN_SPINDOWN_TIME      5000
 
 #define FLAMER_PRICE                400
 #define FLAMER_GAS                  200
