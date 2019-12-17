@@ -567,7 +567,9 @@ static void Give_Ammo( gentity_t *ent ) {
   client->ps.clips = BG_Weapon( client->ps.weapon )->maxClips;
 
   if( BG_Weapon( client->ps.weapon )->usesEnergy &&
-      BG_InventoryContainsUpgrade( UP_BATTPACK, client->ps.stats ) ) {
+      (
+        BG_InventoryContainsUpgrade( UP_BATTPACK, client->ps.stats ) ||
+        BG_InventoryContainsUpgrade( UP_BATTLESUIT, client->ps.stats ) ) ) {
     client->ps.ammo = (int)( (float)client->ps.ammo * BATTPACK_MODIFIER );
   }
 }
@@ -4169,16 +4171,8 @@ void G_GiveItem( gentity_t *ent, const char *itemName, const int price,
   if( weapon != WP_NONE )
   {
     ent->client->ps.stats[ STAT_WEAPON ] = weapon;
-    if( BG_Weapon( weapon )->infiniteAmmo )
-    {
-      ent->client->ps.ammo = BG_Weapon( weapon )->maxAmmo;
-      ent->client->ps.clips = BG_Weapon( weapon )->maxClips;
-    } else
-    {
-      // the first clip is loaded automatically
-      ent->client->ps.ammo = 0;
-      ent->client->ps.clips = BG_Weapon( weapon )->maxClips + 1;
-    }
+    ent->client->ps.ammo = BG_Weapon( weapon )->maxAmmo;
+    ent->client->ps.clips = BG_Weapon( weapon )->maxClips;
 
     if( BG_Weapon( weapon )->usesEnergy &&
         ( BG_InventoryContainsUpgrade( UP_BATTPACK, ent->client->ps.stats ) ||
@@ -4193,8 +4187,6 @@ void G_GiveItem( gentity_t *ent, const char *itemName, const int price,
       ent->client->ps.clips *= 2;
 
     G_ForceWeaponChange( ent, weapon );
-
-    ent->client->ps.pm_flags |= PMF_WEAPON_FORCE_RELOAD;
 
     //set build delay/pounce etc to 0
     ent->client->ps.misc[ MISC_MISC ] = 0;
@@ -4501,13 +4493,17 @@ void Cmd_Reload_f( gentity_t *ent )
       ps->weapon != WP_ABUILD2)
   {
     // reload is being attempted
-    int ammo;
+    int      ammo;
+    qboolean use_remainder_ammo =
+      (BG_Weapon(ent->client->ps.weapon)->weaponOptionA == WEAPONOPTA_REMAINDER_AMMO) ?
+      qtrue : qfalse;
+    int      remainder_ammo = use_remainder_ammo ? ent->client->ps.misc[MISC_MISC3] : 0;
 
     // weapon doesn't ever need reloading
     if( BG_Weapon( ps->weapon )->infiniteAmmo )
       return;
 
-    if( ps->clips <= 0 )
+    if((ps->clips <= 0) && (remainder_ammo <= 0))
       return;
 
     if( BG_Weapon( ps->weapon )->usesEnergy &&

@@ -188,6 +188,10 @@ void G_GiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo )
                                &rounds, &clips, &price ) )
     return;
 
+  if(BG_Weapon(weapon)->weaponOptionA == WEAPONOPTA_REMAINDER_AMMO) {
+    ent->client->ps.misc[MISC_MISC3] = 0;
+  }
+
   G_AddCreditToClient( ent->client, -(short)( price ), qfalse );
 
   ent->client->ps.ammo += rounds;
@@ -207,8 +211,6 @@ void G_GiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo )
     ent->client->ps.clips = BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->maxClips;
 
   G_ForceWeaponChange( ent, ent->client->ps.weapon );
-
-  ent->client->ps.pm_flags |= PMF_WEAPON_FORCE_RELOAD;
 
   if( BG_Weapon( weapon )->usesEnergy )
     G_AddEvent( ent, EV_RPTUSE_SOUND, 0 );

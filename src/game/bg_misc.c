@@ -3866,7 +3866,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
-    WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
+    WEAPONOPTA_REMAINDER_AMMO, //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
@@ -4068,7 +4068,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
-    WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
+    WEAPONOPTA_REMAINDER_AMMO, //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
@@ -4267,7 +4267,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
     qtrue,                //int       usesEnergy;
-    WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
+    WEAPONOPTA_REMAINDER_AMMO, //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
@@ -4566,7 +4566,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
     qtrue,                //int       usesEnergy;
-    WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
+    WEAPONOPTA_REMAINDER_AMMO, //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
@@ -5062,7 +5062,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
-    WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
+    WEAPONOPTA_REMAINDER_AMMO, //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
