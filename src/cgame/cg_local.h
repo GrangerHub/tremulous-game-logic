@@ -1265,6 +1265,8 @@ typedef struct
   float         chargeStaminaMeterValue;
   float         evolveCoolDownaMeterAlpha;
   float         evolveCoolDownaMeterValue;
+  float         overheatMeterAlpha;
+  float         overheatMeterValue;
   qhandle_t     lastHealthCross;
   float         healthCrossFade;
   float         jetpackIconAlert;

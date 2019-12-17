@@ -755,6 +755,10 @@ static void CG_HumanText( char *text, playerState_t *ps )
             va( "Hold %s to activate the %s\n",
               CG_KeyNameForCommand( "+attack" ),
               BG_Weapon( ps->weapon )->humanName ) );
+        Q_strcat( text, MAX_TUTORIAL_TEXT,
+            va( "Hold %s to activate the %s with pull\n",
+              CG_KeyNameForCommand( "+button5" ),
+              BG_Weapon( ps->weapon )->humanName ) );
         break;
 
       case WP_LUCIFER_CANNON:

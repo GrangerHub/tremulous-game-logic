@@ -3639,6 +3639,12 @@ void G_TakeItem(
   {
     weapon_t selected = BG_GetPlayerWeapon( &ent->client->ps );
 
+    //when applicable, reset MISC_MISC3
+    if(BG_Weapon(ent->client->ps.weapon)->weaponOptionA != WEAPONOPTA_NONE) {
+      ent->client->ps.misc[MISC_MISC3] = 0;
+      ent->client->ps.pm_flags &= ~PMF_PAUSE_BEAM;
+    }
+
       ent->client->ps.stats[ STAT_WEAPON ] = WP_NONE;
       // Cancel ghost buildables
       ent->client->ps.stats[ STAT_BUILDABLE ] = BA_NONE;
@@ -4173,6 +4179,12 @@ void G_GiveItem( gentity_t *ent, const char *itemName, const int price,
     ent->client->ps.stats[ STAT_WEAPON ] = weapon;
     ent->client->ps.ammo = BG_Weapon( weapon )->maxAmmo;
     ent->client->ps.clips = BG_Weapon( weapon )->maxClips;
+
+    //when applicable, reset MISC_MISC3
+    if(BG_Weapon(weapon)->weaponOptionA != WEAPONOPTA_NONE) {
+      ent->client->ps.misc[MISC_MISC3] = 0;
+      ent->client->ps.pm_flags &= ~PMF_PAUSE_BEAM;
+    }
 
     if( BG_Weapon( weapon )->usesEnergy &&
         ( BG_InventoryContainsUpgrade( UP_BATTPACK, ent->client->ps.stats ) ||

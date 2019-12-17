@@ -346,6 +346,7 @@ void CG_TransitionPlayerState( playerState_t *ps, playerState_t *ops )
   {
     cg.lastHealthCross = 0;
     cg.chargeMeterAlpha = 0.0f;
+    cg.overheatMeterAlpha = 0.0f;
   }
 
   if( ps->stats[ STAT_FUEL ] < JETPACK_ACT_BOOST_FUEL_USE &&
