@@ -2887,6 +2887,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
     LEVEL0_BITE_REPEAT,   //int       repeatRate1;
@@ -2984,6 +2985,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
     LEVEL1_CLAW_REPEAT,   //int       repeatRate1;
@@ -3081,6 +3083,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
     LEVEL1_CLAW_U_REPEAT, //int       repeatRate1;
@@ -3178,6 +3181,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
     LEVEL2_CLAW_REPEAT,   //int       repeatRate1;
@@ -3275,6 +3279,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
     LEVEL2_CLAW_U_REPEAT, //int       repeatRate1;
@@ -3372,6 +3377,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
     SPITFIRE_ZAP_REPEAT,  //int       repeatRate1;
@@ -3469,6 +3475,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       usesEnergy;
     WEAPONOPTA_POUNCE,    //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
     LEVEL3_CLAW_REPEAT,   //int       repeatRate1;
@@ -3566,6 +3573,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       usesEnergy;
     WEAPONOPTA_POUNCE,    //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
     LEVEL3_CLAW_U_REPEAT, //int       repeatRate1;
@@ -3663,6 +3671,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
     LEVEL4_CLAW_REPEAT,   //int       repeatRate1;
@@ -3760,6 +3769,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       usesEnergy
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;;
     BLASTER_REPEAT,       //int       repeatRate1;
@@ -3858,6 +3868,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
     RIFLE_REPEAT,         //int       repeatRate1;
@@ -3957,6 +3968,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
     PAINSAW_REPEAT,       //int       repeatRate1;
@@ -4058,6 +4070,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
     SHOTGUN_REPEAT,       //int       repeatRate1;
@@ -4156,6 +4169,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qtrue,                //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
     LASGUN_REPEAT,        //int       repeatRate1;
@@ -4255,6 +4269,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qtrue,                //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
     MDRIVER_REPEAT,       //int       repeatRate1;
@@ -4355,6 +4370,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       usesEnergy;
     WEAPONOPTA_SPINUP,    //weapon_Option_A_t weaponOptionA;
     CHAINGUN_START_REPEAT, //int       spinUpStartRepeat;
+    CHAINGUN_START_SPREAD, //int       spinUpStartSpread;
     CHAINGUN_SPINUP_TIME, //int       spinUpTime;
     CHAINGUN_SPINDOWN_TIME, //int       spinDownTime;
     CHAINGUN_REPEAT,      //int       repeatRate1;
@@ -4454,6 +4470,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
     FLAMER_REPEAT,        //int       repeatRate1;
@@ -4551,6 +4568,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qtrue,                //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
     PRIFLE_REPEAT,        //int       repeatRate1;
@@ -4652,6 +4670,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qtrue,                //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
     LCANNON_REPEAT,       //int       repeatRate1;
@@ -4749,6 +4768,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
     GRENADE_REPEAT,       //int       repeatRate1;
@@ -4846,6 +4866,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
     FRAGNADE_REPEAT,      //int       repeatRate1;
@@ -4943,6 +4964,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
     LASERMINE_REPEAT,     //int       repeatRate1;
@@ -5042,6 +5064,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
     LAUNCHER_REPEAT,      //int       repeatRate1;
@@ -5142,6 +5165,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qtrue,                //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
     LIGHTNING_BOLT_CHARGE_TIME_MIN,//int       repeatRate1;
@@ -5239,6 +5263,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
     500,                  //int       repeatRate1;
@@ -5336,6 +5361,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
     500,                  //int       repeatRate1;
@@ -5433,6 +5459,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qtrue,                //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
     500,                  //int       repeatRate1;
@@ -5530,6 +5557,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
     0,                    //int       repeatRate1;
@@ -5627,6 +5655,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
     0,                    //int       repeatRate1;
@@ -5724,6 +5753,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
     ABUILDER_BUILD_REPEAT, //int      repeatRate1;
@@ -5821,6 +5851,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
     ABUILDER_BUILD_REPEAT, //int      repeatRate1;
@@ -5920,6 +5951,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
     HBUILD_REPEAT,        //int       repeatRate1;
@@ -6019,6 +6051,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
     HBUILD_REPEAT,        //int       repeatRate1;
@@ -6117,6 +6150,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
     PORTALGUN_REPEAT,     //int       repeatRate1;

@@ -1652,6 +1652,7 @@ typedef struct
   weapon_Option_A_t   weaponOptionA;
 
   int                 spinUpStartRepeat;
+  int                 spinUpStartSpread;
   int                 spinUpTime;
   int                 spinDownTime;
 
