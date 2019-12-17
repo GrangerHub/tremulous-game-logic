@@ -1575,6 +1575,13 @@ typedef struct
   int       spinUpTime;
   int       spinDownTime;
 
+  qboolean  overheatPrimaryMode;
+  qboolean  overheatAltMode;
+  qboolean  overheatThirdMode;
+  int       overheatTime;
+  int       cooldownTime;
+  int       overheatWeaponDelayTime;
+
   int       repeatRate1;
   int       repeatRate2;
   int       repeatRate3;
