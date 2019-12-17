@@ -483,6 +483,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define CHAINGUN_SPREAD             1000
 #define CHAINGUN_DMG                HWDM(6000)
 #define CHAINGUN_START_REPEAT       300
+#define CHAINGUN_START_SPREAD       200
 #define CHAINGUN_SPINUP_TIME        2500
 #define CHAINGUN_SPINDOWN_TIME      5000
 
