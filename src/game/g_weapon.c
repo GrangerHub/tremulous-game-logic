@@ -475,6 +475,23 @@ void bulletFire( gentity_t *ent, float spread, int damage, int mod )
   gentity_t                *tent;
   gentity_t                *traceEnt;
   unlagged_attacker_data_t unlagged_attacker;
+  const weapon_t           weapon = ent->s.weapon;
+
+  //check for adjustment of spread for spinup weapons
+  if(
+    ent->client &&
+    (BG_Weapon(weapon)->weaponOptionA == WEAPONOPTA_SPINUP) &&
+    (ent->client->ps.misc[MISC_MISC3] > 0) &&
+    (ent->client->ps.misc[MISC_MISC3] < BG_Weapon(weapon)->spinUpTime)) {
+    int startSpread = BG_Weapon(ent->client->ps.weapon)->spinUpStartSpread;
+
+    spread = 
+      startSpread +
+      (
+        (
+          (spread - startSpread) * ent->client->ps.misc[MISC_MISC3]) /
+          BG_Weapon(weapon)->spinUpTime);
+  }
 
   spread *= 16;
 
