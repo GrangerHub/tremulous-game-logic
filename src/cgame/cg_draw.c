@@ -1776,6 +1776,11 @@ static void CG_DrawPlayerClipsValue( rectDef_t *rect, vec4_t color )
 {
   int           value;
   playerState_t *ps = &cg.snap->ps;
+  qboolean      use_remainder_ammo =
+    (BG_Weapon(ps->stats[ STAT_WEAPON ])->weaponOptionA == WEAPONOPTA_REMAINDER_AMMO) ?
+    qtrue : qfalse;
+  int           remainder_ammo = (use_remainder_ammo && ps->misc[MISC_MISC3] > 0) ? ps->misc[MISC_MISC3] : 0;
+  int           clips = ps->clips + ((remainder_ammo > 0) ? 1 : 0);
 
   switch( ps->stats[ STAT_WEAPON ] )
   {
@@ -1787,7 +1792,7 @@ static void CG_DrawPlayerClipsValue( rectDef_t *rect, vec4_t color )
       return;
 
     default:
-      value = ps->clips;
+      value = clips;
 
       if( value > -1 )
       {
@@ -2439,11 +2444,13 @@ void CG_DrawLoadingScreen( void )
 
 float CG_GetValue( int ownerDraw )
 {
-  playerState_t *ps;
-  weapon_t weapon;
-
-  ps = &cg.snap->ps;
-  weapon = BG_GetPlayerWeapon( ps );
+  playerState_t *ps = &cg.snap->ps;
+  weapon_t weapon = BG_GetPlayerWeapon( ps );
+  qboolean      use_remainder_ammo =
+    (BG_Weapon(weapon)->weaponOptionA == WEAPONOPTA_REMAINDER_AMMO) ?
+    qtrue : qfalse;
+  int           remainder_ammo = (use_remainder_ammo && ps->misc[MISC_MISC3] > 0) ? ps->misc[MISC_MISC3] : 0;
+  int           clips = ps->clips + ((remainder_ammo > 0) ? 1 : 0);
 
   switch( ownerDraw )
   {
@@ -2453,7 +2460,7 @@ float CG_GetValue( int ownerDraw )
       break;
     case CG_PLAYER_CLIPS_VALUE:
       if( weapon )
-        return ps->clips;
+        return clips;
       break;
     case CG_PLAYER_HEALTH:
       return ( BG_SU2HP( ps->misc[ MISC_HEALTH ] ) );
@@ -3661,11 +3668,13 @@ CG_DrawWeaponIcon
 void CG_DrawWeaponIcon( rectDef_t *rect, vec4_t color )
 {
   int           maxAmmo;
-  playerState_t *ps;
-  weapon_t      weapon;
-
-  ps = &cg.snap->ps;
-  weapon = BG_GetPlayerWeapon( ps );
+  playerState_t *ps = &cg.snap->ps;
+  weapon_t      weapon  = BG_GetPlayerWeapon( ps );
+  qboolean      use_remainder_ammo =
+    (BG_Weapon(weapon)->weaponOptionA == WEAPONOPTA_REMAINDER_AMMO) ?
+    qtrue : qfalse;
+  int           remainder_ammo = (use_remainder_ammo && ps->misc[MISC_MISC3] > 0) ? ps->misc[MISC_MISC3] : 0;
+  int           clips = ps->clips + ((remainder_ammo > 0) ? 1 : 0);
 
   maxAmmo = BG_Weapon( weapon )->maxAmmo;
 
@@ -3683,7 +3692,7 @@ void CG_DrawWeaponIcon( rectDef_t *rect, vec4_t color )
     return;
   }
 
-  if( ps->clips == 0 && !BG_Weapon( weapon )->infiniteAmmo )
+  if( clips == 0 && !BG_Weapon( weapon )->infiniteAmmo )
   {
     float ammoPercent = (float)ps->ammo / (float)maxAmmo;
 

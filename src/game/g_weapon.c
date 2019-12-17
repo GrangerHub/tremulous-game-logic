@@ -177,6 +177,10 @@ void G_GiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo )
                                &rounds, &clips, &price ) )
     return;
 
+  if(BG_Weapon(weapon)->weaponOptionA == WEAPONOPTA_REMAINDER_AMMO) {
+    ent->client->ps.misc[MISC_MISC3] = 0;
+  }
+
   G_AddCreditToClient( ent->client, -(short)( price ), qfalse );
 
   ent->client->ps.ammo += rounds;
