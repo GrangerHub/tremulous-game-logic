@@ -4558,6 +4558,18 @@ static void PM_Weapon( void )
       addTime = BG_Weapon( pm->ps->weapon )->repeatRate3;
     else
       addTime = BG_Weapon( pm->ps->weapon )->burstDelay3;
+
+    //check for overheating
+    if(
+      (BG_Weapon(pm->ps->weapon)->weaponOptionA == WEAPONOPTA_OVERHEAT) &&
+      BG_Weapon(pm->ps->weapon)->overheatThirdMode) {
+      pm->ps->misc[MISC_MISC3] += addTime;
+      if(pm->ps->misc[MISC_MISC3] >= BG_Weapon(pm->ps->weapon)->overheatTime) {
+        pm->ps->misc[MISC_MISC3] = BG_Weapon(pm->ps->weapon)->overheatTime;
+        pm->ps->weaponTime += BG_Weapon(pm->ps->weapon)->overheatWeaponDelayTime;
+        pm->ps->pm_flags |= PMF_PAUSE_BEAM;
+      }
+    }
   }
   else if( pm->pmext->burstRoundsToFire[ 1 ] > 0 )
   {
@@ -4568,6 +4580,18 @@ static void PM_Weapon( void )
       addTime = BG_Weapon( pm->ps->weapon )->repeatRate2;
     else
       addTime = BG_Weapon( pm->ps->weapon )->burstDelay2;
+
+    //check for overheating
+    if(
+      (BG_Weapon(pm->ps->weapon)->weaponOptionA == WEAPONOPTA_OVERHEAT) &&
+      BG_Weapon(pm->ps->weapon)->overheatAltMode) {
+      pm->ps->misc[MISC_MISC3] += addTime;
+      if(pm->ps->misc[MISC_MISC3] >= BG_Weapon(pm->ps->weapon)->overheatTime) {
+        pm->ps->misc[MISC_MISC3] = BG_Weapon(pm->ps->weapon)->overheatTime;
+        pm->ps->weaponTime += BG_Weapon(pm->ps->weapon)->overheatWeaponDelayTime;
+        pm->ps->pm_flags |= PMF_PAUSE_BEAM;
+      }
+    }
   }
   else if( pm->pmext->burstRoundsToFire[ 0 ] > 0 )
   {
@@ -4578,6 +4602,18 @@ static void PM_Weapon( void )
       addTime = BG_Weapon( pm->ps->weapon )->repeatRate1;
     else
       addTime = BG_Weapon( pm->ps->weapon )->burstDelay1;
+
+    //check for overheating
+    if(
+      (BG_Weapon(pm->ps->weapon)->weaponOptionA == WEAPONOPTA_OVERHEAT) &&
+      BG_Weapon(pm->ps->weapon)->overheatPrimaryMode) {
+      pm->ps->misc[MISC_MISC3] += addTime;
+      if(pm->ps->misc[MISC_MISC3] >= BG_Weapon(pm->ps->weapon)->overheatTime) {
+        pm->ps->misc[MISC_MISC3] = BG_Weapon(pm->ps->weapon)->overheatTime;
+        pm->ps->weaponTime += BG_Weapon(pm->ps->weapon)->overheatWeaponDelayTime;
+        pm->ps->pm_flags |= PMF_PAUSE_BEAM;
+      }
+    }
   }
   else
   {
@@ -4596,6 +4632,18 @@ static void PM_Weapon( void )
         pm->ps->generic1 = WPM_TERTIARY;
         PM_AddEvent( EV_FIRE_WEAPON3 );
         addTime = BG_Weapon( pm->ps->weapon )->repeatRate3;
+
+        //check for overheating
+        if(
+          (BG_Weapon(pm->ps->weapon)->weaponOptionA == WEAPONOPTA_OVERHEAT) &&
+          BG_Weapon(pm->ps->weapon)->overheatThirdMode) {
+          pm->ps->misc[MISC_MISC3] += addTime;
+          if(pm->ps->misc[MISC_MISC3] >= BG_Weapon(pm->ps->weapon)->overheatTime) {
+            pm->ps->misc[MISC_MISC3] = BG_Weapon(pm->ps->weapon)->overheatTime;
+            pm->ps->weaponTime += BG_Weapon(pm->ps->weapon)->overheatWeaponDelayTime;
+            pm->ps->pm_flags |= PMF_PAUSE_BEAM;
+          }
+        }
       }
       else
       {
@@ -4612,6 +4660,18 @@ static void PM_Weapon( void )
         pm->ps->generic1 = WPM_SECONDARY;
         PM_AddEvent( EV_FIRE_WEAPON2 );
         addTime = BG_Weapon( pm->ps->weapon )->repeatRate2;
+
+        //check for overheating
+        if(
+          (BG_Weapon(pm->ps->weapon)->weaponOptionA == WEAPONOPTA_OVERHEAT) &&
+          BG_Weapon(pm->ps->weapon)->overheatAltMode) {
+          pm->ps->misc[MISC_MISC3] += addTime;
+          if(pm->ps->misc[MISC_MISC3] >= BG_Weapon(pm->ps->weapon)->overheatTime) {
+            pm->ps->misc[MISC_MISC3] = BG_Weapon(pm->ps->weapon)->overheatTime;
+            pm->ps->weaponTime += BG_Weapon(pm->ps->weapon)->overheatWeaponDelayTime;
+            pm->ps->pm_flags |= PMF_PAUSE_BEAM;
+          }
+        }
       }
       else
       {
@@ -4626,6 +4686,18 @@ static void PM_Weapon( void )
       pm->ps->generic1 = WPM_PRIMARY;
       PM_AddEvent( EV_FIRE_WEAPON );
       addTime = BG_Weapon( pm->ps->weapon )->repeatRate1;
+
+      //check for overheating
+      if(
+        (BG_Weapon(pm->ps->weapon)->weaponOptionA == WEAPONOPTA_OVERHEAT) &&
+        BG_Weapon(pm->ps->weapon)->overheatPrimaryMode) {
+        pm->ps->misc[MISC_MISC3] += addTime;
+        if(pm->ps->misc[MISC_MISC3] >= BG_Weapon(pm->ps->weapon)->overheatTime) {
+          pm->ps->misc[MISC_MISC3] = BG_Weapon(pm->ps->weapon)->overheatTime;
+          pm->ps->weaponTime += BG_Weapon(pm->ps->weapon)->overheatWeaponDelayTime;
+          pm->ps->pm_flags |= PMF_PAUSE_BEAM;
+        }
+      }
     }
 
     // fire events for autohit weapons
@@ -5038,6 +5110,23 @@ static void PM_DropTimers( void )
     }
   }
 
+  // drop weapon cool down timer
+  if(
+    (BG_Weapon(pm->ps->weapon)->weaponOptionA == WEAPONOPTA_OVERHEAT) &&
+    pm->ps->weaponTime <= 0) {
+    if(pm->ps->misc[MISC_MISC3] > 0) {
+      pm->ps->misc[MISC_MISC3] -=
+        (pml.msec * BG_Weapon(pm->ps->weapon)->overheatTime) /
+        BG_Weapon(pm->ps->weapon)->cooldownTime;
+    } else {
+      pm->ps->misc[MISC_MISC3] = 0;
+    }
+
+    if((pm->ps->pm_flags & PMF_PAUSE_BEAM) && (pm->ps->weaponTime <= 0)) {
+      pm->ps->pm_flags &= ~PMF_PAUSE_BEAM;
+    }
+  }
+
   // the jump timer increases
   if( pm->ps->persistant[PERS_JUMPTIME] < 0 )
     pm->ps->persistant[PERS_JUMPTIME] = 0;
@@ -5361,7 +5450,6 @@ void PmoveSingle( pmove_t *pmove )
     pm->ps->eFlags |= EF_FIRING3;
   else
     pm->ps->eFlags &= ~EF_FIRING3;
-
 
   // clear the respawned flag if attack and use are cleared
   if( pm->ps->misc[ MISC_HEALTH ] > 0 &&

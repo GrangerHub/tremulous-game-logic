@@ -414,6 +414,9 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define PAINSAW_RANGE               64.0f
 #define PAINSAW_WIDTH               0.0f
 #define PAINSAW_HEIGHT              8.0f
+#define PAINSAW_OVERHEAT_TIME       3000
+#define PAINSAW_COOLDOWN_TIME       3000
+#define PAINSAW_OVERHEAT_DELAY      500
 
 #define GRENADE_PRICE               200
 #define GRENADE_REPEAT              0
