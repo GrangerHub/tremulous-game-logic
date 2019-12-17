@@ -2241,6 +2241,140 @@ static void CG_DrawPlayerChargeBar(
   }
 }
 
+
+
+static float CG_OverheatProgress(void) {
+  float progress, rawProgress;
+  int min = 0, max = 0;
+
+  max = BG_Weapon(cg.snap->ps.weapon)->overheatTime;
+  rawProgress = cg.snap->ps.misc[MISC_MISC3];
+
+  if( max - min <= 0.0f )
+    return 0.0f;
+
+  progress = ( rawProgress - min ) / ( max - min );
+
+  if( progress > 1.0f )
+    return 1.0f;
+
+  if( progress < 0.0f )
+    return 0.0f;
+
+  return progress;
+}
+
+static void CG_DrawPlayerOverheatBarBG(
+  rectDef_t *rect, vec4_t ref_color, qhandle_t shader) {
+  vec4_t color;
+  float *meterAlpha = &cg.overheatMeterAlpha;
+
+  if(
+    (BG_Weapon(cg.snap->ps.weapon)->weaponOptionA != WEAPONOPTA_OVERHEAT) ||
+    *meterAlpha <= 0.0f )
+    return;
+
+  color[ 0 ] = ref_color[ 0 ];
+  color[ 1 ] = ref_color[ 1 ];
+  color[ 2 ] = ref_color[ 2 ];
+  color[ 3 ] = ref_color[ 3 ] * *meterAlpha;
+
+  // Draw meter background
+  trap_R_SetColor( color );
+  CG_DrawPic( rect->x, rect->y, rect->w, rect->h, shader );
+  trap_R_SetColor( NULL );
+}
+
+static void CG_DrawPlayerOverheatBar(
+  rectDef_t *rect, vec4_t ref_color, qhandle_t shader) {
+  vec4_t color;
+  float x, y, width, height, cap_size, progress;
+  float *meterAlpha;
+  float *meterValue;
+  qboolean fadeMeter = qfalse;
+
+  if(BG_Weapon(cg.snap->ps.weapon)->weaponOptionA != WEAPONOPTA_OVERHEAT) {
+    return;
+  }
+
+  // Get progress proportion and pump fade
+  progress = CG_OverheatProgress( );
+  meterAlpha = &cg.overheatMeterAlpha;
+  meterValue = &cg.overheatMeterValue;
+  if( progress <= 0.0f ) {
+    fadeMeter = qtrue;
+  }
+
+  if(fadeMeter) {
+    *meterAlpha -= CHARGE_BAR_FADE_RATE * cg.frametime;
+    if(*meterAlpha <= 0.0f) {
+      *meterAlpha = 0.0f;
+      return;
+    }
+  } else {
+    *meterAlpha += CHARGE_BAR_FADE_RATE * cg.frametime;
+    if( *meterAlpha > 1.0f ) {
+      *meterAlpha = 1.0f;
+    }
+  }
+
+  *meterValue = progress;
+
+  color[ 0 ] = ref_color[ 0 ];
+  color[ 1 ] = ref_color[ 1 ];
+  color[ 2 ] = ref_color[ 2 ];
+  color[ 3 ] = ref_color[ 3 ] * *meterAlpha;
+
+  // Flash red for overheat warning
+  if( cg.snap->ps.misc[ MISC_MISC3 ] >= ((2 * BG_Weapon(cg.snap->ps.weapon)->overheatTime) / 3) &&
+      ( cg.time & 128 ) )
+  {
+    color[ 0 ] = 1.0f;
+    color[ 1 ] = 0.0f;
+    color[ 2 ] = 0.0f;
+  }
+
+  x = rect->x;
+  y = rect->y;
+
+  // Horizontal charge bar
+  if( rect->w >= rect->h )
+  {
+    width = ( rect->w - CHARGE_BAR_CAP_SIZE * 2 ) * *meterValue;
+    height = rect->h;
+    CG_AdjustFrom640( &x, &y, &width, &height );
+    cap_size = CHARGE_BAR_CAP_SIZE * cgs.screenXScale;
+
+    // Draw the meter
+    trap_R_SetColor( color );
+    trap_R_DrawStretchPic( x, y, cap_size, height, 0, 0, 1, 1, shader );
+    trap_R_DrawStretchPic( x + width + cap_size, y, cap_size, height,
+                           1, 0, 0, 1, shader );
+    trap_R_DrawStretchPic( x + cap_size, y, width, height, 1, 0, 1, 1, shader );
+    trap_R_SetColor( NULL );
+  }
+
+  // Vertical charge bar
+  else
+  {
+    y += rect->h;
+    width = rect->w;
+    height = ( rect->h - CHARGE_BAR_CAP_SIZE * 2 ) * *meterValue;
+    CG_AdjustFrom640( &x, &y, &width, &height );
+    cap_size = CHARGE_BAR_CAP_SIZE * cgs.screenYScale;
+
+    // Draw the meter
+    trap_R_SetColor( color );
+    trap_R_DrawStretchPic( x, y - cap_size, width, cap_size,
+                           0, 1, 1, 0, shader );
+    trap_R_DrawStretchPic( x, y - height - cap_size * 2, width,
+                           cap_size, 0, 0, 1, 1, shader );
+    trap_R_DrawStretchPic( x, y - height - cap_size, width, height,
+                           0, 1, 1, 1, shader );
+    trap_R_SetColor( NULL );
+  }
+}
+
 static void CG_DrawProgressLabel( rectDef_t *rect, float text_x, float text_y, vec4_t color,
                                   float scale, int textalign, int textvalign,
                                   const char *s, float fraction )
@@ -4096,6 +4230,12 @@ void CG_OwnerDraw( float x, float y, float w, float h, float text_x,
       break;
     case CG_PLAYER_HEALTH_CROSS:
       CG_DrawPlayerHealthCross( &rect, foreColor );
+      break;
+    case CG_PLAYER_OVERHEAT_BAR_BG:
+      CG_DrawPlayerOverheatBarBG( &rect, foreColor, shader );
+      break;
+    case CG_PLAYER_OVERHEAT_BAR:
+      CG_DrawPlayerOverheatBar( &rect, foreColor, shader );
       break;
     case CG_PLAYER_CHARGE_BAR_BG:
       CG_DrawPlayerChargeBarBG( &rect, foreColor, shader );
