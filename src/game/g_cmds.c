@@ -4118,13 +4118,17 @@ void Cmd_Reload_f( gentity_t *ent )
       ps->weapon != WP_HBUILD )
   {
     // reload is being attempted
-    int ammo;
+    int      ammo;
+    qboolean use_remainder_ammo =
+      (BG_Weapon(ent->client->ps.weapon)->weaponOptionA == WEAPONOPTA_REMAINDER_AMMO) ?
+      qtrue : qfalse;
+    int      remainder_ammo = use_remainder_ammo ? ent->client->ps.misc[MISC_MISC3] : 0;
 
     // weapon doesn't ever need reloading
     if( BG_Weapon( ps->weapon )->infiniteAmmo )
       return;
 
-    if( ps->clips <= 0 )
+    if((ps->clips <= 0) && (remainder_ammo <= 0))
       return;
 
     if( BG_Weapon( ps->weapon )->usesEnergy &&

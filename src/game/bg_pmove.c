@@ -3857,6 +3857,11 @@ Generates weapon events and modifes the weapon counter
 static void PM_Weapon( void )
 {
   int           addTime = 200; //default addTime - should never be used
+  qboolean      use_remainder_ammo =
+    (BG_Weapon(pm->ps->weapon)->weaponOptionA == WEAPONOPTA_REMAINDER_AMMO) ?
+    qtrue : qfalse;
+  int           remainder_ammo = (use_remainder_ammo && pm->ps->misc[MISC_MISC3] > 0) ? pm->ps->misc[MISC_MISC3] : 0;
+  int           clips = pm->ps->clips + ((remainder_ammo > 0) ? 1 : 0);
   qboolean      attack1 = !pm->swapAttacks ? (pm->cmd.buttons & BUTTON_ATTACK) : (pm->cmd.buttons & BUTTON_ATTACK2);
   qboolean      attack2 = !pm->swapAttacks ? (pm->cmd.buttons & BUTTON_ATTACK2) : (pm->cmd.buttons & BUTTON_ATTACK);
   qboolean      attack3 = pm->cmd.buttons & BUTTON_USE_HOLDABLE;
@@ -4238,7 +4243,7 @@ static void PM_Weapon( void )
           pm->ps->ammo < BG_Weapon( pm->ps->weapon )->ammoUsage2 ) || 
         ( ( BG_Weapon( pm->ps->weapon )->hasThirdMode && attack3 ) &&
           pm->ps->ammo < BG_Weapon( pm->ps->weapon )->ammoUsage3 ) ) &&
-      !pm->ps->clips && !BG_Weapon( pm->ps->weapon )->infiniteAmmo )
+      !clips && !BG_Weapon( pm->ps->weapon )->infiniteAmmo )
     outOfAmmo = qtrue;
 
   if( !outOfAmmo &&
@@ -4323,12 +4328,37 @@ static void PM_Weapon( void )
   //done reloading so give em some ammo
   if( pm->ps->weaponstate == WEAPON_RELOADING )
   {
-    pm->ps->clips--;
-    pm->ps->ammo = BG_Weapon( pm->ps->weapon )->maxAmmo;
+    int max_ammo = BG_Weapon( pm->ps->weapon )->maxAmmo;
 
     if( BG_Weapon( pm->ps->weapon )->usesEnergy &&
         BG_InventoryContainsUpgrade( UP_BATTPACK, pm->ps->stats ) )
-      pm->ps->ammo *= BATTPACK_MODIFIER;
+      max_ammo *= BATTPACK_MODIFIER;
+
+    if(pm->ps->clips <= 0 && remainder_ammo > 0) {
+      pm->ps->clips = 0;
+
+      if((pm->ps->ammo + remainder_ammo) > max_ammo) {
+        pm->ps->misc[MISC_MISC3] -= max_ammo - pm->ps->ammo;
+        pm->ps->ammo = max_ammo;
+      } else {
+        pm->ps->ammo += pm->ps->misc[MISC_MISC3];
+        pm->ps->misc[MISC_MISC3] = 0;
+      }
+    } else {
+      if(use_remainder_ammo) {
+        pm->ps->misc[MISC_MISC3] += pm->ps->ammo;
+
+        if(pm->ps->misc[MISC_MISC3] > max_ammo) {
+          pm->ps->misc[MISC_MISC3] -= max_ammo;  
+        } else {
+          pm->ps->clips--;
+        }
+      } else {
+        pm->ps->clips--;
+      }
+
+      pm->ps->ammo = max_ammo;
+    }
 
     if( pm->ps->weapon == WP_LUCIFER_CANNON )
       pm->pmext->luciAmmoReduction = 0;
@@ -4349,7 +4379,7 @@ static void PM_Weapon( void )
         pm->ps->ammo < BG_Weapon( pm->ps->weapon )->ammoUsage2 ) || 
       ( ( BG_Weapon( pm->ps->weapon )->hasThirdMode && attack2 ) &&
         pm->ps->ammo < BG_Weapon( pm->ps->weapon )->ammoUsage3 ) ) &&
-      pm->ps->clips > 0 )
+      clips > 0 )
   {
     int i;
 
@@ -5312,6 +5342,10 @@ PmoveSingle
 
 void PmoveSingle( pmove_t *pmove )
 {
+  qboolean      use_remainder_ammo;
+  int           remainder_ammo;
+  int           clips;
+
   pm = pmove;
 
   // this counter lets us debug movement problems with a journal
@@ -5330,12 +5364,18 @@ void PmoveSingle( pmove_t *pmove )
   if( abs( pm->cmd.forwardmove ) > 64 || abs( pm->cmd.rightmove ) > 64 )
     pm->cmd.buttons &= ~BUTTON_WALKING;
 
+  use_remainder_ammo =
+    (BG_Weapon(pm->ps->weapon)->weaponOptionA == WEAPONOPTA_REMAINDER_AMMO) ?
+    qtrue : qfalse;
+  remainder_ammo = (use_remainder_ammo && pm->ps->misc[MISC_MISC3] > 0) ? pm->ps->misc[MISC_MISC3] : 0;
+  clips = pm->ps->clips + ((remainder_ammo > 0) ? 1 : 0);
+
   // set the firing flag for continuous beam weapons
   if( !(pm->ps->pm_flags & PMF_RESPAWNED) && pm->ps->pm_type != PM_INTERMISSION &&
       ( ( ( ( !pm->swapAttacks ?
             (pm->cmd.buttons & BUTTON_ATTACK) : (pm->cmd.buttons & BUTTON_ATTACK2) ) ) ) ||
         pm->pmext->pulsatingBeamTime[ 0 ] ) &&
-      ( ( pm->ps->ammo > 0 || pm->ps->clips > 0 ) || BG_Weapon( pm->ps->weapon )->infiniteAmmo ) &&
+      ( ( pm->ps->ammo > 0 || clips > 0 ) || BG_Weapon( pm->ps->weapon )->infiniteAmmo ) &&
       !( pm->ps->pm_flags & PMF_PAUSE_BEAM ) )
     pm->ps->eFlags |= EF_FIRING;
   else
@@ -5346,7 +5386,7 @@ void PmoveSingle( pmove_t *pmove )
       ( ( ( ( !pm->swapAttacks ?
             (pm->cmd.buttons & BUTTON_ATTACK2) : (pm->cmd.buttons & BUTTON_ATTACK) ) ) ) ||
         pm->pmext->pulsatingBeamTime[ 1 ] ) &&
-      ( ( pm->ps->ammo > 0 || pm->ps->clips > 0 ) || BG_Weapon( pm->ps->weapon )->infiniteAmmo ) &&
+      ( ( pm->ps->ammo > 0 || clips > 0 ) || BG_Weapon( pm->ps->weapon )->infiniteAmmo ) &&
       !( pm->ps->pm_flags & PMF_PAUSE_BEAM ) )
     pm->ps->eFlags |= EF_FIRING2;
   else
@@ -5356,7 +5396,7 @@ void PmoveSingle( pmove_t *pmove )
   if( !(pm->ps->pm_flags & PMF_RESPAWNED) && pm->ps->pm_type != PM_INTERMISSION &&
       ( ( pm->cmd.buttons & BUTTON_USE_HOLDABLE ) ||
         pm->pmext->pulsatingBeamTime[ 2 ] ) &&
-      ( ( pm->ps->ammo > 0 || pm->ps->clips > 0 ) || BG_Weapon( pm->ps->weapon )->infiniteAmmo ) &&
+      ( ( pm->ps->ammo > 0 || clips > 0 ) || BG_Weapon( pm->ps->weapon )->infiniteAmmo ) &&
       !( pm->ps->pm_flags & PMF_PAUSE_BEAM ) )
     pm->ps->eFlags |= EF_FIRING3;
   else
