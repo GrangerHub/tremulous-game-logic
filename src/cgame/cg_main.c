@@ -1083,6 +1083,8 @@ static void CG_RegisterSounds( void )
   cgs.media.lCannonWarningSound     = trap_S_RegisterSound( "models/weapons/lcannon/warning.wav", qfalse );
   cgs.media.lCannonWarningSound2    = trap_S_RegisterSound( "models/weapons/lcannon/warning2.wav", qfalse );
 
+  cgs.media.overheatWarningSound    = trap_S_RegisterSound( "sound/weapons/overheat_warning.wav", qfalse );
+
   cgs.media.hitSound                = trap_S_RegisterSound( "sound/misc/_hit.wav", qfalse );
   cgs.media.hitSoundFF              = trap_S_RegisterSound( "sound/misc/_hitFF.wav", qfalse );
 }

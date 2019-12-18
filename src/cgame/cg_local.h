@@ -1463,6 +1463,8 @@ typedef struct
   sfxHandle_t lCannonWarningSound;
   sfxHandle_t lCannonWarningSound2;
 
+  sfxHandle_t overheatWarningSound;
+
   qhandle_t   buildWeaponTimerPie[ 8 ];
   qhandle_t   upgradeClassIconShader;
   qhandle_t   healthCross;

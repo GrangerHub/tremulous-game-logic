@@ -449,6 +449,7 @@ typedef enum
 #define SFL_GIBBED              0x00000002
 #define SFL_CLASS_FORCED        0x00000004 // can't evolve from a class that a map forced
 #define SFL_SPIN_BARREL         0x00000020 // for weapons with spinup
+#define SFL_OVERHEAT_WARNING    0x00000040 // for weapons that are overheating
 
 
 // player_state->persistant[] indexes
