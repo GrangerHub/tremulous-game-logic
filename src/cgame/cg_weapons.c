@@ -1407,6 +1407,14 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
                                               cgs.media.lCannonWarningSound2 );
   }
 
+  // weapon overheat warning sound
+  if(
+      (BG_Weapon(weaponNum)->weaponOptionA == WEAPONOPTA_OVERHEAT) &&
+      (cent->currentState.otherEntityNum2 & SFL_OVERHEAT_WARNING)) {
+        trap_S_AddLoopingSound( cent->currentState.number, cent->lerpOrigin,
+                                vec3_origin, cgs.media.overheatWarningSound );
+    }
+
   if( !noGunModel )
   {
     CG_PositionEntityOnTag( &gun, parent, parent->hModel, "tag_weapon" );

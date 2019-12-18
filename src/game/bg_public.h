@@ -461,6 +461,7 @@ typedef enum
 #define SFL_ARMOR_GENERATE      0x00000008
 #define SFL_INVIS_ENEMY_NEARBY  0x00000010 // for indicating that an invisible enemy player is near
 #define SFL_SPIN_BARREL         0x00000020 // for weapons with spinup
+#define SFL_OVERHEAT_WARNING    0x00000040 // for weapons that are overheating
 
 
 // player_state->persistant[] indexes
