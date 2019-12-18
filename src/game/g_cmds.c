@@ -3642,7 +3642,7 @@ void G_TakeItem(
     //when applicable, reset MISC_MISC3
     if(BG_Weapon(ent->client->ps.weapon)->weaponOptionA != WEAPONOPTA_NONE) {
       ent->client->ps.misc[MISC_MISC3] = 0;
-      ent->client->ps.pm_flags &= ~PMF_PAUSE_BEAM;
+      ent->client->ps.pm_flags &= ~PMF_OVERHEATED;
     }
 
       ent->client->ps.stats[ STAT_WEAPON ] = WP_NONE;
@@ -4183,7 +4183,7 @@ void G_GiveItem( gentity_t *ent, const char *itemName, const int price,
     //when applicable, reset MISC_MISC3
     if(BG_Weapon(weapon)->weaponOptionA != WEAPONOPTA_NONE) {
       ent->client->ps.misc[MISC_MISC3] = 0;
-      ent->client->ps.pm_flags &= ~PMF_PAUSE_BEAM;
+      ent->client->ps.pm_flags &= ~PMF_OVERHEATED;
     }
 
     if( BG_Weapon( weapon )->usesEnergy &&

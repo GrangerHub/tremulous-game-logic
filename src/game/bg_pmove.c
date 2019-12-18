@@ -5376,8 +5376,12 @@ static void PM_Weapon( void )
       if(pm->ps->misc[MISC_MISC3] >= BG_Weapon(pm->ps->weapon)->overheatTime) {
         pm->ps->misc[MISC_MISC3] = BG_Weapon(pm->ps->weapon)->overheatTime;
         pm->ps->weaponTime += BG_Weapon(pm->ps->weapon)->overheatWeaponDelayTime;
-        pm->ps->pm_flags |= PMF_PAUSE_BEAM;
+        pm->ps->pm_flags |= PMF_OVERHEATED;
+      } else {
+        pm->ps->pm_flags &= ~PMF_OVERHEATED;
       }
+    } else {
+      pm->ps->pm_flags &= ~PMF_OVERHEATED;
     }
   }
   else if( pm->pmext->burstRoundsToFire[ 1 ] > 0 )
@@ -5403,8 +5407,12 @@ static void PM_Weapon( void )
       if(pm->ps->misc[MISC_MISC3] >= BG_Weapon(pm->ps->weapon)->overheatTime) {
         pm->ps->misc[MISC_MISC3] = BG_Weapon(pm->ps->weapon)->overheatTime;
         pm->ps->weaponTime += BG_Weapon(pm->ps->weapon)->overheatWeaponDelayTime;
-        pm->ps->pm_flags |= PMF_PAUSE_BEAM;
+        pm->ps->pm_flags |= PMF_OVERHEATED;
+      } else {
+        pm->ps->pm_flags &= ~PMF_OVERHEATED;
       }
+    } else {
+      pm->ps->pm_flags &= ~PMF_OVERHEATED;
     }
   }
   else if( pm->pmext->burstRoundsToFire[ 0 ] > 0 )
@@ -5430,8 +5438,12 @@ static void PM_Weapon( void )
       if(pm->ps->misc[MISC_MISC3] >= BG_Weapon(pm->ps->weapon)->overheatTime) {
         pm->ps->misc[MISC_MISC3] = BG_Weapon(pm->ps->weapon)->overheatTime;
         pm->ps->weaponTime += BG_Weapon(pm->ps->weapon)->overheatWeaponDelayTime;
-        pm->ps->pm_flags |= PMF_PAUSE_BEAM;
+        pm->ps->pm_flags |= PMF_OVERHEATED;
+      } else {
+        pm->ps->pm_flags &= ~PMF_OVERHEATED;
       }
+    } else {
+      pm->ps->pm_flags &= ~PMF_OVERHEATED;
     }
   }
   else
@@ -5466,8 +5478,12 @@ static void PM_Weapon( void )
           if(pm->ps->misc[MISC_MISC3] >= BG_Weapon(pm->ps->weapon)->overheatTime) {
             pm->ps->misc[MISC_MISC3] = BG_Weapon(pm->ps->weapon)->overheatTime;
             pm->ps->weaponTime += BG_Weapon(pm->ps->weapon)->overheatWeaponDelayTime;
-            pm->ps->pm_flags |= PMF_PAUSE_BEAM;
+            pm->ps->pm_flags |= PMF_OVERHEATED;
+          } else {
+            pm->ps->pm_flags &= ~PMF_OVERHEATED;
           }
+        } else {
+          pm->ps->pm_flags &= ~PMF_OVERHEATED;
         }
       }
       else
@@ -5494,8 +5510,12 @@ static void PM_Weapon( void )
           if(pm->ps->misc[MISC_MISC3] >= BG_Weapon(pm->ps->weapon)->overheatTime) {
             pm->ps->misc[MISC_MISC3] = BG_Weapon(pm->ps->weapon)->overheatTime;
             pm->ps->weaponTime += BG_Weapon(pm->ps->weapon)->overheatWeaponDelayTime;
-            pm->ps->pm_flags |= PMF_PAUSE_BEAM;
+            pm->ps->pm_flags |= PMF_OVERHEATED;
+          } else {
+            pm->ps->pm_flags &= ~PMF_OVERHEATED;
           }
+        } else {
+          pm->ps->pm_flags &= ~PMF_OVERHEATED;
         }
       }
       else
@@ -5520,8 +5540,12 @@ static void PM_Weapon( void )
         if(pm->ps->misc[MISC_MISC3] >= BG_Weapon(pm->ps->weapon)->overheatTime) {
           pm->ps->misc[MISC_MISC3] = BG_Weapon(pm->ps->weapon)->overheatTime;
           pm->ps->weaponTime += BG_Weapon(pm->ps->weapon)->overheatWeaponDelayTime;
-          pm->ps->pm_flags |= PMF_PAUSE_BEAM;
+          pm->ps->pm_flags |= PMF_OVERHEATED;
+        } else {
+          pm->ps->pm_flags &= ~PMF_OVERHEATED;
         }
+      } else {
+        pm->ps->pm_flags &= ~PMF_OVERHEATED;
       }
     }
 
@@ -5884,8 +5908,8 @@ static void PM_DropTimers( void )
       pm->ps->misc[MISC_MISC3] = 0;
     }
 
-    if((pm->ps->pm_flags & PMF_PAUSE_BEAM) && (pm->ps->weaponTime <= 0)) {
-      pm->ps->pm_flags &= ~PMF_PAUSE_BEAM;
+    if(pm->ps->pm_flags & PMF_OVERHEATED) {
+      pm->ps->pm_flags &= ~PMF_OVERHEATED;
     }
   }
 
@@ -6328,7 +6352,7 @@ void PmoveSingle( pmove_t *pmove )
             (pm->cmd.buttons & BUTTON_ATTACK) : (pm->cmd.buttons & BUTTON_ATTACK2) ) ) ) ||
         pm->pmext->pulsatingBeamTime[ 0 ] ) &&
       ( ( pm->ps->ammo > 0 || clips > 0 ) || BG_Weapon( pm->ps->weapon )->infiniteAmmo ) &&
-      !( pm->ps->pm_flags & PMF_PAUSE_BEAM ) )
+      !( pm->ps->pm_flags & (PMF_PAUSE_BEAM|PMF_OVERHEATED) ) )
     pm->ps->eFlags |= EF_FIRING;
   else
     pm->ps->eFlags &= ~EF_FIRING;
@@ -6339,7 +6363,7 @@ void PmoveSingle( pmove_t *pmove )
             (pm->cmd.buttons & BUTTON_ATTACK2) : (pm->cmd.buttons & BUTTON_ATTACK) ) ) ) ||
         pm->pmext->pulsatingBeamTime[ 1 ] ) &&
       ( ( pm->ps->ammo > 0 || clips > 0 ) || BG_Weapon( pm->ps->weapon )->infiniteAmmo ) &&
-      !( pm->ps->pm_flags & PMF_PAUSE_BEAM ) )
+      !( pm->ps->pm_flags & (PMF_PAUSE_BEAM|PMF_OVERHEATED) ) )
     pm->ps->eFlags |= EF_FIRING2;
   else
     pm->ps->eFlags &= ~EF_FIRING2;
@@ -6349,7 +6373,7 @@ void PmoveSingle( pmove_t *pmove )
       ( ( pm->cmd.buttons & BUTTON_USE_HOLDABLE ) ||
         pm->pmext->pulsatingBeamTime[ 2 ] ) &&
       ( ( pm->ps->ammo > 0 || clips > 0 ) || BG_Weapon( pm->ps->weapon )->infiniteAmmo ) &&
-      !( pm->ps->pm_flags & PMF_PAUSE_BEAM ) )
+      !( pm->ps->pm_flags & (PMF_PAUSE_BEAM|PMF_OVERHEATED) ) )
     pm->ps->eFlags |= EF_FIRING3;
   else
     pm->ps->eFlags &= ~EF_FIRING3;
