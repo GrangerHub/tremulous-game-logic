@@ -5135,19 +5135,26 @@ static void PM_DropTimers( void )
   }
 
   // drop weapon cool down timer
-  if(
-    (BG_Weapon(pm->ps->weapon)->weaponOptionA == WEAPONOPTA_OVERHEAT) &&
-    pm->ps->weaponTime <= 0) {
-    if(pm->ps->misc[MISC_MISC3] > 0) {
-      pm->ps->misc[MISC_MISC3] -=
-        (pml.msec * BG_Weapon(pm->ps->weapon)->overheatTime) /
-        BG_Weapon(pm->ps->weapon)->cooldownTime;
-    } else {
-      pm->ps->misc[MISC_MISC3] = 0;
+  if(BG_Weapon(pm->ps->weapon)->weaponOptionA == WEAPONOPTA_OVERHEAT) {
+    if(pm->ps->weaponTime <= 0) {
+      if(pm->ps->misc[MISC_MISC3] > 0) {
+        pm->ps->misc[MISC_MISC3] -=
+          (pml.msec * BG_Weapon(pm->ps->weapon)->overheatTime) /
+          BG_Weapon(pm->ps->weapon)->cooldownTime;
+      } else {
+        pm->ps->misc[MISC_MISC3] = 0;
+      }
+
+      if(pm->ps->pm_flags & PMF_OVERHEATED) {
+        pm->ps->pm_flags &= ~PMF_OVERHEATED;
+      }
     }
 
-    if(pm->ps->pm_flags & PMF_OVERHEATED) {
-      pm->ps->pm_flags &= ~PMF_OVERHEATED;
+    //set the overheat warining flag
+    if(pm->ps->misc[MISC_MISC3] >= ((BG_Weapon(pm->ps->weapon)->overheatTime * 2) / 3)) {
+      pm->ps->stats[STAT_FLAGS] |= SFL_OVERHEAT_WARNING;
+    } else {
+      pm->ps->stats[STAT_FLAGS] &= ~SFL_OVERHEAT_WARNING;
     }
   }
 
