@@ -40,6 +40,8 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 int BG_HP2SU( int healthPoints );
 int BG_SU2HP( int healthSubUnits );
 
+#define DEFAULT_GAME_MODE       "swirl"
+
 #define DEFAULT_GRAVITY         800
 #define GIB_HEALTH              ( BG_HP2SU( -125 ) )
 
@@ -93,6 +95,14 @@ typedef enum sdmode_s {
                         //it has been built prior to sd, and apply the unique requirement
   SDMODE_NO_DECON = 3 //like SDMODE_BP, but also disallows decon/mark of all buildables.
 } sdmode_t;
+
+/*
+--------------------------------------------------------------------------------
+Game Modes
+*/
+qboolean BG_Check_Game_Mode_Name(
+  char *game_mode_raw, char *game_mode_clean, int len);
+void BG_Init_Game_Mode(char *game_mode_raw);
 
 /*
 --------------------------------------------------------------------------------
@@ -1399,7 +1409,6 @@ typedef struct
 
   qboolean  enabled;
   char      *name;
-  char      *info;
 
   int       stages;
 
@@ -1446,6 +1455,7 @@ typedef struct
 typedef struct
 {
   char      modelName[ MAX_QPATH ];
+  char      description[MAX_TOKEN_CHARS];
   float     modelScale;
   char      skinName[ MAX_QPATH ];
   float     shadowScale;
@@ -1499,7 +1509,6 @@ typedef struct
   qboolean      enabled;
   char          *name;
   char          *humanName;
-  char          *info;
   char          *entityName;
 
   trType_t      traj;
@@ -1570,6 +1579,8 @@ typedef struct
 
 typedef struct
 {
+  char      description[MAX_TOKEN_CHARS];
+
   char      models[ MAX_BUILDABLE_MODELS ][ MAX_QPATH ];
 
   float     modelScale;
@@ -1721,6 +1732,8 @@ typedef struct
   team_t    team;
 } upgradeAttributes_t;
 
+void BG_Init_Game_Mode( char *game_mode );
+
 qboolean  BG_WeaponIsFull( weapon_t weapon, int stats[ ], int ammo, int clips );
 qboolean  BG_InventoryContainsWeapon( int weapon, int stats[ ] );
 int       BG_SlotsForInventory( int stats[ ] );
@@ -1765,7 +1778,7 @@ qboolean                    BG_BuildableAllowedInStage( buildable_t buildable,
 buildableConfig_t           *BG_BuildableConfig( buildable_t buildable );
 void                        BG_BuildableBoundingBox( buildable_t buildable,
                                                      vec3_t mins, vec3_t maxs );
-void                        BG_InitBuildableConfigs( void );
+void                        BG_InitBuildableConfigs( char *game_mode );
 
 const classAttributes_t     *BG_ClassByName( const char *name );
 const classAttributes_t     *BG_Class( class_t class );
@@ -1799,7 +1812,7 @@ void                        BG_SetEvolveCoolDownDecayTimer( playerState_t *ps,
 void                        BG_SetEvolveCoolDown( playerState_t *ps,
                                                   int coolDown );
 
-void                        BG_InitClassConfigs( void );
+void                        BG_InitClassConfigs( char *game_mode );
 
 const weaponAttributes_t    *BG_WeaponByName( const char *name );
 const weaponAttributes_t    *BG_Weapon( weapon_t weapon );

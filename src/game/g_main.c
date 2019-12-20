@@ -199,6 +199,7 @@ vmCvar_t  g_playMapEnable;
 vmCvar_t  g_playMapPoolConfig;
 
 vmCvar_t  g_privateMessages;
+vmCvar_t  g_game_mode;
 vmCvar_t  g_logPrivateMessages;
 vmCvar_t  g_specChat;
 vmCvar_t  g_publicAdminMessages;
@@ -417,6 +418,8 @@ static cvarTable_t   gameCvarTable[ ] =
 
   { &g_playMapEnable, "g_playMapEnable", "0", CVAR_ARCHIVE, 0, qfalse  },
   { &g_playMapPoolConfig, "g_playMapPoolConfig", "playmap_pool.dat", CVAR_ARCHIVE, 0, qfalse  },
+
+  { &g_game_mode, "g_game_mode", DEFAULT_GAME_MODE, CVAR_SERVERINFO | CVAR_ROM, 0, qtrue },
 
   { &g_privateMessages, "g_privateMessages", "1", CVAR_ARCHIVE, 0, qfalse  },
   { &g_logPrivateMessages, "g_logPrivateMessages", "0", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qtrue },
@@ -837,8 +840,7 @@ Q_EXPORT void G_InitGame( int levelTime, int randomSeed, int restart )
   // general initialization
   G_FindTeams( );
 
-  BG_InitClassConfigs( );
-  BG_InitBuildableConfigs( );
+  BG_Init_Game_Mode(g_game_mode.string);
   G_InitDamageLocations( );
   G_InitMapRotations( );
   G_ReloadPlayMapPool();
