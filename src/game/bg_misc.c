@@ -77,6 +77,57 @@ int BG_SU2HP( int healthSubUnits )
   int  FS_GetFileList(  const char *path, const char *extension, char *listbuf, int bufsize );
 #endif
 
+/*
+================
+BG_Check_Game_Mode_Name
+
+Sanitizes the raw game mode name, and returns a qboolean that inidcates if the
+game mode exists.
+================
+*/
+qboolean BG_Check_Game_Mode_Name(
+  char *game_mode_raw, char *game_mode_clean, int len) {
+  fileHandle_t  f;
+
+  while(*game_mode_raw && len > 0) {
+    if(Q_IsColorString( game_mode_raw)) {
+      game_mode_raw += 2;    // skip color code
+      continue;
+    }
+
+    if(isalnum(*game_mode_raw)) {
+        *game_mode_clean++ = tolower(*game_mode_raw);
+        len--;
+    }
+    game_mode_raw++;
+  }
+  *game_mode_clean = 0;
+
+  len = FS_FOpenFileByMode(va("game_modes/%s/game_mode.cfg", game_mode_clean), &f, FS_READ);
+  if(len < 0) {
+    return qfalse;
+  } else {
+    return qtrue;
+  }
+}
+
+
+/*
+================
+BG_Init_Game_Mode
+================
+*/
+void BG_Init_Game_Mode(char *game_mode_raw) {
+  char game_mode[MAX_TOKEN_CHARS];
+
+  if(!BG_Check_Game_Mode_Name(game_mode_raw, game_mode, MAX_TOKEN_CHARS)) {
+    Q_strncpyz(game_mode, DEFAULT_GAME_MODE, MAX_TOKEN_CHARS);
+  }
+
+  BG_InitClassConfigs(game_mode);
+  BG_InitBuildableConfigs(game_mode);
+}
+
 static const teamAttributes_t bg_teamList[ ] =
 {
   {
@@ -140,9 +191,6 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  enabled;
     "eggpod",              //char      *name;
     "Egg",                 //char      *humanName;
-    "The most basic alien structure. It allows aliens to spawn "
-      "and protect the Overmind. Without any of these, the Overmind "
-      "is left nearly defenseless and defeat is imminent.",
     "team_alien_spawn",    //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
     0.1,                   //float     bounce;
@@ -200,9 +248,6 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  enabled;
     "overmind",            //char      *name;
     "Overmind",            //char      *humanName;
-    "A collective consciousness that controls all the alien structures "
-      "in its vicinity. It must be protected at all costs, since its "
-      "death will render alien structures defenseless.",
     "team_alien_overmind", //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
     0.1,                   //float     bounce;
@@ -260,9 +305,6 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  enabled;
     "barricade",           //char      *name;
     "Barricade",           //char      *humanName;
-    "Used to obstruct corridors and doorways, hindering humans from "
-      "threatening the spawns and Overmind. Barricades will shrink "
-      "to allow aliens to pass over them, however.",
     "team_alien_barricade", //char     *entityName;
     TR_GRAVITY,            //trType_t  traj;
     0.1,                   //float     bounce;
@@ -317,9 +359,6 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  enabled;
     "acid_tube",           //char      *name;
     "Acid Tube",           //char      *humanName;
-    "Ejects lethal poisonous acid at an approaching human. These "
-      "are highly effective when used in conjunction with a trapper "
-      "to hold the victim in place.",
     "team_alien_acid_tube", //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
     0.1,                   //float     bounce;
@@ -374,9 +413,6 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  enabled;
     "trapper",             //char      *name;
     "Trapper",             //char      *humanName;
-    "Fires a blob of adhesive spit at any non-alien in its line of "
-      "sight. This hinders their movement, making them an easy target "
-      "for other defensive structures or aliens.",
     "team_alien_trapper",  //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
     0.1,                   //float     bounce;
@@ -431,10 +467,6 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  enabled;
     "booster",             //char      *name;
     "Booster",             //char      *humanName;
-    "Laces the attacks of any alien that touches it with a poison "
-      "that will gradually deal damage to any humans exposed to it. "
-      "The booster also increases the rate of health regeneration for "
-      "any nearby aliens.",
     "team_alien_booster",  //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
     0.1,                   //float     bounce;
@@ -490,8 +522,6 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  enabled;
     "hive",                //char      *name;
     "Hive",                //char      *humanName;
-    "Houses millions of tiny insectoid aliens. When a human "
-      "approaches this structure, the insectoids attack.",
     "team_alien_hive",     //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
     0.1,                   //float     bounce;
@@ -546,9 +576,6 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  enabled;
     "telenode",            //char      *name;
     "Telenode",            //char      *humanName;
-    "The most basic human structure. It provides a means for humans "
-      "to enter the battle arena. Without any of these the humans "
-      "cannot spawn and defeat is imminent.",
     "team_human_spawn",    //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
     0.1,                   //float     bounce;
@@ -604,9 +631,6 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  enabled;
     "mgturret",            //char      *name;
     "Machinegun Turret",   //char      *humanName;
-    "Automated base defense that is effective against large targets "
-      "but slow to begin firing. Should always be "
-      "backed up by physical support.",
     "team_human_mgturret", //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
     0.1,                   //float     bounce;
@@ -661,9 +685,6 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  enabled;
     "tesla",               //char      *name;
     "Tesla Generator",     //char      *humanName;
-    "A structure equipped with a strong electrical attack that fires "
-      "instantly and always hits its target. It is effective against smaller "
-      "aliens and for consolidating basic defense.",
     "team_human_tesla",    //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
     0.1,                   //float     bounce;
@@ -718,9 +739,6 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  enabled;
     "arm",                 //char      *name;
     "Armoury",             //char      *humanName;
-    "An essential part of the human base, providing a means "
-      "to upgrade the basic human equipment. A range of upgrades "
-      "and weapons are available for sale from the armoury.",
     "team_human_armoury",  //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
     0.1,                   //float     bounce;
@@ -779,10 +797,6 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  enabled;
     "dcc",                 //char      *name;
     "Defense Computer",    //char      *humanName;
-    "A structure coordinating and enhancing the action of base defense so that "
-      "defense is distributed optimally among the enemy. The Defense "
-      "Computer additionally eneables auto-repair in human structures. "
-      "Each Defense Computer built increases repair rate slightly.",
     "team_human_dcc",      //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
     0.1,                   //float     bounce;
@@ -838,10 +852,6 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  enabled;
     "medistat",            //char      *name;
     "Medistation",         //char      *humanName;
-    "A structure that automatically restores "
-      "the health and stamina of any human that stands on it. "
-      "It may only be used by one person at a time. This structure "
-      "also issues medkits.",
     "team_human_medistat", //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
     0.1,                   //float     bounce;
@@ -896,9 +906,6 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  enabled;
     "reactor",             //char      *name;
     "Reactor",             //char      *humanName;
-    "All structures except the telenode rely on a reactor to operate. "
-      "The reactor provides power for all the human structures either "
-      "directly or via repeaters. Only one reactor can be built at a time.",
     "team_human_reactor",  //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
     0.1,                   //float     bounce;
@@ -960,9 +967,6 @@ static const buildableAttributes_t bg_buildableList[ ] =
     qtrue,                 //qboolean  enabled;
     "repeater",            //char      *name;
     "Repeater",            //char      *humanName;
-    "A power distributor that transmits power from the reactor "
-      "to remote locations, so that bases may be built far "
-      "from the reactor.",
     "team_human_repeater", //char      *entityName;
     TR_GRAVITY,            //trType_t  traj;
     0.1,                   //float     bounce;
@@ -1165,10 +1169,11 @@ static qboolean BG_ParseBuildableFile( const char *filename, buildableConfig_t *
   enum
   {
       MODEL         = 1 << 0,
-      MODELSCALE    = 1 << 1,
-      MINS          = 1 << 2,
-      MAXS          = 1 << 3,
-      ZOFFSET       = 1 << 4
+      DESCRIPTION   = 1 << 1,
+      MODELSCALE    = 1 << 2,
+      MINS          = 1 << 3,
+      MAXS          = 1 << 4,
+      ZOFFSET       = 1 << 5
   };
 
 
@@ -1228,6 +1233,17 @@ static qboolean BG_ParseBuildableFile( const char *filename, buildableConfig_t *
       Q_strncpyz( bc->models[ index ], token, sizeof( bc->models[ 0 ] ) );
 
       defined |= MODEL;
+      continue;
+    }
+    else if( !Q_stricmp( token, "description" ) )
+    {
+      token = COM_Parse( &text_p );
+      if( !token )
+        break;
+
+      Q_strncpyz(bc->description, token, sizeof(bc->description));
+
+      defined |= DESCRIPTION;
       continue;
     }
     else if( !Q_stricmp( token, "modelScale" ) )
@@ -1295,11 +1311,12 @@ static qboolean BG_ParseBuildableFile( const char *filename, buildableConfig_t *
     return qfalse;
   }
 
-  if(      !( defined & MODEL      ) )  token = "model";
-  else if( !( defined & MODELSCALE ) )  token = "modelScale";
-  else if( !( defined & MINS       ) )  token = "mins";
-  else if( !( defined & MAXS       ) )  token = "maxs";
-  else if( !( defined & ZOFFSET    ) )  token = "zOffset";
+  if(      !( defined & MODEL       ) )  token = "model";
+  else if( !( defined & DESCRIPTION ) )  token = "description";
+  else if( !( defined & MODELSCALE  ) )  token = "modelScale";
+  else if( !( defined & MINS        ) )  token = "mins";
+  else if( !( defined & MAXS        ) )  token = "maxs";
+  else if( !( defined & ZOFFSET     ) )  token = "zOffset";
   else                                  token = "";
 
   if( strlen( token ) > 0 )
@@ -1317,7 +1334,7 @@ static qboolean BG_ParseBuildableFile( const char *filename, buildableConfig_t *
 BG_InitBuildableConfigs
 ===============
 */
-void BG_InitBuildableConfigs( void )
+void BG_InitBuildableConfigs( char *game_mode )
 {
   int               i;
   buildableConfig_t *bc;
@@ -1327,7 +1344,8 @@ void BG_InitBuildableConfigs( void )
     bc = BG_BuildableConfig( i );
     Com_Memset( bc, 0, sizeof( buildableConfig_t ) );
 
-    BG_ParseBuildableFile( va( "configs/buildables/%s.cfg",
+    BG_ParseBuildableFile( va( "game_modes/%s/buildables/%s.cfg",
+                               game_mode,
                                BG_Buildable( i )->name ), bc );
   }
 }
@@ -1340,7 +1358,6 @@ static const classAttributes_t bg_classList[ ] =
     PCL_NONE,                                       //int     number;
     qtrue,                                          //qboolean enabled;
     "spectator",                                    //char    *name;
-    "",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
     100000,                                         //int     health;
     0.0f,                                           //float   fallDamage;
@@ -1376,8 +1393,6 @@ static const classAttributes_t bg_classList[ ] =
     PCL_ALIEN_BUILDER0,                             //int     number;
     qtrue,                                          //qboolean enabled;
     "builder",                                      //char    *name;
-    "Responsible for building and maintaining all the alien structures. "
-      "Has a weak melee slash attack.",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
     ABUILDER_HEALTH,                                //int     health;
     0.2f,                                           //float   fallDamage;
@@ -1413,9 +1428,6 @@ static const classAttributes_t bg_classList[ ] =
     PCL_ALIEN_BUILDER0_UPG,                         //int     number;
     qtrue,                                          //qboolean enabled;
     "builderupg",                                   //char    *name;
-    "Similar to the base Granger, except that in addition to "
-      "being able to build structures it has a spit attack "
-      "that slows victims and the ability to crawl on walls.",
     ( 1 << S2 )|( 1 << S3 ),                        //int     stages;
     ABUILDER_UPG_HEALTH,                            //int     health;
     0.2f,                                           //float   fallDamage;
@@ -1451,8 +1463,6 @@ static const classAttributes_t bg_classList[ ] =
     PCL_ALIEN_LEVEL0,                               //int     number;
     qtrue,                                          //qboolean enabled;
     "level0",                                       //char    *name;
-    "Has a lethal reflexive bite and the ability to crawl on "
-      "walls and ceilings.",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
     LEVEL0_HEALTH,                                  //int     health;
     0.0f,                                           //float   fallDamage;
@@ -1488,10 +1498,6 @@ static const classAttributes_t bg_classList[ ] =
     PCL_ALIEN_LEVEL1,                               //int     number;
     qtrue,                                          //qboolean enabled;
     "level1",                                       //char    *name;
-    "A support class able to crawl on walls and ceilings. Its melee "
-      "attack is most effective when combined with the ability to grab "
-      "and hold its victims in place. Provides a weak healing aura "
-      "that accelerates the healing rate of nearby aliens.",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
     LEVEL1_HEALTH,                                  //int     health;
     0.0f,                                           //float   fallDamage;
@@ -1527,10 +1533,6 @@ static const classAttributes_t bg_classList[ ] =
     PCL_ALIEN_LEVEL1_UPG,                           //int     number;
     qtrue,                                          //qboolean enabled;
     "level1upg",                                    //char    *name;
-    "In addition to the basic Basilisk abilities, the Advanced "
-      "Basilisk sprays a poisonous gas which disorients any "
-      "nearby humans. Has a strong healing aura that "
-      "that accelerates the healing rate of nearby aliens.",
     ( 1 << S2 )|( 1 << S3 ),                        //int     stages;
     LEVEL1_UPG_HEALTH,                              //int     health;
     0.0f,                                           //float   fallDamage;
@@ -1566,8 +1568,6 @@ static const classAttributes_t bg_classList[ ] =
     PCL_ALIEN_LEVEL2,                               //int     number;
     qtrue,                                          //qboolean enabled;
     "level2",                                       //char    *name;
-    "Has a melee attack and the ability to jump off walls. This "
-      "allows the Marauder to gather great speed in enclosed areas.",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
     LEVEL2_HEALTH,                                  //int     health;
     0.0f,                                           //float   fallDamage;
@@ -1603,8 +1603,6 @@ static const classAttributes_t bg_classList[ ] =
     PCL_ALIEN_LEVEL2_UPG,                           //int     number;
     qtrue,                                          //qboolean enabled;
     "level2upg",                                    //char    *name;
-    "The Advanced Marauder has all the abilities of the basic Marauder "
-      "with the addition of an area effect electric shock attack.",
     ( 1 << S2 )|( 1 << S3 ),                        //int     stages;
     LEVEL2_UPG_HEALTH,                              //int     health;
     0.0f,                                           //float   fallDamage;
@@ -1640,9 +1638,6 @@ static const classAttributes_t bg_classList[ ] =
     PCL_ALIEN_LEVEL3,                               //int     number;
     qtrue,                                          //qboolean enabled;
     "level3",                                       //char    *name;
-    "Possesses a melee attack and the pounce ability, which may "
-      "be used as both an attack and a means to reach remote "
-      "locations inaccessible from the ground.",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
     LEVEL3_HEALTH,                                  //int     health;
     0.0f,                                           //float   fallDamage;
@@ -1678,9 +1673,6 @@ static const classAttributes_t bg_classList[ ] =
     PCL_ALIEN_LEVEL3_UPG,                           //int     number;
     qtrue,                                          //qboolean enabled;
     "level3upg",                                    //char    *name;
-    "In addition to the basic Dragoon abilities, the Advanced "
-      "Dragoon has 3 barbs which may be used to attack humans "
-      "from a distance.",
     ( 1 << S2 )|( 1 << S3 ),                        //int     stages;
     LEVEL3_UPG_HEALTH,                              //int     health;
     0.0f,                                           //float   fallDamage;
@@ -1716,10 +1708,6 @@ static const classAttributes_t bg_classList[ ] =
     PCL_ALIEN_LEVEL4,                               //int     number;
     qtrue,                                          //qboolean enabled;
     "level4",                                       //char    *name;
-    "A large alien with a strong melee attack, this class can "
-      "also charge at enemy humans and structures, inflicting "
-      "great damage. Any humans or their structures caught under "
-      "a falling Tyrant will be crushed by its weight.",
     ( 1 << S3 ),                                    //int     stages;
     LEVEL4_HEALTH,                                  //int     health;
     0.0f,                                           //float   fallDamage;
@@ -1755,7 +1743,6 @@ static const classAttributes_t bg_classList[ ] =
     PCL_HUMAN,                                      //int     number;
     qtrue,                                          //qboolean enabled;
     "human_base",                                   //char    *name;
-    "",
     ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ),            //int     stages;
     100000,                                         //int     health;
     1.0f,                                           //float   fallDamage;
@@ -1791,7 +1778,6 @@ static const classAttributes_t bg_classList[ ] =
     PCL_HUMAN_BSUIT,                                //int     number;
     qtrue,                                          //qboolean enabled;
     "human_bsuit",                                  //char    *name;
-    "",
     ( 1 << S3 ),                                    //int     stages;
     100000,                                         //int     health;
     1.0f,                                           //float   fallDamage;
@@ -2087,20 +2073,21 @@ static qboolean BG_ParseClassFile( const char *filename, classConfig_t *cc )
   enum
   {
       MODEL           = 1 << 0,
-      SKIN            = 1 << 1,
-      HUD             = 1 << 2,
-      MODELSCALE      = 1 << 3,
-      SHADOWSCALE     = 1 << 4,
-      MINS            = 1 << 5,
-      MAXS            = 1 << 6,
-      DEADMINS        = 1 << 7,
-      DEADMAXS        = 1 << 8,
-      CROUCHMAXS      = 1 << 9,
-      VIEWHEIGHT      = 1 << 10,
-      CVIEWHEIGHT     = 1 << 11,
-      ZOFFSET         = 1 << 12,
-      NAME            = 1 << 13,
-      SHOULDEROFFSETS = 1 << 14
+      DESCRIPTION     = 1 << 1,
+      SKIN            = 1 << 2,
+      HUD             = 1 << 3,
+      MODELSCALE      = 1 << 4,
+      SHADOWSCALE     = 1 << 5,
+      MINS            = 1 << 6,
+      MAXS            = 1 << 7,
+      DEADMINS        = 1 << 8,
+      DEADMAXS        = 1 << 9,
+      CROUCHMAXS      = 1 << 10,
+      VIEWHEIGHT      = 1 << 11,
+      CVIEWHEIGHT     = 1 << 12,
+      ZOFFSET         = 1 << 13,
+      NAME            = 1 << 14,
+      SHOULDEROFFSETS = 1 << 15
   };
 
   // load the file
@@ -2143,6 +2130,17 @@ static qboolean BG_ParseClassFile( const char *filename, classConfig_t *cc )
       Q_strncpyz( cc->modelName, token, sizeof( cc->modelName ) );
 
       defined |= MODEL;
+      continue;
+    }
+    else if( !Q_stricmp( token, "description" ) )
+    {
+      token = COM_Parse( &text_p );
+      if( !token )
+        break;
+
+      Q_strncpyz(cc->description, token, sizeof(cc->description));
+
+      defined |= DESCRIPTION;
       continue;
     }
     else if( !Q_stricmp( token, "skin" ) )
@@ -2329,6 +2327,7 @@ static qboolean BG_ParseClassFile( const char *filename, classConfig_t *cc )
   }
 
   if(      !( defined & MODEL           ) ) token = "model";
+  else if( !( defined & DESCRIPTION     ) ) token = "description";
   else if( !( defined & SKIN            ) ) token = "skin";
   else if( !( defined & HUD             ) ) token = "hud";
   else if( !( defined & MODELSCALE      ) ) token = "modelScale";
@@ -2360,7 +2359,7 @@ static qboolean BG_ParseClassFile( const char *filename, classConfig_t *cc )
 BG_InitClassConfigs
 ===============
 */
-void BG_InitClassConfigs( void )
+void BG_InitClassConfigs( char *game_mode )
 {
   int           i;
   classConfig_t *cc;
@@ -2369,7 +2368,8 @@ void BG_InitClassConfigs( void )
   {
     cc = BG_ClassConfig( i );
 
-    BG_ParseClassFile( va( "configs/classes/%s.cfg",
+    BG_ParseClassFile( va( "game_modes/%s/classes/%s.cfg",
+                           game_mode,
                            BG_Class( i )->name ), cc );
   }
 }

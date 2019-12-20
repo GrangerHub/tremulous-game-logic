@@ -1725,13 +1725,13 @@ static void UI_DrawInfoPane( menuItem_t *item, rectDef_t *rect, float text_x, fl
       {
         s = va( "%s\n\n%s",
                 BG_ClassConfig( item->v.pclass )->humanName,
-                BG_Class( item->v.pclass )->info );
+                BG_ClassConfig( item->v.pclass )->description );
       }
       else
       {
         s = va( "%s\n\n%s\n\nFrags: %d",
                 BG_ClassConfig( item->v.pclass )->humanName,
-                BG_Class( item->v.pclass )->info,
+                BG_ClassConfig( item->v.pclass )->description,
                 value );
       }
 
@@ -1851,13 +1851,13 @@ static void UI_DrawInfoPane( menuItem_t *item, rectDef_t *rect, float text_x, fl
       {
         s = va( "%s\n\n%s",
                 BG_Buildable( item->v.buildable )->humanName,
-                BG_Buildable( item->v.buildable )->info );
+                BG_BuildableConfig( item->v.buildable )->description );
       }
       else
       {
         s = va( "%s\n\n%s\n\n%s: %d",
                 BG_Buildable( item->v.buildable )->humanName,
-                BG_Buildable( item->v.buildable )->info,
+                BG_BuildableConfig( item->v.buildable )->description,
                 string, value );
       }
 
@@ -4251,7 +4251,10 @@ UI_Init
 */
 void UI_Init( qboolean inGameLoad )
 {
-  BG_InitClassConfigs( );
+  char buffer[ MAX_TOKEN_CHARS ];
+
+  trap_Cvar_VariableStringBuffer( "g_game_mode", buffer, sizeof( buffer ) );
+  BG_Init_Game_Mode(buffer);
   BG_InitAllowedGameElements( );
 
   uiInfo.inGameLoad = inGameLoad;
