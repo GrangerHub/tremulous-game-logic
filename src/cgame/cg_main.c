@@ -181,6 +181,7 @@ vmCvar_t  cg_noVoiceChats;
 vmCvar_t  cg_noVoiceText;
 vmCvar_t  cg_hudFiles;
 vmCvar_t  cg_hudFilesEnable;
+vmCvar_t  cg_game_mode;
 vmCvar_t  cg_smoothClients;
 vmCvar_t  pmove_fixed;
 vmCvar_t  pmove_msec;
@@ -437,6 +438,8 @@ static cvarTable_t cvarTable[ ] =
   { &cg_timescale, "timescale", "1", 0},
   { &cg_smoothClients, "cg_smoothClients", "0", CVAR_USERINFO | CVAR_ARCHIVE},
   { &cg_cameraMode, "com_cameraMode", "0", CVAR_CHEAT},
+
+  { &cg_game_mode, "g_game_mode", "0", 0},
 
   { &pmove_fixed, "pmove_fixed", "0", 0},
   { &pmove_msec, "pmove_msec", "8", 0},
@@ -2216,8 +2219,7 @@ void CG_Init( int serverMessageNum, int serverCommandSequence, int clientNum )
 
 
   // load overrides
-  BG_InitClassConfigs( );
-  BG_InitBuildableConfigs( );
+  BG_Init_Game_Mode(cg_game_mode.string);
   BG_InitAllowedGameElements( );
 
   // Dynamic memory

@@ -371,5 +371,7 @@ void UI_ServerInfo( void )
                    Info_ValueForKey( info, "sv_allowdownload" ) );
     trap_Cvar_Set( "ui_serverinfo_logPrivateMessages",
                    Info_ValueForKey( info, "g_logPrivateMessages" ) );
+    trap_Cvar_Set( "ui_serverinfo_game_mode",
+                   Info_ValueForKey( info, "g_game_mode" ) );
   }
 }
