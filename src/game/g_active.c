@@ -820,7 +820,6 @@ void ClientTimerActions( gentity_t *ent, int msec )
               ( client->ps.eFlags & EF_EVOLVING ) ) ||
             ( ucmd->buttons & BUTTON_GESTURE ) ||
             ( ucmd->upmove > 0 ) ||
-            !client->ps.misc[ MISC_MISC ] ||
             !G_Overmind( ) )
         {
           client->timeToInvisibility = LEVEL1_INVISIBILITY_DELAY + level.time;

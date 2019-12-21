@@ -4709,43 +4709,6 @@ static void PM_Weapon( void )
   if( pm->ps->pm_flags & PMF_RESPAWNED )
     return;
 
-  // Charge for invisibility
-  if( pm->ps->weapon == WP_ALEVEL1 ||
-      pm->ps->weapon == WP_ALEVEL1_UPG )
-  {
-    int   max;
-    float chargeRate;
-
-    switch( pm->ps->weapon )
-    {
-      case WP_ALEVEL1:
-        max = LEVEL1_INVISIBILITY_TIME;
-        chargeRate = LEVEL1_CHARGE_RATE;
-        break;
-
-      case WP_ALEVEL1_UPG:
-        max = LEVEL1_UPG_INVISIBILITY_TIME;
-        chargeRate = LEVEL1_UPG_CHARGE_RATE;
-        break;
-
-      default:
-        max = LEVEL1_UPG_INVISIBILITY_TIME;
-        chargeRate = LEVEL1_UPG_CHARGE_RATE;
-        break;
-    }
-
-    if( ( !pm->swapAttacks ?
-          (pm->cmd.buttons & BUTTON_ATTACK2) : (pm->cmd.buttons & BUTTON_ATTACK) ) )
-      pm->ps->misc[ MISC_MISC ] += (int)( chargeRate * pml.msec );
-    else
-      pm->ps->misc[ MISC_MISC ] -= pml.msec;
-
-    if( pm->ps->misc[ MISC_MISC ] > max )
-      pm->ps->misc[ MISC_MISC ] = max;
-    else if( pm->ps->misc[ MISC_MISC ] < 0 )
-      pm->ps->misc[ MISC_MISC ] = 0;
-  }
-
   if( pm->ps->weapon == WP_LUCIFER_CANNON )
   {
     // Charging up a Lucifer Cannon
