@@ -2696,6 +2696,10 @@ void FireWeapon2( gentity_t *ent )
       PGChargeFire( ent, qtrue );
       break;
 
+    case WP_PAIN_SAW:
+      painSawFire( ent );
+      break;
+
     case WP_LAUNCHER:
       launcherFire( ent, qfalse );
       break;
