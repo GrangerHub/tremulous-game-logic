@@ -4705,6 +4705,73 @@ static void PM_Weapon( void )
     }
   }
 
+  // invisibility stamina
+  if( pm->ps->weapon == WP_ALEVEL1 ||
+      pm->ps->weapon == WP_ALEVEL1_UPG )
+  {
+    int   max;
+
+    switch( pm->ps->weapon )
+    {
+      case WP_ALEVEL1:
+        max = LEVEL1_INVISIBILITY_STAMINA_CHARGE_TIME;
+        break;
+
+      case WP_ALEVEL1_UPG:
+        max = LEVEL1_UPG_INVISIBILITY_STAMINA_CHARGE_TIME;
+        break;
+
+      default:
+        max = LEVEL1_UPG_INVISIBILITY_STAMINA_CHARGE_TIME;
+        break;
+    }
+
+    if(pm->cmd.forwardmove || pm->cmd.rightmove) {
+      int stamina_drain;
+
+      if(( pm->cmd.buttons & BUTTON_WALKING )) {
+        switch( pm->ps->weapon )
+        {
+          case WP_ALEVEL1:
+            stamina_drain = LEVEL1_SLOW_INVIS_STAMINA_DRAIN;
+            break;
+
+          case WP_ALEVEL1_UPG:
+            stamina_drain = LEVEL1_UPG_SLOW_INVIS_STAMINA_DRAIN;
+            break;
+
+          default:
+            stamina_drain = LEVEL1_UPG_SLOW_INVIS_STAMINA_DRAIN;
+            break;
+        }
+      } else {
+        switch( pm->ps->weapon )
+        {
+          case WP_ALEVEL1:
+            stamina_drain = LEVEL1_FAST_INVIS_STAMINA_DRAIN;
+            break;
+
+          case WP_ALEVEL1_UPG:
+            stamina_drain = LEVEL1_UPG_FAST_INVIS_STAMINA_DRAIN;
+            break;
+
+          default:
+            stamina_drain = LEVEL1_UPG_FAST_INVIS_STAMINA_DRAIN;
+            break;
+        }
+      }
+
+      pm->ps->misc[ MISC_MISC ] -= (int)(stamina_drain * pml.msec);
+    } else {
+      pm->ps->misc[ MISC_MISC ] += pml.msec;
+    }
+
+    if( pm->ps->misc[ MISC_MISC ] > max )
+      pm->ps->misc[ MISC_MISC ] = max;
+    else if( pm->ps->misc[ MISC_MISC ] < 0 )
+      pm->ps->misc[ MISC_MISC ] = 0;
+  }
+
   // don't allow attack until all buttons are up
   if( pm->ps->pm_flags & PMF_RESPAWNED )
     return;
