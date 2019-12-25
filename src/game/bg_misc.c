@@ -1785,7 +1785,7 @@ static const classAttributes_t bg_classList[ ] =
     "level3",                                       //char    *name;
     ( 1 << S2 )|( 1 << S3 ),                        //int     stages;
     LEVEL3_HEALTH,                                  //int     health;
-    0.15f,                                          //float   maxHealthDecayRate;
+    0.25f,                                          //float   maxHealthDecayRate;
     LEVEL3_MIN_HEALTH,                              //int     minHealth;
     0.0f,                                           //float   fallDamage;
     LEVEL3_REGEN,                                   //float   regenRate;
@@ -1821,7 +1821,7 @@ static const classAttributes_t bg_classList[ ] =
     "level3upg",                                    //char    *name;
     ( 1 << S3 ),                                    //int     stages;
     LEVEL3_UPG_HEALTH,                              //int     health;
-    0.15f,                                          //float   maxHealthDecayRate;
+    0.25f,                                          //float   maxHealthDecayRate;
     LEVEL3_MIN_HEALTH,                              //int     minHealth;
     0.0f,                                           //float   fallDamage;
     LEVEL3_UPG_REGEN,                               //float   regenRate;
