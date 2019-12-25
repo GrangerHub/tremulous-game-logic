@@ -559,6 +559,12 @@ static void CG_Obituary( entityState_t *ent )
             BG_ClassConfig( PCL_ALIEN_SPITFIRE )->humanName );
         message2 = className;
         break;
+      case MOD_SPITFIRE_STING:
+        message = "was stung by";
+        Com_sprintf( className, 64, "'s %s",
+            BG_ClassConfig( PCL_ALIEN_SPITFIRE )->humanName );
+        message2 = className;
+        break;
 
       case MOD_POISON:
         message = "should have used a medkit against";

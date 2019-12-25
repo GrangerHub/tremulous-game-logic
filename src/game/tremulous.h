@@ -192,6 +192,10 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL4_CRUSH_DAMAGE            120000 // to players only
 #define LEVEL4_CRUSH_REPEAT            500    // player damage repeat
 
+#define SPITFIRE_STING_SUBCHECKS        5
+#define SPITFIRE_STING_DMG              AWDM(24000)
+#define SPITFIRE_STING_RANGE            60.0f
+#define SPITFIRE_STING_WIDTH            10.0f
 #define SPITFIRE_ZAP_MAX_TARGETS        6
 #define SPITFIRE_ZAP_REPEAT             1250
 #define SPITFIRE_ZAP_K_SCALE            1.0f

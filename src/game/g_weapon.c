@@ -2777,6 +2777,9 @@ void FireWeapon( gentity_t *ent )
         LEVEL2_CLAW_DMG, LEVEL2_CLAW_SUBCHECKS, MOD_LEVEL2_CLAW );
       break;
     case WP_ASPITFIRE:
+      meleeAttack( 
+        ent, SPITFIRE_STING_RANGE, SPITFIRE_STING_WIDTH, SPITFIRE_STING_WIDTH,
+        SPITFIRE_STING_DMG, SPITFIRE_STING_SUBCHECKS, MOD_SPITFIRE_STING);
       SpitfireZap( ent );			   
       break;
     case WP_ALEVEL4:
