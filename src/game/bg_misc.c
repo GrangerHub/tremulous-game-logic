@@ -77,57 +77,6 @@ int BG_SU2HP( int healthSubUnits )
   int  FS_GetFileList(  const char *path, const char *extension, char *listbuf, int bufsize );
 #endif
 
-/*
-================
-BG_Check_Game_Mode_Name
-
-Sanitizes the raw game mode name, and returns a qboolean that inidcates if the
-game mode exists.
-================
-*/
-qboolean BG_Check_Game_Mode_Name(
-  char *game_mode_raw, char *game_mode_clean, int len) {
-  fileHandle_t  f;
-
-  while(*game_mode_raw && len > 0) {
-    if(Q_IsColorString( game_mode_raw)) {
-      game_mode_raw += 2;    // skip color code
-      continue;
-    }
-
-    if(isalnum(*game_mode_raw)) {
-        *game_mode_clean++ = tolower(*game_mode_raw);
-        len--;
-    }
-    game_mode_raw++;
-  }
-  *game_mode_clean = 0;
-
-  len = FS_FOpenFileByMode(va("game_modes/%s/game_mode.cfg", game_mode_clean), &f, FS_READ);
-  if(len < 0) {
-    return qfalse;
-  } else {
-    return qtrue;
-  }
-}
-
-
-/*
-================
-BG_Init_Game_Mode
-================
-*/
-void BG_Init_Game_Mode(char *game_mode_raw) {
-  char game_mode[MAX_TOKEN_CHARS];
-
-  if(!BG_Check_Game_Mode_Name(game_mode_raw, game_mode, MAX_TOKEN_CHARS)) {
-    Q_strncpyz(game_mode, DEFAULT_GAME_MODE, MAX_TOKEN_CHARS);
-  }
-
-  BG_InitClassConfigs(game_mode);
-  BG_InitBuildableConfigs(game_mode);
-}
-
 static const teamAttributes_t bg_teamList[ ] =
 {
   {
@@ -135,30 +84,18 @@ static const teamAttributes_t bg_teamList[ ] =
     "spectate",            //char     *name;
     "spectator",           //char     *name2;
     "Spectators",          //char     *humanName;
-    "Spectators watch the game without participating.",
   },
   {
     TEAM_ALIENS,           //int       number;
     "aliens",              //char     *name;
     "alien",               //char     *name2;
     "Aliens",              //char     *humanName;
-    "The strength of Aliens lie in their agility, fierce melee attacks and "
-    "their ability to construct new bases without much restriction. They "
-    "possess disorienting and lethal secondary attack skills such as "
-    "psychotropic gas, electrical discharge, pouncing and trampling. Left "
-    "to thrive, they may develop the capability of inflicting cripling "
-    "poisons.",
   },
   {
     TEAM_HUMANS,           //int       number;
     "humans",              //char     *name;
     "human",               //char     *name2;
     "Humans",              //char     *humanName;
-    "Humans are the masters of technology. Although their bases are "
-    "restricted by power requirements, automated defenses help ensure that "
-    "they stay built. To compensate for their lack of natural abilities, a "
-    "wide range of upgrades and weapons are available to the humans, allowing "
-    "them to eradicate the alien threat with lethal efficiency.",
   },
 };
 
@@ -1492,18 +1429,6 @@ qboolean BG_BuildableAllowedInStage( buildable_t buildable,
     return qfalse;
 }
 
-static buildableConfig_t bg_buildableConfigList[ BA_NUM_BUILDABLES ];
-
-/*
-==============
-BG_BuildableConfig
-==============
-*/
-buildableConfig_t *BG_BuildableConfig( buildable_t buildable )
-{
-  return &bg_buildableConfigList[ buildable ];
-}
-
 /*
 ==============
 BG_BuildableBoundingBox
@@ -1521,206 +1446,6 @@ void BG_BuildableBoundingBox( buildable_t buildable,
     VectorCopy( buildableConfig->maxs, maxs );
 }
 
-/*
-======================
-BG_ParseBuildableFile
-
-Parses a configuration file describing a buildable
-======================
-*/
-static qboolean BG_ParseBuildableFile( const char *filename, buildableConfig_t *bc )
-{
-  char          *text_p;
-  int           i;
-  int           len;
-  char          *token;
-  char          text[ 20000 ];
-  fileHandle_t  f;
-  float         scale;
-  int           defined = 0;
-  enum
-  {
-      MODEL         = 1 << 0,
-      DESCRIPTION   = 1 << 1,
-      MODELSCALE    = 1 << 2,
-      MINS          = 1 << 3,
-      MAXS          = 1 << 4,
-      ZOFFSET       = 1 << 5
-  };
-
-
-  // load the file
-  len = FS_FOpenFileByMode( filename, &f, FS_READ );
-  if( len < 0 )
-  {
-    Com_Printf( S_COLOR_RED "ERROR: Buildable file %s doesn't exist\n", filename );
-    return qfalse;
-  }
-
-  if( len == 0 || len >= sizeof( text ) - 1 )
-  {
-    FS_FCloseFile( f );
-    Com_Printf( S_COLOR_RED "ERROR: Buildable file %s is %s\n", filename,
-      len == 0 ? "empty" : "too long" );
-    return qfalse;
-  }
-
-  FS_Read2( text, len, f );
-  text[ len ] = 0;
-  FS_FCloseFile( f );
-
-  // parse the text
-  text_p = text;
-
-  // read optional parameters
-  while( 1 )
-  {
-    token = COM_Parse( &text_p );
-
-    if( !token )
-      break;
-
-    if( !Q_stricmp( token, "" ) )
-      break;
-
-    if( !Q_stricmp( token, "model" ) )
-    {
-      int index = 0;
-
-      token = COM_Parse( &text_p );
-      if( !token )
-        break;
-
-      index = atoi( token );
-
-      if( index < 0 )
-        index = 0;
-      else if( index > 3 )
-        index = 3;
-
-      token = COM_Parse( &text_p );
-      if( !token )
-        break;
-
-      Q_strncpyz( bc->models[ index ], token, sizeof( bc->models[ 0 ] ) );
-
-      defined |= MODEL;
-      continue;
-    }
-    else if( !Q_stricmp( token, "description" ) )
-    {
-      token = COM_Parse( &text_p );
-      if( !token )
-        break;
-
-      Q_strncpyz(bc->description, token, sizeof(bc->description));
-
-      defined |= DESCRIPTION;
-      continue;
-    }
-    else if( !Q_stricmp( token, "modelScale" ) )
-    {
-      token = COM_Parse( &text_p );
-      if( !token )
-        break;
-
-      scale = atof( token );
-
-      if( scale < 0.0f )
-        scale = 0.0f;
-
-      bc->modelScale = scale;
-
-      defined |= MODELSCALE;
-      continue;
-    }
-    else if( !Q_stricmp( token, "mins" ) )
-    {
-      for( i = 0; i <= 2; i++ )
-      {
-        token = COM_Parse( &text_p );
-        if( !token )
-          break;
-
-        bc->mins[ i ] = atof( token );
-      }
-
-      defined |= MINS;
-      continue;
-    }
-    else if( !Q_stricmp( token, "maxs" ) )
-    {
-      for( i = 0; i <= 2; i++ )
-      {
-        token = COM_Parse( &text_p );
-        if( !token )
-          break;
-
-        bc->maxs[ i ] = atof( token );
-      }
-
-      defined |= MAXS;
-      continue;
-    }
-    else if( !Q_stricmp( token, "zOffset" ) )
-    {
-      float offset;
-
-      token = COM_Parse( &text_p );
-      if( !token )
-        break;
-
-      offset = atof( token );
-
-      bc->zOffset = offset;
-
-      defined |= ZOFFSET;
-      continue;
-    }
-
-
-    Com_Printf( S_COLOR_RED "ERROR: unknown token '%s'\n", token );
-    return qfalse;
-  }
-
-  if(      !( defined & MODEL       ) )  token = "model";
-  else if( !( defined & DESCRIPTION ) )  token = "description";
-  else if( !( defined & MODELSCALE  ) )  token = "modelScale";
-  else if( !( defined & MINS        ) )  token = "mins";
-  else if( !( defined & MAXS        ) )  token = "maxs";
-  else if( !( defined & ZOFFSET     ) )  token = "zOffset";
-  else                                  token = "";
-
-  if( strlen( token ) > 0 )
-  {
-      Com_Printf( S_COLOR_RED "ERROR: %s not defined in %s\n",
-                  token, filename );
-      return qfalse;
-  }
-
-  return qtrue;
-}
-
-/*
-===============
-BG_InitBuildableConfigs
-===============
-*/
-void BG_InitBuildableConfigs( char *game_mode )
-{
-  int               i;
-  buildableConfig_t *bc;
-
-  for( i = BA_NONE + 1; i < BA_NUM_BUILDABLES; i++ )
-  {
-    bc = BG_BuildableConfig( i );
-    Com_Memset( bc, 0, sizeof( buildableConfig_t ) );
-
-    BG_ParseBuildableFile( va( "game_modes/%s/buildables/%s.cfg",
-                               game_mode,
-                               BG_Buildable( i )->name ), bc );
-  }
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -2281,18 +2006,6 @@ qboolean BG_ClassAllowedInStage( class_t class,
   return qtrue;
 }
 
-static classConfig_t bg_classConfigList[ PCL_NUM_CLASSES ];
-
-/*
-==============
-BG_ClassConfig
-==============
-*/
-classConfig_t *BG_ClassConfig( class_t class )
-{
-  return &bg_classConfigList[ class ];
-}
-
 /*
 ==============
 BG_ClassBoundingBox
@@ -2516,327 +2229,6 @@ void BG_SetEvolveCoolDown( playerState_t *ps,
   ps->misc[ MISC_MISC2 ] = (coolDown<<7)|(decayTime);
 }
 
-/*
-======================
-BG_ParseClassFile
-
-Parses a configuration file describing a class
-======================
-*/
-static qboolean BG_ParseClassFile( const char *filename, classConfig_t *cc )
-{
-  char          *text_p;
-  int           i;
-  int           len;
-  char          *token;
-  char          text[ 20000 ];
-  fileHandle_t  f;
-  float         scale = 0.0f;
-  int           defined = 0;
-  enum
-  {
-      MODEL           = 1 << 0,
-      DESCRIPTION     = 1 << 1,
-      SKIN            = 1 << 2,
-      HUD             = 1 << 3,
-      MODELSCALE      = 1 << 4,
-      SHADOWSCALE     = 1 << 5,
-      MINS            = 1 << 6,
-      MAXS            = 1 << 7,
-      DEADMINS        = 1 << 8,
-      DEADMAXS        = 1 << 9,
-      CROUCHMAXS      = 1 << 10,
-      VIEWHEIGHT      = 1 << 11,
-      CVIEWHEIGHT     = 1 << 12,
-      ZOFFSET         = 1 << 13,
-      NAME            = 1 << 14,
-      SHOULDEROFFSETS = 1 << 15
-  };
-
-  // load the file
-  len = FS_FOpenFileByMode( filename, &f, FS_READ );
-  if( len < 0 )
-    return qfalse;
-
-  if( len == 0 || len >= sizeof( text ) - 1 )
-  {
-    FS_FCloseFile( f );
-    Com_Printf( S_COLOR_RED "ERROR: Class file %s is %s\n", filename,
-      len == 0 ? "empty" : "too long" );
-    return qfalse;
-  }
-
-  FS_Read2( text, len, f );
-  text[ len ] = 0;
-  FS_FCloseFile( f );
-
-  // parse the text
-  text_p = text;
-
-  // read optional parameters
-  while( 1 )
-  {
-    token = COM_Parse( &text_p );
-
-    if( !token )
-      break;
-
-    if( !Q_stricmp( token, "" ) )
-      break;
-
-    if( !Q_stricmp( token, "model" ) )
-    {
-      token = COM_Parse( &text_p );
-      if( !token )
-        break;
-
-      Q_strncpyz( cc->modelName, token, sizeof( cc->modelName ) );
-
-      defined |= MODEL;
-      continue;
-    }
-    else if( !Q_stricmp( token, "description" ) )
-    {
-      token = COM_Parse( &text_p );
-      if( !token )
-        break;
-
-      Q_strncpyz(cc->description, token, sizeof(cc->description));
-
-      defined |= DESCRIPTION;
-      continue;
-    }
-    else if( !Q_stricmp( token, "skin" ) )
-    {
-      token = COM_Parse( &text_p );
-      if( !token )
-        break;
-
-      Q_strncpyz( cc->skinName, token, sizeof( cc->skinName ) );
-
-      defined |= SKIN;
-      continue;
-    }
-    else if( !Q_stricmp( token, "hud" ) )
-    {
-      token = COM_Parse( &text_p );
-      if( !token )
-        break;
-
-      Q_strncpyz( cc->hudName, token, sizeof( cc->hudName ) );
-
-      defined |= HUD;
-      continue;
-    }
-    else if( !Q_stricmp( token, "modelScale" ) )
-    {
-      token = COM_Parse( &text_p );
-      if( !token )
-        break;
-
-      scale = atof( token );
-
-      if( scale < 0.0f )
-        scale = 0.0f;
-
-      cc->modelScale = scale;
-
-      defined |= MODELSCALE;
-      continue;
-    }
-    else if( !Q_stricmp( token, "shadowScale" ) )
-    {
-      token = COM_Parse( &text_p );
-      if( !token )
-        break;
-
-      scale = atof( token );
-
-      if( scale < 0.0f )
-        scale = 0.0f;
-
-      cc->shadowScale = scale;
-
-      defined |= SHADOWSCALE;
-      continue;
-    }
-    else if( !Q_stricmp( token, "mins" ) )
-    {
-      for( i = 0; i <= 2; i++ )
-      {
-        token = COM_Parse( &text_p );
-        if( !token )
-          break;
-
-        cc->mins[ i ] = atof( token );
-      }
-
-      defined |= MINS;
-      continue;
-    }
-    else if( !Q_stricmp( token, "maxs" ) )
-    {
-      for( i = 0; i <= 2; i++ )
-      {
-        token = COM_Parse( &text_p );
-        if( !token )
-          break;
-
-        cc->maxs[ i ] = atof( token );
-      }
-
-      defined |= MAXS;
-      continue;
-    }
-    else if( !Q_stricmp( token, "deadMins" ) )
-    {
-      for( i = 0; i <= 2; i++ )
-      {
-        token = COM_Parse( &text_p );
-        if( !token )
-          break;
-
-        cc->deadMins[ i ] = atof( token );
-      }
-
-      defined |= DEADMINS;
-      continue;
-    }
-    else if( !Q_stricmp( token, "deadMaxs" ) )
-    {
-      for( i = 0; i <= 2; i++ )
-      {
-        token = COM_Parse( &text_p );
-        if( !token )
-          break;
-
-        cc->deadMaxs[ i ] = atof( token );
-      }
-
-      defined |= DEADMAXS;
-      continue;
-    }
-    else if( !Q_stricmp( token, "crouchMaxs" ) )
-    {
-      for( i = 0; i <= 2; i++ )
-      {
-        token = COM_Parse( &text_p );
-        if( !token )
-          break;
-
-        cc->crouchMaxs[ i ] = atof( token );
-      }
-
-      defined |= CROUCHMAXS;
-      continue;
-    }
-    else if( !Q_stricmp( token, "viewheight" ) )
-    {
-      token = COM_Parse( &text_p );
-      cc->viewheight = atoi( token );
-      defined |= VIEWHEIGHT;
-      continue;
-    }
-    else if( !Q_stricmp( token, "crouchViewheight" ) )
-    {
-      token = COM_Parse( &text_p );
-      cc->crouchViewheight = atoi( token );
-      defined |= CVIEWHEIGHT;
-      continue;
-    }
-    else if( !Q_stricmp( token, "zOffset" ) )
-    {
-      float offset;
-
-      token = COM_Parse( &text_p );
-      if( !token )
-        break;
-
-      offset = atof( token );
-
-      cc->zOffset = offset;
-
-      defined |= ZOFFSET;
-      continue;
-    }
-    else if( !Q_stricmp( token, "name" ) )
-    {
-      token = COM_Parse( &text_p );
-      if( !token )
-        break;
-
-      Q_strncpyz( cc->humanName, token, sizeof( cc->humanName ) );
-
-      defined |= NAME;
-      continue;
-    }
-    else if( !Q_stricmp( token, "shoulderOffsets" ) )
-    {
-      for( i = 0; i <= 2; i++ )
-      {
-        token = COM_Parse( &text_p );
-        if( !token )
-          break;
-
-        cc->shoulderOffsets[ i ] = atof( token );
-      }
-
-      defined |= SHOULDEROFFSETS;
-      continue;
-    }
-
-    Com_Printf( S_COLOR_RED "ERROR: unknown token '%s'\n", token );
-    return qfalse;
-  }
-
-  if(      !( defined & MODEL           ) ) token = "model";
-  else if( !( defined & DESCRIPTION     ) ) token = "description";
-  else if( !( defined & SKIN            ) ) token = "skin";
-  else if( !( defined & HUD             ) ) token = "hud";
-  else if( !( defined & MODELSCALE      ) ) token = "modelScale";
-  else if( !( defined & SHADOWSCALE     ) ) token = "shadowScale";
-  else if( !( defined & MINS            ) ) token = "mins";
-  else if( !( defined & MAXS            ) ) token = "maxs";
-  else if( !( defined & DEADMINS        ) ) token = "deadMins";
-  else if( !( defined & DEADMAXS        ) ) token = "deadMaxs";
-  else if( !( defined & CROUCHMAXS      ) ) token = "crouchMaxs";
-  else if( !( defined & VIEWHEIGHT      ) ) token = "viewheight";
-  else if( !( defined & CVIEWHEIGHT     ) ) token = "crouchViewheight";
-  else if( !( defined & ZOFFSET         ) ) token = "zOffset";
-  else if( !( defined & NAME            ) ) token = "name";
-  else if( !( defined & SHOULDEROFFSETS ) ) token = "shoulderOffsets";
-  else                                      token = "";
-
-  if( strlen( token ) > 0 )
-  {
-      Com_Printf( S_COLOR_RED "ERROR: %s not defined in %s\n",
-                  token, filename );
-      return qfalse;
-  }
-
-  return qtrue;
-}
-
-/*
-===============
-BG_InitClassConfigs
-===============
-*/
-void BG_InitClassConfigs( char *game_mode )
-{
-  int           i;
-  classConfig_t *cc;
-
-  for( i = PCL_NONE; i < PCL_NUM_CLASSES; i++ )
-  {
-    cc = BG_ClassConfig( i );
-
-    BG_ParseClassFile( va( "game_modes/%s/classes/%s.cfg",
-                           game_mode,
-                           BG_Class( i )->name ), cc );
-  }
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 static const weaponAttributes_t bg_weapons[ ] =
@@ -2850,7 +2242,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "level0",             //char      *name;
     "Bite",               //char      *humanName;
-    "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -2954,7 +2345,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "level1",             //char      *name;
     "Claws",              //char      *humanName;
-    "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -3058,7 +2448,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "level1upg",          //char      *name;
     "Claws Upgrade",      //char      *humanName;
-    "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -3162,7 +2551,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "level2",             //char      *name;
     "Bite",               //char      *humanName;
-    "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -3266,7 +2654,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "level2upg",          //char      *name;
     "Zap",                //char      *humanName;
-    "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -3370,7 +2757,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "spitfire",           //char      *weaponName;
     "Spitfire",           //char      *humanName;
-    "",
     SPITFIRE_GAS_TRAIL_PUFFS,//int       maxAmmo; 
     SPITFIRE_GAS_TRAIL_CLIPS,//int       maxClips;
     0,                    //int       ammoUsage1;
@@ -3474,7 +2860,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "level3",             //char      *name;
     "Pounce",             //char      *humanName;
-    "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -3578,7 +2963,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "level3upg",          //char      *name;
     "Pounce (upgrade)",   //char      *humanName;
-    "",
     4,                    //int       maxAmmo;
     0,                    //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -3682,7 +3066,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "level4",             //char      *name;
     "Charge",             //char      *humanName;
-    "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -3786,7 +3169,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       slots;
     "blaster",            //char      *name;
     "Blaster",            //char      *humanName;
-    "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -3890,8 +3272,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "rifle",              //char      *name;
     "Rifle",              //char      *humanName;
-    "Basic weapon. Cased projectile weapon, with a slow clip based "
-      "reload system. Includes a less accurate rapid fire secondary mode.",
     RIFLE_CLIPSIZE,       //int       maxAmmo;
     RIFLE_MAXCLIPS,       //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -3995,9 +3375,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "psaw",               //char      *name;
     "Pain Saw",           //char      *humanName;
-    "Similar to a chainsaw, but instead of a chain it has an "
-      "electric arc capable of dealing a great deal of damage at "
-      "close range. Its secondary attack grabs into surfaces and pulls.",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -4101,11 +3478,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "shotgun",            //char      *name;
     "Shotgun",            //char      *humanName;
-    "Close range weapon that is useful against larger foes. "
-      "It has a slow repeat rate, but can be devastatingly "
-      "effective.  Includes a secondary choke with a more "
-      "focused spread, however, yeilds reduced damage "
-      "over greater distances",
     SHOTGUN_SHELLS,       //int       maxAmmo;
     SHOTGUN_MAXCLIPS,     //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -4209,8 +3581,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "lgun",               //char      *name;
     "Las Gun",            //char      *humanName;
-    "Slightly more powerful than the basic rifle, rapidly fires "
-      "small packets of energy.",
     LASGUN_AMMO,          //int       maxAmmo;
     0,                    //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -4314,9 +3684,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "mdriver",            //char      *name;
     "Mass Driver",        //char      *humanName;
-    "A portable particle accelerator which causes minor nuclear "
-      "reactions at the point of impact. It has a very large "
-      "payload, but fires slowly.",
     MDRIVER_CLIPSIZE,     //int       maxAmmo;
     MDRIVER_MAXCLIPS,     //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -4420,10 +3787,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "chaingun",           //char      *name;
     "Chaingun",           //char      *humanName;
-    "Belt drive, cased projectile weapon. It has a high repeat "
-      "rate but a wide firing angle and is therefore relatively "
-      "inaccurate.  Has a secondary lower rate of fire for better "
-      "for better accuracy",
     CHAINGUN_BULLETS,     //int       maxAmmo;
     0,                    //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -4527,9 +3890,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "flamer",             //char      *name;
     "Flame Thrower",      //char      *humanName;
-    "Sprays fire at its target. It is powered by compressed "
-      "gas. The relatively low rate of fire means this weapon is most "
-      "effective against static targets.",
     FLAMER_GAS,           //int       maxAmmo;
     0,                    //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -4633,7 +3993,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "prifle",             //char      *name;
     "Pulse Rifle",        //char      *humanName;
-    "An energy weapon that fires rapid pulses of concentrated energy.",
     PRIFLE_CLIPS,         //int       maxAmmo;
     PRIFLE_MAXCLIPS,      //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -4737,11 +4096,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "lcannon",            //char      *name;
     "Lucifer Cannon",     //char      *humanName;
-    "Blaster technology scaled up to deliver devastating power. "
-      "Primary fire must be charged before firing. It has a quick "
-      "secondary attack that does not require charging. "
-      "Primary fire's charge can be reduced before firing if the "
-      "secondary attack is held down simultaneously with the primary attack.",
     LCANNON_AMMO,         //int       maxAmmo;
     0,                    //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -4845,7 +4199,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_NONE,            //int       slots;
     "grenade",            //char      *name;
     "Grenade",            //char      *humanName;
-    "",
     1,                    //int       maxAmmo;
     0,                    //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -4949,7 +4302,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_NONE,            //int       slots;
     "fragnade",           //char      *name;
     "Fragmentation Grenade", //char      *humanName;
-    "",
     1,                    //int       maxAmmo;
     0,                    //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -5053,7 +4405,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_NONE,            //int       slots;
     "lasermine",          //char      *name;
     "Laser Mine",         //char      *humanName;
-    "",
     1,                    //int       maxAmmo;
     0,                    //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -5157,9 +4508,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "grenade_launcher",   //char      *name;
     "Grenade Launcher",   //char      *humanName;
-    "Has a primary fire that launches grenades that "
-    "explode on impact, and a secondary fire that "
-    "launches timed grenades.",
     LAUNCHER_AMMO,        //int       maxAmmo;
     LAUNCHER_MAXCLIPS,    //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -5263,10 +4611,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "lightning",          //char      *name;
     "Lightning Gun",      //char      *humanName;
-    "Generates charged pulsating bolts of lightning as its "
-    "primary attack. The secondary attack emmits a burst of ball "
-    "lightning, that can destabilized into a high energy electrical "
-    "explosion triggered by an EMP emitted from the lightning gun.",
     LIGHTNING_AMMO,       //int       maxAmmo;
     LIGHTNING_MAXCLIPS,   //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -5370,7 +4714,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "lockblob",           //char      *name;
     "Lock Blob",          //char      *humanName;
-    "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -5474,7 +4817,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "hive",               //char      *name;
     "Hive",               //char      *humanName;
-    "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -5578,7 +4920,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "teslagen",           //char      *name;
     "Tesla Generator",    //char      *humanName;
-    "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -5682,7 +5023,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "mgturret",           //char      *name;
     "Machinegun Turret",  //char      *humanName;
-    "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -5786,7 +5126,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "flame_turret",       //char      *name;
     "Flame Turret",       //char      *humanName;
-    "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -5890,7 +5229,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "abuild",             //char      *name;
     "Alien build weapon", //char      *humanName;
-    "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -5994,7 +5332,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "abuildupg",          //char      *name;
     "Alien build weapon2", //char     *humanName;
-    "",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -6098,9 +5435,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,          //int       slots;
     "ckit",               //char      *name;
     "Construction Kit",   //char      *humanName;
-    "Used for building structures. This includes "
-      "power and basic defense. More structures become "
-      "available with new stages.",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -6204,9 +5538,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "ackit",               //char      *name;
     "Adv Construction Kit", //char      *humanName;
-    "Used for building structures. This includes "
-      "spawns, armories, power, and basic defense. More structures become "
-      "available with new stages.",
     0,                    //int       maxAmmo;
     0,                    //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -6310,8 +5641,6 @@ static const weaponAttributes_t bg_weapons[ ] =
     SLOT_WEAPON,          //int       slots;
     "portalgun",          //char      *weaponName;
     "Portal Gun",         //char      *humanName;
-    "Wormhole technology packed into a portable gun. Primary fire "
-     "creates the blue portal, secondary fire creates the red portal.",
     PORTALGUN_AMMO,       //int       maxAmmo;
     PORTALGUN_MAXCLIPS,   //int       maxClips;
     1,                    //int       ammoUsage1;
@@ -6511,8 +5840,6 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     SLOT_TORSO|SLOT_ARMS|SLOT_LEGS, //int   slots;
     "larmour",              //char  *name;
     "Light Armour",         //char  *humanName;
-    "Protective armour that helps to defend against light alien melee "
-      "attacks.",
     "icons/iconu_larmour",
     qtrue,                  //qboolean  purchasable;
     qtrue,                  //qboolean  sellable;
@@ -6528,7 +5855,6 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     SLOT_HEAD,              //int   slots;
     "helmet",               //char  *name;
     "Helmet",               //char  *humanName;
-    "The helmet provides protection to your head.",
     "icons/iconu_helmet",
     qtrue,                  //qboolean  purchasable;
     qtrue,                  //qboolean  sellable;
@@ -6544,8 +5870,6 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     SLOT_NONE,              //int   slots;
     "medkit",               //char  *name;
     "Medkit",               //char  *humanName;
-    "A one time use medical kit that cures poison, "
-    "restores health, and restores stamina.",
     "icons/iconu_atoxin",
     qtrue,                  //qboolean  purchasable;
     qfalse,                 //qboolean  sellable;
@@ -6561,8 +5885,6 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     SLOT_BACKPACK,          //int   slots;
     "biopack",               //char  *upgradeName;
     "Biopack",               //char  *humanName;
-    "A backpack utilizing nanotech injected into the spine that enhances "
-    " the user's health.",
     "icons/iconu_biopack",
     qtrue,                  //qboolean purchasable
     qtrue,                  //qboolean  sellable;
@@ -6578,8 +5900,6 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     SLOT_BACKPACK,          //int   slots;
     "battpack",             //char  *name;
     "Battery Pack",         //char  *humanName;
-    "Back-mounted battery pack that permits storage of one and a half "
-      "times the normal energy capacity for energy weapons.",
     "icons/iconu_battpack",
     qtrue,                  //qboolean  purchasable;
     qtrue,                  //qboolean  sellable;
@@ -6595,9 +5915,6 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     SLOT_BACKPACK,          //int   slots;
     "jetpack",              //char  *name;
     "Jet Pack",             //char  *humanName;
-    "Back-mounted jet pack that enables the user to fly to remote "
-      "locations. It is very useful against alien spawns in hard "
-      "to reach spots.",
     "icons/iconu_jetpack",
     qtrue,                  //qboolean  purchasable;
     qtrue,                  //qboolean  sellable;
@@ -6613,11 +5930,6 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     SLOT_BACKPACK, //int  slots;
     "bsuit",                //char  *name;
     "Battlesuit",           //char  *humanName;
-    "A full body armour that is highly effective at repelling alien attacks. "
-    "Includes a built-in battery pack for energy weapons, as well as a higher "
-    "clip capacity for various non-energy weapons. A helmet and light can be "
-    "worn inside the battlesuit. It allows the user to enter hostile situations "
-    "with a greater degree of confidence.",
     "icons/iconu_bsuit",
     qtrue,                  //qboolean  purchasable;
     qtrue,                  //qboolean  sellable;
@@ -6633,8 +5945,6 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     SLOT_NONE,              //int   slots;
     "gren",                 //char  *name;
     "Grenade",              //char  *humanName;
-    "A small incendinary device ideal for damaging tightly packed "
-      "alien structures. Has a five second timer.",
     0,
     qtrue,                  //qboolean  purchasable;
     qtrue,                  //qboolean  sellable;
@@ -6650,10 +5960,6 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     SLOT_NONE,              //int   slots;
     "frag",                 //char  *name;
     "Fragmentation Grenade", //char  *humanName;
-    "A grenade with a heavy shell that, upon detonation, shatters "
-      "into a large number of high speed devestating fragments. Included is a "
-      "built in gyroscope that kicks the grenade up to an optimal height before "
-      "exploding. This grenade is most effective against larger targets.",
     0,
     qtrue,                  //qboolean  purchasable;
     qtrue,                  //qboolean  sellable;
@@ -6669,10 +5975,6 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     SLOT_NONE,              //int   slots;
     "lasmine",              //char  *name;
     "Laser Mine",           //char  *humanName;
-    "A highly explosive mine that can be attached to surfaces, it is"
-      "triggered by a laser trip beam.  It has a 2 minute self destruct timer, "
-      "and can be detonated early from being damaged, so take special care with "
-      "it's placement, and take cover while it is being armed!",
     0,
     qtrue,                  //qboolean  purchasable;
     qtrue,                  //qboolean  sellable;
@@ -6688,7 +5990,6 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     SLOT_NONE,              //int   slots;
     "ammo",                 //char  *name;
     "Ammunition",           //char  *humanName;
-    "Ammunition for the currently held weapon.",
     0,
     qtrue,                  //qboolean  purchasable;
     qfalse,                 //qboolean  sellable;
@@ -6704,7 +6005,6 @@ static const upgradeAttributes_t bg_upgrades[ ] =
     SLOT_NONE,              //int   slots;
     "jetfuel",              //char  *name;
     "Jet Pack Fuel",        //char  *humanName;
-    "Refuels the jet pack",
     0,
     qtrue,                  //qboolean  purchasable;
     qfalse,                 //qboolean  sellable;
