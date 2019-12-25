@@ -1709,7 +1709,7 @@ static void UI_DrawInfoPane( menuItem_t *item, rectDef_t *rect, float text_x, fl
       if( item->v.team == NUM_TEAMS )
         s = "Join the team with the least players.";
       else
-        s = BG_Team( item->v.team )->info;
+        s = BG_TeamConfig( item->v.team )->description;
       break;
 
     case INFOTYPE_CLASS:
@@ -1744,13 +1744,13 @@ static void UI_DrawInfoPane( menuItem_t *item, rectDef_t *rect, float text_x, fl
       {
         s = va( "%s\n\n%s\n\nCredits: Free",
                 BG_Weapon( item->v.weapon )->humanName,
-                BG_Weapon( item->v.weapon )->info );
+                BG_WeaponConfig( item->v.weapon )->description );
       }
       else
       {
         s = va( "%s\n\n%s\n\nCredits: %d",
                 BG_Weapon( item->v.weapon )->humanName,
-                BG_Weapon( item->v.weapon )->info,
+                BG_WeaponConfig( item->v.weapon )->description,
                 value );
       }
 
@@ -1805,25 +1805,25 @@ static void UI_DrawInfoPane( menuItem_t *item, rectDef_t *rect, float text_x, fl
         {
           s = va( "%s\n\n%s\n\nFuel tank is full.",
                   BG_Upgrade( item->v.upgrade )->humanName,
-                  BG_Upgrade( item->v.upgrade )->info );
+                  BG_UpgradeConfig( item->v.upgrade )->description );
         } else if( insufficientFunds )
         {
           s = va( "%s\n\n%s\n\nInsufficient funds.\nEarn more credits",
                   BG_Upgrade( item->v.upgrade )->humanName,
-                  BG_Upgrade( item->v.upgrade )->info );
+                  BG_UpgradeConfig( item->v.upgrade )->description );
         }
       }
         else if( value == 0 )
       {
         s = va( "%s\n\n%s\n\nCredits: Free",
                 BG_Upgrade( item->v.upgrade )->humanName,
-                BG_Upgrade( item->v.upgrade )->info );
+                BG_UpgradeConfig( item->v.upgrade )->description );
       }
       else
       {
         s = va( "%s\n\n%s\n\nCredits%s: %d",
                 BG_Upgrade( item->v.upgrade )->humanName,
-                BG_Upgrade( item->v.upgrade )->info,
+                BG_UpgradeConfig( item->v.upgrade )->description,
                 ( item->v.upgrade == UP_AMMO ) ? " Per Round" : "",
                 value );
       }
