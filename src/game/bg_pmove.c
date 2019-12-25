@@ -45,7 +45,7 @@ float pm_flyaccelerate = 4.0f;
 float pm_friction = 6.0f;
 float pm_waterfriction = 1.0f;
 float pm_flightfriction = 4.0f;
-float pm_spitfire_flyfriction = 3.5f;
+float pm_spitfire_flyfriction = 3.0f;
 float pm_spitfire_flywalkfriction = 5.0f;
 float pm_spectatorfriction = 5.0f;
 
@@ -878,15 +878,6 @@ static float PM_CmdScale( usercmd_t *cmd, qboolean zFlight )
       modifier *= SPITFIRE_POUNCE_SPEED_MOD;
     else if( pm->ps->weapon == WP_ALEVEL0 )
       modifier *= LEVEL0_POUNCE_SPEED_MOD;
-  }
-
-  // the spitfire strafes and moves backwards slower when flying
-  if( pm->ps->weapon == WP_ASPITFIRE &&
-      pm->ps->groundEntityNum == ENTITYNUM_NONE )
-  {
-    cmd->rightmove *= SPITFIRE_SIDE_MODIFIER;
-    if( cmd->forwardmove < 0 )
-      cmd->forwardmove *= SPITFIRE_BACK_MODIFIER;
   }
 
   //slow the player if slow locked
@@ -2086,7 +2077,7 @@ static void PM_SpitfireFlyMove( void )
   vec3_t   wishdir;
   float    scale;
   float    accel = BG_Class( pm->ps->stats[ STAT_CLASS ] )->airAcceleration;
-  qboolean isgliding = qfalse;
+  qboolean isflying = qfalse;
   qboolean basicflight = qfalse;
   qboolean ascend = qfalse;
   qboolean upmovePressed = qfalse;
@@ -2136,8 +2127,8 @@ static void PM_SpitfireFlyMove( void )
         pm->ps->persistant[PERS_JUMPTIME] > SPITFIRE_ASCEND_REPEAT &&
         !freefall )
     {
-      accel = SPITFIRE_GLIDE_ACCEL;
-      isgliding = qtrue;
+      accel = SPITFIRE_FLY_ACCEL;
+      isflying = qtrue;
     }
   }
 
@@ -2170,43 +2161,18 @@ static void PM_SpitfireFlyMove( void )
     for( i = 0; i < 3; i++ )
       wishvel[ i ] = scale * pml.forward[ i ] * pm->cmd.forwardmove;
 
-  if( isgliding )
+  //normal slowdown
+  PM_Friction( );
+
+  if(!isflying)
   {
-    float  pathspeed = VectorLength( pm->ps->velocity);
-
-    //apply gravity
-    pm->ps->velocity[ 2 ] -= PM_Gravity(pm->ps) * pml.frametime;
-
-    if( pathspeed )
-    {
-      vec3_t  pathdir, pathup, pathang;
-      float  liftmod = PM_Gravity(pm->ps) / pow( ( SPITFIRE_GLIDE_MOD ), 2 );
-      float  dragmod = liftmod / tan( DEG2RAD( SPITFIRE_GLIDE_ANGLE ) );
-      float  dragmag = dragmod * pow( pathspeed, 2 );
-      float  liftmag = liftmod * pow( pathspeed, 2 );
-
-      vectoangles( pm->ps->velocity, pathang );
-      AngleVectors( pathang, pathdir, NULL, pathup );
-      //apply drag
-      VectorMA( pm->ps->velocity, -( dragmag * pml.frametime ), pathdir,
-                pm->ps->velocity );
-
-      //apply lift
-      VectorMA( pm->ps->velocity, liftmag * pml.frametime, pathup,
-                  pm->ps->velocity );
-    }
-  } else
-  {
-    //normal slowdown
-    PM_Friction( );
-
-    // hovering
+    // precise hovering
     if( basicflight &&
         ( pm->cmd.buttons & BUTTON_WALKING ) )
     {
       int bobmove, old;
 
-      // restrict ascent for hovering
+      // restrict ascent for precise hovering
       if( wishvel[ 2 ] > 0 )
         wishvel[ 2 ] = 0;
 
@@ -2220,7 +2186,7 @@ static void PM_SpitfireFlyMove( void )
   VectorCopy( wishvel, wishdir );
   wishspeed = VectorNormalize( wishdir );
 
-  if( !isgliding || scale )
+  if( !isflying || scale )
   {
     PM_Accelerate( wishdir, wishspeed, accel );
   }
@@ -2267,7 +2233,7 @@ static void PM_SpitfireFlyMove( void )
   }
 
   if( ( upmovePressed || freefall ) &&
-        !isgliding )
+        !isflying )
     gravity = qtrue;
 
   PM_StepSlideMove( gravity, qfalse );
@@ -6654,12 +6620,14 @@ void PmoveSingle( pmove_t *pmove )
   // entering / leaving water splashes
   PM_WaterEvents( );
 
-  // snap some parts of playerstate to save network bandwidth
-  #ifdef Q3_VM
-    trap_SnapVector( pm->ps->velocity );
-  #else
-    Q_SnapVector( pm->ps->velocity );
-  #endif
+  if(pm->ps->pm_type != PM_SPITFIRE_FLY) {
+    // snap some parts of playerstate to save network bandwidth
+    #ifdef Q3_VM
+      trap_SnapVector( pm->ps->velocity );
+    #else
+      Q_SnapVector( pm->ps->velocity );
+    #endif
+  }
 }
 
 

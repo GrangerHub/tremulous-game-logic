@@ -217,12 +217,10 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define SPITFIRE_PAYLOAD_DISCHARGE_TIME ( SPITFIRE_POUNCE_TIME + SPITFIRE_POUNCE_REPEAT )
 #define SPITFIRE_POUNCE_MAX_STAMINA     ( SPITFIRE_POUNCE_TIME * 20 )
 #define SPITFIRE_POUNCE_STAMINA_RESTORE 15
-#define SPITFIRE_BACK_MODIFIER          0.8f
-#define SPITFIRE_SIDE_MODIFIER          0.9f
-#define SPITFIRE_AIRSPEED_MOD           0.36f
-#define SPITFIRE_GLIDE_ANGLE            15.0f //optimal angle of attack
-#define SPITFIRE_GLIDE_MOD              1000
-#define SPITFIRE_GLIDE_ACCEL            3.8f
+#define SPITFIRE_BACK_MODIFIER          1.5f
+#define SPITFIRE_SIDE_MODIFIER          2.0f
+#define SPITFIRE_AIRSPEED_MOD           0.45f
+#define SPITFIRE_FLY_ACCEL              3.0f
 #define SPITFIRE_HOVER_BOB              0.001f //for view bobbing from hovering
 #define SPITFIRE_GAS_TRAIL_REPEAT       300
 #define SPITFIRE_GAS_TRAIL_RELOAD_TIME  0
