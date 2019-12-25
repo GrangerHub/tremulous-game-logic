@@ -98,14 +98,6 @@ typedef enum sdmode_s {
 
 /*
 --------------------------------------------------------------------------------
-Game Modes
-*/
-qboolean BG_Check_Game_Mode_Name(
-  char *game_mode_raw, char *game_mode_clean, int len);
-void BG_Init_Game_Mode(char *game_mode_raw);
-
-/*
---------------------------------------------------------------------------------
 Scrim
 */
 typedef enum
@@ -1387,27 +1379,6 @@ typedef struct
   team_t    team;
 } classAttributes_t;
 
-typedef struct
-{
-  char      modelName[ MAX_QPATH ];
-  char      description[MAX_TOKEN_CHARS];
-  float     modelScale;
-  char      skinName[ MAX_QPATH ];
-  float     shadowScale;
-  char      hudName[ MAX_QPATH ];
-  char      humanName[ MAX_STRING_CHARS ];
-
-  vec3_t    mins;
-  vec3_t    maxs;
-  vec3_t    crouchMaxs;
-  vec3_t    deadMins;
-  vec3_t    deadMaxs;
-  int       viewheight;
-  int       crouchViewheight;
-  float     zOffset;
-  vec3_t    shoulderOffsets;
-} classConfig_t;
-
 //stages
 typedef enum
 {
@@ -1424,7 +1395,6 @@ typedef struct
   char          *name;
   char          *name2;
   char          *humanName;
-  char          *info;
 } teamAttributes_t;
 
 typedef struct
@@ -1507,18 +1477,6 @@ typedef struct
   int               role;
 } buildableAttributes_t;
 
-typedef struct
-{
-  char      description[MAX_TOKEN_CHARS];
-
-  char      models[ MAX_BUILDABLE_MODELS ][ MAX_QPATH ];
-
-  float     modelScale;
-  vec3_t    mins;
-  vec3_t    maxs;
-  float     zOffset;
-} buildableConfig_t;
-
 typedef enum
 {
   SPLATP_SPHERICAL_CONE,
@@ -1569,7 +1527,6 @@ typedef struct
 
   char      *name;
   char      *humanName;
-  char      *info;
 
   int       maxAmmo;
   int       maxClips;
@@ -1635,7 +1592,6 @@ typedef struct
 
   char      *name;
   char      *humanName;
-  char      *info;
 
   char      *icon;
 
@@ -1644,8 +1600,6 @@ typedef struct
 
   team_t    team;
 } upgradeAttributes_t;
-
-void BG_Init_Game_Mode( char *game_mode );
 
 qboolean  BG_WeaponIsFull( weapon_t weapon, int stats[ ], int ammo, int clips );
 qboolean  BG_InventoryContainsWeapon( int weapon, int stats[ ] );
@@ -1687,19 +1641,14 @@ qboolean                    BG_Weapon_Can_Build_Buildable(
 qboolean                    BG_BuildableAllowedInStage( buildable_t buildable,
                                                         stage_t stage,
                                                         int gameIsInWarmup );
-
-buildableConfig_t           *BG_BuildableConfig( buildable_t buildable );
 void                        BG_BuildableBoundingBox( buildable_t buildable,
                                                      vec3_t mins, vec3_t maxs );
-void                        BG_InitBuildableConfigs( char *game_mode );
 
 const classAttributes_t     *BG_ClassByName( const char *name );
 const classAttributes_t     *BG_Class( class_t class );
 qboolean                    BG_ClassAllowedInStage( class_t class,
                                                     stage_t stage,
                                                     int gameIsInWarmup );
-
-classConfig_t               *BG_ClassConfig( class_t class );
 
 void                        BG_ClassBoundingBox( class_t class, vec3_t mins,
                                                  vec3_t maxs, vec3_t cmaxs,
@@ -1717,8 +1666,6 @@ qboolean                    BG_AlienCanEvolve( class_t class, int credits,
                                                int gameIsInWarmup,
                                                qboolean devMode,
                                                qboolean class_forced );
-
-void                        BG_InitClassConfigs( char *game_mode );
 
 const weaponAttributes_t    *BG_WeaponByName( const char *name );
 const weaponAttributes_t    *BG_Weapon( weapon_t weapon );
@@ -2050,3 +1997,65 @@ typedef enum
 //  Center prints that do not need to be ordered and are of low importance
 //    can use CP_EXTRA
 #define CP_EXTRA -CP_EXTRA1
+
+/*
+--------------------------------------------------------------------------------
+Game Modes
+bg_game_modes.c
+*/
+typedef struct
+{
+  char      description[MAX_TOKEN_CHARS];
+} teamConfig_t;
+
+typedef struct
+{
+  char      modelName[MAX_QPATH];
+  char      description[MAX_TOKEN_CHARS];
+  float     modelScale;
+  char      skinName[MAX_QPATH];
+  float     shadowScale;
+  char      hudName[MAX_QPATH];
+  char      humanName[MAX_STRING_CHARS];
+
+  vec3_t    mins;
+  vec3_t    maxs;
+  vec3_t    crouchMaxs;
+  vec3_t    deadMins;
+  vec3_t    deadMaxs;
+  int       viewheight;
+  int       crouchViewheight;
+  float     zOffset;
+  vec3_t    shoulderOffsets;
+} classConfig_t;
+
+typedef struct
+{
+  char      description[MAX_TOKEN_CHARS];
+
+  char      models[MAX_BUILDABLE_MODELS][MAX_QPATH];
+
+  float     modelScale;
+  vec3_t    mins;
+  vec3_t    maxs;
+  float     zOffset;
+} buildableConfig_t;
+
+typedef struct
+{
+  char      description[MAX_TOKEN_CHARS];
+} upgradeConfig_t;
+
+typedef struct
+{
+  char      description[MAX_TOKEN_CHARS];
+} weaponConfig_t;
+
+qboolean          BG_Check_Game_Mode_Name(
+  char *game_mode_raw, char *game_mode_clean, int len);
+void              BG_Init_Game_Mode(char *game_mode_raw);
+teamConfig_t      *BG_TeamConfig(team_t team);
+classConfig_t     *BG_ClassConfig(class_t class);
+buildableConfig_t *BG_BuildableConfig(buildable_t buildable);
+upgradeConfig_t   *BG_UpgradeConfig( upgrade_t buildable );
+weaponConfig_t             *BG_WeaponConfig( weapon_t weapon );
