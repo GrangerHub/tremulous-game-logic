@@ -2201,6 +2201,7 @@ CGOBJ_ = \
   $(B)/cgame/bg_slidemove.o \
   $(B)/cgame/bg_lib.o \
   $(B)/cgame/bg_alloc.o \
+	$(B)/cgame/bg_game_modes.o \
   $(B)/cgame/bg_voice.o \
   $(B)/cgame/bg_list.o \
   $(B)/cgame/cg_consolecmds.o \
@@ -2237,6 +2238,7 @@ CGOBJ11_ = \
   $(B)/cgame/bg_slidemove.o \
   $(B)/cgame/bg_lib.o \
   $(B)/cgame/bg_alloc.o \
+  $(B)/cgame/bg_game_modes.o \
   $(B)/cgame/bg_voice.o \
   $(B)/cgame/bg_list.o \
   $(B)/11/cgame/cg_consolecmds.o \
@@ -2299,6 +2301,7 @@ GOBJ_ = \
   $(B)/game/bg_slidemove.o \
   $(B)/game/bg_lib.o \
   $(B)/game/bg_alloc.o \
+  $(B)/game/bg_game_modes.o \
   $(B)/game/bg_voice.o \
   $(B)/game/bg_list.o \
   $(B)/game/g_active.o \
@@ -2348,6 +2351,7 @@ UIOBJ_ = \
   $(B)/ui/ui_gameinfo.o \
   \
   $(B)/ui/bg_alloc.o \
+  $(B)/ui/bg_game_modes.o \
   $(B)/ui/bg_voice.o \
   $(B)/cgame/bg_list.o \
   $(B)/ui/bg_misc.o \
@@ -2362,6 +2366,7 @@ UIOBJ11_ = \
   $(B)/ui/ui_gameinfo.o \
   \
   $(B)/ui/bg_alloc.o \
+  $(B)/ui/bg_game_modes.o \
   $(B)/ui/bg_voice.o \
   $(B)/cgame/bg_list.o \
   $(B)/ui/bg_misc.o \
