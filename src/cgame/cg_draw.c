@@ -1364,7 +1364,26 @@ static void CG_DrawPlayerClipsRing( rectDef_t *rect, vec4_t backColor,
     default:
       if( ps->weaponstate == WEAPON_RELOADING )
       {
-        maxDelay = (float)BG_Weapon( cent->currentState.weapon )->reloadTime;
+        if(
+          BG_Weapon(weapon)->oneRoundToOneClip &&
+          (BG_Weapon(weapon)->weaponOptionA != WEAPONOPTA_REMAINDER_AMMO)) {
+          int max_ammo =
+              (
+                BG_Weapon(weapon)->usesEnergy &&
+                BG_InventoryContainsUpgrade(UP_BATTPACK, ps->stats)) ?
+              (BG_Weapon(weapon)->maxAmmo * BATTPACK_MODIFIER) :
+              BG_Weapon(weapon)->maxAmmo;
+          int clips_to_load = max_ammo - ps->ammo;
+
+          if(clips_to_load > ps->clips) {
+            clips_to_load = ps->clips;
+          }
+
+          maxDelay =
+            clips_to_load * BG_Weapon( weapon )->reloadTime;
+        } else {
+          maxDelay = (float)BG_Weapon( cent->currentState.weapon )->reloadTime;
+        }
         progress = ( maxDelay - (float)ps->weaponTime ) / maxDelay;
 
         Vector4Lerp( progress, backColor, foreColor, color );
