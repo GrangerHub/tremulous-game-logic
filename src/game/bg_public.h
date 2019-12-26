@@ -1534,6 +1534,10 @@ typedef struct
   int       ammoUsage2;
   int       ammoUsage3;
   int       roundPrice; // doesn't apply to energy weapons
+  qboolean  oneRoundToOneClip; // each clip has just one round of ammo, and
+                               // reload time is multiplied by the number of
+                               // rounds reloaded.  Doesn't apply if
+                               // WEAPONOPTA_REMAINDER_AMMO is set.
   qboolean  ammoPurchasable;
   qboolean  infiniteAmmo;
   qboolean  usesEnergy;

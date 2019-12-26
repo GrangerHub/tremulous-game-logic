@@ -4277,7 +4277,18 @@ static void PM_Weapon( void )
           pm->ps->clips--;
         }
       } else {
-        pm->ps->clips--;
+        if(BG_Weapon(pm->ps->weapon)->oneRoundToOneClip) {
+          int clips_to_load = max_ammo - pm->ps->ammo;
+
+          if(clips_to_load > pm->ps->clips) {
+            clips_to_load = pm->ps->clips;
+            max_ammo = clips_to_load + pm->ps->ammo;
+          }
+
+          pm->ps->clips -= clips_to_load;
+        } else {
+          pm->ps->clips--;
+        }
       }
 
       pm->ps->ammo = max_ammo;
@@ -4313,7 +4324,26 @@ static void PM_Weapon( void )
       PM_StartTorsoAnim( TORSO_DROP );
       PM_StartWeaponAnim( WANIM_RELOAD );
 
-      pm->ps->weaponTime += BG_Weapon( pm->ps->weapon )->reloadTime;
+      if(
+        BG_Weapon(pm->ps->weapon)->oneRoundToOneClip &&
+        (BG_Weapon(pm->ps->weapon)->weaponOptionA != WEAPONOPTA_REMAINDER_AMMO)) {
+        int max_ammo =
+          (
+            BG_Weapon(pm->ps->weapon)->usesEnergy &&
+            BG_InventoryContainsUpgrade(UP_BATTPACK, pm->ps->stats)) ?
+          (BG_Weapon(pm->ps->weapon)->maxAmmo * BATTPACK_MODIFIER) :
+          BG_Weapon(pm->ps->weapon)->maxAmmo;
+        int clips_to_load = max_ammo - pm->ps->ammo;
+
+        if(clips_to_load > pm->ps->clips) {
+          clips_to_load = pm->ps->clips;
+        }
+
+        pm->ps->weaponTime +=
+          clips_to_load * BG_Weapon( pm->ps->weapon )->reloadTime;
+      } else {
+        pm->ps->weaponTime += BG_Weapon( pm->ps->weapon )->reloadTime;
+      }
       return;
     }
 
