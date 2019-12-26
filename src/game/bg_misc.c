@@ -2248,6 +2248,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
+    qfalse,               //qboolean  oneRoundToOneClip;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
@@ -2351,6 +2352,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
+    qfalse,               //qboolean  oneRoundToOneClip;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
@@ -2454,6 +2456,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
+    qfalse,               //qboolean  oneRoundToOneClip;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
@@ -2557,6 +2560,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
+    qfalse,               //qboolean  oneRoundToOneClip;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
@@ -2660,6 +2664,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
+    qfalse,               //qboolean  oneRoundToOneClip;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
@@ -2763,6 +2768,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
+    qfalse,               //qboolean  oneRoundToOneClip;
     qfalse,               //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
@@ -2866,6 +2872,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
+    qfalse,               //qboolean  oneRoundToOneClip;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
@@ -2969,6 +2976,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
+    qfalse,               //qboolean  oneRoundToOneClip;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
@@ -3072,6 +3080,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
+    qfalse,               //qboolean  oneRoundToOneClip;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
@@ -3175,6 +3184,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
+    qfalse,               //qboolean  oneRoundToOneClip;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy
@@ -3278,6 +3288,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
+    qfalse,               //qboolean  oneRoundToOneClip;
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
@@ -3381,6 +3392,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
+    qfalse,               //qboolean  oneRoundToOneClip;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
@@ -3484,10 +3496,11 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
+    qtrue,                //qboolean  oneRoundToOneClip;
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
-    WEAPONOPTA_REMAINDER_AMMO, //weapon_Option_A_t weaponOptionA;
+    WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
@@ -3587,6 +3600,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
+    qfalse,               //qboolean  oneRoundToOneClip;
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
     qtrue,                //int       usesEnergy;
@@ -3690,6 +3704,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
+    qfalse,               //qboolean  oneRoundToOneClip;
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
     qtrue,                //int       usesEnergy;
@@ -3793,6 +3808,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
+    qfalse,               //qboolean  oneRoundToOneClip;
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
@@ -3896,6 +3912,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
+    qfalse,               //qboolean  oneRoundToOneClip;
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
@@ -3999,6 +4016,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
+    qfalse,               //qboolean  oneRoundToOneClip;
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
     qtrue,                //int       usesEnergy;
@@ -4102,6 +4120,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
+    qfalse,               //qboolean  oneRoundToOneClip;
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
     qtrue,                //int       usesEnergy;
@@ -4205,7 +4224,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
-    qtrue,                //qboolean  ammoPurchasable;
+    qfalse,               //qboolean  oneRoundToOneClip;
+    qfalse,               //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
@@ -4308,7 +4328,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
-    qtrue,                //qboolean  ammoPurchasable;
+    qfalse,               //qboolean  oneRoundToOneClip;
+    qfalse,               //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
@@ -4411,7 +4432,8 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
-    qtrue,                //qboolean  ammoPurchasable;
+    qfalse,               //qboolean  oneRoundToOneClip;
+    qfalse,               //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
@@ -4514,6 +4536,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     LAUNCHER_ROUND_PRICE, //int       roundPrice;
+    qfalse,               //qboolean  oneRoundToOneClip;
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
@@ -4617,6 +4640,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     LIGHTNING_BALL_AMMO_USAGE,//int       ammoUsage2;
     0,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
+    qfalse,               //qboolean  oneRoundToOneClip;
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
     qtrue,                //int       usesEnergy;
@@ -4720,6 +4744,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
+    qfalse,               //qboolean  oneRoundToOneClip;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
@@ -4823,6 +4848,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
+    qfalse,               //qboolean  oneRoundToOneClip;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
@@ -4926,6 +4952,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
+    qfalse,               //qboolean  oneRoundToOneClip;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
     qtrue,                //int       usesEnergy;
@@ -5029,6 +5056,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
+    qfalse,               //qboolean  oneRoundToOneClip;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
@@ -5132,6 +5160,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
+    qfalse,               //qboolean  oneRoundToOneClip;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
@@ -5235,6 +5264,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
+    qfalse,               //qboolean  oneRoundToOneClip;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
@@ -5338,6 +5368,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
+    qfalse,               //qboolean  oneRoundToOneClip;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
@@ -5441,6 +5472,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
+    qfalse,               //qboolean  oneRoundToOneClip;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
@@ -5544,6 +5576,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     0,                    //int       roundPrice;
+    qfalse,               //qboolean  oneRoundToOneClip;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
@@ -5647,6 +5680,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     PORTALGUN_ROUND_PRICE,//int       roundPrice;
+    qfalse,               //qboolean  oneRoundToOneClip;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
@@ -5803,6 +5837,43 @@ int BG_AmmoUsage( playerState_t *ps )
 
     default:
       return 1;
+  }
+}
+
+/*
+==============
+BG_ClipUssage
+==============
+*/
+int BG_ClipUssage( playerState_t *ps )
+{
+  weapon_t weapon;
+
+  Com_Assert(ps);
+
+  weapon = ps->weapon;
+  if(
+    BG_Weapon(weapon)->oneRoundToOneClip &&
+    (BG_Weapon(weapon)->weaponOptionA != WEAPONOPTA_REMAINDER_AMMO)) {
+    int max_ammo =
+        (
+          BG_Weapon(weapon)->usesEnergy &&
+          BG_InventoryContainsUpgrade(UP_BATTPACK, ps->stats)) ?
+        (BG_Weapon(weapon)->maxAmmo * BATTPACK_MODIFIER) :
+        BG_Weapon(weapon)->maxAmmo;
+    int clips_to_load = max_ammo - ps->ammo;
+
+    if(clips_to_load > ps->clips) {
+      clips_to_load = ps->clips;
+    }
+
+    return clips_to_load;
+  } else {
+    if(ps->clips > 0) {
+      return 1;
+    } else {
+      return 0;
+    }
   }
 }
 
