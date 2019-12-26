@@ -1364,26 +1364,10 @@ static void CG_DrawPlayerClipsRing( rectDef_t *rect, vec4_t backColor,
     default:
       if( ps->weaponstate == WEAPON_RELOADING )
       {
-        if(
-          BG_Weapon(weapon)->oneRoundToOneClip &&
-          (BG_Weapon(weapon)->weaponOptionA != WEAPONOPTA_REMAINDER_AMMO)) {
-          int max_ammo =
-              (
-                BG_Weapon(weapon)->usesEnergy &&
-                BG_InventoryContainsUpgrade(UP_BATTPACK, ps->stats)) ?
-              (BG_Weapon(weapon)->maxAmmo * BATTPACK_MODIFIER) :
-              BG_Weapon(weapon)->maxAmmo;
-          int clips_to_load = max_ammo - ps->ammo;
+        const int clips_to_load = BG_ClipUssage(ps);
 
-          if(clips_to_load > ps->clips) {
-            clips_to_load = ps->clips;
-          }
-
-          maxDelay =
-            clips_to_load * BG_Weapon( weapon )->reloadTime;
-        } else {
-          maxDelay = (float)BG_Weapon( cent->currentState.weapon )->reloadTime;
-        }
+        maxDelay =
+          clips_to_load * BG_Weapon( weapon )->reloadTime;
         progress = ( maxDelay - (float)ps->weaponTime ) / maxDelay;
 
         Vector4Lerp( progress, backColor, foreColor, color );
@@ -1555,7 +1539,19 @@ static void CG_DrawPlayerAmmoValue( rectDef_t *rect, vec4_t color )
       break;
 
     default:
-      value = cg.snap->ps.ammo;
+      if(
+        BG_Weapon(cg.snap->ps.weapon)->oneRoundToOneClip &&
+        (BG_Weapon(cg.snap->ps.weapon)->weaponOptionA != WEAPONOPTA_REMAINDER_AMMO) &&
+        (cg.snap->ps.weaponstate == WEAPON_RELOADING)) {
+        const int clips_to_load = BG_ClipUssage(&cg.snap->ps);
+        const int maxDelay =
+          clips_to_load * BG_Weapon( cg.snap->ps.weapon )->reloadTime;
+        const float progress = ( maxDelay - (float)cg.snap->ps.weaponTime ) / maxDelay;
+
+        value = cg.snap->ps.ammo + (int)(clips_to_load * progress);
+      } else {
+        value = cg.snap->ps.ammo;
+      }
       break;
   }
 
@@ -1800,6 +1796,18 @@ static void CG_DrawPlayerClipsValue( rectDef_t *rect, vec4_t color )
     qtrue : qfalse;
   int           remainder_ammo = (use_remainder_ammo && ps->misc[MISC_MISC3] > 0) ? ps->misc[MISC_MISC3] : 0;
   int           clips = ps->clips + ((remainder_ammo > 0) ? 1 : 0);
+
+  if(
+    BG_Weapon(cg.snap->ps.weapon)->oneRoundToOneClip &&
+    !use_remainder_ammo &&
+    (ps->weaponstate == WEAPON_RELOADING)) {
+    const int clips_to_load = BG_ClipUssage(ps);
+    const int maxDelay =
+      clips_to_load * BG_Weapon( ps->weapon )->reloadTime;
+    const float progress = ( maxDelay - (float)ps->weaponTime ) / maxDelay;
+
+    clips = clips - (int)(clips_to_load * progress);
+  }
 
   switch( ps->stats[ STAT_WEAPON ] )
   {
@@ -2608,11 +2616,35 @@ float CG_GetValue( int ownerDraw )
   switch( ownerDraw )
   {
     case CG_PLAYER_AMMO_VALUE:
-      if( weapon )
-        return ps->ammo;
+      if( weapon ) {
+        if(
+          BG_Weapon(cg.snap->ps.weapon)->oneRoundToOneClip &&
+          !use_remainder_ammo &&
+          (ps->weaponstate == WEAPON_RELOADING)) {
+          const int clips_to_load = BG_ClipUssage(ps);
+          const int maxDelay =
+            clips_to_load * BG_Weapon( ps->weapon )->reloadTime;
+          const float progress = ( maxDelay - (float)ps->weaponTime ) / maxDelay;
+
+          return ps->ammo + (int)(clips_to_load * progress);
+        } else {
+          return ps->ammo;
+        }
+      }
       break;
     case CG_PLAYER_CLIPS_VALUE:
       if( weapon )
+        if(
+          BG_Weapon(cg.snap->ps.weapon)->oneRoundToOneClip &&
+          !use_remainder_ammo &&
+          (ps->weaponstate == WEAPON_RELOADING)) {
+          const int clips_to_load = BG_ClipUssage(ps);
+          const int maxDelay =
+            clips_to_load * BG_Weapon( ps->weapon )->reloadTime;
+          const float progress = ( maxDelay - (float)ps->weaponTime ) / maxDelay;
+
+          clips = clips - (int)(clips_to_load * progress);
+        }
         return clips;
       break;
     case CG_PLAYER_HEALTH:

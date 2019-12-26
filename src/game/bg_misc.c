@@ -4452,6 +4452,43 @@ int BG_AmmoUsage( playerState_t *ps )
 
 /*
 ==============
+BG_ClipUssage
+==============
+*/
+int BG_ClipUssage( playerState_t *ps )
+{
+  weapon_t weapon;
+
+  Com_Assert(ps);
+
+  weapon = ps->weapon;
+  if(
+    BG_Weapon(weapon)->oneRoundToOneClip &&
+    (BG_Weapon(weapon)->weaponOptionA != WEAPONOPTA_REMAINDER_AMMO)) {
+    int max_ammo =
+        (
+          BG_Weapon(weapon)->usesEnergy &&
+          BG_InventoryContainsUpgrade(UP_BATTPACK, ps->stats)) ?
+        (BG_Weapon(weapon)->maxAmmo * BATTPACK_MODIFIER) :
+        BG_Weapon(weapon)->maxAmmo;
+    int clips_to_load = max_ammo - ps->ammo;
+
+    if(clips_to_load > ps->clips) {
+      clips_to_load = ps->clips;
+    }
+
+    return clips_to_load;
+  } else {
+    if(ps->clips > 0) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
+}
+
+/*
+==============
 BG_TotalPriceForWeapon
 
 Returns the base price of a weapon plus the cost of full ammo (if ammo isn't free)

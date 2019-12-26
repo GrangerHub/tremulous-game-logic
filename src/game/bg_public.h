@@ -1677,6 +1677,7 @@ qboolean                    BG_WeaponAllowedInStage( weapon_t weapon,
                                                      stage_t stage,
                                                      int gameIsInWarmup );
 int                         BG_AmmoUsage( playerState_t *ps );
+int                         BG_ClipUssage( playerState_t *ps );
 int                         BG_TotalPriceForWeapon( weapon_t weapon,
                                                     int gameIsInWarmup );
 
