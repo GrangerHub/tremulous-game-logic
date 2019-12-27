@@ -1849,6 +1849,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage1;
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
+    qfalse,               //qboolean  allowPartialAmmoUsage;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -1932,6 +1933,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage1;
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
+    qfalse,               //qboolean  allowPartialAmmoUsage;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -2015,6 +2017,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage1;
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
+    qfalse,               //qboolean  allowPartialAmmoUsage;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -2098,6 +2101,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage1;
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
+    qfalse,               //qboolean  allowPartialAmmoUsage;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -2181,6 +2185,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage1;
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
+    qfalse,               //qboolean  allowPartialAmmoUsage;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -2264,6 +2269,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage1;
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
+    qfalse,               //qboolean  allowPartialAmmoUsage;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -2347,6 +2353,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage1;
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
+    qfalse,               //qboolean  allowPartialAmmoUsage;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -2430,6 +2437,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage1;
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
+    qfalse,               //qboolean  allowPartialAmmoUsage;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -2513,6 +2521,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage1;
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
+    qfalse,               //qboolean  allowPartialAmmoUsage;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -2596,6 +2605,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage1;
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
+    qfalse,               //qboolean  allowPartialAmmoUsage;
     0,                    //int       roundPrice;
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
@@ -2679,6 +2689,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage1;
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
+    qfalse,               //qboolean  allowPartialAmmoUsage;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -2762,6 +2773,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage1;
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
+    qfalse,               //qboolean  allowPartialAmmoUsage;
     0,                    //int       roundPrice;
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
@@ -2845,6 +2857,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage1;
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
+    qfalse,               //qboolean  allowPartialAmmoUsage;
     0,                    //int       roundPrice;
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
@@ -2928,6 +2941,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage1;
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
+    qfalse,               //qboolean  allowPartialAmmoUsage;
     0,                    //int       roundPrice;
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
@@ -3011,6 +3025,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage1;
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
+    qfalse,               //qboolean  allowPartialAmmoUsage;
     0,                    //int       roundPrice;
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
@@ -3094,6 +3109,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage1;
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
+    qfalse,               //qboolean  allowPartialAmmoUsage;
     0,                    //int       roundPrice;
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
@@ -3177,6 +3193,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage1;
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
+    qfalse,               //qboolean  allowPartialAmmoUsage;
     0,                    //int       roundPrice;
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
@@ -3260,6 +3277,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage1;
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
+    qfalse,               //qboolean  allowPartialAmmoUsage;
     0,                    //int       roundPrice;
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
@@ -3343,6 +3361,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage1;
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
+    qfalse,               //qboolean  allowPartialAmmoUsage;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
@@ -3426,6 +3445,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage1;
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
+    qfalse,               //qboolean  allowPartialAmmoUsage;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
@@ -3509,6 +3529,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage1;
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
+    qfalse,               //qboolean  allowPartialAmmoUsage;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
@@ -3592,6 +3613,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage1;
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
+    qfalse,               //qboolean  allowPartialAmmoUsage;
     LAUNCHER_ROUND_PRICE, //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
@@ -3675,6 +3697,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage1;
     LIGHTNING_BALL_AMMO_USAGE,//int       ammoUsage2;
     0,                    //int       ammoUsage3;
+    qfalse,               //qboolean  allowPartialAmmoUsage;
     0,                    //int       roundPrice;
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
@@ -3758,6 +3781,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage1;
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
+    qfalse,               //qboolean  allowPartialAmmoUsage;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -3841,6 +3865,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage1;
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
+    qfalse,               //qboolean  allowPartialAmmoUsage;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -3924,6 +3949,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage1;
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
+    qfalse,               //qboolean  allowPartialAmmoUsage;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -4007,6 +4033,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage1;
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
+    qfalse,               //qboolean  allowPartialAmmoUsage;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -4090,6 +4117,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage1;
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
+    qfalse,               //qboolean  allowPartialAmmoUsage;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -4173,6 +4201,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage1;
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
+    qfalse,               //qboolean  allowPartialAmmoUsage;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -4256,6 +4285,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage1;
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
+    qfalse,               //qboolean  allowPartialAmmoUsage;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
     qtrue,                //int       infiniteAmmo;
@@ -4339,6 +4369,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     1,                    //int       ammoUsage1;
     1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
+    qfalse,               //qboolean  allowPartialAmmoUsage;
     PORTALGUN_ROUND_PRICE,//int       roundPrice;
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
@@ -4466,22 +4497,35 @@ qboolean BG_WeaponAllowedInStage( weapon_t weapon, stage_t stage,
 BG_AmmoUsage
 ==============
 */
-int BG_AmmoUsage( playerState_t *ps )
-{
-  switch ( ps->generic1 )
-  {
+int BG_AmmoUsage(playerState_t *ps) {
+  int ammo_usage;
+
+  switch(ps->generic1) {
     case WPM_PRIMARY:
-      return BG_Weapon( ps->weapon )->ammoUsage1;
+      ammo_usage = BG_Weapon(ps->weapon)->ammoUsage1;
+      break;
 
     case WPM_SECONDARY:
-      return BG_Weapon( ps->weapon )->ammoUsage2;
+      ammo_usage = BG_Weapon(ps->weapon)->ammoUsage2;
+      break;
 
     case WPM_TERTIARY:
-      return BG_Weapon( ps->weapon )->ammoUsage3;
+      ammo_usage = BG_Weapon(ps->weapon)->ammoUsage3;
+      break;
 
     default:
-      return 1;
+      ammo_usage = 1;
+      break;
   }
+
+  if(
+    (ammo_usage > 1) &&
+    (ammo_usage > ps->ammo) &&
+    BG_Weapon(ps->weapon)->allowPartialAmmoUsage) {
+    ammo_usage = ps->ammo;
+  }
+
+  return ammo_usage;
 }
 
 /*

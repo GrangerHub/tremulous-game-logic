@@ -676,6 +676,29 @@ void G_SplatterFire( gentity_t *inflicter, gentity_t *attacker,
   gData.attacker = attacker;
   gData.mod = mod;
   data.user_data = &gData;
+  if(inflicter->client) {
+    data.ammo_used = inflicter->client->pmext.ammo_used;
+  } else {
+    switch(weaponMode) {
+      case WPM_PRIMARY:
+        data.ammo_used = BG_Weapon(weapon)->ammoUsage1;
+        break;
+
+      case WPM_SECONDARY:
+        data.ammo_used = BG_Weapon(weapon)->ammoUsage2;
+        break;
+
+      case WPM_TERTIARY:
+        data.ammo_used = BG_Weapon(weapon)->ammoUsage3;
+        break;
+
+      default:
+        data.ammo_used = 1;
+        break;
+    } 
+  }
+
+  tent->s.generic1 = data.ammo_used;
 
   BG_SplatterPattern(
     tent->s.origin2, tent->s.eventParm, tent->s.otherEntityNum,
