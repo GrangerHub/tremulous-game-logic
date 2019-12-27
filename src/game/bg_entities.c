@@ -410,8 +410,11 @@ Splatter Patterns
 typedef struct splatterPatternData_s
 {
   const splatterAttributes_t *splatter;
-  int seed;
-  const int *fragment_num;
+  int                        mode_index;
+  int                        seed;
+  int                        ammo_used;
+  const int                  *fragment_num;
+  weapon_t                   weapon;
 
   float (*distribution)( struct splatterPatternData_s *data, angleIndex_t angle_index );
   void (*pattern)( struct splatterPatternData_s *data, vec3_t out );
@@ -430,11 +433,47 @@ static float BG_SplatterRandom( splatterPatternData_t *data, angleIndex_t angle_
 
 /*
 ==============
+BG_SplatterRandom
+==============
+*/
+static int BG_SplatterPatternNumber(splatterPatternData_t *data) {
+  int ammo_usage;
+
+  switch(data->mode_index) {
+    case 0:
+      ammo_usage = BG_Weapon(data->weapon)->ammoUsage1;
+      break;
+
+    case 1:
+      ammo_usage = BG_Weapon(data->weapon)->ammoUsage2;
+      break;
+
+    case 2:
+      ammo_usage = BG_Weapon(data->weapon)->ammoUsage1;
+      break;
+
+    default:
+      ammo_usage = 1;
+      break;
+  }
+
+  if(
+    BG_Weapon(data->weapon)->allowPartialAmmoUsage &&
+    data->ammo_used < ammo_usage) {
+    return (data->splatter->number * data->ammo_used) / ammo_usage;
+  } else {
+    return data->splatter->number;
+  }
+}
+
+/*
+==============
 BG_SplatterUniform
 ==============
 */
 static float BG_SplatterUniform( splatterPatternData_t *data, angleIndex_t angle_index ) {
-  const int yaw_layers = data->splatter->number / data->splatter->pitchLayers;
+  const int yaw_layers =
+    BG_SplatterPatternNumber(data) / data->splatter->pitchLayers;
 
   Com_Assert( data );
   Com_Assert( data->fragment_num );
@@ -463,7 +502,8 @@ BG_SplatterUniformAlternating
 ==============
 */
 static float BG_SplatterUniformAlternating( splatterPatternData_t *data, angleIndex_t angle_index ) {
-  const int yaw_layers = data->splatter->number / data->splatter->pitchLayers;
+  const int yaw_layers =
+    BG_SplatterPatternNumber(data) / data->splatter->pitchLayers;
 
   Com_Assert( data );
   Com_Assert( data->fragment_num );
@@ -557,6 +597,9 @@ void BG_SplatterPattern(
 
   memset( &splatterData, 0, sizeof( splatterData ) );
   splatterData.splatter = &BG_Weapon( weapon )->splatter[modeIndex];
+  splatterData.weapon = weapon;
+  splatterData.mode_index = modeIndex;
+  splatterData.ammo_used = data->ammo_used;
 
   Com_Assert( modeIndex >= 0 &&
               modeIndex < 3 );
@@ -567,9 +610,10 @@ void BG_SplatterPattern(
   Com_Assert( ( splatterData.distribution == SPLATD_RANDOM ||
                 splatterData.splatter->pitchLayers > 0 ) );
   Com_Assert( splatterData.distribution == SPLATD_RANDOM ||
-              splatterData.splatter->pitchLayers < splatterData.splatter->number );
+              splatterData.splatter->pitchLayers <
+              BG_SplatterPatternNumber(&splatterData) );
   Com_Assert( splatterData.distribution == SPLATD_RANDOM ||
-              !( splatterData.splatter->number % splatterData.splatter->pitchLayers ) );
+              !( BG_SplatterPatternNumber(&splatterData) % splatterData.splatter->pitchLayers ) );
 
   splatterData.seed = seed;
 
@@ -620,7 +664,7 @@ void BG_SplatterPattern(
   }
 
   // generate the pattern
-  for( i = 0; i < splatterData.splatter->number; i++ ) {
+  for( i = 0; i < BG_SplatterPatternNumber(&splatterData); i++ ) {
     vec3_t dir, temp, end;
 
     splatterData.fragment_num = &i;

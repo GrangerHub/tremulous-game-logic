@@ -2667,6 +2667,7 @@ void CG_Splatter( entityState_t *es )
   VectorCopy( es->pos.trBase, data.origin );
   data.weapon = es->angles2[0];
   data.weaponMode = es->angles2[1];
+  data.ammo_used = es->generic1;
 
   BG_SplatterPattern(
     es->origin2, es->eventParm, es->otherEntityNum, &data, CG_SplatterMarks);

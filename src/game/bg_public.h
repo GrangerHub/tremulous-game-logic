@@ -323,6 +323,7 @@ typedef struct unlagged_attacker_data_s
 
 typedef struct
 {
+  int      ammo_used;
   trace_t  impactTriggerTrace; // Used for the lightning gun
   int      pulsatingBeamTime[ 3 ];
   qboolean impactTriggerTraceChecked;
@@ -1614,9 +1615,12 @@ typedef struct
 
   int                 maxAmmo;
   int                 maxClips;
+
   int                 ammoUsage1;
   int                 ammoUsage2;
   int                 ammoUsage3;
+  qboolean  allowPartialAmmoUsage;
+
   int                 roundPrice; // doesn't apply to energy weapons
   qboolean            ammoPurchasable;
   qboolean            infiniteAmmo;
@@ -1780,6 +1784,7 @@ typedef struct splatterData_s
 {
   weapon_t     weapon;
   weaponMode_t weaponMode;
+  int          ammo_used;
   vec3_t       origin;
   trace_t      *tr;
   void         *user_data;
