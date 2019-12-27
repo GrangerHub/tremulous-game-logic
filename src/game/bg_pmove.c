@@ -3820,8 +3820,9 @@ static void PM_Weapon( void )
   qboolean      use_remainder_ammo =
     (BG_Weapon(pm->ps->weapon)->weaponOptionA == WEAPONOPTA_REMAINDER_AMMO) ?
     qtrue : qfalse;
+  int           *ps_clips = BG_GetClips(pm->ps, pm->ps->weapon);
   int           remainder_ammo = (use_remainder_ammo && pm->ps->misc[MISC_MISC3] > 0) ? pm->ps->misc[MISC_MISC3] : 0;
-  int           clips = pm->ps->clips + ((remainder_ammo > 0) ? 1 : 0);
+  int           clips = *ps_clips + ((remainder_ammo > 0) ? 1 : 0);
   qboolean      attack1 = !pm->swapAttacks ? (pm->cmd.buttons & BUTTON_ATTACK) : (pm->cmd.buttons & BUTTON_ATTACK2);
   qboolean      attack2 = !pm->swapAttacks ? (pm->cmd.buttons & BUTTON_ATTACK2) : (pm->cmd.buttons & BUTTON_ATTACK);
   qboolean      attack3 = pm->cmd.buttons & BUTTON_USE_HOLDABLE;
@@ -4294,8 +4295,8 @@ static void PM_Weapon( void )
         BG_InventoryContainsUpgrade( UP_BATTPACK, pm->ps->stats ) )
       max_ammo *= BATTPACK_MODIFIER;
 
-    if(pm->ps->clips <= 0 && remainder_ammo > 0) {
-      pm->ps->clips = 0;
+    if(*ps_clips <= 0 && remainder_ammo > 0) {
+      *ps_clips = 0;
 
       if((pm->ps->ammo + remainder_ammo) > max_ammo) {
         pm->ps->misc[MISC_MISC3] -= max_ammo - pm->ps->ammo;
@@ -4311,12 +4312,12 @@ static void PM_Weapon( void )
         if(pm->ps->misc[MISC_MISC3] > max_ammo) {
           pm->ps->misc[MISC_MISC3] -= max_ammo;  
         } else {
-          pm->ps->clips--;
+          (*ps_clips)--;
         }
       } else {
         const int clips_to_load = BG_ClipUssage(pm->ps);
 
-        pm->ps->clips -= clips_to_load;
+        *ps_clips -= clips_to_load;
 
         if(clips_to_load > 1) {
           max_ammo = clips_to_load + pm->ps->ammo;
@@ -5457,7 +5458,7 @@ void PmoveSingle( pmove_t *pmove )
     (BG_Weapon(pm->ps->weapon)->weaponOptionA == WEAPONOPTA_REMAINDER_AMMO) ?
     qtrue : qfalse;
   remainder_ammo = (use_remainder_ammo && pm->ps->misc[MISC_MISC3] > 0) ? pm->ps->misc[MISC_MISC3] : 0;
-  clips = pm->ps->clips + ((remainder_ammo > 0) ? 1 : 0);
+  clips = *BG_GetClips(pm->ps, pm->ps->weapon) + ((remainder_ammo > 0) ? 1 : 0);
 
   // set the firing flag for continuous beam weapons
   if( !(pm->ps->pm_flags & PMF_RESPAWNED) && pm->ps->pm_type != PM_INTERMISSION &&
