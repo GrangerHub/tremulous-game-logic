@@ -2340,6 +2340,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
         gentity_t *tent;
         vec3_t newOrigin;
         const weapon_t weapon = targ->client->ps.stats[ STAT_WEAPON ];
+        int            *ps_clips = BG_GetClips(&targ->client->ps, weapon);
 
         // have damage that is greater than the remaining armor transfer to the main helth
         take -= targ->client->ps.misc[ MISC_ARMOR ];
@@ -2384,8 +2385,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
             !BG_Weapon( targ->client->ps.weapon )->infiniteAmmo &&
             BG_Weapon( targ->client->ps.weapon )->ammoPurchasable &&
             !BG_Weapon( targ->client->ps.weapon )->roundPrice &&
-            targ->client->ps.clips > BG_Weapon( targ->client->ps.weapon )->maxClips )
-          targ->client->ps.clips = BG_Weapon( targ->client->ps.weapon )->maxClips;
+            *ps_clips > BG_Weapon( targ->client->ps.weapon )->maxClips )
+          *ps_clips = BG_Weapon( targ->client->ps.weapon )->maxClips;
 
         //update ClientInfo
         ClientUserinfoChanged( targ->client->ps.clientNum, qfalse );

@@ -618,6 +618,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define SHOTGUN_PRICE               175
 #define SHOTGUN_SHELLS              2
 #define SHOTGUN_PELLETS             15 //used to sync server and client side
+#define SHOTGUN_CHOKE_PELLETS       30
 #define SHOTGUN_MAXCLIPS            38
 #define SHOTGUN_REPEAT              1000
 #define SHOTGUN_K_SCALE             1.0f

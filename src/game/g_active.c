@@ -1257,8 +1257,10 @@ void ClientTimerActions( gentity_t *ent, int msec )
       ent->timestamp = level.time;
   } else if(client->ps.weapon == WP_ASPITFIRE)
   {
+    int *ps_clips = BG_GetClips(&client->ps, client->ps.weapon);
+
     if(
-      client->ps.clips < BG_Weapon(WP_ASPITFIRE)->maxClips ||
+      *ps_clips < BG_Weapon(WP_ASPITFIRE)->maxClips ||
       client->ps.ammo <= 0)
     {
       if( ent->timestamp + SPITFIRE_GAS_TRAIL_REGEN < level.time )
@@ -1267,7 +1269,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
           G_Spitfire_Detonate_Gas_Trail(client);
           client->ps.ammo = BG_Weapon(WP_ASPITFIRE)->maxAmmo;
         } else {
-          client->ps.clips++;
+          (*ps_clips)++;
         }
         ent->timestamp = level.time;
       }

@@ -1467,7 +1467,7 @@ static void CG_DrawPlayerPoisonBarbs( rectDef_t *rect, vec4_t color, qhandle_t s
 
   if(cg.snap->ps.weapon == WP_ASPITFIRE) {
     maxBarbs = BG_Weapon( cg.snap->ps.weapon )->maxClips + 1;
-    numBarbs = cg.snap->ps.clips;
+    numBarbs = *BG_GetClips(&cg.snap->ps, cg.snap->ps.weapon);
     if(cg.snap->ps.ammo == BG_Weapon(cg.snap->ps.weapon)->maxAmmo) {
       numBarbs++;
     }
@@ -1561,21 +1561,22 @@ static void CG_DrawPlayerAmmoValue( rectDef_t *rect, vec4_t color )
         bp = qtrue;
         break;
 
-      default:
-        if(
-          BG_Weapon(cg.snap->ps.weapon)->oneRoundToOneClip &&
-          (BG_Weapon(cg.snap->ps.weapon)->weaponOptionA != WEAPONOPTA_REMAINDER_AMMO) &&
-          (cg.snap->ps.weaponstate == WEAPON_RELOADING)) {
-          const int clips_to_load = BG_ClipUssage(&cg.snap->ps);
-          const int maxDelay =
-            clips_to_load * BG_Weapon( cg.snap->ps.weapon )->reloadTime;
-          const float progress = ( maxDelay - (float)cg.snap->ps.weaponTime ) / maxDelay;
+        default:
+          if(
+            (
+              BG_Weapon(cg.snap->ps.weapon)->weaponOptionA ==
+              WEAPONOPTA_ONE_ROUND_TO_ONE_CLIP) &&
+            (cg.snap->ps.weaponstate == WEAPON_RELOADING)) {
+            const int clips_to_load = BG_ClipUssage(&cg.snap->ps);
+            const int maxDelay =
+              clips_to_load * BG_Weapon( cg.snap->ps.weapon )->reloadTime;
+            const float progress = ( maxDelay - (float)cg.snap->ps.weaponTime ) / maxDelay;
 
-          value = cg.snap->ps.ammo + (int)(clips_to_load * progress);
-        } else {
-          value = cg.snap->ps.ammo;
-        }
-        break;
+            value = cg.snap->ps.ammo + (int)(clips_to_load * progress);
+          } else {
+            value = cg.snap->ps.ammo;
+          }
+          break;
     }
   }
   
@@ -1838,8 +1839,9 @@ static void CG_DrawPlayerClipsValue( rectDef_t *rect, vec4_t color )
   qboolean      use_remainder_ammo =
     (BG_Weapon(ps->stats[ STAT_WEAPON ])->weaponOptionA == WEAPONOPTA_REMAINDER_AMMO) ?
     qtrue : qfalse;
+  int           *ps_clips = BG_GetClips(ps, ps->stats[ STAT_WEAPON ]);
   int           remainder_ammo = (use_remainder_ammo && ps->misc[MISC_MISC3] > 0) ? ps->misc[MISC_MISC3] : 0;
-  int           clips = ps->clips + ((remainder_ammo > 0) ? 1 : 0);
+  int           clips = *ps_clips + ((remainder_ammo > 0) ? 1 : 0);
 
   if(
     ps->weapon == WP_HBUILD ||
@@ -1848,8 +1850,9 @@ static void CG_DrawPlayerClipsValue( rectDef_t *rect, vec4_t color )
   else
   {
     if(
-      BG_Weapon(cg.snap->ps.weapon)->oneRoundToOneClip &&
-      !use_remainder_ammo &&
+      (
+        BG_Weapon(ps->stats[ STAT_WEAPON ])->weaponOptionA ==
+        WEAPONOPTA_ONE_ROUND_TO_ONE_CLIP) &&
       (ps->weaponstate == WEAPON_RELOADING)) {
       const int clips_to_load = BG_ClipUssage(ps);
       const int maxDelay =
@@ -2857,16 +2860,18 @@ float CG_GetValue( int ownerDraw )
   qboolean      use_remainder_ammo =
     (BG_Weapon(weapon)->weaponOptionA == WEAPONOPTA_REMAINDER_AMMO) ?
     qtrue : qfalse;
+  int           *ps_clips = BG_GetClips(ps, weapon);
   int           remainder_ammo = (use_remainder_ammo && ps->misc[MISC_MISC3] > 0) ? ps->misc[MISC_MISC3] : 0;
-  int           clips = ps->clips + ((remainder_ammo > 0) ? 1 : 0);
+  int           clips = *ps_clips + ((remainder_ammo > 0) ? 1 : 0);
 
   switch( ownerDraw )
   {
     case CG_PLAYER_AMMO_VALUE:
       if( weapon ) {
         if(
-          BG_Weapon(cg.snap->ps.weapon)->oneRoundToOneClip &&
-          !use_remainder_ammo &&
+          (
+            BG_Weapon(ps->stats[ STAT_WEAPON ])->weaponOptionA ==
+            WEAPONOPTA_ONE_ROUND_TO_ONE_CLIP) &&
           (ps->weaponstate == WEAPON_RELOADING)) {
           const int clips_to_load = BG_ClipUssage(ps);
           const int maxDelay =
@@ -2882,8 +2887,9 @@ float CG_GetValue( int ownerDraw )
     case CG_PLAYER_CLIPS_VALUE:
       if( weapon )
         if(
-          BG_Weapon(cg.snap->ps.weapon)->oneRoundToOneClip &&
-          !use_remainder_ammo &&
+          (
+            BG_Weapon(ps->stats[ STAT_WEAPON ])->weaponOptionA ==
+            WEAPONOPTA_ONE_ROUND_TO_ONE_CLIP) &&
           (ps->weaponstate == WEAPON_RELOADING)) {
           const int clips_to_load = BG_ClipUssage(ps);
           const int maxDelay =
@@ -4105,8 +4111,9 @@ void CG_DrawWeaponIcon( rectDef_t *rect, vec4_t color )
   qboolean      use_remainder_ammo =
     (BG_Weapon(weapon)->weaponOptionA == WEAPONOPTA_REMAINDER_AMMO) ?
     qtrue : qfalse;
+  int           *ps_clips = BG_GetClips(ps, weapon);
   int           remainder_ammo = (use_remainder_ammo && ps->misc[MISC_MISC3] > 0) ? ps->misc[MISC_MISC3] : 0;
-  int           clips = ps->clips + ((remainder_ammo > 0) ? 1 : 0);
+  int           clips = *ps_clips + ((remainder_ammo > 0) ? 1 : 0);
 
   maxAmmo = BG_Weapon( weapon )->maxAmmo;
 

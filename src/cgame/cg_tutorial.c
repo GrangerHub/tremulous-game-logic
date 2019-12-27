@@ -689,7 +689,7 @@ static void CG_HumanText( char *text, playerState_t *ps )
     upgrade = cg.weaponSelect - WP_NUM_WEAPONS;
   }
 
-  if( !ps->ammo && !ps->clips && !BG_Weapon( ps->weapon )->infiniteAmmo )
+  if(!ps->ammo && !(*BG_GetClips(ps, ps->weapon)) && !BG_Weapon( ps->weapon )->infiniteAmmo)
   {
     //no ammo
     if( !BG_Weapon( ps->weapon )->ammoPurchasable )
