@@ -1522,6 +1522,9 @@ typedef enum
   WEAPONOPTA_POUNCE,
   WEAPONOPTA_SPINUP,
   WEAPONOPTA_REMAINDER_AMMO,
+  WEAPONOPTA_ONE_ROUND_TO_ONE_CLIP, // each clip has just one round of ammo, and
+                                    // reload time is multiplied by the number of
+                                    // rounds reloaded.
   WEAPONOPTA_OVERHEAT
 } weapon_Option_A_t;
 
@@ -1546,10 +1549,6 @@ typedef struct
   int       ammoUsage2;
   int       ammoUsage3;
   int       roundPrice; // doesn't apply to energy weapons
-  qboolean  oneRoundToOneClip; // each clip has just one round of ammo, and
-                               // reload time is multiplied by the number of
-                               // rounds reloaded.  Doesn't apply if
-                               // WEAPONOPTA_REMAINDER_AMMO is set.
   qboolean  ammoPurchasable;
   qboolean  infiniteAmmo;
   qboolean  usesEnergy;
@@ -1689,6 +1688,7 @@ qboolean                    BG_WeaponAllowedInStage( weapon_t weapon,
                                                      stage_t stage,
                                                      int gameIsInWarmup );
 int                         BG_AmmoUsage( playerState_t *ps );
+int                         *BG_GetClips(playerState_t *ps, weapon_t weapon);
 int                         BG_ClipUssage( playerState_t *ps );
 int                         BG_TotalPriceForWeapon( weapon_t weapon,
                                                     int gameIsInWarmup );

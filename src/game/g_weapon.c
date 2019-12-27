@@ -80,9 +80,10 @@ qboolean G_CanGiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo,
                                  int *rounds, int *clips, int *price )
 {
   weapon_t weapon = ent->client->ps.stats[ STAT_WEAPON ];
+  int *ps_clips = BG_GetClips(&ent->client->ps, weapon);
   int maxAmmo = BG_Weapon( weapon )->maxAmmo;
   int roundDiff;
-  int clipDiff = BG_Weapon( weapon )->maxClips - ent->client->ps.clips;
+  int clipDiff = BG_Weapon( weapon )->maxClips - *ps_clips;
   int roundPrice = BG_Weapon( weapon )->roundPrice;
 
   Com_Assert( rounds &&
@@ -106,7 +107,7 @@ qboolean G_CanGiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo,
     return qfalse;
 
   if( BG_WeaponIsFull( weapon, ent->client->ps.stats, ent->client->ps.ammo,
-                       ent->client->ps.clips ) )
+                       *ps_clips ) )
     return qfalse;
 
   // Apply battery pack modifier
@@ -170,6 +171,7 @@ G_GiveClientMaxAmmo
 void G_GiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo )
 {
   weapon_t weapon = ent->client->ps.stats[ STAT_WEAPON ];
+  int *ps_clips = BG_GetClips(&ent->client->ps, weapon);
   int rounds, clips, price;
   int maxAmmo = BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->maxAmmo;
 
@@ -194,9 +196,9 @@ void G_GiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo )
   if( ent->client->ps.ammo > maxAmmo )
     ent->client->ps.ammo = maxAmmo;
 
-  ent->client->ps.clips += clips;
-  if( ent->client->ps.clips > BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->maxClips )
-    ent->client->ps.clips = BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->maxClips;
+  *ps_clips += clips;
+  if( *ps_clips > BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->maxClips )
+    *ps_clips = BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->maxClips;
 
   G_ForceWeaponChange( ent, ent->client->ps.weapon );
 

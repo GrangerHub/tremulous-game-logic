@@ -1189,9 +1189,11 @@ void trigger_ammo_touch( gentity_t *self, gentity_t *other, trace_t *trace )
 
   if( ( other->client->ps.ammo + self->damage ) > maxAmmo )
   {
-    if( other->client->ps.clips < maxClips )
+    int *ps_clips = BG_GetClips(&other->client->ps, weapon);
+
+    if( *ps_clips < maxClips )
     {
-      other->client->ps.clips++;
+      (*ps_clips)++;
       other->client->ps.ammo = 1;
     }
     else
