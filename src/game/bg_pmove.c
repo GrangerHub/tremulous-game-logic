@@ -3829,6 +3829,9 @@ static void PM_Weapon( void )
   qboolean      outOfAmmo = qfalse;
   qboolean      byPassWeaponTime = qfalse;
   qboolean      burstClearedByEmp = qfalse;
+  qboolean      ammo_usage_needs_more_ammo = qfalse;
+  qboolean      allow_partial_ammo_usage = 
+    BG_Weapon(pm->ps->weapon)->allowPartialAmmoUsage;
 
   // Ignore weapons in some cases
   if( pm->ps->persistant[ PERS_SPECSTATE ] != SPECTATOR_NOT )
@@ -4196,16 +4199,50 @@ static void PM_Weapon( void )
     }
   }
 
+  if(
+    (attack1 &&
+      pm->ps->ammo < BG_Weapon(pm->ps->weapon)->ammoUsage1) || 
+    ((BG_Weapon(pm->ps->weapon)->hasAltMode && attack2) &&
+      pm->ps->ammo < BG_Weapon(pm->ps->weapon)->ammoUsage2) || 
+    ((BG_Weapon(pm->ps->weapon)->hasThirdMode && attack3) &&
+      pm->ps->ammo < BG_Weapon(pm->ps->weapon)->ammoUsage3)) {
+    ammo_usage_needs_more_ammo = qtrue;
+  }
+
   // check for out of ammo
-  if( ( !pm->ps->ammo ||
-        ( attack1 &&
-          pm->ps->ammo < BG_Weapon( pm->ps->weapon )->ammoUsage1 ) || 
-        ( ( BG_Weapon( pm->ps->weapon )->hasAltMode && attack2 ) &&
-          pm->ps->ammo < BG_Weapon( pm->ps->weapon )->ammoUsage2 ) || 
-        ( ( BG_Weapon( pm->ps->weapon )->hasThirdMode && attack3 ) &&
-          pm->ps->ammo < BG_Weapon( pm->ps->weapon )->ammoUsage3 ) ) &&
-      !clips && !BG_Weapon( pm->ps->weapon )->infiniteAmmo )
+  if(
+    (
+      !pm->ps->ammo ||
+      (ammo_usage_needs_more_ammo && !allow_partial_ammo_usage)) &&
+    !clips && !BG_Weapon(pm->ps->weapon)->infiniteAmmo)
     outOfAmmo = qtrue;
+
+  // check if a forced reload is needed for the ammo usage
+  if(
+    ammo_usage_needs_more_ammo && !allow_partial_ammo_usage &&
+    !BG_Weapon( pm->ps->weapon )->infiniteAmmo) {
+    int      ammo;
+    qboolean use_remainder_ammo =
+      (BG_Weapon(pm->ps->weapon)->weaponOptionA == WEAPONOPTA_REMAINDER_AMMO) ?
+      qtrue : qfalse;
+    int      remainder_ammo = use_remainder_ammo ? pm->ps->misc[MISC_MISC3] : 0;
+
+    if(((*BG_GetClips(pm->ps, pm->ps->weapon)) > 0) || (remainder_ammo > 0)) {
+      
+    }
+
+    if( BG_Weapon( pm->ps->weapon )->usesEnergy &&
+        BG_InventoryContainsUpgrade( UP_BATTPACK, pm->ps->stats ) )
+      ammo = BG_Weapon( pm->ps->weapon )->maxAmmo * BATTPACK_MODIFIER;
+    else
+      ammo = BG_Weapon( pm->ps->weapon )->maxAmmo;
+
+    // don't reload when full
+    if( pm->ps->ammo < ammo ) {
+      if( pm->ps->weaponstate != WEAPON_RELOADING )
+        pm->ps->pm_flags |= PMF_WEAPON_RELOAD;
+    }
+  }
 
   if( !outOfAmmo &&
       pm->ps->weaponstate != WEAPON_RELOADING &&
@@ -4339,13 +4376,7 @@ static void PM_Weapon( void )
 
   // check for end of clip
   if( !BG_Weapon( pm->ps->weapon )->infiniteAmmo &&
-      ( pm->ps->ammo <= 0 || ( pm->ps->pm_flags & PMF_WEAPON_RELOAD ) ||
-      ( attack1 &&
-        pm->ps->ammo < BG_Weapon( pm->ps->weapon )->ammoUsage1 ) || 
-      ( ( BG_Weapon( pm->ps->weapon )->hasAltMode && attack2 ) &&
-        pm->ps->ammo < BG_Weapon( pm->ps->weapon )->ammoUsage2 ) || 
-      ( ( BG_Weapon( pm->ps->weapon )->hasThirdMode && attack2 ) &&
-        pm->ps->ammo < BG_Weapon( pm->ps->weapon )->ammoUsage3 ) ) &&
+      ( pm->ps->ammo <= 0 || ( pm->ps->pm_flags & PMF_WEAPON_RELOAD ) ) &&
       clips > 0 )
   {
     int i;
@@ -4540,23 +4571,48 @@ static void PM_Weapon( void )
     }
   }
 
-  if( BG_Weapon( pm->ps->weapon )->hasThirdMode &&
-      BG_Weapon( pm->ps->weapon )->burstDelay3 > 0 &&
-      BG_Weapon( pm->ps->weapon )->burstRounds3 > 0 &&
+  if(
+      BG_Weapon(pm->ps->weapon)->hasThirdMode &&
+      BG_Weapon(pm->ps->weapon)->burstDelay3 > 0 &&
+      BG_Weapon(pm->ps->weapon)->burstRounds3 > 0 &&
       attack3 &&
-      !pm->pmext->burstRoundsToFire[ 2 ] )
-    pm->pmext->burstRoundsToFire[ 2 ] = BG_Weapon( pm->ps->weapon )->burstRounds3;
-  else if( BG_Weapon( pm->ps->weapon )->hasAltMode &&
-           BG_Weapon( pm->ps->weapon )->burstDelay2 > 0 &&
-           BG_Weapon( pm->ps->weapon )->burstRounds2 > 0 &&
-           attack2 &&
-           !pm->pmext->burstRoundsToFire[ 1 ] )
-    pm->pmext->burstRoundsToFire[ 1 ] = BG_Weapon( pm->ps->weapon )->burstRounds2;
-  else if( BG_Weapon( pm->ps->weapon )->burstDelay1 > 0 &&
-           BG_Weapon( pm->ps->weapon )->burstRounds1 > 0 &&
-           attack1 &&
-           !pm->pmext->burstRoundsToFire[ 0 ] )
-    pm->pmext->burstRoundsToFire[ 0 ] = BG_Weapon( pm->ps->weapon )->burstRounds1;
+      !pm->pmext->burstRoundsToFire[2]){
+    int rounds = BG_Weapon(pm->ps->weapon)->burstRounds3;
+
+    if(
+      BG_Weapon(pm->ps->weapon)->allowPartialAmmoUsage &&
+      BG_Weapon(pm->ps->weapon)->ammoUsage3 > pm->ps->ammo) {
+      rounds = (rounds * pm->ps->ammo) / BG_Weapon(pm->ps->weapon)->ammoUsage3;
+    }
+    pm->pmext->burstRoundsToFire[2] = rounds;
+  } else if(
+      BG_Weapon(pm->ps->weapon)->hasAltMode &&
+      BG_Weapon(pm->ps->weapon)->burstDelay2 > 0 &&
+      BG_Weapon(pm->ps->weapon)->burstRounds2 > 0 &&
+      attack2 &&
+      !pm->pmext->burstRoundsToFire[1]) {
+    int rounds = BG_Weapon(pm->ps->weapon)->burstRounds2;
+
+    if(
+      BG_Weapon(pm->ps->weapon)->allowPartialAmmoUsage &&
+      BG_Weapon(pm->ps->weapon)->ammoUsage2 > pm->ps->ammo) {
+      rounds = (rounds * pm->ps->ammo) / BG_Weapon(pm->ps->weapon)->ammoUsage2;
+    }
+    pm->pmext->burstRoundsToFire[1] = rounds;
+  } else if(
+      BG_Weapon(pm->ps->weapon)->burstDelay1 > 0 &&
+      BG_Weapon(pm->ps->weapon)->burstRounds1 > 0 &&
+      attack1 &&
+      !pm->pmext->burstRoundsToFire[0]) {
+    int rounds = BG_Weapon(pm->ps->weapon)->burstRounds1;
+
+    if(
+      BG_Weapon(pm->ps->weapon)->allowPartialAmmoUsage &&
+      BG_Weapon(pm->ps->weapon)->ammoUsage1 > pm->ps->ammo) {
+      rounds = (rounds * pm->ps->ammo) / BG_Weapon(pm->ps->weapon)->ammoUsage1;
+    }
+    pm->pmext->burstRoundsToFire[0] = rounds;
+  }
 
   // fire events for burst weapons
   if( pm->pmext->burstRoundsToFire[ 2 ] > 0 )
@@ -4851,12 +4907,14 @@ static void PM_Weapon( void )
   {
     // Special case for lcannon
     if( pm->ps->weapon == WP_LUCIFER_CANNON && attack1 && !attack2 )
-      pm->ps->ammo -= ( pm->ps->misc[ MISC_MISC ] * LCANNON_CHARGE_AMMO +
+      pm->pmext->ammo_used = ( pm->ps->misc[ MISC_MISC ] * LCANNON_CHARGE_AMMO +
                 LCANNON_CHARGE_TIME_MAX - 1 ) / LCANNON_CHARGE_TIME_MAX;
     else if( pm->ps->weapon == WP_LIGHTNING && attack1 && !attack2 )
-      pm->ps->ammo -= pm->ps->misc[ MISC_MISC ] / LIGHTNING_BOLT_CHARGE_TIME_MIN;
+      pm->pmext->ammo_used = pm->ps->misc[ MISC_MISC ] / LIGHTNING_BOLT_CHARGE_TIME_MIN;
     else
-      pm->ps->ammo -= BG_AmmoUsage( pm->ps );
+      pm->pmext->ammo_used = BG_AmmoUsage( pm->ps );
+
+      pm->ps->ammo -= pm->pmext->ammo_used;
 
     // Stay on the safe side
     if( pm->ps->ammo < 0 )
