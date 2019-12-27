@@ -519,7 +519,7 @@ static void Give_Ammo( gentity_t *ent ) {
   }
 
   client->ps.ammo = BG_Weapon( client->ps.weapon )->maxAmmo;
-  client->ps.clips = BG_Weapon( client->ps.weapon )->maxClips;
+  *BG_GetClips(&client->ps, client->ps.weapon) = BG_Weapon( client->ps.weapon )->maxClips;
 
   if( BG_Weapon( client->ps.weapon )->usesEnergy &&
       BG_InventoryContainsUpgrade( UP_BATTPACK, client->ps.stats ) ) {
@@ -3169,14 +3169,16 @@ sellErr_t G_CanSell(gentity_t *ent, const char *itemName, int *value, qboolean f
       *value = 0;
     } else
     {
+      int *ps_clips = BG_GetClips(&ent->client->ps, weapon);
+
       *value = BG_Weapon( weapon )->price;
       if( BG_Weapon( weapon )->roundPrice && !BG_Weapon( weapon )->usesEnergy &&
           ( BG_Weapon( weapon )->ammoPurchasable ||
             ( ent->client->ps.ammo == BG_Weapon( weapon )->maxAmmo &&
-              ent->client->ps.clips == BG_Weapon( weapon )->maxClips ) ) )
+              *ps_clips == BG_Weapon( weapon )->maxClips ) ) )
       {
         int totalAmmo = ent->client->ps.ammo +
-                        ( ent->client->ps.clips *
+                        ( *ps_clips *
                           BG_Weapon( weapon )->maxAmmo );
 
         *value += ( totalAmmo * BG_Weapon( weapon )->roundPrice);
@@ -3868,13 +3870,14 @@ void G_GiveItem( gentity_t *ent, const char *itemName, const int price,
   {
     ent->client->ps.stats[ STAT_WEAPON ] = weapon;
     ent->client->ps.ammo = BG_Weapon( weapon )->maxAmmo;
-    ent->client->ps.clips = BG_Weapon( weapon )->maxClips;
 
     //when applicable, reset MISC_MISC3
     if(BG_Weapon(weapon)->weaponOptionA != WEAPONOPTA_NONE) {
       ent->client->ps.misc[MISC_MISC3] = 0;
       ent->client->ps.pm_flags &= ~PMF_OVERHEATED;
     }
+
+    *BG_GetClips(&ent->client->ps, weapon) = BG_Weapon( weapon )->maxClips;
 
     if( BG_Weapon( weapon )->usesEnergy &&
         BG_InventoryContainsUpgrade( UP_BATTPACK, ent->client->ps.stats ) )
@@ -4135,7 +4138,7 @@ void Cmd_Reload_f( gentity_t *ent )
     if( BG_Weapon( ps->weapon )->infiniteAmmo )
       return;
 
-    if((ps->clips <= 0) && (remainder_ammo <= 0))
+    if(((*BG_GetClips(ps, ps->weapon)) <= 0) && (remainder_ammo <= 0))
       return;
 
     if( BG_Weapon( ps->weapon )->usesEnergy &&
