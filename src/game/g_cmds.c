@@ -518,13 +518,9 @@ static void Give_Ammo( gentity_t *ent ) {
     return;
   }
 
-  client->ps.ammo = BG_Weapon( client->ps.weapon )->maxAmmo;
-  *BG_GetClips(&client->ps, client->ps.weapon) = BG_Weapon( client->ps.weapon )->maxClips;
-
-  if( BG_Weapon( client->ps.weapon )->usesEnergy &&
-      BG_InventoryContainsUpgrade( UP_BATTPACK, client->ps.stats ) ) {
-    client->ps.ammo = (int)( (float)client->ps.ammo * BATTPACK_MODIFIER );
-  }
+  client->ps.ammo = BG_GetMaxAmmo(client->ps.stats, client->ps.weapon);
+  *BG_GetClips(&client->ps, client->ps.weapon) =
+    BG_GetMaxClips(client->ps.stats, client->ps.weapon);
 }
 
 /*
@@ -3174,12 +3170,12 @@ sellErr_t G_CanSell(gentity_t *ent, const char *itemName, int *value, qboolean f
       *value = BG_Weapon( weapon )->price;
       if( BG_Weapon( weapon )->roundPrice && !BG_Weapon( weapon )->usesEnergy &&
           ( BG_Weapon( weapon )->ammoPurchasable ||
-            ( ent->client->ps.ammo == BG_Weapon( weapon )->maxAmmo &&
-              *ps_clips == BG_Weapon( weapon )->maxClips ) ) )
+            ( ent->client->ps.ammo == BG_GetMaxAmmo(ent->client->ps.stats, weapon) &&
+              *ps_clips == BG_GetMaxClips(ent->client->ps.stats, weapon) ) ) )
       {
         int totalAmmo = ent->client->ps.ammo +
                         ( *ps_clips *
-                          BG_Weapon( weapon )->maxAmmo );
+                          BG_GetMaxAmmo(ent->client->ps.stats, weapon) );
 
         *value += ( totalAmmo * BG_Weapon( weapon )->roundPrice);
       }
@@ -3869,7 +3865,7 @@ void G_GiveItem( gentity_t *ent, const char *itemName, const int price,
   if( weapon != WP_NONE )
   {
     ent->client->ps.stats[ STAT_WEAPON ] = weapon;
-    ent->client->ps.ammo = BG_Weapon( weapon )->maxAmmo;
+    ent->client->ps.ammo = BG_GetMaxAmmo(ent->client->ps.stats, weapon);
 
     //when applicable, reset MISC_MISC3
     if(BG_Weapon(weapon)->weaponOptionA != WEAPONOPTA_NONE) {
@@ -3877,11 +3873,8 @@ void G_GiveItem( gentity_t *ent, const char *itemName, const int price,
       ent->client->ps.pm_flags &= ~PMF_OVERHEATED;
     }
 
-    *BG_GetClips(&ent->client->ps, weapon) = BG_Weapon( weapon )->maxClips;
-
-    if( BG_Weapon( weapon )->usesEnergy &&
-        BG_InventoryContainsUpgrade( UP_BATTPACK, ent->client->ps.stats ) )
-      ent->client->ps.ammo *= BATTPACK_MODIFIER;
+    *BG_GetClips(&ent->client->ps, weapon) =
+      BG_GetMaxClips(ent->client->ps.stats, weapon);
 
     G_ForceWeaponChange( ent, weapon );
 
@@ -4141,11 +4134,7 @@ void Cmd_Reload_f( gentity_t *ent )
     if(((*BG_GetClips(ps, ps->weapon)) <= 0) && (remainder_ammo <= 0))
       return;
 
-    if( BG_Weapon( ps->weapon )->usesEnergy &&
-        BG_InventoryContainsUpgrade( UP_BATTPACK, ps->stats ) )
-      ammo = BG_Weapon( ps->weapon )->maxAmmo * BATTPACK_MODIFIER;
-    else
-      ammo = BG_Weapon( ps->weapon )->maxAmmo;
+    ammo = BG_GetMaxAmmo(ps->stats, ps->weapon);
 
     // don't reload when full
     if( ps->ammo >= ammo )
