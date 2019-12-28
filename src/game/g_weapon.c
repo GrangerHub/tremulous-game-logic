@@ -81,9 +81,9 @@ qboolean G_CanGiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo,
 {
   weapon_t weapon = ent->client->ps.stats[ STAT_WEAPON ];
   int *ps_clips = BG_GetClips(&ent->client->ps, weapon);
-  int maxAmmo = BG_Weapon( weapon )->maxAmmo;
+  int maxAmmo = BG_GetMaxAmmo(ent->client->ps.stats, weapon);
   int roundDiff;
-  int clipDiff = BG_Weapon( weapon )->maxClips - *ps_clips;
+  int clipDiff = BG_GetMaxClips(ent->client->ps.stats, weapon) - *ps_clips;
   int roundPrice = BG_Weapon( weapon )->roundPrice;
 
   Com_Assert( rounds &&
@@ -110,20 +110,15 @@ qboolean G_CanGiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo,
                        *ps_clips ) )
     return qfalse;
 
-  // Apply battery pack modifier
-  if( BG_Weapon( weapon )->usesEnergy &&
-      BG_InventoryContainsUpgrade( UP_BATTPACK, ent->client->ps.stats ) )
-  {
-    maxAmmo *= BATTPACK_MODIFIER;
-  }
-
   roundDiff = maxAmmo - ent->client->ps.ammo;
 
   // charge for ammo when applicable
   if(  !( IS_WARMUP && BG_Weapon( weapon )->warmupFree ) &&
        roundPrice && !BG_Weapon( weapon )->usesEnergy )
   {
-    int clipPrice = roundPrice * BG_Weapon( weapon )->maxClips;
+    int clipPrice =
+      roundPrice *
+      BG_GetMaxAmmo(ent->client->ps.stats, weapon);
     int numAffordableRounds, numAffordableClips;
 
     if( roundPrice > ent->client->pers.credit )
@@ -173,7 +168,8 @@ void G_GiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo )
   weapon_t weapon = ent->client->ps.stats[ STAT_WEAPON ];
   int *ps_clips = BG_GetClips(&ent->client->ps, weapon);
   int rounds, clips, price;
-  int maxAmmo = BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->maxAmmo;
+  int maxAmmo = BG_GetMaxAmmo(ent->client->ps.stats, weapon);
+  int maxClips = BG_GetMaxClips(ent->client->ps.stats, weapon);
 
   if( !G_CanGiveClientMaxAmmo( ent, buyingEnergyAmmo,
                                &rounds, &clips, &price ) )
@@ -187,18 +183,12 @@ void G_GiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo )
 
   ent->client->ps.ammo += rounds;
 
-  // Apply battery pack modifier
-  if( BG_Weapon( weapon )->usesEnergy &&
-      BG_InventoryContainsUpgrade( UP_BATTPACK, ent->client->ps.stats ) ) {
-    maxAmmo *= BATTPACK_MODIFIER;
-  }
-
   if( ent->client->ps.ammo > maxAmmo )
     ent->client->ps.ammo = maxAmmo;
 
   *ps_clips += clips;
-  if( *ps_clips > BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->maxClips )
-    *ps_clips = BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->maxClips;
+  if( *ps_clips > maxClips )
+    *ps_clips = maxClips;
 
   G_ForceWeaponChange( ent, ent->client->ps.weapon );
 

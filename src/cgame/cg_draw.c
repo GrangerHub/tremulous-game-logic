@@ -1518,14 +1518,42 @@ static void CG_DrawPlayerWallclimbing( rectDef_t *rect, vec4_t backColor, vec4_t
   trap_R_SetColor( NULL );
 }
 
-static void CG_DrawPlayerAmmoValue( rectDef_t *rect, vec4_t color )
-{
+static void CG_DrawPlayerAmmoValue(rectDef_t *rect, vec4_t color) {
   int value;
   int valueMarked = -1;
   qboolean bp = qfalse;
+  playerState_t *ps =  &cg.snap->ps;
 
-  switch( cg.snap->ps.stats[ STAT_WEAPON ] )
-  {
+  if(
+    !BG_Weapon(ps->weapon)->infiniteAmmo &&
+    (BG_GetMaxAmmo(ps->stats, ps->weapon) > 0) &&
+    (*BG_GetClips(ps, ps->weapon) <= 0) &&
+    (ps->ammo <= BG_GetMaxAmmo(ps->stats, ps->weapon) / 3)) {
+    if(ps->ammo > 0) {
+      cg.ammoAlert += cg.frametime / 500.0f;
+      if(color[0] + cg.ammoAlert > 1.0f) {
+        cg.ammoAlert = 0.0f;
+      } else {
+        color[0] += cg.ammoAlert;
+        color[1] -= cg.ammoAlert;
+        if(color[1] < 0) {
+          color[1] = 0;
+        }
+        color[2] -= cg.ammoAlert;
+        if(color[2] < 0) {
+          color[2] = 0;
+        }
+      }
+    } else {
+      cg.ammoAlert = 0.0f;
+      color[0] = 1.0f;
+      color[1] = 0.0f;
+      color[2] = 0.0f;
+      color[3] = 1.0f;
+    }
+  }
+
+  switch(cg.snap->ps.stats[STAT_WEAPON]) {
     case WP_NONE:
     case WP_BLASTER:
       return;
@@ -1533,8 +1561,8 @@ static void CG_DrawPlayerAmmoValue( rectDef_t *rect, vec4_t color )
     case WP_ABUILD:
     case WP_ABUILD2:
     case WP_HBUILD:
-      value = cg.snap->ps.persistant[ PERS_BP ];
-      valueMarked = cg.snap->ps.persistant[ PERS_MARKEDBP ];
+      value = cg.snap->ps.persistant[PERS_BP];
+      valueMarked = cg.snap->ps.persistant[PERS_MARKEDBP];
       bp = qtrue;
       break;
 
@@ -1546,8 +1574,8 @@ static void CG_DrawPlayerAmmoValue( rectDef_t *rect, vec4_t color )
         (cg.snap->ps.weaponstate == WEAPON_RELOADING)) {
         const int clips_to_load = BG_ClipUssage(&cg.snap->ps);
         const int maxDelay =
-          clips_to_load * BG_Weapon( cg.snap->ps.weapon )->reloadTime;
-        const float progress = ( maxDelay - (float)cg.snap->ps.weaponTime ) / maxDelay;
+          clips_to_load * BG_Weapon(ps->stats[STAT_WEAPON])->reloadTime;
+        const float progress = (maxDelay - (float)cg.snap->ps.weaponTime) / maxDelay;
 
         value = cg.snap->ps.ammo + (int)(clips_to_load * progress);
       } else {
@@ -1556,47 +1584,45 @@ static void CG_DrawPlayerAmmoValue( rectDef_t *rect, vec4_t color )
       break;
   }
 
-  if( value > 999 )
+  if(value > 999)
     value = 999;
-  if( valueMarked > 999 )
+  if(valueMarked > 999)
     valueMarked = 999;
 
-  if( value > -1 )
-  {
+  if(value > -1) {
     float tx, ty;
     char *text;
     float scale;
     int len;
 
-    trap_R_SetColor( color );
-    if( !bp )
-    {
-      CG_DrawField( rect->x - 5, rect->y, 4, rect->w / 4, rect->h, value );
-      trap_R_SetColor( NULL );
+    trap_R_SetColor(color);
+    if(!bp) {
+      CG_DrawField(rect->x - 5, rect->y, 4, rect->w / 4, rect->h, value);
+      trap_R_SetColor(NULL);
       return;
     }
 
-    if( valueMarked > 0 )
-      text = va( "%d+(%d)", value, valueMarked );
+    if(valueMarked > 0)
+      text = va("%d+(%d)", value, valueMarked);
     else
-      text = va( "%d", value );
+      text = va("%d", value);
 
-    len = strlen( text );
+    len = strlen(text);
 
-    if( len <= 4 )
+    if(len <= 4)
       scale = 0.50f;
-    else if( len <= 6 )
+    else if(len <= 6)
       scale = 0.43f;
-    else if( len == 7 ) 
+    else if(len == 7) 
       scale = 0.36f;
-    else if( len == 8 )
+    else if(len == 8)
       scale = 0.33f;
     else
       scale = 0.31f;
 
-    CG_AlignText( rect, text, scale, 0.0f, 0.0f, ALIGN_RIGHT, VALIGN_CENTER, &tx, &ty );
-    UI_Text_Paint( tx + 1, ty, scale, color, text, 0, 0, ITEM_TEXTSTYLE_NORMAL );
-    trap_R_SetColor( NULL );
+    CG_AlignText(rect, text, scale, 0.0f, 0.0f, ALIGN_RIGHT, VALIGN_CENTER, &tx, &ty);
+    UI_Text_Paint(tx + 1, ty, scale, color, text, 0, 0, ITEM_TEXTSTYLE_NORMAL);
+    trap_R_SetColor(NULL);
   }
 }
 
@@ -1788,32 +1814,59 @@ static void CG_DrawPlayerBuildTimer( rectDef_t *rect, vec4_t color )
   trap_R_SetColor( NULL );
 }
 
-static void CG_DrawPlayerClipsValue( rectDef_t *rect, vec4_t color )
-{
+static void CG_DrawPlayerClipsValue(rectDef_t *rect, vec4_t color) {
   int           value;
   playerState_t *ps = &cg.snap->ps;
   qboolean      use_remainder_ammo =
-    (BG_Weapon(ps->stats[ STAT_WEAPON ])->weaponOptionA == WEAPONOPTA_REMAINDER_AMMO) ?
+    (BG_Weapon(ps->stats[STAT_WEAPON])->weaponOptionA == WEAPONOPTA_REMAINDER_AMMO) ?
     qtrue : qfalse;
-  int           *ps_clips = BG_GetClips(ps, ps->stats[ STAT_WEAPON ]);
+  int           *ps_clips = BG_GetClips(ps, ps->stats[STAT_WEAPON]);
   int           remainder_ammo = (use_remainder_ammo && ps->misc[MISC_MISC3] > 0) ? ps->misc[MISC_MISC3] : 0;
   int           clips = *ps_clips + ((remainder_ammo > 0) ? 1 : 0);
+  int           max_clips = BG_GetMaxClips(ps->stats, ps->weapon);
 
   if(
     (
-      BG_Weapon(ps->stats[ STAT_WEAPON ])->weaponOptionA ==
+      BG_Weapon(ps->stats[STAT_WEAPON])->weaponOptionA ==
       WEAPONOPTA_ONE_ROUND_TO_ONE_CLIP) &&
     (ps->weaponstate == WEAPON_RELOADING)) {
     const int clips_to_load = BG_ClipUssage(ps);
     const int maxDelay =
-      clips_to_load * BG_Weapon( ps->weapon )->reloadTime;
-    const float progress = ( maxDelay - (float)ps->weaponTime ) / maxDelay;
+      clips_to_load * BG_Weapon(ps->stats[STAT_WEAPON])->reloadTime;
+    const float progress = (maxDelay - (float)ps->weaponTime) / maxDelay;
 
     clips = clips - (int)(clips_to_load * progress);
   }
 
-  switch( ps->stats[ STAT_WEAPON ] )
-  {
+  if(
+    !BG_Weapon(ps->weapon)->infiniteAmmo &&
+    (max_clips > 0) &&
+    (clips <= max_clips / 3)) {
+    if(clips > 0) {
+      cg.clipAlert += cg.frametime / 500.0f;
+      if(color[0] + cg.clipAlert > 1.0f) {
+        cg.clipAlert = 0.0f;
+      } else {
+        color[0] += cg.clipAlert;
+        color[1] -= cg.clipAlert;
+        if(color[1] < 0) {
+          color[1] = 0;
+        }
+        color[2] -= cg.clipAlert;
+        if(color[2] < 0) {
+          color[2] = 0;
+        }
+      }
+    } else {
+      cg.clipAlert = 0.0f;
+      color[0] = 1.0f;
+      color[1] = 0.0f;
+      color[2] = 0.0f;
+      color[3] = 1.0f;
+    }
+  }
+
+  switch(ps->stats[STAT_WEAPON]) {
     case WP_NONE:
     case WP_BLASTER:
     case WP_ABUILD:
@@ -1824,11 +1877,10 @@ static void CG_DrawPlayerClipsValue( rectDef_t *rect, vec4_t color )
     default:
       value = clips;
 
-      if( value > -1 )
-      {
-        trap_R_SetColor( color );
-        CG_DrawField( rect->x, rect->y, 4, rect->w / 4, rect->h, value );
-        trap_R_SetColor( NULL );
+      if(value > -1) {
+        trap_R_SetColor(color);
+        CG_DrawField(rect->x, rect->y, 4, rect->w / 4, rect->h, value);
+        trap_R_SetColor(NULL);
       }
       break;
   }
@@ -3858,17 +3910,15 @@ CG_DrawWeaponIcon
 */
 void CG_DrawWeaponIcon( rectDef_t *rect, vec4_t color )
 {
-  int           maxAmmo;
   playerState_t *ps = &cg.snap->ps;
   weapon_t      weapon  = BG_GetPlayerWeapon( ps );
+  int           maxAmmo = BG_GetMaxAmmo(ps->stats, weapon);
   qboolean      use_remainder_ammo =
     (BG_Weapon(weapon)->weaponOptionA == WEAPONOPTA_REMAINDER_AMMO) ?
     qtrue : qfalse;
   int           *ps_clips = BG_GetClips(ps, weapon);
   int           remainder_ammo = (use_remainder_ammo && ps->misc[MISC_MISC3] > 0) ? ps->misc[MISC_MISC3] : 0;
   int           clips = *ps_clips + ((remainder_ammo > 0) ? 1 : 0);
-
-  maxAmmo = BG_Weapon( weapon )->maxAmmo;
 
   // don't display if dead
   if( cg.predictedPlayerState.misc[ MISC_HEALTH ] <= 0 )
