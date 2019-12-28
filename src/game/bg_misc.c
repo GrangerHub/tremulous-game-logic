@@ -5855,6 +5855,41 @@ int BG_AmmoUsage(playerState_t *ps) {
 
 /*
 ==============
+BG_GetMaxAmmo
+==============
+*/
+int BG_GetMaxAmmo(int stats[ ], weapon_t weapon) {
+  if(BG_Weapon(weapon)->usesEnergy &&
+    (
+      BG_InventoryContainsUpgrade(UP_BATTPACK, stats) ||
+      BG_InventoryContainsUpgrade(UP_BATTLESUIT, stats))) {
+    return BG_Weapon(weapon)->maxAmmo * BATTPACK_MODIFIER;
+  } else {
+    return BG_Weapon(weapon)->maxAmmo;
+  }
+}
+
+/*
+==============
+BG_GetMaxClips
+==============
+*/
+int BG_GetMaxClips(int stats[ ], weapon_t weapon) {
+  if(
+    !BG_Weapon(weapon)->usesEnergy &&
+    !BG_Weapon(weapon)->infiniteAmmo &&
+    BG_Weapon(weapon)->ammoPurchasable &&
+    !BG_Weapon(weapon)->roundPrice &&
+    BG_InventoryContainsUpgrade( UP_BATTLESUIT, stats ) ) {
+    return (BG_Weapon(weapon)->maxClips * 2) + 1;
+  } else {
+    return BG_Weapon(weapon)->maxClips;
+  }
+  
+}
+
+/*
+==============
 BG_GetClips
 
 Makes use of a hack to allow in some cases for more than 16 clips restricted by
@@ -5889,14 +5924,7 @@ int BG_ClipUssage( playerState_t *ps )
   clips = BG_GetClips(ps, weapon);
 
   if(BG_Weapon(weapon)->weaponOptionA == WEAPONOPTA_ONE_ROUND_TO_ONE_CLIP) {
-    int max_ammo =
-        (
-          BG_Weapon(weapon)->usesEnergy &&
-          (
-            BG_InventoryContainsUpgrade(UP_BATTPACK, ps->stats) || 
-            BG_InventoryContainsUpgrade(UP_BATTLESUIT, ps->stats))) ?
-        (BG_Weapon(weapon)->maxAmmo * BATTPACK_MODIFIER) :
-        BG_Weapon(weapon)->maxAmmo;
+    int max_ammo = BG_GetMaxAmmo(ps->stats, weapon);
     int clips_to_load = max_ammo - ps->ammo;
 
     if(clips_to_load > *clips) {
@@ -6829,20 +6857,8 @@ qboolean BG_WeaponIsFull( weapon_t weapon, int stats[ ], int ammo, int clips )
 {
   int maxAmmo, maxClips;
 
-  maxAmmo = BG_Weapon( weapon )->maxAmmo;
-  maxClips = BG_Weapon( weapon )->maxClips;
-
-  if( BG_Weapon( weapon )->usesEnergy &&
-      ( BG_InventoryContainsUpgrade( UP_BATTPACK, stats ) ||
-        BG_InventoryContainsUpgrade( UP_BATTLESUIT, stats ) ) )
-    maxAmmo = (int)( (float)maxAmmo * BATTPACK_MODIFIER );
-
-  if( !BG_Weapon( weapon )->usesEnergy &&
-      !BG_Weapon( weapon )->infiniteAmmo &&
-      BG_Weapon( weapon )->ammoPurchasable &&
-      !BG_Weapon( weapon )->roundPrice &&
-      BG_InventoryContainsUpgrade( UP_BATTLESUIT, stats ) )
-    maxClips = ( 2 * BG_Weapon( weapon )->maxClips ) + 1;
+  maxAmmo = BG_GetMaxAmmo(stats, weapon);
+  maxClips = BG_GetMaxClips(stats, weapon);
 
   return (maxClips < clips) || (( maxAmmo == ammo ) && ( maxClips == clips ));
 }
@@ -7175,7 +7191,7 @@ int BG_GetValueOfPlayer( playerState_t *ps )
             WEAPONOPTA_ONE_ROUND_TO_ONE_CLIP) ? (*ps_clips) :
               (
                 (*ps_clips) *
-                BG_Weapon(ps->stats[STAT_WEAPON])->maxAmmo));
+                BG_GetMaxAmmo(ps->stats, ps->stats[STAT_WEAPON])));
 
       worth += BG_Weapon( ps->stats[ STAT_WEAPON ] )->price;
       if( !BG_Weapon( ps->stats[ STAT_WEAPON ] )->usesEnergy )

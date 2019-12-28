@@ -563,15 +563,9 @@ static void Give_Ammo( gentity_t *ent ) {
     return;
   }
 
-  client->ps.ammo = BG_Weapon( client->ps.weapon )->maxAmmo;
-  *BG_GetClips(&client->ps, client->ps.weapon) = BG_Weapon( client->ps.weapon )->maxClips;
-
-  if( BG_Weapon( client->ps.weapon )->usesEnergy &&
-      (
-        BG_InventoryContainsUpgrade( UP_BATTPACK, client->ps.stats ) ||
-        BG_InventoryContainsUpgrade( UP_BATTLESUIT, client->ps.stats ) ) ) {
-    client->ps.ammo = (int)( (float)client->ps.ammo * BATTPACK_MODIFIER );
-  }
+  client->ps.ammo = BG_GetMaxAmmo(client->ps.stats, client->ps.weapon);
+  *BG_GetClips(&client->ps, client->ps.weapon) =
+    BG_GetMaxClips(client->ps.stats, client->ps.weapon);
 }
 
 /*
@@ -3442,12 +3436,12 @@ sellErr_t G_CanSell(gentity_t *ent, const char *itemName, int *value, qboolean f
       *value = BG_Weapon( weapon )->price;
       if( BG_Weapon( weapon )->roundPrice && !BG_Weapon( weapon )->usesEnergy &&
           ( BG_Weapon( weapon )->ammoPurchasable ||
-            ( ent->client->ps.ammo == BG_Weapon( weapon )->maxAmmo &&
-              *ps_clips == BG_Weapon( weapon )->maxClips ) ) )
+            ( ent->client->ps.ammo == BG_GetMaxAmmo(ent->client->ps.stats, weapon) &&
+              *ps_clips == BG_GetMaxClips(ent->client->ps.stats, weapon) ) ) )
       {
         int totalAmmo = ent->client->ps.ammo +
                         ( *ps_clips *
-                          BG_Weapon( weapon )->maxAmmo );
+                          BG_GetMaxAmmo(ent->client->ps.stats, weapon) );
 
         *value += ( totalAmmo * BG_Weapon( weapon )->roundPrice);
       }
@@ -3555,32 +3549,18 @@ G_TakeUpgrade
 */
 static void G_TakeUpgrade(
   gentity_t *ent, const upgrade_t upgrade, qboolean force) {
+  int max_clips;
+  int    *ps_clips =
+    BG_GetClips(&ent->client->ps, ent->client->ps.stats[STAT_WEAPON]);
+
   if(upgrade == UP_BATTLESUIT) {
     vec3_t newOrigin;
-    int    *ps_clips =
-      BG_GetClips(&ent->client->ps, ent->client->ps.stats[STAT_WEAPON]);
 
     G_RoomForClassChange(ent, PCL_HUMAN_BSUIT, newOrigin);
     VectorCopy(newOrigin, ent->client->ps.origin);
     ent->client->ps.stats[STAT_CLASS] = PCL_HUMAN;
     ent->client->pers.classSelection = PCL_HUMAN;
     ent->client->ps.eFlags ^= EF_TELEPORT_BIT;
-
-    if(ent->client->ps.pm_flags & PMF_WEAPON_RELOAD) {
-      if(
-        *ps_clips >
-          BG_Weapon(ent->client->ps.stats[STAT_WEAPON])->maxClips + 1) {
-        *ps_clips =
-          BG_Weapon(ent->client->ps.stats[STAT_WEAPON])->maxClips + 1;
-      }
-    } else {
-      if(
-        *ps_clips >
-          BG_Weapon(ent->client->ps.stats[STAT_WEAPON])->maxClips) {
-        *ps_clips =
-          BG_Weapon(ent->client->ps.stats[STAT_WEAPON])->maxClips;
-      }
-    }
 
     if(
       ent->client->ps.misc[MISC_ARMOR] + ent->client->armorToGen <
@@ -3607,6 +3587,13 @@ static void G_TakeUpgrade(
 
   //remove from inventory
   BG_RemoveUpgradeFromInventory(upgrade, ent->client->ps.stats);
+
+  max_clips =
+    BG_GetMaxClips(ent->client->ps.stats, ent->client->ps.stats[STAT_WEAPON]);
+
+  if(*ps_clips > max_clips) {
+    *ps_clips = max_clips;
+  }
 
   if(
     upgrade == UP_BATTPACK ||
@@ -4186,7 +4173,7 @@ void G_GiveItem( gentity_t *ent, const char *itemName, const int price,
   if( weapon != WP_NONE )
   {
     ent->client->ps.stats[ STAT_WEAPON ] = weapon;
-    ent->client->ps.ammo = BG_Weapon( weapon )->maxAmmo;
+    ent->client->ps.ammo = BG_GetMaxAmmo(ent->client->ps.stats, weapon);
 
     //when applicable, reset MISC_MISC3
     if(BG_Weapon(weapon)->weaponOptionA != WEAPONOPTA_NONE) {
@@ -4194,19 +4181,8 @@ void G_GiveItem( gentity_t *ent, const char *itemName, const int price,
       ent->client->ps.pm_flags &= ~PMF_OVERHEATED;
     }
 
-    *BG_GetClips(&ent->client->ps, weapon) = BG_Weapon( weapon )->maxClips;
-
-    if( BG_Weapon( weapon )->usesEnergy &&
-        ( BG_InventoryContainsUpgrade( UP_BATTPACK, ent->client->ps.stats ) ||
-          BG_InventoryContainsUpgrade( UP_BATTLESUIT, ent->client->ps.stats ) ) )
-      ent->client->ps.ammo *= BATTPACK_MODIFIER;
-
-    if( !BG_Weapon( weapon )->usesEnergy &&
-        !BG_Weapon( weapon )->infiniteAmmo &&
-        BG_Weapon( weapon )->ammoPurchasable &&
-        !BG_Weapon( weapon )->roundPrice &&
-        BG_InventoryContainsUpgrade( UP_BATTLESUIT, ent->client->ps.stats ) )
-      *BG_GetClips(&ent->client->ps, ent->client->ps.stats[STAT_WEAPON]) *= 2;
+    *BG_GetClips(&ent->client->ps, weapon) =
+      BG_GetMaxClips(ent->client->ps.stats, weapon);
 
     G_ForceWeaponChange( ent, weapon );
 
@@ -4306,17 +4282,6 @@ void G_GiveItem( gentity_t *ent, const char *itemName, const int price,
         ent->client->ps.pm_flags |= PMF_WEAPON_RELOAD;
       }
       G_GiveClientMaxAmmo( ent, qtrue );
-    }
-
-    if( !BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->usesEnergy &&
-          !BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->infiniteAmmo &&
-          BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->ammoPurchasable &&
-          !BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->roundPrice &&
-          BG_InventoryContainsUpgrade( UP_BATTLESUIT, ent->client->ps.stats ) ) {
-      int    *ps_clips =
-        BG_GetClips(&ent->client->ps, ent->client->ps.stats[STAT_WEAPON]);
-
-      *ps_clips = ( 2 * BG_Weapon( ent->client->ps.stats[ STAT_WEAPON ] )->maxClips ) + 1;
     }
 
     //subtract from funds
@@ -4528,12 +4493,7 @@ void Cmd_Reload_f( gentity_t *ent )
     if(((*BG_GetClips(ps, ps->weapon)) <= 0) && (remainder_ammo <= 0))
       return;
 
-    if( BG_Weapon( ps->weapon )->usesEnergy &&
-        ( BG_InventoryContainsUpgrade( UP_BATTPACK, ps->stats ) ||
-          BG_InventoryContainsUpgrade( UP_BATTLESUIT, ps->stats )) )
-      ammo = BG_Weapon( ps->weapon )->maxAmmo * BATTPACK_MODIFIER;
-    else
-      ammo = BG_Weapon( ps->weapon )->maxAmmo;
+    ammo = BG_GetMaxAmmo(ps->stats, ps->weapon);
 
     // don't reload when full
     if( ps->ammo >= ammo )

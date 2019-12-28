@@ -1178,8 +1178,8 @@ void trigger_ammo_touch( gentity_t *self, gentity_t *other, trace_t *trace )
   else
     self->timestamp = level.time + FRAMETIME;
 
-  maxAmmo = BG_Weapon( weapon )->maxAmmo;
-  maxClips = BG_Weapon( weapon )->maxClips;
+  maxAmmo = BG_GetMaxAmmo(other->client->ps.stats, weapon);
+  maxClips = BG_GetMaxClips(other->client->ps.stats, weapon);
 
   if( BG_Weapon( other->client->ps.weapon )->usesEnergy &&
         ( BG_InventoryContainsUpgrade( UP_BATTPACK, other->client->ps.stats ) ||

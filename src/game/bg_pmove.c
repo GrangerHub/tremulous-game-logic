@@ -4987,11 +4987,7 @@ static void PM_Weapon( void )
       
     }
 
-    if( BG_Weapon( pm->ps->weapon )->usesEnergy &&
-        BG_InventoryContainsUpgrade( UP_BATTPACK, pm->ps->stats ) )
-      ammo = BG_Weapon( pm->ps->weapon )->maxAmmo * BATTPACK_MODIFIER;
-    else
-      ammo = BG_Weapon( pm->ps->weapon )->maxAmmo;
+    ammo = BG_GetMaxAmmo(pm->ps->stats, pm->ps->weapon);
 
     // don't reload when full
     if( pm->ps->ammo < ammo ) {
@@ -5082,13 +5078,7 @@ static void PM_Weapon( void )
   //done reloading so give em some ammo
   if( pm->ps->weaponstate == WEAPON_RELOADING )
   {
-    int max_ammo = BG_Weapon( pm->ps->weapon )->maxAmmo;
-
-    if( BG_Weapon( pm->ps->weapon )->usesEnergy &&
-        (
-          BG_InventoryContainsUpgrade( UP_BATTPACK, pm->ps->stats ) ||
-          BG_InventoryContainsUpgrade( UP_BATTLESUIT, pm->ps->stats ) ) )
-      max_ammo *= BATTPACK_MODIFIER;
+    int max_ammo = BG_GetMaxAmmo(pm->ps->stats, pm->ps->weapon);
 
     if(*ps_clips <= 0 && remainder_ammo > 0) {
       *ps_clips = 0;

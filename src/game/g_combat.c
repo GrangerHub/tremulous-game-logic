@@ -2385,8 +2385,9 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
             !BG_Weapon( targ->client->ps.weapon )->infiniteAmmo &&
             BG_Weapon( targ->client->ps.weapon )->ammoPurchasable &&
             !BG_Weapon( targ->client->ps.weapon )->roundPrice &&
-            *ps_clips > BG_Weapon( targ->client->ps.weapon )->maxClips )
-          *ps_clips = BG_Weapon( targ->client->ps.weapon )->maxClips;
+            *ps_clips > BG_GetMaxClips(targ->client->ps.stats, targ->client->ps.weapon) )
+          *ps_clips =
+            BG_GetMaxClips(targ->client->ps.stats, targ->client->ps.weapon);
 
         //update ClientInfo
         ClientUserinfoChanged( targ->client->ps.clientNum, qfalse );

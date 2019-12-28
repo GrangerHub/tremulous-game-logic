@@ -1678,8 +1678,8 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   else
     weapon = WP_NONE;
 
-  maxAmmo = BG_Weapon( weapon )->maxAmmo;
-  maxClips = BG_Weapon( weapon )->maxClips;
+  maxAmmo = BG_GetMaxAmmo(client->ps.stats, weapon);
+  maxClips = BG_GetMaxClips(client->ps.stats, weapon);
   client->ps.stats[ STAT_WEAPON ] = weapon;
   client->ps.ammo = maxAmmo;
   *BG_GetClips(&client->ps, weapon) = maxClips;

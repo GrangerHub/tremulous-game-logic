@@ -1270,6 +1270,8 @@ typedef struct
   qhandle_t     lastHealthCross;
   float         healthCrossFade;
   float         jetpackIconAlert;
+  float         ammoAlert;
+  float         clipAlert;
   float         lowArmorAlert;
   int           nearUsableBuildable;
 
