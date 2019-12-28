@@ -1681,7 +1681,11 @@ qboolean                    BG_WeaponAllowedInStage( weapon_t weapon,
                                                      stage_t stage,
                                                      int gameIsInWarmup );
 int                         BG_AmmoUsage( playerState_t *ps );
+qboolean                    BG_HasIncreasedAmmoCapacity(
+  int stats[ ], weapon_t weapon);
 int                         BG_GetMaxAmmo(int stats[ ], weapon_t weapon);
+qboolean                    BG_HasIncreasedClipCapacity(
+  int stats[ ], weapon_t weapon);
 int                         BG_GetMaxClips(int stats[ ], weapon_t weapon);
 int                         *BG_GetClips(playerState_t *ps, weapon_t weapon);
 int                         BG_ClipUssage( playerState_t *ps );
