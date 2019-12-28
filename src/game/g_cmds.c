@@ -4274,14 +4274,18 @@ void G_GiveItem( gentity_t *ent, const char *itemName, const int price,
       }
     }
 
-    if( upgrade == UP_BATTPACK ||
-        upgrade == UP_BATTLESUIT ) {
-      int rounds, clips, price;
+    if(
+      BG_HasIncreasedAmmoCapacity(
+        ent->client->ps.stats, ent->client->ps.stats[STAT_WEAPON])) {
+      G_GiveClientMaxAmmo(
+        ent, BG_Weapon(ent->client->ps.stats[STAT_WEAPON])->usesEnergy);
+    }
 
-      if(G_CanGiveClientMaxAmmo(ent, qtrue, &rounds, &clips, &price)) {
-        ent->client->ps.pm_flags |= PMF_WEAPON_RELOAD;
-      }
-      G_GiveClientMaxAmmo( ent, qtrue );
+    if(
+      BG_HasIncreasedClipCapacity(
+        ent->client->ps.stats, ent->client->ps.stats[STAT_WEAPON])) {
+      G_GiveClientMaxAmmo(
+        ent, BG_Weapon(ent->client->ps.stats[STAT_WEAPON])->usesEnergy);
     }
 
     //subtract from funds
