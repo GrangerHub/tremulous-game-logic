@@ -4187,6 +4187,23 @@ static void PM_Pain_Saw_Pull( void ) {
     //pull towards direction of impact
     VectorMA(pm->ps->velocity, PAINSAW_PULL, unlagged_attacker.forward_out,
       pm->ps->velocity);
+
+    //check for overheating
+    if(
+      (BG_Weapon(pm->ps->weapon)->weaponOptionA == WEAPONOPTA_OVERHEAT) &&
+      (BG_Weapon(pm->ps->weapon)->overheatType == OVERHEAT_FROM_CONTACT) &&
+      BG_Weapon(pm->ps->weapon)->overheatAltMode) {
+      pm->ps->misc[MISC_MISC3] += BG_Weapon(pm->ps->weapon)->repeatRate2;
+      if(pm->ps->misc[MISC_MISC3] >= BG_Weapon(pm->ps->weapon)->overheatTime) {
+        pm->ps->misc[MISC_MISC3] = BG_Weapon(pm->ps->weapon)->overheatTime;
+        pm->ps->weaponTime += BG_Weapon(pm->ps->weapon)->overheatWeaponDelayTime;
+        pm->ps->pm_flags |= PMF_OVERHEATED;
+      } else {
+        pm->ps->pm_flags &= ~PMF_OVERHEATED;
+      }
+    } else {
+      pm->ps->pm_flags &= ~PMF_OVERHEATED;
+    }
   }
 
   BG_UnlaggedOff( );
@@ -5423,6 +5440,7 @@ static void PM_Weapon( void )
     //check for overheating
     if(
       (BG_Weapon(pm->ps->weapon)->weaponOptionA == WEAPONOPTA_OVERHEAT) &&
+      (BG_Weapon(pm->ps->weapon)->overheatType == OVERHEAT_FROM_USE) &&
       BG_Weapon(pm->ps->weapon)->overheatThirdMode) {
       pm->ps->misc[MISC_MISC3] += addTime;
       if(pm->ps->misc[MISC_MISC3] >= BG_Weapon(pm->ps->weapon)->overheatTime) {
@@ -5454,6 +5472,7 @@ static void PM_Weapon( void )
     //check for overheating
     if(
       (BG_Weapon(pm->ps->weapon)->weaponOptionA == WEAPONOPTA_OVERHEAT) &&
+      (BG_Weapon(pm->ps->weapon)->overheatType == OVERHEAT_FROM_USE) &&
       BG_Weapon(pm->ps->weapon)->overheatAltMode) {
       pm->ps->misc[MISC_MISC3] += addTime;
       if(pm->ps->misc[MISC_MISC3] >= BG_Weapon(pm->ps->weapon)->overheatTime) {
@@ -5485,6 +5504,7 @@ static void PM_Weapon( void )
     //check for overheating
     if(
       (BG_Weapon(pm->ps->weapon)->weaponOptionA == WEAPONOPTA_OVERHEAT) &&
+      (BG_Weapon(pm->ps->weapon)->overheatType == OVERHEAT_FROM_USE) &&
       BG_Weapon(pm->ps->weapon)->overheatPrimaryMode) {
       pm->ps->misc[MISC_MISC3] += addTime;
       if(pm->ps->misc[MISC_MISC3] >= BG_Weapon(pm->ps->weapon)->overheatTime) {
@@ -5525,6 +5545,7 @@ static void PM_Weapon( void )
         //check for overheating
         if(
           (BG_Weapon(pm->ps->weapon)->weaponOptionA == WEAPONOPTA_OVERHEAT) &&
+          (BG_Weapon(pm->ps->weapon)->overheatType == OVERHEAT_FROM_USE) &&
           BG_Weapon(pm->ps->weapon)->overheatThirdMode) {
           pm->ps->misc[MISC_MISC3] += addTime;
           if(pm->ps->misc[MISC_MISC3] >= BG_Weapon(pm->ps->weapon)->overheatTime) {
@@ -5557,6 +5578,7 @@ static void PM_Weapon( void )
         //check for overheating
         if(
           (BG_Weapon(pm->ps->weapon)->weaponOptionA == WEAPONOPTA_OVERHEAT) &&
+          (BG_Weapon(pm->ps->weapon)->overheatType == OVERHEAT_FROM_USE) &&
           BG_Weapon(pm->ps->weapon)->overheatAltMode) {
           pm->ps->misc[MISC_MISC3] += addTime;
           if(pm->ps->misc[MISC_MISC3] >= BG_Weapon(pm->ps->weapon)->overheatTime) {
@@ -5587,6 +5609,7 @@ static void PM_Weapon( void )
       //check for overheating
       if(
         (BG_Weapon(pm->ps->weapon)->weaponOptionA == WEAPONOPTA_OVERHEAT) &&
+        (BG_Weapon(pm->ps->weapon)->overheatType == OVERHEAT_FROM_USE) &&
         BG_Weapon(pm->ps->weapon)->overheatPrimaryMode) {
         pm->ps->misc[MISC_MISC3] += addTime;
         if(pm->ps->misc[MISC_MISC3] >= BG_Weapon(pm->ps->weapon)->overheatTime) {
