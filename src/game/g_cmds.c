@@ -3935,8 +3935,19 @@ void G_GiveItem( gentity_t *ent, const char *itemName, const int price,
       }
     }
 
-    if( upgrade == UP_BATTPACK )
-      G_GiveClientMaxAmmo( ent, qtrue );
+    if(
+      BG_HasIncreasedAmmoCapacity(
+        ent->client->ps.stats, ent->client->ps.stats[STAT_WEAPON])) {
+      G_GiveClientMaxAmmo(
+        ent, BG_Weapon(ent->client->ps.stats[STAT_WEAPON])->usesEnergy);
+    }
+
+    if(
+      BG_HasIncreasedClipCapacity(
+        ent->client->ps.stats, ent->client->ps.stats[STAT_WEAPON])) {
+      G_GiveClientMaxAmmo(
+        ent, BG_Weapon(ent->client->ps.stats[STAT_WEAPON])->usesEnergy);
+    }
 
     //subtract from funds
     G_AddCreditToClient( ent->client, -(short)price, qfalse );
