@@ -1507,6 +1507,12 @@ typedef struct splatterAttributes_s
 
 typedef enum
 {
+  OVERHEAT_FROM_USE,
+  OVERHEAT_FROM_CONTACT
+} overheatType_t;
+
+typedef enum
+{
   WEAPONOPTA_NONE,
   WEAPONOPTA_POUNCE,
   WEAPONOPTA_SPINUP,
@@ -1553,6 +1559,7 @@ typedef struct
   int       spinUpTime;
   int       spinDownTime;
 
+  overheatType_t overheatType;
   qboolean  overheatPrimaryMode;
   qboolean  overheatAltMode;
   qboolean  overheatThirdMode;

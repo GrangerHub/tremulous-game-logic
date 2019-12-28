@@ -1794,6 +1794,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
+    OVERHEAT_FROM_USE,    //overheatType_t overheatType;
     qfalse,               //qboolean  overheatPrimaryMode;
     qfalse,               //qboolean  overheatAltMode;
     qfalse,               //qboolean  overheatThirdMode;
@@ -1878,6 +1879,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
+    OVERHEAT_FROM_USE,    //overheatType_t overheatType;
     qfalse,               //qboolean  overheatPrimaryMode;
     qfalse,               //qboolean  overheatAltMode;
     qfalse,               //qboolean  overheatThirdMode;
@@ -1962,6 +1964,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
+    OVERHEAT_FROM_USE,    //overheatType_t overheatType;
     qfalse,               //qboolean  overheatPrimaryMode;
     qfalse,               //qboolean  overheatAltMode;
     qfalse,               //qboolean  overheatThirdMode;
@@ -2046,6 +2049,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
+    OVERHEAT_FROM_USE,    //overheatType_t overheatType;
     qfalse,               //qboolean  overheatPrimaryMode;
     qfalse,               //qboolean  overheatAltMode;
     qfalse,               //qboolean  overheatThirdMode;
@@ -2130,6 +2134,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
+    OVERHEAT_FROM_USE,    //overheatType_t overheatType;
     qfalse,               //qboolean  overheatPrimaryMode;
     qfalse,               //qboolean  overheatAltMode;
     qfalse,               //qboolean  overheatThirdMode;
@@ -2214,6 +2219,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
+    OVERHEAT_FROM_USE,    //overheatType_t overheatType;
     qfalse,               //qboolean  overheatPrimaryMode;
     qfalse,               //qboolean  overheatAltMode;
     qfalse,               //qboolean  overheatThirdMode;
@@ -2298,6 +2304,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
+    OVERHEAT_FROM_USE,    //overheatType_t overheatType;
     qfalse,               //qboolean  overheatPrimaryMode;
     qfalse,               //qboolean  overheatAltMode;
     qfalse,               //qboolean  overheatThirdMode;
@@ -2382,6 +2389,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
+    OVERHEAT_FROM_USE,    //overheatType_t overheatType;
     qfalse,               //qboolean  overheatPrimaryMode;
     qfalse,               //qboolean  overheatAltMode;
     qfalse,               //qboolean  overheatThirdMode;
@@ -2466,6 +2474,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
+    OVERHEAT_FROM_USE,    //overheatType_t overheatType;
     qfalse,               //qboolean  overheatPrimaryMode;
     qfalse,               //qboolean  overheatAltMode;
     qfalse,               //qboolean  overheatThirdMode;
@@ -2550,6 +2559,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
+    OVERHEAT_FROM_USE,    //overheatType_t overheatType;
     qfalse,               //qboolean  overheatPrimaryMode;
     qfalse,               //qboolean  overheatAltMode;
     qfalse,               //qboolean  overheatThirdMode;
@@ -2634,6 +2644,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
+    OVERHEAT_FROM_USE,    //overheatType_t overheatType;
     qfalse,               //qboolean  overheatPrimaryMode;
     qfalse,               //qboolean  overheatAltMode;
     qfalse,               //qboolean  overheatThirdMode;
@@ -2718,6 +2729,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
+    OVERHEAT_FROM_USE,    //overheatType_t overheatType;
     qfalse,               //qboolean  overheatPrimaryMode;
     qfalse,               //qboolean  overheatAltMode;
     qfalse,               //qboolean  overheatThirdMode;
@@ -2802,6 +2814,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
+    OVERHEAT_FROM_USE,    //overheatType_t overheatType;
     qfalse,               //qboolean  overheatPrimaryMode;
     qfalse,               //qboolean  overheatAltMode;
     qfalse,               //qboolean  overheatThirdMode;
@@ -2886,6 +2899,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
+    OVERHEAT_FROM_USE,    //overheatType_t overheatType;
     qfalse,               //qboolean  overheatPrimaryMode;
     qfalse,               //qboolean  overheatAltMode;
     qfalse,               //qboolean  overheatThirdMode;
@@ -2970,6 +2984,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     CHAINGUN_START_SPREAD, //int       spinUpStartSpread;
     CHAINGUN_SPINUP_TIME, //int       spinUpTime;
     CHAINGUN_SPINDOWN_TIME, //int       spinDownTime;
+    OVERHEAT_FROM_USE,    //overheatType_t overheatType;
     qfalse,               //qboolean  overheatPrimaryMode;
     qfalse,               //qboolean  overheatAltMode;
     qfalse,               //qboolean  overheatThirdMode;
@@ -3054,6 +3069,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
+    OVERHEAT_FROM_USE,    //overheatType_t overheatType;
     qfalse,               //qboolean  overheatPrimaryMode;
     qfalse,               //qboolean  overheatAltMode;
     qfalse,               //qboolean  overheatThirdMode;
@@ -3138,6 +3154,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
+    OVERHEAT_FROM_USE,    //overheatType_t overheatType;
     qfalse,               //qboolean  overheatPrimaryMode;
     qfalse,               //qboolean  overheatAltMode;
     qfalse,               //qboolean  overheatThirdMode;
@@ -3222,6 +3239,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
+    OVERHEAT_FROM_USE,    //overheatType_t overheatType;
     qfalse,               //qboolean  overheatPrimaryMode;
     qfalse,               //qboolean  overheatAltMode;
     qfalse,               //qboolean  overheatThirdMode;
@@ -3306,6 +3324,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
+    OVERHEAT_FROM_USE,    //overheatType_t overheatType;
     qfalse,               //qboolean  overheatPrimaryMode;
     qfalse,               //qboolean  overheatAltMode;
     qfalse,               //qboolean  overheatThirdMode;
@@ -3390,6 +3409,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
+    OVERHEAT_FROM_USE,    //overheatType_t overheatType;
     qfalse,               //qboolean  overheatPrimaryMode;
     qfalse,               //qboolean  overheatAltMode;
     qfalse,               //qboolean  overheatThirdMode;
@@ -3474,6 +3494,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
+    OVERHEAT_FROM_USE,    //overheatType_t overheatType;
     qfalse,               //qboolean  overheatPrimaryMode;
     qfalse,               //qboolean  overheatAltMode;
     qfalse,               //qboolean  overheatThirdMode;
@@ -3558,6 +3579,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
+    OVERHEAT_FROM_USE,    //overheatType_t overheatType;
     qfalse,               //qboolean  overheatPrimaryMode;
     qfalse,               //qboolean  overheatAltMode;
     qfalse,               //qboolean  overheatThirdMode;
@@ -3642,6 +3664,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
+    OVERHEAT_FROM_USE,    //overheatType_t overheatType;
     qfalse,               //qboolean  overheatPrimaryMode;
     qfalse,               //qboolean  overheatAltMode;
     qfalse,               //qboolean  overheatThirdMode;
@@ -3726,6 +3749,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
+    OVERHEAT_FROM_USE,    //overheatType_t overheatType;
     qfalse,               //qboolean  overheatPrimaryMode;
     qfalse,               //qboolean  overheatAltMode;
     qfalse,               //qboolean  overheatThirdMode;
@@ -3810,6 +3834,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
+    OVERHEAT_FROM_USE,    //overheatType_t overheatType;
     qfalse,               //qboolean  overheatPrimaryMode;
     qfalse,               //qboolean  overheatAltMode;
     qfalse,               //qboolean  overheatThirdMode;
@@ -3894,6 +3919,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
+    OVERHEAT_FROM_USE,    //overheatType_t overheatType;
     qfalse,               //qboolean  overheatPrimaryMode;
     qfalse,               //qboolean  overheatAltMode;
     qfalse,               //qboolean  overheatThirdMode;
@@ -3978,6 +4004,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
+    OVERHEAT_FROM_USE,    //overheatType_t overheatType;
     qfalse,               //qboolean  overheatPrimaryMode;
     qfalse,               //qboolean  overheatAltMode;
     qfalse,               //qboolean  overheatThirdMode;
@@ -4062,6 +4089,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
+    OVERHEAT_FROM_USE,    //overheatType_t overheatType;
     qfalse,               //qboolean  overheatPrimaryMode;
     qfalse,               //qboolean  overheatAltMode;
     qfalse,               //qboolean  overheatThirdMode;
@@ -4146,6 +4174,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
+    OVERHEAT_FROM_USE,    //overheatType_t overheatType;
     qfalse,               //qboolean  overheatPrimaryMode;
     qfalse,               //qboolean  overheatAltMode;
     qfalse,               //qboolean  overheatThirdMode;
@@ -4230,6 +4259,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
+    OVERHEAT_FROM_USE,    //overheatType_t overheatType;
     qfalse,               //qboolean  overheatPrimaryMode;
     qfalse,               //qboolean  overheatAltMode;
     qfalse,               //qboolean  overheatThirdMode;
@@ -4314,6 +4344,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
     0,                    //int       spinDownTime;
+    OVERHEAT_FROM_USE,    //overheatType_t overheatType;
     qfalse,               //qboolean  overheatPrimaryMode;
     qfalse,               //qboolean  overheatAltMode;
     qfalse,               //qboolean  overheatThirdMode;
