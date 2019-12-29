@@ -6352,6 +6352,12 @@ void BG_EvaluateBBOXPoint( bboxPoint_t *bboxPoint, vec3_t origin,
       //return the origin
       break;
 
+    case BBXP_MIDPOINT:
+      bboxPoint->point[2] += ( mins[2] + maxs[2] ) / 2;
+      bboxPoint->point[1] += ( mins[1] + maxs[1] ) / 2;
+      bboxPoint->point[0] += ( mins[0] + maxs[0] ) / 2;
+      break;
+
     case BBXP_MIDFACE1:
       bboxPoint->point[2] += maxs[2];
       bboxPoint->point[1] += ( mins[1] + maxs[1] ) / 2;
