@@ -615,7 +615,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define	LASERMINE_SELF_DESTRUCT     120000
 #define LASERMINE_HEALTH            30
 
-#define SHOTGUN_PRICE               175
+#define SHOTGUN_PRICE               250
 #define SHOTGUN_SHELLS              2
 #define SHOTGUN_PELLETS             15 //used to sync server and client side
 #define SHOTGUN_CHOKE_PELLETS       30
