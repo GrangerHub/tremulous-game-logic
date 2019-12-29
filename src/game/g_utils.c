@@ -1170,7 +1170,7 @@ qboolean G_BBOXes_Visible(
   const vec3_t dest_origin, const vec3_t dest_mins, const vec3_t dest_maxs,
   const content_mask_t content_mask) {
   trace_t        tr;
-  vec3_t         source_midpoint, destination_midpoint, absmins, absmaxs;
+  vec3_t         source_orig, destination_orig;
   bboxPoint_t    source_point, destination_point;
 
   Com_Assert(source_origin && "G_BBOXes_Visible: source_origin is NULL");
@@ -1184,37 +1184,19 @@ qboolean G_BBOXes_Visible(
     destination_num = ENTITYNUM_NONE;
   }
 
-  if(source_mins && source_maxs) {
-    // use the midpoint of the bounds instead of the origin, because
-    // bmodels may have their origin set to 0,0,0
-    VectorAdd(source_origin, source_mins, absmins);
-    VectorAdd(source_origin, source_maxs, absmaxs);
-    VectorAdd( absmins, absmaxs, source_midpoint );
-    VectorScale( source_midpoint, 0.5, source_midpoint );
-  } else {
-    VectorCopy(source_origin, source_midpoint);
-  }
+  VectorCopy(source_origin, source_orig);
 
-  if(dest_mins && dest_maxs) {
-    // use the midpoint of the bounds instead of the origin, because
-    // bmodels may have their origin set to 0,0,0
-    VectorAdd(dest_origin, dest_mins, absmins);
-    VectorAdd(dest_origin, dest_maxs, absmaxs);
-    VectorAdd( absmins, absmaxs, destination_midpoint );
-    VectorScale( destination_midpoint, 0.5, destination_midpoint );
-  } else {
-    VectorCopy(dest_origin, destination_midpoint);
-  }
+  VectorCopy(dest_origin, destination_orig);
   
 
-  source_point.num = 0;
+  source_point.num = 1;
 
   do {//check between the different points
-    BG_EvaluateBBOXPoint( &source_point, source_midpoint, source_mins, source_maxs );
+    BG_EvaluateBBOXPoint( &source_point, source_orig, source_mins, source_maxs );
 
-    destination_point.num = 0;
+    destination_point.num = 1;
     do {
-      BG_EvaluateBBOXPoint( &destination_point, destination_midpoint, dest_mins, dest_maxs );
+      BG_EvaluateBBOXPoint( &destination_point, destination_orig, dest_mins, dest_maxs );
       SV_Trace(
         &tr, source_point.point, NULL, NULL, destination_point.point,
         source_num, content_mask, TT_AABB );
