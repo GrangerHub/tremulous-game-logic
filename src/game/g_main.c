@@ -1555,14 +1555,14 @@ void G_CalculateBuildPoints( void )
 
   if(level.humanBuildTimeMod > 1.0f) {
     level.humanBuildTimeMod = 1.0f;
-  } else if(level.humanBuildTimeMod < 0.05f) {
-    level.humanBuildTimeMod = 0.05f;
+  } else if(level.humanBuildTimeMod < 0.20f) {
+    level.humanBuildTimeMod = 0.20f;
   }
 
   if(level.alienBuildTimeMod > 1.0f) {
     level.alienBuildTimeMod = 1.0f;
-  } else if(level.alienBuildTimeMod < 0.05f) {
-    level.alienBuildTimeMod = 0.05f;
+  } else if(level.alienBuildTimeMod < 0.20f) {
+    level.alienBuildTimeMod = 0.20f;
   }
 }
 /*
