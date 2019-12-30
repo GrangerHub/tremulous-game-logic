@@ -105,6 +105,7 @@ vmCvar_t  ui_developer;
 vmCvar_t  ui_emoticons;
 vmCvar_t  ui_winner;
 vmCvar_t  ui_chatCommands;
+vmCvar_t  ui_clantag;
 
 static cvarTable_t    cvarTable[ ] =
 {
@@ -130,7 +131,8 @@ static cvarTable_t    cvarTable[ ] =
   { &ui_developer, "ui_developer", "0", CVAR_ARCHIVE | CVAR_CHEAT },
   { &ui_emoticons, "cg_emoticons", "1", CVAR_LATCH | CVAR_ARCHIVE },
   { &ui_winner, "ui_winner", "", CVAR_ROM },
-  { &ui_chatCommands, "ui_chatCommands", "1", CVAR_ARCHIVE }
+  { &ui_chatCommands, "ui_chatCommands", "1", CVAR_ARCHIVE },
+  { &ui_clantag, "ui_clantag", "", CVAR_ARCHIVE }
 };
 
 static size_t cvarTableSize = ARRAY_LEN( cvarTable );
@@ -3241,6 +3243,27 @@ static void UI_RunMenuScript( char **args )
       }
       else if( uiInfo.chatTeam )
         trap_Cmd_ExecuteText( EXEC_APPEND, va( "say_team \"%s\"\n", buffer ) );
+      else if( uiInfo.chatAdmins )
+        trap_Cmd_ExecuteText( EXEC_APPEND, va( "a \"%s\"\n", buffer ) );
+      else if( uiInfo.chatClan )
+      {
+        char clantagDecolored[ 32 ];
+
+				Q_strncpyz( clantagDecolored, ui_clantag.string,
+										sizeof(clantagDecolored) );
+				Q_CleanStr( clantagDecolored );
+
+				if( strlen(clantagDecolored) > 2 && strlen(clantagDecolored) < 11 ) {
+					trap_Cmd_ExecuteText(
+            EXEC_APPEND, va( "m \"%s\" \"%s\"\n", clantagDecolored, buffer ) );
+				} else {
+					//string isnt long enough
+					Com_Printf ( 
+						"^3Error:your ui_clantag has to be between 3 and 10 characters long. current value is:^7 %s^7\n",
+						clantagDecolored );
+					return;
+				}
+      }
       else
         trap_Cmd_ExecuteText( EXEC_APPEND, va( "say \"%s\"\n", buffer ) );
     }
@@ -3255,6 +3278,10 @@ static void UI_RunMenuScript( char **args )
           Menus_ReplaceActiveByName( "say_command" );
         else if( uiInfo.chatTeam )
           Menus_ReplaceActiveByName( "say_team" );
+        else if( uiInfo.chatAdmins )
+          Menus_ReplaceActiveByName( "say_admins" );
+        else if( uiInfo.chatClan )
+          Menus_ActivateByName( "say_clan" );
         else
           Menus_ReplaceActiveByName( "say" );
       }
