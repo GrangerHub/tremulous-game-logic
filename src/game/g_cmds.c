@@ -186,7 +186,8 @@ names that are a partial match for s.
 Returns number of matching clientids up to max.
 ==================
 */
-int G_ClientNumbersFromString( char *s, int *plist, int max )
+int G_ClientNumbersFromString(
+  char *s, int *plist, int max, qboolean alphanumeric )
 {
   gclient_t *p;
   int i, found = 0;
@@ -218,7 +219,12 @@ int G_ClientNumbersFromString( char *s, int *plist, int max )
   }
 
   // now look for name matches
-  G_SanitiseString( s, s2, sizeof( s2 ) );
+  if(alphanumeric) {
+    G_SanitiseString( s, s2, sizeof( s2 ) );
+  } else {
+    Q_strncpyz( s2, s, sizeof( s2 ) );
+    Q_CleanStr( s2 );
+  }
   if( !s2[ 0 ] )
     return 0;
   for( i = 0; i < level.maxclients && found < max; i++ )
@@ -228,7 +234,12 @@ int G_ClientNumbersFromString( char *s, int *plist, int max )
     {
       continue;
     }
-    G_SanitiseString( p->pers.netname, n2, sizeof( n2 ) );
+    if(alphanumeric) {
+      G_SanitiseString( p->pers.netname, n2, sizeof( n2 ) );
+    } else {
+      Q_strncpyz( n2, p->pers.netname, sizeof( n2 ) );
+      Q_CleanStr( n2 );
+    }
     if( strstr( n2, s2 ) )
     {
       *plist++ = i;
@@ -4891,7 +4902,7 @@ static void Cmd_Ignore_f( gentity_t *ent )
   }
 
   Q_strncpyz( name, ConcatArgs( 1 ), sizeof( name ) );
-  matches = G_ClientNumbersFromString( name, pids, MAX_CLIENTS );
+  matches = G_ClientNumbersFromString( name, pids, MAX_CLIENTS, qtrue );
   if( matches < 1 )
   {
     SV_GameSendServerCommand( ent-g_entities, va( "print \"[skipnotify]"
@@ -5908,7 +5919,7 @@ void Cmd_PrivateMessage_f( gentity_t *ent )
   else
   {
     int pcount = G_ClientNumbersFromString( name, pids,
-                                            MAX_CLIENTS );
+                                            MAX_CLIENTS, qfalse );
 
     // reset the previous recipient list
     prevRecipients->count = 0;

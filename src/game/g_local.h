@@ -1115,7 +1115,8 @@ void      G_FollowLockView( gentity_t *ent );
 qboolean  G_FollowNewClient( gentity_t *ent, int dir );
 void      G_ToggleFollow( gentity_t *ent );
 int       G_ClientNumberFromString( char *s, char *err, int len );
-int       G_ClientNumbersFromString( char *s, int *plist, int max );
+int       G_ClientNumbersFromString(
+  char *s, int *plist, int max, qboolean alphanumeric );
 char      *ConcatArgs( int start );
 char      *ConcatArgsPrintable( int start );
 void      G_Say( gentity_t *ent, saymode_t mode, const char *chatText );
