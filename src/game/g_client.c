@@ -504,6 +504,7 @@ static void SpawnCorpse( gentity_t *ent )
 
   body = G_Spawn( );
 
+  BG_GetClientNormal(&ent->client->ps, body->s.origin2);
   VectorCopy( ent->s.apos.trBase, body->s.apos.trBase );
   VectorCopy( ent->s.apos.trBase, body->r.currentAngles );
   body->s.eFlags = EF_DEAD;
