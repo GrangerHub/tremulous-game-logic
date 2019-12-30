@@ -58,9 +58,31 @@ PM_AddEvent
 
 ===============
 */
-void PM_AddEvent( int newEvent )
-{
-  BG_AddPredictableEventToPlayerstate( newEvent, 0, pm->ps );
+void PM_AddEvent(int newEvent) {
+  BG_AddPredictableEventToPlayerstate(newEvent, 0, pm->ps);
+}
+
+/*
+===============
+PM_AddEventWithParm
+
+===============
+*/
+void PM_AddEventWithParm(int newEvent, int eventParm) {
+  BG_AddPredictableEventToPlayerstate(newEvent, eventParm, pm->ps);
+}
+
+/*
+===============
+PM_AddEventWithParm
+
+===============
+*/
+void PM_AddEventWithRandSeed(int newEvent) {
+  int seed;
+
+  seed = ((Q_rand(&pm->ps->misc[MISC_SEED]) & 0x7fff) / (0x7fff / 0x100 + 1));
+  PM_AddEventWithParm(newEvent, seed);
 }
 
 /*
@@ -4566,8 +4588,12 @@ static void PM_Weapon( void )
   // fire events for burst weapons
   if( pm->pmext->burstRoundsToFire[ 2 ] > 0 )
   {
+    vec3_t right, up;
+
+    BG_CalcMuzzlePointFromPS(
+      pm->ps, pm->pmext->dir_fired, right, up, pm->pmext->muzzel_point_fired);
     pm->ps->generic1 = WPM_TERTIARY;
-    PM_AddEvent( EV_FIRE_WEAPON3 );
+    PM_AddEventWithRandSeed( EV_FIRE_WEAPON3 );
     pm->pmext->burstRoundsToFire[ 2 ]--;
     if( pm->pmext->burstRoundsToFire[ 2 ] )
       addTime = BG_Weapon( pm->ps->weapon )->repeatRate3;
@@ -4593,8 +4619,12 @@ static void PM_Weapon( void )
   }
   else if( pm->pmext->burstRoundsToFire[ 1 ] > 0 )
   {
+    vec3_t right, up;
+
+    BG_CalcMuzzlePointFromPS(
+      pm->ps, pm->pmext->dir_fired, right, up, pm->pmext->muzzel_point_fired);
     pm->ps->generic1 = WPM_SECONDARY;
-    PM_AddEvent( EV_FIRE_WEAPON2 );
+    PM_AddEventWithRandSeed( EV_FIRE_WEAPON2 );
     pm->pmext->burstRoundsToFire[ 1 ]--;
     if( pm->pmext->burstRoundsToFire[ 1 ] )
       addTime = BG_Weapon( pm->ps->weapon )->repeatRate2;
@@ -4620,8 +4650,12 @@ static void PM_Weapon( void )
   }
   else if( pm->pmext->burstRoundsToFire[ 0 ] > 0 )
   {
+    vec3_t right, up;
+
+    BG_CalcMuzzlePointFromPS(
+      pm->ps, pm->pmext->dir_fired, right, up, pm->pmext->muzzel_point_fired);
     pm->ps->generic1 = WPM_PRIMARY;
-    PM_AddEvent( EV_FIRE_WEAPON );
+    PM_AddEventWithRandSeed( EV_FIRE_WEAPON );
     pm->pmext->burstRoundsToFire[ 0 ]--;
     if( pm->pmext->burstRoundsToFire[ 0 ] )
       addTime = BG_Weapon( pm->ps->weapon )->repeatRate1;
@@ -4652,6 +4686,8 @@ static void PM_Weapon( void )
     {
       if( BG_Weapon( pm->ps->weapon )->hasThirdMode )
       {
+        vec3_t right, up;
+
         //hacky special case for slowblob
         if( pm->ps->weapon == WP_ALEVEL3_UPG && !pm->ps->ammo )
         {
@@ -4659,8 +4695,10 @@ static void PM_Weapon( void )
           return;
         }
 
+        BG_CalcMuzzlePointFromPS(
+          pm->ps, pm->pmext->dir_fired, right, up, pm->pmext->muzzel_point_fired);
         pm->ps->generic1 = WPM_TERTIARY;
-        PM_AddEvent( EV_FIRE_WEAPON3 );
+        PM_AddEventWithRandSeed( EV_FIRE_WEAPON3 );
         addTime = BG_Weapon( pm->ps->weapon )->repeatRate3;
 
         //check for overheating
@@ -4692,8 +4730,12 @@ static void PM_Weapon( void )
     {
       if( BG_Weapon( pm->ps->weapon )->hasAltMode )
       {
+        vec3_t right, up;
+
+        BG_CalcMuzzlePointFromPS(
+          pm->ps, pm->pmext->dir_fired, right, up, pm->pmext->muzzel_point_fired);
         pm->ps->generic1 = WPM_SECONDARY;
-        PM_AddEvent( EV_FIRE_WEAPON2 );
+        PM_AddEventWithRandSeed( EV_FIRE_WEAPON2 );
         addTime = BG_Weapon( pm->ps->weapon )->repeatRate2;
 
         //check for overheating
@@ -4723,8 +4765,12 @@ static void PM_Weapon( void )
     }
     else if( attack1 )
     {
+      vec3_t right, up;
+
+      BG_CalcMuzzlePointFromPS(
+        pm->ps, pm->pmext->dir_fired, right, up, pm->pmext->muzzel_point_fired);
       pm->ps->generic1 = WPM_PRIMARY;
-      PM_AddEvent( EV_FIRE_WEAPON );
+      PM_AddEventWithRandSeed( EV_FIRE_WEAPON );
       addTime = BG_Weapon( pm->ps->weapon )->repeatRate1;
 
       //check for overheating
@@ -4748,18 +4794,23 @@ static void PM_Weapon( void )
     // fire events for autohit weapons
     if( pm->autoWeaponHit[ pm->ps->weapon ] )
     {
+      vec3_t right, up;
       switch( pm->ps->weapon )
       {
         case WP_ALEVEL0:
+          BG_CalcMuzzlePointFromPS(
+            pm->ps, pm->pmext->dir_fired, right, up, pm->pmext->muzzel_point_fired);
           pm->ps->generic1 = WPM_PRIMARY;
-          PM_AddEvent( EV_FIRE_WEAPON );
+          PM_AddEventWithRandSeed( EV_FIRE_WEAPON );
           addTime = BG_Weapon( pm->ps->weapon )->repeatRate1;
           break;
 
         case WP_ALEVEL3:
         case WP_ALEVEL3_UPG:
+          BG_CalcMuzzlePointFromPS(
+            pm->ps, pm->pmext->dir_fired, right, up, pm->pmext->muzzel_point_fired);
           pm->ps->generic1 = WPM_SECONDARY;
-          PM_AddEvent( EV_FIRE_WEAPON2 );
+          PM_AddEventWithRandSeed( EV_FIRE_WEAPON2 );
           addTime = BG_Weapon( pm->ps->weapon )->repeatRate2;
           break;
 
