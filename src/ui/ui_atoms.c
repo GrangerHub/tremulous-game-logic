@@ -164,20 +164,44 @@ static void UI_MessageMode_f( void )
     case '\0':
       // Global
       uiInfo.chatTeam             = qfalse;
+      uiInfo.chatAdmins           = qfalse;
+      uiInfo.chatClan             = qfalse;
       break;
 
     case '2':
       // Team
       uiInfo.chatTeam             = qtrue;
+      uiInfo.chatAdmins           = qfalse;
+      uiInfo.chatClan             = qfalse;
+      break;
+
+    case '5':
+      // Admins
+      uiInfo.chatTeam             = qfalse;
+      uiInfo.chatAdmins           = qtrue;
+      uiInfo.chatClan             = qfalse;
+      break;
+
+    case '6':
+      // Clan
+      uiInfo.chatTeam             = qfalse;
+      uiInfo.chatAdmins           = qfalse;
+      uiInfo.chatClan             = qtrue;
       break;
   }
 
   trap_Key_SetCatcher( KEYCATCH_UI );
   Menus_CloseByName( "say" );
   Menus_CloseByName( "say_team" );
+  Menus_CloseByName( "say_admins" );
+  Menus_CloseByName( "say_clan" );
 
   if( uiInfo.chatTeam )
     Menus_ActivateByName( "say_team" );
+  else if( uiInfo.chatAdmins )
+    Menus_ActivateByName( "say_admins" );
+  else if( uiInfo.chatClan )
+    Menus_ActivateByName( "say_clan" );
   else
     Menus_ActivateByName( "say" );
 }
@@ -201,6 +225,8 @@ struct uicmd
   { "menu", UI_Menu_f },
   { "messagemode", UI_MessageMode_f },
   { "messagemode2", UI_MessageMode_f },
+  { "messagemode5", UI_MessageMode_f },
+  { "messagemode6", UI_MessageMode_f },
   { "ui_cache", UI_Cache_f },
   { "ui_load", UI_Load },
   { "ui_report", UI_Report }

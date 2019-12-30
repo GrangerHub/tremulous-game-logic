@@ -311,6 +311,8 @@ typedef struct
   qboolean inGameLoad;
 
   qboolean  chatTeam;
+  qboolean  chatAdmins;
+  qboolean  chatClan;
   qboolean  voiceCmd;
 }
 uiInfo_t;
