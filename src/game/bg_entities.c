@@ -595,14 +595,15 @@ void BG_SplatterPattern(
   trace_t   tr;
   splatterPatternData_t splatterData;
 
+  Com_Assert( modeIndex >= 0 &&
+              modeIndex < 3 );
+
   memset( &splatterData, 0, sizeof( splatterData ) );
   splatterData.splatter = &BG_Weapon( weapon )->splatter[modeIndex];
   splatterData.weapon = weapon;
   splatterData.mode_index = modeIndex;
   splatterData.ammo_used = data->ammo_used;
 
-  Com_Assert( modeIndex >= 0 &&
-              modeIndex < 3 );
   Com_Assert( func );
   Com_Assert( splatterData.splatter );
   Com_Assert( splatterData.splatter->spread >= 0 &&

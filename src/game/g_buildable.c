@@ -1558,7 +1558,7 @@ static qboolean AHive_CheckTarget( gentity_t *self, gentity_t *enemy )
     vectoangles( dirToTarget, self->turretAim );
 
     // Fire at target
-    FireWeapon( self );
+    FireWeapon( self, rand() / ( RAND_MAX / 0x100 + 1 ) );
     G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
     return qtrue;
   }
@@ -2100,7 +2100,7 @@ static void ATrapper_FireOnEnemy( gentity_t *self, int firespeed )
   vectoangles( dirToTarget, self->turretAim );
 
   //fire at target
-  FireWeapon( self );
+  FireWeapon( self, rand() / ( RAND_MAX / 0x100 + 1 ) );
   G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
   self->count = level.time + firespeed;
 }
@@ -3546,7 +3546,7 @@ void HMGTurret_Think( gentity_t *self )
   if( self->timestamp > level.time )
     return;
 
-  FireWeapon( self );
+  FireWeapon( self, rand() / ( RAND_MAX / 0x100 + 1 ) );
   self->s.eFlags |= EF_FIRING;
   self->timestamp = level.time + BG_Buildable( self->s.modelindex )->turretFireSpeed;
   G_AddEvent( self, EV_FIRE_WEAPON, 0 );
@@ -3622,7 +3622,7 @@ void HTeslaGen_Think( gentity_t *self )
             self->enemy->s.eType == ET_TELEPORTAL ) &&
           self->enemy->health > 0 &&
           Distance( origin, self->enemy->s.pos.trBase ) <= TESLAGEN_RANGE )
-        FireWeapon( self );
+        FireWeapon( self, rand() / ( RAND_MAX / 0x100 + 1 ) );
     }
     self->enemy = NULL;
 

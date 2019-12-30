@@ -322,6 +322,8 @@ typedef struct unlagged_attacker_data_s
 typedef struct
 {
   int      ammo_used;
+  vec3_t   dir_fired;
+  vec3_t   muzzel_point_fired;
   trace_t  impactTriggerTrace; // Used for the lightning gun
   int      pulsatingBeamTime[ 3 ];
   qboolean impactTriggerTraceChecked;
@@ -1505,6 +1507,7 @@ typedef enum
 
 typedef struct splatterAttributes_s
 {
+  qboolean               predicted;
   unsigned int           number;
   splatterPattern_t      pattern;
   splatterDistribution_t distribution;
@@ -1782,8 +1785,10 @@ void  BG_EvaluateTrajectoryDelta( const trajectory_t *tr, int atTime, vec3_t res
 
 void  BG_AddPredictableEventToPlayerstate( int newEvent, int eventParm, playerState_t *ps );
 
-void  BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s );
-void  BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s, int time );
+void  BG_PlayerStateToEntityState(
+  playerState_t *ps, entityState_t *s, pmoveExt_t *pmext );
+void  BG_PlayerStateToEntityStateExtraPolate(
+  playerState_t *ps, entityState_t *s, int time, pmoveExt_t *pmext );
 
 qboolean  BG_PlayerTouchesItem( playerState_t *ps, entityState_t *item, int atTime );
 

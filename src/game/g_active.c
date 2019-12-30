@@ -1054,6 +1054,7 @@ void ClientEvents( gentity_t *ent, int oldEventSequence )
 {
   int       i;
   int       event;
+  int       eventParm;
   gclient_t *client;
   int       damage;
   vec3_t    dir;
@@ -1070,6 +1071,7 @@ void ClientEvents( gentity_t *ent, int oldEventSequence )
   for( i = oldEventSequence; i < client->ps.eventSequence; i++ )
   {
     event = client->ps.events[ i & ( MAX_PS_EVENTS - 1 ) ];
+    eventParm = client->ps.eventParms[ i & ( MAX_PS_EVENTS - 1 ) ];
 
     switch( event )
     {
@@ -1099,15 +1101,15 @@ void ClientEvents( gentity_t *ent, int oldEventSequence )
         break;
 
       case EV_FIRE_WEAPON:
-        FireWeapon( ent );
+        FireWeapon( ent, eventParm );
         break;
 
       case EV_FIRE_WEAPON2:
-        FireWeapon2( ent );
+        FireWeapon2( ent, eventParm );
         break;
 
       case EV_FIRE_WEAPON3:
-        FireWeapon3( ent );
+        FireWeapon3( ent, eventParm );
         break;
 
       case EV_NOAMMO:
@@ -1125,7 +1127,7 @@ void ClientEvents( gentity_t *ent, int oldEventSequence )
 SendPendingPredictableEvents
 ==============
 */
-void SendPendingPredictableEvents( playerState_t *ps )
+void SendPendingPredictableEvents( playerState_t *ps, pmoveExt_t *pmext )
 {
   gentity_t *t;
   int       event, seq;
@@ -1144,7 +1146,7 @@ void SendPendingPredictableEvents( playerState_t *ps )
     // create temporary entity for event
     t = G_TempEntity( ps->origin, event );
     number = t->s.number;
-    BG_PlayerStateToEntityState( ps, &t->s );
+    BG_PlayerStateToEntityState( ps, &t->s, pmext );
     t->s.number = number;
     t->s.eType = ET_EVENTS + event;
     t->s.eFlags |= EF_PLAYER_EVENT;
@@ -2143,7 +2145,7 @@ void ClientThink_real( gentity_t *ent )
 
     //M-M-M-M-MONSTER HACK
     ent->s.weapon = WP_GRENADE;
-    FireWeapon( ent );
+    FireWeapon( ent, rand() / ( RAND_MAX / 0x100 + 1 ) );
     ent->s.weapon = lastWeapon;
   }
 
@@ -2158,7 +2160,7 @@ void ClientThink_real( gentity_t *ent )
 
     //M-M-M-M-MONSTER HACK
     ent->s.weapon = WP_FRAGNADE;
-    FireWeapon( ent );
+    FireWeapon( ent, rand() / ( RAND_MAX / 0x100 + 1 ) );
     ent->s.weapon = lastWeapon;
   }
 
@@ -2173,7 +2175,7 @@ void ClientThink_real( gentity_t *ent )
 
     //M-M-M-M-MONSTER HACK
     ent->s.weapon = WP_LASERMINE;
-    FireWeapon( ent );
+    FireWeapon( ent, rand() / ( RAND_MAX / 0x100 + 1 ) );
     ent->s.weapon = lastWeapon;
   }
 
@@ -2264,9 +2266,10 @@ void ClientThink_real( gentity_t *ent )
   if( g_smoothClients.integer )
     BG_PlayerStateToEntityStateExtraPolate( &ent->client->ps,
                                             &ent->s,
-                                            ent->client->ps.commandTime );
+                                            ent->client->ps.commandTime,
+                                            &ent->client->pmext);
   else
-    BG_PlayerStateToEntityState( &ent->client->ps, &ent->s );
+    BG_PlayerStateToEntityState( &ent->client->ps, &ent->s, &ent->client->pmext );
 
   switch( client->ps.weapon )
   {
@@ -2317,7 +2320,7 @@ void ClientThink_real( gentity_t *ent )
       break;
   }
 
-  SendPendingPredictableEvents( &ent->client->ps );
+  SendPendingPredictableEvents( &ent->client->ps, &ent->client->pmext );
 
   if( !( ent->client->ps.eFlags & EF_FIRING ) )
     client->fireHeld = qfalse;    // for grapple
@@ -2540,9 +2543,10 @@ void ClientEndFrame( gentity_t *ent )
   // set the latest infor
   if( g_smoothClients.integer )
     BG_PlayerStateToEntityStateExtraPolate( &ent->client->ps, &ent->s,
-                                            ent->client->ps.commandTime );
+                                            ent->client->ps.commandTime,
+                                            &ent->client->pmext);
   else
-    BG_PlayerStateToEntityState( &ent->client->ps, &ent->s );
+    BG_PlayerStateToEntityState( &ent->client->ps, &ent->s, &ent->client->pmext );
 
-  SendPendingPredictableEvents( &ent->client->ps );
+  SendPendingPredictableEvents( &ent->client->ps, &ent->client->pmext );
 }

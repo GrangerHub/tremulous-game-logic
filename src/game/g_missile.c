@@ -85,7 +85,8 @@ void G_ExplodeMissile( gentity_t *ent )
 
   ent->s.eFlags &= ~EF_WARN_CHARGE;
 
-  G_SplatterFire( ent, ent->parent, ent->s.pos.trBase, dir, ent->s.weapon,
+  G_SplatterFire( ent, ent->parent, ent->s.pos.trBase, dir,
+                  (rand() / (RAND_MAX / 0x100 + 1)), ent->s.weapon,
                   ent->s.generic1, ent->splashMethodOfDeath );
 
   if( ent->s.weapon != WP_LOCKBLOB_LAUNCHER &&
