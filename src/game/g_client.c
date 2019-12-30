@@ -504,6 +504,7 @@ static void SpawnCorpse( gentity_t *ent )
 
   body = G_Spawn( );
 
+  BG_GetClientNormal(&ent->client->ps, body->s.origin2);
   VectorCopy( ent->s.apos.trBase, body->s.apos.trBase );
   VectorCopy( ent->s.apos.trBase, body->r.currentAngles );
   body->s.eFlags = EF_DEAD;
@@ -1577,6 +1578,11 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   for( i = 0; i < MAX_PERSISTANT; i++ )
     client->ps.persistant[ i ] = persistant[ i ];
 
+  //Set the seed for predicted psuedorandomness in bg_pmove.c.
+  //Do not touch this value outside of PM_PSRandom(), and
+  //do not use PM_PSRandom() outside of bg_pmove.c.
+  client->ps.misc[ MISC_SEED ] = rand() / ( RAND_MAX / 0x100 + 1 );
+
   client->ps.eventSequence = eventSequence;
 
   // increment the spawncount so the client will detect the respawn
@@ -1801,7 +1807,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   // positively link the client, even if the command times are weird
   if( client->sess.spectatorState == SPECTATOR_NOT )
   {
-    BG_PlayerStateToEntityState( &client->ps, &ent->s );
+    BG_PlayerStateToEntityState( &client->ps, &ent->s, &client->pmext );
     SV_LinkEntity( ent );
   }
 
@@ -1812,7 +1818,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   ClientEndFrame( ent );
 
   // clear entity state values
-  BG_PlayerStateToEntityState( &client->ps, &ent->s );
+  BG_PlayerStateToEntityState( &client->ps, &ent->s, &client->pmext );
 
   client->pers.infoChangeTime = level.time;
 }

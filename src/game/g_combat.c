@@ -254,12 +254,12 @@ float G_RewardAttackers( gentity_t *self )
 GibEntity
 ==================
 */
-void GibEntity( gentity_t *self )
+void GibEntity( gentity_t *self, vec3_t normal )
 {
   vec3_t dir;
   gentity_t *tent;
 
-  VectorCopy( self->s.origin2, dir );
+  VectorCopy( normal, dir );
 
   //send gibbing event
   tent = G_TempEntity( self->r.currentOrigin, EV_GIB_PLAYER );
@@ -296,7 +296,7 @@ void body_die( gentity_t *self, gentity_t *unused, gentity_t *unused2, int damag
   if ( self->health > GIB_HEALTH )
     return;
 
-  GibEntity( self );
+  GibEntity( self, self->s.origin2 );
 }
 
 
@@ -508,7 +508,10 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   {
     if ( self->health <= GIB_HEALTH )
     {
-      GibEntity( self );
+      vec3_t normal;
+
+      BG_GetClientNormal(&self->client->ps, normal);
+      GibEntity( self, normal );
     } else
     {
       self->takedamage = qtrue; // can still be gibbed
