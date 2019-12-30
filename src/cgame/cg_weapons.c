@@ -2175,7 +2175,7 @@ CG_FireWeapon
 Caused by an EV_FIRE_WEAPON event
 ================
 */
-void CG_FireWeapon( centity_t *cent, weaponMode_t weaponMode )
+void CG_FireWeapon( centity_t *cent, weaponMode_t weaponMode, int seed )
 {
   centity_t         *wcent;
   entityState_t     *es;
@@ -2213,6 +2213,24 @@ void CG_FireWeapon( centity_t *cent, weaponMode_t weaponMode )
   }
 
   wi = &cg_weapons[ weaponNum ];
+
+  // predicted splatter
+  if(BG_Weapon( weaponNum )->splatter[weaponMode - 1].predicted) {
+    int    ammo_used;
+    vec3_t normal, origin;
+
+    if(es->number == cg.predictedPlayerState.clientNum) {
+      ammo_used = cg.pmext.ammo_used;
+      VectorCopy(cg.pmext.muzzel_point_fired, origin);
+      VectorNormalize2( cg.pmext.dir_fired, normal );
+    } else {
+      ammo_used = *((int *)&es->origin[2]);
+      VectorCopy(es->origin2, origin);
+      VectorCopy(es->angles, normal);
+    }
+
+    CG_Splatter(es, ammo_used, weaponMode, normal, origin, seed);
+  }
 
   // mark the entity as muzzle flashing, so when it is added it will
   // append the flash to the weapon model
@@ -2436,7 +2454,7 @@ void CG_BuildFire( entityState_t *es )
   builder->buildFireMode = es->generic1;
   builder->currentState.generic1 = es->generic1;
   builder->buildFireTime = cg.time + 250;
-  CG_FireWeapon( builder, es->generic1 );
+  CG_FireWeapon( builder, es->generic1, es->eventParm );
   switch ( es->generic1 )
   {
     case WPM_PRIMARY:
@@ -2660,17 +2678,18 @@ static void CG_SplatterMarks( splatterData_t *data ) {
 CG_Splatter
 ==============
 */
-void CG_Splatter( entityState_t *es )
-{
+void CG_Splatter(
+  entityState_t *es, int ammo_used, weaponMode_t weaponMode, vec3_t normal,
+  vec3_t origin, int seed) {
   splatterData_t data;
 
-  VectorCopy( es->pos.trBase, data.origin );
-  data.weapon = es->angles2[0];
-  data.weaponMode = es->angles2[1];
-  data.ammo_used = es->generic1;
+  VectorCopy(origin, data.origin);
+  data.weapon = es->weapon;
+  data.weaponMode = weaponMode;
+  data.ammo_used = ammo_used;
 
   BG_SplatterPattern(
-    es->origin2, es->eventParm, es->otherEntityNum, &data, CG_SplatterMarks);
+    normal, seed, es->otherEntityNum, &data, CG_SplatterMarks);
 }
 
 /*

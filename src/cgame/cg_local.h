@@ -2094,14 +2094,16 @@ void        CG_RegisterUpgrade( int upgradeNum );
 void        CG_InitWeapons( void );
 void        CG_RegisterWeapon( int weaponNum );
 
-void        CG_FireWeapon( centity_t *cent, weaponMode_t weaponMode );
+void        CG_FireWeapon( centity_t *cent, weaponMode_t weaponMode, int seed );
 void        CG_MissileHitWall( weapon_t weapon, weaponMode_t weaponMode, int clientNum,
                                vec3_t origin, vec3_t dir, impactSound_t soundType, int charge );
 void        CG_MissileHitEntity( weapon_t weaponNum, weaponMode_t weaponMode,
                                  vec3_t origin, vec3_t dir, int entityNum, int charge );
 void        CG_MassDriverFire( entityState_t *es );
 void        CG_Bullet( vec3_t origin, int sourceEntityNum, vec3_t normal, qboolean flesh, int fleshEntityNum );
-void        CG_Splatter( entityState_t *es );
+void        CG_Splatter(
+  entityState_t *es, int ammo_used, weaponMode_t weaponMode, vec3_t normal,
+  vec3_t origin, int seed);
 void        CG_BuildFire( entityState_t *es );
 
 void        CG_AddViewWeapon (playerState_t *ps);

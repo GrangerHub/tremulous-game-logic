@@ -1610,7 +1610,8 @@ void CG_AddPacketEntities( void )
 
   // generate and add the entity from the playerstate
   ps = &cg.predictedPlayerState;
-  BG_PlayerStateToEntityState( ps, &cg.predictedPlayerEntity.currentState );
+  BG_PlayerStateToEntityState(
+    ps, &cg.predictedPlayerEntity.currentState, &cg.pmext );
   cg.predictedPlayerEntity.valid = qtrue;
   CG_AddCEntity( &cg.predictedPlayerEntity );
 

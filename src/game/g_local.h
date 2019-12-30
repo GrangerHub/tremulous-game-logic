@@ -1500,7 +1500,7 @@ qboolean  G_CanGiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo,
 void      G_GiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo );
 void      SnapVectorTowards( vec3_t v, vec3_t to );
 void      G_SplatterFire( gentity_t *inflicter, gentity_t *attacker,
-                          vec3_t origin, vec3_t dir,
+                          vec3_t origin, vec3_t dir, int seed,
                           weapon_t weapon, weaponMode_t weaponMode, meansOfDeath_t mod );
 qboolean  CheckVenomAttack( gentity_t *ent );
 void      CheckGrabAttack( gentity_t *ent );
@@ -1549,9 +1549,9 @@ void      G_UnregisterCommands( void );
 //
 // g_weapon.c
 //
-void FireWeapon( gentity_t *ent );
-void FireWeapon2( gentity_t *ent );
-void FireWeapon3( gentity_t *ent );
+void FireWeapon( gentity_t *ent, int seed );
+void FireWeapon2( gentity_t *ent, int seed );
+void FireWeapon3( gentity_t *ent, int seed );
 
 //
 // g_scrim.c

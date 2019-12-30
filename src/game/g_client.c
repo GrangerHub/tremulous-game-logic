@@ -503,6 +503,7 @@ static void SpawnCorpse( gentity_t *ent )
 
   body = G_Spawn( );
 
+  BG_GetClientNormal(&ent->client->ps, body->s.origin2);
   VectorCopy( ent->s.apos.trBase, body->s.apos.trBase );
   VectorCopy( ent->s.apos.trBase, body->r.currentAngles );
   body->s.eFlags = EF_DEAD;
@@ -1877,7 +1878,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   // positively link the client, even if the command times are weird
   if( client->sess.spectatorState == SPECTATOR_NOT )
   {
-    BG_PlayerStateToEntityState( &client->ps, &ent->s );
+    BG_PlayerStateToEntityState( &client->ps, &ent->s, &client->pmext );
     SV_LinkEntity( ent );
   }
 
@@ -1888,7 +1889,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   ClientEndFrame( ent );
 
   // clear entity state values
-  BG_PlayerStateToEntityState( &client->ps, &ent->s );
+  BG_PlayerStateToEntityState( &client->ps, &ent->s, &client->pmext );
 
   client->pers.infoChangeTime = level.time;
 }

@@ -1030,7 +1030,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
     case EV_FIRE_WEAPON:
       if(es->weapon != WP_HBUILD && es->weapon != WP_HBUILD2)
       {
-        CG_FireWeapon( cent, WPM_PRIMARY );
+        CG_FireWeapon( cent, WPM_PRIMARY, es->eventParm );
         if( cent->currentState.number == cg.predictedPlayerState.clientNum )
           BG_ResetLightningBoltCharge( &cg.predictedPlayerState,
                                        &cg.pmext );
@@ -1038,13 +1038,13 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       break;
 
     case EV_FIRE_WEAPON2:
-      if(es->weapon != WP_HBUILD && es->weapon != WP_HBUILD2)
-        CG_FireWeapon( cent, WPM_SECONDARY );
+      if( es->weapon != WP_HBUILD && es->weapon != WP_HBUILD )
+        CG_FireWeapon( cent, WPM_SECONDARY, es->eventParm );
       break;
 
     case EV_FIRE_WEAPON3:
-      if(es->weapon != WP_HBUILD && es->weapon != WP_HBUILD2)
-        CG_FireWeapon( cent, WPM_TERTIARY );
+      if( es->weapon != WP_HBUILD && es->weapon != WP_HBUILD )
+        CG_FireWeapon( cent, WPM_TERTIARY, es->eventParm );
       break;
 
     //=================================================================
@@ -1196,7 +1196,9 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       break;
 
     case EV_SPLATTER:
-      CG_Splatter( es );
+      CG_Splatter(
+        es, *((int *)&es->origin2[2]), es->generic1, es->angles,
+        es->origin2, es->eventParm);
       break;
 
     case EV_MASS_DRIVER:

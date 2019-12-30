@@ -610,7 +610,7 @@ typedef struct gSplatterData_s
 
 /*
 ==============
-CG_SplatterMarks
+G_Splatter
 ==============
 */
 static void G_Splatter( splatterData_t *data ) {
@@ -664,12 +664,12 @@ G_SplatterFire
 ==============
 */
 void G_SplatterFire( gentity_t *inflicter, gentity_t *attacker,
-                     vec3_t origin, vec3_t dir,
+                     vec3_t origin, vec3_t dir, int seed,
                      weapon_t weapon, weaponMode_t weaponMode, meansOfDeath_t mod ) {
   splatterData_t  data;
   gSplatterData_t gData;
   const int modeIndex = weaponMode - 1;
-  gentity_t       *tent;
+  vec3_t          normal;
 
   Com_Assert( modeIndex >= 0 &&
               modeIndex < 3 &&
@@ -687,14 +687,11 @@ void G_SplatterFire( gentity_t *inflicter, gentity_t *attacker,
   Com_Assert( dir &&
               "G_SplatterFire: dir is NULL" );
 
-  // send splatter
-  tent = G_TempEntity( origin, EV_SPLATTER );
-  VectorNormalize2( dir, tent->s.origin2 );
-  VectorCopy( tent->s.pos.trBase, data.origin );
-  tent->s.eventParm = rand() / ( RAND_MAX / 0x100 + 1 );    // seed for spread pattern
-  tent->s.otherEntityNum = inflicter->s.number;
-  data.weapon = tent->s.angles2[0] = weapon;
-  data.weaponMode = tent->s.angles2[1] = weaponMode;
+  // set data
+  VectorNormalize2( dir, normal );
+  VectorCopy( origin, data.origin );
+  data.weapon = weapon;
+  data.weaponMode = weaponMode;
   gData.inflicter = inflicter;
   gData.attacker = attacker;
   gData.mod = mod;
@@ -721,11 +718,21 @@ void G_SplatterFire( gentity_t *inflicter, gentity_t *attacker,
     } 
   }
 
-  tent->s.generic1 = data.ammo_used;
+  // send splatter if not predicted client side
+  if(!BG_Weapon( weapon )->splatter[ modeIndex ].predicted) {
+    gentity_t       *tent;
 
-  BG_SplatterPattern(
-    tent->s.origin2, tent->s.eventParm, tent->s.otherEntityNum,
-    &data, G_Splatter);
+    tent = G_TempEntity( origin, EV_SPLATTER );
+    VectorCopy(origin, tent->s.origin2);
+    VectorCopy( normal,  tent->s.angles);
+    tent->s.eventParm = seed;
+    tent->s.otherEntityNum = inflicter->s.number;
+    tent->s.weapon = weapon;
+    tent->s.generic1 = weaponMode;
+    tent->s.origin[2] = *((float *)&data.ammo_used);
+  }
+
+  BG_SplatterPattern(normal, seed, inflicter->s.number,&data, G_Splatter);
 }
 
 /*
@@ -735,7 +742,7 @@ SHOTGUN
 
 ======================================================================
 */
-void shotgunFire( gentity_t *ent )
+void shotgunFire( gentity_t *ent, int seed )
 {
   unlagged_attacker_data_t unlagged_attacker;
 
@@ -745,7 +752,7 @@ void shotgunFire( gentity_t *ent )
   G_UnlaggedOn(&unlagged_attacker);
   G_SplatterFire(
     ent, ent, unlagged_attacker.muzzle_out, unlagged_attacker.forward_out,
-    ent->s.weapon, ent->s.generic1, MOD_SHOTGUN );
+    seed, ent->s.weapon, ent->s.generic1, MOD_SHOTGUN );
   G_UnlaggedOff();
 }
 
@@ -2617,7 +2624,7 @@ void G_CrushAttack( gentity_t *ent, gentity_t *victim )
 FireWeapon3
 ===============
 */
-void FireWeapon3( gentity_t *ent )
+void FireWeapon3( gentity_t *ent, int seed )
 {
   if( ent->client )
   {
@@ -2660,7 +2667,7 @@ void FireWeapon3( gentity_t *ent )
 FireWeapon2
 ===============
 */
-void FireWeapon2( gentity_t *ent )
+void FireWeapon2( gentity_t *ent, int seed )
 {
   if( ent->client )
   {
@@ -2685,7 +2692,7 @@ void FireWeapon2( gentity_t *ent )
       break;
 
     case WP_SHOTGUN:
-      shotgunFire( ent );
+      shotgunFire( ent, seed );
       break;
 
     case WP_CHAINGUN:
@@ -2732,7 +2739,7 @@ void FireWeapon2( gentity_t *ent )
 FireWeapon
 ===============
 */
-void FireWeapon( gentity_t *ent )
+void FireWeapon( gentity_t *ent, int seed )
 {
   if( ent->client )
   {
@@ -2799,7 +2806,7 @@ void FireWeapon( gentity_t *ent )
       bulletFire( ent, RIFLE_SPREAD, RIFLE_DMG, MOD_MACHINEGUN );
       break;
     case WP_SHOTGUN:
-      shotgunFire( ent );
+      shotgunFire( ent, seed );
       break;
     case WP_CHAINGUN:
       bulletFire( ent, CHAINGUN_SPREAD, CHAINGUN_DMG, MOD_CHAINGUN );
