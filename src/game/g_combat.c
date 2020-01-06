@@ -322,11 +322,29 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
   switch(self->client->pers.teamSelection) {
     case TEAM_ALIENS:
-      self->client->pers.spawnTime = level.time + (g_alienSpawnCountdown.integer * 1000);
+      if(level.numAlienClients < 3) {
+        self->client->pers.spawnTime =
+          level.time + ((g_alienSpawnCountdown.integer * 1000) / 2);
+      } else if(level.numAlienClients < 6) {
+        self->client->pers.spawnTime =
+          level.time + ((g_alienSpawnCountdown.integer * 3000) / 4);
+      } else {
+        self->client->pers.spawnTime =
+          level.time + (g_alienSpawnCountdown.integer * 1000);
+      }
       break;
 
     case TEAM_HUMANS:
-      self->client->pers.spawnTime = level.time + (g_humanSpawnCountdown.integer * 1000);
+    if(level.numHumanClients < 3) {
+      self->client->pers.spawnTime =
+        level.time + ((g_humanSpawnCountdown.integer * 1000) / 2);
+    } else if(level.numHumanClients < 6) {
+      self->client->pers.spawnTime =
+        level.time + ((g_humanSpawnCountdown.integer * 3000) / 4);
+    } else {
+      self->client->pers.spawnTime =
+        level.time + (g_humanSpawnCountdown.integer * 1000);
+    }
       break;
 
     default:
