@@ -3632,8 +3632,6 @@ qboolean G_admin_nextmap( gentity_t *ent )
     va(
       "nextmap was run by %s",
       ( ent ) ? ent->client->pers.netname : "console"));
-  Cvar_SetSafe( "g_warmup", "1" );
-  SV_SetConfigstring( CS_WARMUP, va( "%d", IS_WARMUP ) );
 
   return qtrue;
 }
