@@ -948,6 +948,7 @@ void    Q_cleanDelimitedString( char *dest, const char *src );
 int Q_PrintStrlen( const char *string );
 // removes color sequences from string
 char *Q_CleanStr( char *string );
+void Q_StringToLower( char *in, char *out, int len );
 // parse "\n" into '\n'
 void Q_ParseNewlines( char *dest, const char *src, int destsize );
 // Count the number of char tocount encountered in string

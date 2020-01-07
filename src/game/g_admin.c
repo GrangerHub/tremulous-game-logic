@@ -3323,7 +3323,7 @@ qboolean G_admin_spec999( gentity_t *ent )
 
 qboolean G_admin_forcespec( gentity_t *ent )
 {
-  const int seconds = G_admin_parse_time( g_adminTempSpec.string );;
+  const int seconds = G_admin_parse_time( g_adminTempSpec.string );
   team_t    old_team;
   char      name[MAX_NAME_LENGTH];
   namelog_t *vic;
