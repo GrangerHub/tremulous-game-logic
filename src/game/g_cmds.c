@@ -194,6 +194,8 @@ int G_ClientNumbersFromString(
   char *endptr;
   char n2[ MAX_NAME_LENGTH ] = {""};
   char s2[ MAX_NAME_LENGTH ] = {""};
+  char n2_temp[ MAX_NAME_LENGTH ] = {""};
+  char s2_temp[ MAX_NAME_LENGTH ] = {""};
 
   if( max == 0 )
     return 0;
@@ -222,8 +224,9 @@ int G_ClientNumbersFromString(
   if(alphanumeric) {
     G_SanitiseString( s, s2, sizeof( s2 ) );
   } else {
-    Q_strncpyz( s2, s, sizeof( s2 ) );
-    Q_CleanStr( s2 );
+    Q_strncpyz( s2_temp, s, sizeof( s2_temp ) );
+    Q_CleanStr( s2_temp );
+    Q_StringToLower(s2_temp, s2, sizeof( s2 ));
   }
   if( !s2[ 0 ] )
     return 0;
@@ -237,8 +240,9 @@ int G_ClientNumbersFromString(
     if(alphanumeric) {
       G_SanitiseString( p->pers.netname, n2, sizeof( n2 ) );
     } else {
-      Q_strncpyz( n2, p->pers.netname, sizeof( n2 ) );
-      Q_CleanStr( n2 );
+      Q_strncpyz( n2_temp, p->pers.netname, sizeof( n2_temp ) );
+      Q_CleanStr( n2_temp );
+      Q_StringToLower(n2_temp, n2, sizeof( n2 ));
     }
     if( strstr( n2, s2 ) )
     {
