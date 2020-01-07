@@ -995,6 +995,18 @@ char *Q_CleanStr( char *string ) {
 	return string;
 }
 
+
+void Q_StringToLower(char *in, char *out, int len) {
+	len--;
+
+	while(*in && len > 0) {
+		*out++ = tolower(*in);
+		len--;
+		in++;
+	}
+	*out = 0;
+}
+
 int Q_CountChar(const char *string, char tocount)
 {
 	int count;
