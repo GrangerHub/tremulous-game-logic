@@ -39,8 +39,11 @@ void G_SanitiseString( char *in, char *out, int len )
   {
     if( Q_IsColorString( in ) )
     {
-      in += 2;    // skip color code
+      in += Q_ColorStringLength(in);    // skip color code
       continue;
+    }
+    else if(Q_IsColorEscapeEscape(in)) {
+      in++;
     }
 
     if( isalnum( *in ) )
@@ -1082,13 +1085,27 @@ void G_CensorString( char *out, const char *in, int len, gentity_t *ent )
   {
     if( Q_IsColorString( in ) )
     {
-      if( len < 2 )
+      int color_string_length = Q_ColorStringLength(in);
+      int i;
+
+      if( len < color_string_length )
         break;
-      *out++ = *in++;
-      *out++ = *in++;
-      len -= 2;
+
+      for(i = 0; i < color_string_length; i++) {
+        *out++ = *in++;
+      }
+
+      len -= color_string_length;
       continue;
     }
+    else if(Q_IsColorEscapeEscape(in)) {
+      if( len < 1 )
+        break;
+
+      *out++ = *in++;
+      len--;
+    }
+
     if( !isalnum( *in ) )
     {
       if( len < 1 )
@@ -1105,9 +1122,13 @@ void G_CensorString( char *out, const char *in, int len, gentity_t *ent )
       {
         if( Q_IsColorString( s ) )
         {
-          s += 2;
+          s += Q_ColorStringLength(s);
           continue;
         }
+        else if(Q_IsColorEscapeEscape(s)) {
+          s++;
+        }
+
         if( !isalnum( *s ) )
         {
           s++;
@@ -5792,8 +5813,11 @@ void G_DecolorString( char *in, char *out, int len )
       continue;
     }
     if( Q_IsColorString( in ) && decolor ) {
-      in += 2;
+      in += Q_ColorStringLength(in);
       continue;
+    } if(Q_IsColorEscapeEscape(in)) {
+      *out++ = *in++;
+      len--;
     }
     *out++ = *in++;
     len--;

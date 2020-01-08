@@ -36,7 +36,6 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 vec3_t	vec3_origin = {0,0,0};
 vec3_t	axisDefault[3] = { { 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, 1 } };
 
-
 vec4_t		colorBlack	= {0, 0, 0, 1};
 vec4_t		colorRed	= {1, 0, 0, 1};
 vec4_t		colorGreen	= {0, 1, 0, 1};
@@ -161,6 +160,127 @@ vec3_t	bytedirs[NUMVERTEXNORMALS] =
 {-0.425325f, 0.688191f, -0.587785f}, {-0.425325f, -0.688191f, -0.587785f}, 
 {-0.587785f, -0.425325f, -0.688191f}, {-0.688191f, -0.587785f, -0.425325f}
 };
+
+//==============================================================
+
+void	Q_GetVectFromHexColor(const char *color_code, vec4_t color) {
+	const char *c = color_code + 1; // skip Q_COLOR_ESCAPE
+	int  i;
+	qboolean is_short_hex_color;
+
+	assert(color);
+	assert(color_code);
+	assert(Q_IsColorString(color_code));
+	assert(Q_IsHexColor(c));
+
+	//clear to color
+	for(i = 0; i < 4; i++) {
+		color[i] = 0;
+	}
+
+	is_short_hex_color = Q_IsShortHexColor(c);
+
+	//skip Q_COLOR_HEX_ESCAPE
+	c++;
+
+	//the long hex color format uses and extra Q_COLOR_HEX_ESCAPE
+	if(!is_short_hex_color) {
+		c++;
+	}
+
+	//convert the particular hex character
+	for(i = 0; i < Q_NumOfColorCodeDigits(color_code); i++) {
+		int val;
+
+		if(isdigit(*c)) {
+			val = *c - '0';
+		} else {
+			switch (tolower(*c)) {
+				case 'a':
+					val = 10;
+					break;
+				case 'b':
+					val = 11;
+					break;
+				case 'c':
+					val = 12;
+					break;
+				case 'd':
+					val = 13;
+					break;
+				case 'e':
+					val = 14;
+					break;
+				case 'f':
+					val = 15;
+					break;
+
+				default:
+					val = 15;
+			}
+		}
+
+		if(!is_short_hex_color) {
+			// determine if this is the first or seconad charcter of the particul hex value
+			if((i % 2) == 0) {
+				val *= 16;
+			}
+		}
+
+		//set the appropriate absulute color values
+		if(i < (is_short_hex_color ? 1 : 2)) {
+			color[0] += val;
+		} else if(i < (is_short_hex_color ? 2 : 4)) {
+			color[1] += val;
+		} else if(i < (is_short_hex_color ? 3 : 6)) {
+			color[2] += val;
+		}
+
+		//increment to the next hex color character.
+		c++;
+	}
+
+	//convert color values to a fractional value
+	if(is_short_hex_color) {
+		for(i = 0; i < 3; i++) {
+			color[i] = color[i] / 15;
+		}
+	} else {
+		for(i = 0; i < 3; i++) {
+			color[i] = color[i] / 255;
+		}
+	}
+
+	//always opaque
+	color[3] = 1;
+}
+
+int Q_ApproxBasicColorIndexFromVectColor(const vec4_t color) {
+	int			best_index = 7;
+	int			i;
+	float		best_color_distance = 2.0;
+
+	for(i = 0; i < 8; i++) {
+		vec4_t   basic_color;
+		vec3_t   color_diff;
+		float    distance;
+		int      j;
+
+		Vector4Copy(g_color_table[i], basic_color);
+		for(j = 0; j < 3; j++) {
+			color_diff[j] = color[j] - basic_color[j];
+		}
+
+		distance = VectorLength(color_diff);
+
+		if(distance < best_color_distance) {
+			best_color_distance = distance;
+			best_index = i;
+		}
+	}
+
+	return best_index;
+}
 
 //==============================================================
 
