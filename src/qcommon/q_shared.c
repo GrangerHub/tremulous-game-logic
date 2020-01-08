@@ -963,8 +963,10 @@ int Q_PrintStrlen( const char *string ) {
 	p = string;
 	while( *p ) {
 		if( Q_IsColorString( p ) ) {
-			p += 2;
+			p += Q_ColorStringLength(p);
 			continue;
+		} else if(Q_IsColorEscapeEscape(p)) {
+			p++;
 		}
 		p++;
 		len++;
@@ -983,9 +985,13 @@ char *Q_CleanStr( char *string ) {
 	d = string;
 	while ((c = *s) != 0 ) {
 		if ( Q_IsColorString( s ) ) {
-			s++;
+			s += Q_ColorStringLength(s) - 1;
 		}		
 		else if ( c >= 0x20 && c <= 0x7E ) {
+			if(Q_IsColorEscapeEscape(s)) {
+				s++;
+				c = *s;
+			}
 			*d++ = c;
 		}
 		s++;
@@ -1003,6 +1009,86 @@ void Q_StringToLower(char *in, char *out, int len) {
 		*out++ = tolower(*in);
 		len--;
 		in++;
+	}
+	*out = 0;
+}
+
+void Q_RemoveUnusedColorStrings(char *in, char *out, int outSize) {
+	int len = 0;
+
+	outSize--;
+
+	for(; *in; in++) {
+		if( Q_IsColorString( in ) )
+    {
+      int color_string_length = Q_ColorStringLength(in);
+      int checked_index = color_string_length;
+      qboolean skip = qfalse;
+
+      //remove unused color strings
+      while(1) {
+        if( Q_IsColorString( in + color_string_length ) )
+        {
+          skip = qtrue;
+          in += color_string_length - 1;
+          break;
+        } else if(*in == ' ') {
+          //spaces don't use the color strings
+          checked_index++;
+
+          if(!(*(in + checked_index))) {
+            //reached the end of the name without using this string
+            skip = qtrue;
+            in += color_string_length - 1;
+            break;
+          }
+          continue;
+        }
+
+        if(!(*(in + checked_index))) {
+          //reached the end of the name without using this string
+          skip = qtrue;
+          in += color_string_length - 1;
+          break;
+        }
+
+        //this color string is used
+        break;
+      }
+
+      if(skip) {
+        continue;
+      }
+
+      in++;
+
+      // make sure room in dest for both chars
+      if( len > outSize - color_string_length )
+        break;
+
+      *out++ = Q_COLOR_ESCAPE;
+
+      if(Q_IsHardcodedColor(in - 1)) {
+        *out++ = *in;
+      } else {
+				int i;
+ 
+        for(i = 0; i < (color_string_length - 1); i++) {
+          *out++ = *(in + i);
+        }
+        in += color_string_length - 1;
+      }
+
+      len += color_string_length;
+      continue;
+    } else if(Q_IsColorEscapeEscape(in)) {
+			*out++ = *in;
+			in++;
+			len++;
+		}
+
+		*out++ = *in;
+		len++;
 	}
 	*out = 0;
 }

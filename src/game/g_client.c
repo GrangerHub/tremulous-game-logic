@@ -787,17 +787,65 @@ static void G_ClientCleanName( const char *in, char *out, int outSize,
     // check colors
     if( Q_IsColorString( in ) )
     {
+      int color_string_length = Q_ColorStringLength(in);
+      int checked_index = color_string_length;
+      qboolean skip = qfalse;
+
+      //remove unused color strings
+      while(1) {
+        if( Q_IsColorString( in + color_string_length ) )
+        {
+          skip = qtrue;
+          in += color_string_length - 1;
+          break;
+        } else if(*in == ' ') {
+          //spaces don't use the color strings
+          checked_index++;
+
+          if(!(*(in + checked_index))) {
+            //reached the end of the name without using this string
+            skip = qtrue;
+            in += color_string_length - 1;
+            break;
+          }
+          continue;
+        }
+
+        if(!(*(in + checked_index))) {
+          //reached the end of the name without using this string
+          skip = qtrue;
+          in += color_string_length - 1;
+          break;
+        }
+
+        //this color string is used
+        break;
+      }
+
+      if(skip) {
+        continue;
+      }
+
       in++;
 
       // make sure room in dest for both chars
-      if( len > outSize - 2 )
+      if( len > outSize - color_string_length )
         break;
 
       *out++ = Q_COLOR_ESCAPE;
 
-      *out++ = *in;
+      if(Q_IsHardcodedColor(in - 1)) {
+        *out++ = *in;
+      } else {
+        int i;
+ 
+        for(i = 0; i < (color_string_length - 1); i++) {
+          *out++ = *(in + i);
+        }
+        in += color_string_length - 1;
+      }
 
-      len += 2;
+      len += color_string_length;
       continue;
     }
     else if( !g_emoticonsAllowedInNames.integer && G_IsEmoticon( in, &escaped ) )
@@ -812,6 +860,10 @@ static void G_ClientCleanName( const char *in, char *out, int outSize,
       if( escaped )
         in++;
       continue;
+    } else if(Q_IsColorEscapeEscape(in)) {
+      *out++ = *in;
+      in++;
+      len++;
     }
 
     // don't allow too many consecutive spaces
