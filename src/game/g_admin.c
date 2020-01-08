@@ -963,7 +963,12 @@ static void admin_out( void *admin, char *str )
   for( i = 0; l && l->name[ i ]; i++ )
   {
     if( Q_IsColorString( l->name + i ) )
-      lncol += 2;
+      lncol += Q_ColorStringLength(l->name + i);
+    else if(Q_IsColorEscapeEscape(l->name + i))
+    {
+      lncol++;
+      i++;
+    }
   }
   Com_sprintf( str, MAX_STRING_CHARS, "%-6d %*s^7 %s",
     a->level, admin_level_maxname + lncol - 1, l ? l->name : "(null)",
@@ -2968,7 +2973,11 @@ qboolean G_admin_listplayers( gentity_t *ent )
     for( colorlen = j = 0; lname[ j ]; j++ )
     {
       if( Q_IsColorString( &lname[ j ] ) )
-        colorlen += 2;
+        colorlen += Q_ColorStringLength(&lname[ j ]);
+      else if(Q_IsColorEscapeEscape(&lname[j])) {
+        colorlen++;
+        j++;
+      }
     }
 
     ADMBP( va( "%2i ^%c%c %s %s^7 %*s^7 ^1%c%c^7 %s^7 %s%s%s\n",
@@ -3017,7 +3026,11 @@ static void ban_out( void *ban, char *str )
   for( i = 0; b->name[ i ]; i++ )
   {
     if( Q_IsColorString( &b->name[ i ] ) )
-      colorlen1 += 2;
+      colorlen1 += Q_ColorStringLength(&b->name[ i ]);
+    else if(Q_IsColorEscapeEscape(&b->name[i])) {
+      colorlen1++;
+      i++;
+    }
   }
 
   // only print out the the date part of made

@@ -2010,8 +2010,10 @@ float UI_Char_Width( const char **text, float scale )
   {
     if( Q_IsColorString( *text ) )
     {
-      *text += 2;
+      *text += Q_ColorStringLength(*text);
       return 0.0f;
+    } else if(Q_IsColorEscapeEscape(*text)) {
+      *text += 1;
     }
 
     if( **text == INDENT_MARKER )
@@ -2079,11 +2081,15 @@ float UI_Text_Height( const char *text, float scale )
     {
       if( Q_IsColorString( s ) )
       {
-        s += 2;
+        s += Q_ColorStringLength(s);
         continue;
       }
       else
       {
+        if(Q_IsColorEscapeEscape(s)) {
+          s++;
+        }
+
         glyph = &font->glyphs[( int )*s];
 
         if( max < glyph->height )
@@ -2234,12 +2240,17 @@ static void UI_Text_Paint_Generic( float x, float y, float scale, float gapAdjus
     {
       if( Q_IsColorString( s ) )
       {
-        memcpy( newColor, g_color_table[ColorIndex( *( s+1 ) )],
-                sizeof( newColor ) );
+        if(Q_IsHardcodedColor(s)) {
+          Vector4Copy(g_color_table[ColorIndex( *( s+1 ) )], newColor);
+        } else {
+          Q_GetVectFromHexColor(s, newColor);
+        }
         newColor[3] = color[3];
         DC->setColor( newColor );
-        s += 2;
+        s += Q_ColorStringLength(s);
         continue;
+      } else if(Q_IsColorEscapeEscape(s)) {
+        s++;
       }
 
       if( *s == INDENT_MARKER )
@@ -4336,9 +4347,15 @@ static void SkipColorCodes( const char **text, char *lastColor )
 {
   while( Q_IsColorString( *text ) )
   {
-    lastColor[ 0 ] = (*text)[ 0 ];
-    lastColor[ 1 ] = (*text)[ 1 ];
-    (*text) += 2;
+    const int color_chars = Q_ColorStringLength(*text);
+    int       i;
+
+    for(i = 0; i < color_chars; i++) {
+      lastColor[ i ] = (*text)[ i ];
+    }
+
+    lastColor[color_chars] = '\0';
+    (*text) += color_chars;
   }
 }
 
@@ -4359,7 +4376,7 @@ const char *Item_Text_Wrap( const char *text, float scale, float width )
 {
   static char   out[ 8192 ] = "";
   char          *paint = out;
-  char          c[ 3 ] = "";
+  char          c[ 9 ] = "";
   const char    *p;
   const char    *eos;
   float         indentWidth = 0.0f;
@@ -4463,8 +4480,13 @@ const char *Item_Text_Wrap( const char *text, float scale, float width )
 
     if( c[ 0 ] )
     {
-      *paint++ = c[ 0 ];
-      *paint++ = c[ 1 ];
+      const int color_chars = Q_ColorStringLength(c);
+      int       i;
+
+      for(i = 0; i < color_chars; i++) {
+        *paint++ = c[ i ];
+      }
+
       *paint = '\0';
     }
   }

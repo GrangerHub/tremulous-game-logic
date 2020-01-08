@@ -1251,8 +1251,17 @@ char *Cvar_InfoString(int bit)
 
 	for(var = cvar_vars; var; var = var->next)
 	{
-		if(var->name && (var->flags & bit))
+		if(var->name && (var->flags & bit)) {
+			if(var->flags & CVAR_REMOVE_UNUSED_COLOR_STRINGS) {
+				char cleaned_string[MAX_CVAR_VALUE_STRING];
+
+				Q_RemoveUnusedColorStrings(var->string, cleaned_string, MAX_CVAR_VALUE_STRING);
+				if(Q_stricmp(cleaned_string, var->string)) {
+					Cvar_Set(var->name, cleaned_string);
+				}
+			}
 			Info_SetValueForKey (info, var->name, var->string);
+		}
 	}
 
 	return info;
