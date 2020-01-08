@@ -54,8 +54,10 @@ qboolean BG_Check_Game_Mode_Name(
 
   while(*game_mode_raw && len > 0) {
     if(Q_IsColorString( game_mode_raw)) {
-      game_mode_raw += 2;    // skip color code
+      game_mode_raw += Q_ColorStringLength(game_mode_raw);    // skip color code
       continue;
+    } else if(Q_IsColorEscapeEscape(game_mode_raw)) {
+      game_mode_raw++;
     }
 
     if(isalnum(*game_mode_raw)) {

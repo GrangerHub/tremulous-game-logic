@@ -435,7 +435,16 @@ extern	vec4_t		colorGold;
 extern	vec4_t		colorIndigo;
 
 #define Q_COLOR_ESCAPE	'^'
-#define Q_IsColorString(p)	((p) && *(p) == Q_COLOR_ESCAPE && *((p)+1) && isalnum(*((p)+1))) // ^[0-9a-zA-Z]
+#define Q_COLOR_HEX_ESCAPE '#'
+#define Q_IsShortHexColor(p) ((p) && *(p) == Q_COLOR_HEX_ESCAPE && *((p)+1) && isalnum(*((p)+1)) && *((p)+2) && isalnum(*((p)+2)) && *((p)+3) && isalnum(*((p)+3)))
+#define Q_IsLongHexColor(p) ((p) && *(p) == Q_COLOR_HEX_ESCAPE && *((p)+1) && *((p)+1) == Q_COLOR_HEX_ESCAPE && *((p)+2) && isalnum(*((p)+2)) && *((p)+3) && isalnum(*((p)+3)) && *((p)+4) && isalnum(*((p)+4)) && *((p)+5) && isalnum(*((p)+5)) && *((p)+6) && isalnum(*((p)+6)) && *((p)+7) && isalnum(*((p)+7)))
+#define Q_IsHexColor(p)     (Q_IsShortHexColor(p) || Q_IsLongHexColor(p))
+#define Q_IsHardcodedColor(p) ((p) && *(p) == Q_COLOR_ESCAPE && *((p)+1) && *((p)+1) != Q_COLOR_ESCAPE && (isalnum(*((p)+1))))
+#define Q_IsColorString(p)	((p) && *(p) == Q_COLOR_ESCAPE && *((p)+1) && *((p)+1) != Q_COLOR_ESCAPE && (Q_IsHardcodedColor(p) || Q_IsHexColor(p+1))) // ^[0-9a-zA-Z] or for custom short hex ^#[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F] or custom long hex ^##[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]
+#define Q_IsColorEscapeEscape(p) ((p) && *(p) == Q_COLOR_ESCAPE && *((p)+1) && *((p)+1) == Q_COLOR_ESCAPE)
+#define Q_ColorStringLength(p) (Q_IsHardcodedColor(p) ? 2 : (Q_IsShortHexColor(p+1) ? 5 : 9))
+#define Q_NumOfColorCodeDigits(p) (Q_IsHardcodedColor(p) ? 1 : (Q_IsShortHexColor(p+1) ? 3 : 6))
+
 
 #define COLOR_BLACK	'0'
 #define COLOR_RED	'1'
@@ -472,6 +481,9 @@ extern	vec4_t		colorIndigo;
 #define S_COLOR_GOLD		"^m"
 #define S_COLOR_SILVER		"^n"
 #define S_COLOR_INDIGO		"^o"
+
+void	Q_GetVectFromHexColor(const char *color_code, vec4_t color);
+int   Q_ApproxBasicColorIndexFromVectColor(const vec4_t color);
 
 #define INDENT_MARKER '\v'
 void Q_StripIndentMarker(char *string);
@@ -661,6 +673,13 @@ static ID_INLINE int VectorCompare( const vec3_t v1, const vec3_t v2 ) {
 	return 1;
 }
 
+static ID_INLINE int Vector4Compare( const vec4_t v1, const vec4_t v2 ) {
+	if (v1[0] != v2[0] || v1[1] != v2[1] || v1[2] != v2[2] || v1[3] != v2[3]) {
+		return 0;
+	}			
+	return 1;
+}
+
 static ID_INLINE int VectorCompareEpsilon(
 		const vec3_t v1, const vec3_t v2, float epsilon )
 {
@@ -726,6 +745,8 @@ static ID_INLINE void CrossProduct( const vec3_t v1, const vec3_t v2, vec3_t cro
 
 #else
 int VectorCompare( const vec3_t v1, const vec3_t v2 );
+
+int Vector4Compare(const vec_t *v1, const vec_t *v2);
 
 vec_t VectorLength( const vec3_t v );
 
@@ -949,6 +970,7 @@ int Q_PrintStrlen( const char *string );
 // removes color sequences from string
 char *Q_CleanStr( char *string );
 void Q_StringToLower( char *in, char *out, int len );
+void Q_RemoveUnusedColorStrings(char *in, char *out, int len);
 // parse "\n" into '\n'
 void Q_ParseNewlines( char *dest, const char *src, int destsize );
 // Count the number of char tocount encountered in string
@@ -1041,6 +1063,7 @@ default values.
 #define CVAR_SERVER_CREATED	0x0800	// cvar was created by a server the client connected to.
 #define CVAR_VM_CREATED		0x1000	// cvar was created exclusively in one of the VMs.
 #define CVAR_PROTECTED		0x2000	// prevent modifying this var from VMs or the server
+#define CVAR_REMOVE_UNUSED_COLOR_STRINGS 0x4000 // applied in Cvar_InfoString()
 #define CVAR_ALTERNATE_SYSTEMINFO	0x1000000
 // These flags are only returned by the Cvar_Flags() function
 #define CVAR_MODIFIED		0x40000000	// Cvar was modified
