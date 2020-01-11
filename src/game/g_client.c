@@ -790,31 +790,29 @@ static void G_ClientCleanName( const char *in, char *out, int outSize,
       int color_string_length = Q_ColorStringLength(in);
       int checked_index = color_string_length;
       qboolean skip = qfalse;
+      const char *temp_ptr = in;
 
       //remove unused color strings
       while(1) {
-        if( Q_IsColorString( in + color_string_length ) )
+        if( Q_IsColorString( temp_ptr + checked_index ) )
         {
           skip = qtrue;
-          in += color_string_length - 1;
           break;
-        } else if(*in == ' ') {
+        } else if(*(temp_ptr + checked_index) == ' ') {
           //spaces don't use the color strings
           checked_index++;
 
-          if(!(*(in + checked_index))) {
+          if(!(*(temp_ptr + checked_index))) {
             //reached the end of the name without using this string
             skip = qtrue;
-            in += color_string_length - 1;
             break;
           }
           continue;
         }
 
-        if(!(*(in + checked_index))) {
+        if(!(*(temp_ptr + checked_index))) {
           //reached the end of the name without using this string
           skip = qtrue;
-          in += color_string_length - 1;
           break;
         }
 
@@ -823,6 +821,7 @@ static void G_ClientCleanName( const char *in, char *out, int outSize,
       }
 
       if(skip) {
+        in += (color_string_length - 1);
         continue;
       }
 
@@ -842,7 +841,7 @@ static void G_ClientCleanName( const char *in, char *out, int outSize,
         for(i = 0; i < (color_string_length - 1); i++) {
           *out++ = *(in + i);
         }
-        in += color_string_length - 1;
+        in += color_string_length - 2;
       }
 
       len += color_string_length;
