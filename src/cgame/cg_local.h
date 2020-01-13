@@ -1506,6 +1506,8 @@ typedef struct
 } buildStat_t;
 
 
+#define MAX_KILLMSG_CHARS MAX_COLORFUL_NAME_LENGTH*3+1
+
 // The client game static (cgs) structure hold everything
 // loaded or calculated from the gamestate.  It will NOT
 // be cleared when a tournement restart is done, allowing
@@ -1604,8 +1606,8 @@ typedef struct
   voice_t       *voices;
 
   // Kill Message
-  char          killMsgKillers[ TEAMCHAT_HEIGHT ][ 33*3+1 ];
-  char          killMsgVictims[ TEAMCHAT_HEIGHT ][ 33*3+1 ];
+  char          killMsgKillers[ TEAMCHAT_HEIGHT ][ MAX_KILLMSG_CHARS ];
+  char          killMsgVictims[ TEAMCHAT_HEIGHT ][ MAX_KILLMSG_CHARS ];
   int           killMsgWeapons[ TEAMCHAT_HEIGHT ];
   int           killMsgMsgTimes[ TEAMCHAT_HEIGHT ];
   int           killMsgPos;

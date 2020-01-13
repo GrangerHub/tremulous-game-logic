@@ -210,7 +210,12 @@ void Con_CheckResize (void)
 	char		tbuf[CON_TEXTSIZE];
 	vec4_t	tcbuf[CON_TEXTSIZE];
 
-	width = (SCREEN_WIDTH / SMALLCHAR_WIDTH) - 2;
+	if (cls.glconfig.vidWidth) {
+		width = cls.glconfig.vidWidth / SMALLCHAR_WIDTH -2;
+		g_consoleField.widthInChars = width -2;
+	} else {
+		width = (SCREEN_WIDTH / SMALLCHAR_WIDTH) - 2;
+	}
 
 	if (width == con.linewidth)
 		return;
