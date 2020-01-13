@@ -79,6 +79,7 @@ void CG_AddToKillMsg( const char* killername, const char* victimname, int icon )
       *k++ = COLOR_WHITE;
       klen = 0;
       kls = NULL;
+      break;
     }
 
     if( *killername == ' ' )
@@ -86,8 +87,17 @@ void CG_AddToKillMsg( const char* killername, const char* victimname, int icon )
     else
       kls = NULL;
 
-    *k++ = *killername++;
-    klen++;
+    if(Q_IsColorString(killername)) {
+      const int color_string_len = Q_ColorStringLength(killername);
+      int       i;
+
+      for(i = 0; i < color_string_len; i++) {
+        *k++ = *killername++;
+      }
+    } else {
+      *k++ = *killername++;
+      klen++;
+    }
   }
 
   // Victims name
@@ -108,6 +118,7 @@ void CG_AddToKillMsg( const char* killername, const char* victimname, int icon )
           *v++ = COLOR_WHITE;
           vlen = 0;
           vls = NULL;
+          break;
         }
 
         if( *victimname == ' ' )
@@ -115,8 +126,17 @@ void CG_AddToKillMsg( const char* killername, const char* victimname, int icon )
         else
           vls = NULL;
 
-        *v++ = *victimname++;
-        vlen++;
+        if(Q_IsColorString(killername)) {
+          const int color_string_len = Q_ColorStringLength(killername);
+          int       i;
+
+          for(i = 0; i < color_string_len; i++) {
+            *v++ = *victimname++;
+          }
+        } else {
+          *v++ = *victimname++;
+          vlen++;
+        }
       }
 
   cgs.killMsgMsgTimes[ index ] = cg.time;
