@@ -794,7 +794,7 @@ typedef struct
 {
   qboolean    infoValid;
 
-  char        name[ MAX_NAME_LENGTH ];
+  char        name[ MAX_COLORFUL_NAME_LENGTH ];
   team_t      team;
 
   int         score;                      // updated by score servercmds
@@ -1111,7 +1111,7 @@ typedef struct
   score_t       scores[MAX_CLIENTS];
   qboolean      scoreBoardShowing;
   int           scoreFadeTime;
-  char          killerName[ MAX_NAME_LENGTH ];
+  char          killerName[ MAX_COLORFUL_NAME_LENGTH ];
   char          spectatorList[ MAX_STRING_CHARS ];  // list of names
   int           spectatorTime;                      // next time to offset
   float         spectatorOffset;                    // current offset from start
@@ -1599,7 +1599,7 @@ typedef struct
   int           voteTime[ NUM_TEAMS ];
   int           voteCast[ NUM_TEAMS ];   // Total number of yes and no votes combined
   int           voteActive[ NUM_TEAMS ]; // Total number of active clients during a vote
-  char          voteCaller[ NUM_TEAMS ][ MAX_NAME_LENGTH ];
+  char          voteCaller[ NUM_TEAMS ][ MAX_COLORFUL_NAME_LENGTH ];
   qboolean      voteModified[ NUM_TEAMS ]; // beep whenever changed
   char          voteString[ NUM_VOTE_STRINGS ][ NUM_TEAMS ][ MAX_STRING_TOKENS ];
   qboolean      voteAlarmPlay[ NUM_TEAMS ];

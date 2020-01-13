@@ -738,7 +738,7 @@ G_ClientNewbieName
 static const char *G_ClientNewbieName( gclient_t *client )
 {
   static int  nextNumber = 1;
-  static char name[ MAX_NAME_LENGTH ];
+  static char name[ MAX_COLORFUL_NAME_LENGTH ];
   int         number;
 
   if( !g_newbieNameNumbering.integer ||
@@ -777,6 +777,7 @@ static void G_ClientCleanName( const char *in, char *out, int outSize,
   int   len, colorlessLen;
   char  *p;
   int   spaces;
+  int   total_color_length = 0;
   qboolean escaped;
   qboolean invalid = qfalse;
 
@@ -860,6 +861,7 @@ static void G_ClientCleanName( const char *in, char *out, int outSize,
       }
 
       len += color_string_length;
+      total_color_length += color_string_length;
       continue;
     }
     else if( !g_emoticonsAllowedInNames.integer && G_IsEmoticon( in, &escaped ) )
@@ -892,6 +894,10 @@ static void G_ClientCleanName( const char *in, char *out, int outSize,
 
     if( len > outSize - 1 )
       break;
+
+    if((len - total_color_length) >= MAX_NAME_LENGTH) {
+      break;
+    }
 
     *out++ = *in;
     colorlessLen++;
@@ -993,8 +999,8 @@ Q_EXPORT char *ClientUserinfoChanged( int clientNum, qboolean forceName )
   char      model[ MAX_QPATH ];
   char      buffer[ MAX_QPATH ];
   char      filename[ MAX_QPATH ];
-  char      oldname[ MAX_NAME_LENGTH ];
-  char      newname[ MAX_NAME_LENGTH ];
+  char      oldname[ MAX_COLORFUL_NAME_LENGTH ];
+  char      newname[ MAX_COLORFUL_NAME_LENGTH ];
   char      err[ MAX_STRING_CHARS ];
   qboolean  revertName = qfalse;
   gclient_t *client;
@@ -1074,6 +1080,8 @@ Q_EXPORT char *ClientUserinfoChanged( int clientNum, qboolean forceName )
 
       G_CensorString( client->pers.netname, newname,
         sizeof( client->pers.netname ), ent );
+      Info_SetValueForKey( userinfo, "name", client->pers.netname );
+      SV_SetUserinfo( clientNum, userinfo );
       if( !forceName && client->pers.connected == CON_CONNECTED )
       {
         client->pers.namelog->nameChangeTime = level.time;

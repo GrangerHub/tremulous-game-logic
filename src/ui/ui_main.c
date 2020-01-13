@@ -653,7 +653,7 @@ static void UI_BuildFindPlayerList( qboolean force )
   static int numFound, numTimeOuts;
   int i, j, k, resend;
   serverStatusInfo_t info;
-  char name[MAX_NAME_LENGTH+2];
+  char name[MAX_COLORFUL_NAME_LENGTH+2];
   char infoString[MAX_STRING_CHARS];
   qboolean duplicate;
 
@@ -2039,9 +2039,9 @@ static void UI_BuildPlayerList( void )
       Com_ClientListParse( &uiInfo.ignoreList[ uiInfo.playerCount ],
                           Info_ValueForKey( info, "ig" ) );
       Q_strncpyz( uiInfo.rawPlayerNames[uiInfo.playerCount],
-                  Info_ValueForKey( info, "n" ), MAX_NAME_LENGTH );
+                  Info_ValueForKey( info, "n" ), MAX_COLORFUL_NAME_LENGTH );
       Q_strncpyz( uiInfo.playerNames[uiInfo.playerCount],
-                  Info_ValueForKey( info, "n" ), MAX_NAME_LENGTH );
+                  Info_ValueForKey( info, "n" ), MAX_COLORFUL_NAME_LENGTH );
       Q_CleanStr( uiInfo.playerNames[uiInfo.playerCount] );
       uiInfo.clientNums[uiInfo.playerCount] = n;
 
@@ -2055,9 +2055,9 @@ static void UI_BuildPlayerList( void )
       if( team2 == team )
       {
         Q_strncpyz( uiInfo.rawTeamNames[uiInfo.myTeamCount],
-                    Info_ValueForKey( info, "n" ), MAX_NAME_LENGTH );
+                    Info_ValueForKey( info, "n" ), MAX_COLORFUL_NAME_LENGTH );
         Q_strncpyz( uiInfo.teamNames[uiInfo.myTeamCount],
-                    Info_ValueForKey( info, "n" ), MAX_NAME_LENGTH );
+                    Info_ValueForKey( info, "n" ), MAX_COLORFUL_NAME_LENGTH );
         Q_CleanStr( uiInfo.teamNames[uiInfo.myTeamCount] );
         uiInfo.teamClientNums[uiInfo.myTeamCount] = n;
 

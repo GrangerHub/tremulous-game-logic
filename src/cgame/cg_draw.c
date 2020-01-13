@@ -841,7 +841,7 @@ static void CG_DrawTeamOverlay(rectDef_t *rect, float scale, vec4_t color) {
   float             backgroundWidth = rect->w;
   float             fontScale = 0.30f;
   float             nameWidth = 0.45f * rect->w;
-  char              name[ MAX_NAME_LENGTH + 2 ];
+  char              name[ MAX_COLORFUL_NAME_LENGTH + 2 ];
   char              multiple[ 12 ];
   qboolean          made_an_entry = qfalse;
   char              entry[ 1024 ];
