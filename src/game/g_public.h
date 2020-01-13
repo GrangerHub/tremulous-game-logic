@@ -151,8 +151,8 @@ typedef struct scrim_team_member_s
   qboolean inuse;
   size_t   roster_id;
   qboolean standby;
-  char     netname[ MAX_NAME_LENGTH ];
-  char     registered_name[ MAX_NAME_LENGTH ];
+  char     netname[ MAX_COLORFUL_NAME_LENGTH ];
+  char     registered_name[ MAX_COLORFUL_NAME_LENGTH ];
   addr_t   ip;
   char     guid[ 33 ];
   qboolean guidless;
@@ -165,7 +165,7 @@ typedef struct scrim_team_roster_s
 
 typedef struct pers_scrim_team_info_s
 {
-  char                name[MAX_NAME_LENGTH];
+  char                name[MAX_COLORFUL_NAME_LENGTH];
   int                 current_team;
   qboolean            has_captain;
   char                captain_guid[ 33 ];

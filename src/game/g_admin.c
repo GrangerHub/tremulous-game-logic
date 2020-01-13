@@ -468,8 +468,8 @@ qboolean G_admin_name_check( gentity_t *ent, char *name, char *err, int len )
 {
   int i;
   gclient_t *client;
-  char testName[ MAX_NAME_LENGTH ] = {""};
-  char name2[ MAX_NAME_LENGTH ] = {""};
+  char testName[ MAX_COLORFUL_NAME_LENGTH ] = {""};
+  char name2[ MAX_COLORFUL_NAME_LENGTH ] = {""};
   g_admin_admin_t *admin;
   int alphaCount = 0;
 
@@ -948,7 +948,7 @@ static int admin_search( gentity_t *ent,
 
 static qboolean admin_match( void *admin, const void *match )
 {
-  char n1[ MAX_NAME_LENGTH ], n2[ MAX_NAME_LENGTH ];
+  char n1[ MAX_COLORFUL_NAME_LENGTH ], n2[ MAX_COLORFUL_NAME_LENGTH ];
   G_SanitiseString( (char *)match, n2, sizeof( n2 ) );
   if( !n2[ 0 ] )
     return qtrue;
@@ -1449,7 +1449,7 @@ qboolean G_admin_setlevel( gentity_t *ent )
 {
   char name[ MAX_NAME_LENGTH ] = {""};
   char lstr[ 12 ]; // 11 is max strlen() for 32-bit (signed) int
-  char testname[ MAX_NAME_LENGTH ] = {""};
+  char testname[ MAX_COLORFUL_NAME_LENGTH ] = {""};
   int i;
   gentity_t *vic = NULL;
   g_admin_admin_t *a = NULL;
@@ -1615,7 +1615,7 @@ qboolean G_admin_setlevel( gentity_t *ent )
 qboolean G_admin_register( gentity_t *ent )
 {
   char arg[ 16 ];
-  char playerName [ MAX_NAME_LENGTH ];
+  char playerName [ MAX_COLORFUL_NAME_LENGTH ];
   int  oldLevel;
   int  newLevel = 1;
 
@@ -1869,7 +1869,7 @@ qboolean G_admin_setdevmode( gentity_t *ent )
 qboolean G_admin_kick( gentity_t *ent )
 {
   int pid;
-  char name[ MAX_NAME_LENGTH ], *reason, err[ MAX_STRING_CHARS ];
+  char name[ MAX_COLORFUL_NAME_LENGTH ], *reason, err[ MAX_STRING_CHARS ];
   int minargc;
   gentity_t *vic;
 
@@ -1968,7 +1968,7 @@ qboolean G_admin_setivo( gentity_t* ent )
 qboolean G_admin_ban( gentity_t *ent )
 {
   int seconds;
-  char search[ MAX_NAME_LENGTH ];
+  char search[ MAX_COLORFUL_NAME_LENGTH ];
   char secs[ MAX_TOKEN_CHARS ];
   char *reason;
   char duration[ MAX_DURATION_LENGTH ];
@@ -2383,7 +2383,7 @@ qboolean G_admin_adjustban( gentity_t *ent )
 }
 
 qboolean G_admin_putteam(gentity_t *ent) {
-  char      name[MAX_NAME_LENGTH], team[sizeof("spectators")],
+  char      name[MAX_COLORFUL_NAME_LENGTH], team[sizeof("spectators")],
             err[MAX_STRING_CHARS];
   namelog_t *vic;
   team_t    old_team;
@@ -2624,7 +2624,7 @@ qboolean G_admin_warn( gentity_t *ent )
 {
   char      reason[ 64 ];
   int       pid;
-  char      name[ MAX_NAME_LENGTH ], err[ MAX_STRING_CHARS ];
+  char      name[ MAX_COLORFUL_NAME_LENGTH ], err[ MAX_STRING_CHARS ];
   gentity_t *vic;
 
   if( Cmd_Argc() < 3 )
@@ -2658,7 +2658,7 @@ qboolean G_admin_warn( gentity_t *ent )
 
 qboolean G_admin_mute( gentity_t *ent )
 {
-  char name[ MAX_NAME_LENGTH ];
+  char name[ MAX_COLORFUL_NAME_LENGTH ];
   char command[ MAX_ADMIN_CMD_LEN ];
   namelog_t *vic;
 
@@ -2716,7 +2716,7 @@ qboolean G_admin_mute( gentity_t *ent )
 
 qboolean G_admin_denybuild( gentity_t *ent )
 {
-  char name[ MAX_NAME_LENGTH ];
+  char name[ MAX_COLORFUL_NAME_LENGTH ];
   char command[ MAX_ADMIN_CMD_LEN ];
   namelog_t *vic;
 
@@ -2785,7 +2785,7 @@ qboolean G_admin_explode( gentity_t *ent )
 {
 
   int pid;
-  char name[ MAX_NAME_LENGTH ], *reason, err[ MAX_STRING_CHARS ];
+  char name[ MAX_COLORFUL_NAME_LENGTH ], *reason, err[ MAX_STRING_CHARS ];
   gentity_t *vic;
 
   if( Cmd_Argc() < 2 )
@@ -2839,7 +2839,7 @@ qboolean G_admin_listadmins( gentity_t *ent )
 {
   int i;
   char search[ MAX_NAME_LENGTH ] = {""};
-  char s[ MAX_NAME_LENGTH ] = {""};
+  char s[ MAX_COLORFUL_NAME_LENGTH ] = {""};
   int start = MAX_CLIENTS;
 
   if( Cmd_Argc() == 3 )
@@ -2911,7 +2911,7 @@ qboolean G_admin_listplayers( gentity_t *ent )
   gclient_t       *p;
   char            c, t; // color and team letter
   char            *registeredname;
-  char            lname[ MAX_NAME_LENGTH ];
+  char            lname[ MAX_COLORFUL_NAME_LENGTH ];
   char            muted, denied;
   int             colorlen;
   char            namecleaned[ MAX_NAME_LENGTH ];
@@ -3064,7 +3064,7 @@ qboolean G_admin_showbans( gentity_t *ent )
 {
   int i;
   int start = 1;
-  char filter[ MAX_NAME_LENGTH ] = {""};
+  char filter[ MAX_COLORFUL_NAME_LENGTH ] = {""};
   char name_match[ MAX_NAME_LENGTH ] = {""};
   qboolean ipmatch = qfalse;
   addr_t ip;
@@ -3338,7 +3338,7 @@ qboolean G_admin_forcespec( gentity_t *ent )
 {
   const int seconds = G_admin_parse_time( g_adminTempSpec.string );
   team_t    old_team;
-  char      name[MAX_NAME_LENGTH];
+  char      name[MAX_COLORFUL_NAME_LENGTH];
   namelog_t *vic;
 
   Cmd_ArgvBuffer(1, name, sizeof(name));
@@ -3424,8 +3424,8 @@ qboolean G_admin_forcespec( gentity_t *ent )
 qboolean G_admin_rename( gentity_t *ent )
 {
   int pid;
-  char name[ MAX_NAME_LENGTH ];
-  char newname[ MAX_NAME_LENGTH ];
+  char name[ MAX_COLORFUL_NAME_LENGTH ];
+  char newname[ MAX_COLORFUL_NAME_LENGTH ];
   char err[ MAX_STRING_CHARS ];
   char userinfo[ MAX_INFO_STRING ];
   gentity_t *victim = NULL;
@@ -3476,7 +3476,7 @@ qboolean G_admin_rename( gentity_t *ent )
 qboolean G_admin_transform( gentity_t *ent )
 {
   int pid;
-  char name[ MAX_NAME_LENGTH ];
+  char name[ MAX_COLORFUL_NAME_LENGTH ];
   char modelname[ MAX_NAME_LENGTH ];
   char skin[ MAX_NAME_LENGTH ];
   char err[ MAX_STRING_CHARS ];
@@ -3757,7 +3757,7 @@ static void namelog_out( void *namelog, char *str )
 }
 qboolean G_admin_namelog( gentity_t *ent )
 {
-  char search[ MAX_NAME_LENGTH ] = {""};
+  char search[ MAX_COLORFUL_NAME_LENGTH ] = {""};
   char s2[ MAX_NAME_LENGTH ] = {""};
   addr_t ip;
   qboolean ipmatch = qfalse;
@@ -4243,7 +4243,7 @@ static char *fates[] =
 qboolean G_admin_slap( gentity_t *ent )
 {
   int pid;
-  char name[ MAX_NAME_LENGTH ], *reason, err[ MAX_STRING_CHARS ];
+  char name[ MAX_COLORFUL_NAME_LENGTH ], *reason, err[ MAX_STRING_CHARS ];
   int minargc;
   gentity_t *vic;
   vec3_t dir;
@@ -4317,7 +4317,7 @@ qboolean G_admin_slap( gentity_t *ent )
 
 qboolean G_admin_buildlog( gentity_t *ent )
 {
-  char       search[ MAX_NAME_LENGTH ] = {""};
+  char       search[ MAX_COLORFUL_NAME_LENGTH ] = {""};
   char       s[ MAX_NAME_LENGTH ] = {""};
   char       n[ MAX_NAME_LENGTH ];
   char       stamp[ 8 ];
@@ -4695,7 +4695,7 @@ const char *G_admin_user_flag( char *oldflags, char *flag, qboolean add, qboolea
 qboolean G_admin_flag( gentity_t *ent )
 {
   char cmd[ MAX_NAME_LENGTH ] = {""};
-  char testname[ MAX_NAME_LENGTH ] = {""};
+  char testname[ MAX_COLORFUL_NAME_LENGTH ] = {""};
   char name[ MAX_NAME_LENGTH ] = {""};
   char flag[ MAX_ADMIN_FLAG_LEN ] = {""};
   char *flagptr = NULL;
@@ -5710,7 +5710,7 @@ qboolean G_admin_scrim(gentity_t *ent) {
     return qtrue;
   } else if(!Q_stricmp(subcmd, "putteam")) {
     int pid;
-    char name[ MAX_NAME_LENGTH ], team[ sizeof( "spectators" ) ],
+    char name[ MAX_COLORFUL_NAME_LENGTH ], team[ sizeof( "spectators" ) ],
          err[ MAX_STRING_CHARS ];
     gentity_t *vic;
     team_t teamnum = TEAM_NONE;
@@ -5973,7 +5973,7 @@ qboolean G_admin_scrim(gentity_t *ent) {
 
     return qtrue;
   } else if(!Q_stricmp(subcmd, "team_name")) {
-    char newname[ MAX_NAME_LENGTH ];
+    char newname[ MAX_COLORFUL_NAME_LENGTH ];
     char err[ MAX_STRING_CHARS ];
     team_t       playing_team;
     scrim_team_t scrim_team;
@@ -6031,7 +6031,7 @@ qboolean G_admin_scrim(gentity_t *ent) {
     G_Scrim_Send_Status( );
     return qtrue;
   } else if(!Q_stricmp(subcmd, "team_captain")) {
-    char                captain_name[ MAX_NAME_LENGTH ];
+    char                captain_name[ MAX_COLORFUL_NAME_LENGTH ];
     char                err[ MAX_STRING_CHARS ];
     scrim_team_t        scrim_team;
     scrim_team_member_t *member;
@@ -6154,7 +6154,7 @@ qboolean G_admin_scrim(gentity_t *ent) {
   } else if(!Q_stricmp(subcmd, "remove")) {
     scrim_team_t        scrim_team;
     scrim_team_member_t *member;
-    char name[ MAX_NAME_LENGTH ], err[ MAX_STRING_CHARS ], netname[ MAX_NAME_LENGTH ];
+    char name[ MAX_COLORFUL_NAME_LENGTH ], err[ MAX_STRING_CHARS ], netname[ MAX_COLORFUL_NAME_LENGTH ];
 
     if(!IS_SCRIM) {
       ADMP("^3scrim: ^7this subcommand requires scrim mode to be on\n");
@@ -6194,7 +6194,7 @@ qboolean G_admin_scrim(gentity_t *ent) {
     return qtrue;
   } else if(!Q_stricmp(subcmd, "warn")) {
     int       pid;
-    char      name[ MAX_NAME_LENGTH ], err[ MAX_STRING_CHARS ], reason[ 64 ];
+    char      name[ MAX_COLORFUL_NAME_LENGTH ], err[ MAX_STRING_CHARS ], reason[ 64 ];
     gentity_t *vic;
 
     if(!IS_SCRIM) {
@@ -6256,7 +6256,7 @@ qboolean G_admin_seen( gentity_t *ent )
 {
   int        offset = 0;
   char       offsetstr[ 10 ];
-  char       name[ MAX_NAME_LENGTH ];
+  char       name[ MAX_COLORFUL_NAME_LENGTH ];
 
   if( Cmd_Argc() < 2 )
   {

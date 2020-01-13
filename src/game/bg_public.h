@@ -126,7 +126,7 @@ typedef enum
 
 typedef struct scrim_team_info_s
 {
-  char     name[MAX_NAME_LENGTH];
+  char     name[MAX_COLORFUL_NAME_LENGTH];
   team_t   current_team;
   qboolean has_captain;
   char     captain_guid[ 33 ]; // guid is only stored in the game module, don't broadcast to clients

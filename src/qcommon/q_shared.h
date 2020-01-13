@@ -270,7 +270,8 @@ typedef enum
 #define	MAX_OSPATH			256		// max length of a filesystem pathname
 #endif
 
-#define	MAX_NAME_LENGTH			32		// max length of a client name
+#define	MAX_NAME_LENGTH			32		// max length of a client name ignoring colors
+#define MAX_COLORFUL_NAME_LENGTH MAX_CVAR_VALUE_STRING
 #define	MAX_HOSTNAME_LENGTH	80		// max length of a host name
 
 #define	MAX_SAY_TEXT	800
@@ -969,6 +970,9 @@ void    Q_cleanDelimitedString( char *dest, const char *src );
 int Q_PrintStrlen( const char *string );
 // removes color sequences from string
 char *Q_CleanStr( char *string );
+void Q_ApproxStrHexColors(
+  const char *in_string, char *out_string,
+	const size_t in_string_length, const size_t out_string_length);
 void Q_StringToLower( char *in, char *out, int len );
 void Q_RemoveUnusedColorStrings(char *in, char *out, int len);
 // parse "\n" into '\n'
