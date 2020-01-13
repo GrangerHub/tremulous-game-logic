@@ -195,10 +195,10 @@ int G_ClientNumbersFromString(
   gclient_t *p;
   int i, found = 0;
   char *endptr;
-  char n2[ MAX_NAME_LENGTH ] = {""};
-  char s2[ MAX_NAME_LENGTH ] = {""};
-  char n2_temp[ MAX_NAME_LENGTH ] = {""};
-  char s2_temp[ MAX_NAME_LENGTH ] = {""};
+  char n2[ MAX_COLORFUL_NAME_LENGTH ] = {""};
+  char s2[ MAX_COLORFUL_NAME_LENGTH ] = {""};
+  char n2_temp[ MAX_COLORFUL_NAME_LENGTH ] = {""};
+  char s2_temp[ MAX_COLORFUL_NAME_LENGTH ] = {""};
 
   if( max == 0 )
     return 0;
@@ -4493,7 +4493,7 @@ Cmd_Follow_f
 void Cmd_Follow_f( gentity_t *ent )
 {
   int   i;
-  char  arg[ MAX_NAME_LENGTH ];
+  char  arg[ MAX_COLORFUL_NAME_LENGTH ];
 
   // won't work unless spectating
   if( ent->client->sess.spectatorState == SPECTATOR_NOT )
@@ -4561,7 +4561,7 @@ void Cmd_FollowCycle_f( gentity_t *ent )
 static void Cmd_Ignore_f( gentity_t *ent )
 {
   int pids[ MAX_CLIENTS ];
-  char name[ MAX_NAME_LENGTH ];
+  char name[ MAX_COLORFUL_NAME_LENGTH ];
   char cmd[ 9 ];
   int matches = 0;
   int i;
@@ -5482,7 +5482,7 @@ void G_UnEscapeString( char *in, char *out, int len )
 void Cmd_PrivateMessage_f( gentity_t *ent )
 {
   int pids[ MAX_CLIENTS ];
-  char name[ MAX_NAME_LENGTH ];
+  char name[ MAX_COLORFUL_NAME_LENGTH ];
   char cmd[ 12 ];
   char text[ MAX_STRING_CHARS ];
   char *msg;

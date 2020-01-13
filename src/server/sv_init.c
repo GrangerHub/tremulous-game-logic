@@ -96,7 +96,7 @@ static const pers_scrim_t scrim_defaults =
 	35,          //int                    time_limit;
 	{            //pers_scrim_team_info_t team[];
 		{            //pers_scrim_team_info_t team[0];
-			"",          //char   name[MAX_NAME_LENGTH];
+			"",          //char   name[MAX_COLORFUL_NAME_LENGTH];
 			0,           //int    current_team;
 			qfalse,      //qboolean has_captain;
 			"",          //char     captain_guid[ 33 ];
@@ -301,7 +301,7 @@ static const pers_scrim_t scrim_defaults =
 			}
 		},
 		{            //pers_scrim_team_info_t team[1];
-			"Red",       //char   name[MAX_NAME_LENGTH];
+			"Red",       //char   name[MAX_COLORFUL_NAME_LENGTH];
 			1,           //int    current_team;
 			qfalse,      //qboolean has_captain;
 			"",          //char     captain_guid[ 33 ];
@@ -506,7 +506,7 @@ static const pers_scrim_t scrim_defaults =
 			}
 		},
 		{            //pers_scrim_team_info_t team[2];
-			"Blue",      //char   name[MAX_NAME_LENGTH];
+			"Blue",      //char   name[MAX_COLORFUL_NAME_LENGTH];
 			2,           //int    current_team;
 			qfalse,      //qboolean has_captain;
 			"",          //char     captain_guid[ 33 ];
@@ -1001,6 +1001,11 @@ void SV_SetUserinfo( int index, const char *val ) {
 
 	Q_strncpyz( svs.clients[index].userinfo, val, sizeof( svs.clients[ index ].userinfo ) );
 	Q_strncpyz( svs.clients[index].name, Info_ValueForKey( val, "name" ), sizeof(svs.clients[index].name) );
+	//for backwards compatibility approx hex color codes to hardcoded ansi
+	//color codes
+	Q_ApproxStrHexColors(
+		svs.clients[index].name, svs.clients[index].name_ansi,
+		sizeof(svs.clients[index].name), sizeof(svs.clients[index].name_ansi));
 }
 
 

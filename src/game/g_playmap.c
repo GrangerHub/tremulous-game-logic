@@ -690,7 +690,7 @@ playMapError_t G_ValidatePlayMapQueue( void )
       if ( !playMap.console &&
      !G_FindClientByGUID( playMap.guid ) )
         {
-          char name[MAX_NAME_LENGTH + 1];
+          char name[MAX_COLORFUL_NAME_LENGTH + 1];
 
           SV_GameSendServerCommand( -1,
                                   va( "print \"Removing playlist entry #%d for "
@@ -1269,7 +1269,7 @@ void G_PrintPlayMapQueue( gentity_t *ent )
   int       i, len;
   playMap_t *playMap;
   char      *flagString;
-  char      name[MAX_NAME_LENGTH + 1];
+  char      name[MAX_COLORFUL_NAME_LENGTH + 1];
 
   ADMBP_begin(); // begin buffer
 
