@@ -497,6 +497,8 @@ void Con_DrawSolidConsole( float frac ) {
 	vec4_t    *text_color;
 	int				row;
 	int				lines;
+	float			currentLuminance = 1.0;
+	qboolean	currentColorChanged = qfalse;
 //	qhandle_t		conShader;
 	vec4_t			currentColor;
 	vec4_t			color;
@@ -583,12 +585,30 @@ void Con_DrawSolidConsole( float frac ) {
 				continue;
 			}
 
-			if (!Vector4Compare(currentColor, text_color[x])) {
+			if(!Vector4Compare(currentColor, text_color[x])) {
+				currentColorChanged = qtrue;
 				Vector4Copy(text_color[x], currentColor);
-				re.SetColor( currentColor );
+				currentLuminance =
+					sqrt(
+						(0.299 * currentColor[0] * currentColor[0]) +
+						(0.587 * currentColor[1] * currentColor[1]) +
+						(0.114 * currentColor[2] * currentColor[2]));
 			}
 
-			SCR_DrawSmallChar(  con.xadjust + (x+1)*SMALLCHAR_WIDTH, y, text[x] & 0xff );
+			if(currentLuminance <= 0.24) {
+				//draw a white rectangle behind characters that are too dark
+				re.SetColor(colorWhite);
+				re.DrawStretchPic(
+					con.xadjust + (x+1)*SMALLCHAR_WIDTH, y, SMALLCHAR_WIDTH,
+					SMALLCHAR_HEIGHT, 0, 0, 0, 0, cls.whiteShader);
+				re.SetColor(currentColor);
+				currentColorChanged = qfalse;
+			} else if(currentColorChanged) {
+				re.SetColor(currentColor);
+				currentColorChanged = qfalse;
+			}
+
+			SCR_DrawSmallChar(con.xadjust + (x+1)*SMALLCHAR_WIDTH, y, text[x] & 0xff);
 		}
 	}
 
