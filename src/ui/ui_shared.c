@@ -2203,6 +2203,7 @@ static void UI_Text_Paint_Generic( float x, float y, float scale, float gapAdjus
   qhandle_t   emoticonHandle = 0;
   float       emoticonH, emoticonW;
   qboolean    emoticonEscaped;
+  qboolean    skip_color_string_check = qfalse;
   int         emoticonLen = 0;
   int         emoticonWidth;
   int         cursorX = -1;
@@ -2280,6 +2281,21 @@ static void UI_Text_Paint_Generic( float x, float y, float scale, float gapAdjus
           continue;
         }
       }
+    } else {
+      if(skip_color_string_check) {
+        skip_color_string_check = qfalse;
+      } else if( Q_IsColorString( s ) )
+      {
+         if(Q_IsHardcodedColor(s)) {
+          Vector4Copy(g_color_table[ColorIndex( *( s+1 ) )], newColor);
+        } else {
+          Q_GetVectFromHexColor(s, newColor);
+        }
+        newColor[3] = color[3];
+        DC->setColor( newColor );
+      } else if(Q_IsColorEscapeEscape(s)) {
+        skip_color_string_check = qtrue;
+      }
     }
 
     if( style == ITEM_TEXTSTYLE_SHADOWED ||
@@ -2336,6 +2352,7 @@ static void UI_Text_Paint_Generic( float x, float y, float scale, float gapAdjus
     if( cursorX >= 0 && !( ( DC->realTime / BLINK_DIVISOR ) & 1 ) )
     {
       glyph = &font->glyphs[ (int)cursor ];
+      DC->setColor(color);
       UI_Text_PaintChar( cursorX, y, useScale, glyph, 0.0f );
     }
   }
