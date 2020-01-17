@@ -1859,7 +1859,7 @@ void CG_DrawItemSelect( rectDef_t *rect, vec4_t color )
          color = colorRed;
          break;
        case 2:
-         color = colorMdGrey;
+         color = colorGray;
          break;
       }
       color[3] = 0.5;
