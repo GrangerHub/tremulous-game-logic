@@ -161,30 +161,22 @@ static void UI_MessageMode_f( void )
     default:
     case '\0':
       // Global
-      uiInfo.chatTeam             = qfalse;
-      uiInfo.chatAdmins           = qfalse;
-      uiInfo.chatClan             = qfalse;
+      chat_mode = CHAT_GLOBAL;
       break;
 
     case '2':
       // Team
-      uiInfo.chatTeam             = qtrue;
-      uiInfo.chatAdmins           = qfalse;
-      uiInfo.chatClan             = qfalse;
+      chat_mode = CHAT_TEAM;
       break;
 
     case '5':
       // Admins
-      uiInfo.chatTeam             = qfalse;
-      uiInfo.chatAdmins           = qtrue;
-      uiInfo.chatClan             = qfalse;
+      chat_mode = CHAT_ADMINS;
       break;
 
     case '6':
       // Clan
-      uiInfo.chatTeam             = qfalse;
-      uiInfo.chatAdmins           = qfalse;
-      uiInfo.chatClan             = qtrue;
+      chat_mode = CHAT_CLAN;
       break;
   }
 
@@ -194,14 +186,28 @@ static void UI_MessageMode_f( void )
   Menus_CloseByName( "say_admins" );
   Menus_CloseByName( "say_clan" );
 
-  if( uiInfo.chatTeam )
-    Menus_ActivateByName( "say_team" );
-  else if( uiInfo.chatAdmins )
-    Menus_ActivateByName( "say_admins" );
-  else if( uiInfo.chatClan )
-    Menus_ActivateByName( "say_clan" );
-  else
-    Menus_ActivateByName( "say" );
+  switch (chat_mode) {
+    case CHAT_GLOBAL:
+      Menus_ActivateByName( "say" );
+      break;
+
+    case CHAT_TEAM:
+      Menus_ActivateByName( "say_team" );
+      break;
+
+    case CHAT_ADMINS:
+      Menus_ActivateByName( "say_admins" );
+      break;
+
+    case CHAT_CLAN:
+      Menus_ActivateByName( "say_clan" );
+      break;
+
+    case NUM_CHAT_MODES:
+      chat_mode = CHAT_GLOBAL;
+      Menus_ActivateByName( "say" );
+      break;
+  }
 }
 
 static void UI_Me_f( void )

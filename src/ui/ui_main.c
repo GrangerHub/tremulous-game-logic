@@ -3232,6 +3232,8 @@ static void UI_RunMenuScript( char **args )
     else if( Q_stricmp( name, "Say" ) == 0 )
     {
       char buffer[ MAX_CVAR_VALUE_STRING ];
+      char clantagDecolored[ 32 ];
+
       trap_Cvar_VariableStringBuffer( "ui_sayBuffer", buffer, sizeof( buffer ) );
 
       if( !buffer[ 0 ] )
@@ -3256,33 +3258,43 @@ static void UI_RunMenuScript( char **args )
           buffer[ 0 ] == '\\' ) )
         {
           trap_Cmd_ExecuteText( EXEC_APPEND, va( "%s\n", buffer + 1 ) );
-        }
-        else if( uiInfo.chatTeam )
-          trap_Cmd_ExecuteText( EXEC_APPEND, va( "say_team \"%s\"\n", buffer ) );
-        else if( uiInfo.chatAdmins )
-          trap_Cmd_ExecuteText( EXEC_APPEND, va( "a \"%s\"\n", buffer ) );
-        else if( uiInfo.chatClan )
-        {
-          char clantagDecolored[ 32 ];
+        } else {
+          switch (chat_mode) {
+            case CHAT_GLOBAL:
+              trap_Cmd_ExecuteText( EXEC_APPEND, va( "say \"%s\"\n", buffer ) );
+              break;
 
-          Q_strncpyz(
-            clantagDecolored, ui_clantag.string,
-            sizeof(clantagDecolored) );
-          Q_CleanStr( clantagDecolored );
+            case CHAT_TEAM:
+              trap_Cmd_ExecuteText( EXEC_APPEND, va( "say_team \"%s\"\n", buffer ) );
+              break;
 
-          if( strlen(clantagDecolored) > 2 && strlen(clantagDecolored) < 11 ) {
-            trap_Cmd_ExecuteText(
-              EXEC_APPEND, va( "m \"%s\" \"%s\"\n", clantagDecolored, buffer ) );
-          } else {
-            //string isnt long enough
-            Com_Printf ( 
-              "^3Error:your ui_clantag has to be between 3 and 10 characters long. current value is:^7 %s^7\n",
-              clantagDecolored );
-            return;
+            case CHAT_ADMINS:
+              trap_Cmd_ExecuteText( EXEC_APPEND, va( "a \"%s\"\n", buffer ) );
+              break;
+
+            case CHAT_CLAN:
+              Q_strncpyz(
+                clantagDecolored, ui_clantag.string,
+                sizeof(clantagDecolored) );
+              Q_CleanStr( clantagDecolored );
+
+              if( strlen(clantagDecolored) > 2 && strlen(clantagDecolored) < 11 ) {
+                trap_Cmd_ExecuteText(
+                  EXEC_APPEND, va( "m \"%s\" \"%s\"\n", clantagDecolored, buffer ) );
+              } else {
+                //string isnt long enough
+                Com_Printf ( 
+                  "^3Error:your ui_clantag has to be between 3 and 10 characters long. current value is:^7 %s^7\n",
+                  clantagDecolored );
+                return;
+              }
+              break;
+
+            case NUM_CHAT_MODES:
+              chat_mode = CHAT_GLOBAL;
+              trap_Cmd_ExecuteText( EXEC_APPEND, va( "say \"%s\"\n", buffer ) );
+              break;
           }
-        }
-        else{
-          trap_Cmd_ExecuteText( EXEC_APPEND, va( "say \"%s\"\n", buffer ) );
         }
 
         say_unsubmitted_line[0] = '\0';
@@ -3300,16 +3312,55 @@ static void UI_RunMenuScript( char **args )
 
       if( ui_chatCommands.integer )
       {
-        if( buffer[ 0 ] == '/' || buffer[ 0 ] == '\\' )
+        if( buffer[ 0 ] == '/' || buffer[ 0 ] == '\\' ) {
           Menus_ReplaceActiveByName( "say_command" );
-        else if( uiInfo.chatTeam )
-          Menus_ReplaceActiveByName( "say_team" );
-        else if( uiInfo.chatAdmins )
-          Menus_ReplaceActiveByName( "say_admins" );
-        else if( uiInfo.chatClan )
-          Menus_ActivateByName( "say_clan" );
-        else
-          Menus_ReplaceActiveByName( "say" );
+        } else {
+          switch (chat_mode) {
+            case CHAT_GLOBAL:
+              Menus_ReplaceActiveByName( "say" );
+              break;
+
+            case CHAT_TEAM:
+              Menus_ReplaceActiveByName( "say_team" );
+              break;
+
+            case CHAT_ADMINS:
+              Menus_ReplaceActiveByName( "say_admins" );
+              break;
+
+            case CHAT_CLAN:
+              Menus_ReplaceActiveByName( "say_clan" );
+              break;
+
+            case NUM_CHAT_MODES:
+              chat_mode = CHAT_GLOBAL;
+              trap_Cmd_ExecuteText( EXEC_APPEND, va( "say \"%s\"\n", buffer ) );
+              break;
+          }
+        }
+      } else {
+        switch (chat_mode) {
+          case CHAT_GLOBAL:
+            Menus_ReplaceActiveByName( "say" );
+            break;
+
+          case CHAT_TEAM:
+            Menus_ReplaceActiveByName( "say_team" );
+            break;
+
+          case CHAT_ADMINS:
+            Menus_ReplaceActiveByName( "say_admins" );
+            break;
+
+          case CHAT_CLAN:
+            Menus_ReplaceActiveByName( "say_clan" );
+            break;
+
+          case NUM_CHAT_MODES:
+            chat_mode = CHAT_GLOBAL;
+            trap_Cmd_ExecuteText( EXEC_APPEND, va( "say \"%s\"\n", buffer ) );
+            break;
+        }
       }
     }
     else if( Q_stricmp( name, "playMovie" ) == 0 )
@@ -4315,6 +4366,9 @@ void UI_Init( qboolean inGameLoad )
   UI_RegisterCvars();
   UI_InitMemory();
   BG_InitMemory(); // Shouldn't really have 2 of these but whatev for now
+
+  chat_mode = CHAT_GLOBAL;
+  chat_mode_blink_time = 0;
 
   memset(say_unsubmitted_line, 0, sizeof(say_unsubmitted_line));
   memset(

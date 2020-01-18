@@ -31,6 +31,9 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 static qboolean ui_shared_is_scrim;
 
+chatMode_t chat_mode;
+int        chat_mode_blink_time;
+
 qboolean say_history_current;
 char     say_unsubmitted_line[MAX_CVAR_VALUE_STRING];
 char     say_history_lines[MAX_SAY_HISTORY_LINES][MAX_CVAR_VALUE_STRING];
@@ -3460,6 +3463,34 @@ qboolean Item_TextField_HandleKey( itemDef_t *item, int key )
 
           break;
 
+        case K_PGUP:
+        case K_KP_PGUP:
+          if( item->type != ITEM_TYPE_SAYFIELD ) {
+            break;
+          }
+
+          if(chat_mode >= NUM_CHAT_MODES - 1) {
+            chat_mode = 0;
+          } else {
+            chat_mode++;
+          }
+          chat_mode_blink_time = DC->realTime + 2000;
+          break;
+
+        case K_PGDN:
+        case K_KP_PGDN:
+          if( item->type != ITEM_TYPE_SAYFIELD ) {
+            break;
+          }
+
+          if(chat_mode <= 0) {
+            chat_mode = NUM_CHAT_MODES - 1;
+          } else {
+            chat_mode--;
+          }
+          chat_mode_blink_time = DC->realTime + 2000;
+          break;
+
         case K_TAB:
           if( item->type == ITEM_TYPE_SAYFIELD ) {
             break;
@@ -3976,6 +4007,12 @@ void Menus_Activate( menuDef_t *menu )
           DC->feederInitialise( menu->items[ i ]->feederID );
       }
 
+      if(menu->items[ i ]->type == ITEM_TYPE_SAYFIELD) {
+        char buffer[MAX_CVAR_VALUE_STRING];
+
+        DC->getCVarString("ui_sayBuffer", buffer, sizeof(buffer));
+        menu->items[i]->cursorPos = strlen(buffer);
+      }
     }
 
     if( openMenuCount < MAX_OPEN_MENUS )
@@ -4050,13 +4087,6 @@ qboolean Menus_ReplaceActive( menuDef_t *menu )
         break;
       default:
         break;
-    }
-
-    if(menu->items[ i ]->type == ITEM_TYPE_SAYFIELD) {
-      char buffer[MAX_CVAR_VALUE_STRING];
-
-      DC->getCVarString("ui_sayBuffer", buffer, sizeof(buffer));
-      menu->items[i]->cursorPos = strlen(buffer);
     }
   }
   return qtrue;
@@ -4396,7 +4426,26 @@ void Item_TextColor( itemDef_t *item, vec4_t *newColor )
   Fade( &item->window.flags, &item->window.foreColor[3], parent->fadeClamp,
         &item->window.nextTime, parent->fadeCycle, qtrue, parent->fadeAmount );
 
-  if( item->window.flags & WINDOW_HASFOCUS )
+  if(
+    (item->type == ITEM_TYPE_SAYFIELD) &&
+    (chat_mode_blink_time > DC->realTime &&
+    !((DC->realTime / BLINK_DIVISOR ) & 1))) {
+      lowLight[0] = 0.8 * item->window.foreColor[0];
+      lowLight[1] = 0.8 * item->window.foreColor[1];
+      lowLight[2] = 0.8 * item->window.foreColor[2];
+      lowLight[3] = 0.8 * item->window.foreColor[3];
+      LerpColor(
+        item->window.foreColor, lowLight, *newColor,
+        0.5 + 0.5 * sin(DC->realTime / PULSE_DIVISOR));
+
+      lowLight[0] = 1.0 * parent->focusColor[0];
+      lowLight[1] = 0.5 * parent->focusColor[1];
+      lowLight[2] = 0.5 * parent->focusColor[2];
+      lowLight[3] = 0.8 * parent->focusColor[3];
+      LerpColor(
+        parent->focusColor, lowLight, *newColor,
+        0.5 + 0.5 * sin(DC->realTime / PULSE_DIVISOR));
+  } else if( item->window.flags & WINDOW_HASFOCUS )
     memcpy( newColor, &parent->focusColor, sizeof( vec4_t ) );
   else if( item->textStyle == ITEM_TEXTSTYLE_BLINK && !( ( DC->realTime / BLINK_DIVISOR ) & 1 ) )
   {
