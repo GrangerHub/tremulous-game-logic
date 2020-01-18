@@ -31,6 +31,13 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 static qboolean ui_shared_is_scrim;
 
+qboolean say_history_current;
+char     say_unsubmitted_line[MAX_CVAR_VALUE_STRING];
+char     say_history_lines[MAX_SAY_HISTORY_LINES][MAX_CVAR_VALUE_STRING];
+int      nextHistoryLine; // the last line in the history buffer, not masked
+int      historyLine;     // the line being displayed from history buffer
+                      // will be <= nextHistoryLine
+
 void UI_Shared_Set_Is_Scrim(qboolean scrim_is_on) {
   ui_shared_is_scrim = scrim_is_on;
 }
@@ -3454,13 +3461,58 @@ qboolean Item_TextField_HandleKey( itemDef_t *item, int key )
           break;
 
         case K_TAB:
+          if( item->type == ITEM_TYPE_SAYFIELD ) {
+            break;
+          }
         case K_DOWNARROW:
         case K_KP_DOWNARROW:
+        if( item->type == ITEM_TYPE_SAYFIELD ) {
+          if(!say_history_current) {
+            historyLine++;
+            while(
+              historyLine <= nextHistoryLine &&
+              !say_history_lines[historyLine % MAX_SAY_HISTORY_LINES][0]) {
+              //skip over Null history lines
+              historyLine++;
+            }
+            if (historyLine > nextHistoryLine) {
+              historyLine = nextHistoryLine;
+              DC->setCVar(
+                "ui_sayBuffer",
+                say_unsubmitted_line);
+              say_history_current = qtrue;
+              break;
+            }
+            DC->setCVar(
+              "ui_sayBuffer",
+              say_history_lines[historyLine % MAX_SAY_HISTORY_LINES]);
+          }
+          break;
+        }
         case K_UPARROW:
         case K_KP_UPARROW:
-          // Ignore these keys from the say field
-          if( item->type == ITEM_TYPE_SAYFIELD )
+          if( item->type == ITEM_TYPE_SAYFIELD ) {
+            if(
+              nextHistoryLine - historyLine < MAX_SAY_HISTORY_LINES 
+              && historyLine > 0 ) {
+              char buffer[ MAX_CVAR_VALUE_STRING ];
+
+              DC->getCVarString("ui_sayBuffer", buffer, sizeof( buffer ));
+              if(say_history_current) {
+                //save the unsubmitted line
+                Q_strncpyz(
+                  say_unsubmitted_line, buffer, sizeof(say_unsubmitted_line));
+                say_history_current = qfalse;
+              }
+
+              historyLine--;
+
+              DC->setCVar(
+                "ui_sayBuffer",
+                say_history_lines[historyLine % MAX_SAY_HISTORY_LINES]);
+            }
             break;
+          }
 
           newItem = Menu_SetNextCursorItem( item->parent );
 
@@ -3998,6 +4050,13 @@ qboolean Menus_ReplaceActive( menuDef_t *menu )
         break;
       default:
         break;
+    }
+
+    if(menu->items[ i ]->type == ITEM_TYPE_SAYFIELD) {
+      char buffer[MAX_CVAR_VALUE_STRING];
+
+      DC->getCVarString("ui_sayBuffer", buffer, sizeof(buffer));
+      menu->items[i]->cursorPos = strlen(buffer);
     }
   }
   return qtrue;

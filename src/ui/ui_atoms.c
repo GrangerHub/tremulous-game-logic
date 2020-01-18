@@ -156,8 +156,6 @@ static void UI_MessageMode_f( void )
 {
   char *arg = UI_Argv( 0 );
 
-  trap_Cvar_Set( "ui_sayBuffer", "" );
-
   switch( arg[ 11 ] )
   {
     default:
