@@ -271,7 +271,6 @@ typedef enum
 #endif
 
 #define	MAX_NAME_LENGTH			32		// max length of a client name ignoring colors
-#define MAX_COLORFUL_NAME_LENGTH MAX_CVAR_VALUE_STRING
 #define	MAX_HOSTNAME_LENGTH	80		// max length of a host name
 
 #define	MAX_SAY_TEXT	800
@@ -1235,6 +1234,8 @@ struct cvar_s {
 };
 
 #define	MAX_CVAR_VALUE_STRING	256
+
+#define MAX_COLORFUL_NAME_LENGTH MAX_CVAR_VALUE_STRING
 
 typedef int	cvarHandle_t;
 
