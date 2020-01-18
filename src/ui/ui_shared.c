@@ -31,6 +31,16 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 static qboolean ui_shared_is_scrim;
 
+chatMode_t chat_mode;
+int        chat_mode_blink_time;
+
+qboolean say_history_current;
+char     say_unsubmitted_line[MAX_CVAR_VALUE_STRING];
+char     say_history_lines[MAX_SAY_HISTORY_LINES][MAX_CVAR_VALUE_STRING];
+int      nextHistoryLine; // the last line in the history buffer, not masked
+int      historyLine;     // the line being displayed from history buffer
+                      // will be <= nextHistoryLine
+
 void UI_Shared_Set_Is_Scrim(qboolean scrim_is_on) {
   ui_shared_is_scrim = scrim_is_on;
 }
@@ -2203,6 +2213,7 @@ static void UI_Text_Paint_Generic( float x, float y, float scale, float gapAdjus
   qhandle_t   emoticonHandle = 0;
   float       emoticonH, emoticonW;
   qboolean    emoticonEscaped;
+  qboolean    skip_color_string_check = qfalse;
   int         emoticonLen = 0;
   int         emoticonWidth;
   int         cursorX = -1;
@@ -2280,6 +2291,21 @@ static void UI_Text_Paint_Generic( float x, float y, float scale, float gapAdjus
           continue;
         }
       }
+    } else {
+      if(skip_color_string_check) {
+        skip_color_string_check = qfalse;
+      } else if( Q_IsColorString( s ) )
+      {
+         if(Q_IsHardcodedColor(s)) {
+          Vector4Copy(g_color_table[ColorIndex( *( s+1 ) )], newColor);
+        } else {
+          Q_GetVectFromHexColor(s, newColor);
+        }
+        newColor[3] = color[3];
+        DC->setColor( newColor );
+      } else if(Q_IsColorEscapeEscape(s)) {
+        skip_color_string_check = qtrue;
+      }
     }
 
     if( style == ITEM_TEXTSTYLE_SHADOWED ||
@@ -2336,6 +2362,7 @@ static void UI_Text_Paint_Generic( float x, float y, float scale, float gapAdjus
     if( cursorX >= 0 && !( ( DC->realTime / BLINK_DIVISOR ) & 1 ) )
     {
       glyph = &font->glyphs[ (int)cursor ];
+      DC->setColor(color);
       UI_Text_PaintChar( cursorX, y, useScale, glyph, 0.0f );
     }
   }
@@ -3436,14 +3463,87 @@ qboolean Item_TextField_HandleKey( itemDef_t *item, int key )
 
           break;
 
+        case K_PGUP:
+        case K_KP_PGUP:
+          if( item->type != ITEM_TYPE_SAYFIELD ) {
+            break;
+          }
+
+          if(chat_mode >= NUM_CHAT_MODES - 1) {
+            chat_mode = 0;
+          } else {
+            chat_mode++;
+          }
+          chat_mode_blink_time = DC->realTime + 2000;
+          break;
+
+        case K_PGDN:
+        case K_KP_PGDN:
+          if( item->type != ITEM_TYPE_SAYFIELD ) {
+            break;
+          }
+
+          if(chat_mode <= 0) {
+            chat_mode = NUM_CHAT_MODES - 1;
+          } else {
+            chat_mode--;
+          }
+          chat_mode_blink_time = DC->realTime + 2000;
+          break;
+
         case K_TAB:
+          if( item->type == ITEM_TYPE_SAYFIELD ) {
+            break;
+          }
         case K_DOWNARROW:
         case K_KP_DOWNARROW:
+        if( item->type == ITEM_TYPE_SAYFIELD ) {
+          if(!say_history_current) {
+            historyLine++;
+            while(
+              historyLine <= nextHistoryLine &&
+              !say_history_lines[historyLine % MAX_SAY_HISTORY_LINES][0]) {
+              //skip over Null history lines
+              historyLine++;
+            }
+            if (historyLine > nextHistoryLine) {
+              historyLine = nextHistoryLine;
+              DC->setCVar(
+                "ui_sayBuffer",
+                say_unsubmitted_line);
+              say_history_current = qtrue;
+              break;
+            }
+            DC->setCVar(
+              "ui_sayBuffer",
+              say_history_lines[historyLine % MAX_SAY_HISTORY_LINES]);
+          }
+          break;
+        }
         case K_UPARROW:
         case K_KP_UPARROW:
-          // Ignore these keys from the say field
-          if( item->type == ITEM_TYPE_SAYFIELD )
+          if( item->type == ITEM_TYPE_SAYFIELD ) {
+            if(
+              nextHistoryLine - historyLine < MAX_SAY_HISTORY_LINES 
+              && historyLine > 0 ) {
+              char buffer[ MAX_CVAR_VALUE_STRING ];
+
+              DC->getCVarString("ui_sayBuffer", buffer, sizeof( buffer ));
+              if(say_history_current) {
+                //save the unsubmitted line
+                Q_strncpyz(
+                  say_unsubmitted_line, buffer, sizeof(say_unsubmitted_line));
+                say_history_current = qfalse;
+              }
+
+              historyLine--;
+
+              DC->setCVar(
+                "ui_sayBuffer",
+                say_history_lines[historyLine % MAX_SAY_HISTORY_LINES]);
+            }
             break;
+          }
 
           newItem = Menu_SetNextCursorItem( item->parent );
 
@@ -3907,6 +4007,12 @@ void Menus_Activate( menuDef_t *menu )
           DC->feederInitialise( menu->items[ i ]->feederID );
       }
 
+      if(menu->items[ i ]->type == ITEM_TYPE_SAYFIELD) {
+        char buffer[MAX_CVAR_VALUE_STRING];
+
+        DC->getCVarString("ui_sayBuffer", buffer, sizeof(buffer));
+        menu->items[i]->cursorPos = strlen(buffer);
+      }
     }
 
     if( openMenuCount < MAX_OPEN_MENUS )
@@ -4320,7 +4426,26 @@ void Item_TextColor( itemDef_t *item, vec4_t *newColor )
   Fade( &item->window.flags, &item->window.foreColor[3], parent->fadeClamp,
         &item->window.nextTime, parent->fadeCycle, qtrue, parent->fadeAmount );
 
-  if( item->window.flags & WINDOW_HASFOCUS )
+  if(
+    (item->type == ITEM_TYPE_SAYFIELD) &&
+    (chat_mode_blink_time > DC->realTime &&
+    !((DC->realTime / BLINK_DIVISOR ) & 1))) {
+      lowLight[0] = 0.8 * item->window.foreColor[0];
+      lowLight[1] = 0.8 * item->window.foreColor[1];
+      lowLight[2] = 0.8 * item->window.foreColor[2];
+      lowLight[3] = 0.8 * item->window.foreColor[3];
+      LerpColor(
+        item->window.foreColor, lowLight, *newColor,
+        0.5 + 0.5 * sin(DC->realTime / PULSE_DIVISOR));
+
+      lowLight[0] = 1.0 * parent->focusColor[0];
+      lowLight[1] = 0.5 * parent->focusColor[1];
+      lowLight[2] = 0.5 * parent->focusColor[2];
+      lowLight[3] = 0.8 * parent->focusColor[3];
+      LerpColor(
+        parent->focusColor, lowLight, *newColor,
+        0.5 + 0.5 * sin(DC->realTime / PULSE_DIVISOR));
+  } else if( item->window.flags & WINDOW_HASFOCUS )
     memcpy( newColor, &parent->focusColor, sizeof( vec4_t ) );
   else if( item->textStyle == ITEM_TEXTSTYLE_BLINK && !( ( DC->realTime / BLINK_DIVISOR ) & 1 ) )
   {
