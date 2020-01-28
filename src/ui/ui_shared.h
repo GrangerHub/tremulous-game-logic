@@ -573,14 +573,26 @@ typedef enum
   NUM_CHAT_MODES
 } chatMode_t;
 
-extern chatMode_t chat_mode;
-extern int        chat_mode_blink_time;
+extern int key_pressed_onCharEntry; // used by onCharEntry
 
 #define MAX_SAY_HISTORY_LINES 32
-extern qboolean say_history_current;
-extern char     say_unsubmitted_line[MAX_CVAR_VALUE_STRING];
-extern char     say_history_lines[MAX_SAY_HISTORY_LINES][MAX_CVAR_VALUE_STRING];
-extern int      nextHistoryLine;
-extern int      historyLine;
+
+typedef struct chatInfo_s
+{
+  chatMode_t chat_mode;
+  int        chat_mode_blink_time;
+
+  qboolean   say_history_current;
+  char       say_unsubmitted_line[MAX_CVAR_VALUE_STRING];
+  char       say_history_lines[MAX_SAY_HISTORY_LINES][MAX_CVAR_VALUE_STRING];
+  int        nextHistoryLine; // the last line in the history buffer, not masked
+  int        historyLine;     // the line being displayed from history buffer
+                              // will be <= chatInfo.nextHistoryLine
+  int        *say_cursor_pos;
+  int        say_max_chars;
+  int        say_length;
+} chatInfo_t;
+
+extern chatInfo_t chatInfo;
 
 #endif
