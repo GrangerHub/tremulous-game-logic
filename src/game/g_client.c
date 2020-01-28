@@ -918,6 +918,13 @@ static void G_ClientCleanName( const char *in, char *out, int outSize,
   if( *p == 0 || colorlessLen == 0 )
     invalid = qtrue;
 
+  // don't allow @ in names because it messes up player mentions
+  if( strchr(p, '@') ) {
+    SV_GameSendServerCommand( client - level.clients, va(
+      "print \"'@'' is not a valid character for player names\n\"" ) );
+    invalid = qtrue;
+  }
+
   // if something made the name bad, put them back to UnnamedPlayer
   if( invalid )
     Q_strncpyz( p, G_ClientNewbieName( client ), outSize );

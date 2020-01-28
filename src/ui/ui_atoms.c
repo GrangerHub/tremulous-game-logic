@@ -161,22 +161,22 @@ static void UI_MessageMode_f( void )
     default:
     case '\0':
       // Global
-      chat_mode = CHAT_GLOBAL;
+      chatInfo.chat_mode = CHAT_GLOBAL;
       break;
 
     case '2':
       // Team
-      chat_mode = CHAT_TEAM;
+      chatInfo.chat_mode = CHAT_TEAM;
       break;
 
     case '5':
       // Admins
-      chat_mode = CHAT_ADMINS;
+      chatInfo.chat_mode = CHAT_ADMINS;
       break;
 
     case '6':
       // Clan
-      chat_mode = CHAT_CLAN;
+      chatInfo.chat_mode = CHAT_CLAN;
       break;
   }
 
@@ -186,7 +186,7 @@ static void UI_MessageMode_f( void )
   Menus_CloseByName( "say_admins" );
   Menus_CloseByName( "say_clan" );
 
-  switch (chat_mode) {
+  switch (chatInfo.chat_mode) {
     case CHAT_GLOBAL:
       Menus_ActivateByName( "say" );
       break;
@@ -204,7 +204,7 @@ static void UI_MessageMode_f( void )
       break;
 
     case NUM_CHAT_MODES:
-      chat_mode = CHAT_GLOBAL;
+      chatInfo.chat_mode = CHAT_GLOBAL;
       Menus_ActivateByName( "say" );
       break;
   }

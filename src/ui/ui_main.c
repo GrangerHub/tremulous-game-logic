@@ -836,6 +836,59 @@ static void UI_BuildFindPlayerList( qboolean force )
 
 /*
 ==================
+UI_ClientNumbersFromString
+
+Sets plist to an array of integers that represent client numbers that have
+names that are a partial match for s.
+
+Returns number of matching clientids up to max.
+==================
+*/
+static void UI_BuildPlayerList();
+int UI_ClientNumbersFromString(char *s, int *plist, int max) {
+  int i, found = 0;
+  char n2[MAX_COLORFUL_NAME_LENGTH] = {""};
+  char s2[MAX_COLORFUL_NAME_LENGTH] = {""};
+  char n2_temp[MAX_COLORFUL_NAME_LENGTH] = {""};
+  char s2_temp[MAX_COLORFUL_NAME_LENGTH] = {""};
+
+  if(max == 0) {
+    return 0;
+  }
+
+  UI_BuildPlayerList();
+
+  if(!s[0]) {
+    for(i = 0; i < uiInfo.playerCount && found < max; i++) {
+      *plist++ = i;
+      found++;
+    }
+    return found;
+  }
+
+  // now look for name matches
+  Q_strncpyz(s2_temp, s, sizeof(s2_temp));
+  Q_CleanStr(s2_temp);
+  Q_StringToLower(s2_temp, s2, sizeof(s2));
+  if(!s2[0]) {
+    return 0;
+  }
+
+  for(i = 0; i < uiInfo.playerCount && found < max; i++) {
+    Q_strncpyz(n2_temp, uiInfo.playerNames[i], sizeof(n2_temp));
+    Q_CleanStr(n2_temp);
+    Q_StringToLower(n2_temp, n2, sizeof(n2));
+    if(strstr(n2, s2)) {
+      *plist++ = i;
+      found++;
+    }
+  }
+
+  return found;
+}
+
+/*
+==================
 UI_BuildServerStatus
 ==================
 */
@@ -3253,25 +3306,25 @@ static void UI_RunMenuScript( char **args )
       else {
 
         // copy line to history buffer
-        if(!say_history_current) {
+        if(!chatInfo.say_history_current) {
           Q_strncpyz(
-            say_history_lines[nextHistoryLine % MAX_SAY_HISTORY_LINES],
-            say_unsubmitted_line, MAX_CVAR_VALUE_STRING);
-          nextHistoryLine++;
+            chatInfo.say_history_lines[chatInfo.nextHistoryLine % MAX_SAY_HISTORY_LINES],
+            chatInfo.say_unsubmitted_line, MAX_CVAR_VALUE_STRING);
+          chatInfo.nextHistoryLine++;
         }
         Q_strncpyz(
-          say_history_lines[nextHistoryLine % MAX_SAY_HISTORY_LINES],
+          chatInfo.say_history_lines[chatInfo.nextHistoryLine % MAX_SAY_HISTORY_LINES],
           buffer, MAX_CVAR_VALUE_STRING);
-        nextHistoryLine++;
-        historyLine = nextHistoryLine;
-        say_history_current = qtrue;
+        chatInfo.nextHistoryLine++;
+        chatInfo.historyLine = chatInfo.nextHistoryLine;
+        chatInfo.say_history_current = qtrue;
 
         if( ui_chatCommands.integer && ( buffer[ 0 ] == '/' ||
           buffer[ 0 ] == '\\' ) )
         {
           trap_Cmd_ExecuteText( EXEC_APPEND, va( "%s\n", buffer + 1 ) );
         } else {
-          switch (chat_mode) {
+          switch (chatInfo.chat_mode) {
             case CHAT_GLOBAL:
               trap_Cmd_ExecuteText( EXEC_APPEND, va( "say \"%s\"\n", buffer ) );
               break;
@@ -3298,18 +3351,19 @@ static void UI_RunMenuScript( char **args )
                 Com_Printf ( 
                   "^3Error:your ui_clantag has to be between 3 and 10 characters long. current value is:^7 %s^7\n",
                   clantagDecolored );
+                key_pressed_onCharEntry = K_NONE;
                 return;
               }
               break;
 
             case NUM_CHAT_MODES:
-              chat_mode = CHAT_GLOBAL;
+              chatInfo.chat_mode = CHAT_GLOBAL;
               trap_Cmd_ExecuteText( EXEC_APPEND, va( "say \"%s\"\n", buffer ) );
               break;
           }
         }
 
-        say_unsubmitted_line[0] = '\0';
+        chatInfo.say_unsubmitted_line[0] = '\0';
         trap_Cvar_Set( "ui_sayBuffer", "" );
       }
     }
@@ -3318,8 +3372,8 @@ static void UI_RunMenuScript( char **args )
       char buffer[ MAX_CVAR_VALUE_STRING ];
 
       trap_Cvar_VariableStringBuffer("ui_sayBuffer", buffer, sizeof(buffer));
-      if(say_history_current) {
-        Q_strncpyz(say_unsubmitted_line, buffer, sizeof(say_unsubmitted_line));
+      if(chatInfo.say_history_current) {
+        Q_strncpyz(chatInfo.say_unsubmitted_line, buffer, sizeof(chatInfo.say_unsubmitted_line));
       }
 
       if( ui_chatCommands.integer )
@@ -3327,7 +3381,7 @@ static void UI_RunMenuScript( char **args )
         if( buffer[ 0 ] == '/' || buffer[ 0 ] == '\\' ) {
           Menus_ReplaceActiveByName( "say_command" );
         } else {
-          switch (chat_mode) {
+          switch (chatInfo.chat_mode) {
             case CHAT_GLOBAL:
               Menus_ReplaceActiveByName( "say" );
               break;
@@ -3345,13 +3399,149 @@ static void UI_RunMenuScript( char **args )
               break;
 
             case NUM_CHAT_MODES:
-              chat_mode = CHAT_GLOBAL;
+              chatInfo.chat_mode = CHAT_GLOBAL;
               trap_Cmd_ExecuteText( EXEC_APPEND, va( "say \"%s\"\n", buffer ) );
               break;
           }
         }
+
+        //handle player name tab completion
+        if(key_pressed_onCharEntry == K_TAB) {
+          char string[MAX_CVAR_VALUE_STRING];
+          int at_pos = -1;
+          int i;
+
+          //find the position of the nearest @ from the left of the cursor
+          i = *chatInfo.say_cursor_pos;
+          while(i >= 0) {
+            if(buffer[i] == '@') {
+              at_pos = i;
+              break;
+            }
+
+            i--;
+          }
+
+          if(at_pos >= 0) {
+            int pids[MAX_CLIENTS];
+            int matches = 0;
+            int j;
+
+            memset(string, 0, sizeof(string));
+            for(
+              i = at_pos + 1, j = 0;
+              i <= *chatInfo.say_cursor_pos && j < MAX_CVAR_VALUE_STRING;
+              i++, j++) {
+              if((i == *chatInfo.say_cursor_pos) && (buffer[1] == ' ')) {
+                break;
+              }
+
+              string[j] = buffer[i];
+            }
+
+            matches = UI_ClientNumbersFromString(string, pids, MAX_CLIENTS);
+
+            if(matches == 0) {
+              //try one more time ignoring the cursor location
+              string[j-1] = '\0';
+              matches = UI_ClientNumbersFromString(string, pids, MAX_CLIENTS);
+            } else {
+              //make sure that the cursor is at the end of the entered partial name
+              while(
+                buffer[i] &&
+                (UI_ClientNumbersFromString(string, pids, MAX_CLIENTS) > 0)) {
+                (*chatInfo.say_cursor_pos)++;
+                string[j] = buffer[i];
+                i++;
+                j++;
+              }
+            }
+
+            if(matches > 1) {
+              //print the multiple possibile matches
+              for(i = 0; i < matches; i++) {
+                Com_Printf("    %s\n", uiInfo.playerNames[pids[i]]);
+              }
+            } else if(matches == 1) {
+              char n2[MAX_COLORFUL_NAME_LENGTH] = {""};
+              char s2[MAX_COLORFUL_NAME_LENGTH] = {""};
+              char n2_temp[MAX_COLORFUL_NAME_LENGTH] = {""};
+              char s2_temp[MAX_COLORFUL_NAME_LENGTH] = {""};
+
+              Q_strncpyz(s2_temp, string, sizeof(s2_temp));
+              Q_CleanStr(s2_temp);
+              Q_StringToLower(s2_temp, s2, sizeof(s2));
+              Q_strncpyz(n2_temp, uiInfo.playerNames[pids[0]], sizeof(n2_temp));
+              Q_CleanStr(n2_temp);
+              Q_StringToLower(n2_temp, n2, sizeof(n2));
+
+              if(!s2[0] || Q_strncmp(s2, n2, sizeof(n2))) {
+                qboolean name_incomplete = qfalse;
+                const int clean_name_length = strlen(n2);
+
+                for(
+                  i = at_pos + 1, j = 0;
+                  i <= chatInfo.say_length && j < clean_name_length; i++, j++) {
+                  char *s = &buffer[i];
+
+                  if ( Q_IsColorString( s ) ) {
+                    i += Q_ColorStringLength(s) - 1;
+                    s += Q_ColorStringLength(s) - 1;
+                  }
+                  else if ( s[0] >= 0x20 && s[0] <= 0x7E ) {
+                    if(Q_IsColorEscapeEscape(s)) {
+                      i++;
+                      s++;
+                    }
+                  }
+                  if(tolower(s[0]) != n2[j]) {
+                    name_incomplete = qtrue;
+                    break;
+                  }
+                }
+
+                if(name_incomplete) {
+                  const int clean_name_length = strlen(n2_temp);
+                  const int offset = clean_name_length - strlen(string) + 1;
+
+                  //tab complete the name
+                  if(!trap_Key_GetOverstrikeMode( )) {
+                    if(
+                      (*chatInfo.say_cursor_pos < chatInfo.say_length) &&
+                      (chatInfo.say_length <  MAX_EDITFIELD - offset) &&
+                      (
+                        !chatInfo.say_max_chars ||
+                        chatInfo.say_length < chatInfo.say_max_chars ) ) {
+                      int end_of_string = at_pos + strlen(string);
+
+                      //move the subsequent text to the right for insertion
+                      memmove(
+                        &buffer[end_of_string + offset],
+                        &buffer[end_of_string],
+                        chatInfo.say_length + offset - end_of_string);
+                    }
+                  }
+
+                  for(
+                    i = at_pos + 1, j = 0;
+                    i < MAX_EDITFIELD && j < clean_name_length;
+                    i++, j++) {
+                    buffer[i] = n2_temp[j];
+                  }
+
+                  if((i < MAX_EDITFIELD) && (buffer[i] != ' ')) {
+                    buffer[i] = ' ';
+                  }
+
+                  *chatInfo.say_cursor_pos = at_pos + offset + 2;
+                  trap_Cvar_Set("ui_sayBuffer", buffer);
+                }
+              }
+            }
+          }
+        }
       } else {
-        switch (chat_mode) {
+        switch (chatInfo.chat_mode) {
           case CHAT_GLOBAL:
             Menus_ReplaceActiveByName( "say" );
             break;
@@ -3369,7 +3559,7 @@ static void UI_RunMenuScript( char **args )
             break;
 
           case NUM_CHAT_MODES:
-            chat_mode = CHAT_GLOBAL;
+            chatInfo.chat_mode = CHAT_GLOBAL;
             trap_Cmd_ExecuteText( EXEC_APPEND, va( "say \"%s\"\n", buffer ) );
             break;
         }
@@ -3731,6 +3921,8 @@ static void UI_RunMenuScript( char **args )
     else
       Com_Printf( "unknown UI script %s\n", name );
   }
+
+  key_pressed_onCharEntry = K_NONE;
 }
 
 static int UI_FeederInitialise( int feederID );
@@ -4379,17 +4571,17 @@ void UI_Init( qboolean inGameLoad )
   UI_InitMemory();
   BG_InitMemory(); // Shouldn't really have 2 of these but whatev for now
 
-  chat_mode = CHAT_GLOBAL;
-  chat_mode_blink_time = 0;
+  chatInfo.chat_mode = CHAT_GLOBAL;
+  chatInfo.chat_mode_blink_time = 0;
 
-  memset(say_unsubmitted_line, 0, sizeof(say_unsubmitted_line));
+  memset(chatInfo.say_unsubmitted_line, 0, sizeof(chatInfo.say_unsubmitted_line));
   memset(
-    say_history_lines, 0,
-    sizeof(say_history_lines[0][0]) *
+    chatInfo.say_history_lines, 0,
+    sizeof(chatInfo.say_history_lines[0][0]) *
     MAX_SAY_HISTORY_LINES * MAX_CVAR_VALUE_STRING);
-  say_history_current = qtrue;
-  nextHistoryLine = 0;
-  historyLine = 0;
+  chatInfo.say_history_current = qtrue;
+  chatInfo.nextHistoryLine = 0;
+  chatInfo.historyLine = 0;
 
   // cache redundant calulations
   trap_GetGlconfig( &uiInfo.uiDC.glconfig );

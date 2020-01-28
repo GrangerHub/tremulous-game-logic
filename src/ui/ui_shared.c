@@ -31,15 +31,9 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 static qboolean ui_shared_is_scrim;
 
-chatMode_t chat_mode;
-int        chat_mode_blink_time;
+int key_pressed_onCharEntry; // used by onCharEntry
 
-qboolean say_history_current;
-char     say_unsubmitted_line[MAX_CVAR_VALUE_STRING];
-char     say_history_lines[MAX_SAY_HISTORY_LINES][MAX_CVAR_VALUE_STRING];
-int      nextHistoryLine; // the last line in the history buffer, not masked
-int      historyLine;     // the line being displayed from history buffer
-                      // will be <= nextHistoryLine
+chatInfo_t chatInfo;
 
 void UI_Shared_Set_Is_Scrim(qboolean scrim_is_on) {
   ui_shared_is_scrim = scrim_is_on;
@@ -3469,12 +3463,12 @@ qboolean Item_TextField_HandleKey( itemDef_t *item, int key )
             break;
           }
 
-          if(chat_mode >= NUM_CHAT_MODES - 1) {
-            chat_mode = 0;
+          if(chatInfo.chat_mode >= NUM_CHAT_MODES - 1) {
+            chatInfo.chat_mode = 0;
           } else {
-            chat_mode++;
+            chatInfo.chat_mode++;
           }
-          chat_mode_blink_time = DC->realTime + 2000;
+          chatInfo.chat_mode_blink_time = DC->realTime + 2000;
           break;
 
         case K_PGDN:
@@ -3483,40 +3477,43 @@ qboolean Item_TextField_HandleKey( itemDef_t *item, int key )
             break;
           }
 
-          if(chat_mode <= 0) {
-            chat_mode = NUM_CHAT_MODES - 1;
+          if(chatInfo.chat_mode <= 0) {
+            chatInfo.chat_mode = NUM_CHAT_MODES - 1;
           } else {
-            chat_mode--;
+            chatInfo.chat_mode--;
           }
-          chat_mode_blink_time = DC->realTime + 2000;
+          chatInfo.chat_mode_blink_time = DC->realTime + 2000;
           break;
 
         case K_TAB:
           if( item->type == ITEM_TYPE_SAYFIELD ) {
+            chatInfo.say_cursor_pos = &item->cursorPos;
+            chatInfo.say_length = len;
+            chatInfo.say_max_chars = editPtr->maxChars;
             break;
           }
         case K_DOWNARROW:
         case K_KP_DOWNARROW:
         if( item->type == ITEM_TYPE_SAYFIELD ) {
-          if(!say_history_current) {
-            historyLine++;
+          if(!chatInfo.say_history_current) {
+            chatInfo.historyLine++;
             while(
-              historyLine <= nextHistoryLine &&
-              !say_history_lines[historyLine % MAX_SAY_HISTORY_LINES][0]) {
+              chatInfo.historyLine <= chatInfo.nextHistoryLine &&
+              !chatInfo.say_history_lines[chatInfo.historyLine % MAX_SAY_HISTORY_LINES][0]) {
               //skip over Null history lines
-              historyLine++;
+              chatInfo.historyLine++;
             }
-            if (historyLine > nextHistoryLine) {
-              historyLine = nextHistoryLine;
+            if (chatInfo.historyLine > chatInfo.nextHistoryLine) {
+              chatInfo.historyLine = chatInfo.nextHistoryLine;
               DC->setCVar(
                 "ui_sayBuffer",
-                say_unsubmitted_line);
-              say_history_current = qtrue;
+                chatInfo.say_unsubmitted_line);
+              chatInfo.say_history_current = qtrue;
               break;
             }
             DC->setCVar(
               "ui_sayBuffer",
-              say_history_lines[historyLine % MAX_SAY_HISTORY_LINES]);
+              chatInfo.say_history_lines[chatInfo.historyLine % MAX_SAY_HISTORY_LINES]);
           }
           break;
         }
@@ -3524,23 +3521,23 @@ qboolean Item_TextField_HandleKey( itemDef_t *item, int key )
         case K_KP_UPARROW:
           if( item->type == ITEM_TYPE_SAYFIELD ) {
             if(
-              nextHistoryLine - historyLine < MAX_SAY_HISTORY_LINES 
-              && historyLine > 0 ) {
+              chatInfo.nextHistoryLine - chatInfo.historyLine < MAX_SAY_HISTORY_LINES 
+              && chatInfo.historyLine > 0 ) {
               char buffer[ MAX_CVAR_VALUE_STRING ];
 
               DC->getCVarString("ui_sayBuffer", buffer, sizeof( buffer ));
-              if(say_history_current) {
+              if(chatInfo.say_history_current) {
                 //save the unsubmitted line
                 Q_strncpyz(
-                  say_unsubmitted_line, buffer, sizeof(say_unsubmitted_line));
-                say_history_current = qfalse;
+                  chatInfo.say_unsubmitted_line, buffer, sizeof(chatInfo.say_unsubmitted_line));
+                chatInfo.say_history_current = qfalse;
               }
 
-              historyLine--;
+              chatInfo.historyLine--;
 
               DC->setCVar(
                 "ui_sayBuffer",
-                say_history_lines[historyLine % MAX_SAY_HISTORY_LINES]);
+                chatInfo.say_history_lines[chatInfo.historyLine % MAX_SAY_HISTORY_LINES]);
             }
             break;
           }
@@ -4177,6 +4174,7 @@ void Menu_HandleKey( menuDef_t *menu, int key, qboolean down )
     }
     else
     {
+      key_pressed_onCharEntry = key;
       Item_RunScript( g_editItem, g_editItem->onCharEntry );
     }
   }
@@ -4428,7 +4426,7 @@ void Item_TextColor( itemDef_t *item, vec4_t *newColor )
 
   if(
     (item->type == ITEM_TYPE_SAYFIELD) &&
-    (chat_mode_blink_time > DC->realTime &&
+    (chatInfo.chat_mode_blink_time > DC->realTime &&
     !((DC->realTime / BLINK_DIVISOR ) & 1))) {
       lowLight[0] = 0.8 * item->window.foreColor[0];
       lowLight[1] = 0.8 * item->window.foreColor[1];
