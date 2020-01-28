@@ -194,6 +194,7 @@ int G_ClientNumbersFromString(
 {
   gclient_t *p;
   int i, found = 0;
+  char *s_start = s;
   char *endptr;
   char n2[ MAX_COLORFUL_NAME_LENGTH ] = {""};
   char s2[ MAX_COLORFUL_NAME_LENGTH ] = {""};
@@ -203,11 +204,15 @@ int G_ClientNumbersFromString(
   if( max == 0 )
     return 0;
 
-  if( !s[ 0 ] )
+  if(*s_start == '@') {
+    s_start++;
+  }
+
+  if( !s_start[ 0 ] )
     return 0;
 
   // if a number is provided, it is a clientnum
-  i = strtol( s, &endptr, 10 );
+  i = strtol( s_start, &endptr, 10 );
   if( *endptr == '\0' )
   {
     if( i >= 0 && i < level.maxclients )
@@ -225,7 +230,7 @@ int G_ClientNumbersFromString(
 
   // now look for name matches
   if(alphanumeric) {
-    G_SanitiseString( s, s2, sizeof( s2 ) );
+    G_SanitiseString( s_start, s2, sizeof( s2 ) );
   } else {
     Q_strncpyz( s2_temp, s, sizeof( s2_temp ) );
     Q_CleanStr( s2_temp );
