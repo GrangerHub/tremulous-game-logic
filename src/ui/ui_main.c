@@ -3257,19 +3257,26 @@ static void UI_TabCompleteName(
       clean_name_length = strlen(clean_name);
 
       if(uncleaned_entered_partial_name_length > 0) {
+        qboolean end_of_buffer =
+          !buffer[at_pos + uncleaned_entered_partial_name_length];
         //delete the unclean partial name for replacement by the completed clean name
-        memmove(
-          &buffer[at_pos + 1],
-          &buffer[at_pos + uncleaned_entered_partial_name_length + 1],
-          chatInfo.say_length -
-          (at_pos + uncleaned_entered_partial_name_length + 1));
-        buffer[
-          chatInfo.say_length - uncleaned_entered_partial_name_length] = '\0';
+        if(end_of_buffer) {
+          buffer[at_pos +1] = '\0';
+        } else {
+          memmove(
+            &buffer[at_pos + 1],
+            &buffer[at_pos + uncleaned_entered_partial_name_length + 1],
+            chatInfo.say_length -
+            (at_pos + uncleaned_entered_partial_name_length + 1));
+          buffer[
+            chatInfo.say_length - uncleaned_entered_partial_name_length] = '\0';
+        }
       }
 
       //tab complete the name
       if(!trap_Key_GetOverstrikeMode( )) {
         if(
+          buffer[at_pos +1] &&
           (*chatInfo.say_cursor_pos < chatInfo.say_length) &&
           (chatInfo.say_length <  MAX_EDITFIELD - clean_name_length) &&
           (
