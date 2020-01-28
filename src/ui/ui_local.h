@@ -46,6 +46,8 @@ void UI_UpdateNews( qboolean );
 
 qboolean UI_GameIsInScrimMode( void );
 
+int UI_ClientNumbersFromString(char *s, int *plist, int max);
+
 void UI_RegisterCvars( void );
 void UI_UpdateCvars( void );
 void UI_DrawConnectScreen( qboolean overlay );
