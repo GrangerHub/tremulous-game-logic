@@ -3516,3 +3516,84 @@ qboolean Com_IsVoipTarget(uint8_t *voipTargets, int voipTargetsSize, int clientN
 
 	return qfalse;
 }
+
+/*
+==================
+Com_rgb_to_hsl
+
+Converts from the red green blue color space to hue saturation luminosity
+==================
+*/
+void Com_rgb_to_hsl(vec4_t rgb, vec4_t hsl) {
+	float max_color, min_color, chroma;
+
+	//keep the alpha the same
+	hsl[3] = rgb[3];
+
+	max_color = MAX(MAX(rgb[0], rgb[1]), rgb[2]);
+	min_color = MIN(MIN(rgb[0], rgb[1]), rgb[2]);
+	chroma = max_color - min_color;
+
+	//calc luminosity
+	hsl[2] = (max_color + min_color) / 2;
+
+	//calc hue and saturation
+	if(chroma == 0) {
+		//0 chroma means this color is grey, so hue and saturation are 0
+		hsl[0] = 0;
+		hsl[1] = 0;
+	} else {
+		if(max_color == rgb[0]) {
+			hsl[0] = fmod(((rgb[1] - rgb[2]) / chroma), 6);
+			if(hsl[0] < 0) {
+				hsl[0] = (6 - fmod(fabs(hsl[0]), 6));
+			}
+		} else if(max_color == rgb[1]) {
+			hsl[0] = (rgb[2] - rgb[0]) / chroma + 2;
+		} else {
+			hsl[0] = (rgb[0] - rgb[1]) / chroma + 4;
+		}
+        
+        hsl[0] = hsl[0] / 6;
+        hsl[1] = 1 - fabs(2 * hsl[2] - 1);
+	}
+}
+
+/*
+==================
+Com_hsl_to_rgb
+
+Converts from the hue saturation luminosity color space to red green blue
+==================
+*/
+void Com_hsl_to_rgb(vec4_t hsl, vec4_t rgb) {
+	
+	//keep the alpha the same
+	rgb[3] = hsl[3];
+
+	if(hsl[1] == 0) {
+		// 0 saturation means this color is grey
+		VectorSet(rgb, hsl[2], hsl[2], hsl[2]);
+	} else {
+		float chroma, h_, x, m;
+
+		chroma = (1 - fabs(2 * hsl[2] - 1)) * hsl[1];
+		h_ = hsl[0] * 6;
+		x = chroma * (1 - fabs((fmod(h_, 2)) - 1));
+		m = hsl[2] - roundf((chroma/2) * 10000000000) / 10000000000.0;
+
+		if(h_ >= 0 && h_ < 1) {
+			VectorSet(rgb, (chroma + m), (x + m), m);
+		} else if(h_ >= 1 && h_ < 2) {
+					VectorSet(rgb, (x + m), (chroma + m), m);
+		} else if(h_ >= 2 && h_ < 3) {
+			VectorSet(rgb, m, (chroma + m), (x + m));
+		} else if(h_ >= 3 && h_ < 4) {
+			VectorSet(rgb, m, (x + m), (chroma + m));
+		} else if(h_ >= 4 && h_ < 5) {
+			VectorSet(rgb, (x + m), m, (chroma + m));
+		} else if(h_ >= 5 && h_ < 6) {
+			VectorSet(rgb, (chroma + m), m, (x + m));
+		}
+	}
+}
