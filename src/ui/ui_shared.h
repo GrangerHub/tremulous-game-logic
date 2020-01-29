@@ -584,6 +584,7 @@ typedef struct chatInfo_s
   int        chat_mode_blink_time;
 
   qboolean   say_history_current;
+  qboolean   say_make_current_line_blank;
   char       say_unsubmitted_line[MAX_CVAR_VALUE_STRING];
   char       say_history_lines[MAX_SAY_HISTORY_LINES][MAX_CVAR_VALUE_STRING];
   int        nextHistoryLine; // the last line in the history buffer, not masked
