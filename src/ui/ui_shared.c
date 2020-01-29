@@ -3469,6 +3469,7 @@ qboolean Item_TextField_HandleKey( itemDef_t *item, int key )
               "ui_sayBuffer",
               chatInfo.say_unsubmitted_line);
             chatInfo.say_history_current = qtrue;
+            chatInfo.say_make_current_line_blank = qfalse;
           }
           break;
 
@@ -3502,6 +3503,15 @@ qboolean Item_TextField_HandleKey( itemDef_t *item, int key )
 
         case K_TAB:
           if( item->type == ITEM_TYPE_SAYFIELD ) {
+            if(chatInfo.say_make_current_line_blank) {
+              chatInfo.say_make_current_line_blank = qfalse;
+              memset(
+                chatInfo.say_unsubmitted_line, 0,
+                sizeof(chatInfo.say_unsubmitted_line));
+              DC->setCVar("ui_sayBuffer", "");
+              item->cursorPos = 0;
+              len = 0;
+            }
             chatInfo.say_cursor_pos = &item->cursorPos;
             chatInfo.say_length = len;
             chatInfo.say_max_chars = editPtr->maxChars;
@@ -3510,51 +3520,66 @@ qboolean Item_TextField_HandleKey( itemDef_t *item, int key )
         case K_DOWNARROW:
         case K_KP_DOWNARROW:
         if( item->type == ITEM_TYPE_SAYFIELD ) {
-          if(!chatInfo.say_history_current) {
-            chatInfo.historyLine++;
-            while(
-              chatInfo.historyLine <= chatInfo.nextHistoryLine &&
-              !chatInfo.say_history_lines[chatInfo.historyLine % MAX_SAY_HISTORY_LINES][0]) {
-              //skip over Null history lines
+          if(!chatInfo.say_make_current_line_blank) {
+            if(chatInfo.say_history_current) {
+              chatInfo.say_make_current_line_blank = qtrue;
+              DC->setCVar("ui_sayBuffer", "");
+              break;
+            } else {
               chatInfo.historyLine++;
-            }
-            if (chatInfo.historyLine > chatInfo.nextHistoryLine) {
-              chatInfo.historyLine = chatInfo.nextHistoryLine;
+              while(
+                chatInfo.historyLine <= chatInfo.nextHistoryLine &&
+                !chatInfo.say_history_lines[chatInfo.historyLine % MAX_SAY_HISTORY_LINES][0]) {
+                //skip over Null history lines
+                chatInfo.historyLine++;
+              }
+              if (chatInfo.historyLine > chatInfo.nextHistoryLine) {
+                chatInfo.historyLine = chatInfo.nextHistoryLine;
+                DC->setCVar(
+                  "ui_sayBuffer",
+                  chatInfo.say_unsubmitted_line);
+                chatInfo.say_history_current = qtrue;
+                break;
+              }
               DC->setCVar(
                 "ui_sayBuffer",
-                chatInfo.say_unsubmitted_line);
-              chatInfo.say_history_current = qtrue;
-              break;
+                chatInfo.say_history_lines[chatInfo.historyLine % MAX_SAY_HISTORY_LINES]);
+                break;
             }
-            DC->setCVar(
-              "ui_sayBuffer",
-              chatInfo.say_history_lines[chatInfo.historyLine % MAX_SAY_HISTORY_LINES]);
           }
           break;
         }
         case K_UPARROW:
         case K_KP_UPARROW:
           if( item->type == ITEM_TYPE_SAYFIELD ) {
-            if(
-              chatInfo.nextHistoryLine - chatInfo.historyLine < MAX_SAY_HISTORY_LINES 
-              && chatInfo.historyLine > 0 ) {
-              char buffer[ MAX_CVAR_VALUE_STRING ];
-
-              DC->getCVarString("ui_sayBuffer", buffer, sizeof( buffer ));
-              if(chatInfo.say_history_current) {
-                //save the unsubmitted line
-                Q_strncpyz(
-                  chatInfo.say_unsubmitted_line, buffer, sizeof(chatInfo.say_unsubmitted_line));
-                chatInfo.say_history_current = qfalse;
-              }
-
-              chatInfo.historyLine--;
-
+            if(chatInfo.say_make_current_line_blank) {
+              chatInfo.say_make_current_line_blank = qfalse;
               DC->setCVar(
                 "ui_sayBuffer",
-                chatInfo.say_history_lines[chatInfo.historyLine % MAX_SAY_HISTORY_LINES]);
+                chatInfo.say_unsubmitted_line);
+              break;
+            } else {
+              if(
+                chatInfo.nextHistoryLine - chatInfo.historyLine < MAX_SAY_HISTORY_LINES 
+                && chatInfo.historyLine > 0 ) {
+                char buffer[ MAX_CVAR_VALUE_STRING ];
+
+                DC->getCVarString("ui_sayBuffer", buffer, sizeof( buffer ));
+                if(chatInfo.say_history_current) {
+                  //save the unsubmitted line
+                  Q_strncpyz(
+                    chatInfo.say_unsubmitted_line, buffer, sizeof(chatInfo.say_unsubmitted_line));
+                  chatInfo.say_history_current = qfalse;
+                }
+
+                chatInfo.historyLine--;
+
+                DC->setCVar(
+                  "ui_sayBuffer",
+                  chatInfo.say_history_lines[chatInfo.historyLine % MAX_SAY_HISTORY_LINES]);
+              }
+              break;
             }
-            break;
           }
 
           newItem = Menu_SetNextCursorItem( item->parent );
@@ -3591,6 +3616,30 @@ qboolean Item_TextField_HandleKey( itemDef_t *item, int key )
     }
 
     releaseFocus = qfalse;
+  }
+
+  if( item->type == ITEM_TYPE_SAYFIELD ) {
+    if(chatInfo.say_make_current_line_blank) {
+      switch(key) {
+        case K_PGUP:
+        case K_KP_PGUP:
+        case K_PGDN:
+        case K_KP_PGDN:
+        case K_UPARROW:
+        case K_KP_UPARROW:
+        case K_DOWNARROW:
+        case K_KP_DOWNARROW:
+          break;
+
+        default:
+          chatInfo.say_make_current_line_blank = qfalse;
+          memset(
+            chatInfo.say_unsubmitted_line, 0,
+            sizeof(chatInfo.say_unsubmitted_line));
+          DC->setCVar("ui_sayBuffer", "");
+          break;
+      }
+    }
   }
 
 exit:
