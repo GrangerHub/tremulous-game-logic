@@ -596,11 +596,12 @@ void Con_DrawSolidConsole( float frac ) {
 			}
 
 			if(currentLuminance <= 0.24) {
-				//draw a white rectangle behind characters that are too dark
-				re.SetColor(colorWhite);
-				re.DrawStretchPic(
-					con.xadjust + (x+1)*SMALLCHAR_WIDTH, y, SMALLCHAR_WIDTH,
-					SMALLCHAR_HEIGHT, 0, 0, 0, 0, cls.whiteShader);
+				vec4_t hsl;
+
+				//make the color brighter
+				Com_rgb_to_hsl(currentColor, hsl);
+				hsl[2] = 0.25;
+				Com_hsl_to_rgb(hsl, currentColor);
 				re.SetColor(currentColor);
 				currentColorChanged = qfalse;
 			} else if(currentColorChanged) {
