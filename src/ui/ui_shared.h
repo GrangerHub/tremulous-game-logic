@@ -574,6 +574,7 @@ typedef enum
 } chatMode_t;
 
 extern int key_pressed_onCharEntry; // used by onCharEntry
+extern qboolean ctrl_held;
 
 #define MAX_SAY_HISTORY_LINES 32
 
