@@ -4761,6 +4761,8 @@ void UI_Init( qboolean inGameLoad )
   UI_InitMemory();
   BG_InitMemory(); // Shouldn't really have 2 of these but whatev for now
 
+  ctrl_held = qfalse;
+
   chatInfo.chat_mode = CHAT_GLOBAL;
   chatInfo.chat_mode_blink_time = 0;
 
@@ -4873,6 +4875,14 @@ void UI_KeyEvent( int key, qboolean down )
   if( Menu_Count() > 0 )
   {
     menuDef_t *menu = Menu_GetFocused();
+
+    if(key == K_CTRL) {
+      if(down) {
+        ctrl_held = qtrue;
+      } else {
+        ctrl_held = qfalse;
+      }
+    }
 
     if( menu )
     {
