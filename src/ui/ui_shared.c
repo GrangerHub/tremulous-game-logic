@@ -3643,6 +3643,22 @@ qboolean Item_TextField_HandleKey( itemDef_t *item, int key )
   }
 
 exit:
+  if( item->type == ITEM_TYPE_SAYFIELD ) {
+    if(releaseFocus && !chatInfo.say_make_current_line_blank) {
+      switch (key) {
+        case K_ENTER:
+        case K_KP_ENTER:
+          break;
+
+          default:
+            chatInfo.historyLine = chatInfo.nextHistoryLine;
+            chatInfo.say_history_current = qtrue;
+            chatInfo.say_make_current_line_blank = qtrue;
+            DC->setCVar("ui_sayBuffer", "");
+            break;
+      }
+    }
+  }
   Item_TextField_CalcPaintOffset( item, buff );
 
   return !releaseFocus;

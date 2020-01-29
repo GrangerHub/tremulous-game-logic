@@ -3462,7 +3462,8 @@ static void UI_RunMenuScript( char **args )
       else {
 
         // copy line to history buffer
-        if(!chatInfo.say_history_current) {
+        if(
+          !chatInfo.say_history_current) {
           Q_strncpyz(
             chatInfo.say_history_lines[chatInfo.nextHistoryLine % MAX_SAY_HISTORY_LINES],
             chatInfo.say_unsubmitted_line, MAX_CVAR_VALUE_STRING);
@@ -4875,8 +4876,17 @@ void UI_KeyEvent( int key, qboolean down )
 
     if( menu )
     {
-      if( key == K_ESCAPE && down && !Menus_AnyFullScreenVisible() )
+      if( key == K_ESCAPE && down && !Menus_AnyFullScreenVisible() ) {
+        if(!Q_stricmp(menu->window.name, "say")) {
+          if(!chatInfo.say_make_current_line_blank) {
+              chatInfo.historyLine = chatInfo.nextHistoryLine;
+              chatInfo.say_history_current = qtrue;
+              chatInfo.say_make_current_line_blank = qtrue;
+              trap_Cvar_Set("ui_sayBuffer", "");
+          }
+        }
         Menus_CloseAll( );
+      }
       else
         Menu_HandleKey( menu, key, down );
     }
