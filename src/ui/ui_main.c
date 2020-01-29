@@ -3677,6 +3677,7 @@ static void UI_RunMenuScript( char **args )
                   clean_name_length >
                   max_entered_partial_name_length) {
                   char *s_ptr = strstr(clean_name, entered_partial_name);
+                  char *start = s_ptr;
                   char partial_completion[MAX_CVAR_VALUE_STRING];
 
                   //check if we can have a partial tab name completion
@@ -3695,7 +3696,36 @@ static void UI_RunMenuScript( char **args )
                   }
 
                   partial_completion[j] = '\0';
-                  if(j > max_entered_partial_name_length) {
+
+                  //check if we can have a partial tab name completion to the
+                  //left of the string
+                  for(s_ptr = start - 1;s_ptr - clean_name >= 0; s_ptr--) {
+                    int  partial_completion_length = strlen(partial_completion);
+                    char backup[MAX_CVAR_VALUE_STRING];
+
+                    memcpy(backup, partial_completion, sizeof(backup));
+
+                    memmove(
+                      &partial_completion[1], &partial_completion[0],
+                      partial_completion_length);
+
+                    partial_completion[0] = s_ptr[0];
+
+                    if(
+                      matches !=
+                        UI_ClientNumbersFromString(
+                          partial_completion, temp_pids, MAX_CLIENTS)) {
+                      //restore to the previous value that still worked
+                      memcpy(
+                        partial_completion, backup,
+                        sizeof(partial_completion));
+                      break;
+                    }
+                  }
+
+                  if(
+                    strlen(partial_completion) >
+                    max_entered_partial_name_length) {
                     max_entered_partial_name_length = j;
                     Q_strncpyz(
                       tab_completed_name, partial_completion,
