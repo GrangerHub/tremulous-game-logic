@@ -32,6 +32,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 static qboolean ui_shared_is_scrim;
 
 int key_pressed_onCharEntry; // used by onCharEntry
+qboolean ctrl_held;
 
 chatInfo_t chatInfo;
 
@@ -3455,6 +3456,20 @@ qboolean Item_TextField_HandleKey( itemDef_t *item, int key )
         case K_KP_INS:
           DC->setOverstrikeMode( !DC->getOverstrikeMode() );
 
+          break;
+
+        case ('c'):
+          if( ctrl_held && (item->type == ITEM_TYPE_SAYFIELD) ) {
+            // ctrl-c clears the field
+            memset(
+              chatInfo.say_unsubmitted_line, 0,
+              sizeof(chatInfo.say_unsubmitted_line));
+            chatInfo.historyLine = chatInfo.nextHistoryLine;
+            DC->setCVar(
+              "ui_sayBuffer",
+              chatInfo.say_unsubmitted_line);
+            chatInfo.say_history_current = qtrue;
+          }
           break;
 
         case K_PGUP:
