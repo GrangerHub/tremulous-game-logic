@@ -3540,7 +3540,7 @@ static void UI_RunMenuScript( char **args )
       char buffer[ MAX_CVAR_VALUE_STRING ];
 
       trap_Cvar_VariableStringBuffer("ui_sayBuffer", buffer, sizeof(buffer));
-      if(chatInfo.say_history_current) {
+      if(chatInfo.say_history_current && !chatInfo.say_make_current_line_blank) {
         Q_strncpyz(chatInfo.say_unsubmitted_line, buffer, sizeof(chatInfo.say_unsubmitted_line));
       }
 
@@ -4771,6 +4771,7 @@ void UI_Init( qboolean inGameLoad )
     chatInfo.say_history_lines, 0,
     sizeof(chatInfo.say_history_lines[0][0]) *
     MAX_SAY_HISTORY_LINES * MAX_CVAR_VALUE_STRING);
+  chatInfo.say_make_current_line_blank = qfalse;
   chatInfo.say_history_current = qtrue;
   chatInfo.nextHistoryLine = 0;
   chatInfo.historyLine = 0;
