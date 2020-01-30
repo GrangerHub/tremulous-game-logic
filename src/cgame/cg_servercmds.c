@@ -1593,34 +1593,34 @@ static void CG_Say( int clientNum, saymode_t mode, const char *text )
       break;
     case SAY_TEAM:
 #ifdef MODULE_INTERFACE_11
-      CG_Printf( "%s%s(%s" S_COLOR_WHITE ")%s%s %s%s\n",
-                 ignore, prefix, name, location, maybeColon, tmsgcolor, text );
+      CG_Printf( "%s%s%s(%s" S_COLOR_WHITE ")%s%s %s%s\n",
+                 ignore, mention, prefix, name, location, maybeColon, tmsgcolor, text );
 #else
-      CG_Printf( "%s%s(%s" S_COLOR_WHITE ")%s%s %c%s%s\n",
-                 ignore, prefix, name, location, maybeColon, INDENT_MARKER, tmsgcolor, text );
+      CG_Printf( "%s%s%s(%s" S_COLOR_WHITE ")%s%s %c%s%s\n",
+                 ignore, mention, prefix, name, location, maybeColon, INDENT_MARKER, tmsgcolor, text );
 #endif
       break;
     case SAY_ADMINS:
     case SAY_ADMINS_PUBLIC:
 #ifdef MODULE_INTERFACE_11
-      CG_Printf( "%s%s%s%s" S_COLOR_WHITE "%s " S_COLOR_MAGENTA "%s\n",
-                 ignore, prefix,
+      CG_Printf( "%s%s%s%s%s" S_COLOR_WHITE "%s " S_COLOR_MAGENTA "%s\n",
+                 ignore, mention, prefix,
                  ( mode == SAY_ADMINS ) ? "[ADMIN]" : "[PLAYER]",
                  name, maybeColon, text );
 #else
-      CG_Printf( "%s%s%s%s" S_COLOR_WHITE "%s %c" S_COLOR_MAGENTA "%s\n",
-                 ignore, prefix,
+      CG_Printf( "%s%s%s%s%s" S_COLOR_WHITE "%s %c" S_COLOR_MAGENTA "%s\n",
+                 ignore, mention, prefix,
                  ( mode == SAY_ADMINS ) ? "[ADMIN]" : "[PLAYER]",
                  name, maybeColon, INDENT_MARKER, text );
 #endif
       break;
     case SAY_AREA:
 #ifdef MODULE_INTERFACE_11
-      CG_Printf( "%s%s<%s" S_COLOR_WHITE ">%s%s " S_COLOR_BLUE "%s\n",
-                 ignore, prefix, name, location, maybeColon, text );
+      CG_Printf( "%s%s%s<%s" S_COLOR_WHITE ">%s%s " S_COLOR_BLUE "%s\n",
+                 ignore, mention, prefix, name, location, maybeColon, text );
 #else
-      CG_Printf( "%s%s<%s" S_COLOR_WHITE ">%s%s %c" S_COLOR_BLUE "%s\n",
-                 ignore, prefix, name, location, maybeColon, INDENT_MARKER, text );
+      CG_Printf( "%s%s%s<%s" S_COLOR_WHITE ">%s%s %c" S_COLOR_BLUE "%s\n",
+                 ignore, mention, prefix, name, location, maybeColon, INDENT_MARKER, text );
 #endif
       break;
     case SAY_PRIVMSG:
