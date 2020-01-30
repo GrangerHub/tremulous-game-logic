@@ -1044,7 +1044,7 @@ int       G_ClientNumbersFromString(
 char      *ConcatArgs( int start );
 char      *ConcatArgsPrintable( int start );
 void      G_Say( gentity_t *ent, saymode_t mode, const char *chatText );
-void      G_DecolorString( char *in, char *out, int len );
+void      G_DecolorString( const char *in, char *out, int len );
 void      G_UnEscapeString( char *in, char *out, int len );
 void      G_SanitiseString( char *in, char *out, int len );
 void      Cmd_PrivateMessage_f( gentity_t *ent );

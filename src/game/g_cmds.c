@@ -5454,7 +5454,7 @@ void G_ListCommands( gentity_t *ent )
   G_admin_cmdlist( ent );
 }
 
-void G_DecolorString( char *in, char *out, int len )
+void G_DecolorString( const char *in, char *out, int len )
 {
   qboolean decolor = qtrue;
 
