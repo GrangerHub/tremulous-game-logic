@@ -4919,14 +4919,6 @@ void UI_KeyEvent( int key, qboolean down )
     if( menu )
     {
       if( key == K_ESCAPE && down && !Menus_AnyFullScreenVisible() ) {
-        if(!Q_stricmp(menu->window.name, "say")) {
-          if(!chatInfo.say_make_current_line_blank) {
-              chatInfo.historyLine = chatInfo.nextHistoryLine;
-              chatInfo.say_history_current = qtrue;
-              chatInfo.say_make_current_line_blank = qtrue;
-              trap_Cvar_Set("ui_sayBuffer", "");
-          }
-        }
         Menus_CloseAll( );
       }
       else
