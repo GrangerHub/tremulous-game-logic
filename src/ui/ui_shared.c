@@ -3517,6 +3517,17 @@ qboolean Item_TextField_HandleKey( itemDef_t *item, int key )
             chatInfo.say_max_chars = editPtr->maxChars;
             break;
           }
+
+          newItem = Menu_SetNextCursorItem(item->parent);
+
+          if (newItem && Item_IsEditField(newItem)) {
+              g_editItem = newItem;
+          } else {
+              releaseFocus = qtrue;
+              goto exit;
+          }
+          break;
+
         case K_DOWNARROW:
         case K_KP_DOWNARROW:
         if( item->type == ITEM_TYPE_SAYFIELD ) {
@@ -3549,6 +3560,17 @@ qboolean Item_TextField_HandleKey( itemDef_t *item, int key )
           }
           break;
         }
+
+        newItem = Menu_SetNextCursorItem(item->parent);
+
+        if (newItem && Item_IsEditField(newItem)) {
+            g_editItem = newItem;
+        } else {
+            releaseFocus = qtrue;
+            goto exit;
+        }
+        break;
+
         case K_UPARROW:
         case K_KP_UPARROW:
           if( item->type == ITEM_TYPE_SAYFIELD ) {
@@ -3593,7 +3615,6 @@ qboolean Item_TextField_HandleKey( itemDef_t *item, int key )
             releaseFocus = qtrue;
             goto exit;
           }
-
           break;
 
         case K_MOUSE1:
