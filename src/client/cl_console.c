@@ -225,10 +225,10 @@ void Con_CheckResize (void)
 		width = DEFAULT_CONSOLE_WIDTH;
 		con.linewidth = width;
 		con.totallines = CON_TEXTSIZE / con.linewidth;
-		for(i=0; i<CON_TEXTSIZE; i++)
-
+		for(i=0; i<CON_TEXTSIZE; i++) {
 			con.text[i] = ' ';
 			Vector4Copy(g_color_table[ColorIndex(COLOR_WHITE)], con.text_color[i]);
+		}
 	}
 	else
 	{
