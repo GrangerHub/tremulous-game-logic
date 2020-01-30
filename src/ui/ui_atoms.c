@@ -156,6 +156,19 @@ static void UI_MessageMode_f( void )
 {
   char *arg = UI_Argv( 0 );
 
+  if(!chatInfo.say_make_current_line_blank) {
+    char buffer[ MAX_CVAR_VALUE_STRING ];
+
+    trap_Cvar_VariableStringBuffer("ui_sayBuffer", buffer, sizeof(buffer));
+
+    if(buffer[0]) {
+      chatInfo.historyLine = chatInfo.nextHistoryLine;
+      chatInfo.say_history_current = qtrue;
+      chatInfo.say_make_current_line_blank = qtrue;
+      trap_Cvar_Set("ui_sayBuffer", "");
+    }
+  }
+
   switch( arg[ 11 ] )
   {
     default:
