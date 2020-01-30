@@ -164,7 +164,7 @@ void Con_Dump_f (void)
 	{
 		line = con.text + (l%con.totallines)*con.linewidth;
 		for(i=0; i<con.linewidth; i++)
-			buffer[i] = line[x];
+			buffer[i] = line[i];
 		for (x=con.linewidth-1 ; x>=0 ; x--)
 		{
 			if (buffer[x] == ' ')
