@@ -1134,7 +1134,7 @@ void G_CountBuildables( void ) {
     level.num_buildables[i] = 0;
   }
   for(i = 0; i < NUM_TEAMS; i++) {
-    level.core_buildable_constructing[i] = qtrue;
+    level.core_buildable_constructing[i] = qfalse;
     level.core_buildable_health[i] = 0;
   }
 
@@ -1162,12 +1162,8 @@ void G_CountBuildables( void ) {
     if(BG_Buildable(buildable)->role & ROLE_CORE) {
       int health = (BG_SU2HP(ent->health) * 100) / BG_SU2HP(BG_Buildable(buildable)->health);
 
-      if(level.core_buildable_constructing[team]) {
-        level.core_buildable_constructing[team] = !ent->spawned;
-      }
-      if(health > level.core_buildable_health[team]) {
-        level.core_buildable_health[team] = health;
-      }
+      level.core_buildable_constructing[team] = !ent->spawned;
+      level.core_buildable_health[team] = health;
     }
   }
 }
