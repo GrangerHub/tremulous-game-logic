@@ -93,8 +93,8 @@ static void CG_Parse_Team_Status(void) {
     cg.team_status.num_buildables, 0, sizeof(cg.team_status.num_buildables));
 
   for(i = 0; i < total_buildables; i++) {
-    //
-    cg.team_status.num_buildables[atoi(CG_Argv(i * 2 + 4))] =
+    buildable_t buildable = atoi(CG_Argv(i * 2 + 4));
+    cg.team_status.num_buildables[buildable] =
       atoi(CG_Argv(i * 2 + 5));
   }
 }

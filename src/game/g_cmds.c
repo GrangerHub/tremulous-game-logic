@@ -1475,10 +1475,13 @@ void Cmd_TeamStatus_f( gentity_t *ent )
   switch (ent->client->pers.teamSelection) {
     case TEAM_ALIENS:
       omrccount = level.num_buildables[BA_A_OVERMIND];
+      break;
     case TEAM_HUMANS:
       omrccount = level.num_buildables[BA_H_REACTOR];
+      break;
     default:
       omrccount = 0;
+      break;
   }
 
   if( omrccount > 1 )
@@ -1541,6 +1544,8 @@ void Cmd_TeamStatusOverlay_f( gentity_t *ent )
       builders++;
     continue;
   }
+
+  memset(string, 0, sizeof(string));
 
   for(i = 0; i < BA_NUM_BUILDABLES; i++) {
 
