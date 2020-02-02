@@ -2339,7 +2339,7 @@ static void CG_DrawPlayerChargeBarBG(
     if( cg.snap->ps.stats[ STAT_TEAM ] != TEAM_ALIENS )
       return;
 
-    meterAlpha = &cg.evolveCoolDownaMeterAlpha;
+    meterAlpha = &cg.evolveCoolDownMeterAlpha;
   } else {
     if(BG_ClassHasAbility(cg.snap->ps.stats[STAT_CLASS], SCA_CHARGE_STAMINA)) {
       stamina_fraction = CG_ChargeProgress(qtrue, qfalse);
@@ -2452,8 +2452,8 @@ static void CG_DrawPlayerChargeBar(
     if( cg.snap->ps.stats[ STAT_TEAM ] != TEAM_ALIENS )
       return;
 
-    meterAlpha = &cg.evolveCoolDownaMeterAlpha;
-    meterValue = &cg.evolveCoolDownaMeterValue;
+    meterAlpha = &cg.evolveCoolDownMeterAlpha;
+    meterValue = &cg.evolveCoolDownMeterValue;
   } else {
     if(BG_ClassHasAbility(cg.snap->ps.stats[STAT_CLASS], SCA_CHARGE_STAMINA)) {
       progress *= CG_ChargeProgress( qtrue, qfalse );
