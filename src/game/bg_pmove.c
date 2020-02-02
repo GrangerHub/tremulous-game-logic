@@ -4398,7 +4398,11 @@ static void PM_Weapon( void )
     if( pm->ps->weapon != WP_LIGHTNING ||
         !( pm->ps->stats[ STAT_STATE ] & SS_CHARGING ) )
     {
-      const int clips_to_load = BG_ClipUssage(pm->ps);
+      int clips_to_load = BG_ClipUssage(pm->ps);
+
+      if(remainder_ammo > 0) {
+        clips_to_load = 1;
+      }
 
       pm->ps->pm_flags &= ~PMF_WEAPON_RELOAD;
       pm->ps->weaponstate = WEAPON_RELOADING;
