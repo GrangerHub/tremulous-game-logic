@@ -3548,7 +3548,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qtrue,                //qboolean  ammoPurchasable;
     qfalse,               //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
-    WEAPONOPTA_ONE_ROUND_TO_ONE_CLIP, //weapon_Option_A_t weaponOptionA;
+    WEAPONOPTA_REMAINDER_AMMO, //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;
     0,                    //int       spinUpStartSpread;
     0,                    //int       spinUpTime;
@@ -3612,7 +3612,7 @@ static const weaponAttributes_t bg_weapons[ ] =
       },
       {                   //struct    splatter[1]
         qtrue,            //qboolean               predicted;
-        SHOTGUN_CHOKE_PELLETS,  //unsigned int number;
+        SHOTGUN_PELLETS,  //unsigned int number;
         SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
         SPLATD_RANDOM,    //splatterDistribution_t distribution;
         0,                //unsigned int           pitchLayers;
@@ -3621,6 +3621,114 @@ static const weaponAttributes_t bg_weapons[ ] =
         SHOTGUN_CHOKE_DMG_FALLOFF, //float        impactDamageFalloff;
         SHOTGUN_CHOKE_DMG_CAP, //int          impactDamageCap;
         SHOTGUN_CHOKE_DMG_FALLOFF, //float        range;
+      },
+      {                   //struct    splatter[2]
+        qfalse,           //qboolean               predicted;
+        0,                //unsigned int number;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
+        0,                //float        spread;
+        0,                //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        0.0f,             //float        range;
+      }
+    },
+    TEAM_HUMANS           //team_t    team;
+  },
+  {
+    WP_DBSHOTGUN,         //int       number;
+    qtrue,                //qboolean enabled;
+    DBSHOTGUN_PRICE,      //int       price;
+    qfalse,               //qboolean  warmupFree;
+    ( 1 << S1 )|( 1 << S2 )|( 1 << S3 ), //int  stages;
+    SLOT_WEAPON,          //int       slots;
+    "dbshotgun",          //char      *name;
+    "Double Barreled Shotgun", //char      *humanName;
+    DBSHOTGUN_SHELLS,     //int       maxAmmo;
+    DBSHOTGUN_MAXCLIPS,   //int       maxClips;
+    1,                    //int       ammoUsage1;
+    2,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage3;
+    qtrue,                //qboolean  allowPartialAmmoUsage;
+    0,                    //int       roundPrice;
+    qtrue,                //qboolean  ammoPurchasable;
+    qfalse,               //int       infiniteAmmo;
+    qfalse,               //int       usesEnergy;
+    WEAPONOPTA_ONE_ROUND_TO_ONE_CLIP, //weapon_Option_A_t weaponOptionA;
+    0,                    //int       spinUpStartRepeat;
+    0,                    //int       spinUpStartSpread;
+    0,                    //int       spinUpTime;
+    0,                    //int       spinDownTime;
+    OVERHEAT_FROM_USE,    //overheatType_t overheatType;
+    qfalse,               //qboolean  overheatPrimaryMode;
+    qfalse,               //qboolean  overheatAltMode;
+    qfalse,               //qboolean  overheatThirdMode;
+    0,                    //int       overheatTime;
+    0,                    //int       cooldownTime;
+    0,                    //int       overheatWeaponDelayTime;
+    DBSHOTGUN_REPEAT,     //int       repeatRate1;
+    DBSHOTGUN_REPEAT,     //int       repeatRate2;
+    0,                    //int       repeatRate3;
+    0,                    //int       burstRounds1;
+    0,                    //int       burstRounds2;
+    0,                    //int       burstRounds3;
+    0,                    //int       burstDelay1;
+    0,                    //int       burstDelay2;
+    0,                    //int       burstDelay3;
+    DBSHOTGUN_RELOAD,     //int       reloadTime;
+    DBSHOTGUN_K_SCALE,    //float     knockbackScale;
+    DBSHOTGUN_RECOIL1,    //float     recoil1;
+    DBSHOTGUN_RECOIL2,    //float     recoil2;
+    0.0f,                 //float     recoil3;
+    qtrue,                //qboolean  hasAltMode;
+    qfalse,               //qboolean  hasThirdMode;
+    qfalse,               //qboolean  canZoom;
+    90.0f,                //float     zoomFov;
+    qtrue,                //qboolean  purchasable;
+    qtrue,                //qboolean  longRanged;
+    qfalse,               //qboolean  relativeMissileSpeed;
+    {
+      {                     //impactPrediction_t impactPrediction[0];
+        WPM_NONE,           //weaponMode_t  weaponMode;
+        TR_STATIONARY,      //trType_t      trType;
+        0,                  //int       missileLifeTime;
+        0,                  //int       missileSize;
+        0                   //int       missileLaunchSpeed;
+      },
+      {                     //impactPrediction_t impactPrediction[1];
+        WPM_NONE,           //weaponMode_t  weaponMode;
+        TR_STATIONARY,      //trType_t      trType;
+        0,                  //int       missileLifeTime;
+        0,                  //int       missileSize;
+        0                   //int       missileLaunchSpeed;
+      }
+    },
+    {                     //struct    splatter
+      {                   //struct    splatter[0]
+        qtrue,            //qboolean               predicted;
+        DBSHOTGUN_PELLETS, //unsigned int number;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
+        DBSHOTGUN_SPREAD, //float        spread;
+        DBSHOTGUN_DMG,    //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        DBSHOTGUN_RANGE,  //float        range;
+      },
+      {                   //struct    splatter[1]
+        qtrue,            //qboolean               predicted;
+        DBSHOTGUN_DOUBLE_PELLETS, //unsigned int number;
+        SPLATP_SPHERICAL_CONE, //splatterPattern_t pattern;
+        SPLATD_RANDOM,    //splatterDistribution_t distribution;
+        0,                //unsigned int           pitchLayers;
+        DBSHOTGUN_SPREAD, //float        spread;
+        DBSHOTGUN_DMG,    //int          impactDamage;
+        0.0f,             //float        impactDamageFalloff;
+        0,                //int          impactDamageCap;
+        DBSHOTGUN_RANGE,  //float        range;
       },
       {                   //struct    splatter[2]
         qfalse,           //qboolean               predicted;

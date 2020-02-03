@@ -615,24 +615,37 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define	LASERMINE_SELF_DESTRUCT     120000
 #define LASERMINE_HEALTH            30
 
-#define SHOTGUN_PRICE               250
-#define SHOTGUN_SHELLS              2
+#define SHOTGUN_PRICE               200
+#define SHOTGUN_SHELLS              15
 #define SHOTGUN_PELLETS             15 //used to sync server and client side
-#define SHOTGUN_CHOKE_PELLETS       30
-#define SHOTGUN_MAXCLIPS            38
-#define SHOTGUN_REPEAT              1000
+#define SHOTGUN_MAXCLIPS            3
+#define SHOTGUN_REPEAT              500
 #define SHOTGUN_K_SCALE             1.0f
 #define SHOTGUN_RECOIL1             64.0f
 #define SHOTGUN_RECOIL2             128.0f
 #define SHOTGUN_RELOAD              750
 #define SHOTGUN_SPREAD              (6.5f)
-#define SHOTGUN_DMG                 HWDM(5000)
+#define SHOTGUN_DMG                 HWDM(2500)
 #define SHOTGUN_RANGE               (8192 * 12)
-#define SHOTGUN_CHOKE_REPEAT        1300
-#define SHOTGUN_CHOKE_DMG           HWDM(6725)
-#define SHOTGUN_CHOKE_DMG_CAP       HWDM(6250)
+#define SHOTGUN_CHOKE_REPEAT        600
+#define SHOTGUN_CHOKE_DMG           HWDM(3225)
+#define SHOTGUN_CHOKE_DMG_CAP       HWDM(2750)
 #define SHOTGUN_CHOKE_SPREAD        (4.2f)
 #define SHOTGUN_CHOKE_DMG_FALLOFF   2048.0f
+
+#define DBSHOTGUN_PRICE               500
+#define DBSHOTGUN_SHELLS              2
+#define DBSHOTGUN_PELLETS             15 //used to sync server and client side
+#define DBSHOTGUN_DOUBLE_PELLETS      30
+#define DBSHOTGUN_MAXCLIPS            38
+#define DBSHOTGUN_REPEAT              1000
+#define DBSHOTGUN_K_SCALE             1.0f
+#define DBSHOTGUN_RECOIL1             64.0f
+#define DBSHOTGUN_RECOIL2             128.0f
+#define DBSHOTGUN_RELOAD              750
+#define DBSHOTGUN_SPREAD              (6.5f)
+#define DBSHOTGUN_DMG                 HWDM(5000)
+#define DBSHOTGUN_RANGE               (8192 * 12)
 
 #define LASGUN_PRICE                275
 #define LASGUN_AMMO                 200

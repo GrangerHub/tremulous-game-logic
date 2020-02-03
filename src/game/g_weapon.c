@@ -759,6 +759,27 @@ void shotgunFire( gentity_t *ent, int seed )
 /*
 ======================================================================
 
+DOUBLE BARREL SHOTGUN
+
+======================================================================
+*/
+void dbshotgunFire( gentity_t *ent, int seed )
+{
+  unlagged_attacker_data_t unlagged_attacker;
+
+  unlagged_attacker.ent_num = ent->s.number;
+  unlagged_attacker.point_type = UNLGD_PNT_MUZZLE;
+  unlagged_attacker.range = DBSHOTGUN_RANGE;
+  G_UnlaggedOn(&unlagged_attacker);
+  G_SplatterFire(
+    ent, ent, unlagged_attacker.muzzle_out, unlagged_attacker.forward_out,
+    seed, ent->s.weapon, ent->s.generic1, MOD_DBSHOTGUN );
+  G_UnlaggedOff();
+}
+
+/*
+======================================================================
+
 MASS DRIVER
 
 ======================================================================
@@ -2703,6 +2724,10 @@ void FireWeapon2( gentity_t *ent, int seed )
       shotgunFire( ent, seed );
       break;
 
+    case WP_DBSHOTGUN:
+      dbshotgunFire(ent, seed);
+      break;
+
     case WP_CHAINGUN:
       bulletFire( ent, CHAINGUN_SPREAD2, CHAINGUN_DMG2, MOD_CHAINGUN );
       break;
@@ -2815,6 +2840,9 @@ void FireWeapon( gentity_t *ent, int seed )
       break;
     case WP_SHOTGUN:
       shotgunFire( ent, seed );
+      break;
+    case WP_DBSHOTGUN:
+      dbshotgunFire(ent, seed);
       break;
     case WP_CHAINGUN:
       bulletFire( ent, CHAINGUN_SPREAD, CHAINGUN_DMG, MOD_CHAINGUN );

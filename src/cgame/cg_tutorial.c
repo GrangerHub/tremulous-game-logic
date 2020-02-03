@@ -710,7 +710,6 @@ static void CG_HumanText( char *text, playerState_t *ps )
     {
       case WP_BLASTER:
       case WP_MACHINEGUN:
-      case WP_SHOTGUN:
       case WP_LAS_GUN:
       case WP_CHAINGUN:
       case WP_PULSE_RIFLE:
@@ -722,6 +721,30 @@ static void CG_HumanText( char *text, playerState_t *ps )
         break;
 
         
+      case WP_SHOTGUN:
+        Q_strcat( text, MAX_TUTORIAL_TEXT,
+            va( "Press %s to fire the %s\n",
+              CG_KeyNameForCommand( "+attack" ),
+              BG_Weapon( ps->weapon )->humanName ) );
+
+        Q_strcat( text, MAX_TUTORIAL_TEXT,
+            va( "Press %s to fire the %s choked\n",
+              CG_KeyNameForCommand( "+button5" ),
+              BG_Weapon( ps->weapon )->humanName ) );
+        break;
+
+      case WP_DBSHOTGUN:
+        Q_strcat( text, MAX_TUTORIAL_TEXT,
+            va( "Press %s to fire a single barrel of the %s\n",
+              CG_KeyNameForCommand( "+attack" ),
+              BG_Weapon( ps->weapon )->humanName ) );
+
+        Q_strcat( text, MAX_TUTORIAL_TEXT,
+            va( "Press %s to fire both barrels of the %s\n",
+              CG_KeyNameForCommand( "+button5" ),
+              BG_Weapon( ps->weapon )->humanName ) );
+        break;
+
       case WP_LAUNCHER:
       Q_strcat( text, MAX_TUTORIAL_TEXT,
           va( "Press %s to launch an impact grenade\n",
