@@ -848,7 +848,12 @@ void G_UnlaggedOff(void) {
     }
 
     backup->used = qfalse;
-    SV_LinkEntity(ent);
+    if(ent->r.linked) {
+      SV_LinkEntity(ent);
+    } else {
+      SV_LinkEntity(ent);
+      SV_UnlinkEntity(ent);
+    }
   }
 }
 
@@ -1058,7 +1063,12 @@ void G_UnlaggedOn(unlagged_attacker_data_t *attacker_data) {
       VectorCopy(calc->angles, ent->r.currentAngles);
     }
 
-    SV_LinkEntity(ent);
+    if(ent->r.linked) {
+      SV_LinkEntity(ent);
+    } else {
+      SV_LinkEntity(ent);
+      SV_UnlinkEntity(ent);
+    }
   }
 }
 
