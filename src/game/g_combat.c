@@ -1861,6 +1861,16 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
   if(targ->s.eType == ET_BUILDABLE) {
     if(
+      (targ->buildableTeam == TEAM_HUMANS) &&
+      (
+        (mod == MOD_FLAMER) ||
+        (mod == MOD_FLAMER_SPLASH) ||
+        (mod == MOD_FLAME_TURRET))) {
+      // human buildables are fire proof
+      return;
+    }
+
+    if(
       g_friendlyFireLastSpawnProtection.integer &&
       mod != MOD_TRIGGER_HURT &&
       mod != MOD_LAVA &&
