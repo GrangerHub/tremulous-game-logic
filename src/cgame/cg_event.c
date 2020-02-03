@@ -1043,7 +1043,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       break;
 
     case EV_FIRE_WEAPON2:
-      if( es->weapon != WP_HBUILD && es->weapon != WP_HBUILD )
+      if( es->weapon != WP_HBUILD && es->weapon != WP_HBUILD2 )
         CG_FireWeapon( cent, WPM_SECONDARY, es->eventParm );
       break;
 
