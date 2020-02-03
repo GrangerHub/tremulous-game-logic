@@ -1182,35 +1182,36 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   attacker->dmgProtectionTime = 0;
   attacker->targetProtectionTime = 0;
 
-  if(
-    g_friendlyFireLastSpawnProtection.integer &&
-    targ->s.eType == ET_BUILDABLE &&
-    mod != MOD_TRIGGER_HURT &&
-    mod != MOD_LAVA &&
-    mod != MOD_SLIME) {
-    if(BG_Buildable(targ->s.modelindex)->role & ROLE_SPAWN) {
-      //don't allow teammates to deal damage to their last spawn
-      switch (targ->buildableTeam) {
-        case TEAM_ALIENS:
-          if(
-            level.numAlienSpawns <= 1 &&
-            attacker->client &&
-            attacker->client->pers.teamSelection == TEAM_ALIENS) {
-            return;
-          }
-          break;
+  if(targ->s.eType == ET_BUILDABLE) {
+    if(
+      g_friendlyFireLastSpawnProtection.integer &&
+      mod != MOD_TRIGGER_HURT &&
+      mod != MOD_LAVA &&
+      mod != MOD_SLIME) {
+      if(BG_Buildable(targ->s.modelindex)->role & ROLE_SPAWN) {
+        //don't allow teammates to deal damage to their last spawn
+        switch (targ->buildableTeam) {
+          case TEAM_ALIENS:
+            if(
+              level.numAlienSpawns <= 1 &&
+              attacker->client &&
+              attacker->client->pers.teamSelection == TEAM_ALIENS) {
+              return;
+            }
+            break;
 
-        case TEAM_HUMANS:
-          if(
-            level.numHumanSpawns <= 1 &&
-            attacker->client &&
-            attacker->client->pers.teamSelection == TEAM_HUMANS) {
-            return;
-          }
-          break;
+          case TEAM_HUMANS:
+            if(
+              level.numHumanSpawns <= 1 &&
+              attacker->client &&
+              attacker->client->pers.teamSelection == TEAM_HUMANS) {
+              return;
+            }
+            break;
 
-        default:
-          break;
+          default:
+            break;
+        }
       }
     }
   }
