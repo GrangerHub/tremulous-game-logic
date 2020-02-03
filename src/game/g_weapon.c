@@ -2313,8 +2313,11 @@ G_Spitfire_Detonate_Gas_Trail
 */
 void G_Spitfire_Detonate_Gas_Trail(gclient_t *client) {
   int i;
+  int *clips;
 
   Com_Assert(client && "G_Spitfire_Detonate_Gas_Trail: client is NULL");
+
+  clips = BG_GetClips(&client->ps, client->ps.weapon);
 
   for(i = client->pers.spitfire_gas_puffs_num - 1; i >= 0 ; i--) {
     gentity_t *cloud = G_Entity_UEID_get(&client->pers.spitfire_gas_puffs[i]);
@@ -2328,6 +2331,11 @@ void G_Spitfire_Detonate_Gas_Trail(gclient_t *client) {
   client->pers.spitfire_gas_puffs_num = 0;
 
   client->ps.weaponTime += 1000;
+
+  if(*clips > 0) {
+    (*clips)--;
+    client->ps.ammo = BG_Weapon(WP_ASPITFIRE)->maxAmmo;
+  }
 }
 
 /*
@@ -2347,7 +2355,7 @@ void Spitfire_Gas_Trail_Fire( gentity_t *ent )
 
   gas_trail_puff = Gas_Trail_fire( ent, muzzle, forward );
 
-  //add to the client's ball lightning array
+  //add to the client's gas puffs array
   G_Entity_UEID_set( &client->pers.spitfire_gas_puffs[client->pers.spitfire_gas_puffs_num],
                    gas_trail_puff );
   client->pers.spitfire_gas_puffs_num ++;

@@ -2790,7 +2790,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     qfalse,               //qboolean  allowPartialAmmoUsage;
     0,                    //int       roundPrice;
     qfalse,               //qboolean  ammoPurchasable;
-    qfalse,               //int       infiniteAmmo;
+    qtrue,                //int       infiniteAmmo;
     qfalse,               //int       usesEnergy;
     WEAPONOPTA_NONE,      //weapon_Option_A_t weaponOptionA;
     0,                    //int       spinUpStartRepeat;

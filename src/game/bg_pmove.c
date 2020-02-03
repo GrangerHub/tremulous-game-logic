@@ -5715,7 +5715,8 @@ static void PM_Weapon( void )
 
   // take an ammo away if not infinite
   if( !BG_Weapon( pm->ps->weapon )->infiniteAmmo ||
-      ( pm->ps->weapon == WP_ALEVEL3_UPG && attack3 ) )
+      ( pm->ps->weapon == WP_ALEVEL3_UPG && attack3 ) ||
+      ( pm->ps->weapon == WP_ASPITFIRE && attack3 ))
   {
     // Special case for lcannon
     if( pm->ps->weapon == WP_LUCIFER_CANNON && attack1 && !attack2 )

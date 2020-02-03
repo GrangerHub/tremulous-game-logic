@@ -582,6 +582,7 @@ static void Give_Ammo( gentity_t *ent ) {
   gclient_t *client = ent->client;
 
   if( client->ps.weapon != WP_ALEVEL3_UPG &&
+      client->ps.weapon != WP_ASPITFIRE &&
       BG_Weapon( client->ps.weapon )->infiniteAmmo ) {
     return;
   }
