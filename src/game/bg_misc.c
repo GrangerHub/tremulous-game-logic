@@ -7928,6 +7928,20 @@ pain_t BG_GetPainState( playerState_t *ps )
 
 /*
 ============
+BG_GetBsuitResaleValue
+============
+*/
+int BG_GetBsuitResaleValue(int armor, int armor_to_gen) {
+  float armor_fraction;
+  int   price;
+
+  armor_fraction = ((float)(armor + armor_to_gen))/((float)BSUIT_MAX_ARMOR);
+  price = armor_fraction * (BG_Upgrade(UP_BATTLESUIT)->price);
+  return MAX(price, BSUIT_PRICE_USED_MIN);
+}
+
+/*
+============
 BG_BuildableIsAllowed
 ============
 */

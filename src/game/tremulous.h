@@ -825,7 +825,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define JETPACK_DEACTIVATION_FALL_TIME 750 // amount of time gravity is reduced after deactivation
 
 #define BSUIT_PRICE                 1000
-#define BSUIT_PRICE_USED            200
+#define BSUIT_PRICE_USED_MIN        200
 #define BSUIT_POISON_PROTECTION     3000
 #define BSUIT_PCLOUD_PROTECTION     6000
 #define BSUIT_MAX_ARMOR             750000

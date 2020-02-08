@@ -3394,9 +3394,10 @@ static sellErr_t G_CanSellUpgrade(
                            ( (float)(BIOPACK_HEALTH_RESERVE) ) ) );
     } else if(
       upgrade == UP_BATTLESUIT &&
-      ent->client->ps.misc[ MISC_ARMOR ] + ent->client->armorToGen <
+      ent->client->ps.misc[MISC_ARMOR] + ent->client->armorToGen <
         BSUIT_MAX_ARMOR) {
-      *value = BSUIT_PRICE_USED;
+      *value = BG_GetBsuitResaleValue(
+        ent->client->ps.misc[MISC_ARMOR], ent->client->armorToGen);
     } else {
       *value = BG_Upgrade( upgrade )->price;
     }

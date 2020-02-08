@@ -1397,6 +1397,7 @@ typedef enum
 } pain_t;
 
 pain_t BG_GetPainState( playerState_t *ps );
+int    BG_GetBsuitResaleValue(int armor, int armor_to_gen);
 
 //---------------------------------------------------------
 
