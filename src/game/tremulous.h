@@ -633,7 +633,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define SHOTGUN_CHOKE_SPREAD        (4.2f)
 #define SHOTGUN_CHOKE_DMG_FALLOFF   2048.0f
 
-#define DBSHOTGUN_PRICE               500
+#define DBSHOTGUN_PRICE               375
 #define DBSHOTGUN_SHELLS              2
 #define DBSHOTGUN_PELLETS             15 //used to sync server and client side
 #define DBSHOTGUN_DOUBLE_PELLETS      30
