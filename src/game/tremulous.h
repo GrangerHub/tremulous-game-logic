@@ -615,7 +615,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define	LASERMINE_SELF_DESTRUCT     120000
 #define LASERMINE_HEALTH            30
 
-#define SHOTGUN_PRICE               200
+#define SHOTGUN_PRICE               180
 #define SHOTGUN_SHELLS              15
 #define SHOTGUN_PELLETS             15 //used to sync server and client side
 #define SHOTGUN_MAXCLIPS            3
@@ -625,11 +625,11 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define SHOTGUN_RECOIL2             128.0f
 #define SHOTGUN_RELOAD              750
 #define SHOTGUN_SPREAD              (6.5f)
-#define SHOTGUN_DMG                 HWDM(2500)
+#define SHOTGUN_DMG                 HWDM(3000)
 #define SHOTGUN_RANGE               (8192 * 12)
 #define SHOTGUN_CHOKE_REPEAT        600
-#define SHOTGUN_CHOKE_DMG           HWDM(3225)
-#define SHOTGUN_CHOKE_DMG_CAP       HWDM(2750)
+#define SHOTGUN_CHOKE_DMG           HWDM(3525)
+#define SHOTGUN_CHOKE_DMG_CAP       HWDM(3250)
 #define SHOTGUN_CHOKE_SPREAD        (4.2f)
 #define SHOTGUN_CHOKE_DMG_FALLOFF   2048.0f
 
