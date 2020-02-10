@@ -4142,26 +4142,36 @@ static void PM_Weapon( void )
   // pump the spinup time
   if(BG_Weapon(pm->ps->weapon)->weaponOptionA == WEAPONOPTA_SPINUP) {
     if(
-      attack1 ||
-      (BG_Weapon(pm->ps->weapon)->hasAltMode && attack2) ||
-      (BG_Weapon(pm->ps->weapon)->hasThirdMode && attack3)) {
+      (pm->ps->stats[STAT_WEAPON] == pm->ps->weapon) &&
+      (
+        attack1 ||
+        (BG_Weapon(pm->ps->weapon)->hasAltMode && attack2) ||
+        (BG_Weapon(pm->ps->weapon)->hasThirdMode && attack3))) {
       pm->ps->misc[MISC_MISC3] += pml.msec;
       if(pm->ps->misc[MISC_MISC3] > BG_Weapon(pm->ps->weapon)->spinUpTime) {
         pm->ps->misc[MISC_MISC3] = BG_Weapon(pm->ps->weapon)->spinUpTime;
       }
-    } else {
-      pm->ps->misc[MISC_MISC3] -=
-        (pml.msec * BG_Weapon(pm->ps->weapon)->spinUpTime) /
-        BG_Weapon(pm->ps->weapon)->spinDownTime;
-      if(pm->ps->misc[MISC_MISC3] < 0) {
-        pm->ps->misc[MISC_MISC3] = 0;
-      }
-    }
 
-    if(pm->ps->misc[MISC_MISC3] > 0) {
-      pm->ps->stats[STAT_FLAGS] |= SFL_SPIN_BARREL;
-    } else {
-      pm->ps->stats[STAT_FLAGS] &= ~SFL_SPIN_BARREL;
+      if(pm->ps->misc[MISC_MISC3] > 0) {
+        pm->ps->stats[STAT_FLAGS] |= SFL_SPIN_BARREL;
+      } else {
+        pm->ps->stats[STAT_FLAGS] &= ~SFL_SPIN_BARREL;
+      }
+    } else if(
+      (pm->ps->stats[STAT_WEAPON] == pm->ps->weapon) ||
+      (pm->ps->stats[STAT_WEAPON] == WP_BLASTER)) {
+        pm->ps->misc[MISC_MISC3] -=
+          (pml.msec * BG_Weapon(pm->ps->weapon)->spinUpTime) /
+          BG_Weapon(pm->ps->weapon)->spinDownTime;
+        if(pm->ps->misc[MISC_MISC3] < 0) {
+          pm->ps->misc[MISC_MISC3] = 0;
+        }
+
+      if(pm->ps->misc[MISC_MISC3] > 0) {
+        pm->ps->stats[STAT_FLAGS] |= SFL_SPIN_BARREL;
+      } else {
+        pm->ps->stats[STAT_FLAGS] &= ~SFL_SPIN_BARREL;
+      }
     }
   }
 
