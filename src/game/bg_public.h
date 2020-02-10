@@ -391,7 +391,6 @@ struct pmove_s
   qboolean      (*pm_reactor)(void);
 };
 
-qboolean BG_ExplodeMarauder( playerState_t *ps, pmoveExt_t *pmext );
 int PM_Gravity( playerState_t *ps );
 
 // if a full pmove isn't done on the client, you can just update the angles
@@ -1357,7 +1356,6 @@ typedef enum
   MOD_LEVEL3_POUNCE,
   MOD_LEVEL3_BOUNCEBALL,
   MOD_LEVEL2_CLAW,
-  MOD_LEVEL2_EXPLOSION,
   MOD_LEVEL2_ZAP,
   MOD_LEVEL4_CLAW,
   MOD_LEVEL4_TRAMPLE,

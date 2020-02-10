@@ -1910,10 +1910,6 @@ static void G_FindSpitfireZapTarget( zap_t *zap )
       zapTarget_t *zapTarget;
       float range = SPITFIRE_ZAP_RANGE;
 
-      if( zap->creator && zap->creator->client &&
-          zap->creator->client->ps.weapon == WP_ALEVEL2 )
-        range = LEVEL2_EXPLODE_CHARGE_ZAP_RADIUS;
-
       // only target entities that can take damage
       if( !G_TakesDamage( enemy ) )
         continue;
@@ -2003,13 +1999,6 @@ static void G_DamageSpitfireZapTarget( void *data, void *user_data )
   vec3_t dir;
   meansOfDeath_t mod = MOD_SPITFIRE_ZAP;
   int damage = SPITFIRE_ZAP_DMG;
-
-  if( zap->creator && zap->creator->client &&
-      zap->creator->client->ps.weapon == WP_ALEVEL2 )
-  {
-    mod = MOD_LEVEL2_ZAP;
-    damage = LEVEL2_EXPLODE_CHARGE_ZAP_DMG;
-  }
 
   // apply 3/4 damage to targets niether grounded nor that contact water
   if( target->targetEnt->s.groundEntityNum == ENTITYNUM_NONE &&
@@ -2312,16 +2301,6 @@ SpitfireZap
 ===============
 */
 void SpitfireZap( gentity_t *self )
-{
-  G_CreateNewSpitfireZap( self );
-}
-
-/*
-===============
-MarauderExplosionZap
-===============
-*/
-void MarauderExplosionZap( gentity_t *self )
 {
   G_CreateNewSpitfireZap( self );
 }

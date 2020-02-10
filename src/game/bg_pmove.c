@@ -4469,26 +4469,6 @@ static void PM_Weapon( void )
     return;
   }
 
-  // check for marauder self-destruction
-  if( pm->ps->weapon == WP_ALEVEL2 )
-  {
-    int max = LEVEL2_EXPLODE_CHARGE_TIME;
-
-    if( ( !pm->swapAttacks ?
-          (pm->cmd.buttons & BUTTON_ATTACK2) : (pm->cmd.buttons & BUTTON_ATTACK) ) )
-      pm->ps->misc[ MISC_MISC ] += pml.msec;
-    else
-      pm->ps->misc[ MISC_MISC ] -= pml.msec;
-
-    if( pm->ps->misc[ MISC_MISC ] > max )
-    {
-      pm->ps->misc[ MISC_MISC ] = max;
-      return;
-    }
-    else if( pm->ps->misc[ MISC_MISC ] < 0 )
-      pm->ps->misc[ MISC_MISC ] = 0;
-  }
-
   //restore charge stamina
   if(
     BG_ClassHasAbility(pm->ps->stats[STAT_CLASS], SCA_CHARGE_STAMINA) &&
@@ -5217,13 +5197,6 @@ static void PM_Weapon( void )
           pm->ps->weaponstate = WEAPON_READY;
           return;
         }
-        break;
-
-      case WP_ALEVEL2:
-        // kamikaze attack is handeled seperately
-        attack2 = qfalse;
-        if( !attack1 )
-          return;
         break;
 
       case WP_ALEVEL3:

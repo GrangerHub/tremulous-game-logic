@@ -710,29 +710,6 @@ void CG_OffsetFirstPersonView( void )
     VectorMA( origin, LEVEL3_FEEDBACK * fraction2, forward, origin );
   }
 
-  // marauder explosion charging vibration effect
-  if( cg.predictedPlayerState.weapon == WP_ALEVEL2 &&
-      cg.predictedPlayerState.misc[ MISC_MISC ] > LEVEL2_EXPLODE_CHARGE_TIME_MIN )
-  {
-    float fraction;
-    vec3_t forward, right, up;
-
-    AngleVectors( angles, forward, right, up);
-    VectorNormalize( right );
-    VectorNormalize( up );
-
-    fraction = (float)cg.predictedPlayerState.misc[ MISC_MISC ] /
-                      LEVEL2_EXPLODE_CHARGE_TIME;
-    if( cg.predictedPlayerState.eFlags & EF_EVOLVING )
-      fraction *= BG_EvolveScale( &cg.predictedPlayerState );
-    VectorMA( origin, LEVEL2_EXPLODE_CHARGE_SHAKE * random( ) * fraction, 
-              forward, origin );
-    VectorMA( origin, LEVEL2_EXPLODE_CHARGE_SHAKE * random( ) * fraction, 
-              right, origin );
-    VectorMA( origin, LEVEL2_EXPLODE_CHARGE_SHAKE * random( ) * fraction, 
-              up, origin );
-  }
-
 #define STRUGGLE_DIST 5.0f
 #define STRUGGLE_TIME 250
 

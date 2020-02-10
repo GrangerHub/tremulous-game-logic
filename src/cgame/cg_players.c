@@ -2135,27 +2135,6 @@ void CG_Player( centity_t *cent )
     }
   }
 
-  // marauder explosion charging vibration effect
-  if( es->weapon == WP_ALEVEL2 &&
-      es->constantLight > LEVEL2_EXPLODE_CHARGE_TIME_MIN )
-  {
-    float fraction;
-    vec3_t forward, right, up;
-
-    AngleVectors( cent->lerpAngles, forward, right, up);
-    VectorNormalize( right );
-    VectorNormalize( up );
-
-    fraction = (float)es->constantLight /
-                      LEVEL2_EXPLODE_CHARGE_TIME;
-    VectorMA( cent->lerpOrigin, LEVEL2_EXPLODE_CHARGE_SHAKE * random( ) * fraction, 
-              forward, cent->lerpOrigin );
-    VectorMA( cent->lerpOrigin, LEVEL2_EXPLODE_CHARGE_SHAKE * random( ) * fraction, 
-              right, cent->lerpOrigin );
-    VectorMA( cent->lerpOrigin, LEVEL2_EXPLODE_CHARGE_SHAKE * random( ) * fraction, 
-              up, cent->lerpOrigin );
-  }
-
   // check if weak armor effects should be shown
   if( ci->team == TEAM_HUMANS )
   {

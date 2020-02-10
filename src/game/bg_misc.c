@@ -7083,50 +7083,6 @@ void BG_PlayerStateToEntityStateExtraPolate( playerState_t *ps, entityState_t *s
 }
 
 /*
-==================
-BG_ExplodeMarauder
-==================
-*/
-qboolean BG_ExplodeMarauder( playerState_t *ps, pmoveExt_t *pmext )
-{
-  vec3_t    dir;
-
-  if( ps->weapon != WP_ALEVEL2 )
-    return qfalse;
-
-  if( pmext->explosionMod > 0.000f )
-    return qfalse;
-
-  if( ps->misc[ MISC_MISC ] <=
-      LEVEL2_EXPLODE_CHARGE_TIME_MIN )
-    return qfalse;
-
-  AngleVectors( ps->viewangles, NULL, NULL, dir );
-
-  //send explosion event
-  BG_AddPredictableEventToPlayerstate( EV_EXPLODE_MARAUDER, DirToByte( dir ), ps );
-
-  // set the explosion intensity
-  if( ps->misc[ MISC_MISC ] >= LEVEL2_EXPLODE_CHARGE_TIME )
-  {
-    pmext->explosionMod = 1.0f;
-  } else
-  {
-    pmext->explosionMod = ( (float)ps->misc[ MISC_MISC ] ) /
-                          ( (float)LEVEL2_EXPLODE_CHARGE_TIME );
-    if( pmext->explosionMod <= 0.000f )
-      pmext->explosionMod = 0.001f;
-  }
-
-  //cleanup the playerstate
-  ps->misc[ MISC_MISC ] = 0;
-  ps->eFlags |= (EF_NODRAW|EF_DEAD);
-  ps->pm_type = PM_DEAD;
-
-  return qtrue;
-}
-
-/*
 ========================
 BG_WeaponIsFull
 

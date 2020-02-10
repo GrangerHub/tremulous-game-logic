@@ -131,7 +131,6 @@ char *modNames[ ] =
   "MOD_LEVEL3_POUNCE",
   "MOD_LEVEL3_BOUNCEBALL",
   "MOD_LEVEL2_CLAW",
-  "MOD_LEVEL2_EXPLOSION",
   "MOD_LEVEL2_ZAP",
   "MOD_LEVEL4_CLAW",
   "MOD_LEVEL4_TRAMPLE",
@@ -889,33 +888,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   // g_forcerespawn may force spawning at some later time
   self->client->respawnTime = level.time + 1700;
 
-  if( BG_ExplodeMarauder( &self->client->ps,
-                          &self->client->pmext ) )
-  {
-    float  explosionMod = self->client->pmext.explosionMod;
-
-    if( self->client->ps.eFlags & EF_EVOLVING )
-      explosionMod *= BG_EvolveScale( &self->client->ps );
-
-    // do some splash damage
-    G_SelectiveRadiusDamage( self->client->ps.origin,
-                             self->r.mins, self->r.maxs,
-                             self,
-                             ( (int)( explosionMod * ( (float)LEVEL2_EXPLODE_CHARGE_SPLASH_DMG ) ) ),
-                             ( (int)( explosionMod * LEVEL2_EXPLODE_CHARGE_SPLASH_RADIUS ) ),
-                             self, MOD_LEVEL2_EXPLOSION,
-                             TEAM_ALIENS, qtrue );
-
-    // create the explosion zap
-    MarauderExplosionZap( self );
-
-    //cleanup the player entity
-    self->takedamage = qfalse;
-    G_SetContents( self, 0, qtrue);
-    self->die = NULL;
-    return;
-  }
-  else if( self->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
+  if( self->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
   {
     if ( self->health <= GIB_HEALTH )
     {

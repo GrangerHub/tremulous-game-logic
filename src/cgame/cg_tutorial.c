@@ -379,13 +379,7 @@ static void CG_AlienLevel2Text( char *text, playerState_t *ps )
       va( "Press %s to bite\n",
         CG_KeyNameForCommand( "+attack" ) ) );
 
-  if( ps->stats[ STAT_CLASS ] == PCL_ALIEN_LEVEL2 )
-  {
-    Q_strcat( text, MAX_TUTORIAL_TEXT,
-        va( "Hold %s to charge up for a kamikaze zap explosion\n",
-          CG_KeyNameForCommand( "+button5" ) ) );
-  }
-  else if( ps->stats[ STAT_CLASS ] == PCL_ALIEN_LEVEL2_UPG )
+  if( ps->stats[ STAT_CLASS ] == PCL_ALIEN_LEVEL2_UPG )
   {
     Q_strcat( text, MAX_TUTORIAL_TEXT,
         va( "Press %s to invoke an electrical attack\n",

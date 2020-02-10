@@ -126,15 +126,6 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL2_AREAZAP_TIME         1000
 #define LEVEL2_AREAZAP_MAX_TARGETS  5
 #define LEVEL2_WALLJUMP_MAXSPEED    1000.0f
-#define LEVEL2_EXPLODE_CHARGE_TIME  4500 // msec for full marauder explosion
-#define LEVEL2_EXPLODE_CHARGE_TIME_MIN 500 // msec before which explosion cancels
-#define LEVEL2_EXPLODE_CHARGE_TIME_WARNING 3000
-#define LEVEL2_EXPLODE_CHARGE_SELF_DMG AWDM(65000)
-#define LEVEL2_EXPLODE_CHARGE_SPLASH_DMG   AWDM(50000) // splash damage at max charge
-#define LEVEL2_EXPLODE_CHARGE_SPLASH_RADIUS 100.0f // splash radius at max charge
-#define LEVEL2_EXPLODE_CHARGE_ZAP_DMG   AWDM(165000) // total zap damage at max charge
-#define LEVEL2_EXPLODE_CHARGE_ZAP_RADIUS 300.0f // zap radius at max charge
-#define LEVEL2_EXPLODE_CHARGE_SHAKE 1.25f
 
 #define LEVEL3_CLAW_SUBCHECKS       5
 #define LEVEL3_CLAW_DMG             AWDM(80000)

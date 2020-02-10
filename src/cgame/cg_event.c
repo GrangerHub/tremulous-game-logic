@@ -507,12 +507,6 @@ static void CG_Obituary( entityState_t *ent )
             BG_ClassConfig( PCL_ALIEN_LEVEL2 )->humanName );
         message2 = className;
         break;
-      case MOD_LEVEL2_EXPLOSION:
-      message = "was caught in the blast radius of";
-      Com_sprintf( className, 64, "'s exploding %s",
-          BG_ClassConfig( PCL_ALIEN_LEVEL2 )->humanName );
-      message2 = className;
-      break;
       case MOD_LEVEL2_ZAP:
         message = "was zapped by";
         Com_sprintf( className, 64, "'s %s",
