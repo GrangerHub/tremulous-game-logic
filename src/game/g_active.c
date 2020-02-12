@@ -950,8 +950,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
     }
 
     if( ent->client->pers.teamSelection == TEAM_HUMANS &&
-        ( client->ps.stats[ STAT_STATE ] & SS_HEALING_2X ) &&
-        ent->lastDamageTime + HUMAN_DAMAGE_HEAL_DELAY_TIME < level.time )
+        ( client->ps.stats[ STAT_STATE ] & SS_HEALING_2X ) )
     {
       int remainingStartupTime = MEDKIT_STARTUP_TIME - ( level.time - client->lastMedKitTime );
 

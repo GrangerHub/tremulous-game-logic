@@ -3232,10 +3232,6 @@ void HMedistat_Think( gentity_t *self )
   gentity_t *player;
   int       nextThink = BG_Buildable( self->s.modelindex )->nextthink;
 
-  // out of health reserve
-  if( self->healthReserve <= 0 )
-    nextThink *= 4;
-
   self->nextthink = level.time + nextThink;
 
   G_SuffocateTrappedEntities( self );
@@ -3266,13 +3262,6 @@ void HMedistat_Think( gentity_t *self )
     self->nextthink = level.time + POWER_REFRESH_TIME;
     return;
   }
-
-  // regen health reserve
-  if( self->healthReserve < MEDISTAT_HEALTH_RESERVE )
-    self->healthReserve += ( BG_HP2SU( 1 ) / 8 );
-
-  if( self->healthReserve > MEDISTAT_HEALTH_RESERVE )
-    self->healthReserve = MEDISTAT_HEALTH_RESERVE;
 
   if( self->spawned )
   {
@@ -3339,44 +3328,61 @@ void HMedistat_Think( gentity_t *self )
       if(player->client->ps.stats[ STAT_STATE ] & SS_POISONED )
         player->client->ps.stats[ STAT_STATE ] &= ~SS_POISONED;
 
+      if(player->lastDamageTime + HUMAN_DAMAGE_HEAL_DELAY_TIME >= level.time)
+        continue;
+
       // reached the max number of players that can be healed
       if( self->numEnemies >= 10 )
         continue;
 
       if( player->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
-          ( ( player->health < maxHealth &&
-              player->health < player->client->ps.misc[ MISC_MAX_HEALTH ] ) ||
-            player->client->ps.stats[ STAT_STAMINA ] < STAMINA_MAX ) &&
-          PM_Alive( player->client->ps.pm_type ) )
-      {
-        gclient_t *client = player->client;
-
-        player->client->ps.stats[ STAT_STATE ] |= SS_HEALING_ACTIVE;
-
-        G_Entity_UEID_set( &self->enemies[self->numEnemies], player);
-        self->numEnemies++;
-
-        if( client->ps.stats[ STAT_STAMINA ] <  STAMINA_MAX )
-          client->ps.stats[ STAT_STAMINA ] += STAMINA_MEDISTAT_RESTORE;
-
-        if( client->ps.stats[ STAT_STAMINA ] > STAMINA_MAX )
-          client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
-
-        if( player->health < maxHealth &&
-            player->health < player->client->ps.misc[ MISC_MAX_HEALTH ] )
+          PM_Alive( player->client->ps.pm_type ) ) {
+        if( ( ( player->health < maxHealth &&
+            player->health < player->client->ps.misc[ MISC_MAX_HEALTH ] ) ||
+            player->client->ps.stats[ STAT_STAMINA ] < STAMINA_MAX ) )
         {
-          G_ChangeHealth( player, self, BG_HP2SU( 1 ),
-                          (HLTHF_INITIAL_MAX_CAP|
-                           HLTHF_USE_CHANGER_RESERVE) );
+          gclient_t *client = player->client;
+
+          player->client->ps.stats[ STAT_STATE ] |= SS_HEALING_ACTIVE;
+
+          G_Entity_UEID_set( &self->enemies[self->numEnemies], player);
+          self->numEnemies++;
+
+          if( client->ps.stats[ STAT_STAMINA ] <  STAMINA_MAX )
+            client->ps.stats[ STAT_STAMINA ] += STAMINA_MEDISTAT_RESTORE;
+
+          if( client->ps.stats[ STAT_STAMINA ] > STAMINA_MAX )
+            client->ps.stats[ STAT_STAMINA ] = STAMINA_MAX;
+
+          if( player->health < maxHealth &&
+              player->health < player->client->ps.misc[ MISC_MAX_HEALTH ] )
+          {
+            G_ChangeHealth( player, self, BG_HP2SU( 1 ),
+                            (HLTHF_INITIAL_MAX_CAP|
+                             HLTHF_USE_CHANGER_RESERVE) );
+          }
+
+          //start the heal anim
+          if( !self->active )
+          {
+            G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
+            self->active = qtrue;
+          }
         }
 
-        //start the heal anim
-        if( !self->active )
+        //if they're completely healed and have full stamina and can afford the
+        //healthcare, give them a medkit
+        if( player->health >= maxHealth &&
+            player->client->ps.stats[ STAT_STAMINA ] >= STAMINA_MAX &&
+            player->client->pers.credit >= MEDKIT_PRICE )
         {
-          G_SetBuildableAnim( self, BANIM_ATTACK1, qfalse );
-          self->active = qtrue;
+          if( !BG_InventoryContainsUpgrade( UP_MEDKIT, player->client->ps.stats ) ) {
+            BG_AddUpgradeToInventory( UP_MEDKIT, player->client->ps.stats );
+            G_AddCreditToClient(player->client, -(MEDKIT_PRICE), qfalse);
+          }
         }
       }
+          
     }
 
     //nothing left to heal so go back to idling
@@ -6016,8 +6022,6 @@ static gentity_t *G_Build( gentity_t *builder, buildable_t buildable,
   else
     G_ChangeHealth( built, built, 1,
                     HLTHF_SET_TO_CHANGE );
-
-  built->healthReserve = 0;
 
   built->splashDamage = BG_Buildable( buildable )->splashDamage;
   built->splashRadius = BG_Buildable( buildable )->splashRadius;
