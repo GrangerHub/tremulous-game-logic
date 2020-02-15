@@ -124,6 +124,7 @@ vmCvar_t  cg_drawFPS;
 vmCvar_t  cg_drawDemoState;
 vmCvar_t  cg_drawSnapshot;
 vmCvar_t  cg_drawChargeBar;
+vmCvar_t  cg_drawCompass;
 vmCvar_t  cg_drawCrosshair;
 vmCvar_t  cg_drawCrosshairNames;
 vmCvar_t  cg_crosshairSize;
@@ -307,6 +308,7 @@ static cvarTable_t cvarTable[ ] =
   { &cg_drawDemoState, "cg_drawDemoState", "1", CVAR_ARCHIVE  },
   { &cg_drawSnapshot, "cg_drawSnapshot", "0", CVAR_ARCHIVE  },
   { &cg_drawChargeBar, "cg_drawChargeBar", "1", CVAR_ARCHIVE  },
+  { &cg_drawCompass, "cg_drawCompass", "1", CVAR_ARCHIVE  },
   { &cg_drawCrosshair, "cg_drawCrosshair", "2", CVAR_ARCHIVE },
   { &cg_drawCrosshairNames, "cg_drawCrosshairNames", "1", CVAR_ARCHIVE },
   { &cg_crosshairSize, "cg_crosshairSize", "1", CVAR_ARCHIVE },

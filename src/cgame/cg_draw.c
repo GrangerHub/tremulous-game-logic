@@ -1753,6 +1753,12 @@ CG_DrawCompass
 static void CG_DrawCompass(rectDef_t *rect, float scale, qhandle_t shader, vec4_t color) {
   playerState_t *ps = &cg.predictedPlayerState;
 
+  if(
+    !(cg_drawCompass.integer) &&
+    !BG_InventoryContainsUpgrade(UP_HELMET, cg.snap->ps.stats)) {
+    return;
+  }
+
   if(ps->stats[ STAT_TEAM ] == TEAM_ALIENS) {
     vec3_t      forward, angles;
 
