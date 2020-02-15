@@ -86,71 +86,6 @@ void LookAtKiller( gentity_t *self, gentity_t *inflictor, gentity_t *attacker )
     self->client->ps.stats[ STAT_VIEWLOCK ] = self - g_entities;
 }
 
-// these are just for logging, the client prints its own messages
-char *modNames[ ] =
-{
-  "MOD_UNKNOWN",
-  "MOD_SHOTGUN",
-  "MOD_BLASTER",
-  "MOD_PAINSAW",
-  "MOD_MACHINEGUN",
-  "MOD_CHAINGUN",
-  "MOD_PRIFLE",
-  "MOD_MDRIVER",
-  "MOD_LASGUN",
-  "MOD_LCANNON",
-  "MOD_LCANNON_SPLASH",
-  "MOD_FLAMER",
-  "MOD_FLAMER_SPLASH",
-  "MOD_GRENADE",
-  "MOD_FRAGNADE",
-  "MOD_LASERMINE",
-  "MOD_GRENADE_LAUNCHER",
-  "MOD_LIGHTNING",
-  "MOD_LIGHTNING_EMP",
-  "MOD_WATER",
-  "MOD_SLIME",
-  "MOD_LAVA",
-  "MOD_CRUSH",
-  "MOD_DROP",
-  "MOD_TELEFRAG",
-  "MOD_FALLING",
-  "MOD_SUICIDE",
-  "MOD_TARGET_LASER",
-  "MOD_TRIGGER_HURT",
-  "MOD_SUFFOCATION",
-
-  "MOD_ABUILDER_CLAW",
-  "MOD_LEVEL0_BITE",
-  "MOD_LEVEL1_CLAW",
-  "MOD_LEVEL1_PCLOUD",
-  "MOD_LEVEL3_CLAW",
-  "MOD_LEVEL3_POUNCE",
-  "MOD_LEVEL3_BOUNCEBALL",
-  "MOD_LEVEL2_CLAW",
-  "MOD_LEVEL2_ZAP",
-  "MOD_LEVEL4_CLAW",
-  "MOD_LEVEL4_TRAMPLE",
-  "MOD_LEVEL4_CRUSH",
-
-  "MOD_SLOWBLOB",
-  "MOD_POISON",
-  "MOD_SWARM",
-
-  "MOD_HSPAWN",
-  "MOD_TESLAGEN",
-  "MOD_MGTURRET",
-  "MOD_REACTOR",
-
-  "MOD_ASPAWN",
-  "MOD_ATUBE",
-  "MOD_OVERMIND",
-  "MOD_DECONSTRUCT",
-  "MOD_REPLACE",
-  "MOD_NOCREEP",
-  "MOD_SLAP"
-};
-
 /*
 ==================
 G_RewardAttackers
@@ -422,11 +357,11 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
     killerName = "<world>";
   }
 
-  if( meansOfDeath < 0 || meansOfDeath >= ARRAY_LEN( modNames ) )
+  if( meansOfDeath < 0 || meansOfDeath >= NUM_MODS )
     // fall back on the number
     obit = va( "%d", meansOfDeath );
   else
-    obit = modNames[ meansOfDeath ];
+    obit = BG_MOD(meansOfDeath)->name;
 
   G_LogPrintf( "Die: %d %d %s: %s" S_COLOR_WHITE " killed %s\n",
     killer,
@@ -1943,7 +1878,7 @@ void G_LogDestruction( gentity_t *self, gentity_t *actor, int mod )
     (int)( actor - g_entities ),
     (int)( self - g_entities ),
     BG_Buildable( self->s.modelindex )->name,
-    modNames[ mod ],
+    BG_MOD(mod)->name,
     BG_Buildable( self->s.modelindex )->humanName,
     mod == MOD_DECONSTRUCT ? "deconstructed" : "destroyed",
     actor->client ?
