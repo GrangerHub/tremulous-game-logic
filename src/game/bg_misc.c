@@ -103,6 +103,344 @@ size_t bg_numTeams = ARRAY_LEN( bg_teamList );
 
 static const teamAttributes_t nullTeam = { 0 };
 
+static const modAttributes_t bg_modList[ ] =
+{
+  {
+    MOD_UNKNOWN,             //meansOfDeath_t means_of_death;
+    "MOD_UNKNOWN",           //char           *name;
+    MODTYPE_GENERIC          //mod_type_t     mod_type;
+  },
+  {
+    MOD_SHOTGUN,
+    "MOD_SHOTGUN",
+    MODTYPE_BALLISTIC
+  },
+  {
+    MOD_DBSHOTGUN,
+    "MOD_DBSHOTGUN",
+    MODTYPE_BALLISTIC
+  },
+  {
+    MOD_BLASTER,
+    "MOD_BLASTER",
+    MODTYPE_ENERGY
+  },
+  {
+    MOD_PAINSAW,
+    "MOD_PAINSAW",
+    MODTYPE_ENERGY
+  },
+  {
+    MOD_MACHINEGUN,
+    "MOD_MACHINEGUN",
+    MODTYPE_BALLISTIC
+  },
+  {
+    MOD_CHAINGUN,
+    "MOD_CHAINGUN",
+    MODTYPE_BALLISTIC
+  },
+  {
+    MOD_PRIFLE,
+    "MOD_PRIFLE",
+    MODTYPE_ENERGY
+  },
+  {
+    MOD_MDRIVER,
+    "MOD_MDRIVER",
+    MODTYPE_ENERGY
+  },
+  {
+    MOD_LASGUN,
+    "MOD_LASGUN",
+    MODTYPE_ENERGY
+  },
+  {
+    MOD_LCANNON,
+    "MOD_LCANNON",
+    MODTYPE_ENERGY
+  },
+  {
+    MOD_LCANNON_SPLASH,
+    "MOD_LCANNON_SPLASH",
+    MODTYPE_ENERGY
+  },
+  {
+    MOD_SPITFIRE_GAS_TRAIL,
+    "MOD_SPITFIRE_GAS_TRAIL",
+    MODTYPE_BLAST
+  },
+  {
+    MOD_FLAMER,
+    "MOD_FLAMER",
+    MODTYPE_BURN
+  },
+  {
+    MOD_FLAMER_SPLASH,
+    "MOD_FLAMER_SPLASH",
+    MODTYPE_BURN
+  },
+  {
+    MOD_GRENADE,
+    "MOD_GRENADE",
+    MODTYPE_BLAST
+  },
+  {
+    MOD_FRAGNADE,
+    "MOD_FRAGNADE",
+    MODTYPE_SHRAPNEL
+  },
+  {
+    MOD_LASERMINE,
+    "MOD_LASERMINE",
+    MODTYPE_BLAST
+  },
+  {
+    MOD_GRENADE_LAUNCHER,
+    "MOD_GRENADE_LAUNCHER",
+    MODTYPE_BLAST
+  },
+  {
+    MOD_LIGHTNING,
+    "MOD_LIGHTNING",
+    MODTYPE_ZAP
+  },
+  {
+    MOD_LIGHTNING_EMP,
+    "MOD_LIGHTNING_EMP",
+    MODTYPE_ZAP
+  },
+  {
+    MOD_WATER,
+    "MOD_WATER",
+    MODTYPE_DROWN
+  },
+  {
+    MOD_SLIME,
+    "MOD_SLIME",
+    MODTYPE_CHEMICAL
+  },
+  {
+    MOD_LAVA,
+    "MOD_LAVA",
+    MODTYPE_LAVA
+  },
+  {
+    MOD_CRUSH,
+    "MOD_CRUSH",
+    MODTYPE_MOMENTUM
+  },
+  {
+    MOD_DROP,
+    "MOD_DROP",
+    MODTYPE_FELL
+  },
+  {
+    MOD_TELEFRAG,
+    "MOD_TELEFRAG",
+    MODTYPE_GENERIC
+  },
+  {
+    MOD_FALLING,
+    "MOD_FALLING",
+    MODTYPE_FELL
+  },
+  {
+    MOD_SUICIDE,
+    "MOD_SUICIDE",
+    MODTYPE_GENERIC
+  },
+  {
+    MOD_TARGET_LASER,
+    "MOD_TARGET_LASER",
+    MODTYPE_ENERGY
+  },
+  {
+    MOD_TRIGGER_HURT,
+    "MOD_TRIGGER_HURT",
+    MODTYPE_GENERIC
+  },
+  {
+    MOD_SUFFOCATION,
+    "MOD_SUFFOCATION",
+    MODTYPE_SUFFOCATION
+  },
+  {
+    MOD_SELFDESTRUCT,
+    "MOD_SELFDESTRUCT",
+    MODTYPE_BLAST
+  },
+  {
+    MOD_ABUILDER_CLAW,
+    "MOD_ABUILDER_CLAW",
+    MODTYPE_CLAW
+  },
+  {
+    MOD_LEVEL0_BITE,
+    "MOD_LEVEL0_BITE",
+    MODTYPE_BITE
+  },
+  {
+    MOD_LEVEL1_CLAW,
+    "MOD_LEVEL1_CLAW",
+    MODTYPE_CLAW
+  },
+  {
+    MOD_LEVEL1_PCLOUD,
+    "MOD_LEVEL1_PCLOUD",
+    MODTYPE_CHEMICAL
+  },
+  {
+    MOD_LEVEL3_CLAW,
+    "MOD_LEVEL3_CLAW",
+    MODTYPE_CLAW
+  },
+  {
+    MOD_LEVEL3_POUNCE,
+    "MOD_LEVEL3_POUNCE",
+    MODTYPE_MOMENTUM
+  },
+  {
+    MOD_LEVEL3_BOUNCEBALL,
+    "MOD_LEVEL3_BOUNCEBALL",
+    MODTYPE_BALLISTIC
+  },
+  {
+    MOD_LEVEL2_CLAW,
+    "MOD_LEVEL2_CLAW",
+    MODTYPE_CLAW
+  },
+  {
+    MOD_LEVEL2_ZAP,
+    "MOD_LEVEL2_ZAP",
+    MODTYPE_ZAP
+  },
+  {
+    MOD_LEVEL4_CLAW,
+    "MOD_LEVEL4_CLAW",
+    MODTYPE_CLAW
+  },
+  {
+    MOD_LEVEL4_TRAMPLE,
+    "MOD_LEVEL4_TRAMPLE",
+    MODTYPE_MOMENTUM
+  },
+  {
+    MOD_LEVEL4_CRUSH,
+    "MOD_LEVEL4_CRUSH",
+    MODTYPE_MOMENTUM
+  },
+  {
+    MOD_SPITFIRE_POUNCE,
+    "MOD_SPITFIRE_POUNCE",
+    MODTYPE_MOMENTUM
+  },
+  {
+    MOD_SPITFIRE_ZAP,
+    "MOD_SPITFIRE_ZAP",
+    MODTYPE_ZAP
+  },
+  {
+    MOD_SPITFIRE_STING,
+    "MOD_SPITFIRE_STING",
+    MODTYPE_STING
+  },
+  {
+    MOD_SLOWBLOB,
+    "MOD_SLOWBLOB",
+    MODTYPE_CHEMICAL
+  },
+  {
+    MOD_POISON,
+    "MOD_POISON",
+    MODTYPE_CHEMICAL
+  },
+  {
+    MOD_SWARM,
+    "MOD_SWARM",
+    MODTYPE_STING
+  },
+  {
+    MOD_HSPAWN,
+    "MOD_HSPAWN",
+    MODTYPE_BLAST
+  },
+  {
+    MOD_TESLAGEN,
+    "MOD_TESLAGEN",
+    MODTYPE_ZAP
+  },
+  {
+    MOD_MGTURRET,
+    "MOD_MGTURRET",
+    MODTYPE_BALLISTIC
+  },
+  {
+    MOD_FLAME_TURRET,
+    "MOD_FLAME_TURRET",
+    MODTYPE_BURN
+  },
+  {
+    MOD_REACTOR,
+    "MOD_REACTOR",
+    MODTYPE_RADIATION
+  },
+  {
+    MOD_MEDISTAT,
+    "MOD_MEDISTAT",
+    MODTYPE_ENERGY
+  },
+  {
+    MOD_ASPAWN,
+    "MOD_ASPAWN",
+    MODTYPE_BLAST
+  },
+  {
+    MOD_ATUBE,
+    "MOD_ATUBE",
+    MODTYPE_CHEMICAL
+  },
+  {
+    MOD_TRAP,
+    "MOD_TRAP",
+    MODTYPE_CHEMICAL
+  },
+  {
+    MOD_SLIMER,
+    "MOD_SLIMER",
+    MODTYPE_CHEMICAL
+  },
+  {
+    MOD_OVERMIND,
+    "MOD_OVERMIND",
+    MODTYPE_MIND
+  },
+  {
+    MOD_DECONSTRUCT,
+    "MOD_DECONSTRUCT",
+    MODTYPE_BUILD
+  },
+  {
+    MOD_REPLACE,
+    "MOD_REPLACE",
+    MODTYPE_BUILD
+  },
+  {
+    MOD_NOCREEP,
+    "MOD_NOCREEP",
+    MODTYPE_MIND
+  },
+  {
+    MOD_SLAP,
+    "MOD_SLAP",
+    MODTYPE_GENERIC
+  }
+};
+
+size_t bg_numMODs = ARRAY_LEN( bg_modList );
+
+static const modAttributes_t nullMOD = { 0 };
+
 static const rankAttributes_t bg_rankList[ ] =
 {
   {
@@ -7980,10 +8318,23 @@ int BG_LoadEmoticons( emoticon_t *emoticons, int num )
 BG_Team
 ============
 */
-const teamAttributes_t *BG_Team( team_t team )
-{
-  return ( team < NUM_TEAMS ) ?
-    &bg_teamList[ team ] : &nullTeam;
+const teamAttributes_t *BG_Team(team_t team) {
+  return (team < NUM_TEAMS) ?
+    &bg_teamList[team] : &nullTeam;
+}
+
+/*
+============
+BG_MOD
+============
+*/
+const modAttributes_t *BG_MOD(meansOfDeath_t mod) {
+  if(mod < NUM_MODS) {
+    Com_Assert(mod == bg_modList[mod].means_of_death);
+  }
+
+  return ( mod < NUM_MODS ) ?
+    &bg_modList[ mod ] : &nullMOD;
 }
 
 /*
@@ -7991,10 +8342,9 @@ const teamAttributes_t *BG_Team( team_t team )
 BG_Rank
 ============
 */
-const rankAttributes_t *BG_Rank( rank_t rank )
-{
-  return ( rank < NUM_OF_RANKS ) ?
-    &bg_rankList[ rank ] : &nullRank;
+const rankAttributes_t *BG_Rank(rank_t rank) {
+  return (rank < NUM_OF_RANKS) ?
+    &bg_rankList[rank] : &nullRank;
 }
 
 /*

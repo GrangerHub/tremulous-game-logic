@@ -161,7 +161,6 @@ static void CG_Obituary( entityState_t *ent )
   const char    *attackerInfo;
   char          targetName[ MAX_COLORFUL_NAME_LENGTH ];
   char          attackerName[ MAX_COLORFUL_NAME_LENGTH ];
-  char          className[ 64 ];
   gender_t      gender;
   clientInfo_t  *ci;
   qboolean      teamKill = qfalse;
@@ -173,423 +172,103 @@ static void CG_Obituary( entityState_t *ent )
   mod = ent->eventParm;
   icon = ent->weapon;
 
-  if( target < 0 || target >= MAX_CLIENTS )
-    CG_Error( "CG_Obituary: target out of range" );
+  if(target < 0 || target >= MAX_CLIENTS) {
+    CG_Error("CG_Obituary: target out of range");
+  }
 
-  ci = &cgs.clientinfo[ target ];
+  ci = &cgs.clientinfo[target];
   gender = ci->gender;
 
-  if( attacker < 0 || attacker >= MAX_CLIENTS )
-  {
+  if(attacker < 0 || attacker >= MAX_CLIENTS) {
     attacker = ENTITYNUM_WORLD;
     attackerInfo = NULL;
-  }
-  else
-  {
-    attackerInfo = CG_ConfigString( CS_PLAYERS + attacker );
-    if( ci && cgs.clientinfo[ attacker ].team == ci->team )
+  } else {
+    attackerInfo = CG_ConfigString(CS_PLAYERS + attacker);
+    if(ci && cgs.clientinfo[attacker].team == ci->team)
       teamKill = qtrue;
   }
 
-  targetInfo = CG_ConfigString( CS_PLAYERS + target );
+  targetInfo = CG_ConfigString(CS_PLAYERS + target);
 
-  if( !targetInfo )
+  if( !targetInfo ) {
     return;
-
-  Q_strncpyz( targetName, Info_ValueForKey( targetInfo, "n" ), sizeof( targetName ));
-
-  message2 = "";
-
-  // check for single client messages
-
-  switch( mod )
-  {
-    case MOD_FALLING:
-      message = "fell fowl to gravity";
-      break;
-    case MOD_CRUSH:
-      message = "was squished";
-      break;
-    case MOD_WATER:
-      message = "forgot to pack a snorkel";
-      break;
-    case MOD_SLIME:
-      message = "melted";
-      break;
-    case MOD_LAVA:
-      message = "did a back flip into the lava";
-      break;
-    case MOD_TARGET_LASER:
-      message = "saw the light";
-      break;
-    case MOD_TRIGGER_HURT:
-      message = "was in the wrong place";
-      break;
-    case MOD_SUFFOCATION:
-      message = "died of suffocation";
-      break;
-    case MOD_HSPAWN:
-      message = "should have run further";
-      break;
-    case MOD_ASPAWN:
-      message = "shouldn't have trod in the acid";
-      break;
-    case MOD_MGTURRET:
-      message = "was gunned down by a turret";
-      break;
-    case MOD_FLAME_TURRET:
-      message = "was barbecued by a flame turret";
-      break;
-    case MOD_TESLAGEN:
-      message = "was zapped by a tesla generator";
-      break;
-    case MOD_ATUBE:
-      message = "was melted by an acid tube";
-      break;
-    case MOD_TRAP:
-      message = "was caught in a trap";
-      break;
-    case MOD_SLIMER:
-      message = "was devoured by a slimer";
-      break;
-    case MOD_OVERMIND:
-      message = "got too close to the overmind";
-      break;
-    case MOD_REACTOR:
-      message = "got too close to the reactor";
-      break;
-    case MOD_MEDISTAT:
-      message = "underwent alien tumor extraction by a medical station";
-      break;
-    case MOD_SLOWBLOB:
-      message = "should have visited a medical station";
-      break;
-    case MOD_SWARM:
-      message = "was hunted down by the swarm";
-      break;
-    default:
-      message = NULL;
-      break;
   }
 
-  if( !message && attacker == target )
-  {
-    switch( mod )
-    {
-      case MOD_SPITFIRE_GAS_TRAIL:
-      case MOD_FLAMER_SPLASH:
-        if( gender == GENDER_FEMALE )
-          message = "toasted herself";
-        else if( gender == GENDER_NEUTER )
-          message = "toasted itself";
-        else
-          message = "toasted himself";
-        break;
+  Q_strncpyz(
+    targetName, Info_ValueForKey(targetInfo, "n"), sizeof(targetName));
 
-      case MOD_LCANNON_SPLASH:
-        if( gender == GENDER_FEMALE )
-          message = "irradiated herself";
-        else if( gender == GENDER_NEUTER )
-          message = "irradiated itself";
-        else
-          message = "irradiated himself";
-        break;
+  message = message2 = "";
 
-      case MOD_GRENADE_LAUNCHER:
-      case MOD_GRENADE:
-        if( gender == GENDER_FEMALE )
-          message = "blew herself up";
-        else if( gender == GENDER_NEUTER )
-          message = "blew itself up";
-        else
-          message = "blew himself up";
-        break;
+  // check for single client messages
+  if(BG_MODConfig(mod)->single_message[0]) {
+    message = BG_MODConfig(mod)->single_message;
+  }
 
-      case MOD_FRAGNADE:
-        if( gender == GENDER_FEMALE )
-          message = "shredded herself ";
-        else if( gender == GENDER_NEUTER )
-          message = "shredded itself";
-        else
-          message = "shredded himself";
-        break;
-
-      case MOD_LASERMINE:
-        if( gender == GENDER_FEMALE )
-          message = "tripped her own laser mine ";
-        else if( gender == GENDER_NEUTER )
-          message = "tripped its own laser mine";
-        else
-          message = "tripped his own laser mine";
-        break;
-
-      case MOD_LIGHTNING:
-      case MOD_LIGHTNING_EMP:
-        if( gender == GENDER_FEMALE )
-          message = "electrocuted herself";
-        else if( gender == GENDER_NEUTER )
-          message = "electrocuted itself";
-        else
-          message = "electrocuted himself";
-        break;
-
-      case MOD_DROP:
-        if( gender == GENDER_FEMALE )
-          message = "squished herself";
-        else if( gender == GENDER_NEUTER )
-          message = "squished itself";
-        else
-          message = "squished himself";
-        break;
-
-      case MOD_SELFDESTRUCT:
-        if( gender == GENDER_FEMALE )
-          message = "took one for her team";
-        else if( gender == GENDER_NEUTER )
-          message = "took one for its team";
-        else
-          message = "took one for his team";
-        break;
-
-      case MOD_LEVEL3_BOUNCEBALL:
-        if( gender == GENDER_FEMALE )
-          message = "sniped herself";
-        else if( gender == GENDER_NEUTER )
-          message = "sniped itself";
-        else
-          message = "sniped himself";
-        break;
-
-      case MOD_PRIFLE:
-        if( gender == GENDER_FEMALE )
-          message = "pulse rifled herself";
-        else if( gender == GENDER_NEUTER )
-          message = "pulse rifled itself";
-        else
-          message = "pulse rifled himself";
-        break;
-
-      default:
+  if(!(message[0]) && attacker == target) {
+    if(gender < 0 || gender >= NUM_GENDERS) {
+      if(BG_MODConfig(mod)->suicide_message[GENDER_MALE][0]) {
+        message = BG_MODConfig(mod)->suicide_message[GENDER_MALE];
+      } else {
+        message = "killed himself";
+      }
+    } else {
+      if(BG_MODConfig(mod)->suicide_message[gender][0]) {
+        message = BG_MODConfig(mod)->suicide_message[gender];
+      } else {
         if( gender == GENDER_FEMALE )
           message = "killed herself";
         else if( gender == GENDER_NEUTER )
           message = "killed itself";
         else
           message = "killed himself";
-        break;
+      }
     }
   }
 
-  if( message )
-  {
+  if(message[0]) {
     if(
       cg_killMsg.integer != 0 &&
-      (!(cgs.voteTime[TEAM_NONE] || cgs.voteTime[cg.predictedPlayerState.stats[STAT_TEAM]]))) {
+      (!(
+        cgs.voteTime[TEAM_NONE] ||
+        cgs.voteTime[cg.predictedPlayerState.stats[STAT_TEAM]]))) {
       CG_AddToKillMsg(va("%s ^7%s", targetName, message), NULL, WP_NONE);
       skipnotify = qtrue;
     }
 
     if(skipnotify) {
-      CG_Printf( "[skipnotify]%s" S_COLOR_WHITE " %s\n", targetName, message );
+      CG_Printf("[skipnotify]%s" S_COLOR_WHITE " %s\n", targetName, message);
     } else {
-      CG_Printf( "%s" S_COLOR_WHITE " %s\n", targetName, message );
+      CG_Printf("%s" S_COLOR_WHITE " %s\n", targetName, message);
     }
     return;
   }
 
   // check for double client messages
-  if( !attackerInfo )
-  {
+  if(!attackerInfo) {
     attacker = ENTITYNUM_WORLD;
-    strcpy( attackerName, "noname" );
-  }
-  else
-  {
-    Q_strncpyz( attackerName, Info_ValueForKey( attackerInfo, "n" ), sizeof( attackerName ));
+    strcpy(attackerName, "noname");
+  } else {
+    Q_strncpyz(
+      attackerName, Info_ValueForKey(attackerInfo, "n"), sizeof(attackerName));
     // check for kill messages about the current clientNum
-    if( target == cg.snap->ps.clientNum )
-      Q_strncpyz( cg.killerName, attackerName, sizeof( cg.killerName ) );
+    if(target == cg.snap->ps.clientNum) {
+      Q_strncpyz(cg.killerName, attackerName, sizeof(cg.killerName));
+    }
   }
 
-  if( attacker != ENTITYNUM_WORLD )
-  {
-    switch( mod )
-    {
-      case MOD_PAINSAW:
-        message = "was sawn by";
-        break;
-      case MOD_BLASTER:
-        message = "was blasted by";
-        break;
-      case MOD_MACHINEGUN:
-        message = "was machinegunned by";
-        break;
-      case MOD_CHAINGUN:
-        message = "was chaingunned by";
-        break;
-      case MOD_SHOTGUN:
-      case MOD_DBSHOTGUN:
-        message = "was gunned down by";
-        break;
-      case MOD_PRIFLE:
-        message = "was pulse rifled by";
-        break;
-      case MOD_MDRIVER:
-        message = "was mass driven by";
-        break;
-      case MOD_LASGUN:
-        message = "was lasgunned by";
-        break;
-      case MOD_SPITFIRE_GAS_TRAIL:
-        message = "was roasted by";
-        message2 = "'s gas trail";
-        break;
-      case MOD_FLAMER:
-        message = "was grilled by";
-        message2 = "'s flamer";
-        break;
-      case MOD_FLAMER_SPLASH:
-        message = "was toasted by";
-        message2 = "'s flamer";
-        break;
-      case MOD_LCANNON:
-        message = "felt the full force of";
-        message2 = "'s lucifer cannon";
-        break;
-      case MOD_LCANNON_SPLASH:
-        message = "was caught in the fallout of";
-        message2 = "'s lucifer cannon";
-        break;
-      case MOD_GRENADE:
-        message = "couldn't escape";
-        message2 = "'s grenade";
-        break;
-      case MOD_FRAGNADE:
-        message = "was shredded by";
-        message2 = "'s frag grenade";
-        break;
-      case MOD_LASERMINE:
-        message = "tripped";
-        message2 = "'s laser mine";
-        break;
-      case MOD_GRENADE_LAUNCHER:
-        message = "was pulverized by";
-        message2 = "'s launched grenade";
-        break;
-
-      case MOD_LIGHTNING:
-      case MOD_LIGHTNING_EMP:
-        message = " was electrocuted by";
-        message2 = "'s lightning gun";
-        break;
-
-      case MOD_DROP:
-        message = "was squished by";
-        message2 = "'s dropped structure";
-        break;
-
-      case MOD_ABUILDER_CLAW:
-        message = "should leave";
-        message2 = "'s buildings alone";
-        break;
-      case MOD_LEVEL0_BITE:
-        message = "was bitten by";
-        break;
-      case MOD_LEVEL1_CLAW:
-        message = "was swiped by";
-        Com_sprintf( className, 64, "'s %s",
-            BG_ClassConfig( PCL_ALIEN_LEVEL1 )->humanName );
-        message2 = className;
-        break;
-      case MOD_LEVEL2_CLAW:
-        message = "was clawed by";
-        Com_sprintf( className, 64, "'s %s",
-            BG_ClassConfig( PCL_ALIEN_LEVEL2 )->humanName );
-        message2 = className;
-        break;
-      case MOD_LEVEL2_ZAP:
-        message = "was zapped by";
-        Com_sprintf( className, 64, "'s %s",
-            BG_ClassConfig( PCL_ALIEN_LEVEL2 )->humanName );
-        message2 = className;
-        break;
-      case MOD_LEVEL3_CLAW:
-        message = "was chomped by";
-        Com_sprintf( className, 64, "'s %s",
-            BG_ClassConfig( PCL_ALIEN_LEVEL3 )->humanName );
-        message2 = className;
-        break;
-      case MOD_LEVEL3_POUNCE:
-        message = "was pounced upon by";
-        Com_sprintf( className, 64, "'s %s",
-            BG_ClassConfig( PCL_ALIEN_LEVEL3 )->humanName );
-        message2 = className;
-        break;
-      case MOD_LEVEL3_BOUNCEBALL:
-        message = "was sniped by";
-        Com_sprintf( className, 64, "'s %s",
-            BG_ClassConfig( PCL_ALIEN_LEVEL3 )->humanName );
-        message2 = className;
-        break;
-      case MOD_LEVEL4_CLAW:
-        message = "was mauled by";
-        Com_sprintf( className, 64, "'s %s",
-            BG_ClassConfig( PCL_ALIEN_LEVEL4 )->humanName );
-        message2 = className;
-        break;
-      case MOD_LEVEL4_TRAMPLE:
-        message = "should have gotten out of the way of";
-        Com_sprintf( className, 64, "'s %s",
-            BG_ClassConfig( PCL_ALIEN_LEVEL4 )->humanName );
-        message2 = className;
-        break;
-      case MOD_LEVEL4_CRUSH:
-        message = "was crushed under";
-        message2 = "'s weight";
-        break;
-      case MOD_SPITFIRE_POUNCE:
-        message = "was air pounced upon by";
-        Com_sprintf( className, 64, "'s %s",
-            BG_ClassConfig( PCL_ALIEN_SPITFIRE )->humanName );
-        message2 = className;
-        break;
-      case MOD_SPITFIRE_ZAP:
-        message = "was zapped by";
-        Com_sprintf( className, 64, "'s %s",
-            BG_ClassConfig( PCL_ALIEN_SPITFIRE )->humanName );
-        message2 = className;
-        break;
-      case MOD_SPITFIRE_STING:
-        message = "was stung by";
-        Com_sprintf( className, 64, "'s %s",
-            BG_ClassConfig( PCL_ALIEN_SPITFIRE )->humanName );
-        message2 = className;
-        break;
-
-      case MOD_POISON:
-        message = "should have used a medkit against";
-        message2 = "'s poison";
-        break;
-      case MOD_LEVEL1_PCLOUD:
-        message = "was gassed by";
-        Com_sprintf( className, 64, "'s %s",
-            BG_ClassConfig( PCL_ALIEN_LEVEL1 )->humanName );
-        message2 = className;
-        break;
-
-
-      case MOD_TELEFRAG:
-        message = "tried to invade";
-        message2 = "'s personal space";
-        break;
-      default:
-        message = "was killed by";
-        break;
+  if(attacker != ENTITYNUM_WORLD) {
+    if(BG_MODConfig(mod)->message1[0]) {
+      message = BG_MODConfig(mod)->message1;
+    } else {
+      message = "was killed by";
     }
+    message2 = BG_MODConfig(mod)->message2;
 
     if(
       cg_killMsg.integer != 0 &&
-      (!(cgs.voteTime[TEAM_NONE] || cgs.voteTime[cg.predictedPlayerState.stats[STAT_TEAM]]))) {
+      (!(
+          cgs.voteTime[TEAM_NONE] ||
+          cgs.voteTime[cg.predictedPlayerState.stats[STAT_TEAM]]))) {
       if(cg_killMsg.integer == 2 && icon > WP_NONE) {
         char killMessage[80];
 
@@ -608,34 +287,44 @@ static void CG_Obituary( entityState_t *ent )
       skipnotify = qtrue;
     }
 
-    if(message) {
+    if(message[0]) {
       if(skipnotify) {
-        CG_Printf( "[skipnotify]%s" S_COLOR_WHITE " %s %s%s" S_COLOR_WHITE "%s\n",
+        CG_Printf(
+          "[skipnotify]%s" S_COLOR_WHITE " %s %s%s" S_COLOR_WHITE "%s\n",
           targetName, message,
-          ( teamKill ) ? S_COLOR_RED "TEAMMATE " S_COLOR_WHITE : "",
-          attackerName, message2 );
+          (teamKill) ? S_COLOR_RED "TEAMMATE " S_COLOR_WHITE : "",
+          attackerName, message2);
       } else {
-        CG_Printf( "%s" S_COLOR_WHITE " %s %s%s" S_COLOR_WHITE "%s\n",
+        CG_Printf(
+          "%s" S_COLOR_WHITE " %s %s%s" S_COLOR_WHITE "%s\n",
           targetName, message,
-          ( teamKill ) ? S_COLOR_RED "TEAMMATE " S_COLOR_WHITE : "",
-          attackerName, message2 );
+          (teamKill) ? S_COLOR_RED "TEAMMATE " S_COLOR_WHITE : "",
+          attackerName, message2);
       }
 
       
-      if( teamKill && attacker == cg.clientNum ) {
-        CG_CenterPrint( CP_TEAM_KILL,
-                        va ( "You killed " S_COLOR_RED "TEAMMATE "
-                           S_COLOR_WHITE "%s", targetName ),
-                        BIGCHAR_WIDTH, -1 );
+      if(teamKill && attacker == cg.clientNum) {
+        CG_CenterPrint(
+          CP_TEAM_KILL,
+          va (
+            "You killed " S_COLOR_RED "TEAMMATE " S_COLOR_WHITE "%s",
+            targetName),
+          BIGCHAR_WIDTH, -1);
       }
       return;
     }
   }
 
   // we don't know what it was
+  if(!(message[0])) {
+    message = "died";
+  }
+
   if(
     cg_killMsg.integer != 0 &&
-    (!(cgs.voteTime[TEAM_NONE] || cgs.voteTime[cg.predictedPlayerState.stats[STAT_TEAM]]))) {
+    (!(
+      cgs.voteTime[TEAM_NONE] ||
+      cgs.voteTime[cg.predictedPlayerState.stats[STAT_TEAM]]))) {
     CG_AddToKillMsg(va("%s ^7%s", targetName, message), NULL, WP_NONE);
     skipnotify = qtrue;
   }

@@ -228,7 +228,9 @@ typedef enum
 {
   GENDER_MALE,
   GENDER_FEMALE,
-  GENDER_NEUTER
+  GENDER_NEUTER,
+
+  NUM_GENDERS
 } gender_t;
 
 /*
@@ -1383,8 +1385,44 @@ typedef enum
   MOD_DECONSTRUCT,
   MOD_REPLACE,
   MOD_NOCREEP,
-  MOD_SLAP
+  MOD_SLAP,
+
+  NUM_MODS
 } meansOfDeath_t;
+
+typedef enum
+{
+  MODTYPE_NONE,
+
+  MODTYPE_GENERIC,
+  MODTYPE_BALLISTIC,
+  MODTYPE_SHRAPNEL,
+  MODTYPE_BLAST,
+  MODTYPE_RADIATION,
+  MODTYPE_BURN,
+  MODTYPE_LAVA,
+  MODTYPE_ENERGY,     //doesn't include zaps
+  MODTYPE_ZAP,
+  MODTYPE_CHEMICAL,
+  MODTYPE_MOMENTUM,
+  MODTYPE_FELL,
+  MODTYPE_BITE,
+  MODTYPE_CLAW,
+  MODTYPE_STING,
+  MODTYPE_MIND,
+  MODTYPE_SUFFOCATION,
+  MODTYPE_DROWN,
+  MODTYPE_BUILD,
+
+  NUM_MODTYPES
+} mod_type_t;
+
+typedef struct modAttributes_s
+{
+  meansOfDeath_t means_of_death;
+  char           *name;
+  mod_type_t     mod_type;
+} modAttributes_t;
 
 typedef enum
 {
@@ -1961,6 +1999,8 @@ int BG_LoadEmoticons( emoticon_t *emoticons, int num );
 
 const teamAttributes_t *BG_Team( team_t team );
 
+const modAttributes_t *BG_MOD(meansOfDeath_t mod);
+
 const rankAttributes_t *BG_Rank( rank_t rank );
 
 //bg_entities.c
@@ -2139,6 +2179,14 @@ typedef struct
 
 typedef struct
 {
+  char      single_message[MAX_TOKEN_CHARS];
+  char      suicide_message[NUM_GENDERS][MAX_TOKEN_CHARS];
+  char      message1[MAX_TOKEN_CHARS];
+  char      message2[MAX_TOKEN_CHARS];
+} modConfig_t;
+
+typedef struct
+{
   char      modelName[MAX_QPATH];
   char      description[MAX_TOKEN_CHARS];
   float     modelScale;
@@ -2184,6 +2232,7 @@ qboolean          BG_Check_Game_Mode_Name(
   char *game_mode_raw, char *game_mode_clean, int len);
 void              BG_Init_Game_Mode(char *game_mode_raw);
 teamConfig_t      *BG_TeamConfig(team_t team);
+modConfig_t       *BG_MODConfig(meansOfDeath_t mod);
 classConfig_t     *BG_ClassConfig(class_t class);
 buildableConfig_t *BG_BuildableConfig(buildable_t buildable);
 upgradeConfig_t   *BG_UpgradeConfig( upgrade_t buildable );

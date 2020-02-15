@@ -77,6 +77,7 @@ qboolean BG_Check_Game_Mode_Name(
 }
 
 static void BG_InitTeamConfigs(char *game_mode);
+static void BG_InitMODConfigs(char *game_mode);
 static void BG_InitClassConfigs(char *game_mode);
 static void BG_InitBuildableConfigs(char *game_mode);
 static void BG_InitUpgradeConfigs(char *game_mode);
@@ -95,6 +96,7 @@ void BG_Init_Game_Mode(char *game_mode_raw) {
   }
 
   BG_InitTeamConfigs(game_mode);
+  BG_InitMODConfigs(game_mode);
   BG_InitClassConfigs(game_mode);
   BG_InitBuildableConfigs(game_mode);
   BG_InitUpgradeConfigs(game_mode);
@@ -217,6 +219,194 @@ static void BG_InitTeamConfigs(char *game_mode) {
 
     BG_ParseTeamFile(
       va("game_modes/%s/teams/%s.cfg", game_mode, BG_Team( i )->name), tc);
+  }
+}
+
+/*
+======================================================================
+
+Means of Death
+
+======================================================================
+*/
+
+static modConfig_t bg_modConfigList[NUM_MODS];
+
+/*
+==============
+BG_MODConfig
+==============
+*/
+modConfig_t *BG_MODConfig(meansOfDeath_t mod) {
+  return &bg_modConfigList[mod];
+}
+
+/*
+======================
+BG_ParseMODFile
+
+Parses a configuration file describing a means of death
+======================
+*/
+static qboolean BG_ParseMODFile(const char *filename, modConfig_t *mc) {
+  char          *text_p;
+  int           len;
+  char          *token;
+  char          text[20000];
+  fileHandle_t  f;
+
+  // load the file
+  len = FS_FOpenFileByMode(filename, &f, FS_READ);
+  if(len < 0) {
+    Com_Printf(S_COLOR_RED "ERROR: Means of death file %s doesn't exist\n", filename);
+    return qfalse;
+  }
+
+  if(len == 0 || len >= sizeof(text) - 1) {
+    FS_FCloseFile(f);
+    Com_Printf(S_COLOR_RED "ERROR: Means of death file %s is %s\n", filename,
+      len == 0 ? "empty" : "too long");
+    return qfalse;
+  }
+
+  FS_Read2(text, len, f);
+  text[len] = 0;
+  FS_FCloseFile(f);
+
+  // parse the text
+  text_p = text;
+
+  // read optional parameters
+  while(1) {
+    token = COM_Parse(&text_p);
+
+    if(!token) {
+      break;
+    }
+
+    if(!Q_stricmp(token, "")) {
+      break;
+    }
+
+    if(!Q_stricmp(token, "single_message")) {
+      token = COM_Parse(&text_p);
+      if(!token) {
+        break;
+      }
+
+      Q_strncpyz(
+        mc->single_message,
+        token,
+        sizeof(mc->single_message));
+
+      continue;
+    }
+
+    if(!Q_stricmp(token, "suicide_message")) {
+      token = COM_Parse(&text_p);
+      if(!token) {
+        break;
+      }
+
+      if(!Q_stricmp(token, "female")) {
+        token = COM_Parse(&text_p);
+        if(!token) {
+          break;
+        }
+
+        Q_strncpyz(
+          mc->suicide_message[GENDER_FEMALE],
+          token,
+          sizeof(mc->suicide_message[GENDER_FEMALE]));
+
+        continue;
+      } else if(!Q_stricmp(token, "male")) {
+        token = COM_Parse(&text_p);
+        if(!token) {
+          break;
+        }
+
+        Q_strncpyz(
+          mc->suicide_message[GENDER_MALE],
+          token,
+          sizeof(mc->suicide_message[GENDER_MALE]));
+
+        continue;
+      } else if(!Q_stricmp(token, "neuter")) {
+        token = COM_Parse(&text_p);
+        if(!token) {
+          break;
+        }
+
+        Q_strncpyz(
+          mc->suicide_message[GENDER_NEUTER],
+          token,
+          sizeof(mc->suicide_message[GENDER_NEUTER]));
+
+        continue;
+      } else {
+        Com_Printf(
+          S_COLOR_RED "ERROR: Means of death file %s has unknown gender %s\n",
+          filename,
+          token);
+        return qfalse;
+      }
+    }
+
+    if(!Q_stricmp(token, "message1")) {
+      token = COM_Parse(&text_p);
+      if(!token) {
+        break;
+      }
+
+      Q_strncpyz(
+        mc->message1,
+        token,
+        sizeof(mc->message1));
+
+      continue;
+    }
+
+    if(!Q_stricmp(token, "message2")) {
+      token = COM_Parse(&text_p);
+      if(!token) {
+        break;
+      }
+
+      Q_strncpyz(
+        mc->message2,
+        token,
+        sizeof(mc->message2));
+
+      continue;
+    }
+
+    Com_Printf( S_COLOR_RED "ERROR: unknown token '%s'\n", token );
+    return qfalse;
+  }
+
+  return qtrue;
+}
+
+/*
+===============
+BG_InitMODConfigs
+===============
+*/
+static void BG_InitMODConfigs(char *game_mode) {
+  int               i;
+  modConfig_t *mc;
+
+  for(i = 0; i < NUM_MODS; i++) {
+    mc = BG_MODConfig(i);
+    Com_Memset(mc, 0, sizeof(teamConfig_t));
+
+    BG_ParseMODFile(
+      va(
+        "game_modes/%s/means_of_death/%s.cfg",
+        game_mode,
+        BG_MOD( i )->name),
+      mc);
   }
 }
 
