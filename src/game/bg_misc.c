@@ -3879,7 +3879,7 @@ static const weaponAttributes_t bg_weapons[ ] =
     SHOTGUN_SHELLS,       //int       maxAmmo;
     SHOTGUN_MAXCLIPS,     //int       maxClips;
     1,                    //int       ammoUsage1;
-    2,                    //int       ammoUsage2;
+    1,                    //int       ammoUsage2;
     1,                    //int       ammoUsage3;
     qtrue,                //qboolean  allowPartialAmmoUsage;
     0,                    //int       roundPrice;
