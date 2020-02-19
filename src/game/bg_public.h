@@ -1357,6 +1357,12 @@ typedef struct modAttributes_s
   meansOfDeath_t means_of_death;
   char           *name;
   mod_type_t     mod_type;
+  qboolean       hit_detected;
+  qboolean       spawn_protected;
+  qboolean       last_spawn_protection;
+  qboolean       friendly_fire_protection;
+  qboolean       can_poison;
+  qboolean       self_radius_damage;
 } modAttributes_t;
 
 typedef enum
