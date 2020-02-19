@@ -1013,61 +1013,6 @@ dflags    these flags are used to control how T_Damage works
 ============
 */
 
-/*
-============
-G_MODHitDetection
-
-Determines if a means of death would result in hit indication
-============
-*/
-static qboolean G_MODHitIndication( meansOfDeath_t mod )
-{
-  switch( mod )
-  {
-    case MOD_DROP:
-    case MOD_FALLING:
-    case MOD_TRIGGER_HURT:
-    case MOD_LEVEL1_PCLOUD:
-    case MOD_POISON:
-    case MOD_HSPAWN:
-    case MOD_ASPAWN:
-    case MOD_DECONSTRUCT:
-    case MOD_REPLACE:
-    case MOD_NOCREEP:
-      return qfalse;
-    default:
-      return qtrue;
-  }
-}
-
-/*
-============
-G_MODSpawnProtected
-
-Determines if a means of death doesn't apply damage when spawn protected
-============
-*/
-static qboolean G_MODSpawnProtected( meansOfDeath_t mod )
-{
-  switch ( mod ) 
-  {
-    case MOD_WATER:
-    case MOD_SLIME:
-    case MOD_LAVA:
-    case MOD_CRUSH:
-    case MOD_DROP:
-    case MOD_TELEFRAG:
-    case MOD_FALLING:
-    case MOD_SUICIDE:
-    case MOD_TARGET_LASER:
-    case MOD_TRIGGER_HURT:
-    case MOD_SUFFOCATION:
-      return qfalse;
-    default:
-      return qtrue;
-  }
-}
-
 // team is the team that is immune to this damage
 void G_SelectiveDamage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
          vec3_t dir, vec3_t point, int damage, int dflags, int mod, int team )
@@ -1120,18 +1065,14 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   if(targ->s.eType == ET_BUILDABLE) {
     if(
       (targ->buildableTeam == TEAM_HUMANS) &&
-      (
-        (mod == MOD_FLAMER) ||
-        (mod == MOD_FLAMER_SPLASH))) {
+      (BG_MOD(mod)->mod_type == MODTYPE_BURN)) {
       // human buildables are fire proof
       return;
     }
 
     if(
       g_friendlyFireLastSpawnProtection.integer &&
-      mod != MOD_TRIGGER_HURT &&
-      mod != MOD_LAVA &&
-      mod != MOD_SLIME) {
+      BG_MOD(mod)->last_spawn_protection) {
       if(BG_Buildable(targ->s.modelindex)->role & ROLE_SPAWN) {
         //don't allow teammates to deal damage to their last spawn
         switch (targ->buildableTeam) {
@@ -1179,7 +1120,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
     g_damageProtection.integer &&
     targ->dmgProtectionTime > level.time &&
     attacker && attacker->s.number != ENTITYNUM_WORLD &&
-    G_MODSpawnProtected( mod )) {
+    BG_MOD(mod)->spawn_protected) {
     damage = (int)(0.3f * (float)damage);
     if( damage < 1 ) {
       damage = 1;
@@ -1330,10 +1271,9 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
     return;
 
   // don't do friendly fire on movement attacks
-  if( ( mod == MOD_LEVEL4_TRAMPLE || mod == MOD_LEVEL3_POUNCE ||
-        mod == MOD_LEVEL4_CRUSH ) &&
-      targ->s.eType == ET_BUILDABLE && targ->buildableTeam == TEAM_ALIENS )
-  {
+  if(
+    (BG_MOD(mod)->mod_type == MODTYPE_MOMENTUM) &&
+    targ->s.eType == ET_BUILDABLE && targ->buildableTeam == TEAM_ALIENS) {
     return;
   }
 
@@ -1347,9 +1287,9 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
         OnSameTeam( targ, attacker ) )
     {
       // don't do friendly fire on movement attacks
-      if( mod == MOD_LEVEL4_TRAMPLE || mod == MOD_LEVEL3_POUNCE ||
-          mod == MOD_LEVEL4_CRUSH )
+      if(BG_MOD(mod)->mod_type == MODTYPE_MOMENTUM) {
         return;
+      }
 
       // if dretchpunt is enabled and this is a dretch, do dretchpunt instead of damage
       if( g_dretchPunt.integer &&
@@ -1375,8 +1315,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
     }
 
     if( targ->s.eType == ET_BUILDABLE && attacker->client &&
-        mod != MOD_DECONSTRUCT && mod != MOD_SUICIDE &&
-        mod != MOD_REPLACE && mod != MOD_NOCREEP )
+        BG_MOD(mod)->friendly_fire_protection)
     {
       if( targ->buildableTeam == attacker->client->pers.teamSelection )
       {
@@ -1402,7 +1341,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
   if( attacker->client && targ != attacker && targ->health > 0
       && targ->s.eType != ET_MISSILE
       && targ->s.eType != ET_GENERAL
-      && G_MODHitIndication( mod ) )
+      && BG_MOD(mod)->hit_detected )
   {
     if( OnSameTeam( targ, attacker ) )
       attacker->client->ps.persistant[ PERS_HITS ]--;
@@ -1466,9 +1405,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
     if( attacker->client && attacker->client->ps.stats[ STAT_STATE ] & SS_BOOSTED )
     {
       if( targ->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
-          mod != MOD_LEVEL2_ZAP && mod != MOD_POISON &&
-          mod != MOD_LEVEL1_PCLOUD && mod != MOD_HSPAWN &&
-          mod != MOD_ASPAWN && targ->client->poisonImmunityTime < level.time )
+          BG_MOD(mod)->can_poison &&
+          targ->client->poisonImmunityTime < level.time )
       {
         targ->client->ps.stats[ STAT_STATE ] |= SS_POISONED;
         targ->client->lastPoisonTime = level.time;
@@ -1780,10 +1718,11 @@ qboolean G_RadiusDamage( vec3_t origin, vec3_t originMins, vec3_t originMaxs,
     if( dist >= radius )
       continue;
 
-    if( ( mod == MOD_LIGHTNING_EMP ||
-          mod == MOD_LIGHTNING ) &&
-        attacker->s.number == ent->s.number )
+    if(
+      BG_MOD(mod)->self_radius_damage &&
+      attacker->s.number == ent->s.number) {
       continue;
+    }
 
     points = damage * ( 1.0 - dist / radius );
     // don't let the damage be less than half of one health point unit

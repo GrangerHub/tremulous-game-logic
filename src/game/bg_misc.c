@@ -108,283 +108,619 @@ static const modAttributes_t bg_modList[ ] =
   {
     MOD_UNKNOWN,             //meansOfDeath_t means_of_death;
     "MOD_UNKNOWN",           //char           *name;
-    MODTYPE_GENERIC          //mod_type_t     mod_type;
+    MODTYPE_GENERIC,         //mod_type_t     mod_type;
+    qfalse,                  //qboolean       hit_detected;
+    qfalse,                  //qboolean       spawn_protected;
+    qfalse,                  //qboolean       last_spawn_protection;
+    qfalse,                  //qboolean       friendly_fire_protection;
+    qfalse,                  //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_SHOTGUN,
-    "MOD_SHOTGUN",
-    MODTYPE_BALLISTIC
+    MOD_SHOTGUN,             //meansOfDeath_t means_of_death;
+    "MOD_SHOTGUN",           //char           *name;
+    MODTYPE_BALLISTIC,       //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_BLASTER,
-    "MOD_BLASTER",
-    MODTYPE_ENERGY
+    MOD_BLASTER,             //meansOfDeath_t means_of_death;
+    "MOD_BLASTER",           //char           *name;
+    MODTYPE_ENERGY,          //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_PAINSAW,
-    "MOD_PAINSAW",
-    MODTYPE_ENERGY
+    MOD_PAINSAW,             //meansOfDeath_t means_of_death;
+    "MOD_PAINSAW",           //char           *name;
+    MODTYPE_ENERGY,          //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_MACHINEGUN,
-    "MOD_MACHINEGUN",
-    MODTYPE_BALLISTIC
+    MOD_MACHINEGUN,          //meansOfDeath_t means_of_death;
+    "MOD_MACHINEGUN",        //char           *name;
+    MODTYPE_BALLISTIC,       //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_CHAINGUN,
-    "MOD_CHAINGUN",
-    MODTYPE_BALLISTIC
+    MOD_CHAINGUN,            //meansOfDeath_t means_of_death;
+    "MOD_CHAINGUN",          //char           *name;
+    MODTYPE_BALLISTIC,       //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_PRIFLE,
-    "MOD_PRIFLE",
-    MODTYPE_ENERGY
+    MOD_PRIFLE,              //meansOfDeath_t means_of_death;
+    "MOD_PRIFLE",            //char           *name;
+    MODTYPE_ENERGY,          //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_MDRIVER,
-    "MOD_MDRIVER",
-    MODTYPE_ENERGY
+    MOD_MDRIVER,             //meansOfDeath_t means_of_death;
+    "MOD_MDRIVER",           //char           *name;
+    MODTYPE_ENERGY,          //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_LASGUN,
-    "MOD_LASGUN",
-    MODTYPE_ENERGY
+    MOD_LASGUN,              //meansOfDeath_t means_of_death;
+    "MOD_LASGUN",            //char           *name;
+    MODTYPE_ENERGY,          //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_LCANNON,
-    "MOD_LCANNON",
-    MODTYPE_ENERGY
+    MOD_LCANNON,             //meansOfDeath_t means_of_death;
+    "MOD_LCANNON",           //char           *name;
+    MODTYPE_ENERGY,          //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_LCANNON_SPLASH,
-    "MOD_LCANNON_SPLASH",
-    MODTYPE_ENERGY
+    MOD_LCANNON_SPLASH,      //meansOfDeath_t means_of_death;
+    "MOD_LCANNON_SPLASH",    //char           *name;
+    MODTYPE_ENERGY,          //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_FLAMER,
-    "MOD_FLAMER",
-    MODTYPE_BURN
+    MOD_FLAMER,              //meansOfDeath_t means_of_death;
+    "MOD_FLAMER",            //char           *name;
+    MODTYPE_BURN,            //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_FLAMER_SPLASH,
-    "MOD_FLAMER_SPLASH",
-    MODTYPE_BURN
+    MOD_FLAMER_SPLASH,       //meansOfDeath_t means_of_death;
+    "MOD_FLAMER_SPLASH",     //char           *name;
+    MODTYPE_BURN,            //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_GRENADE,
-    "MOD_GRENADE",
-    MODTYPE_BLAST
+    MOD_GRENADE,             //meansOfDeath_t means_of_death;
+    "MOD_GRENADE",           //char           *name;
+    MODTYPE_BLAST,           //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_FRAGNADE,
-    "MOD_FRAGNADE",
-    MODTYPE_SHRAPNEL
+    MOD_FRAGNADE,            //meansOfDeath_t means_of_death;
+    "MOD_FRAGNADE",          //char           *name;
+    MODTYPE_SHRAPNEL,        //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_LASERMINE,
-    "MOD_LASERMINE",
-    MODTYPE_BLAST
+    MOD_LASERMINE,           //meansOfDeath_t means_of_death;
+    "MOD_LASERMINE",         //char           *name;
+    MODTYPE_BLAST,           //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_GRENADE_LAUNCHER,
-    "MOD_GRENADE_LAUNCHER",
-    MODTYPE_BLAST
+    MOD_GRENADE_LAUNCHER,    //meansOfDeath_t means_of_death;
+    "MOD_GRENADE_LAUNCHER",  //char           *name;
+    MODTYPE_BLAST,           //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_LIGHTNING,
-    "MOD_LIGHTNING",
-    MODTYPE_ZAP
+    MOD_LIGHTNING,           //meansOfDeath_t means_of_death;
+    "MOD_LIGHTNING",         //char           *name;
+    MODTYPE_ZAP,             //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qfalse,                  //qboolean       self_radius_damage;
   },
   {
-    MOD_LIGHTNING_EMP,
-    "MOD_LIGHTNING_EMP",
-    MODTYPE_ZAP
+    MOD_LIGHTNING_EMP,       //meansOfDeath_t means_of_death;
+    "MOD_LIGHTNING_EMP",     //char           *name;
+    MODTYPE_ZAP,             //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qfalse,                  //qboolean       self_radius_damage;
   },
   {
-    MOD_WATER,
-    "MOD_WATER",
-    MODTYPE_DROWN
+    MOD_WATER,               //meansOfDeath_t means_of_death;
+    "MOD_WATER",             //char           *name;
+    MODTYPE_DROWN,           //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qfalse,                  //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_SLIME,
-    "MOD_SLIME",
-    MODTYPE_CHEMICAL
+    MOD_SLIME,               //meansOfDeath_t means_of_death;
+    "MOD_SLIME",             //char           *name;
+    MODTYPE_CHEMICAL,        //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qfalse,                  //qboolean       spawn_protected;
+    qfalse,                  //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_LAVA,
-    "MOD_LAVA",
-    MODTYPE_LAVA
+    MOD_LAVA,                //meansOfDeath_t means_of_death;
+    "MOD_LAVA",              //char           *name;
+    MODTYPE_LAVA,            //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qfalse,                  //qboolean       spawn_protected;
+    qfalse,                  //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_CRUSH,
-    "MOD_CRUSH",
-    MODTYPE_MOMENTUM
+    MOD_CRUSH,               //meansOfDeath_t means_of_death;
+    "MOD_CRUSH",             //char           *name;
+    MODTYPE_MOMENTUM,        //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qfalse,                  //qboolean       spawn_protected;
+    qfalse,                  //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_DROP,
-    "MOD_DROP",
-    MODTYPE_FELL
+    MOD_DROP,                //meansOfDeath_t means_of_death;
+    "MOD_DROP",              //char           *name;
+    MODTYPE_FELL,            //mod_type_t     mod_type;
+    qfalse,                  //qboolean       hit_detected;
+    qfalse,                  //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_TELEFRAG,
-    "MOD_TELEFRAG",
-    MODTYPE_GENERIC
+    MOD_TELEFRAG,            //meansOfDeath_t means_of_death;
+    "MOD_TELEFRAG",          //char           *name;
+    MODTYPE_GENERIC,         //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qfalse,                  //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_FALLING,
-    "MOD_FALLING",
-    MODTYPE_FELL
+    MOD_FALLING,             //meansOfDeath_t means_of_death;
+    "MOD_FALLING",           //char           *name;
+    MODTYPE_FELL,            //mod_type_t     mod_type;
+    qfalse,                  //qboolean       hit_detected;
+    qfalse,                  //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_SUICIDE,
-    "MOD_SUICIDE",
-    MODTYPE_GENERIC
+    MOD_SUICIDE,             //meansOfDeath_t means_of_death;
+    "MOD_SUICIDE",           //char           *name;
+    MODTYPE_GENERIC,         //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qfalse,                  //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qfalse,                  //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_TARGET_LASER,
-    "MOD_TARGET_LASER",
-    MODTYPE_ENERGY
+    MOD_TARGET_LASER,        //meansOfDeath_t means_of_death;
+    "MOD_TARGET_LASER",      //char           *name;
+    MODTYPE_ENERGY,          //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qfalse,                  //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_TRIGGER_HURT,
-    "MOD_TRIGGER_HURT",
-    MODTYPE_GENERIC
+    MOD_TRIGGER_HURT,        //meansOfDeath_t means_of_death;
+    "MOD_TRIGGER_HURT",      //char           *name;
+    MODTYPE_GENERIC,         //mod_type_t     mod_type;
+    qfalse,                  //qboolean       hit_detected;
+    qfalse,                  //qboolean       spawn_protected;
+    qfalse,                  //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_SUFFOCATION,
-    "MOD_SUFFOCATION",
-    MODTYPE_SUFFOCATION
+    MOD_SUFFOCATION,         //meansOfDeath_t means_of_death;
+    "MOD_SUFFOCATION",       //char           *name;
+    MODTYPE_SUFFOCATION,     //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qfalse,                  //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_ABUILDER_CLAW,
-    "MOD_ABUILDER_CLAW",
-    MODTYPE_CLAW
+    MOD_ABUILDER_CLAW,       //meansOfDeath_t means_of_death;
+    "MOD_ABUILDER_CLAW",     //char           *name;
+    MODTYPE_CLAW,            //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_LEVEL0_BITE,
-    "MOD_LEVEL0_BITE",
-    MODTYPE_BITE
+    MOD_LEVEL0_BITE,         //meansOfDeath_t means_of_death;
+    "MOD_LEVEL0_BITE",       //char           *name;
+    MODTYPE_BITE,            //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_LEVEL1_CLAW,
-    "MOD_LEVEL1_CLAW",
-    MODTYPE_CLAW
+    MOD_LEVEL1_CLAW,         //meansOfDeath_t means_of_death;
+    "MOD_LEVEL1_CLAW",       //char           *name;
+    MODTYPE_CLAW,            //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_LEVEL1_PCLOUD,
-    "MOD_LEVEL1_PCLOUD",
-    MODTYPE_CHEMICAL
+    MOD_LEVEL1_PCLOUD,       //meansOfDeath_t means_of_death;
+    "MOD_LEVEL1_PCLOUD",     //char           *name;
+    MODTYPE_CHEMICAL,        //mod_type_t     mod_type;
+    qfalse,                  //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qfalse,                  //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_LEVEL3_CLAW,
-    "MOD_LEVEL3_CLAW",
-    MODTYPE_CLAW
+    MOD_LEVEL3_CLAW,         //meansOfDeath_t means_of_death;
+    "MOD_LEVEL3_CLAW",       //char           *name;
+    MODTYPE_CLAW,            //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_LEVEL3_POUNCE,
-    "MOD_LEVEL3_POUNCE",
-    MODTYPE_MOMENTUM
+    MOD_LEVEL3_POUNCE,       //meansOfDeath_t means_of_death;
+    "MOD_LEVEL3_POUNCE",     //char           *name;
+    MODTYPE_MOMENTUM,        //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_LEVEL3_BOUNCEBALL,
-    "MOD_LEVEL3_BOUNCEBALL",
-    MODTYPE_BALLISTIC
+    MOD_LEVEL3_BOUNCEBALL,   //meansOfDeath_t means_of_death;
+    "MOD_LEVEL3_BOUNCEBALL", //char           *name;
+    MODTYPE_BALLISTIC,       //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_LEVEL2_CLAW,
-    "MOD_LEVEL2_CLAW",
-    MODTYPE_CLAW
+    MOD_LEVEL2_CLAW,         //meansOfDeath_t means_of_death;
+    "MOD_LEVEL2_CLAW",       //char           *name;
+    MODTYPE_CLAW,            //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_LEVEL2_ZAP,
-    "MOD_LEVEL2_ZAP",
-    MODTYPE_ZAP
+    MOD_LEVEL2_ZAP,          //meansOfDeath_t means_of_death;
+    "MOD_LEVEL2_ZAP",        //char           *name;
+    MODTYPE_ZAP,             //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qfalse,                  //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_LEVEL4_CLAW,
-    "MOD_LEVEL4_CLAW",
-    MODTYPE_CLAW
+    MOD_LEVEL4_CLAW,         //meansOfDeath_t means_of_death;
+    "MOD_LEVEL4_CLAW",       //char           *name;
+    MODTYPE_CLAW,            //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_LEVEL4_TRAMPLE,
-    "MOD_LEVEL4_TRAMPLE",
-    MODTYPE_MOMENTUM
+    MOD_LEVEL4_TRAMPLE,      //meansOfDeath_t means_of_death;
+    "MOD_LEVEL4_TRAMPLE",    //char           *name;
+    MODTYPE_MOMENTUM,        //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_LEVEL4_CRUSH,
-    "MOD_LEVEL4_CRUSH",
-    MODTYPE_MOMENTUM
+    MOD_LEVEL4_CRUSH,        //meansOfDeath_t means_of_death;
+    "MOD_LEVEL4_CRUSH",      //char           *name;
+    MODTYPE_MOMENTUM,        //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
 
   {
-    MOD_SLOWBLOB,
-    "MOD_SLOWBLOB",
-    MODTYPE_CHEMICAL
+    MOD_SLOWBLOB,            //meansOfDeath_t means_of_death;
+    "MOD_SLOWBLOB",          //char           *name;
+    MODTYPE_CHEMICAL,        //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_POISON,
-    "MOD_POISON",
-    MODTYPE_CHEMICAL
+    MOD_POISON,              //meansOfDeath_t means_of_death;
+    "MOD_POISON",            //char           *name;
+    MODTYPE_CHEMICAL,        //mod_type_t     mod_type;
+    qfalse,                  //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qfalse,                  //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_SWARM,
-    "MOD_SWARM",
-    MODTYPE_STING
+    MOD_SWARM,               //meansOfDeath_t means_of_death;
+    "MOD_SWARM",             //char           *name;
+    MODTYPE_STING,           //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_HSPAWN,
-    "MOD_HSPAWN",
-    MODTYPE_BLAST
+    MOD_HSPAWN,              //meansOfDeath_t means_of_death;
+    "MOD_HSPAWN",            //char           *name;
+    MODTYPE_BLAST,           //mod_type_t     mod_type;
+    qfalse,                  //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qfalse,                  //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_TESLAGEN,
-    "MOD_TESLAGEN",
-    MODTYPE_ZAP
+    MOD_TESLAGEN,            //meansOfDeath_t means_of_death;
+    "MOD_TESLAGEN",          //char           *name;
+    MODTYPE_ZAP,             //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_MGTURRET,
-    "MOD_MGTURRET",
-    MODTYPE_BALLISTIC
+    MOD_MGTURRET,            //meansOfDeath_t means_of_death;
+    "MOD_MGTURRET",          //char           *name;
+    MODTYPE_BALLISTIC,       //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_REACTOR,
-    "MOD_REACTOR",
-    MODTYPE_RADIATION
+    MOD_REACTOR,             //meansOfDeath_t means_of_death;
+    "MOD_REACTOR",           //char           *name;
+    MODTYPE_RADIATION,       //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_ASPAWN,
-    "MOD_ASPAWN",
-    MODTYPE_BLAST
+    MOD_ASPAWN,              //meansOfDeath_t means_of_death;
+    "MOD_ASPAWN",            //char           *name;
+    MODTYPE_BLAST,           //mod_type_t     mod_type;
+    qfalse,                  //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qfalse,                  //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_ATUBE,
-    "MOD_ATUBE",
-    MODTYPE_CHEMICAL
+    MOD_ATUBE,               //meansOfDeath_t means_of_death;
+    "MOD_ATUBE",             //char           *name;
+    MODTYPE_CHEMICAL,        //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_OVERMIND,
-    "MOD_OVERMIND",
-    MODTYPE_MIND
+    MOD_OVERMIND,            //meansOfDeath_t means_of_death;
+    "MOD_OVERMIND",          //char           *name;
+    MODTYPE_MIND,            //mod_type_t     mod_type;
+    qtrue,                   //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qtrue,                   //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_DECONSTRUCT,
-    "MOD_DECONSTRUCT",
-    MODTYPE_BUILD
+    MOD_DECONSTRUCT,         //meansOfDeath_t means_of_death;
+    "MOD_DECONSTRUCT",       //char           *name;
+    MODTYPE_BUILD,           //mod_type_t     mod_type;
+    qfalse,                  //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qfalse,                  //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_REPLACE,
-    "MOD_REPLACE",
-    MODTYPE_BUILD
+    MOD_REPLACE,             //meansOfDeath_t means_of_death;
+    "MOD_REPLACE",           //char           *name;
+    MODTYPE_BUILD,           //mod_type_t     mod_type;
+    qfalse,                  //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qfalse,                  //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_NOCREEP,
-    "MOD_NOCREEP",
-    MODTYPE_MIND
+    MOD_NOCREEP,             //meansOfDeath_t means_of_death;
+    "MOD_NOCREEP",           //char           *name;
+    MODTYPE_MIND,            //mod_type_t     mod_type;
+    qfalse,                  //qboolean       hit_detected;
+    qtrue,                   //qboolean       spawn_protected;
+    qtrue,                   //qboolean       last_spawn_protection;
+    qfalse,                  //qboolean       friendly_fire_protection;
+    qtrue,                   //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   },
   {
-    MOD_SLAP,
-    "MOD_SLAP",
-    MODTYPE_GENERIC
+    MOD_SLAP,                //meansOfDeath_t means_of_death;
+    "MOD_SLAP",              //char           *name;
+    MODTYPE_GENERIC,         //mod_type_t     mod_type;
+    qfalse,                  //qboolean       hit_detected;
+    qfalse,                  //qboolean       spawn_protected;
+    qfalse,                  //qboolean       last_spawn_protection;
+    qfalse,                  //qboolean       friendly_fire_protection;
+    qfalse,                  //qboolean       can_poison;
+    qtrue,                   //qboolean       self_radius_damage;
   }
 };
 
