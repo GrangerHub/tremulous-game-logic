@@ -73,6 +73,18 @@ Sends a command string to a client
 ===============
 */
 void SV_GameSendServerCommand( int clientNum, const char *text ) {
+	// record the game server commands in demos
+	if ( sv.demoState == DS_RECORDING ) {
+		SV_DemoWriteGameCommand( clientNum, text );
+	} else if ( sv.demoState == DS_PLAYBACK ) {
+		// store the new game command, so when replaying a demo message, we can
+		// check for duplicates: maybe this message was already submitted (because
+		// of the events simulation, an event may trigger a message), and so we want
+		// to avoid those duplicates: if an event already triggered a message, no
+		// need to issue the one stored in the demo
+		SV_CheckLastCmd( text, qtrue );
+	}
+
 	if ( clientNum == -1 ) {
 		SV_SendServerCommand( NULL, "%s", text );
 	} else {
@@ -362,6 +374,8 @@ void (*dll_ClientDisconnect)( int clientNum );
 void (*dll_ClientBegin)( int clientNum );
 void (*dll_ClientCommand)( int clientNum );
 void (*dll_G_RunFrame)( int levelTime );
+void (*dll_G_TeamStringFromTeamNumber)(
+  int team_num, char *team_string, unsigned int team_string_size);
 qboolean (*dll_ConsoleCommand)( void );
 
 #include "../qcommon/vm_local.h"
@@ -377,6 +391,8 @@ void SV_LoadFunctions( void ) {
 	dll_ClientBegin           = Sys_GetFunction( gvm->dllHandle, "ClientBegin" );
 	dll_ClientCommand         = Sys_GetFunction( gvm->dllHandle, "ClientCommand" );
 	dll_G_RunFrame            = Sys_GetFunction( gvm->dllHandle, "G_RunFrame" );
+	dll_G_TeamStringFromTeamNumber =
+		Sys_GetFunction( gvm->dllHandle, "G_TeamStringFromTeamNumber" );
 	dll_ConsoleCommand        = Sys_GetFunction( gvm->dllHandle, "ConsoleCommand" );
 }
 

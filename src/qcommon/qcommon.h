@@ -103,6 +103,11 @@ void MSG_WriteDeltaEntity( int alternateProtocol, msg_t *msg, struct entityState
 void MSG_ReadDeltaEntity( int alternateProtocol, msg_t *msg, entityState_t *from, entityState_t *to,
 						 int number );
 
+void MSG_WriteDeltaSharedEntity(
+	msg_t *msg, void *from, void *to, qboolean force, int number);
+void MSG_ReadDeltaSharedEntity(
+	msg_t *msg, void *from, void *to, int number);
+
 void MSG_WriteDeltaPlayerstate( int alternateProtocol, msg_t *msg, struct playerState_s *from, struct playerState_s *to );
 void MSG_ReadDeltaPlayerstate( msg_t *msg, struct playerState_s *from, struct playerState_s *to );
 struct alternatePlayerState_s;
@@ -450,6 +455,7 @@ char	*Cmd_ArgsFrom( int arg );
 void	Cmd_ArgsBuffer( char *buffer, int bufferLength );
 void	Cmd_LiteralArgsBuffer( char *buffer, int bufferLength );
 char	*Cmd_Cmd (void);
+void	Cmd_Args_Sanitize( void );
 // The functions that execute commands get their parameters with these
 // functions. Cmd_Argv () will return an empty string, not a NULL
 // if arg > argc, so string operations are allways safe.
@@ -1207,6 +1213,8 @@ extern void (*dll_ClientDisconnect)( int clientNum );
 extern void (*dll_ClientBegin)( int clientNum );
 extern void (*dll_ClientCommand)( int clientNum );
 extern void (*dll_G_RunFrame)( int levelTime );
+extern void (*dll_G_TeamStringFromTeamNumber)(
+  int team_num, char *team_string, unsigned int team_string_size);
 extern qboolean (*dll_ConsoleCommand)( void );
 
 #endif // _QCOMMON_H_

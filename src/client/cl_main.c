@@ -2455,7 +2455,7 @@ void CL_InitServerInfo( serverInfo_t *server, netadr_t *address ) {
 	server->minPing = 0;
 	server->ping = -1;
 	server->game[0] = '\0';
-	server->gameType = 0;
+	server->game_mode = 0;
 	server->netType = 0;
 }
 
@@ -3800,7 +3800,7 @@ static void CL_SetServerInfo(serverInfo_t *server, const char *info, int ping) {
 			server->maxClients = atoi(Info_ValueForKey(info, "sv_maxclients"));
 			game = Info_ValueForKey(info, "game");
 			Q_strncpyz(server->game, (game[0]) ? game : BASEGAME, MAX_NAME_LENGTH);
-			server->gameType = atoi(Info_ValueForKey(info, "gametype"));
+			server->game_mode = atoi(Info_ValueForKey(info, "g_game_mode"));
 			server->netType = atoi(Info_ValueForKey(info, "nettype"));
 			server->minPing = atoi(Info_ValueForKey(info, "minping"));
 			server->maxPing = atoi(Info_ValueForKey(info, "maxping"));

@@ -40,6 +40,7 @@ cvar_t	*sv_rconPassword;		// password for remote server commands
 cvar_t	*sv_privatePassword;		// password for the privateClient slots
 cvar_t	*sv_allowDownload;
 cvar_t	*sv_maxclients;
+cvar_t	*sv_democlients;		// number of slots reserved for playing a demo
 
 cvar_t	*sv_privateClients;		// number of clients reserved for password
 cvar_t	*sv_hostname;
@@ -59,6 +60,11 @@ cvar_t	*sv_maxPing;
 cvar_t	*sv_pure;
 cvar_t	*sv_lanForceRate; // dedicated 1 (LAN) server forces local client rates to 99999 (bug #491)
 cvar_t	*sv_banFile;
+
+cvar_t	*sv_demoState;
+cvar_t	*sv_autoDemo;
+cvar_t	*cl_freezeDemo; // to freeze server-side demos
+cvar_t	*sv_demoTolerant;
 
 // server attack protection
 cvar_t *sv_protect;     // 0 - unprotected
@@ -213,9 +219,19 @@ void QDECL SV_SendServerCommand(client_t *cl, const char *fmt, ...) {
 		Com_Printf ("broadcast: %s\n", SV_ExpandNewlines((char *)message) );
 	}
 
+	// save broadcasts to demo
+	// note: in the case a command is only issued to a specific client, it is NOT
+	// recorded (see above when cl != NULL). If you want to record them, just
+	// place this code above, but be warned that it may be dangerous (such as
+	// "disconnect" command) because server commands will be replayed to every
+	// connected clients!
+	if(sv.demoState == DS_RECORDING) {
+		SV_DemoWriteServerCommand((char *)message);
+	}
+
 	// send the data to all relevent clients
-	for (j = 0, client = svs.clients; j < sv_maxclients->integer ; j++, client++) {
-		SV_AddServerCommand( client, (char *)message );
+	for(j = 0, client = svs.clients; j < sv_maxclients->integer ; j++, client++) {
+		SV_AddServerCommand(client, (char *)message);
 	}
 }
 
@@ -681,8 +697,13 @@ void SVC_Info( netadr_t from ) {
 	Info_SetValueForKey( infostring, "hostname", sv_hostname->string );
 	Info_SetValueForKey( infostring, "mapname", sv_mapname->string );
 	Info_SetValueForKey( infostring, "clients", va("%i", count) );
-	Info_SetValueForKey( infostring, "sv_maxclients",
-		va("%i", sv_maxclients->integer - sv_privateClients->integer ) );
+	Info_SetValueForKey(
+		infostring, "sv_maxclients",
+		va(
+			"%i",
+			sv_maxclients->integer -
+			sv_privateClients->integer -
+			sv_democlients->integer));
 	Info_SetValueForKey( infostring, "pure", va("%i", sv_pure->integer ) );
 
 #ifdef USE_VOIP
@@ -1276,11 +1297,11 @@ void SV_Frame( int msec ) {
 
 	// update infostrings if anything has been changed
 	if ( cvar_modifiedFlags & CVAR_SERVERINFO ) {
-		SV_SetConfigstring( CS_SERVERINFO, Cvar_InfoString( CVAR_SERVERINFO ) );
+		SV_SetConfigstring( CS_SERVERINFO, Cvar_InfoString( CVAR_SERVERINFO ), qfalse );
 		cvar_modifiedFlags &= ~CVAR_SERVERINFO;
 	}
 	if ( cvar_modifiedFlags & CVAR_SYSTEMINFO ) {
-		SV_SetConfigstring( CS_SYSTEMINFO, Cvar_InfoString_Big( CVAR_SYSTEMINFO ) );
+		SV_SetConfigstring( CS_SYSTEMINFO, Cvar_InfoString_Big( CVAR_SYSTEMINFO ), qfalse );
 		cvar_modifiedFlags &= ~CVAR_SYSTEMINFO;
 	}
 
@@ -1301,6 +1322,21 @@ void SV_Frame( int msec ) {
 
 		// let everything in the world think and move
 		dll_G_RunFrame( sv.time );
+
+		// play/record demo frame (if enabled)
+		if (sv.demoState == DS_RECORDING) {
+			// Record the frame
+			SV_DemoWriteFrame();
+		} else if(
+			sv.demoState == DS_WAITINGPLAYBACK ||
+			Cvar_VariableIntegerValue("sv_demoState") == DS_WAITINGPLAYBACK) {
+			// Launch again the playback of the demo (because we needed a restart in
+			// order to set some cvars such as sv_maxclients or fs_game)
+			SV_DemoRestartPlayback();
+		} else if (sv.demoState == DS_PLAYBACK) {
+			// Play the next demo frame
+			SV_DemoReadFrame();
+		}
 	}
 
 	if ( com_speeds->integer ) {

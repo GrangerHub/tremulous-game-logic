@@ -118,7 +118,7 @@ int G_FindConfigstringIndex( const char *name, int start, int max, qboolean crea
   if( i == max )
     Com_Error( ERR_DROP, "G_FindConfigstringIndex: overflow" );
 
-  SV_SetConfigstring( start + i, name );
+  SV_SetConfigstring( start + i, name, qtrue );
 
   return i;
 }
@@ -422,7 +422,7 @@ void G_UseTargets(gentity_t *ent, gentity_t *activator) {
   if(ent->targetShaderName && ent->targetShaderNewName) {
     float f = level.time * 0.001;
     AddRemap(ent->targetShaderName, ent->targetShaderNewName, f);
-    SV_SetConfigstring(CS_SHADERSTATE, BuildShaderStateConfig( ));
+    SV_SetConfigstring(CS_SHADERSTATE, BuildShaderStateConfig( ), qtrue);
   }
 
   if(g_debugAMP.integer) {

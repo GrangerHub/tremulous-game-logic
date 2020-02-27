@@ -776,7 +776,7 @@ typedef struct
   int               lastTeamLocationTime;         // last time of client team location update
 
   qboolean          newSession;                   // don't use any old session data, because
-                                                  // we changed gametype
+                                                  // we changed game_mode
 
   qboolean          restarted;                    // waiting for a map_restart to fire
 
@@ -1662,6 +1662,7 @@ extern  vmCvar_t  g_humanSpawnCountdown;
 extern  vmCvar_t  g_alienSpawnCountdown;
 extern  vmCvar_t  g_allowVote;
 extern  vmCvar_t  g_voteLimit;
+extern	vmCvar_t	g_teamAutoJoin;
 extern  vmCvar_t  g_suddenDeathVotePercent;
 extern  vmCvar_t  g_suddenDeathVoteDelay;
 extern  vmCvar_t  g_intermissionReadyPercent;
@@ -1783,7 +1784,7 @@ void      SV_Scrim_Save(pers_scrim_t *scrim_input);
 void      SV_Scrim_Load(pers_scrim_t *scrim_input);
 size_t    SV_Scrim_Get_New_Roster_ID(void);
 size_t    SV_Scrim_Get_Last_Roster_ID(void);
-void      SV_SetConfigstring( int num, const char *string );
+void      SV_SetConfigstring( int num, const char *string, qboolean game_module_call );
 void      SV_GetConfigstring( int num, char *buffer, int bufferSize );
 void      SV_SetConfigstringRestrictions( int num, const clientList_t *clientList );
 void      SV_GetUserinfo( int num, char *buffer, int bufferSize );

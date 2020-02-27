@@ -621,17 +621,17 @@ void SP_worldspawn( void )
     Com_Error( ERR_DROP, "SP_worldspawn: The first entity isn't 'worldspawn'" );
 
   // make some data visible to connecting client
-  SV_SetConfigstring( CS_GAME_VERSION, GAME_VERSION );
+  SV_SetConfigstring( CS_GAME_VERSION, GAME_VERSION, qtrue );
 
-  SV_SetConfigstring( CS_LEVEL_START_TIME, va( "%i", level.startTime ) );
+  SV_SetConfigstring( CS_LEVEL_START_TIME, va( "%i", level.startTime ), qtrue );
 
   G_SpawnString( "music", "", &s );
-  SV_SetConfigstring( CS_MUSIC, s );
+  SV_SetConfigstring( CS_MUSIC, s, qtrue );
 
   G_SpawnString( "message", "", &s );
-  SV_SetConfigstring( CS_MESSAGE, s );        // map specific message
+  SV_SetConfigstring( CS_MESSAGE, s, qtrue );        // map specific message
 
-  SV_SetConfigstring( CS_MOTD, g_motd.string );   // message of the day
+  SV_SetConfigstring( CS_MOTD, g_motd.string, qtrue );   // message of the day
 
   if( G_SpawnString( "gravity", "", &s ) )
     Cvar_SetSafe( "g_gravity", s );
@@ -685,7 +685,8 @@ void SP_worldspawn( void )
   } else
     level.countdownTime = 0;
 
-  SV_SetConfigstring( CS_COUNTDOWN, va( "%i %i", level.countdownTime, index ) );
+  SV_SetConfigstring(
+    CS_COUNTDOWN, va("%i %i", level.countdownTime, index), qtrue);
 }
 
 

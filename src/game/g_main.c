@@ -105,6 +105,7 @@ vmCvar_t  g_logFile;
 vmCvar_t  g_logFileSync;
 vmCvar_t  g_allowVote;
 vmCvar_t  g_voteLimit;
+vmCvar_t	g_teamAutoJoin;
 vmCvar_t  g_suddenDeathVotePercent;
 vmCvar_t  g_suddenDeathVoteDelay;
 vmCvar_t  g_intermissionReadyPercent;
@@ -305,6 +306,7 @@ static cvarTable_t   gameCvarTable[ ] =
 
   { &g_allowVote, "g_allowVote", "1", CVAR_ARCHIVE, 0, qfalse },
   { &g_voteLimit, "g_voteLimit", "3", CVAR_ARCHIVE, 0, qfalse },
+  { &g_teamAutoJoin, "g_teamAutoJoin", "0", CVAR_ARCHIVE, 0, qtrue },
   { &g_suddenDeathVotePercent, "g_suddenDeathVotePercent", "74", CVAR_ARCHIVE, 0, qfalse },
   { &g_suddenDeathVoteDelay, "g_suddenDeathVoteDelay", "180", CVAR_ARCHIVE, 0, qfalse },
   { &g_minNameChangePeriod, "g_minNameChangePeriod", "5", 0, 0, qfalse},
@@ -786,8 +788,8 @@ Q_EXPORT void G_InitGame( int levelTime, int randomSeed, int restart )
 
   level.emoticonCount = BG_LoadEmoticons( level.emoticons, MAX_EMOTICONS );
 
-  SV_SetConfigstring( CS_INTERMISSION, "0" );
-  SV_SetConfigstring( CS_WARMUP, va( "%d", IS_WARMUP ) );
+  SV_SetConfigstring( CS_INTERMISSION, "0", qtrue );
+  SV_SetConfigstring( CS_WARMUP, va( "%d", IS_WARMUP ), qtrue );
 
   G_InitPlayerModel( );
 
@@ -875,8 +877,8 @@ static void G_ClearVotes( void )
   memset( level.numVotingClients, 0, sizeof( level.numVotingClients ) );
   for( i = 0; i < NUM_TEAMS; i++ )
   {
-    SV_SetConfigstring( CS_VOTE_TIME + i, "" );
-    SV_SetConfigstring( CS_VOTE_STRING + i, "" );
+    SV_SetConfigstring( CS_VOTE_TIME + i, "", qtrue );
+    SV_SetConfigstring( CS_VOTE_STRING + i, "", qtrue );
     level.voteType[ i ] = VOID_VOTE;
   }
 }
@@ -948,7 +950,7 @@ Q_EXPORT void G_ShutdownGame( int restart )
 
   level.restarted = qfalse;
   level.surrenderTeam = TEAM_NONE;
-  SV_SetConfigstring( CS_WINNER, "" );
+  SV_SetConfigstring( CS_WINNER, "", qtrue );
 
   sl_query( DB_CLOSE, NULL, NULL );
 }
@@ -1522,12 +1524,12 @@ void G_CalculateStages( void )
   SV_SetConfigstring( CS_ALIEN_STAGES, va( "%d %d %d",
         ( IS_WARMUP ? S3 : g_alienStage.integer ),
         ( IS_WARMUP ? 99999 : g_alienCredits.integer ),
-        ( IS_WARMUP ? 0 : level.alienNextStageThreshold ) ) );
+        ( IS_WARMUP ? 0 : level.alienNextStageThreshold ) ), qtrue );
 
   SV_SetConfigstring( CS_HUMAN_STAGES, va( "%d %d %d",
         ( IS_WARMUP ? S3 : g_humanStage.integer ),
         ( IS_WARMUP ? 99999 : g_humanCredits.integer ),
-        ( IS_WARMUP ? 0 : level.humanNextStageThreshold ) ) );
+        ( IS_WARMUP ? 0 : level.humanNextStageThreshold ) ), qtrue );
 }
 
 /*
@@ -1804,7 +1806,7 @@ void ExitLevel( void )
 
   //clear the "ready" configstring
   Com_Memset( &readyMasks, 0, sizeof( readyMasks ) );
-  SV_SetConfigstring( CS_CLIENTS_READY, Com_ClientListString( &readyMasks ) );
+  SV_SetConfigstring( CS_CLIENTS_READY, Com_ClientListString( &readyMasks ), qtrue );
 
   if ( G_MapExists( g_nextMap.string ) )
   {
@@ -1839,7 +1841,7 @@ void ExitLevel( void )
 
   Cvar_SetSafe( "g_nextMap", "" );
   Cvar_SetSafe( "g_warmup", "1" );
-  SV_SetConfigstring( CS_WARMUP, va( "%d", IS_WARMUP ) );
+  SV_SetConfigstring( CS_WARMUP, va( "%d", IS_WARMUP ), qtrue );
 
   level.restarted = qtrue;
   level.changemap = NULL;
@@ -1953,7 +1955,7 @@ void LogExit( const char *string )
 
   G_Scrim_Check_Win_Conditions( );
 
-  SV_SetConfigstring(CS_WINNER, level.winner_configstring);
+  SV_SetConfigstring(CS_WINNER, level.winner_configstring, qtrue);
 
   Cvar_VariableStringBuffer( "mapname", map, sizeof( map ) );
   pack_start( level.database_data, DATABASE_DATA_MAX );
@@ -1971,7 +1973,7 @@ void LogExit( const char *string )
 
   // this will keep the clients from playing any voice sounds
   // that will get cut off when the queued intermission starts
-  SV_SetConfigstring( CS_INTERMISSION, "1" );
+  SV_SetConfigstring( CS_INTERMISSION, "1", qtrue );
 
   // don't send more than 32 scores (FIXME?)
   numSorted = level.numConnectedClients;
@@ -2069,7 +2071,7 @@ void CheckIntermissionExit( void )
     numPlayers++;
   }
 
-  SV_SetConfigstring( CS_CLIENTS_READY, Com_ClientListString( &readyMasks ) );
+  SV_SetConfigstring( CS_CLIENTS_READY, Com_ClientListString( &readyMasks ), qtrue );
 
   // never exit in less than five seconds
   if( level.time < level.intermissiontime + 5000 )
@@ -2460,16 +2462,16 @@ void G_LevelRestart( qboolean stopWarmup )
         va( "%i", ( g_restartingFlags.integer | RESTART_WARMUP_END ) ) );
       Cvar_Update( &g_restartingFlags );
     }
-    SV_SetConfigstring( CS_WARMUP, va( "%d", IS_WARMUP ) );
+    SV_SetConfigstring( CS_WARMUP, va( "%d", IS_WARMUP ), qtrue );
     SV_SetConfigstring( CS_ALIEN_STAGES, va( "%d %d %d",
         ( g_alienStage.integer ),
         ( g_alienCredits.integer ),
-        ( level.alienNextStageThreshold ) ) );
+        ( level.alienNextStageThreshold ) ), qtrue );
 
     SV_SetConfigstring( CS_HUMAN_STAGES, va( "%d %d %d",
           ( g_humanStage.integer ),
           ( g_humanCredits.integer ),
-          ( level.humanNextStageThreshold ) ) );
+          ( level.humanNextStageThreshold ) ), qtrue );
 
     // reset everyone's ready state
     for( i = 0; i < level.maxclients; i++ )
@@ -2585,7 +2587,7 @@ void G_LevelReady( void )
     }
   }
 
-  SV_SetConfigstring( CS_CLIENTS_READY, Com_ClientListString( &readyMasks ) );
+  SV_SetConfigstring( CS_CLIENTS_READY, Com_ClientListString( &readyMasks ), qtrue );
 
   if( !level.countdownTime )
   {
@@ -2704,7 +2706,7 @@ void G_LevelReady( void )
           ( level.warmup1Time > -1 ?  ( level.time - level.warmup1Time ) / 1000 :
             -1 ),
           ( level.warmup2Time > -1 ?  ( level.time - level.warmup2Time ) / 1000 :
-            -1 ) ) );
+            -1 ) ), qtrue );
   } else
     startGame = qtrue;
 
@@ -2722,7 +2724,8 @@ void G_LevelReady( void )
     int    index = rand( ) % MAX_WARMUP_SOUNDS; // randomly select an end of warmup sound set
 
     level.countdownTime = level.time + ( g_doWarmupCountdown.integer * 1000 );
-    SV_SetConfigstring( CS_COUNTDOWN, va( "%i %i", level.countdownTime, index ) );
+    SV_SetConfigstring(
+      CS_COUNTDOWN, va( "%i %i", level.countdownTime, index ), qtrue );
     G_LogPrintf( "Countdown to the End of Warmup: %i\n", g_doWarmupCountdown.integer );
   }
 
@@ -2764,7 +2767,7 @@ void G_Vote( gentity_t *ent, team_t team, qboolean voting )
       level.voteYes[ team ]--;
 
     SV_SetConfigstring( CS_VOTE_CAST + team,
-      va( "%d", (level.voteYes[ team ] + level.voteNo[ team ] ) ) );
+      va( "%d", (level.voteYes[ team ] + level.voteNo[ team ] ) ), qtrue );
   }
   else
   {
@@ -2774,7 +2777,7 @@ void G_Vote( gentity_t *ent, team_t team, qboolean voting )
       level.voteNo[ team ]--;
 
     SV_SetConfigstring( CS_VOTE_CAST + team,
-      va( "%d", (level.voteYes[ team ] + level.voteNo[ team ] ) ) );
+      va( "%d", (level.voteYes[ team ] + level.voteNo[ team ] ) ), qtrue );
   }
 }
 
@@ -2873,12 +2876,12 @@ void G_CheckVote( team_t team )
   {
     level.numCountedVotingClients[ team ] = numActiveClients;
     SV_SetConfigstring( CS_VOTE_ACTIVE + team,
-    va( "%d", level.numCountedVotingClients[ team ] ) );
+    va( "%d", level.numCountedVotingClients[ team ] ), qtrue );
   }
   else
   {
     level.numCountedVotingClients[ team ] = level.voteYes[ team ] + level.voteNo[ team ];
-    SV_SetConfigstring( CS_VOTE_ACTIVE + team, va( "%d", -1 ) );
+    SV_SetConfigstring( CS_VOTE_ACTIVE + team, va( "%d", -1 ), qtrue );
   }
 
   if( ( level.time - level.voteTime[ team ] >= VOTE_TIME ) ||
@@ -2974,10 +2977,10 @@ void G_CheckVote( team_t team )
   for( i = 0; i < level.maxclients; i++ )
     level.clients[ i ].pers.voted &= ~( 1 << team );
 
-  SV_SetConfigstring( CS_VOTE_TIME + team, "" );
-  SV_SetConfigstring( CS_VOTE_STRING + team, "" );
-  SV_SetConfigstring( CS_VOTE_CAST + team, "0" );
-  SV_SetConfigstring( CS_VOTE_ACTIVE + team, "0" );
+  SV_SetConfigstring( CS_VOTE_TIME + team, "", qtrue );
+  SV_SetConfigstring( CS_VOTE_STRING + team, "", qtrue );
+  SV_SetConfigstring( CS_VOTE_CAST + team, "0", qtrue );
+  SV_SetConfigstring( CS_VOTE_ACTIVE + team, "0", qtrue );
 }
 
 
@@ -3146,7 +3149,7 @@ void CheckCvars(void) {
   }
 
   if(g_cheats.modificationCount != lastCheatsModCount) {
-    SV_SetConfigstring(CS_DEVMODE, va("%i", g_cheats.integer));
+    SV_SetConfigstring(CS_DEVMODE, va("%i", g_cheats.integer), qtrue);
   }
 
   if(
@@ -3156,7 +3159,7 @@ void CheckCvars(void) {
     lastHumanStaminaModeModCount = g_humanStaminaMode.modificationCount;
     SV_SetConfigstring(
       CS_PHYSICS,
-      va("%i %i", g_playerAccelMode.integer, g_humanStaminaMode.integer));
+      va("%i %i", g_playerAccelMode.integer, g_humanStaminaMode.integer), qtrue);
   }
 
   if(g_unlagged.modificationCount != lastUnlaggedModCount) {
@@ -3218,6 +3221,16 @@ void G_EvaluateAcceleration( gentity_t *ent, int msec )
 
 /*
 ================
+G_TeamStringFromTeamNumber
+================
+*/
+Q_EXPORT void G_TeamStringFromTeamNumber(
+  int team_num, char *team_string, unsigned int team_string_size) {
+  Q_strncpyz(team_string, BG_Team( team_num )->name2, team_string_size);
+}
+
+/*
+================
 G_RunFrame
 
 Advances the non-player objects in the world
@@ -3241,7 +3254,7 @@ Q_EXPORT void G_RunFrame( int levelTime )
 
     //adjust the start time
     level.startTime += msec;
-    SV_SetConfigstring( CS_LEVEL_START_TIME, va( "%i", level.startTime ) );
+    SV_SetConfigstring( CS_LEVEL_START_TIME, va( "%i", level.startTime ), qtrue );
 
     //adjust the warmup timers
     if(level.warmup1Time > -1) {
@@ -3261,7 +3274,8 @@ Q_EXPORT void G_RunFrame( int levelTime )
       sscanf( info, "%i %i",
                   &dummy,
                   &index);
-      SV_SetConfigstring( CS_COUNTDOWN, va( "%i %i", level.countdownTime, index ) );
+      SV_SetConfigstring(
+        CS_COUNTDOWN, va("%i %i", level.countdownTime, index), qtrue);
     }
 
     ptime3000 += msec;

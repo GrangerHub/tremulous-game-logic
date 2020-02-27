@@ -50,6 +50,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define MAX_MASTER_SERVERS      5 // number of supported master servers
 
 #define DEMOEXT	"dm_"			// standard demo extension
+#define SVDEMOEXT	"svdm_"		// server-side demo extension
 
 #ifdef _MSC_VER
 
@@ -1749,8 +1750,11 @@ typedef enum _flag_status {
 typedef enum {
 	DS_NONE,
 
-	DS_PLAYBACK,
-	DS_RECORDING,
+	DS_WAITINGPLAYBACK, // demo will play after map_restart)
+	DS_PLAYBACK, // a demo is playing
+	DS_WAITINGSTOP, // demo is stopped but we must move clients over their normal slots
+
+	DS_RECORDING, // a demo is being recorded
 
 	DS_NUM_DEMO_STATES
 } demoState_t;

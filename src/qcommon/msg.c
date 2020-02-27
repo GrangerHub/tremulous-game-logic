@@ -24,6 +24,17 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #include "q_shared.h"
 #include "qcommon.h"
 
+#include "../game/g_public.h" // FIXME: necessary for entityShared_t management
+                              // to work (since we need the definitions...),
+                              // which is a very necessary function for
+                              // server-side demos recording. It would be better
+                              // if this functionality would be separated in an
+                              // _ext.c file, but I could not find a way to make
+                              // it work (because it also needs the definitions
+                              // in msg.c, and since it's not a header, these
+                              // are being redefined when included, producing a
+															// lot of recursive declarations errors...)
+
 static huffman_t		msgHuff;
 
 static qboolean			msgInit = qfalse;
@@ -1071,6 +1082,274 @@ void MSG_ReadDeltaEntity( int alternateProtocol, msg_t *msg, entityState_t *from
 			endBit = ( msg->readcount - 1 ) * 8 + msg->bit - GENTITYNUM_BITS;
 		}
 		Com_Printf( " (%i bits)\n", endBit - startBit  );
+	}
+}
+
+
+/*
+============================================================================
+entityShared_t communication
+============================================================================
+*/
+
+// using the stringizing operator to save typing...
+#define	ESF(x) #x,(size_t)&((entityShared_t*)0)->x
+
+/*
+ * Return (v ? floor(log2(v)) : 0) when 0 <= v < 1<<[8, 16, 32, 64].
+ * Inefficient algorithm, intended for compile-time constants.
+ * Courtesy of Hallvard B Furuseth
+ */
+#define LOG2_8BIT(v)  (8 - 90/(((v)/4+14)|1) - 2/((v)/2+1))
+#define LOG2_16BIT(v) (8*((v)>255) + LOG2_8BIT((v) >>8*((v)>255)))
+#define LOG2_32BIT(v) \
+    (16*((v)>65535L) + LOG2_16BIT((v)*1L >>16*((v)>65535L)))
+#define LOG2_64BIT(v)\
+    (32*((v)/2L>>31 > 0) \
+     + LOG2_32BIT((v)*1L >>16*((v)/2L>>31 > 0) \
+                         >>16*((v)/2L>>31 > 0)))
+
+// Compute the number of clients bits at compile-time (this is necessary else the compiler will throw an error because this is not a constant)
+#define	CLIENTNUM_BITS	LOG2_8BIT(MAX_CLIENTS)
+
+netField_t	entitySharedFields[] =
+{
+	{ ESF(hack.pos.trTime), 32 },
+	{ ESF(hack.pos.trBase[0]), 0 },
+	{ ESF(hack.pos.trBase[1]), 0 },
+	{ ESF(hack.pos.trDelta[0]), 0 },
+	{ ESF(hack.pos.trDelta[1]), 0 },
+	{ ESF(hack.pos.trBase[2]), 0 },
+	{ ESF(hack.apos.trBase[1]), 0 },
+	{ ESF(hack.pos.trDelta[2]), 0 },
+	{ ESF(hack.apos.trBase[0]), 0 },
+	{ ESF(hack.event), 10 },
+	{ ESF(hack.angles2[1]), 0 },
+	{ ESF(hack.eType), 8 },
+	{ ESF(hack.torsoAnim), 8 },
+	{ ESF(hack.weaponAnim), 8 },
+	{ ESF(hack.eventParm), 8 },
+	{ ESF(hack.legsAnim), 8 },
+	{ ESF(hack.groundEntityNum), GENTITYNUM_BITS },
+	{ ESF(hack.pos.trType), 8 },
+	{ ESF(hack.eFlags), 19 },
+	{ ESF(hack.otherEntityNum), GENTITYNUM_BITS },
+	{ ESF(hack.weapon), 8 },
+	{ ESF(hack.clientNum), 8 },
+	{ ESF(hack.angles[1]), 0 },
+	{ ESF(hack.pos.trDuration), 32 },
+	{ ESF(hack.apos.trType), 8 },
+	{ ESF(hack.origin[0]), 0 },
+	{ ESF(hack.origin[1]), 0 },
+	{ ESF(hack.origin[2]), 0 },
+	{ ESF(hack.solid), 24 },
+	{ ESF(hack.misc), MAX_MISC },
+	{ ESF(hack.modelindex), 8 },
+	{ ESF(hack.otherEntityNum2), GENTITYNUM_BITS },
+	{ ESF(hack.loopSound), 8 },
+	{ ESF(hack.generic1), 10 },
+	{ ESF(hack.origin2[2]), 0 },
+	{ ESF(hack.origin2[0]), 0 },
+	{ ESF(hack.origin2[1]), 0 },
+	{ ESF(hack.modelindex2), 8 },
+	{ ESF(hack.angles[0]), 0 },
+	{ ESF(hack.time), 32 },
+	{ ESF(hack.apos.trTime), 32 },
+	{ ESF(hack.apos.trDuration), 32 },
+	{ ESF(hack.apos.trBase[2]), 0 },
+	{ ESF(hack.apos.trDelta[0]), 0 },
+	{ ESF(hack.apos.trDelta[1]), 0 },
+	{ ESF(hack.apos.trDelta[2]), 0 },
+	{ ESF(hack.time2), 32 },
+	{ ESF(hack.angles[2]), 0 },
+	{ ESF(hack.angles2[0]), 0 },
+	{ ESF(hack.angles2[2]), 0 },
+	{ ESF(hack.constantLight), 32 },
+	{ ESF(hack.frame), 16 },
+	{ ESF(linked), 1 },
+	{ ESF(linkcount), 8 }, // enough to see whether the linkcount has changed
+                         // (assuming it doesn't change 256 times in 1 frame)
+	{ ESF(svFlags), 12 },
+	{ ESF(singleClient), CLIENTNUM_BITS },
+	{ ESF(bmodel), 1 },
+	{ ESF(mins[0]), 0 },
+	{ ESF(mins[1]), 0 },
+	{ ESF(mins[2]), 0 },
+	{ ESF(maxs[0]), 0 },
+	{ ESF(maxs[1]), 0 },
+	{ ESF(maxs[2]), 0 },
+	{ ESF(contents), 32 },
+	{ ESF(absmin[0]), 0 },
+	{ ESF(absmin[1]), 0 },
+	{ ESF(absmin[2]), 0 },
+	{ ESF(absmax[0]), 0 },
+	{ ESF(absmax[1]), 0 },
+	{ ESF(absmax[2]), 0 },
+	{ ESF(currentOrigin[0]), 0 },
+	{ ESF(currentOrigin[1]), 0 },
+	{ ESF(currentOrigin[2]), 0 },
+	{ ESF(currentAngles[0]), 0 },
+	{ ESF(currentAngles[1]), 0 },
+	{ ESF(currentAngles[2]), 0 },
+	{ ESF(ownerNum), GENTITYNUM_BITS }
+};
+
+
+/*
+==================
+MSG_WriteDeltaSharedEntity
+==================
+*/
+void MSG_WriteDeltaSharedEntity( msg_t *msg, void *from, void *to,
+						   qboolean force, int number ) {
+	int			i, lc;
+	int			numFields;
+	netField_t	*field;
+	int			trunc;
+	float		fullFloat;
+	int			*fromF, *toF;
+
+	numFields = sizeof(entitySharedFields)/sizeof(entitySharedFields[0]);
+
+	// all fields should be 32 bits to avoid any compiler packing issues
+	// if this assert fails, someone added a field to the entityShared_t
+	// struct without updating the message fields
+	assert( numFields + 1 == (sizeof( entityShared_t ))/4 );
+
+	lc = 0;
+	// build the change vector as bytes so it is endien independent
+	for ( i = 0, field = entitySharedFields ; i < numFields ; i++, field++ ) {
+		fromF = (int *)( (byte *)from + field->offset );
+		toF = (int *)( (byte *)to + field->offset );
+		if ( *fromF != *toF ) {
+			lc = i+1;
+		}
+	}
+
+	if ( lc == 0 ) {
+		// nothing at all changed
+		if ( !force ) {
+			return;		// nothing at all
+		}
+		// write a bits for no change
+		MSG_WriteBits( msg, number, GENTITYNUM_BITS );
+		MSG_WriteBits( msg, 0, 1 );		// no delta
+		return;
+	}
+
+	MSG_WriteBits( msg, number, GENTITYNUM_BITS );
+	MSG_WriteBits( msg, 1, 1 );			// we have a delta
+
+	MSG_WriteByte( msg, lc );	// # of changes
+
+	oldsize += numFields;
+
+	for ( i = 0, field = entitySharedFields ; i < lc ; i++, field++ ) {
+		fromF = (int *)( (byte *)from + field->offset );
+		toF = (int *)( (byte *)to + field->offset );
+
+		if ( *fromF == *toF ) {
+			MSG_WriteBits( msg, 0, 1 );	// no change
+			continue;
+		}
+
+		MSG_WriteBits( msg, 1, 1 );	// changed
+
+		if ( field->bits == 0 ) {
+			// float
+			fullFloat = *(float *)toF;
+			trunc = (int)fullFloat;
+
+			if (fullFloat == 0.0f) {
+					MSG_WriteBits( msg, 0, 1 );
+					oldsize += FLOAT_INT_BITS;
+			} else {
+				MSG_WriteBits( msg, 1, 1 );
+				if ( trunc == fullFloat && trunc + FLOAT_INT_BIAS >= 0 &&
+					trunc + FLOAT_INT_BIAS < ( 1 << FLOAT_INT_BITS ) ) {
+					// send as small integer
+					MSG_WriteBits( msg, 0, 1 );
+					MSG_WriteBits( msg, trunc + FLOAT_INT_BIAS, FLOAT_INT_BITS );
+				} else {
+					// send as full floating point value
+					MSG_WriteBits( msg, 1, 1 );
+					MSG_WriteBits( msg, *toF, 32 );
+				}
+			}
+		} else {
+			if (*toF == 0) {
+				MSG_WriteBits( msg, 0, 1 );
+			} else {
+				MSG_WriteBits( msg, 1, 1 );
+				// integer
+				MSG_WriteBits( msg, *toF, field->bits );
+			}
+		}
+	}
+}
+
+/*
+==================
+MSG_ReadDeltaSharedEntity
+==================
+*/
+void MSG_ReadDeltaSharedEntity( msg_t *msg, void *from, void *to,
+						 int number) {
+	int			i, lc;
+	int			numFields;
+	netField_t	*field;
+	int			*fromF, *toF;
+	int			trunc;
+
+	// check for no delta
+	if ( MSG_ReadBits( msg, 1 ) == 0 ) {
+		*(entityShared_t*)to = *(entityShared_t*)from;
+		return;
+	}
+
+	numFields = sizeof(entitySharedFields)/sizeof(entitySharedFields[0]);
+	lc = MSG_ReadByte(msg);
+
+	for ( i = 0, field = entitySharedFields ; i < lc ; i++, field++ ) {
+		fromF = (int *)( (byte *)from + field->offset );
+		toF = (int *)( (byte *)to + field->offset );
+
+		if ( ! MSG_ReadBits( msg, 1 ) ) {
+			// no change
+			*toF = *fromF;
+		} else {
+			if ( field->bits == 0 ) {
+				// float
+				if ( MSG_ReadBits( msg, 1 ) == 0 ) {
+						*(float *)toF = 0.0f;
+				} else {
+					if ( MSG_ReadBits( msg, 1 ) == 0 ) {
+						// integral float
+						trunc = MSG_ReadBits( msg, FLOAT_INT_BITS );
+						// bias to allow equal parts positive and negative
+						trunc -= FLOAT_INT_BIAS;
+						*(float *)toF = trunc;
+					} else {
+						// full floating point value
+						*toF = MSG_ReadBits( msg, 32 );
+					}
+				}
+			} else {
+				if ( MSG_ReadBits( msg, 1 ) == 0 ) {
+					*toF = 0;
+				} else {
+					// integer
+					*toF = MSG_ReadBits( msg, field->bits );
+				}
+			}
+//			pcount[i]++;
+		}
+	}
+	for ( i = lc, field = &entitySharedFields[lc] ; i < numFields ; i++, field++ ) {
+		fromF = (int *)( (byte *)from + field->offset );
+		toF = (int *)( (byte *)to + field->offset );
+		// no change
+		*toF = *fromF;
 	}
 }
 

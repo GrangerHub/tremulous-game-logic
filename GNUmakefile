@@ -1558,6 +1558,7 @@ Q3OBJ = \
   $(B)/client/sv_net_chan.o \
   $(B)/client/sv_snapshot.o \
   $(B)/client/sv_world.o \
+  $(B)/client/sv_demo.o \
   $(B)/client/sv_database.o \
   $(B)/client/sv_sqlite.o \
   $(B)/client/sqlite3.o \
@@ -2092,6 +2093,7 @@ Q3DOBJ = \
   $(B)/ded/sv_net_chan.o \
   $(B)/ded/sv_snapshot.o \
   $(B)/ded/sv_world.o \
+  $(B)/client/sv_demo.o \
   $(B)/ded/sv_database.o \
   $(B)/ded/sv_sqlite.o \
   $(B)/ded/sqlite3.o \

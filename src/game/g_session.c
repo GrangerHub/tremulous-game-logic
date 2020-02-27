@@ -110,38 +110,56 @@ G_InitSessionData
 Called on a first-time connect
 ================
 */
-void G_InitSessionData( gclient_t *client, char *userinfo )
-{
+void G_InitSessionData(gclient_t *client, char *userinfo) {
   clientSession_t  *sess;
   const char      *value;
 
   sess = &client->sess;
 
   // initial team determination
-  value = Info_ValueForKey( userinfo, "team" );
-  if( value[ 0 ] == 's' )
-  {
-    // a willing spectator, not a waiting-in-line
+  if(g_teamAutoJoin.integer) {
+    team_t team;
+    int       aliens = level.numAlienClients;
+    int       humans = level.numHumanClients;
+
+    sess->spectatorState = SPECTATOR_NOT;
+    if(level.humanTeamLocked && level.alienTeamLocked) {
+      team = TEAM_NONE;
+    } else if(level.humanTeamLocked || humans > aliens) {
+      team = TEAM_ALIENS;
+    } else if(level.alienTeamLocked || aliens > humans) {
+      team = TEAM_HUMANS;
+    } else {
+      team = TEAM_ALIENS + rand( ) / (RAND_MAX / 2 + 1);
+    }
+
+    G_ChangeTeam(&g_entities[client - level.clients], team);
+    sess->restartTeam = team;
+  }  else {
+    value = Info_ValueForKey(userinfo, "team");
+    if(value[0] == 's') {
+      // a willing spectator, not a waiting-in-line
+      sess->spectatorState = SPECTATOR_FREE;
+    } else {
+      if(
+        g_maxGameClients.integer > 0 &&
+        level.numNonSpectatorClients >= g_maxGameClients.integer) {
+        sess->spectatorState = SPECTATOR_FREE;
+      } else {
+        sess->spectatorState = SPECTATOR_NOT;
+      }
+    }
+    sess->restartTeam = TEAM_NONE;
     sess->spectatorState = SPECTATOR_FREE;
   }
-  else
-  {
-    if( g_maxGameClients.integer > 0 &&
-      level.numNonSpectatorClients >= g_maxGameClients.integer )
-      sess->spectatorState = SPECTATOR_FREE;
-    else
-      sess->spectatorState = SPECTATOR_NOT;
-  }
 
-  sess->restartTeam = TEAM_NONE;
   sess->rank = RANK_NONE;
-  sess->spectatorState = SPECTATOR_FREE;
   sess->spectatorTime = level.time;
   sess->spectatorClient = -1;
-  memset( &sess->ignoreList, 0, sizeof( sess->ignoreList ) );
+  memset(&sess->ignoreList, 0, sizeof(sess->ignoreList));
   client->sess.readyToPlay = qfalse;
 
-  G_WriteClientSessionData( client );
+  G_WriteClientSessionData(client);
 }
 
 

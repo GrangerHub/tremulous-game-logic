@@ -2536,7 +2536,7 @@ qboolean G_admin_changemap( gentity_t *ent )
           ( ent ) ? ent->client->pers.netname : "console",
           ( layout[ 0 ] ) ? va( "(forcing layout '%s')", layout ) : "" ) );
   Cvar_SetSafe( "g_warmup", "1" );
-  SV_SetConfigstring( CS_WARMUP, va( "%d", IS_WARMUP ) );
+  SV_SetConfigstring( CS_WARMUP, va( "%d", IS_WARMUP ), qtrue );
 
   return qtrue;
 }
@@ -5704,7 +5704,7 @@ qboolean G_admin_scrim(gentity_t *ent) {
             (ent) ? ent->client->pers.netname : "console",
             (layout[ 0 ]) ? va( "(forcing layout '%s')", layout) : ""));
     Cvar_SetSafe("g_warmup", "1");
-    SV_SetConfigstring(CS_WARMUP, va( "%d", IS_WARMUP));
+    SV_SetConfigstring(CS_WARMUP, va( "%d", IS_WARMUP), qtrue);
     G_Scrim_Send_Status( );
 
     return qtrue;

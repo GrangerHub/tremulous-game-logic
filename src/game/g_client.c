@@ -1247,7 +1247,7 @@ Q_EXPORT char *ClientUserinfoChanged( int clientNum, qboolean forceName )
     Com_ClientListString( &client->sess.ignoreList ),
     client->pers.voice, g_restartingFlags.integer );
 
-  SV_SetConfigstring( CS_PLAYERS + clientNum, userinfo );
+  SV_SetConfigstring( CS_PLAYERS + clientNum, userinfo, qtrue );
 
   /*G_LogPrintf( "ClientUserinfoChanged: %i %s\n", clientNum, userinfo );*/
 
@@ -1956,7 +1956,7 @@ Q_EXPORT void ClientDisconnect( int clientNum )
   ent->client->sess.spectatorState =
       ent->client->ps.persistant[ PERS_SPECSTATE ] = SPECTATOR_NOT;
 
-  SV_SetConfigstring( CS_PLAYERS + clientNum, "");
+  SV_SetConfigstring( CS_PLAYERS + clientNum, "", qtrue);
 
   CalculateRanks(qtrue);
 

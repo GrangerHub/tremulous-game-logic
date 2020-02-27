@@ -343,7 +343,7 @@ void SP_target_location( gentity_t *self )
   }
   else
     message = self->message;
-  SV_SetConfigstring( CS_LOCATIONS + n, message );
+  SV_SetConfigstring( CS_LOCATIONS + n, message, qtrue );
   self->nextTrain = level.locationHead;
   self->s.generic1 = n; // use for location marking
   level.locationHead = self;

@@ -90,7 +90,7 @@ void G_Portal_Clear( portal_t portalindex )
 	G_Portal_Effect( portalindex, 0.25 );
 	level.humanPortals.createTime[ portalindex ] = 0;
 	SV_SetConfigstring( ( CS_HUMAN_PORTAL_CREATETIME + portalindex ),
-												va( "%i", 0 ) );
+												va( "%i", 0 ), qtrue );
 	level.humanPortals.portals[portalindex] = NULL;
 	G_FreeEntity( self );
 }
@@ -243,6 +243,7 @@ void G_Portal_Create(gentity_t *ent, vec3_t origin, vec3_t normal, portal_t port
 	level.humanPortals.portals[ portalindex ] = portal;
 	level.humanPortals.lifetime[ portalindex ] = level.time + PORTAL_LIFETIME;
 	level.humanPortals.createTime[ portalindex ] = PORTAL_CREATED_REPEAT;
-	SV_SetConfigstring( ( CS_HUMAN_PORTAL_CREATETIME + portalindex ),
-												va( "%i", level.humanPortals.createTime[ portalindex ] ) );
+	SV_SetConfigstring(
+		(CS_HUMAN_PORTAL_CREATETIME + portalindex),
+		va("%i", level.humanPortals.createTime[portalindex]), qtrue);
 }

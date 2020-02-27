@@ -435,7 +435,7 @@ typedef struct {
 	char	  	game[MAX_NAME_LENGTH];
 	char		label[MAX_FEATLABEL_CHARS]; // for featured servers, NULL otherwise
 	int			netType;
-	int			gameType;
+	char		*game_mode;
 	int		  	clients;
 	int		  	maxClients;
 	int			minPing;

@@ -2296,11 +2296,11 @@ void Cmd_CallVote_f( gentity_t *ent )
 
   level.voteTime[ team ] = level.time;
   SV_SetConfigstring( CS_VOTE_TIME + team,
-    va( "%d", level.voteTime[ team ] ) );
+    va( "%d", level.voteTime[ team ] ), qtrue );
   SV_SetConfigstring( CS_VOTE_STRING + team,
-    level.voteDisplayString[ team ] );
+    level.voteDisplayString[ team ], qtrue );
   SV_SetConfigstring( CS_VOTE_CALLER + team,
-    caller );
+    caller, qtrue );
 
   // issue a special message about mute and the virtues of /ignore
   if( !Q_stricmp( vote, "mute" ) )

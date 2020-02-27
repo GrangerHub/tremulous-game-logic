@@ -366,11 +366,12 @@ void G_Scrim_Send_Status(void) {
       level.scrim.time_limit,
       level.scrim.previous_round_win,
       level.scrim.rounds_completed,
-      level.scrim.max_rounds));
+      level.scrim.max_rounds), qtrue);
 
   for(scrim_team = 0; scrim_team < NUM_SCRIM_TEAMS; scrim_team++) {
     SV_SetConfigstring(
-      CS_SCRIM_TEAM_NAME + scrim_team, level.scrim.team[scrim_team].name);
+      CS_SCRIM_TEAM_NAME + scrim_team,
+      level.scrim.team[scrim_team].name, qtrue);
 
     SV_SetConfigstring(
       CS_SCRIM_TEAM + scrim_team,
@@ -381,7 +382,7 @@ void G_Scrim_Send_Status(void) {
         level.scrim.team[scrim_team].captain_num,
         level.scrim.team[scrim_team].wins,
         level.scrim.team[scrim_team].losses,
-        level.scrim.team[scrim_team].draws));
+        level.scrim.team[scrim_team].draws), qtrue);
   }
 }
 
