@@ -1452,16 +1452,29 @@ static void CG_DrawPlayerBoosterBolt( rectDef_t *rect, vec4_t backColor,
 CG_DrawPlayerPoisonBarbs
 ==============
 */
-static void CG_DrawPlayerPoisonBarbs( rectDef_t *rect, vec4_t color, qhandle_t shader )
-{
+static void CG_DrawPlayerPoisonBarbs(
+  rectDef_t *rect, vec4_t color, qhandle_t shader) {
   qboolean vertical;
   float    x = rect->x, y = rect->y;
   float    width = rect->w, height = rect->h;
   float    diff;
   int      iconsize, numBarbs, maxBarbs;
 
-  maxBarbs = BG_Weapon( cg.snap->ps.weapon )->maxAmmo;
-  numBarbs = cg.snap->ps.ammo;
+  if(!BG_Weapon(cg.snap->ps.weapon)->usesBarbs) {
+    return;
+  }
+
+  if(BG_Weapon( cg.snap->ps.weapon )->maxClips > 0) {
+    maxBarbs = BG_Weapon( cg.snap->ps.weapon )->maxClips + 1;
+    numBarbs = *BG_GetClips(&cg.snap->ps, cg.snap->ps.weapon);
+    if(cg.snap->ps.ammo == BG_Weapon(cg.snap->ps.weapon)->maxAmmo) {
+      numBarbs++;
+    }
+  } else {
+    maxBarbs = BG_Weapon( cg.snap->ps.weapon )->maxAmmo;
+    numBarbs = cg.snap->ps.ammo;
+  }
+
   if( maxBarbs <= 0 || numBarbs <= 0 )
     return;
 
@@ -4077,7 +4090,8 @@ static void CG_ScanForCrosshairEntity( void )
   VectorMA( start, 131072, cg.refdef.viewaxis[ 0 ], end );
 
   CG_Trace( &trace, start, vec3_origin, vec3_origin, end,
-    cg.snap->ps.clientNum, *Temp_Clip_Mask((CONTENTS_SOLID|CONTENTS_BODY), 0));
+    cg.snap->ps.clientNum, qfalse,
+    *Temp_Clip_Mask((CONTENTS_SOLID|CONTENTS_BODY), 0));
 
   // if the player is in fog, don't show it
 /*  content = trap_CM_PointContents( trace.endpos, 0 );*/
@@ -5439,6 +5453,7 @@ void CG_DrawActive( stereoFrame_t stereoView )
       CG_CapTrace( &trace, cg.refdef.vieworg, mins, maxs,
                    lanternOrigin,
                    cg.predictedPlayerState.clientNum,
+                   qfalse,
                    *Temp_Clip_Mask(MASK_DEADSOLID, 0) );
 
       if( trace.fraction != 1.0f )
@@ -5453,6 +5468,7 @@ void CG_DrawActive( stereoFrame_t stereoView )
         CG_CapTrace( &trace, cg.refdef.vieworg, mins, maxs,
                      lanternOrigin,
                      cg.predictedPlayerState.clientNum,
+                     qfalse,
                      *Temp_Clip_Mask(MASK_DEADSOLID, 0) );
         VectorCopy( trace.endpos, lanternOrigin );
       }

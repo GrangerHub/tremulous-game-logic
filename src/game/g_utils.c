@@ -1149,7 +1149,7 @@ qboolean G_Visible(
   trace_t trace;
 
   SV_Trace( &trace, ent1->s.pos.trBase, NULL, NULL, ent2->s.pos.trBase,
-              ent1->s.number, content_mask, TT_AABB );
+              ent1->s.number, qfalse, content_mask, TT_AABB );
 
   return
     (trace.fraction >= 1.0f && !trace.startsolid && !trace.allsolid) ||
@@ -1198,7 +1198,7 @@ qboolean G_BBOXes_Visible(
     do {
       BG_EvaluateBBOXPoint( &destination_point, destination_orig, dest_mins, dest_maxs );
       SV_Trace(
-        &tr, source_point.point, NULL, NULL, destination_point.point,
+        &tr, source_point.point, NULL, NULL, destination_point.point, qfalse,
         source_num, content_mask, TT_AABB );
       if( tr.fraction == 1.0  || tr.entityNum == destination_num ) {
         return qtrue;

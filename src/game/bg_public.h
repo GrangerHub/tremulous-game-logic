@@ -73,6 +73,7 @@ typedef enum
 // human portals
 typedef enum
 {
+  PORTAL_NONE,
   PORTAL_BLUE,
   PORTAL_RED,
   PORTAL_NUM
@@ -452,11 +453,18 @@ typedef enum
 
 #define SB_VALID_TOGGLEBIT      0x00002000
 
+
 #define SFL_READY               0x00000001 // player ready state
 #define SFL_GIBBED              0x00000002
 #define SFL_CLASS_FORCED        0x00000004 // can't evolve from a class that a map forced
+#define SFL_ARMOR_GENERATE      0x00000008
+#define SFL_INVIS_ENEMY_NEARBY  0x00000010 // for indicating that an invisible enemy player is near
 #define SFL_SPIN_BARREL         0x00000020 // for weapons with spinup
 #define SFL_OVERHEAT_WARNING    0x00000040 // for weapons that are overheating
+#define SFL_ATTACK1_FIRED       0x00000080
+#define SFL_ATTACK2_FIRED       0x00000200
+#define SFL_ATTACK3_FIRED       0x00000400
+#define SFL_DETONATE_MISSILES   0x00000800
 
 
 // player_state->persistant[] indexes
@@ -859,9 +867,9 @@ typedef enum
   EV_PLAYER_TELEPORT_IN,
   EV_PLAYER_TELEPORT_OUT,
 
-  EV_GRENADE_BOUNCE,    // eventParm will be the soundindex
+  EV_MISSILE_BOUNCE,    // eventParm will be the soundindex
 
-  EV_LASERMINE_ARMED,
+  EV_TRIPWIRE_ARMED,
 
   EV_GENERAL_SOUND,
   EV_GLOBAL_SOUND,    // no attenuation
@@ -1536,7 +1544,7 @@ typedef enum
   SPLATD_UNIFORM,
   SPLATD_UNIFORM_ALTERNATING
 } splatterDistribution_t;
-
+// splatter record
 typedef struct splatterAttributes_s
 {
   qboolean               predicted;
@@ -1551,6 +1559,78 @@ typedef struct splatterAttributes_s
   int                    impactDamageCap; //only applies if fallof is enabled
   float                  range;
 } splatterAttributes_t;
+
+typedef enum bounce_s
+{
+  BOUNCE_NONE,
+  BOUNCE_HALF,
+  BOUNCE_FULL,
+
+  NUM_BOUNCE_TYPES
+} bounce_t;
+
+typedef enum impede_move_s
+{
+  IMPEDE_MOVE_NONE,
+  IMPEDE_MOVE_SLOW,
+  IMPEDE_MOVE_LOCK,
+
+  NUM_IMPEDE_MOVE_TYPES
+} impede_move_t;
+
+typedef struct missileAttributes_s
+{
+  qboolean       enabled;
+  char           *class_name;
+  meansOfDeath_t mod;
+  meansOfDeath_t splash_mod;
+  int            damage;
+  int            splash_damage;
+  float          splash_radius;
+  qboolean       point_against_world;
+  vec3_t         mins;
+  vec3_t         maxs;
+  vec3_t         muzzle_offset;
+  float          speed;
+  trType_t       trajectory_type;
+  int            activation_delay;
+  int            explode_delay;
+  qboolean       explode_miss_effect;
+  qboolean       team_only_trail;
+  bounce_t       bounce_type;
+  qboolean       damage_on_bounce; //explode against targets that can take damage
+  qboolean       bounce_sound;
+  qboolean       impact_stick;
+  qboolean       impact_miss_effect; // use the miss effect on impact of players/buildables
+  portal_t       impact_create_portal; // creates a portal on impact
+  int            health; // if 0, doesn't take damage
+  float          kick_up_speed; // if 0.0f, doesn't kickup
+  int            kick_up_time;
+  float          tripwire_range; // if 0.0f, no trip wire detection
+  int            tripwire_check_frequency;
+  int            search_and_destroy_change_period; // if 0, no search and destroy
+  qboolean       return_after_damage; //return back to the parent
+  qboolean       has_knockback;
+  impede_move_t  impede_move; // slow or lock movement of the impacted target
+  int            charged_time_max;
+  qboolean       charged_damage;
+  qboolean       charged_speed; // speed is effected by the charge
+  int            charged_speed_min; // minium charged speed
+  int            charged_speed_min_damage_mod; // affects the charged speed algorithm
+  qboolean       save_missiles;
+  qboolean       detonate_saved_missiles;
+  int            detonate_saved_missiles_delay;
+  int            detonate_saved_missiles_repeat;
+  qboolean       relative_missile_speed;
+  qboolean       relative_missile_speed_along_aim;
+  float          relative_missile_speed_lag;
+  content_mask_t clip_mask;
+  qboolean       scale;
+  int            scale_start_time;
+  int            scale_stop_time;
+  vec3_t         scale_stop_mins;
+  vec3_t         scale_stop_maxs;
+} missileAttributes_t;
 
 typedef enum
 {
@@ -1598,6 +1678,8 @@ typedef struct
   qboolean  ammoPurchasable;
   qboolean  infiniteAmmo;
   qboolean  usesEnergy;
+  qboolean  usesBarbs;
+  int       barbRegenTime;
 
   weapon_Option_A_t weaponOptionA;
 
@@ -1626,6 +1708,10 @@ typedef struct
   int       reloadTime;
   float     knockbackScale;
 
+  qboolean  fully_auto1;
+  qboolean  fully_auto2;
+  qboolean  fully_auto3;
+
   qboolean  hasAltMode;
   qboolean  hasThirdMode;
 
@@ -1634,6 +1720,8 @@ typedef struct
 
   qboolean  purchasable;
   qboolean  longRanged;
+
+  missileAttributes_t missile[3];
 
   splatterAttributes_t splatter[3];
 
@@ -1731,6 +1819,7 @@ qboolean                    BG_AlienCanEvolve( class_t class, int credits,
 
 const weaponAttributes_t    *BG_WeaponByName( const char *name );
 const weaponAttributes_t    *BG_Weapon( weapon_t weapon );
+const missileAttributes_t   *BG_Missile(weapon_t weapon, weaponMode_t mode);
 qboolean                    BG_WeaponAllowedInStage( weapon_t weapon,
                                                      stage_t stage,
                                                      int gameIsInWarmup );
@@ -1764,6 +1853,10 @@ const upgradeAttributes_t   *BG_Upgrade( upgrade_t upgrade );
 qboolean                    BG_UpgradeAllowedInStage( upgrade_t upgrade,
                                                       stage_t stage,
                                                       int gameIsInWarmup );
+
+void                        BG_ModifyMissleLaunchVelocity(
+  vec3_t pVelocity, int speed, vec3_t mVelocity, weapon_t weapon,
+  weaponMode_t mode);
 
 // content masks
 #define MASK_ALL          (-1)
@@ -1922,7 +2015,8 @@ typedef struct bg_collision_funcs_s
 {
   void  (*trace)(
     trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs,
-  	const vec3_t end, int passEntityNum, const content_mask_t content_mask,
+  	const vec3_t end, int passEntityNum, qboolean clip_against_missiles,
+    const content_mask_t content_mask,
   	traceType_t type);
   int   (*pointcontents)( const vec3_t point, int passEntityNum );
   int (*area_entities)( const vec3_t mins, const vec3_t maxs,
@@ -1953,8 +2047,8 @@ int           BG_UEID_get_ent_num(bgentity_id *ueid);
 void          BG_Init_Collision_Functions(bg_collision_funcs_t funcs);
 void          BG_Trace(
   trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs,
-  const vec3_t end, int passEntityNum, const content_mask_t content_mask,
-  traceType_t type);
+  const vec3_t end, int passEntityNum, qboolean clip_against_missiles,
+  const content_mask_t content_mask, traceType_t type);
 void          BG_Area_Entities(
   const vec3_t mins, const vec3_t maxs, const content_mask_t *content_mask,
   int *entityList, int maxcount);

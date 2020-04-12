@@ -440,7 +440,6 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define	LASERMINE_INIT_TIME         3000
 #define LASERMINE_CHECK_FREQUENCY   100
 #define	LASERMINE_BOOM_TIME         50
-#define	LASERMINE_SELF_DESTRUCT     120000
 #define LASERMINE_HEALTH            30
 
 #define SHOTGUN_PRICE               150
@@ -568,7 +567,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LIGHTNING_BALL_SIZE            5
 #define LIGHTNING_BALL_SPEED           750
 #define LIGHTNING_EMP_DAMAGE           HWDM( 0 )
-#define LIGHTNING_EMP_SPLASH_DMG       HWDM( 0 )
+#define LIGHTNING_EMP_SPLASH_DMG       HWDM( 1 )
 #define LIGHTNING_EMP_RADIUS           0
 #define LIGHTNING_EMP_SPEED            1500
 

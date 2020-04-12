@@ -117,7 +117,8 @@ void G_SuffocateTrappedEntities( gentity_t *self )
 
     // check to see if entity is really trapped inside
     SV_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs,
-                ent->r.currentOrigin, ent->s.number, ent->clip_mask, TT_AABB );
+                ent->r.currentOrigin, ent->s.number, qtrue, ent->clip_mask,
+                TT_AABB );
     if( tr.startsolid )
     {
       G_Damage( ent, self, self, NULL, NULL,
@@ -168,14 +169,14 @@ gentity_t *G_CheckSpawnPoint( int spawnNum, const vec3_t origin,
     return NULL;
 
   SV_Trace(
-    &tr, origin, NULL, NULL, localOrigin, spawnNum,
+    &tr, origin, NULL, NULL, localOrigin, spawnNum, qfalse,
     *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB);
 
   if( tr.entityNum != ENTITYNUM_NONE )
     return &g_entities[ tr.entityNum ];
 
   SV_Trace(
-    &tr, localOrigin, cmins, cmaxs, localOrigin, -1,
+    &tr, localOrigin, cmins, cmaxs, localOrigin, -1, qfalse,
     *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB);
 
   if( tr.entityNum != ENTITYNUM_NONE )
@@ -1412,7 +1413,7 @@ void ABarricade_Shrink( gentity_t *self, qboolean shrink )
 
     SV_Trace(
       &tr, self->r.currentOrigin, self->r.mins, self->r.maxs,
-      self->r.currentOrigin, self->s.number,
+      self->r.currentOrigin, self->s.number, qfalse,
       *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB);
     if ( tr.startsolid || tr.fraction < 1.0f )
     {
@@ -1601,7 +1602,7 @@ static qboolean AHive_CheckTarget( gentity_t *self, gentity_t *enemy )
     }
 
     SV_Trace( &trace, tip_origin, NULL, NULL, bboxPoint.point,
-                self->s.number, *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB );
+                self->s.number, qfalse, *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB);
     if( trace.fraction < 1.0f && trace.entityNum != enemy->s.number ) {
       continue;
     }
@@ -1884,7 +1885,7 @@ static qboolean ATrapper_CheckTarget( gentity_t *self, gentity_t *target, int ra
 
   SV_Trace(
     &trace, self->s.pos.trBase, NULL, NULL, target->s.pos.trBase,
-    self->s.number, *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB);
+    self->s.number, qfalse, *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB);
   if ( trace.contents & CONTENTS_SOLID ) // can we see the target?
     return qfalse;
 
@@ -2724,7 +2725,7 @@ static qboolean HMGTurret_TargetPointIsVisible( gentity_t *self,
 
   VectorMA( self->s.pos.trBase, range, targetPoint->direction, end );
   SV_Trace( &tr, self->s.pos.trBase, NULL, NULL, end,
-              self->s.number, *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB );
+              self->s.number, qfalse, *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB );
 
   return ( tr.entityNum == target - g_entities );
 
@@ -3022,7 +3023,7 @@ static qboolean HMGTurret_TrackEnemy( gentity_t *self )
     VectorNormalize( forward );
     VectorMA( self->s.pos.trBase, range, forward, end );
     SV_Trace( &tr, self->s.pos.trBase, NULL, NULL, end,
-                self->s.number, *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB );
+                self->s.number, qfalse, *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB );
 
     return ( tr.entityNum == self->enemy - g_entities );
   }
@@ -3854,7 +3855,7 @@ void G_BuildableThink( gentity_t *ent, int msec )
       trace_t   tr;
       SV_Trace(
         &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs,
-        ent->r.currentOrigin, ent->s.number,
+        ent->r.currentOrigin, ent->s.number, qfalse,
         *Temp_Clip_Mask((CONTENTS_LAVA|CONTENTS_SLIME), 0), TT_AABB);
       if(tr.fraction < 1.0f || tr.allsolid || tr.startsolid) {
         if( tr.contents & CONTENTS_LAVA ) {
@@ -4559,7 +4560,7 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   BG_PositionBuildableRelativeToPlayer(ps, qfalse, entity_origin, angles, &tr1);
   G_SetPlayersLinkState( qtrue, ent );
 
-  SV_Trace( &tr2, entity_origin, mins, maxs, entity_origin, -1,
+  SV_Trace( &tr2, entity_origin, mins, maxs, entity_origin, -1, qtrue,
                 *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB );
 
   VectorCopy( entity_origin, origin );
@@ -4779,6 +4780,7 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   if(reason == IBE_NONE) {
     SV_Trace(
       &tr3, entity_origin, mins, maxs, entity_origin, ent->s.number,
+      qtrue,
       *Temp_Clip_Mask((CONTENTS_LAVA|CONTENTS_SLIME), 0), TT_AABB);
     if(tr3.fraction < 1.0f || tr3.allsolid || tr3.startsolid) {
       reason = IBE_NOROOM;
@@ -5211,7 +5213,7 @@ static gentity_t *G_FinishSpawningBuildable( gentity_t *ent, qboolean force )
   VectorAdd( dest, built->r.currentOrigin, dest );
 
   SV_Trace( &tr, built->r.currentOrigin, built->r.mins, built->r.maxs, dest,
-    built->s.number, built->clip_mask, TT_AABB );
+    built->s.number, qfalse, built->clip_mask, TT_AABB );
 
   if( tr.startsolid && !force )
   {

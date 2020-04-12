@@ -137,7 +137,7 @@ static void CG_Creep( centity_t *cent )
   VectorAdd( temp, cent->lerpOrigin, temp );
 
   CG_Trace(
-    &tr, cent->lerpOrigin, NULL, NULL, temp, cent->currentState.number,
+    &tr, cent->lerpOrigin, NULL, NULL, temp, cent->currentState.number, qfalse,
     *Temp_Clip_Mask(MASK_PLAYERSOLID, 0));
 
   VectorCopy( tr.endpos, origin );
@@ -602,7 +602,7 @@ static void CG_PositionAndOrientateBuildable( const vec3_t angles, const vec3_t 
   VectorMA( inOrigin, -TRACE_DEPTH, normal, end );
 
   CG_CapTrace( &tr, inOrigin, mins, maxs, end, skipNumber,
-               *Temp_Clip_Mask(MASK_PLAYERSOLID, 0) );
+               qfalse, *Temp_Clip_Mask(MASK_PLAYERSOLID, 0) );
 
   fraction = tr.fraction;
   if( tr.startsolid )
@@ -998,7 +998,7 @@ static void CG_BuildableStatusDisplay( centity_t *cent )
       for( i = 0; i < 3; i++ )
       {
         CG_Trace(
-          &tr, trOrigin, NULL, NULL, origin, entNum,
+          &tr, trOrigin, NULL, NULL, origin, entNum, qfalse,
           *Temp_Clip_Mask(MASK_SHOT, 0));
         if( tr.entityNum == cent->currentState.number )
         {
