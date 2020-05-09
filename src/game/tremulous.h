@@ -264,16 +264,16 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define ASPAWN_HEALTH               ABHM(250000)
 #define ASPAWN_REGEN                8000
 #define ASPAWN_SPLASHDAMAGE         ABDM(50000)
-#define ASPAWN_SPLASHRADIUS         100
+#define ASPAWN_SPLASHRADIUS         50
 #define ASPAWN_CREEPSIZE            120
 #define ASPAWN_VALUE                150
 
 #define BARRICADE_BP                8
-#define BARRICADE_BT                20000
-#define BARRICADE_HEALTH            ABHM(300000)
+#define BARRICADE_BT                15000
+#define BARRICADE_HEALTH            ABHM(250000)
 #define BARRICADE_REGEN             14000
 #define BARRICADE_SPLASHDAMAGE      ABDM(50000)
-#define BARRICADE_SPLASHRADIUS      100
+#define BARRICADE_SPLASHRADIUS      50
 #define BARRICADE_CREEPSIZE         120
 #define BARRICADE_SHRINKPROP        0.25f
 #define BARRICADE_SHRINKTIMEOUT     500
@@ -284,7 +284,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define BOOSTER_HEALTH              ABHM(150000)
 #define BOOSTER_REGEN               8000
 #define BOOSTER_SPLASHDAMAGE        ABDM(50000)
-#define BOOSTER_SPLASHRADIUS        100
+#define BOOSTER_SPLASHRADIUS        50
 #define BOOSTER_CREEPSIZE           120
 #define BOOSTER_REGEN_MOD           2.0f
 #define BOOSTER_VALUE               0
@@ -300,23 +300,23 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define ACIDTUBE_CREEPSIZE          120
 #define ACIDTUBE_DAMAGE             ABDM(6000)
 #define ACIDTUBE_RANGE              300.0f
-#define ACIDTUBE_REPEAT             200
-#define ACIDTUBE_REPEAT_ANIM        2000
+#define ACIDTUBE_REPEAT             300
+#define ACIDTUBE_REPEAT_ANIM        3000
 #define ACIDTUBE_VALUE              0
 
 #define HIVE_BP                     12
-#define HIVE_BT                     20000
+#define HIVE_BT                     15000
 #define HIVE_HEALTH                 ABHM(125000)
 #define HIVE_REGEN                  10000
 #define HIVE_SPLASHDAMAGE           ABDM(30000)
 #define HIVE_SPLASHRADIUS           200
 #define HIVE_CREEPSIZE              120
 #define HIVE_SENSE_RANGE            500.0f
-#define HIVE_LIFETIME               3000
-#define HIVE_REPEAT                 3000
+#define HIVE_LIFETIME               4000
+#define HIVE_REPEAT                 4000
 #define HIVE_K_SCALE                1.0f
-#define HIVE_DMG                    ABDM(80000)
-#define HIVE_SPEED                  320.0f
+#define HIVE_DMG                    ABDM(50000)
+#define HIVE_SPEED                  300.0f
 #define HIVE_DIR_CHANGE_PERIOD      500
 #define HIVE_VALUE                  0
 
@@ -678,8 +678,8 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define MGTURRET_SPLASHRADIUS       100
 #define MGTURRET_ANGULARSPEED       8
 #define MGTURRET_ACCURACY_TO_FIRE   0
-#define MGTURRET_VERTICALCAP        45  // +/- maximum pitch
-#define MGTURRET_REPEAT             150
+#define MGTURRET_VERTICALCAP        30  // +/- maximum pitch
+#define MGTURRET_REPEAT             100
 #define MGTURRET_K_SCALE            1.0f
 #define MGTURRET_RANGE              300.0f
 #define MGTURRET_SPREAD             200
@@ -713,7 +713,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 #define ARMOURY_BP                  10
 #define ARMOURY_BT                  10000
-#define ARMOURY_HEALTH              HBHM(420000)
+#define ARMOURY_HEALTH              HBHM(280000)
 #define ARMOURY_SPLASHDAMAGE        HBDM(50000)
 #define ARMOURY_SPLASHRADIUS        100
 #define ARMOURY_VALUE               0
