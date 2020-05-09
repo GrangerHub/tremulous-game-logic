@@ -42,7 +42,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define AWDM(d)                     ((int)((float)d*ALIEN_WDMG_MODIFIER))
 
 #define ABUILDER_BUILD_REPEAT       500
-#define ABUILDER_CLAW_SUBCHECKS     0
+#define ABUILDER_CLAW_SUBCHECKS     2
 #define ABUILDER_CLAW_DMG           AWDM(20000)
 #define ABUILDER_CLAW_RANGE         64.0f
 #define ABUILDER_CLAW_WIDTH         4.0f
@@ -61,7 +61,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL0_BITE_REPEAT          500
 #define LEVEL0_BITE_K_SCALE         1.0f
 
-#define LEVEL1_CLAW_SUBCHECKS       0
+#define LEVEL1_CLAW_SUBCHECKS       2
 #define LEVEL1_CLAW_DMG             AWDM(32000)
 #define LEVEL1_CLAW_RANGE           96.0f
 #define LEVEL1_CLAW_U_RANGE         LEVEL1_CLAW_RANGE
@@ -85,7 +85,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL1_JUMP_MAGNITUDE       270.0f
 #define LEVEL1_UPG_JUMP_MAGNITUDE   366.0f
 
-#define LEVEL2_CLAW_SUBCHECKS       0
+#define LEVEL2_CLAW_SUBCHECKS       2
 #define LEVEL2_CLAW_DMG             AWDM(40000)
 #define LEVEL2_CLAW_RANGE           96.0f
 #define LEVEL2_CLAW_U_RANGE         LEVEL2_CLAW_RANGE
@@ -105,7 +105,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL2_AREAZAP_MAX_TARGETS  5
 #define LEVEL2_WALLJUMP_MAXSPEED    1000.0f
 
-#define LEVEL3_CLAW_SUBCHECKS       0
+#define LEVEL3_CLAW_SUBCHECKS       2
 #define LEVEL3_CLAW_DMG             AWDM(80000)
 #define LEVEL3_CLAW_RANGE           96.0f
 #define LEVEL3_CLAW_UPG_RANGE       LEVEL3_CLAW_RANGE // + 3.0f          
@@ -132,7 +132,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL3_BOUNCEBALL_RADIUS    0
 #define LEVEL3_BOUNCEBALL_REGEN     12500    // msec until new barb
 
-#define LEVEL4_CLAW_SUBCHECKS       0
+#define LEVEL4_CLAW_SUBCHECKS       2
 #define LEVEL4_CLAW_DMG             AWDM(100000)
 #define LEVEL4_CLAW_RANGE           100.0f
 #define LEVEL4_CLAW_WIDTH           20.0f
