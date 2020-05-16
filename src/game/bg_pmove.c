@@ -1061,9 +1061,6 @@ static qboolean PM_CheckPounce( void )
   }
 
   pm->pmext->pouncePayload = pm->ps->misc[ MISC_MISC ];
-  if(pounce_mod < 1.0f) {
-    pm->pmext->pouncePayload *= pounce_mod;
-  }
   pm->ps->misc[ MISC_MISC ] = 0;
 
   return qtrue;
