@@ -95,20 +95,20 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL2_CLAW_U_REPEAT        400
 #define LEVEL2_CLAW_U_K_SCALE       1.0f
 #define LEVEL2_AREAZAP_SUBCHECKS    5
-#define LEVEL2_AREAZAP_DMG          AWDM(60000)
+#define LEVEL2_AREAZAP_DMG          AWDM(80000)
 #define LEVEL2_AREAZAP_RANGE        200.0f
 #define LEVEL2_AREAZAP_CHAIN_RANGE  150.0f
 #define LEVEL2_AREAZAP_CHAIN_FALLOFF 8.0f
 #define LEVEL2_AREAZAP_WIDTH        15.0f
 #define LEVEL2_AREAZAP_REPEAT       1500
 #define LEVEL2_AREAZAP_TIME         1000
-#define LEVEL2_AREAZAP_MAX_TARGETS  5
+#define LEVEL2_AREAZAP_MAX_TARGETS  3
 #define LEVEL2_WALLJUMP_MAXSPEED    1000.0f
 
 #define LEVEL3_CLAW_SUBCHECKS       2
 #define LEVEL3_CLAW_DMG             AWDM(80000)
 #define LEVEL3_CLAW_RANGE           96.0f
-#define LEVEL3_CLAW_UPG_RANGE       LEVEL3_CLAW_RANGE // + 3.0f          
+#define LEVEL3_CLAW_UPG_RANGE       LEVEL3_CLAW_RANGE
 #define LEVEL3_CLAW_WIDTH           16.0f
 #define LEVEL3_CLAW_REPEAT          700
 #define LEVEL3_CLAW_K_SCALE         0.1f
@@ -121,7 +121,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL3_POUNCE_WIDTH         16.0f
 #define LEVEL3_POUNCE_TIME          700      // msec for full Dragoon pounce
 #define LEVEL3_POUNCE_TIME_UPG      700      // msec for full Adv. Dragoon pounce
-#define LEVEL3_POUNCE_TIME_MIN      200      // msec before which pounce cancels  
+#define LEVEL3_POUNCE_TIME_MIN      50       // msec before which pounce cancels  
 #define LEVEL3_POUNCE_REPEAT        400      // msec before a new pounce starts
 #define LEVEL3_POUNCE_SPEED_MOD     0.75f    // walking speed modifier for pounce charging
 #define LEVEL3_POUNCE_JUMP_MAG      700      // Dragoon pounce jump power
@@ -134,7 +134,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 #define LEVEL4_CLAW_SUBCHECKS       2
 #define LEVEL4_CLAW_DMG             AWDM(100000)
-#define LEVEL4_CLAW_RANGE           100.0f
+#define LEVEL4_CLAW_RANGE           128.0f
 #define LEVEL4_CLAW_WIDTH           20.0f
 #define LEVEL4_CLAW_HEIGHT          22.0f
 #define LEVEL4_CLAW_OFFSET          (-16.5f)
@@ -171,13 +171,13 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define AVM(h)                      ((int)((float)h*ALIEN_VALUE_MODIFIER))
 
 #define ABUILDER_SPEED              0.8f
-#define ABUILDER_VALUE              AVM(240)
+#define ABUILDER_VALUE              AVM(200)
 #define ABUILDER_HEALTH             AHM(50000)
 #define ABUILDER_REGEN              (0.04f * ABUILDER_HEALTH)
 #define ABUILDER_COST               0
 
 #define ABUILDER_UPG_SPEED          1.0f
-#define ABUILDER_UPG_VALUE          AVM(300)
+#define ABUILDER_UPG_VALUE          AVM(250)
 #define ABUILDER_UPG_HEALTH         AHM(75000)
 #define ABUILDER_UPG_REGEN          (0.04f * ABUILDER_UPG_HEALTH)
 #define ABUILDER_UPG_COST           0
@@ -189,43 +189,43 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL0_COST                 0
 
 #define LEVEL1_SPEED                1.25f
-#define LEVEL1_VALUE                AVM(270)
+#define LEVEL1_VALUE                AVM(225)
 #define LEVEL1_HEALTH               AHM(75000)
 #define LEVEL1_REGEN                2000
 #define LEVEL1_COST                 1
 
 #define LEVEL1_UPG_SPEED            1.25f
-#define LEVEL1_UPG_VALUE            AVM(330)
+#define LEVEL1_UPG_VALUE            AVM(275)
 #define LEVEL1_UPG_HEALTH           AHM(100000)
 #define LEVEL1_UPG_REGEN            3000
 #define LEVEL1_UPG_COST             1
 
 #define LEVEL2_SPEED                1.35f
-#define LEVEL2_VALUE                AVM(420)
+#define LEVEL2_VALUE                AVM(350)
 #define LEVEL2_HEALTH               AHM(150000)
 #define LEVEL2_REGEN                4000
 #define LEVEL2_COST                 1
 
 #define LEVEL2_UPG_SPEED            1.35f
-#define LEVEL2_UPG_VALUE            AVM(540)
+#define LEVEL2_UPG_VALUE            AVM(450)
 #define LEVEL2_UPG_HEALTH           AHM(175000)
 #define LEVEL2_UPG_REGEN            5000
 #define LEVEL2_UPG_COST             1
 
 #define LEVEL3_SPEED                1.1f
-#define LEVEL3_VALUE                AVM(600)
+#define LEVEL3_VALUE                AVM(500)
 #define LEVEL3_HEALTH               AHM(200000)
 #define LEVEL3_REGEN                (0.03f * LEVEL3_HEALTH)
 #define LEVEL3_COST                 1
 
 #define LEVEL3_UPG_SPEED            1.1f
-#define LEVEL3_UPG_VALUE            AVM(720)
+#define LEVEL3_UPG_VALUE            AVM(600)
 #define LEVEL3_UPG_HEALTH           AHM(250000)
 #define LEVEL3_UPG_REGEN            7000
 #define LEVEL3_UPG_COST             1
 
 #define LEVEL4_SPEED                1.2f
-#define LEVEL4_VALUE                AVM(960)
+#define LEVEL4_VALUE                AVM(800)
 #define LEVEL4_HEALTH               AHM(400000)
 #define LEVEL4_REGEN                7000
 #define LEVEL4_COST                 2
@@ -407,7 +407,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define RIFLE_K_SCALE               1.0f
 #define RIFLE_RELOAD                2000
 #define RIFLE_PRICE                 0
-#define RIFLE_SPREAD                180
+#define RIFLE_SPREAD                200
 #define RIFLE_DMG                   HWDM(5000)
 
 #define PAINSAW_PRICE               100
@@ -490,8 +490,8 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define CHAINGUN_SPINUP_TIME        2500
 #define CHAINGUN_SPINDOWN_TIME      5000
 
-#define FLAMER_PRICE                400
-#define FLAMER_GAS                  200
+#define FLAMER_PRICE                450
+#define FLAMER_GAS                  150
 #define FLAMER_REPEAT               200
 #define FLAMER_K_SCALE              2.0f
 #define FLAMER_DMG                  HWDM(20000)
@@ -505,8 +505,8 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define FLAMER_LAG                  0.65f    // the amount of player velocity that is added to the fireball
 
 #define PRIFLE_PRICE                400
-#define PRIFLE_CLIPS                40
-#define PRIFLE_MAXCLIPS             5
+#define PRIFLE_CLIPS                50
+#define PRIFLE_MAXCLIPS             4
 #define PRIFLE_REPEAT               100
 #define PRIFLE_K_SCALE              1.0f
 #define PRIFLE_RELOAD               2000
@@ -596,11 +596,11 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 #define LIGHTARMOUR_PRICE           70
 #define LIGHTARMOUR_POISON_PROTECTION 1000
-#define LIGHTARMOUR_PCLOUD_PROTECTION 1000000
+#define LIGHTARMOUR_PCLOUD_PROTECTION 0
 
 #define HELMET_PRICE                90
 #define HELMET_RANGE                1000.0f
-#define HELMET_POISON_PROTECTION    1000
+#define HELMET_POISON_PROTECTION    2000
 #define HELMET_PCLOUD_PROTECTION    1000000
 
 #define MEDKIT_PRICE                0
@@ -625,7 +625,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define JETPACK_DEACTIVATION_FALL_TIME 750 // amount of time gravity is reduced after deactivation
 
 #define BSUIT_PRICE                 400
-#define BSUIT_POISON_PROTECTION     3000
+#define BSUIT_POISON_PROTECTION     4000
 #define BSUIT_PCLOUD_PROTECTION     3000000
 
 #define MEDKIT_POISON_IMMUNITY_TIME 0
@@ -798,8 +798,8 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 #define DEFAULT_ALIEN_BUILDPOINTS   "130"
 #define DEFAULT_ALIEN_QUEUE_TIME    "12000"
-#define DEFAULT_ALIEN_STAGE2_THRESH "12000"
-#define DEFAULT_ALIEN_STAGE3_THRESH "24000"
+#define DEFAULT_ALIEN_STAGE2_THRESH "20000"
+#define DEFAULT_ALIEN_STAGE3_THRESH "40000"
 #define DEFAULT_ALIEN_MAX_STAGE     "2"
 #define DEFAULT_HUMAN_BUILDPOINTS   "130"
 #define DEFAULT_HUMAN_QUEUE_TIME    "8000"
