@@ -141,7 +141,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL4_CLAW_REPEAT          750
 #define LEVEL4_CLAW_K_SCALE         1.0f
 
-#define LEVEL4_TRAMPLE_DMG             AWDM(111000)
+#define LEVEL4_TRAMPLE_DMG             AWDM(50000)
 #define LEVEL4_TRAMPLE_SPEED           2.0f
 #define LEVEL4_TRAMPLE_CHARGE_MIN      750   // minimum msec to start a charge
 #define LEVEL4_TRAMPLE_CHARGE_MAX      1500  // msec to maximum charge stored
@@ -170,13 +170,13 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define ALIEN_VALUE_MODIFIER        1.0f
 #define AVM(h)                      ((int)((float)h*ALIEN_VALUE_MODIFIER))
 
-#define ABUILDER_SPEED              0.9f
+#define ABUILDER_SPEED              0.8f
 #define ABUILDER_VALUE              AVM(240)
 #define ABUILDER_HEALTH             AHM(50000)
 #define ABUILDER_REGEN              (0.04f * ABUILDER_HEALTH)
 #define ABUILDER_COST               0
 
-#define ABUILDER_UPG_SPEED          0.9f
+#define ABUILDER_UPG_SPEED          1.0f
 #define ABUILDER_UPG_VALUE          AVM(300)
 #define ABUILDER_UPG_HEALTH         AHM(75000)
 #define ABUILDER_UPG_REGEN          (0.04f * ABUILDER_UPG_HEALTH)
@@ -398,7 +398,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define BLASTER_K_SCALE             1.0f
 #define BLASTER_SPREAD              200
 #define BLASTER_SPEED               1400
-#define BLASTER_DMG                 HWDM(10000)
+#define BLASTER_DMG                 HWDM(9000)
 #define BLASTER_SIZE                5
 
 #define RIFLE_CLIPSIZE              30
@@ -504,7 +504,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define FLAMER_SPEED                300.0f
 #define FLAMER_LAG                  0.65f    // the amount of player velocity that is added to the fireball
 
-#define PRIFLE_PRICE                450
+#define PRIFLE_PRICE                400
 #define PRIFLE_CLIPS                40
 #define PRIFLE_MAXCLIPS             5
 #define PRIFLE_REPEAT               100
