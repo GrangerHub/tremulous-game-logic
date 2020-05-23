@@ -882,7 +882,7 @@ void G_LaunchMissile(
           self->client->ps.misc[MISC_MISC] -
           BG_Missile(weapon, mode)->charged_time_max) *
           (
-            BG_Missile(weapon, mode)->charged_speed -
+            BG_Missile(weapon, mode)->speed -
             BG_Missile(weapon, mode)->charged_speed_min) /
           (
             (
