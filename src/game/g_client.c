@@ -1550,6 +1550,8 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   index = ent - g_entities;
   client = ent->client;
 
+  G_Detonate_Saved_Missiles(ent);
+
   id = ent->client->ps.misc[MISC_ID];
 
   teamLocal = client->pers.teamSelection;
@@ -1596,6 +1598,8 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
 
     if( spawn != NULL && spawn != ent )
     {
+      weapon_t weapon;
+
       //start spawn animation on spawnPoint
       G_SetBuildableAnim( spawn, BANIM_SPAWN1, qtrue );
 
@@ -1612,6 +1616,21 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
         spawn->clientSpawnTime = HUMAN_SPAWN_REPEAT_TIME;
         ent->targetProtectionTime = level.time + HUMAN_SPAWN_PROTECTION_TIME;
         ent->dmgProtectionTime = level.time + HUMAN_SPAWN_PROTECTION_TIME;
+      }
+
+      //reset barbs
+      for(weapon = 0; weapon < WP_NUM_WEAPONS; weapon++) {
+        if(!BG_Weapon(weapon)->usesBarbs) {
+          continue;
+        }
+
+        if(BG_Weapon(weapon)->maxClips > 0) {
+          client->pers.barbs[weapon] = BG_Weapon(weapon)->maxClips + 1;
+        } else {
+          client->pers.barbs[weapon] = BG_Weapon(weapon)->maxAmmo;
+        }
+
+        client->pers.barbRegenTime[weapon] = level.time;
       }
     }
   }
@@ -1861,6 +1880,8 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
     client->ps.misc[MISC_HELD_WEAPON] = client->ps.stats[ STAT_WEAPON ];
     client->ps.weapon = client->ps.stats[ STAT_WEAPON ];
   }
+
+  G_Detonate_Saved_Missiles(ent);
 
   // run a client frame to drop exactly to the floor,
   // initialize animations and other things

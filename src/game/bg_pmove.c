@@ -1094,7 +1094,7 @@ static qboolean PM_CheckWallJump( vec3_t wishDir, float wishSpeed )
   // Find a wall to jump off of.
   VectorMA( pm->ps->origin, 0.25f, moveDir, searchEnd );
   BG_Trace( &wall, pm->ps->origin, pm->mins, pm->maxs,
-             searchEnd, pm->ps->clientNum, pm->trace_mask, TT_AABB );
+             searchEnd, pm->ps->clientNum, qfalse, pm->trace_mask, TT_AABB );
 
   // Check if the found a wall.
   if( !PM_IsWall( &wall ) )
@@ -1542,7 +1542,7 @@ static qboolean PM_CheckWaterJump( void )
 
   VectorMA( start, 2.0f, flatforward, spot );
 
-  BG_Trace( &trace, start, mins, maxs, spot, pm->ps->clientNum,
+  BG_Trace( &trace, start, mins, maxs, spot, pm->ps->clientNum, qfalse,
              pm->trace_mask, TT_AABB );
 
   if( trace.fraction >= 1.0f  )
@@ -1551,7 +1551,7 @@ static qboolean PM_CheckWaterJump( void )
   start[ 2 ] += 16;
   spot[ 2 ] += 16;
 
-  BG_Trace( &trace, start, mins, maxs, spot, pm->ps->clientNum,
+  BG_Trace( &trace, start, mins, maxs, spot, pm->ps->clientNum, qfalse,
              pm->trace_mask, TT_AABB );
 
   if( trace.fraction < 1.0f  )
@@ -2306,7 +2306,7 @@ static void PM_CheckLadder( void )
 
   // trace to check for touching a potential ladder surface
   BG_Trace(
-    &bboxTouchTrace, pm->ps->origin, mins, maxs, end, pm->ps->clientNum,
+    &bboxTouchTrace, pm->ps->origin, mins, maxs, end, pm->ps->clientNum, qfalse,
     pm->trace_mask, TT_AABB);
 
   if( bboxTouchTrace.fraction >= 1 &&
@@ -2349,7 +2349,8 @@ static void PM_CheckLadder( void )
     VectorMA( start, 2.0f, flatforward, end );
 
     BG_Trace(
-      &trace, start, mins, maxs, end, pm->ps->clientNum, pm->trace_mask, TT_AABB);
+      &trace, start, mins, maxs, end, pm->ps->clientNum, qfalse, pm->trace_mask,
+      TT_AABB);
 
     if( trace.fraction >= 1.0f &&
         !trace.startsolid &&
@@ -2374,7 +2375,7 @@ static void PM_CheckLadder( void )
       //find how far below the viewheight the dry surface is
       BG_Trace(
         &trace, dryTraceStart, mins, maxs, dryTraceEnd, pm->ps->clientNum,
-        pm->trace_mask, TT_AABB);
+        qfalse, pm->trace_mask, TT_AABB);
 
       if( trace.startsolid || trace.allsolid )
         drySurfaceDistance = 0;
@@ -2387,7 +2388,7 @@ static void PM_CheckLadder( void )
 
       // find how far below the viewheight the water level is
       BG_Trace( &trace, start, mins, maxs, bboxBottom, pm->ps->clientNum,
-                 *Temp_Clip_Mask(MASK_WATER, 0), TT_AABB);
+                qfalse, *Temp_Clip_Mask(MASK_WATER, 0), TT_AABB);
 
       if( trace.fraction < 1.0f )
       {
@@ -2681,7 +2682,7 @@ static int PM_CorrectAllSolid(trace_t *trace) {
         point[2] += (float)k;
         BG_Trace(
           trace, point, pm->mins, pm->maxs, point, pm->ps->clientNum,
-          pm->trace_mask, TT_AABB);
+          qfalse, pm->trace_mask, TT_AABB);
 
         if( pm->debugLevel ) {
           Com_Printf("%i:trace->allsolid is %d\n", c_pmove, trace->allsolid);
@@ -2694,7 +2695,7 @@ static int PM_CorrectAllSolid(trace_t *trace) {
 
           BG_Trace(
             trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum,
-            pm->trace_mask, TT_AABB);
+            qfalse, pm->trace_mask, TT_AABB);
           pml.groundTrace = *trace;
           return qtrue;
         }
@@ -2735,7 +2736,7 @@ static void PM_GroundTraceMissed( void )
 
     BG_Trace(
       &trace, pm->ps->origin, NULL, NULL, point, pm->ps->clientNum,
-      pm->trace_mask, TT_AABB);
+      qfalse, pm->trace_mask, TT_AABB);
     if( trace.fraction == 1.0f )
     {
       if( pm->cmd.forwardmove >= 0 )
@@ -2898,7 +2899,7 @@ static void PM_GroundClimbTrace( void )
         VectorMA( pm->ps->origin, 0.25f, movedir, point );
         BG_Trace(
           &trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum,
-          pm->trace_mask, TT_AABB);
+          qfalse, pm->trace_mask, TT_AABB);
         break;
 
       case 1:
@@ -2908,6 +2909,7 @@ static void PM_GroundClimbTrace( void )
         VectorMA( pm->ps->origin, -0.25f, surfNormal, point );
         BG_Trace(
           &trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum,
+          qfalse,
           *Temp_Clip_Mask(
             (pm->trace_mask.include & ~CONTENTS_BODY), pm->trace_mask.exclude),
           TT_AABB);
@@ -2920,6 +2922,7 @@ static void PM_GroundClimbTrace( void )
           VectorMA( pm->ps->origin, -STEPSIZE, surfNormal, point );
           BG_Trace(
             &trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum,
+            qfalse,
             pm->trace_mask, TT_AABB);
         }
         else
@@ -2934,7 +2937,7 @@ static void PM_GroundClimbTrace( void )
           VectorMA( point, -16.0f, movedir, point );
           BG_Trace(
             &trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum,
-            pm->trace_mask, TT_AABB);
+            qfalse, pm->trace_mask, TT_AABB);
         }
         else
           continue;
@@ -2946,7 +2949,7 @@ static void PM_GroundClimbTrace( void )
         point[ 2 ] = pm->ps->origin[ 2 ] - 0.25f;
         BG_Trace(
           &trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum,
-          pm->trace_mask, TT_AABB);
+          qfalse, pm->trace_mask, TT_AABB);
         break;
     }
 
@@ -3205,7 +3208,7 @@ static void PM_GroundTrace( void )
 
   BG_Trace(
     &trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum,
-    pm->trace_mask, TT_AABB);
+    qfalse, pm->trace_mask, TT_AABB);
 
   pml.groundTrace = trace;
 
@@ -3231,7 +3234,7 @@ static void PM_GroundTrace( void )
       point[ 2 ] = pm->ps->origin[ 2 ] - STEPSIZE;
       BG_Trace(
         &trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum,
-        pm->trace_mask, TT_AABB);
+        qfalse, pm->trace_mask, TT_AABB);
 
       //if we hit something
       if( trace.fraction < 1.0f )
@@ -3452,7 +3455,7 @@ static void PM_CheckDuck (void)
       pm->maxs[ 2 ] = PCmaxs[ 2 ];
       BG_Trace(
         &trace, pm->ps->origin, pm->mins, pm->maxs, pm->ps->origin,
-        pm->ps->clientNum, pm->trace_mask, TT_AABB);
+        pm->ps->clientNum, qfalse, pm->trace_mask, TT_AABB);
       if( !trace.allsolid )
         pm->ps->pm_flags &= ~PMF_DUCKED;
     }
@@ -3850,7 +3853,6 @@ static void PM_Weapon( void )
   qboolean      attack3 = pm->cmd.buttons & BUTTON_USE_HOLDABLE;
   qboolean      outOfAmmo = qfalse;
   qboolean      byPassWeaponTime = qfalse;
-  qboolean      burstClearedByEmp = qfalse;
   qboolean      ammo_usage_needs_more_ammo = qfalse;
   qboolean      allow_partial_ammo_usage = 
     BG_Weapon(pm->ps->weapon)->allowPartialAmmoUsage;
@@ -3937,6 +3939,18 @@ static void PM_Weapon( void )
       pm->ps->misc[ MISC_MISC ] = max;
     else if( pm->ps->misc[ MISC_MISC ] < 0 )
       pm->ps->misc[ MISC_MISC ] = 0;
+  }
+
+  if(
+    BG_Weapon(pm->ps->weapon)->usesBarbs &&
+    BG_Weapon(pm->ps->weapon)->hasThirdMode &&
+    (BG_Weapon(pm->ps->weapon)->maxClips > 0) &&
+    BG_Missile(pm->ps->weapon, WPM_TERTIARY)->detonate_saved_missiles &&
+    pm->ps->ammo < BG_Weapon(pm->ps->weapon)->maxAmmo &&
+    pm->ps->ammo > 0) {
+    //detonate early
+    attack3 = qtrue;
+    pm->ps->ammo = 1;
   }
 
   // Trample charge mechanics
@@ -4086,12 +4100,7 @@ static void PM_Weapon( void )
 
     if( pm->ps->stats[ STAT_STATE ] & SS_CHARGING )
     {
-      //clear any remaining burst rounds for the EMP
-      if( !attack2 && pm->pmext->burstRoundsToFire[ 1 ] )
-      {
-        pm->pmext->burstRoundsToFire[ 1 ] = 0;
-        burstClearedByEmp = qtrue;
-      }
+      
     } else if( !pm->pmext->burstRoundsToFire[ 1 ] )
     {
       // Charging up
@@ -4431,6 +4440,63 @@ static void PM_Weapon( void )
       pm->pmext->burstRoundsToFire[ i ] = 0;
   }
 
+  if(pm->ps->stats[ STAT_FLAGS ] & SFL_ATTACK1_FIRED) {
+    if(!attack1) {
+      pm->ps->stats[ STAT_FLAGS ] &= ~SFL_ATTACK1_FIRED;
+      if(BG_Missile(pm->ps->weapon, WPM_PRIMARY)->detonate_saved_missiles) {
+        pm->ps->stats[ STAT_FLAGS ] |= SFL_DETONATE_MISSILES;
+      }
+    } else if(!BG_Weapon(pm->ps->weapon)->fully_auto1) {
+      pm->ps->weaponstate = WEAPON_READY;
+      return;
+    }
+  } else if(
+    BG_Missile(pm->ps->weapon, WPM_PRIMARY)->detonate_saved_missiles &&
+    (BG_Weapon(pm->ps->weapon)->burstRounds1 > 0)) {
+    if(!attack1 && (pm->pmext->burstRoundsToFire[0] > 0)) {
+      pm->pmext->burstRoundsToFire[ 0 ] = 0;
+      pm->ps->stats[ STAT_FLAGS ] |= SFL_DETONATE_MISSILES;
+    }
+  }
+
+  if(pm->ps->stats[ STAT_FLAGS ] & SFL_ATTACK2_FIRED) {
+    if(!attack2) {
+      pm->ps->stats[ STAT_FLAGS ] &= ~SFL_ATTACK2_FIRED;
+      if(BG_Missile(pm->ps->weapon, WPM_SECONDARY)->detonate_saved_missiles) {
+        pm->ps->stats[ STAT_FLAGS ] |= SFL_DETONATE_MISSILES;
+      }
+    } else if(!BG_Weapon(pm->ps->weapon)->fully_auto2) {
+      pm->ps->weaponstate = WEAPON_READY;
+      return;
+    }
+  } else if(
+    BG_Missile(pm->ps->weapon, WPM_SECONDARY)->detonate_saved_missiles &&
+    (BG_Weapon(pm->ps->weapon)->burstRounds2 > 0)) {
+    if(!attack2 && (pm->pmext->burstRoundsToFire[1] > 0)) {
+      pm->pmext->burstRoundsToFire[ 1 ] = 0;
+      pm->ps->stats[ STAT_FLAGS ] |= SFL_DETONATE_MISSILES;
+    }
+  }
+
+  if(pm->ps->stats[ STAT_FLAGS ] & SFL_ATTACK3_FIRED) {
+    if(!attack3) {
+      pm->ps->stats[ STAT_FLAGS ] &= ~SFL_ATTACK3_FIRED;
+      if(BG_Missile(pm->ps->weapon, WPM_TERTIARY)->detonate_saved_missiles) {
+        pm->ps->stats[ STAT_FLAGS ] |= SFL_DETONATE_MISSILES;
+      }
+    } else if(!BG_Weapon(pm->ps->weapon)->fully_auto3) {
+      pm->ps->weaponstate = WEAPON_READY;
+      return;
+    }
+  } else if(
+    BG_Missile(pm->ps->weapon, WPM_TERTIARY)->detonate_saved_missiles &&
+    (BG_Weapon(pm->ps->weapon)->burstRounds3 > 0)) {
+    if(!attack3 && (pm->pmext->burstRoundsToFire[2] > 0)) {
+      pm->pmext->burstRoundsToFire[ 2 ] = 0;
+      pm->ps->stats[ STAT_FLAGS ] |= SFL_DETONATE_MISSILES;
+    }
+  }
+
   if( !pm->pmext->burstRoundsToFire[ 2 ] &&
       !pm->pmext->burstRoundsToFire[ 1 ] &&
       !pm->pmext->burstRoundsToFire[ 0 ] )
@@ -4540,6 +4606,13 @@ static void PM_Weapon( void )
           }
         }
 
+        if(pm->ps->stats[ STAT_FLAGS ] & SFL_DETONATE_MISSILES) {
+          // Fire the EMP
+          attack3 = qtrue;
+        } else {
+          attack3 = qfalse;
+        }
+
         if( pm->ps->stats[ STAT_STATE ] & SS_CHARGING )
         {
           if( attack2 )
@@ -4549,11 +4622,7 @@ static void PM_Weapon( void )
             return;
           }
 
-          // Fire the EMP
-          attack3 = qtrue;
           attack1 = attack2 = qfalse;
-          if( burstClearedByEmp )
-            pm->ps->weaponTime += BG_Weapon( pm->ps->weapon )->burstDelay2;
           pm->ps->stats[ STAT_STATE ] &= ~SS_CHARGING;
         }
         else if( pm->ps->misc[ MISC_MISC ] >= LIGHTNING_BOLT_CHARGE_TIME_MIN )
@@ -4654,8 +4723,10 @@ static void PM_Weapon( void )
     pm->pmext->burstRoundsToFire[ 2 ]--;
     if( pm->pmext->burstRoundsToFire[ 2 ] )
       addTime = BG_Weapon( pm->ps->weapon )->repeatRate3;
-    else
+    else {
+      pm->ps->stats[ STAT_FLAGS ] |= SFL_ATTACK3_FIRED;
       addTime = BG_Weapon( pm->ps->weapon )->burstDelay3;
+    }
 
     //check for overheating
     if(
@@ -4685,8 +4756,10 @@ static void PM_Weapon( void )
     pm->pmext->burstRoundsToFire[ 1 ]--;
     if( pm->pmext->burstRoundsToFire[ 1 ] )
       addTime = BG_Weapon( pm->ps->weapon )->repeatRate2;
-    else
+    else {
+      pm->ps->stats[ STAT_FLAGS ] |= SFL_ATTACK2_FIRED;
       addTime = BG_Weapon( pm->ps->weapon )->burstDelay2;
+    }
 
     //check for overheating
     if(
@@ -4716,8 +4789,10 @@ static void PM_Weapon( void )
     pm->pmext->burstRoundsToFire[ 0 ]--;
     if( pm->pmext->burstRoundsToFire[ 0 ] )
       addTime = BG_Weapon( pm->ps->weapon )->repeatRate1;
-    else
+    else {
+      pm->ps->stats[ STAT_FLAGS ] |= SFL_ATTACK1_FIRED;
       addTime = BG_Weapon( pm->ps->weapon )->burstDelay1;
+    }
 
     //check for overheating
     if(
@@ -4745,8 +4820,8 @@ static void PM_Weapon( void )
       {
         vec3_t right, up;
 
-        //hacky special case for slowblob
-        if( pm->ps->weapon == WP_ALEVEL3_UPG && !pm->ps->ammo )
+        //hacky special case for barbs
+        if( BG_Weapon(pm->ps->weapon)->usesBarbs && !pm->ps->ammo )
         {
           pm->ps->weaponTime += 200;
           return;
@@ -4756,6 +4831,7 @@ static void PM_Weapon( void )
           pm->ps, pm->pmext->dir_fired, right, up, pm->pmext->muzzel_point_fired);
         pm->ps->generic1 = WPM_TERTIARY;
         PM_AddEventWithRandSeed( EV_FIRE_WEAPON3 );
+        pm->ps->stats[ STAT_FLAGS ] |= SFL_ATTACK3_FIRED;
         addTime = BG_Weapon( pm->ps->weapon )->repeatRate3;
 
         //check for overheating
@@ -4793,6 +4869,7 @@ static void PM_Weapon( void )
           pm->ps, pm->pmext->dir_fired, right, up, pm->pmext->muzzel_point_fired);
         pm->ps->generic1 = WPM_SECONDARY;
         PM_AddEventWithRandSeed( EV_FIRE_WEAPON2 );
+        pm->ps->stats[ STAT_FLAGS ] |= SFL_ATTACK2_FIRED;
         addTime = BG_Weapon( pm->ps->weapon )->repeatRate2;
 
         //check for overheating
@@ -4828,6 +4905,7 @@ static void PM_Weapon( void )
         pm->ps, pm->pmext->dir_fired, right, up, pm->pmext->muzzel_point_fired);
       pm->ps->generic1 = WPM_PRIMARY;
       PM_AddEventWithRandSeed( EV_FIRE_WEAPON );
+      pm->ps->stats[ STAT_FLAGS ] |= SFL_ATTACK1_FIRED;
       addTime = BG_Weapon( pm->ps->weapon )->repeatRate1;
 
       //check for overheating
@@ -4966,7 +5044,7 @@ static void PM_Weapon( void )
 
   // take an ammo away if not infinite
   if( !BG_Weapon( pm->ps->weapon )->infiniteAmmo ||
-      ( pm->ps->weapon == WP_ALEVEL3_UPG && attack3 ) )
+      ( BG_Weapon(pm->ps->weapon)->usesBarbs && attack3 ) )
   {
     // Special case for lcannon
     if( pm->ps->weapon == WP_LUCIFER_CANNON && attack1 && !attack2 )
@@ -4977,7 +5055,7 @@ static void PM_Weapon( void )
     else
       pm->pmext->ammo_used = BG_AmmoUsage( pm->ps );
 
-      pm->ps->ammo -= pm->pmext->ammo_used;
+    pm->ps->ammo -= pm->pmext->ammo_used;
 
     // Stay on the safe side
     if( pm->ps->ammo < 0 )

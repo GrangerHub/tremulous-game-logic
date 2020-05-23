@@ -522,8 +522,8 @@ int SV_PointContents( const vec3_t p, int passEntityNum );
 
 void SV_Trace(
 	trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs,
-	const vec3_t end, int passEntityNum, const content_mask_t content_mask,
-	traceType_t type );
+	const vec3_t end, int passEntityNum, qboolean clip_against_missiles,
+	const content_mask_t content_mask, traceType_t type );
 // mins and maxs are relative
 
 // if the entire move stays in a solid volume, trace.allsolid will be set,

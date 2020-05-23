@@ -32,19 +32,6 @@ static  vec3_t  muzzle;
 
 /*
 ================
-Blow_up
-================
-*/
-void Blow_up( gentity_t *ent )
-{
-  // set directions
-  BG_CalcMuzzlePointFromPS( &ent->client->ps, forward, right, up, muzzle );
-
-  launch_grenade2( ent, muzzle, forward );
-}
-
-/*
-================
 G_ForceWeaponChange
 ================
 */
@@ -269,7 +256,7 @@ static void G_WideTraceSolid(trace_t *tr, gentity_t *ent, float range,
 
   // Trace against entities and the world
   SV_Trace(
-    tr, unlagged_attacker.muzzle_out, mins, maxs, end, ent->s.number,
+    tr, unlagged_attacker.muzzle_out, mins, maxs, end, ent->s.number, qfalse,
     *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB);
   if(tr->entityNum != ENTITYNUM_NONE) {
     *target = &g_entities[ tr->entityNum ];
@@ -279,7 +266,7 @@ static void G_WideTraceSolid(trace_t *tr, gentity_t *ent, float range,
     //check for collision against the world
     SV_Trace(
       &tr2, unlagged_attacker.muzzle_out, mins, maxs, unlagged_attacker.muzzle_out,
-      ent->s.number,
+      ent->s.number, qfalse,
       *Temp_Clip_Mask(MASK_SOLID, 0), TT_AABB );
     if(tr2.entityNum != ENTITYNUM_NONE) {
       *target = &g_entities[ tr2.entityNum ];
@@ -510,7 +497,7 @@ void bulletFire( gentity_t *ent, float spread, int damage, int mod )
     VectorMA(end, x, unlagged_attacker.right_out, end);
     VectorMA(end, y, unlagged_attacker.up_out, end);
     SV_Trace(
-      &tr, unlagged_attacker.muzzle_out, NULL, NULL, end, ent->s.number,
+      &tr, unlagged_attacker.muzzle_out, NULL, NULL, end, ent->s.number, qtrue,
       *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB );
     G_UnlaggedOff( );
 
@@ -523,7 +510,7 @@ void bulletFire( gentity_t *ent, float spread, int damage, int mod )
     VectorMA( end, y, up, end );
 
     SV_Trace(
-      &tr, muzzle, NULL, NULL, end, ent->s.number,
+      &tr, muzzle, NULL, NULL, end, ent->s.number, qtrue,
       *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB);
 
     VectorCopy(muzzle, muzzle_temp);
@@ -747,7 +734,7 @@ void massDriverFire( gentity_t *ent )
     unlagged_attacker.muzzle_out, 8192.0f * 16.0f,
     unlagged_attacker.forward_out, end);
   SV_Trace(
-    &tr, unlagged_attacker.muzzle_out, NULL, NULL, end, ent->s.number,
+    &tr, unlagged_attacker.muzzle_out, NULL, NULL, end, ent->s.number, qtrue,
     *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB);
   G_UnlaggedOff( );
 
@@ -789,11 +776,6 @@ LOCKBLOB
 ======================================================================
 */
 
-void lockBlobLauncherFire( gentity_t *ent )
-{
-  fire_lockblob( ent, muzzle, forward );
-}
-
 /*
 ======================================================================
 
@@ -801,16 +783,6 @@ HIVE
 
 ======================================================================
 */
-
-void hiveFire( gentity_t *ent )
-{
-  vec3_t origin;
-
-  // Fire from the hive tip, not the center
-  VectorMA( muzzle, ent->r.maxs[ 2 ], ent->s.origin2, origin );
-
-  fire_hive( ent, origin, forward );
-}
 
 /*
 ======================================================================
@@ -820,10 +792,6 @@ BLASTER PISTOL
 ======================================================================
 */
 
-void blasterFire( gentity_t *ent )
-{
-  fire_blaster( ent, muzzle, forward );
-}
 
 /*
 ======================================================================
@@ -833,11 +801,6 @@ PULSE RIFLE
 ======================================================================
 */
 
-void pulseRifleFire( gentity_t *ent )
-{
-  fire_pulseRifle( ent, muzzle, forward );
-}
-
 /*
 ======================================================================
 
@@ -845,19 +808,6 @@ FLAME THROWER
 
 ======================================================================
 */
-
-void flamerFire( gentity_t *ent )
-{
-  vec3_t origin;
-
-  // Correct muzzle so that the missile does not start in the ceiling
-  VectorMA( muzzle, -7.0f, up, origin );
-
-  // Correct muzzle so that the missile fires from the player's hand
-  VectorMA( origin, 4.5f, right, origin );
-
-  fire_flamer( ent, origin, forward );
-}
 
 /*
 ======================================================================
@@ -867,11 +817,6 @@ GRENADE
 ======================================================================
 */
 
-void throwGrenade( gentity_t *ent )
-{
-  launch_grenade( ent, muzzle, forward );
-}
-
 /*
 ======================================================================
 
@@ -879,11 +824,6 @@ FRAGMENTATION GRENADE
 
 ======================================================================
 */
-
-void throwFragnade( gentity_t *ent )
-{
-  launch_fragnade( ent, muzzle, forward );
-}
 
 /*
 ======================================================================
@@ -893,10 +833,6 @@ LASER MINE
 ======================================================================
 */
 
-void throwLaserMine( gentity_t *ent )
-{
-  launch_lasermine( ent, muzzle, forward );
-}
 
 /*
 ======================================================================
@@ -906,11 +842,6 @@ GRENADE LAUNCHER
 ======================================================================
 */
 
-void launcherFire( gentity_t *ent, qboolean impact )
-{
-  launch_grenade3( ent, muzzle, forward, impact );
-}
-
 /*
 ======================================================================
 
@@ -918,61 +849,6 @@ Lightning Gun
 
 ======================================================================
 */
-
-/*
-===============
-lightningBallFire
-===============
-*/
-void lightningBallFire( gentity_t *ent )
-{
-  gentity_t *missile;
-  gclient_t *client = ent ->client;
-
-  Com_Assert( client && "lightningBallFire: Can only be used by clients" );
-
-  Com_Assert( client->firedBallLightningNum < LIGHTNING_BALL_BURST_ROUNDS &&
-              "lightningBallFire: attempted to exceed the ball lightning burst limit" );
-
-  missile = fire_lightningBall( ent, qfalse, muzzle, forward );
-
-  //add to the client's ball lightning array
-  G_Entity_UEID_set( &client->firedBallLightning[ client->firedBallLightningNum ],
-                   missile );
-  client->firedBallLightningNum++;
-
-  // damage self if in contact with water
-  if( ent->waterlevel )
-    G_Damage( ent, ent, ent, NULL, NULL,
-              LIGHTNING_BALL_DAMAGE, 0, MOD_LIGHTNING);
-}
-
-/*
-===============
-lightningEMPFire
-===============
-*/
-void lightningEMPFire( gentity_t *ent )
-{
-  int i;
-  gclient_t *client = ent->client;
-
-  Com_Assert( client && "lightningEMPFire: Can only be used by clients" );
-
-  for( i = 0; i < LIGHTNING_BALL_BURST_ROUNDS; i++ )
-  {
-    gentity_t *missile = G_Entity_UEID_get( &client->firedBallLightning[ i ] );
-
-    if( missile &&
-        missile->s.eType == ET_MISSILE &&
-        !strcmp( missile->classname, "lightningBall" ) )
-      missile->die( missile, ent, ent, missile->health, MOD_LIGHTNING_EMP );
-  }
-
-  client->firedBallLightningNum = 0;
-
-  fire_lightningBall( ent, qtrue, muzzle, forward );
-}
 
 /*
 ===============
@@ -1051,7 +927,7 @@ void lasGunFire( gentity_t *ent )
     unlagged_attacker.muzzle_out, 8192 * 16,
     unlagged_attacker.forward_out, end);
   SV_Trace(
-    &tr, unlagged_attacker.muzzle_out, NULL, NULL, end, ent->s.number,
+    &tr, unlagged_attacker.muzzle_out, NULL, NULL, end, ent->s.number, qtrue,
     *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB);
   G_UnlaggedOff( );
 
@@ -1131,48 +1007,15 @@ LUCIFER CANNON
 ======================================================================
 */
 
-/*
-===============
-LCChargeFire
-===============
-*/
-void LCChargeFire( gentity_t *ent, qboolean secondary )
-{
-  if( secondary && ent->client->ps.misc[ MISC_MISC ] <= 0 )
-    fire_luciferCannon( ent, muzzle, forward, LCANNON_SECONDARY_DAMAGE,
-                            LCANNON_SECONDARY_RADIUS, LCANNON_SECONDARY_SPEED );
-  else
-    fire_luciferCannon( ent, muzzle, forward,
-                            ent->client->ps.misc[ MISC_MISC ] *
-                            LCANNON_DAMAGE / LCANNON_CHARGE_TIME_MAX,
-                            LCANNON_RADIUS,
-                            BG_GetLCannonPrimaryFireSpeed( ent->client->ps.misc[ MISC_MISC ] ));
-
-  ent->client->ps.misc[ MISC_MISC ] = 0;
-}
 
 /*
+=======
 ======================================================================
 
 PORTAL GUN
 
 ======================================================================
 */
-
-/*
-===============
-PGChargeFire
-===============
-*/
-void PGChargeFire( gentity_t *ent, qboolean secondary )
-{
-  if( secondary )
-    fire_portalGun( ent, muzzle, forward, PORTAL_BLUE, !( ent->client->buttons & BUTTON_WALKING ) );
-  else
-    fire_portalGun( ent, muzzle, forward, PORTAL_RED, !( ent->client->buttons & BUTTON_WALKING ) );
-
-  ent->client->ps.weaponTime = PORTALGUN_REPEAT;
-}
 
 /*
 ======================================================================
@@ -1202,11 +1045,11 @@ void teslaFire( gentity_t *self )
   // Trace to the target entity
   if( self->enemy->s.eType != ET_TELEPORTAL )
     SV_Trace(
-      &tr, origin, NULL, NULL, target, self->s.number,
+      &tr, origin, NULL, NULL, target, self->s.number, qtrue,
       *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB);
   else
     SV_Trace(
-      &tr, origin, NULL, NULL, target, self->s.number,
+      &tr, origin, NULL, NULL, target, self->s.number, qtrue,
       *Temp_Clip_Mask((MASK_SHOT|CONTENTS_TELEPORTER), 0), TT_AABB );
   if( tr.entityNum != self->enemy->s.number )
     return;
@@ -1255,7 +1098,7 @@ void CheckCkitRepair( gentity_t *ent )
 
   G_SetPlayersLinkState( qfalse, ent );
   SV_Trace(
-    &tr, viewOrigin, NULL, NULL, end, ent->s.number,
+    &tr, viewOrigin, NULL, NULL, end, ent->s.number, qfalse,
     *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB);
   traceEnt = &g_entities[ tr.entityNum ];
   G_SetPlayersLinkState( qtrue, ent );
@@ -1365,11 +1208,6 @@ void buildFire( gentity_t *ent, dynMenu_t menu )
   G_TriggerMenu( ent->client->ps.clientNum, menu );
 }
 
-void slowBlobFire( gentity_t *ent )
-{
-  fire_slowBlob( ent, muzzle, forward );
-}
-
 
 /*
 ======================================================================
@@ -1470,7 +1308,7 @@ void CheckGrabAttack( gentity_t *ent )
   VectorMA(
     unlagged_attacker.muzzle_out, range, unlagged_attacker.forward_out, end);
   SV_Trace(
-    &tr, unlagged_attacker.muzzle_out, NULL, NULL, end, ent->s.number,
+    &tr, unlagged_attacker.muzzle_out, NULL, NULL, end, ent->s.number, qfalse,
     *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB );
   G_UnlaggedOff( );
 
@@ -1551,7 +1389,7 @@ void poisonCloud( gentity_t *ent )
     {
       SV_Trace(
         &tr, unlagged_attacker.muzzle_out, NULL, NULL,
-        humanPlayer->r.currentOrigin, humanPlayer->s.number,
+        humanPlayer->r.currentOrigin, humanPlayer->s.number, qfalse,
         *Temp_Clip_Mask(CONTENTS_SOLID, 0), TT_AABB );
 
       //can't see target from here
@@ -1639,7 +1477,7 @@ static void G_FindLev2ZapChainTargets( zap_t *zap )
     {
       // world-LOS check: trace against the world, ignoring other BODY entities
       SV_Trace(
-        &tr, ent->r.currentOrigin, NULL, NULL, enemy->r.currentOrigin,
+        &tr, ent->r.currentOrigin, NULL, NULL, enemy->r.currentOrigin, qtrue,
         ent->s.number, *Temp_Clip_Mask(CONTENTS_SOLID, 0), TT_AABB);
 
       if( tr.entityNum == ENTITYNUM_NONE )
@@ -1921,11 +1759,6 @@ qboolean CheckPounceAttack( gentity_t *ent )
   return qtrue;
 }
 
-void bounceBallFire( gentity_t *ent )
-{
-  fire_bounceBall( ent, muzzle, forward );
-}
-
 
 /*
 ======================================================================
@@ -2038,6 +1871,8 @@ FireWeapon3
 */
 void FireWeapon3( gentity_t *ent, int seed )
 {
+  weapon_t       weapon = ent->s.weapon;
+
   if( ent->client )
   {
     // set aiming directions
@@ -2049,23 +1884,19 @@ void FireWeapon3( gentity_t *ent, int seed )
     VectorCopy( ent->s.pos.trBase, muzzle );
   }
 
-  // fire the specific weapon
-  switch( ent->s.weapon )
-  {
-    case WP_ALEVEL3_UPG:
-      bounceBallFire( ent );
-      break;
+  if(BG_Missile(weapon, WPM_TERTIARY)->enabled) {
+    vec3_t origin;
 
-    case WP_LIGHTNING:
-      lightningEMPFire( ent );
-      break;
-
-    case WP_ABUILD2:
-      slowBlobFire( ent );
-      break;
-
-    default:
-      break;
+    VectorMA(
+      muzzle, BG_Missile(weapon, WPM_TERTIARY)->muzzle_offset[0], up, origin);
+    VectorMA(
+      origin, BG_Missile(weapon, WPM_TERTIARY)->muzzle_offset[1], right,
+      origin);
+    VectorMA(
+      origin, BG_Missile(weapon, WPM_TERTIARY)->muzzle_offset[2], forward,
+      origin);
+    SnapVector(origin);
+    G_LaunchMissile(ent, weapon, WPM_TERTIARY, origin, forward);
   }
 }
 
@@ -2076,6 +1907,8 @@ FireWeapon2
 */
 void FireWeapon2( gentity_t *ent, int seed )
 {
+  weapon_t       weapon = ent->s.weapon;
+
   if( ent->client )
   {
     // set aiming directions
@@ -2087,27 +1920,26 @@ void FireWeapon2( gentity_t *ent, int seed )
     VectorCopy( ent->s.pos.trBase, muzzle );
   }
 
+  if(BG_Missile(weapon, WPM_SECONDARY)->enabled) {
+    vec3_t origin;
+
+    VectorMA(
+      muzzle, BG_Missile(weapon, WPM_SECONDARY)->muzzle_offset[0], up, origin);
+    VectorMA(
+      origin, BG_Missile(weapon, WPM_SECONDARY)->muzzle_offset[1], right,
+      origin);
+    VectorMA(
+      origin, BG_Missile(weapon, WPM_SECONDARY)->muzzle_offset[2], forward,
+      origin);
+    SnapVector(origin);
+    G_LaunchMissile(ent, weapon, WPM_SECONDARY, origin, forward);
+  }
+
   // fire the specific weapon
-  switch( ent->s.weapon )
+  switch( weapon )
   {
     case WP_ALEVEL1_UPG:
       poisonCloud( ent );
-      break;
-
-    case WP_LUCIFER_CANNON:
-      LCChargeFire( ent, qtrue );
-      break;
-
-    case WP_PORTAL_GUN:
-      PGChargeFire( ent, qtrue );
-      break;
-
-    case WP_LAUNCHER:
-      launcherFire( ent, qfalse );
-      break;
-
-    case WP_LIGHTNING:
-      lightningBallFire( ent );
       break;
 
     case WP_ALEVEL2_UPG:
@@ -2131,6 +1963,8 @@ FireWeapon
 */
 void FireWeapon( gentity_t *ent, int seed )
 {
+  weapon_t       weapon = ent->s.weapon;
+
   if( ent->client )
   {
     // set aiming directions
@@ -2142,8 +1976,23 @@ void FireWeapon( gentity_t *ent, int seed )
     VectorCopy( ent->s.pos.trBase, muzzle );
   }
 
+  if(BG_Missile(weapon, WPM_PRIMARY)->enabled) {
+    vec3_t origin;
+
+    VectorMA(
+      muzzle, BG_Missile(weapon, WPM_PRIMARY)->muzzle_offset[0], up, origin);
+    VectorMA(
+      origin, BG_Missile(weapon, WPM_PRIMARY)->muzzle_offset[1], right,
+      origin);
+    VectorMA(
+      origin, BG_Missile(weapon, WPM_PRIMARY)->muzzle_offset[2], forward,
+      origin);
+    SnapVector(origin);
+    G_LaunchMissile(ent, weapon, WPM_PRIMARY, origin, forward);
+  }
+
   // fire the specific weapon
-  switch( ent->s.weapon )
+  switch( weapon )
   {
     case WP_ALEVEL1:
       meleeAttack( 
@@ -2181,9 +2030,6 @@ void FireWeapon( gentity_t *ent, int seed )
         LEVEL4_CLAW_DMG, LEVEL4_CLAW_SUBCHECKS, MOD_LEVEL4_CLAW );
       break;
 
-    case WP_BLASTER:
-      blasterFire( ent );
-      break;
     case WP_MACHINEGUN:
       bulletFire( ent, RIFLE_SPREAD, RIFLE_DMG, MOD_MACHINEGUN );
       break;
@@ -2193,20 +2039,8 @@ void FireWeapon( gentity_t *ent, int seed )
     case WP_CHAINGUN:
       bulletFire( ent, CHAINGUN_SPREAD, CHAINGUN_DMG, MOD_CHAINGUN );
       break;
-    case WP_FLAMER:
-      flamerFire( ent );
-      break;
-    case WP_PULSE_RIFLE:
-      pulseRifleFire( ent );
-      break;
     case WP_MASS_DRIVER:
       massDriverFire( ent );
-      break;
-    case WP_LUCIFER_CANNON:
-      LCChargeFire( ent, qfalse );
-      break;
-    case WP_PORTAL_GUN:
-      PGChargeFire( ent, qfalse );
       break;
     case WP_LAS_GUN:
       lasGunFire( ent );
@@ -2214,28 +2048,11 @@ void FireWeapon( gentity_t *ent, int seed )
     case WP_PAIN_SAW:
       painSawFire( ent );
       break;
-    case WP_GRENADE:
-      throwGrenade( ent );
-      break;
-    case WP_FRAGNADE:
-      throwFragnade( ent );
-      break;
-    case WP_LASERMINE:
-      throwLaserMine( ent );
-      break;
-    case WP_LAUNCHER:
-      launcherFire(ent, qtrue);
-      break;
 
     case WP_LIGHTNING:
       lightningBoltFire( ent );
       break;
 
-    case WP_LOCKBLOB_LAUNCHER:
-      lockBlobLauncherFire( ent );
-      break;
-    case WP_HIVE:
-      hiveFire( ent );
       break;
     case WP_TESLAGEN:
       teslaFire( ent );

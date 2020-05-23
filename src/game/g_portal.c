@@ -40,6 +40,10 @@ static void G_Portal_Effect( portal_t portalindex, float speedMod )
 	gentity_t *effect;
 	int       speed = (int)((float)(PORTALGUN_SPEED) * speedMod);
 
+	if(!portal) {
+		return;
+	}
+
 	if( !G_Expired( portal, EXP_PORTAL_EFFECT ) )
 		return;
 
@@ -86,6 +90,9 @@ void G_Portal_Clear( portal_t portalindex )
 	if (!self)
 		return;
 
+	if(!self) {
+		return;
+	}
 
 	G_Portal_Effect( portalindex, 0.25 );
 	level.humanPortals.createTime[ portalindex ] = 0;
@@ -104,6 +111,9 @@ A wrapper think function for delayed clearing of a portal
 */
 static void portal_destroy_think( gentity_t *self )
 {
+	if(!self) {
+		return;
+	}
 	G_Portal_Clear( self->s.modelindex2 );
 }
 
@@ -130,9 +140,10 @@ Send someone over to the other portal.
 static void G_Portal_Touch(gentity_t *self, gentity_t *other, trace_t *trace)
 {
 	gentity_t *portal;
-	vec3_t origin, dir, end, angles;
-	trace_t tr;
-	int speed, i;
+	portal_t  portal_index = PORTAL_NONE;
+	vec3_t    origin, dir, end, angles;
+	trace_t   tr;
+	int       speed, i;
 
 	if (!other->client)
 		return;
@@ -141,7 +152,13 @@ static void G_Portal_Touch(gentity_t *self, gentity_t *other, trace_t *trace)
 	 		other->client->ps.weapon == WP_ALEVEL4 )
 		return;
 
-	portal = level.humanPortals.portals[ !self->s.modelindex2 ];
+	if(self->s.modelindex2 == PORTAL_RED) {
+		portal_index = PORTAL_BLUE;
+	} else if(self->s.modelindex2 == PORTAL_BLUE) {
+		portal_index = PORTAL_RED;
+	}
+
+	portal = level.humanPortals.portals[ portal_index ];
 	if (!portal)
 		return;
 
@@ -152,13 +169,13 @@ static void G_Portal_Touch(gentity_t *self, gentity_t *other, trace_t *trace)
     {
 		VectorMA(origin, i, dir, end);
 		SV_Trace(
-			&tr, origin, NULL, NULL, end, portal->s.number,
+			&tr, origin, NULL, NULL, end, portal->s.number, qfalse,
 			*Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB);
 		if (tr.fraction != 1.0f)
     {
 			return;
     }
-		SV_Trace(&tr, end, other->r.mins, other->r.maxs, end, -1,
+		SV_Trace(&tr, end, other->r.mins, other->r.maxs, end, -1, qfalse,
 			*Temp_Clip_Mask((MASK_PLAYERSOLID|CONTENTS_TELEPORTER), 0), TT_AABB);
 		if (tr.fraction == 1.0f)
     {
@@ -211,8 +228,12 @@ void G_Portal_Create(gentity_t *ent, vec3_t origin, vec3_t normal, portal_t port
 	vec3_t oldOrigin;
 	trace_t tr;
 
-    if ( ent->health <= 0 || !ent->client || ent->client->ps.pm_type == PM_DEAD )
-      return;
+	if(portalindex == PORTAL_NONE) {
+		return;
+	}
+
+	if ( ent->health <= 0 || !ent->client || ent->client->ps.pm_type == PM_DEAD )
+		return;
 
 	// Create the portal
 	portal = G_Spawn();
@@ -230,7 +251,7 @@ void G_Portal_Create(gentity_t *ent, vec3_t origin, vec3_t normal, portal_t port
 	VectorCopy( origin, oldOrigin );
 	VectorMA( origin, -PORTAL_OFFSET, normal, origin );
 	SV_Trace(
-		&tr, oldOrigin, NULL, NULL, origin, ent->s.number,
+		&tr, oldOrigin, NULL, NULL, origin, ent->s.number, qfalse,
 		*Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB);
 	VectorCopy( tr.endpos, origin);
 	G_SetOrigin( portal, origin );

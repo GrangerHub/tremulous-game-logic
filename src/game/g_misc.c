@@ -419,13 +419,13 @@ static void findEmptySpot( vec3_t origin, float radius, vec3_t spot )
         VectorAdd( origin, delta, test );
 
         SV_Trace(
-          &tr, test, NULL, NULL, test, -1,
+          &tr, test, NULL, NULL, test, -1, qfalse,
           *Temp_Clip_Mask(MASK_SOLID, 0), TT_AABB);
 
         if( !tr.allsolid )
         {
           SV_Trace(
-            &tr, test, NULL, NULL, origin, -1,
+            &tr, test, NULL, NULL, origin, -1, qfalse,
             *Temp_Clip_Mask(MASK_SOLID, 0), TT_AABB);
           VectorScale( delta, tr.fraction, delta );
           VectorAdd( total, delta, total );

@@ -406,7 +406,7 @@ void CG_OffsetThirdPersonView( void )
     // in a solid block.  Use an 8 by 8 block to prevent the view from near clipping anything
     CG_Trace(
       &trace, cg.refdef.vieworg, mins, maxs, view,
-      cg.predictedPlayerState.clientNum, *Temp_Clip_Mask(MASK_SHOT, 0) );
+      cg.predictedPlayerState.clientNum, qfalse, *Temp_Clip_Mask(MASK_SHOT, 0) );
 
     if( trace.fraction != 1.0f )
     {
@@ -417,7 +417,7 @@ void CG_OffsetThirdPersonView( void )
 
       CG_Trace(
         &trace, cg.refdef.vieworg, mins, maxs, view,
-        cg.predictedPlayerState.clientNum, *Temp_Clip_Mask(MASK_SHOT, 0));
+        cg.predictedPlayerState.clientNum, qfalse, *Temp_Clip_Mask(MASK_SHOT, 0));
       VectorCopy( trace.endpos, view );
     }
   }
@@ -1032,7 +1032,7 @@ static void CG_DrawSurfNormal( void )
 
   CG_Trace(
     &tr, cg.refdef.vieworg, NULL, NULL, end, cg.predictedPlayerState.clientNum,
-    *Temp_Clip_Mask(MASK_SHOT, 0));
+    qfalse, *Temp_Clip_Mask(MASK_SHOT, 0));
 
   VectorCopy( tr.endpos, normal[ 0 ].xyz );
   normal[ 0 ].st[ 0 ] = 0;
