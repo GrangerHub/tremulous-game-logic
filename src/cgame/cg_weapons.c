@@ -1107,7 +1107,7 @@ static void CG_LightningBolt( centity_t *cent, vec3_t origin )
 	// see if it hit a wall
 	CG_Trace(
     &trace, muzzlePoint, NULL, NULL, endPoint, cent->currentState.number,
-    *Temp_Clip_Mask(MASK_SHOT, 0));
+    qfalse, *Temp_Clip_Mask(MASK_SHOT, 0));
 
 	// this is the endpoint
 	VectorCopy( trace.endpos, beam.oldorigin );

@@ -724,7 +724,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.repeaterUseSound );
       break;
 
-    case EV_GRENADE_BOUNCE:
+    case EV_MISSILE_BOUNCE:
       {
         weaponInfo_t *weapon = &cg_weapons[ es->weapon ];
         weaponMode_t weaponMode = es->generic1;
@@ -751,7 +751,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
         break;
       }
 
-    case EV_LASERMINE_ARMED:
+    case EV_TRIPWIRE_ARMED:
       trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.lasermineArmedSound );
       break;
 
@@ -819,7 +819,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
 
     case EV_SPLATTER:
       CG_Splatter(
-        es, *((int *)&es->origin2[2]), es->generic1, es->angles,
+        es, *((int *)&es->origin[2]), es->generic1, es->angles,
         es->origin2, es->eventParm);
       break;
 

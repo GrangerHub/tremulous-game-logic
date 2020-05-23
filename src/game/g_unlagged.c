@@ -1158,7 +1158,7 @@ void G_UnlaggedDetectCollisions(gentity_t *ent) {
 
   SV_Trace(
     &tr, ent->client->oldOrigin, ent->r.mins, ent->r.maxs,
-    ent->client->ps.origin, ent->s.number,
+    ent->client->ps.origin, ent->s.number, qfalse,
     *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB);
 
   if(tr.entityNum >= 0 && tr.entityNum < MAX_CLIENTS) {

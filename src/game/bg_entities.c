@@ -299,12 +299,14 @@ BG_Trace
 */
 void BG_Trace(
   trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs,
-  const vec3_t end, int passEntityNum, const content_mask_t content_mask,
+  const vec3_t end, int passEntityNum, qboolean clip_against_missiles,
+  const content_mask_t content_mask,
   traceType_t type) {
   Com_Assert(bg_collision_funcs.trace);
 
   bg_collision_funcs.trace(
-    results, start, mins, maxs, end, passEntityNum, content_mask, type);
+    results, start, mins, maxs, end, passEntityNum, clip_against_missiles,
+    content_mask, type);
 }
 
 /*
@@ -686,8 +688,8 @@ void BG_SplatterPattern(
 
     //apply the impact
     BG_Trace(
-      &tr, origin, NULL, NULL, end, passEntNum, *Temp_Clip_Mask(MASK_SHOT, 0),
-      TT_AABB);
+      &tr, origin, NULL, NULL, end, passEntNum, qfalse,
+      *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB);
     data->tr = &tr;
     func( data );
   }
@@ -755,7 +757,7 @@ void BG_CheckBoltImpactTrigger(pmove_t *pm) {
 
     BG_Trace(
       &pm->pmext->impactTriggerTrace, attacker_data.muzzle_out, NULL, NULL, end,
-      pm->ps->clientNum, *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB );
+      pm->ps->clientNum, qfalse, *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB );
 
     BG_UnlaggedOff();
 
@@ -807,7 +809,8 @@ qboolean BG_FindValidSpot(
   VectorScale(increment, incDist, increment);
 
   do {
-    BG_Trace(tr, start2, mins, maxs, end, passEntityNum, content_mask, TT_AABB);
+    BG_Trace(tr, start2, mins, maxs, end, passEntityNum, qfalse, content_mask,
+      TT_AABB);
     VectorAdd(tr->endpos, increment, start2);
     if(!tr->allsolid) {
       return qtrue;
@@ -901,7 +904,7 @@ void BG_PositionBuildableRelativeToPlayer(
     VectorMA(viewOrigin, -builderDia, playerNormal, builderBottom);
     BG_Trace(
       &builder_bottom_trace, viewOrigin, mins2, maxs2, builderBottom,
-      ps->clientNum, *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB);
+      ps->clientNum, qfalse, *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB);
     VectorCopy(builder_bottom_trace.endpos, builderBottom);
     VectorMA(builderBottom, 0.5f, playerNormal, builderBottom);
 
@@ -918,7 +921,7 @@ void BG_PositionBuildableRelativeToPlayer(
         vec3_t targetNormal;
 
         BG_Trace(
-          tr, startOrigin, mins2, maxs2, targetOrigin, ps->clientNum,
+          tr, startOrigin, mins2, maxs2, targetOrigin, ps->clientNum, qfalse,
           *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB);
         if( tr->startsolid || tr->allsolid ) {
           VectorCopy( viewOrigin, outOrigin );
@@ -947,7 +950,7 @@ void BG_PositionBuildableRelativeToPlayer(
             VectorNormalize(end);
             VectorMA(targetOrigin, 1.0f, end, end);
             BG_Trace(
-              &tr2, startOrigin, mins2, maxs2, end, MAGIC_TRACE_HACK,
+              &tr2, startOrigin, mins2, maxs2, end, MAGIC_TRACE_HACK, qfalse,
               *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB);
             if(!tr2.allsolid && tr2.fraction >= 1.0f) {
               VectorCopy(tr2.endpos, startOrigin);
@@ -961,7 +964,7 @@ void BG_PositionBuildableRelativeToPlayer(
             //nudge the target origin back down to undo the offset
             VectorMA(targetOrigin, -0.5f, targetNormal, end);
             BG_Trace(
-              &tr2, targetOrigin, mins2, maxs2, end, ps->clientNum,
+              &tr2, targetOrigin, mins2, maxs2, end, ps->clientNum, qfalse,
               *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB);
             if(!tr2.startsolid && !tr2.allsolid) {
               VectorCopy(tr2.endpos, targetOrigin);
@@ -975,7 +978,7 @@ void BG_PositionBuildableRelativeToPlayer(
             //check that there is a clear trace from the builderBottom to the target
             VectorMA(targetOrigin, 0.5, targetNormal, end);
             BG_Trace(
-              &tr2, builderBottom, mins2, maxs2, end, ps->clientNum,
+              &tr2, builderBottom, mins2, maxs2, end, ps->clientNum, qfalse,
               *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB);
             if(!tr2.startsolid && !tr2.allsolid && tr2.fraction >= 1.0f) {
               //undo the offset
@@ -1017,7 +1020,7 @@ void BG_PositionBuildableRelativeToPlayer(
         //position the target origin to collide back against the builder.
         BG_Trace(
           &tr2, startOrigin, mins2, maxs2, targetOrigin, MAGIC_TRACE_HACK,
-          *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB);
+          qfalse, *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB);
         if(!tr2.startsolid && !tr2.allsolid) {
           VectorCopy(tr2.endpos, targetOrigin);
 
@@ -1026,7 +1029,7 @@ void BG_PositionBuildableRelativeToPlayer(
           VectorNormalize(temp);
           VectorMA(targetOrigin, 5.0f, temp, temp);
           BG_Trace(
-            &tr2, targetOrigin, mins2, maxs2, temp, ps->clientNum,
+            &tr2, targetOrigin, mins2, maxs2, temp, ps->clientNum, qfalse,
             *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB);
           if(!tr2.startsolid && !tr2.allsolid && tr2.fraction >= 1.0f) {
             VectorCopy(tr2.endpos, targetOrigin);
@@ -1060,7 +1063,7 @@ void BG_PositionBuildableRelativeToPlayer(
 
         //Check that the spot is not on the opposite side of a thin wall
         BG_Trace(
-          &tr2, startOrigin, NULL, NULL, tr->endpos, ps->clientNum,
+          &tr2, startOrigin, NULL, NULL, tr->endpos, ps->clientNum, qfalse,
           *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB);
         if(tr2.fraction < 1.0f || tr2.startsolid || tr2.allsolid) {
           VectorCopy(viewOrigin, outOrigin);
@@ -1094,7 +1097,7 @@ void BG_PositionBuildableRelativeToPlayer(
         VectorCopy(tr->endpos, startOrigin);
 
         BG_Trace(
-          tr, startOrigin, mins, maxs, targetOrigin, ps->clientNum,
+          tr, startOrigin, mins, maxs, targetOrigin, ps->clientNum, qfalse,
           *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB);
       }
     }
@@ -1104,7 +1107,7 @@ void BG_PositionBuildableRelativeToPlayer(
 
       //check if this position would collide with the builder
       BG_Trace(
-        &tr2, tr->endpos, mins, maxs, tr->endpos, MAGIC_TRACE_HACK,
+        &tr2, tr->endpos, mins, maxs, tr->endpos, MAGIC_TRACE_HACK, qfalse,
         *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB);
 
       if((tr2.startsolid || tr2.allsolid) && tr2.entityNum == ps->clientNum) {

@@ -314,6 +314,8 @@ struct gentity_s
   int               methodOfDeath;
   int               splashMethodOfDeath;
   qboolean          noKnockback; // for direct impact by missiles.
+  int               kick_up_time;
+  int               explode_time;
 
   int               count;
 
@@ -414,9 +416,12 @@ struct gentity_s
   qboolean          MasterPower;
   int               PowerRadius;
 
-  qboolean          lasermine_set;
-  trace_t           lasermine_trace;
-  int               lasermine_self_destruct_time;
+  int               tripwire_time;
+  qboolean          tripwire_set;
+  trace_t           tripwire_trace;
+
+  bgentity_id       saved_missiles[MAX_GENTITIES][WP_NUM_WEAPONS][WPM_NUM_WEAPONMODES];
+  int               num_saved_missiles[WP_NUM_WEAPONS][WPM_NUM_WEAPONMODES];
 
   bglink_t          *zapLink;  // For ET_LEV2_ZAP_CHAIN
 };
@@ -552,6 +557,9 @@ typedef struct
   addr_t              ip;
   char                voice[ MAX_VOICE_NAME_LEN ];
   qboolean            useUnlagged;
+
+  int                 barbs[WP_NUM_WEAPONS];
+  int                 barbRegenTime[WP_NUM_WEAPONS];
 
   int                 replacable_buildables[MAX_REPLACABLE_BUILDABLES];
 
@@ -1311,28 +1319,11 @@ void      G_InitDamageLocations( void );
 // g_missile.c
 //
 void      G_RunMissile( gentity_t *ent );
+void G_LaunchMissile(
+  gentity_t *self, weapon_t weapon, weaponMode_t mode, vec3_t start,
+  vec3_t dir);
 qboolean  G_PlayerHasUnexplodedGrenades( gentity_t *player );
-
-gentity_t *fire_flamer( gentity_t *self, vec3_t start, vec3_t aimdir );
-gentity_t *fire_blaster( gentity_t *self, vec3_t start, vec3_t dir );
-gentity_t *fire_pulseRifle( gentity_t *self, vec3_t start, vec3_t dir );
-gentity_t *fire_luciferCannon( gentity_t *self, vec3_t start, vec3_t dir,
-                               int damage, int radius, int speed );
-gentity_t *fire_lockblob( gentity_t *self, vec3_t start, vec3_t dir );
-gentity_t *fire_paraLockBlob( gentity_t *self, vec3_t start, vec3_t dir );
-gentity_t *fire_slowBlob( gentity_t *self, vec3_t start, vec3_t dir );
-gentity_t *fire_bounceBall( gentity_t *self, vec3_t start, vec3_t dir );
-gentity_t *fire_hive( gentity_t *self, vec3_t start, vec3_t dir );
-gentity_t *fire_portalGun( gentity_t *self, vec3_t start, vec3_t dir,
-                           portal_t portal, qboolean relativeVelocity );
-gentity_t *launch_grenade( gentity_t *self, vec3_t start, vec3_t dir );
-gentity_t *launch_grenade2( gentity_t *self, vec3_t start, vec3_t dir );
-gentity_t *launch_grenade3( gentity_t *self, vec3_t start, vec3_t dir,
-                            qboolean impact );
-gentity_t *launch_fragnade( gentity_t *self, vec3_t start, vec3_t dir );
-gentity_t *launch_lasermine( gentity_t *self, vec3_t start, vec3_t dir );
-gentity_t *fire_lightningBall( gentity_t *self, qboolean primary,
-                               vec3_t start, vec3_t dir );
+void      G_Detonate_Saved_Missiles(gentity_t *self);
 
 //
 // g_mover.c
@@ -1382,7 +1373,6 @@ extern bglink_t *lev2ZapList;
 void      G_PackEntityNumbers( entityState_t *es, int creatorNum,
                                bglist_t *targetQueue );
 
-void      Blow_up( gentity_t *ent );
 void      G_ForceWeaponChange( gentity_t *ent, weapon_t weapon );
 qboolean  G_CanGiveClientMaxAmmo( gentity_t *ent, qboolean buyingEnergyAmmo,
                                   int *rounds, int *clips, int *price );
@@ -1801,8 +1791,8 @@ void      SV_ClipToEntity(
   traceType_t type);
 void      SV_Trace(
 	trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs,
-	const vec3_t end, int passEntityNum, const content_mask_t content_mask,
-	traceType_t type);
+	const vec3_t end, int passEntityNum, qboolean clip_against_missiles,
+  const content_mask_t content_mask, traceType_t type);
 void      SV_ClipToTestArea(
 	trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs,
 	const vec3_t end, const vec3_t test_mins, const vec3_t test_maxs,

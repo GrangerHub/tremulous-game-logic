@@ -2787,6 +2787,14 @@ qboolean G_admin_explode( gentity_t *ent )
   int pid;
   char name[ MAX_COLORFUL_NAME_LENGTH ], *reason, err[ MAX_STRING_CHARS ];
   gentity_t *vic;
+  gentity_t *effect;
+  vec3_t    dir;
+
+  if( level.intermissiontime )
+  {
+    ADMP( "^3explode: ^7this command can't be used during intermission\n" );
+    return qfalse;
+  }
 
   if( Cmd_Argc() < 2 )
   {
@@ -2821,7 +2829,26 @@ qboolean G_admin_explode( gentity_t *ent )
   if( vic->flags & FL_GODMODE )
     vic->flags ^= FL_GODMODE;
 
-  Blow_up(vic);
+  //explode the vic
+  G_Damage(
+    vic, NULL, NULL, NULL, vic->r.currentOrigin, 0, DAMAGE_INSTAGIB,
+    MOD_GRENADE);
+  //simulate a grenade
+  effect = G_Spawn( );
+  effect->freeAfterEvent = qtrue;
+  effect->s.eType = ET_GENERAL;
+  effect->s.weapon = WP_GRENADE;
+  effect->s.generic1 = WPM_PRIMARY; //weaponMode
+  G_SetOrigin(effect, vic->r.currentOrigin);
+  VectorCopy( vic->client->ps.velocity, effect->s.pos.trDelta);
+  effect->s.pos.trTime = level.time;
+  effect->s.pos.trType = TR_LINEAR;
+  dir[0] = dir[1] = 0;
+  dir[2] = 1;
+  G_AddEvent(effect, EV_MISSILE_MISS, DirToByte(dir));
+  G_SetContents(effect, CONTENTS_SOLID, qfalse);
+  SV_LinkEntity(effect);
+  G_SetContents(effect, 0, qfalse);
 
   SV_GameSendServerCommand( vic-g_entities,
 			                    va( "cp \"^1Boom!!!\n^7%s\n\" %d",
@@ -3943,7 +3970,7 @@ qboolean G_admin_builder( gentity_t *ent )
   VectorMA( start, 1000, forward, end );
 
   SV_Trace(
-    &tr, start, NULL, NULL, end, ent->s.number,
+    &tr, start, NULL, NULL, end, ent->s.number, qtrue,
     *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB );
   traceEnt = &g_entities[ tr.entityNum ];
   if( tr.fraction < 1.0f && ( traceEnt->s.eType == ET_BUILDABLE ) )

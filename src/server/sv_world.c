@@ -484,6 +484,7 @@ typedef struct {
 	vec3_t		end;
 	trace_t		trace;
 	int			passEntityNum;
+	qboolean clip_against_missiles;
 	content_mask_t	content_mask;
 	traceType_t	collisionType;
 } moveclip_t;
@@ -583,11 +584,17 @@ static void SV_ClipMoveToEntities( moveclip_t *clip ) {
 			if ( touchlist[i] == clip->passEntityNum ) {
 				continue;	// don't clip against the pass entity
 			}
-			if ( touch->r.ownerNum == clip->passEntityNum ) {
-				continue;	// don't clip against own missiles
-			}
-			if ( touch->r.ownerNum == passOwnerNum ) {
-				continue;	// don't clip against other missiles from our owner
+			if(!clip->clip_against_missiles) {
+				if ( touch->r.ownerNum == clip->passEntityNum ) {
+					continue;	// don't clip against own missiles
+				}
+				if ( touch->r.ownerNum == passOwnerNum ) {
+					continue;	// don't clip against other missiles from our owner
+				}
+			} else {
+				if ( touch->s.number == passOwnerNum ) {
+					continue;	// don't clip against the owner
+				}
 			}
 		}
 
@@ -667,7 +674,7 @@ Moves the given mins/maxs volume through the world from start to end.
 passEntityNum and entities owned by passEntityNum are explicitly not checked.
 ==================
 */
-void SV_Trace( trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs, const vec3_t end, int passEntityNum, const content_mask_t content_mask, traceType_t type ) {
+void SV_Trace( trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs, const vec3_t end, int passEntityNum, qboolean clip_against_missiles, const content_mask_t content_mask, traceType_t type ) {
 	moveclip_t	clip;
 	int			i;
 
@@ -695,6 +702,7 @@ void SV_Trace( trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs, c
 	clip.mins = mins;
 	clip.maxs = maxs;
 	clip.passEntityNum = passEntityNum;
+	clip.clip_against_missiles = clip_against_missiles;
 	clip.collisionType = type;
 
 	// create the bounding box of the entire move
