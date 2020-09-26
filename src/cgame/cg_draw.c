@@ -1457,24 +1457,29 @@ static void CG_DrawPlayerBoosterBolt( rectDef_t *rect, vec4_t backColor,
 CG_DrawPlayerPoisonBarbs
 ==============
 */
-static void CG_DrawPlayerPoisonBarbs( rectDef_t *rect, vec4_t color, qhandle_t shader )
-{
+static void CG_DrawPlayerPoisonBarbs(
+  rectDef_t *rect, vec4_t color, qhandle_t shader) {
   qboolean vertical;
   float    x = rect->x, y = rect->y;
   float    width = rect->w, height = rect->h;
   float    diff;
   int      iconsize, numBarbs, maxBarbs;
 
-  if(cg.snap->ps.weapon == WP_ASPITFIRE) {
+  if(!BG_Weapon(cg.snap->ps.weapon)->usesBarbs) {
+    return;
+  }
+
+  if(BG_Weapon( cg.snap->ps.weapon )->maxClips > 0) {
     maxBarbs = BG_Weapon( cg.snap->ps.weapon )->maxClips + 1;
     numBarbs = *BG_GetClips(&cg.snap->ps, cg.snap->ps.weapon);
     if(cg.snap->ps.ammo == BG_Weapon(cg.snap->ps.weapon)->maxAmmo) {
       numBarbs++;
     }
   } else {
-    maxBarbs = BG_Weapon(cg.snap->ps.weapon)->maxAmmo;
+    maxBarbs = BG_Weapon( cg.snap->ps.weapon )->maxAmmo;
     numBarbs = cg.snap->ps.ammo;
   }
+
   if( maxBarbs <= 0 || numBarbs <= 0 )
     return;
 
@@ -4353,10 +4358,28 @@ static void CG_ScanForCrosshairEntity( void )
       }
     }
 
-    if( weapon == WP_LUCIFER_CANNON && num == 1 )
-      speed = BG_GetLCannonPrimaryFireSpeed( cg.predictedPlayerState.misc[ MISC_MISC ] );
-    else
-      speed = BG_Weapon( weapon )->impactPrediction[ num ].missileLaunchSpeed;
+    if(
+      BG_Missile(weapon, WPM_PRIMARY)->charged_speed &&
+      cg.predictedPlayerState.misc[ MISC_MISC ] >= 0) {
+      speed =
+        (
+          BG_Missile(weapon, WPM_PRIMARY)->charged_speed_min +
+          (
+            cg.predictedPlayerState.misc[ MISC_MISC ] -
+            BG_Missile(weapon, WPM_PRIMARY)->charged_time_max) *
+            (
+              BG_Missile(weapon, WPM_PRIMARY)->speed -
+              BG_Missile(weapon, WPM_PRIMARY)->charged_speed_min) /
+            (
+              (
+                (
+                  BG_Missile(weapon, WPM_PRIMARY)->charged_time_max *
+                  BG_Missile(weapon, WPM_PRIMARY)->charged_speed_min_damage_mod) /
+                BG_Missile(weapon, WPM_PRIMARY)->charged_damage) -
+                BG_Missile(weapon, WPM_PRIMARY)->charged_time_max));
+    } else {
+      speed = BG_Missile(weapon, WPM_PRIMARY)->speed;
+    }
 
     mins[0] = mins[1] = mins[2] = -BG_Weapon( weapon )->impactPrediction[ num ].missileSize;
     maxs[0] = maxs[1] = maxs[2] = BG_Weapon( weapon )->impactPrediction[ num ].missileSize;
@@ -4367,7 +4390,7 @@ static void CG_ScanForCrosshairEntity( void )
         VectorScale( forward, speed, velocity );
         BG_ModifyMissleLaunchVelocity( cg.predictedPlayerEntity.currentState.pos.trDelta, 
                                        cg.predictedPlayerState.speed, velocity,
-                                       BG_Weapon( weapon )->relativeMissileSpeed );
+                                       weapon, WPM_PRIMARY );
         SnapVector( velocity );
         VectorScale( velocity, BG_Weapon( weapon )->impactPrediction[ num ].missileLifeTime, end );
         endCalculated = qtrue;
@@ -4382,7 +4405,7 @@ static void CG_ScanForCrosshairEntity( void )
 
   CG_Trace(
     &trace, start, mins, maxs, end,
-    cg.predictedPlayerState.clientNum,
+    cg.predictedPlayerState.clientNum, qfalse,
     *Temp_Clip_Mask((CONTENTS_SOLID|CONTENTS_BODY), 0) );
 
   VectorCopy( trace.endpos, cg.crosshairPredictedImpactPoint );
@@ -5838,6 +5861,7 @@ void CG_DrawActive( stereoFrame_t stereoView )
       CG_CapTrace( &trace, cg.refdef.vieworg, mins, maxs,
                    lanternOrigin,
                    cg.predictedPlayerState.clientNum,
+                   qfalse,
                    *Temp_Clip_Mask(MASK_DEADSOLID, 0) );
 
       if( trace.fraction != 1.0f )
@@ -5852,6 +5876,7 @@ void CG_DrawActive( stereoFrame_t stereoView )
         CG_CapTrace( &trace, cg.refdef.vieworg, mins, maxs,
                      lanternOrigin,
                      cg.predictedPlayerState.clientNum,
+                     qfalse,
                      *Temp_Clip_Mask(MASK_DEADSOLID, 0) );
         VectorCopy( trace.endpos, lanternOrigin );
       }

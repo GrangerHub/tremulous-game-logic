@@ -604,11 +604,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   if( level.intermissiontime )
     return;
 
-  
-
-  if(self->client->ps.weapon == WP_ASPITFIRE) {
-    G_Spitfire_Detonate_Gas_Trail(self->client);
-  }
+  G_Detonate_Saved_Missiles(self);
 
   switch(self->client->pers.teamSelection) {
     case TEAM_ALIENS:
@@ -2107,7 +2103,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
       if( modDamge >= 1.0 )
       {
-        if( take < ( ( INT_MAX - 1 ) / damageMod ) )
+        if( take < ( ( (float)(INT_MAX - 1) ) / damageMod ) )
           take = (int)( ( take * damageMod ) + 0.5f );
       }
     }
@@ -2602,7 +2598,7 @@ qboolean G_RadiusDamage( vec3_t origin, vec3_t originMins, vec3_t originMaxs,
       continue;
 
     if(
-      BG_MOD(mod)->self_radius_damage &&
+      !BG_MOD(mod)->self_radius_damage &&
       attacker->s.number == ent->s.number) {
       continue;
     }

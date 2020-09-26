@@ -88,14 +88,11 @@ void CG_BuildSolidList( void )
       continue;
     }
 
-    if( cent->nextState.solid && ent->eType != ET_MISSILE )
-    {
-      cg_solidEntities[ cg_numSolidEntities ] = cent;
-      cg_numSolidEntities++;
-      cent->linked = qtrue;
-      cent->is_in_solid_list = qtrue;
-      continue;
-    }
+    cg_solidEntities[ cg_numSolidEntities ] = cent;
+    cg_numSolidEntities++;
+    cent->linked = qtrue;
+    cent->is_in_solid_list = qtrue;
+    continue;
   }
 }
 
@@ -668,7 +665,8 @@ CG_ClipMoveToEntities
 */
 static void CG_ClipMoveToEntities(
   const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end,
-  int skipNumber, content_mask_t content_mask, trace_t *tr,
+  int skipNumber, qboolean clip_against_missiles, content_mask_t content_mask,
+  trace_t *tr,
   traceType_t collisionType) {
   int           i, j, k;
   trace_t       trace;
@@ -676,12 +674,15 @@ static void CG_ClipMoveToEntities(
   clipHandle_t  cmodel;
   vec3_t        move_mins, move_maxs;
   centity_t     *cent;
+  centity_t     *skip_ent;
 
   //SUPAR HACK
   //this causes a trace to collide with the local player
   if(skipNumber == MAGIC_TRACE_HACK) {
+    skip_ent = &cg_entities[ENTITYNUM_NONE];
     j = cg_numSolidEntities + 1;
   } else {
+    skip_ent = &cg_entities[skipNumber];
     j = cg_numSolidEntities;
   }
 
@@ -725,6 +726,23 @@ static void CG_ClipMoveToEntities(
     ent = &cent->currentState;
     if(ent->number == skipNumber) {
       continue;
+    }
+
+
+    if(skipNumber != ENTITYNUM_NONE) {
+      if(ent->eType == ET_MISSILE) {
+        if(!clip_against_missiles) {
+          if(ent->otherEntityNum == skipNumber) {
+            continue; // don't clip against own missiles
+          }
+        }
+      }
+
+      if(skip_ent->currentState.eType == ET_MISSILE) {
+        if(ent->number == skip_ent->currentState.otherEntityNum) {
+          continue; // don't clip against the owner
+        }
+      }
     }
 
     if(!(cent->contents & content_mask.include)) {
@@ -824,19 +842,22 @@ static void CG_ClipMoveToEntities(
 CG_Trace
 ================
 */
-void  CG_Trace( trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end,
-                int skipNumber, content_mask_t content_mask )
-{
+void  CG_Trace(
+  trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs,
+  const vec3_t end, int skipNumber, qboolean clip_against_missiles,
+  content_mask_t content_mask) {
   trace_t t;
 
-  trap_CM_BoxTrace( &t, start, end, mins, maxs, 0, content_mask.include );
+  trap_CM_BoxTrace(&t, start, end, mins, maxs, 0, content_mask.include);
   t.entityNum = t.fraction != 1.0 ? ENTITYNUM_WORLD : ENTITYNUM_NONE;
-  if ( t.fraction == 0 ) {
+  if(t.fraction == 0) {
     *result = t;
     return;		// blocked immediately by the world
   }
   // check all other solid models
-  CG_ClipMoveToEntities( start, mins, maxs, end, skipNumber, content_mask, &t, TT_AABB );
+  CG_ClipMoveToEntities(
+    start, mins, maxs, end, skipNumber, clip_against_missiles, content_mask, &t,
+    TT_AABB);
 
   *result = t;
 }
@@ -846,19 +867,22 @@ void  CG_Trace( trace_t *result, const vec3_t start, const vec3_t mins, const ve
 CG_CapTrace
 ================
 */
-void  CG_CapTrace( trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end,
-                   int skipNumber, content_mask_t content_mask )
-{
+void  CG_CapTrace(
+  trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs,
+  const vec3_t end, int skipNumber, qboolean clip_against_missiles,
+  content_mask_t content_mask) {
   trace_t t;
 
-  trap_CM_CapsuleTrace( &t, start, end, mins, maxs, 0, content_mask.include );
+  trap_CM_CapsuleTrace(&t, start, end, mins, maxs, 0, content_mask.include);
   t.entityNum = t.fraction != 1.0 ? ENTITYNUM_WORLD : ENTITYNUM_NONE;
-  if ( t.fraction == 0 ) {
+  if(t.fraction == 0) {
     *result = t;
     return;		// blocked immediately by the world
   }
   // check all other solid models
-  CG_ClipMoveToEntities( start, mins, maxs, end, skipNumber, content_mask, &t, TT_CAPSULE );
+  CG_ClipMoveToEntities(
+    start, mins, maxs, end, skipNumber, clip_against_missiles, content_mask, &t,
+    TT_CAPSULE);
 
   *result = t;
 }
@@ -868,19 +892,23 @@ void  CG_CapTrace( trace_t *result, const vec3_t start, const vec3_t mins, const
 CG_BiSphereTrace
 ================
 */
-void CG_BiSphereTrace( trace_t *result, const vec3_t start, const vec3_t end,
-    const float startRadius, const float endRadius, int skipNumber, content_mask_t content_mask )
-{
+void CG_BiSphereTrace(
+  trace_t *result, const vec3_t start, const vec3_t end,
+  const float startRadius, const float endRadius, int skipNumber,
+  qboolean clip_against_missiles, content_mask_t content_mask) {
   trace_t t;
   vec3_t  mins, maxs;
 
-  mins[ 0 ] = startRadius;
-  maxs[ 0 ] = endRadius;
+  mins[0] = startRadius;
+  maxs[0] = endRadius;
 
-  trap_CM_BiSphereTrace( &t, start, end, startRadius, endRadius, 0, content_mask.include );
+  trap_CM_BiSphereTrace(
+    &t, start, end, startRadius, endRadius, 0, content_mask.include);
   t.entityNum = t.fraction != 1.0 ? ENTITYNUM_WORLD : ENTITYNUM_NONE;
   // check all other solid models
-  CG_ClipMoveToEntities( start, mins, maxs, end, skipNumber, content_mask, &t, TT_BISPHERE );
+  CG_ClipMoveToEntities(
+    start, mins, maxs, end, skipNumber, clip_against_missiles, content_mask, &t,
+    TT_BISPHERE);
 
   *result = t;
 }
@@ -892,26 +920,30 @@ CG_Trace_Wrapper
 */
 void CG_Trace_Wrapper(
 	trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs,
-	const vec3_t end, int passEntityNum, const content_mask_t content_mask,
-	traceType_t type) {
+	const vec3_t end, int passEntityNum, qboolean clip_against_missiles,
+  const content_mask_t content_mask, traceType_t type) {
   trace_t t;
 
   switch(type) {
     case TT_AABB:
-      CG_Trace(results, start, mins, maxs, end, passEntityNum, content_mask);
+      CG_Trace(
+        results, start, mins, maxs, end, passEntityNum, clip_against_missiles,
+        content_mask);
       break;
 
     case TT_CAPSULE:
-      CG_CapTrace(results, start, mins, maxs, end, passEntityNum, content_mask);
+      CG_CapTrace(results, start, mins, maxs, end, passEntityNum,
+        clip_against_missiles, content_mask);
       break;
 
     case TT_BISPHERE:
       trap_CM_BiSphereTrace(
-        &t, start, end, mins[ 0 ], maxs[ 0 ], 0, content_mask.include);
+        &t, start, end, mins[0], maxs[0], 0, content_mask.include);
       t.entityNum = t.fraction != 1.0 ? ENTITYNUM_WORLD : ENTITYNUM_NONE;
       // check all other solid models
       CG_ClipMoveToEntities(
-        start, mins, maxs, end, passEntityNum, content_mask, &t, TT_BISPHERE);
+        start, mins, maxs, end, passEntityNum, clip_against_missiles,
+        content_mask, &t, TT_BISPHERE);
 
       *results = t;
       break;
@@ -1001,7 +1033,7 @@ qboolean CG_Visible( centity_t *cent, content_mask_t contents )
 
   CG_Trace( &trace, cg.predictedPlayerEntity.currentState.pos.trBase, NULL,
             NULL, cent->currentState.pos.trBase,
-            cg.predictedPlayerEntity.currentState.number, contents );
+            cg.predictedPlayerEntity.currentState.number, qfalse, contents );
 
   return trace.fraction >= 1.0f || trace.entityNum == cent - cg_entities;
 }

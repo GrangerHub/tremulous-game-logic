@@ -103,7 +103,7 @@ qboolean  PM_SlideMove( qboolean gravity )
     // see if we can make it there
     BG_Trace(
       &trace, pm->ps->origin, pm->mins, pm->maxs, end, pm->ps->clientNum,
-      pm->trace_mask, TT_AABB);
+      qfalse, pm->trace_mask, TT_AABB);
 
     if( trace.allsolid &&
         ( trace.plane.normal[2] > 0 ||
@@ -324,7 +324,7 @@ qboolean PM_StepSlideMove( qboolean gravity, qboolean predictive )
     VectorMA( down, -STEPSIZE, normal, down );
     BG_Trace(
       &trace, start_o, pm->mins, pm->maxs, down, pm->ps->clientNum,
-      pm->trace_mask, TT_AABB);
+      qfalse, pm->trace_mask, TT_AABB);
 
     //we can step down
     if( trace.fraction > 0.01f && trace.fraction < 1.0f &&
@@ -347,7 +347,7 @@ qboolean PM_StepSlideMove( qboolean gravity, qboolean predictive )
     VectorMA( down, -STEPSIZE, normal, down );
     BG_Trace(
       &trace, start_o, pm->mins, pm->maxs, down, pm->ps->clientNum,
-      pm->trace_mask, TT_AABB);
+      qfalse, pm->trace_mask, TT_AABB);
     // never step up when you still have up velocity
     if( DotProduct( trace.plane.normal, pm->ps->velocity ) > 0.0f &&
         ( trace.fraction == 1.0f || DotProduct( trace.plane.normal, normal ) < 0.7f ) )
@@ -361,7 +361,7 @@ qboolean PM_StepSlideMove( qboolean gravity, qboolean predictive )
     // test the player position if they were a stepheight higher
     BG_Trace(
       &trace, start_o, pm->mins, pm->maxs, up, pm->ps->clientNum,
-      pm->trace_mask, TT_AABB);
+      qfalse, pm->trace_mask, TT_AABB);
     if( trace.allsolid )
     {
       if( pm->debugLevel )
@@ -380,11 +380,11 @@ qboolean PM_StepSlideMove( qboolean gravity, qboolean predictive )
     VectorMA( trace.endpos, STEPSIZE * 1.5f, stepCheckDir, stepCheckEnd );
     BG_Trace(
       &stepCheckTrace, trace.endpos, pm->mins, pm->maxs, stepCheckEnd,
-      pm->ps->clientNum, pm->trace_mask, TT_AABB);
+      pm->ps->clientNum, qfalse, pm->trace_mask, TT_AABB);
     VectorCopy( stepCheckTrace.endpos, stepCheckStart );
     BG_Trace(
       &stepCheckTrace, stepCheckStart, pm->mins, pm->maxs, down,
-      pm->ps->clientNum, pm->trace_mask, TT_AABB);
+      pm->ps->clientNum, qfalse, pm->trace_mask, TT_AABB);
     if( stepCheckTrace.fraction >= 1.0f ||
         stepCheckTrace.plane.normal[ 2 ] < MIN_WALK_NORMAL )
       return stepped;
@@ -407,7 +407,7 @@ qboolean PM_StepSlideMove( qboolean gravity, qboolean predictive )
     VectorMA( down, -stepSize, normal, down );
     BG_Trace(
       &trace, pm->ps->origin, pm->mins, pm->maxs, down, pm->ps->clientNum,
-      pm->trace_mask, TT_AABB);
+      qfalse, pm->trace_mask, TT_AABB);
 
     if( !trace.allsolid )
       VectorCopy( trace.endpos, pm->ps->origin );

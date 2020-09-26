@@ -118,10 +118,10 @@ gentity_t *G_TestEntityPosition(gentity_t *ent) {
 
   if(ent->client) {
     SV_Trace(&tr, ent->client->ps.origin, ent->r.mins, ent->r.maxs,
-      ent->client->ps.origin, ent->s.number, ent->clip_mask, TT_AABB);
+      ent->client->ps.origin, ent->s.number, qfalse, ent->clip_mask, TT_AABB);
   } else {
     SV_Trace(&tr, ent->s.pos.trBase, ent->r.mins, ent->r.maxs,
-      ent->s.pos.trBase, ent->s.number, ent->clip_mask, TT_AABB);
+      ent->s.pos.trBase, ent->s.number, qfalse, ent->clip_mask, TT_AABB);
   }
 
   if(tr.startsolid) {

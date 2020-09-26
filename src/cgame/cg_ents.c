@@ -413,8 +413,7 @@ static void CG_Speaker( centity_t *cent )
 CG_LaunchMissile
 ===============
 */
-static void CG_LaunchMissile( centity_t *cent )
-{
+static void CG_LaunchMissile(centity_t *cent) {
   entityState_t       *es;
   const weaponInfo_t  *wi;
   particleSystem_t    *ps;
@@ -425,32 +424,33 @@ static void CG_LaunchMissile( centity_t *cent )
   es = &cent->currentState;
 
   weapon = es->weapon;
-  if( weapon > WP_NUM_WEAPONS )
+  if(weapon > WP_NUM_WEAPONS) {
     weapon = WP_NONE;
+  }
 
-  wi = &cg_weapons[ weapon ];
+  wi = &cg_weapons[weapon];
   weaponMode = es->generic1;
 
-  if( wi->wim[ weaponMode ].missileParticleSystem )
-  {
-    ps = CG_SpawnNewParticleSystem( wi->wim[ weaponMode ].missileParticleSystem );
+  if(wi->wim[weaponMode].missileParticleSystem) {
+    ps = CG_SpawnNewParticleSystem(wi->wim[weaponMode].missileParticleSystem);
 
-    if( CG_IsParticleSystemValid( &ps ) )
-    {
-      CG_SetAttachmentCent( &ps->attachment, cent );
-      CG_AttachToCent( &ps->attachment );
+    if(CG_IsParticleSystemValid(&ps)) {
+      CG_SetAttachmentCent(&ps->attachment, cent);
+      CG_AttachToCent(&ps->attachment);
       ps->charge = es->torsoAnim;
     }
   }
 
-  if( wi->wim[ weaponMode ].missileTrailSystem )
-  {
-    ts = CG_SpawnNewTrailSystem( wi->wim[ weaponMode ].missileTrailSystem );
+  if(wi->wim[weaponMode].missileTrailSystem) {
+    if(
+      !BG_Missile(weapon, weaponMode)->team_only_trail ||
+      es->otherEntityNum2 == cg.predictedPlayerState.stats[STAT_TEAM]) {
+      ts = CG_SpawnNewTrailSystem(wi->wim[weaponMode].missileTrailSystem);
 
-    if( CG_IsTrailSystemValid( &ts ) )
-    {
-      CG_SetAttachmentCent( &ts->frontAttachment, cent );
-      CG_AttachToCent( &ts->frontAttachment );
+      if(CG_IsTrailSystemValid(&ts)) {
+        CG_SetAttachmentCent(&ts->frontAttachment, cent);
+        CG_AttachToCent(&ts->frontAttachment);
+      }
     }
   }
 }
@@ -533,7 +533,7 @@ static void CG_LaserMine(centity_t *cent, refEntity_t *ent) {
         (
           cgs.clientinfo[cg.clientNum].team != TEAM_HUMANS &&
           cgs.clientinfo[cg.clientNum].team != TEAM_NONE) ? MAGIC_TRACE_HACK : ENTITYNUM_NONE,
-        *Temp_Clip_Mask(MASK_SHOT, 0));
+        qfalse, *Temp_Clip_Mask(MASK_SHOT, 0));
       CG_Link_Solid_Entity(es->number);
       CG_SetAttachmentCent( &cent->lasermineTS->frontAttachment, cent );
       CG_AttachToCent( &cent->lasermineTS->frontAttachment );
@@ -808,7 +808,7 @@ static void CG_LightFlare( centity_t *cent )
     return;
 
   CG_Trace( &tr, cg.refdef.vieworg, NULL, NULL, es->angles2,
-            entityNum, *Temp_Clip_Mask(MASK_SHOT, 0) );
+            entityNum, qfalse, *Temp_Clip_Mask(MASK_SHOT, 0) );
 
   //if there is no los between the view and the flare source
   //it definately cannot be seen
@@ -876,7 +876,7 @@ static void CG_LightFlare( centity_t *cent )
     {
       //"correct" flares
       CG_BiSphereTrace( &tr, cg.refdef.vieworg, end,
-          1.0f, srcRadius, entityNum, *Temp_Clip_Mask(MASK_SHOT, 0));
+          1.0f, srcRadius, entityNum, qfalse, *Temp_Clip_Mask(MASK_SHOT, 0));
 
       if( tr.fraction < 1.0f )
         ratio = tr.lateralFraction;
@@ -888,7 +888,7 @@ static void CG_LightFlare( centity_t *cent )
       //draw timed flares
       SETBOUNDS( mins, maxs, srcRadius );
       CG_Trace( &tr, start, mins, maxs, end,
-                entityNum, *Temp_Clip_Mask(MASK_SHOT, 0) );
+                entityNum, qfalse, *Temp_Clip_Mask(MASK_SHOT, 0) );
 
       if( ( tr.fraction < 1.0f || tr.startsolid ) && cent->lfs.status )
       {
@@ -925,7 +925,7 @@ static void CG_LightFlare( centity_t *cent )
       //draw nofade flares
       SETBOUNDS( mins, maxs, srcRadius );
       CG_Trace( &tr, start, mins, maxs, end,
-                entityNum, *Temp_Clip_Mask(MASK_SHOT, 0) );
+                entityNum, qfalse, *Temp_Clip_Mask(MASK_SHOT, 0) );
 
       //flare source occluded
       if( ( tr.fraction < 1.0f || tr.startsolid ) )
@@ -1230,6 +1230,52 @@ static void CG_InterpolateEntityPosition( centity_t *cent, int time )
   cent->lerpAngles[ 2 ] = LerpAngle( current[ 2 ], next[ 2 ], f );
 }
 
+static void CG_Bounce_Missile(
+  centity_t *cent, trace_t *tr, int time, int timeshift) {
+  weapon_t     weapon = cent->currentState.weapon;
+  weaponMode_t mode = cent->currentState.generic1;
+
+  //bounce
+  if(BG_Missile(weapon, mode)->bounce_type != BOUNCE_NONE) {
+    vec3_t       velocity;
+    vec3_t       reflected_velocity;
+    vec3_t       hitOrigin;
+    float        dot;
+    int          hitTime;
+    trajectory_t traj = cent->currentState.pos;
+
+    // reflect the velocity on the trace plane
+    hitTime =
+      time + (timeshift * tr->fraction);
+    BG_EvaluateTrajectory(&cent->currentState.pos, hitTime, hitOrigin);
+    BG_EvaluateTrajectoryDelta(
+      &cent->currentState.pos, hitTime, velocity);
+    dot = DotProduct(velocity, tr->plane.normal);
+    VectorMA(
+      velocity, -2 * dot, tr->plane.normal,
+      reflected_velocity);
+
+    if(BG_Missile(weapon, mode)->bounce_type == BOUNCE_HALF) {
+      VectorScale(
+        reflected_velocity, 0.65,
+        reflected_velocity);
+      // check for stop
+      if(
+        tr->plane.normal[2] > 0.2 &&
+        VectorLength(reflected_velocity) < 40) {
+        VectorCopy(hitOrigin, cent->lerpOrigin);
+        return;
+      }
+    }
+
+    traj.trTime = hitTime;
+    VectorAdd(hitOrigin, tr->plane.normal, hitOrigin);
+    VectorCopy(hitOrigin, traj.trBase);
+    VectorCopy(reflected_velocity, traj.trDelta);
+    BG_EvaluateTrajectory(&traj, (time + timeshift), cent->lerpOrigin);
+  }
+}
+
 /*
 ===============
 CG_CalcEntityLerpPositions
@@ -1290,11 +1336,17 @@ void CG_CalcEntityLerpPositions(centity_t *cent, int time)
     BG_EvaluateTrajectory( &cent->currentState.pos, time, lastOrigin );
 	
     CG_Trace( &tr, lastOrigin, vec3_origin, vec3_origin, cent->lerpOrigin,
-      cent->currentState.number, *Temp_Clip_Mask(MASK_SHOT, 0) );
+      cent->currentState.number, qfalse, *Temp_Clip_Mask(MASK_SHOT, 0) );
 	
     // don't let the projectile go through the floor
-    if( tr.fraction < 1.0f )
-      VectorLerp2( tr.fraction, lastOrigin, cent->lerpOrigin, cent->lerpOrigin );
+    if( tr.fraction < 1.0f ) {
+      if(cent->currentState.eType == ET_MISSILE) {
+        CG_Bounce_Missile(cent, &tr, time, timeshift);
+      } else {
+        VectorLerp2(tr.fraction, lastOrigin, cent->lerpOrigin, cent->lerpOrigin);
+      }
+    }
+      
   }
 
   // adjust for riding a mover if it wasn't rolled into the predicted

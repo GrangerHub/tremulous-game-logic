@@ -99,7 +99,7 @@ static void G_CheckGround( gentity_t *ent ) {
   VectorMA( origin, -1.0f, ent->s.origin2, origin );
 
   SV_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin,
-    ent->s.number, ent->clip_mask, TT_AABB );
+    ent->s.number, qfalse, ent->clip_mask, TT_AABB );
 
   if( G_GroundIsValid( ent, &g_entities[ tr.entityNum ] ) ) {
     ent->s.groundEntityNum = tr.entityNum;
@@ -271,7 +271,7 @@ void G_Physics( gentity_t *ent, int msec )
   BG_EvaluateTrajectory( &ent->s.pos, level.time, origin );
 
   SV_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs,
-    origin, ent->s.number, ent->clip_mask, TT_AABB );
+    origin, ent->s.number, qfalse, ent->clip_mask, TT_AABB );
 
   VectorCopy( tr.endpos, ent->r.currentOrigin );
 

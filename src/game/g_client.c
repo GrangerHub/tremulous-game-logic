@@ -1566,9 +1566,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   index = ent - g_entities;
   client = ent->client;
 
-  if(client->ps.weapon == WP_ASPITFIRE) {
-    G_Spitfire_Detonate_Gas_Trail(client);
-  }
+  G_Detonate_Saved_Missiles(ent);
 
   id = ent->client->ps.misc[MISC_ID];
 
@@ -1616,6 +1614,8 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
 
     if( spawn != NULL && spawn != ent )
     {
+      weapon_t weapon;
+
       //start spawn animation on spawnPoint
       G_SetBuildableAnim( spawn, BANIM_SPAWN1, qtrue );
 
@@ -1634,11 +1634,20 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
         ent->dmgProtectionTime = level.time + HUMAN_SPAWN_PROTECTION_TIME;
       }
 
-      // reset the barbs
-      ent->client->pers.barbs = BG_Weapon( WP_ALEVEL3_UPG )->maxAmmo;
-      ent->client->pers.barbRegenTime = level.time;
-      ent->client->pers.spitfire_fuel = BG_Weapon(WP_ASPITFIRE)->maxClips + 1;
-      ent->client->pers.SPITFIRE_GAS_TRAIL_REGEN_time = level.time;
+      //reset barbs
+      for(weapon = 0; weapon < WP_NUM_WEAPONS; weapon++) {
+        if(!BG_Weapon(weapon)->usesBarbs) {
+          continue;
+        }
+
+        if(BG_Weapon(weapon)->maxClips > 0) {
+          client->pers.barbs[weapon] = BG_Weapon(weapon)->maxClips + 1;
+        } else {
+          client->pers.barbs[weapon] = BG_Weapon(weapon)->maxAmmo;
+        }
+
+        client->pers.barbRegenTime[weapon] = level.time;
+      }
     }
   }
 
@@ -1925,9 +1934,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
     client->ps.weapon = client->ps.stats[ STAT_WEAPON ];
   }
 
-  if(client->ps.weapon == WP_ASPITFIRE) {
-    G_Spitfire_Detonate_Gas_Trail(client);
-  }
+  G_Detonate_Saved_Missiles(ent);
 
   if(client->ps.weapon != WP_ALEVEL1 && client->ps.weapon != WP_ALEVEL1_UPG) {
     ent->r.svFlags &= ~SVF_CLIENTMASK_EXCLUSIVE;

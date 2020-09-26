@@ -1224,64 +1224,40 @@ void ClientTimerActions( gentity_t *ent, int msec )
     }
   }
 
-  // Regenerate Adv. Dragoon barbs
-  if( client->ps.weapon == WP_ALEVEL3_UPG )
-  {
-    if( client->ps.ammo < BG_Weapon( WP_ALEVEL3_UPG )->maxAmmo )
-    {
-      if( ent->timestamp + LEVEL3_BOUNCEBALL_REGEN < level.time )
-      {
-        client->ps.ammo++;
-        ent->timestamp = level.time;
-      }
-    }
-    else
-      ent->timestamp = level.time;
-  } else if(client->ps.weapon == WP_ASPITFIRE)
-  {
-    int *ps_clips = BG_GetClips(&client->ps, client->ps.weapon);
+  // Regenerate barbs
+  if(BG_Weapon(client->ps.weapon)->usesBarbs) {
+    if(BG_Weapon(client->ps.weapon)->maxClips > 0) {
+      int *ps_clips = BG_GetClips(&client->ps, client->ps.weapon);
 
-    if(
-      *ps_clips < BG_Weapon(WP_ASPITFIRE)->maxClips ||
-      client->ps.ammo <= 0)
-    {
-      if( ent->timestamp + SPITFIRE_GAS_TRAIL_REGEN < level.time )
-      {
-        if(client->ps.ammo <= 0) {
-          G_Spitfire_Detonate_Gas_Trail(client);
-          client->ps.ammo = BG_Weapon(WP_ASPITFIRE)->maxAmmo;
-        } else {
-          (*ps_clips)++;
+      if(
+        *ps_clips < BG_Weapon(client->ps.weapon)->maxClips ||
+        client->ps.ammo <= 0) {
+        if( ent->timestamp + BG_Weapon(client->ps.weapon)->barbRegenTime < level.time )
+        {
+          if(client->ps.ammo <= 0) {
+            G_Detonate_Saved_Missiles(ent);
+            client->ps.ammo = BG_Weapon(client->ps.weapon)->maxAmmo;
+          } else {
+            (*ps_clips)++;
+          }
+          ent->timestamp = level.time;
         }
+      } else {
+        ent->timestamp = level.time;
+      }
+    } else {
+      if(client->ps.ammo < BG_Weapon(client->ps.weapon)->maxAmmo) {
+        if(
+          ent->timestamp + BG_Weapon(client->ps.weapon)->barbRegenTime <
+          level.time) {
+          client->ps.ammo++;
+          ent->timestamp = level.time;
+        }
+      }
+      else {
         ent->timestamp = level.time;
       }
     }
-    else
-      ent->timestamp = level.time;
-  }
-  {
-    // regen the barb while evolved to a different class
-    if( client->pers.barbs < BG_Weapon( WP_ALEVEL3_UPG )->maxAmmo )
-    {
-      if( client->pers.barbRegenTime + LEVEL3_BOUNCEBALL_REGEN < level.time )
-      {
-        client->pers.barbs++;
-        client->pers.barbRegenTime = level.time;
-      }
-    }
-    else
-      client->pers.barbRegenTime = level.time;
-
-    if( client->pers.spitfire_fuel < BG_Weapon(WP_ASPITFIRE)->maxClips + 1 )
-    {
-      if( client->pers.SPITFIRE_GAS_TRAIL_REGEN_time + SPITFIRE_GAS_TRAIL_REGEN < level.time )
-      {
-        client->pers.spitfire_fuel++;
-        client->pers.SPITFIRE_GAS_TRAIL_REGEN_time = level.time;
-      }
-    }
-    else
-      client->pers.SPITFIRE_GAS_TRAIL_REGEN_time = level.time;
   }
 
   // limit the broadcasting of invis players to guard against wallhax
@@ -1632,7 +1608,7 @@ static void G_FindActivationEnt( gentity_t *ent )
   VectorMA( client->ps.origin, ACTIVATION_ENT_RANGE, view, point );
   SV_Trace(
     &trace, client->ps.origin, NULL, NULL, point, ent->s.number,
-    *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB );
+    qtrue, *Temp_Clip_Mask(MASK_SHOT, 0), TT_AABB );
 
   traceEnt = &g_entities[ trace.entityNum ];
 
@@ -1671,7 +1647,8 @@ static void G_FindActivationEnt( gentity_t *ent )
       {
         SV_Trace(
           &trace, client->ps.origin, NULL, NULL, traceEnt->r.currentOrigin,
-          client->ps.clientNum, *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB);
+          client->ps.clientNum, qtrue, *Temp_Clip_Mask(MASK_PLAYERSOLID, 0),
+          TT_AABB);
 
         if( trace.fraction < 1.0f && trace.entityNum == traceEnt->s.number )
           activationEntDistance = Distance( client->ps.origin, trace.endpos );
@@ -2832,6 +2809,11 @@ void ClientThink_real( gentity_t *ent )
 
   // execute client events
   ClientEvents( ent, oldEventSequence );
+
+  if(client->ps.stats[ STAT_FLAGS ] & SFL_DETONATE_MISSILES) {
+    G_Detonate_Saved_Missiles(ent);
+    client->ps.stats[ STAT_FLAGS ] &= ~SFL_DETONATE_MISSILES;
+  }
 
   // link entity now, after any personal teleporters have been used
   SV_LinkEntity( ent );

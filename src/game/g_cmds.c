@@ -581,8 +581,7 @@ static void Give_Stamina( gentity_t *ent ) {
 static void Give_Ammo( gentity_t *ent ) {
   gclient_t *client = ent->client;
 
-  if( client->ps.weapon != WP_ALEVEL3_UPG &&
-      client->ps.weapon != WP_ASPITFIRE &&
+  if( !BG_Weapon(client->ps.weapon)->usesBarbs &&
       BG_Weapon( client->ps.weapon )->infiniteAmmo ) {
     return;
   }
@@ -2549,19 +2548,19 @@ qboolean G_RoomForClassChange( gentity_t *ent, class_t class,
   //compute a place up in the air to start the real trace
   VectorCopy( newOrigin, temp );
   temp[ 2 ] += nudgeHeight;
-  SV_Trace( &tr, newOrigin, toMins, toMaxs, temp, ent->s.number,
+  SV_Trace( &tr, newOrigin, toMins, toMaxs, temp, ent->s.number, qfalse,
     *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB );
 
   //trace down to the ground so that we can evolve on slopes
   VectorCopy( newOrigin, temp );
   temp[ 2 ] += ( nudgeHeight * tr.fraction );
-  SV_Trace( &tr, temp, toMins, toMaxs, newOrigin, ent->s.number,
+  SV_Trace( &tr, temp, toMins, toMaxs, newOrigin, ent->s.number, qfalse,
     *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB );
   VectorCopy( tr.endpos, newOrigin );
 
   //make REALLY sure
   SV_Trace( &tr, newOrigin, toMins, toMaxs, newOrigin,
-    ent->s.number, *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB );
+    ent->s.number, qfalse, *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB );
 
   //check there is room to evolve
   return ( !tr.startsolid && tr.fraction == 1.0f );
@@ -2777,19 +2776,19 @@ void G_Evolve( gentity_t *ent, class_t newClass,
                       BG_Class( currentClass )->chargeStaminaRestoreRate);
 
   //save the barbs
-  if( ent->client->ps.weapon == WP_ALEVEL3_UPG )
-  {
-    ent->client->pers.barbs = ent->client->ps.ammo;
-    ent->client->pers.barbRegenTime = ent->timestamp;
-  }
+  if(BG_Weapon(ent->client->ps.weapon)->usesBarbs) {
+    int *clips = BG_GetClips(&ent->client->ps, ent->client->ps.weapon);
 
-  if(ent->client->ps.weapon == WP_ASPITFIRE) {
-    ent->client->pers.spitfire_fuel = 
-      *BG_GetClips(&ent->client->ps, ent->client->ps.weapon);
-    if(ent->client->ps.ammo == BG_Weapon(WP_ASPITFIRE)->maxAmmo) {
-      ent->client->pers.spitfire_fuel++;
+    if(clips && *clips > 0) {
+      ent->client->pers.barbs[ent->client->ps.weapon] = *clips;
+      if(ent->client->ps.ammo == BG_Weapon(ent->client->ps.weapon)->maxAmmo) {
+        (ent->client->pers.barbs[ent->client->ps.weapon])++;
+      }
+    } else {
+      ent->client->pers.barbs[ent->client->ps.weapon] = ent->client->ps.ammo;
     }
-    ent->client->pers.SPITFIRE_GAS_TRAIL_REGEN_time = ent->timestamp;
+
+    ent->client->pers.barbRegenTime[ent->client->ps.weapon] = ent->timestamp;
   }
 
   ent->client->pers.classSelection = newClass;
@@ -2897,23 +2896,22 @@ void G_Evolve( gentity_t *ent, class_t newClass,
   }
 
   //restore the barbs
-  if( ent->client->ps.weapon == WP_ALEVEL3_UPG )
-  {
-    ent->client->ps.ammo = ent->client->pers.barbs;
-    ent->timestamp = ent->client->pers.barbRegenTime;
-  }
+  if(BG_Weapon(ent->client->ps.weapon)->usesBarbs) {
+    int *clips = BG_GetClips(&ent->client->ps, ent->client->ps.weapon);
 
-  if(ent->client->ps.weapon == WP_ASPITFIRE) {
-    int *ps_clips = BG_GetClips(&ent->client->ps, ent->client->ps.weapon);
+    if(clips && *clips > 0) {
+      if(ent->client->pers.barbs[ent->client->ps.weapon] > 0) {
+        ent->client->ps.ammo = BG_Weapon(ent->client->ps.weapon)->maxAmmo;
+      }
+      *clips = (ent->client->pers.barbs[ent->client->ps.weapon]) - 1;
+      if(*clips < 0) {
+        *clips = 0;
+      }
+    } else {
+      ent->client->ps.ammo = ent->client->pers.barbs[ent->client->ps.weapon];
+    }
 
-    if(ent->client->pers.spitfire_fuel > 0) {
-      ent->client->ps.ammo = BG_Weapon(WP_ASPITFIRE)->maxAmmo;
-    }
-    *ps_clips = ent->client->pers.spitfire_fuel - 1;
-    if(*ps_clips < 0) {
-      *ps_clips = 0;
-    }
-    ent->timestamp = ent->client->pers.SPITFIRE_GAS_TRAIL_REGEN_time;
+    ent->timestamp = ent->client->pers.barbRegenTime[ent->client->ps.weapon];
   }
 
   if( !g_cheats.integer && !force )
@@ -3131,11 +3129,10 @@ void Cmd_Destroy_f( gentity_t *ent ) {
   VectorMA( viewOrigin, 100, forward, end );
 
   SV_Trace( &tr, viewOrigin, NULL, NULL, end, ent->s.number,
-    *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB);
+    qfalse, *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB);
   if ( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING ) {
     traceEnt = &g_entities[ ent->client->ps.persistant[ PERS_ACT_ENT ] ];
-  }
-  else {
+  } else {
     traceEnt = &g_entities[ tr.entityNum ];
   }
 
@@ -4575,7 +4572,8 @@ void Cmd_Reload_f( gentity_t *ent )
     AngleVectors( ent->client->ps.viewangles, forward, NULL, NULL );
     VectorMA( viewOrigin, 100, forward, end );
 
-    SV_Trace( &tr, viewOrigin, NULL, NULL, end, ent->s.number,
+    SV_Trace(
+      &tr, viewOrigin, NULL, NULL, end, ent->s.number, qtrue,
       *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB );
     if ( ent->client->ps.stats[ STAT_STATE ] & SS_HOVELING )
       traceEnt = &g_entities[ ent->client->ps.persistant[ PERS_ACT_ENT ] ];

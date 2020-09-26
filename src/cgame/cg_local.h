@@ -2042,18 +2042,20 @@ void CG_Clip_To_Test_Area(
   traceType_t collisionType);
 void        CG_Trace(
   trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs,
-  const vec3_t end, int skipNumber, content_mask_t content_mask);
+  const vec3_t end, int skipNumber, qboolean clip_against_missiles,
+  content_mask_t content_mask);
 void        CG_CapTrace(
   trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs,
-  const vec3_t end, int skipNumber, content_mask_t content_mask);
+  const vec3_t end, int skipNumber, qboolean clip_against_missiles,
+  content_mask_t content_mask);
 void        CG_BiSphereTrace(
   trace_t *result, const vec3_t start, const vec3_t end,
   const float startRadius, const float endRadius, int skipNumber,
-  content_mask_t content_mask);
+  qboolean clip_against_missiles, content_mask_t content_mask);
 void        CG_Trace_Wrapper(
 	trace_t *results, const vec3_t start, vec3_t mins, vec3_t maxs,
-	const vec3_t end, int passEntityNum, const content_mask_t content_mask,
-	traceType_t type);
+	const vec3_t end, int passEntityNum, qboolean clip_against_missiles,
+  const content_mask_t content_mask, traceType_t type);
 void        CG_PredictPlayerState( void );
 
 

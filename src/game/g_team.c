@@ -219,9 +219,7 @@ void G_LeaveTeam( gentity_t *self )
   if( self->client->ps.eFlags & EF_OCCUPYING )
     G_ResetOccupation( self->occupation.occupied, self );
 
-  if(self->client->ps.weapon == WP_ASPITFIRE) {
-    G_Spitfire_Detonate_Gas_Trail(self->client);
-  }
+  G_Detonate_Saved_Missiles(self);
 
   for( i = 0; i < level.num_entities; i++ )
   {
