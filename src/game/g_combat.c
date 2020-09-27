@@ -927,7 +927,7 @@ G_InitDamageLocations
 */
 void G_InitDamageLocations( void )
 {
-  char          *modelName;
+  const char    *modelName;
   char          filename[ MAX_QPATH ];
   int           i;
   int           len;

@@ -444,15 +444,15 @@ CG_OffsetShoulderView
 */
 void CG_OffsetShoulderView( void )
 {
-  int            i;
-  int            cmdNum;
-  usercmd_t      cmd, oldCmd;
-  vec3_t         rotationAngles;
-  vec3_t         axis[ 3 ], rotaxis[ 3 ];
-  float          deltaMousePitch;
-  static float   mousePitch;
-  vec3_t         forward, right, up;
-  classConfig_t* classConfig;
+  int                  i;
+  int                  cmdNum;
+  usercmd_t            cmd, oldCmd;
+  vec3_t               rotationAngles;
+  vec3_t               axis[ 3 ], rotaxis[ 3 ];
+  float                deltaMousePitch;
+  static float         mousePitch;
+  vec3_t               forward, right, up;
+  const classConfig_t* classConfig;
 
   // Ignore following pitch; it's too jerky otherwise.
   if( !cg_thirdPersonPitchFollow.integer ) 

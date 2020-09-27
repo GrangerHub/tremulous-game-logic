@@ -106,6 +106,655 @@ void BG_Init_Game_Mode(char *game_mode_raw) {
 /*
 ======================================================================
 
+Parse Utilities
+
+======================================================================
+*/
+
+/*
+==============
+BG_Parse_String
+==============
+*/
+static qboolean BG_Parse_String(char *string, char **text_p, size_t string_size) {
+  char  *token;
+
+  Com_Assert(string);
+
+  token = COM_Parse(text_p);
+  if(!token) {
+    Com_Printf(S_COLOR_RED "ERROR: expected string token\n");
+    return qfalse;
+  }
+
+  Q_strncpyz(string, token, string_size);
+  return qtrue;
+}
+
+/*
+==============
+BG_Parse_Bool
+==============
+*/
+static qboolean BG_Parse_Bool(qboolean *bool_var, char **text_p) {
+  char  *token;
+
+  Com_Assert(bool_var);
+
+  token = COM_Parse(text_p);
+  if(!token) {
+    Com_Printf(S_COLOR_RED "ERROR: expected boolean token\n");
+    return qfalse;
+  }
+
+  if(!Q_stricmp(token, "")) {
+    Com_Printf(S_COLOR_RED "ERROR: expected boolean token\n");
+    return qfalse;
+  }
+
+  if(!Q_stricmp(token, "true")) {
+    *bool_var = qtrue;
+    return qtrue;
+  } else if(!Q_stricmp(token, "false")) {
+    *bool_var = qfalse;
+    return qtrue;
+  }
+
+  Com_Printf(S_COLOR_RED "ERROR: unknown token '%s', expected boolean token\n", token);
+  return qfalse;
+}
+
+/*
+==============
+BG_Parse_Integer
+==============
+*/
+static qboolean BG_Parse_Integer(
+  int *int_var, char **text_p, qboolean nonnegative) {
+  char  *token;
+
+  Com_Assert(int_var);
+
+  token = COM_Parse(text_p);
+  if(!token) {
+    Com_Printf(S_COLOR_RED "ERROR: expected integer token\n");
+    return qfalse;
+  }
+
+  if(!Q_stricmp(token, "")) {
+    Com_Printf(S_COLOR_RED "ERROR: expected integer token\n");
+    return qfalse;
+  }
+
+  *int_var = atoi(token);
+
+  if(nonnegative) {
+    if(*int_var < 0) {
+      *int_var = 0;
+    }
+  }
+
+  return qtrue;
+}
+
+/*
+==============
+BG_Parse_Float
+==============
+*/
+static qboolean BG_Parse_Float(
+  float *float_var, char **text_p, qboolean nonnegative) {
+  char  *token;
+
+  Com_Assert(float_var);
+
+  token = COM_Parse(text_p);
+  if(!token) {
+    Com_Printf(S_COLOR_RED "ERROR: expected float token\n");
+    return qfalse;
+  }
+
+  if(!Q_stricmp(token, "")) {
+    Com_Printf(S_COLOR_RED "ERROR: expected float token\n");
+    return qfalse;
+  }
+
+  *float_var = atof(token);
+
+  if(nonnegative) {
+    if(*float_var < 0.0) {
+      *float_var = 0.0;
+    }
+  }
+
+  return qtrue;
+}
+
+/*
+==============
+BG_Parse_Vect2
+==============
+*/
+/*
+static qboolean BG_Parse_Vect2(vec2_t *vect_var, char **text_p) {
+  char  *token;
+  int   i;
+
+  Com_Assert(vect_var);
+
+  for (i = 0; i < 2; i++) {
+    token = COM_Parse(text_p);
+    if(!token) {
+      Com_Printf(S_COLOR_RED "ERROR: expected vector 2 token\n");
+      return qfalse;
+    }
+
+    if(!Q_stricmp(token, "")) {
+      Com_Printf(S_COLOR_RED "ERROR: expected vector 2 token\n");
+      return qfalse;
+    }
+
+    (*vect_var)[i] = atof(token);
+  }
+
+  return qtrue;
+}
+*/
+
+/*
+==============
+BG_Parse_Vect3
+==============
+*/
+static qboolean BG_Parse_Vect3(vec3_t *vect_var, char **text_p) {
+  char  *token;
+  int   i;
+
+  Com_Assert(vect_var);
+
+  for (i = 0; i < 3; i++) {
+    token = COM_Parse(text_p);
+    if(!token) {
+      Com_Printf(S_COLOR_RED "ERROR: expected vector 3 token\n");
+      return qfalse;
+    }
+
+    if(!Q_stricmp(token, "")) {
+      Com_Printf(S_COLOR_RED "ERROR: expected vector 3 token\n");
+      return qfalse;
+    }
+
+    (*vect_var)[i] = atof(token);
+  }
+
+  return qtrue;
+}
+
+/*
+==============
+BG_Parse_Vect4
+==============
+*/
+/*
+static qboolean BG_Parse_Vect4(vec4_t *vect_var, char **text_p) {
+  char  *token;
+  int   i;
+
+  Com_Assert(vect_var);
+
+  for (i = 0; i < 4; i++) {
+    token = COM_Parse(text_p);
+    if(!token) {
+      Com_Printf(S_COLOR_RED "ERROR: expected vector 4 token\n");
+      return qfalse;
+    }
+
+    if(!Q_stricmp(token, "")) {
+      Com_Printf(S_COLOR_RED "ERROR: expected vector 4 token\n");
+      return qfalse;
+    }
+
+    (*vect_var)[i] = atof(token);
+  }
+
+  return qtrue;
+}
+*/
+
+/*
+==============
+BG_Parse_Vect5
+==============
+*/
+/*
+static qboolean BG_Parse_Vect5(vec5_t *vect_var, char **text_p) {
+  char  *token;
+  int   i;
+
+  Com_Assert(vect_var);
+
+  for (i = 0; i < 5; i++) {
+    token = COM_Parse(text_p);
+    if(!token) {
+      Com_Printf(S_COLOR_RED "ERROR: expected vector 5 token\n");
+      return qfalse;
+    }
+
+    if(!Q_stricmp(token, "")) {
+      Com_Printf(S_COLOR_RED "ERROR: expected vector 5 token\n");
+      return qfalse;
+    }
+
+    (*vect_var)[i] = atof(token);
+  }
+
+  return qtrue;
+}
+*/
+
+/*
+==============
+BG_Parse_Means_Of_Death
+==============
+*/
+static qboolean BG_Parse_Means_Of_Death(
+  meansOfDeath_t *mod_var, char **text_p) {
+  char           *token;
+  meansOfDeath_t mod;
+
+  Com_Assert(mod_var);
+
+  token = COM_Parse(text_p);
+  if(!token) {
+    Com_Printf(S_COLOR_RED "ERROR: expected means of death token\n");
+    return qfalse;
+  }
+
+  for (mod = 0; mod < NUM_MODS; mod++) {
+    if(!Q_stricmp(token, BG_MOD(mod)->name)) {
+      *mod_var = mod;
+      break;
+    }
+  }
+
+  return qtrue;
+}
+
+/*
+==============
+BG_Parse_Traj_Type
+==============
+*/
+static qboolean BG_Parse_Traj_Type(trType_t *trType_var, char **text_p) {
+  char  *token;
+
+  Com_Assert(trType_var);
+
+  token = COM_Parse(text_p);
+  if(!token) {
+    Com_Printf(S_COLOR_RED "ERROR: expected trajectory type token\n");
+    return qfalse;
+  }
+
+  if(!Q_stricmp(token, "")) {
+    Com_Printf(S_COLOR_RED "ERROR: expected trajectory type token\n");
+    return qfalse;
+  }
+
+  if(!Q_stricmp(token, "TR_STATIONARY")) {
+    *trType_var = TR_STATIONARY;
+    return qtrue;
+  } else if(!Q_stricmp(token, "TR_INTERPOLATE")) {
+    *trType_var = TR_INTERPOLATE;
+    return qtrue;
+  } else if(!Q_stricmp(token, "TR_LINEAR")) {
+    *trType_var = TR_LINEAR;
+    return qtrue;
+  } else if(!Q_stricmp(token, "TR_LINEAR_STOP")) {
+    *trType_var = TR_LINEAR_STOP;
+    return qtrue;
+  } else if(!Q_stricmp(token, "TR_SINE")) {
+    *trType_var = TR_SINE;
+    return qtrue;
+  } else if(!Q_stricmp(token, "TR_GRAVITY")) {
+    *trType_var = TR_GRAVITY;
+    return qtrue;
+  } else if(!Q_stricmp(token, "TR_BUOYANCY")) {
+    *trType_var = TR_BUOYANCY;
+    return qtrue;
+  } else if(!Q_stricmp(token, "TR_ACCEL")) {
+    *trType_var = TR_ACCEL;
+    return qtrue;
+  } else if(!Q_stricmp(token, "TR_HALF_GRAVITY")) {
+    *trType_var = TR_HALF_GRAVITY;
+    return qtrue;
+  }
+
+  Com_Printf(S_COLOR_RED "ERROR: unknown token '%s', expected trajectory type token\n", token);
+  return qfalse;
+}
+
+/*
+==============
+BG_Parse_Bounce_Type
+==============
+*/
+static qboolean BG_Parse_Bounce_Type(bounce_t *bounce_var, char **text_p) {
+  char  *token;
+
+  Com_Assert(bounce_var);
+
+  token = COM_Parse(text_p);
+  if(!token) {
+    Com_Printf(S_COLOR_RED "ERROR: expected bounce type token\n");
+    return qfalse;
+  }
+
+  if(!Q_stricmp(token, "")) {
+    Com_Printf(S_COLOR_RED "ERROR: expected bounce type token\n");
+    return qfalse;
+  }
+
+  if(!Q_stricmp(token, "BOUNCE_NONE")) {
+    *bounce_var = BOUNCE_NONE;
+    return qtrue;
+  } else if(!Q_stricmp(token, "BOUNCE_HALF")) {
+    *bounce_var = BOUNCE_HALF;
+    return qtrue;
+  } else if(!Q_stricmp(token, "BOUNCE_FULL")) {
+    *bounce_var = BOUNCE_FULL;
+    return qtrue;
+  }
+
+  Com_Printf(S_COLOR_RED "ERROR: unknown token '%s', expected bounce type token\n", token);
+  return qfalse;
+}
+
+/*
+==============
+BG_Parse_Portal_Type
+==============
+*/
+static qboolean BG_Parse_Portal_Type(portal_t *portal_var, char **text_p) {
+  char  *token;
+
+  Com_Assert(portal_var);
+
+  token = COM_Parse(text_p);
+  if(!token) {
+    Com_Printf(S_COLOR_RED "ERROR: expected portal type token\n");
+    return qfalse;
+  }
+
+  if(!Q_stricmp(token, "")) {
+    Com_Printf(S_COLOR_RED "ERROR: expected portal type token\n");
+    return qfalse;
+  }
+
+  if(!Q_stricmp(token, "PORTAL_NONE")) {
+    *portal_var = PORTAL_NONE;
+    return qtrue;
+  } else if(!Q_stricmp(token, "PORTAL_BLUE")) {
+    *portal_var = PORTAL_BLUE;
+    return qtrue;
+  } else if(!Q_stricmp(token, "PORTAL_RED")) {
+    *portal_var = PORTAL_RED;
+    return qtrue;
+  }
+
+  Com_Printf(S_COLOR_RED "ERROR: unknown token '%s', expected portal type token\n", token);
+  return qfalse;
+}
+
+/*
+==============
+BG_Parse_Impede_Move_Type
+==============
+*/
+static qboolean BG_Parse_Impede_Move_Type(
+  impede_move_t *impeade_move_var, char **text_p) {
+  char  *token;
+
+  Com_Assert(impeade_move_var);
+
+  token = COM_Parse(text_p);
+  if(!token) {
+    Com_Printf(S_COLOR_RED "ERROR: expected impede movement type token\n");
+    return qfalse;
+  }
+
+  if(!Q_stricmp(token, "")) {
+    Com_Printf(S_COLOR_RED "ERROR: expected impede movement type token\n");
+    return qfalse;
+  }
+
+  if(!Q_stricmp(token, "IMPEDE_MOVE_NONE")) {
+    *impeade_move_var = IMPEDE_MOVE_NONE;
+    return qtrue;
+  } else if(!Q_stricmp(token, "IMPEDE_MOVE_SLOW")) {
+    *impeade_move_var = IMPEDE_MOVE_SLOW;
+    return qtrue;
+  } else if(!Q_stricmp(token, "IMPEDE_MOVE_LOCK")) {
+    *impeade_move_var = IMPEDE_MOVE_LOCK;
+    return qtrue;
+  }
+
+  Com_Printf(S_COLOR_RED "ERROR: unknown token '%s', expected impede movement type token\n", token);
+  return qfalse;
+}
+
+/*
+==============
+BG_Parse_Contents
+==============
+*/
+static qboolean BG_Parse_Contents(int *contents, char **text_p) {
+  char  *token;
+
+  Com_Assert(contents);
+
+  *contents = 0;
+
+  while(1) {
+    token = COM_Parse(text_p);
+    if(!token){
+      return qtrue;
+    }
+
+    if(!Q_stricmp(token, "")) {
+      Com_Printf(S_COLOR_RED "ERROR: expected contents or mask token\n");
+      return qfalse;
+    }
+
+    if(!Q_stricmp(token, "MASK_ALL")) {
+      *contents = MASK_ALL;
+      return qtrue;
+    } else if(!Q_stricmp(token, "0")) {
+      continue;
+    } else if(!Q_stricmp(token, "MASK_SOLID")) {
+      *contents |= MASK_SOLID;
+      continue;
+    } else if(!Q_stricmp(token, "MASK_PLAYERSOLID")) {
+      *contents |= MASK_PLAYERSOLID;
+      continue;
+    } else if(!Q_stricmp(token, "MASK_DEADSOLID")) {
+      *contents |= MASK_DEADSOLID;
+      continue;
+    } else if(!Q_stricmp(token, "MASK_WATER")) {
+      *contents |= MASK_WATER;
+      continue;
+    } else if(!Q_stricmp(token, "MASK_OPAQUE")) {
+      *contents |= MASK_OPAQUE;
+      continue;
+    } else if(!Q_stricmp(token, "MASK_SHOT")) {
+      *contents |= MASK_SHOT;
+      continue;
+    } else if(!Q_stricmp(token, "CONTENTS_SOLID")) {
+      *contents |= CONTENTS_SOLID;
+      continue;
+    } else if(!Q_stricmp(token, "CONTENTS_ASTRAL")) {
+      *contents |= CONTENTS_ASTRAL;
+      continue;
+    } else if(!Q_stricmp(token, "CONTENTS_LAVA")) {
+      *contents |= CONTENTS_LAVA;
+      continue;
+    } else if(!Q_stricmp(token, "CONTENTS_SLIME")) {
+      *contents |= CONTENTS_SLIME;
+      continue;
+    } else if(!Q_stricmp(token, "CONTENTS_WATER")) {
+      *contents |= CONTENTS_WATER;
+      continue;
+    } else if(!Q_stricmp(token, "CONTENTS_FOG")) {
+      *contents |= CONTENTS_FOG;
+      continue;
+    } else if(!Q_stricmp(token, "CONTENTS_NOTTEAM1")) {
+      *contents |= CONTENTS_NOTTEAM1;
+      continue;
+    } else if(!Q_stricmp(token, "CONTENTS_NOTTEAM2")) {
+      *contents |= CONTENTS_NOTTEAM2;
+      continue;
+    } else if(!Q_stricmp(token, "CONTENTS_NOBOTCLIP")) {
+      *contents |= CONTENTS_NOBOTCLIP;
+      continue;
+    } else if(!Q_stricmp(token, "CONTENTS_DOOR")) {
+      *contents |= CONTENTS_DOOR;
+      continue;
+    } else if(!Q_stricmp(token, "CONTENTS_AREAPORTAL")) {
+      *contents |= CONTENTS_AREAPORTAL;
+      continue;
+    } else if(!Q_stricmp(token, "CONTENTS_PLAYERCLIP")) {
+      *contents |= CONTENTS_PLAYERCLIP;
+      continue;
+    } else if(!Q_stricmp(token, "CONTENTS_MONSTERCLIP")) {
+      *contents |= CONTENTS_MONSTERCLIP;
+      continue;
+    } else if(!Q_stricmp(token, "CONTENTS_TELEPORTER")) {
+      *contents |= CONTENTS_TELEPORTER;
+      continue;
+    } else if(!Q_stricmp(token, "CONTENTS_JUMPPAD")) {
+      *contents |= CONTENTS_JUMPPAD;
+      continue;
+    } else if(!Q_stricmp(token, "CONTENTS_CLUSTERPORTAL")) {
+      *contents |= CONTENTS_CLUSTERPORTAL;
+      continue;
+    } else if(!Q_stricmp(token, "CONTENTS_DONOTENTER")) {
+      *contents |= CONTENTS_DONOTENTER;
+      continue;
+    } else if(!Q_stricmp(token, "CONTENTS_BOTCLIP")) {
+      *contents |= CONTENTS_BOTCLIP;
+      continue;
+    } else if(!Q_stricmp(token, "CONTENTS_MOVER")) {
+      *contents |= CONTENTS_MOVER;
+      continue;
+    } else if(!Q_stricmp(token, "CONTENTS_ORIGIN")) {
+      *contents |= CONTENTS_ORIGIN;
+      continue;
+    } else if(!Q_stricmp(token, "CONTENTS_BODY")) {
+      *contents |= CONTENTS_BODY;
+      continue;
+    } else if(!Q_stricmp(token, "CONTENTS_CORPSE")) {
+      *contents |= CONTENTS_CORPSE;
+      continue;
+    } else if(!Q_stricmp(token, "CONTENTS_DETAIL")) {
+      *contents |= CONTENTS_DETAIL;
+      continue;
+    } else if(!Q_stricmp(token, "CONTENTS_STRUCTURAL")) {
+      *contents |= CONTENTS_STRUCTURAL;
+      continue;
+    } else if(!Q_stricmp(token, "CONTENTS_TRANSLUCENT")) {
+      *contents |= CONTENTS_TRANSLUCENT;
+      continue;
+    } else if(!Q_stricmp(token, "CONTENTS_TRIGGER")) {
+      *contents |= CONTENTS_TRIGGER;
+      continue;
+    } else if(!Q_stricmp(token, "CONTENTS_NODROP")) {
+      *contents |= CONTENTS_NODROP;
+      continue;
+    } else if(!Q_stricmp(token, "CONTENTS_NOALIENBUILD")) {
+      *contents |= CONTENTS_NOALIENBUILD;
+      continue;
+    } else if(!Q_stricmp(token, "CONTENTS_NOHUMANBUILD")) {
+      *contents |= CONTENTS_NOHUMANBUILD;
+      continue;
+    } else if(!Q_stricmp(token, "CONTENTS_NOBUILD")) {
+      *contents |= CONTENTS_NOBUILD;
+      continue;
+    } else if(!Q_stricmp(token, "}")) {
+      return qtrue; // reached the end of the contents
+    }
+
+    Com_Printf(S_COLOR_RED "ERROR: unknown token '%s', expected contents or mask token\n", token);
+    return qfalse;
+  }
+
+  return qfalse;
+}/*
+==============
+BG_Parse_Clip_Mask
+==============
+*/
+static qboolean BG_Parse_Clip_Mask(content_mask_t *clip_mask, char **text_p) {
+  char  *token;
+  char  substruct[MAX_TOKEN_CHARS] = "";
+
+  Com_Assert(clip_mask);
+
+  clip_mask->exclude = 0;
+  clip_mask->include = 0;
+
+  while(1) {
+    token = COM_Parse(text_p);
+    if(!token){
+      break;
+    }
+
+    if(!Q_stricmp(token, "")) {
+      Com_Printf(S_COLOR_RED "ERROR: expected exclude or include token\n");
+      return qfalse;
+    }
+
+    if(!Q_stricmp(token, "{")) {
+      if(!Q_stricmp(substruct, "")) {
+        Com_Printf( S_COLOR_RED "ERROR: clip_mask contents parsing started without a declaration\n" );
+        return qfalse;
+      } else if(!Q_stricmp(substruct, "exclude")) {
+        if(!BG_Parse_Contents(&clip_mask->exclude, text_p)) {
+          Com_Printf( S_COLOR_RED "ERROR: failed to parse exclude contents\n" );
+          return qfalse;
+        }
+      } else if(!Q_stricmp(substruct, "include")) {
+        if(!BG_Parse_Contents(&clip_mask->include, text_p)) {
+          Com_Printf( S_COLOR_RED "ERROR: failed to parse include contents\n" );
+          return qfalse;
+        }
+      } else {
+        Com_Printf(S_COLOR_RED "ERROR: unknown substruct '%s'\n", substruct);
+        return qfalse;
+      }
+
+      substruct[0] = '\0';
+
+      continue;
+    } else if(!Q_stricmp(token, "exclude")) {
+      Q_strncpyz(substruct, token, sizeof(substruct));
+      continue;
+    } else if(!Q_stricmp(token, "include")) {
+      Q_strncpyz(substruct, token, sizeof(substruct));
+      continue;
+    } else if(!Q_stricmp(token, "}")) {
+      return qtrue; // reached the end of the clip mask
+    }
+
+    Com_Printf(S_COLOR_RED "ERROR: unknown token '%s', expected exclude or include token\n", token);
+    return qfalse;
+  }
+
+  return qfalse;
+}
+
+/*
+======================================================================
+
 Teams
 
 ======================================================================
@@ -118,7 +767,7 @@ static teamConfig_t bg_teamConfigList[ NUM_TEAMS ];
 BG_TeamConfig
 ==============
 */
-teamConfig_t *BG_TeamConfig(team_t team) {
+const teamConfig_t *BG_TeamConfig(team_t team) {
   return &bg_teamConfigList[team];
 }
 
@@ -214,7 +863,7 @@ static void BG_InitTeamConfigs(char *game_mode) {
   teamConfig_t *tc;
 
   for(i = TEAM_NONE; i < NUM_TEAMS; i++) {
-    tc = BG_TeamConfig(i);
+    tc = &bg_teamConfigList[i];
     Com_Memset(tc, 0, sizeof(teamConfig_t));
 
     BG_ParseTeamFile(
@@ -237,7 +886,7 @@ static modConfig_t bg_modConfigList[NUM_MODS];
 BG_MODConfig
 ==============
 */
-modConfig_t *BG_MODConfig(meansOfDeath_t mod) {
+const modConfig_t *BG_MODConfig(meansOfDeath_t mod) {
   return &bg_modConfigList[mod];
 }
 
@@ -398,7 +1047,7 @@ static void BG_InitMODConfigs(char *game_mode) {
   modConfig_t *mc;
 
   for(i = 0; i < NUM_MODS; i++) {
-    mc = BG_MODConfig(i);
+    mc = &bg_modConfigList[i];
     Com_Memset(mc, 0, sizeof(teamConfig_t));
 
     BG_ParseMODFile(
@@ -425,7 +1074,7 @@ static classConfig_t bg_classConfigList[PCL_NUM_CLASSES];
 BG_ClassConfig
 ==============
 */
-classConfig_t *BG_ClassConfig(class_t class) {
+const classConfig_t *BG_ClassConfig(class_t class) {
   return &bg_classConfigList[class];
 }
 
@@ -723,7 +1372,7 @@ static void BG_InitClassConfigs(char *game_mode) {
   classConfig_t *cc;
 
   for(i = PCL_NONE; i < PCL_NUM_CLASSES; i++) {
-    cc = BG_ClassConfig(i);
+    cc = &bg_classConfigList[i];
 
     BG_ParseClassFile(
       va("game_modes/%s/classes/%s.cfg", game_mode, BG_Class(i)->name), cc);
@@ -745,7 +1394,7 @@ static buildableConfig_t bg_buildableConfigList[BA_NUM_BUILDABLES];
 BG_BuildableConfig
 ==============
 */
-buildableConfig_t *BG_BuildableConfig(buildable_t buildable) {
+const buildableConfig_t *BG_BuildableConfig(buildable_t buildable) {
   return &bg_buildableConfigList[buildable];
 }
 
@@ -933,7 +1582,7 @@ static void BG_InitBuildableConfigs(char *game_mode) {
   buildableConfig_t *bc;
 
   for(i = BA_NONE + 1; i < BA_NUM_BUILDABLES; i++) {
-    bc = BG_BuildableConfig(i);
+    bc = &bg_buildableConfigList[i];
     Com_Memset(bc, 0, sizeof(buildableConfig_t));
 
     BG_ParseBuildableFile(
@@ -957,8 +1606,527 @@ static weaponConfig_t bg_weaponConfigList[WP_NUM_WEAPONS];
 BG_WeaponConfig
 ==============
 */
-weaponConfig_t *BG_WeaponConfig(weapon_t weapon) {
+const weaponConfig_t *BG_WeaponConfig(weapon_t weapon) {
   return &bg_weaponConfigList[weapon];
+}
+
+static const weaponModeConfig_t weapon_mode_default =
+{
+  {                   //missileConfig_t missile;
+    qfalse,             //qboolean       enabled;
+    "",                 //char           *class_name;
+    MOD_UNKNOWN,        //meansOfDeath_t mod;
+    MOD_UNKNOWN,        //meansOfDeath_t splash_mod;
+    qfalse,             //qboolean       selective_damage;
+    0,                  //int            damage;
+    0,                  //int            splash_damage;
+    0.0f,               //float          splash_radius;
+    qtrue,              //qboolean       point_against_world;
+    {0.0f, 0.0f, 0.0f}, //vec3_t         mins;
+    {0.0f, 0.0f, 0.0f}, //vec3_t         maxs;
+    {0.0f, 0.0f, 0.0f}, //vec3_t         muzzle_offset;
+    0.0f,               //float          speed;
+    TR_LINEAR,          //trType_t       trajectory_type;
+    0,                  //int            activation_delay;
+    0,                  //int            explode_delay;
+    qtrue,              //qboolean       explode_miss_effect;
+    qfalse,             //qboolean       team_only_trail;
+    BOUNCE_NONE,        //bounce_t       bounce_type;
+    qtrue,              //qboolean       damage_on_bounce;
+    qtrue,              //qboolean       bounce_sound;
+    qfalse,             //qboolean       impact_stick;
+    qfalse,             //qboolean       impact_miss_effect;
+    PORTAL_NONE,        //portal_t       impact_create_portal;
+    0,                  //int            health;
+    0.0f,               //float          kick_up_speed;
+    0,                  //int            kick_up_time;
+    0.0f,               //float          tripwire_range;
+    0,                  //int            tripwire_check_frequency;
+    0,                  //int            search_and_destroy_change_period;
+    qfalse,             //qboolean       return_after_damage;
+    qtrue,              //qboolean       has_knockback;
+    IMPEDE_MOVE_NONE,   //impede_move_t  impede_move;
+    0,                  //int            charged_time_max;
+    qfalse,             //qboolean       charged_damage;
+    qfalse,             //qboolean       charged_speed;
+    0,                  //int            charged_speed_min;
+    0,                  //int            charged_speed_min_damage_mod;
+    qfalse,             //qboolean       save_missiles;
+    qfalse,             //qboolean       detonate_saved_missiles;
+    100,                //int            detonate_saved_missiles_delay;
+    1000,               //int            detonate_saved_missiles_repeat;
+    qfalse,             //qboolean       relative_missile_speed;
+    qtrue,              //qboolean       relative_missile_speed_along_aim;
+    1.0f,               //float          relative_missile_speed_lag;
+    {0, MASK_SHOT},     //content_mask_t clip_mask;
+    qfalse,             //qboolean       scale;
+    0,                  //int            scale_start_time;
+    0,                  //int            scale_stop_time;
+    {0.0f, 0.0f, 0.0f}, //vec3_t         scale_stop_mins;
+    {0.0f, 0.0f, 0.0f}  //vec3_t         scale_stop_maxs;
+  }
+};
+
+
+
+/*
+==============
+BG_Missile
+==============
+*/
+const missileConfig_t *BG_Missile(weapon_t weapon, weaponMode_t mode) {
+  if((mode < 0) || (mode >= WPM_NUM_WEAPONMODES)) {
+    return &weapon_mode_default.missile;
+  }
+
+  return &BG_WeaponConfig(weapon)->mode[mode].missile;
+}
+
+static qboolean BG_ParseMissileConfig(missileConfig_t *missile, char **text_p)
+{
+  char  *token;
+  char  substruct[MAX_TOKEN_CHARS] = "";
+
+  while(1) {
+    token = COM_Parse(text_p);
+
+    if(!token) {
+      break;
+    }
+
+    if(!Q_stricmp(token, "")) {
+      break;
+    }
+
+    if(!Q_stricmp(token, "{")) {
+      if(!Q_stricmp(substruct, "")) {
+        Com_Printf( S_COLOR_RED "ERROR: missile config substruct parsing started without a declaration\n" );
+        return qfalse;
+      } else if(!Q_stricmp(substruct, "clip_mask")) {
+        if(!BG_Parse_Clip_Mask(&missile->clip_mask, text_p)) {
+          Com_Printf( S_COLOR_RED "ERROR: failed to parse clip mask\n" );
+          return qfalse;
+        }
+      } else {
+        Com_Printf(S_COLOR_RED "ERROR: unknown substruct '%s'\n", substruct);
+        return qfalse;
+      }
+
+      substruct[0] = '\0';
+
+      continue;
+    } else if(!Q_stricmp(token, "enabled")) {
+      if(!BG_Parse_Bool(&missile->enabled, text_p)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse enabled token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "class_name")) {
+      if(
+        !BG_Parse_String(
+          missile->class_name, text_p, sizeof(missile->class_name))) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse  token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "means_of_death")) {
+      if(!BG_Parse_Means_Of_Death(&missile->mod, text_p)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse means_of_death token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "splash_means_of_death")) {
+      if(!BG_Parse_Means_Of_Death(&missile->splash_mod, text_p)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse splash_means_of_death token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "selective_damage")) {
+      if(!BG_Parse_Bool(&missile->selective_damage, text_p)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse selective_damage token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "damage")) {
+      if(!BG_Parse_Integer(&missile->damage, text_p, qtrue)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse damage token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "splash_damage")) {
+      if(!BG_Parse_Integer(&missile->splash_damage, text_p, qtrue)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse splash_damage token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "splash_radius")) {
+      if(!BG_Parse_Float(&missile->splash_radius, text_p, qtrue)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse splash_radius token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "point_against_world")) {
+      if(!BG_Parse_Bool(&missile->point_against_world, text_p)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse point_against_world token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "mins")) {
+      if(!BG_Parse_Vect3(&missile->mins, text_p)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse mins token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "maxs")) {
+      if(!BG_Parse_Vect3(&missile->maxs, text_p)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse maxs token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "muzzle_offset")) {
+      if(!BG_Parse_Vect3(&missile->muzzle_offset, text_p)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse muzzle_offset token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "speed")) {
+      if(!BG_Parse_Float(&missile->speed, text_p, qtrue)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse speed token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "trajectory_type")) {
+      if(!BG_Parse_Traj_Type(&missile->trajectory_type, text_p)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse trajectory_type token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "activation_delay")) {
+      if(!BG_Parse_Integer(&missile->activation_delay, text_p, qtrue)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse activation_delay token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "explode_delay")) {
+      if(!BG_Parse_Integer(&missile->explode_delay, text_p, qtrue)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse explode_delay token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "explode_miss_effect")) {
+      if(!BG_Parse_Bool(&missile->explode_miss_effect, text_p)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse explode_miss_effect token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "team_only_trail")) {
+      if(!BG_Parse_Bool(&missile->team_only_trail, text_p)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse team_only_trail token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "bounce_type")) {
+      if(!BG_Parse_Bounce_Type(&missile->bounce_type, text_p)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse bounce_type token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "damage_on_bounce")) {
+      if(!BG_Parse_Bool(&missile->damage_on_bounce, text_p)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse damage_on_bounce token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "bounce_sound")) {
+      if(!BG_Parse_Bool(&missile->bounce_sound, text_p)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse bounce_sound token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "impact_stick")) {
+      if(!BG_Parse_Bool(&missile->impact_stick, text_p)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse impact_stick token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "impact_miss_effect")) {
+      if(!BG_Parse_Bool(&missile->impact_miss_effect, text_p)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse impact_miss_effect token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "impact_create_portal")) {
+      if(!BG_Parse_Portal_Type(&missile->impact_create_portal, text_p)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse impact_create_portal token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "health")) {
+      if(!BG_Parse_Integer(&missile->health, text_p, qtrue)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse health token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "kick_up_speed")) {
+      if(!BG_Parse_Float(&missile->kick_up_speed, text_p, qtrue)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse kick_up_speed token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "kick_up_time")) {
+      if(!BG_Parse_Integer(&missile->kick_up_time, text_p, qtrue)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse kick_up_time token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "tripwire_range")) {
+      if(!BG_Parse_Float(&missile->tripwire_range, text_p, qtrue)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse tripwire_range token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "tripwire_check_frequency")) {
+      if(!BG_Parse_Integer(&missile->tripwire_check_frequency, text_p, qtrue)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse tripwire_check_frequency token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "search_and_destroy_change_period")) {
+      if(
+        !BG_Parse_Integer(
+          &missile->search_and_destroy_change_period, text_p, qtrue)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse search_and_destroy_change_period token\n" );
+        return qfalse;
+      }
+
+      continue;
+    }  else if(!Q_stricmp(token, "return_after_damage")) {
+      if(!BG_Parse_Bool(&missile->return_after_damage, text_p)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse return_after_damage token\n" );
+        return qfalse;
+      }
+
+      continue;
+    }  else if(!Q_stricmp(token, "has_knockback")) {
+      if(!BG_Parse_Bool(&missile->has_knockback, text_p)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse has_knockback token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "impede_move")) {
+      if(!BG_Parse_Impede_Move_Type(&missile->impede_move, text_p)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse impede_move token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "charged_time_max")) {
+      if(!BG_Parse_Integer(&missile->charged_time_max, text_p, qtrue)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse charged_time_max token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "charged_damage")) {
+      if(!BG_Parse_Bool(&missile->charged_damage, text_p)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse charged_damage token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "charged_speed")) {
+      if(!BG_Parse_Bool(&missile->charged_speed, text_p)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse charged_speed token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "charged_speed_min")) {
+      if(!BG_Parse_Integer(&missile->charged_speed_min, text_p, qtrue)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse charged_speed_min token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "charged_speed_min_damage_mod")) {
+      if(!BG_Parse_Integer(
+        &missile->charged_speed_min_damage_mod, text_p, qtrue)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse charged_speed_min_damage_mod token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "save_missiles")) {
+      if(!BG_Parse_Bool(&missile->save_missiles, text_p)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse save_missiles token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "detonate_saved_missiles")) {
+      if(!BG_Parse_Bool(&missile->detonate_saved_missiles, text_p)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse detonate_saved_missiles token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "detonate_saved_missiles_delay")) {
+      if(!BG_Parse_Integer(&missile->detonate_saved_missiles_delay, text_p, qtrue)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse detonate_saved_missiles_delay token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "detonate_saved_missiles_repeat")) {
+      if(!BG_Parse_Integer(&missile->detonate_saved_missiles_repeat, text_p, qtrue)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse detonate_saved_missiles_repeat token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "relative_missile_speed")) {
+      if(!BG_Parse_Bool(&missile->relative_missile_speed, text_p)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse relative_missile_speed token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "relative_missile_speed_along_aim")) {
+      if(!BG_Parse_Bool(&missile->relative_missile_speed_along_aim, text_p)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse relative_missile_speed_along_aim token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "relative_missile_speed_lag")) {
+      if(!BG_Parse_Float(&missile->relative_missile_speed_lag, text_p, qtrue)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse relative_missile_speed_lag token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "clip_mask")) {
+      Q_strncpyz(substruct, token, sizeof(substruct));
+      continue;
+    } else if(!Q_stricmp(token, "scale")) {
+      if(!BG_Parse_Bool(&missile->scale, text_p)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse scale token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "scale_start_time")) {
+      if(!BG_Parse_Integer(&missile->scale_start_time, text_p, qtrue)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse scale_start_time token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "scale_stop_time")) {
+      if(!BG_Parse_Integer(&missile->scale_stop_time, text_p, qtrue)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse scale_stop_time token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "scale_stop_mins")) {
+      if(!BG_Parse_Vect3(&missile->scale_stop_mins, text_p)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse scale_stop_mins token\n" );
+        return qfalse;
+      }
+
+      continue;
+    } else if(!Q_stricmp(token, "scale_stop_maxs")) {
+      if(!BG_Parse_Vect3(&missile->scale_stop_maxs, text_p)) {
+        Com_Printf( S_COLOR_RED "ERROR: failed to parse scale_stop_maxs token\n" );
+        return qfalse;
+      }
+
+      continue;
+    }  else if(!Q_stricmp(token, "}")) {
+      return qtrue; // reached the end of the missile config
+    }
+
+    Com_Printf(S_COLOR_RED "ERROR: unknown token '%s'\n", token);
+    return qfalse;
+  }
+  return qfalse;
+}
+
+static qboolean BG_ParseWeaponModeConfig(weaponModeConfig_t *wmc, char **text_p)
+{
+  char  *token;
+  char  substruct[MAX_TOKEN_CHARS] = "";
+
+  while(1) {
+    token = COM_Parse(text_p);
+
+    if(!token) {
+      break;
+    }
+
+    if(!Q_stricmp(token, "")) {
+      break;
+    }
+
+    if(!Q_stricmp(token, "{")) {
+      if(!Q_stricmp(substruct, "")) {
+        Com_Printf( S_COLOR_RED "ERROR: weapon mode substruct parsing started without a declaration\n" );
+        return qfalse;
+      } else if(!Q_stricmp(substruct, "missile")) {
+        if(!BG_ParseMissileConfig(&wmc->missile, text_p)) {
+         Com_Printf(S_COLOR_RED "ERROR: failed missile configuration\n");
+         return qfalse;
+       }
+      } else {
+        Com_Printf(S_COLOR_RED "ERROR: unknown substruct '%s'\n", substruct);
+        return qfalse;
+      }
+
+      substruct[0] = '\0';
+
+      continue;
+    } else if(!Q_stricmp(token, "missile")) {
+      Q_strncpyz(substruct, token, sizeof(substruct));
+      continue;
+    }  else if(!Q_stricmp(token, "}")) {
+      return qtrue; // reached the end of the weapon mode config
+    }
+
+    Com_Printf(S_COLOR_RED "ERROR: unknown token '%s'\n", token);
+    return qfalse;
+  }
+  return qfalse;
 }
 
 /*
@@ -971,10 +2139,10 @@ Parses a configuration file describing a weapon
 static qboolean BG_ParseWeaponFile(const char *filename, weaponConfig_t *wc) {
   char          *text_p;
   int           len;
+  weaponMode_t  mode = WPM_NONE;
   char          *token;
-  char          text[20000];
+  char          text[25000];
   fileHandle_t  f;
-  int           defined = 0;
   enum {
       DESCRIPTION   = 1 << 0
   };
@@ -1014,30 +2182,41 @@ static qboolean BG_ParseWeaponFile(const char *filename, weaponConfig_t *wc) {
       break;
     }
 
-    if(!Q_stricmp(token, "description")) {
+    if(!Q_stricmp(token, "{")) {
+      if(mode == WPM_NONE) {
+        Com_Printf( S_COLOR_RED "ERROR: weapon mode section started without a declaration\n" );
+        return qfalse;
+      } else if(!BG_ParseWeaponModeConfig(&wc->mode[mode], &text_p)) {
+        Com_Printf(S_COLOR_RED "ERROR: failed to parse weapon mode configuration for file %s\n", filename);
+        return qfalse;
+      }
+
+      //start parsing ejectors again
+      mode = WPM_NONE;
+
+      continue;
+    } else if(!Q_stricmp(token, "primary")) {
+      mode = WPM_PRIMARY;
+      continue;
+    } else if(!Q_stricmp(token, "secondary")) {
+      mode = WPM_SECONDARY;
+      continue;
+    } else if(!Q_stricmp( token, "tertiary")) {
+      mode = WPM_TERTIARY;
+      continue;
+    } if(!Q_stricmp(token, "description")) {
       token = COM_Parse(&text_p);
       if(!token) {
         break;
       }
 
       Q_strncpyz(wc->description, token, sizeof(wc->description));
-
-      defined |= DESCRIPTION;
       continue;
     }
 
 
     Com_Printf(S_COLOR_RED "ERROR: unknown token '%s'\n", token);
     return qfalse;
-  }
-
-  if(     !( defined & DESCRIPTION ) )  {token = "description";}
-  else                                  {token = "";}
-
-  if(strlen(token) > 0) {
-      Com_Printf(
-        S_COLOR_RED "ERROR: %s not defined in %s\n", token, filename);
-      return qfalse;
   }
 
 return qtrue;
@@ -1051,10 +2230,16 @@ BG_InitWeaponConfigs
 static void BG_InitWeaponConfigs(char *game_mode) {
   int               i;
   weaponConfig_t    *wc;
+  weaponMode_t  mode = WPM_NONE;
 
   for(i = WP_NONE + 1; i < WP_NUM_WEAPONS; i++) {
-    wc = BG_WeaponConfig(i);
+    wc = &bg_weaponConfigList[i];
     Com_Memset(wc, 0, sizeof(weaponConfig_t));
+
+    // initialize default values
+    for (mode = 0; mode < WPM_NUM_WEAPONMODES; mode++) {
+      wc->mode[mode] = weapon_mode_default;
+    }
 
     BG_ParseWeaponFile(
       va("game_modes/%s/weapons/%s.cfg", game_mode, BG_Weapon(i)->name), wc);
@@ -1076,7 +2261,7 @@ static upgradeConfig_t bg_upgradeConfigList[UP_NUM_UPGRADES];
 BG_UpgradeConfig
 ==============
 */
-upgradeConfig_t *BG_UpgradeConfig(upgrade_t upgrade) {
+const upgradeConfig_t *BG_UpgradeConfig(upgrade_t upgrade) {
   return &bg_upgradeConfigList[upgrade];
 }
 
@@ -1172,7 +2357,7 @@ static void BG_InitUpgradeConfigs(char *game_mode) {
   upgradeConfig_t    *uc;
 
   for(i = UP_NONE + 1; i < UP_NUM_UPGRADES; i++) {
-    uc = BG_UpgradeConfig(i);
+    uc = &bg_upgradeConfigList[i];
     Com_Memset(uc, 0, sizeof( upgradeConfig_t ));
 
     BG_ParseUpgradeFile(

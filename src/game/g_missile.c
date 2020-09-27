@@ -97,11 +97,17 @@ void G_ExplodeMissile(gentity_t *ent) {
   ent->freeAfterEvent = qtrue;
 
   // splash damage
-  if(ent->splashDamage) {
-    G_RadiusDamage(
-      ent->r.currentOrigin, ent->r.mins, ent->r.maxs, ent->parent,
-      ent->splashDamage, ent->splashRadius, ent, ent->splashMethodOfDeath,
-      qtrue);
+  if( ent->splashDamage ) {
+    if(BG_Missile(weapon, mode)->selective_damage) {
+      G_SelectiveRadiusDamage(
+        ent->r.currentOrigin, ent->r.mins, ent->r.maxs, ent->parent, ent->splashDamage,
+        ent->splashRadius, ent, ent->splashMethodOfDeath, ent->buildableTeam,
+        qtrue);
+    } else {
+      G_RadiusDamage( ent->r.currentOrigin, ent->r.mins,
+                      ent->r.maxs, ent->parent, ent->splashDamage,
+                      ent->splashRadius, ent, ent->splashMethodOfDeath, qtrue );
+    }
   }
 
   SV_LinkEntity(ent);
@@ -380,7 +386,9 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace ) {
   }
 
   // impact damage
-  if(G_TakesDamage(other)) {
+  if(
+    G_TakesDamage(other) &&
+    !(BG_Missile(weapon, mode)->selective_damage && OnSameTeam(ent, other))) {
     // FIXME: wrong damage direction?
     if(ent->damage) {
       vec3_t  velocity;
@@ -434,9 +442,16 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace ) {
 
   // splash damage (doesn't apply to person directly hit)
   if(ent->splashDamage) {
-    G_RadiusDamage(
-      trace->endpos, NULL, NULL, ent->parent, ent->splashDamage,
-      ent->splashRadius, other, ent->splashMethodOfDeath, qtrue);
+    if(BG_Missile(weapon, mode)->selective_damage) {
+      G_SelectiveRadiusDamage(
+        trace->endpos, ent->r.mins, ent->r.maxs, ent->parent, ent->splashDamage,
+        ent->splashRadius, other, ent->splashMethodOfDeath, ent->buildableTeam,
+        qtrue);
+    } else {
+      G_RadiusDamage( trace->endpos, NULL, NULL,
+                      ent->parent, ent->splashDamage, ent->splashRadius,
+                      other, ent->splashMethodOfDeath, qtrue );
+    }
   }
 
   SV_LinkEntity(ent);
