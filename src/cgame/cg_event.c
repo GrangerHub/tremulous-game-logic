@@ -155,8 +155,8 @@ static void CG_Obituary( entityState_t *ent )
 {
   int           mod;
   int           target, attacker;
-  char          *message;
-  char          *message2;
+  const char    *message;
+  const char    *message2;
   const char    *targetInfo;
   const char    *attackerInfo;
   char          targetName[ MAX_COLORFUL_NAME_LENGTH ];
