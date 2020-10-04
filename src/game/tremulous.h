@@ -678,7 +678,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define MGTURRET_ANGULARSPEED       8
 #define MGTURRET_ACCURACY_TO_FIRE   0
 #define MGTURRET_VERTICALCAP        30  // +/- maximum pitch
-#define MGTURRET_REPEAT             100
+#define MGTURRET_REPEAT             150
 #define MGTURRET_K_SCALE            1.0f
 #define MGTURRET_RANGE              300.0f
 #define MGTURRET_SPREAD             200
