@@ -1648,60 +1648,6 @@ typedef enum impede_move_s
   NUM_IMPEDE_MOVE_TYPES
 } impede_move_t;
 
-typedef struct missileAttributes_s
-{
-  qboolean       enabled;
-  char           *class_name;
-  meansOfDeath_t mod;
-  meansOfDeath_t splash_mod;
-  int            damage;
-  int            splash_damage;
-  float          splash_radius;
-  qboolean       point_against_world;
-  vec3_t         mins;
-  vec3_t         maxs;
-  vec3_t         muzzle_offset;
-  float          speed;
-  trType_t       trajectory_type;
-  int            activation_delay;
-  int            explode_delay;
-  qboolean       explode_miss_effect;
-  qboolean       team_only_trail;
-  bounce_t       bounce_type;
-  qboolean       damage_on_bounce; //explode against targets that can take damage
-  qboolean       bounce_sound;
-  qboolean       impact_stick;
-  qboolean       impact_miss_effect; // use the miss effect on impact of players/buildables
-  portal_t       impact_create_portal; // creates a portal on impact
-  int            health; // if 0, doesn't take damage
-  float          kick_up_speed; // if 0.0f, doesn't kickup
-  int            kick_up_time;
-  float          tripwire_range; // if 0.0f, no trip wire detection
-  int            tripwire_check_frequency;
-  int            search_and_destroy_change_period; // if 0, no search and destroy
-  qboolean       return_after_damage; //return back to the parent
-  qboolean       has_knockback;
-  impede_move_t  impede_move; // slow or lock movement of the impacted target
-  int            charged_time_max;
-  qboolean       charged_damage;
-  qboolean       charged_speed; // speed is effected by the charge
-  int            charged_speed_min; // minium charged speed
-  int            charged_speed_min_damage_mod; // affects the charged speed algorithm
-  qboolean       save_missiles;
-  qboolean       detonate_saved_missiles;
-  int            detonate_saved_missiles_delay;
-  int            detonate_saved_missiles_repeat;
-  qboolean       relative_missile_speed;
-  qboolean       relative_missile_speed_along_aim;
-  float          relative_missile_speed_lag;
-  content_mask_t clip_mask;
-  qboolean       scale;
-  int            scale_start_time;
-  int            scale_stop_time;
-  vec3_t         scale_stop_mins;
-  vec3_t         scale_stop_maxs;
-} missileAttributes_t;
-
 typedef enum
 {
   OVERHEAT_FROM_USE,
@@ -1804,8 +1750,6 @@ typedef struct
   qboolean            longRanged;
 
   impactPrediction_t  impactPrediction[2];
-
-  missileAttributes_t missile[3];
 
   splatterAttributes_t splatter[3];
 
@@ -1911,7 +1855,6 @@ void                        BG_SetEvolveCoolDown( playerState_t *ps,
 
 const weaponAttributes_t    *BG_WeaponByName( const char *name );
 const weaponAttributes_t    *BG_Weapon( weapon_t weapon );
-const missileAttributes_t   *BG_Missile(weapon_t weapon, weaponMode_t mode);
 qboolean                    BG_WeaponAllowedInStage( weapon_t weapon,
                                                      stage_t stage,
                                                      int gameIsInWarmup );
@@ -2318,17 +2261,79 @@ typedef struct
   char      description[MAX_TOKEN_CHARS];
 } upgradeConfig_t;
 
+typedef struct missileConfig_s
+{
+  qboolean       enabled;
+  char           class_name[MAX_STRING_CHARS];
+  meansOfDeath_t mod;
+  meansOfDeath_t splash_mod;
+  qboolean       selective_damage;
+  int            damage;
+  int            splash_damage;
+  float          splash_radius;
+  qboolean       point_against_world;
+  vec3_t         mins;
+  vec3_t         maxs;
+  vec3_t         muzzle_offset;
+  float          speed;
+  trType_t       trajectory_type;
+  int            activation_delay;
+  int            explode_delay;
+  qboolean       explode_miss_effect;
+  qboolean       team_only_trail;
+  bounce_t       bounce_type;
+  qboolean       damage_on_bounce; //explode against targets that can take damage
+  qboolean       bounce_sound;
+  qboolean       impact_stick;
+  qboolean       impact_miss_effect; // use the miss effect on impact of players/buildables
+  portal_t       impact_create_portal; // creates a portal on impact
+  int            health; // if 0, doesn't take damage
+  float          kick_up_speed; // if 0.0f, doesn't kickup
+  int            kick_up_time;
+  float          tripwire_range; // if 0.0f, no trip wire detection
+  int            tripwire_check_frequency;
+  int            search_and_destroy_change_period; // if 0, no search and destroy
+  qboolean       return_after_damage; //return back to the parent
+  qboolean       has_knockback;
+  impede_move_t  impede_move; // slow or lock movement of the impacted target
+  int            charged_time_max;
+  qboolean       charged_damage;
+  qboolean       charged_speed; // speed is effected by the charge
+  int            charged_speed_min; // minium charged speed
+  int            charged_speed_min_damage_mod; // affects the charged speed algorithm
+  qboolean       save_missiles;
+  qboolean       detonate_saved_missiles;
+  int            detonate_saved_missiles_delay;
+  int            detonate_saved_missiles_repeat;
+  qboolean       relative_missile_speed;
+  qboolean       relative_missile_speed_along_aim;
+  float          relative_missile_speed_lag;
+  content_mask_t clip_mask;
+  qboolean       scale;
+  int            scale_start_time;
+  int            scale_stop_time;
+  vec3_t         scale_stop_mins;
+  vec3_t         scale_stop_maxs;
+} missileConfig_t;
+
+typedef struct weaponModeConfig_s
+{
+  missileConfig_t missile;
+} weaponModeConfig_t;
+
 typedef struct
 {
-  char      description[MAX_TOKEN_CHARS];
+  char               description[MAX_TOKEN_CHARS];
+  weaponModeConfig_t mode[WPM_NUM_WEAPONMODES];
 } weaponConfig_t;
 
 qboolean          BG_Check_Game_Mode_Name(
   char *game_mode_raw, char *game_mode_clean, int len);
 void              BG_Init_Game_Mode(char *game_mode_raw);
-teamConfig_t      *BG_TeamConfig(team_t team);
-modConfig_t       *BG_MODConfig(meansOfDeath_t mod);
-classConfig_t     *BG_ClassConfig(class_t class);
-buildableConfig_t *BG_BuildableConfig(buildable_t buildable);
-upgradeConfig_t   *BG_UpgradeConfig( upgrade_t buildable );
-weaponConfig_t             *BG_WeaponConfig( weapon_t weapon );
+const teamConfig_t      *BG_TeamConfig(team_t team);
+const modConfig_t       *BG_MODConfig(meansOfDeath_t mod);
+const classConfig_t     *BG_ClassConfig(class_t class);
+const buildableConfig_t *BG_BuildableConfig(buildable_t buildable);
+const upgradeConfig_t   *BG_UpgradeConfig( upgrade_t buildable );
+const weaponConfig_t    *BG_WeaponConfig( weapon_t weapon );
+const missileConfig_t   *BG_Missile(weapon_t weapon, weaponMode_t mode);

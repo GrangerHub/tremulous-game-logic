@@ -4616,6 +4616,7 @@ static void PM_Weapon( void )
     BG_Weapon(pm->ps->weapon)->hasThirdMode &&
     (BG_Weapon(pm->ps->weapon)->maxClips > 0) &&
     BG_Missile(pm->ps->weapon, WPM_TERTIARY)->detonate_saved_missiles &&
+    !attack3 &&
     pm->ps->ammo < BG_Weapon(pm->ps->weapon)->maxAmmo &&
     pm->ps->ammo > 0) {
     //detonate early

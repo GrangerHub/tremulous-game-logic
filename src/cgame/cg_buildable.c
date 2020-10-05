@@ -318,7 +318,7 @@ void CG_InitBuildables( void )
   char          filename[ MAX_QPATH ];
   char          soundfile[ MAX_QPATH ];
   char          *buildableName;
-  char          *modelFile;
+  const char    *modelFile;
   int           i;
   int           j;
   fileHandle_t  f;

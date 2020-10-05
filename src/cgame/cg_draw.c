@@ -5823,7 +5823,7 @@ void CG_DrawActive( stereoFrame_t stereoView )
   //emit lantern light
   if( cg_lanternLight.integer )
   {
-    classConfig_t *classConfig;
+    const classConfig_t *classConfig;
     vec3_t        lanternOrigin;
     vec3_t        lanternAngles;
     vec3_t        forward, right, up;

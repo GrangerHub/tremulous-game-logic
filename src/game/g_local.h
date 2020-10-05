@@ -59,7 +59,6 @@ gentity->flags
 #define FL_NO_BOUNCE_SOUND    0x00040000  // for missiles
 #define FL_OCCUPIED           0x00080000  // for occupiable entities
 #define FL_GRAPNEL_HLTH_BOOST 0x00100000
-#define FL_SELECTIVE_DMG      0x00200000  // for missiles
 
 #define  VALUE_MASK       0x0001FFFF
 #define  SIGN_BIT         0x00020000

@@ -647,8 +647,8 @@ static int CG_GetCorpseNum( class_t class )
 {
   int           i;
   clientInfo_t  *match;
-  char          *modelName;
-  char          *skinName;
+  const char    *modelName;
+  const char    *skinName;
 
   modelName = BG_ClassConfig( class )->modelName;
   skinName = BG_ClassConfig( class )->skinName;
@@ -710,7 +710,7 @@ static qboolean CG_ScanForExistingClientInfo( clientInfo_t *ci )
 CG_PrecacheClientInfo
 ======================
 */
-void CG_PrecacheClientInfo( class_t class, char *model, char *skin )
+void CG_PrecacheClientInfo( class_t class, const char *model, const char *skin )
 {
   clientInfo_t  *ci;
   clientInfo_t  newInfo;
