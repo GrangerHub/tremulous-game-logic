@@ -6217,6 +6217,11 @@ void Item_Paint( itemDef_t *item )
     return;
   }
 
+  if( item->game_mode && (item->game_mode[0] != '\0') && !item->game_mode_enabled )
+  {
+    return;
+  }
+
   if( !( item->window.flags & WINDOW_VISIBLE ) )
     return;
 
@@ -7341,6 +7346,16 @@ qboolean ItemParse_cvar( itemDef_t *item, int handle )
   return qtrue;
 }
 
+qboolean ItemParse_game_mode( itemDef_t *item, int handle )
+{
+  if( !PC_String_Parse( handle, &item->game_mode ) )
+    return qfalse;
+
+  item->game_mode_enabled = DC->Is_Current_Game_Mode( item->game_mode );
+
+  return qtrue;
+}
+
 qboolean ItemParse_maxChars( itemDef_t *item, int handle )
 {
   return PC_Int_Parse( handle, &item->typeData.edit->maxChars );
@@ -7604,6 +7619,7 @@ keywordHash_t itemParseKeywords[] = {
   {"textstyle", ItemParse_textstyle, TYPE_ANY},
   {"backcolor", ItemParse_backcolor, TYPE_ANY},
   {"forecolor", ItemParse_forecolor, TYPE_ANY},
+  {"game_mode", ItemParse_game_mode, TYPE_ANY},
   {"bordercolor", ItemParse_bordercolor, TYPE_ANY},
   {"outlinecolor", ItemParse_outlinecolor, TYPE_ANY},
   {"background", ItemParse_background, TYPE_ANY},
