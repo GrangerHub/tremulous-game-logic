@@ -2249,6 +2249,7 @@ typedef struct
 
 qboolean          BG_Check_Game_Mode_Name(
   char *game_mode_raw, char *game_mode_clean, int len);
+qboolean    BG_Is_Current_Game_Mode(const char *game_mode_raw_check);
 void              BG_Init_Game_Mode(char *game_mode_raw);
 const teamConfig_t      *BG_TeamConfig(team_t team);
 const modConfig_t       *BG_MODConfig(meansOfDeath_t mod);

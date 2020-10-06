@@ -4855,6 +4855,7 @@ void UI_Init( qboolean inGameLoad )
   uiInfo.uiDC.stopCinematic = &UI_StopCinematic;
   uiInfo.uiDC.drawCinematic = &UI_DrawCinematic;
   uiInfo.uiDC.runCinematicFrame = &UI_RunCinematicFrame;
+  uiInfo.uiDC.Is_Current_Game_Mode = BG_Is_Current_Game_Mode;
 
   Init_Display( &uiInfo.uiDC );
 

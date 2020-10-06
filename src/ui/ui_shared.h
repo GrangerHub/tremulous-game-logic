@@ -309,7 +309,9 @@ typedef struct itemDef_s
   const char *cvar;              // associated cvar
   const char *cvarTest;          // associated cvar for enable actions
   const char *enableCvar;         // enable, disable, show, or hide based on value, this can contain a list
+  const char *game_mode;          // only allow during the specified game mode
   int cvarFlags;                 //  what type of action to take on cvarenables
+  qboolean game_mode_enabled;
   sfxHandle_t focusSound;
   int numColors;                 // number of color ranges
   colorRangeDef_t colorRanges[MAX_COLOR_RANGES];
@@ -447,6 +449,7 @@ typedef struct
   void ( *stopCinematic )( int handle );
   void ( *drawCinematic )( int handle, float x, float y, float w, float h );
   void ( *runCinematicFrame )( int handle );
+  qboolean ( *Is_Current_Game_Mode )(const char *game_mode_raw_check);
 
   float      yscale;
   float      xscale;
