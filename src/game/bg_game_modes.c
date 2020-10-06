@@ -50,6 +50,7 @@ game mode exists.
 */
 qboolean BG_Check_Game_Mode_Name(
   char          *game_mode_raw, char *game_mode_clean, int len) {
+  char          *game_mode_clean_ptr = game_mode_clean;
   fileHandle_t  f;
 
   while(*game_mode_raw && len > 0) {
@@ -61,12 +62,12 @@ qboolean BG_Check_Game_Mode_Name(
     }
 
     if(isalnum(*game_mode_raw)) {
-        *game_mode_clean++ = tolower(*game_mode_raw);
+        *(game_mode_clean_ptr++) = tolower(*game_mode_raw);
         len--;
     }
     game_mode_raw++;
   }
-  *game_mode_clean = 0;
+  *game_mode_clean_ptr = 0;
 
   len = FS_FOpenFileByMode(va("game_modes/%s/game_mode.cfg", game_mode_clean), &f, FS_READ);
   if(len < 0) {
@@ -83,14 +84,45 @@ static void BG_InitBuildableConfigs(char *game_mode);
 static void BG_InitUpgradeConfigs(char *game_mode);
 static void BG_InitWeaponConfigs(char *game_mode);
 
+static char game_mode[MAX_TOKEN_CHARS];
+
+/*
+================
+BG_Is_Current_Game_Mode
+================
+*/
+qboolean BG_Is_Current_Game_Mode(const char *game_mode_raw_check) {
+  char       game_mode_check[MAX_TOKEN_CHARS];
+  char       *game_mode_check_ptr = game_mode_check;
+  const char *game_mode_raw_check_ptr = game_mode_raw_check;
+  int        len = MAX_TOKEN_CHARS;
+
+  //clean game_mode_raw_check
+  while(*game_mode_raw_check_ptr && len > 0) {
+    if(Q_IsColorString( game_mode_raw_check_ptr)) {
+      game_mode_raw_check_ptr += Q_ColorStringLength(game_mode_raw_check_ptr);    // skip color code
+      continue;
+    } else if(Q_IsColorEscapeEscape(game_mode_raw_check_ptr)) {
+      game_mode_raw_check_ptr++;
+    }
+
+    if(isalnum(*game_mode_raw_check_ptr)) {
+        *(game_mode_check_ptr++) = tolower(*game_mode_raw_check_ptr);
+        len--;
+    }
+    game_mode_raw_check_ptr++;
+  }
+  *game_mode_check_ptr = 0;
+
+  return !Q_stricmp(game_mode_check, game_mode);
+}
+
 /*
 ================
 BG_Init_Game_Mode
 ================
 */
 void BG_Init_Game_Mode(char *game_mode_raw) {
-  char game_mode[MAX_TOKEN_CHARS];
-
   if(!BG_Check_Game_Mode_Name(game_mode_raw, game_mode, MAX_TOKEN_CHARS)) {
     Q_strncpyz(game_mode, DEFAULT_GAME_MODE, MAX_TOKEN_CHARS);
   }
