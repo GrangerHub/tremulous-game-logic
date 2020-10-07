@@ -789,11 +789,11 @@ static void CG_HumanText( char *text, playerState_t *ps )
           key_string_2,
           CG_KeyNameForCommand( "+speed" ), sizeof(key_string_2));
         Q_strcat( text, MAX_TUTORIAL_TEXT,
-                   va( "%sress and hold %s or %s while off of the ground to activate the jetpack\n",
-                       ps->groundEntityNum == ENTITYNUM_NONE ? "P" : va( "Jump off the ground by pressing %s, then p",
-                                                                         CG_KeyNameForCommand( "+moveup" ) ),
-                       key_string_1,
-                       key_string_2) );
+                   va( "%s to activate the jetpack\n",
+                       ps->groundEntityNum == ENTITYNUM_NONE ? 
+                       va( "Press and hold %s or %s while off of the ground",
+                       key_string_1, key_string_2) :
+                       va( "Press and hold %s", key_string_1 ) ) );
       }
     }
 

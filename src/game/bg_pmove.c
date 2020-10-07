@@ -5858,11 +5858,14 @@ void PmoveSingle( pmove_t *pmove )
   PM_CheckLadder( );
 
   // jet activation
-  if( (pm->cmd.upmove >= 10 || ( pm->cmd.buttons & BUTTON_WALKING )) &&
+  if( 
+      ( 
+        pm->cmd.upmove >= 10 ||
+        (
+          ( pm->cmd.buttons & BUTTON_WALKING ) &&
+          pm->ps->groundEntityNum == ENTITYNUM_NONE) ) &&
       BG_InventoryContainsUpgrade( UP_JETPACK, pm->ps->stats ) &&
       !BG_UpgradeIsActive( UP_JETPACK, pm->ps->stats ) &&
-      ( pm->ps->groundEntityNum == ENTITYNUM_NONE ||
-        pm->ps->stats[ STAT_STATE ] & SS_GRABBED ) &&
       !(pm->ps->pm_flags & PMF_JUMP_HELD) &&
       pm->ps->stats[ STAT_FUEL ] > JETPACK_FUEL_MIN_START &&
       ( pm->ps->pm_type == PM_NORMAL || 
