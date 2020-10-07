@@ -1743,10 +1743,10 @@ static void CG_HelmetVision( void )
 CG_DrawHumanScanner
 ==============
 */
-static void CG_DrawHumanScanner( rectDef_t *rect, qhandle_t shader, vec4_t color )
+static void CG_DrawHumanScanner( rectDef_t *rect, qhandle_t shader, vec4_t color, qboolean legacy )
 {
   if( BG_InventoryContainsUpgrade( UP_HELMET, cg.snap->ps.stats ) ) {
-    CG_Scanner( rect, shader, color );
+    CG_Scanner( rect, shader, color, legacy );
   }
 }
 
@@ -4712,7 +4712,10 @@ void CG_OwnerDraw( float x, float y, float w, float h, float text_x,
       CG_DrawAlienSense( &rect );
       break;
     case CG_PLAYER_HUMAN_SCANNER:
-      CG_DrawHumanScanner( &rect, shader, foreColor );
+      CG_DrawHumanScanner( &rect, shader, foreColor, qfalse );
+      break;
+    case CG_PLAYER_LEGACY_HUMAN_SCANNER:
+      CG_DrawHumanScanner( &rect, shader, foreColor, qtrue );
       break;
     case CG_PLAYER_USABLE_BUILDABLE:
       CG_DrawUsableBuildable( &rect, shader, foreColor );

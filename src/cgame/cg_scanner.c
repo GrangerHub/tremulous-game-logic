@@ -139,12 +139,13 @@ CG_DrawBlips
 Draw blips and stalks for the human scanner
 =============
 */
-static void CG_DrawBlips( rectDef_t *rect, vec3_t origin, vec4_t colour )
-{
+static void CG_DrawBlips(rectDef_t *rect, vec3_t origin, vec4_t colour, qboolean legacy) {
   vec3_t  drawOrigin;
+  vec3_t  up = {0, 0, 1};
+  float   alphaMod = 1.0f;
   float   timeFractionSinceRefresh = 1.0f -
-    ( (float)( cg.time - entityPositions.lastUpdateTime ) /
-      (float)HUMAN_SCANNER_UPDATE_PERIOD );
+    ((float)(cg.time - entityPositions.lastUpdateTime) /
+      (float)HUMAN_SCANNER_UPDATE_PERIOD);
   vec4_t  localColour;
   const float width = 4 * rect->w;
   const float x = rect->x - ((3 * rect->w) / 2.0f);
@@ -155,58 +156,95 @@ static void CG_DrawBlips( rectDef_t *rect, vec3_t origin, vec4_t colour )
   float clip_offset =
     ((360.0f - fov) / 360.0f) * width;
 
-  Vector4Copy( colour, localColour );
+  Vector4Copy(colour, localColour);
 
-  if(
-    orientation_offset_angle > half_fov && orientation_offset_angle <= 180.0f) {
-    orientation_offset_angle = half_fov;
-  } else if(
-    orientation_offset_angle > 180.0f &&
-    orientation_offset_angle < 360.0f - half_fov) {
-    orientation_offset_angle = 360.0f - half_fov;
-  }
+  if(legacy) {
+    RotatePointAroundVector(drawOrigin, up, origin, -entityPositions.vangles[1] - 90);
+    drawOrigin[0] /= (2 * HELMET_RANGE / rect->w);
+    drawOrigin[1] /= (2 * HELMET_RANGE / rect->h);
+    drawOrigin[2] /= (2 * HELMET_RANGE / rect->w);
 
-  orientation_offset = (orientation_offset_angle / 360.0f) * width;
+    alphaMod =
+      FAR_ALPHA +
+      ((drawOrigin[1] + (rect->h / 2.0f)) / rect->h) * (NEAR_ALPHA - FAR_ALPHA);
 
-  drawOrigin[ 0 ] = x + (width / 2.0) + orientation_offset;
-  drawOrigin[ 1 ] = rect->y + (rect->h / 2.0);
-  drawOrigin[2] = origin[2];
-  drawOrigin[2] /= ( 2 * HELMET_RANGE / rect->h );
-
-  localColour[ 3 ] *= ( 0.5f + ( timeFractionSinceRefresh * 0.5f ) );
-
-  if( localColour[ 3 ] > 1.0f )
-    localColour[ 3 ] = 1.0f;
-  else if( localColour[ 3 ] < 0.0f )
-    localColour[ 3 ] = 0.0f;
-
-  CG_SetClipRegion(
-    x + (clip_offset / 2), rect->y, width - clip_offset, rect->h);
-  trap_R_SetColor( localColour );
-
-  if( drawOrigin[ 2 ] > 0 ) {
-    CG_DrawPic( drawOrigin[ 0 ] - ( STALKWIDTH / 2 ),
-                drawOrigin[ 1 ] - drawOrigin[ 2 ],
-                STALKWIDTH, drawOrigin[ 2 ], cgs.media.scannerLineShader );
-    CG_DrawPic( drawOrigin[ 0 ] - ( STALKWIDTH / 2 ) - width,
-                drawOrigin[ 1 ] - drawOrigin[ 2 ],
-                STALKWIDTH, drawOrigin[ 2 ], cgs.media.scannerLineShader );
+    localColour[ 3 ] *= alphaMod;
   } else {
-    CG_DrawPic( drawOrigin[ 0 ] - ( STALKWIDTH / 2 ),
-                drawOrigin[ 1 ],
-                STALKWIDTH, -drawOrigin[ 2 ], cgs.media.scannerLineShader );
-    CG_DrawPic( drawOrigin[ 0 ] - ( STALKWIDTH / 2 ) - width,
-                drawOrigin[ 1 ],
-                STALKWIDTH, -drawOrigin[ 2 ], cgs.media.scannerLineShader );
+    if(
+      orientation_offset_angle > half_fov && orientation_offset_angle <= 180.0f) {
+      orientation_offset_angle = half_fov;
+    } else if(
+      orientation_offset_angle > 180.0f &&
+      orientation_offset_angle < 360.0f - half_fov) {
+      orientation_offset_angle = 360.0f - half_fov;
+    }
+
+    orientation_offset = (orientation_offset_angle / 360.0f) * width;
+
+    drawOrigin[0] = x + (width / 2.0) + orientation_offset;
+    drawOrigin[1] = rect->y + (rect->h / 2.0);
+    drawOrigin[2] = origin[2];
+    drawOrigin[2] /= (2 * HELMET_RANGE / rect->h);
   }
-  CG_DrawPic( drawOrigin[ 0 ] - ( BLIPX / 2 ),
-              drawOrigin[ 1 ] - ( BLIPY / 2 ) - drawOrigin[ 2 ],
-              BLIPX, BLIPY, cgs.media.scannerBlipShader );
-  CG_DrawPic( drawOrigin[ 0 ] - ( BLIPX / 2 ) - width,
-               drawOrigin[ 1 ] - ( BLIPY / 2 ) - drawOrigin[ 2 ],
-              BLIPX, BLIPY, cgs.media.scannerBlipShader );
-  trap_R_SetColor( NULL );
-  CG_ClearClipRegion( );
+
+  localColour[3] *= (0.5f + (timeFractionSinceRefresh * 0.5f));
+
+  if(localColour[3] > 1.0f) {
+    localColour[3] = 1.0f;
+  } else if(localColour[3] < 0.0f) {
+    localColour[3] = 0.0f;
+  }
+
+  if(legacy) {
+    trap_R_SetColor(localColour);
+ 
+    if(drawOrigin[ 2 ] > 0) {
+      CG_DrawPic(
+        rect->x + (rect->w / 2) - (STALKWIDTH / 2) - drawOrigin[0],
+        rect->y + (rect->h / 2) + drawOrigin[1] - drawOrigin[2],
+        STALKWIDTH, drawOrigin[2], cgs.media.scannerLineShader);
+    } else {
+      CG_DrawPic(
+        rect->x + (rect->w / 2) - (STALKWIDTH / 2) - drawOrigin[0],
+        rect->y + (rect->h / 2) + drawOrigin[1],
+        STALKWIDTH, -drawOrigin[2], cgs.media.scannerLineShader);
+    }
+
+    CG_DrawPic(
+      rect->x + (rect->w / 2) - (BLIPX / 2) - drawOrigin[0],
+      rect->y + (rect->h / 2) - (BLIPY / 2) + drawOrigin[1] - drawOrigin[2],
+      BLIPX, BLIPY, cgs.media.scannerBlipShader);
+     trap_R_SetColor(NULL);
+  } else {
+    CG_SetClipRegion(
+      x + (clip_offset / 2), rect->y, width - clip_offset, rect->h);
+    trap_R_SetColor( localColour );
+
+    if(drawOrigin[2] > 0) {
+      CG_DrawPic(
+        drawOrigin[0] - (STALKWIDTH / 2), drawOrigin[1] - drawOrigin[2],
+        STALKWIDTH, drawOrigin[2], cgs.media.scannerLineShader);
+      CG_DrawPic(
+        drawOrigin[0] - (STALKWIDTH / 2) - width, drawOrigin[1] - drawOrigin[2],
+        STALKWIDTH, drawOrigin[2], cgs.media.scannerLineShader);
+    } else {
+      CG_DrawPic(
+        drawOrigin[0] - (STALKWIDTH / 2), drawOrigin[1], STALKWIDTH,
+        -drawOrigin[ 2 ], cgs.media.scannerLineShader);
+      CG_DrawPic(
+        drawOrigin[0] - (STALKWIDTH / 2) - width, drawOrigin[1], STALKWIDTH,
+        -drawOrigin[2], cgs.media.scannerLineShader);
+    }
+    CG_DrawPic(
+      drawOrigin[0] - (BLIPX / 2), drawOrigin[1] - (BLIPY / 2) - drawOrigin[2],
+      BLIPX, BLIPY, cgs.media.scannerBlipShader);
+    CG_DrawPic(
+      drawOrigin[0] - (BLIPX / 2) - width,
+      drawOrigin[1] - (BLIPY / 2) - drawOrigin[2], BLIPX, BLIPY,
+      cgs.media.scannerBlipShader);
+    trap_R_SetColor(NULL);
+    CG_ClearClipRegion( );
+  }
 }
 
 #define BLIPX2  (24.0f * cgDC.aspectScale)
@@ -330,64 +368,207 @@ void CG_AlienSense( rectDef_t *rect )
 CG_Scanner
 =============
 */
-void CG_Scanner( rectDef_t *rect, qhandle_t shader, vec4_t color )
-{
+void CG_Scanner(
+  rectDef_t *rect, qhandle_t shader, vec4_t color, qboolean legacy) {
   int     i;
   vec3_t  origin;
   vec3_t  relOrigin;
   vec4_t  hIabove;
-  vec4_t  aIabove = { 1.0f, 0.0f, 0.0f, 0.9f };
+  vec4_t  hIbelow;
+  vec4_t  aIabove = {1.0f, 0.0f, 0.0f, 0.9f};
+  vec4_t  aIbelow = {1.0f, 0.0f, 0.0f, 0.5f};
 
-  Vector4Copy( color, hIabove );
-  hIabove[ 3 ] = 0.9f;
+  if(legacy) {
+    aIabove[3] = 0.75f; 
+  } else {
+    aIabove[3] = 0.9f; 
+  }
 
-  VectorCopy( entityPositions.origin, origin );
+  Vector4Copy(color, hIabove);
+  hIabove[3] *= 1.5f;
+
+  Vector4Copy(color, hIbelow);
+
+  VectorCopy(entityPositions.origin, origin);
+
+  if(legacy) {
+    //draw human buildables below scanner plane
+    for(i = 0; i < entityPositions.numHumanBuildables; i++) {
+      VectorClear(relOrigin);
+      VectorSubtract(entityPositions.humanBuildablePos[i], origin, relOrigin);
+
+      if(
+        VectorLength(relOrigin) < HELMET_RANGE && (relOrigin[2] < 0) &&
+        (
+          !CG_Visible(
+            entityPositions.humanBuildable[i],
+            *Temp_Clip_Mask(MASK_DEADSOLID, 0)) ||
+          entityPositions.humanBuildable[i]->currentState.modelindex ==
+            BA_H_REACTOR)) {
+        CG_DrawBlips(rect, relOrigin, hIbelow, legacy);
+      }
+    }
+
+    //draw alien buildables below scanner plane
+    for(i = 0; i < entityPositions.numAlienBuildables; i++) {
+      VectorClear(relOrigin);
+      VectorSubtract(entityPositions.alienBuildablePos[i], origin, relOrigin);
+
+      if(
+        VectorLength(relOrigin) < HELMET_RANGE && (relOrigin[2] < 0) &&
+        (
+          (entityPositions.alienBuildable[i]->currentState.eFlags & EF_SCAN_SPOTTED) ||
+          CG_Visible(
+            entityPositions.alienBuildable[ i ],
+            *Temp_Clip_Mask(MASK_DEADSOLID, 0)))) {
+        CG_DrawBlips(rect, relOrigin, aIbelow, legacy);
+      }
+    }
+
+    //draw human clients below scanner plane
+    for(i = 0; i < entityPositions.numHumanClients; i++) {
+      VectorClear(relOrigin);
+      VectorSubtract(entityPositions.humanClientPos[i], origin, relOrigin);
+
+      if(VectorLength(relOrigin) < HELMET_RANGE && (relOrigin[2] < 0)) {
+        CG_DrawBlips(rect, relOrigin, hIbelow, legacy);
+      }
+    }
+
+    //draw alien clients below scanner plane
+    for(i = 0; i < entityPositions.numAlienClients; i++) {
+      VectorClear(relOrigin);
+      VectorSubtract(entityPositions.alienClientPos[i], origin, relOrigin);
+
+      if(
+        VectorLength(relOrigin) < HELMET_RANGE && (relOrigin[2] < 0) &&
+        !(
+          (entityPositions.alienClient[i]->currentState.eFlags & EF_INVISIBILE) &&
+          entityPositions.alienClient[i]->currentState.weapon !=
+            WP_LUCIFER_CANNON) &&
+          (
+            (entityPositions.alienClient[i]->currentState.eFlags & EF_SCAN_SPOTTED) ||
+            CG_Visible(
+              entityPositions.alienClient[i],
+              *Temp_Clip_Mask(MASK_DEADSOLID, 0)))) {
+        CG_DrawBlips(rect, relOrigin, aIbelow, legacy);
+      }
+    }
+
+    if(!cg_disableScannerPlane.integer) {
+      trap_R_SetColor(color);
+      CG_DrawPic(rect->x, rect->y, rect->w, rect->h, shader);
+      trap_R_SetColor(NULL);
+    }
+  }
 
   //draw human buildables above scanner plane
-  for( i = 0; i < entityPositions.numHumanBuildables; i++ )
-  {
-    VectorClear( relOrigin );
-    VectorSubtract( entityPositions.humanBuildablePos[ i ], origin, relOrigin );
+  for(i = 0; i < entityPositions.numHumanBuildables; i++) {
+    VectorClear(relOrigin);
+    VectorSubtract(entityPositions.humanBuildablePos[i], origin, relOrigin);
 
-    if( VectorLength( relOrigin ) < HELMET_RANGE &&
-        ( !CG_Visible( entityPositions.humanBuildable[ i ], *Temp_Clip_Mask(MASK_DEADSOLID, 0) ) ||
-            entityPositions.humanBuildable[ i ]->currentState.modelindex == BA_H_REACTOR ) )
-      CG_DrawBlips( rect, relOrigin, hIabove );
+    if(legacy) {
+      if(
+        VectorLength(relOrigin) < HELMET_RANGE && (relOrigin[2] > 0) &&
+        (
+          !CG_Visible(
+            entityPositions.humanBuildable[i],
+            *Temp_Clip_Mask(MASK_DEADSOLID, 0)) ||
+          entityPositions.humanBuildable[i]->currentState.modelindex ==
+            BA_H_REACTOR)) {
+        CG_DrawBlips(rect, relOrigin, hIabove, legacy);
+      }
+    } else {
+      if(
+        VectorLength(relOrigin) < HELMET_RANGE &&
+        (
+          !CG_Visible(
+            entityPositions.humanBuildable[i],
+            *Temp_Clip_Mask(MASK_DEADSOLID, 0)) ||
+            entityPositions.humanBuildable[i]->currentState.modelindex ==
+              BA_H_REACTOR)) {
+        CG_DrawBlips(rect, relOrigin, hIabove, legacy);
+      }
+    }
   }
 
   //draw human clients above scanner plane
-  for( i = 0; i < entityPositions.numHumanClients; i++ )
-  {
-    VectorClear( relOrigin );
-    VectorSubtract( entityPositions.humanClientPos[ i ], origin, relOrigin );
+  for(i = 0; i < entityPositions.numHumanClients; i++) {
+    VectorClear(relOrigin);
+    VectorSubtract(entityPositions.humanClientPos[i], origin, relOrigin);
 
-    if( VectorLength( relOrigin ) < HELMET_RANGE )
-      CG_DrawBlips( rect, relOrigin, hIabove );
+    if(legacy) {
+      if(VectorLength(relOrigin) < HELMET_RANGE && (relOrigin[2] > 0)) {
+        CG_DrawBlips(rect, relOrigin, hIabove, legacy);
+      }
+    } else {
+      if(VectorLength(relOrigin) < HELMET_RANGE) {
+        CG_DrawBlips(rect, relOrigin, hIabove, legacy);
+      }
+    }
   }
 
   //draw alien buildables above scanner plane
-  for( i = 0; i < entityPositions.numAlienBuildables; i++ )
-  {
-    VectorClear( relOrigin );
-    VectorSubtract( entityPositions.alienBuildablePos[ i ], origin, relOrigin );
+  for(i = 0; i < entityPositions.numAlienBuildables; i++) {
+    VectorClear(relOrigin);
+    VectorSubtract(entityPositions.alienBuildablePos[i], origin, relOrigin);
 
-    if( VectorLength( relOrigin ) < HELMET_RANGE &&
-        ( ( entityPositions.alienBuildable[ i ]->currentState.eFlags & EF_SCAN_SPOTTED ) ||
-           CG_Visible( entityPositions.alienBuildable[ i ], *Temp_Clip_Mask(MASK_DEADSOLID, 0) ) ) )
-      CG_DrawBlips( rect, relOrigin, aIabove );
+    if(legacy) {
+      if(
+        VectorLength(relOrigin) < HELMET_RANGE && (relOrigin[2] > 0) &&
+        (
+          (entityPositions.alienBuildable[i]->currentState.eFlags & EF_SCAN_SPOTTED) ||
+          CG_Visible(
+            entityPositions.alienBuildable[ i ],
+            *Temp_Clip_Mask(MASK_DEADSOLID, 0)))) {
+        CG_DrawBlips( rect, relOrigin, aIabove, legacy );
+      }
+    } else {
+      if(
+        VectorLength(relOrigin) < HELMET_RANGE &&
+        (
+          (entityPositions.alienBuildable[i]->currentState.eFlags & EF_SCAN_SPOTTED) ||
+          CG_Visible(
+            entityPositions.alienBuildable[ i ],
+            *Temp_Clip_Mask(MASK_DEADSOLID, 0)))) {
+        CG_DrawBlips( rect, relOrigin, aIabove, legacy );
+      }
+    }
   }
 
   //draw alien clients above scanner plane
-  for( i = 0; i < entityPositions.numAlienClients; i++ )
-  {
-    VectorClear( relOrigin );
-    VectorSubtract( entityPositions.alienClientPos[ i ], origin, relOrigin );
+  for(i = 0; i < entityPositions.numAlienClients; i++) {
+    VectorClear(relOrigin);
+    VectorSubtract(entityPositions.alienClientPos[i], origin, relOrigin);
 
-    if( VectorLength( relOrigin ) < HELMET_RANGE &&
-        !( ( entityPositions.alienClient[ i ]->currentState.eFlags & EF_INVISIBILE ) &&
-           entityPositions.alienClient[ i ]->currentState.weapon != WP_LUCIFER_CANNON ) &&
-        ( ( entityPositions.alienClient[ i ]->currentState.eFlags & EF_SCAN_SPOTTED ) ||
-          CG_Visible( entityPositions.alienClient[ i ], *Temp_Clip_Mask(MASK_DEADSOLID, 0) ) ) )
-      CG_DrawBlips( rect, relOrigin, aIabove );
+    if(legacy) {
+      if(
+        VectorLength(relOrigin) < HELMET_RANGE && (relOrigin[2] > 0) &&
+        !(
+          (entityPositions.alienClient[i]->currentState.eFlags & EF_INVISIBILE) &&
+          entityPositions.alienClient[i]->currentState.weapon !=
+            WP_LUCIFER_CANNON) &&
+          (
+            (entityPositions.alienClient[i]->currentState.eFlags & EF_SCAN_SPOTTED) ||
+            CG_Visible(
+              entityPositions.alienClient[i],
+              *Temp_Clip_Mask(MASK_DEADSOLID, 0)))) {
+        CG_DrawBlips(rect, relOrigin, aIabove, legacy);
+      }
+    } else {
+      if(
+        VectorLength( relOrigin ) < HELMET_RANGE &&
+        !(
+          (entityPositions.alienClient[i]->currentState.eFlags & EF_INVISIBILE) &&
+          entityPositions.alienClient[i]->currentState.weapon !=
+            WP_LUCIFER_CANNON) &&
+          (
+            (entityPositions.alienClient[i]->currentState.eFlags & EF_SCAN_SPOTTED) ||
+            CG_Visible(
+              entityPositions.alienClient[i],
+              *Temp_Clip_Mask(MASK_DEADSOLID, 0)))) {
+        CG_DrawBlips(rect, relOrigin, aIabove, legacy);
+      }
+    }
   }
 }

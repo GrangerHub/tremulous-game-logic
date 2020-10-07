@@ -2148,6 +2148,7 @@ void CG_LoadHudMenu( void )
   cgDC.stopCinematic        = &CG_StopCinematic;
   cgDC.drawCinematic        = &CG_DrawCinematic;
   cgDC.runCinematicFrame    = &CG_RunCinematicFrame;
+  cgDC.Is_Current_Game_Mode = BG_Is_Current_Game_Mode;
 
   Init_Display( &cgDC );
 

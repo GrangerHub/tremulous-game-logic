@@ -2121,7 +2121,7 @@ void        CG_DrawItemSelectText( rectDef_t *rect, float scale, int textStyle )
 // cg_scanner.c
 //
 void        CG_UpdateEntityPositions( void );
-void        CG_Scanner( rectDef_t *rect, qhandle_t shader, vec4_t color );
+void        CG_Scanner( rectDef_t *rect, qhandle_t shader, vec4_t color, qboolean legacy );
 void        CG_AlienSense( rectDef_t *rect );
 
 //

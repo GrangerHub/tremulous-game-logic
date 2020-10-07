@@ -759,7 +759,7 @@ void dbshotgunFire( gentity_t *ent, int seed )
   unlagged_attacker.range = DBSHOTGUN_RANGE;
   G_UnlaggedOn(&unlagged_attacker);
   G_SplatterFire(
-    ent, ent, unlagged_attacker.muzzle_out, unlagged_attacker.forward_out,
+    ent, ent, ent->client->pmext.muzzel_point_fired, ent->client->pmext.dir_fired,
     seed, ent->s.weapon, ent->s.generic1, MOD_DBSHOTGUN );
   G_UnlaggedOff();
 }
