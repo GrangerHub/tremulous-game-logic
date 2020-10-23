@@ -1550,7 +1550,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
   index = ent - g_entities;
   client = ent->client;
 
-  G_Detonate_Saved_Missiles(ent);
+  G_Detonate_Saved_Missiles(ent->s.number);
 
   id = ent->client->ps.misc[MISC_ID];
 
@@ -1881,7 +1881,7 @@ void ClientSpawn( gentity_t *ent, gentity_t *spawn, const vec3_t origin, const v
     client->ps.weapon = client->ps.stats[ STAT_WEAPON ];
   }
 
-  G_Detonate_Saved_Missiles(ent);
+  G_Detonate_Saved_Missiles(ent->s.number);
 
   // run a client frame to drop exactly to the floor,
   // initialize animations and other things

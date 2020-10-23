@@ -3760,6 +3760,10 @@ static void PM_BeginWeaponChange( int weapon )
 
   BG_ResetLightningBoltCharge( pm->ps, pm->pmext);
 
+  if(pm->detonate_saved_missiles) {
+    pm->detonate_saved_missiles(pm->ps->clientNum);
+  }
+
   pm->ps->weaponstate = WEAPON_DROPPING;
   pm->ps->weaponTime += 200;
   pm->ps->persistant[ PERS_NEWWEAPON ] = weapon;

@@ -142,7 +142,7 @@ struct gentity_s
 
   qboolean          inuse;
 
-  char              *classname;     // set in QuakeEd
+  const char        *classname;     // set in QuakeEd
   int               spawnflags;     // set in QuakeEd
 
   qboolean          neverFree;      // if true, FreeEntity will only unlink
@@ -420,8 +420,7 @@ struct gentity_s
   qboolean          tripwire_set;
   trace_t           tripwire_trace;
 
-  bgentity_id       saved_missiles[MAX_GENTITIES][WP_NUM_WEAPONS][WPM_NUM_WEAPONMODES];
-  int               num_saved_missiles[WP_NUM_WEAPONS][WPM_NUM_WEAPONMODES];
+  bglist_t          saved_missiles;
 
   bglink_t          *zapLink;  // For ET_LEV2_ZAP_CHAIN
 };
@@ -1314,12 +1313,14 @@ void      G_InitDamageLocations( void );
 //
 // g_missile.c
 //
+void      G_Init_Missiles(void);
+void      G_Missle_Entity_ID_Free_Memory_Info( void );
 void      G_RunMissile( gentity_t *ent );
-void G_LaunchMissile(
+void      G_LaunchMissile(
   gentity_t *self, weapon_t weapon, weaponMode_t mode, vec3_t start,
   vec3_t dir);
 qboolean  G_PlayerHasUnexplodedGrenades( gentity_t *player );
-void      G_Detonate_Saved_Missiles(gentity_t *self);
+void      G_Detonate_Saved_Missiles(int ent_num);
 
 //
 // g_mover.c
