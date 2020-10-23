@@ -38,7 +38,7 @@ Custom Dynamic Memory Management for the unlagged system
 
 /*
 ===============
-G_Unlagged_Dimensions_Memory_Info
+G_Unlagged_Memory_Info
 
 Displays info related to allocation for the unlagged system
 ===============
