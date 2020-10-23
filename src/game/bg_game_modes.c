@@ -73,6 +73,7 @@ qboolean BG_Check_Game_Mode_Name(
   if(len < 0) {
     return qfalse;
   } else {
+    FS_FCloseFile(f);
     return qtrue;
   }
 }

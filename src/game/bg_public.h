@@ -392,6 +392,7 @@ struct pmove_s
   float         marauderMinJumpFactor;
 
   qboolean      (*pm_reactor)(void);
+  void      (*detonate_saved_missiles)(int ent_num);
 };
 
 int PM_Gravity( playerState_t *ps );

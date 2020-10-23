@@ -585,6 +585,7 @@ void G_InitGentity( gentity_t *e )
   e->s.number = e - g_entities;
   e->r.ownerNum = ENTITYNUM_NONE;
   BG_List_Init(&e->targeted);
+  BG_List_Init(&e->saved_missiles);
 }
 
 /*
@@ -708,6 +709,7 @@ void G_FreeEntity( gentity_t *ent )
 
   G_UnlaggedClear( ent );
   BG_List_Clear(&ent->targeted);
+  G_Detonate_Saved_Missiles(ent->s.number);
   if(ent->client) {
     ent->client->ps.misc[MISC_ID] = 0;
   }

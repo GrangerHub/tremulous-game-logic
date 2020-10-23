@@ -26,6 +26,48 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 #define MISSILE_PRESTEP_TIME  50
 
+allocator_protos(missile_entity_id)
+allocator(missile_entity_id, sizeof(bgentity_id), 2048)
+
+
+
+/*
+===============
+G_Init_Missiles
+===============
+*/
+void G_Init_Missiles(void) {
+  initPool_missile_entity_id( __FILE__, __LINE__ );
+}
+
+/*
+===============
+G_Missle_Entity_ID_Free
+===============
+*/
+static void G_Missle_Entity_ID_Free(void *ptr) {
+  bgentity_id *missile_entity_id;
+
+  if(ptr == NULL) {
+    return;
+  }
+
+  missile_entity_id = (bgentity_id *)ptr;
+
+  free_missile_entity_id(missile_entity_id, __FILE__, __LINE__);
+}
+
+/*
+===============
+G_Missle_Entity_ID_Free_Memory_Info
+
+Displays info related to allocation for the unlagged system
+===============
+*/
+void G_Missle_Entity_ID_Free_Memory_Info( void ) {
+  memoryInfo_missile_entity_id(  );
+}
+
 /*
 ================
 G_BounceMissile
@@ -864,63 +906,104 @@ void G_MissileDie(
   self->think = G_ExplodeMissile;
 }
 
-void G_Detonate_Saved_Missiles(gentity_t *self) {
-  int          i;
+typedef struct detonate_saved_missiles_data_s
+{
+  int          total_saved_missiles;
+  int          current_saved_missile_index;
+  qboolean     missile_mode_detonated[WP_NUM_WEAPONS][WPM_NUM_WEAPONMODES];
+} detonate_saved_missiles_data_t;
+
+static void _G_Detonate_Saved_Missile(void *data, void *user_data) {
+  weaponMode_t                   mode;
+  weapon_t                       weapon;
+  bgentity_id                    *missile_entity_id;
+  gentity_t                      *missile;
+  detonate_saved_missiles_data_t *detonate_saved_missiles_data;
+
+  Com_Assert(data && "_G_Detonate_Saved_Missile: data is NULL");
+  Com_Assert(user_data && "_G_Detonate_Saved_Missile: user_data is NULL");
+
+  detonate_saved_missiles_data = (detonate_saved_missiles_data_t *)user_data;
+  missile_entity_id = (bgentity_id *)data;
+  missile = G_Entity_UEID_get(missile_entity_id);
+
+  if(missile) {
+    weapon = missile->s.weapon;
+    mode = missile->s.generic1;
+
+    if(!BG_Missile(weapon, mode)->detonate_saved_missiles) {
+      return;
+    }
+
+    detonate_saved_missiles_data->missile_mode_detonated[weapon][mode] = qtrue;
+    missile->think = G_ExplodeMissile;
+    missile->nextthink =
+      level.time +
+      (
+        detonate_saved_missiles_data->current_saved_missile_index *
+          BG_Missile(weapon, mode)->detonate_saved_missiles_delay);
+    detonate_saved_missiles_data->current_saved_missile_index++;
+  }
+}
+
+void G_Detonate_Saved_Missiles(int ent_num) {
+  gentity_t    *self;
+  weapon_t     weapon;
+  weaponMode_t mode;
   int          *clips;
   int          *ammo;
-  weaponMode_t mode;
-  weapon_t     weapon;
   qboolean     decrement_clips = qfalse;
 
-  Com_Assert(self && "G_Detonate_Saved_Missiles: self is NULL");
+  Com_Assert(
+    ent_num >= 0 && ent_num < MAX_GENTITIES &&
+    "G_Detonate_Saved_Missiles: ent_num out of range");
 
-  for(weapon = 0; weapon < WP_NUM_WEAPONS; weapon++) {
-    for(mode = 0; mode < WPM_NUM_WEAPONMODES; mode++) {
-      qboolean missile_mode_detonated = qfalse;
+  self = &g_entities[ent_num];
 
-      if(
-        !BG_Missile(weapon, mode) ||
-        !BG_Missile(weapon, mode)->detonate_saved_missiles ||
-        self->num_saved_missiles[weapon][mode] <= 0) {
-        self->num_saved_missiles[weapon][mode] = 0;
-        continue;
+  if(!BG_List_Is_Empty(&self->saved_missiles)) {
+    detonate_saved_missiles_data_t detonate_saved_missiles_data;
+
+    detonate_saved_missiles_data.current_saved_missile_index = 0;
+    detonate_saved_missiles_data.total_saved_missiles =
+       self->saved_missiles.length;
+
+    for(weapon = 0; weapon < WP_NUM_WEAPONS; weapon++) {
+      for(mode = 0; mode < WPM_NUM_WEAPONMODES; mode++) {
+        detonate_saved_missiles_data.missile_mode_detonated[weapon][mode] = qfalse;
       }
+    }
 
-      for(i = self->num_saved_missiles[weapon][mode] - 1; i >= 0 ; i--) {
-        gentity_t *missile =
-          G_Entity_UEID_get(&self->saved_missiles[i][weapon][mode]);
+    BG_List_Foreach(
+      &self->saved_missiles, NULL, _G_Detonate_Saved_Missile,
+      &detonate_saved_missiles_data);
 
-        if(missile) {
-          missile_mode_detonated = qtrue;
-          missile->think = G_ExplodeMissile;
-          missile->nextthink =
-            level.time +
-            (
-              (
-                self->num_saved_missiles[weapon][mode] - i) *
-                BG_Missile(weapon, mode)->detonate_saved_missiles_delay);
-        }
-      }
+    BG_List_Clear_Full_Forced(&self->saved_missiles, G_Missle_Entity_ID_Free);
 
-      if(self->client) {
+    if(self->client) {
+      for(weapon = 0; weapon < WP_NUM_WEAPONS; weapon++) {
+        for(mode = 0; mode < WPM_NUM_WEAPONMODES; mode++) {
+          if(!detonate_saved_missiles_data.missile_mode_detonated[weapon][mode]) {
+            continue;
+          }
 
-        if(
-          BG_Missile(weapon, mode)->detonate_saved_missiles_repeat >
-          self->client->ps.weaponTime) {
-            self->client->ps.weaponTime +=
-              BG_Missile(weapon, mode)->detonate_saved_missiles_repeat;
-        }
+          if(
+            BG_Missile(weapon, mode)->detonate_saved_missiles_repeat >
+            self->client->ps.weaponTime) {
+              self->client->ps.weaponTime +=
+                BG_Missile(weapon, mode)->detonate_saved_missiles_repeat;
+          }
 
-        if(weapon == self->client->ps.weapon) {
           decrement_clips = qtrue;
         }
       }
-
-      self->num_saved_missiles[weapon][mode] = 0;
     }
+  } else {
+    return;
   }
 
-  if(decrement_clips && BG_Weapon(self->client->ps.weapon)->usesBarbs) {
+  if(
+    self->client && decrement_clips &&
+    BG_Weapon(self->client->ps.weapon)->usesBarbs) {
     if(self->client) {
       clips = BG_GetClips(&self->client->ps, self->client->ps.weapon);
       ammo = &self->client->ps.ammo;
@@ -1072,11 +1155,11 @@ void G_LaunchMissile(
   }
 
   if(BG_Missile(weapon, mode)->save_missiles) {
-    G_Entity_UEID_set(
-      &self->saved_missiles[
-        self->num_saved_missiles[weapon][mode]][weapon][mode],
-      bolt);
-    self->num_saved_missiles[weapon][mode]++;
+    bgentity_id *missile_entity_id = alloc_missile_entity_id(__FILE__, __LINE__);
+
+    G_Entity_UEID_set(missile_entity_id, bolt);
+
+    BG_List_Push_Head(&self->saved_missiles, missile_entity_id);
 
     if(
       BG_Weapon(weapon)->usesBarbs &&
@@ -1085,7 +1168,7 @@ void G_LaunchMissile(
       (
         !(self->client->pers.cmd.buttons & BUTTON_USE_HOLDABLE) ||
         self->client->ps.ammo <= 0)) {
-      G_Detonate_Saved_Missiles(self);
+      G_Detonate_Saved_Missiles(self->s.number);
     }
   }
 }

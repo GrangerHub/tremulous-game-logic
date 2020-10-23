@@ -219,7 +219,7 @@ void G_LeaveTeam( gentity_t *self )
   if( self->client->ps.eFlags & EF_OCCUPYING )
     G_ResetOccupation( self->occupation.occupied, self );
 
-  G_Detonate_Saved_Missiles(self);
+  G_Detonate_Saved_Missiles(self->s.number);
 
   for( i = 0; i < level.num_entities; i++ )
   {

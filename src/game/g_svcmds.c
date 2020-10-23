@@ -602,6 +602,7 @@ static void Svcmd_G_MemoryInfo( void ) {
 
   //local custom allocators
   G_Unlagged_Memory_Info( );
+  G_Missle_Entity_ID_Free_Memory_Info( );
 }
 
 struct svcmd

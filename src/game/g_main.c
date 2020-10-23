@@ -814,7 +814,9 @@ Q_EXPORT void G_InitGame( int levelTime, int randomSeed, int restart )
 
   G_Init_Unlagged( );
 
-  G_Scrim_Load();
+  G_Init_Missiles( );
+
+  G_Scrim_Load( );
 
   level.emoticonCount = BG_LoadEmoticons( level.emoticons, MAX_EMOTICONS );
 
