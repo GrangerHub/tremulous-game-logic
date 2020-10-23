@@ -530,6 +530,7 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd )
     pm.wallJumperMinFactor = client->pers.wallJumperMinFactor;
     pm.marauderMinJumpFactor = client->pers.marauderMinJumpFactor;
     pm.pm_reactor = G_Reactor_Is_Up;
+    pm.detonate_saved_missiles = G_Detonate_Saved_Missiles;
 
     // Perform a pmove
     Pmove( &pm );
@@ -1017,7 +1018,7 @@ void ClientTimerActions( gentity_t *ent, int msec )
       if( ent->timestamp + BG_Weapon(client->ps.weapon)->barbRegenTime < level.time )
       {
         if(client->ps.ammo <= 0) {
-          G_Detonate_Saved_Missiles(ent);
+          G_Detonate_Saved_Missiles(ent->s.number);
           client->ps.ammo = BG_Weapon(client->ps.weapon)->maxAmmo;
         } else {
           (*ps_clips)++;
@@ -2357,7 +2358,7 @@ void ClientThink_real( gentity_t *ent )
   ClientEvents( ent, oldEventSequence );
 
   if(client->ps.stats[ STAT_FLAGS ] & SFL_DETONATE_MISSILES) {
-    G_Detonate_Saved_Missiles(ent);
+    G_Detonate_Saved_Missiles(ent->s.number);
     client->ps.stats[ STAT_FLAGS ] &= ~SFL_DETONATE_MISSILES;
   }
 

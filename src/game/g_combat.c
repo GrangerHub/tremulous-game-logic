@@ -255,7 +255,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
   if( level.intermissiontime )
     return;
 
-  G_Detonate_Saved_Missiles(self);
+  G_Detonate_Saved_Missiles(self->s.number);
 
   switch(self->client->pers.teamSelection) {
     case TEAM_ALIENS:
