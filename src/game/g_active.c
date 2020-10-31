@@ -1002,6 +1002,8 @@ void ClientTimerActions( gentity_t *ent, int msec )
         AddScore( ent, LEVEL1_REGEN_SCOREINC );
       else if( client->ps.weapon == WP_ALEVEL1_UPG )
         AddScore( ent, LEVEL1_UPG_REGEN_SCOREINC );
+      else
+        AddScore( ent, LEVEL1_REGEN_SCOREINC );
 
       ent->client->pers.hasHealed = qfalse;
     }
@@ -2092,11 +2094,11 @@ void ClientThink_real( gentity_t *ent )
           qboolean didBoost = qfalse;
 
           //don't give a heal boost to self
-          if( boost->s.number == ent->s.number ) {
+          if( boost->s.number == ent->s.number && class != PCL_ALIEN_LEVEL4) {
             continue;
           }
 
-          if( class == PCL_ALIEN_LEVEL1 && modifier < LEVEL1_REGEN_MOD )
+          if( (class == PCL_ALIEN_LEVEL1 || class == PCL_ALIEN_LEVEL4) && modifier < LEVEL1_REGEN_MOD )
           {
             modifier = LEVEL1_REGEN_MOD;
             didBoost = qtrue;
@@ -2108,7 +2110,7 @@ void ClientThink_real( gentity_t *ent )
             didBoost = qtrue;
           }
 
-          if( didBoost && ent->health < maxHealth )
+          if( didBoost && ent->health < maxHealth && boost->s.number != ent->s.number )
             boost->client->pers.hasHealed = qtrue;
         }
       }
