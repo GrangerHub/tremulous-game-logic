@@ -1065,6 +1065,13 @@ void G_LaunchMissile(
     bolt->damage = BG_Missile(weapon, mode)->damage;
     bolt->splashDamage = BG_Missile(weapon, mode)->splash_damage;
   }
+
+  // Pass the missile charge through
+  bolt->s.torsoAnim = BG_SU2HP(bolt->damage) / 2;
+  if(bolt->s.torsoAnim > 255) {
+    bolt->s.torsoAnim = 255;
+  }
+
   bolt->splashRadius = BG_Missile(weapon, mode)->splash_radius;
   bolt->pointAgainstWorld = BG_Missile(weapon, mode)->point_against_world;
   VectorCopy(BG_Missile(weapon, mode)->mins, bolt->r.mins);
