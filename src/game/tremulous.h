@@ -83,7 +83,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define LEVEL1_REGEN_SCOREINC       AVM(100) // score added for healing per 10s
 #define LEVEL1_UPG_REGEN_SCOREINC   AVM(200)
 #define LEVEL1_JUMP_MAGNITUDE       270.0f
-#define LEVEL1_UPG_JUMP_MAGNITUDE   366.0f
+#define LEVEL1_UPG_JUMP_MAGNITUDE   270.0f
 
 #define LEVEL2_CLAW_SUBCHECKS       2
 #define LEVEL2_CLAW_DMG             AWDM(40000)
