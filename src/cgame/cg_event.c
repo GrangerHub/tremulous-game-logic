@@ -397,6 +397,8 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
   int           clientNum;
   clientInfo_t  *ci;
   int           steptime;
+  class_t       class;
+  qboolean      silenceFootsteps;
 
   if( cg.snap->ps.persistant[ PERS_SPECSTATE ] != SPECTATOR_NOT )
     steptime = 200;
@@ -419,13 +421,16 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
 
   ci = &cgs.clientinfo[ clientNum ];
 
+  class = (cg_entities[clientNum].currentState.misc >> 8) & 0xFF;
+  silenceFootsteps = BG_ClassConfig(class)->silenceFootsteps;
+
   switch( event )
   {
     //
     // movement generated events
     //
     case EV_FOOTSTEP:
-      if( cg_footsteps.integer && ci->footsteps != FOOTSTEP_NONE )
+      if( cg_footsteps.integer && ci->footsteps != FOOTSTEP_NONE && !silenceFootsteps )
       {
         if( ci->footsteps == FOOTSTEP_CUSTOM )
           trap_S_StartSound( NULL, es->number, CHAN_BODY,
@@ -437,7 +442,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       break;
 
     case EV_FOOTSTEP_METAL:
-      if( cg_footsteps.integer && ci->footsteps != FOOTSTEP_NONE )
+      if( cg_footsteps.integer && ci->footsteps != FOOTSTEP_NONE && !silenceFootsteps )
       {
         if( ci->footsteps == FOOTSTEP_CUSTOM )
           trap_S_StartSound( NULL, es->number, CHAN_BODY,
@@ -449,7 +454,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       break;
 
     case EV_FOOTSTEP_SQUELCH:
-      if( cg_footsteps.integer && ci->footsteps != FOOTSTEP_NONE )
+      if( cg_footsteps.integer && ci->footsteps != FOOTSTEP_NONE && !silenceFootsteps )
       {
         trap_S_StartSound( NULL, es->number, CHAN_BODY,
           cgs.media.footsteps[ FOOTSTEP_FLESH ][ rand( ) & 3 ] );
@@ -457,7 +462,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       break;
 
     case EV_FOOTSPLASH:
-      if( cg_footsteps.integer && ci->footsteps != FOOTSTEP_NONE )
+      if( cg_footsteps.integer && ci->footsteps != FOOTSTEP_NONE && !silenceFootsteps )
       {
         trap_S_StartSound( NULL, es->number, CHAN_BODY,
           cgs.media.footsteps[ FOOTSTEP_SPLASH ][ rand( ) & 3 ] );
@@ -465,7 +470,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       break;
 
     case EV_FOOTWADE:
-      if( cg_footsteps.integer && ci->footsteps != FOOTSTEP_NONE )
+      if( cg_footsteps.integer && ci->footsteps != FOOTSTEP_NONE && !silenceFootsteps )
       {
         trap_S_StartSound( NULL, es->number, CHAN_BODY,
           cgs.media.footsteps[ FOOTSTEP_SPLASH ][ rand( ) & 3 ] );
@@ -473,7 +478,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position )
       break;
 
     case EV_SWIM:
-      if( cg_footsteps.integer && ci->footsteps != FOOTSTEP_NONE )
+      if( cg_footsteps.integer && ci->footsteps != FOOTSTEP_NONE && !silenceFootsteps )
       {
         trap_S_StartSound( NULL, es->number, CHAN_BODY,
           cgs.media.footsteps[ FOOTSTEP_SPLASH ][ rand( ) & 3 ] );

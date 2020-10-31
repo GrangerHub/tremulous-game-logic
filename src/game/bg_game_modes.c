@@ -1128,22 +1128,23 @@ static qboolean BG_ParseClassFile(const char *filename, classConfig_t *cc) {
   float         scale = 0.0f;
   int           defined = 0;
   enum {
-      MODEL           = 1 << 0,
-      DESCRIPTION     = 1 << 1,
-      SKIN            = 1 << 2,
-      HUD             = 1 << 3,
-      MODELSCALE      = 1 << 4,
-      SHADOWSCALE     = 1 << 5,
-      MINS            = 1 << 6,
-      MAXS            = 1 << 7,
-      DEADMINS        = 1 << 8,
-      DEADMAXS        = 1 << 9,
-      CROUCHMAXS      = 1 << 10,
-      VIEWHEIGHT      = 1 << 11,
-      CVIEWHEIGHT     = 1 << 12,
-      ZOFFSET         = 1 << 13,
-      NAME            = 1 << 14,
-      SHOULDEROFFSETS = 1 << 15
+      MODEL            = 1 << 0,
+      DESCRIPTION      = 1 << 1,
+      SKIN             = 1 << 2,
+      HUD              = 1 << 3,
+      MODELSCALE       = 1 << 4,
+      SHADOWSCALE      = 1 << 5,
+      MINS             = 1 << 6,
+      MAXS             = 1 << 7,
+      DEADMINS         = 1 << 8,
+      DEADMAXS         = 1 << 9,
+      CROUCHMAXS       = 1 << 10,
+      VIEWHEIGHT       = 1 << 11,
+      CVIEWHEIGHT      = 1 << 12,
+      ZOFFSET          = 1 << 13,
+      NAME             = 1 << 14,
+      SHOULDEROFFSETS  = 1 << 15,
+      SILENCEFOOTSTEPS = 1 << 16
   };
 
   // load the file
@@ -1362,28 +1363,35 @@ static qboolean BG_ParseClassFile(const char *filename, classConfig_t *cc) {
 
       defined |= SHOULDEROFFSETS;
       continue;
+    } else if(!Q_stricmp(token, "silenceFootsteps")) {
+      if(BG_Parse_Bool(&cc->silenceFootsteps, &text_p)) {
+        defined |= SILENCEFOOTSTEPS;
+      }
+
+      continue;
     }
 
     Com_Printf(S_COLOR_RED "ERROR: unknown token '%s'\n", token);
     return qfalse;
   }
 
-  if(      !( defined & MODEL           ) ) {token = "model";}
-  else if( !( defined & DESCRIPTION     ) ) {token = "description";}
-  else if( !( defined & SKIN            ) ) {token = "skin";}
-  else if( !( defined & HUD             ) ) {token = "hud";}
-  else if( !( defined & MODELSCALE      ) ) {token = "modelScale";}
-  else if( !( defined & SHADOWSCALE     ) ) {token = "shadowScale";}
-  else if( !( defined & MINS            ) ) {token = "mins";}
-  else if( !( defined & MAXS            ) ) {token = "maxs";}
-  else if( !( defined & DEADMINS        ) ) {token = "deadMins";}
-  else if( !( defined & DEADMAXS        ) ) {token = "deadMaxs";}
-  else if( !( defined & CROUCHMAXS      ) ) {token = "crouchMaxs";}
-  else if( !( defined & VIEWHEIGHT      ) ) {token = "viewheight";}
-  else if( !( defined & CVIEWHEIGHT     ) ) {token = "crouchViewheight";}
-  else if( !( defined & ZOFFSET         ) ) {token = "zOffset";}
-  else if( !( defined & NAME            ) ) {token = "name";}
-  else if( !( defined & SHOULDEROFFSETS ) ) {token = "shoulderOffsets";}
+  if(      !( defined & MODEL            ) ) {token = "model";}
+  else if( !( defined & DESCRIPTION      ) ) {token = "description";}
+  else if( !( defined & SKIN             ) ) {token = "skin";}
+  else if( !( defined & HUD              ) ) {token = "hud";}
+  else if( !( defined & MODELSCALE       ) ) {token = "modelScale";}
+  else if( !( defined & SHADOWSCALE      ) ) {token = "shadowScale";}
+  else if( !( defined & MINS             ) ) {token = "mins";}
+  else if( !( defined & MAXS             ) ) {token = "maxs";}
+  else if( !( defined & DEADMINS         ) ) {token = "deadMins";}
+  else if( !( defined & DEADMAXS         ) ) {token = "deadMaxs";}
+  else if( !( defined & CROUCHMAXS       ) ) {token = "crouchMaxs";}
+  else if( !( defined & VIEWHEIGHT       ) ) {token = "viewheight";}
+  else if( !( defined & CVIEWHEIGHT      ) ) {token = "crouchViewheight";}
+  else if( !( defined & ZOFFSET          ) ) {token = "zOffset";}
+  else if( !( defined & NAME             ) ) {token = "name";}
+  else if( !( defined & SHOULDEROFFSETS  ) ) {token = "shoulderOffsets";}
+  else if( !( defined & SILENCEFOOTSTEPS ) ) {token = "silenceFootsteps";}
   else                                      {token = "";}
 
   if(strlen( token ) > 0) {

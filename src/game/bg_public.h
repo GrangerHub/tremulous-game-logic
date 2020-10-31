@@ -2163,6 +2163,7 @@ typedef struct
   int       crouchViewheight;
   float     zOffset;
   vec3_t    shoulderOffsets;
+  qboolean  silenceFootsteps;
 } classConfig_t;
 
 typedef struct
