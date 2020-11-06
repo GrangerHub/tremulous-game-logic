@@ -1513,7 +1513,7 @@ qboolean CanDamage(
 
   return G_BBOXes_Visible(
     ENTITYNUM_NONE, origin, mins, maxs, targ->s.number, targ->r.currentOrigin,
-    targ->r.mins, targ->r.maxs, *Temp_Clip_Mask(MASK_SHOT, 0));
+    targ->r.mins, targ->r.maxs, *Temp_Clip_Mask(MASK_SOLID, 0));
 }
 
 /*
