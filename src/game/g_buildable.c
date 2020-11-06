@@ -4766,8 +4766,8 @@ itemBuildError_t G_CanBuild( gentity_t *ent, buildable_t buildable, int distance
   BG_PositionBuildableRelativeToPlayer(ps, qfalse, entity_origin, angles, &tr1);
   G_SetPlayersLinkState( qtrue, ent );
 
-  SV_Trace( &tr2, entity_origin, mins, maxs, entity_origin, -1, qtrue,
-                *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB );
+  SV_Trace( &tr2, entity_origin, mins, maxs, entity_origin, ENTITYNUM_NONE,
+            qtrue, *Temp_Clip_Mask(MASK_PLAYERSOLID, 0), TT_AABB );
 
   VectorCopy( entity_origin, origin );
   *groundEntNum = tr1.entityNum;
