@@ -75,6 +75,7 @@ struct bglist_s
  typedef void (*BG_Destroy)(void *data);
  typedef qboolean (*BG_DestroyNotify)(void *data);
  typedef void (*BG_Func)(void *data, void *user_data);
+ typedef qboolean (*BG_FuncWithReturn)(void *data, void *user_data);
  
  /**
  * BG_CopyFunc:
@@ -131,6 +132,8 @@ bglist_t    *BG_List_Copy_Deep(
   bglist_t *list, BG_CopyFunc  func, void *user_data);
 void        BG_List_Foreach(
   bglist_t *list, bglink_t *startLink, BG_Func func, void *user_data );
+bglink_t   *BG_List_Foreach_With_Break(
+  bglist_t *list, bglink_t *startLink, BG_FuncWithReturn func, void *user_data);
 
 bglink_t    *BG_List_Find(bglist_t *list, const void *data);
 bglink_t    *BG_List_Find_Custom (

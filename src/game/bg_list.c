@@ -443,6 +443,47 @@ void BG_List_Foreach(
 }
 
 /**
+ * BG_List_Foreach_With_Break:
+ * @list: a #bglist_t
+ * @startLink: The link in the list that the loop starts at. If NULL
+               the loop would start at the head of the list.
+ * @func: the function to call for each element's data. if it returns qtrue
+          Foreach ends early.
+ * @user_data: user data to pass to @func
+ * 
+ * Calls @func for each element in the list passing @user_data to the
+ * function.  Like BG_List_Foreach but with the option to end early.
+ * 
+ * Returns: the current link if Foreach ends early.
+ * 
+ * Since: 2.4
+ */
+bglink_t *BG_List_Foreach_With_Break(
+  bglist_t *list, bglink_t *startLink, BG_FuncWithReturn func, void *user_data) {
+  bglink_t *link;
+
+  Com_Assert(list != NULL);
+  Com_Assert(func != NULL);
+
+  if(startLink) {
+    link = startLink;
+  } else {
+    link = list->head;
+  }
+
+  while(link) {
+    bglink_t *next = link->next;
+    Com_Assert(link->list == list);
+    if(func(link->data, user_data)) {
+      return link;
+    }
+    link = next;
+  }
+
+  return NULL;
+}
+
+/**
  * BG_List_Find:
  * @list: a #bglist_t
  * @data: data to find
@@ -1379,10 +1420,10 @@ BG_Link functions
  Custom Dynamic Memory Management for list links
  */
 #ifdef GAME
-# define  MAX_LINKS (16 * 1024)
+# define  MAX_LINKS (8 * 1024)
 #else
 #ifdef CGAME
-# define  MAX_LINKS (16 * 1024)
+# define  MAX_LINKS (8 * 1024)
 #else
 # define  MAX_LINKS (16 * 1024)
 #endif

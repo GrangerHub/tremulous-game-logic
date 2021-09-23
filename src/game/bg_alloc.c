@@ -361,6 +361,7 @@ void  _BG_InitMemory( char *calledFile, int calledLine )
   // Init the memory for custom allocators
   BG_Link_Init_Memory( calledFile, calledLine );
   BG_List_Init_Memory( calledFile, calledLine );
+  BG_Parser_Token_Data_Init_Memory(calledFile, calledLine);
 }
 
 /*
@@ -469,6 +470,7 @@ void BG_MemoryInfo( void )
 
   BG_Link_Memory_Info( );
   BG_List_Memory_Info( );
+  BG_Parser_Token_Data_Memory_Info( );
 }
 
 /*

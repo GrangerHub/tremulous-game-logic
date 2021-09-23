@@ -30,6 +30,9 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 // linked lists
 #include "bg_list.h"
 
+// tries
+#include "bg_trie.h"
+
 // BGAME Dynamic Memory Allocation
 #include "bg_alloc.h"
 
@@ -2112,6 +2115,15 @@ typedef enum
 //  Center prints that do not need to be ordered and are of low importance
 //    can use CP_EXTRA
 #define CP_EXTRA -CP_EXTRA1
+
+/*
+--------------------------------------------------------------------------------
+Config File Parsing
+bg_parse.c
+*/
+void BG_Parser_Token_Data_Init_Memory(char *calledFile, int calledLine);
+void BG_Parser_Token_Data_Memory_Info(void);
+
 
 /*
 --------------------------------------------------------------------------------

@@ -385,6 +385,47 @@ static qboolean BG_Parse_Vect5(vec5_t *vect_var, char **text_p) {
 }
 */
 
+typedef const char *(*BG_Enum_Name)(const int num);
+
+/*
+==============
+BG_Parse_Enum
+==============
+*/
+static qboolean BG_Parse_Enum(
+  char **text_p, int *enum_var, const int max_enum,
+  BG_Enum_Name func, const char *error_str) {
+  char *token;
+  int  num;
+
+  Com_Assert(enum_var);
+
+  token = COM_Parse(text_p);
+  if(!token) {
+    Com_Printf(error_str);
+    return qfalse;
+  }
+
+  for (num = 0; num < max_enum; num++) {
+    if(!Q_stricmp(token, func(num))) {
+      *enum_var = num;
+      break;
+    }
+  }
+
+  return qtrue;
+}
+
+/*
+==============
+BG_MOD_Name
+==============
+*/
+static const char *BG_MOD_Name(const int num) {
+  meansOfDeath_t mod = (meansOfDeath_t)num;
+  return BG_MOD(mod)->name;
+}
+
 /*
 ==============
 BG_Parse_Means_Of_Death
@@ -392,25 +433,9 @@ BG_Parse_Means_Of_Death
 */
 static qboolean BG_Parse_Means_Of_Death(
   meansOfDeath_t *mod_var, char **text_p) {
-  char           *token;
-  meansOfDeath_t mod;
-
-  Com_Assert(mod_var);
-
-  token = COM_Parse(text_p);
-  if(!token) {
-    Com_Printf(S_COLOR_RED "ERROR: expected means of death token\n");
-    return qfalse;
-  }
-
-  for (mod = 0; mod < NUM_MODS; mod++) {
-    if(!Q_stricmp(token, BG_MOD(mod)->name)) {
-      *mod_var = mod;
-      break;
-    }
-  }
-
-  return qtrue;
+    return BG_Parse_Enum(
+      text_p, (int *)mod_var, NUM_MODS, BG_MOD_Name,
+      S_COLOR_RED "ERROR: expected means of death token\n");
 }
 
 /*
