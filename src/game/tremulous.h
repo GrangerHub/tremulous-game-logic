@@ -1050,8 +1050,8 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define DEFAULT_ALIEN_BUILDPOINTS          "250"
 #define DEFAULT_ALIEN_BUILDPOINTS_RESERVE  "200"
 #define DEFAULT_ALIEN_QUEUE_TIME           "2000"
-#define DEFAULT_ALIEN_STAGE2_THRESH        "12000"
-#define DEFAULT_ALIEN_STAGE3_THRESH        "24000"
+#define DEFAULT_ALIEN_STAGE2_THRESH        "20"
+#define DEFAULT_ALIEN_STAGE3_THRESH        "40"
 #define DEFAULT_ALIEN_MAX_STAGE            "2"
 #define DEFAULT_HUMAN_BUILDPOINTS          "250"
 #define DEFAULT_HUMAN_BUILDPOINTS_RESERVE  "200"
@@ -1059,8 +1059,8 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define DEFAULT_HUMAN_REPEATER_BUILDPOINTS "20"
 #define DEFAULT_HUMAN_REPEATER_QUEUE_TIME  "2000"
 #define DEFAULT_HUMAN_REPEATER_MAX_ZONES   "500"
-#define DEFAULT_HUMAN_STAGE2_THRESH        "6000"
-#define DEFAULT_HUMAN_STAGE3_THRESH        "12000"
+#define DEFAULT_HUMAN_STAGE2_THRESH        "20"
+#define DEFAULT_HUMAN_STAGE3_THRESH        "40"
 #define DEFAULT_HUMAN_MAX_STAGE            "2"
 
 #define DAMAGE_FRACTION_FOR_KILL    0.5f //how much damage players (versus structures) need to
