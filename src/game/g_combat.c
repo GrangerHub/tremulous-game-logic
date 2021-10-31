@@ -168,6 +168,23 @@ float G_RewardAttackers( gentity_t *self )
     self->credits[ i ] = 0;
   }
 
+  // if players did more than DAMAGE_FRACTION_FOR_KILL increment the stage counters
+  if(
+    !IS_WARMUP &&
+    !g_AMPStageLock.integer &&
+    self->client &&
+    !OnSameTeam(self, self->enemy) &&
+    totalDamage >= (maxHealth * DAMAGE_FRACTION_FOR_KILL)) {
+    if(self->client->pers.teamSelection == TEAM_HUMANS) {
+      Cvar_SetSafe("g_alienKills", va("%d", g_alienKills.integer + 1));
+      Cvar_Update( &g_alienCredits );
+    }
+    else if(self->client->pers.teamSelection == TEAM_ALIENS) {
+      Cvar_SetSafe("g_humanKills", va("%d", g_humanKills.integer + 1));
+      Cvar_Update( &g_alienCredits );
+    }
+  }
+
   if( alienCredits )
   {
     Cvar_SetSafe( "g_alienCredits",
