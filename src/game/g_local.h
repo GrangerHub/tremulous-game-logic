@@ -431,7 +431,7 @@ struct gentity_s
   // variables for buildable stacking
   qboolean          damageDroppedBuildable;
   int               dropperNum;
-  int               buildableStack[ MAX_GENTITIES ];
+  bgentity_id       buildableStack[ MAX_GENTITIES ];
   int               numOfStackedBuildables;
 
   int               buildPointZone;                 // index for zone
