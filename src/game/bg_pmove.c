@@ -709,11 +709,12 @@ PM_IsWall
 Checks if the given surface is a wall.
 ==============
 */
+/*
 static qboolean PM_IsWall( trace_t *trace )
 {
   return trace->fraction < 1.0f && trace->plane.normal[ 2 ] < MIN_WALK_NORMAL &&
          !( trace->contents & CONTENTS_BODY ) ;
-}
+}*/
 
 
 /*
@@ -1066,13 +1067,113 @@ static qboolean PM_CheckPounce( void )
   return qtrue;
 }
 
-#define WALLJUMP_TIME 350
-
 /*
 =============
-PM_CheckWallJump
+PM_CheckVanillaWallJump
 =============
 */
+static qboolean PM_CheckVanillaWallJump(void) {
+  vec3_t  dir, forward, right;
+  vec3_t  refNormal = { 0.0f, 0.0f, 1.0f };
+  float   normalFraction = 1.5f;
+  float   cmdFraction = 1.0f;
+  float   upFraction = 1.5f;
+
+  if(pm->ps->pm_flags & PMF_RESPAWNED) {
+    return qfalse;    // don't allow jump until all buttons are up
+  }
+
+  if(pm->cmd.upmove < 10) {
+    // not holding jump
+    return qfalse;
+  }
+
+  // Don't walljump if the class does not have such an ability.
+  if(!(BG_Class(pm->ps->stats[ STAT_CLASS ])->abilities & SCA_WALLJUMPER)) {
+    return qfalse;
+  }
+
+  if(pm->ps->pm_flags & PMF_TIME_WALLJUMP) {
+    return qfalse;
+  }
+
+  // must wait for jump to be released
+  if(pm->ps->pm_flags & PMF_JUMP_HELD &&
+    pm->ps->grapplePoint[ 2 ] == 1.0f) {
+    // clear upmove so cmdscale doesn't lower running speed
+    pm->cmd.upmove = 0;
+    return qfalse;
+  }
+
+  pm->ps->pm_flags |= PMF_TIME_WALLJUMP;
+  pm->ps->pm_time = 200;
+
+  pml.groundPlane = qfalse;   // jumping away
+  pml.walking = qfalse;
+  pm->ps->pm_flags |= PMF_JUMP_HELD;
+
+  pm->ps->groundEntityNum = ENTITYNUM_NONE;
+
+  ProjectPointOnPlane(forward, pml.forward, pm->ps->grapplePoint);
+  ProjectPointOnPlane(right, pml.right, pm->ps->grapplePoint);
+
+  VectorScale(pm->ps->grapplePoint, normalFraction, dir);
+
+  if(pm->cmd.forwardmove > 0) {
+    VectorMA(dir, cmdFraction, forward, dir);
+  } else if(pm->cmd.forwardmove < 0) {
+    VectorMA(dir, -cmdFraction, forward, dir);
+  }
+
+  if(pm->cmd.rightmove > 0) {
+    VectorMA(dir, cmdFraction, right, dir);
+  } else if(pm->cmd.rightmove < 0) {
+    VectorMA(dir, -cmdFraction, right, dir);
+  }
+
+  VectorMA(dir, upFraction, refNormal, dir);
+  VectorNormalize(dir);
+
+  VectorMA(
+    pm->ps->velocity, BG_Class(pm->ps->stats[STAT_CLASS])->jumpMagnitude,
+    dir, pm->ps->velocity);
+
+  //for a long run of wall jumps the velocity can get pretty large, this caps it
+  if(VectorLength(pm->ps->velocity) > LEVEL2_WALLJUMP_MAXSPEED) {
+    VectorNormalize(pm->ps->velocity);
+    VectorScale(pm->ps->velocity, LEVEL2_WALLJUMP_MAXSPEED, pm->ps->velocity);
+  }
+
+  PM_AddEvent(EV_JUMP);
+
+  if(pm->cmd.forwardmove >= 0) {
+    if(!(pm->ps->persistant[PERS_STATE] & PS_NONSEGMODEL)) {
+      PM_ForceLegsAnim(LEGS_JUMP);
+    } else {
+      PM_ForceLegsAnim(NSPA_JUMP);
+    }
+
+    pm->ps->pm_flags &= ~PMF_BACKWARDS_JUMP;
+  } else {
+    if( !(pm->ps->persistant[PERS_STATE] & PS_NONSEGMODEL)) {
+      PM_ForceLegsAnim(LEGS_JUMPB);
+    } else {
+      PM_ForceLegsAnim(NSPA_JUMPBACK);
+    }
+
+    pm->ps->pm_flags |= PMF_BACKWARDS_JUMP;
+  }
+
+  return qtrue;
+}
+
+#define WALLJUMP_TIME 350
+/*
+//
+//=============
+//PM_CheckWallJump
+//=============
+//
 static qboolean PM_CheckWallJump( vec3_t wishDir, float wishSpeed )
 {  
   trace_t wall;           //- Which wall we are jumping off.
@@ -1234,6 +1335,7 @@ static qboolean PM_CheckWallJump( vec3_t wishDir, float wishSpeed )
 
   return qtrue;
 }
+*/
 
 /*
 ==============
@@ -1307,8 +1409,14 @@ static qboolean PM_CheckJump( vec3_t customNormal )
   // Maximum fraction of the jump speed we can add to the horizontal movement.
   float maxKickFraction;
 
-  if( BG_Class( pm->ps->stats[ STAT_CLASS ] )->jumpMagnitude == 0.0f )
+  if( BG_Class( pm->ps->stats[ STAT_CLASS ] )->jumpMagnitude == 0.0f ) {
     return qfalse;
+  }
+    
+
+  if(BG_Class(pm->ps->stats[ STAT_CLASS ])->abilities & SCA_WALLJUMPER)  {
+      return PM_CheckVanillaWallJump( );
+  }
 
   //can't jump and pounce at the same time
   if( ( pm->ps->weapon == WP_ALEVEL3 ||
@@ -1933,7 +2041,6 @@ static void PM_AirMove( void )
     PM_SetMovementDir( );
 
     PM_GetDesiredDirAndSpeed( wishdir, &wishspeed, upNormal );
-    PM_CheckWallJump( wishdir, wishspeed );
     PM_Friction( );
 
     // Reduce air control immediately after a wall jump to give the player some
@@ -1994,8 +2101,6 @@ static void PM_AirMove( void )
     VectorCopy( wishvel, wishdir );
     wishspeed = VectorNormalize( wishdir );
     wishspeed *= scale;
-
-    PM_CheckWallJump( wishdir, wishspeed );
 
     // not on ground, so little effect on velocity
     PM_AccelerateHorizontal( wishdir, wishspeed,
@@ -3292,6 +3397,41 @@ static void PM_GroundTrace( void )
       PM_GroundTraceMissed( );
       pml.groundPlane = qfalse;
       pml.walking = qfalse;
+
+      if(BG_Class(pm->ps->stats[ STAT_CLASS ])->abilities & SCA_WALLJUMPER) {
+        vec3_t movedir;
+
+        ProjectPointOnPlane(movedir, pml.forward, refNormal);
+        VectorNormalize(movedir);
+
+        if(pm->cmd.forwardmove < 0) {
+          VectorNegate(movedir, movedir);
+        }
+
+        //allow strafe transitions
+        if(pm->cmd.rightmove) {
+          VectorCopy(pml.right, movedir);
+
+          if(pm->cmd.rightmove < 0)
+            VectorNegate(movedir, movedir);
+        }
+
+        //trace into direction we are moving
+        VectorMA( pm->ps->origin, 0.25f, movedir, point );
+        BG_Trace(
+          &trace, pm->ps->origin, pm->mins, pm->maxs, point, pm->ps->clientNum,
+          qfalse, pm->trace_mask, TT_AABB);
+
+        if(
+          trace.fraction < 1.0f &&
+          !(trace.surfaceFlags & (SURF_SKY | SURF_SLICK)) &&
+          (trace.entityNum == ENTITYNUM_WORLD)) {
+          if(!VectorCompare(trace.plane.normal, pm->ps->grapplePoint)) {
+            VectorCopy( trace.plane.normal, pm->ps->grapplePoint);
+            PM_CheckVanillaWallJump();
+          }
+        }
+      }
 
       return;
     }
