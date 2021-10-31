@@ -2722,7 +2722,7 @@ float CG_GetValue( int ownerDraw )
 
           clips = clips - (int)(clips_to_load * progress);
         }
-        return clips;
+      return clips;
       break;
     case CG_PLAYER_HEALTH:
       return ( BG_SU2HP( ps->misc[ MISC_HEALTH ] ) );
@@ -3083,21 +3083,21 @@ static const char *CG_SpawnReport( qboolean eggs )
              ( eggs ? "egg" : "telenode" ),
              s );
 }
-static void CG_DrawStageReport( rectDef_t *rect, float text_x, float text_y,
-    vec4_t color, float scale, int textalign, int textvalign, int textStyle )
-{
-  char  s[ MAX_TOKEN_CHARS ];
+static void CG_DrawStageReport(
+  rectDef_t *rect, float text_x, float text_y,
+  vec4_t color, float scale, int textalign, int textvalign, int textStyle ) {
+  char  s[MAX_TOKEN_CHARS];
   float tx, ty;
+  int kills;
 
   if( cg.intermissionStarted )
     return;
 
-  if( cg.snap->ps.stats[ STAT_TEAM ] == TEAM_NONE )
+  if(cg.snap->ps.stats[STAT_TEAM] == TEAM_NONE)
     return;
 
-  if( cg.snap->ps.stats[ STAT_TEAM ] == TEAM_ALIENS )
-  {
-    int kills = ceil( (float)(cgs.alienNextStageThreshold - cgs.alienCredits) / ALIEN_CREDITS_PER_KILL );
+  if(cg.snap->ps.stats[STAT_TEAM] == TEAM_ALIENS) {
+    kills = cgs.alienNextStageThreshold - cgs.alienCredits;
     if( kills < 0 )
       kills = 0;
 
@@ -3105,28 +3105,27 @@ static void CG_DrawStageReport( rectDef_t *rect, float text_x, float text_y,
       Com_sprintf( s, MAX_TOKEN_CHARS, "Stage %d, %s", cgs.alienStage + 1,
                    CG_SpawnReport( qtrue ) );
     else if( kills == 1 )
-      Com_sprintf( s, MAX_TOKEN_CHARS, "Stage %d, 1 frag for next stage, %s",
+      Com_sprintf( s, MAX_TOKEN_CHARS, "Stage %d, 1 kill for next stage, %s",
                    cgs.alienStage + 1, CG_SpawnReport( qtrue ) );
     else
-      Com_sprintf( s, MAX_TOKEN_CHARS, "Stage %d, %d frags for next stage, %s",
+      Com_sprintf( s, MAX_TOKEN_CHARS, "Stage %d, %d kills for next stage, %s",
                    cgs.alienStage + 1, kills, CG_SpawnReport( qtrue ) );
   }
-  else if( cg.snap->ps.stats[ STAT_TEAM ] == TEAM_HUMANS )
-  {
-    int credits = cgs.humanNextStageThreshold - cgs.humanCredits;
+  else if( cg.snap->ps.stats[ STAT_TEAM ] == TEAM_HUMANS ) {
+    kills = cgs.humanNextStageThreshold - cgs.humanCredits;
 
-    if( credits < 0 )
-      credits = 0;
+    if(kills < 0)
+      kills = 0;
 
     if( cgs.humanNextStageThreshold < 0 )
       Com_sprintf( s, MAX_TOKEN_CHARS, "Stage %d, %s", cgs.humanStage + 1,
                    CG_SpawnReport( qfalse ) );
-    else if( credits == 1 )
-      Com_sprintf( s, MAX_TOKEN_CHARS, "Stage %d, 1 credit for next stage, %s",
+    else if( kills == 1 )
+      Com_sprintf( s, MAX_TOKEN_CHARS, "Stage %d, 1 kill for next stage, %s",
                    cgs.humanStage + 1, CG_SpawnReport( qfalse ) );
     else
-      Com_sprintf( s, MAX_TOKEN_CHARS, "Stage %d, %d credits for next stage, %s",
-          cgs.humanStage + 1, credits, CG_SpawnReport( qfalse ) );
+      Com_sprintf( s, MAX_TOKEN_CHARS, "Stage %d, %d kills for next stage, %s",
+          cgs.humanStage + 1, kills, CG_SpawnReport( qfalse ) );
   }
 
   CG_AlignText( rect, s, scale, 0.0f, 0.0f, textalign, textvalign, &tx, &ty );
@@ -4186,9 +4185,9 @@ static void CG_DrawWarmup( int ownerDraw, rectDef_t *rect, float textScale, int 
   if( cg.intermissionStarted )
     return;
 
-    if(CG_Show_Tab_Overlay_Selection_Bar()) {
-      return;
-    }
+  if(CG_Show_Tab_Overlay_Selection_Bar()) {
+    return;
+  }
 
   if( !cgs.warmup ) {
     if(

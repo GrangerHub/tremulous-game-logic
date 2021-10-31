@@ -131,11 +131,13 @@ vmCvar_t  g_humanRepeaterBuildPoints;
 vmCvar_t  g_humanRepeaterBuildQueueTime;
 vmCvar_t  g_humanRepeaterMaxZones;
 vmCvar_t  g_humanStage;
+vmCvar_t  g_humanKills;
 vmCvar_t  g_humanCredits;
 vmCvar_t  g_humanMaxStage;
 vmCvar_t  g_humanStage2Threshold;
 vmCvar_t  g_humanStage3Threshold;
 vmCvar_t  g_alienStage;
+vmCvar_t  g_alienKills;
 vmCvar_t  g_alienCredits;
 vmCvar_t  g_alienMaxStage;
 vmCvar_t  g_alienStage2Threshold;
@@ -330,11 +332,13 @@ static cvarTable_t   gameCvarTable[ ] =
   { &g_humanRepeaterMaxZones, "g_humanRepeaterMaxZones", DEFAULT_HUMAN_REPEATER_MAX_ZONES, CVAR_ARCHIVE, 0, qfalse  },
   { &g_humanRepeaterBuildQueueTime, "g_humanRepeaterBuildQueueTime", DEFAULT_HUMAN_REPEATER_QUEUE_TIME, CVAR_ARCHIVE, 0, qfalse  },
   { &g_humanStage, "g_humanStage", "0", 0, 0, qfalse  },
+  { &g_humanKills, "g_humanKills", "0", 0, 0, qfalse  },
   { &g_humanCredits, "g_humanCredits", "0", 0, 0, qfalse  },
   { &g_humanMaxStage, "g_humanMaxStage", DEFAULT_HUMAN_MAX_STAGE, 0, 0, qfalse, cv_humanMaxStage },
   { &g_humanStage2Threshold, "g_humanStage2Threshold", DEFAULT_HUMAN_STAGE2_THRESH, 0, 0, qfalse  },
   { &g_humanStage3Threshold, "g_humanStage3Threshold", DEFAULT_HUMAN_STAGE3_THRESH, 0, 0, qfalse  },
   { &g_alienStage, "g_alienStage", "0", 0, 0, qfalse  },
+  { &g_alienKills, "g_alienKills", "0", 0, 0, qfalse  },
   { &g_alienCredits, "g_alienCredits", "0", 0, 0, qfalse  },
   { &g_alienMaxStage, "g_alienMaxStage", DEFAULT_ALIEN_MAX_STAGE, 0, 0, qfalse, cv_alienMaxStage },
   { &g_alienStage2Threshold, "g_alienStage2Threshold", DEFAULT_ALIEN_STAGE2_THRESH, 0, 0, qfalse  },
@@ -832,6 +836,8 @@ Q_EXPORT void G_InitGame( int levelTime, int randomSeed, int restart )
   Cvar_SetSafe( "g_humanStage", va( "%d", S1 ) );
   Cvar_SetSafe( "g_alienCredits", 0 );
   Cvar_SetSafe( "g_humanCredits", 0 );
+  Cvar_SetSafe( "g_alienKills", 0 );
+  Cvar_SetSafe( "g_humanKills", 0 );
   if(IS_SCRIM) {
     level.suddenDeathBeginTime = level.scrim.sudden_death_time * 60000;
   } else {
@@ -1359,7 +1365,7 @@ void G_CalculateStages( void )
   if( humanPlayerCountMod < 0.1f )
     humanPlayerCountMod = 0.1f;
 
-  if( g_alienCredits.integer >=
+  if( g_alienKills.integer >=
       (int)( ceil( (float)g_alienStage2Threshold.integer * alienPlayerCountMod ) ) &&
       g_alienStage.integer == S1 && g_alienMaxStage.integer > S1 )
   {
@@ -1369,7 +1375,7 @@ void G_CalculateStages( void )
     G_LogPrintf("Stage: A 2: Aliens reached Stage 2\n");
   }
 
-  if( g_alienCredits.integer >=
+  if( g_alienKills.integer >=
       (int)( ceil( (float)g_alienStage3Threshold.integer * alienPlayerCountMod ) ) &&
       g_alienStage.integer == S2 && g_alienMaxStage.integer > S2 )
   {
@@ -1379,7 +1385,7 @@ void G_CalculateStages( void )
     G_LogPrintf("Stage: A 3: Aliens reached Stage 3\n");
   }
 
-  if( g_humanCredits.integer >=
+  if( g_humanKills.integer >=
       (int)( ceil( (float)g_humanStage2Threshold.integer * humanPlayerCountMod ) ) &&
       g_humanStage.integer == S1 && g_humanMaxStage.integer > S1 )
   {
@@ -1389,7 +1395,7 @@ void G_CalculateStages( void )
     G_LogPrintf("Stage: H 2: Humans reached Stage 2\n");
   }
 
-  if( g_humanCredits.integer >=
+  if( g_humanKills.integer >=
       (int)( ceil( (float)g_humanStage3Threshold.integer * humanPlayerCountMod ) ) &&
       g_humanStage.integer == S2 && g_humanMaxStage.integer > S2 )
   {
@@ -1443,22 +1449,14 @@ void G_CalculateStages( void )
   else
     level.humanNextStageThreshold = -1;
 
-  // save a lot of bandwidth by rounding thresholds up to the nearest 100
-  if( level.alienNextStageThreshold > 0 )
-    level.alienNextStageThreshold = ceil( (float)level.alienNextStageThreshold / 100 ) * 100;
-
-  if( level.humanNextStageThreshold > 0 )
-    level.humanNextStageThreshold = ceil( (float)level.humanNextStageThreshold / 100 ) * 100;
-
-
   SV_SetConfigstring( CS_ALIEN_STAGES, va( "%d %d %d",
         ( IS_WARMUP ? S3 : g_alienStage.integer ),
-        ( IS_WARMUP ? 99999 : g_alienCredits.integer ),
+        ( IS_WARMUP ? 99999 : g_alienKills.integer ),
         ( IS_WARMUP ? 0 : level.alienNextStageThreshold ) ) );
 
   SV_SetConfigstring( CS_HUMAN_STAGES, va( "%d %d %d",
         ( IS_WARMUP ? S3 : g_humanStage.integer ),
-        ( IS_WARMUP ? 99999 : g_humanCredits.integer ),
+        ( IS_WARMUP ? 99999 : g_humanKills.integer ),
         ( IS_WARMUP ? 0 : level.humanNextStageThreshold ) ) );
 }
 
@@ -1478,12 +1476,14 @@ void G_CalculateAvgPlayers( void )
   {
     level.numAlienSamples = 0;
     Cvar_SetSafe( "g_alienCredits", "0" );
+    Cvar_SetSafe( "g_alienKills", "0" );
   }
 
   if( !level.numHumanClients )
   {
     level.numHumanSamples = 0;
     Cvar_SetSafe( "g_humanCredits", "0" );
+    Cvar_SetSafe( "g_humanKills", "0" );
   }
 
   //calculate average number of clients for stats
@@ -2395,12 +2395,12 @@ void G_LevelRestart( qboolean stopWarmup )
     SV_SetConfigstring( CS_WARMUP, va( "%d", IS_WARMUP ) );
     SV_SetConfigstring( CS_ALIEN_STAGES, va( "%d %d %d",
         ( g_alienStage.integer ),
-        ( g_alienCredits.integer ),
+        ( g_alienKills.integer ),
         ( level.alienNextStageThreshold ) ) );
 
     SV_SetConfigstring( CS_HUMAN_STAGES, va( "%d %d %d",
           ( g_humanStage.integer ),
-          ( g_humanCredits.integer ),
+          ( g_humanKills.integer ),
           ( level.humanNextStageThreshold ) ) );
 
     // reset everyone's ready state
