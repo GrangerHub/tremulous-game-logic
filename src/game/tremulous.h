@@ -609,17 +609,17 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 #define JETPACK_FULL_FUEL_PRICE        90
 #define JETPACK_PRICE                  120
-#define JETPACK_FLOAT_SPEED            136.0f //up movement speed
+#define JETPACK_FLOAT_SPEED            130.0f //up movement speed
 #define JETPACK_SINK_SPEED             184.0f //down movement speed
 #define JETPACK_DISABLE_TIME           1000 //time to disable the jetpack when player damaged
 #define JETPACK_DISABLE_CHANCE         0.3f
-#define JETPACK_FUEL_FULL              6000 //can't exceed 32767
+#define JETPACK_FUEL_FULL              6275 //can't exceed 32767
 #define JETPACK_FUEL_LOW               1000
 #define JETPACK_FUEL_USAGE             12 //every 100ms
 #define JETPACK_FUEL_MIN_START         300 // Minimum fuel required to start the jet
-#define JETPACK_ACT_BOOST_FUEL_USE     ( JETPACK_FUEL_USAGE * 2 )
+#define JETPACK_ACT_BOOST_FUEL_USE     ( (int)(JETPACK_FUEL_USAGE * 1.75) )
 #define JETPACK_ACT_BOOST_TIME         750
-#define JETPACK_ACT_BOOST_SPEED        184.0f
+#define JETPACK_ACT_BOOST_SPEED        160.0f
 #define JETPACK_FUEL_RECHARGE          5 // every 100ms
 #define JETPACK_DEACTIVATION_FALL_TIME 750 // amount of time gravity is reduced after deactivation
 
