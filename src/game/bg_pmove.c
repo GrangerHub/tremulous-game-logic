@@ -1792,8 +1792,10 @@ static void PM_JetPackMove( void )
   {
     vec3_t thrustDir = { 0.0f, 0.0f, 1.0f };
 
-    if( pm->ps->viewangles[ PITCH ] > 0.0f )
-      VectorCopy( pml.up, thrustDir ) ;
+    if((pm->ps->groundEntityNum == ENTITYNUM_NONE) &&
+      (pm->ps->viewangles[ PITCH ] > 0.0f)) {
+        VectorCopy(pml.up, thrustDir) ;
+      }
 
     // give an initial vertical boost when first activating the jet
     if( pm->ps->persistant[PERS_JUMPTIME] <= JETPACK_ACT_BOOST_TIME )
