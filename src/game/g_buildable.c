@@ -3626,16 +3626,20 @@ void G_BuildableTouchTriggers( gentity_t *ent )
 G_FindBuildableInStack
 ===============
 */
-qboolean G_FindBuildableInStack( int groundBuildableNum, int stackedBuildableNum, int *index )
-{
-  if( g_entities[ groundBuildableNum ].s.eType != ET_BUILDABLE ||
-      g_entities[ stackedBuildableNum ].s.eType != ET_BUILDABLE )
+qboolean G_FindBuildableInStack(
+  int groundBuildableNum, int stackedBuildableNum, int *index) {
+  gentity_t *groundEnt = &g_entities[ groundBuildableNum ];
+  gentity_t *stackedBuldable = &g_entities[ stackedBuildableNum ];
+  
+  if( groundEnt->s.eType != ET_BUILDABLE ||
+      stackedBuldable->s.eType != ET_BUILDABLE )
     return qfalse;
 
-  for( *index = 0; *index < g_entities[ groundBuildableNum ].numOfStackedBuildables; *index += 1 )
-  {
-    if( g_entities[ groundBuildableNum ].buildableStack[ *index ] == stackedBuildableNum )
-      return qtrue;
+  for(*index = 0; *index < groundEnt->numOfStackedBuildables; *index += 1) {
+    if( BG_UEID_get_ent_num(
+      &groundEnt->buildableStack[ *index ]) == stackedBuildableNum ) {
+        return qtrue;
+    }
   }
 
   return qfalse;
@@ -3671,7 +3675,9 @@ void G_AddBuildableToStack( int groundBuildableNum, int stackedBuildableNum )
 
   if( !G_FindBuildableInStack( groundBuildableNum, stackedBuildableNum, &i )  )
   {
-    groundBuildable->buildableStack[ *numOfStackedBuildables ] = stackedBuildableNum;
+    BG_UEID_set(
+      &groundBuildable->buildableStack[ *numOfStackedBuildables ],
+      stackedBuildableNum);
     *numOfStackedBuildables += 1;
   }
 }
@@ -3703,8 +3709,9 @@ void G_RemoveBuildableFromStack( int groundBuildableNum, int stackedBuildableNum
 
   if( *numOfStackedBuildables == 1 )
   {
-    if( groundBuildable->buildableStack[ 0 ] == stackedBuildableNum )
-      groundBuildable->buildableStack[ 0 ] = ENTITYNUM_NONE;
+    if(BG_UEID_get_ent_num(&groundBuildable->buildableStack[ 0 ]) == stackedBuildableNum) {
+      BG_UEID_set(&groundBuildable->buildableStack[ 0 ], ENTITYNUM_NONE);
+    }
 
     return;
   }
@@ -3714,7 +3721,9 @@ void G_RemoveBuildableFromStack( int groundBuildableNum, int stackedBuildableNum
 
   if( G_FindBuildableInStack( groundBuildableNum, stackedBuildableNum, &i ) )
   {
-    groundBuildable->buildableStack[ i ] = groundBuildable->buildableStack[ *numOfStackedBuildables - 1 ];
+    BG_UEID_set(
+      &groundBuildable->buildableStack[ i ],
+      BG_UEID_get_ent_num(&groundBuildable->buildableStack[ *numOfStackedBuildables - 1 ]));
     *numOfStackedBuildables -= 1;
   }
 }
@@ -3748,8 +3757,11 @@ void G_SetBuildableDropper( int removedBuildableNum, int dropperNum )
 
   for( i = 0; i < *numOfStackedBuildables; i++ )
   {
-    g_entities[ removedBuildable->buildableStack[ i ] ].dropperNum = dropperNum;
-    G_SetBuildableDropper( removedBuildable->buildableStack[ i ], dropperNum );
+    g_entities[
+      BG_UEID_get_ent_num(&removedBuildable->buildableStack[ i ])].dropperNum =
+      dropperNum;
+    G_SetBuildableDropper(
+      BG_UEID_get_ent_num(&removedBuildable->buildableStack[ i ]), dropperNum);
   }
 }
 
