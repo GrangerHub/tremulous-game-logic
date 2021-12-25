@@ -2568,6 +2568,8 @@ int G_CheckEvolve( gentity_t *ent, class_t newClass,
     //if we are not currently spectating, we are attempting evolution
     if( ent->client->pers.classSelection != PCL_NONE )
     {
+      qboolean humanNear = qfalse;
+
       //check that we have an overmind
       if( !G_Overmind( ) && !give )
       {
@@ -2588,9 +2590,20 @@ int G_CheckEvolve( gentity_t *ent, class_t newClass,
               ( other->s.eType == ET_BUILDABLE && other->buildableTeam == TEAM_HUMANS &&
                 other->powered ) ) && !give )
         {
-          G_TriggerMenu( clientNum, MN_A_TOOCLOSE );
-          return -1;
+          humanNear = qtrue;
         }
+
+        //If its the OM, then ignore all humans.
+        if(other->s.eType == ET_BUILDABLE && other->s.modelindex == BA_A_OVERMIND)
+        {
+          humanNear = qfalse;
+          break;
+        }
+      }
+
+      if(humanNear != qfalse) {
+        G_TriggerMenu( clientNum, MN_A_TOOCLOSE );
+        return -1;
       }
 
       if ( ent->client->ps.eFlags & EF_OCCUPYING )
