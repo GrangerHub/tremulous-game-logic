@@ -924,9 +924,22 @@ void ClientTimerActions( gentity_t *ent, int msec )
 
     //client is poison clouded
     if( client->ps.eFlags & EF_POISONCLOUDED ) {
-      G_Damage(
-        ent, client->lastPoisonCloudedClient, client->lastPoisonCloudedClient,
-        NULL, NULL, LEVEL1_PCLOUD_DMG, 0, MOD_LEVEL1_PCLOUD );
+      int damage = LEVEL1_PCLOUD_DMG;
+
+      if( BG_InventoryContainsUpgrade( UP_BATTLESUIT, client->ps.stats ) )
+        damage -= BSUIT_POISON_PROTECTION;
+
+      if( BG_InventoryContainsUpgrade( UP_HELMET, client->ps.stats ) )
+        damage -= HELMET_POISON_PROTECTION;
+
+      if( BG_InventoryContainsUpgrade( UP_LIGHTARMOUR, client->ps.stats ) )
+        damage -= LIGHTARMOUR_POISON_PROTECTION;
+
+      if(damage > 0) {
+        G_Damage(
+          ent, client->lastPoisonCloudedClient, client->lastPoisonCloudedClient,
+          NULL, NULL, damage, 0, MOD_LEVEL1_PCLOUD );
+      }
     }
 
     //client is poisoned
@@ -2019,6 +2032,7 @@ void ClientThink_real( gentity_t *ent )
       BG_DeactivateUpgrade( UP_MEDKIT, client->ps.stats );
       BG_RemoveUpgradeFromInventory( UP_MEDKIT, client->ps.stats );
 
+      client->ps.eFlags &= ~EF_POISONCLOUDED;
       client->ps.stats[ STAT_STATE ] &= ~SS_POISONED;
       client->poisonImmunityTime = level.time + MEDKIT_POISON_IMMUNITY_TIME;
 

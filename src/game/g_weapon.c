@@ -1384,7 +1384,6 @@ void poisonCloud( gentity_t *ent )
 
     if( humanPlayer->client &&
         humanPlayer->client->pers.teamSelection == TEAM_HUMANS &&
-        !BG_InventoryContainsUpgrade( UP_HELMET, humanPlayer->client->ps.stats ) &&
         !BG_InventoryContainsUpgrade( UP_BATTLESUIT, humanPlayer->client->ps.stats ))
     {
       SV_Trace(

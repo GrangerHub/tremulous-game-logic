@@ -2797,6 +2797,10 @@ void HMedistat_Think( gentity_t *self )
       if(player->client->ps.stats[ STAT_STATE ] & SS_POISONED )
         player->client->ps.stats[ STAT_STATE ] &= ~SS_POISONED;
 
+      //remove gas cloud
+      if(player->client->ps.eFlags & EF_POISONCLOUDED)
+        player->client->ps.eFlags &= ~EF_POISONCLOUDED;
+
       //give a medkit to all fully healed human players
       if( player->client->ps.stats[ STAT_TEAM ] == TEAM_HUMANS &&
           PM_Alive( player->client->ps.pm_type ) &&

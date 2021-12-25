@@ -600,7 +600,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 #define HELMET_PRICE                90
 #define HELMET_RANGE                1000.0f
 #define HELMET_POISON_PROTECTION    2000
-#define HELMET_PCLOUD_PROTECTION    1000000
+#define HELMET_PCLOUD_PROTECTION    4000
 
 #define MEDKIT_PRICE                0
 
@@ -625,7 +625,7 @@ along with Tremulous; if not, see <https://www.gnu.org/licenses/>
 
 #define BSUIT_PRICE                 400
 #define BSUIT_POISON_PROTECTION     4000
-#define BSUIT_PCLOUD_PROTECTION     3000000
+#define BSUIT_PCLOUD_PROTECTION     8000
 
 #define MEDKIT_POISON_IMMUNITY_TIME 0
 #define MEDKIT_STARTUP_TIME         4000
