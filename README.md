@@ -13,16 +13,16 @@ DEPENDENCIES:
 
 (see below for additional client dependencies)
 
-If you don't have these in your system, also clone the `tremulous-dependencies`
+If you don't have these in your system, also clone the `tremulous-game-logic-dependencies`
 repo and then make symbolic links into a directory called `dep` as in the
 following:
 
-    $ git clone <into tremulous-dependencies>
-    $ git clone <into tremulous-source>
-    $ cd tremulous-source
+    $ git clone <into tremulous-game-logic-dependencies>
+    $ git clone <into tremulous-game-logic>
+    $ cd tremulous-game-logic
     $ mkdir dep
     $ cd dep
-    $ ln -s ../../tremulous-dependencies/* .
+    $ ln -s ../../tremulous-game-logic-dependencies/* .
 
 *Note:* libspeex is also provided in the ioQ3 repo, under `code/libspeex`.
 Download from git@github.com:ioquake/ioq3.git.
